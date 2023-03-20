@@ -17,16 +17,28 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
+
 * PCA score plot labelling (issue #543).
 * Improved loading time
+* Plot2D accept a color argument.  In addition to cmap=None,
+  it produces single color 2D plot. It also accept a line style parameters.
+  e.g.:
+
+  ```
+  nd.plot(cmap=None, color='red', ls='dashed')
+  ```
+
+  produces a dashed red stack plot.
 
 .. section
 
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+
 * Masks handling.
 * Multicoordinates slicing work correctly.
+* Removed some deprecation warnings from numpy library.
 
 .. section
 

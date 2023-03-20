@@ -1,15 +1,27 @@
-What's new in revision 0.5.5.dev12
+What's new in revision 0.5.5.dev14
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.5.5.dev12.
+These are the changes in SpectroChemPy-0.5.5.dev14.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 New features
 ~~~~~~~~~~~~
+
 * PCA score plot labelling (issue #543).
 * Improved loading time
+* Plot2D accept a color argument.  In addition to cmap=None,
+  it produces single color 2D plot. It also accept a line style parameters.
+  e.g.:
+
+  ```
+  nd.plot(cmap=None, color='red', ls='dashed')
+  ```
+
+  produces a dashed red stack plot.
 
 Bug fixes
 ~~~~~~~~~
+
 * Masks handling.
 * Multicoordinates slicing work correctly.
+* Removed some deprecation warnings from numpy library.
