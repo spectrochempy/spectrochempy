@@ -183,6 +183,8 @@ def plot_2D(dataset, method=None, **kwargs):
     # Other properties that can be passed as arguments
     # ------------------------------------------------------------------------
     lw = kwargs.get("linewidth", kwargs.get("lw", prefs.lines_linewidth))
+    ls = kwargs.get("linestyle", kwargs.get("ls", prefs.lines_linestyle))
+
     alpha = kwargs.get("calpha", prefs.contour_alpha)
 
     number_x_labels = prefs.number_of_x_labels
@@ -321,7 +323,6 @@ def plot_2D(dataset, method=None, **kwargs):
     zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
     if method in ["stack", "waterfall"]:
-
         # the z axis info
         # ---------------
         # zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
@@ -347,7 +348,6 @@ def plot_2D(dataset, method=None, **kwargs):
             ax.set_ylim(zlim)
 
     else:
-
         # the y axis info
         # ----------------
         if data_only:
@@ -369,7 +369,9 @@ def plot_2D(dataset, method=None, **kwargs):
     ax.grid(prefs.axes_grid)
 
     normalize = kwargs.get("normalize", None)
-    cmap = kwargs.get("colormap", kwargs.get("cmap", prefs.colormap))
+    cmap = kwargs.get("colormap", "Undefined")
+    if cmap == "Undefined":
+        cmap = kwargs.get("cmap", prefs.colormap)
 
     if method in ["map", "image", "surface"]:
         zmin, zmax = zlim
@@ -407,7 +409,6 @@ def plot_2D(dataset, method=None, **kwargs):
         _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs)
 
     elif method in ["image"]:
-
         cmap = kwargs.get("cmap", kwargs.get("image_cmap", prefs.image_cmap))
         if discrete_data:
             method = "map"
@@ -422,7 +423,6 @@ def plot_2D(dataset, method=None, **kwargs):
 
     elif method in ["map"]:
         if discrete_data:
-
             _colormap = plt.get_cmap(cmap)
             scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
@@ -446,12 +446,10 @@ def plot_2D(dataset, method=None, **kwargs):
             c.set_norm(norm)
 
     elif method in ["stack"]:
-
         # stack plot
         # ----------
         # now plot the collection of lines
-        # map colors using the colormap
-
+        # map colors
         vmin, vmax = ylim
         norm = mpl.colors.Normalize(
             vmin=vmin, vmax=vmax
@@ -459,8 +457,15 @@ def plot_2D(dataset, method=None, **kwargs):
         if normalize is not None:
             norm.vmax = normalize
 
-        _colormap = plt.get_cmap(cmap)
-        scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
+        if cmap is None:
+            color = kwargs.get("color")
+            if color is None:
+                colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+            else:
+                colors = [color]
+        else:
+            _colormap = plt.get_cmap(cmap)
+            scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
         # we display the line in the reverse order, so that the last
         # are behind the first.
@@ -470,10 +475,8 @@ def plot_2D(dataset, method=None, **kwargs):
         if not clear and not transposed:
             lines.extend(ax.lines)  # keep the old lines
 
-        line0 = mpl.lines.Line2D(xdata, zdata[0], lw=lw, picker=True)
+        line0 = mpl.lines.Line2D(xdata, zdata[0], lw=lw, ls=ls, picker=True)
 
-        if cmap is None:
-            colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         for i in range(zdata.shape[0]):
             li = cpy(line0)
             li.set_ydata(zdata[i])
@@ -482,6 +485,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 li.set_color(scalarMap.to_rgba(ydata[i]))
             else:
                 li.set_color(colors[i % len(colors)])
+
             fmt = kwargs.get("label_fmt", "{:.5f}")
             li.set_label(fmt.format(ydata[i]))
             li.set_zorder(zdata.shape[0] + 1 - i)
