@@ -479,7 +479,7 @@ class MCRALS(HasTraits):
                 )
 
             # recompute C for consistency(soft modeling)
-            C.data = np.linalg.lstsq(St.data.T, X.data.T)[0].T
+            C.data = np.linalg.lstsq(St.data.T, X.data.T, rcond=-1)[0].T
 
             # rescale spectra & concentrations
             if normSpec == "max":

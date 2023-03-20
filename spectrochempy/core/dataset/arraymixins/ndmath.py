@@ -65,7 +65,6 @@ class _from_numpy_method:
     def __get__(self, instance, cls):
         @functools.wraps(self.method)
         def func(*args, **kwargs):
-
             # Delayed import to avoid circular reference
             from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
             from spectrochempy.core.dataset.coord import Coord
@@ -167,7 +166,6 @@ class _from_numpy_method:
             # ............................
 
             if not self.reduce:  # _like' in method:
-
                 new = self.method(new, *argpos)
                 if new._implements("NDDataset"):
                     new.history = f"Created using method : {method}"  # (args:{argpos},
@@ -196,7 +194,6 @@ class _from_numpy_method:
 
 
 def _reduce_dims(cls, dim, keepdims=False):
-
     dims = cls.dims
     if hasattr(cls, "coordset"):
         coordset = cls.coordset
@@ -225,7 +222,6 @@ def _get_name(x):
 
 
 def _extract_ufuncs(strg):
-
     ufuncs = {}
     regex = r"^([a-z,0-9,_]*)\((x.*)\[.*]\)\W*(.*\.)$"
     matches = re.finditer(regex, strg, re.MULTILINE)
@@ -304,7 +300,6 @@ signbit(x, [, out, where, casting, order, …])   Returns element-wise True wher
 
 
 def _unary_ufuncs():
-
     return _extract_ufuncs(UNARY_STR)
 
 
@@ -326,7 +321,6 @@ copysign(x1, x2 [, out, where, casting, …])    Change the sign of x1 to that o
 
 
 def _binary_ufuncs():
-
     return _extract_ufuncs(BINARY_STR)
 
 
@@ -343,7 +337,6 @@ equal(x1, x2 [, out, where, casting, …])           Return (x1 == x2) element-w
 
 
 def _comp_ufuncs():
-
     return _extract_ufuncs(COMP_STR)
 
 
@@ -356,7 +349,6 @@ logical_xor(x1, x2 [, out, where, …])          Compute the truth value of x1 X
 
 
 def _logical_binary_ufuncs():
-
     return _extract_ufuncs(LOGICAL_BINARY_STR)
 
 
@@ -516,7 +508,6 @@ class NDMath(object):
         return self.data.__array_struct__
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-
         fname = ufunc.__name__
 
         #        # case of complex or hypercomplex data
@@ -1314,7 +1305,8 @@ class NDMath(object):
 
         axis, dim = cls.get_axis(dim, allows_none=True)
         data = np.ma.cumsum(dataset, axis=axis, dtype=dtype)
-        cls._data = data
+        cls._data = data.data
+        cls._mask = data.mask
         return cls
 
     @_from_numpy_method
@@ -1347,7 +1339,6 @@ class NDMath(object):
         new = cls
 
         if new.ndim == 1:
-
             # construct a diagonal array
             # --------------------------
             data = np.diag(new.data)
@@ -1372,7 +1363,6 @@ class NDMath(object):
             return new
 
         if new.ndim == 2:
-
             # extract a diagonal
             # ------------------
             return new.diagonal(offset=offset, **kwargs)
@@ -2717,7 +2707,6 @@ class NDMath(object):
     # private methods
     # ------------------------------------------------------------------------
     def _preprocess_op_inputs(self, fname, inputs):
-
         inputs = list(inputs)  # work with a list of objs not tuples
         # print(fname)
 
@@ -2743,7 +2732,6 @@ class NDMath(object):
         compatible_units = fname in self.__compatible_units
 
         for i, obj in enumerate(inputs):
-
             # type
             objtype = type(obj).__name__
             objtypes.append(objtype)
@@ -2786,7 +2774,6 @@ class NDMath(object):
             returntype in ["NDDataset", "Coord", "LinearCoord"]
             and objtypes[0] != returntype
         ):
-
             inputs.reverse()
             objtypes.reverse()
 
@@ -2867,10 +2854,8 @@ class NDMath(object):
         # If other is None, then it is a unary operation we can pass the following
 
         if other is not None:
-
             # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
             if othertype in ["NDDataset", "Coord", "LinearCoord", "Quantity"]:
-
                 # rescale according to units
                 if not other.unitless:
                     if hasattr(obj, "units"):
@@ -2885,7 +2870,6 @@ class NDMath(object):
                 and (othertype == "NDDataset")
                 and (other._coordset != obj._coordset)
             ):
-
                 obc = obj.coordset
                 otc = other.coordset
 
@@ -2949,7 +2933,6 @@ class NDMath(object):
                             )
 
             if othertype in ["NDDataset", "Coord", "LinearCoord"]:
-
                 # mask?
                 if is_masked:
                     arg = other._umasked(other.data, other.mask)
@@ -3006,7 +2989,6 @@ class NDMath(object):
         units = UNITLESS
 
         if not remove_units:
-
             if hasattr(q, "units"):
                 # q = q.m * check_require_units(fname, q.units)
                 q = q.to(check_require_units(fname, q.units))
@@ -3019,7 +3001,6 @@ class NDMath(object):
                         otherqm = otherq.m
                     otherqs[i] = otherqm * check_require_units(fname, otherq.units)
                 else:
-
                     # here we want to change the behavior a pint regarding the addition
                     # of scalar to quantity
                     #         # in principle it is only possible with dimensionless
@@ -3052,7 +3033,6 @@ class NDMath(object):
                     # can be dropped
                     res = q
                 else:
-
                     raise e
 
             if hasattr(res, "units"):
@@ -3061,9 +3041,7 @@ class NDMath(object):
         # perform operation on magnitudes
         # ------------------------------------------------------------------------------
         if isufunc:
-
             with catch_warnings(record=True) as ws:
-
                 # try to apply the ufunc
                 if fname == "log1p":
                     fname = "log"
@@ -3168,7 +3146,6 @@ class NDMath(object):
             returntype in ["NDDataset", "Coord", "LinearCoord"]
             and objtypes[0] != returntype
         ):
-
             inputs.reverse()
             objtypes.reverse()
 
