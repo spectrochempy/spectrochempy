@@ -186,7 +186,6 @@ class NDArray(HasTraits):
     _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
 
     def __init__(self, data=None, **kwargs):
-
         super().__init__()
 
         # By default, we try to keep a reference to the data, so we do not copy them.
@@ -245,7 +244,6 @@ class NDArray(HasTraits):
         ]
 
     def __eq__(self, other, attrs=None):
-
         eq = True
 
         if not isinstance(other, NDArray):
@@ -320,7 +318,6 @@ class NDArray(HasTraits):
         return eq
 
     def __getitem__(self, items, return_index=False):
-
         if isinstance(items, list):
             # Special case of fancy indexing
             items = (items,)
@@ -347,7 +344,7 @@ class NDArray(HasTraits):
 
         # choose, if we keep the same or create new object
         inplace = False
-        if isinstance(items, tuple) and items[-1] == INPLACE:
+        if isinstance(items, tuple) and np.any(str(items[-1]) == INPLACE):
             items = items[:-1]
             inplace = True
 
@@ -419,7 +416,6 @@ class NDArray(HasTraits):
         return out
 
     def __setitem__(self, items, value):
-
         keys = self._make_index(items)
 
         if isinstance(value, (bool, np.bool_, MaskedConstant)):
@@ -602,7 +598,6 @@ class NDArray(HasTraits):
         return axis
 
     def _get_slice(self, key, dim):
-
         info = None
 
         # allow passing a quantity as indice or in slices
@@ -702,11 +697,9 @@ class NDArray(HasTraits):
             )
 
         if self.is_empty and not self.is_labeled:
-
             raise IndexError(f"Could not find this location {loc} on an empty array")
 
         else:
-
             data = self.data
 
             if is_number(loc):
@@ -735,7 +728,6 @@ class NDArray(HasTraits):
                 return index
 
             elif self.is_labeled:
-
                 # TODO: look in all row of labels
                 labels = self._labels
                 indexes = np.argwhere(labels == loc).flatten()
@@ -754,7 +746,6 @@ class NDArray(HasTraits):
                 raise IndexError(f"Could not find this location: {loc}")
 
     def _make_index(self, key):
-
         if isinstance(key, np.ndarray) and key.dtype == bool:
             # this is a boolean selection
             # we can proceed directly
@@ -842,7 +833,6 @@ class NDArray(HasTraits):
         return convert_to_html(self)
 
     def _repr_shape(self):
-
         if self.is_empty:
             return "size: 0"
 
@@ -871,7 +861,6 @@ class NDArray(HasTraits):
         return strunits
 
     def _repr_value(self):
-
         numpyprintoptions(precision=4, edgeitems=0, spc=1, linewidth=120)
 
         prefix = type(self).__name__ + ": "
@@ -879,9 +868,7 @@ class NDArray(HasTraits):
 
         size = ""
         if not self.is_empty:
-
             if self.data is not None:
-
                 dtype = self.dtype
                 data = ""
                 if self._implements("Coord") or self._implements("LinearCoord"):
@@ -908,7 +895,6 @@ class NDArray(HasTraits):
         return None
 
     def _set_data(self, data):
-
         if data is None:
             return
 
@@ -982,7 +968,6 @@ class NDArray(HasTraits):
             return len([x for x in self.data.shape if x > 1])
 
     def _str_shape(self):
-
         if self.is_empty:
             return "         size: 0\n"
 
@@ -1029,7 +1014,6 @@ class NDArray(HasTraits):
 
         text = ""
         if not self.is_empty:
-
             if self.data is not None:
                 data = self.umasked_data
             else:
@@ -1233,7 +1217,6 @@ class NDArray(HasTraits):
 
     @dims.setter
     def dims(self, values):
-
         if isinstance(values, str) and len(values) == 1:
             values = [values]
 
@@ -1601,7 +1584,6 @@ class NDArray(HasTraits):
 
     @labels.setter
     def labels(self, labels):
-
         if labels is None:
             return
 
@@ -1610,7 +1592,6 @@ class NDArray(HasTraits):
                 "We cannot set the labels for multidimentional data - Thus, these labels are ignored"
             )
         else:
-
             # make sure labels array is of type np.ndarray or Quantity arrays
             if not isinstance(labels, np.ndarray):
                 labels = np.array(labels, subok=True, copy=True).astype(
@@ -1671,7 +1652,6 @@ class NDArray(HasTraits):
 
     @mask.setter
     def mask(self, mask):
-
         if mask is NOMASK or mask is MASKED:
             pass
         elif isinstance(mask, (np.bool_, bool)):
@@ -1730,7 +1710,6 @@ class NDArray(HasTraits):
 
     @meta.setter
     def meta(self, meta):
-
         if meta is not None:
             self._meta.update(meta)
 
@@ -1748,7 +1727,6 @@ class NDArray(HasTraits):
 
     @name.setter
     def name(self, name):
-
         if name:
             if self._name:
                 pass
@@ -1956,7 +1934,6 @@ class NDArray(HasTraits):
 
     @title.setter
     def title(self, title):
-
         if title:
             self._title = title
 
@@ -2040,7 +2017,6 @@ class NDArray(HasTraits):
             units = ur.Unit(other)
 
         if self.has_units:
-
             oldunits = self._units
 
             try:
@@ -2053,7 +2029,6 @@ class NDArray(HasTraits):
 
                 # particular case of dimensionless units: absorbance and transmittance
                 else:
-
                     if f"{oldunits:P}" in ["transmittance", "absolute_transmittance"]:
                         if f"{units:P}" == "absorbance":
                             udata = (new.data * new.units).to(units)
@@ -2270,7 +2245,6 @@ class NDArray(HasTraits):
 
     @units.setter
     def units(self, units):
-
         if units is None:
             return
         if isinstance(units, str):
