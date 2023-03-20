@@ -824,7 +824,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         # separation between traces
         offset = kwargs.pop("offset", 0)
-
+        if offset is None:
+            offset = 0
         ma = max(X.max(), X_hat.max())
         mao = ma * offset / 100
         mad = ma * offset / 100 + ma / 10
