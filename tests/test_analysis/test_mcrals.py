@@ -119,9 +119,6 @@ def test_MCRALS(model, data):
     # Now set or modify some configuration parameters
     mcr.tol = 30.0
 
-    # if necessary get help
-    print(MCRALS.help)
-
     # execute the main process
     mcr.fit(D, C0)
 
