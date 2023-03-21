@@ -13,6 +13,7 @@ import traitlets as tr
 from numpy.random import RandomState
 from sklearn import decomposition
 
+from spectrochempy.analysis._analysisutils import _make_other_parameters_doc
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.utils.docstrings import _docstring
 
@@ -26,9 +27,9 @@ __configurables__ = ["NMF"]
 class NMF(DecompositionAnalysis):
     __doc__ = _docstring.dedent(
         """
-    Non-Negative Matrix Factorization (NMF)
+    Non-Negative Matrix Factorization (NMF).
 
-    Use `~sklearn.decomposition.NMF` .
+    Use `~sklearn.decomposition.NMF`\.
 
     Find two non-negative matrices, i.e. matrices with all non-negative elements, (W, H)
     whose product approximates the non-negative matrix X. This factorization can be used
@@ -37,6 +38,10 @@ class NMF(DecompositionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
+
+    Other Parameters
+    ----------------
+    {{CONFIGURATION_PARAMETERS}}
 
     See Also
     --------
@@ -76,20 +81,20 @@ class NMF(DecompositionAnalysis):
         default_value=None,
         allow_none=True,
         help=(
-            "Method used to initialize the procedure.\n"
-            "Valid options:\n"
-            "- `None`: 'nndsvda' if n_components <= min(n_samples, n_features), "
+            "Method used to initialize the procedure.\n\n"
+            "Valid options:\n\n"
+            "* `None` : 'nndsvda' if n_components <= min(n_samples, n_features), "
             "otherwise random.\n"
-            "- `'random'`: non-negative random matrices, scaled with:\n"
+            "* `random` : non-negative random matrices, scaled with:\n"
             "  sqrt(X.mean() / n_components)\n"
-            "- `'nndsvd'`: Nonnegative Double Singular Value Decomposition (NNDSVD) "
+            "* `nndsvd` : Nonnegative Double Singular Value Decomposition (NNDSVD) "
             "initialization (better for sparseness)\n"
-            "- `'nndsvda'`: NNDSVD with zeros filled with the average of X "
+            "* `nndsvda` : NNDSVD with zeros filled with the average of X "
             "(better when sparsity is not desired)\n"
-            "- `'nndsvdar'` NNDSVD with zeros filled with small random values "
+            "* `nndsvdar` NNDSVD with zeros filled with small random values "
             "(generally faster, less accurate alternative to NNDSVDa "
             "for when sparsity is not desired)\n"
-            "- `'custom'`: use custom matrices W and H"
+            "* `custom` : use custom matrices W and H."
         ),
     ).tag(config=True)
 
@@ -246,6 +251,5 @@ class NMF(DecompositionAnalysis):
         self._components = self._nmf.components_
         return self._components
 
-    # ----------------------------------------------------------------------------------
-    # Public methods and properties specific to NMF
-    # ----------------------------------------------------------------------------------
+
+_make_other_parameters_doc(NMF)

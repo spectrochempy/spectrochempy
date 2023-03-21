@@ -9,6 +9,7 @@ This module implement some common utilities for the various analysis model.
 """
 import inspect
 from functools import partial
+from textwrap import indent
 
 import numpy as np
 
@@ -205,3 +206,19 @@ def _wrap_ndarray_output_to_nddataset(
             )
 
         return wrapper
+
+
+def _make_other_parameters_doc(klass):
+    otherpar = ""
+    traits = klass.class_traits(config=True)
+    for k, v in traits.items():
+        info = v.info_text
+        if info.startswith("a "):
+            info = info[2:]
+        elif info.startswith("an "):
+            info = info[3:]
+        otherpar += f"{k} : {info}, optional, default:{v.default_value}\n"
+        desc = f"{v.help}\n"
+        desc = indent(desc, "    ")
+        otherpar += desc
+    klass.__doc__ = klass.__doc__.replace("{{CONFIGURATION_PARAMETERS}}", otherpar)

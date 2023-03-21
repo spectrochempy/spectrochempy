@@ -59,7 +59,8 @@ class AnalysisConfigurable(MetaConfigurable):
         When warm_start is true, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to fit.
     **kwargs
-        Optional configuration  parameters.
+        Optional configuration parameters. See Other Parameters.
+
     """
 
     name = tr.Unicode(help="name of the implemented model")
@@ -110,6 +111,8 @@ class AnalysisConfigurable(MetaConfigurable):
         copy=True,
         **kwargs,
     ):
+        """ """
+        # An empty __doc__ must be placed here, else Configurable.__doc__ will appear
 
         # call the super class for initialisation
         super().__init__(section=self.name, config=config, parent=app)
@@ -447,14 +450,6 @@ class AnalysisConfigurable(MetaConfigurable):
         for k, v in self.parameters(default=True).items():
             setattr(self, k, v)
 
-    @classmethod
-    @property
-    def help(cls):
-        """
-        Return a description of all configuration parameters with their default value
-        """
-        return cls.class_config_rst_doc()
-
     @property
     def log(self):
         """
@@ -771,7 +766,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
-    @_docstring.get_sections(base="plotmerit")
     @_docstring.dedent
     def plotmerit(self, X, X_hat, **kwargs):
         """
@@ -791,7 +785,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Colors for :math:`X`, :math:`\hat X` and :math:`E`.
             in the case of 2D, The default colormap is used for X.
         offset : float, optional, default: None
-            Specify the separation (%%) between the X, X_hat and E.
+            Specify the separation (in percent) between the X, X_hat and E.
         nb_traces : int, optional
             Number of lines to display. Default is all
         **others : Other keywords parameters that are passed to
@@ -854,26 +848,13 @@ class DecompositionAnalysis(AnalysisConfigurable):
         ax.yaxis.set_visible(False)
         return ax
 
+    _docstring.get_sections(_docstring.dedent(plotmerit.__doc__), base="plotmerit")
+
 
 # ======================================================================================
 # Base class LinearRegressionAnalysis
 # ======================================================================================
 class LinearRegressionAnalysis(AnalysisConfigurable):
-    __doc__ = _docstring.dedent(
-        """
-    Ordinary least squares Linear Regression.
-
-    Use :class:`~sklearn.linear_model.LinearRegression`
-
-    LinearRegression fits a linear model with coefficients w = (w1, ..., wp)
-    to minimize the residual sum of squares between the observed targets in
-    the dataset, and the targets predicted by the linear approximation.
-
-    Parameters
-    ----------
-    %(AnalysisConfigurable.parameters)s
-    """
-    )
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass

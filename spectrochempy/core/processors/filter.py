@@ -72,15 +72,15 @@ def savgol_filter(
 
     Returns
     -------
-    NDDataset: same shape as x. data units are removed when deriv > 1
-        The filtered data.
+    NDDataset
+        The filtered data with same shape as x. data units are removed when deriv > 1.
 
     Other Parameters
     ----------------
-    dim : str or int, optional, default='x'.
+    dim : str or int, optional, default='x'
         Specify on which dimension to apply this method. If `dim` is specified as an
         integer it is equivalent to the usual `axis` numpy parameter.
-    inplace : bool, optional, default=False.
+    inplace : bool, optional, default=False
         True if we make the transform inplace.  If False, the function return a new
         object.
 
@@ -105,14 +105,18 @@ def savgol_filter(
     `window_length` is 7, the following shows the extended data for
     the various `mode` options (assuming `cval` is 0)
 
-    +------------+---------+------------------------+---------+
-    | Mode       |   Ext   |         Input          |   Ext   |
-    *============+=========+========================+=========+
-    | 'mirror'   | 4  3  2 | 1  2  3  4  5  6  7  8 | 7  6  5 |
-    | 'nearest'  | 1  1  1 | 1  2  3  4  5  6  7  8 | 8  8  8 |
-    | 'constant' | 0  0  0 | 1  2  3  4  5  6  7  8 | 0  0  0 |
-    | 'wrap'     | 6  7  8 | 1  2  3  4  5  6  7  8 | 1  2  3 |
-    +------------+---------+------------------------+---------+
+    +------------+----------+------------------------+---------+
+    | Mode       |   Ext    |         Input          |   Ext   |
+    +============+==========+========================+=========+
+    | 'mirror'   | 4  3  2  | 1  2  3  4  5  6  7  8 | 7  6  5 |
+    +------------+----------+------------------------+---------+
+    | 'nearest'  | 1  1  1  | 1  2  3  4  5  6  7  8 | 8  8  8 |
+    +------------+----------+------------------------+---------+
+    | 'constant' | 0  0  0  | 1  2  3  4  5  6  7  8 | 0  0  0 |
+    +------------+----------+------------------------+---------+
+    | 'wrap'     | 6  7  8  | 1  2  3  4  5  6  7  8 | 1  2  3 |
+    +------------+----------+------------------------+---------+
+
 
     See Also
     ---------

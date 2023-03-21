@@ -18,7 +18,7 @@ import shutil
 import sys
 import warnings
 import zipfile
-from os import environ, utime
+from os import environ
 from pathlib import Path
 from warnings import warn
 
@@ -338,15 +338,9 @@ class BuildDocumentation(object):
             py = item.with_suffix(".py")
             ipynb = item.with_suffix(".ipynb")
 
-            # case of an existing pair py,ipynb
-            difftime = 0
-            if py.exists() and ipynb.exists():
-                difftime = py.stat().st_mtime - ipynb.stat().st_mtime  # negative if
-                # ipynb is more recent else positive
-
             args = None
 
-            if not ipynb.exists() or difftime > 0.5:
+            if not ipynb.exists():
                 args = [
                     "--update-metadata",
                     '{"jupytext": {"notebook_metadata_filter":"all"}}',
@@ -355,7 +349,7 @@ class BuildDocumentation(object):
                     py,
                 ]
 
-            elif not py.exists() or difftime < -0.5:
+            elif not py.exists():
                 args = [
                     "--update-metadata",
                     '{"jupytext": {"notebook_metadata_filter":"all"}}',
@@ -365,15 +359,10 @@ class BuildDocumentation(object):
                 ]
 
             if args is not None:
-                print(f"sync: {item}   diff time: {difftime}")
+                print(f"sync: {item}")
                 count += 1
 
                 sh.jupytext(*args, silent=False)
-
-                # modify the py file timestamp to ensure a difftime == 0
-                atime = ipynb.stat().st_mtime
-                mtime = ipynb.stat().st_mtime
-                utime(py, (atime, mtime))
 
         if count == 0:
             print("\nAll notebooks are up-to-date and synchronised with rst files")

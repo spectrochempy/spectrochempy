@@ -570,25 +570,94 @@ Miscellaneous
 
     pipe
 
+*******************
+Analysis
+*******************
 
-********************
-Fitting
-********************
+
+Linear regression
+=================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    Fit
-    ParameterScript
-    FitParameters
-    CurveFit
     LSTSQ
     NNLS
 
-
-Fitting models
+Decomposition
 ==============
+
+Non-linear optimization and curve fit
+-------------------------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    Optimize
+
+Evolving factor analysis
+------------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    EFA
+
+Integral inversion solver for spectroscopic data
+------------------------------------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    IRIS
+    IrisKernel
+
+Multivariate Curve Resolution - Alternating Least Squares
+----------------------------------------------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    MCRALS
+
+Non-Negative Matrix Factorization
+---------------------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    NMF
+
+Singular value decomposition and Principal component analysis
+-------------------------------------------------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    PCA
+    SVD
+
+SIMPLe to use Interactive Self-modeling Mixture Analysis
+---------------------------------------------------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    SIMPLISMA
+
+Utilities
+=========
+
+Lineshape models
+----------------
 
 .. autosummary::
     :nosignatures:
@@ -601,23 +670,24 @@ Fitting models
     sigmoidmodel
     polynomialbaseline
 
-
-*******************
-Analysis
-*******************
+Find peaks
+----------
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     find_peaks
-    EFA
-    PCA
-    NNMF
-    SIMPLISMA
-    MCRALS
-    IRIS
-    kern
+
+Kinetic
+--------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    ActionMassKinetics
+    PFR
 
 ********************
 Project management

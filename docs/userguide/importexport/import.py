@@ -52,7 +52,7 @@ import spectrochempy as scp
 # To do so, we can use the
 # ``read`` function which open a dialog, allowing the selection of data file form various
 # origin. By default,
-# the native SCPy type of data is proposed (file suffix: ``.scp`` ). The desired type of
+# the native SCPy type of data is proposed (file suffix: ``.scp``\). The desired type of
 # files to display can be chosen
 # in a dropdown field.
 
@@ -65,7 +65,7 @@ X = scp.read()
 # <center><img id='drawings' width='600px'  src='./images/read.png'></img></center>
 #
 # The dialog Box allows selecting the file which data will be loaded in the variable
-# ``X`` . Try for instance to run the
+# ``X``\. Try for instance to run the
 # cell below, and select an omnic spg datafile (select the .spg extension), which you
 # can find in the ``irdata`` directory.
 #
@@ -122,7 +122,7 @@ print(X)
 #     - ``read_dir`` to open readable files in a directory
 #
 #
-# - The list of readers available will hopefully increase in future **SCPy** releases:-)
+# - The list of readers available will hopefully increase in future **SCPy** releases.
 #
 # If successful, the output of the above cell should read something like
 #
@@ -146,7 +146,7 @@ print(X)
 # string literals
 # to represent Windows paths. These are string literals that have an ``r`` prepended to
 # them. In raw string literals
-# the ``\`` represents a literal backslash: ``r'C:\users\Brian'``\:
+# the ``\\`` represents a literal backslash: ``r'C:\users\Brian'``\:
 #
 # For instance, on Windows systems, the two following commands are fully equivalent:
 #
@@ -215,7 +215,7 @@ print(X)
 #
 # ```
 #
-# Then running this project in John's Linux computer (e.g. in ``\home\john\s_copy`` )
+# Then running this project in John's Linux computer (e.g. in ``/home/john/s_copy`` )
 # will certainly result in execution
 # errors if absolute paths are used in the notebook:
 # ```text

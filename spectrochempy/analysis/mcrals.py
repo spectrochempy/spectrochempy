@@ -20,6 +20,7 @@ from sklearn import decomposition
 
 from spectrochempy.analysis._analysisutils import (
     NotFittedError,
+    _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
@@ -42,16 +43,22 @@ class MCRALS(DecompositionAnalysis):
         """
     Perform MCR-ALS of a dataset knowing the initial C or St matrix.
 
-    MCR-ALS (Multivariate Curve Resolution - Alternating Least Squares) resolve"s a set
+    MCR-ALS (Multivariate Curve Resolution \- Alternating Least Squares) resolve's a set
     (or several sets) of spectra X of an evolving mixture (or a set of mixtures) into
     the spectra St of ‘pure’ species and their concentration profiles C. In terms of
     matrix equation:
-    .. math::`X = C.S^T + E`
+
+    .. math::X = C.S^T + E
+
     where :math:`E` is the matrix of residuals.
 
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
+
+    Other Parameters
+    ----------------
+    {{CONFIGURATION_PARAMETERS}}
 
     See Also
     --------
@@ -96,7 +103,7 @@ standard deviation of residuals).""",
 all concentrations profiles are considered non-negative. If an array of indexes
 is passed, the corresponding profiles are considered non-negative, not the
 others. For instance `[0, 2]` indicates that profile #0 and #2 are non-negative
-while profile #1 *can* be negative. If set to `[]`, all profiles can
+while profile #1 *can* be negative. If set to `[]`\, all profiles can
 be negative.""",
     ).tag(config=True)
 
@@ -107,7 +114,7 @@ be negative.""",
 concentrations profiles are considered unimodal. If an array of indexes is
 passed, the corresponding profiles are considered unimodal, not the others.
 For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
-profile #1 *can* be multimodal. If set to `[]`, all profiles can be multimodal.""",
+profile #1 *can* be multimodal. If set to `[]`\, all profiles can be multimodal.""",
     ).tag(config=True)
 
     unimodConcMod = tr.Enum(
@@ -138,7 +145,7 @@ while profile #1 *can* increase.""",
     monoDecTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if:```C[i,j] > C[i-1,j] * unimodTol```  along profile #j.""",
+if:``C[i,j] > C[i-1,j] * unimodTol``  along profile #j.""",
     ).tag(config=True)
 
     monoIncConc = tr.List(
@@ -153,22 +160,22 @@ while profile #1 *can* decrease.""",
     monoIncTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if: ```C[i,j] < C[i-1,j] * unimodTol``` along profile  #j.""",
+if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile  #j.""",
     ).tag(config=True)
 
     closureConc = tr.List(
         default_value=[],
         help="""Defines the concentration profiles subjected to closure constraint.
-If set to `[]`, no constraint is applied. If an array of indexes is
+If set to `[]`\, no constraint is applied. If an array of indexes is
 passed, the corresponding profile will be constrained so that their
-weighted sum equals the `closureTarget`.""",
+weighted sum equals the `closureTarget`\.""",
     ).tag(config=True)
 
     closureTarget = tr.Union(
         (tr.Enum(["default"]), Array()),
         default_value="default",
         help="""The value of the sum of concentrations profiles subjected to closure.
-If set to `default`, the total concentration is set to 1.0 for all observations.
+If set to `default`\, the total concentration is set to 1.0 for all observations.
 If an array is passed: the values of concentration for each observation. Hence,
 `np.ones(X.shape[0])` would be equivalent to 'default'.""",
     ).tag(config=True)
@@ -178,18 +185,20 @@ If an array is passed: the values of concentration for each observation. Hence,
         default_value="scaling",
         help="""The method used to enforce Closure. 'scaling' recompute the
 concentration profiles using linear algebra:
+
 ```
 C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(
 np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))
 ```
-'constantSum' normalize the sum of concentration profiles to `closureTarget`.""",
+
+'constantSum' normalize the sum of concentration profiles to `closureTarget`\.""",
     ).tag(config=True)
 
     hardConc = tr.List(
         default_value=[],
         help="""Defines hard constraints on the concentration profiles. If set to
-`[]`, no constraint is applied. If an array of indexes is passed, the
-corresponding profiles will set by `getC`.""",
+`[]`\, no constraint is applied. If an array of indexes is passed, the
+corresponding profiles will set by `getC`\.""",
     ).tag(config=True)
 
     getC = tr.Callable(
@@ -197,20 +206,26 @@ corresponding profiles will set by `getC`.""",
         allow_none=True,
         help="""An external function that will provide `len(hardConc)` concentration
 profiles:
+
 ```
 getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC
 ```
+
 or:
+
 ```
 getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC, newArgsGetC
 ```
+
 or:
+
 ```
 getC(Ccurr, *argsGetCn, **kargsGetC) -> hardC, newArgsGetC, extOutput
 ```
+
 where Ccurr  is the current C NDDataset, *argsGetC are the parameters needed to
 completely specify the function. `hardC` is a nadarray or NDDataset of shape
-`(C.y, len(hardConc)`, newArgsGetC are the updated parameters for the next
+`(C.y, len(hardConc)`\, newArgsGetC are the updated parameters for the next
 iteration (can be None), and extOutput can be any other relevant output to be kept
 in extOutput attribute (only the last iteration extOutput is kept)""",
     ).tag(config=True)
@@ -240,7 +255,7 @@ hardC (index O) corresponds to the second profile of C (index 1).""",
 all spectral profiles are considered non-negative. If an array of indexes is
 passed, the corresponding profiles are considered non-negative, not the others.
 For instance `[0, 2]` indicates that profile #0 and #2 are non-negative while
-profile #1 *can* be negative. If set to `None` or `[]`, all profiles can be
+profile #1 *can* be negative. If set to `None` or `[]`\, all profiles can be
 negative.""",
     ).tag(config=True)
 
@@ -258,7 +273,7 @@ value.""",
         (tr.Enum(["all"]), tr.List()),
         default_value=[],
         help="""Unimodality constraint on Spectra. If the list of spectral profiles is
-void, all profiles can be multimodal. If set to `all`, all profiles are unimodal.
+void, all profiles can be multimodal. If set to `all`\, all profiles are unimodal.
 If an array of indexes is passed, the corresponding profiles are considered unimodal,
 not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal
 while profile #1 *can* be multimodal.""",
@@ -267,8 +282,8 @@ while profile #1 *can* be multimodal.""",
     unimodSpecMod = tr.Enum(
         ["strict", "smooth"],
         default_value="strict",
-        help=""" When set to `"strict"`, values deviating from unimodality are reset to
-the value of the previous point. When set to `"smooth"`, both values (deviating
+        help=""" When set to `"strict"`\, values deviating from unimodality are reset to
+the value of the previous point. When set to `"smooth"`\, both values (deviating
 point and previous point) are modified to avoid ="steps"
 in the concentration profile.""",
     ).tag(config=True)
@@ -276,10 +291,9 @@ in the concentration profile.""",
     unimodSpecTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for unimodality. Correction is applied only if the
-deviating point is larger/lower than
-```St[j,i] > St[j, i-1] * unimodSpecTol```  on the decreasing branch of
-profile #j,
-```St[j,i] < St[j, i-1] * unimodTol```  on the increasing branch of profile  #j.""",
+deviating point is larger/lower than ``St[j,i] > St[j, i-1] * unimodSpecTol``
+on the decreasing branch of profile #j,
+``St[j,i] < St[j, i-1] * unimodTol`` on the increasing branch of profile  #j.""",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -351,8 +365,8 @@ profile #j,
 
         # check the dimensions compatibility
         # however as the dimension of profile should match the initial shape
-        # of X we use self._X_shape not self._X.shape (because for this masked columns or
-        # rows have already been removed
+        # of X we use self._X_shape not self._X.shape (because for this masked columns
+        # or rows have already been removed.
         if (self._X_shape[1] != profile.shape[1]) and (
             self._X_shape[0] != profile.shape[0]
         ):
@@ -840,7 +854,13 @@ profile #j,
         return self._outfit[4]
 
 
-# ---------------------------------
+# Docstrings
+_make_other_parameters_doc(MCRALS)
+
+
+# --------------------------------------------------------------------------------------
+# Utilities
+# --------------------------------------------------------------------------------------
 def _unimodal_2D(a, axis, idxes, tol, mod):
     """Force unimodality on given lines or columnns od a 2D ndarray
 
@@ -853,9 +873,9 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
         indexes at which the correction is applied
 
     mod : str
-        When set to `"strict"`, values deviating from unimodality are reset to the value of the previous point.
-        When set to `"smooth"`, both values (deviating point and previous point) are modified to avoid "steps"
-        in the profile.
+        When set to `"strict"`, values deviating from unimodality are reset to the
+        value of the previous point. When set to `"smooth"`, both values (deviating
+        point and previous point) are modified to avoid "steps" in the profile.
 
     tol: float
         Tolerance parameter for unimodality. Correction is applied only if:
@@ -884,8 +904,9 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
     a : 1D ndarray
 
     mod : str
-        When set to `"strict"`, values deviating from unimodality are reset to the value of the previous point.
-        When set to `"smooth"`, both values (deviating point and previous point) are modified to avoid "steps"
+        When set to `"strict"`, values deviating from unimodality are reset to the value
+        of the previous point. When set to `"smooth"`, both values (deviating point and
+        previous point) are modified to avoid "steps"
         in the profile.
 
     tol: float

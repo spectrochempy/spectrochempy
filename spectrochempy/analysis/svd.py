@@ -11,6 +11,7 @@ import numpy as np
 import traitlets as tr
 
 from spectrochempy.analysis._analysisutils import (
+    _make_other_parameters_doc,
     _svd_flip,
     _wrap_ndarray_output_to_nddataset,
 )
@@ -39,6 +40,10 @@ class SVD(DecompositionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
+
+    Other Parameters
+    ----------------
+    {{CONFIGURATION_PARAMETERS}}
 
     See Also
     --------
@@ -212,6 +217,8 @@ class SVD(DecompositionAnalysis):
         """
         return self._outfit[1]
 
+
+_make_other_parameters_doc(SVD)
 
 # ======================================================================================
 if __name__ == "__main__":

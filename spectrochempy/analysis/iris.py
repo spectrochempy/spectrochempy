@@ -18,7 +18,10 @@ import traitlets as tr
 from matplotlib import pyplot as plt
 from scipy import optimize
 
-from spectrochempy.analysis._analysisutils import NotFittedError
+from spectrochempy.analysis._analysisutils import (
+    NotFittedError,
+    _make_other_parameters_doc,
+)
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.core import info_, warning_
 from spectrochempy.core.dataset.coord import Coord
@@ -298,6 +301,10 @@ class IRIS(DecompositionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
+
+    Other Parameters
+    ----------------
+    {{CONFIGURATION_PARAMETERS}}
 
     See Also
     --------
@@ -987,6 +994,8 @@ def _isPD(B):  # pragma: no cover
     except np.linalg.LinAlgError:
         return False
 
+
+_make_other_parameters_doc(IRIS)
 
 # ======================================================================================
 if __name__ == "__main__":

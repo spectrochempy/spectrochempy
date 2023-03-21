@@ -69,7 +69,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "sphinx.ext.napoleon",
-    "autodoc_traitlets",
+    # "autodoc_traits",
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
 ]
@@ -453,7 +453,7 @@ nbsphinx_execute_arguments = [
 
 #
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
-nbsphinx_execute = "always"
+nbsphinx_execute = "auto"
 nbsphinx_allow_errors = True
 nbsphinx_timeout = 90
 nbsphinx_prolog = """
@@ -541,7 +541,8 @@ autoclass_content = "both"
 # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
 
 #
-autodoc_default_flags = ["autosummary"]
+autodoc_default_options = ["autosummary"]
+autodoc_class_signature = "separated"
 
 #
 exclusions = (

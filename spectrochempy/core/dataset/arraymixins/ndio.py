@@ -111,7 +111,7 @@ class NDIO(HasTraits):
         """
         Save the current object in SpectroChemPy format.
 
-        Default extension is *.scp for |NDDataset|'s and *.pscp for
+        Default extension is *.scp for |NDDataset|\'s and *.pscp for
         |Project|'s.
 
         Parameters

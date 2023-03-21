@@ -10,7 +10,10 @@ This module implement the EFA (Evolving Factor Analysis) class.
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._analysisutils import _wrap_ndarray_output_to_nddataset
+from spectrochempy.analysis._analysisutils import (
+    _make_other_parameters_doc,
+    _wrap_ndarray_output_to_nddataset,
+)
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.core import info_
 from spectrochempy.utils.docstrings import _docstring
@@ -24,11 +27,15 @@ class EFA(DecompositionAnalysis):
         """
     Evolving Factor Analysis.
 
-    Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset| .
+    Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|\.
 
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
+
+    Other Parameters
+    ----------------
+    {{CONFIGURATION_PARAMETERS}}
 
     See Also
     --------
@@ -168,7 +175,7 @@ class EFA(DecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def f_ev(self):
         """
-        Eigenvalues for the forward analysis (|NDDataset|).
+        Eigenvalues for the forward analysis (|NDDataset|\).
         """
         f = self._outfit[0]
         if self.cutoff is not None:
@@ -179,13 +186,15 @@ class EFA(DecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def b_ev(self):
         """
-        Eigenvalues for the backward analysis (|NDDataset|).
+        Eigenvalues for the backward analysis (|NDDataset|\).
         """
         b = self._outfit[1]
         if self.cutoff is not None:
             b = np.max((b, np.ones_like(b) * self.cutoff), axis=0)
         return b
 
+
+_make_other_parameters_doc(EFA)
 
 # ======================================================================================
 if __name__ == "__main__":

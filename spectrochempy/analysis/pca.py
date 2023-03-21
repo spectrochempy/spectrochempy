@@ -16,6 +16,7 @@ from sklearn import decomposition
 
 from spectrochempy.analysis._analysisutils import (
     NotFittedError,
+    _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
@@ -41,6 +42,10 @@ class PCA(DecompositionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
+
+    Other Parameters
+    ----------------
+    {{CONFIGURATION_PARAMETERS}}
 
     See Also
     --------
@@ -584,6 +589,8 @@ for reproducible results across multiple function calls.""",
 
         return ax
 
+
+_make_other_parameters_doc(PCA)
 
 if __name__ == "__main__":
     pass

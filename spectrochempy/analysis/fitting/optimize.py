@@ -37,42 +37,12 @@ class Optimize(DecompositionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
-"""
-    )
 
-    # Note:
-    # I am starting using the fitting module in practical cases, and I take this
-    # opportunity to jote down few notes/questions about its current implementation.
-    # There is no need of immediate response as there will be probably more points and
-    # editing as I will =use it :-)
-    #
-    # 3/ no linear baseline should be automatically calculated and added, in particular
-    # because in some instances, the user will already have a "baseline corrected"
-    # dataset. This is the case of the example in userguide/analysis/fitting.
-    # Here the spectrum is baseline corrected and in this case the baseline add 2 degrees
-    # of freedom that are not needed, and increase the number of iterations (+22\% in this case).
-    # In more complicated cases, it can be worse (observed up to +70\%), and also worsen
-    # the fit. Scpy has very good and sophisticated baseline correction schemes, they can
-    # be are somehow 'wasted' with this automatic linear correction.
-    # 4/ the amplitude setting is not straightforward to adjust manually because (1)
-    # it corresponds to the area of the peak, and (2) it is renormalized when runing with
-    # dry=True, and this renormalization depends on the presence of other peaks....
-    # In practice i think it would be easier for the user to set the height (because
-    # it is easier to estimate), than the area, and these heights should no be
-    # renormalized when dry=True.
-    # 5/ the silent parameter should be passed to the scipy.optimize functions
-    # (currently (..., disp=False, ...), we could pass a disp parameter to
-    # fitting.optimize() and call it with disp = not silent .
-    # By the way we should use a consistent keyword (and default) in scpy.analysis
-    # functions (mcrals: verbose=False ; nnmf: verbose=True).
-    # 6/ maybe not necessary to generate a .model attribute to the dataset when Fit.run()
-    # is used. Instead, Fit/run() could return the model lines in a NDDataset on its own ?
-    # it would allow to have name of each line thet Coord labls, and properties of each
-    # line in desfription, etc... Ploting of the model and experimental dataset could
-    # be done with standard scpy plotting functions instead using ("plot_model=True") ?
-    # Another possibility would be to add this dataset as an attribute of the fitting
-    # object and to add methods consitent with other analysis methods -- i.e.
-    # reconstruct() and plotmerit() ?
+    Other parameters
+    ----------------
+
+    """
+    )
 
     name = "Optimize"
     description = "Non-linear Least-Squares Optimization"
@@ -103,7 +73,9 @@ class Optimize(DecompositionAnalysis):
         config=True
     )
 
-    constraints = tr.Any(allow_none=True).tag(config=True)  # TODO: adjust this
+    constraints = tr.Any(allow_none=True, help="Constraints").tag(
+        config=True
+    )  # TODO: adjust this
 
     dry = tr.Bool(
         default_value=False,
@@ -143,6 +115,8 @@ class Optimize(DecompositionAnalysis):
         copy=True,
         **kwargs,
     ):
+        """ """
+        # An empty __doc__ must be placed here, else Configurable.__doc__ will appear
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!

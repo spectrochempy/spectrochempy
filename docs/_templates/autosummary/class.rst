@@ -4,11 +4,11 @@
 
 .. autoclass:: {{ objname }}
 
-   {% block methods %}
+    {% block methods %}
      {% if methods %}
-   .. rubric:: {{ _('Methods') }}
+    .. rubric:: {{ _('Methods') }}
 
-   .. autosummary::
+    .. autosummary::
        {% for item in methods %}
          {%- if item != "__init__" %}
        {{ name }}.{{ item }}
@@ -16,25 +16,19 @@
        {%- endfor %}
 
       {% endif %}
-   {% endblock %}
+    {% endblock %}
 
-   {% block attributes %}
+    {% block attributes %}
      {% if attributes %}
-   .. rubric:: {{ _('Attributes') }}
+    .. rubric:: {{ _('Attributes') }}
 
-   .. autosummary::
+    .. autosummary::
        {% for item in attributes %}
        {{ name }}.{{ item }}
        {%- endfor %}
 
-
-       {% for item in attributes %}
-   .. autoattribute:: {{ item }}
-
-       {%- endfor %}
-
      {% endif %}
-   {% endblock %}
+    {% endblock %}
 
 
 .. include:: /gettingstarted/gallery/backreferences/{{fullname}}.examples
