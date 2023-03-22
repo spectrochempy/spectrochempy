@@ -1,7 +1,7 @@
-What's new in revision 0.5.5.dev17
+What's new in revision 0.5.5
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.5.5.dev17.
+These are the changes in SpectroChemPy-0.5.5.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 New features
