@@ -75,6 +75,10 @@ jobs:
         run: |
           python3 -m pip install xarray
 
+      - name: List final packages used for tests
+        run: |
+          python3 -m pip list
+
       - name: Test with coverage
         run: |
           coverage run -m pytest tests
