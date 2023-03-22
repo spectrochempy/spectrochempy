@@ -39,6 +39,7 @@ Bug fixes
 * Masks handling.
 * Multicoordinates slicing work correctly.
 * Removed some deprecation warnings from numpy library.
+* Pin ipywidgets to avoid runtime errors until ipywidgets is fixed.
 
 .. section
 

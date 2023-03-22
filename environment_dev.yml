@@ -88,6 +88,5 @@ dependencies:
     - conda-build
     - conda-verify
     - anaconda-client
-    - autodoc-traits
 
 #EOF
