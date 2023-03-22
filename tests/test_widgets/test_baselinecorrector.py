@@ -10,6 +10,7 @@ import pytest
 
 import spectrochempy
 import spectrochempy as scp
+from spectrochempy.core.common import dialogs
 
 DATADIR = scp.preferences.datadir
 SPG_FILE = DATADIR / "irdata/nh4y-activation.spg"
