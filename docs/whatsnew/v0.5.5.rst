@@ -1,7 +1,7 @@
-What's new in revision 0.5.5.dev14
+What's new in revision 0.5.5
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.5.5.dev14.
+These are the changes in SpectroChemPy-0.5.5.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 New features
@@ -25,3 +25,4 @@ Bug fixes
 * Masks handling.
 * Multicoordinates slicing work correctly.
 * Removed some deprecation warnings from numpy library.
+* Pin ipywidgets to avoid runtime errors until ipywidgets is fixed.
