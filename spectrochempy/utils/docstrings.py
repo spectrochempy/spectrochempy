@@ -50,7 +50,7 @@ ERROR_MSGS = {
 }
 
 
-common_doc = """
+_common_doc = """
 copy : bool, optional, Default: True
     Perform a copy of the passed object.
 inplace : bool, optional, default: False
@@ -70,7 +70,7 @@ class DocstringProcessor(docrep.DocstringProcessor):
         super().__init__(**kwargs)
 
         regex = re.compile(r"(?=^[*]{0,2}\b\w+\b\s?:?\s?)", re.MULTILINE | re.DOTALL)
-        plist = regex.split(common_doc.strip())[1:]
+        plist = regex.split(_common_doc.strip())[1:]
         params = {
             k.strip("*"): f"{k.strip()} : {v.strip()}"
             for k, v in (re.split(r"\s?:\s?", p, maxsplit=1) for p in plist)

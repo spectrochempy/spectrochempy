@@ -541,7 +541,7 @@ autoclass_content = "class"
 # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
 
 #
-autodoc_default_options = ["autosummary"]
+autodoc_default_options = {"autosummary": True}
 autodoc_class_signature = "mixed"
 
 #
@@ -597,7 +597,10 @@ exclusions = (
 
 #
 def autodoc_skip_member(app, what, name, obj, skip, options):
-    doc = True if obj.__doc__ is not None else False
+    doc = (
+        True if obj.__doc__ is not None and "#NOT_IN_DOC" not in obj.__doc__ else False
+    )
+
     exclude = name in exclusions or "trait" in name or name.startswith("_") or not doc
     return skip or exclude
 

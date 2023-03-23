@@ -170,8 +170,6 @@ class EFA(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
-    _docstring.keep_params("analysis_fit.parameters", "X")
-
     @_docstring.dedent
     def fit(self, X):
         """
@@ -190,6 +188,29 @@ class EFA(DecompositionAnalysis):
         %(analysis_fit.see_also)s
         """
         return super().fit(X, Y=None)
+
+    @_docstring.dedent
+    def fit_transform(self, X, **kwargs):
+        """
+        Fit the model with X and apply the dimensionality reduction on X.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+        %(analysis_transform.parameters.kwargs)s
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
+
+        Returns
+        -------
+        %(analysis_transform.returns)s
+        """
+        return super().fit_transform(X, **kwargs)
+
+    def inverse_transform(self):
+        """Not implemented"""
 
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")

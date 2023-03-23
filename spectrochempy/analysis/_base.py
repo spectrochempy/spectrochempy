@@ -12,7 +12,7 @@ import inspect
 import logging
 import warnings
 from copy import copy
-from functools import partial
+from functools import partial, update_wrapper
 from textwrap import indent
 
 import numpy as np
@@ -95,6 +95,8 @@ def _svd_flip(U, VT, u_based_decision=True):
 # according to the X input
 # ======================================================================================
 class _set_output(object):
+    """set output"""
+
     def __init__(
         self,
         method,
@@ -106,19 +108,18 @@ class _set_output(object):
         typesingle=None,
     ):
         self.method = method
+        update_wrapper(self, method)
         self.units = units
         self.title = title
         self.typex = typex
         self.typey = typey
         self.typesingle = typesingle
 
-    def __repr__(self):
-        """Return the method's docstring."""
-        return self.method.__doc__
-
     def __get__(self, obj, objtype):
         """Support instance methods."""
-        return partial(self.__call__, obj)
+        newfunc = partial(self.__call__, obj)
+        update_wrapper(newfunc, self.method)
+        return newfunc
 
     def __call__(self, obj, *args, **kwargs):
 
@@ -249,11 +250,20 @@ def _make_other_parameters_doc(klass):
     klass.__doc__ = klass.__doc__.replace("{{CONFIGURATION_PARAMETERS}}", otherpar)
 
 
+_common_docs = """
+
+
+"""
+_docstring.get_sections(__doc__, base="common")
+
+
 # ======================================================================================
 # Base class AnalysisConfigurable
 # ======================================================================================
 class AnalysisConfigurable(MetaConfigurable):
-    """
+
+    __doc__ = _docstring.dedent(
+        """
     Abstract class to write analysis estimators.
 
     Analysis method must subclass this to get a minimal structure
@@ -262,8 +272,7 @@ class AnalysisConfigurable(MetaConfigurable):
     ----------
     log_level : [`"INFO"` , `"DEBUG"` , `"WARNING"`, `"ERROR"`], optional, default:`"WARNING"`
         The log level at startup
-    copy : bool, optional, default:True
-        Whether to copy input data to avoid overriding.
+    %(copy)s
     config : Config object, optional
         By default the configuration is determined by the object configuration
         file in the configuration directory.
@@ -280,9 +289,10 @@ class AnalysisConfigurable(MetaConfigurable):
     **kwargs
         Optional configuration parameters. See Other Parameters.
     """
+    )
 
     # Get doc sections for reuse in subclass
-    _docstring.get_sections(_docstring.dedent(__doc__), base="AnalysisConfigurable")
+    _docstring.get_sections(__doc__, base="AnalysisConfigurable")
 
     name = tr.Unicode(help="name of the implemented model")
     # name must be defined in subclass with the name of the model: PCA, MCRALS, ...
@@ -618,7 +628,7 @@ class AnalysisConfigurable(MetaConfigurable):
         --------
         fit_transform :  Fit the model with an input dataset X and apply the
                          dimensionality reduction on X.
-
+        fit_reduce : Alias of fit_transform (Deprecated).
         """
         self._fitted = False  # reinit this flag
 
@@ -651,11 +661,13 @@ class AnalysisConfigurable(MetaConfigurable):
         base="analysis_fit",
         sections=["Parameters", "Returns", "See Also"],
     )
+    # extract useful individual parameters doc
+    _docstring.keep_params("analysis_fit.parameters", "X")
 
     @property
     def X(self):
         """
-        Return the X input dataset (eventually modified by the model)
+        Return the X input dataset (eventually modified by the model).
         """
         if self._X_is_missing:
             raise NotFittedError
@@ -701,7 +713,7 @@ class AnalysisConfigurable(MetaConfigurable):
     @property
     def log(self):
         """
-        Logs output.
+        Return log output.
         """
         # A string handler (#2) is defined for the Spectrochempy logger,
         # thus we will return it's content
@@ -813,11 +825,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @property
     def Y(self):
         """
-        Return the Y input dataset or a list of dataset
-
-        This describes for example starting Concentration and Spectra in MCRALS
+        Return the Y input.
         """
-        # We use Y property only to show this information to the end user. Internally
+        # We use Y property only to show this information to the end-user. Internally
         # we use _Y attribute to refer to the input data
         if self._Y_is_missing:
             raise NotFittedError
@@ -835,14 +845,13 @@ class DecompositionAnalysis(AnalysisConfigurable):
             New data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
             if not provided, the input dataset of the fit method will be used.
-
         **kwargs
             Additional keyword parameters. See Other Parameters
 
         Other Parameters
         ----------------
         n_components : int, optional
-            The number of components to use for the transformation. If not given
+            The number of components to use for the reduction. If not given
             the number of components is eventually the one specified or determined
             in the fit process.
 
@@ -876,6 +885,15 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         return X_transform
 
+    # Get doc sections for reuse in subclass
+    _docstring.get_sections(
+        _docstring.dedent(transform.__doc__),
+        base="analysis_transform",
+        sections=["Parameters", "Other Parameters", "Returns"],
+    )
+    _docstring.keep_params("analysis_transform.parameters", "X")
+    _docstring.keep_params("analysis_transform.parameters", "kwargs")
+
     @_wrap_ndarray_output_to_nddataset
     def inverse_transform(self, X_transform=None, **kwargs):
         """
@@ -889,21 +907,15 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Reduced X data, where `n_observations` is the number of observations
             and `n_components` is the number of components. If X_transform is not
             provided, a transform of X provided in fit is performed first.
-        **kwargs
-            Additional keyword parameters. See Other Parameters
+        %(analysis_transform.parameters.kwargs)s
 
         Other Parameters
         ----------------
-        n_components : int, optional
-            The number of components to use for the inverse_transformation. If not given
-            The number of components is eventually the one specified or determined
-            in the fit process.
+        %(analysis_transform.other_parameters)s
 
         Returns
         -------
         NDDataset(n_observations, n_features)
-            Data with the original X shape
-            eventually filtered by the reduce/transform operation.
         """
         if not self._fitted:
             raise NotFittedError
@@ -934,23 +946,34 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         return X
 
+    _docstring.get_sections(
+        _docstring.dedent(inverse_transform.__doc__),
+        base="analysis_inverse_transform",
+        sections=["Parameters", "Returns"],
+    )
+    _docstring.keep_params("analysis_inverse_transform.parameters", "X")
+
+    @_docstring.dedent
     def fit_transform(self, X, Y=None, **kwargs):
         """
         Fit the model with X and apply the dimensionality reduction on X.
 
         Parameters
         ----------
-        X : NDDataset
-            Input dataset of shape (n_observation, n_feature) to fit
+        %(analysis_fit.parameters.X)s
         Y : array_like, optional
             For example Y is not used in PCA, but corresponds to the guess profiles in
             MCRALS
-        **kwargs :
-            Additional optional keywords parameters as for the `transform` method.
+        **kwargs
+            Additional keyword parameters. See Other Parameters
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
 
         Returns
         -------
-        NDDataset(n_observations, n_components)
+        %(analysis_transform.returns)s
         """
         try:
             self.fit(X, Y)
@@ -1009,7 +1032,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         See Also
         --------
-        get_components: retrieve only the specified number of components
+        get_components : retrieve only the specified number of components
         """
         return self._get_components()
 

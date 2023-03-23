@@ -85,7 +85,7 @@ jobs:
           python docs/make.py --clean --apigen --html
 
       - name: Deployment
-        if: (github.event_name != 'pull_request')
+        # if: (github.event_name != 'pull_request')     if it's a PR in principle html pages are in the dirty folder
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages

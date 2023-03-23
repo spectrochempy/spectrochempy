@@ -25,6 +25,10 @@ datadir = scp.preferences.datadir
 dataset = scp.read_omnic(os.path.join(datadir, "irdata", "nh4y-activation.spg"))
 
 # %%
+# Change the time origin
+dataset.y -= dataset.y[0]
+
+# %%
 # columns masking
 dataset[:, 1230.0:920.0] = scp.MASKED  # do not forget to use float in slicing
 dataset[:, 5997.0:5993.0] = scp.MASKED
@@ -74,7 +78,7 @@ assert C1 == C2
 # %%
 # Get components
 #
-St = efa2.components
+St = efa2.get_components()
 St.plot(title="components", legend=St.y.labels)
 
 scp.show()

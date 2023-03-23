@@ -183,17 +183,13 @@ If an array is passed: the values of concentration for each observation. Hence,
     closureMethod = tr.Enum(
         ["scaling", "constantSum"],
         default_value="scaling",
-        help="""The method used to enforce Closure. 'scaling' recompute the
-concentration profiles using linear algebra:
+        help="""The method used to enforce Closure.
 
-````
-C.data[:, closureConc] = np.dot(
-        C.data[:, closureConc],
-        np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0])
-        )
-````
+* `'scaling'` recompute the concentration profiles using linear algebra::
 
-'constantSum' normalize the sum of concentration profiles to `closureTarget` .""",
+``C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))``
+
+`'constantSum'` normalize the sum of concentration profiles to `closureTarget` .""",
     ).tag(config=True)
 
     hardConc = tr.List(
@@ -822,6 +818,49 @@ on the decreasing branch of profile #j,
         %(analysis_fit.see_also)s
         """
         return super().fit(X, Y)
+
+    @_docstring.dedent
+    def fit_transform(self, X, Y, **kwargs):
+        """
+        Fit the model with X and apply the dimensionality reduction on X.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+        Y : array-like or list of array-like
+            Initial concentration or spectra.
+        %(analysis_transform.parameters.kwargs)s
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
+
+        Returns
+        -------
+        NDDataset(n_observations, n_components)
+        """
+        return super().fit_transform(X, Y, **kwargs)
+
+    @_docstring.dedent
+    def inverse_transform(self, X_transform=None, **kwargs):
+        """
+        Transform data back to its original space.
+
+        In other words, return an input `X_original` whose reduce/transform would be X.
+
+        Parameters
+        ----------
+        %(analysis_inverse_transform.parameters)s
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
+
+        Returns
+        -------
+        NDDataset(n_observations, n_features)
+        """
+        return super().inverse_transform(X_transform, **kwargs)
 
     @property
     def C(self):

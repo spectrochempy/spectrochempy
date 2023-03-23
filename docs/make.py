@@ -20,7 +20,6 @@ import warnings
 import zipfile
 from os import environ
 from pathlib import Path
-from warnings import warn
 
 import numpy as np
 from skimage.io import imread, imsave
@@ -35,6 +34,8 @@ from spectrochempy.api import version
 from spectrochempy.utils.file import download_testdata
 from spectrochempy.utils.packages import list_packages
 from spectrochempy.utils.system import sh
+
+__all__ = []
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
 warnings.filterwarnings(action="ignore", category=RemovedInSphinx70Warning)
@@ -85,8 +86,9 @@ class BuildDocumentation(object):
     def __init__(self):
 
         # determine if we are in the development branch (latest) or master (stable)
-
-        if "dev" in version:
+        if "+" in version:
+            self._doc_version = "dirty"
+        elif "dev" in version:
             print("\n\nWe are creating the latest (dev) documentation.\n")
             self._doc_version = "latest"
         else:
@@ -122,6 +124,12 @@ class BuildDocumentation(object):
         parser.add_argument(
             "--apigen",
             help="execute a full regeneration of the api",
+            action="store_true",
+        )
+
+        parser.add_argument(
+            "--norun",
+            help="do not execute notebooks",
             action="store_true",
         )
 
@@ -555,7 +563,7 @@ class Apigen:
                 print(alls)
 
             except AttributeError:
-                warn("This module has no __all__ attribute")
+                # warn("This module has no __all__ attribute")
                 continue
 
             if alls == []:

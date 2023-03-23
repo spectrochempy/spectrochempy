@@ -55,6 +55,9 @@ Among its major features:
 
     Home <self>
     whatsnew/latest
+    whatsnew/index
+
+.. _getting_started:
 
 ****************
 Getting Started
@@ -77,11 +80,26 @@ Getting Started
     Installation <gettingstarted/install/index>
     gettingstarted/papers
 
-.. _userguide:
+.. _api_reference:
 
 ***********************
-User's Guide
+Reference
 ***********************
+
+* :doc:`userguide/reference/index`
+
+.. toctree::
+    :maxdepth: 3
+    :hidden:
+    :caption: Reference
+
+    userguide/reference/index
+
+.. _userguide:
+
+************************
+User's Guide & Tutorials
+************************
 
 * :doc:`userguide/introduction/introduction`
 * :doc:`userguide/objects`
@@ -93,9 +111,9 @@ User's Guide
 * :doc:`userguide/api/api`
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 3
     :hidden:
-    :caption: User's Guide
+    :caption: User's Guide & Tutorials
 
     userguide/introduction/introduction
     userguide/objects
@@ -107,12 +125,9 @@ User's Guide
     userguide/api/api
 
 ***********************
-Reference & Help
+Contribute
 ***********************
 
-* :doc:`userguide/reference/index`
-* :doc:`userguide/reference/faq`
-* :doc:`whatsnew/index`
 * :doc:`devguide/issues`
 * :doc:`devguide/examples`
 * :doc:`devguide/index`
@@ -120,15 +135,11 @@ Reference & Help
 .. toctree::
     :maxdepth: 1
     :hidden:
-    :caption: Reference & Help
+    :caption: Contribute
 
-    userguide/reference/index
-    userguide/reference/faq
-    whatsnew/index
     Bug reports & feature request <devguide/issues>
     Sharing examples & tutorials <devguide/examples>
     devguide/index
-
 
 ********
 Credits

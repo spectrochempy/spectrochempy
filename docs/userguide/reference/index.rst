@@ -585,11 +585,9 @@ Linear regression
     LSTSQ
     NNLS
 
-Decomposition
-==============
 
 Non-linear optimization and curve fit
--------------------------------------
+=====================================
 
 .. autosummary::
     :nosignatures:
@@ -598,7 +596,7 @@ Non-linear optimization and curve fit
     Optimize
 
 Evolving factor analysis
-------------------------
+========================
 
 .. autosummary::
     :nosignatures:
@@ -607,7 +605,7 @@ Evolving factor analysis
     EFA
 
 Integral inversion solver for spectroscopic data
-------------------------------------------------
+================================================
 
 .. autosummary::
     :nosignatures:
@@ -617,7 +615,7 @@ Integral inversion solver for spectroscopic data
     IrisKernel
 
 Multivariate Curve Resolution - Alternating Least Squares
-----------------------------------------------------------
+=========================================================
 
 .. autosummary::
     :nosignatures:
@@ -626,7 +624,7 @@ Multivariate Curve Resolution - Alternating Least Squares
     MCRALS
 
 Non-Negative Matrix Factorization
----------------------------------
+=================================
 
 .. autosummary::
     :nosignatures:
@@ -635,7 +633,7 @@ Non-Negative Matrix Factorization
     NMF
 
 Singular value decomposition and Principal component analysis
--------------------------------------------------------------
+=============================================================
 
 .. autosummary::
     :nosignatures:
@@ -645,7 +643,7 @@ Singular value decomposition and Principal component analysis
     SVD
 
 SIMPLe to use Interactive Self-modeling Mixture Analysis
----------------------------------------------------------
+========================================================
 
 .. autosummary::
     :nosignatures:
