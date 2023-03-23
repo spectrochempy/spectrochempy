@@ -8,18 +8,17 @@
 This module implements the base abstract class to define estimators such as PCA, ...
 """
 
+import inspect
 import logging
 import warnings
 from copy import copy
+from functools import partial
+from textwrap import indent
 
 import numpy as np
 import traitlets as tr
 from sklearn import linear_model
 
-from spectrochempy.analysis._analysisutils import (
-    NotFittedError,
-    _wrap_ndarray_output_to_nddataset,
-)
 from spectrochempy.core import app, set_loglevel
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
@@ -29,7 +28,225 @@ from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import MASKED, NOMASK
 from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.plots import NBlue, NGreen, NRed
 from spectrochempy.utils.traits import MetaConfigurable, NDDatasetType
+
+
+# ======================================================================================
+# Exceptions for analysis models
+# ======================================================================================
+class NotFittedError(exceptions.SpectroChemPyError):
+    """
+    Exception raised when an analysis estimator is not fitted
+    but one use one of its method.
+
+    Parameters
+    ----------
+    attr :
+    """
+
+    def __init__(self, attr=None):
+        frame = inspect.currentframe().f_back
+        caller = frame.f_code.co_name if attr is None else attr
+        model = frame.f_locals["self"].name
+        message = (
+            f"To use `{caller}`,  the method `fit` of model `{model}`"
+            f" should be executed first"
+        )
+        super().__init__(message)
+
+
+# ======================================================================================
+def _svd_flip(U, VT, u_based_decision=True):
+    """
+    Sign correction to ensure deterministic output from SVD.
+    Adjusts the columns of u and the rows of v such that the loadings in the
+    columns in u that are largest in absolute value are always positive.
+
+    Parameters
+    ----------
+    u_based_decision : boolean, (default=True)
+        If True, use the columns of u as the basis for sign flipping.
+        Otherwise, use the rows of v.
+
+    Notes
+    -----
+    Copied and modified from scikit-learn.utils.extmath (BSD 3 Licence)
+    """
+
+    if u_based_decision:
+        # columns of U, rows of VT
+        max_abs_cols = np.argmax(np.abs(U), axis=0)
+        signs = np.sign(U[max_abs_cols, range(U.shape[1])])
+        U *= signs
+        VT *= signs[:, np.newaxis]
+    else:
+        # rows of V, columns of U
+        max_abs_rows = np.argmax(np.abs(VT), axis=1)
+        signs = np.sign(VT[range(VT.shape[0]), max_abs_rows])
+        U *= signs
+        VT *= signs[:, np.newaxis]
+
+    return U, VT
+
+
+# ======================================================================================
+# A decorator to transform np.ndarray output from models to NDDataset
+# according to the X input
+# ======================================================================================
+class _set_output(object):
+    def __init__(
+        self,
+        method,
+        *args,
+        units="keep",
+        title="keep",
+        typex=None,
+        typey=None,
+        typesingle=None,
+    ):
+        self.method = method
+        self.units = units
+        self.title = title
+        self.typex = typex
+        self.typey = typey
+        self.typesingle = typesingle
+
+    def __repr__(self):
+        """Return the method's docstring."""
+        return self.method.__doc__
+
+    def __get__(self, obj, objtype):
+        """Support instance methods."""
+        return partial(self.__call__, obj)
+
+    def __call__(self, obj, *args, **kwargs):
+
+        from spectrochempy.core.dataset.coord import Coord
+        from spectrochempy.core.dataset.nddataset import NDDataset
+
+        # HACK to be able to used deprecated alias of the method, without error
+        # because if not this modification obj appears two times
+        if args and type(args[0]) == type(obj):
+            args = args[1:]
+
+        # get the sklearn data output
+        data = self.method(obj, *args, **kwargs)
+
+        # restore eventually masked rows and columns
+        axis = "both"
+        if self.typex is not None and self.typex != "features":
+            axis = 0
+        elif self.typey is not None:
+            axis = 1
+
+        # make a new dataset with this data
+        X_transf = NDDataset(data)
+
+        # Now set the NDDataset attributes from the original X
+
+        # determine the input X dataset
+        X = obj._X
+
+        if self.units is not None:
+            if self.units == "keep":
+                X_transf.units = X.units
+            else:
+                X_transf.units = self.units
+        X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
+        X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
+        if self.title is not None:
+            if self.title == "keep":
+                X_transf.title = X.title
+            else:
+                X_transf.title = self.title
+        # make coordset
+        M, N = X.shape
+        if X_transf.shape == X.shape and self.typex is None and self.typey is None:
+            X_transf.set_coordset(y=X.coord(0), x=X.coord(1))
+        else:
+            if self.typey == "components":
+                X_transf.set_coordset(
+                    y=Coord(
+                        None,
+                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[0])],
+                        title="components",
+                    ),
+                    x=X.coord(-1),
+                )
+            if self.typex == "components":
+                X_transf.set_coordset(
+                    y=X.coord(0),  # cannot use X.y in case of transposed X
+                    x=Coord(
+                        None,
+                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        title="components",
+                    ),
+                )
+            if self.typex == "features":
+                X_transf.set_coordset(
+                    y=Coord(
+                        None,
+                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        title="components",
+                    ),
+                    x=X.coord(1),
+                )
+            if self.typesingle == "components":
+                # occurs when the data are 1D such as ev_ratio...
+                X_transf.set_coordset(
+                    x=Coord(
+                        None,
+                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        title="components",
+                    ),
+                )
+
+        # eventually restore masks
+        X_transf = obj._restore_masked_data(X_transf, axis=axis)
+
+        return X_transf.squeeze()
+
+
+def _wrap_ndarray_output_to_nddataset(
+    method=None, units="keep", title="keep", typex=None, typey=None, typesingle=None
+):
+    # wrap _set_output to allow for deferred calling
+    if method:
+        # case of the decorator without argument
+        return _set_output(method)
+    else:
+        # and with argument
+        def wrapper(method):
+            return _set_output(
+                method,
+                units=units,
+                title=title,
+                typex=typex,
+                typey=typey,
+                typesingle=typesingle,
+            )
+
+        return wrapper
+
+
+# ======================================================================================
+# Generate a rst doc for config parameters
+# ======================================================================================
+def _make_other_parameters_doc(klass):
+    otherpar = ""
+    traits = klass.class_traits(config=True)
+    for k, v in traits.items():
+        info = v.info_text
+        if info.startswith("a "):
+            info = info[2:]
+        elif info.startswith("an "):
+            info = info[3:]
+        otherpar += f"{k} : {info}, optional, default:{v.default_value}\n"
+        desc = f"{v.help}\n"
+        desc = indent(desc, "    ")
+        otherpar += desc
+    klass.__doc__ = klass.__doc__.replace("{{CONFIGURATION_PARAMETERS}}", otherpar)
 
 
 # ======================================================================================
@@ -39,41 +256,52 @@ class AnalysisConfigurable(MetaConfigurable):
     """
     Abstract class to write analysis estimators.
 
-    Subclass this to get a minimal structure
+    Analysis method must subclass this to get a minimal structure
 
     Parameters
     ----------
-    log_level : ["INFO", "DEBUG", "WARNING", "ERROR"], optional, default:"WARNING"
+    log_level : [`"INFO"` , `"DEBUG"` , `"WARNING"`, `"ERROR"`], optional, default:`"WARNING"`
         The log level at startup
     copy : bool, optional, default:True
         Whether to copy input data to avoid overriding.
     config : Config object, optional
         By default the configuration is determined by the object configuration
-        file in the configuration directory. A traitlets.config.Config() object can
-        eventually be used here.
+        file in the configuration directory.
+
+        A traitlets.config.Config() object can eventually be used here.
     warm_start : bool, optional, default:False
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
         it may be possible to reuse previous model learned from the previous parameter
         value, saving time.
+
         When warm_start is true, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to fit.
     **kwargs
         Optional configuration parameters. See Other Parameters.
-
     """
+
+    # Get doc sections for reuse in subclass
+    _docstring.get_sections(_docstring.dedent(__doc__), base="AnalysisConfigurable")
 
     name = tr.Unicode(help="name of the implemented model")
     # name must be defined in subclass with the name of the model: PCA, MCRALS, ...
     description = tr.Unicode(help="optional description of the implemented model")
 
-    # get doc sections for reuse
-    _docstring.get_sections(_docstring.dedent(__doc__), base="AnalysisConfigurable")
+    # This is a trick to change the way this two attributes are displayed
+    config = tr.Instance(tr.config.Config, (), {}, help="Configuration object")
+    parent = tr.Instance(
+        "traitlets.config.configurable.Configurable",
+        help="parent=SpectroChemPy (ReadOnly)",
+        allow_none=True,
+    )
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
+    _copy = tr.Bool(default_value=True, help="If True, input X data are copied")
     _warm_start = tr.Bool(False, help="If True previous execution state is reused")
+
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows and columns")
     _X = NDDatasetType(allow_none=True, help="Data to fit a model")
@@ -85,7 +313,6 @@ class AnalysisConfigurable(MetaConfigurable):
     _X_coordset = tr.Instance(CoordSet, allow_none=True)
     _is_dataset = tr.Bool(help="True if the input X data is a NDDataset")
     _outfit = tr.Any(help="the output of the _fit method - generally a tuple")
-    _copy = tr.Bool(default_value=True, help="If True, input X data are copied")
     _output_type = tr.Enum(
         ["NDDataset", "ndarray"],
         default_value="NDDataset",
@@ -97,7 +324,8 @@ class AnalysisConfigurable(MetaConfigurable):
     # as they depend on the model estimator)
     # ----------------------------------------------------------------------------------
 
-    # write traits like e.g.,  A = Unicode("A", help='description").tag(config=True)
+    # Write here traits like e.g.,
+    #     A = Unicode("A", help='description").tag(config=True)
 
     # ----------------------------------------------------------------------------------
     # Initialization
@@ -106,25 +334,33 @@ class AnalysisConfigurable(MetaConfigurable):
         self,
         *,
         log_level=logging.WARNING,
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
     ):
         """ """
-        # An empty __doc__ must be placed here, else Configurable.__doc__ will appear
+        # An empty __doc__ is placed here, else Configurable.__doc__
+        # will appear when there is no __init___.doc in subclass
 
-        # call the super class for initialisation
+        # Call the super class (MetaConfigurable) for initialisation
+        config = kwargs.pop("config", None)
         super().__init__(section=self.name, config=config, parent=app)
 
-        # set log_level of the console report
+        # For cleaning docs information, we define here the doc for two objects of the
+        # superclass : config and parent
+        self.config.__doc__ = "Configuration object"
+        self.parent.__doc__ = "Parent application (SpectroChemPy) - Read-Only"
+
+        # Set log_level of the console report (accessible using the log property)
         set_loglevel(log_level)
 
-        # initial configuration
-        # reset to default if not warm_start
+        # Initial configuration
+        # ---------------------
+        # Reset all config parameters to default, if not warm_start
         defaults = self.parameters(default=True)
         configkw = {} if warm_start else defaults
-        # eventually take parameters form kwargs
+
+        # Eventually take parameters from kwargs
         configkw.update(kwargs)
 
         for k, v in configkw.items():
@@ -137,14 +373,14 @@ class AnalysisConfigurable(MetaConfigurable):
                     f"allowed parameters and their current value."
                 )
 
-        # if warm start we can use the previous fit as starting profiles.
+        # If warm start we can use the previous fit as starting profiles.
         self._warm_start = warm_start
         if not warm_start:
             # We should not be able to use any methods requiring fit results
             # until the fit method has been executed
             self._fitted = False
 
-        # copy passed data
+        # Copy passed data if required (True is the default)
         self._copy = copy
 
     # ----------------------------------------------------------------------------------
@@ -152,7 +388,7 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     def _make_dataset(self, d):
         # Transform an array-like object to NDDataset (optionally copy data)
-        # or a list of array-like to alist of NDQataset
+        # or a list of array-like to a list of NDQataset
         if d is None:
             return
         if isinstance(d, (tuple, list)):
@@ -164,6 +400,11 @@ class AnalysisConfigurable(MetaConfigurable):
         return d
 
     def _get_masked_rc(self, mask):
+        # Get the mask by row and columns.
+        # -------------------------------
+        # When a single element in the array is
+        # masked, the whole row and columns for this element is masked as well as the
+        # corresponding columns.
         if np.any(mask):
             masked_columns = np.all(mask, axis=-2)  # if mask.ndim == 2 else None
             masked_rows = np.all(mask, axis=-1)
@@ -209,7 +450,6 @@ class AnalysisConfigurable(MetaConfigurable):
         rowsize, colsize = self._X_shape
         masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
 
-        Dtemp = None
         if D.ndim == 2:
             # Put back masked columns in D
             # ----------------------------
@@ -327,7 +567,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
     @property
     def _X_is_missing(self):
-        # check wether or not X has been already defined
+        # check whether X has been already defined
         try:
             if self._X is None:
                 return True
@@ -336,7 +576,7 @@ class AnalysisConfigurable(MetaConfigurable):
         return False
 
     # ----------------------------------------------------------------------------------
-    # Private methods that should be most of the time overloaded in subclass
+    # Private methods that should be, most of the time, overloaded in subclass
     # ----------------------------------------------------------------------------------
     @tr.observe("_X")
     def _preprocess_as_X_changed(self, change):
@@ -354,30 +594,11 @@ class AnalysisConfigurable(MetaConfigurable):
         raise NotImplementedError("fit method has not yet been implemented")
 
     # ----------------------------------------------------------------------------------
-    # Public methods
+    # Public methods and property
     # ----------------------------------------------------------------------------------
-    @property
-    def X(self):
-        """
-        Return the X input dataset (eventually modified by the model)
-        """
-        if self._X_is_missing:
-            raise NotFittedError
-        # We use X property only to show this information to the end user. Internally
-        # we use _X attribute to refer to the input data
-        X = self._X.copy()
-        if np.any(self._X_mask):
-            # restore masked row and column if necessary
-            # X.data = self._restore_masked_data(X.data, axis="both")
-            X = self._restore_masked_data(X, axis="both")
-        if self._is_dataset or self._output_type == "NDDataset":
-            return X
-        else:
-            return np.asarray(X)
-
     def fit(self, X, Y=None):
         """
-        Fit the model with X and optional Y data
+        Fit the model with X as input dataset.
 
         Parameters
         ----------
@@ -385,16 +606,21 @@ class AnalysisConfigurable(MetaConfigurable):
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
 
-        Y : array_like, optional
-            For example Y is not used in PCA, but corresponds to the guess profiles in
-            MCRALS
+        Y : any
+            depends on the model.
 
         Returns
         -------
-        self : object
-            Returns the fitted instance itself.
+        self
+            The fitted instance itself.
+
+        See Also
+        --------
+        fit_transform :  Fit the model with an input dataset X and apply the
+                         dimensionality reduction on X.
+
         """
-        self._fitted = False  # reiniit this flag
+        self._fitted = False  # reinit this flag
 
         # fire the X and eventually Y validation and preprocessing.
         # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
@@ -407,24 +633,46 @@ class AnalysisConfigurable(MetaConfigurable):
         newX = self._X_preprocessed
         newY = self._Y_preprocessed if Y is not None else None
 
-        # call to the actual _fit method (overloaded in the subclass)
+        # Call to the actual _fit method (overloaded in the subclass)
         # warning : _fit must take ndarray arguments not NDDataset arguments.
         # when method must return NDDataset from the calculated data,
-        # we use the decorator _wrap_ndarray_output_to_nddataset, as below or in the PCA
+        # we use the decorator _wrap_ndarray_output_to_nddataset, as in the PCA
         # model for example.
         self._outfit = self._fit(newX, newY)
 
-        # if the process was succesful,_fitted is set to True so that other method which
-        # needs fit will be possibly used.
+        # if the process was successful, _fitted is set to True so that other method
+        # which needs fit will be possibly used.
         self._fitted = True
         return self
 
-    # ----------------------------------------------------------------------------------
-    # Public utility functions
-    # ----------------------------------------------------------------------------------
+    # we do not use this method as a decorator as in this case signature of subclasses
+    _docstring.get_sections(
+        _docstring.dedent(fit.__doc__),
+        base="analysis_fit",
+        sections=["Parameters", "Returns", "See Also"],
+    )
+
+    @property
+    def X(self):
+        """
+        Return the X input dataset (eventually modified by the model)
+        """
+        if self._X_is_missing:
+            raise NotFittedError
+        # We use X property only to show this information to the end user. Internally
+        # we use _X attribute to refer to the input data
+        X = self._X.copy()
+        if np.any(self._X_mask):
+            # restore masked row and column if necessary
+            X = self._restore_masked_data(X, axis="both")
+        if self._is_dataset or self._output_type == "NDDataset":
+            return X
+        else:
+            return np.asarray(X)
+
     def parameters(self, default=False):
         """
-        Return current or default configuration values
+        Return current or default configuration values.
 
         Parameters
         ----------
@@ -468,10 +716,27 @@ class DecompositionAnalysis(AnalysisConfigurable):
     Abstract class to write analysis decomposition model such as PCA, ...
 
     Subclass this to get a minimal structure
+
+    See Also
+    --------
+    EFA : Perform an Evolving Factor Analysis (forward and reverse).
+    IRIS : Integral inversion solver for spectroscopic data.
+    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
+    NMF : Non-Negative Matrix Factorization (NMF).
+    PCA : Perform Principal Components Analysis.
+    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
+    SVD : Perform a Singular Value Decomposition.
     """
 
     # This class is subclass AnalysisConfigurable, so we define only additional
     # attributes and methods necessary for decomposition model.
+
+    # Get doc sections for reuse in subclass
+    _docstring.get_sections(
+        _docstring.dedent(__doc__),
+        base="DecompositionAnalysis",
+        sections=["See Also"],
+    )
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters (in addition to those of AnalysisConfigurable)
@@ -564,9 +829,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
         """
         Apply dimensionality reduction to X.
 
-        X is projected on the first principal components previously extracted
-        from a training set.
-
         Parameters
         ----------
         X : array-like of shape (n_observations, n_features), optional
@@ -581,14 +843,12 @@ class DecompositionAnalysis(AnalysisConfigurable):
         ----------------
         n_components : int, optional
             The number of components to use for the transformation. If not given
-            The number of compopnents is eventually the one specified or determined
+            the number of components is eventually the one specified or determined
             in the fit process.
 
         Returns
         -------
         NDDataset(n_observations, n_components)
-            Projection of X in the first principal components, where `n_observations`
-            is the number of observations and `n_components` is the number of the components.
         """
         if not self._fitted:
             raise NotFittedError()
@@ -646,10 +906,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             eventually filtered by the reduce/transform operation.
         """
         if not self._fitted:
-            raise NotFittedError(
-                "The fit method must be used before using reconstruct/inverse_transform "
-                "method"
-            )
+            raise NotFittedError
 
         # get optional n_components
         n_components = kwargs.pop(
@@ -695,7 +952,11 @@ class DecompositionAnalysis(AnalysisConfigurable):
         -------
         NDDataset(n_observations, n_components)
         """
-        self.fit(X, Y)
+        try:
+            self.fit(X, Y)
+        except TypeError:
+            # the current model does not use Y
+            self.fit(X)
         X_transform = self.transform(X, **kwargs)
         return X_transform
 
@@ -720,7 +981,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):
         """
-        Returns the components dataset: (selected n_components, n_features).
+        Returns the component's dataset: (selected n_components, n_features).
 
         Parameters
         ----------
@@ -730,8 +991,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Returns
         -------
-        NDDataset
-            A nddataset with shape (n_components, n_features).
+        NDDataset(n_components, n_features)
         """
         if n_components is None or n_components > self._n_components:
             n_components = self._n_components
@@ -781,9 +1041,11 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Other Parameters
         ----------------
-        colors : tuple or array of 3 colors, optional, default: ["blue", "orange", "red"]
+        colors : tuple or array of 3 colors, optional
             Colors for :math:`X`, :math:`\hat X` and :math:`E`.
             in the case of 2D, The default colormap is used for X.
+            By default, the three colors are NBlue, NGreen and NRed (which are
+            colorblind friendly).
         offset : float, optional, default: None
             Specify the separation (in percent) between the X, X_hat and E.
         nb_traces : int, optional
@@ -800,7 +1062,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
                 "The fit method must be used before using this method."
             )
 
-        colX, colXhat, colRes = kwargs.pop("colors", ["blue", "orange", "red"])
+        colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
 
         if X._squeeze_ndim == 1:
             # normally this was done before, but if needed.

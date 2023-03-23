@@ -10,12 +10,12 @@ This module implements the Singular Value Decomposition (SVD) class.
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._analysisutils import (
+from spectrochempy.analysis._base import (
+    DecompositionAnalysis,
     _make_other_parameters_doc,
     _svd_flip,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["SVD"]
@@ -26,6 +26,9 @@ __configurables__ = ["SVD"]
 # class PCA
 # ======================================================================================
 class SVD(DecompositionAnalysis):
+
+    _docstring.delete_params("DecompositionAnalysis.see_also", "SVD")
+
     __doc__ = _docstring.dedent(
         """
     Performs a Singular Value Decomposition of a dataset.
@@ -47,11 +50,7 @@ class SVD(DecompositionAnalysis):
 
     See Also
     --------
-    PCA : Perform Principal Components Analysis.
-    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    NMF : Non-Negative Matrix Factorization (NMF).
-    EFA : Perform an Evolving Factor Analysis (forward and reverse).
-    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
+    %(DecompositionAnalysis.see_also.no_SVD)s
 
     Examples
     --------
@@ -137,6 +136,27 @@ class SVD(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public method and properties
     # ----------------------------------------------------------------------------------
+    _docstring.keep_params("analysis_fit.parameters", "X")
+
+    @_docstring.dedent
+    def fit(self, X):
+        """
+        Fit the SVD model on X.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+
+        Returns
+        -------
+        %(analysis_fit.returns)s
+
+        See Also
+        --------
+        %(analysis_fit.see_also)s
+        """
+        return super().fit(X, Y=None)
+
     @property
     @_wrap_ndarray_output_to_nddataset(
         units=None, title="Singular values", typesingle="components"

@@ -13,8 +13,10 @@ import traitlets as tr
 from numpy.random import RandomState
 from sklearn import decomposition
 
-from spectrochempy.analysis._analysisutils import _make_other_parameters_doc
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
+from spectrochempy.analysis._base import (
+    DecompositionAnalysis,
+    _make_other_parameters_doc,
+)
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["NMF"]
@@ -25,11 +27,13 @@ __configurables__ = ["NMF"]
 # class NMF
 # ======================================================================================
 class NMF(DecompositionAnalysis):
+    _docstring.delete_params("DecompositionAnalysis.see_also", "NMF")
+
     __doc__ = _docstring.dedent(
         """
     Non-Negative Matrix Factorization (NMF).
 
-    Use `~sklearn.decomposition.NMF`\.
+    Use `~sklearn.decomposition.NMF` .
 
     Find two non-negative matrices, i.e. matrices with all non-negative elements, (W, H)
     whose product approximates the non-negative matrix X. This factorization can be used
@@ -250,6 +254,27 @@ class NMF(DecompositionAnalysis):
     def _get_components(self):
         self._components = self._nmf.components_
         return self._components
+
+    _docstring.keep_params("analysis_fit.parameters", "X")
+
+    @_docstring.dedent
+    def fit(self, X):
+        """
+        Fit the NMF  model on X.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+
+        Returns
+        -------
+        %(analysis_fit.returns)s
+
+        See Also
+        --------
+        %(analysis_fit.see_also)s
+        """
+        return super().fit(X, Y=None)
 
 
 _make_other_parameters_doc(NMF)

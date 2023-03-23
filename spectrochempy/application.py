@@ -931,7 +931,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     # Error/warning capture
     # ----------------------------------------------------------------------------------
     def _ipython_catch_exceptions(self, shell, etype, evalue, tb, tb_offset=None):
-        # output the full traceback only in DEBUG mode
+        # output the full traceback only in DEBUG mode or when under pytest
         if self.log_level == logging.DEBUG:
             shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
         else:

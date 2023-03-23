@@ -9,9 +9,7 @@ import pytest
 import traitlets as tr
 
 import spectrochempy as scp
-from spectrochempy.analysis.abstractanalysis import (
-    AnalysisConfigurable,  # , DecompositionAnalysis
-)
+from spectrochempy.analysis._base import AnalysisConfigurable  # , DecompositionAnalysis
 
 
 def test_analysisconfigurable():

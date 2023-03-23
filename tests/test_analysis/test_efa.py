@@ -8,7 +8,7 @@
 import numpy as np
 
 import spectrochempy as scp
-from spectrochempy.analysis.fitting._models import asymmetricvoigtmodel
+from spectrochempy.analysis.optimize._models import asymmetricvoigtmodel
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
 

@@ -13,7 +13,7 @@ Tests for the PCA module
 import matplotlib.pyplot as plt
 import numpy as np
 
-from spectrochempy.analysis._analysisutils import NotFittedError
+from spectrochempy.analysis._base import NotFittedError
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import exceptions, testing

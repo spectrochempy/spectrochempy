@@ -7,7 +7,7 @@
 """
 Package to perform fitting of 1D or n-D spectral data.
 """
-from spectrochempy.analysis.fitting.optimize import Optimize
+from spectrochempy.analysis.optimize.optimize import Optimize
 
 __all__ = ["Optimize"]
 __configurables__ = __all__

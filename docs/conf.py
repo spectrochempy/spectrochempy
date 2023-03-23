@@ -537,12 +537,12 @@ numpydoc_show_class_members = False
 numpydoc_use_plots = True
 
 #
-autoclass_content = "both"
+autoclass_content = "class"
 # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
 
 #
 autodoc_default_options = ["autosummary"]
-autodoc_class_signature = "separated"
+autodoc_class_signature = "mixed"
 
 #
 exclusions = (

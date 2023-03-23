@@ -18,12 +18,12 @@ import numpy as np
 import traitlets as tr
 from sklearn import decomposition
 
-from spectrochempy.analysis._analysisutils import (
+from spectrochempy.analysis._base import (
+    DecompositionAnalysis,
     NotFittedError,
     _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.core import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import exceptions
@@ -39,11 +39,14 @@ from spectrochempy.utils.docstrings import _docstring
 
 
 class MCRALS(DecompositionAnalysis):
+
+    _docstring.delete_params("DecompositionAnalysis.see_also", "MCRALS")
+
     __doc__ = _docstring.dedent(
         """
     Perform MCR-ALS of a dataset knowing the initial C or St matrix.
 
-    MCR-ALS (Multivariate Curve Resolution \- Alternating Least Squares) resolve's a set
+    MCR-ALS (Multivariate Curve Resolution Alternating Least Squares) resolve's a set
     (or several sets) of spectra X of an evolving mixture (or a set of mixtures) into
     the spectra St of ‘pure’ species and their concentration profiles C. In terms of
     matrix equation:
@@ -62,11 +65,7 @@ class MCRALS(DecompositionAnalysis):
 
     See Also
     --------
-    PCA : Perform Principal Components Analysis.
-    NMF : Non-Negative Matrix Factorization (NMF).
-    EFA : Perform an Evolving Factor Analysis (forward and reverse).
-    SVD : Perform a Singular Value Decomposition.
-    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
+    %(DecompositionAnalysis.see_also.no_MCRALS)s
     """
     )
 
@@ -103,7 +102,7 @@ standard deviation of residuals).""",
 all concentrations profiles are considered non-negative. If an array of indexes
 is passed, the corresponding profiles are considered non-negative, not the
 others. For instance `[0, 2]` indicates that profile #0 and #2 are non-negative
-while profile #1 *can* be negative. If set to `[]`\, all profiles can
+while profile #1 *can* be negative. If set to `[]` , all profiles can
 be negative.""",
     ).tag(config=True)
 
@@ -114,14 +113,14 @@ be negative.""",
 concentrations profiles are considered unimodal. If an array of indexes is
 passed, the corresponding profiles are considered unimodal, not the others.
 For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
-profile #1 *can* be multimodal. If set to `[]`\, all profiles can be multimodal.""",
+profile #1 *can* be multimodal. If set to `[]` , all profiles can be multimodal.""",
     ).tag(config=True)
 
     unimodConcMod = tr.Enum(
         ["strict", "smooth"],
         default_value="strict",
         help="""When set to 'strict', values deviating from unimodality are reset to the
-value of the previous point. When set to 'smooth', both values (deviating point
+value of the previous point. When set to `smooth` , both values (deviating point
 and previous point) are modified to avoid ='steps' in the concentration
 profile.""",
     ).tag(config=True)
@@ -129,8 +128,9 @@ profile.""",
     unimodConcTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for unimodality. Correction is applied only if:
-```C[i,j] > C[i-1,j] * unimodTol```  on the decreasing branch of profile #j,
-```C[i,j] < C[i-1,j] * unimodTol```  on the increasing branch of profile  #j.""",
+
+* ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile #j,
+* ``C[i,j] < C[i-1,j] * unimodTol``  on the increasing branch of profile  #j.""",
     ).tag(config=True)
 
     monoDecConc = tr.List(
@@ -166,16 +166,16 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile  #j.""",
     closureConc = tr.List(
         default_value=[],
         help="""Defines the concentration profiles subjected to closure constraint.
-If set to `[]`\, no constraint is applied. If an array of indexes is
+If set to `[]` , no constraint is applied. If an array of indexes is
 passed, the corresponding profile will be constrained so that their
-weighted sum equals the `closureTarget`\.""",
+weighted sum equals the `closureTarget` .""",
     ).tag(config=True)
 
     closureTarget = tr.Union(
         (tr.Enum(["default"]), Array()),
         default_value="default",
         help="""The value of the sum of concentrations profiles subjected to closure.
-If set to `default`\, the total concentration is set to 1.0 for all observations.
+If set to `default` , the total concentration is set to 1.0 for all observations.
 If an array is passed: the values of concentration for each observation. Hence,
 `np.ones(X.shape[0])` would be equivalent to 'default'.""",
     ).tag(config=True)
@@ -186,46 +186,36 @@ If an array is passed: the values of concentration for each observation. Hence,
         help="""The method used to enforce Closure. 'scaling' recompute the
 concentration profiles using linear algebra:
 
-```
-C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(
-np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))
-```
+````
+C.data[:, closureConc] = np.dot(
+        C.data[:, closureConc],
+        np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0])
+        )
+````
 
-'constantSum' normalize the sum of concentration profiles to `closureTarget`\.""",
+'constantSum' normalize the sum of concentration profiles to `closureTarget` .""",
     ).tag(config=True)
 
     hardConc = tr.List(
         default_value=[],
         help="""Defines hard constraints on the concentration profiles. If set to
-`[]`\, no constraint is applied. If an array of indexes is passed, the
-corresponding profiles will set by `getC`\.""",
+`[]` , no constraint is applied. If an array of indexes is passed, the
+corresponding profiles will set by `getC` .""",
     ).tag(config=True)
 
     getC = tr.Callable(
         default_value=None,
         allow_none=True,
         help="""An external function that will provide `len(hardConc)` concentration
-profiles:
+profiles using one of the following syntax:
 
-```
-getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC
-```
-
-or:
-
-```
-getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC, newArgsGetC
-```
-
-or:
-
-```
-getC(Ccurr, *argsGetCn, **kargsGetC) -> hardC, newArgsGetC, extOutput
-```
+* `getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC`
+* `getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC, newArgsGetC`
+* `getC(Ccurr, *argsGetCn, **kargsGetC) -> hardC, newArgsGetC, extOutput`
 
 where Ccurr  is the current C NDDataset, *argsGetC are the parameters needed to
 completely specify the function. `hardC` is a nadarray or NDDataset of shape
-`(C.y, len(hardConc)`\, newArgsGetC are the updated parameters for the next
+`(C.y, len(hardConc)` , newArgsGetC are the updated parameters for the next
 iteration (can be None), and extOutput can be any other relevant output to be kept
 in extOutput attribute (only the last iteration extOutput is kept)""",
     ).tag(config=True)
@@ -255,7 +245,7 @@ hardC (index O) corresponds to the second profile of C (index 1).""",
 all spectral profiles are considered non-negative. If an array of indexes is
 passed, the corresponding profiles are considered non-negative, not the others.
 For instance `[0, 2]` indicates that profile #0 and #2 are non-negative while
-profile #1 *can* be negative. If set to `None` or `[]`\, all profiles can be
+profile #1 *can* be negative. If set to `None` or `[]` , all profiles can be
 negative.""",
     ).tag(config=True)
 
@@ -273,7 +263,7 @@ value.""",
         (tr.Enum(["all"]), tr.List()),
         default_value=[],
         help="""Unimodality constraint on Spectra. If the list of spectral profiles is
-void, all profiles can be multimodal. If set to `all`\, all profiles are unimodal.
+void, all profiles can be multimodal. If set to `all` , all profiles are unimodal.
 If an array of indexes is passed, the corresponding profiles are considered unimodal,
 not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal
 while profile #1 *can* be multimodal.""",
@@ -282,8 +272,8 @@ while profile #1 *can* be multimodal.""",
     unimodSpecMod = tr.Enum(
         ["strict", "smooth"],
         default_value="strict",
-        help=""" When set to `"strict"`\, values deviating from unimodality are reset to
-the value of the previous point. When set to `"smooth"`\, both values (deviating
+        help=""" When set to `"strict"` , values deviating from unimodality are reset to
+the value of the previous point. When set to `"smooth"` , both values (deviating
 point and previous point) are modified to avoid ="steps"
 in the concentration profile.""",
     ).tag(config=True)
@@ -812,6 +802,27 @@ on the decreasing branch of profile #j,
     # ----------------------------------------------------------------------------------
     # Public methods and properties
     # ----------------------------------------------------------------------------------
+    @_docstring.dedent
+    def fit(self, X, Y):
+        """
+        Fit the MCRALS model on a X dataset using initial concentration or spectra.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+        Y : array-like or list of array-like
+            Initial concentration or spectra.
+
+        Returns
+        -------
+        %(analysis_fit.returns)s
+
+        See Also
+        --------
+        %(analysis_fit.see_also)s
+        """
+        return super().fit(X, Y)
+
     @property
     def C(self):
         """

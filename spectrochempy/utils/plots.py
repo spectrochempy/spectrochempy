@@ -395,6 +395,7 @@ NBlack = (0, 0, 0)
 NRed = cmyk2rgb(0, 77, 100, 0)
 NBlue = cmyk2rgb(100, 30, 0, 0)
 NGreen = cmyk2rgb(85, 0, 60, 10)
+# TODO : make a color cycle based on these colors
 
 
 def figure(preferences=None, **kwargs):

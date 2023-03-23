@@ -14,12 +14,12 @@ from matplotlib.ticker import MaxNLocator, ScalarFormatter
 from numpy.random import RandomState
 from sklearn import decomposition
 
-from spectrochempy.analysis._analysisutils import (
+from spectrochempy.analysis._base import (
+    DecompositionAnalysis,
     NotFittedError,
     _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.plots import NBlue, NRed
 
@@ -31,6 +31,8 @@ __configurables__ = ["PCA"]
 # class PCA
 # ======================================================================================
 class PCA(DecompositionAnalysis):
+    _docstring.delete_params("DecompositionAnalysis.see_also", "PCA")
+
     __doc__ = _docstring.dedent(
         """
     PCA analysis is here done using the sklearn PCA model.
@@ -49,11 +51,7 @@ class PCA(DecompositionAnalysis):
 
     See Also
     --------
-    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    NMF : Non-Negative Matrix Factorization (NMF).
-    EFA : Perform an Evolving Factor Analysis (forward and reverse).
-    SVD : Perform a Singular Value Decomposition.
-    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
+    %(DecompositionAnalysis.see_also.no_PCA)s
     """
     )
 
@@ -308,6 +306,27 @@ for reproducible results across multiple function calls.""",
     # ----------------------------------------------------------------------------------
     # Public methods and properties specific to PCA
     # ----------------------------------------------------------------------------------
+    _docstring.keep_params("analysis_fit.parameters", "X")
+
+    @_docstring.dedent
+    def fit(self, X):
+        """
+        Fit the PCA model on X.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+
+        Returns
+        -------
+        %(analysis_fit.returns)s
+
+        See Also
+        --------
+        %(analysis_fit.see_also)s
+        """
+        return super().fit(X, Y=None)
+
     @property
     def loadings(self):
         """

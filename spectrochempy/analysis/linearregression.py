@@ -9,8 +9,10 @@ Implementation of least squares Linear Regression.
 """
 import traitlets as tr
 
-from spectrochempy.analysis._analysisutils import _make_other_parameters_doc
-from spectrochempy.analysis.abstractanalysis import LinearRegressionAnalysis
+from spectrochempy.analysis._base import (
+    LinearRegressionAnalysis,
+    _make_other_parameters_doc,
+)
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["LSTSQ", "NNLS"]
@@ -38,6 +40,10 @@ class LSTSQ(LinearRegressionAnalysis):
     Other Parameters
     ----------------
     {{CONFIGURATION_PARAMETERS}}
+
+    See Also
+    --------
+    NNLS : Non-Negative least squares Linear Regression.
     """
     )
     name = "LSTSQ"
@@ -69,6 +75,10 @@ class NNLS(LinearRegressionAnalysis):
     Other Parameters
     ----------------
     {{CONFIGURATION_PARAMETERS}}
+
+    See Also
+    --------
+    NNLS : Ordinary least squares Linear Regression.
     """
     )
     name = "NNLS"

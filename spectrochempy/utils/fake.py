@@ -13,7 +13,7 @@ __all__ = ["generate_fake"]
 # Create fake data to be used by analysis routine for testing
 # --------------------------------------------------------------------------------------
 def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
-    from spectrochempy.analysis.fitting import _models
+    from spectrochempy.analysis.optimize import _models
     from spectrochempy.core.dataset.coord import Coord
     from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -61,7 +61,7 @@ def generate_fake():
 
     # define properties of the spectra and concentration profiles
     # ----------------------------------------------------------------------------------
-    from spectrochempy.analysis.fitting import _models
+    from spectrochempy.analysis.optimize import _models
     from spectrochempy.core.dataset.arraymixins.npy import dot
 
     # data for four peaks (one very broad)

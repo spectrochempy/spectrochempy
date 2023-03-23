@@ -16,8 +16,10 @@ from warnings import warn
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._analysisutils import _make_other_parameters_doc
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
+from spectrochempy.analysis._base import (
+    DecompositionAnalysis,
+    _make_other_parameters_doc,
+)
 from spectrochempy.core import info_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.docstrings import _docstring
@@ -27,11 +29,13 @@ from spectrochempy.utils.docstrings import _docstring
 # class SIMPLISMA
 # ======================================================================================
 class SIMPLISMA(DecompositionAnalysis):
+    _docstring.delete_params("DecompositionAnalysis.see_also", "SIMPLISMA")
+
     __doc__ = _docstring.dedent(
         """
     SIMPLe to use Interactive Self-modeling Mixture Analysis.
 
-    This class performs a SIMPLISMA analysis of a 2D |NDDataset|\.
+    This class performs a SIMPLISMA analysis of a 2D |NDDataset| .
     The algorithm is adapted from Windig's paper,
     Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16.
 
@@ -45,11 +49,7 @@ class SIMPLISMA(DecompositionAnalysis):
 
     See Also
     --------
-    PCA : Perform Principal Components Analysis.
-    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    NMF : Non-Negative Matrix Factorization (NMF).
-    EFA : Perform an Evolving Factor Analysis (forward and reverse).
-    SVD : Perform a Singular Value Decomposition.
+    %(DecompositionAnalysis.see_also.no_SIMPLISMA)s
     """
     )
 
@@ -506,6 +506,27 @@ class SIMPLISMA(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods and properties
     # ----------------------------------------------------------------------------------
+    _docstring.keep_params("analysis_fit.parameters", "X")
+
+    @_docstring.dedent
+    def fit(self, X):
+        """
+        Fit the SIMPLISMA model on X.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+
+        Returns
+        -------
+        %(analysis_fit.returns)s
+
+        See Also
+        --------
+        %(analysis_fit.see_also)s
+        """
+        return super().fit(X, Y=None)
+
     @property
     def C(self):
         """

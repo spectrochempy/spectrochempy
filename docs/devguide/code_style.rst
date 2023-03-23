@@ -11,7 +11,7 @@ SpectroChemPy follows the `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_
 standard and uses `Black <https://black.readthedocs.io/en/stable/>`_
 and `Flake8 <https://flake8.pycqa.org/en/latest/>`_ to ensure a
 consistent code format throughout the project. We encourage you to use
-:ref:`pre-commit <contributing.pre-commit>` to automatically run ``black``\,
+:ref:`pre-commit <contributing.pre-commit>` to automatically run ``black`` ,
 ``flake8`` whenever you make a git commit.
 
 

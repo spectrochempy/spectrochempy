@@ -10,11 +10,11 @@ This module implement the EFA (Evolving Factor Analysis) class.
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._analysisutils import (
+from spectrochempy.analysis._base import (
+    DecompositionAnalysis,
     _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.core import info_
 from spectrochempy.utils.docstrings import _docstring
 
@@ -23,6 +23,9 @@ __configurables__ = ["EFA"]
 
 
 class EFA(DecompositionAnalysis):
+
+    _docstring.delete_params("DecompositionAnalysis.see_also", "EFA")
+
     __doc__ = _docstring.dedent(
         """
     Evolving Factor Analysis.
@@ -39,16 +42,14 @@ class EFA(DecompositionAnalysis):
 
     See Also
     --------
-    PCA : Perform Principal Components Analysis.
-    NMF : Non-Negative Matrix Factorization (NMF).
-    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    SVD : Perform a Singular Value Decomposition.
-    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
+    %(DecompositionAnalysis.see_also.no_EFA)s
     """
     )
 
-    name = tr.Unicode("EFA")
-    description = tr.Unicode("Evolving factor analysis model")
+    name = tr.Unicode("EFA", help="Name of the model")
+    description = tr.Unicode(
+        "Evolving factor analysis model", help="short description of the model"
+    )
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
@@ -104,10 +105,10 @@ class EFA(DecompositionAnalysis):
         )
 
     def _fit(self, X, Y=None):
-        # Y is ignored but necessary to corresponds to the signature in abstractanalysis
         # X has already been validated and eventually
         # preprocessed. X is now a nd-array with masked elements removed.
         # and this method should return _outfit
+        # Y is not used but necessary to fit the superclass
 
         # max number of components
         M, N = X.shape
@@ -116,7 +117,6 @@ class EFA(DecompositionAnalysis):
         # ------------------------------------------------------------------------------
         # forward analysis
         # ------------------------------------------------------------------------------
-
         f = np.zeros((M, K))
         for i in range(M):
 
@@ -128,7 +128,6 @@ class EFA(DecompositionAnalysis):
         # ------------------------------------------------------------------------------
         # backward analysis
         # ------------------------------------------------------------------------------
-
         b = np.zeros((M, K))
         for i in range(M - 1, -1, -1):
             # if some rows are masked, we must skip them
@@ -171,6 +170,27 @@ class EFA(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
+    _docstring.keep_params("analysis_fit.parameters", "X")
+
+    @_docstring.dedent
+    def fit(self, X):
+        """
+        Fit the EFA model on a X dataset.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+
+        Returns
+        -------
+        %(analysis_fit.returns)s
+
+        See Also
+        --------
+        %(analysis_fit.see_also)s
+        """
+        return super().fit(X, Y=None)
+
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def f_ev(self):

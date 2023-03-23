@@ -62,6 +62,9 @@ inplace : bool, optional, default: False
 
 
 class DocstringProcessor(docrep.DocstringProcessor):
+
+    param_like_sections = ["See Also"] + docrep.DocstringProcessor.param_like_sections
+
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)

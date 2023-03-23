@@ -18,11 +18,11 @@ import traitlets as tr
 from matplotlib import pyplot as plt
 from scipy import optimize
 
-from spectrochempy.analysis._analysisutils import (
+from spectrochempy.analysis._base import (
+    DecompositionAnalysis,
     NotFittedError,
     _make_other_parameters_doc,
 )
-from spectrochempy.analysis.abstractanalysis import DecompositionAnalysis
 from spectrochempy.core import info_, warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
@@ -291,6 +291,9 @@ class IrisKernel(tr.HasTraits):
 
 
 class IRIS(DecompositionAnalysis):
+
+    _docstring.delete_params("DecompositionAnalysis.see_also", "IRIS")
+
     __doc__ = _docstring.dedent(
         """
     Integral inversion solver for spectroscopic data.
@@ -308,12 +311,7 @@ class IRIS(DecompositionAnalysis):
 
     See Also
     --------
-    PCA : Perform Principal Components Analysis.
-    NMF : Non-Negative Matrix Factorization (NMF).
-    EFA : Perform an Evolving Factor Analysis (forward and reverse).
-    SVD : Perform a Singular Value Decomposition.
-    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
-    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
+    %(DecompositionAnalysis.see_also.no_IRIS)s
 
     Notes
     -----
@@ -330,13 +328,16 @@ class IRIS(DecompositionAnalysis):
     where the kernel :math:`k(q, p)` expresses the functional dependence of a single
     contribution with respect to the experimental variable :math:`p` and 'internal'
     physico-chemical variable :math:`q`.
+
     Regularization is triggered when 'reg_param' is set to an array of two or three
     values.
+
     If 'reg_param' has two values [min, max], the optimum regularization parameter is
     searched between :math:`10^{min}` and :math:`10^{max}`. Automatic search of the
     regularization is made using the Cultrera_Callegaro algorithm (arXiv:1608.04571v2)
     which involves the Menger curvature of a circumcircle and the golden section search
     method.
+
     If three values are given (`[min, max, num]`), then the inversion will be made for
     num values evenly spaced on a log scale between :math:`10^{min}` and
     :math:`10^{max}`
