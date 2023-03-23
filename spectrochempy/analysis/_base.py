@@ -991,7 +991,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     @exceptions.deprecated(replace="inverse_transform")
     def reconstruct(self, X_transform=None, **kwargs):
-        return self.inverse_transform(self, X_transform, **kwargs)
+        return self.inverse_transform(X_transform, **kwargs)
 
     reconstruct.__doc__ = inverse_transform.__doc__
 
