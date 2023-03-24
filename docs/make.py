@@ -502,7 +502,6 @@ class Apigen:
         members = inspect.getmembers(obj)
         for member in members:
             _name, _type = member
-
             if (
                 (alls is not None and _name not in alls)
                 or str(_name).startswith("_")
@@ -516,7 +515,7 @@ class Apigen:
                 )
             ):
                 # we keep only the members in __all__ but the constants
-                # print(f">>>>>>>>>>>>>>>>   {_name}\t\t{_type}")
+                print(f">>>>>>>>>>>>>>>>   {_name}\t\t{_type}")
                 continue
             else:
 
@@ -541,6 +540,7 @@ class Apigen:
                     klass = getattr(obj, _name)
 
                     subres = self.get_members(klass, objname + "." + _name)
+                    print(subres)
                     res.extend(subres)
 
         return res
@@ -556,7 +556,8 @@ class Apigen:
             print("*" * 88)
             print(pkg_name)
             print("-" * len(pkg_name))
-
+            if "mcrals" in pkg_name:
+                pass
             pkg = import_item(pkg_name)
             try:
                 alls = getattr(pkg, "__all__")

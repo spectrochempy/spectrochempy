@@ -7,6 +7,7 @@
 """
 SpectroChemPy specific exceptions
 """
+import functools
 from contextlib import contextmanager
 from warnings import warn
 
@@ -302,6 +303,7 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
         return
 
     def deprecation_decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             name = func.__qualname__
             if name.endswith("__init__"):

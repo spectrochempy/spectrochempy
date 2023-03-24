@@ -181,7 +181,7 @@ def _wrap_ndarray_output_to_nddataset(
     # wrap _set_output to allow for deferred calling
     if method:
         # case of the decorator without argument
-        return _set_output(method)
+        out = _set_output(method)
     else:
         # and with argument
         def wrapper(method):
@@ -194,7 +194,8 @@ def _wrap_ndarray_output_to_nddataset(
                 typesingle=typesingle,
             )
 
-        return wrapper
+        out = wrapper
+    return out
 
 
 # ======================================================================================
@@ -230,16 +231,16 @@ class AnalysisConfigurable(MetaConfigurable):
 
     __doc__ = _docstring.dedent(
         """
-    Abstract class to write analysis estimators.
+    Abstract class to write analysis model estimators.
 
-    Analysis method must subclass this to get a minimal structure
+    Analysis model class must subclass this to get a minimal structure
 
     Parameters
     ----------
     log_level : [`"INFO"` , `"DEBUG"` , `"WARNING"`, `"ERROR"`], optional, default:`"WARNING"`
         The log level at startup
     %(copy)s
-    config : Config object, optional
+    config : :py:class:`Config object, optional
         By default the configuration is determined by the object configuration
         file in the configuration directory.
 
@@ -791,7 +792,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @property
     def Y(self):
         """
-        Return the Y input.
+        Return the `Y` input.
         """
         # We use Y property only to show this information to the end-user. Internally
         # we use _Y attribute to refer to the input data
@@ -803,14 +804,14 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def transform(self, X=None, **kwargs):
         """
-        Apply dimensionality reduction to X.
+        Apply dimensionality reduction to `X` .
 
         Parameters
         ----------
         X : array-like of shape (n_observations, n_features), optional
             New data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
-            if not provided, the input dataset of the fit method will be used.
+            if not provided, the input dataset of the :py:meth:fit method will be used.
         **kwargs
             Additional keyword parameters. See Other Parameters
 
@@ -819,11 +820,12 @@ class DecompositionAnalysis(AnalysisConfigurable):
         n_components : int, optional
             The number of components to use for the reduction. If not given
             the number of components is eventually the one specified or determined
-            in the fit process.
+            in the :py:meth:`fit` process.
 
         Returns
         -------
-        NDDataset(n_observations, n_components)
+        NDDataset
+            Shape (n_observations, n_components)
         """
         if not self._fitted:
             raise NotFittedError()
@@ -953,7 +955,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     def reduce(self, X=None, **kwargs):
         return self.transform(X, **kwargs)
 
-    reduce.__doc__ = transform.__doc__
+    # reduce.__doc__ = transform.__doc__
 
     @exceptions.deprecated(replace="inverse_transform")
     def reconstruct(self, X_transform=None, **kwargs):
@@ -1018,29 +1020,29 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def plotmerit(self, X, X_hat, **kwargs):
         """
-        Plots the input dataset (X), reconstructed (X_hat) and residuals (E) datasets.
+        Plots the input (`X`), reconstructed (`X_hat`) and residuals (`E`) datasets.
 
         Parameters
         ----------
-        X : NDDataset
+        X : |NDDataset|
             Original dataset.
-        X_hat : NDDataset
-            Inverse_transform (reconstructed) dataset from a decomposition model.
+        X_hat : |NDDataset|
+            Inverse transformed (reconstructed) dataset from a decomposition model.
         %(kwargs)s
 
         Other Parameters
         ----------------
         colors : tuple or array of 3 colors, optional
-            Colors for :math:`X`, :math:`\hat X` and :math:`E`.
-            in the case of 2D, The default colormap is used for X.
-            By default, the three colors are NBlue, NGreen and NRed (which are
-            colorblind friendly).
+            Colors for `X` , `X_hat` and residuals `E` .
+            in the case of 2D, The default colormap is used for `X`.
+            By default, the three colors are :py:const:`NBlue` , :py:const:`NGreen`
+            and :py:const:`NRed`  (which are colorblind friendly).
         offset : float, optional, default: None
-            Specify the separation (in percent) between the X, X_hat and E.
+            Specify the separation (in percent) between the `X`, `X_hat` and `E`.
         nb_traces : int, optional
             Number of lines to display. Default is all
-        **others : Other keywords parameters that are passed to
-            the internal plot method of the X dataset.
+        **others : Other keywords parameters
+            Parameters passed to the internal :py:meth:`plot` method of the `X` dataset.
 
         Returns
         -------
