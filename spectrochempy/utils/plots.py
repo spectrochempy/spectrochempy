@@ -12,22 +12,6 @@ import mpl_toolkits.mplot3d.axes3d as maxes3D
 import numpy as np
 from matplotlib import pyplot as plt
 
-__all__ = [
-    "cmyk2rgb",
-    "NBlack",
-    "NRed",
-    "NBlue",
-    "NGreen",
-    "figure",
-    "show",
-    "get_figure",  # Plotly specific
-    "get_plotly_figure",
-    "colorscale",
-    "make_attr",
-    "make_label",
-    "plot_method",
-]
-
 
 @maxes.subplot_class_factory
 class _Axes(maxes.Axes):

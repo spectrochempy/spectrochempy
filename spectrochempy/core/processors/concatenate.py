@@ -16,6 +16,7 @@ import numpy as np
 from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import exceptions
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.orderedset import OrderedSet
 
 
@@ -79,7 +80,7 @@ def concatenate(*datasets, **kwargs):
 
     # check uise
     if "force_stack" in kwargs:
-        exceptions.deprecated("force_stack", replace="method stack()")
+        deprecated("force_stack", replace="method stack()")
         return stack(datasets)
 
     # get a copy of input datasets in order that input data are not modified

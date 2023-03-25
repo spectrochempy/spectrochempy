@@ -212,6 +212,9 @@ class EFA(DecompositionAnalysis):
     def inverse_transform(self):
         """Not implemented"""
 
+    def reconstruct(self):
+        """Not implemented"""
+
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def f_ev(self):

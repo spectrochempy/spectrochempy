@@ -12,17 +12,6 @@ import warnings
 from os import environ
 from pathlib import Path, PosixPath, WindowsPath
 
-__all__ = [
-    "get_filenames",
-    "get_directory_name",
-    "pathclean",
-    "patterns",
-    "check_filenames",
-    "check_filename_to_open",
-    "check_filename_to_save",
-    "download_testdata",
-]
-
 
 # ======================================================================================
 # Utility functions

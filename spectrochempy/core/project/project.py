@@ -29,6 +29,7 @@ from spectrochempy.utils.traits import NDDatasetType
 # ======================================================================================
 # Project class
 # ======================================================================================
+@tr.signature_has_traits
 class Project(AbstractProject, NDIO):
     """
     A manager for projects, datasets and scripts.

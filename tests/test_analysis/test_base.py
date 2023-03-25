@@ -48,7 +48,7 @@ def test_analysisconfigurable_validation():
 
         name = "Foo"
 
-        def fit(self, X):
+        def _fit(self, X):
             self._X = X
             return self
 
@@ -79,3 +79,11 @@ def test_analysisconfigurable_validation():
     X[1] = scp.MASKED
     foo.fit(X)
     assert repr(foo.X) == "NDDataset: [float64] m (shape: (y:1, x:3))"
+
+
+# def test_decompositionanalysis():
+#
+#     X = scp.NDDataset(np.arange(3) + 1.5, coordset=[range(3)], units="m")
+#     # with a mask
+#     foo.fit(X)
+#     assert repr(foo.X) == "NDDataset: [float64] m (shape: (y:1, x:3))"

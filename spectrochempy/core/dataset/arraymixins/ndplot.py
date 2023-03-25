@@ -32,7 +32,7 @@ from spectrochempy.utils.plots import _Axes, _Axes3D, get_figure
 go = import_optional_dependency("plotly.graph_objects", errors="ignore")
 HAS_PLOTLY = go is not None
 
-# from spectrochempy.utils import deprecated
+# from spectrochempy.utils.decorators import deprecated
 
 
 # ======================================================================================

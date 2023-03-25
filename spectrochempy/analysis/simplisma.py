@@ -22,6 +22,7 @@ from spectrochempy.analysis._base import (
 )
 from spectrochempy.core import info_
 from spectrochempy.utils import exceptions
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docstrings import _docstring
 
 
@@ -116,16 +117,14 @@ class SIMPLISMA(DecompositionAnalysis):
         # warn about deprecations
         # -----------------------
         if "verbose" in kwargs:
-            exceptions.deprecated(
-                "verbose", replace="log_level='INFO'", removed="0.6.5"
-            )
+            deprecated("verbose", replace="log_level='INFO'", removed="0.6.5")
             verbose = kwargs.pop("verbose")
             if verbose:
                 log_level = "INFO"
 
         # unimodMod deprecation
         if "n_pc" in kwargs:
-            exceptions.deprecated("n_pc", replace="max_components", removed="0.6.5")
+            deprecated("n_pc", replace="max_components", removed="0.6.5")
             kwargs["max_components"] = kwargs.pop("n_pc")
 
         # call the super class for initialisation

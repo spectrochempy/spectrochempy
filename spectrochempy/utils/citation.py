@@ -12,8 +12,6 @@ from datetime import date
 import yaml
 from cffconvert.cli.create_citation import create_citation
 
-__all__ = ["Citation", "Zenodo"]
-
 sys.tracebacklimit = 2
 
 HOME = pathlib.Path(__file__).parent.parent.parent

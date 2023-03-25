@@ -22,7 +22,7 @@ from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.units import ur
 from spectrochempy.extern.nmrglue import read_fid, read_pdata
-from spectrochempy.utils import exceptions
+from spectrochempy.utils.decorators import deprecated
 
 # ======================================================================================
 # Constants
@@ -773,7 +773,7 @@ def read_topspin(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@exceptions.deprecated(replace="read_topspin")
+@deprecated(replace="read_topspin")
 def read_bruker_nmr(*args, **kwargs):
     return read_topspin(*args, **kwargs)
 

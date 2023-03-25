@@ -7,7 +7,15 @@
 import ast
 import re
 
-from traitlets import Float, HasTraits, Instance, TraitError, Unicode, validate
+from traitlets import (
+    Float,
+    HasTraits,
+    Instance,
+    TraitError,
+    Unicode,
+    signature_has_traits,
+    validate,
+)
 
 from spectrochempy.core import error_
 from spectrochempy.core.project.abstractproject import AbstractProject
@@ -15,6 +23,7 @@ from spectrochempy.core.project.abstractproject import AbstractProject
 __all__ = ["Script", "run_script", "run_all_scripts"]
 
 
+@signature_has_traits
 class Script(HasTraits):
     """
     Executable scripts.
@@ -54,7 +63,9 @@ class Script(HasTraits):
     _priority = Float(min=0.0, max=100.0)
     _parent = Instance(AbstractProject, allow_none=True)
 
-    def __init__(self, name="unamed_script", content=None, parent=None, priority=50.0):
+    def __init__(
+        self, name="unamed_script", content=None, parent=None, priority=50.0, **kwargs
+    ):
 
         self.name = name
         self.content = content

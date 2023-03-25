@@ -27,6 +27,7 @@ from traitlets import (
     Unicode,
     default,
     observe,
+    signature_has_traits,
     validate,
 )
 
@@ -51,6 +52,7 @@ from spectrochempy.utils.system import get_user_and_node
 # ======================================================================================
 # NDDataset class definition
 # ======================================================================================
+@signature_has_traits
 class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     """
     The main N-dimensional dataset class used by |scpy| .

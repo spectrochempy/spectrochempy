@@ -49,18 +49,18 @@ import spectrochempy as scp
 # readers which are specific
 # to IR data:
 #
-# - `read_omnic()` to open omnic (spa and spg) files
-# - `read_opus()` to open Opus (*.0, ...) files
-# - `read_jcamp()` to open an IR JCAMP-DX datafile
-# - `read()` which is the generic reader. The type of data is then deduced from the
+# - ``read_omnic()`` to open omnic (spa and spg) files
+# - ``read_opus()`` to open Opus (*.0, ...) files
+# - ``read_jcamp()`` to open an IR JCAMP-DX datafile
+# - ``read()`` which is the generic reader. The type of data is then deduced from the
 # file extension.
 #
 # General purpose data exchange formats such as  \*.csv or \*.mat will be treated in
 # another tutorial (yet to come...)
 # can also be read using:
 #
-# - `read_csv()` to open csv files
-# - `read_matlab()` to open .mat files
+# - ``read_csv()`` to open csv files
+# - ``read_matlab()`` to open .mat files
 #
 # ## Import of OMNIC files
 #
@@ -71,7 +71,7 @@ import spectrochempy as scp
 # - .spg files which contain a group of spectra
 #
 # Both have been reverse engineered, hence allowing extracting their key data.
-# The Omnic reader of Spectrochempy (`read_omnic()`) has been developed based on
+# The Omnic reader of Spectrochempy (``read_omnic()`` ) has been developed based on
 # posts in open forums on the .spa file format and extended to .spg file formats.
 #
 #
@@ -88,25 +88,24 @@ X
 # The displayed attributes are detailed in the following.
 #
 # - ``name`` is the name of the group of spectra as it appears in the .spg file. OMNIC
-# sets this name to the .spg
-# filename used at the creation of the group. In this example, the name ("Group sust
-# Mo_Al2O3_base line.SPG") differs
-# from the filename ("CO@Mo_Al2O3.SPG") because the latter has been changed from outside
-# OMNIC (directly in the OS).
+#   sets this name to the .spg
+#   filename used at the creation of the group. In this example, the name ("Group sust
+#   Mo_Al2O3_base line.SPG") differs
+#   from the filename ("CO@Mo_Al2O3.SPG") because the latter has been changed from
+#   outside OMNIC (directly in the OS).
 #
 # - ``author`` is that of the creator of the NDDataset (not of the .spg file, which, to
-# `our knowledge, does not have
-# this type of attribute). The string is composed of the username and of the machine
-# name as given by the OS:
-# username@machinename. It can be accessed and changed using ``X.author`` .
+#   our knowledge, does not have
+#   this type of attribute). The string is composed of the username and of the machine
+#   name as given by the OS:
+#   username@machinename. It can be accessed and changed using ``X.author`` .
 #
 # - ``created`` is the creation date of the NDDataset (again not that of the .spg file).
-# It can be accessed (or even changed) using ``X.created`` .
+#   It can be accessed (or even changed) using ``X.created`` .
 #
 # - ``description`` indicates the complete pathname of the .spg file. As the pathname is
-# also given in the history (below)
-# , it can be a good practice to give a self explaining description of the group, for
-# instance:
+#   also given in the history (below), it can be a good practice to give a
+#   self-explaining description of the group, for instance:
 
 # %%
 X.description = "CO adsorption on CoMo/Al2O3, difference spectra"
@@ -175,7 +174,7 @@ X.y
 # will return the absorbance of the ith spectrum at the jth  wavenumber. However, this
 # is subject to change, for instance if you
 # perform operation on your data such as
-# [Transposition](../../processing/transformations.html#Transposition). At any time
+# [Transposition](../../processing/transformations.ipynb#Transposition). At any time
 # the attribute ``dims`` gives the correct names (which can be modified) and order of
 # the dimensions.
 
@@ -357,9 +356,8 @@ print(X)
 # QED. It imports absorbance
 # spectra (the AB block), acquisition times and name of spectra.
 #
-# The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files. Hence,
-# one can open sample
-# Opus files contained in the ``datadir`` using:
+# The use of ``read_opus()`` is similar to that of  ``read_omnic()`` for .spa files.
+# Hence, one can open sample Opus files contained in the ``datadir`` using:
 
 # %%
 Z = scp.read_opus(["test.0000", "test.0001", "test.0002"], directory="irdata/OPUS")
@@ -406,7 +404,7 @@ Z3["Optik"]  # looks what is the Optik block:
 #
 # The JCAMP-DX reader of spectrochempy has been essentially written to read again the
 # jcamp-dx files exported by
-# spectrochempy `write_jdx()` writer.
+# spectrochempy ``write_jdx()`` writer.
 #
 # Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
 

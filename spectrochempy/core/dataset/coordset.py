@@ -25,6 +25,7 @@ from traitlets import (
     Unicode,
     default,
     observe,
+    signature_has_traits,
     validate,
 )
 
@@ -37,6 +38,7 @@ from spectrochempy.utils.print import colored_output, convert_to_html
 # ======================================================================================
 # CoordSet
 # ======================================================================================
+@signature_has_traits
 class CoordSet(HasTraits):
     """
     A collection of Coord objects for a NDArray object with validation.

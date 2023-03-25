@@ -26,7 +26,7 @@ from spectrochempy.analysis._base import (
 )
 from spectrochempy.core import info_
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils import exceptions
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docstrings import _docstring
 
 # Developper notes
@@ -308,21 +308,19 @@ on the decreasing branch of profile #j,
 
         # verbose
         if "verbose" in kwargs:
-            exceptions.deprecated(
-                "verbose", replace="log_level='INFO'", removed="0.6.5"
-            )
+            deprecated("verbose", replace="log_level='INFO'", removed="0.6.5")
             verbose = kwargs.pop("verbose")
             if verbose:
                 log_level = "INFO"
 
         # unimodTol deprecation
         if "unimodTol" in kwargs:
-            exceptions.deprecated("unimodTol", replace="unimodConcTol", removed="0.6.5")
+            deprecated("unimodTol", replace="unimodConcTol", removed="0.6.5")
             kwargs["unimodConcTol"] = kwargs.pop("unimodTol")
 
         # unimodMod deprecation
         if "unimodMod" in kwargs:
-            exceptions.deprecated("unimodMod", replace="unimodConcMod", removed="0.6.5")
+            deprecated("unimodMod", replace="unimodConcMod", removed="0.6.5")
             kwargs["unimodConcMod"] = kwargs.pop("unimodMod")
 
         # call the super class for initialisation

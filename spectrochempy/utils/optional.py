@@ -11,7 +11,6 @@ import warnings
 
 from pkg_resources import DistributionNotFound, get_distribution
 
-__all__ = ["import_optional_dependency", "get_module_version"]
 VERSIONS = {
     "xarray": "*",
     "cantera": "2.5.1",

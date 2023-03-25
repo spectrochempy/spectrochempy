@@ -19,7 +19,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
-from spectrochempy.utils import exceptions
+from spectrochempy.utils.decorators import deprecated
 
 
 # ======================================================================================
@@ -101,12 +101,12 @@ def read_jcamp(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@exceptions.deprecated(replace="read__jcamp")
+@deprecated(replace="read__jcamp")
 def read_jdx(*args, **kwargs):
     return read_jcamp(*args, **kwargs)
 
 
-@exceptions.deprecated(replace="read_jcamp")
+@deprecated(replace="read_jcamp")
 def read_dx(*args, **kwargs):  # pragma: no cover
     return read_jcamp(*args, **kwargs)
 

@@ -15,8 +15,6 @@ from traitlets.config.loader import LazyConfigValue
 
 from spectrochempy.extern.traittypes import Empty, SciType
 
-__all__ = []
-
 
 class MetaConfigurable(Configurable):
     """

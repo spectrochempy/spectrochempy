@@ -32,6 +32,7 @@ from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
 
+@tr.signature_has_traits
 class IrisKernel(tr.HasTraits):
     """
     Define a kernel matrix of Fredholm equation of the 1st kind.
@@ -90,7 +91,7 @@ class IrisKernel(tr.HasTraits):
     # ----------------------------------------------------------------------------------
     # Initialization
     # ----------------------------------------------------------------------------------
-    def __init__(self, X, K, p=None, q=None):
+    def __init__(self, X, K, p=None, q=None, **kwargs):
 
         info_("Creating Kernel...")
 

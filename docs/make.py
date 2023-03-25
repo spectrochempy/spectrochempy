@@ -13,7 +13,6 @@ where optional parameters indicates which job(s) is(are) to perform.
 """
 
 import argparse
-import inspect
 import shutil
 import sys
 import warnings
@@ -26,16 +25,12 @@ from skimage.io import imread, imsave
 from skimage.transform import resize
 from sphinx.application import Sphinx
 from sphinx.deprecation import RemovedInSphinx70Warning
-from traitlets import import_item
 
-import spectrochempy
 from spectrochempy.api import preferences as prefs
 from spectrochempy.api import version
 from spectrochempy.utils.file import download_testdata
-from spectrochempy.utils.packages import list_packages
 from spectrochempy.utils.system import sh
-
-__all__ = []
+from apigen import Apigen
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
 warnings.filterwarnings(action="ignore", category=RemovedInSphinx70Warning)
@@ -69,8 +64,6 @@ REFERENCE = SRC / "userguide" / "reference"
 API = REFERENCE / "generated"
 DEV_API = DEVGUIDE / "generated"
 GALLERY = GETTINGSTARTED / "gallery"
-
-__all__ = []
 
 # create the testdata directory
 
@@ -142,6 +135,10 @@ class BuildDocumentation(object):
             print("by default, option is set to --html")
             args.html = True
 
+        self.norun = False
+        if args.norun:
+            self.norun = True
+
         if args.clean and (args.html or args.all):
             self.clean("html")
 
@@ -150,6 +147,9 @@ class BuildDocumentation(object):
 
         if args.clean or args.apigen:
             self.apigen()
+
+        if args.delnb:
+            self.delnb()
 
         if args.html:
             self.make_docs("html")
@@ -238,13 +238,18 @@ class BuildDocumentation(object):
         outdir = f"{BUILDDIR}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"
 
-        sp = Sphinx(srcdir, confdir, outdir, doctreesdir, builder)
+        sp = Sphinx(str(srcdir), str(confdir), str(outdir), str(doctreesdir), builder)
         # verbosity: int = 0,
         # parallel: int = 0,
         # keep_going: bool = False,
         # pdb: bool = False
         sp.parallel = 8
         sp.verbosity = 1
+
+        if self.norun:
+            sp.config.nbsphinx_execute = "never"
+            sp.config.plot_gallery = 0
+
         sp.build()
 
         print(
@@ -384,7 +389,8 @@ class BuildDocumentation(object):
         for nb in DOCS.rglob("**/*.ipynb"):
             # This will erase all notebook output
             sh(
-                f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {nb}",
+                f"jupyter nbconvert "
+                f"--ClearOutputPreprocessor.enabled=True --inplace {nb}",
                 silent=True,
             )
 
@@ -465,126 +471,18 @@ class BuildDocumentation(object):
         Apigen()
 
 
-# %%
-Build = BuildDocumentation()
-
-
-# ======================================================================================
-# Class Apigen
-# ======================================================================================
-class Apigen:
-
-    header = """\
-.. Generate API reference pages, but don't display these in tables.
-
-:orphan:
-
-.. currentmodule:: spectrochempy
-.. autosummary::
-   :toctree: generated/
-
-"""
-
-    def __init__(self):
-        entries = self.list_entries()
-        self.write_api_rst(entries)
-
-    @staticmethod
-    def get_packages():
-        pkgs = list_packages(spectrochempy)
-        for pkg in pkgs[:]:
-            if pkg.endswith(".api"):
-                pkgs.remove(pkg)
-        return pkgs
-
-    def get_members(self, obj, objname, alls=None):
-        res = []
-        members = inspect.getmembers(obj)
-        for member in members:
-            _name, _type = member
-            if (
-                (alls is not None and _name not in alls)
-                or str(_name).startswith("_")
-                or not str(_type).startswith("<")
-                or "HasTraits" in str(_type)
-                or "cross_validation_lock" in str(_name)
-                or not (
-                    str(_type).startswith("<class")
-                    or str(_type).startswith("<function")
-                    or str(_type).startswith("<property")
-                )
-            ):
-                # we keep only the members in __all__ but the constants
-                print(f">>>>>>>>>>>>>>>>   {_name}\t\t{_type}")
-                continue
-            else:
-
-                if objname != "spectrochempy" and objname.split(".")[1:][0] in [
-                    "core",
-                    "analysis",
-                    "utils",
-                    "widgets",
-                ]:
-
-                    continue
-
-                module = ".".join(objname.split(".")[1:])
-                module = module + "." if module else ""
-                print(f"{module}{_name}\t\t{_type}")
-                #          o = import_item(f"{objname}")
-
-                res.append(f"{module}{_name}")
-
-                if str(_type).startswith("<class"):
-                    # find also members in class
-                    klass = getattr(obj, _name)
-
-                    subres = self.get_members(klass, objname + "." + _name)
-                    print(subres)
-                    res.extend(subres)
-
-        return res
-
-    def list_entries(self):
-
-        pkgs = self.get_packages()
-
-        results = []
-        for pkg_name in pkgs:
-
-            print()
-            print("*" * 88)
-            print(pkg_name)
-            print("-" * len(pkg_name))
-            if "mcrals" in pkg_name:
-                pass
-            pkg = import_item(pkg_name)
-            try:
-                alls = getattr(pkg, "__all__")
-                print(alls)
-
-            except AttributeError:
-                # warn("This module has no __all__ attribute")
-                continue
-
-            if alls == []:
-                continue
-
-            res = self.get_members(pkg, pkg_name, alls)
-            results.extend(res)
-
-        return results
-
-    def write_api_rst(self, items):
-        with open(REFERENCE / "api.rst", "w") as f:
-            f.write(self.header)
-            for item in items:
-                f.write(f"    {item}\n")
-
-
-# %%
-if __name__ == "__main__":
-
+def main():
     environ["DOC_BUILDING"] = "yes"
-    Build()
+    Build = BuildDocumentation()
+    try:
+        res = Build()
+    except Exception:
+        return 1
+
     del environ["DOC_BUILDING"]
+    return res
+
+
+# ======================================================================================
+if __name__ == "__main__":
+    sys.exit(main())

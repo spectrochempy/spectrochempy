@@ -4,31 +4,52 @@
 
 .. autoclass:: {{ objname }}
 
-    {% block methods %}
-     {% if methods %}
-    .. rubric:: Methods:
+   {% if '__init__' in methods %}
+     {% set caught_result = methods.remove('__init__') %}
+   {% endif %}
 
-    .. autosummary::
+   {% block attributes_summary %}
+   {% if attributes %}
+   .. rubric:: Attributes Summary
 
-       {% for item in methods %}
-       {{ name }}.{{ item }}
-       {%- endfor %}
+   .. autosummary::
+   {% for item in attributes %}
+      ~{{ name }}.{{ item }}
+   {%- endfor %}
+   {% endif %}
+   {% endblock %}
 
-      {% endif %}
-    {% endblock %}
+   {% block methods_summary %}
+   {% if methods %}
+   .. rubric:: Methods Summary
 
+   .. autosummary::
+   {% for item in methods %}
+      ~{{ name }}.{{ item }}
+   {%- endfor %}
 
-    {% block attributes %}
-     {% if attributes %}
-    .. rubric:: Attributes:
+   {% endif %}
+   {% endblock %}
 
-       {% for item in attributes %}
-    .. autoattribute:: {{ item }}
-       {%- endfor %}
+   {% block attributes_documentation %}
+   {% if attributes %}
+   .. rubric:: Attributes Documentation
 
-     {% endif %}
-    {% endblock %}
+   {% for item in attributes %}
+   .. autoattribute:: {{ item }}
+   {%- endfor %}
+   {% endif %}
+   {% endblock %}
 
+   {% block methods_documentation %}
+   {% if methods %}
+   .. rubric:: Methods Documentation
+
+   {% for item in methods %}
+   .. automethod:: {{ item }}
+   {%- endfor %}
+   {% endif %}
+   {% endblock %}
 
 .. include:: /gettingstarted/gallery/backreferences/{{fullname}}.examples
 

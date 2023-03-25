@@ -4,27 +4,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-__all__ = [
-    "set_env",
-    "assert_equal",
-    "assert_array_equal",
-    "assert_array_almost_equal",
-    "assert_ndarray_equal",
-    "assert_ndarray_almost_equal",
-    "assert_coord_equal",
-    "assert_coord_almost_equal",
-    "assert_dataset_equal",
-    "assert_dataset_almost_equal",
-    "assert_equal_units",
-    "assert_project_equal",
-    "assert_script_equal",
-    "assert_project_almost_equal",
-    "assert_approx_equal",
-    "assert_raises",
-    "raises",
-    "catch_warnings",
-    "RandomSeedContext",
-]
 
 import contextlib
 import functools
@@ -36,7 +15,7 @@ import numpy as np
 
 # import matplotlib.pyplot as plt
 # from matplotlib.testing.compare import calculate_rms, ImageAssertionError
-from numpy.testing import (
+from numpy.testing import (  # noqa
     assert_approx_equal,
     assert_array_almost_equal,
     assert_array_compare,

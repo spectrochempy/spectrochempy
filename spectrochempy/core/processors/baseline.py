@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate
 from matplotlib.widgets import SpanSelector
-from traitlets import Float, HasTraits, Int, List, Tuple, Unicode
+from traitlets import Float, HasTraits, Int, List, Tuple, Unicode, signature_has_traits
 
 from spectrochempy.core import debug_, warning_
 from spectrochempy.core.plotters.multiplot import multiplot
@@ -26,6 +26,7 @@ from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.traits import NDDatasetType
 
 
+@signature_has_traits
 class BaselineCorrection(HasTraits):
     """
     Baseline Correction processor.

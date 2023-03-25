@@ -8,8 +8,6 @@
 This module implements the class _CoordRange.
 """
 
-__all__ = ["trim_ranges"]
-
 import traitlets as tr
 
 

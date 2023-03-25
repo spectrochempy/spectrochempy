@@ -17,32 +17,6 @@ from datetime import datetime, timezone
 import numpy as np
 from quaternion import as_float_array, as_quat_array
 
-__all__ = [
-    "TYPE_INTEGER",
-    "TYPE_COMPLEX",
-    "TYPE_FLOAT",
-    "TYPE_BOOL",
-    "EPSILON",
-    "INPLACE",
-    "typequaternion",
-    "make_new_object",
-    "getdocfrom",
-    "dict_compare",
-    "htmldoc",
-    "is_iterable",
-    "is_sequence",
-    "is_number",
-    "spacing_",
-    "largest_power_of_2",
-    "get_component",
-    "interleaved2quaternion",
-    "interleaved2complex",
-    "as_quaternion",
-    "quat_as_complex_array",
-    "get_n_decimals",
-    "gt_eps",
-]
-
 #
 # constants
 #

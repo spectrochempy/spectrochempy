@@ -16,7 +16,7 @@ import textwrap
 import numpy as np
 from traitlets import All, Bool, CFloat, CInt, Instance, Integer, Unicode, Union
 from traitlets import default as traitdefault
-from traitlets import observe
+from traitlets import observe, signature_has_traits
 
 from spectrochempy.core import error_
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath, _set_operators
@@ -30,6 +30,7 @@ from spectrochempy.utils.print import colored_output
 # ======================================================================================
 # Coord
 # ======================================================================================
+@signature_has_traits
 class Coord(NDMath, NDArray):
     """
     Explicit coordinates for a dataset along a given axis.
@@ -862,6 +863,7 @@ class Coord(NDMath, NDArray):
             return increment
 
 
+@signature_has_traits
 class LinearCoord(Coord):
     """
     Linear coordinates.

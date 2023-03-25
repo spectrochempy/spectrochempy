@@ -35,6 +35,7 @@ __all__ = [
 R = 8.314
 
 
+@tr.signature_has_traits
 class ActionMassKinetics(tr.HasTraits):
     """
     A class which stores a reaction network of elementary reactions.
@@ -66,7 +67,7 @@ class ActionMassKinetics(tr.HasTraits):
     k = Array()
     T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0)
 
-    def __init__(self, equations, species_concentrations, k, T=298.0):
+    def __init__(self, equations, species_concentrations, k, T=298.0, **kwars):
         self.equations = equations
         self.species_concentrations = species_concentrations
 

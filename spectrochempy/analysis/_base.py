@@ -27,6 +27,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import MASKED, NOMASK
+from spectrochempy.utils.decorators import deprecated, preserve_signature
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.plots import NBlue, NGreen, NRed
 from spectrochempy.utils.traits import MetaConfigurable, NDDatasetType
@@ -81,6 +82,7 @@ class _set_output(object):
         self.typey = typey
         self.typesingle = typesingle
 
+    @preserve_signature
     def __get__(self, obj, objtype):
         """Support instance methods."""
         newfunc = partial(self.__call__, obj)
@@ -227,6 +229,7 @@ _docstring.get_sections(__doc__, base="common")
 # ======================================================================================
 # Base class AnalysisConfigurable
 # ======================================================================================
+@tr.signature_has_traits
 class AnalysisConfigurable(MetaConfigurable):
 
     __doc__ = _docstring.dedent(
@@ -951,23 +954,20 @@ class DecompositionAnalysis(AnalysisConfigurable):
         X_transform = self.transform(X, **kwargs)
         return X_transform
 
-    @exceptions.deprecated(replace="transform")
+    @deprecated(replace="transform")
     def reduce(self, X=None, **kwargs):
+        """(Deprecated)"""
         return self.transform(X, **kwargs)
 
-    # reduce.__doc__ = transform.__doc__
-
-    @exceptions.deprecated(replace="inverse_transform")
+    @deprecated(replace="inverse_transform")
     def reconstruct(self, X_transform=None, **kwargs):
+        """(Deprecated)"""
         return self.inverse_transform(X_transform, **kwargs)
 
-    reconstruct.__doc__ = inverse_transform.__doc__
-
-    @exceptions.deprecated(replace="fit_transform")
+    @deprecated(replace="fit_transform")
     def fit_reduce(self, X, Y=None, **kwargs):
+        """(Deprecated)"""
         return self.fit_transform(X, Y, **kwargs)
-
-    fit_reduce.__doc__ = fit_transform.__doc__
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):

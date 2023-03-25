@@ -16,7 +16,7 @@ import functools
 
 import scipy.integrate
 
-from spectrochempy.utils import exceptions
+from spectrochempy.utils.decorators import deprecated
 
 
 def _integrate_method(method):
@@ -99,16 +99,17 @@ def trapezoid(dataset, **kwargs):
     Other Parameters
     ----------------
     dim : int or str, optional, default: "x"
-        Dimension along which to integrate.       If an integer is provided, it is equivalent to the `axis` parameter for numpy arrays.
+        Dimension along which to integrate.
+        If an integer is provided, it is equivalent to the `axis`
+        parameter for numpy arrays.
 
     See Also
     --------
     trapz : An alias of trapezoid.
-
     simps : Integrate using the composite simpson rule.
 
     Example
-    --------
+    -------
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].trapz()
     NDDataset: [float64] a.u..cm^-1 (size: 55)
@@ -117,13 +118,13 @@ def trapezoid(dataset, **kwargs):
     return scipy.integrate.trapz(dataset, **kwargs)
 
 
-@exceptions.deprecated(replace="Trapezoid")
+@deprecated(replace="Trapezoid")
 def trapz(dataset, **kwargs):
     return trapezoid(dataset, **kwargs)
 
 
 trapz.__doc__ = f"""
-An alias of `trapezoid` kept for backwards compatibility.
+    An alias of `trapezoid` kept for backwards compatibility.
 {trapezoid.__doc__}"""
 
 
@@ -157,15 +158,16 @@ def simpson(dataset, *args, **kwargs):
     ----------------
     dim : int or str, optional, default: "x"
         Dimension along which to integrate.
-        If an integer is provided, it is equivalent to the `axis` parameter for numpy arrays.
+        If an integer is provided, it is equivalent to the `axis` parameter
+        for numpy arrays.
     even : str {'avg', 'first', 'last'}, optional, default is 'avg'
-        'avg' : Average two results: 1) use the first N-2 intervals with
-                  a trapezoidal rule on the last interval and 2) use the last
-                  N-2 intervals with a trapezoidal rule on the first interval.
-        'first' : Use Simpson's rule for the first N-2 intervals with
-                a trapezoidal rule on the last interval.
-        'last' : Use Simpson's rule for the last N-2 intervals with a
-               trapezoidal rule on the first interval.
+        * 'avg' : Average two results: 1) use the first N-2 intervals with
+         a trapezoidal rule on the last interval and 2) use the last
+         N-2 intervals with a trapezoidal rule on the first interval.
+        *'first' : Use Simpson's rule for the first N-2 intervals with
+         a trapezoidal rule on the last interval.
+        *'last' : Use Simpson's rule for the last N-2 intervals with a
+         trapezoidal rule on the first interval.
 
     See Also
     --------
@@ -182,11 +184,11 @@ def simpson(dataset, *args, **kwargs):
     return scipy.integrate.simps(dataset.data, **kwargs)
 
 
-@exceptions.deprecated(replace="simpson")
+@deprecated(replace="simpson")
 def simps(dataset, **kwargs):
     return simpson(dataset, **kwargs)
 
 
-simps__doc__ = f"""
-An alias of `Simpson` kept for backwards compatibility.
+simps.__doc__ = f"""
+    An alias of `Simpson` kept for backwards compatibility.
 {trapezoid.__doc__}"""

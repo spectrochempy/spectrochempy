@@ -1083,8 +1083,10 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         if ipy is None:
             # remove argument not known by spectrochempy
+            print("args", sys.argv)
             if (
-                "make.py" in sys.argv[0]
+                "sphinx-build" in sys.argv[0]
+                or "make.py" in sys.argv[0]
                 or "pytest" in sys.argv[0]
                 or "validate_docstrings" in sys.argv[0]
             ):  # building docs
@@ -1101,7 +1103,8 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                             options.append(item)
                 self.parse_command_line(options)
             else:  # pragma: no cover
-                self.parse_command_line(sys.argv)
+                print("args", sys.argv)
+                # self.parse_command_line(sys.argv)
 
         # Get preferences from the config file and init everything
         # ---------------------------------------------------------------------

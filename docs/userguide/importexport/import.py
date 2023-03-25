@@ -38,7 +38,7 @@
 #
 # First, let's ``import spectrochempy as scp`` in the current
 # namespace, so that all spectrochempy commands will be called as
-# ``scp.method(<method parameters>)``\.
+# ``scp.method(<method parameters>)`` .
 
 # %%
 import spectrochempy as scp
@@ -52,7 +52,7 @@ import spectrochempy as scp
 # To do so, we can use the
 # ``read`` function which open a dialog, allowing the selection of data file form various
 # origin. By default,
-# the native SCPy type of data is proposed (file suffix: ``.scp``\). The desired type of
+# the native SCPy type of data is proposed (file suffix: ``.scp``). The desired type of
 # files to display can be chosen
 # in a dropdown field.
 
@@ -139,14 +139,15 @@ print(X)
 #
 # If only a directory is indicated, the dialog box will open in this directory.
 #
-# Note that on Windows the path separator is a backslash `\` . However, in many contexts,
+# Note that on Windows the path separator is a backslash ``\\`` .
+# However, in many contexts,
 # backslash is also used as an escape character in order to represent non-printable
 # characters. To avoid problems,
 # either it has to be escaped itself,  a double backslash or one can also use raw
 # string literals
 # to represent Windows paths. These are string literals that have an ``r`` prepended to
 # them. In raw string literals
-# the ``\\`` represents a literal backslash: ``r'C:\users\Brian'``\:
+# the ``\\`` represents a literal backslash: ``r'C:\users\Brian'`` :
 #
 # For instance, on Windows systems, the two following commands are fully equivalent:
 #
@@ -176,7 +177,7 @@ print(X)
 # X = scp.read_omnic('wodger.spg', directory='C:/')
 # ```
 # then SpectroChemPy will attempt opening a file named ``wodger.spg`` supposedly located
-# in `C:\ ` .
+# in `C:\\` .
 #
 #
 # Imagine now that the file of interest is actually located in
@@ -248,7 +249,7 @@ print(X)
 # os.path.expanduser("~")  # returns the home directory of the user
 # os.path.join('path1','path2','path3', ...)
 #                          # intelligently concatenates path components
-#                          # using the system separator (``/`` or ``\\``\)
+#                          # using the system separator (``/`` or ``\\`` )
 # ```
 #
 # Using ``Pathlib`` is even simpler:
@@ -261,8 +262,8 @@ print(X)
 # ```
 #
 #  The interested readers will find more details on the use of these modules here:
-# - [os - Miscellaneous operating system interfaces](https://docs.python.org/3/library/os.html)
-# - [pathlib — Object-oriented filesystem paths](https://docs.python.org/3/library/pathlib.html)
+# - [os](https://docs.python.org/3/library/os.html)
+# - [pathlib](https://docs.python.org/3/library/pathlib.html)
 #
 # ## Another default search directory: ``datadir``
 #
