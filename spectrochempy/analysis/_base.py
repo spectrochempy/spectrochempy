@@ -618,7 +618,11 @@ class AnalysisConfigurable(MetaConfigurable):
         # when method must return NDDataset from the calculated data,
         # we use the decorator _wrap_ndarray_output_to_nddataset, as in the PCA
         # model for example.
-        self._outfit = self._fit(newX, newY)
+        try:
+            self._outfit = self._fit(newX, newY)
+        except TypeError:
+            # in case Y s not used in _fit
+            self._outfit = self._fit(newX)
 
         # if the process was successful, _fitted is set to True so that other method
         # which needs fit will be possibly used.
