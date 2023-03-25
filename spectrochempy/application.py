@@ -1083,7 +1083,6 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
         if ipy is None:
             # remove argument not known by spectrochempy
-            print("args", sys.argv)
             if (
                 "sphinx-build" in sys.argv[0]
                 or "make.py" in sys.argv[0]
