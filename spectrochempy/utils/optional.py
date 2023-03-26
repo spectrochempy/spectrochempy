@@ -67,7 +67,7 @@ def import_optional_dependency(
         * ignore: If the module is not installed, return None, otherwise,
           return the module, even if the version is too old.
           It's expected that users validate the version locally when
-          using ``errors="ignore"`` (see. ``io/html.py``)
+          using `errors="ignore"` (see. `io/html.py` )
     min_version : str, default None
         Specify a minimum version that is different from the global pandas
         minimum version required.
@@ -77,7 +77,7 @@ def import_optional_dependency(
         The imported module, when found and the version is correct.
         None is returned when the package is not found and `errors`
         is False, or when the package's version is too old and `errors`
-        is ``'warn'``.
+        is `'warn'` .
     """
     from spectrochempy.utils.version import Version
 

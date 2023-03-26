@@ -179,7 +179,7 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 # When fitting data with LSTSQ, it happens that we get some negative values were
 # it should not, for instance having a negative distance at time 0.
 #
-# In this case, we can use the NNLS method of fitting. It operates as ``LSTSQ``
+# In this case, we can use the NNLS method of fitting. It operates as `LSTSQ`
 # but keep the Y values always positive.
 
 # %%
@@ -232,7 +232,7 @@ ndOH.plot()
 # %% [markdown]
 # We can perform a linear baseline correction to start with this data (see the
 # [baseline tutorial](../processing/baseline.ipynb)).
-# For removing a linear baseline, the fastest method is however to use the ``abc`` (
+# For removing a linear baseline, the fastest method is however to use the `abc` (
 # automatic baseline correction)
 
 # %%
@@ -315,20 +315,21 @@ shape: asymmetricvoigtmodel
 #
 # Each individual model component is identified by the keyword `MODEL`
 #
-# A `MODEL` have a name, *e.g.*, `MODEL: LINE_1`.
+# A `MODEL` have a name, *e.g.*, `MODEL: LINE_1` .
 #
-# Then come for each model components its `shape`, *i.e.,* the shape of the line.
+# Then come for each model components its `shape` , *i.e.,* the shape of the line.
 #
 # Come after the definition of the model parameters depending on the shape, e.g., for
 # a `gaussianmodel` we have three
-# parameters: `amplitude` (`ampl`), `width` and `position` (`pos`) of the line.
+# parameters: `amplitude` (`ampl` ), `width` and `position` (`pos` ) of the line.
 #
 # To define a given parameter, we have to write its `name` and a set of 3 values:
 # the expected `value` and 2 limits
-# for the allowed variations : `low_bound`,  `high_bound`
+# for the allowed variations : `low_bound` ,  `high_bound` :
+#
 # ```
 # name : value, low_bound,  high_bound
-# ````
+# ```
 # These parameters are preceded by a mark saying what kind of parameter it will behave
 # in the fit procedure:
 #

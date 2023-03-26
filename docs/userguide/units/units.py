@@ -42,7 +42,7 @@ from spectrochempy import Quantity, ur  # to simplify further writing
 # SpectroChemPy can do calculations with units - it uses [pint](https://pint.readthedocs.io) to define and perform
 # operation on data with units.
 #
-# Two objects, `ur` and `Quantity`, allow the manipulation of data with units:
+# Two objects, `ur` and `Quantity` , allow the manipulation of data with units:
 #
 # * `ur`: stands for **unit registry**, is used to define and handle many type of units as well as making conversion
 #  between them.

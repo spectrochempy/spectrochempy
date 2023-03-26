@@ -33,12 +33,12 @@ class BaselineCorrection(HasTraits):
 
     2 methods are proposed :
 
-    * ``sequential`` (default) = classical polynom fit or spline
+    * `sequential` (default) = classical polynom fit or spline
       interpolation with separate fitting of each row (spectrum)
-    * ``multivariate`` = SVD modeling of baseline, polynomial fit of PC's
+    * `multivariate` = SVD modeling of baseline, polynomial fit of PC's
       and calculation of the modelled baseline spectra.
 
-    Interactive mode is proposed using the interactive function : :meth:`run`.
+    Interactive mode is proposed using the interactive function : :meth:`run` .
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ class BaselineCorrection(HasTraits):
         if args or kwargs:
             warning_(
                 "DEPRECATION WARNING: Pass all arguments such range, and method definition in the "
-                "``compute`` method, not during the initialisation of the BaselineCorrection instance.\n"
+                "`compute` method, not during the initialisation of the BaselineCorrection instance.\n"
                 "Here they are ignored."
             )
 
@@ -156,7 +156,7 @@ class BaselineCorrection(HasTraits):
             If the correction method polynomial,
             this give the polynomial order to use.
         npc : int, keyword parameter, optional, default=5
-            Number of components to keep for the ``multivariate`` method
+            Number of components to keep for the `multivariate` method
         zoompreview : float, keyword parameter, optional, default=1.0
             The zoom factor for the preview in interactive mode
         figsize : tuple, keyword parameter, optional, default=(8, 6)
@@ -420,9 +420,9 @@ def basc(dataset, *ranges, **kwargs):
 
     2 methods are proposed :
 
-    * ``sequential`` (default) = classical polynom fit or spline
+    * `sequential` (default) = classical polynom fit or spline
       interpolation with separate fitting of each row (spectrum)
-    * ``multivariate`` = SVD modeling of baseline, polynomial fit of PC's
+    * `multivariate` = SVD modeling of baseline, polynomial fit of PC's
       and calculation of the modelled baseline spectra.
 
     Parameters
@@ -446,7 +446,7 @@ def basc(dataset, *ranges, **kwargs):
     order : int, keyword parameter, optional, default=6
         If the correction method polynomial, this give the polynomial order to use.
     npc : int, keyword parameter, optional, default=5
-        Number of components to keep for the ``multivariate`` method
+        Number of components to keep for the `multivariate` method
 
     See Also
     --------
@@ -603,7 +603,7 @@ def abc(dataset, dim=-1, **kwargs):
 
 def ab(dataset, dim=-1, **kwargs):
     """
-    Alias of `abc`.
+    Alias of `abc` .
     """
     return abs(dataset, dim, **kwargs)
 

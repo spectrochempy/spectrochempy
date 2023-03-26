@@ -32,7 +32,7 @@ proj = scp.Project(
 assert proj.projects_names == ["P350", "A350", "B350"]
 
 # %%
-# Add for example two datasets to the ``A350`` subproject.
+# Add for example two datasets to the `A350` subproject.
 
 ir = scp.NDDataset([1.1, 2.2, 3.3], coords=[[1, 2, 3]])
 print(ir)

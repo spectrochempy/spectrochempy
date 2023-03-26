@@ -48,7 +48,7 @@
 #
 # This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful
 # for applications.
-# See the **[Examples](../../gettingstarted/gallery/auto_examples/index.rst)** for
+# See the **[Examples](../../gallery/auto_examples/index.rst)** for
 # additional information about such possible applications.
 
 # %% [markdown]
@@ -123,7 +123,7 @@ print(d1D)
 _ = d1D.plot(figsize=(3, 2))
 
 # %% [markdown]
-# Except few additional metadata such `author`, `created` ..., there is not much
+# Except few additional metadata such `author` , `created` ..., there is not much
 # difference with respect to a conventional
 # **[numpy.array](
 # https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array)**.
@@ -150,7 +150,7 @@ d1D
 # * `created` : Date and time of creation.
 # * `modified`: Date and time of modification.
 #
-# These attributes can be modified by the user, but the `id`, `created` and `modified`
+# These attributes can be modified by the user, but the `id` , `created` and `modified`
 # attributes are read only.
 #
 # Some other attributes are defined to describe the data:
@@ -609,7 +609,7 @@ except ValueError:
     )
 
 # %% [markdown]
-# This works : it uses a tuple `()`, not a list `[]`
+# This works : it uses a tuple `()` , not a list `[]`
 
 # %%
 d3D.coordset = (
@@ -669,7 +669,7 @@ cs
 
 
 # %% [markdown]
-# Now we will generate the full dataset, using a ``fromfunction`` method.
+# Now we will generate the full dataset, using a `fromfunction` method.
 # All needed information are passed as
 # parameter of the NDDataset instance constructor.
 

@@ -107,19 +107,19 @@ class NDArray(HasTraits):
     dims : list of chars, optional
         If specified the list must have a length equal to the number of data dimensions (ndim).
         If not specified, dimension names are automatically attributed in the order given by
-        `DEFAULT_DIM_NAME`.
+        `DEFAULT_DIM_NAME` .
     name : str, optional
         A user-friendly name for this object. If not given, the automatic `id` given at the object creation will be
         used as a name.
     labels : array of objects, optional
-        Labels for the `data`. Note that the labels can be used only for 1D-datasets.
+        Labels for the `data` . Note that the labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning several series of labels for the same data.
         The given array can be a list, a tuple, a |ndarray| , a ndarray-like, a |NDArray| or any subclass of
         |NDArray| .
-    mask : array of bool or `NOMASK`, optional
+    mask : array of bool or `NOMASK` , optional
         Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
         a tuple, or a |ndarray| . Each values in the array must be `False` where the data are *valid* and True when
-        they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
+        they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray` , or any
         array object (such as a |NDArray| or subclass of it), providing a `mask` here will cause the mask from the
         masked array to be ignored.
     units : |Unit| instance or str, optional
@@ -130,7 +130,7 @@ class NDArray(HasTraits):
         The title of the dimension. It will later be used for instance for labelling plots of the data.
         It is optional but recommended giving a title to each ndarray.
     dlabel :  str, optional
-        Alias of `title`.
+        Alias of `title` .
     meta : dict-like object, optional
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
@@ -461,7 +461,7 @@ class NDArray(HasTraits):
 
         if by is None:
             warnings.warn(
-                "parameter `by` should be set to `value` or `label`, use `value` by default"
+                "parameter `by` should be set to `value` or `label` , use `value` by default"
             )
             by = "value"
 
@@ -520,7 +520,7 @@ class NDArray(HasTraits):
 
     def _get_dims_from_args(self, *dims, **kwargs):
         # utility function to read dims args and kwargs
-        # sequence of dims or axis, or `dim`, `dims` or `axis` keyword are accepted
+        # sequence of dims or axis, or `dim` , `dims` or `axis` keyword are accepted
 
         # check if we have arguments
         if not dims:
@@ -533,7 +533,7 @@ class NDArray(HasTraits):
         if kdims is not None:
             if dims is not None:
                 warnings.warn(
-                    "the unnamed arguments are interpreted as `dims`. But a named argument `dims` or `axis`"
+                    "the unnamed arguments are interpreted as `dims` . But a named argument `dims` or `axis`"
                     "(DEPRECATED) has been specified. \nThe unnamed arguments will thus be ignored.",
                     UserWarning,
                 )
@@ -1829,7 +1829,7 @@ class NDArray(HasTraits):
         Raises
         ------
         ValueError
-            If `dims` is not `None`, and the dimension being squeezed is not
+            If `dims` is not `None` , and the dimension being squeezed is not
             of length 1
         """
         if inplace:
@@ -1904,7 +1904,7 @@ class NDArray(HasTraits):
         return new
 
     swapaxes = swapdims
-    swapaxes.__doc__ = "Alias of `swapdims`."
+    swapaxes.__doc__ = "Alias of `swapdims` ."
 
     @property
     def T(self):
@@ -2287,6 +2287,6 @@ class NDArray(HasTraits):
     @property
     def value(self):
         """
-        Alias of `values`.
+        Alias of `values` .
         """
         return self.values

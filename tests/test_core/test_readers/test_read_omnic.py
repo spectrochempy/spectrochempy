@@ -32,7 +32,7 @@ def test_read_omnic():
     assert nd1 == nd2
 
     # It is also possible to use more specific reader function such as
-    # `read_spg`, `read_spa` or `read_srs` - they are alias of the read_omnic function.
+    # `read_spg` , `read_spa` or `read_srs` - they are alias of the read_omnic function.
     l2 = scp.read_spg("wodger.spg", "irdata/nh4y-activation.spg")
     assert len(l2) == 2
 

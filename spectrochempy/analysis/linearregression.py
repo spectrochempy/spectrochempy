@@ -86,7 +86,7 @@ class NNLS(LinearRegressionAnalysis):
 
     positive = tr.Bool(
         default_value=True,
-        help="When set to ``True``, forces the coefficients to be positive. This"
+        help="When set to `True` , forces the coefficients to be positive. This"
         "option is only supported for dense arrays.",
     ).tag(config=True)
 

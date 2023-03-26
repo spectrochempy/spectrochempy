@@ -36,8 +36,8 @@
 # analyzing spectroscopic data, initially for internal purposes in the
 # [LCS (https://www.lcs.ensicaen.fr)](https://www.lcs.ensicaen.fr).
 #
-# **SpectroChemPy** is essentially a library written in python language and which proposes objects (`NDDataset`, and
-# `Project`) to contain data, equipped with methods to analyze, transform or display
+# **SpectroChemPy** is essentially a library written in python language and which proposes objects (`NDDataset` , and
+# `Project` ) to contain data, equipped with methods to analyze, transform or display
 # this data in a simple way by the user.
 #
 #  The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited
@@ -113,7 +113,7 @@ import os
 nd = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
 # %% [markdown]
-# Note that for this example, we use data stored in a ``test`` directory. For your own usage, you probably have to
+# Note that for this example, we use data stored in a `test` directory. For your own usage, you probably have to
 # give the full pathname (see ... for the way to overcome this using `preferences` setting)
 
 # %% [markdown]
@@ -174,14 +174,14 @@ _ = nd.plot(method="image")  # or nd.plot_image()
 # %% [markdown]
 # Note that as we plot wavenumbers as abscissa, by convention the coordinates' direction is reversed.
 #
-# This can be changed by using the keyword argument `reversed = False`.
+# This can be changed by using the keyword argument `reversed = False` .
 
 # %% [markdown]
 # ### Processing a dataset
 
 # %% [markdown]
 # Some arithmetic can be performed on such dataset. Here is an example where we subtract one reference spectrum to
-# the whole nddataset that we have read above (`nd`).
+# the whole nddataset that we have read above (`nd` ).
 
 # %% [markdown]
 # Let's take, e.g., the last row as reference

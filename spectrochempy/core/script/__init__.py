@@ -152,7 +152,7 @@ class Script(HasTraits):
     @staticmethod
     def _implements(name=None):
         """
-        Utility to check if the current object implement `Project`.
+        Utility to check if the current object implement `Project` .
 
         Rather than isinstance(obj, Project) use object._implements('Project').
         This is useful to check type without importing the module
@@ -217,7 +217,7 @@ def run_script(script, localvars=None):
         The script to execute.
     localvars : dict, optional
         If provided it will be used for evaluating the script. In general,
-        it can be `localvrs`=``locals()``.
+        it can be `localvrs`=`locals()` .
 
     Returns
     -------

@@ -129,8 +129,8 @@ profile.""",
         default_value=1.1,
         help="""Tolerance parameter for unimodality. Correction is applied only if:
 
-* ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile #j,
-* ``C[i,j] < C[i-1,j] * unimodTol``  on the increasing branch of profile  #j.""",
+* `C[i,j] > C[i-1,j] * unimodTol` on the decreasing branch of profile #j,
+* `C[i,j] < C[i-1,j] * unimodTol`  on the increasing branch of profile  #j.""",
     ).tag(config=True)
 
     monoDecConc = tr.List(
@@ -145,7 +145,7 @@ while profile #1 *can* increase.""",
     monoDecTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if:``C[i,j] > C[i-1,j] * unimodTol``  along profile #j.""",
+if:`C[i,j] > C[i-1,j] * unimodTol`  along profile #j.""",
     ).tag(config=True)
 
     monoIncConc = tr.List(
@@ -160,7 +160,7 @@ while profile #1 *can* decrease.""",
     monoIncTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile  #j.""",
+if: `C[i,j] < C[i-1,j] * unimodTol` along profile  #j.""",
     ).tag(config=True)
 
     closureConc = tr.List(
@@ -187,7 +187,7 @@ If an array is passed: the values of concentration for each observation. Hence,
 
 * `'scaling'` recompute the concentration profiles using linear algebra::
 
-``C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))``
+`C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))`
 
 `'constantSum'` normalize the sum of concentration profiles to `closureTarget` .""",
     ).tag(config=True)
@@ -277,9 +277,9 @@ in the concentration profile.""",
     unimodSpecTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for unimodality. Correction is applied only if the
-deviating point is larger/lower than ``St[j,i] > St[j, i-1] * unimodSpecTol``
+deviating point is larger/lower than `St[j,i] > St[j, i-1] * unimodSpecTol`
 on the decreasing branch of profile #j,
-``St[j,i] < St[j, i-1] * unimodTol`` on the increasing branch of profile  #j.""",
+`St[j,i] < St[j, i-1] * unimodTol` on the increasing branch of profile  #j.""",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -921,8 +921,8 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
         indexes at which the correction is applied
 
     mod : str
-        When set to `"strict"`, values deviating from unimodality are reset to the
-        value of the previous point. When set to `"smooth"`, both values (deviating
+        When set to `"strict"` , values deviating from unimodality are reset to the
+        value of the previous point. When set to `"smooth"` , both values (deviating
         point and previous point) are modified to avoid "steps" in the profile.
 
     tol: float
@@ -952,8 +952,8 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
     a : 1D ndarray
 
     mod : str
-        When set to `"strict"`, values deviating from unimodality are reset to the value
-        of the previous point. When set to `"smooth"`, both values (deviating point and
+        When set to `"strict"` , values deviating from unimodality are reset to the value
+        of the previous point. When set to `"smooth"` , both values (deviating point and
         previous point) are modified to avoid "steps"
         in the profile.
 

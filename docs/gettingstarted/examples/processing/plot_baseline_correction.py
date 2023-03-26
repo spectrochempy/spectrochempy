@@ -10,7 +10,7 @@ NDDataset baseline correction
 ==============================
 
 In this example, we perform a baseline correction of a 2D NDDataset
-interactively, using the ``multivariate`` method and a ``pchip`` interpolation.
+interactively, using the `multivariate` method and a `pchip` interpolation.
 
 """
 

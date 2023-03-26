@@ -2,6 +2,7 @@
 
 .. currentmodule:: {{ module }}
 
+
 .. autoclass:: {{ objname }}
 
    {% if '__init__' in methods %}
@@ -11,6 +12,7 @@
    {% block attributes_summary %}
    {% if attributes %}
    .. rubric:: Attributes Summary
+
 
    .. autosummary::
    {% for item in attributes %}
@@ -22,6 +24,7 @@
    {% block methods_summary %}
    {% if methods %}
    .. rubric:: Methods Summary
+
 
    .. autosummary::
    {% for item in methods %}
@@ -41,18 +44,6 @@
    {% endif %}
    {% endblock %}
 
-   {% block methods_documentation %}
-   {% if methods %}
-   .. rubric:: Methods Documentation
 
-   {% for item in methods %}
-   .. automethod:: {{ item }}
-   {%- endfor %}
-   {% endif %}
-   {% endblock %}
-
-.. include:: /gettingstarted/gallery/backreferences/{{fullname}}.examples
-
-.. raw:: html
-
-   <div style='clear:both'></div>
+.. minigallery:: {{fullname}}
+    :add-heading:

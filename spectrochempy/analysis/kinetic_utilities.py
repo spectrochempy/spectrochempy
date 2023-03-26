@@ -209,7 +209,7 @@ class ActionMassKinetics(tr.HasTraits):
         ----------
         t: iterable of length t_points
             time values at which the concentrations are computed
-        method : string or `OdeSolver`, optional
+        method : string or `OdeSolver` , optional
             Integration method to use:
 
             * 'RK45' (default): Explicit Runge-Kutta method of order 5(4)
@@ -226,7 +226,7 @@ class ActionMassKinetics(tr.HasTraits):
             Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
             for non-stiff problems and implicit methods ('Radau', 'BDF') for
             stiff problems. Among Runge-Kutta methods, 'DOP853' is recommended
-            for solving with high precision (low values of `rtol` and `atol`).
+            for solving with high precision (low values of `rtol` and `atol` ).
             If not sure, first try to run 'RK45'. If it makes unusually many
             iterations, diverges, or fails, your problem is likely to be stiff and
             you should use 'Radau' or 'BDF'. 'LSODA' can also be a good universal
@@ -238,7 +238,7 @@ class ActionMassKinetics(tr.HasTraits):
         Returns
         -------
         C : ndarray or NDDataset, shape (t_points, n_species)
-            Values of the solution at `t`.
+            Values of the solution at `t` .
         meta : Bunch object with the following fields defined:
         t : ndarray, shape (t_points,)
             Time points.
@@ -249,7 +249,7 @@ class ActionMassKinetics(tr.HasTraits):
             Contains for each event type a list of arrays at which an event of
             that type event was detected. None if `events` was None.
         y_events : list of ndarray or None
-            For each value of `t_events`, the corresponding value of the solution.
+            For each value of `t_events` , the corresponding value of the solution.
             None if `events` was None.
         nfev : int
             Number of evaluations of the right-hand side.
@@ -260,13 +260,13 @@ class ActionMassKinetics(tr.HasTraits):
         status : int
             Reason for algorithm termination:
                 * -1: Integration step failed.
-                *  0: The solver successfully reached the end of `tspan`.
+                *  0: The solver successfully reached the end of `tspan` .
                 *  1: A termination event occurred.
         message : string
             Human-readable description of the termination reason.
         success : bool
             True if the solver reached the interval end or a termination event
-            occurred (``status >= 0``).
+            occurred (`status >= 0` ).
         """
 
         def production_rates(ti, Ci):

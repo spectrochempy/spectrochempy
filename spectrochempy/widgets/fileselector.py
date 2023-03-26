@@ -90,8 +90,8 @@ class FileSelector(Base):
     """
     IPyWidgets interface for picking files.
 
-    The current path is stored in ``.path`` and the current selection is
-    stored in ``.value``.
+    The current path is stored in ` .path` and the current selection is
+    stored in ` .value` .
 
     Parameters
     ----------

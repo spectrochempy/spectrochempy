@@ -43,7 +43,7 @@
 # __[PyCharm](https://www.jetbrains.com/fr-fr/pycharm/)__, __[VS
 # Code](https://code.visualstudio.com)__ or __[Spyder](https://www.spyder-ide.org)__.
 #
-# To launch `Jupyter Lab`, open a terminal and follow the steps below:
+# To launch `Jupyter Lab` , open a terminal and follow the steps below:
 #
 # * Go to your favorite user document folder (*e.g.,* `$HOME/workspace` or
 # any other folder you want to use to store your work).

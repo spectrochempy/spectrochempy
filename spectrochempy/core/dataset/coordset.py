@@ -244,7 +244,7 @@ class CoordSet(HasTraits):
 
                 else:
                     raise KeyError(
-                        f"Probably an invalid key (`{key}`) for coordinates has been passed. "
+                        f"Probably an invalid key (`{key}` ) for coordinates has been passed. "
                         f"Valid keys are among:{DEFAULT_DIM_NAME}"
                     )
 
@@ -270,7 +270,7 @@ class CoordSet(HasTraits):
     @staticmethod
     def _implements(name=None):
         """
-        Utility to check if the current object implement `CoordSet`.
+        Utility to check if the current object implement `CoordSet` .
 
         Rather than isinstance(obj, CoordSet) use object._implements('CoordSet').
 
@@ -605,7 +605,7 @@ class CoordSet(HasTraits):
         -----
         If the args are not named, then the attributions are made in coordinate's  name
         alphabetical order :
-        e.g, the first title will be for the `x` coordinates, the second for the `y`,
+        e.g, the first title will be for the `x` coordinates, the second for the `y` ,
         etc.
         """
         if len(args) == 1 and (is_sequence(args[0]) or isinstance(args[0], CoordSet)):
@@ -638,13 +638,13 @@ class CoordSet(HasTraits):
             is the recommended way to set units as this will be less prone to errors.
         force : bool, optional, default=False
             Whether or not the new units must be compatible with the current units. See
-            the `Coord`.`to` method.
+            the `Coord` .`to` method.
 
         Notes
         -----
         If the args are not named, then the attributions are made in coordinate's name
         alphabetical order :
-        e.g, the first units will be for the `x` coordinates, the second for the `y`, etc.
+        e.g, the first units will be for the `x` coordinates, the second for the `y` , etc.
         """
         force = kwargs.pop("force", False)
 

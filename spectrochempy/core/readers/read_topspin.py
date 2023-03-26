@@ -723,7 +723,7 @@ def read_topspin(*paths, **kwargs):
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
-        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified, read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been provided as arguments,
@@ -738,12 +738,12 @@ def read_topspin(*paths, **kwargs):
         Up to now only 'omnic' and 'tga' have been implemented.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
-        By default it is the one set in SpectroChemPy ``Preferences``.
+        By default it is the one set in SpectroChemPy `Preferences` .
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For examples on how to use this feature, one can look in the `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True)

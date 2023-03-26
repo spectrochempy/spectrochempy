@@ -59,7 +59,6 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "sphinx.ext.napoleon",
-    # "autodoc_traitlets",
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
 ]
@@ -95,7 +94,15 @@ today_fmt = "%B %d, %Y"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_templates", "_static", "**.ipynb_checkpoints", "gallery", "~temp"]
+exclude_patterns = [
+    "_templates",
+    "_static",
+    "**.ipynb_checkpoints",
+    "gallery/auto_examples/*.md5",
+    "gallery/auto_examples/*.py",
+    "gallery/auto_examples/*.ipynb",
+    "~temp",
+]
 
 # The reST default role (used for this markup: `text` ) to use for all
 # documents.
@@ -127,7 +134,7 @@ todo_include_todos = True
 
 rst_epilog = """
 
-.. |scpy| replace:: **SpectroChemPy**
+.. |scpy| replace:: `SpectroChemPy`
 
 .. |ndarray| replace:: :class:`~numpy.ndarray`
 
@@ -355,7 +362,7 @@ pdf_language = "en_EN"
 
 sphinx_gallery_conf = {
     "plot_gallery": "True",
-    "backreferences_dir": "gettingstarted/gallery/backreferences",
+    "backreferences_dir": "gallery/backreferences",
     "doc_module": ("spectrochempy",),
     "reference_url": {
         "spectrochempy": None,
@@ -363,7 +370,7 @@ sphinx_gallery_conf = {
     # path to the examples scripts
     "examples_dirs": "gettingstarted/examples",
     # path where to save gallery generated examples=======
-    "gallery_dirs": "gettingstarted/gallery/auto_examples",
+    "gallery_dirs": "gallery/auto_examples",
     "abort_on_example_error": False,
     "expected_failing_examples": [],
     "download_all_examples": False,
@@ -398,7 +405,6 @@ nbsphinx_custom_formats = {
     # ".md": ["jupytext.reads", {"fmt": "Rmd"}],
 }
 
-
 # configuration for intersphinx --------------------------------------------------------
 
 intersphinx_mapping = {
@@ -409,7 +415,6 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
 }
-
 
 # linkcode ---------------------------------------------------------------------
 
@@ -443,7 +448,10 @@ def linkcode_resolve(domain, info):
 
 # Autosummary --------------------------------------------------------------------------
 
-autosummary_generate = True
+pattern = os.environ.get("SPHINX_NOAPI")
+include_api = pattern is None
+autosummary_generate = True if include_api else ["index"]
+
 autodoc_typehints = "none"
 napoleon_use_param = False
 napoleon_use_rtype = False
@@ -455,7 +463,7 @@ numpydoc_use_plots = True
 autoclass_content = "both"
 # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
 
-autodoc_default_options = {"autosummary": True}
+autodoc_default_options = {"autosummary": include_api}
 autodoc_class_signature = "mixed"
 exclusions = (
     "_*",
@@ -569,6 +577,5 @@ def setup(app):
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("theme_override.css")  # also can be a full URL
-    # Ignore .ipynb files
-    app.registry.source_suffix.pop(".ipynb", None)
-    app.registry.source_suffix.pop(".py", None)
+    # # Ignore .ipynb files
+    # app.registry.source_suffix.pop(".ipynb", None)

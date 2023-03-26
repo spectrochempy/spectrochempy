@@ -32,12 +32,12 @@ def write_csv(*args, **kwargs):
         Protocol used for writing. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
-        Where to write the specified `filename`. If not specified, write in the current directory.
+        Where to write the specified `filename` . If not specified, write in the current directory.
     description: str, optional
         A Custom description.
     delimiter : str, optional
         Set the column delimiter in CSV file.
-        By default it is ',' or the one set in SpectroChemPy `Preferences`.
+        By default it is ',' or the one set in SpectroChemPy `Preferences` .
 
     Returns
     -------

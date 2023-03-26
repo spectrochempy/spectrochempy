@@ -193,7 +193,7 @@ class NDIO(HasTraits):
 
         Notes
         -----
-        Adapted from :class:`numpy.savez`.
+        Adapted from :class:`numpy.savez` .
 
         Examples
         --------
@@ -245,7 +245,7 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-        filename :  `str`, `pathlib` or `file` objects
+        filename :  `str` , `pathlib` or `file` objects
             The name of the file to read (or a file objects.
         **kwargs
             Optional keyword parameters (see Other Parameters).
@@ -262,7 +262,7 @@ class NDIO(HasTraits):
 
         Notes
         -----
-        Adapted from `numpy.load`.
+        Adapted from `numpy.load` .
 
         Examples
         --------

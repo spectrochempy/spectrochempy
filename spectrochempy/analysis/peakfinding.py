@@ -56,9 +56,9 @@ def find_peaks(
     Parameters
     ----------
     dataset : |NDDataset|
-        A 1D NDDataset or a 2D NDdataset with `len(X.y) == 1`.
+        A 1D NDDataset or a 2D NDdataset with `len(X.y) == 1` .
     height : number or ndarray or sequence, optional
-        Required height of peaks. Either a number, ``None``, an array matching
+        Required height of peaks. Either a number, `None` , an array matching
         `x` or a 2-element sequence of the former. The first element is
         always interpreted as the  minimal and the second, if supplied, as the
         maximal required height.
@@ -67,7 +67,7 @@ def find_peaks(
         If set to one, the actual maximum is returned.
     threshold : number or ndarray or sequence, optional
         Required threshold of peaks, the vertical distance to its neighbouring
-        samples. Either a number, ``None``, an array matching `x` or a
+        samples. Either a number, `None` , an array matching `x` or a
         2-element sequence of the former. The first element is always
         interpreted as the  minimal and the second, if supplied, as the maximal
         required threshold.
@@ -76,12 +76,12 @@ def find_peaks(
         neighbouring peaks. Smaller peaks are removed first until the condition
         is fulfilled for all remaining peaks.
     prominence : number or ndarray or sequence, optional
-        Required prominence of peaks. Either a number, ``None``, an array
+        Required prominence of peaks. Either a number, `None` , an array
         matching `x` or a 2-element sequence of the former. The first
         element is always interpreted as the  minimal and the second, if
         supplied, as the maximal required prominence.
     width : number or ndarray or sequence, optional
-        Required width of peaks in samples. Either a number, ``None``, an array
+        Required width of peaks in samples. Either a number, `None` , an array
         matching `x` or a 2-element sequence of the former. The first
         element is always interpreted as the  minimal and the second, if
         supplied, as the maximal required width. Floats are interpreted as width
@@ -98,7 +98,7 @@ def find_peaks(
         for a full description of its effects.
     plateau_size : number or ndarray or sequence, optional
         Required size of the flat top of peaks in samples. Either a number,
-        ``None``, an array matching `x` or a 2-element sequence of the former.
+        `None` , an array matching `x` or a 2-element sequence of the former.
         The first element is always interpreted as the minimal and the second,
         if supplied as the maximal required plateau size. Floats are interpreted
         as measured along the 'x' Coord; ints are interpreted as a number of points.
@@ -118,7 +118,7 @@ def find_peaks(
         conditions:
 
         * peak_heights
-              If `height` is given, the height of each peak in `x`.
+              If `height` is given, the height of each peak in `x` .
         * left_thresholds, right_thresholds
               If `threshold` is given, these keys contain a peaks vertical
               distance to its neighbouring samples.
@@ -134,14 +134,14 @@ def find_peaks(
               plateau) and the calculated plateau sizes.
 
         To calculate and return properties without excluding peaks, provide the
-        open interval ``(None, None)`` as a value to the appropriate argument
-        (excluding `distance`).
+        open interval `(None, None)` as a value to the appropriate argument
+        (excluding `distance` ).
 
     Warns
     -----
     PeakPropertyWarning
         Raised if a peak's properties have unexpected values (see
-        `peak_prominences` and `peak_widths`).
+        `peak_prominences` and `peak_widths` ).
 
     See Also
     --------
@@ -161,27 +161,27 @@ def find_peaks(
     For noisy signals the peak locations can be off because the noise might
     change the position of local maxima. In those cases consider smoothing the
     signal before searching for peaks or use other peak finding and fitting
-    methods (like `find_peaks_cwt`).
+    methods (like `find_peaks_cwt` ).
     Some additional comments on specifying conditions:
 
-    * Almost all conditions (excluding `distance`) can be given as half-open or
-      closed intervals, e.g ``1`` or ``(1, None)`` defines the half-open
-      interval :math:`[1, \\infty]` while ``(None, 1)`` defines the interval
-      :math:`[-\\infty, 1]`. The open interval ``(None, None)`` can be specified
+    * Almost all conditions (excluding `distance` ) can be given as half-open or
+      closed intervals, e.g `1` or `(1, None)` defines the half-open
+      interval :math:`[1, \\infty]` while `(None, 1)` defines the interval
+      :math:`[-\\infty, 1]` . The open interval `(None, None)` can be specified
       as well, which returns the matching properties without exclusion of peaks.
     * The border is always included in the interval used to select valid peaks.
     * For several conditions the interval borders can be specified with
       arrays matching `x` in shape which enables dynamic constrains based on
       the sample position.
-    * The conditions are evaluated in the following order: `plateau_size`,
-      `height`, `threshold`, `distance`, `prominence`, `width`. In most cases
+    * The conditions are evaluated in the following order: `plateau_size` ,
+      `height` , `threshold` , `distance` , `prominence` , `width` . In most cases
       this order is the fastest one because faster operations are applied first
       to reduce the number of peaks that need to be evaluated later.
     * While indices in `peaks` are guaranteed to be at least `distance` samples
-      apart, edges of flat peaks may be closer than the allowed `distance`.
+      apart, edges of flat peaks may be closer than the allowed `distance` .
     * Use `wlen` to reduce the time it takes to evaluate the conditions for
       `prominence` or `width` if `x` is large or has many local maxima
-      (see `peak_prominences`).
+      (see `peak_prominences` ).
 
     Examples
     --------

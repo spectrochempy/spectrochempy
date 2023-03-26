@@ -51,7 +51,7 @@ class NotFittedError(exceptions.SpectroChemPyError):
         caller = frame.f_code.co_name if attr is None else attr
         model = frame.f_locals["self"].name
         message = (
-            f"To use `{caller}`,  the method `fit` of model `{model}`"
+            f"To use `{caller}` ,  the method `fit` of model `{model}`"
             f" should be executed first"
         )
         super().__init__(message)
@@ -240,7 +240,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
     Parameters
     ----------
-    log_level : [`"INFO"` , `"DEBUG"` , `"WARNING"`, `"ERROR"`], optional, default:`"WARNING"`
+    log_level : [`"INFO"` , `"DEBUG"` , `"WARNING"` , `"ERROR"`], optional, default:`"WARNING"`
         The log level at startup
     %(copy)s
     config : :py:class:`Config object, optional
@@ -958,20 +958,19 @@ class DecompositionAnalysis(AnalysisConfigurable):
         X_transform = self.transform(X, **kwargs)
         return X_transform
 
-    @deprecated(replace="transform")
     def reduce(self, X=None, **kwargs):
-        """(Deprecated)"""
-        return self.transform(X, **kwargs)
+        # deprecated decorator do not preserve signature, so
+        # i use a workaround
+        return deprecated(replace="transform")(self.transform)(X, **kwargs)
 
-    @deprecated(replace="inverse_transform")
+    reduce.__doc__ = transform.__doc__ + "\n\n DEPRECATED."
+
     def reconstruct(self, X_transform=None, **kwargs):
-        """(Deprecated)"""
-        return self.inverse_transform(X_transform, **kwargs)
+        return deprecated(replace="inverse_transform")(self.inverse_transform)(
+            X_transform, **kwargs
+        )
 
-    @deprecated(replace="fit_transform")
-    def fit_reduce(self, X, Y=None, **kwargs):
-        """(Deprecated)"""
-        return self.fit_transform(X, Y, **kwargs)
+    reconstruct.__doc__ = inverse_transform.__doc__ + "\n\n DEPRECATED."
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):
@@ -1024,7 +1023,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def plotmerit(self, X, X_hat, **kwargs):
         """
-        Plots the input (`X`), reconstructed (`X_hat`) and residuals (`E`) datasets.
+        Plots the input (`X` ), reconstructed (`X_hat` ) and residuals (`E` ) datasets.
 
         Parameters
         ----------
@@ -1038,11 +1037,11 @@ class DecompositionAnalysis(AnalysisConfigurable):
         ----------------
         colors : tuple or array of 3 colors, optional
             Colors for `X` , `X_hat` and residuals `E` .
-            in the case of 2D, The default colormap is used for `X`.
+            in the case of 2D, The default colormap is used for `X` .
             By default, the three colors are :py:const:`NBlue` , :py:const:`NGreen`
             and :py:const:`NRed`  (which are colorblind friendly).
         offset : float, optional, default: None
-            Specify the separation (in percent) between the `X`, `X_hat` and `E`.
+            Specify the separation (in percent) between the `X` , `X_hat` and `E` .
         nb_traces : int, optional
             Number of lines to display. Default is all
         **others : Other keywords parameters
@@ -1126,7 +1125,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     positive = tr.Bool(
         default_value=False,
-        help="When set to ``True``, forces the coefficients to be positive. This"
+        help="When set to `True` , forces the coefficients to be positive. This"
         "option is only supported for dense arrays.",
     ).tag(config=True)
 
@@ -1400,12 +1399,12 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         """Return the coefficient of determination of the prediction.
 
         The coefficient of determination :math:`R^2` is defined as
-        :math:`(1 - \\frac{u}{v})`, where :math:`u` is the residual
-        sum of squares ``((y_true - y_pred)** 2).sum()`` and :math:`v`
-        is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()``.
+        :math:`(1 - \\frac{u}{v})` , where :math:`u` is the residual
+        sum of squares `((y_true - y_pred)** 2).sum()` and :math:`v`
+        is the total sum of squares `((y_true - y_true.mean()) ** 2).sum()` .
         The best possible score is 1.0 and it can be negative (because the
         model can be arbitrarily worse). A constant model that always predicts
-        the expected value of `y`, disregarding the input features, would get
+        the expected value of `y` , disregarding the input features, would get
         a :math:`R^2` score of 0.0.
 
         Parameters
@@ -1413,11 +1412,11 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         X : array-like of shape (n_observations, n_features)
             Test samples. For some estimators this may be a precomputed
             kernel matrix or a list of generic objects instead with shape
-            ``(n_observations, n_observations_fitted)``, where ``n_observations_fitted``
+            `(n_observations, n_observations_fitted)` , where `n_observations_fitted`
             is the number of observations used in the fitting for the estimator.
 
         Y : array-like of shape (n_observations,) or (n_observations, n_outputs)
-            True values for `X`.
+            True values for `X` .
 
         sample_weight : array-like of shape (n_observations,), default=None
             Sample weights.
@@ -1425,7 +1424,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         Returns
         -------
         score : float
-            :math:`R^2` of ``self.predict(X)`` wrt. `Y`.
+            :math:`R^2` of `self.predict(X)` wrt. `Y` .
         """
         if not self._fitted:
             raise NotFittedError()

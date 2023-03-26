@@ -65,7 +65,7 @@ Getting Started
 
 * :doc:`gettingstarted/whyscpy`
 * :doc:`gettingstarted/overview`
-* :doc:`gettingstarted/gallery/auto_examples/index`
+* :doc:`gallery/auto_examples/index`
 * :doc:`gettingstarted/install/index`
 * :doc:`gettingstarted/papers`
 
@@ -76,7 +76,7 @@ Getting Started
 
     gettingstarted/whyscpy
     gettingstarted/overview
-    Examples <gettingstarted/gallery/auto_examples/index>
+    Examples <gallery/auto_examples/index>
     Installation <gettingstarted/install/index>
     gettingstarted/papers
 
@@ -86,14 +86,14 @@ Getting Started
 Reference
 ***********************
 
-* :doc:`userguide/reference/index`
+* :doc:`reference/index`
 
 .. toctree::
     :maxdepth: 3
     :hidden:
     :caption: Reference
 
-    userguide/reference/index
+    reference/index
 
 .. _userguide:
 

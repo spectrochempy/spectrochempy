@@ -8,7 +8,7 @@
 """
 PCA analysis example
 ---------------------
-In this example, we perform the PCA dimensionality reduction of the classical ``iris``
+In this example, we perform the PCA dimensionality reduction of the classical `iris`
 dataset (Ronald A. Fisher.
 "The Use of Multiple Measurements in Taxonomic Problems. Annals of Eugenics, 7, pp.179-188, 1936).
 
@@ -30,7 +30,7 @@ except (IOError, OSError):
 # %%
 # Create a PCA object
 # Here, the number of components  wich is used by the model is automatically determined
-# using ``n_components="mle"``\. Warning: ``mle`` cannot be used when
+# using `n_components="mle"`\. Warning: `mle` cannot be used when
 # n_observations < n_features.
 pca = scp.PCA(used_components="mle")
 
@@ -73,7 +73,7 @@ scores = pca.transform()
 scores
 
 # %%
-# Again, we can also use the ``scores`` attribute to get this results
+# Again, we can also use the `scores` attribute to get this results
 scores = pca.scores
 scores
 

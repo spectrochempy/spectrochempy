@@ -305,10 +305,10 @@ def _get_config_dir():
     Determines the SpectroChemPy configuration directory name and
     creates the directory if it doesn't exist.
 
-    This directory is typically ``$HOME/.spectrochempy/config``,
+    This directory is typically `$HOME/.spectrochempy/config` ,
     but if the
     SCP_CONFIG_HOME environment variable is set and the
-    ``$SCP_CONFIG_HOME`` directory exists, it will be that
+    `$SCP_CONFIG_HOME` directory exists, it will be that
     directory.
 
     If neither exists, the former will be created.
@@ -632,7 +632,7 @@ class GeneralPreferences(MetaConfigurable):
     def _get_default_project_directory(self):
         # Determines the SpectroChemPy project directory name and creates the directory
         # if it doesn't exist.
-        # This directory is typically ``$HOME/spectrochempy/projects``, but if the
+        # This directory is typically `$HOME/spectrochempy/projects` , but if the
         # SCP_PROJECTS_HOME environment
         # variable is set and the `$SCP_PROJECTS_HOME` directory exists, it will be
         # that directory.

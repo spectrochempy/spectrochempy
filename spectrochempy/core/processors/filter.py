@@ -172,9 +172,9 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
     dataset :  |NDDataset|
         The input data.
     type : str among ['linear', 'constant'}, optional, default='linear'
-        The type of detrending. If ``type == 'linear'`` (default),
+        The type of detrending. If `type == 'linear'` (default),
         the result of a linear least-squares fit to `data` is subtracted from `data` .
-        If ``type == 'constant'`` , only the mean of `data` is subtracted.
+        If `type == 'constant'` , only the mean of `data` is subtracted.
     bp : array_like of ints, optional
         A sequence of break points. If given, an individual linear fit is
         performed for each part of `data` between two break points.

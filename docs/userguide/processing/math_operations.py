@@ -50,7 +50,7 @@ np.sqrt(x)
 # %% [markdown]
 # As seen above, `np.sqrt(x)` return a numpy array.
 #
-# The interesting thing, it that `ufunc`'s can also work with `NDDataset`.
+# The interesting thing, it that `ufunc`'s can also work with `NDDataset` .
 
 # %%
 dx = scp.NDDataset(x)
@@ -83,7 +83,7 @@ np.sqrt(dx)
 # * [log](#log)(x, \*\*kwargs): Natural logarithm, element-wise.
 # * [log2](#log)(x, \*\*kwargs): Base-2 logarithm of x.
 # * [log10](#log)(x, \*\*kwargs): Return the base 10 logarithm of the input array, element-wise.
-# * [log1p](#log)(x, \*\*kwargs): Return `log(x + 1)`, element-wise.
+# * [log1p](#log)(x, \*\*kwargs): Return `log(x + 1)` , element-wise.
 #
 # ### Functions that return numpy arrays (*Work only for NDDataset*)
 # * [sign](#sign)(x): Returns an element-wise indication of the sign of a number.
@@ -315,7 +315,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log1p
-# Return `log(x + 1)`, element-wise.
+# Return `log(x + 1)` , element-wise.
 
 # %%
 out = np.log1p(dataset)

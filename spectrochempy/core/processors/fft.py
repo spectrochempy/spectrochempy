@@ -230,7 +230,7 @@ def ifft(dataset, size=None, **kwargs):
     dataset : |NDDataset|
         The dataset on which to apply the fft transformation.
     size : int, optional
-        Size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
+        Size of the transformed dataset dimension - a shorter parameter is `si` . by default, the size is the closest
         power of two greater than the data size.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -273,7 +273,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     dataset : |NDDataset|
         The dataset on which to apply the fft transformation.
     size : int, optional
-        Size of the transformed dataset dimension - a shorter parameter is `si`. by default, the size is the closest
+        Size of the transformed dataset dimension - a shorter parameter is `si` . by default, the size is the closest
         power of two greater than the data size.
     sizeff : int, optional
         The number of effective data point to take into account for the transformation. By default it is equal to the

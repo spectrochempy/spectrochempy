@@ -52,7 +52,7 @@ prefs.figure.figsize = (7, 3)
 _ = ds.plot()
 
 # %%
-# * `wavenumbers` (`x`) coordinates are here expressed in $cm^{-1}$
+# * `wavenumbers` (`x` ) coordinates are here expressed in $cm^{-1}$
 # * and `data` are in absorbance ($a.u.$) units.
 
 # %%
@@ -104,7 +104,7 @@ _ = ds.plot()
 print(ds.x)  # The LinearCoord object is transformed into a Coord object
 
 # %%
-# ``absorbance`` units (the units of the data) can also be transformed into ``transmittance``
+# `absorbance` units (the units of the data) can also be transformed into `transmittance`
 
 ds.ito("transmittance")
 _ = ds.plot()

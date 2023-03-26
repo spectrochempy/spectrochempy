@@ -550,7 +550,7 @@ def assert_script_equal(sc1, sc2, **kwargs):
 # ======================================================================================
 class RandomSeedContext(object):
     """
-    A context manager (for use with the ``with`` statement) that will seed the
+    A context manager (for use with the `with` statement) that will seed the
     numpy random number generator (RNG) to a specific value, and then restore
     the RNG state back to whatever it was before.
 
@@ -601,7 +601,7 @@ def assert_equal_units(unit1, unit2, strict=False):
     unit2 : units
         Other units to be compared
     strict :  bool, optional, default: False
-        If True, units should be exactly the same: `km` != `mm`.
+        If True, units should be exactly the same: `km` != `mm` .
     """
     from pint import DimensionalityError
 
@@ -636,7 +636,7 @@ class raises(object):
             x = 1/0
 
     This can also be used a context manager, in which case it is just
-    an alias for the ``pytest.raises`` context manager (because the
+    an alias for the `pytest.raises` context manager (because the
     two have the same name this help avoid confusion by being
     flexible).
 
@@ -676,7 +676,7 @@ class catch_warnings(warnings.catch_warnings):
     This completely blitzes any memory of any warnings that have
     appeared before so that all warnings will be caught and displayed.
 
-    ``*args`` is a set of warning classes to collect.  If no arguments are
+    `*args` is a set of warning classes to collect.  If no arguments are
     provided, all warnings are collected.
 
     Use as follows::
@@ -819,7 +819,7 @@ class catch_warnings(warnings.catch_warnings):
 #     reference : list of image filename for the references
 #
 #         List the image filenames of the reference figures
-#         (located in ``.spectrochempy/figures``) which correspond in
+#         (located in ` .spectrochempy/figures` ) which correspond in
 #         the same order to
 #         the various figures created in the decorated function. if
 #         these files doesn't exist an error is generated, except if the
@@ -827,17 +827,17 @@ class catch_warnings(warnings.catch_warnings):
 #         of a reference figures, the first time the corresponding figures are
 #         created.
 #
-#     extension : str, optional, default=``png``
+#     extension : str, optional, default=`png`
 #
 #         Extension to be used to save figure, among
 #         (eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff)
 #
-#     force_creation : `bool`, optional, default=`False`.
+#     force_creation : `bool` , optional, default=`False` .
 #
 #         if this flag is True, the figures created in the decorated
 #         function are
 #         saved in the reference figures directory (
-#         ``.spectrocchempy/figures``)
+#         ` .spectrocchempy/figures` )
 #
 #     min_similarity : float (percent).
 #
@@ -847,7 +847,7 @@ class catch_warnings(warnings.catch_warnings):
 #
 #     max_rms : float
 #
-#         rms stands for `Root Mean Square`. If set, then it will
+#         rms stands for `Root Mean Square` . If set, then it will
 #         be used to decide if an image is the same
 #         (less than the acceptable rms). Not used if min_similarity also set.
 #

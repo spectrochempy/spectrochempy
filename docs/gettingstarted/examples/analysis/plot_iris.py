@@ -20,7 +20,7 @@ import spectrochempy as scp
 X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
 # %%
-# ``X`` has two coordinates:
+# `X` has two coordinates:
 # * `wavenumbers` named "x"
 # * and `timestamps` (*i.e.,* the time of recording) named "y".
 
@@ -30,11 +30,11 @@ print(X.coordset)
 # Setting new coordinates
 # -----------------------
 #
-# The ``y`` coordinates of the dataset is the acquisition timestamp.
+# The `y` coordinates of the dataset is the acquisition timestamp.
 # However, each spectrum has been recorded with a given pressure of CO
 # in the infrared cell.
 #
-# Hence, it would be interesting to add pressure coordinates to the ``y`` dimension:
+# Hence, it would be interesting to add pressure coordinates to the `y` dimension:
 
 pressures = [
     0.003,
@@ -74,7 +74,7 @@ print(X.y)
 X.coordset
 
 # %%
-# By default, the current coordinate is the first one (here `c_times`).
+# By default, the current coordinate is the first one (here `c_times` ).
 # For example, it will be used by default for
 # plotting:
 
@@ -87,7 +87,7 @@ _ = X.plot_map(colorbar=True)
 # To seamlessly work with the second coordinates (pressures), we can change the default
 # coordinate:
 
-X.y.select(2)  # to select coordinate ``_2``
+X.y.select(2)  # to select coordinate `_2`
 X.y.default
 
 # %%

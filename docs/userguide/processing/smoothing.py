@@ -73,7 +73,7 @@ ax = X.plot()  # plot
 # the window length. For the points located at both end of the spectra, the extremities of the spectrum are mirrored
 # beyond the initial limits to minimize boundary effects.
 #
-# When passed as is, i.e. `X.smooth()`, the method uses a moving average of 5 points:
+# When passed as is, i.e. `X.smooth()` , the method uses a moving average of 5 points:
 
 # %%
 ax = X.smooth().plot()
@@ -115,7 +115,7 @@ ax = scp.plot_multiple(
 # ### Window function
 #
 # Besides the window `length` (default=11 points), the user can also choose the type of
-# window (`window`) from `flat`, `hanning` (i.e. Hann window), `hamming`, `bartlett` or
+# window (`window` ) from `flat` , `hanning` (i.e. Hann window), `hamming` , `bartlett` or
 # `blackman` .  The `flat`
 # window - which is the default shown above - should be fine for the vast majority of
 # cases.
@@ -162,7 +162,7 @@ ax = scp.plot_multiple(
 )
 
 # %% As shown above, the "bartlett" function is equivalent to a triangular apodization, while other [markdown]
-# functions (`hanning`, `hamming`, `blackman`) are bell-shaped. More information on window functions can be found [
+# functions (`hanning` , `hamming` , `blackman` ) are bell-shaped. More information on window functions can be found [
 # here](https://en.wikipedia.org/wiki/Window_function).
 #
 # Overall, the impact of the window function on the final spectrum is moderate, as can be shown by comparing the
@@ -200,11 +200,11 @@ for ll, s in zip(labels, stds):
 # https://docs.scipy.org/doc/scipy/reference/signal.html) module to which we refer the interested reader. It not only
 # used to smooth spectra but also to compute their successive derivatives. The latter are treated in [the
 # peak-finding tutorial](../analysis/peak_finding.ipynb) and we will focus here on the smoothing which is the default
-# of the filter (default parameter: `deriv=0`).
+# of the filter (default parameter: `deriv=0` ).
 #
 # As for the `smooth()` method, it is a moving-window based method. Hence, the window length (`window_length`
 # parameter) plays an equivalent role, except that it *must* be odd. Moreover, instead of choosing a window function,
-# the user can choose the order of the polynomial used to fit the window data points (`polyorder`, default value: 0).
+# the user can choose the order of the polynomial used to fit the window data points (`polyorder` , default value: 0).
 # The latter must be strictly smaller than the window size (so that the polynomial coefficients can be fully
 # determined).
 #

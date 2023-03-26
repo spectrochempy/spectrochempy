@@ -54,7 +54,7 @@ def read_csv(*paths, **kwargs):
         *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        except if `merge` is set to False. If a source is not provided (i.e. no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -67,7 +67,7 @@ def read_csv(*paths, **kwargs):
     Other Parameters
     ----------------
     directory : str, optional
-        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified, read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been provided as arguments,
@@ -82,12 +82,12 @@ def read_csv(*paths, **kwargs):
         Up to now only 'omnic' and 'tga' have been implemented.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
-        By default it is the one set in SpectroChemPy ``Preferences``.
+        By default it is the one set in SpectroChemPy `Preferences` .
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For examples on how to use this feature, one can look in the `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True).
@@ -217,7 +217,7 @@ def _read_csv(*args, **kwargs):
         raise NotImplementedError(
             f"Sorry, but reading a csv file with '{origin}' origin is not implemented. "
             "Please, remove or set the keyword 'origin'\n "
-            "(Up to now implemented csv files are: `omnic`, `tga`)"
+            "(Up to now implemented csv files are: `omnic` , `tga` )"
         )
 
     # reset modification date to cretion date

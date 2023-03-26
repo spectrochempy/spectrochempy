@@ -246,7 +246,7 @@ def align(dataset, *others, **kwargs):
             if method in ["outer", "interpolate"]:
                 # in this case we do a union of the coords (masking the
                 # missing values)
-                # For method=`interpolate`, the interpolation will be
+                # For method=`interpolate` , the interpolation will be
                 # performed in a second step
                 new_coord._data = sorted(coord_data | new_coord_data)
 

@@ -237,7 +237,7 @@ _ = evol.plot(ls=":")
 # lowest "contour line". It should not be confused with the height as a peak can have
 # an important height but a small
 # prominence when surrounded by other peaks (see below for an illustration).
-#     - in addition to the prominence, the user can define `wlen`, the width (in points)
+#     - in addition to the prominence, the user can define `wlen` , the width (in points)
 #     of the window used to look
 #     at neighboring minima, the peak maximum being is at the center of the window.
 # - `threshold`: a single number (the minimal required threshold) or a sequence of two
@@ -336,7 +336,7 @@ _ = ax.legend()
 # If the concept of "peak height" is pretty clear, it is worth examining further some
 # peak properties as defined and
 # used in `find_peaks()` . They can be obtained (and used) by passing the parameters
-# `height`, `prominence`,
+# `height` , `prominence` ,
 # `threshold`  and `width` . Then `find_peaks()` will return the corresponding properties
 # of the detected peaks in the
 # `properties` dictionary.
@@ -353,7 +353,7 @@ _ = ax.legend()
 #
 # Let's illustrate this for the second-highest peak which height is comprised between
 # ~ 0.15 and 0.22 and see which
-# properties are returned when, on top of `height`, we pass `prominence=0`: this will
+# properties are returned when, on top of `height` , we pass `prominence=0`: this will
 # return the properties
 # associated to the prominence and warrant that this peak will not be rejected on the
 # prominence criterion.
@@ -412,7 +412,7 @@ print(f"calc. prominence = {prominence:0.4fK}")
 
 # %% Finally, we illustrate how the use of the `wlen` parameter - which limits the
 # search of the "base [markdown]
-# Finally, the figure below shows how the prominence can be affected by `wlen`, the
+# Finally, the figure below shows how the prominence can be affected by `wlen` , the
 # size of the window used to determine the peaks' bases.
 #
 # <img src="images/prominence_wlen.png" alt="prominence_def"

@@ -372,7 +372,7 @@ class NDPlot(HasTraits):
         Generic plot function.
 
         This apply to a |NDDataset| but actually delegate the work to a plotter defined by the keyword parameter
-        ``method``.
+        `method` .
 
         Parameters
         ----------

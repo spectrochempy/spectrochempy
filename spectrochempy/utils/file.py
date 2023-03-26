@@ -333,12 +333,12 @@ def get_filenames(*filenames, **kwargs):
     directory : `str` or pathlib object, optional.
         The directory where to look at. If not specified, read in
         current directory, or in the datadir if unsuccessful.
-    filetypes : `list`, optional, default=['all files, '.*)'].
+    filetypes : `list` , optional, default=['all files, '.*)'].
         File type filter.
-    dictionary : `bool`, optional, default=True
+    dictionary : `bool` , optional, default=True
         Whether a dictionary or a list should be returned.
     listdir : bool, default=False
-        Read all file (possibly limited by `filetypes` in a given `directory`.
+        Read all file (possibly limited by `filetypes` in a given `directory` .
     recursive : bool, optional,  default=False.
         Read also subfolders.
 

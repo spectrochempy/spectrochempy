@@ -64,14 +64,14 @@ class NDComplexArray(NDArray):
             A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
             used as a name.
         labels : array of objects, optional
-            Labels for the `data`. labels can be used only for 1D-datasets.
+            Labels for the `data` . labels can be used only for 1D-datasets.
             The labels array may have an additional dimension, meaning several series of labels for the same data.
             The given array can be a list, a tuple, a |ndarray| , a ndarray-like, a |NDArray| or any subclass of
             |NDArray| .
-        mask : array of bool or `NOMASK`, optional
+        mask : array of bool or `NOMASK` , optional
             Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
             a tuple, or a |ndarray| . Each values in the array must be `False` where the data are *valid* and True when
-            they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray`, or any
+            they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray` , or any
             array object (such as a |NDArray| or subclass of it), providing a `mask` here will causes the mask from the
             masked array to be ignored.
         units : |Unit| instance or str, optional
@@ -82,7 +82,7 @@ class NDComplexArray(NDArray):
             The title of the dimension. It will later be used for instance for labelling plots of the data.
             It is optional but recommended to give a title to each ndarray.
         dlabel :  str, optional.
-            Alias of `title`.
+            Alias of `title` .
         meta : dict-like object, optional.
             Additional metadata for this object. Must be dict-like but no
             further restriction is placed on meta.
@@ -90,7 +90,7 @@ class NDComplexArray(NDArray):
             name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
             created.
         description : str, optional.
-            A optional description of the nd-dataset. A shorter alias is `desc`.
+            A optional description of the nd-dataset. A shorter alias is `desc` .
         history : str, optional.
             A string to add to the object history.
         copy : bool, optional
@@ -212,7 +212,7 @@ class NDComplexArray(NDArray):
     @property
     def real(self):
         """
-        The array with real component of the `data`.
+        The array with real component of the `data` .
 
         (Readonly property).
         """
@@ -239,7 +239,7 @@ class NDComplexArray(NDArray):
     @property
     def imag(self):
         """
-        The array with imaginary component of the `data`.
+        The array with imaginary component of the `data` .
 
         (Readonly property).
         """
@@ -268,7 +268,7 @@ class NDComplexArray(NDArray):
     @property
     def RR(self):
         """
-        The array with real component in both dimension of hypercomplex 2D `data`.
+        The array with real component in both dimension of hypercomplex 2D `data` .
 
         This readonly property is equivalent to the `real` property.
         """
@@ -279,7 +279,7 @@ class NDComplexArray(NDArray):
     @property
     def RI(self):
         """
-        The array with real-imaginary component of hypercomplex 2D `data`.
+        The array with real-imaginary component of hypercomplex 2D `data` .
 
         (Readonly property).
         """
@@ -290,7 +290,7 @@ class NDComplexArray(NDArray):
     @property
     def IR(self):
         """
-        The array with imaginary-real component of hypercomplex 2D `data`.
+        The array with imaginary-real component of hypercomplex 2D `data` .
 
         (Readonly property).
         """
@@ -388,7 +388,7 @@ class NDComplexArray(NDArray):
         Returns
         -------
         out
-            Same object or a copy depending on the ``inplace`` flag.
+            Same object or a copy depending on the `inplace` flag.
 
         See Also
         --------
@@ -420,7 +420,7 @@ class NDComplexArray(NDArray):
         Returns
         -------
         out
-            Same object or a copy depending on the ``inplace`` flag.
+            Same object or a copy depending on the `inplace` flag.
         """
         if not inplace:  # default is to return a new array
             new = self.copy()
@@ -450,7 +450,7 @@ class NDComplexArray(NDArray):
         Returns
         -------
         transposed
-            Same object or a copy depending on the ``inplace`` flag.
+            Same object or a copy depending on the `inplace` flag.
         """
 
         new = super().transpose(*dims, inplace=inplace)
@@ -483,7 +483,7 @@ class NDComplexArray(NDArray):
         Returns
         -------
         transposed
-            Same object or a copy depending on the ``inplace`` flag.
+            Same object or a copy depending on the `inplace` flag.
         """
 
         new = super().swapdims(dim1, dim2, inplace=inplace)

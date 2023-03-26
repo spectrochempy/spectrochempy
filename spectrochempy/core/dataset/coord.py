@@ -74,7 +74,7 @@ class Coord(NDMath, NDArray):
         the automatic `id` given at the object creation will be
         used as a name..
     labels : array of objects, optional
-        Labels for the `data`. labels can be used only for 1D-datasets.
+        Labels for the `data` . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
         several series of labels for the same data.
         The given array can be a list, a tuple, a |ndarray| ,
@@ -91,12 +91,12 @@ class Coord(NDMath, NDArray):
         for labelling plots of the data.
         It is optional but recommended to give a title to each ndarray.
     dlabel :  str, optional
-        Alias of `title`.
+        Alias of `title` .
     copy : bool, optional
         Perform a copy of the passed object. Default is False.
     linear : bool, optional
         If set to True, the coordinate is considered as a
-        ``LinearCoord`` object.
+        `LinearCoord` object.
     offset : float, optional
         Only used is linear is True.
         If omitted a value of 0.0 is taken for the coordinate offset.
@@ -811,7 +811,7 @@ class Coord(NDMath, NDArray):
         #         if inplace:
         #             raise Exception(
         #                     "A LinearCoord object cannot be transformed to a non linear coordinate "
-        #                     "`inplace`. "
+        #                     "`inplace` . "
         #                     "Use to() instead of ito() and leave the `inplace` attribute to False"
         #             )
         #         else:
@@ -905,7 +905,7 @@ class LinearCoord(Coord):
         the automatic `id` given at the object creation will be
         used as a name.
     labels : array of objects, optional
-        Labels for the `data`. labels can be used only for 1D-datasets.
+        Labels for the `data` . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
         several series of labels for the same data.
         The given array can be a list, a tuple, a |ndarray| ,
@@ -922,7 +922,7 @@ class LinearCoord(Coord):
         for labelling plots of the data.
         It is optional but recommended to give a title to each ndarray.
     dlabel : str, optional.
-        Alias of `title`.
+        Alias of `title` .
     meta : dict-like object, optional.
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
@@ -948,7 +948,7 @@ class LinearCoord(Coord):
     >>> c1 = LinearCoord(offset=2.0, increment=2.0, size=10)
 
     Alternatively, linear coordinates can be created using the
-    ``linear`` keyword
+    `linear` keyword
 
     >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
     """

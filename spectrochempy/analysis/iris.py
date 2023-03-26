@@ -53,7 +53,7 @@ class IrisKernel(tr.HasTraits):
     K : str or callable or NDDataset
         Kernel of the integral equation. Pre-defined kernels can be chosen among
         `["langmuir", "ca", "reactant-first-order", "product-first-order",
-        "diffusion"]`.
+        "diffusion"]` .
     p : Coord or Iterable
         External variable. Must be provided if the kernel is passed as a str or
         callable.
@@ -328,18 +328,18 @@ class IRIS(DecompositionAnalysis):
 
     where the kernel :math:`k(q, p)` expresses the functional dependence of a single
     contribution with respect to the experimental variable :math:`p` and 'internal'
-    physico-chemical variable :math:`q`.
+    physico-chemical variable :math:`q` .
 
     Regularization is triggered when 'reg_param' is set to an array of two or three
     values.
 
     If 'reg_param' has two values [min, max], the optimum regularization parameter is
-    searched between :math:`10^{min}` and :math:`10^{max}`. Automatic search of the
+    searched between :math:`10^{min}` and :math:`10^{max}` . Automatic search of the
     regularization is made using the Cultrera_Callegaro algorithm (arXiv:1608.04571v2)
     which involves the Menger curvature of a circumcircle and the golden section search
     method.
 
-    If three values are given (`[min, max, num]`), then the inversion will be made for
+    If three values are given (`[min, max, num]` ), then the inversion will be made for
     num values evenly spaced on a log scale between :math:`10^{min}` and
     :math:`10^{max}`
 
@@ -385,7 +385,7 @@ class IRIS(DecompositionAnalysis):
         default_value=None,
         allow_none=True,
         help="Regularization parameter (two values `[min, max]` or three values "
-        "`[start, stop, num]`. If reg_par is None, no regularization is applied.",
+        "`[start, stop, num]` . If reg_par is None, no regularization is applied.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -967,8 +967,8 @@ def _nearestPD(A, shift):  # pragma: no cover
     # The above is different from [1]. It appears that MATLAB's `chol` Cholesky
     # decomposition will accept matrices with exactly 0-eigenvalue, whereas
     # Numpy's will not. So where [1] uses `eps(mineig)` (where `eps` is Matlab
-    # for `np.spacing`), we use the above definition. CAVEAT: our `spacing`
-    # will be much larger than [1]'s `eps(mineig)`, since `mineig` is usually on
+    # for `np.spacing` ), we use the above definition. CAVEAT: our `spacing`
+    # will be much larger than [1]'s `eps(mineig)` , since `mineig` is usually on
     # the order of 1e-16, and `eps(1e-16)` is on the order of 1e-34, whereas
     # `spacing` will, for Gaussian random matrices of small dimension, be on
     # the order of 1e-16. In practice, both ways converge, as the unit test

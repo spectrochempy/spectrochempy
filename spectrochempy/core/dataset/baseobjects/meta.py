@@ -10,7 +10,7 @@ This module mainly contains the definition of a Meta class object.
 Such object is particularly used in `SpectrochemPy` by the |NDDataset| object
 to store metadata. Like a regular dictionary, the
 elements can be accessed by key, but also by attributes, *e.g.*
-``a = meta['key']`` give the same results as ``a = meta.key``.
+`a = meta['key']` give the same results as `a = meta.key` .
 """
 
 # from traitlets import HasTraits, Dict, Bool, default
@@ -210,7 +210,7 @@ class Meta(object):  # HasTraits):
         Parameters
         ----------
         d : dict-like object
-            Any dict-like object can be used, such as `dict`, traits `Dict` or
+            Any dict-like object can be used, such as `dict` , traits `Dict` or
             another `Meta` object.
         """
 

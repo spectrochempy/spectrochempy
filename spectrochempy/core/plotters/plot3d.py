@@ -22,13 +22,13 @@ figsize : tuple, optional
     The figure size expressed as a tuple (w,h) in inch.
 fontsize : int, optional
     The font size in pixels, default is 10 (or read from preferences).
-autolayout : `bool`, optional, default=True
+autolayout : `bool` , optional, default=True
     if True, layout will be set automatically.
 dpi : [ None | scalar > 0]
     The resolution in dots per inch. If None it will default to the
     value savefig.dpi in the matplotlibrc file.
 colorbar :
-method : str [optional among ``surface``, ``waterfall``, ...]
+method : str [optional among `surface` , `waterfall` , ...]
     The type of plot,
 style : str, optional, default='notebook'
     Matplotlib stylesheet (use `available_style` to get a list of available
@@ -51,7 +51,7 @@ def plot_surface(dataset, **kwargs):
     """
     Plot a 2D dataset as a a 3D-surface.
 
-    Alias of plot_3D (with `method` argument set to ``surface``).
+    Alias of plot_3D (with `method` argument set to `surface` ).
     """
     return
 
@@ -61,7 +61,7 @@ def plot_waterfall(dataset, **kwargs):
     """
     Plot a 2D dataset as a a 3D-waterfall plot.
 
-    Alias of plot_2D (with `method` argument set to ``waterfall``).
+    Alias of plot_2D (with `method` argument set to `waterfall` ).
     """
     return
 

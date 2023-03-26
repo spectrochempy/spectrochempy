@@ -137,7 +137,7 @@ class NMF(DecompositionAnalysis):
         allow_none=True,
         default_value=None,
         help=(
-            "Used for initialisation (when ``init`` == 'nndsvdar' or 'random'), and "
+            "Used for initialisation (when `init` == 'nndsvdar' or 'random'), and "
             "in Coordinate Descent. Pass an int, for reproducible results across "
             "multiple function calls."
         ),
@@ -145,17 +145,17 @@ class NMF(DecompositionAnalysis):
 
     alpha_W = tr.Float(
         default_value=0.0,
-        help="Constant that multiplies the regularization terms of `W`. Set it to zero"
-        "(default) to have no regularization on `W`.",
+        help="Constant that multiplies the regularization terms of `W` . Set it to zero"
+        "(default) to have no regularization on `W` .",
     ).tag(config=True)
 
     alpha_H = tr.Union(
         (tr.Float(), tr.Enum(["same"])),
         default_value="same",
         help=(
-            "Constant that multiplies the regularization terms of `H`. Set it to zero"
-            'to have no regularization on `H`. If "same" (default), it takes the same'
-            "value as `alpha_W`."
+            "Constant that multiplies the regularization terms of `H` . Set it to zero"
+            'to have no regularization on `H` . If "same" (default), it takes the same'
+            "value as `alpha_W` ."
         ),
     ).tag(config=True)
 

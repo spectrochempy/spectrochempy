@@ -25,7 +25,8 @@ for item in scripts[:]:
         "checkpoints" in str(item)
         or "make.py" in str(item)
         or "conf.py" in str(item)
-        or "autodoc_traitlets.py" in str(item)
+        or "apigen.py" in str(item)
+        or "gallery" in str(item)
     ):
         scripts.remove(item)
 

@@ -68,9 +68,9 @@ class SVD(DecompositionAnalysis):
         """
     Performs a Singular Value Decomposition of a dataset.
 
-    The SVD is commonly written as :math:`X = U \\Sigma V^{T}`.
+    The SVD is commonly written as :math:`X = U \\Sigma V^{T}` .
 
-    This class has the attributes : U, s = diag(S) and VT=V :math:`^T`.
+    This class has the attributes : U, s = diag(S) and VT=V :math:`^T` .
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
@@ -250,7 +250,7 @@ class SVD(DecompositionAnalysis):
         """
         Return the left unitary matrix.
 
-        Its shape depends on `full_matrices`.
+        Its shape depends on `full_matrices` .
         """
         if self.compute_uv:
             return self._outfit[0]

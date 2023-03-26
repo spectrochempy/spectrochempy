@@ -91,13 +91,13 @@ class PCA(DecompositionAnalysis):
         help="""Number of components to keep.
 if used_components is not set all components are kept::
     used_components == min(n_observations, n_features)
-If ``used_components == 'mle'`` and ``svd_solver == 'full'``, Minka's MLE is used to guess
-the dimension. Use of ``used_components == 'mle'`` will interpret ``svd_solver == 'auto'``
-as ``svd_solver == 'full'``.
-If ``0 < used_components < 1`` and ``svd_solver == 'full'``, select the number of
+If `used_components == 'mle'` and `svd_solver == 'full'` , Minka's MLE is used to guess
+the dimension. Use of `used_components == 'mle'` will interpret `svd_solver == 'auto'`
+as `svd_solver == 'full'` .
+If `0 < used_components < 1` and `svd_solver == 'full'` , select the number of
 components such that the amount of variance that needs to be explained is greater than
 the percentage specified by used_components.
-If ``svd_solver == 'arpack'``, the number of components must be strictly less than the
+If `svd_solver == 'arpack'` , the number of components must be strictly less than the
 minimum of n_features and n_observations. Hence, the None case results in::
     used_components == min(n_observations, n_features) - 1""",
     ).tag(config=True)
@@ -125,7 +125,7 @@ If full :
 run exact full SVD calling the standard LAPACK solver via `scipy.linalg.svd` and select
 the components by postprocessing
 If arpack :
-run SVD truncated to used_components calling ARPACK solver via `scipy.sparse.linalg.svds`.
+run SVD truncated to used_components calling ARPACK solver via `scipy.sparse.linalg.svds` .
 It requires strictly 0 < used_components < min(X.shape)
 If randomized :
 run randomized SVD by the method of Halko et al.""",
@@ -146,7 +146,7 @@ svd_solver == 'randomized'. Must be of range [0, infinity).""",
 
     n_oversamples = tr.Int(
         default_value=10,
-        help="""This parameter is only relevant when `svd_solver="randomized"`.
+        help="""This parameter is only relevant when `svd_solver="randomized"` .
 It corresponds to the additional number of random vectors to sample the range of `X` so
 as to ensure proper conditioning. See :func:`~sklearn.utils.extmath.randomized_svd`
 for more details.""",
@@ -431,8 +431,8 @@ for reproducible results across multiple function calls.""",
         n_components : int
             Number of components to plot.
         **kwargs
-            Extra arguments: `colors` (default: `[NBlue, NRed]`) to set the colors
-            of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]`).
+            Extra arguments: `colors` (default: `[NBlue, NRed]` ) to set the colors
+            of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]` ).
 
         Returns
         -------

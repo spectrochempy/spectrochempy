@@ -168,7 +168,7 @@ class gaussianmodel(object):
     .. math::
         f(x) = \\frac{ampl}{\\sqrt{2 \\pi \\sigma^2} } \\exp({\\frac{-(x-pos)^2}{2 \\sigma^2}})
 
-    where :math:`\\sigma = \\frac{width}{2.3548}`.
+    where :math:`\\sigma = \\frac{width}{2.3548}` .
     """
 
     type = "1D"
@@ -200,7 +200,7 @@ class lorentzianmodel(object):
     .. math::
         f(x) = \\frac{ampl * \\lambda}{\\pi [(x-pos)^2+ \\lambda^2]}
 
-    where :math:`\\lambda = \\frac{width}{2}`.
+    where :math:`\\lambda = \\frac{width}{2}` .
     """
 
     type = "1D"
@@ -227,7 +227,7 @@ class lorentzianmodel(object):
 class voigtmodel(object):
     """
     A Voigt model constructed as the convolution of a :class:`GaussianModel` and
-    a :class:`LorentzianModel`.
+    a :class:`LorentzianModel` .
 
     Commonly used for spectral line fitting.
     """

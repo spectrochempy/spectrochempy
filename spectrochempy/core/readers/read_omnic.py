@@ -32,8 +32,8 @@ def read_omnic(*paths, **kwargs):
     """
     Open a Thermo Nicolet OMNIC file.
 
-    Open Omnic file or a list of files with extension ``.spg`` , ``.spa`` or
-    ``.srs`` and set data/metadata in the current dataset.
+    Open Omnic file or a list of files with extension ` .spg` , ` .spa` or
+    ` .srs` and set data/metadata in the current dataset.
 
     The collected metadata are:
     - names of spectra
@@ -63,7 +63,7 @@ def read_omnic(*paths, **kwargs):
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -77,8 +77,8 @@ def read_omnic(*paths, **kwargs):
     Other Parameters
     -----------------
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -96,7 +96,7 @@ def read_omnic(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -121,13 +121,13 @@ def read_omnic(*paths, **kwargs):
     Examples
     ---------
     Reading a single OMNIC file  (providing a windows type filename relative
-    to the default ``datadir``)
+    to the default `datadir` )
 
     >>> scp.read_omnic('irdata\\\\nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Reading a single OMNIC file  (providing a unix/python type filename
-    relative to the default ``datadir``)
+    relative to the default `datadir` )
     Note that here read_omnic is called as a classmethod of the NDDataset class
 
     >>> scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
@@ -215,9 +215,9 @@ def read_omnic(*paths, **kwargs):
 
 def read_spg(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ``.spg``.
+    Open a Thermo Nicolet file or a list of files with extension ` .spg` .
 
-    Open Omnic file or a list of files with extension ``.spg`` and set
+    Open Omnic file or a list of files with extension ` .spg` and set
     data/metadata in the current dataset.
 
     Parameters
@@ -234,7 +234,7 @@ def read_spg(*paths, **kwargs):
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -248,8 +248,8 @@ def read_spg(*paths, **kwargs):
     Other Parameters
     -----------------
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -267,7 +267,7 @@ def read_spg(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -291,7 +291,7 @@ def read_spg(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file
+    This method is an alias of `read_omnic` , except that the type of file
     is contrain to *.spg.
 
     Examples
@@ -309,9 +309,9 @@ def read_spg(*paths, **kwargs):
 
 def read_spa(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ``.spa``.
+    Open a Thermo Nicolet file or a list of files with extension ` .spa` .
 
-    Open Omnic file or a list of files with extension ``.spa`` and set
+    Open Omnic file or a list of files with extension ` .spa` and set
     data/metadata in the current dataset.
 
     Parameters
@@ -328,7 +328,7 @@ def read_spa(*paths, **kwargs):
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -346,8 +346,8 @@ def read_spa(*paths, **kwargs):
         of the spa file if present or None if absent. When set to 'backgroung' returns
         the backgroung interferogram of the spa file if present or None if absent.
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -365,7 +365,7 @@ def read_spa(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -389,7 +389,7 @@ def read_spa(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file
+    This method is an alias of `read_omnic` , except that the type of file
     is contrain to *.spa.
 
     Examples
@@ -409,9 +409,9 @@ def read_spa(*paths, **kwargs):
 
 def read_srs(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ``.srs``.
+    Open a Thermo Nicolet file or a list of files with extension ` .srs` .
 
-    Open Omnic file or a list of files with extension ``.srs`` and set
+    Open Omnic file or a list of files with extension ` .srs` and set
     data/metadata in the current dataset.
 
     Parameters
@@ -428,7 +428,7 @@ def read_srs(*paths, **kwargs):
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -444,8 +444,8 @@ def read_srs(*paths, **kwargs):
     return_bg : bool, optional
         Default value is False. When set to 'True' returns the series background
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -463,7 +463,7 @@ def read_srs(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -487,7 +487,7 @@ def read_srs(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file
+    This method is an alias of `read_omnic` , except that the type of file
     is constrained to *.srs.
 
     Examples

@@ -183,6 +183,7 @@ Creation from from external sources
     read_carroucell
     download_nist_ir
 
+
 ******************
 Export a NDDataset
 ******************
@@ -203,7 +204,6 @@ Export a NDDataset
     write_xls
     to_array
     to_xarray
-
 
 
 **************************
@@ -248,6 +248,7 @@ Plotting functions
     multiplot_stack
     multiplot_with_transposed
     show
+
 
 ************
 Processing
@@ -569,6 +570,7 @@ Miscellaneous
     :toctree: generated/
 
     pipe
+
 
 *******************
 Analysis

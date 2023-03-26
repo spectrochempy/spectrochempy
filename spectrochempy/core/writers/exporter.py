@@ -116,12 +116,12 @@ def write(dataset, filename=None, **kwargs):
         Protocol used for writing. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
-        Where to write the specified `filename`. If not specified, write in the current directory.
+        Where to write the specified `filename` . If not specified, write in the current directory.
     description: str, optional
         A Custom description.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
-        By default it is the one set in SpectroChemPy `Preferences`.
+        By default it is the one set in SpectroChemPy `Preferences` .
 
     See Also
     --------
@@ -129,7 +129,7 @@ def write(dataset, filename=None, **kwargs):
 
     Examples
     ---------
-    write a dataset (providing a windows type filename relative to the default ``Datadir``)
+    write a dataset (providing a windows type filename relative to the default `Datadir` )
 
     >>> nd = scp.read_opus('irdata/OPUS')
     >>> f = nd.write('opus.scp') # doctest: +SKIP

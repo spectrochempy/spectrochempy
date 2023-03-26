@@ -125,7 +125,7 @@ scp.debug_("this is a debug message!")
 # %% [markdown]
 # As expected, only the info message was displayed.
 #
-# If we change the loglevel to ``DEBUG``, then the two messages will be printed:
+# If we change the loglevel to `DEBUG` , then the two messages will be printed:
 
 # %%
 scp.set_loglevel(scp.DEBUG)
@@ -146,10 +146,10 @@ scp.debug_("this is a debug message!")
 # %% [markdown]
 #
 # ### Error handling
-# If something goes wrong with during a cell execution,  a ``traceback`` is displayed.
+# If something goes wrong with during a cell execution,  a `traceback` is displayed.
 #
-# For instance, the object or method ``toto`` does not exist in the API, so an error
-# (`ImportError`) is generated
+# For instance, the object or method `toto` does not exist in the API, so an error
+# (`ImportError` ) is generated
 # when trying to import this from the API.
 #
 # Here we catch the error with a conventional `try-except` structure

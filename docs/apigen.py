@@ -23,7 +23,7 @@ from spectrochempy.utils.packages import list_packages
 
 __all__ = []
 
-REFERENCE = pathlib.Path(__file__).parent / "userguide" / "reference"
+REFERENCE = pathlib.Path(__file__).parent / "reference"
 
 
 # ======================================================================================
@@ -65,6 +65,8 @@ class Apigen:
         members = inspect.getmembers(obj)
         for member in members:
             _name, _type = member
+            if _name == "transform":
+                pass
             if (
                 (alls is not None and _name not in alls)
                 or str(_name).startswith("_")
@@ -77,25 +79,31 @@ class Apigen:
                     or str(_type).startswith("<property")
                 )
             ):
-                # we keep only the members in __all__ but the constants
+                # we keep only the members in __all__
                 # print(f">>>>>>>>>>>>>>>>   {_name}\t\t{_type}")
-                continue
-            else:
-
-                if objname != "spectrochempy" and objname.split(".")[1:][0] in [
-                    "core",
-                    "analysis",
-                    "utils",
-                    "widgets",
-                ]:
-
+                if "partial" not in str(_type):
                     continue
 
-                module = ".".join(objname.split(".")[1:])
-                module = module + "." if module else ""
-                print(f"{module}{_name}\t\t{_type}")
+            if objname != "spectrochempy" and objname.split(".")[1:][0] in [
+                "core",
+                "analysis",
+                "utils",
+                "widgets",
+            ]:
 
-                res.append(f"{module}{_name}")
+                continue
+
+            module = ".".join(objname.split(".")[1:])
+            module = module + "." if module else ""
+            print(f"{module}{_name}\t\t{_type}")
+
+            res.append(f"{module}{_name}")
+
+            if str(_type).startswith("<class"):
+                # find also members in class
+                klass = getattr(obj, _name)
+                subres = self.get_members(klass, objname + "." + _name)
+                res.extend(subres)
 
         return res
 
@@ -107,8 +115,6 @@ class Apigen:
         for pkg_name in pkgs:
 
             print(pkg_name)
-            if "mcrals" in pkg_name:
-                pass
             pkg = import_item(pkg_name)
             try:
                 alls = getattr(pkg, "__all__")
