@@ -64,7 +64,7 @@ class EFA(DecompositionAnalysis):
     >>> model.fit(X)
     >>> # Display components spectra (2 x M)
     >>> model.used_components = 2
-    >>> _ = components.plot(title="Component spectra")
+    >>> _ = model.components.plot(title="Component spectra")
     >>> # Get the abstract concentration profile based on the FIFO EFA analysis
     >>> c = model.transform()
     >>> # Plot the transposed concentration matrix  (2 x N)

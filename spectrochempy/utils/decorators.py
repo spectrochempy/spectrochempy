@@ -215,7 +215,14 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
     _docstring.get_sections(
         doc,
         base=cls.__name__,
-        sections=["Parameters", "Other Parameters", "See Also", "Examples", "Notes"],
+        sections=[
+            "Parameters",
+            "Other Parameters",
+            "See Also",
+            "Examples",
+            "Notes",
+            "References",
+        ],
     )
     _docstring.params[f"{cls.__name__}.parameters"] += f"\n{otherpar.strip()}"
     doc = "\n" + _docstring.params[f"{cls.__name__}.full_desc"]
@@ -243,6 +250,11 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
         doc += "\nNotes\n"
         doc += "-----\n"
         doc += _docstring.params[f"{cls.__name__}.notes"]
+        doc += "\n"
+    if _docstring.params[f"{cls.__name__}.references"]:
+        doc += "\nReferences\n"
+        doc += "----------\n"
+        doc += _docstring.params[f"{cls.__name__}.references"]
         doc += "\n"
     cls.__doc__ = doc
     return cls
