@@ -99,11 +99,11 @@ class Apigen:
 
             res.append(f"{module}{_name}")
 
-            if str(_type).startswith("<class"):
-                # find also members in class
-                klass = getattr(obj, _name)
-                subres = self.get_members(klass, objname + "." + _name)
-                res.extend(subres)
+            # if str(_type).startswith("<class"):
+            #     # find also members in class
+            #     klass = getattr(obj, _name)
+            #     subres = self.get_members(klass, objname + "." + _name)
+            #     res.extend(subres)
 
         return res
 

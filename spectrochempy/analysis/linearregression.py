@@ -9,10 +9,8 @@ Implementation of least squares Linear Regression.
 """
 import traitlets as tr
 
-from spectrochempy.analysis._base import (
-    LinearRegressionAnalysis,
-    _make_other_parameters_doc,
-)
+from spectrochempy.analysis._base import LinearRegressionAnalysis
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["LSTSQ", "NNLS"]
@@ -22,6 +20,7 @@ __configurables__ = ["LSTSQ", "NNLS"]
 # ======================================================================================
 # class LSTSQ
 # ======================================================================================
+@signature_has_configurable_traits
 class LSTSQ(LinearRegressionAnalysis):
     __doc__ = _docstring.dedent(
         """
@@ -50,12 +49,10 @@ class LSTSQ(LinearRegressionAnalysis):
     description = "Ordinary Least Squares Linear Regression"
 
 
-_make_other_parameters_doc(LSTSQ)
-
-
 # ======================================================================================
 # class NNLS
 # ======================================================================================
+@signature_has_configurable_traits
 class NNLS(LinearRegressionAnalysis):
     __doc__ = _docstring.dedent(
         """
@@ -89,6 +86,3 @@ class NNLS(LinearRegressionAnalysis):
         help="When set to `True` , forces the coefficients to be positive. This"
         "option is only supported for dense arrays.",
     ).tag(config=True)
-
-
-_make_other_parameters_doc(NNLS)

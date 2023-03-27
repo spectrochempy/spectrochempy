@@ -67,7 +67,7 @@ class ActionMassKinetics(tr.HasTraits):
     k = Array()
     T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0)
 
-    def __init__(self, equations, species_concentrations, k, T=298.0, **kwars):
+    def __init__(self, equations, species_concentrations, k, T=298.0, **kwargs):
         self.equations = equations
         self.species_concentrations = species_concentrations
 

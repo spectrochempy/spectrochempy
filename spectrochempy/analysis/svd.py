@@ -12,7 +12,6 @@ import traitlets as tr
 
 from spectrochempy.analysis._base import (
     DecompositionAnalysis,
-    _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.utils.docstrings import _docstring
@@ -124,7 +123,6 @@ class SVD(DecompositionAnalysis):
         self,
         *,
         log_level="WARNING",
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
@@ -135,7 +133,6 @@ class SVD(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )
@@ -272,8 +269,6 @@ class SVD(DecompositionAnalysis):
         """
         return self._outfit[1]
 
-
-_make_other_parameters_doc(SVD)
 
 # ======================================================================================
 if __name__ == "__main__":

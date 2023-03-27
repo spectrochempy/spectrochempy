@@ -21,10 +21,12 @@ from spectrochempy.analysis.optimize import _models as models_
 from spectrochempy.analysis.optimize._parameters import FitParameters
 from spectrochempy.application import info_, warning_
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 
 # ======================================================================================
+@signature_has_configurable_traits
 class Optimize(DecompositionAnalysis):
     __doc__ = _docstring.dedent(
         """
@@ -37,10 +39,6 @@ class Optimize(DecompositionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
-
-    Other parameters
-    ----------------
-
     """
     )
 
@@ -110,7 +108,6 @@ class Optimize(DecompositionAnalysis):
         self,
         *,
         log_level="WARNING",
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
@@ -123,7 +120,6 @@ class Optimize(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )

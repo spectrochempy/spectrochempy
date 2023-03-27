@@ -15,27 +15,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate
 from matplotlib.widgets import SpanSelector
-from traitlets import Float, HasTraits, Int, List, Tuple, Unicode, signature_has_traits
+from traitlets import Enum, Float, HasTraits, Int, List, Tuple, Unicode
 
 from spectrochempy.core import debug_, warning_
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.processors.smooth import smooth
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.utils.coordrange import trim_ranges
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.traits import NDDatasetType
 
 
-@signature_has_traits
+@signature_has_configurable_traits
+# Note: with this decorator
+# Configurable traits are added to the signature as keywords if they are not yet present.
 class BaselineCorrection(HasTraits):
     """
     Baseline Correction processor.
 
-    2 methods are proposed :
+    Two methods are proposed :
 
-    * `sequential` (default) = classical polynom fit or spline
+    - `sequential` (default) = classical polynom fit or spline
       interpolation with separate fitting of each row (spectrum)
-    * `multivariate` = SVD modeling of baseline, polynomial fit of PC's
+    - `multivariate` = SVD modeling of baseline, polynomial fit of PC's
       and calculation of the modelled baseline spectra.
 
     Interactive mode is proposed using the interactive function : :meth:`run` .
@@ -48,6 +51,7 @@ class BaselineCorrection(HasTraits):
     See Also
     --------
     abc : Automatic baseline correction.
+    BaselineCorrector : A helper widget to use in Jupyter notebooks
 
     Examples
     --------
@@ -68,8 +72,14 @@ class BaselineCorrection(HasTraits):
     """
 
     dataset = NDDatasetType()
+
+    # hidden parameters (not passed in the constructor)
     corrected = NDDatasetType()
-    method = Unicode("sequential")
+    method = Enum(
+        ["sequential", "multivariate"],
+        default_value="sequential",
+        help="Method used for baseline resolution",
+    ).tag(config=True)
     interpolation = Unicode("polynomial")
     axis = Int(-1)
     dim = Unicode("")
@@ -80,10 +90,14 @@ class BaselineCorrection(HasTraits):
     figsize = Tuple((7, 5))
     sps = List()
 
-    def __init__(self, dataset, *args, **kwargs):
+    def __init__(self, dataset, **kwargs):
+
+        super().__init__(**kwargs)
+
         self.dataset = dataset
+
         self.corrected = self.dataset.copy()
-        if args or kwargs:
+        if kwargs:
             warning_(
                 "DEPRECATION WARNING: Pass all arguments such range, and method definition in the "
                 "`compute` method, not during the initialisation of the BaselineCorrection instance.\n"

@@ -115,8 +115,6 @@ class BuildDocumentation(object):
 
         if noapi and not whatsnew:  # API is included when whatsnew is compiled
             environ["SPHINX_NOAPI"] = "noapi"
-        else:
-            self._apigen()
 
     @staticmethod
     def _delnb():
@@ -274,19 +272,25 @@ class BuildDocumentation(object):
         BUILDDIR = DOCREPO / builder
 
         print(
-            f'{"-" * 80}\n'
-            f"building {builder.upper()} documentation ({doc_version.capitalize()} "
+            f'{"#" * 80}\n'
+            f"Building {builder.upper()} documentation ({doc_version.capitalize()} "
             f"version : {version})"
             f"\n in {BUILDDIR}"
-            f'\n{"-" * 80}'
+            f'\n{"#" * 80}'
         )
 
         self._make_dirs()
 
+        # API?
+        if not self.noapi:
+            self._apigen()
+
         self._sync_notebooks()
 
         # run sphinx
-        print(f"\n{builder.upper()} BUILDING:")
+        print(f'{"-" * 80}\n')
+        print(f"\n{builder.upper()} BUILDING")
+        print(f'{"-" * 80}\n')
         srcdir = confdir = DOCS
         outdir = f"{BUILDDIR}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"

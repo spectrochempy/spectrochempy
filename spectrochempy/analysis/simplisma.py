@@ -16,19 +16,17 @@ from warnings import warn
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._base import (
-    DecompositionAnalysis,
-    _make_other_parameters_doc,
-)
+from spectrochempy.analysis._base import DecompositionAnalysis
 from spectrochempy.core import info_
 from spectrochempy.utils import exceptions
-from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 
 # ======================================================================================
 # class SIMPLISMA
 # ======================================================================================
+@signature_has_configurable_traits
 class SIMPLISMA(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "SIMPLISMA")
 
@@ -102,7 +100,6 @@ class SIMPLISMA(DecompositionAnalysis):
         self,
         *args,
         log_level="WARNING",
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
@@ -131,7 +128,6 @@ class SIMPLISMA(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )
@@ -570,8 +566,6 @@ class SIMPLISMA(DecompositionAnalysis):
         s.description = "Standard deviation spectra matrix from SIMPLISMA:"  # + logs
         return s
 
-
-_make_other_parameters_doc(SIMPLISMA)
 
 # ======================================================================================
 if __name__ == "__main__":

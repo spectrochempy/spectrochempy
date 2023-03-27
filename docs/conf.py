@@ -100,7 +100,7 @@ exclude_patterns = [
     "**.ipynb_checkpoints",
     "gallery/auto_examples/*.md5",
     "gallery/auto_examples/*.py",
-    "gallery/auto_examples/*.ipynb",
+    # "gallery/auto_examples/*.ipynb",
     "~temp",
 ]
 
@@ -181,8 +181,10 @@ html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     "logo_only": True,
     "display_version": True,
-    "collapse_navigation": True,
-    "navigation_depth": 3,
+    "collapse_navigation": False,
+    "navigation_depth": 5,
+    "sticky_navigation": True,
+    "prev_next_buttons_location": "both",
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -252,7 +254,7 @@ warnings.filterwarnings(
 html_context = {
     "current_version": "latest" if ("dev" in version) else "stable",
     "release": release,
-    "base_url": "https://www.spectrochempy.fr",
+    "base_url": "..",
     "versions": (
         ("latest", '/latest/index.html"'),
         ("stable", "/stable/index.html"),
@@ -578,4 +580,4 @@ def setup(app):
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("theme_override.css")  # also can be a full URL
     # # Ignore .ipynb files
-    # app.registry.source_suffix.pop(".ipynb", None)
+    app.registry.source_suffix.pop(".ipynb", None)

@@ -2124,7 +2124,7 @@ class NDArray(HasTraits):
         Returns
         -------
         rescaled
-            A rescaled array
+            A rescaled array.
         """
         q = Quantity(1.0, self.units)
         q.ito_base_units()

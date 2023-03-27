@@ -12,16 +12,17 @@ import traitlets as tr
 
 from spectrochempy.analysis._base import (
     DecompositionAnalysis,
-    _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.core import info_
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["EFA"]
 __configurables__ = ["EFA"]
 
 
+@signature_has_configurable_traits
 class EFA(DecompositionAnalysis):
 
     _docstring.delete_params("DecompositionAnalysis.see_also", "EFA")
@@ -30,42 +31,58 @@ class EFA(DecompositionAnalysis):
         """
     Evolving Factor Analysis.
 
-    Perform an Evolving Factor Analysis (forward and reverse) of the input |NDDataset|\.
+    Evolving factor analysis (`EFA`) is a method that allows model-free resolution of
+    overlapping peaks into concentration profiles and normalized spectra of components.
+
+    Originally developed for GC and GC-MS experiments (See e.g.,
+    [Maeder86]_ , [Roach92]_ ), it is also suitable for
+    analysis spectra such as those obtained by Operando FTIR for example.
+
+    The model used in this class allow to perform a forward and reverse analysis of the
+    input |NDDataset| .
 
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
 
-    Other Parameters
-    ----------------
-    {{CONFIGURATION_PARAMETERS}}
-
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_EFA)s
+
+    References
+    ----------
+    .. [Maeder86] M. Maeder, A.D. Zuberbuehler, Anal. Chim. Acta, 181 (1986), 287-291
+    .. [Roach92] L. Roach, M. Guilhaus, Org. mass. spec., 27, 1071-1076
+
+    Examples
+    --------
+    >>> # Init the model
+    >>> model = scp.EFA()
+    >>> # Read an experimental 2D spectra (N x M )
+    >>> X = scp.read("irdata/nh4y-activation.spg")
+    >>> # Fit the model
+    >>> model.fit(X)
+    >>> # Display components spectra (2 x M)
+    >>> model.used_components = 2
+    >>> _ = components.plot(title="Component spectra")
+    >>> # Get the abstract concentration profile based on the FIFO EFA analysis
+    >>> c = model.transform()
+    >>> # Plot the transposed concentration matrix  (2 x N)
+    >>> _ = c.T.plot(title="Concentration")
+    >>> scp.show()
     """
     )
 
-    name = tr.Unicode("EFA", help="Name of the model")
+    name = tr.Unicode("EFA", help="Name of the model.")
     description = tr.Unicode(
-        "Evolving factor analysis model", help="short description of the model"
+        "Evolving factor analysis model", help="Short description of the model."
     )
-
-    # ----------------------------------------------------------------------------------
-    # Runtime Parameters,
-    # only those specific to PCA, the other being defined in AnalysisConfigurable.
-    # ----------------------------------------------------------------------------------
-    # define here only the variable that you use in fit or transform functions
-
-    # _X = NDDatasetType()
-    # _f_ev = NDDatasetType()
-    # _b_ev = NDDatasetType()
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
     # as they depend on the model estimator)
     # ----------------------------------------------------------------------------------
-    cutoff = tr.Float(default_value=None, allow_none=True, help="Cut-off value").tag(
+    cutoff = tr.Float(default_value=None, allow_none=True, help="Cut-off value.").tag(
         config=True
     )
 
@@ -80,13 +97,12 @@ class EFA(DecompositionAnalysis):
         self,
         *,
         log_level="WARNING",
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
     ):
-        # we have changed the name n_components use in sklearn by
-        # used_components (in order  to avoid conflict with the rest of the progrma)
+        # We have changed the name n_components use in sklearn by
+        # used_components (in order  to avoid conflict with the rest of the program)
         # warn th user:
         if "n_components" in kwargs:
             raise KeyError(
@@ -94,12 +110,11 @@ class EFA(DecompositionAnalysis):
                 "`used_components`?"
             )
 
-        # call the super class for initialisation of the configuration parameters
+        # Call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )
@@ -173,7 +188,7 @@ class EFA(DecompositionAnalysis):
     @_docstring.dedent
     def fit(self, X):
         """
-        Fit the EFA model on a X dataset.
+        Fit the `EFA` model on a `X` dataset.
 
         Parameters
         ----------
@@ -197,7 +212,7 @@ class EFA(DecompositionAnalysis):
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-        %(analysis_transform.parameters.kwargs)s
+        %(kwargs)s
 
         Other Parameters
         ----------------
@@ -237,8 +252,6 @@ class EFA(DecompositionAnalysis):
             b = np.max((b, np.ones_like(b) * self.cutoff), axis=0)
         return b
 
-
-_make_other_parameters_doc(EFA)
 
 # ======================================================================================
 if __name__ == "__main__":

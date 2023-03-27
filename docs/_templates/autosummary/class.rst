@@ -44,6 +44,16 @@
    {% endif %}
    {% endblock %}
 
+   {% block methods_documentation %}
+   {% if methods %}
+   .. rubric:: Methods Documentation
+
+   {% for item in methods %}
+   .. automethod:: {{ item }}
+   {%- endfor %}
+   {% endif %}
+   {% endblock %}
+
 
 .. minigallery:: {{fullname}}
     :add-heading:

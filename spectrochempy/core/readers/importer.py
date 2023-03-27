@@ -294,16 +294,18 @@ def read(*paths, **kwargs):
     Parameters
     ----------
     *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+        The data source(s) can be specified by the name or a list of name for the
+        file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename` , nor `content` ),
+        except if `merge` is set to False. If a source is not provided (i.e. no
+        `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -319,10 +321,12 @@ def read(*paths, **kwargs):
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whenever it is possible) from the file name extension.
     directory : str, optional
-        From where to read the specified `filename` . If not specified, read in the default `datadir` specified in
+        From where to read the specified `filename` . If not specified, read in the
+        default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
+        Default value is False. If True, and several filenames have been provided as
+        arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False).
     sortbydate : bool, optional
@@ -330,7 +334,8 @@ def read(*paths, **kwargs):
     description : str, optional
         A Custom description.
     origin : {'omnic', 'tga'}, optional
-        In order to properly interpret CSV file it can be necessary to set the origin of the spectra.
+        In order to properly interpret CSV file it can be necessary to set the origin
+        of the spectra.
         Up to now only 'omnic' and 'tga' have been implemented.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
@@ -352,9 +357,9 @@ def read(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
-    read_spc : Read Galactic *.spc files.
+    read_spg : Read Omnic .spg grouped spectra.
+    read_spa : Read Omnic .spa single spectra.
+    read_spc : Read Galactic .spc files.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
@@ -451,12 +456,12 @@ def read_dir(directory=None, **kwargs):
     Open a list of readable files in a and store data/metadata in a dataset or a list of datasets according to the
     following rules :
 
-    * 2D spectroscopic data (e.g. valid *.spg files or matlab arrays, etc...) from
+    * 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
       distinct files are stored in distinct NDdatasets.
-    * 1D spectroscopic data (e.g., *.spa files) in a given directory are grouped
+    * 1D spectroscopic data (e.g., .spa files) in a given directory are grouped
       into single NDDataset, providing their unique dimension are compatible. If not,
       an error is generated.
-    * non readable files are ignored
+    * non-readable files are ignored
 
     Parameters
     ----------
@@ -475,8 +480,8 @@ def read_dir(directory=None, **kwargs):
     read_topspin : Read TopSpin Bruker NMR spectra.
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic .spg grouped spectra.
+    read_spa : Read Omnic .Spa single spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.

@@ -400,6 +400,11 @@ def sine(dataset, *args, **kwargs):
     """
     Strictly equivalent to :meth:`sp` .
 
+    Returns
+    -------
+    |NDDataset|
+        Modified dataset.
+
     See Also
     --------
     em, gm, sp, sinm, qsin, hamming, triang, bartlett, blackmanharris
@@ -410,6 +415,16 @@ def sine(dataset, *args, **kwargs):
 def sinm(dataset, ssb=1, **kwargs):
     """
     Equivalent to :meth:`sp` , with pow = 1 (sine bell apodization window).
+
+    Returns
+    -------
+    |NDDataset|
+        Modified dataset.
+
+    Returns
+    -------
+    |NDDataset|
+        Modified dataset.
 
     See Also
     --------
@@ -616,7 +631,7 @@ def triang(dataset, **kwargs):
     Returns
     -------
     apodized
-        Dataset
+        Dataset.
     apod_arr
         The apodization array only if 'retapod' is True.
 

@@ -2222,13 +2222,13 @@ class NDMath(object):
 
     def pipe(self, func, *args, **kwargs):
         """
-        Apply func(self, *args, **kwargs).
+        Apply func(self, \*args, \*\*kwargs).
 
         Parameters
         ----------
         func : function
             Function to apply to the |NDDataset| .
-            `*args` , and `**kwargs` are passed into `func` .
+            \*args` , and `\*\*kwargs` are passed into `func` .
             Alternatively a `(callable, data_keyword)` tuple where
             `data_keyword` is a string indicating the keyword of
             `callable` that expects the array object.

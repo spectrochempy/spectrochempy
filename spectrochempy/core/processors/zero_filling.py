@@ -144,8 +144,8 @@ def zf_size(dataset, size=None, mid=False, **kwargs):
 
     Parameters
     ----------
-    dataset : ndarray
-        Array of NMR data.
+    dataset : |NDDataset|
+        Input dataset.
     size : int
         Size of data after zero filling.
     mid : bool
@@ -153,8 +153,8 @@ def zf_size(dataset, size=None, mid=False, **kwargs):
 
     Returns
     -------
-    ndata : ndarray
-        Zero filled array of NMR data.
+    |NDDataset|
+        Modified dataset.
     """
     if size is None:
         size = dataset.shape[-1]

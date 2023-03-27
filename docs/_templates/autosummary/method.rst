@@ -5,7 +5,7 @@
 
 
 .. auto{{ objtype }}:: {{ objname }}
-
+    :noindex:
 
 .. minigallery:: {{fullname}}
     :add-heading:

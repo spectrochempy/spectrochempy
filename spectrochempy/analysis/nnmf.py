@@ -13,10 +13,8 @@ import traitlets as tr
 from numpy.random import RandomState
 from sklearn import decomposition
 
-from spectrochempy.analysis._base import (
-    DecompositionAnalysis,
-    _make_other_parameters_doc,
-)
+from spectrochempy.analysis._base import DecompositionAnalysis
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["NMF"]
@@ -26,6 +24,7 @@ __configurables__ = ["NMF"]
 # ======================================================================================
 # class NMF
 # ======================================================================================
+@signature_has_configurable_traits
 class NMF(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "NMF")
 
@@ -182,7 +181,6 @@ class NMF(DecompositionAnalysis):
         self,
         *,
         log_level="WARNING",
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
@@ -201,7 +199,6 @@ class NMF(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )
@@ -275,6 +272,3 @@ class NMF(DecompositionAnalysis):
         %(analysis_fit.see_also)s
         """
         return super().fit(X, Y=None)
-
-
-_make_other_parameters_doc(NMF)

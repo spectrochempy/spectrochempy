@@ -222,7 +222,7 @@ def run_script(script, localvars=None):
     Returns
     -------
     out
-        Output of the script if any
+        Output of the script if any.
     """
 
     return script.execute(localvars)

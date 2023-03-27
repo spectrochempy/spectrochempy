@@ -51,16 +51,15 @@ import spectrochempy as scp
 # to IR data:
 #
 # - `read_omnic()` to open omnic (spa and spg) files
-# - `read_opus()` to open Opus (*.0, ...) files
+# - `read_opus()` to open Opus (.0, ...) files
 # - `read_jcamp()` to open an IR JCAMP-DX datafile
 # - `read()` which is the generic reader. The type of data is then deduced from the
 # file extension.
 #
-# General purpose data exchange formats such as  \*.csv or \*.mat will be treated in
-# another tutorial (yet to come...)
-# can also be read using:
+# General purpose data exchange formats such as .csv or .mat will be treated in
+# another tutorial (yet to come...) can also be read using:
 #
-# - `read_csv()` to open csv files
+# - `read_csv()` to open .csv files
 # - `read_matlab()` to open .mat files
 #
 # ## Import of OMNIC files
@@ -72,7 +71,7 @@ import spectrochempy as scp
 # - .spg files which contain a group of spectra
 #
 # Both have been reverse engineered, hence allowing extracting their key data.
-# The Omnic reader of Spectrochempy (`read_omnic()` ) has been developed based on
+# The Omnic reader of Spectrochempy ( `read_omnic()` ) has been developed based on
 # posts in open forums on the .spa file format and extended to .spg file formats.
 #
 #
@@ -89,9 +88,8 @@ X
 # The displayed attributes are detailed in the following.
 #
 # - `name` is the name of the group of spectra as it appears in the .spg file. OMNIC
-#   sets this name to the .spg
-#   filename used at the creation of the group. In this example, the name ("Group sust
-#   Mo_Al2O3_base line.SPG") differs
+#   sets this name to the .spg filename used at the creation of the group.
+#   In this example, the name ("Group sust Mo_Al2O3_base line.SPG") differs
 #   from the filename ("CO@Mo_Al2O3.SPG") because the latter has been changed from
 #   outside OMNIC (directly in the OS).
 #

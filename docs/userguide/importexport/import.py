@@ -85,7 +85,7 @@ print(X)
 # %% [markdown]
 # The size of the `y` and `x` dimension will depend, of course, of the file that you
 # have selected ! If you did not
-# select any file (*e.g.,* by pressing 'cancel' in th Dialog Box), the result will be
+# select any file ( *e.g.,* by pressing 'cancel' in th Dialog Box), the result will be
 # `None` , as nothing has been loaded in `X` .
 #
 # <div class='alert alert-info'>
@@ -107,11 +107,11 @@ print(X)
 # - At the time of writing this tutorial (SpectroChemPy v.0.1.23), the following
 # commands will behave similarly:
 #     - `read` to open any kind of recognised data files based on the file suffix
-#       (e.g., *.spg, etc...)
+#       (e.g., .spg, etc...)
 #     - `read_omnic` to open omnic (spa and spg) files
-#     - `read_opus` to open Bruker Opus (*.0, ...) files
+#     - `read_opus` to open Bruker Opus (.0, ...) files
 #     - `read_labspec` to open LABSPEC6 files - this assumes they have been exported
-#       as *.txt files
+#       as .txt files
 #     - `read_topspin` to open Bruker Topspin NMR files
 #     - `read_csv` to open csv files
 #     - `read_jcamp` to open an IR JCAMP-DX datafile

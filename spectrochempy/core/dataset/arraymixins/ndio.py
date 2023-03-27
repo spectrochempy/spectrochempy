@@ -111,7 +111,7 @@ class NDIO(HasTraits):
         """
         Save the current object in SpectroChemPy format.
 
-        Default extension is *.scp for |NDDataset|\'s and *.pscp for
+        Default extension is .scp for |NDDataset|\'s and .pscp for
         |Project|'s.
 
         Parameters
@@ -132,18 +132,22 @@ class NDIO(HasTraits):
         ---------
 
         Read some data from an OMNIC file
+
         >>> nd = scp.read_omnic('wodger.spg')
         >>> assert nd.name == 'wodger'
 
         Write it in SpectroChemPy format (.scp)
         (return a `pathlib` object)
+
         >>> filename = nd.save()
 
         Check the existence of the scp fie
+
         >>> assert filename.is_file()
         >>> assert filename.name == 'wodger.scp'
 
         Remove this file
+
         >>> filename.unlink()
         """
 
@@ -171,7 +175,7 @@ class NDIO(HasTraits):
 
     def save_as(self, filename="", **kwargs):
         """
-        Save the current |NDDataset| in SpectroChemPy format (*.scp).
+        Save the current |NDDataset| in SpectroChemPy format (\*.scp).
 
         Parameters
         ----------
@@ -197,20 +201,23 @@ class NDIO(HasTraits):
 
         Examples
         --------
-
         Read some data from an OMNIC file
+
         >>> nd = scp.read_omnic('wodger.spg')
         >>> assert nd.name == 'wodger'
 
         Write it in SpectroChemPy format (.scp)
         (return a `pathlib` object)
+
         >>> filename = nd.save_as('new_wodger')
 
-        Check the existence of the scp fie
+        Check the existence of the scp file
+
         >>> assert filename.is_file()
         >>> assert filename.name == 'new_wodger.scp'
 
         Remove this file
+
         >>> filename.unlink()
         """
         if filename:

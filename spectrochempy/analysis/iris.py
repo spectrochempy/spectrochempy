@@ -18,16 +18,13 @@ import traitlets as tr
 from matplotlib import pyplot as plt
 from scipy import optimize
 
-from spectrochempy.analysis._base import (
-    DecompositionAnalysis,
-    NotFittedError,
-    _make_other_parameters_doc,
-)
+from spectrochempy.analysis._base import DecompositionAnalysis, NotFittedError
 from spectrochempy.core import info_, warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
@@ -291,6 +288,7 @@ class IrisKernel(tr.HasTraits):
         return out
 
 
+@signature_has_configurable_traits
 class IRIS(DecompositionAnalysis):
 
     _docstring.delete_params("DecompositionAnalysis.see_also", "IRIS")
@@ -305,10 +303,6 @@ class IRIS(DecompositionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
-
-    Other Parameters
-    ----------------
-    {{CONFIGURATION_PARAMETERS}}
 
     See Also
     --------
@@ -395,7 +389,6 @@ class IRIS(DecompositionAnalysis):
         self,
         *,
         log_level="WARNING",
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
@@ -405,7 +398,6 @@ class IRIS(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )
@@ -996,8 +988,6 @@ def _isPD(B):  # pragma: no cover
     except np.linalg.LinAlgError:
         return False
 
-
-_make_other_parameters_doc(IRIS)
 
 # ======================================================================================
 if __name__ == "__main__":

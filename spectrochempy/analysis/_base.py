@@ -13,7 +13,6 @@ import logging
 import warnings
 from copy import copy
 from functools import partial, update_wrapper
-from textwrap import indent
 
 import numpy as np
 import traitlets as tr
@@ -200,25 +199,6 @@ def _wrap_ndarray_output_to_nddataset(
     return out
 
 
-# ======================================================================================
-# Generate a rst doc for config parameters
-# ======================================================================================
-def _make_other_parameters_doc(klass):
-    otherpar = ""
-    traits = klass.class_traits(config=True)
-    for k, v in traits.items():
-        info = v.info_text
-        if info.startswith("a "):
-            info = info[2:]
-        elif info.startswith("an "):
-            info = info[3:]
-        otherpar += f"{k} : {info}, optional, default:{v.default_value}\n"
-        desc = f"{v.help}\n"
-        desc = indent(desc, "    ")
-        otherpar += desc
-    klass.__doc__ = klass.__doc__.replace("{{CONFIGURATION_PARAMETERS}}", otherpar)
-
-
 _common_docs = """
 
 
@@ -229,7 +209,6 @@ _docstring.get_sections(__doc__, base="common")
 # ======================================================================================
 # Base class AnalysisConfigurable
 # ======================================================================================
-@tr.signature_has_traits
 class AnalysisConfigurable(MetaConfigurable):
 
     __doc__ = _docstring.dedent(
@@ -241,13 +220,8 @@ class AnalysisConfigurable(MetaConfigurable):
     Parameters
     ----------
     log_level : [`"INFO"` , `"DEBUG"` , `"WARNING"` , `"ERROR"`], optional, default:`"WARNING"`
-        The log level at startup
+        The log level at startup.
     %(copy)s
-    config : :py:class:`Config object, optional
-        By default the configuration is determined by the object configuration
-        file in the configuration directory.
-
-        A traitlets.config.Config() object can eventually be used here.
     warm_start : bool, optional, default:False
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
@@ -256,8 +230,6 @@ class AnalysisConfigurable(MetaConfigurable):
 
         When warm_start is true, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to fit.
-    **kwargs
-        Optional configuration parameters. See Other Parameters.
     """
     )
 
@@ -267,14 +239,6 @@ class AnalysisConfigurable(MetaConfigurable):
     name = tr.Unicode(help="name of the implemented model")
     # name must be defined in subclass with the name of the model: PCA, MCRALS, ...
     description = tr.Unicode(help="optional description of the implemented model")
-
-    # This is a trick to change the way this two attributes are displayed
-    config = tr.Instance(tr.config.Config, (), {}, help="Configuration object")
-    parent = tr.Instance(
-        "traitlets.config.configurable.Configurable",
-        help="parent=SpectroChemPy (ReadOnly)",
-        allow_none=True,
-    )
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -323,8 +287,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # will appear when there is no __init___.doc in subclass
 
         # Call the super class (MetaConfigurable) for initialisation
-        config = kwargs.pop("config", None)
-        super().__init__(section=self.name, config=config, parent=app)
+        super().__init__(section=self.name, parent=app)
 
         # For cleaning docs information, we define here the doc for two objects of the
         # superclass : config and parent
@@ -578,16 +541,16 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     def fit(self, X, Y=None):
         """
-        Fit the model with X as input dataset.
+        Fit the model with `X` as input dataset.
 
         Parameters
         ----------
-        X : NDDataset or array-like of shape (n_observations, n_features)
+        X : NDDataset or array-like of shape (`n_observations` , `n_features` )
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
 
         Y : any
-            depends on the model.
+            Depends on the model.
 
         Returns
         -------
@@ -597,7 +560,7 @@ class AnalysisConfigurable(MetaConfigurable):
         See Also
         --------
         fit_transform :  Fit the model with an input dataset X and apply the
-                         dimensionality reduction on X.
+                         dimensionality reduction on `X`.
         fit_reduce : Alias of fit_transform (Deprecated).
         """
         self._fitted = False  # reinit this flag
@@ -669,6 +632,7 @@ class AnalysisConfigurable(MetaConfigurable):
         Returns
         -------
         dict
+            Current or default configuration values.
         """
         d = Meta()
         if not default:
@@ -679,7 +643,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
     def reset(self):
         """
-        Reset configuration to default
+        Reset configuration to default.
         """
         for k, v in self.parameters(default=True).items():
             setattr(self, k, v)
@@ -809,6 +773,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         return Y
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
+    @_docstring.dedent
     def transform(self, X=None, **kwargs):
         """
         Apply dimensionality reduction to `X` .
@@ -819,20 +784,19 @@ class DecompositionAnalysis(AnalysisConfigurable):
             New data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
             if not provided, the input dataset of the :py:meth:fit method will be used.
-        **kwargs
-            Additional keyword parameters. See Other Parameters
+        %(kwargs)s
+
+        Returns
+        -------
+        NDDataset
+            Dataset with shape (`n_observations`, `n_components`).
 
         Other Parameters
         ----------------
         n_components : int, optional
             The number of components to use for the reduction. If not given
             the number of components is eventually the one specified or determined
-            in the :py:meth:`fit` process.
-
-        Returns
-        -------
-        NDDataset
-            Shape (n_observations, n_components)
+            in the `fit` process.
         """
         if not self._fitted:
             raise NotFittedError()
@@ -867,30 +831,36 @@ class DecompositionAnalysis(AnalysisConfigurable):
         sections=["Parameters", "Other Parameters", "Returns"],
     )
     _docstring.keep_params("analysis_transform.parameters", "X")
-    _docstring.keep_params("analysis_transform.parameters", "kwargs")
 
     @_wrap_ndarray_output_to_nddataset
+    @_docstring.dedent
     def inverse_transform(self, X_transform=None, **kwargs):
         """
         Transform data back to its original space.
 
-        In other words, return an input `X_original` whose reduce/transform would be X.
+        In other words, return an input `X_original` whose reduce/transform would
+        be `X_transform`.
 
         Parameters
         ----------
-        X_transform : array-like of shape (n_observations, n_components), optional
-            Reduced X data, where `n_observations` is the number of observations
-            and `n_components` is the number of components. If X_transform is not
-            provided, a transform of X provided in fit is performed first.
-        %(analysis_transform.parameters.kwargs)s
+        X_transform : array-like of shape (`n_observations` , `n_components` ), optional
+            Reduced `X` data, where `n_observations` is the number of observations
+            and `n_components` is the number of components. If `X_transform` is not
+            provided, a transform of `X` provided in `fit` is performed first.
+        %(kwargs)s
+
+        Returns
+        -------
+        |NDDataset|
+            Dataset with shape (n_observations, n_features).
 
         Other Parameters
         ----------------
         %(analysis_transform.other_parameters)s
 
-        Returns
-        -------
-        NDDataset(n_observations, n_features)
+        See Also
+        --------
+        reconstruct : Alias of inverse_transform (Deprecated).
         """
         if not self._fitted:
             raise NotFittedError
@@ -926,29 +896,28 @@ class DecompositionAnalysis(AnalysisConfigurable):
         base="analysis_inverse_transform",
         sections=["Parameters", "Returns"],
     )
-    _docstring.keep_params("analysis_inverse_transform.parameters", "X")
+    # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
 
     @_docstring.dedent
     def fit_transform(self, X, Y=None, **kwargs):
         """
-        Fit the model with X and apply the dimensionality reduction on X.
+        Fit the model with `X` and apply the dimensionality reduction on X.
 
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-        Y : array_like, optional
-            For example Y is not used in PCA, but corresponds to the guess profiles in
-            MCRALS
-        **kwargs
-            Additional keyword parameters. See Other Parameters
-
-        Other Parameters
-        ----------------
-        %(analysis_transform.other_parameters)s
+        Y : array-like, optional
+            For example `Y` is not used in `PCA`, but corresponds to the guess profiles
+            in `MCRALS`.
+        %(kwargs)s
 
         Returns
         -------
         %(analysis_transform.returns)s
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
         """
         try:
             self.fit(X, Y)
@@ -963,25 +932,27 @@ class DecompositionAnalysis(AnalysisConfigurable):
         # i use a workaround
         return deprecated(replace="transform")(self.transform)(X, **kwargs)
 
-    reduce.__doc__ = transform.__doc__ + "\n\n DEPRECATED."
+    reduce.__doc__ = transform.__doc__ + "\nNotes\n-----\nDeprecated in version 0.6.\n"
 
     def reconstruct(self, X_transform=None, **kwargs):
         return deprecated(replace="inverse_transform")(self.inverse_transform)(
             X_transform, **kwargs
         )
 
-    reconstruct.__doc__ = inverse_transform.__doc__ + "\n\n DEPRECATED."
+    reconstruct.__doc__ = (
+        inverse_transform.__doc__ + "\nNotes\n-----\nDeprecated in version 0.6.\n"
+    )
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):
         """
-        Returns the component's dataset: (selected n_components, n_features).
+        Return the component's dataset: (selected `n_components`, `n_features`).
 
         Parameters
         ----------
         n_components : int, optional
-            The number of components to keep in the output nddataset
-            If None, all calculated components are eturned.
+            The number of components to keep in the output nddataset.
+            If None, all calculated components are returned.
 
         Returns
         -------
@@ -1003,7 +974,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         See Also
         --------
-        get_components : retrieve only the specified number of components
+        get_components : Retrieve only the specified number of components.
         """
         return self._get_components()
 
@@ -1023,7 +994,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def plotmerit(self, X, X_hat, **kwargs):
         """
-        Plots the input (`X` ), reconstructed (`X_hat` ) and residuals (`E` ) datasets.
+        Plot the input (`X` ), reconstructed (`X_hat` ) and residuals (`E` ) datasets.
 
         Parameters
         ----------
@@ -1032,6 +1003,11 @@ class DecompositionAnalysis(AnalysisConfigurable):
         X_hat : |NDDataset|
             Inverse transformed (reconstructed) dataset from a decomposition model.
         %(kwargs)s
+
+        Returns
+        -------
+        mpl.Axe
+            Matplotlib subplot axe.
 
         Other Parameters
         ----------------
@@ -1043,13 +1019,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
         offset : float, optional, default: None
             Specify the separation (in percent) between the `X` , `X_hat` and `E` .
         nb_traces : int, optional
-            Number of lines to display. Default is all
+            Number of lines to display. Default is `all` .
         **others : Other keywords parameters
             Parameters passed to the internal :py:meth:`plot` method of the `X` dataset.
-
-        Returns
-        -------
-        mpl.Axe
         """
         if not self._fitted:
             raise NotFittedError(
@@ -1142,7 +1114,6 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         self,
         *,
         log_level="WARNING",
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
@@ -1153,7 +1124,6 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )
@@ -1215,21 +1185,21 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     def fit(self, X, Y=None, sample_weight=None):
         """
-        Fit linear model
+        Fit linear model.
 
         Parameters
         ----------
         X : NDDataset or array-like of shape (n_observations, n_features)
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
-        Y : array_like of shape (n_observations,) or (n_observations, n_targets)
+        Y : array-like of shape (n_observations,) or (n_observations, n_targets)
             Target values. Will be cast to X's dtype if necessary.
         sample_weight : array-like of shape (n_observations,), default=None
             Individual weights for each sample.
 
         Returns
         -------
-        self : object
+        instance
             Returns the instance itself.
         """
         self._fitted = False  # reiniit this flag
@@ -1286,7 +1256,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
     @property
     def Y(self):
         """
-        Return the Y input dataset
+        Return the Y input dataset.
         """
         # We use Y property only to show this information to the end user. Internally
         # we use _Y attribute to refer to the input data
@@ -1300,7 +1270,8 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     @property
     def coef(self):
-        """Estimated coefficients for the linear regression problem.
+        """
+        Estimated coefficients for the linear regression problem.
 
         If multiple targets are passed during the fit (Y 2D), this is a 2D array of
         shape (n_targets, n_features), while if only one target is passed,
@@ -1358,17 +1329,17 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     def predict(self, X=None):
         """
-        Predict using the linear model
+        Predict using the linear model.
 
         Parameters
         ----------
-        X : NDDataset or array-like matrix, shape (n_observations, n_features)
-            Observations. If X is not set, the input X for fit is used.
+        X : NDDataset or array-like matrix, shape (`n_observations` , `n_features` )
+            Observations. If `X` is not set, the input `X` for fit is used.
 
         Returns
         -------
-        C : array, shape (n_observations,)
-            Returns predicted values.
+        array
+            Returns predicted values. Shape (`n_observations` ,).
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1396,7 +1367,8 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         return predicted
 
     def score(self, X=None, Y=None, sample_weight=None):
-        """Return the coefficient of determination of the prediction.
+        """
+        Return the coefficient of determination of the prediction.
 
         The coefficient of determination :math:`R^2` is defined as
         :math:`(1 - \\frac{u}{v})` , where :math:`u` is the residual
@@ -1423,8 +1395,8 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Returns
         -------
-        score : float
-            :math:`R^2` of `self.predict(X)` wrt. `Y` .
+        float
+            :math:`R^2` of `predict` (`X` ) wrt. `Y` .
         """
         if not self._fitted:
             raise NotFittedError()

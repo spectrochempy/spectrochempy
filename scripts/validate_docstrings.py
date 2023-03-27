@@ -311,11 +311,14 @@ def validate_all(prefix, ignore_deprecated=False):
     seen = {}
 
     base_path = pathlib.Path(__file__).parent.parent
-    api_doc_fnames = pathlib.Path(base_path, "docs", "userguide", "reference")
+    api_doc_fnames = pathlib.Path(base_path, "docs", "reference")
     api_items = []
     for api_doc_fname in api_doc_fnames.glob("*.rst"):
         with open(api_doc_fname) as f:
-            api_items += list(get_api_items(f))
+            try:
+                api_items += list(get_api_items(f))
+            except AttributeError:
+                continue
 
     for func_name, _, section, subsection in api_items:
         if prefix and not func_name.startswith(prefix):
@@ -417,7 +420,7 @@ def main(func_name, prefix, errors, output_format, ignore_deprecated):
 if __name__ == "__main__":
     format_opts = "default", "json", "actions"
     func_help = (
-        "function or method to validate (e.g. spectrochempy.DataFrame.head) "
+        "function or method to validate (e.g. spectrochempy.NDDataset.read) "
         "if not provided, all docstrings are validated and returned "
         "as JSON"
     )

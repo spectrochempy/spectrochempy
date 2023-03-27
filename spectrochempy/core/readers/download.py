@@ -124,8 +124,8 @@ def download_nist_ir(CAS, index="all"):
         the CAS number, can be given as "XXXX-XX-X" (str), "XXXXXXX" (str), XXXXXXX (int)
 
     index : str or int or tuple of ints
-        If set to 'all' (default, import all available spectra for the compound corresponding to the index, or a single spectrum,
-        or selected spectra.
+        If set to 'all' (default, import all available spectra for the compound
+        corresponding to the index, or a single spectrum, or selected spectra.
 
     Returns
     -------

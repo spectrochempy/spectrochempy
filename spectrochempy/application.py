@@ -1102,7 +1102,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                             options.append(item)
                 self.parse_command_line(options)
             else:  # pragma: no cover
-                print("args", sys.argv)
+                pass  # print("args", sys.argv)
                 # self.parse_command_line(sys.argv)
 
         # Get preferences from the config file and init everything

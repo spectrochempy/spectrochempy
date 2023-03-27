@@ -88,8 +88,8 @@ def read_jcamp(*paths, **kwargs):
     read_topspin : Read TopSpin Bruker NMR spectra.
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic .spg grouped spectra.
+    read_spa : Read Omnic .spa single spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.

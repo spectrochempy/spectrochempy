@@ -17,9 +17,9 @@ from sklearn import decomposition
 from spectrochempy.analysis._base import (
     DecompositionAnalysis,
     NotFittedError,
-    _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.plots import NBlue, NRed
 
@@ -30,6 +30,7 @@ __configurables__ = ["PCA"]
 # ======================================================================================
 # class PCA
 # ======================================================================================
+@signature_has_configurable_traits
 class PCA(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "PCA")
 
@@ -174,7 +175,6 @@ for reproducible results across multiple function calls.""",
         self,
         *,
         log_level="WARNING",
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
@@ -193,7 +193,6 @@ for reproducible results across multiple function calls.""",
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )
@@ -608,8 +607,6 @@ for reproducible results across multiple function calls.""",
 
         return ax
 
-
-_make_other_parameters_doc(PCA)
 
 if __name__ == "__main__":
     pass

@@ -4,10 +4,51 @@
 # # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # # See full LICENSE agreement in the root directory.
 # # ======================================================================================
-# import numpy as np
-# import pytest
-# import traitlets as tr
-#
+# flake8: noqa
+
+from os import environ
+
+import numpy as np
+import pytest
+import traitlets as tr
+
+import spectrochempy as scp
+from spectrochempy.utils import docstrings as chd
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_base_docstrings():
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.analysis._base"
+
+    # analyse AnalysisConfigurable
+    chd.check_docstrings(
+        module,
+        obj=scp.analysis._base.AnalysisConfigurable,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
+
+    # analyse DecompositionAnalysis
+    chd.check_docstrings(
+        module,
+        obj=scp.analysis._base.DecompositionAnalysis,
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
+
+    # analyse LinearRegressionAnalysis
+    chd.check_docstrings(
+        module,
+        obj=scp.analysis._base.LinearRegressionAnalysis,
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
+
+
 # import spectrochempy as scp
 # from spectrochempy.analysis._base import AnalysisConfigurable  # , DecompositionAnalysis
 #

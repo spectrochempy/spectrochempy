@@ -37,7 +37,7 @@ except Exception:  # pragma: no cover
 # ======================================================================================
 def read_csv(*paths, **kwargs):
     """
-    Open a *.csv file or a list of *.csv files.
+    Open a \*.csv file or a list of \*.csv files.
 
     This is limited to 1D array - csv file must have two columns [index, data]
     without header.
@@ -99,8 +99,8 @@ def read_csv(*paths, **kwargs):
     read_topspin : Read TopSpin Bruker NMR spectra.
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
+    read_spa : Read Omnic \*.Spa single spectra.
     read_srs : Read Omnic series.
     read_zip : Read Zip files.
     read_matlab : Read Matlab files.

@@ -21,12 +21,11 @@ from sklearn import decomposition
 from spectrochempy.analysis._base import (
     DecompositionAnalysis,
     NotFittedError,
-    _make_other_parameters_doc,
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.core import info_
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 # Developper notes
@@ -38,6 +37,7 @@ from spectrochempy.utils.docstrings import _docstring
 # some parameters.
 
 
+@signature_has_configurable_traits
 class MCRALS(DecompositionAnalysis):
 
     _docstring.delete_params("DecompositionAnalysis.see_also", "MCRALS")
@@ -289,7 +289,6 @@ on the decreasing branch of profile #j,
         self,
         *args,
         log_level=logging.WARNING,
-        config=None,
         warm_start=False,
         copy=True,
         **kwargs,
@@ -327,7 +326,6 @@ on the decreasing branch of profile #j,
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            config=config,
             copy=copy,
             **kwargs,
         )
@@ -827,15 +825,15 @@ on the decreasing branch of profile #j,
         %(analysis_fit.parameters.X)s
         Y : array-like or list of array-like
             Initial concentration or spectra.
-        %(analysis_transform.parameters.kwargs)s
+        %(kwargs)s
+
+        Returns
+        -------
+        %(analysis_transform.returns)s
 
         Other Parameters
         ----------------
         %(analysis_transform.other_parameters)s
-
-        Returns
-        -------
-        NDDataset(n_observations, n_components)
         """
         return super().fit_transform(X, Y, **kwargs)
 
@@ -900,10 +898,6 @@ on the decreasing branch of profile #j,
         The last relevant output of the external function used to get concentrations.
         """
         return self._outfit[4]
-
-
-# Docstrings
-_make_other_parameters_doc(MCRALS)
 
 
 # --------------------------------------------------------------------------------------

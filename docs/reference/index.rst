@@ -13,9 +13,9 @@ What is not listed here is reserved for developers and should not normally be ne
 
 .. contents:: Table of Contents
 
-****************
+***************
 Loading the API
-****************
+***************
 
 To use the API, you must import it using one of the following syntax:
 
@@ -35,9 +35,9 @@ of overwriting some variables or functions already present in the namespace. The
 highly recommended.
 
 
-*********************
+********************
 The NDDataset Object
-*********************
+********************
 
 The NDDataset is the main object use by |scpy| .
 
@@ -76,9 +76,9 @@ All coordinates of a |NDDataset| are grouped in a particular object: |CoordSet| 
     CoordSet
 
 
-*******************
+******************
 Creating NDDataset
-*******************
+******************
 
 A |NDDataset| can be created using the |NDDataset| class constructor, for instance here we create a dataset from a
 random two-dimensional array:
@@ -89,7 +89,7 @@ random two-dimensional array:
     X = np.random.random((4,4))
     nd = NDDataset(X)
 
-The above code in |scpy| can be simplified using the ``random`` creation method:
+The above code in |scpy| can be simplified using the `random` creation method:
 
 .. ipython:: python
 
@@ -217,9 +217,9 @@ Select data in a NDDataset
     take
 
 
-********************
+******************
 Plotting functions
-********************
+******************
 
 .. autosummary::
     :nosignatures:
@@ -250,9 +250,9 @@ Plotting functions
     show
 
 
-************
+**********
 Processing
-************
+**********
 
 Transpose-like oprations
 ========================
@@ -572,9 +572,9 @@ Miscellaneous
     pipe
 
 
-*******************
+********
 Analysis
-*******************
+********
 
 
 Linear regression

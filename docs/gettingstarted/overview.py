@@ -35,7 +35,7 @@
 # The purpose of this page is to give you some quick examples of what can be done with
 # SpectroChemPy.
 #
-# See the [gallery of examples](gallery/auto_examples/index.rst) and consult the
+# See the [gallery of examples](../gallery/auto_examples/index.rst) and consult the
 # [user's guide](../userguide/introduction/introduction.ipynb)
 # for more information on using SpectroChemPy
 #

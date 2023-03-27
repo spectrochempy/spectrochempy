@@ -52,7 +52,9 @@ def patterns(filetypes, allcase=True):
 
 def pathclean(paths):
     """
-    Clean a path or a series of path in order to be compatible with windows and unix-based system.
+    Clean a path or a series of path.
+
+    The aim is to be compatible with windows and unix-based system.
 
     Parameters
     ----------
@@ -61,8 +63,8 @@ def pathclean(paths):
 
     Returns
     -------
-    out : a pathlib object or a list of pathlib objects
-        Cleaned path(s)
+    pathlib or list of pathlib
+        Cleaned path(s).
 
     Examples
     --------

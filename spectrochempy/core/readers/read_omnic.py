@@ -281,12 +281,12 @@ def read_spg(*paths, **kwargs):
     read : Generic read method.
     read_dir : Read a set of data from a directory.
     read_omnnic : Read Omnic files.
-    read_spa : Read Omnic files *.spa.
-    read_srs : Read Omnic files *.srs.
+    read_spa : Read Omnic files .spa.
+    read_srs : Read Omnic files .srs.
     read_opus : Read Bruker OPUS files.
     read_topspin : Read TopSpin NMR files.
-    read_csv : Read *.csv.
-    read_matlab : Read MATLAB files *.mat.
+    read_csv : Read .csv.
+    read_matlab : Read MATLAB files .mat.
     read_zip : Read zipped group of files.
 
     Notes

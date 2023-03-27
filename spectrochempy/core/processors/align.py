@@ -105,7 +105,7 @@ def align(dataset, *others, **kwargs):
 
     Returns
     --------
-    aligned_datasets : tuple of |NDDataset|
+    tuple of |NDDataset|
         Same objects as datasets with dimensions aligned.
 
     Raises

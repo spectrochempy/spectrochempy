@@ -5,12 +5,50 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+from os import environ
+
 import numpy as np
+import pytest
 
 import spectrochempy as scp
 from spectrochempy.analysis.optimize._models import asymmetricvoigtmodel
+from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_EFA_docstrings():
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.analysis.efa"
+    chd.check_docstrings(
+        module,
+        obj=scp.EFA,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
+
+
+def test_example():
+    # Init the model
+    model = scp.EFA()
+    # Read an experimental 2D spectra (N x M )
+    X = scp.read("irdata/nh4y-activation.spg")
+    # Fit the model
+    model.fit(X)
+    # Display components spectra (2 x M)
+    model.used_components = 2
+    _ = model.components.plot(title="Components")
+    # Get the abstract concentration profile based on the FIFO EFA analysis
+    c = model.transform()
+    # Plot the transposed concentration matrix  (2 x N)
+    _ = c.T.plot(title="Concentration")
+    scp.show()
 
 
 def test_EFA(IR_dataset_2D):
