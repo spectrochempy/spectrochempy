@@ -61,7 +61,7 @@ class EFA(DecompositionAnalysis):
     >>> # Read an experimental 2D spectra (N x M )
     >>> X = scp.read("irdata/nh4y-activation.spg")
     >>> # Fit the model
-    >>> model.fit(X)
+    >>> _ = model.fit(X)
     >>> # Display components spectra (2 x M)
     >>> model.used_components = 2
     >>> _ = model.components.plot(title="Component spectra")
@@ -214,27 +214,27 @@ class EFA(DecompositionAnalysis):
         %(analysis_fit.parameters.X)s
         %(kwargs)s
 
-        Other Parameters
-        ----------------
-        %(analysis_transform.other_parameters)s
-
         Returns
         -------
         %(analysis_transform.returns)s
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
         """
         return super().fit_transform(X, **kwargs)
 
     def inverse_transform(self):
-        """Not implemented"""
+        """Not implemented."""
 
     def reconstruct(self):
-        """Not implemented"""
+        """Not implemented."""
 
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def f_ev(self):
         """
-        Eigenvalues for the forward analysis (|NDDataset|\).
+        Eigenvalues for the forward analysis ( |NDDataset| ).
         """
         f = self._outfit[0]
         if self.cutoff is not None:
@@ -245,7 +245,7 @@ class EFA(DecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def b_ev(self):
         """
-        Eigenvalues for the backward analysis (|NDDataset|\).
+        Eigenvalues for the backward analysis ( |NDDataset| ).
         """
         b = self._outfit[1]
         if self.cutoff is not None:

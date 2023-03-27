@@ -42,10 +42,6 @@ class NMF(DecompositionAnalysis):
     ----------
     %(AnalysisConfigurable.parameters)s
 
-    Other Parameters
-    ----------------
-    {{CONFIGURATION_PARAMETERS}}
-
     See Also
     --------
     PCA : Perform Principal Components Analysis.

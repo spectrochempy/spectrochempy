@@ -35,20 +35,19 @@ class SIMPLISMA(DecompositionAnalysis):
     SIMPLe to use Interactive Self-modeling Mixture Analysis.
 
     This class performs a SIMPLISMA analysis of a 2D |NDDataset| .
-    The algorithm is adapted from Windig's paper,
-    Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16.
+    The algorithm is adapted from Windig's paper [Windig97]_ .
 
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
 
-    Other Parameters
-    ----------------
-    {{CONFIGURATION_PARAMETERS}}
-
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_SIMPLISMA)s
+
+    References
+    ----------
+    .. [windig87] : Windig, Chemometrics and Intelligent Laboratory Systems, 36, 1997, 3-16
     """
     )
 

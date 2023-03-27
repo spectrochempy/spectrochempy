@@ -36,10 +36,6 @@ class LSTSQ(LinearRegressionAnalysis):
     ----------
     %(AnalysisConfigurable.parameters)s
 
-    Other Parameters
-    ----------------
-    {{CONFIGURATION_PARAMETERS}}
-
     See Also
     --------
     NNLS : Non-Negative least squares Linear Regression.
@@ -68,10 +64,6 @@ class NNLS(LinearRegressionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
-
-    Other Parameters
-    ----------------
-    {{CONFIGURATION_PARAMETERS}}
 
     See Also
     --------

@@ -241,6 +241,11 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
         doc += "--------\n"
         doc += _docstring.params[f"{cls.__name__}.see_also"]
         doc += "\n"
+    if _docstring.params[f"{cls.__name__}.references"]:
+        doc += "\nReferences\n"
+        doc += "----------\n"
+        doc += _docstring.params[f"{cls.__name__}.references"]
+        doc += "\n"
     if _docstring.params[f"{cls.__name__}.examples"]:
         doc += "\nExamples\n"
         doc += "--------\n"
@@ -250,11 +255,6 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
         doc += "\nNotes\n"
         doc += "-----\n"
         doc += _docstring.params[f"{cls.__name__}.notes"]
-        doc += "\n"
-    if _docstring.params[f"{cls.__name__}.references"]:
-        doc += "\nReferences\n"
-        doc += "----------\n"
-        doc += _docstring.params[f"{cls.__name__}.references"]
         doc += "\n"
     cls.__doc__ = doc
     return cls

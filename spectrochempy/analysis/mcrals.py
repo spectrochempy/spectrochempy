@@ -59,10 +59,6 @@ class MCRALS(DecompositionAnalysis):
     ----------
     %(AnalysisConfigurable.parameters)s
 
-    Other Parameters
-    ----------------
-    {{CONFIGURATION_PARAMETERS}}
-
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_MCRALS)s

@@ -221,7 +221,6 @@ class AnalysisConfigurable(MetaConfigurable):
     ----------
     log_level : [`"INFO"` , `"DEBUG"` , `"WARNING"` , `"ERROR"`], optional, default:`"WARNING"`
         The log level at startup.
-    %(copy)s
     warm_start : bool, optional, default:False
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
@@ -230,6 +229,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         When warm_start is true, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to fit.
+    %(copy)s
     """
     )
 

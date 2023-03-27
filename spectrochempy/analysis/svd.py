@@ -78,10 +78,6 @@ class SVD(DecompositionAnalysis):
     ----------
     %(AnalysisConfigurable.parameters)s
 
-    Other Parameters
-    ----------------
-    {{CONFIGURATION_PARAMETERS}}
-
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_SVD)s
