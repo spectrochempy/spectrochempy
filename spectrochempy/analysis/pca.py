@@ -87,7 +87,9 @@ class PCA(DecompositionAnalysis):
         default_value=None,
         help="""Number of components to keep.
 if used_components is not set all components are kept::
+
     used_components == min(n_observations, n_features)
+
 If `used_components == 'mle'` and `svd_solver == 'full'` , Minka's MLE is used to guess
 the dimension. Use of `used_components == 'mle'` will interpret `svd_solver == 'auto'`
 as `svd_solver == 'full'` .
@@ -96,6 +98,7 @@ components such that the amount of variance that needs to be explained is greate
 the percentage specified by used_components.
 If `svd_solver == 'arpack'` , the number of components must be strictly less than the
 minimum of n_features and n_observations. Hence, the None case results in::
+
     used_components == min(n_observations, n_features) - 1""",
     ).tag(config=True)
 

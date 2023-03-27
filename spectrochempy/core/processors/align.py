@@ -65,7 +65,7 @@ def align(dataset, *others, **kwargs):
     Parameters
     -----------
     dataset : |NDDataset|
-        Dataset on which we want to salign other objects.
+        Dataset on which we want to align other objects.
     *others : |NDDataset|
         Objects to align.
     dim : str. Optional, default='x'
@@ -85,6 +85,7 @@ def align(dataset, *others, **kwargs):
         * 'last' means that the last dataset is used as reference.
         * 'interpolate' means that interpolation is performed relative to
         the first dataset.
+
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
     interpolate_sampling : 'auto', int or float. Optional, default='auto'
@@ -95,6 +96,7 @@ def align(dataset, *others, **kwargs):
           this number of points.
         * float : If a float value is provided, it determines the interval
         between the interpolated data.
+
     coord : |Coord| , optional, default=None
         Coordinates to use for alignment. Ignore those corresponding to the
         dimensions to align.

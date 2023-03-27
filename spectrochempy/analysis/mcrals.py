@@ -97,8 +97,8 @@ standard deviation of residuals).""",
         help="""Non negativity constraint on concentrations. If set to `'all'` (default)
 all concentrations profiles are considered non-negative. If an array of indexes
 is passed, the corresponding profiles are considered non-negative, not the
-others. For instance `[0, 2]` indicates that profile #0 and #2 are non-negative
-while profile #1 *can* be negative. If set to `[]` , all profiles can
+others. For instance `[0, 2]` indicates that profile \#0 and \#2 are non-negative
+while profile \#1 *can* be negative. If set to `[]` , all profiles can
 be negative.""",
     ).tag(config=True)
 
@@ -108,8 +108,8 @@ be negative.""",
         help="""Unimodality constraint on concentrations. If set to 'all' (default) all
 concentrations profiles are considered unimodal. If an array of indexes is
 passed, the corresponding profiles are considered unimodal, not the others.
-For instance `[0, 2]` indicates that profile #0 and #2 are unimodal while
-profile #1 *can* be multimodal. If set to `[]` , all profiles can be multimodal.""",
+For instance `[0, 2]` indicates that profile \#0 and \#2 are unimodal while
+profile \#1 *can* be multimodal. If set to `[]` , all profiles can be multimodal.""",
     ).tag(config=True)
 
     unimodConcMod = tr.Enum(
@@ -125,8 +125,8 @@ profile.""",
         default_value=1.1,
         help="""Tolerance parameter for unimodality. Correction is applied only if:
 
-* `C[i,j] > C[i-1,j] * unimodTol` on the decreasing branch of profile #j,
-* `C[i,j] < C[i-1,j] * unimodTol`  on the increasing branch of profile  #j.""",
+* `C[i,j] > C[i-1,j] * unimodTol` on the decreasing branch of profile \#j,
+* `C[i,j] < C[i-1,j] * unimodTol`  on the increasing branch of profile  \#j.""",
     ).tag(config=True)
 
     monoDecConc = tr.List(
@@ -134,14 +134,14 @@ profile.""",
         help="""Monotonic decrease constraint on concentrations.  If set to `[]`
 (default) no constraint is applied. If an array of indexes is passed,
 the corresponding profiles are considered do decrease monotonically, not the
-others. For instance `[0, 2]` indicates that profile #0 and #2 are decreasing
-while profile #1 *can* increase.""",
+others. For instance `[0, 2]` indicates that profile \#0 and \#2 are decreasing
+while profile \#1 *can* increase.""",
     ).tag(config=True)
 
     monoDecTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if:`C[i,j] > C[i-1,j] * unimodTol`  along profile #j.""",
+if:`C[i,j] > C[i-1,j] * unimodTol`  along profile \#j.""",
     ).tag(config=True)
 
     monoIncConc = tr.List(
@@ -149,14 +149,14 @@ if:`C[i,j] > C[i-1,j] * unimodTol`  along profile #j.""",
         help="""Monotonic increase constraint on concentrations.  If set to `[]`
 (default) no constraint is applied. If an array of indexes is passed,
 the corresponding profiles are considered to increase monotonically, not the
-others. For instance `[0, 2]` indicates that profile #0 and #2 are increasing
-while profile #1 *can* decrease.""",
+others. For instance `[0, 2]` indicates that profile \#0 and \#2 are increasing
+while profile \#1 *can* decrease.""",
     ).tag(config=True)
 
     monoIncTol = tr.Float(
         default_value=1.1,
         help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if: `C[i,j] < C[i-1,j] * unimodTol` along profile  #j.""",
+if: `C[i,j] < C[i-1,j] * unimodTol` along profile \#j.""",
     ).tag(config=True)
 
     closureConc = tr.List(
@@ -183,9 +183,9 @@ If an array is passed: the values of concentration for each observation. Hence,
 
 * `'scaling'` recompute the concentration profiles using linear algebra::
 
-`C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))`
+  `C.data[:, closureConc] = np.dot(C.data[:, closureConc], np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))`
 
-`'constantSum'` normalize the sum of concentration profiles to `closureTarget` .""",
+* `'constantSum'` normalize the sum of concentration profiles to `closureTarget` .""",
     ).tag(config=True)
 
     hardConc = tr.List(
@@ -236,8 +236,8 @@ hardC (index O) corresponds to the second profile of C (index 1).""",
         help="""Indicates non-negative spectral profile. If set to `'all'` (default)
 all spectral profiles are considered non-negative. If an array of indexes is
 passed, the corresponding profiles are considered non-negative, not the others.
-For instance `[0, 2]` indicates that profile #0 and #2 are non-negative while
-profile #1 *can* be negative. If set to `None` or `[]` , all profiles can be
+For instance `[0, 2]` indicates that profile \#0 and \#2 are non-negative while
+profile \#1 *can* be negative. If set to `None` or `[]` , all profiles can be
 negative.""",
     ).tag(config=True)
 
@@ -257,8 +257,8 @@ value.""",
         help="""Unimodality constraint on Spectra. If the list of spectral profiles is
 void, all profiles can be multimodal. If set to `all` , all profiles are unimodal.
 If an array of indexes is passed, the corresponding profiles are considered unimodal,
-not the others. For instance `[0, 2]` indicates that profile #0 and #2 are unimodal
-while profile #1 *can* be multimodal.""",
+not the others. For instance `[0, 2]` indicates that profile \#0 and \#2 are unimodal
+while profile \#1 *can* be multimodal.""",
     ).tag(config=True)
 
     unimodSpecMod = tr.Enum(
@@ -274,8 +274,8 @@ in the concentration profile.""",
         default_value=1.1,
         help="""Tolerance parameter for unimodality. Correction is applied only if the
 deviating point is larger/lower than `St[j,i] > St[j, i-1] * unimodSpecTol`
-on the decreasing branch of profile #j,
-`St[j,i] < St[j, i-1] * unimodTol` on the increasing branch of profile  #j.""",
+on the decreasing branch of profile \#j,
+`St[j,i] < St[j, i-1] * unimodTol` on the increasing branch of profile  \#j.""",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
