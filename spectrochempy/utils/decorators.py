@@ -211,12 +211,17 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
             type_ = "`str`"
         elif type_ == "Any":
             type_ = "any value"
+        elif type_ == "Union":
+            type_ = value.info_text
         else:
             type_ = f"`{type_.lower()}`"
 
         default = value.default_value
         if isinstance(default, type(tr.Undefined)) or default is None:
-            default = "`None`"
+            if type(value).__name__.lower() in ["tuple", "dict", "list"]:
+                default = __builtins__[type(value).__name__.lower()]()
+            else:
+                default = "`None`"
         elif isinstance(default, str):
             default = f"``'{default}'``"
         otherpar += f"{name} : {type_}, optional, default: {default}\n"
