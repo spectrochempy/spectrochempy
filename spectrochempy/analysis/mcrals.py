@@ -232,14 +232,12 @@ in `extOutput` attribute (only the last iteration ``extOutput`` is kept)""",
     ).tag(config=True)
 
     argsGetConc = tr.Tuple(
-        allow_none=True,
-        default_value=None,
+        default_value=(),
         help="Supplementary positional arguments passed to the external function.",
     ).tag(config=True)
 
     kwargsGetConc = tr.Dict(
-        allow_none=True,
-        default_value=None,
+        default_value={},
         help="Supplementary keyword arguments passed to the external function.",
     ).tag(config=True)
 

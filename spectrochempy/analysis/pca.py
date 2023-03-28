@@ -77,8 +77,8 @@ class PCA(DecompositionAnalysis):
 
     scaled = tr.Bool(
         default_value=False,
-        help="If True the data are scaled in the interval [0-1]: "
-        ":math:`X' = (X - min(X)) / (max(X)-min(X))`",
+        help="If True the data are scaled in the interval ``[0-1]`` : "
+        ":math:`X' = (X - min(X)) / (max(X)-min(X))``",
     ).tag(config=True)
 
     used_components = tr.Union(
@@ -86,13 +86,13 @@ class PCA(DecompositionAnalysis):
         allow_none=True,
         default_value=None,
         help="""Number of components to keep.
-if used_components is not set all components are kept::
+if `used_components` is not set all components are kept::
 
     used_components == min(n_observations, n_features)
 
-If `used_components == 'mle'` and `svd_solver == 'full'` , Minka's MLE is used to guess
-the dimension. Use of `used_components == 'mle'` will interpret `svd_solver == 'auto'`
-as `svd_solver == 'full'` .
+If ``used_components == 'mle'`` and ``svd_solver == 'full'`` , Minka's MLE is used to guess
+the dimension. Use of ``used_components == 'mle'`` will interpret `svd_solver == 'auto'`
+as ``svd_solver == 'full'`` .
 If `0 < used_components < 1` and `svd_solver == 'full'` , select the number of
 components such that the amount of variance that needs to be explained is greater than
 the percentage specified by used_components.

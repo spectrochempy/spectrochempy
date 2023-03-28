@@ -9,9 +9,9 @@ SpectroChemPy code style guide
 .. contents:: Table of contents:
    :local:
 
-SpectroChemPy follows the `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_
-standard and uses `Black <https://black.readthedocs.io/en/stable/>`_
-and `Flake8 <https://flake8.pycqa.org/en/latest/>`_ to ensure a
+SpectroChemPy follows the `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__
+standard and uses `Black <https://black.readthedocs.io/en/stable/>`__
+and `Flake8 <https://flake8.pycqa.org/en/latest/>`__ to ensure a
 consistent code format throughout the project. We encourage you to use
 :ref:`pre-commit <contributing.pre-commit>` to automatically run ``black`` ,
 ``flake8`` whenever you make a git commit.

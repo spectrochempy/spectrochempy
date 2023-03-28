@@ -142,7 +142,7 @@ rst_epilog = """
 
 .. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
 
-.. |Script| replace:: :class:`~spectrochempy.core.dataset.scripts.Script`
+.. |Script| replace:: :class:`~spectrochempy.core.dataset.script.Script`
 
 .. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
 
@@ -210,7 +210,7 @@ html_favicon = "_static/scpy.ico"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_css_files = [
-    "theme_override.css",
+    "css/spectrochempy.css",
 ]
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

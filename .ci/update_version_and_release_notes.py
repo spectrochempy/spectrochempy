@@ -214,7 +214,7 @@ These are the changes in SpectroChemPy-{{ revision }}.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 ..
-   Do not remove the `revision` marker. It will be replaced during doc building.
+   Do not remove the ``revision`` marker. It will be replaced during doc building.
    Also do not delete the section titles.
    Add your list of changes between (Add here) and (section) comments
    keeping a blank line before and after this list.
