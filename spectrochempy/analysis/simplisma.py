@@ -47,7 +47,7 @@ class SIMPLISMA(DecompositionAnalysis):
 
     References
     ----------
-    .. [Windig87] : W. Windig, Chemometr. Intell. Lab. Syst., 36, 1997, 3-16
+    .. [Windig97] : W. Windig, Chemometr. Intell. Lab. Syst., 36, 1997, 3-16
     """
     )
 

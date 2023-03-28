@@ -281,9 +281,9 @@ class BuildDocumentation(object):
 
         self._make_dirs()
 
-        # API?
-        if not self.noapi:
-            self._apigen()
+        # APIGEN?
+        # if not self.noapi:
+        #    self._apigen()
 
         self._sync_notebooks()
 

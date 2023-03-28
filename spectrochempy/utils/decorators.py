@@ -200,12 +200,26 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
     # add the corresponding doctrings
     otherpar = ""
     for name, value in traits:
-        info = value.info_text
-        if info.startswith("a "):
-            info = info[2:]
-        elif info.startswith("an "):
-            info = info[3:]
-        otherpar += f"{name} : {info}, optional, default:{value.default_value}\n"
+        # try to infer the parameter type
+        type_ = type(value).__name__
+        if type_ in ["Enum", "CaselessStrEnum"]:
+            values = ""
+            for val in value.values:
+                values += f" ``'{val}'`` ,"
+            type_ = f"any value of [{values.rstrip(',')}]"
+        elif type_ == "Unicode":
+            type_ = "`str`"
+        elif type_ == "Any":
+            type_ = "any value"
+        else:
+            type_ = f"`{type_.lower()}`"
+
+        default = value.default_value
+        if isinstance(default, type(tr.Undefined)) or default is None:
+            default = "`None`"
+        elif isinstance(default, str):
+            default = f"``'{default}'``"
+        otherpar += f"{name} : {type_}, optional, default: {default}\n"
         desc = f"{value.help}\n"
         desc = indent(desc, "    ")
         otherpar += desc
@@ -257,4 +271,9 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
         doc += _docstring.params[f"{cls.__name__}.notes"]
         doc += "\n"
     cls.__doc__ = doc
+
+    # some attribute doc
+    if hasattr(cls, "config"):
+        cls.config.__doc__ = "`traitlets.config.Config` object."
+        cls.parent.__doc__ = None
     return cls

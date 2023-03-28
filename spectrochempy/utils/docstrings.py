@@ -51,11 +51,11 @@ ERROR_MSGS = {
 
 
 _common_doc = """
-copy : bool, optional, Default: True
+copy : `bool`, optional, default: `True`
     Perform a copy of the passed object.
-inplace : bool, optional, default: False
+inplace : `bool`, optional, default: `False`
     By default, the method returns a newly allocated object.
-    If `inplace` is set to True, the input object is returned.
+    If `inplace` is set to `True`, the input object is returned.
 **kwargs : keyword parameters, optional
     See Other Parameters.
 """
@@ -78,10 +78,10 @@ class DocstringProcessor(docrep.DocstringProcessor):
         self.params.update(params)
         self.params.update(
             {
-                "out": "object\n"
+                "out": "`object`\n"
                 "    Input object or a newly allocated object\n"
                 "    depending on the `inplace` flag.",
-                "new": "object\n" "    Newly allocated object.",
+                "new": "`object`\n" "    Newly allocated object.",
             }
         )
 

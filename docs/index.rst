@@ -87,6 +87,7 @@ Reference
 ***********************
 
 * :doc:`reference/index`
+* :doc:`glossary`
 
 .. toctree::
     :maxdepth: 3
@@ -94,6 +95,7 @@ Reference
     :caption: Reference
 
     reference/index
+    glossary
 
 .. _userguide:
 

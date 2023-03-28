@@ -416,6 +416,7 @@ intersphinx_mapping = {
     "SciPy": ("https://docs.scipy.org/doc/scipy/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
+    "traitlets": ("https://traitlets.readthedocs.io/en/stable/", None),
 }
 
 # linkcode ---------------------------------------------------------------------
@@ -578,6 +579,6 @@ def setup(app):
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
-    app.add_css_file("theme_override.css")  # also can be a full URL
+    app.add_css_file("css/spectrochempy.css")  # also can be a full URL
     # # Ignore .ipynb files
     app.registry.source_suffix.pop(".ipynb", None)

@@ -37,43 +37,49 @@ class IrisKernel(tr.HasTraits):
     This class define a kernel matrix as a NDDataset compatible
     with the X input NDDataset.
 
-    Pre-defined kernels can be chosen among: {'langmuir', 'ca', 'reactant-first-order',
+    Pre-defined kernels can be chosen among: {``'langmuir'`, ``'ca'``, 'reactant-first-order',
     'product-first-order', 'diffusion'},  a custom kernel function - a 2-variable lambda
-    function `ker(p, q)` or a function returning a ndarray can be passed.
+    function `K`\ ``(p, q)`` or a function returning a |ndarray| can be passed.
     `p` and `q` contain the values of an external experimental variable and an internal
     physico-chemical parameter, respectively.
 
     Parameters
     -----------
-    X : NDDataset
+    X : |NDDataset|
         The 1D or 2D dataset for the kernel is defined.
-    K : str or callable or NDDataset
-        Kernel of the integral equation. Pre-defined kernels can be chosen among
-        `["langmuir", "ca", "reactant-first-order", "product-first-order",
-        "diffusion"]` .
-    p : Coord or Iterable
-        External variable. Must be provided if the kernel is passed as a str or
-        callable.
-    q : Coord or Iterable of 3 values
-        Internal variable. Must be provided if the kernel is passed as a str or
-        callable.
+    K : any of [ ``'langmuir'`` , ``'ca'`` , ``'reactant-first-order'``, ``'product-first-order'``, ``'diffusion'`` ] or `callable` or |NDDataset|
+        Predefined or user-defined Kernel for the integral equation.
+    p : |Coord| or ``iterable``
+        External variable. Must be provided if the kernel `K` is passed as a `str` or
+        `callable` .
+    q : |Coord| or ``iterable`` of 3 values
+        Internal variable. Must be provided if the kernel `K` is passed as a `str` or
+        `callable`.
     """
 
-    _X = NDDatasetType(allow_none=True, help="Dataset for which the kernel is defined.")
-    _K = tr.Union(
-        (tr.Unicode(), tr.Callable(), NDDatasetType()),
-        default_value=None,
-        allow_none=True,
-        help=(
-            "Kernel of the integral equation. Pre-defined kernels can be chosen among"
-            "`['langmuir', 'ca', 'reactant-first-order', 'product-first-order',"
-            "'diffusion']`"
+    _X = NDDatasetType(allow_none=True)
+    _K = (
+        tr.Union(
+            (
+                tr.Enum(
+                    [
+                        "langmuir",
+                        "ca",
+                        "reactant-first-order",
+                        "product-first-order",
+                        "diffusion",
+                    ]
+                ),
+                tr.Callable(),
+                NDDatasetType(),
+            ),
+            default_value=None,
+            allow_none=True,
         ),
     )
+
     _p = CoordType(
         # CoordType include array-like iterables
-        help="External variable. optionally provided if the kernel is passed as a str "
-        "or callable."
     )
     _q = tr.Union(
         (
@@ -81,8 +87,6 @@ class IrisKernel(tr.HasTraits):
             CoordType(),
             # CoordType include array-like iterables
         ),
-        help="Internal variable. Must be provided if the kernel is passed as a str or "
-        "callable.",
     )
 
     # ----------------------------------------------------------------------------------
@@ -298,7 +302,7 @@ class IRIS(DecompositionAnalysis):
     Integral inversion solver for spectroscopic data.
 
     Solves integral equations of the first kind of 1 or 2 dimensions, i.e. returns a
-    distribution f of contributions to 1D ou 2D datasets.
+    distribution `f` of contributions to 1D ou 2D datasets.
 
     Parameters
     ----------
@@ -310,11 +314,11 @@ class IRIS(DecompositionAnalysis):
 
     Notes
     -----
-    IRIS solves integral equation of the first kind of 1 or 2 dimensions, i.e. finds a
-    distribution function :math:`f(p)` or :math:`f(c,p)` of contributions to univariate
-    data :math:`a(p)` or multivariate :math:`a(c, p)` data evolving with an external
-    experimental variable :math:`p` (time, pressure, temperature, concentration, ...)
-    according to the integral transform:
+    `IRIS` solves integral equation of the first kind of 1 or 2 dimensions, *i.e.,*
+    finds a distribution function :math:`f(p)` or :math:`f(c,p)` of contributions to
+    univariate data :math:`a(p)` or multivariate :math:`a(c, p)` data evolving with an
+    external experimental variable :math:`p` (time, pressure, temperature,
+    concentration, ...) according to the integral transform:
 
     .. math:: a(c, p) = \int_{min}^{max} k(q, p) f(c, q) dq
 
@@ -324,18 +328,18 @@ class IRIS(DecompositionAnalysis):
     contribution with respect to the experimental variable :math:`p` and 'internal'
     physico-chemical variable :math:`q` .
 
-    Regularization is triggered when 'reg_param' is set to an array of two or three
+    Regularization is triggered when `reg_par` is set to an array of two or three
     values.
 
-    If 'reg_param' has two values [min, max], the optimum regularization parameter is
-    searched between :math:`10^{min}` and :math:`10^{max}` . Automatic search of the
-    regularization is made using the Cultrera_Callegaro algorithm (arXiv:1608.04571v2)
-    which involves the Menger curvature of a circumcircle and the golden section search
-    method.
+    If `reg_par` has two values [ ``min`` , ``max``], the optimum regularization
+    parameter is searched between :math:`10^{min}` and :math:`10^{max}`\ .
+    Automatic search of the regularization is made using the Cultrera_Callegaro
+    algorithm (arXiv:1608.04571v2) which involves the Menger curvature of a
+    circumcircle and the golden section search method.
 
-    If three values are given (`[min, max, num]` ), then the inversion will be made for
-    num values evenly spaced on a log scale between :math:`10^{min}` and
-    :math:`10^{max}`
+    If three values are given ([ ``min`` , ``max`` , ``num`` ]), then the inversion
+    will be made for ``num`` values evenly spaced on a log scale between
+    :math:`10^{min}` and :math:`10^{max}`
 
     Examples
     --------
@@ -348,8 +352,8 @@ class IRIS(DecompositionAnalysis):
     """
     )
 
-    name = tr.Unicode("IRIS2")
-    description = tr.Unicode("IRIS2 model")
+    name = tr.Unicode("IRIS")
+    description = tr.Unicode("IRIS model")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters (in addition to those of AnalysisConfigurable)
@@ -378,8 +382,9 @@ class IRIS(DecompositionAnalysis):
         maxlen=3,
         default_value=None,
         allow_none=True,
-        help="Regularization parameter (two values `[min, max]` or three values "
-        "`[start, stop, num]` . If reg_par is None, no regularization is applied.",
+        help="Regularization parameter (two values [ ``min`` , ``max`` ] "
+        "or three values [ ``start`` , ``stop`` , ``num`` ]. "
+        "If `reg_par` is None, no :term:`regularization` is applied.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -387,7 +392,6 @@ class IRIS(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     def __init__(
         self,
-        *,
         log_level="WARNING",
         warm_start=False,
         copy=True,
@@ -741,7 +745,7 @@ class IRIS(DecompositionAnalysis):
 
         Returns
         -------
-        NDDataset
+        |NDDataset|
             The reconstructed dataset.
         """
         if not self._fitted:
@@ -771,27 +775,27 @@ class IRIS(DecompositionAnalysis):
 
     def plotlcurve(self, scale="ll", title="L curve"):
         """
-        Plot the L Curve.
+        Plot the ``L`` Curve.
 
         Parameters
         ----------
-        scale : str, optional, default='ll'
-            String of 2 letters among 'l' (log) or 'n' (non-log) indicating whether the y and x
-            axes should be log scales.
-        title : str, optional, default='L curve'
+        scale : `str`, optional, default=``'ll'``
+            String of 2 letters among ``'l'`` (log) or ``'n'`` (non-log) indicating
+            whether the y and x axes should be log scales.
+        title : `str`, optional, default= ``'L curve'``
             Plot title.
 
         Returns
         -------
-            matplotlib.pyplot.axes
-                The axes.
+        `~matplotlib.pyplot.axes`
+                The matplotlib axe.
         """
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using this method")
 
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.set_title("L curve")
+        ax.set_title(title)
         plt.plot(self.RSS, self.SM, "o")
         ax.set_xlabel("Residuals")
         ax.set_ylabel("Curvature")
@@ -808,9 +812,9 @@ class IRIS(DecompositionAnalysis):
 
         Parameters
         ----------
-        index : int, list or tuple of int, optional, default: None
-            Index(es) of the inversions (i.e. of the lambda values) to consider.
-            If 'None': plots for all indices.
+        index : `int`, `list` or `tuple` of `int`, optional, default: `None`
+            Index(es) of the inversions (*i.e.,* of the lambda values) to consider.
+            If `None`: plots for all indices.
         %(kwargs)s
 
         Other Parameters
@@ -819,7 +823,8 @@ class IRIS(DecompositionAnalysis):
 
         Returns
         -------
-        list of mpl.Axes
+        `list` of `~matplotlib.pyplot.axes`
+            Subplots.
         """
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using this method")
@@ -851,20 +856,21 @@ class IRIS(DecompositionAnalysis):
         """
         Plot the distribution function.
 
-        This fucntion plots the distribution function f of the IRIS object.
+        This function plots the distribution function f of the `IRIS` object.
 
         Parameters
         ----------
-        index : optional, int, list or tuple of int. default: None
-            Index(es) of the inversions (i.e. of the regularization parameter) to consider.
-            If 'None': plots for all indices.
+        index : `int` , `list` or `tuple` of `int`, optional, default: `None`
+            Index(es) of the inversions (i.e. of the :term:`regularization` parameter)
+            to consider.
+            If `None`, plots for all indices.
         **kwargs
             Other optional arguments are passed in the plots.
 
         Returns
         -------
-            List of axes
-                The axes.
+        `list` of `~matplotlib.pyplot.axes`
+            Subplots.
         """
 
         axeslist = []

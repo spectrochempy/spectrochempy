@@ -36,12 +36,12 @@ class BaselineCorrection(HasTraits):
 
     Two methods are proposed :
 
-    - `sequential` (default) = classical polynom fit or spline
+    - ``'sequential'`` (default) = classical polynom fit or spline
       interpolation with separate fitting of each row (spectrum)
-    - `multivariate` = SVD modeling of baseline, polynomial fit of PC's
-      and calculation of the modelled baseline spectra.
+    - ``'multivariate'`` = SVD modeling of baseline, polynomial fit of PC's
+      and calculation of the modeled baseline spectra.
 
-    Interactive mode is proposed using the interactive function : :meth:`run` .
+    Interactive mode is proposed using the interactive method `run` .
 
     Parameters
     ----------
@@ -78,9 +78,11 @@ class BaselineCorrection(HasTraits):
     method = Enum(
         ["sequential", "multivariate"],
         default_value="sequential",
-        help="Method used for baseline resolution",
+        help="Method used for baseline resolution.",
     ).tag(config=True)
-    interpolation = Unicode("polynomial")
+    interpolation = Unicode(
+        "polynomial",
+    )
     axis = Int(-1)
     dim = Unicode("")
     ranges = List(List(minlen=2, maxlen=2))

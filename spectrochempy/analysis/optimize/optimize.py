@@ -50,50 +50,50 @@ class Optimize(DecompositionAnalysis):
     # as they depend on the model estimator)
     # ----------------------------------------------------------------------------------
     max_iter = tr.Integer(
-        default_value=500, help="Maximum number of fitting iteration"
+        default_value=500, help="Maximum number of fitting iteration."
     ).tag(config=True)
 
     max_fun_calls = tr.Integer(
-        allow_none=True, help="Maximum number of function calls at each iteration"
+        allow_none=True, help="Maximum number of function calls at each iteration."
     ).tag(config=True)
 
     callback_every = tr.Integer(
         default_value=10,
         help="Number of iteration between each callback report. "
-        "Used for printing or display intermediate results",
+        "Used for printing or display intermediate results.",
     ).tag(config=True)
 
     method = tr.CaselessStrEnum(
-        ["SIMPLEX"], default_value="SIMPLEX", help="Optimization method"
+        ["SIMPLEX", "HOPPING"], default_value="SIMPLEX", help="Optimization method."
     ).tag(config=True)
 
-    script = tr.Unicode(help="Script defining models and parameters for fitting").tag(
+    script = tr.Unicode(help="Script defining models and parameters for fitting.").tag(
         config=True
     )
 
-    constraints = tr.Any(allow_none=True, help="Constraints").tag(
+    constraints = tr.Any(allow_none=True, help="Constraints.").tag(
         config=True
     )  # TODO: adjust this
 
     dry = tr.Bool(
         default_value=False,
-        help="If True perform a dry run, "
-        "mainly used to check the validity of the input parameters.",
+        help="If True perform a dry run. "
+        "Mainly used to check the validity of the input parameters.",
     ).tag(config=True)
 
     autobase = tr.Bool(
         default_value=False, help="Whether to apply an automatic baseline correction."
-    )
+    ).tag(config=True)
 
     autoampl = tr.Bool(
         default_value=False, help="Whether to apply an automatic amplitude correction."
-    )
+    ).tag(config=True)
 
     amplitude_mode = tr.CaselessStrEnum(
         ["area", "height"],
         default_value="height",
         help="Initial amplitude setting mode.",
-    )
+    ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters (in addition to those of AnalysisConfigurable)
@@ -128,17 +128,6 @@ class Optimize(DecompositionAnalysis):
     # Private methods ( overriding abstract methods)
     # ----------------------------------------------------------------------------------
     def _fit(self, X, Y=None):
-        """
-        Main fitting procedure.
-
-        Parameters
-        ----------
-        maxiter : int, maximum number of iteration
-        maxfun : int, maximum number of function calls
-        every : int, number of function call between two displays
-        method : str, ether 'simplex' or 'hopping'
-        dryrun : bool
-        """
 
         # NMR
         # sequence = kargs.get('sequence', 'ideal_pulse')
@@ -257,7 +246,7 @@ class Optimize(DecompositionAnalysis):
         fp = self.fp  # starting parameters
 
         if not self.dry:
-            fp, fopt = optimize(
+            fp, fopt = _optimize(
                 funchi2,
                 fp,
                 args=(X,),
@@ -908,7 +897,7 @@ class Optimize(DecompositionAnalysis):
 
 
 # ======================================================================================
-def optimize(
+def _optimize(
     func,
     fp0,
     args=(),
