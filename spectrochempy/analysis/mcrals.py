@@ -871,7 +871,7 @@ on the decreasing branch of profile ``#j`` ,
         Returns
         -------
         `~spectrochempy.core.dataset.nddataset.NDDataset`
-            Dataset with shape (:term:`n_observations\ , :term:`n_features`)
+            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ )
         """
         return super().inverse_transform(X_transform, **kwargs)
 

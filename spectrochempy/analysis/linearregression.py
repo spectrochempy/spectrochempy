@@ -26,9 +26,9 @@ class LSTSQ(LinearRegressionAnalysis):
         """
     Ordinary least squares Linear Regression.
 
-    Use :class:`~sklearn.linear_model.LinearRegression`
+    Use :class:`sklearn.linear_model.LinearRegression`
 
-    LinearRegression fits a linear model with coefficients w = (w1, ..., wp)
+    LinearRegression fits a linear model with coefficients ``w = (w1, ..., wp)``
     to minimize the residual sum of squares between the observed targets in
     the dataset, and the targets predicted by the linear approximation.
 
@@ -54,7 +54,7 @@ class NNLS(LinearRegressionAnalysis):
         """
     Non-Negative least squares Linear Regression.
 
-    Use :class:`~sklearn.linear_model.LinearRegression`
+    Use :class:`sklearn.linear_model.LinearRegression`
 
     LinearRegression fits a linear model with coefficients w = (w1, ..., wp)
     which can not be negative
@@ -75,6 +75,5 @@ class NNLS(LinearRegressionAnalysis):
 
     positive = tr.Bool(
         default_value=True,
-        help="When set to `True` , forces the coefficients to be positive. This"
-        "option is only supported for dense arrays.",
+        help="When set to `True` , forces the coefficients to be positive.",
     ).tag(config=True)

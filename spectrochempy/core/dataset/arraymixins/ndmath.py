@@ -1680,7 +1680,7 @@ class NDMath(object):
             An iterable object providing data for the array.
         dtype : data-type
             The data-type of the returned array.
-        count : int, optional
+        count : `int`, optional
             The number of items to read from iterable. The default is -1, which means
             all data is read.
         **kwargs
@@ -1693,14 +1693,12 @@ class NDMath(object):
 
         See Also
         --------
-        fromfunction : Construct a nddataset by executing a function over each
-        coordinate.
+        fromfunction : Construct a nddataset by executing a function over each coordinate.
 
         Notes
         -----
             Specify count to improve performance. It allows fromiter to pre-allocate the
-             output array,
-            instead of resizing it on demand.
+             output array, instead of resizing it on demand.
 
         Examples
         --------

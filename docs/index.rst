@@ -80,25 +80,6 @@ Getting Started
     Installation <gettingstarted/install/index>
     gettingstarted/papers
 
-.. _api_reference:
-
-***********************
-Reference
-***********************
-
-* :doc:`reference/index`
-* :doc:`reference/bibliography`
-* :doc:`reference/glossary`
-
-.. toctree::
-    :maxdepth: 3
-    :hidden:
-    :caption: Reference
-
-    reference/index
-    reference/bibliography
-    reference/glossary
-
 .. _userguide:
 
 ************************
@@ -128,6 +109,27 @@ User's Guide & Tutorials
     userguide/units/units
     userguide/api/api
 
+.. _api_reference:
+
+***********************
+Reference
+***********************
+
+* :doc:`reference/index`
+* :doc:`reference/bibliography`
+* :doc:`reference/glossary`
+
+.. toctree::
+    :maxdepth: 3
+    :hidden:
+    :caption: Reference
+
+    reference/index
+    reference/bibliography
+    reference/glossary
+
+.. _contribute:
+
 ***********************
 Contribute
 ***********************
@@ -144,6 +146,8 @@ Contribute
     Bug reports & feature request <devguide/issues>
     Sharing examples & tutorials <devguide/examples>
     devguide/index
+
+.. _credits:
 
 ********
 Credits

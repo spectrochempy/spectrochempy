@@ -212,13 +212,13 @@ class AnalysisConfigurable(MetaConfigurable):
     ----------
     log_level : any of [ ``"INFO"`` , ``"DEBUG"`` , ``"WARNING"`` , ``"ERROR"`` ], optional, default: ``"WARNING"``
         The log level at startup.
-    warm_start : `bool`, optional, default:`False`
+    warm_start : `bool`\ , optional, default:`False`
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
         it may be possible to reuse previous model learned from the previous parameter
         value, saving time.
 
-        When `warm_start` is `True`, the existing fitted model attributes is used to
+        When `warm_start` is `True`\ , the existing fitted model attributes is used to
         initialize the new model in a subsequent call to `fit`.
     %(copy)s
     """
@@ -967,7 +967,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def plotmerit(self, X, X_hat, **kwargs):
         """
-        Plot the input (:math:`X`\ ), reconstructed (:math:`X_hat`\ ) and residuals (:math:`E`\ ) datasets.
+        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
 
         Parameters
         ----------
@@ -979,7 +979,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Returns
         -------
-        `~matplotlib.Axes`
+        `~matplotlib.axes.Axes`
             Matplotlib subplot axe.
 
         Other Parameters
@@ -1365,7 +1365,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,:term:`n_features`\ )
+        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ , :term:`n_features`\ )
             Test samples.
 
         Y : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,)

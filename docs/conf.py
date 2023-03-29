@@ -167,7 +167,7 @@ rst_epilog = """
 
 .. |Quantity| replace:: :class:`~spectrochempy.core.units.units.Quantity`
 
-.. |Axes| replace:: :class:`~matplotlib.Axes`
+.. |Axes| replace:: :class:`~matplotlib.axes.Axes`
 
 """
 

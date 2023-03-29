@@ -207,21 +207,21 @@ class ActionMassKinetics(tr.HasTraits):
 
         Parameters
         ----------
-        t: iterable of length t_points
-            time values at which the concentrations are computed
-        method : string or `OdeSolver` , optional
+        t : iterable of length t_points
+            Time values at which the concentrations are computed.
+        method : `str` or `OdeSolver` , optional
             Integration method to use:
 
-            * 'RK45' (default): Explicit Runge-Kutta method of order 5(4)
-            * 'RK23': Explicit Runge-Kutta method of order 3(2)
-            * 'DOP853': Explicit Runge-Kutta method of order 8
+            * 'RK45' (default): Explicit Runge-Kutta method of order 5(4).
+            * 'RK23': Explicit Runge-Kutta method of order 3(2).
+            * 'DOP853': Explicit Runge-Kutta method of order 8.
             * 'Radau': Implicit Runge-Kutta method of the Radau IIA family of
-              order 5
+              order 5.
             * 'BDF': Implicit multi-step variable-order (1 to 5) method based
               on a backward differentiation formula for the derivative
-              approximation
+              approximation.
             * 'LSODA': Adams/BDF method with automatic stiffness detection and
-              switching
+              switching.
 
             Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
             for non-stiff problems and implicit methods ('Radau', 'BDF') for
@@ -237,8 +237,8 @@ class ActionMassKinetics(tr.HasTraits):
 
         Returns
         -------
-        C : |ndarray| or |NDDataset|, shape ( ``t_points``, ``n_species``)
-            Values of the solution at `t` .
+        C : |ndarray| or |NDDataset|, shape ( ``t_points``\ , ``n_species``\ )
+            Values of the solution at `t`\ .
         meta : Bunch object with the following fields defined:
 
             * t : ndarray, shape (t_points,)
@@ -246,47 +246,52 @@ class ActionMassKinetics(tr.HasTraits):
             * sol : `OdeSolution` or None
               Found solution as `OdeSolution` instance; None if `dense_output` was
               set to False.
-            * t_events : list of ndarray or None
+            * t_events : `list` of |ndarray| or `None`
               Contains for each event type a list of arrays at which an event of
-              that type event was detected. None if `events` was None.
-            * y_events : list of ndarray or None
+              that type event was detected. `None` if events` was None.
+            * y_events : `list` of |ndarray| or `None`
               For each value of `t_events` , the corresponding value of the solution.
-              None if `events` was None.
-            * nfev : int
+              `None` if events was `None`.
+            * nfev : `int`
               Number of evaluations of the right-hand side.
-            * njev : int
+            * njev : `int`
               Number of evaluations of the Jacobian.
-            * nlu : int
+            * nlu : `int`
               Number of LU decompositions.
-            * status : int
+            * status : `int`
               Reason for algorithm termination:
+
                     * -1: Integration step failed.
                     *  0: The solver successfully reached the end of `tspan` .
                     *  1: A termination event occurred.
-            * message : string
+
+            * message : `str`
               Human-readable description of the termination reason.
-            * success : bool
-              True if the solver reached the interval end or a termination event
-              occurred (`status >= 0` ).
+            * success : `bool`
+              `True` if the solver reached the interval end or a termination event
+              occurred (``status >= 0`` ).
         """
 
         def production_rates(ti, Ci):
             """
             Compute the production rates :math:`\frac{dC,dt}`.
 
-            Compute the n_s production rates at time ti according to:
-            $$ dC / dt =  (B - A).T  K Ci^A $$
-            $$ Ci = C(ti) $$
+            Compute the n_s production rates at time :math:`t_i` according to:
 
-            where $A$ and $B$ are the stoichiometry matrices, $K$ is the diagonal matrix
-            of rate constants and $Ci^A$ is the vector-matrix exponentiation of Ci by A.
+            .. math::
+                dC / dt =  (B - A).T  K C_i^A
+                C_i = C(t_i) $$
+
+            where :math:`A` and :math:`B` are the stoichiometry matrices, :math:`K` is
+            the diagonal matrix of rate constants and :math:`C_i^A` is the vector-matrix
+            exponentiation of :math:`C_i` by :math:`A`.
 
             parameters:
             ----------
-            ti: float
-                time
-            Ci: 1D vector
-                concentrations at time ti
+            ti: `float`
+                Time.
+            Ci: |ndarray|
+                1D vector of the concentrations at time `ti`\ .
             """
             beta = 1 / R / self.T(ti)
             K = np.diag(self.k[:, 0] * np.exp(-beta * self.k[:, 1]))
@@ -342,19 +347,18 @@ class ActionMassKinetics(tr.HasTraits):
 
         Parameters
         ------------
-
-        Cexp: NDDataset
+        Cexp : |NDDataset|
             Experimental concentration profiles on which to fit the model.
-            Cexp can contain more concentration profiles than those to fit.
-        iexp:
+            `Cexp` can contain more concentration profiles than those to fit.
+        iexp : `int`
             Indexes of experimental concentration profiles on which the model will be
-            fitted
-        iexp_to_i:
+            fitted.
+        i2iexp : `int`
             Correspondence between optimized (external) concentration profile and
             experimental concentration profile.
-        param_to_optimize: dict
+        dict_param_to_optimize : `dict`
             rate parameters to optimize. Keys should be 'k[i].A' and 'k[i].Ea' for
-            preexponential factor
+            pre-exponential factor.
 
         **kwargs
             Parameters for the optimization (see scipy.optimize.minimize).
@@ -413,7 +417,8 @@ class ActionMassKinetics(tr.HasTraits):
 
 
 def _vm_exp(x: Iterable, A: Iterable):
-    """Vector matrix exponentiation
+    """
+    Vector matrix exponentiation
 
     The vector-matrix exponentiation is the operation that maps x
     and A to its vector-matrix power $x^A$ which given by:
@@ -550,7 +555,7 @@ class PFR:
     cti_file: `str`
         The cti file must contain a gas phase named 'gas' and optionally a reactive
         surface named 'surface'.
-    init_X: `dict`, :term:`array-like`
+    init_X: `dict`\ , :term:`array-like`
         Initial composition of the reactors.
     """
 

@@ -9,6 +9,17 @@ Glossary
 .. glossary::
     :sorted:
 
+    API
+        API stands for `Application Programming Interface`, which is a set of methods
+        and protocols for using the SpectroChemPy (especially in :term:`Jupyter notebooks` or :term:`JupyterLab`)
+        without knowing all the details of the implementation of these methods or protocols.
+
+    Jupyter Notebooks
+        see `https://docs.jupyter.org/en/latest/`__
+
+    JupyterLab
+        see `https://docs.jupyter.org/en/latest/`__
+
     SVD
         ``Singular Value Decomposition``\ .
 
@@ -22,7 +33,7 @@ Glossary
         ``Multivariate Curve Resolution Alternating Least Squares``
         resolve's a set of spectra :math:`X` of an evolving mixture
         into the spectra :math:`S` of "pure" species and their
-        concentration profiles :math:`C`, such as:
+        concentration profiles :math:`C`\ , such as:
 
         .. math:: X = C . S^T
 

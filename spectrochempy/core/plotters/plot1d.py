@@ -35,7 +35,7 @@ style : str, optional, default: `dataset.preferences.style` (scpy)
     styles for plotting.
 use_plotly : bool, optional, default: `preferences.use_plotly` (False)
     Should we use plotly instead of matplotlib for plotting.
-twinx : :class:`~matplotlib.Axes` instance, optional, default: None
+twinx : :class:`~matplotlib.axes.Axes` instance, optional, default: None
     If this is not None, then a twin axes will be created with a
     common x dimension.
 clear : bool, optional, default: True

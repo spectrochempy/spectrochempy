@@ -79,7 +79,7 @@ def trapezoid(dataset, **kwargs):
     """
     Integrate using the composite trapezoidal rule.
 
-    Wrapper of scpy.integrate.trapezoid.
+    Wrapper of `scpy.integrate.trapezoid`\ .
 
     Performs the integration along the last or given dimension.
 
@@ -88,25 +88,24 @@ def trapezoid(dataset, **kwargs):
     dataset : |NDDataset|
         Dataset to be integrated.
     **kwargs
-        Additional keywords parameters.
-        See Other Parameters.
+        Additional keywords parameters. See Other Parameters.
 
     Returns
     -------
-    integral
+    `~spectrochempy.core.dataset.ndataset.NDDataset`
         Definite integral as approximated by trapezoidal rule.
 
     Other Parameters
     ----------------
-    dim : int or str, optional, default: "x"
+    dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
-        If an integer is provided, it is equivalent to the `axis`
-        parameter for numpy arrays.
+        If an integer is provided, it is equivalent to the numpy axis
+        parameter for |ndarray|\ s.
 
     See Also
     --------
-    trapz : An alias of trapezoid.
-    simps : Integrate using the composite simpson rule.
+    trapz : An alias of `trapezoid`.
+    simpson : Integrate using the composite simpson rule.
 
     Example
     -------
@@ -133,12 +132,12 @@ def simpson(dataset, *args, **kwargs):
     """
     Integrate using the composite Simpson's rule.
 
-    Wrapper of scpy.integrate.trapezoid.
+    Wrapper of `scpy.integrate.simpson`.
 
     Performs the integration along the last or given dimension.
 
-    If there are an even number of samples, N, then there are an odd
-    number of intervals (N-1), but Simpson's rule requires an even number
+    If there are an even number of samples, ``N``, then there are an odd
+    number of intervals (``N-1``), but Simpson's rule requires an even number
     of intervals. The parameter 'even' controls how this is handled.
 
     Parameters
@@ -146,32 +145,32 @@ def simpson(dataset, *args, **kwargs):
     dataset : |NDDataset|
         Dataset to be integrated.
     **kwargs
-        Additional keywords parameters.
-        See Other Parameters.
+        Additional keywords parameters. See Other Parameters.
 
     Returns
     -------
-    integral
+    `~spectrochempy.core.dataset.ndataset.NDDataset`
         Definite integral as approximated using the composite Simpson's rule.
 
     Other Parameters
     ----------------
-    dim : int or str, optional, default: "x"
+    dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
-        If an integer is provided, it is equivalent to the `axis` parameter
-        for numpy arrays.
-    even : str {'avg', 'first', 'last'}, optional, default is 'avg'
-        * 'avg' : Average two results: 1) use the first N-2 intervals with
+        If an integer is provided, it is equivalent to the `numpy` axis` parameter
+        for |ndarray|\ s.
+    even : any of [``'avg'``\ , ``'first'``\ , ``'last'``\ }, optional, default: ``'avg'``
+
+        * ``'avg'`` : Average two results: 1) use the first N-2 intervals with
          a trapezoidal rule on the last interval and 2) use the last
-         N-2 intervals with a trapezoidal rule on the first interval.
-        *'first' : Use Simpson's rule for the first N-2 intervals with
+         ``N-2`` intervals with a trapezoidal rule on the first interval.
+        * ``'first'`` : Use Simpson's rule for the first ``N-2`` intervals with
          a trapezoidal rule on the last interval.
-        *'last' : Use Simpson's rule for the last N-2 intervals with a
+        *``'last'`` : Use Simpson's rule for the last ``N-2`` intervals with a
          trapezoidal rule on the first interval.
 
     See Also
     --------
-    simps : An alias of simpson.
+    simps : An alias of simpson (Deprecated).
     trapezoid : Integrate using the composite simpson rule.
 
     Example
@@ -190,5 +189,5 @@ def simps(dataset, **kwargs):
 
 
 simps.__doc__ = f"""
-    An alias of `Simpson` kept for backwards compatibility.
+    An alias of `simpson` kept for backwards compatibility.
 {trapezoid.__doc__}"""
