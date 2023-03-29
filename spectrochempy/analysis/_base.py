@@ -1054,7 +1054,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @property
     def Y(self):
         """
-        Return the `Y` input.
+        The `Y` input.
         """
         # We use Y property only to show this information to the end-user. Internally
         # we use _Y attribute to refer to the input data
@@ -1368,7 +1368,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,:term:`n_features`\ )
             Test samples.
 
-        Y : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,).
+        Y : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,)
             True values for `X`\ .
 
         sample_weight : |array-like| of shape (:term:`n_observations`\ ,), default: `None`
