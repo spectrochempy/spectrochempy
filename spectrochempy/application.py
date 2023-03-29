@@ -516,7 +516,7 @@ class DataDir(tr.HasTraits):
 
         Returns
         -------
-        listing : str
+        `str`
             Display of the datadir content
         """
         strg = f"{self.path.name}\n"  # os.path.basename(self.path) + "\n"

@@ -61,6 +61,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
+    "sphinxcontrib.bibtex",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -137,6 +138,8 @@ rst_epilog = """
 .. |scpy| replace:: `SpectroChemPy`
 
 .. |ndarray| replace:: :class:`~numpy.ndarray`
+
+.. |array-like| replace:: :term:`array-like`
 
 .. |ma.ndarray| replace:: :class:`~numpy.ma.array`
 
@@ -407,6 +410,13 @@ nbsphinx_custom_formats = {
     # ".md": ["jupytext.reads", {"fmt": "Rmd"}],
 }
 
+# Configure sphinxcontrib-bibtex
+
+bibtex_bibfiles = ["reference/bibliography.bib"]
+bibtex_default_style = "plain"
+bibtex_reference_style = "author_year"
+bibtex_cite_id = "{key}"
+
 # configuration for intersphinx --------------------------------------------------------
 
 intersphinx_mapping = {
@@ -419,7 +429,7 @@ intersphinx_mapping = {
     "traitlets": ("https://traitlets.readthedocs.io/en/stable/", None),
 }
 
-# linkcode ---------------------------------------------------------------------
+# linkcode -----------------------------------------------------------------------------
 
 
 def linkcode_resolve(domain, info):

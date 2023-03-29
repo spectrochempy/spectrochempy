@@ -434,7 +434,7 @@ for reproducible results across multiple function calls.""",
 
         Returns
         -------
-        list of axes
+        `list` of `~matplotlib.Axes`
             The list of axes.
         """
         # get n_components

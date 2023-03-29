@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements the base abstract class to define estimators such as PCA, ...
+This module implements the base abstract classes to define estimators such as PCA, ...
 """
 
 import inspect
@@ -61,8 +61,6 @@ class NotFittedError(exceptions.SpectroChemPyError):
 # according to the X input
 # ======================================================================================
 class _set_output(object):
-    """set output"""
-
     def __init__(
         self,
         method,
@@ -199,13 +197,6 @@ def _wrap_ndarray_output_to_nddataset(
     return out
 
 
-_common_docs = """
-
-
-"""
-_docstring.get_sections(__doc__, base="common")
-
-
 # ======================================================================================
 # Base class AnalysisConfigurable
 # ======================================================================================
@@ -288,11 +279,6 @@ class AnalysisConfigurable(MetaConfigurable):
 
         # Call the super class (MetaConfigurable) for initialisation
         super().__init__(section=self.name, parent=app)
-
-        # For cleaning docs information, we define here the doc for two objects of the
-        # superclass : config and parent
-        self.config.__doc__ = "Configuration object"
-        self.parent.__doc__ = "Parent application (SpectroChemPy) - Read-Only"
 
         # Set log_level of the console report (accessible using the log property)
         set_loglevel(log_level)
@@ -541,13 +527,12 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     def fit(self, X, Y=None):
         """
-        Fit the model with `X` as input dataset.
+        Fit the model with ``X`` as input dataset.
 
         Parameters
         ----------
-        X : NDDataset or array-like of shape (`n_observations` , `n_features` )
-            Training data, where `n_observations` is the number of observations
-            and `n_features` is the number of features.
+        X : |NDDataset| or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+            Training data.
 
         Y : any
             Depends on the model.
@@ -559,9 +544,9 @@ class AnalysisConfigurable(MetaConfigurable):
 
         See Also
         --------
-        fit_transform :  Fit the model with an input dataset X and apply the
-                         dimensionality reduction on `X`.
-        fit_reduce : Alias of fit_transform (Deprecated).
+        fit_transform :  Fit the model with an input dataset ``X`` and apply the
+                         dimensionality reduction on ``X``.
+        fit_reduce : Alias of `fit_transform` (Deprecated).
         """
         self._fitted = False  # reinit this flag
 
@@ -602,6 +587,44 @@ class AnalysisConfigurable(MetaConfigurable):
     _docstring.keep_params("analysis_fit.parameters", "X")
 
     @property
+    def log(self):
+        """
+        Return ``log`` output.
+        """
+        # A string handler (#2) is defined for the Spectrochempy logger,
+        # thus we will return it's content
+        return app.log.handlers[2].stream.getvalue().rstrip()
+
+    def parameters(self, default=False):
+        """
+        Return current or default configuration values.
+
+        Parameters
+        ----------
+        default : `bool`, optional, default: `False`
+            If `default` is `True`, the default parameters are returned,
+            else the current values.
+
+        Returns
+        -------
+        `dict`
+            Current or default configuration values.
+        """
+        d = Meta()
+        if not default:
+            d.update(self.trait_values(config=True))
+        else:
+            d.update(self.trait_defaults(config=True))
+        return d
+
+    def reset(self):
+        """
+        Reset configuration parameters to their default values.
+        """
+        for k, v in self.parameters(default=True).items():
+            setattr(self, k, v)
+
+    @property
     def X(self):
         """
         Return the X input dataset (eventually modified by the model).
@@ -619,51 +642,13 @@ class AnalysisConfigurable(MetaConfigurable):
         else:
             return np.asarray(X)
 
-    def parameters(self, default=False):
-        """
-        Return current or default configuration values.
-
-        Parameters
-        ----------
-        default : Bool, optional, default: False
-            If 'default' is True, the default parameters are returned,
-            else the current values.
-
-        Returns
-        -------
-        dict
-            Current or default configuration values.
-        """
-        d = Meta()
-        if not default:
-            d.update(self.trait_values(config=True))
-        else:
-            d.update(self.trait_defaults(config=True))
-        return d
-
-    def reset(self):
-        """
-        Reset configuration to default.
-        """
-        for k, v in self.parameters(default=True).items():
-            setattr(self, k, v)
-
-    @property
-    def log(self):
-        """
-        Return log output.
-        """
-        # A string handler (#2) is defined for the Spectrochempy logger,
-        # thus we will return it's content
-        return app.log.handlers[2].stream.getvalue().rstrip()
-
 
 # ======================================================================================
 # Base class DecompositionAnalysis
 # ======================================================================================
 class DecompositionAnalysis(AnalysisConfigurable):
     """
-    Abstract class to write analysis decomposition model such as PCA, ...
+    Abstract class to write analysis decomposition models such as `PCA`, ...
 
     Subclass this to get a minimal structure
 
@@ -671,8 +656,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
     --------
     EFA : Perform an Evolving Factor Analysis (forward and reverse).
     IRIS : Integral inversion solver for spectroscopic data.
-    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    NMF : Non-Negative Matrix Factorization (NMF).
+    MCRALS : Perform MCR-ALS of a dataset knowing the initial :math:`C` or :math:`S^T` matrix.
+    NMF : Non-Negative Matrix Factorization.
     PCA : Perform Principal Components Analysis.
     SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
     SVD : Perform a Singular Value Decomposition.
@@ -760,40 +745,28 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    @property
-    def Y(self):
-        """
-        Return the `Y` input.
-        """
-        # We use Y property only to show this information to the end-user. Internally
-        # we use _Y attribute to refer to the input data
-        if self._Y_is_missing:
-            raise NotFittedError
-        Y = self._Y
-        return Y
-
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     @_docstring.dedent
     def transform(self, X=None, **kwargs):
         """
-        Apply dimensionality reduction to `X` .
+        Apply dimensionality reduction to `X`\ .
 
         Parameters
         ----------
-        X : array-like of shape (n_observations, n_features), optional
-            New data, where `n_observations` is the number of observations
-            and `n_features` is the number of features.
-            if not provided, the input dataset of the :py:meth:fit method will be used.
+        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+            New data, where :term:`n_observations` is the number of observations
+            and :term:`n_features` is the number of features.
+            if not provided, the input dataset of the `fit` method will be used.
         %(kwargs)s
 
         Returns
         -------
-        NDDataset
-            Dataset with shape (`n_observations`, `n_components`).
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
+            Dataset with shape (:term:`n_observations`\ , :term:`n_components`\ ).
 
         Other Parameters
         ----------------
-        n_components : int, optional
+        n_components : `int`, optional
             The number of components to use for the reduction. If not given
             the number of components is eventually the one specified or determined
             in the `fit` process.
@@ -843,7 +816,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X_transform : array-like of shape (`n_observations` , `n_components` ), optional
+        X_transform : array-like of shape (:term:`n_observations`\ , :term:`n_components`\ ), optional
             Reduced `X` data, where `n_observations` is the number of observations
             and `n_components` is the number of components. If `X_transform` is not
             provided, a transform of `X` provided in `fit` is performed first.
@@ -851,8 +824,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Returns
         -------
-        |NDDataset|
-            Dataset with shape (n_observations, n_features).
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
+            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
 
         Other Parameters
         ----------------
@@ -901,14 +874,13 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def fit_transform(self, X, Y=None, **kwargs):
         """
-        Fit the model with `X` and apply the dimensionality reduction on X.
+        Fit the model with `X` and apply the dimensionality reduction on `X`\ .
 
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-        Y : array-like, optional
-            For example `Y` is not used in `PCA`, but corresponds to the guess profiles
-            in `MCRALS`.
+        Y : any
+            Depends on the model.
         %(kwargs)s
 
         Returns
@@ -946,17 +918,18 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):
         """
-        Return the component's dataset: (selected `n_components`, `n_features`).
+        Return the component's dataset: (selected :term:`n_components`\ , :term:`n_features`\ ).
 
         Parameters
         ----------
-        n_components : int, optional
-            The number of components to keep in the output nddataset.
-            If None, all calculated components are returned.
+        n_components : `int`, optional, default: `None`
+            The number of components to keep in the output dataset.
+            If `None`, all calculated components are returned.
 
         Returns
         -------
-        NDDataset(n_components, n_features)
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
+            Dataset with shape (:term:`n_components`\ , :term:`n_features`\ )
         """
         if n_components is None or n_components > self._n_components:
             n_components = self._n_components
@@ -970,7 +943,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
     def components(self):
         """
-        Return a NDDataset with components in feature space (n_components, n_features).
+        |NDDataset| with components in feature space (:term:`n_components`\ , :term:`n_features`\ ).
 
         See Also
         --------
@@ -981,7 +954,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @property
     def n_components(self):
         """
-        Return the number of components that were fitted.
+        Number of components that were fitted.
         """
         if self._fitted:
             return self._n_components
@@ -994,34 +967,34 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def plotmerit(self, X, X_hat, **kwargs):
         """
-        Plot the input (`X` ), reconstructed (`X_hat` ) and residuals (`E` ) datasets.
+        Plot the input (:math:`X`\ ), reconstructed (:math:`X_hat`\ ) and residuals (:math:`E`\ ) datasets.
 
         Parameters
         ----------
         X : |NDDataset|
-            Original dataset.
+            Original dataset that was fitted.
         X_hat : |NDDataset|
             Inverse transformed (reconstructed) dataset from a decomposition model.
         %(kwargs)s
 
         Returns
         -------
-        mpl.Axe
+        `~matplotlib.Axes`
             Matplotlib subplot axe.
 
         Other Parameters
         ----------------
-        colors : tuple or array of 3 colors, optional
-            Colors for `X` , `X_hat` and residuals `E` .
+        colors : `tuple` or |ndarray| of 3 colors, optional
+            Colors for `X` , `X_hat` and residuals ``E`` .
             in the case of 2D, The default colormap is used for `X` .
             By default, the three colors are :py:const:`NBlue` , :py:const:`NGreen`
             and :py:const:`NRed`  (which are colorblind friendly).
-        offset : float, optional, default: None
+        offset : `float`, optional, default: `None`
             Specify the separation (in percent) between the `X` , `X_hat` and `E` .
-        nb_traces : int, optional
-            Number of lines to display. Default is `all` .
+        nb_traces : `int` or ``'all'``, optional
+            Number of lines to display. Default is ``'all'`` .
         **others : Other keywords parameters
-            Parameters passed to the internal :py:meth:`plot` method of the `X` dataset.
+            Parameters passed to the internal `plot` method of the `X` dataset.
         """
         if not self._fitted:
             raise NotFittedError(
@@ -1078,6 +1051,18 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     _docstring.get_sections(_docstring.dedent(plotmerit.__doc__), base="plotmerit")
 
+    @property
+    def Y(self):
+        """
+        Return the `Y` input.
+        """
+        # We use Y property only to show this information to the end-user. Internally
+        # we use _Y attribute to refer to the input data
+        if self._Y_is_missing:
+            raise NotFittedError
+        Y = self._Y
+        return Y
+
 
 # ======================================================================================
 # Base class LinearRegressionAnalysis
@@ -1090,15 +1075,14 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     fit_intercept = tr.Bool(
         default_value=True,
-        help="Whether to calculate the intercept for this model. If set to False, "
-        "no intercept will be used in calculations (i.e. data is expected to be "
+        help="Whether to calculate the `intercept` for this model. If set to `False`, "
+        "no `intercept` will be used in calculations (*i.e.,* data is expected to be "
         "centered).",
     ).tag(config=True)
 
     positive = tr.Bool(
         default_value=False,
-        help="When set to `True` , forces the coefficients to be positive. This"
-        "option is only supported for dense arrays.",
+        help="When set to `True` , forces the coefficients (\ `coef`\ ) to be positive.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -1189,17 +1173,17 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : NDDataset or array-like of shape (n_observations, n_features)
+        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,:term:`n_features`\ )
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
-        Y : array-like of shape (n_observations,) or (n_observations, n_targets)
-            Target values. Will be cast to X's dtype if necessary.
-        sample_weight : array-like of shape (n_observations,), default=None
-            Individual weights for each sample.
+        Y : |array-like| of shape (:term:`n_observations`\ ,) or (:term:`n_observations`\ ,:term:`n_targets`\ )
+            Target values. Will be cast to `X`\ 's dtype if necessary.
+        sample_weight : |array-like| of shape (:term:`n_observations`\ ,), default: `None`
+            Individual weights for each observation.
 
         Returns
         -------
-        instance
+        self
             Returns the instance itself.
         """
         self._fitted = False  # reiniit this flag
@@ -1256,7 +1240,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
     @property
     def Y(self):
         """
-        Return the Y input dataset.
+        Return the `Y` input dataset.
         """
         # We use Y property only to show this information to the end user. Internally
         # we use _Y attribute to refer to the input data
@@ -1274,8 +1258,8 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         Estimated coefficients for the linear regression problem.
 
         If multiple targets are passed during the fit (Y 2D), this is a 2D array of
-        shape (n_targets, n_features), while if only one target is passed,
-        this is a 1D array of length n_features.
+        shape (:term:`n_targets`\ , :term:`n_features`\ ), while if only one target
+        is passed, this is a 1D array of length :term:`n_features`\ .
         """
         if self._linear_regression.coef_.size == 1:
             # this is the result of the single equation, so only one value
@@ -1305,10 +1289,10 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
     @property
     def intercept(self):
         """
-        Return a float or na array of shape (n_targets,).
+        Return a float or an array of shape (:term:`n_targets`\ ,).
 
-        Independent term in the linear model. Set to 0.0 if fit_intercept = False.
-        If Y has units, then intercept has the same units.
+        Independent term in the linear model. Set to ``0.0`` if `fit_intercept` is `False`.
+        If `Y` has units, then `intercept` has the same units.
         """
         if self._linear_regression.intercept_.size == 1:
             # A single value, return the associated quantity
@@ -1329,17 +1313,17 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     def predict(self, X=None):
         """
-        Predict using the linear model.
+        Predict features using the linear model.
 
         Parameters
         ----------
-        X : NDDataset or array-like matrix, shape (`n_observations` , `n_features` )
-            Observations. If `X` is not set, the input `X` for fit is used.
+        X : |NDDataset| or |array-like| matrix, shape (:term:`n_observations`\ ,:term:`n_features`\ )
+            Observations. If `X` is not set, the input `X` for `fit` is used.
 
         Returns
         -------
-        array
-            Returns predicted values. Shape (`n_observations` ,).
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
+            Predicted values (object of type of the input) using a ahape (:term:`n_observations`\ ,).
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1372,30 +1356,27 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         The coefficient of determination :math:`R^2` is defined as
         :math:`(1 - \\frac{u}{v})` , where :math:`u` is the residual
-        sum of squares `((y_true - y_pred)** 2).sum()` and :math:`v`
-        is the total sum of squares `((y_true - y_true.mean()) ** 2).sum()` .
-        The best possible score is 1.0 and it can be negative (because the
+        sum of squares ``((y_true - y_pred)** 2).sum()`` and :math:`v`
+        is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()`` .
+        The best possible score is ``1.0`` and it can be negative (because the
         model can be arbitrarily worse). A constant model that always predicts
-        the expected value of `y` , disregarding the input features, would get
+        the expected value of `Y`\ , disregarding the input features, would get
         a :math:`R^2` score of 0.0.
 
         Parameters
         ----------
-        X : array-like of shape (n_observations, n_features)
-            Test samples. For some estimators this may be a precomputed
-            kernel matrix or a list of generic objects instead with shape
-            `(n_observations, n_observations_fitted)` , where `n_observations_fitted`
-            is the number of observations used in the fitting for the estimator.
+        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,:term:`n_features`\ )
+            Test samples.
 
-        Y : array-like of shape (n_observations,) or (n_observations, n_outputs)
-            True values for `X` .
+        Y : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,).
+            True values for `X`\ .
 
-        sample_weight : array-like of shape (n_observations,), default=None
+        sample_weight : |array-like| of shape (:term:`n_observations`\ ,), default: `None`
             Sample weights.
 
         Returns
         -------
-        float
+        `float`
             :math:`R^2` of `predict` (`X` ) wrt. `Y` .
         """
         if not self._fitted:

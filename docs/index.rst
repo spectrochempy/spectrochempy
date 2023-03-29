@@ -25,12 +25,12 @@ Among its major features:
     smoothing, apodization...
 #.  Manipulate single or multiple datasets: concatenation, splitting, alignment
     along given dimensions, ...
-#.  Explore data with exploratory analyses methods such as ``SVD`` , ``PCA`` , ``EFA``
-    and visualization capabilities ...
+#.  Explore data with exploratory analyses methods such as :term:`SVD` ,
+    :term:`PCA` , :term:`EFA` and visualization capabilities ...
 #.  Modeling single or multiple datasets with curve fitting / curve modeling
     (``MCR-ALS`` ) methods...
 #.  Export data and analyses to various formats: ``csv`` , ``xls`` , ``JCAMP-DX`` ,  ...
-#.  Embed the complete workflow from raw data import to final analyses in a     Project Manager
+#.  Embed the complete workflow from raw data import to final analyses in a project manager
 
 .. only:: html
 
@@ -87,7 +87,8 @@ Reference
 ***********************
 
 * :doc:`reference/index`
-* :doc:`glossary`
+* :doc:`reference/bibliography`
+* :doc:`reference/glossary`
 
 .. toctree::
     :maxdepth: 3
@@ -95,7 +96,8 @@ Reference
     :caption: Reference
 
     reference/index
-    glossary
+    reference/bibliography
+    reference/glossary
 
 .. _userguide:
 

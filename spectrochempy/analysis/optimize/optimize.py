@@ -895,6 +895,28 @@ class Optimize(DecompositionAnalysis):
     def _get_components(self):
         return self._outfit[1]  # the first is the baseline, the last is the sum
 
+    # ----------------------------------------------------------------------------------
+    # Public methods/properties
+    # ----------------------------------------------------------------------------------
+    @_docstring.dedent
+    def fit(self, X):
+        """
+        Perform a non-linear optimization of the ``X`` dataset.
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+
+        Returns
+        -------
+        %(analysis_fit.returns)s
+
+        See Also
+        --------
+        %(analysis_fit.see_also)s
+        """
+        return super().fit(X, Y=None)
+
 
 # ======================================================================================
 def _optimize(
@@ -1067,8 +1089,8 @@ def getmodel(x, y=None, modelname=None, par=None, **kwargs):
 
     Returns
     -------
-    ndarray : float
-        An array containing the calculated model.
+    `~numpy.ndarray`
+        Array containing the calculated model.
     """
     model = par.model[modelname]
     modelcls = getattr(models_, model)

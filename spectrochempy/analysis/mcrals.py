@@ -813,7 +813,7 @@ on the decreasing branch of profile ``#j`` ,
     @_docstring.dedent
     def fit(self, X, Y):
         """
-        Fit the MCRALS model on a X dataset using initial concentration or spectra.
+        Fit the MCRALS model on an X dataset using initial concentration or spectra.
 
         Parameters
         ----------
@@ -870,7 +870,8 @@ on the decreasing branch of profile ``#j`` ,
 
         Returns
         -------
-        NDDataset(n_observations, n_features)
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
+            Dataset with shape (:term:`n_observations\ , :term:`n_features`)
         """
         return super().inverse_transform(X_transform, **kwargs)
 

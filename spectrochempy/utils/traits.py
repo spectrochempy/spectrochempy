@@ -37,7 +37,7 @@ class MetaConfigurable(Configurable):
 
         Returns
         -------
-        dict
+        `dict`
             A regular dictionary.
         """
         d = {}

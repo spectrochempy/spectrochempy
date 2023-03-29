@@ -237,40 +237,42 @@ class ActionMassKinetics(tr.HasTraits):
 
         Returns
         -------
-        C : ndarray or NDDataset, shape (t_points, n_species)
+        C : |ndarray| or |NDDataset|, shape ( ``t_points``, ``n_species``)
             Values of the solution at `t` .
         meta : Bunch object with the following fields defined:
-        t : ndarray, shape (t_points,)
-            Time points.
-        sol : `OdeSolution` or None
-            Found solution as `OdeSolution` instance; None if `dense_output` was
-            set to False.
-        t_events : list of ndarray or None
-            Contains for each event type a list of arrays at which an event of
-            that type event was detected. None if `events` was None.
-        y_events : list of ndarray or None
-            For each value of `t_events` , the corresponding value of the solution.
-            None if `events` was None.
-        nfev : int
-            Number of evaluations of the right-hand side.
-        njev : int
-            Number of evaluations of the Jacobian.
-        nlu : int
-            Number of LU decompositions.
-        status : int
-            Reason for algorithm termination:
-                * -1: Integration step failed.
-                *  0: The solver successfully reached the end of `tspan` .
-                *  1: A termination event occurred.
-        message : string
-            Human-readable description of the termination reason.
-        success : bool
-            True if the solver reached the interval end or a termination event
-            occurred (`status >= 0` ).
+
+            * t : ndarray, shape (t_points,)
+              Time points.
+            * sol : `OdeSolution` or None
+              Found solution as `OdeSolution` instance; None if `dense_output` was
+              set to False.
+            * t_events : list of ndarray or None
+              Contains for each event type a list of arrays at which an event of
+              that type event was detected. None if `events` was None.
+            * y_events : list of ndarray or None
+              For each value of `t_events` , the corresponding value of the solution.
+              None if `events` was None.
+            * nfev : int
+              Number of evaluations of the right-hand side.
+            * njev : int
+              Number of evaluations of the Jacobian.
+            * nlu : int
+              Number of LU decompositions.
+            * status : int
+              Reason for algorithm termination:
+                    * -1: Integration step failed.
+                    *  0: The solver successfully reached the end of `tspan` .
+                    *  1: A termination event occurred.
+            * message : string
+              Human-readable description of the termination reason.
+            * success : bool
+              True if the solver reached the interval end or a termination event
+              occurred (`status >= 0` ).
         """
 
         def production_rates(ti, Ci):
-            """compute the production rates dC/dt
+            """
+            Compute the production rates :math:`\frac{dC,dt}`.
 
             Compute the n_s production rates at time ti according to:
             $$ dC / dt =  (B - A).T  K Ci^A $$
@@ -359,7 +361,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         Returns
         ----------
-        result
+        `dict`
             A result dictionary.
         """
 
@@ -545,10 +547,10 @@ class PFR:
 
     Parameters
     ----------
-    cti_file: str
+    cti_file: `str`
         The cti file must contain a gas phase named 'gas' and optionally a reactive
         surface named 'surface'.
-    init_X: dict, array or list of them
+    init_X: `dict`, :term:`array-like`
         Initial composition of the reactors.
     """
 
@@ -795,7 +797,7 @@ class PFR:
             names of kinetic parameters differing from the cti file but fixed
             during optimization.
 
-        logfile: None (default) or str
+        logfile: `None` (default) or str
             name of the logfile.
 
         **kwargs
@@ -803,7 +805,7 @@ class PFR:
 
         Returns
         -------
-        dict
+        `dict`
         """
         # global variables to keep track of iterations and optimization history
         global it, trials, func_values, popsize, pop_sse, prev_min_sse

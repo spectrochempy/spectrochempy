@@ -35,7 +35,7 @@ class EFA(DecompositionAnalysis):
     overlapping peaks into concentration profiles and normalized spectra of components.
 
     Originally developed for GC and GC-MS experiments (See e.g.,
-    [Maeder86]_ , [Roach92]_ ), it is also suitable for
+    :cite:t:`maeder:1986` , :cite:t:`roach:1992`\ ), it is also suitable for
     analysis spectra such as those obtained by Operando FTIR for example.
 
     The model used in this class allow to perform a forward and reverse analysis of the
@@ -48,11 +48,6 @@ class EFA(DecompositionAnalysis):
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_EFA)s
-
-    References
-    ----------
-    .. [Maeder86] M. Maeder, A.D. Zuberbuehler, Anal. Chim. Acta, 181 (1986), 287-291
-    .. [Roach92] L. Roach, M. Guilhaus, Org. mass. spec., 27, 1071-1076
 
     Examples
     --------

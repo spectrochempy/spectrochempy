@@ -84,6 +84,7 @@ dependencies:
     - jupyter_sphinx
     - json5
     - sphinx-copybutton
+    - sphinxcontrib-bibtex
     - pandoc=2.19
     - conda-build
     - conda-verify

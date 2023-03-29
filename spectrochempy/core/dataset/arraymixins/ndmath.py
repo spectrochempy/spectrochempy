@@ -560,7 +560,7 @@ class NDMath(object):
 
         Parameters
         ----------
-        dataset : array_like
+        dataset : |NDDataset| or |array_like|
             Input array or object that can be converted to an array.
         dtype : dtype
             The type of the output array. If dtype is not given, infer the data type
@@ -568,8 +568,8 @@ class NDMath(object):
 
         Returns
         -------
-        absolute
-            An ndarray containing the absolute value of each element in dataset.
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
+            The absolute value of each element in dataset.
         """
 
         if not cls.has_complex_dims:

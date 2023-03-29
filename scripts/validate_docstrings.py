@@ -228,7 +228,7 @@ def spectrochempy_validate(func_name: str):
 
     Returns
     -------
-    dict
+    `dict`
         Information about the docstring and the errors found.
     """
     func_obj = Validator._load_obj(func_name)
@@ -303,7 +303,7 @@ def validate_all(prefix, ignore_deprecated=False):
 
     Returns
     -------
-    dict
+    `dict`
         A dictionary with an item for every function/method... containing
         all the validation information.
     """

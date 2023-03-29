@@ -109,10 +109,10 @@ def find_peaks(
 
     Returns
     -------
-    peaks : ndarray
+    peaks : |ndarray|
         Indices of peaks in `x` that satisfy all given conditions.
 
-    properties : dict
+    properties : `dict`
         A dictionary containing properties of the returned peaks which were
         calculated as intermediate results during evaluation of the specified
         conditions:

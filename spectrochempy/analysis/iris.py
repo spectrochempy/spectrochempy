@@ -745,7 +745,7 @@ class IRIS(DecompositionAnalysis):
 
         Returns
         -------
-        |NDDataset|
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
             The reconstructed dataset.
         """
         if not self._fitted:
@@ -787,7 +787,7 @@ class IRIS(DecompositionAnalysis):
 
         Returns
         -------
-        `~matplotlib.pyplot.axes`
+        `~matplotlib.Axes`
                 The matplotlib axe.
         """
         if not self._fitted:
@@ -823,7 +823,7 @@ class IRIS(DecompositionAnalysis):
 
         Returns
         -------
-        `list` of `~matplotlib.pyplot.axes`
+        `list` of `~matplotlib.Axes`
             Subplots.
         """
         if not self._fitted:
@@ -869,7 +869,7 @@ class IRIS(DecompositionAnalysis):
 
         Returns
         -------
-        `list` of `~matplotlib.pyplot.axes`
+        `list` of `~matplotlib.Axes`
             Subplots.
         """
 

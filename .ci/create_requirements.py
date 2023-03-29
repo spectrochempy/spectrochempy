@@ -86,7 +86,7 @@ def generate_pip_requirements(conda_fname, pip_fnames):
 
     Returns
     -------
-    bool
+    `bool`
         True if the comparison fails, False otherwise.
     """
     with conda_fname.open() as conda_fd:
