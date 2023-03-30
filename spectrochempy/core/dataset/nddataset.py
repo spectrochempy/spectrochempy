@@ -53,7 +53,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     application of mathematical operations.
     In addition or in replacement of numerical data for coordinates,
     |NDDataset| can also have labeled coordinates where labels can be different kind of
-    objects (strings, `datetime`, |ndarray| or other |NDDataset|\ 's, etc...).
+    objects (`str`\ , `datetime`\ , |ndarray| or other |NDDataset|\ 's, etc...).
 
     Parameters
     ----------
@@ -97,14 +97,14 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     name : `str`\ , optional
         A user-friendly name for this object. If not given, the automatic
         `id` given at the object creation will be used as a name.
-    labels : array of objects, optional
+    labels : :term:`array-like` of objects, optional
         Labels for the `data`\ . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning several
         series of labels for the same data.
         The given array can be a list, a tuple, a |ndarray| , a ndarray-like,
         a |NDArray| or any subclass of
         |NDArray| .
-    mask : array of bool or `NOMASK` , optional
+    mask : :term:`array-like` of `bool` or `NOMASK` , optional
         Mask for the data. The mask array must have the same shape as the
         data. The given array can be a list,
         a tuple, or a |ndarray| . Each values in the array must be `False`
@@ -112,41 +112,41 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         they are not (like in numpy masked arrays). If `data` is already a
         :class:`~numpy.ma.MaskedArray` , or any
         array object (such as a |NDArray| or subclass of it), providing a
-        `mask` here, will causes the mask from the
+        `mask` here, will cause the mask from the
         masked array to be ignored.
-    units : |Unit| instance or str, optional
+    units : |Unit| instance or `str`, optional
         Units of the data. If data is a |Quantity| then `units` is set to
-        the unit of the `data`; if a unit is also
+        the unit of the `data`\ ; if a unit is also
         explicitly provided an error is raised. Handling of units use the
-        `pint <https://pint.readthedocs.org/>`_
+        `pint <https://pint.readthedocs.org/>`__
         package.
-    timezone : datetime.tzinfo, optional
+    timezone : `datetime.tzinfo`\ , optional
         The timezone where the data were created. If not specified, the local timezone
         is assumed.
-    title : str, optional
+    title : `str`\ , optional
         The title of the data dimension. The `title` attribute should not be confused
         with the `name` .
         The `title` attribute is used for instance for labelling plots of the data.
         It is optional but recommended to give a title to each ndarray data.
-    dlabel :  str, optional
+    dlabel :  `str`\ , optional
         Alias of `title` .
-    meta : dict-like object, optional
+    meta : `dict`\ -like object, optional
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
-    author : str, optional
-        Name(s) of the author(s) of this dataset. BNy default, name of the
+    author : `str`\ , optional
+        Name(s) of the author(s) of this dataset. By default, name of the
         computer note where this dataset is
         created.
-    description : str, optional
+    description : `str`\ , optional
         An optional description of the nd-dataset. A shorter alias is `desc` .
-    origin : str, optional
+    origin : `str`\ , optional
         Origin of the data: Name of organization, address, telephone number,
         name of individual contributor, etc., as appropriate.
-    roi : list
+    roi : `list`
         Region of interest (ROI) limits.
-    history : str, optional
+    history : `str`\ , optional
         A string to add to the object history.
-    copy : bool, optional
+    copy : `bool`\ , optional
         Perform a copy of the passed object. Default is False.
 
     See Also
@@ -158,7 +158,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     Notes
     -----
     The underlying array in a |NDDataset| object can be accessed through the
-    `data` attribute, which will return a conventional |ndarray| .
+    `data` attribute, which will return a conventional |ndarray|\ .
     """
 
     # Examples
