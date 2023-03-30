@@ -452,16 +452,18 @@ def basc(dataset, *ranges, **kwargs):
 
     Other Parameters
     ----------------
-    dim : str or int, keyword parameter, optional, default='x'.
-        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
+    dim : str or int, keyword parameter, optional, default: 'x'.
+        Specify on which dimension to apply the apodization method.
+        If `dim` is specified as an integer
         it is equivalent  to the usual `axis` numpy parameter.
-    method : str, keyword parameter, optional, default='sequential'
+    method : str, keyword parameter, optional, default: 'sequential'
         Correction method among ['multivariate','sequential']
     interpolation : string, keyword parameter, optional, default='polynomial'
-        Interpolation method for the computation of the baseline, among ['polynomial','pchip']
-    order : int, keyword parameter, optional, default=6
+        Interpolation method for the computation of the baseline,
+        among ['polynomial','pchip']
+    order : int, keyword parameter, optional, default: 6
         If the correction method polynomial, this give the polynomial order to use.
-    npc : int, keyword parameter, optional, default=5
+    npc : int, keyword parameter, optional, default: 5
         Number of components to keep for the `multivariate` method
 
     See Also
@@ -471,24 +473,8 @@ def basc(dataset, *ranges, **kwargs):
 
     Notes
     -----
-    For more flexibility and functionality, it is advised to use the BaselineCorrection processor instead.
-
-    Examples
-    --------
-    .. plot::
-        :include-source:
-
-        import spectrochempy as scp
-        nd = scp.read('irdata/nh4y-activation.spg')
-        ndp = nd[:, 1291.0:5999.0]
-
-        ranges=[[5996., 5998.], [1290., 1300.],
-                [2205., 2301.], [5380., 5979.],
-                [3736., 5125.]]
-
-        ndcorr = scp.basc(ndp, *ranges,method='multivariate', interpolation='pchip', npc=8)
-        ndcorr.plot()
-        scp.show()
+    For more flexibility and functionality, it is advised to use the BaselineCorrection
+    processor instead.
     """
     blc = BaselineCorrection(dataset)
     if not ranges and dataset.meta.regions is not None:

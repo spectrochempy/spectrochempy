@@ -196,8 +196,8 @@ Export a NDDataset
     :nosignatures:
     :toctree: generated/
 
-    NDDataset.save<save>
-    NDDataset.save<save_as>
+    NDDataset.save
+    NDDataset.save_as
     write
     write_csv
     write_excel
@@ -256,15 +256,14 @@ Plotting functions
 Processing
 **********
 
-Transpose-like oprations
-========================
+Transpose-like operations
+=========================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     transpose
-    NDDataset.T
     swapdims
 
 

@@ -67,7 +67,6 @@ Getting Started
 * :doc:`gettingstarted/overview`
 * :doc:`gallery/auto_examples/index`
 * :doc:`gettingstarted/install/index`
-* :doc:`gettingstarted/papers`
 
 .. toctree::
     :maxdepth: 1
@@ -78,7 +77,6 @@ Getting Started
     gettingstarted/overview
     Examples <gallery/auto_examples/index>
     Installation <gettingstarted/install/index>
-    gettingstarted/papers
 
 .. _userguide:
 
@@ -118,6 +116,7 @@ Reference
 * :doc:`reference/index`
 * :doc:`reference/bibliography`
 * :doc:`reference/glossary`
+* :doc:`reference/papers`
 
 .. toctree::
     :maxdepth: 3
@@ -125,8 +124,9 @@ Reference
     :caption: Reference
 
     reference/index
-    reference/bibliography
     reference/glossary
+    reference/bibliography
+    reference/papers
 
 .. _contribute:
 

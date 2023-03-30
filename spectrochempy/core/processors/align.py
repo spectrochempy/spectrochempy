@@ -79,12 +79,12 @@ def align(dataset, *others, **kwargs):
         If align is defined :
 
         * 'outer' means that a union of the different coordinates is
-        achieved (missing values are masked).
+          achieved (missing values are masked).
         * 'inner' means that the intersection of the coordinates is used.
         * 'first' means that the first dataset is used as reference.
         * 'last' means that the last dataset is used as reference.
         * 'interpolate' means that interpolation is performed relative to
-        the first dataset.
+          the first dataset.
 
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
@@ -95,7 +95,7 @@ def align(dataset, *others, **kwargs):
           sampling interval for the interpolated data will be split in
           this number of points.
         * float : If a float value is provided, it determines the interval
-        between the interpolated data.
+          between the interpolated data.
 
     coord : |Coord| , optional, default=None
         Coordinates to use for alignment. Ignore those corresponding to the

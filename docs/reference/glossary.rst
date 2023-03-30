@@ -10,15 +10,11 @@ Glossary
     :sorted:
 
     API
-        API stands for `Application Programming Interface`, which is a set of methods
-        and protocols for using the SpectroChemPy (especially in :term:`Jupyter notebooks` or :term:`JupyterLab`)
+        API stands for ``Application Programming Interface``, which is a set of methods
+        and protocols for using the SpectroChemPy (especially
+        in `Jupyter Notebooks <https://docs.jupyter.org/en/latest/>`__
+        or `Jupyter Lab <https://docs.jupyter.org/en/latest/>`__\ )
         without knowing all the details of the implementation of these methods or protocols.
-
-    Jupyter Notebooks
-        see `https://docs.jupyter.org/en/latest/`__
-
-    JupyterLab
-        see `https://docs.jupyter.org/en/latest/`__
 
     SVD
         ``Singular Value Decomposition``\ .
@@ -52,7 +48,7 @@ Glossary
 
     array-like
         An object which can be transformed into a 1D dataset such as a list or tuple of numbers, or a
-        2D or nD dataset such a list of lists or a |ndarray|.
+        2D or nD dataset such a list of lists or a |ndarray|\ .
 
     n_observations
         Number of ``observations``. When dealing with spectroscopic data, an ``observation``

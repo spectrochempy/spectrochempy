@@ -279,7 +279,7 @@ class BuildDocumentation(object):
             f'\n{"#" * 80}'
         )
 
-        self._make_dirs()
+        # self._make_dirs()
 
         # APIGEN?
         # if not self.noapi:

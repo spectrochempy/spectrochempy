@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -22,15 +22,17 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.8
+#     version: 3.9.16
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
 #       version_major: 2
 #       version_minor: 0
 # ---
-# %% [markdown] {"slideshow": {"slide_type": "slide"}}
-# # Introduction
+
+# %% [raw] {"raw_mimetype": "text/restructuredtext"}
+# Introduction
+# ============
 #
 # The **SpectroChemPy** project was developed to provide advanced tools for processing and
 # analyzing spectroscopic data, initially for internal purposes in the

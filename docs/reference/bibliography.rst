@@ -8,3 +8,4 @@ Bibliography
    bibliography.bib. Add new references to bibliography.bib.
 
 .. bibliography::
+    :all:

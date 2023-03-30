@@ -162,3 +162,9 @@ div.pkgnav ul li a:hover {
     color: #f50404;
     text-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
 }
+
+/* code cells */
+
+.highlight {
+    background: #f2f7fa;
+}
