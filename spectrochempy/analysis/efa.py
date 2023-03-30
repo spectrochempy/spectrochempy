@@ -29,7 +29,7 @@ class EFA(DecompositionAnalysis):
 
     __doc__ = _docstring.dedent(
         """
-    Evolving Factor Analysis.
+    Evolving Factor Analysis (EFA).
 
     Evolving factor analysis (`EFA`) is a method that allows model-free resolution of
     overlapping peaks into concentration profiles and normalized spectra of components.

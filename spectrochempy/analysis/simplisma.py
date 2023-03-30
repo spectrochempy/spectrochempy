@@ -32,7 +32,7 @@ class SIMPLISMA(DecompositionAnalysis):
 
     __doc__ = _docstring.dedent(
         """
-    SIMPLe to use Interactive Self-modeling Mixture Analysis.
+    SIMPLe to use Interactive Self-modeling Mixture Analysis (SIMPLISMA).
 
     This class performs a SIMPLISMA analysis of a 2D |NDDataset| .
     The algorithm is adapted from Windig's paper [Windig97]_ .

@@ -44,7 +44,7 @@ class MCRALS(DecompositionAnalysis):
 
     __doc__ = _docstring.dedent(
         """
-    Perform MCR-ALS of a dataset knowing the initial :math:`C` or :math:`S^T` matrix.
+    Multivariate Curve Resolution Alternating Least Squares (MCRALS).
 
     :term:`MCR-ALS` ( ``Multivariate Curve Resolution Alternating Least Squares`` )
     resolve's a set (or several sets) of spectra :math:`X` of an evolving mixture

@@ -24,7 +24,7 @@ __configurables__ = ["LSTSQ", "NNLS"]
 class LSTSQ(LinearRegressionAnalysis):
     __doc__ = _docstring.dedent(
         """
-    Ordinary least squares Linear Regression.
+    Ordinary least squares Linear Regression (LSTSQ).
 
     Use :class:`sklearn.linear_model.LinearRegression`
 
@@ -52,7 +52,7 @@ class LSTSQ(LinearRegressionAnalysis):
 class NNLS(LinearRegressionAnalysis):
     __doc__ = _docstring.dedent(
         """
-    Non-Negative least squares Linear Regression.
+    Non-Negative least squares Linear Regression (NNLS).
 
     Use :class:`sklearn.linear_model.LinearRegression`
 

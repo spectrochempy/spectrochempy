@@ -34,11 +34,12 @@ class IrisKernel(tr.HasTraits):
     """
     Define a kernel matrix of Fredholm equation of the 1st kind.
 
-    This class define a kernel matrix as a NDDataset compatible
-    with the X input NDDataset.
+    This class define a kernel matrix as a |NDDataset| compatible
+    with the `X` input |NDDataset|\ .
 
-    Pre-defined kernels can be chosen among: {``'langmuir'` , ``'ca'`` , 'reactant-first-order',
-    'product-first-order', 'diffusion'},  a custom kernel function - a 2-variable lambda
+    Pre-defined kernels can be chosen among: {``'langmuir'` , ``'ca'`` ,
+    ``'reactant-first-order'``, ``'product-first-order'``, ``'diffusion'``},
+    a custom kernel function - a 2-variable lambda
     function `K`\ ``(p, q)`` or a function returning a |ndarray| can be passed.
     `p` and `q` contain the values of an external experimental variable and an internal
     physico-chemical parameter, respectively.
@@ -299,22 +300,10 @@ class IRIS(DecompositionAnalysis):
 
     __doc__ = _docstring.dedent(
         """
-    Integral inversion solver for spectroscopic data.
+    Integral inversion solver for spectroscopic data (IRIS).
 
-    Solves integral equations of the first kind of 1 or 2 dimensions, i.e. returns a
-    distribution `f` of contributions to 1D ou 2D datasets.
-
-    Parameters
-    ----------
-    %(AnalysisConfigurable.parameters)s
-
-    See Also
-    --------
-    %(DecompositionAnalysis.see_also.no_IRIS)s
-
-    Notes
-    -----
-    `IRIS` solves integral equation of the first kind of 1 or 2 dimensions, *i.e.,*
+    `IRIS`, a model developed by :cite:t:`stelmachowski:2013`\ , solves integral
+    equation of the first kind of 1 or 2 dimensions, *i.e.,*
     finds a distribution function :math:`f(p)` or :math:`f(c,p)` of contributions to
     univariate data :math:`a(p)` or multivariate :math:`a(c, p)` data evolving with an
     external experimental variable :math:`p` (time, pressure, temperature,
@@ -331,15 +320,23 @@ class IRIS(DecompositionAnalysis):
     Regularization is triggered when `reg_par` is set to an array of two or three
     values.
 
-    If `reg_par` has two values [ ``min`` , ``max``], the optimum regularization
+    If `reg_par` has two values [``min``\ , ``max``\ ], the optimum regularization
     parameter is searched between :math:`10^{min}` and :math:`10^{max}`\ .
     Automatic search of the regularization is made using the Cultrera_Callegaro
-    algorithm (arXiv:1608.04571v2) which involves the Menger curvature of a
+    algorithm (:cite:p:cultrera:2020) which involves the Menger curvature of a
     circumcircle and the golden section search method.
 
-    If three values are given ([ ``min`` , ``max`` , ``num`` ]), then the inversion
+    If three values are given ([``min``\ , ``max``\ , ``num``\ ]), then the inversion
     will be made for ``num`` values evenly spaced on a log scale between
-    :math:`10^{min}` and :math:`10^{max}`
+    :math:`10^{min}` and :math:`10^{max}`\ .
+
+    Parameters
+    ----------
+    %(AnalysisConfigurable.parameters)s
+
+    See Also
+    --------
+    %(DecompositionAnalysis.see_also.no_IRIS)s
 
     Examples
     --------
@@ -740,7 +737,7 @@ class IRIS(DecompositionAnalysis):
         """
         Transform data back to the original space.
 
-        The following matrix operation is performed : :math:`\\hat{X} = K.f[i]`
+        The following matrix operation is performed : :math:`\hat{X} = K.f[i]`
         for each value of the regularization parameter.
 
         Returns
@@ -775,14 +772,14 @@ class IRIS(DecompositionAnalysis):
 
     def plotlcurve(self, scale="ll", title="L curve"):
         """
-        Plot the ``L`` Curve.
+        Plot the ``L-Curve``\ .
 
         Parameters
         ----------
-        scale : `str`\ , optional, default=``'ll'``
-            String of 2 letters among ``'l'`` (log) or ``'n'`` (non-log) indicating
-            whether the y and x axes should be log scales.
-        title : `str`, optional, default= ``'L curve'``
+        scale : `str`\ , optional, default: ``'ll'``
+            String of 2 letters among ``'l'``\ (log) or ``'n'``\ (non-log) indicating
+            whether the ``y`` and ``x`` axes should be log scales.
+        title : `str`, optional, default: ``'L-curve'``
             Plot title.
 
         Returns

@@ -32,7 +32,7 @@ class NMF(DecompositionAnalysis):
         """
     Non-Negative Matrix Factorization (NMF).
 
-    Use `~sklearn.decomposition.NMF` .
+    Use `sklearn.decomposition.NMF` .
 
     Find two non-negative matrices, i.e. matrices with all non-negative elements, (W, H)
     whose product approximates the non-negative matrix X. This factorization can be used

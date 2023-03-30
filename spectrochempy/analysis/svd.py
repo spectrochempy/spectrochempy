@@ -65,7 +65,7 @@ class SVD(DecompositionAnalysis):
 
     __doc__ = _docstring.dedent(
         """
-    Performs a Singular Value Decomposition of a dataset.
+    Singular Value Decomposition (SVD).
 
     The SVD is commonly written as :math:`X = U \\Sigma V^{T}` .
 

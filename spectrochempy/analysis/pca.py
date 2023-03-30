@@ -36,11 +36,9 @@ class PCA(DecompositionAnalysis):
 
     __doc__ = _docstring.dedent(
         """
-    PCA analysis is here done using the sklearn PCA model.
+    Principal Component Anamysis (PCA).
 
-    We just implement fit, transform, inverse_transform and fit_transform
-
-    Use `~sklearn.decomposition.PCA`
+    The Principal Component Analysis analysis is using the `sklearn.decomposition.PCA` model.
 
     Parameters
     ----------
