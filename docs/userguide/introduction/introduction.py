@@ -30,17 +30,25 @@
 #       version_minor: 0
 # ---
 
-# flake8: noqa
-# %% [markdown] {"raw_mimetype": "text/restructuredtext"}
+# %% [markdown]
 # # Introduction
 #
-# The `SpectroChemPy` project was developed to provide advanced tools for processing and analyzing spectroscopic data, initially for internal purposes within the [LCS (https://www.lcs.ensicaen.fr)] (https://www.lcs.ensicaen.fr).
+# The `SpectroChemPy` project was developed to provide advanced tools for processing and
+# analyzing spectroscopic data, initially for internal purposes within the
+# [LCS (https://www.lcs.ensicaen.fr)] (https://www.lcs.ensicaen.fr).
 #
-# The `SpectroChemPy` project is essentially a library written in [python](www.python.org) language and provides objects, [NDDataset](../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset) and [Project]((../../reference/generated/spectrochempy.Project.html#spectrochempy.Project)),  to hold data, equipped with methods to analyze, transform or display these data in a simple way through a python type interface.
+# The `SpectroChemPy` project is essentially a library written in
+# [python](https://www.python.org) language and provides objects,
+# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset)
+# and [Project]((../../reference/generated/spectrochempy.Project.html#spectrochempy.Project)),
+# to hold data, equipped with methods to analyze, transform or display these data in a
+# simple way through a python type interface.
 #
-# The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited to this type of application, as any type of data can be used.
+# The processed data are mainly spectroscopic data from techniques such as IR, Raman or
+# NMR, but they are not limited to this type of application, as any type of data can be
+# used.
 
-# %% [markdown] {"slideshow": {"slide_type": "slide"}}
+# %% [markdown]
 # ## How to get started
 #
 # We assume that the SpectroChemPy package has been correctly
@@ -48,13 +56,18 @@
 # procedure](../../gettingstarted/install/index.rst).
 # </div>
 
-# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}, "slideshow": {"slide_type": "subslide"}}
-#
+# %% [markdown]
 # ### Writing and executing SpectroChemPy scripts
 #
-# If you are already an experienced `python` user, you can certainly use your favorite IDE to run your scripts, debug them and display the results. But if you want an easier way, especially if you are a beginner, we recommend you to use `Jupyter Lab` to do it. To get started, you can follow this link : [Jupyter Lab interface](interface.ipynb).
+# If you are already an experienced `python` user, you can certainly use your favorite
+# IDE to run your scripts, debug them and display the results. But if you want an easier
+# way, especially if you are a beginner, we recommend you to use `Jupyter Lab` to do it.
+# To get started, you can follow links below:
 
-# %% [markdown] {"slideshow": {"slide_type": "slide"}}
+# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}}
+# [Jupyter Lab interface](interface.ipynb).
+
+# %% [markdown]
 # ### Loading the API
 #
 # Before using SpectroChemPy, we need to load the **API (Application Programming Interface)**: it exposes many
@@ -79,12 +92,13 @@ nd = scp.NDDataset()
 # With a wild `*` import. In this second syntax, the access to objects/functions can be greatly simplified. For example, we can use directly `NDDataset` without a prefix instead of `scp.NDDataset` but there is always a risk of overwriting some variables or functions already present in the namespace. Therefore, the first syntax is generally highly recommended.
 
 # %%
-from spectrochempy import *
+from spectrochempy import *  # noqa
 
 nd = NDDataset()
 
 # %% [markdown]
-# Alternatively, you can also load only the objects and function required by your application:
+# Alternatively, you can also load only the objects and function required by your
+# application:
 
 # %%
 from spectrochempy import NDDataset
@@ -95,13 +109,13 @@ nd = NDDataset()
 # %% [markdown]
 # ## NDDataset, the main object
 #
-# NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic
-# data.
+# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset) is a python object, actually a container, which can represent most of your
+# multidimensional spectroscopic data.
 #
-# For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:
+# For instance, in the following we read data from a series of FTIR experiments,
+# provided  by the OMNIC software:
 
 # %%
-
 nd = NDDataset.read_omnic("irdata/nh4y-activation.spg")
 
 # %% [markdown]
@@ -193,10 +207,4 @@ nds[:, 1290.0:890.0] = scp.MASKED
 _ = nds.plot_stack()
 
 # %% [markdown]
-# More details on available processing and analysis function will be given later in this user guide.
-
-# %% [markdown]
-# This was a short overview of the possibilities. To go further you can **Continue with ...**
-
-# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}}
-# [Data structures](../objects.rst)
+# More details on available processing and analysis functions will be given later in this user guide.
