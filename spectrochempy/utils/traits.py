@@ -67,6 +67,11 @@ class MetaConfigurable(Configurable):
         if change.name in self.traits(config=True):
 
             value = change.new
+
+            # workaround to not write callable
+            if callable(value):
+                return
+
             # replace non serializable value by an equivalent
             if isinstance(value, (type(cycler), Path)):
                 value = str(value)
