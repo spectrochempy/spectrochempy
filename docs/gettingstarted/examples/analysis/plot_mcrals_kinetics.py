@@ -17,7 +17,7 @@ in .
 The data has been provided by the Biosystems Data Analysis Group of the University of
 Amsterdam [32].
 
-Here we will focus on a signlme run. For the user convenience, this dataset is present
+Here we will focus on a single run. For the user convenience, this dataset is present
 in the spectrochempy_data as 'METING9.mat'\.
 """
 
@@ -86,6 +86,8 @@ mcr_2 = scp.MCRALS()
 mcr_2.hardConc = [0, 1, 2]
 mcr_2.getConc = kin.fit_to_concentrations
 mcr_2.argsGetConc = ([0, 1, 2], [0, 1, 2], param_to_optimize)
+
+
 mcr_2.fit(X, Ckin)
 
 # %%
