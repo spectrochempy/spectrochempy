@@ -39,7 +39,6 @@ from spectrochempy.utils.docstrings import _docstring
 # derived class
 @signature_has_configurable_traits
 class MCRALS(DecompositionAnalysis):
-
     _docstring.delete_params("DecompositionAnalysis.see_also", "MCRALS")
 
     __doc__ = _docstring.dedent(
@@ -212,7 +211,7 @@ If an array is passed: the values of concentration for each observation. Hence,
 corresponding profiles will set by `getC` .""",
     ).tag(config=True)
 
-    getC = tr.Callable(
+    getConc = tr.Callable(
         default_value=None,
         allow_none=True,
         help="""An external function that will provide ``len(hardConc)`` concentration
@@ -220,15 +219,15 @@ profiles.
 
 It should be using one of the following syntax:
 
-* ``getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC``
-* ``getC(Ccurr, *argsGetC, **kwargsGetC) -> hardC, newArgsGetC``
-* ``getC(Ccurr, *argsGetCn, **kargsGetC) -> hardC, newArgsGetC, extOutput``
+* ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC``
+* ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc``
+* ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc, extraOutputGetConc``
 
-where ``Ccurr``  is the current `C` dataset, ``\*argsGetC`` are the parameters needed to
+where ``Ccurr``  is the current `C` dataset, ``\*argsGetConc`` are the parameters needed to
 completely specify the function. `hardC` is a |ndarray| or |NDDataset| of shape
-``(C.y, len(hardConc)`` , ``newArgsGetC`` are the updated parameters for the next
-iteration (can be None), and ``extOutput`` can be any other relevant output to be kept
-in `extOutput` attribute (only the last iteration ``extOutput`` is kept)""",
+``(C.y, len(hardConc)`` , ``newArgsGetConc`` are the updated parameters for the next
+iteration (can be None), and ``extraOutputGetConc`` can be any other relevant output to be kept
+in `extraOutputGetConc` attribute, a list of ``extraOutputGetConc`` at each MCR ALS iterations""",
     ).tag(config=True)
 
     argsGetConc = tr.Tuple(
@@ -295,6 +294,50 @@ in the concentration profile.""",
 deviating point is larger/lower than ``St[j,i] > St[j, i-1] * unimodSpecTol``
 on the decreasing branch of profile ``#j`` ,
 ``St[j,i] < St[j, i-1] * unimodTol`` on the increasing branch of profile  ``#j`` .""",
+    ).tag(config=True)
+
+    hardSpec = tr.List(
+        default_value=[],
+        help="""Defines hard constraints on the spectral profiles. If set to
+    ``[]`` , no constraint is applied. If an array of indexes is passed, the
+    corresponding profiles will set by `getSt` .""",
+    ).tag(config=True)
+
+    getSpec = tr.Callable(
+        default_value=None,
+        allow_none=True,
+        help="""An external function that will provide ``len(hardSpec)`` concentration
+    profiles.
+
+    It should be using one of the following syntax:
+
+    * ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt``
+    * ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt, newArgsGetSpec``
+    * ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt, newArgsGetSpec, extraOutputGetSpec``
+
+    where ``Stcurr``  is the current `St` dataset, ``\*argsGetSpec`` are the parameters needed to
+    completely specify the function. `hardSt` is a |ndarray| or |NDDataset| of shape
+    ``(C.y, len(hardSpec)`` , ``newArgsGetSpec`` are the updated parameters for the next
+    iteration (can be None), and ``extraOutputGetSpec`` can be any other relevant output to be kept
+    in `extraOutputGetSpec` attribute, a list of ``extraOutputGetSpec`` at each iterations""",
+    ).tag(config=True)
+
+    argsGetSpec = tr.Tuple(
+        default_value=(),
+        help="Supplementary positional arguments passed to the external function.",
+    ).tag(config=True)
+
+    kwargsGetSpec = tr.Dict(
+        default_value={},
+        help="Supplementary keyword arguments passed to the external function.",
+    ).tag(config=True)
+
+    hardSt_to_St_idx = tr.Union(
+        (tr.Enum(["default"]), tr.List()),
+        default_value="default",
+        help="""Indicates the correspondence between the indexes of the lines of
+    `hardSt` and of the `St` matrix. ``[1, None, 0]`` indicates that the first profile in
+    `hardSt` (index ``O`` ) corresponds to the second profile of `St` (index ``1`` ).""",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -433,6 +476,14 @@ on the decreasing branch of profile ``#j`` ,
         # function will create the corresponding dataset
         return C
 
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
+    def _St_2_NDDataset(self, St):
+        # getconc takes the C NDDataset as first argument (to take advantage
+        # of useful metadata). The current St in fit method is a ndarray (without
+        # the masked rows and columns, nor the coord information: this
+        # function will create the corresponding dataset
+        return St
+
     # ----------------------------------------------------------------------------------
     # Private validation methods and default getter
     # ----------------------------------------------------------------------------------
@@ -550,6 +601,25 @@ on the decreasing branch of profile ``#j`` ,
             )
         return unimodSpec
 
+    @tr.validate("hardSt_to_St_idx")
+    def _validate_hardSt_to_St_idx(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
+        hardSt_to_St_idx = proposal.value
+        if not self._n_components:  # not initialized or 0
+            return hardSt_to_St_idx
+        if hardSt_to_St_idx == "default":
+            hardSt_to_St_idx = np.arange(self._n_components).tolist()
+        elif (
+            len(hardSt_to_St_idx) > self._n_components
+            or max(hardSt_to_St_idx) + 1 > self._n_components
+        ):
+            raise ValueError(
+                f"The profile has only {self._n_components} species, please check "
+                f"the `hardSt_to_St_idx`  configuration (value:{hardSt_to_St_idx})"
+            )
+        return hardSt_to_St_idx
+
     @tr.observe("_Y_preprocessed")
     def _Y_preprocessed_change(self, change):
         if self._n_components > 0:
@@ -561,6 +631,7 @@ on the decreasing branch of profile ``#j`` ,
                 warnings.simplefilter(action="ignore", category=FutureWarning)
                 self.closureTarget = self.closureTarget
                 self.hardC_to_C_idx = self.hardC_to_C_idx
+                self.hardSt_to_St_idx = self.hardSt_to_St_idx
                 self.nonnegConc = self.nonnegConc
                 self.nonnegSpec = self.nonnegSpec
                 self.unimodConc = self.unimodConc
@@ -690,9 +761,8 @@ on the decreasing branch of profile ``#j`` ,
 
             # external concentration profiles
             # ------------------------------------------
-            extOutput = None
+            extraOutputGetConc = []
             if np.any(self.hardConc):
-
                 _C = self._C_2_NDDataset(C)
                 if self.kwargsGetConc != {} and self.argsGetConc != ():
                     output = self.getConc(_C, *self.argsGetConc, **self.kwargsGetConc)
@@ -707,12 +777,11 @@ on the decreasing branch of profile ``#j`` ,
                     fixedC = output[0]
                     self.argsGetConc = output[1]
                     if len(output) == 3:
-                        extOutput = output[2]
+                        extraOutputGetConc.append(output[2])
                     else:
                         fixedC = output
                 else:
                     fixedC = output
-                    extOutput = None
 
                 C[:, self.hardConc] = fixedC[:, self.hardC_to_C_idx]
 
@@ -740,6 +809,33 @@ on the decreasing branch of profile ``#j`` ,
                     tol=self.unimodSpecTol,
                     mod=self.unimodSpecMod,
                 )
+
+            # External spectral profile
+            # -----------------------------
+            extraOutputGetSpec = []
+            if np.any(self.hardSpec):
+                _St = self._St_2_NDDataset(St)
+                if self.kwargsGetSpec != {} and self.argsGetSpec != ():
+                    output = self.getSpec(_St, *self.argsGetSpec, **self.kwargsGetSpec)
+                elif self.kwargsGetSpec == {} and self.argsGetSpec != ():
+                    output = self.getSpec(_St, *self.argsGetSpecc)
+                elif self.kwargsGetSpec != {} and self.argsGetSpec == ():
+                    output = self.getSpec(_St, **self.kwargsGetSpec)
+                else:
+                    output = self.getSpec(_St)
+
+                if isinstance(output, tuple):
+                    fixedSt = output[0].data
+                    self.argsGetSpec = output[1]
+                    if len(output) == 3:
+                        extraOutputGetSpec.append(output[2])
+                    else:
+                        fixedSt = output.data
+                else:
+                    fixedSt = output.data
+
+                print(self.hardSt_to_St_idx)
+                St[self.hardSpec, :] = fixedSt[self.hardSt_to_St_idx, :]
 
             # recompute C for consistency(soft modeling)
             C = np.linalg.lstsq(St.T, X.T, rcond=-1)[0].T
@@ -793,7 +889,7 @@ on the decreasing branch of profile ``#j`` ,
 
         # return _fit results
         self._components = St
-        _outfit = (C, St, C_hard, St_soft, extOutput)
+        _outfit = (C, St, C_hard, St_soft, extraOutputGetConc, extraOutputGetSpec)
         return _outfit
 
     def _transform(self, X=None):
@@ -910,11 +1006,18 @@ on the decreasing branch of profile ``#j`` ,
         return self._outfit[3]
 
     @property
-    def extOutput(self):
+    def extraOutputGetConc(self):
         """
-        The last relevant output of the external function used to get concentrations.
+        The extra outputs of the external function used to get concentrations.
         """
         return self._outfit[4]
+
+    @property
+    def extraOutputGetSpec(self):
+        """
+        The extra outputs of the external function used to get spectra.
+        """
+        return self._outfit[5]
 
 
 # --------------------------------------------------------------------------------------
@@ -1002,5 +1105,4 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
                 a[curid - 1] = a[curid]
                 curid = curid - 2
         curmax = a[curid]
-
     return a
