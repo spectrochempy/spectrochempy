@@ -32,8 +32,8 @@ def expon(t, c0, l, noise):
         return c0 * (np.exp(l * t.data)) + noise * np.random.randn(len(t.data))
 
 
-def get_C(x):
-    return x
+def get_C(C):
+    return C
 
 
 def get_C_a(C, a):

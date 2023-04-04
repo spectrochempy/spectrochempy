@@ -70,7 +70,7 @@ class MCRALS(DecompositionAnalysis):
 
     # Developer notes
     # ----------------
-    # Private traits with internal validation (see Traitlets librairie for more
+    # Private traits with internal validation (see Traitlets library for more
     # information)
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
