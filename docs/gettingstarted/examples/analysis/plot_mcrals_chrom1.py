@@ -66,7 +66,6 @@ _ = mcr.St.plot()
 # %%
 # Finally, plots the reconstructed dataset  (X_hat = C St) vs original dataset (X)
 # and residuals for few spectra. The fit is good and comparable with the original paper.
-X_hat = mcr.inverse_transform()
-mcr.plotmerit(X, X_hat, nb_traces=5)
+mcr.plotmerit(nb_traces=5)
 
 scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
