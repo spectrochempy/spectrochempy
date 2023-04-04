@@ -98,10 +98,9 @@ _ = mcr_2.C.T.plot()
 _ = mcr_2.C_hard.T.plot(clear=False)
 
 # %%
-# Finally, let\'s plot the pure spectra profiles St, and the
+# Finally, let\'s plot some of the pure spectra profiles St, and the
 #  reconstructed dataset  (X_hat = C St) vs original dataset (X) and residuals.
 _ = mcr_2.St.plot()
-X_hat = mcr_2.inverse_transform()
-_ = mcr_2.plotmerit(X, X_hat, offset=0, nb_traces=10)
+_ = mcr_2.plotmerit(offset=0, nb_traces=10)
 
 scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
