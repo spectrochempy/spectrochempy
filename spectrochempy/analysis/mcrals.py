@@ -46,7 +46,7 @@ class MCRALS(DecompositionAnalysis):
     Multivariate Curve Resolution Alternating Least Squares (MCRALS).
 
     :term:`MCR-ALS` ( ``Multivariate Curve Resolution Alternating Least Squares`` )
-    resolve's a set (or several sets) of spectra :math:`X` of an evolving mixture
+    resolves a set (or several sets) of spectra :math:`X` of an evolving mixture
     (or a set of mixtures) into the spectra :math:`S^T` of "pure" species and their
     concentration profiles :math:`C` .
 
@@ -68,7 +68,7 @@ class MCRALS(DecompositionAnalysis):
 
     # Developer notes
     # ----------------
-    # Private traits with internal validation (see Traitlets librairie for more
+    # Private traits with internal validation (see Traitlets library for more
     # information)
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
@@ -138,7 +138,7 @@ if:
 
     monoDecConc = tr.List(
         default_value=[],
-        help="""Monotonic decrease constraint on concentrations.  If set to ``[]``
+        help="""Monotonic decrease constraint on concentrations. If set to ``[]``
 (default) no constraint is applied. If an array of indexes is passed,
 the corresponding profiles are considered do decrease monotonically, not the
 others. For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are decreasing
