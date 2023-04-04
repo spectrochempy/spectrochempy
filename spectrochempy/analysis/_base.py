@@ -965,16 +965,12 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Plot methods
     # ----------------------------------------------------------------------------------
     @_docstring.dedent
-    def plotmerit(self, X, X_hat, **kwargs):
+    def plotmerit(self, **kwargs):
         """
         Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
 
         Parameters
         ----------
-        X : |NDDataset|
-            Original dataset that was fitted.
-        X_hat : |NDDataset|
-            Inverse transformed (reconstructed) dataset from a decomposition model.
         %(kwargs)s
 
         Returns
@@ -1003,6 +999,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
 
+        X = self._X
+        X_hat = self.inverse_transform()
         if X._squeeze_ndim == 1:
             # normally this was done before, but if needed.
             X = X.squeeze()
@@ -1011,7 +1009,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         # Number of traces to keep
         nb_traces = kwargs.pop("nb_traces", "all")
         if X.ndim == 2 and nb_traces != "all":
-            inc = int(X.shape[0] / nb_traces)
+            inc = int(self._X.shape[0] / nb_traces)
             X = X[::inc]
             X_hat = X_hat[::inc]
 
