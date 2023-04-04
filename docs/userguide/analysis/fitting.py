@@ -448,7 +448,7 @@ ax.autoscale(enable=True, axis="y")
 
 # plotmerit
 som = f1.inverse_transform()
-f1.plotmerit(ndOHcorr, som, offset=0, kind="scatter")
+f1.plotmerit(offset=0, kind="scatter")
 
 
 # %% [markdown]

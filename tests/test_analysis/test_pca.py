@@ -133,9 +133,7 @@ def test_pca():
 
     # if scores was not determined or the X used for score is the same as in fit
     # score is optional
-    X_hat = pca.inverse_transform()
-
-    pca.plotmerit(dataset, X_hat, offset=0, nb_traces=10)
+    pca.plotmerit(offset=0, nb_traces=10)
     plt.show()
 
     # printev
