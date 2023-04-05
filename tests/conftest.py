@@ -64,8 +64,9 @@ datadir = pathclean(prefs.datadir)
 print("DATADIR: ", datadir)
 
 
-# from spectrochempy.utils.file import download_testdata
-# download_testdata()
+from spectrochempy.utils.file import download_testdata
+
+download_testdata()
 
 
 # initialize a ipython session before calling spectrochempy
