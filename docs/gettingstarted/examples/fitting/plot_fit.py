@@ -111,5 +111,6 @@ ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
 # plotmerit
-f1.plotmerit(method="scatter", markevery=5, markersize=2)
+som = f1.inverse_transform()
+f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2)
 scp.show()
