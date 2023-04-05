@@ -272,7 +272,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # An empty __doc__ is placed here, else Configurable.__doc__
         # will appear when there is no __init___.doc in subclass
 
-        # reset default configuration if not warm_start
+        # Reset default configuration if not warm_start
         reset = not warm_start
 
         # Call the super class (MetaConfigurable) for initialisation
@@ -290,6 +290,8 @@ class AnalysisConfigurable(MetaConfigurable):
         # Eventually take parameters from kwargs
         configkw.update(kwargs)
 
+        # Now update all configuration parameters
+        # if an item k is not in the config parameters, an error is raised.
         for k, v in configkw.items():
             if hasattr(self, k) and k in defaults:
                 if getattr(self, k) != v:
@@ -302,6 +304,7 @@ class AnalysisConfigurable(MetaConfigurable):
                 )
 
         # If warm start we can use the previous fit as starting profiles.
+        # so the flag _fitted is not set.
         if not warm_start:
             # We should not be able to use any methods requiring fit results
             # until the fit method has been executed
