@@ -82,10 +82,10 @@ master_doc = "index"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-version = scp.application.__version__  # .split('+')[0]
+version = scp.application.version  # .split('+')[0]
 release = version.split("+")[0]
 project = f"SpectroChemPy v{version}"
-copyright = scp.application.__copyright__
+copyright = scp.application.copyright
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
