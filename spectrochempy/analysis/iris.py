@@ -24,6 +24,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.traits import CoordType, NDDatasetType
@@ -890,6 +891,9 @@ def _menger(x, y):
     points. x, y = sets of 3 cartesian coordinates
     """
     numerator = 2 * (((x[1] - x[0]) * (y[2] - y[1])) - ((y[1] - y[0]) * (x[2] - x[1])))
+    if abs(numerator) <= EPSILON:
+        return 0.0
+
     # euclidian distances
     r01 = (x[1] - x[0]) ** 2 + (y[1] - y[0]) ** 2
     r12 = (x[2] - x[1]) ** 2 + (y[2] - y[1]) ** 2

@@ -10,10 +10,13 @@ from pathlib import Path
 import numpy as np
 import traitlets as tr
 from matplotlib import cycler
+from traitlets.config import Config
 from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
 from spectrochempy.extern.traittypes import Empty, SciType
+from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.objects import Adict
 
 
 class MetaConfigurable(Configurable):
@@ -24,12 +27,29 @@ class MetaConfigurable(Configurable):
     executions of the main application.
     """
 
-    def __init__(self, section, **kwargs):  # lgtm[py/missing-call-to-init]
+    name = tr.Unicode()
 
-        super().__init__(**kwargs)
-
+    def __init__(self, **kwargs):
+        # keep only the current config section
+        reset = kwargs.pop("reset", False)
+        parent = kwargs.get("parent")
+        parent_config = parent.config
+        config = Config()
+        if self.name in parent_config and not reset:
+            config = Config({self.name: parent_config[self.name]})
+        # call the superclass __init__ is required
+        super().__init__(parent=parent, config=config)
+        # get the config manager
         self.cfg = self.parent.config_manager
-        self.section = section
+
+    @tr.default("name")
+    def _name_default(self):
+        # this ensures a name has been defined for the subclassed model estimators
+        # or an error is returned
+        raise NameError(
+            "The name of the object was not defined. It is necessary"
+            "for writing configuration files"
+        )
 
     def to_dict(self):
         """
@@ -50,11 +70,53 @@ class MetaConfigurable(Configurable):
         defaults = super().trait_defaults(*names, **metadata)
         # modify with the loaded external config
         if not names:  # full dictionary
-            config = self.config[self.section]
+            config = self.config[self.name]
             if "shape" in config and isinstance(config["shape"], LazyConfigValue):
                 del config["shape"]  # remove the lazy configurable object
             defaults.update(config)
         return defaults
+
+    @_docstring.get_docstring(base="metaconfigurable.parameters")
+    @_docstring.dedent
+    def parameters(self, default=False):
+        """
+        Current or default configuration values.
+
+        Parameters
+        ----------
+        default : `bool`, optional, default: `False`
+            If `default` is `True`, the default parameters are returned,
+            else the current values.
+
+        Returns
+        -------
+        `dict`
+            Current or default configuration values.
+        """
+        d = Adict()
+        if not default:
+            d.update(self.trait_values(config=True))
+        else:
+            d.update(self.trait_defaults(config=True))
+        return d
+
+    def reset(self):
+        """
+        Reset configuration parameters to their default values
+        """
+        # for this we need to remove the section corresponding
+        # to the current configurable (i.e., self.name)
+        if self.name in self.config:
+            # remove this entry in config
+            del self.config[self.name]
+            # also delete the current JSON config file
+            f = (Path(self.cfg.config_dir) / self.name).with_suffix(".json")
+            f.unlink()
+
+        # then set the default parameters
+        for k, v in self.parameters(default=True).items():
+            if getattr(self, k) != v:
+                setattr(self, k, v)
 
     @tr.observe(tr.All)
     def _anytrait_changed(self, change):
@@ -64,16 +126,26 @@ class MetaConfigurable(Configurable):
             # not yet initialized
             return
 
-        if change.name in self.traits(config=True):
+        if change.name in self.trait_names(config=True):
 
             value = change.new
 
-            # workaround to not write callable
+            # Serialization of callable functions
+            # (avoid recursive functions, though!)
+            # for this we use the dill library
+            # (see
+            # https://medium.com/@greyboi/serialising-all-the-functions-in-python-cd880a63b591)
             if callable(value):
-                return
+                import dill
 
-            # replace non serializable value by an equivalent
-            if isinstance(value, (type(cycler), Path)):
+                value = dill.dumps(value)
+                # bytes are however not JSON serialisable: make an encoded string
+                import base64
+
+                value = base64.b64encode(value).decode()
+
+            # replace other serializable value by an equivalent
+            elif isinstance(value, (type(cycler), Path)):
                 value = str(value)
             if isinstance(value, np.ndarray):
                 # we need to transform it to a list of elements, bUT with python built-in
@@ -81,7 +153,7 @@ class MetaConfigurable(Configurable):
                 value = value.tolist()
 
             self.cfg.update(
-                self.section,
+                self.name,
                 {
                     self.__class__.__name__: {
                         change.name: value,

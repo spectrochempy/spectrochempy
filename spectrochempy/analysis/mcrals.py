@@ -16,9 +16,11 @@ This module implements the MCRALS class.
 __all__ = ["MCRALS"]
 __configurables__ = ["MCRALS"]
 
+import base64
 import logging
 import warnings
 
+import dill
 import numpy as np
 import traitlets as tr
 from sklearn import decomposition
@@ -211,7 +213,8 @@ If an array is passed: the values of concentration for each observation. Hence,
 corresponding profiles will set by `getC` .""",
     ).tag(config=True)
 
-    getConc = tr.Callable(
+    getConc = tr.Union(
+        (tr.Callable(), tr.Unicode()),
         default_value=None,
         allow_none=True,
         help="""An external function that will provide ``len(hardConc)`` concentration
@@ -227,7 +230,11 @@ where ``Ccurr``  is the current `C` dataset, ``\*argsGetConc`` are the parameter
 completely specify the function. `hardC` is a |ndarray| or |NDDataset| of shape
 ``(C.y, len(hardConc)`` , ``newArgsGetConc`` are the updated parameters for the next
 iteration (can be None), and ``extraOutputGetConc`` can be any other relevant output to be kept
-in `extraOutputGetConc` attribute, a list of ``extraOutputGetConc`` at each MCR ALS iterations""",
+in `extraOutputGetConc` attribute, a list of ``extraOutputGetConc`` at each MCR ALS iterations.
+
+.. note::
+    it can be also a serialized function created using dill and base64.
+    Normally not used directly, it is here for internal process.""",
     ).tag(config=True)
 
     argsGetConc = tr.Tuple(
@@ -303,7 +310,8 @@ on the decreasing branch of profile ``#j`` ,
     corresponding profiles will set by `getSt` .""",
     ).tag(config=True)
 
-    getSpec = tr.Callable(
+    getSpec = tr.Union(
+        (tr.Callable(), tr.Unicode()),
         default_value=None,
         allow_none=True,
         help="""An external function that will provide ``len(hardSpec)`` concentration
@@ -388,6 +396,12 @@ on the decreasing branch of profile ``#j`` ,
             copy=copy,
             **kwargs,
         )
+
+        # deal with the callable that may have been serialized
+        if self.getConc is not None and isinstance(self.getConc, str):
+            self.getConc = dill.loads(base64.b64decode(self.getConc))
+        if self.getSpec is not None and isinstance(self.getSpec, str):
+            self.getSpec = dill.loads(base64.b64decode(self.getSpec))
 
     # ----------------------------------------------------------------------------------
     # Private methods

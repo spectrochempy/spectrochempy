@@ -19,7 +19,6 @@ import traitlets as tr
 from sklearn import linear_model
 
 from spectrochempy.core import app, set_loglevel
-from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -235,7 +234,6 @@ class AnalysisConfigurable(MetaConfigurable):
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
     _copy = tr.Bool(default_value=True, help="If True, input X data are copied")
-    _warm_start = tr.Bool(False, help="If True previous execution state is reused")
 
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows and columns")
@@ -277,8 +275,11 @@ class AnalysisConfigurable(MetaConfigurable):
         # An empty __doc__ is placed here, else Configurable.__doc__
         # will appear when there is no __init___.doc in subclass
 
+        # reset default configuration if not warm_start
+        reset = not warm_start
+
         # Call the super class (MetaConfigurable) for initialisation
-        super().__init__(section=self.name, parent=app)
+        super().__init__(parent=app, reset=reset)
 
         # Set log_level of the console report (accessible using the log property)
         set_loglevel(log_level)
@@ -293,8 +294,9 @@ class AnalysisConfigurable(MetaConfigurable):
         configkw.update(kwargs)
 
         for k, v in configkw.items():
-            if k in defaults:
-                setattr(self, k, v)
+            if hasattr(self, k) and k in defaults:
+                if getattr(self, k) != v:
+                    setattr(self, k, v)
             else:
                 raise KeyError(
                     f"'{k}' is not a valid configuration parameters. "
@@ -303,7 +305,6 @@ class AnalysisConfigurable(MetaConfigurable):
                 )
 
         # If warm start we can use the previous fit as starting profiles.
-        self._warm_start = warm_start
         if not warm_start:
             # We should not be able to use any methods requiring fit results
             # until the fit method has been executed
@@ -453,12 +454,6 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
     # ----------------------------------------------------------------------------------
-    @tr.default("name")
-    def _name_default(self):
-        # this ensures a name has been defined for the subclassed model estimators
-        # or an error is returned
-        raise NameError("The name of the object was not defined.")
-
     @tr.default("_X")
     def _X_default(self):
         raise NotFittedError
@@ -554,7 +549,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
         self._X = X  # self._make_dataset(X)
         if Y is not None:
-            self._Y = Y  # self._make_dataset(Y)
+            self._Y = Y
 
         # _X_preprocessed has been computed when X was set, as well as _Y_preprocessed.
         # At this stage they should be simple ndarrays
@@ -595,34 +590,16 @@ class AnalysisConfigurable(MetaConfigurable):
         # thus we will return it's content
         return app.log.handlers[2].stream.getvalue().rstrip()
 
+    @_docstring.dedent
     def parameters(self, default=False):
-        """
-        Return current or default configuration values.
-
-        Parameters
-        ----------
-        default : `bool`, optional, default: `False`
-            If `default` is `True`, the default parameters are returned,
-            else the current values.
-
-        Returns
-        -------
-        `dict`
-            Current or default configuration values.
-        """
-        d = Meta()
-        if not default:
-            d.update(self.trait_values(config=True))
-        else:
-            d.update(self.trait_defaults(config=True))
-        return d
+        """%(metaconfigurable.parameters)s"""
+        return super().parameters(default)
 
     def reset(self):
         """
         Reset configuration parameters to their default values.
         """
-        for k, v in self.parameters(default=True).items():
-            setattr(self, k, v)
+        super().reset()
 
     @property
     def X(self):
