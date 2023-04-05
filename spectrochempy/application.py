@@ -564,7 +564,10 @@ class GeneralPreferences(MetaConfigurable):
     They should be accessible from the main API.
     """
 
-    name = tr.Unicode("GeneralPreferences")
+    name = tr.Unicode(
+        "GeneralPreferences",
+        help="required parameter : " "serve as name for the JSON" "configuration file.",
+    )
     description = tr.Unicode("General options for the SpectroChemPy application")
     updated = tr.Bool(False)
 
@@ -701,7 +704,7 @@ class GeneralPreferences(MetaConfigurable):
     # Class Initialisation
     # ----------------------------------------------------------------------------------
     def __init__(self, **kwargs):
-        super().__init__(section="GeneralPreferences", **kwargs)
+        super().__init__(**kwargs)
 
 
 # ======================================================================================
@@ -985,7 +988,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
                         pyname.unlink()
                     else:
                         configfiles.append(pyname)
-                elif fil.suffix == ".jso":
+                elif fil.suffix == ".json":
                     jsonname = self.config_dir / fil
                     if self.reset_config or fil == "PlotPreferences.json":
                         # remove the user json file to reset to defaults
@@ -1008,12 +1011,12 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
         self.datadir = (
             DataDir()
         )  # config=self.config)  -- passing args deprecated in traitlets 4.2
-        self.preferences = GeneralPreferences(config=self.config, parent=self)
+        self.preferences = GeneralPreferences(parent=self)
         from spectrochempy.plot_preferences import (
             PlotPreferences,  # slow : delayed import
         )
 
-        self.plot_preferences = PlotPreferences(config=self.config, parent=self)
+        self.plot_preferences = PlotPreferences(parent=self)
         self.classes.extend(
             [
                 GeneralPreferences,
@@ -1287,22 +1290,26 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
     # Private methods
     # ----------------------------------------------------------------------------------
     def _make_default_config_file(self):
-        """auto generate default config file."""
-
-        # first we will complete self.classes with a list of configurable in analysis
-        from spectrochempy.analysis.api import __configurables__
+        # auto generate default config file.
 
         # remove old configuration file spectrochempy_cfg.py
+        # --------------------------------------------------
         fname = self.config_dir / "spectrochempy_cfg.py"  # Old configuration file
-        if fname.exists():
-            fname.unlink()
+        fname2 = self.config_dir / "SpectroChemPy.cfg.py"
+        if fname.exists() or fname2.exists():
+            for file in list(self.config_dir.iterdir()):
+                file.unlink()
 
         # create a configuration file for each configurables
+        # --------------------------------------------------
+        from spectrochempy.analysis.api import __configurables__
+
+        # first we will complete self.classes with a list of configurable in analysis
         self.classes.extend(__configurables__)
         config_classes = list(self._classes_with_config_traits(self.classes))
         for cls in config_classes:
             name = cls.__name__
-            fname = self.config_dir / f"{name}.cfg.py"
+            fname = self.config_dir / f"{name}.py"
             if fname.exists() and not self.reset_config:
                 continue
             """generate default config file from Configurables"""
@@ -1318,7 +1325,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
 
 
 # ======================================================================================
-# Start instance od Spectrochempy and expose public members in all
+# Start instance of Spectrochempy and expose public members in all
 # ======================================================================================
 app = SpectroChemPy()
 preferences = app.preferences

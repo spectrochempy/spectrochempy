@@ -63,9 +63,9 @@ warnings.filterwarnings(
 
 warnings.filterwarnings(action="ignore", module="jupyter")  # , category=UserWarning)
 warnings.filterwarnings(action="ignore", module="pykwalify")  # , category=UserWarning)
-warnings.filterwarnings(
-    action="error", category=FutureWarning
-)  # , category=UserWarning)
+# warnings.filterwarnings(
+#    action="error", category=FutureWarning
+# )  # , category=UserWarning)
 
 from spectrochempy import api
 from spectrochempy.api import *  # noqa: F401

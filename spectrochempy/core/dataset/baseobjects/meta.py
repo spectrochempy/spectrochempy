@@ -21,13 +21,13 @@ import json
 
 import numpy as np
 
-__all__ = ["Meta"]
+__all__ = []
 
 
 # ======================================================================================
 # Class Meta
 # ======================================================================================
-class Meta(object):  # HasTraits):
+class Meta(object):
     """
     A dictionary to store metadata.
 

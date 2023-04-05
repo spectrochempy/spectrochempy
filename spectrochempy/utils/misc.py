@@ -75,15 +75,6 @@ def _codechange(code_obj, changes):
     return code(*values)
 
 
-class _DummyFile(object):
-    """
-    A writeable object.
-    """
-
-    def write(self, s):
-        pass
-
-
 # ======================================================================================
 # Public methods
 # ======================================================================================
