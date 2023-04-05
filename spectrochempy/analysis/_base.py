@@ -969,15 +969,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
         """
         Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
 
-        Parameters
-        ----------
-        %(args)s
-            X : |NDDataset|
-                Original dataset that was fitted.
-            X_hat : |NDDataset|
-                Inverse transformed (reconstructed) dataset from a decomposition model.
-        if not provided, X attribute is used and X_hat is computed by inverse_transform()
-        %(kwargs)s
+        :math:`X`\ and :math:`\hat{X}`\ can be passed as positionbal arguments. If not, the X attribute is
+        used for :math:`X`\ and :math:`\hat{X}`\ is computed by the inverse_transform() method
 
         Returns
         -------
@@ -995,7 +988,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Specify the separation (in percent) between the `X` , `X_hat` and `E` .
         nb_traces : `int` or ``'all'``, optional
             Number of lines to display. Default is ``'all'`` .
-        **others : Other keywords parameters
+        **kwargs : Other keywords parameters
             Parameters passed to the internal `plot` method of the `X` dataset.
         """
         if not self._fitted:
