@@ -988,7 +988,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Specify the separation (in percent) between the `X` , `X_hat` and `E` .
         nb_traces : `int` or ``'all'``, optional
             Number of lines to display. Default is ``'all'`` .
-        **kwargs : Other keywords parameters
+        **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the `X` dataset.
         """
         if not self._fitted:
