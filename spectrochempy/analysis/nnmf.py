@@ -52,9 +52,6 @@ class NMF(DecompositionAnalysis):
     """
     )
 
-    name = tr.Unicode("NMF")
-    description = tr.Unicode("Scikit-learn NMF model")
-
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
     # only those specific to NMF, the other being defined in AnalysisConfigurable.

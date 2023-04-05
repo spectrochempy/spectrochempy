@@ -68,11 +68,6 @@ class EFA(DecompositionAnalysis):
     """
     )
 
-    name = tr.Unicode("EFA", help="Name of the model.")
-    description = tr.Unicode(
-        "Evolving factor analysis model", help="Short description of the model."
-    )
-
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
     # as they depend on the model estimator)

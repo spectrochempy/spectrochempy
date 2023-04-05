@@ -23,7 +23,7 @@ from traitlets import (
     observe,
 )
 
-from spectrochempy.utils.traits import MetaConfigurable
+from spectrochempy.application.metaconfigurable import MetaConfigurable
 
 # from spectrochempy.core import warning_
 
@@ -333,7 +333,7 @@ class PlotPreferences(MetaConfigurable):
         config=True, kind=""
     )
     mathtext_bf = Unicode("dejavusans:bold", help=r"""bold""").tag(config=True, kind="")
-    mathtext_sf = Unicode("sans\-serif", help=r"""""").tag(
+    mathtext_sf = Unicode(r"sans\-serif", help=r"""""").tag(
         config=True, kind=""
     )  # noqa: W605
     mathtext_fontset = Unicode(

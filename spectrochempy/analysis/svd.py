@@ -96,9 +96,6 @@ class SVD(DecompositionAnalysis):
     """
     )
 
-    name = tr.Unicode("SVD")
-    description = tr.Unicode("Singular Value Decomposition")
-
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------

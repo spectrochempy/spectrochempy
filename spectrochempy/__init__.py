@@ -50,12 +50,13 @@ It is a cross-platform software, running on Linux, Windows or OS X.
 
 import warnings
 
+import numpy as np
+
 # warnings.filterwarnings(action="error", category=DeprecationWarning)
 # warnings.filterwarnings(action="ignore", module="matplotlib")  # , category=UserWarning)
 warnings.filterwarnings(
     action="once", module="spectrochempy", category=DeprecationWarning
 )
-import numpy as np
 
 warnings.filterwarnings(
     action="error", module="spectrochempy", category=np.VisibleDeprecationWarning

@@ -19,43 +19,10 @@ except ModuleNotFoundError:  # pragma: no cover
         "You must install spectrochempy and its dependencies before executing tests!"
     )
 
-from spectrochempy.core import preferences as prefs
-from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
-from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.project.project import Project
-from spectrochempy.core.script import Script
-from spectrochempy.utils.file import download_testdata, pathclean
-from spectrochempy.utils.testing import RandomSeedContext
 
-# first download missing data
-datadir = pathclean(prefs.datadir)
-print("DATADIR: ", datadir)
-
-download_testdata()
-
-# ======================================================================================
-# FIXTURES
-# ======================================================================================
-# initialize a ipython session before calling spectrochempy
-# --------------------------------------------------------------------------------------
-@pytest.fixture(scope="session")
-def session_ip():
-    try:
-        from IPython.testing.globalipapp import start_ipython
-
-        return start_ipython()
-    except ImportError:
-        return None
-
-
-@pytest.fixture(scope="module")
-def ip(session_ip):
-    yield session_ip
-
-
+# ----------------------------
+# Cleaning when exiting pytest
+# ----------------------------
 def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
     """whole test run finishes."""
 
@@ -75,6 +42,47 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
     docs = cwd / "docs"
     for f in list(docs.glob("**/*.ipynb")):
         f.unlink()
+
+
+# ======================================================================================
+# FIXTURES
+# ======================================================================================
+
+from spectrochempy.core import preferences as prefs
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.project.project import Project
+from spectrochempy.core.script import Script
+from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.testing import RandomSeedContext
+
+# first download missing data
+datadir = pathclean(prefs.datadir)
+print("DATADIR: ", datadir)
+
+
+# from spectrochempy.utils.file import download_testdata
+# download_testdata()
+
+
+# initialize a ipython session before calling spectrochempy
+# --------------------------------------------------------------------------------------
+@pytest.fixture(scope="session")
+def session_ip():
+    try:
+        from IPython.testing.globalipapp import start_ipython
+
+        return start_ipython()
+    except ImportError:
+        return None
+
+
+@pytest.fixture(scope="module")
+def ip(session_ip):
+    yield session_ip
 
 
 # --------------------------------------------------------------------------------------

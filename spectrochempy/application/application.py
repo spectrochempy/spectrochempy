@@ -44,8 +44,8 @@ from traitlets.config.application import Application
 from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
 
+from spectrochempy.application.general_preferences import GeneralPreferences
 from spectrochempy.utils.file import pathclean
-from spectrochempy.utils.traits import MetaConfigurable
 from spectrochempy.utils.version import Version
 
 # ======================================================================================
@@ -134,17 +134,17 @@ def _display_info_string(**kwargs):  # pragma: no cover
 # Version
 # --------------------------------------------------------------------------------------
 try:
-    __release__ = get_distribution("spectrochempy").version.split("+")[0]
+    release = get_distribution("spectrochempy").version.split("+")[0]
     "Release version string of this package"
 except DistributionNotFound:  # pragma: no cover
     # package is not installed
-    __release__ = "--not set--"
+    release = "--not set--"
 
 try:
-    __version__ = get_version(root="..", relative_to=__file__)
+    version = get_version(root="..", relative_to=__file__)
     "Version string of this package"
 except LookupError:  # pragma: no cover
-    __version__ = __release__
+    version = release
 
 
 def _get_copyright():
@@ -154,7 +154,7 @@ def _get_copyright():
     return right
 
 
-__copyright__ = _get_copyright()
+copyright = _get_copyright()
 "Copyright string of this package"
 
 
@@ -162,7 +162,7 @@ def _get_release_date():
     return subprocess.getoutput("git log -1 --tags --date=short --format='%ad'")
 
 
-__release_date__ = _get_release_date()
+release_date = _get_release_date()
 "Last release date of this package"
 
 
@@ -199,19 +199,19 @@ def _get_pypi_version():
 
 def _check_for_updates(*args):
 
-    old = Version(__version__)
+    old = Version(version)
     res = _get_pypi_version()
     if res is not None:
-        version, release_date = res
+        _version, _release_date = res
     else:
         # probably a ConnectionError
         return
 
     new_release = None
 
-    if version > old:  # pragma: no cover  # TODO: change back the comparison sign
-        new_version = version.public
-        if not version.is_devrelease:
+    if _version > old:  # pragma: no cover  # TODO: change back the comparison sign
+        new_version = _version.public
+        if not _version.is_devrelease:
             new_release = new_version
 
     fil = Path.home() / ".scpy_update"
@@ -265,21 +265,21 @@ CHECK_UPDATE.start()
 # --------------------------------------------------------------------------------------
 # Other info
 # --------------------------------------------------------------------------------------
-__url__ = "https://www.spectrochempy.fr"
+url = "https://www.spectrochempy.fr"
 "URL for the documentation of this package"
 
-__author__ = "C. Fernandez & A. Travert"
+authors = "C. Fernandez & A. Travert"
 "First authors(s) of this package"
 
-__contributor__ = "A. Ait Blal, W. Guérin, M. Mailänder"
+contributors = "A. Ait Blal, W. Guérin, M. Mailänder"
 "contributor(s) to this package"
 
-__license__ = "CeCILL-B license"
+license = "CeCILL-B license"
 "License of this package"
 
-__cite__ = (
+cite = (
     f"Arnaud Travert & Christian Fernandez (2021) SpectroChemPy (version"
-    f" {'.'.join(__version__.split('.')[0:2])}). "
+    f" {'.'.join(version.split('.')[0:2])}). "
     f"Zenodo. https://doi.org/10.5281/zenodo.3823841"
 )
 "How to cite this package"
@@ -555,159 +555,6 @@ class DataDir(tr.HasTraits):
 
 
 # ======================================================================================
-# General Preferences
-# ======================================================================================
-class GeneralPreferences(MetaConfigurable):
-    """
-    Preferences that apply to the |scpy| application in general.
-
-    They should be accessible from the main API.
-    """
-
-    name = tr.Unicode(
-        "GeneralPreferences",
-        help="required parameter : " "serve as name for the JSON" "configuration file.",
-    )
-    description = tr.Unicode("General options for the SpectroChemPy application")
-    updated = tr.Bool(False)
-
-    # ----------------------------------------------------------------------------------
-    # Configuration entries
-    # ----------------------------------------------------------------------------------
-    # NON GUI
-    show_info_on_loading = tr.Bool(True, help="Display info on loading").tag(
-        config=True
-    )
-    use_qt = tr.Bool(
-        False,
-        help="Use QT for dialog instead of TK which is the default. "
-        "If True the PyQt libraries must be installed",
-    ).tag(config=True)
-
-    # GUI
-    # databases_directory = tr.Union(
-    #     (tr.Instance(Path), tr.Unicode()),
-    #     help="Directory where to look for database files such as csv",
-    # ).tag(config=True, gui=True, kind="folder")
-
-    datadir = tr.Union(
-        (tr.Instance(Path), tr.Unicode()),
-        help="Directory where to look for data by default",
-    ).tag(config=True, gui=True, kind="folder")
-
-    workspace = tr.Union(
-        (tr.Instance(Path), tr.Unicode()), help="Workspace directory by default"
-    ).tag(config=True, gui=True, kind="folder")
-
-    autoload_project = tr.Bool(
-        True, help="Automatic loading of the last project at startup"
-    ).tag(config=True, gui=True)
-
-    autosave_project = tr.Bool(
-        True, help="Automatic saving of the current project"
-    ).tag(config=True, gui=True)
-
-    project_directory = tr.Union(
-        (tr.Instance(Path), tr.Unicode()),
-        help="Directory where projects are stored by default",
-    ).tag(config=True, kind="folder")
-
-    last_project = tr.Union(
-        (tr.Instance(Path, allow_none=True), tr.Unicode()), help="Last used project"
-    ).tag(config=True, gui=True, kind="file")
-
-    show_close_dialog = tr.Bool(
-        True,
-        help="Display the close project dialog project changing or on application exit",
-    ).tag(config=True, gui=True)
-
-    csv_delimiter = tr.Enum(
-        [",", ";", r"\t", " "], default_value=",", help="CSV data delimiter"
-    ).tag(config=True, gui=True)
-
-    check_update_frequency = tr.Enum(
-        ["day", "week", "month"],
-        default_value="day",
-        help="Frequency of checking for update",
-    )
-
-    @tr.default("project_directory")
-    def _get_default_project_directory(self):
-        # Determines the SpectroChemPy project directory name and creates the directory
-        # if it doesn't exist.
-        # This directory is typically `$HOME/spectrochempy/projects` , but if the
-        # SCP_PROJECTS_HOME environment
-        # variable is set and the `$SCP_PROJECTS_HOME` directory exists, it will be
-        # that directory.
-        # If neither exists, the former will be created.
-
-        # first look for SCP_PROJECTS_HOME
-        pscp = environ.get("SCP_PROJECTS_HOME")
-        if pscp is not None and Path(pscp).exists():
-            return Path(pscp)
-
-        pscp = Path.home() / ".spectrochempy" / "projects"
-
-        pscp.mkdir(exist_ok=True)
-
-        if pscp.is_file():
-            raise IOError("Intended Projects directory is actually a file.")
-
-        return pscp
-
-    @tr.default("workspace")
-    def _get_workspace_default(self):
-        # the spectra path in package data
-        return Path.home()
-
-    # @tr.default("databases_directory")
-    # def _get_databases_directory_default(self):
-    #     # the spectra path in package data
-    #     return pathclean(get_pkg_path("databases", "scp_data"))
-
-    @tr.default("datadir")
-    def _get_default_datadir(self):
-        return pathclean(self.parent.datadir.path)
-
-    @tr.observe("datadir")
-    def _datadir_changed(self, change):
-        self.parent.datadir.path = pathclean(change["new"])
-
-    @tr.validate("datadir")
-    def _data_validate(self, proposal):
-        # validation of the datadir attribute
-        datadir = proposal["value"]
-        if isinstance(datadir, str):
-            datadir = pathclean(datadir)
-        return datadir
-
-    @property
-    def log_level(self):
-        """
-        Logging level (int).
-        """
-        return self.parent.log_level
-
-    @log_level.setter
-    def log_level(self, value):
-        if isinstance(value, str):
-            value = getattr(logging, value, None)
-            if value is None:  # pragma: no cover
-                warnings.warn(
-                    "Log level not changed: invalid value given\n"
-                    "string values must be DEBUG, INFO, WARNING, "
-                    "or ERROR"
-                )
-        self.parent.log_level = value
-
-    # ----------------------------------------------------------------------------------
-    # Class Initialisation
-    # ----------------------------------------------------------------------------------
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
-# ======================================================================================
 # Application
 # ======================================================================================
 class SpectroChemPy(Application):
@@ -741,9 +588,9 @@ class SpectroChemPy(Application):
  <strong>Spectro</>scopic data for <strong>Chem</strong>istry with
  <strong>Py</strong>thon.
  It is a cross platform software, running on Linux, Windows or OS X.</p><br><br>
-<strong>Version:</strong> {__release__}<br>
-<strong>Authors:</strong> {__author__}<br>
-<strong>License:</strong> {__license__}<br>
+<strong>Version:</strong> {release}<br>
+<strong>Authors:</strong> {authors}<br>
+<strong>License:</strong> {license}<br>
 <div class='warning'> SpectroChemPy is still experimental and under active development.
 Its current design and
  functionalities are subject to major changes, reorganizations, bugs and crashes!!!.
@@ -751,7 +598,7 @@ Its current design and
 to the <a url='https://github.com/spectrochempy/spectrochempy/issues'>Issue Tracker<a>
 </div><br><br>
 When using <strong>SpectroChemPy</strong> for your own work,
-you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
+you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 """
 
         return desc
@@ -1012,7 +859,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             DataDir()
         )  # config=self.config)  -- passing args deprecated in traitlets 4.2
         self.preferences = GeneralPreferences(parent=self)
-        from spectrochempy.plot_preferences import (
+        from spectrochempy.application.plot_preferences import (
             PlotPreferences,  # slow : delayed import
         )
 
@@ -1161,9 +1008,7 @@ you are kindly requested to cite it this way: <pre>{__cite__}</pre></p>.
             return True
 
         if self.preferences.show_info_on_loading:
-            info_string = (
-                f"SpectroChemPy's API - v.{__version__}\n© Copyright {__copyright__}"
-            )
+            info_string = f"SpectroChemPy's API - v.{version}\n© Copyright {copyright}"
             ipy = get_ipython()
             if ipy is not None and "TerminalInteractiveShell" not in str(ipy):
                 _display_info_string(message=info_string.strip())

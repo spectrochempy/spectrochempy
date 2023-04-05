@@ -50,9 +50,6 @@ class PCA(DecompositionAnalysis):
     """
     )
 
-    name = tr.Unicode("PCA")
-    description = tr.Unicode("Scikit-learn PCA model")
-
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
     # only those specific to PCA, the other being defined in AnalysisConfigurable.

@@ -74,8 +74,6 @@ class MCRALS(DecompositionAnalysis):
     # information)
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
-    name = tr.Unicode("MCRALS")
-    description = tr.Unicode("MCRALS model")
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters

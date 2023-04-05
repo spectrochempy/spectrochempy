@@ -18,6 +18,7 @@ import numpy as np
 import traitlets as tr
 from sklearn import linear_model
 
+from spectrochempy.application.metaconfigurable import MetaConfigurable
 from spectrochempy.core import app, set_loglevel
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.coordset import CoordSet
@@ -28,7 +29,7 @@ from spectrochempy.utils.constants import MASKED, NOMASK
 from spectrochempy.utils.decorators import deprecated, preserve_signature
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.plots import NBlue, NGreen, NRed
-from spectrochempy.utils.traits import MetaConfigurable, NDDatasetType
+from spectrochempy.utils.traits import NDDatasetType
 
 
 # ======================================================================================
@@ -225,10 +226,6 @@ class AnalysisConfigurable(MetaConfigurable):
 
     # Get doc sections for reuse in subclass
     _docstring.get_sections(__doc__, base="AnalysisConfigurable")
-
-    name = tr.Unicode(help="name of the implemented model")
-    # name must be defined in subclass with the name of the model: PCA, MCRALS, ...
-    description = tr.Unicode(help="optional description of the implemented model")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -589,17 +586,6 @@ class AnalysisConfigurable(MetaConfigurable):
         # A string handler (#2) is defined for the Spectrochempy logger,
         # thus we will return it's content
         return app.log.handlers[2].stream.getvalue().rstrip()
-
-    @_docstring.dedent
-    def parameters(self, default=False):
-        """%(metaconfigurable.parameters)s"""
-        return super().parameters(default)
-
-    def reset(self):
-        """
-        Reset configuration parameters to their default values.
-        """
-        super().reset()
 
     @property
     def X(self):

@@ -53,8 +53,6 @@ class SIMPLISMA(DecompositionAnalysis):
 
     # TODO : adapt to 3DDataset ?
 
-    name = tr.Unicode("SIMPLISMA")
-    description = tr.Unicode("SIMPLISMA model")
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
     # only those specific to PCA, the other being defined in AnalysisConfigurable.

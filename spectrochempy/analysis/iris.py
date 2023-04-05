@@ -350,9 +350,6 @@ class IRIS(DecompositionAnalysis):
     """
     )
 
-    name = tr.Unicode("IRIS")
-    description = tr.Unicode("IRIS model")
-
     # ----------------------------------------------------------------------------------
     # Runtime Parameters (in addition to those of AnalysisConfigurable)
     # ----------------------------------------------------------------------------------
