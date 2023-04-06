@@ -74,7 +74,7 @@ kin = scp.ActionMassKinetics(reactions, species_concentrations, k0)
 # %%
 # The concentration profile obtained with this approximate model can be computed and
 # compared with those of the soft MCR-ALS:
-Ckin, meta = kin.integrate(D.y.data)
+Ckin = kin.integrate(D.y.data)
 _ = mcr_1.C.T.plot(linestyle="-", cmap=None)
 _ = Ckin.T.plot(clear=False, cmap=None)
 

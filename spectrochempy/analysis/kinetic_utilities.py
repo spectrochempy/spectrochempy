@@ -22,9 +22,11 @@ import traitlets as tr
 from scipy.integrate import solve_ivp
 from scipy.optimize import differential_evolution, least_squares, minimize
 
-from spectrochempy.core import error_
+from spectrochempy.core import debug_, error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
+from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
 
 __all__ = [
@@ -32,13 +34,18 @@ __all__ = [
     "PFR",
 ]
 
-R = 8.314
+R = 8.314462618153241
+
+
+# exception used in this module
+class SolverError(SpectroChemPyError):
+    """Error raised if solve_ivp (integrate) return a status < 0"""
 
 
 @tr.signature_has_traits
 class ActionMassKinetics(tr.HasTraits):
     """
-    A class which stores a reaction network of elementary reactions.
+    An object which stores a reaction network of elementary reactions.
 
     It stores its rate parameterization, initial concentrations, temperature profile,
     with methods for evaluating production rates and concentration profiles assuming
@@ -46,45 +53,40 @@ class ActionMassKinetics(tr.HasTraits):
 
     Parameters
     ----------
-    equations: iterable object of `n_r` strings
-         Strings giving the `n_r` chemical equation of the network. Reactants and
-         products must be separated by a "->" symbol, stoichiometric coefficients,
-         species names and "+" symbols must be separated by at leat one space *
-         (" "). The name of each species should match a key of the `species` dict.
-
-         "A + B -> C"
-         "2 A -> D"
-    species : dict of `n_s` float, optional
-         Dict of initial concentrations of the `n_s` species.
-    k : iterable of shape n_reactions x 2
-         Arrhenius rate parameters ((A_1, Ea_1), ... (A_n, Ea_n)).
-    T : float or callable T(t)
-         Temperature.
+    equations : `list` or `tuple` of `str`
+        Strings giving the ``n_equations`` chemical equation of the network.
+        Reactants and products must be separated by a ``"->"`` symbol,
+        Stoichiometric coefficients, species names and ``"+"`` symbols must be
+        separated by at leat one space.
+        The name of each species should match a key of the `species` dictionary.
+        Examples: ``"A + B -> C"`` or ``"2 A -> D"``\
+    species : `dict`, optional
+        Dictionary of initial concentrations for the `n_species` species.
+    k : |array-like|
+        Iterable of  of shape `n_equations` x 2 with the Arrhenius rate parameters
+        ((:math:`A_1`\ , :math:`Ea_1`\ ), ... (:math:`A_n`\ , :math:`Ea_n`\ )).
+    T : `float`, `Quantity` or `callable`\ , optional, default: 298.0
+        Temperature. If it is not a temperature quantity, the unit is assumed to be
+        in Kelvin. A function can also be provided which output a temperature `T`
+        vs. time `t`\ .
     """
 
-    equations = tr.List(tr.Unicode())
-    species_concentrations = tr.Dict()
-    k = Array()
-    T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0)
+    # internal parameters
+    _equations = tr.List(tr.Unicode())
+    _species_concentrations = tr.Dict()
+    _k = Array()
+    _T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0)
 
-    def __init__(self, equations, species_concentrations, k, T=298.0, **kwargs):
-        self.equations = equations
-        self.species_concentrations = species_concentrations
-
-        # self.species = list(species_concentrations.keys()) : This is now provided
-        # by a property
-        # self.concentrations = list(species_concentrations.values()) : This is now
-        # provided by a property
-        # self.n_r = len(self.equations)  # again a property
-        # self.n_s = len(self.species)  # and a property
-
-        self.k = k  # a validation method is added (see below)
-        self.T = T  # a validation method has been added
+    def __init__(self, equations, species, k, T=298.0, **kwargs):
+        self._equations = equations
+        self._species_concentrations = species
+        self._k = k
+        self._T = T
 
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
-    @tr.validate("k")
+    @tr.validate("_k")
     def _k_validate(self, proposal):
         # k must be an iterable of pairs (A_1, Ea_1)
         k = proposal.value
@@ -95,9 +97,13 @@ class ActionMassKinetics(tr.HasTraits):
         # ...
         return k
 
-    @tr.validate("T")
+    @tr.validate("_T")
     def _T_validate(self, proposal):
         Tp = proposal.value
+
+        if isinstance(Tp, Quantity):
+            Tp = Tp.to("K").magnitude
+
         if isinstance(Tp, float):
             # if T float, transform it to a callable
             T = lambda t: Tp
@@ -110,14 +116,12 @@ class ActionMassKinetics(tr.HasTraits):
         Stoichiometry matrices.
 
         Generates stoichiometry matrices from the chemical equations
-        Stoichiometry matrices A and B are defined in Chellaboina et al., "Modeling and
-        analysis of mass-action kinetics", IEEE control systems (2009),
-        DOI: 10.1109/MCS.2009.932926.
+        Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
         """
 
-        A = np.zeros((self.n_r, self.n_s))
+        A = np.zeros((self.n_equations, self.n_species))
         B = np.zeros_like(A)
-        for i, rxn in enumerate(self.equations):
+        for i, rxn in enumerate(self._equations):
             rp = rxn.split("->")
             if len(rp) != 2:
                 raise ValueError(
@@ -176,51 +180,57 @@ class ActionMassKinetics(tr.HasTraits):
     # Public properties
     # ----------------------------------------------------------------------------------
     @property
-    def n_r(self):
-        return len(self.equations)
+    def n_equations(self):
+        """Number of reaction equations"""
+        return len(self._equations)
 
     @property
-    def n_s(self):
+    def n_species(self):
+        """Number of species"""
         return len(self.species)
 
     @property
     def species(self):
-        """Return components names."""
-        return list(self.species_concentrations.keys())
+        """Components names."""
+        return list(self._species_concentrations.keys())
 
     @property
     def concentrations(self):
-        """Return concentrations."""
-        return list(self.species_concentrations.values())
+        """Concentrations."""
+        return list(self._species_concentrations.values())
 
-    def integrate(self, t, method="RK45", return_NDDataset=True, **kwargs):
+    def integrate(self, t, method="RK45", **kwargs):
         """
-        Integrate the kinetic equations at times t.
+        Integrate the kinetic equations at times `t`.
 
-        This function computes and integrates the set of n_s kinetic differential
-        equations given the initial concentration values::
-        $$ dC / dt =  (B - A).T  K C^A $$
-        $$ C(t0) = C0 $$
+        This function computes and integrates the set of kinetic differential
+        equations given the initial concentration values:
 
-        where $A$ and $B$ are the stoichiometry matrices, $K$ is the diagonal matrix of
-        rate constants and $C^A$ is the vector-matrix exponentiation of C by A
+        .. math::
+            dC / dt =  (B - A).T  K C^A
+
+            C(t0) = C0
+
+        where :math:`A` and :math:`B` are the stoichiometry matrices,
+        :math:`K` is the diagonal matrix of rate constants and :math:`C^A` is the
+        vector-matrix exponentiation of :math:`C` by :math:`A`\ .
 
         Parameters
         ----------
-        t : iterable of length t_points
-            Time values at which the concentrations are computed.
-        method : `str` or `OdeSolver` , optional
+        t : |array-like| of shape (``t_points`\ , )
+            Iterable with time values at which the concentrations are computed.
+        method : `str` or `~scipy.integrate.OdeSolver`\ , optional, default: ``'RK45'``
             Integration method to use:
 
-            * 'RK45' (default): Explicit Runge-Kutta method of order 5(4).
-            * 'RK23': Explicit Runge-Kutta method of order 3(2).
-            * 'DOP853': Explicit Runge-Kutta method of order 8.
-            * 'Radau': Implicit Runge-Kutta method of the Radau IIA family of
+            * ``'RK45'`` (default): Explicit Runge-Kutta method of order 5(4).
+            * ``'RK23'`` : Explicit Runge-Kutta method of order 3(2).
+            * ``'DOP853'``: Explicit Runge-Kutta method of order 8.
+            * ``'Radau'`` : Implicit Runge-Kutta method of the Radau IIA family of
               order 5.
-            * 'BDF': Implicit multi-step variable-order (1 to 5) method based
+            * ``'BDF'`` : Implicit multi-step variable-order (1 to 5) method based
               on a backward differentiation formula for the derivative
               approximation.
-            * 'LSODA': Adams/BDF method with automatic stiffness detection and
+            * ``'LSODA'`` : Adams/BDF method with automatic stiffness detection and
               switching.
 
             Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
@@ -232,19 +242,31 @@ class ActionMassKinetics(tr.HasTraits):
             you should use 'Radau' or 'BDF'. 'LSODA' can also be a good universal
             choice, but it might be somewhat less convenient to work with as it
             wraps old Fortran code.
-            You can also pass an arbitrary class derived from `OdeSolver` which
-            implements the solver.
+            You can also pass an arbitrary class derived from
+            `~scipy.integrate.OdeSolver` which implements the solver.
+        **kwargs
+            Additional keyword parameters. See Other Parameters.
+
+        Other Parameters
+        ----------------
+        return_NDDataset : `bool`\ , optional, default: `True`
+            Whether to return a NDDataset
+        return_meta : `bool`\ , optional, default: `False`
+            Whether to return a dictionary with the solver results.
+            Note that when return_NDDataset is True, meta is always
+            included in the meta attribute of the NDDataset.
 
         Returns
         -------
-        C : |ndarray| or |NDDataset|, shape ( ``t_points``\ , ``n_species``\ )
-            Values of the solution at `t`\ .
+        C : |ndarray| or `NDDataset`, shape ( ``t_points``\ , ``n_species``\ )
+            Values of the solution at times `t`\ .
         meta : Bunch object with the following fields defined:
 
             * t : ndarray, shape (t_points,)
               Time points.
-            * sol : `OdeSolution` or None
-              Found solution as `OdeSolution` instance; None if `dense_output` was
+            * sol : `~scipy.integrate.OdeSolution` or None
+              Found solution as `~scipy.integrate.OdeSolution` instance;
+              None if `dense_output` was
               set to False.
             * t_events : `list` of |ndarray| or `None`
               Contains for each event type a list of arrays at which an event of
@@ -261,9 +283,9 @@ class ActionMassKinetics(tr.HasTraits):
             * status : `int`
               Reason for algorithm termination:
 
-                    * -1: Integration step failed.
-                    *  0: The solver successfully reached the end of `tspan` .
-                    *  1: A termination event occurred.
+                    * -1 : Integration step failed.
+                    *  0 : The solver successfully reached the end of `tspan` .
+                    *  1 : A termination event occurred.
 
             * message : `str`
               Human-readable description of the termination reason.
@@ -280,7 +302,7 @@ class ActionMassKinetics(tr.HasTraits):
 
             .. math::
                 dC / dt =  (B - A).T  K C_i^A
-                C_i = C(t_i) $$
+                C_i = C(t_i)
 
             where :math:`A` and :math:`B` are the stoichiometry matrices, :math:`K` is
             the diagonal matrix of rate constants and :math:`C_i^A` is the vector-matrix
@@ -293,8 +315,8 @@ class ActionMassKinetics(tr.HasTraits):
             Ci: |ndarray|
                 1D vector of the concentrations at time `ti`\ .
             """
-            beta = 1 / R / self.T(ti)
-            K = np.diag(self.k[:, 0] * np.exp(-beta * self.k[:, 1]))
+            beta = 1 / R / self._T(ti)
+            K = np.diag(self._k[:, 0] * np.exp(-beta * self._k[:, 1]))
             A, B = self._stoichio_matrices()
             BmAt = (B - A).T
             return np.dot(np.dot(BmAt, K), _vm_exp(Ci, A))
@@ -307,35 +329,36 @@ class ActionMassKinetics(tr.HasTraits):
             method=method,
         )
 
-        if return_NDDataset:
-            C = NDDataset(bunch.y.T, name="Concentrations")
-            C.y = Coord(bunch.t, title="time")
-            C.x = Coord(range(self.n_s), labels=self.species, title="species")
-            t = Coord(bunch.t, title="time")
+        debug_(bunch.message)
+        if bunch.status != 0:
+            raise SolverError(bunch.message)
 
-        else:
-            C = bunch.y.T
+        C = bunch.y.T
+        t = bunch.t
 
-        meta = {
-            "t": bunch.t,
-            "nfev": bunch.nfev,
-            "t_events": bunch.t_events,
-            "y_events": bunch.y_events,
-            "njev": bunch.njev,
-            "nlu": bunch.nlu,
-            "status": bunch.status,
-            "message": bunch.message,
-            "success": bunch.success,
-        }
-        return C, meta
+        # remove some keys from bunch
+        del bunch.y
+        del bunch.success
 
-    def modify_kinetics(self, dict_param):
+        return_dataset = kwargs.get("return_NDDataset", True)
+        if return_dataset:
+            C = NDDataset(C, name="Concentrations")
+            C.y = Coord(t, title="time")
+            C.x = Coord(range(self.n_species), labels=self.species, title="species")
+            C.history = "Created using ActionMassKinetics.integrate"
+            C.meta.update(bunch)
+
+        if kwargs.get("return_meta", False) and not return_dataset:
+            return (C, bunch)
+        return C
+
+    def _modify_kinetics(self, dict_param):
         for item in dict_param:
             i_r, p = item.split("[")[-1].split("].")
             if p == "A":
-                self.k[int(i_r), 0] = dict_param[item]
+                self._k[int(i_r), 0] = dict_param[item]
             elif p == "Ea":
-                self.k[int(i_r), 1] = dict_param[item]
+                self._k[int(i_r), 1] = dict_param[item]
             else:
                 raise ValueError("something went wrong in parsing the dict of params")
 
@@ -343,11 +366,11 @@ class ActionMassKinetics(tr.HasTraits):
         self, Cexp, iexp, i2iexp, dict_param_to_optimize, **kwargs
     ):
         """
-        Function fitting rate parameters and concentrations to a concentration profile.
+        Fit rate parameters and concentrations to a concentration profile.
 
         Parameters
         ------------
-        Cexp : |NDDataset|
+        Cexp : `NDDataset`
             Experimental concentration profiles on which to fit the model.
             `Cexp` can contain more concentration profiles than those to fit.
         iexp : `int`
@@ -359,12 +382,11 @@ class ActionMassKinetics(tr.HasTraits):
         dict_param_to_optimize : `dict`
             rate parameters to optimize. Keys should be 'k[i].A' and 'k[i].Ea' for
             pre-exponential factor.
-
         **kwargs
-            Parameters for the optimization (see scipy.optimize.minimize).
+            Parameters for the optimization (see `~scipy.optimize.minimize`\ ).
 
         Returns
-        ----------
+        --------
         `dict`
             A result dictionary.
         """
@@ -372,8 +394,8 @@ class ActionMassKinetics(tr.HasTraits):
         def objective(params, Cexp, iexp, i2iexp, dict_param_to_optimize):
             for param, item in zip(params, dict_param_to_optimize):
                 dict_param_to_optimize[item] = param
-            self.modify_kinetics(dict_param_to_optimize)
-            Chat = self.integrate(Cexp.y.data, return_NDDataset=False)[0]
+            self._modify_kinetics(dict_param_to_optimize)
+            Chat = self.integrate(Cexp.y.data, return_NDDataset=False)
             return np.sum(np.square(Cexp.data[:, iexp] - Chat[:, i2iexp]))
 
         method = kwargs.get("method", "Nelder-Mead")
@@ -408,7 +430,7 @@ class ActionMassKinetics(tr.HasTraits):
             print(f"         Optimization time: {toc - tic}")
             print(f"         Final parameters: {opt_param}")
 
-        Ckin, meta = self.integrate(Cexp.y.data, return_NDDataset=False)
+        Ckin = self.integrate(Cexp.y.data, return_NDDataset=False)
 
         for i, param in enumerate(dict_param_to_optimize):
             dict_param_to_optimize[param] = opt_param[i]
@@ -422,7 +444,9 @@ def _vm_exp(x: Iterable, A: Iterable):
 
     The vector-matrix exponentiation is the operation that maps x
     and A to its vector-matrix power $x^A$ which given by:
-    $$ \left[ x_1^{A_{11}}x_2^{A_{21}} ... x_n^{A_{n1}} \;\; x_1^{A_{1n}}x_2^{A_{2n}} ... x_n^{A_{nn}} \right]$$
+    $$ \left[ x_1^{A_{11}}x_2^{A_{21}} ... x_n^{A_{n1}} \;\; x_1^{A_{1n}}x_2^{A_{2n}}
+    ... x_n^{A_{nn}} \right]$$
+
 
     parameters:
     ----------
@@ -460,14 +484,16 @@ def _cantera_is_not_available():
     if ct is None:
         error_(
             ImportError,
-            "Missing optional dependency 'cantera'.  Use conda or pip to install cantera.",
+            "Missing optional dependency 'cantera'.  "
+            "Use conda or pip to install cantera.",
         )
     return ct is None
 
 
 def _ct_modify_rate(reactive_phase, i_reaction, rate):
     """
-    Modify the reaction rate of with index i_reaction to have the same rate parameters as rate.
+    Modify the reaction rate of with index i_reaction to have the same rate parameters
+    as rate.
 
     Parameters
     ----------
@@ -552,10 +578,10 @@ class PFR:
 
     Parameters
     ----------
-    cti_file: `str`
+    cti_file : `str`
         The cti file must contain a gas phase named 'gas' and optionally a reactive
         surface named 'surface'.
-    init_X: `dict`\ , :term:`array-like`
+    init_X : `dict`\ , :term:`array-like`
         Initial composition of the reactors.
     """
 
