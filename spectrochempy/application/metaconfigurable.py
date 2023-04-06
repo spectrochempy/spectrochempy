@@ -102,7 +102,7 @@ class MetaConfigurable(Configurable):
             del self.config[self.name]
             # also delete the current JSON config file
             f = (Path(self.cfg.config_dir) / self.name).with_suffix(".json")
-            f.unlink()
+            f.unlink(missing_ok=True)
 
         # then set the default parameters
         for k, v in self.parameters(default=True).items():
