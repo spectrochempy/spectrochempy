@@ -74,6 +74,20 @@ def test_analysisconfigurable():
         # not an integer
         foo.a = 10.1
 
+    # set conf. at init
+    foo.reset()  # needed to delete json (in case it was already created)
+    cd = scp.app.config_dir
+    assert not (cd / "Foo.json").exists()
+    foo = Foo(a=1)
+    assert foo.a == 1
+    assert (cd / "Foo.json").exists()
+
+    # wrong parameters
+    with pytest.raises(KeyError):
+        _ = Foo(j=1)
+
+    # with
+
 
 def test_analysisconfigurable_validation():
     class Foo(AnalysisConfigurable):
