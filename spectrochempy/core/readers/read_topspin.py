@@ -711,7 +711,7 @@ def read_topspin(*paths, **kwargs):
     Returns
     --------
     read_topspin
-        |NDDataset| or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     Other Parameters
     ----------------

@@ -32,11 +32,12 @@ class NMF(DecompositionAnalysis):
         """
     Non-Negative Matrix Factorization (NMF).
 
-    Use `sklearn.decomposition.NMF` .
+    Use `sklearn.decomposition.NMF`\ .
 
-    Find two non-negative matrices, i.e. matrices with all non-negative elements, (W, H)
-    whose product approximates the non-negative matrix X. This factorization can be used
-    for example for dimensionality reduction, source separation or topic extraction.
+    Find two non-negative matrices, *i.e.,* matrices with all non-negative elements,
+    (``W``\ , ``H``\ ) whose product approximates the non-negative matrix `X`.
+    This factorization can be used for example for dimensionality reduction,
+    source separation or topic extraction.
 
     Parameters
     ----------
@@ -44,11 +45,7 @@ class NMF(DecompositionAnalysis):
 
     See Also
     --------
-    PCA : Perform Principal Components Analysis.
-    EFA : Perform an Evolving Factor Analysis (forward and reverse).
-    MCRALS : Perform MCR-ALS of a dataset knowing the initial C or St matrix.
-    SVD : Perform a Singular Value Decomposition.
-    SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
+    %(DecompositionAnalysis.see_also.no_NMF)s
     """
     )
 

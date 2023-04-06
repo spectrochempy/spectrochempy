@@ -62,7 +62,7 @@ def read_csv(*paths, **kwargs):
     Returns
     --------
     read_csv
-        |NDDataset| or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     Other Parameters
     ----------------

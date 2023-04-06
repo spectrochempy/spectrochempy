@@ -98,7 +98,7 @@ def write(dataset, filename=None, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         Dataset to write.
     filename : str or pathlib object, optional
         If not provided, a dialog is opened to select a file for writing.

@@ -149,8 +149,6 @@ rst_epilog = """
 
 .. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
 
-.. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-
 .. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
 
 .. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`

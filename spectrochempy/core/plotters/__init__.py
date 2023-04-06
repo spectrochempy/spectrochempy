@@ -5,5 +5,5 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Package defining plotting methods for n-dimensional |NDDataset|\'s.
+Package defining plotting methods for n-dimensional `NDDataset`\'s.
 """

@@ -144,7 +144,7 @@ def zf_size(dataset, size=None, mid=False, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         Input dataset.
     size : int
         Size of data after zero filling.
@@ -153,7 +153,7 @@ def zf_size(dataset, size=None, mid=False, **kwargs):
 
     Returns
     -------
-    |NDDataset|
+    `NDDataset`
         Modified dataset.
     """
     if size is None:

@@ -48,7 +48,7 @@ def read_quadera(*paths, **kwargs):
 
     Returns
     --------
-    |NDDataset| or list of |NDDataset| .
+    `NDDataset` or list of `NDDataset` .
 
     Other Parameters
     ----------------

@@ -45,7 +45,7 @@ class BaselineCorrection(HasTraits):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         The dataset to be transformed.
 
     See Also

@@ -78,7 +78,7 @@
 #
 #     Parameters
 #     ----------
-#     dataset; |NDDataset|
+#     dataset; `NDDataset`
 #         The dataset to plot
 #     kwargs: any
 #         Additional keyword arguments
@@ -486,7 +486,7 @@
 #     """
 #     Parameters
 #     ----------
-#     p : |NDDataset|
+#     p : `NDDataset`
 #     """
 #     dimx = p.dims[-1]
 #     x = getattr(p, dimx).data
@@ -536,7 +536,7 @@
 #     reduce the number of spectra to display
 #     Parameters
 #     ----------
-#     ds: |NDDataset|
+#     ds: `NDDataset`
 #         The dataset to simplify
 #
 #     Returns

@@ -32,7 +32,7 @@ class BaselineCorrector:
 
     Parameters
     ----------
-    X : |NDDataset|\, default: None
+    X : `NDDataset`\, default: None
         The NDDataset to process. If None, an upload button can be used to load data.
     initial_ranges : list, optional, default: None
         The initial regions where to compute the baseline. If not given, 5% on each
@@ -40,11 +40,11 @@ class BaselineCorrector:
 
     Attributes
     ----------
-    original : |NDDataset|
+    original : `NDDataset`
         The (sliced) NDDataset, without baseline correction.
-    corrected : |NDDataset|
+    corrected : `NDDataset`
         The baseline corrected NDDataset.
-    baseline : |NDDataset|
+    baseline : `NDDataset`
         The baselines.
 
     See Also

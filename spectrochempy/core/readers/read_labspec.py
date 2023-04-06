@@ -51,7 +51,7 @@ def read_labspec(*paths, **kwargs):
     Returns
     --------
     read
-        |NDDataset| or list of |NDDataset| or None.
+        `NDDataset` or list of `NDDataset` or None.
 
     Other Parameters
     ----------------

@@ -712,7 +712,7 @@ class NDMath(object):
             the result will broadcast correctly against the input array.
             If the default value is passed, then `keepdims` will not be
             passed through to the `all` method of sub-classes of
-            `ndarray` , however any non-default value will be.  If the
+            |ndarray| , however any non-default value will be.  If the
             sub-class' method does not implement `keepdims` any
             exceptions will be raised.
 
@@ -961,14 +961,14 @@ class NDMath(object):
             the result will broadcast correctly against the input array.
             If the default value is passed, then `keepdims` will not be
             passed through to the `any` method of sub-classes of
-            `ndarray` , however any non-default value will be.  If the
+            |ndarray| , however any non-default value will be.  If the
             sub-class' method does not implement `keepdims` any
             exceptions will be raised.
 
         Returns
         -------
         any
-            A new boolean or `ndarray` is returned.
+            A new boolean or |ndarray| is returned.
 
         See Also
         --------

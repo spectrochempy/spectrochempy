@@ -41,7 +41,7 @@ class Project(AbstractProject, NDIO):
     ----------
     *args : Series of objects, optional
         Argument type will be interpreted correctly if they are of type
-        |NDDataset| , |Project| , or other objects such as |Script| .
+        `NDDataset` , |Project| , or other objects such as |Script| .
         This is optional, as they can be added later.
     argnames : list, optional
         If not None, this list gives the names associated to each
@@ -438,7 +438,7 @@ class Project(AbstractProject, NDIO):
 
         Parameters
         ----------
-        *datasets : series of |NDDataset|
+        *datasets : series of `NDDataset`
             Datasets to add to the current project.
             The name of the entries in the project will be identical to the
             names of the datasets.

@@ -35,11 +35,11 @@ class IrisKernel(tr.HasTraits):
     """
     Define a kernel matrix of Fredholm equation of the 1st kind.
 
-    This class define a kernel matrix as a |NDDataset| compatible
-    with the `X` input |NDDataset|\ .
+    This class define a kernel matrix as a `NDDataset` compatible
+    with the `X` input `NDDataset`\ .
 
-    Pre-defined kernels can be chosen among: {``'langmuir'` , ``'ca'`` ,
-    ``'reactant-first-order'``, ``'product-first-order'``, ``'diffusion'``},
+    Pre-defined kernels can be chosen among: {``'langmuir'``\ , ``'ca'``\ ,
+    ``'reactant-first-order'``\ , ``'product-first-order'``\ , ``'diffusion'``\ },
     a custom kernel function - a 2-variable lambda
     function `K`\ ``(p, q)`` or a function returning a |ndarray| can be passed.
     `p` and `q` contain the values of an external experimental variable and an internal
@@ -47,9 +47,9 @@ class IrisKernel(tr.HasTraits):
 
     Parameters
     -----------
-    X : |NDDataset|
+    X : `NDDataset`
         The 1D or 2D dataset for the kernel is defined.
-    K : any of [ ``'langmuir'`` , ``'ca'`` , ``'reactant-first-order'`` , ``'product-first-order'`` , ``'diffusion'`` ] or `callable` or |NDDataset|
+    K : any of [ ``'langmuir'`` , ``'ca'`` , ``'reactant-first-order'`` , ``'product-first-order'`` , ``'diffusion'`` ] or `callable` or `NDDataset`
         Predefined or user-defined Kernel for the integral equation.
     p : |Coord| or ``iterable``
         External variable. Must be provided if the kernel `K` is passed as a `str` or

@@ -35,7 +35,7 @@ class Coord(NDMath, NDArray):
     """
     Explicit coordinates for a dataset along a given axis.
 
-    The coordinates of a |NDDataset| can be created using the |Coord|
+    The coordinates of a `NDDataset` can be created using the |Coord|
     object.
     This is a single dimension array with either numerical (float)
     values or labels (str, `Datetime` objects, or any other kind of objects) to

@@ -38,7 +38,7 @@ def savgol_filter(
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         The dataset to be filtered. If dataset.data is not a single or double precision
         floating point array, it will be converted to type numpy.float64 before
         filtering.
@@ -169,7 +169,7 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
 
     Parameters
     ----------
-    dataset :  |NDDataset|
+    dataset :  `NDDataset`
         The input data.
     type : str among ['linear', 'constant'}, optional, default='linear'
         The type of detrending. If `type == 'linear'` (default),
@@ -185,7 +185,7 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
     Returns
     -------
     detrended
-        The detrended |NDDataset| .
+        The detrended `NDDataset` .
 
     Other Parameters
     ----------------

@@ -47,10 +47,10 @@ class MCRALS(DecompositionAnalysis):
         """
     Multivariate Curve Resolution Alternating Least Squares (MCRALS).
 
-    :term:`MCR-ALS` ( ``Multivariate Curve Resolution Alternating Least Squares`` )
+    :term:`MCR-ALS` (``Multivariate Curve Resolution Alternating Least Squares``\ )
     resolve's a set (or several sets) of spectra :math:`X` of an evolving mixture
     (or a set of mixtures) into the spectra :math:`S^T` of "pure" species and their
-    concentration profiles :math:`C` .
+    concentration profiles :math:`C`\ .
 
     In terms of matrix equation:
 
@@ -139,7 +139,7 @@ profile.""",
 if:
 
 * ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile ``#j``\ ,
-* ``C[i,j] < C[i-1,j] * unimodTol``  on the increasing branch of profile  ``#j``\ .""",
+* ``C[i,j] < C[i-1,j] * unimodTol`` on the increasing branch of profile ``#j``\ .""",
     ).tag(config=True)
 
     monoDecConc = tr.List(
@@ -231,7 +231,7 @@ It should be using one of the following syntax:
 * ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc, extraOutputGetConc``
 
 where ``Ccurr`` is the current `C` dataset, ``\*argsGetConc`` are the parameters needed
-to completely specify the function. `hardC` is a `ndarray` or `NDDataset` of shape
+to completely specify the function. `hardC` is a |ndarray| or `NDDataset` of shape
 ``(C.y, len(hardConc)``\ , ``newArgsGetConc`` are the updated parameters for the next
 iteration (can be None), and ``extraOutputGetConc`` can be any other relevant output to
 be kept in `extraOutputGetConc` attribute, a list of ``extraOutputGetConc`` at each
@@ -329,7 +329,7 @@ It should be using one of the following syntax:
 * ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt, newArgsGetSpec, extraOutputGetSpec``
 
 where ``Stcurr`` is the current `St` dataset, ``\*argsGetSpec`` are the parameters
-needed to completely specify the function. `hardSt` is a `ndarray` or `NDDataset` of
+needed to completely specify the function. `hardSt` is a |ndarray| or `NDDataset` of
 shape ``(C.y, len(hardSpec)``\ , ``newArgsGetSpec`` are the updated parameters for the
 next iteration (can be None), and ``extraOutputGetSpec`` can be any other relevant
 output to be kept in `extraOutputGetSpec` attribute, a list of ``extraOutputGetSpec``
@@ -1059,8 +1059,8 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
         indexes at which the correction is applied
 
     mod : str
-        When set to `"strict"` , values deviating from unimodality are reset to the
-        value of the previous point. When set to `"smooth"` , both values (deviating
+        When set to `"strict"`\ , values deviating from unimodality are reset to the
+        value of the previous point. When set to `"smooth"`\ , both values (deviating
         point and previous point) are modified to avoid "steps" in the profile.
 
     tol: float
@@ -1090,8 +1090,8 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
     a : 1D ndarray
 
     mod : str
-        When set to `"strict"` , values deviating from unimodality are reset to the value
-        of the previous point. When set to `"smooth"` , both values (deviating point and
+        When set to `"strict"`\ , values deviating from unimodality are reset to the value
+        of the previous point. When set to `"smooth"`\ , both values (deviating point and
         previous point) are modified to avoid "steps"
         in the profile.
 

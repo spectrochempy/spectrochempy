@@ -73,7 +73,7 @@ def plot_3D(dataset, method="surface", **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         The dataset to plot.
     method : ['surface', 'waterfall'] , optional
         The method of plot of the dataset, which will determine the plotter to use. Default is stack.

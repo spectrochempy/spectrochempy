@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements the |NDDataset| class.
+This module implements the `NDDataset` class.
 """
 
 __all__ = ["NDDataset"]
@@ -44,24 +44,24 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     """
     The main N-dimensional dataset class used by |scpy|\ .
 
-    The |NDDataset| is the main object use by SpectroChemPy. Like numpy
-    |ndarray|\ s, |NDDataset| have the capability to be sliced, sorted and subject to
-    mathematical operations. But, in addition, |NDDataset| may have units,
+    The `NDDataset` is the main object use by SpectroChemPy. Like numpy
+    |ndarray|\ s, `NDDataset` have the capability to be sliced, sorted and subject to
+    mathematical operations. But, in addition, `NDDataset` may have units,
     can be masked and each dimensions can have coordinates also with units. This make
-    |NDDataset| aware of unit compatibility,
+    `NDDataset` aware of unit compatibility,
     *e.g.,* for binary operation such as additions or subtraction or during the
     application of mathematical operations.
     In addition or in replacement of numerical data for coordinates,
-    |NDDataset| can also have labeled coordinates where labels can be different kind of
-    objects (`str`\ , `datetime`\ , |ndarray| or other |NDDataset|\ 's, etc...).
+    `NDDataset` can also have labeled coordinates where labels can be different kind of
+    objects (`str`\ , `datetime`\ , |ndarray| or other `NDDataset`\ 's, etc...).
 
     Parameters
     ----------
     data : |array-like|
         Data array contained in the object. The data can be a list, a tuple,
-        a |ndarray|, a subclass of |ndarray|, another |NDDataset| or a |Coord| object.
+        a |ndarray|, a subclass of |ndarray|, another `NDDataset` or a |Coord| object.
         Any size or shape of data is accepted. If not given, an empty
-        |NDDataset| will be inited.
+        `NDDataset` will be inited.
         At the initialisation the provided data will be eventually cast to
         a |ndarray|\ .
         If the provided objects is passed which already contains some
@@ -157,7 +157,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     Notes
     -----
-    The underlying array in a |NDDataset| object can be accessed through the
+    The underlying array in a `NDDataset` object can be accessed through the
     `data` attribute, which will return a conventional |ndarray|\ .
     """
 
@@ -1377,7 +1377,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         # ----------
         # data: array_like
         #     Values for this array. Must be an `numpy.ndarray` , ndarray like,
-        #     or castable to an `ndarray` .
+        #     or castable to an |ndarray| .
         # coords: sequence or dict of array_like objects, optional
         #     Coordinates (tick labels) to use for indexing along each dimension.
         #     If dict-like, should be a mapping from dimension names to the

@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module defines the |NDPlot| class in which generic |NDDataset| plot methods are defined.
+This module defines the |NDPlot| class in which generic `NDDataset` plot methods are defined.
 """
 
 __all__ = ["plot"]
@@ -341,7 +341,7 @@ class PreferencesSet(Meta):
 # ======================================================================================
 class NDPlot(HasTraits):
     """
-    Plotting interface for |NDDataset| .
+    Plotting interface for `NDDataset` .
 
     This class is used as basic plotting interface of the |NDDataset| .
     """

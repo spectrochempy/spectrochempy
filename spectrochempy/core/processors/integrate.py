@@ -85,7 +85,7 @@ def trapezoid(dataset, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         Dataset to be integrated.
     **kwargs
         Additional keywords parameters. See Other Parameters.
@@ -142,7 +142,7 @@ def simpson(dataset, *args, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         Dataset to be integrated.
     **kwargs
         Additional keywords parameters. See Other Parameters.

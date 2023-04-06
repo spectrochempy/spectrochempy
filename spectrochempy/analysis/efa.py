@@ -39,7 +39,7 @@ class EFA(DecompositionAnalysis):
     analysis spectra such as those obtained by Operando FTIR for example.
 
     The model used in this class allow to perform a forward and reverse analysis of the
-    input |NDDataset| .
+    input `NDDataset` .
 
     Parameters
     ----------
@@ -224,7 +224,7 @@ class EFA(DecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def f_ev(self):
         """
-        Eigenvalues for the forward analysis ( |NDDataset| ).
+        Eigenvalues for the forward analysis ( `NDDataset` ).
         """
         f = self._outfit[0]
         if self.cutoff is not None:
@@ -235,7 +235,7 @@ class EFA(DecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def b_ev(self):
         """
-        Eigenvalues for the backward analysis ( |NDDataset| ).
+        Eigenvalues for the backward analysis ( `NDDataset` ).
         """
         b = self._outfit[1]
         if self.cutoff is not None:

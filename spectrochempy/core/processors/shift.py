@@ -78,7 +78,7 @@ def ls(dataset, pts=0.0, **kwargs):
 
     Returns
     -------
-    |NDDataset|
+    `NDDataset`
         Modified dataset.
 
     Other Parameters

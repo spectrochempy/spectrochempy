@@ -30,9 +30,9 @@ def autosub(
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         Dataset to which we want to subtract the reference data.
-    ref : |NDDataset|
+    ref : `NDDataset`
          1D reference data, with a size matching the axis to subtract.
          (axis parameter).  # TODO : optionally use title of axis.
     *ranges : pair(s) of values
@@ -52,9 +52,9 @@ def autosub(
 
     Returns
     --------
-    out : |NDDataset|
+    out : `NDDataset`
         The subtracted dataset.
-    coefs : `ndarray` .
+    coefs : |ndarray| .
         The table of subtraction coefficients
         (only if `return_coefs` is set to `True` ).
 

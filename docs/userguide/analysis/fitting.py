@@ -44,7 +44,7 @@ from spectrochempy import ur
 # In the first example, we find the least square solution of a simple linear equation.
 #
 # Let's first create a NDDataset with some data. We have for instance some noisy data
-# that represent the distance `d` traveled by some objects versus time `t`\ :
+# that represent the distance ``d`` traveled by some objects versus time ``t``\ :
 
 
 # %%
@@ -99,8 +99,8 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 # <b>Note</b>
 #
 # In the particular case where the variation is proportional to the x dataset
-# coordinate, the same result can be obtained directly using `d` as a single
-# parameter on LSTSQ (as `t` is the `x` coordinate axis!)
+# coordinate, the same result can be obtained directly using ``d`` as a single
+# parameter on LSTSQ (as ``t  `` is the ``x`` coordinate axis!)
 # </div>
 
 # %%

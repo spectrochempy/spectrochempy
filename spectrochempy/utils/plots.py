@@ -311,7 +311,7 @@ def plot_method(type, doc):
 
 Parameters
 ----------
-dataset : |NDDataset|
+dataset : `NDDataset`
     The dataset to plot.
 **kwargs
     Optional keyword parameters (see Other Parameters).

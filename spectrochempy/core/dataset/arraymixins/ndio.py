@@ -6,7 +6,7 @@
 # ======================================================================================
 """
 This module define the class |NDIO| in which input/output standard
-methods for a |NDDataset| are defined.
+methods for a `NDDataset` are defined.
 """
 
 __all__ = ["load"]
@@ -39,9 +39,9 @@ SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 # ======================================================================================
 class NDIO(HasTraits):
     """
-    Import/export interface from |NDDataset| .
+    Import/export interface from `NDDataset` .
 
-    This class is used as basic import/export interface of the |NDDataset| .
+    This class is used as basic import/export interface of the `NDDataset` .
     """
 
     _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
@@ -111,7 +111,7 @@ class NDIO(HasTraits):
         """
         Save the current object in SpectroChemPy format.
 
-        Default extension is .scp for |NDDataset|\'s and .pscp for
+        Default extension is .scp for `NDDataset`\'s and .pscp for
         |Project|'s.
 
         Parameters
@@ -175,7 +175,7 @@ class NDIO(HasTraits):
 
     def save_as(self, filename="", **kwargs):
         """
-        Save the current |NDDataset| in SpectroChemPy format (\*.scp).
+        Save the current `NDDataset` in SpectroChemPy format (\*.scp).
 
         Parameters
         ----------

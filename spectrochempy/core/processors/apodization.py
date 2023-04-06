@@ -402,7 +402,7 @@ def sine(dataset, *args, **kwargs):
 
     Returns
     -------
-    |NDDataset|
+    `NDDataset`
         Modified dataset.
 
     See Also
@@ -418,12 +418,12 @@ def sinm(dataset, ssb=1, **kwargs):
 
     Returns
     -------
-    |NDDataset|
+    `NDDataset`
         Modified dataset.
 
     Returns
     -------
-    |NDDataset|
+    `NDDataset`
         Modified dataset.
 
     See Also

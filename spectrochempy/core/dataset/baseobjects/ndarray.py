@@ -79,7 +79,7 @@ class NDArray(HasTraits):
     The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
     as its basic functionalities may be quite limited, but to be subclassed.
 
-    Indeed, both the classes |NDDataset| and |Coord| which respectively implement a full dataset (with
+    Indeed, both the classes `NDDataset` and |Coord| which respectively implement a full dataset (with
     coordinates) and the coordinates in a given dimension, are derived from |NDArray| in |scpy| .
 
     The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,

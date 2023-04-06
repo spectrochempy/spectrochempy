@@ -53,7 +53,7 @@ def read_matlab(*paths, **kwargs):
     Returns
     --------
     read_matlab
-        |NDDataset| or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     Other Parameters
     ----------------

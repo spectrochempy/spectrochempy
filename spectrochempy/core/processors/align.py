@@ -60,13 +60,13 @@ def can_merge_or_align(coord1, coord2):
 
 def align(dataset, *others, **kwargs):
     """
-    Align individual |NDDataset| along given dimensions using various methods.
+    Align individual `NDDataset` along given dimensions using various methods.
 
     Parameters
     -----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         Dataset on which we want to align other objects.
-    *others : |NDDataset|
+    *others : `NDDataset`
         Objects to align.
     dim : str. Optional, default='x'
         Along which axis to perform the alignment.
@@ -107,7 +107,7 @@ def align(dataset, *others, **kwargs):
 
     Returns
     --------
-    tuple of |NDDataset|
+    tuple of `NDDataset`
         Same objects as datasets with dimensions aligned.
 
     Raises

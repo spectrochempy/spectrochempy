@@ -108,7 +108,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         The dataset to plot.
     method : ['stack', 'map', 'image'] , optional
         The method of plot of the dataset, which will determine the plotter to use.

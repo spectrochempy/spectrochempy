@@ -10,7 +10,7 @@ Papers citing |scpy|
 - Catalysis by sulfides: Advanced IR/CO spectroscopy for the identification of the most active sites in hydrodesulfurization reactions,
   :cite:t:`oliviero:2021`\ , `DOI: 10.1016/j.jcat.2021.02.018 <https://dx.doi.org/10.1016/j.jcat.2021.02.018>`__\ .
 - A highly selective FER-based catalyst to produce n-butenes from isobutanol,
-  `:cite:t:vandaele:2021`\ , `DOI: 10.1016/j.apcatb.2020.119699 <https://dx.doi.org/10.1016/j.apcatb.2020.119699>`__\ .
+  :cite:t:`vandaele:2021`\ , `DOI: 10.1016/j.apcatb.2020.119699 <https://dx.doi.org/10.1016/j.apcatb.2020.119699>`__\ .
 
 2022
 ====

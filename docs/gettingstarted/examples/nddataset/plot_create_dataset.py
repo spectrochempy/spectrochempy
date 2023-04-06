@@ -56,7 +56,7 @@ print(a)
 # %%
 # nd-Dataset
 # +++++++++++
-# The |NDDataset| object allow making the array of data with units, etc...
+# The `NDDataset` object allow making the array of data with units, etc...
 mydataset = scp.NDDataset(
     nd_data, coordset=[coord0, coord1, coord2], title="Absorbance", units="absorbance"
 )

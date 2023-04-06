@@ -38,7 +38,8 @@ class PCA(DecompositionAnalysis):
         """
     Principal Component Anamysis (PCA).
 
-    The Principal Component Analysis analysis is using the `sklearn.decomposition.PCA` model.
+    The Principal Component Analysis analysis is using the
+    `sklearn.decomposition.PCA` model.
 
     Parameters
     ----------

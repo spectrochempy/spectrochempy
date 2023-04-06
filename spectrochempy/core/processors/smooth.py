@@ -22,7 +22,7 @@ def smooth(dataset, window_length=5, window="flat", **kwargs):
 
     Parameters
     ----------
-    dataset :  |NDDataset| or a ndarray-like object
+    dataset :  `NDDataset` or a ndarray-like object
         Input object.
     window_length :  int, optional, default=5
         The dimension of the smoothing window; must be an odd integer.

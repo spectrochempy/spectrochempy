@@ -22,20 +22,20 @@ from spectrochempy.utils.orderedset import OrderedSet
 
 def concatenate(*datasets, **kwargs):
     """
-    Concatenation of |NDDataset| objects along a given axis.
+    Concatenation of `NDDataset` objects along a given axis.
 
-    Any number of |NDDataset| objects can be concatenated (by default
+    Any number of `NDDataset` objects can be concatenated (by default
     the last on the last dimension). For this operation
     to be defined the following must be true :
 
-        #. all inputs must be valid |NDDataset| objects;
+        #. all inputs must be valid `NDDataset` objects;
         #. units of data must be compatible
         #. concatenation is along the axis specified or the last one;
         #. along the non-concatenated dimensions, shapes must match.
 
     Parameters
     ----------
-    *datasets : positional |NDDataset| arguments
+    *datasets : positional `NDDataset` arguments
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
         (the last, by default).
@@ -45,7 +45,7 @@ def concatenate(*datasets, **kwargs):
     Returns
     --------
     out
-        A |NDDataset| created from the contenations of the |NDDataset| input objects.
+        A `NDDataset` created from the contenations of the `NDDataset` input objects.
 
     Other Parameters
     ----------------
@@ -57,7 +57,7 @@ def concatenate(*datasets, **kwargs):
 
     See Also
     ---------
-    stack : Stack of |NDDataset| objects along a new dimension.
+    stack : Stack of `NDDataset` objects along a new dimension.
 
     Examples
     --------
@@ -190,7 +190,7 @@ def concatenate(*datasets, **kwargs):
 
 def stack(*datasets):
     """
-    Stack of |NDDataset| objects along a new dimension.
+    Stack of `NDDataset` objects along a new dimension.
 
     Any number of |NDDataset| objects can be stacked. For this operation
     to be defined the following must be true :
