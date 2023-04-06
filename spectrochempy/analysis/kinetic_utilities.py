@@ -281,17 +281,13 @@ class ActionMassKinetics(tr.HasTraits):
             * nlu : `int`
               Number of LU decompositions.
             * status : `int`
-              Reason for algorithm termination:
+              Reason for a successful algorithm termination:
 
-                    * -1 : Integration step failed.
                     *  0 : The solver successfully reached the end of `tspan` .
                     *  1 : A termination event occurred.
 
             * message : `str`
               Human-readable description of the termination reason.
-            * success : `bool`
-              `True` if the solver reached the interval end or a termination event
-              occurred (``status >= 0`` ).
         """
 
         def production_rates(ti, Ci):
