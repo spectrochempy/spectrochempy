@@ -40,6 +40,7 @@ def test_cu(monkeypatch):
         ("A+3V->X+Y", {"A": -1, "V": -3, "X": 1, "Y": 1}),
         ("2+V->X+5Y", {"V": -1, "X": 1, "Y": 5}),
         ("AT+CF->SCP+2X", {"AT": -1, "CF": -1, "SCP": 1, "X": 2}),
+        ("4 NH3 + 7 O2 → 4 NO2 + 6 H2O", {"NH3": -4, "O2": -7, "NO2": 4, "H2O": 6}),
     ],
 )
 def test_equations_regex(test_str, expected):

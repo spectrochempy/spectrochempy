@@ -47,7 +47,7 @@ def _interpret_equation(eq, species):
     # transform an equation given as a string to a dictionary of species with
     # integer stoechiometric coefficients.
 
-    regex = r"(((([\.,0-9]*)([a-zA-Z]+))(?=\+?))?(?=(->)?))"
+    regex = r"(((([\.,0-9]*)((?=[a-zA-Z])[a-zA-Z, 1-9]+))(?=\+?))?(?=(->|→)?))"
 
     matches = re.finditer(regex, eq.replace(" ", ""))
     equation = {}
@@ -64,7 +64,7 @@ def _interpret_equation(eq, species):
             )
         coef = match.group(4) if match.group(4) else 1
         equation[s] = float(coef) * mult
-        if match.group(6) == "->":
+        if match.group(6) in ["->", "→"]:
             # shift to products
             mult = 1
 
@@ -90,7 +90,7 @@ class ActionMassKinetics(tr.HasTraits):
     ----------
     equations : `list` or `tuple` of `str`
         Strings giving the ``n_equations`` chemical equation of the network.
-        Reactants and products must be separated by a ``"->"`` symbol,
+        Reactants and products must be separated by a ``"->"`` or "→" symbol,
         The name of each species should match a key of the `species` dictionary.
         Examples: ``"A + B -> C"`` or ``"2A -> 0.5 D"``\
     species : `dict`, optional
@@ -156,7 +156,7 @@ class ActionMassKinetics(tr.HasTraits):
         equations = change.new
         M = np.zeros((self.n_equations, self.n_species))
         for i, eq in enumerate(equations):
-            equation = self._interpret_equation(eq, self._species)
+            equation = _interpret_equation(eq, self._species)
             # fill M matrix in the order of the species list
             M[i] = [equation[k] if k in equation else 0 for k in self._species]
         self._M = M
