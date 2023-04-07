@@ -177,11 +177,11 @@ for reproducible results across multiple function calls.""",
         **kwargs,
     ):
         # we have changed the name n_components use in sklearn by
-        # used_components (in order  to avoid conflict with the rest of the progrma)
+        # used_components (in order  to avoid conflict with the rest of the program)
         # warn th user:
         if "n_components" in kwargs:
             raise KeyError(
-                "`n_components` is not a valid parameter. Did-you mean "
+                "`n_components` is not a valid parameter anymore. Did-you mean "
                 "`used_components`?"
             )
 
