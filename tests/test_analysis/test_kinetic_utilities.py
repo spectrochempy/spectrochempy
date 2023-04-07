@@ -28,4 +28,22 @@ def test_cu(monkeypatch):
     assert not cu._cantera_is_not_available()
 
 
-# TODO: tests someexamples
+@pytest.mark.parametrize(
+    "test_str, expected",
+    [
+        ("A ->E", {"A": -1, "E": 1}),
+        ("2A -> 0.5 D", {"A": -4, "D": 1}),
+        ("A +b   -> 43 C + 2.5 D", {"A": -2, "b": -2, "C": 86, "D": 5}),
+        ("A+V+H->X+Y", {"A": -1, "V": -1, "H": -1, "X": 1, "Y": 1}),
+        ("A->2E+F", {"A": -1, "E": 2, "F": 1}),
+        ("A   +  s->2E+4F", {"A": -1, "s": -1, "E": 2, "F": 4}),
+        ("A+3V->X+Y", {"A": -1, "V": -3, "X": 1, "Y": 1}),
+        ("2+V->X+5Y", {"V": -1, "X": 1, "Y": 5}),
+        ("AT+CF->SCP+2X", {"AT": -1, "CF": -1, "SCP": 1, "X": 2}),
+    ],
+)
+def test_equations_regex(test_str, expected):
+    species = list(expected.keys())
+    eq = cu._interpret_equation(test_str, species)
+
+    assert expected == eq

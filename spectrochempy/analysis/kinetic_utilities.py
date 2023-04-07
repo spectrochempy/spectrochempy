@@ -10,10 +10,9 @@
 Utility functions to deal with Cantera input/output.
 """
 
-# TODO: Testing !
-
 import datetime
 import logging
+import re
 import warnings
 from collections.abc import Iterable
 
@@ -42,6 +41,42 @@ class SolverError(SpectroChemPyError):
     """Error raised if solve_ivp (integrate) return a status < 0"""
 
 
+# Utility
+# --------
+def _interpret_equation(eq, species):
+    # transform an equation given as a string to a dictionary of species with
+    # integer stoechiometric coefficients.
+
+    regex = r"(((([\.,0-9]*)([a-zA-Z]+))(?=\+?))?(?=(->)?))"
+
+    matches = re.finditer(regex, eq.replace(" ", ""))
+    equation = {}
+    mult = -1  # reactants
+    for match in matches:
+        if not match.group(5):
+            # no species
+            continue
+        s = match.group(5)
+        if s not in species:
+            raise ValueError(
+                f'Species "{s}" in equation "{eq}" is not listed in species\n'
+                f"Available species : {species}"
+            )
+        coef = match.group(4) if match.group(4) else 1
+        equation[s] = float(coef) * mult
+        if match.group(6) == "->":
+            # shift to products
+            mult = 1
+
+    # normalize the coefficients (for float we assume that they have at the maximum
+    # 2 decimals
+    y = (np.array(list(equation.values())) * 100).astype(int)
+    div = np.gcd.reduce(np.abs(y))
+    equation = {k: int(v * 100 / div) for k, v in equation.items()}
+
+    return equation
+
+
 @tr.signature_has_traits
 class ActionMassKinetics(tr.HasTraits):
     """
@@ -56,14 +91,12 @@ class ActionMassKinetics(tr.HasTraits):
     equations : `list` or `tuple` of `str`
         Strings giving the ``n_equations`` chemical equation of the network.
         Reactants and products must be separated by a ``"->"`` symbol,
-        Stoichiometric coefficients, species names and ``"+"`` symbols must be
-        separated by at leat one space.
         The name of each species should match a key of the `species` dictionary.
-        Examples: ``"A + B -> C"`` or ``"2 A -> D"``\
+        Examples: ``"A + B -> C"`` or ``"2A -> 0.5 D"``\
     species : `dict`, optional
         Dictionary of initial concentrations for the `n_species` species.
     k : |array-like|
-        Iterable of  of shape `n_equations` x 2 with the Arrhenius rate parameters
+        Iterable of shape `n_equations` x 2 with the Arrhenius rate parameters
         ((:math:`A_1`\ , :math:`Ea_1`\ ), ... (:math:`A_n`\ , :math:`Ea_n`\ )).
     T : `float`, `Quantity` or `callable`\ , optional, default: 298.0
         Temperature. If it is not a temperature quantity, the unit is assumed to be
@@ -72,16 +105,22 @@ class ActionMassKinetics(tr.HasTraits):
     """
 
     # internal parameters
-    _equations = tr.List(tr.Unicode())
-    _species_concentrations = tr.Dict()
-    _k = Array()
-    _T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0)
+    _equations = tr.List(tr.Unicode(), help="List of model equations")
+    _concentrations = tr.Dict(help="A dictionary of model's species:concentrations")
+    _species = tr.List(help="a list of species in this model")
+    _M = Array(help="Stoichiometric matrix M = A+B")
+    _k = Array(help="Arrhenius rate")
+    _T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0, help="Temperature")
 
     def __init__(self, equations, species, k, T=298.0, **kwargs):
-        self._equations = equations
-        self._species_concentrations = species
+
         self._k = k
         self._T = T
+
+        # initialise concentrations, species and equations
+        self._concentrations = species
+        self._species = list(self._concentrations.keys())
+        self._equations = equations
 
     # ----------------------------------------------------------------------------------
     # Private methods
@@ -111,74 +150,38 @@ class ActionMassKinetics(tr.HasTraits):
             T = Tp
         return T
 
-    def _stoichio_matrices(self):
-        """
-        Stoichiometry matrices.
-
-        Generates stoichiometry matrices from the chemical equations
-        Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
-        """
-
-        A = np.zeros((self.n_equations, self.n_species))
-        B = np.zeros_like(A)
-        for i, rxn in enumerate(self._equations):
-            rp = rxn.split("->")
-            if len(rp) != 2:
-                raise ValueError(
-                    f"in reaction #{i}, reactants and products must be separated "
-                    f'by "->" '
-                )
-            r = rp[0].split("+")  # reactants
-            p = rp[1].split("+")  # products
-
-            for ns in r:
-                if len(ns.split()) == 1:
-                    n = 1
-                    s = ns.split()[0]
-                elif len(ns.split()) == 2:
-                    n = ns.split()[0]
-                    try:
-                        n = int(n)
-                    except ValueError:
-                        raise ValueError(
-                            f"syntax error in reaction {i}: a stoichimetric coefficient"
-                            f' is expected, not "{n}"'
-                        )
-                    s = ns.split()[1]
-
-                if s not in self.species:
-                    raise ValueError(
-                        f'reactant "{s}" in reaction {i} is not listed in species'
-                    )
-
-                A[i, self.species.index(s)] = n
-
-            for ns in p:
-                if len(ns.split()) == 1:
-                    n = 1
-                    s = ns.split()[0]
-                elif len(ns.split()) == 2:
-                    n = ns.split()[0]
-                    try:
-                        n = int(n)
-                    except ValueError:
-                        raise ValueError(
-                            f"syntax error in reaction {i}: a stoichimetric coefficient"
-                            f' is expected, not "{n}"'
-                        )
-                    s = ns.split()[1]
-
-                if s not in self.species:
-                    raise ValueError(
-                        f'product "{s}" in reaction {i} is not listed in species'
-                    )
-
-                B[i, self.species.index(s)] = n
-        return A, B
+    @tr.observe("_equations")
+    def _stoichio_matrix(self, change):
+        # generate stoichio matrix
+        equations = change.new
+        M = np.zeros((self.n_equations, self.n_species))
+        for i, eq in enumerate(equations):
+            equation = self._interpret_equation(eq, self._species)
+            # fill M matrix in the order of the species list
+            M[i] = [equation[k] if k in equation else 0 for k in self._species]
+        self._M = M
 
     # ----------------------------------------------------------------------------------
     # Public properties
     # ----------------------------------------------------------------------------------
+    @property
+    def A(self):
+        """
+        Stoichiometry matrix A
+
+        Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
+        """
+        return (-self._M).clip(0)
+
+    @property
+    def B(self):
+        """
+        Stoichiometry matrix B
+
+        Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
+        """
+        return self._M.clip(0)
+
     @property
     def n_equations(self):
         """Number of reaction equations"""
@@ -187,17 +190,17 @@ class ActionMassKinetics(tr.HasTraits):
     @property
     def n_species(self):
         """Number of species"""
-        return len(self.species)
+        return len(self._species)
 
     @property
     def species(self):
         """Components names."""
-        return list(self._species_concentrations.keys())
+        return list(self._concentrations.keys())
 
     @property
     def concentrations(self):
         """Concentrations."""
-        return list(self._species_concentrations.values())
+        return list(self._concentrations.values())
 
     def integrate(self, t, method="RK45", **kwargs):
         """
@@ -313,7 +316,7 @@ class ActionMassKinetics(tr.HasTraits):
             """
             beta = 1 / R / self._T(ti)
             K = np.diag(self._k[:, 0] * np.exp(-beta * self._k[:, 1]))
-            A, B = self._stoichio_matrices()
+            A, B = self.A, self.B
             BmAt = (B - A).T
             return np.dot(np.dot(BmAt, K), _vm_exp(Ci, A))
 
