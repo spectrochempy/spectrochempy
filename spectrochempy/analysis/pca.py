@@ -471,12 +471,14 @@ for reproducible results across multiple function calls.""",
         """
         2D or 3D scoreplot of observations.
 
-        By default plots the bidimensional score plot of components #1 and #2
+        Plots can the projection of each observation/spectrum # onto the span of the principal
+        components. By default plots the bidimensional score plot of components #1 and #2
 
         Parameters
         ----------
-        *args : a NDDataset object containing the scores (if different from the current PCA.scores)
-        and/or a series of int argument or a list/tuple of 2 or 3 elements indicating the PC's
+        *args : a NDDataset object containing the scores. If not provided, the current PCA.scores
+            are used) and/or a series of int argument or a list/tuple of 2 or 3 elements indicating
+            the PC's on which the projection is made
         colormap : str
             A matplotlib colormap.
         color_mapping : 'index' or 'labels'
