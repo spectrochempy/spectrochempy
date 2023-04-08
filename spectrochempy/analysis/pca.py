@@ -19,6 +19,7 @@ from spectrochempy.analysis._base import (
     NotFittedError,
     _wrap_ndarray_output_to_nddataset,
 )
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.plots import NBlue, NRed
@@ -459,8 +460,7 @@ for reproducible results across multiple function calls.""",
 
     def scoreplot(
         self,
-        scores,
-        *pcs,
+        *args,
         colormap="viridis",
         color_mapping="index",
         show_labels=False,
@@ -471,12 +471,12 @@ for reproducible results across multiple function calls.""",
         """
         2D or 3D scoreplot of observations.
 
+        By default plots the bidimensional score plot of components #1 and #2
+
         Parameters
         ----------
-        scores : NDDataset object
-            The NDDataset containing the scores to plot
-        *pcs : a series of int argument or a list/tuple
-            Must contain 2 or 3 elements.
+        *args : a NDDataset object containing the scores (if different from the current PCA.scores)
+        and/or a series of int argument or a list/tuple of 2 or 3 elements indicating the PC's
         colormap : str
             A matplotlib colormap.
         color_mapping : 'index' or 'labels'
@@ -491,14 +491,25 @@ for reproducible results across multiple function calls.""",
         labels_every : int, optional, default: 1
         `   Do not label all points, but only every value indicated by this parameter.
         """
+        if not self._fitted:
+            raise NotFittedError()
 
         self.prefs = self.X.preferences
 
         # checks args
-        if hasattr(scores, "_implements") and not scores._implements("NDDataset"):
-            raise ValueError(
-                "The fist argument of scoreplot must be the score NDDataset"
-            )
+        if len(args) > 0:
+            if isinstance(args[0], NDDataset):
+                scores = args[0]
+                if len(args) > 1:
+                    pcs = args[1:]
+                else:
+                    pcs = 1, 2
+            else:
+                scores = self.scores
+                pcs = args
+        else:
+            scores = self.scores
+            pcs = 1, 2
 
         if isinstance(pcs[0], (list, tuple, set)):
             pcs = pcs[0]
@@ -523,7 +534,12 @@ for reproducible results across multiple function calls.""",
         # labels
         scatterlabels = None
         if show_labels:
-            scatterlabels = scores.y.labels[:, labels_column]
+            if scores.y.labels is None:
+                raise ValueError("You set show_label to true but score.y has no label")
+            elif scores.y.labels.ndim == 1:
+                scatterlabels = scores.y.labels
+            else:
+                scatterlabels = scores.y.labels[:, labels_column]
 
         if len(pcs) == 2:
             # bidimensional score plot

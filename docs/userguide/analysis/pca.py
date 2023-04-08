@@ -86,7 +86,7 @@ _ = X.plot()
 # coordinates:
 # %%
 X.title = "absorbance"
-X.y = scp.Coord.arange(51, title="elution time")
+X.y = scp.Coord.arange(51, title="elution time", labels=[str(i) for i in range(51)])
 X.x = scp.Coord.arange(96, title="wavelength")
 
 # %% [markdown]
@@ -96,8 +96,7 @@ X.x = scp.Coord.arange(96, title="wavelength")
 surf = X.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5))
 
 # %% [markdown]
-# ## PCA
-#
+# ## Running a PCA
 # First, we create a PCA object with default parameters and we compute the components with the fit() method:
 # %%
 pca = scp.PCA()
@@ -150,8 +149,8 @@ _ = pca.screeplot()
 # Scores and Loadings can be plotted using the usual plot() method, with prior transpositon
 # for the scores:
 # %%
-pca.scores.T.plot()
-pca.loadings.plot()
+_ = pca.scores.T.plot()
+_ = pca.loadings.plot()
 
 # %% [markdown]
 # Examination of the plots above indicate that the 4th component has a structured,
@@ -164,14 +163,21 @@ pca.loadings.plot()
 # %%
 pca = scp.PCA(used_components=4)
 pca.fit(X)
-pca.plotmerit()
+_ = pca.plotmerit()
 
 # %% [markdown]
 # The number of spectra can be limited by the `nb_traces` attributes:
 # %%
-pca.plotmerit(nb_traces=5)
+_ = pca.plotmerit(nb_traces=5)
 
 # %% [markdown]
 # and if needed both datasets can be shifted using the `offset` attribute (in percet of the fullscale):
 # %%
 pca.plotmerit(nb_traces=5, offset=100.0)
+
+# %% [markdown]
+# Score plots can be used to see the projection of each observation/spectrum
+# onto the span of the principal components:
+# %%
+_ = pca.scoreplot(1, 2, show_labels=True, labels_every=5)
+_ = pca.scoreplot(1, 2, 3)
