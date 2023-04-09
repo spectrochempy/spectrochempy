@@ -89,3 +89,7 @@ def test_download_nist():
     CAS = 2146363  # Acenaphthylene, dodecahydro-
     ds = scp.download_nist_ir(CAS)
     assert ds is None
+
+
+def test_download():
+    ds = scp.download("http://www.eigenvector.com/data/Corn/corn.mat")
