@@ -354,7 +354,7 @@ def _logical_binary_ufuncs():
 
 class NDMath(object):
     """
-    This class provides the math and some other array manipulation functionalities to |NDArray| or |Coord| .
+    This class provides the math and some other array manipulation functionalities to  `NDArray` or  `Coord` .
 
     Below is a list of mathematical functions (numpy) implemented (or
     planned for implementation).
@@ -364,9 +364,9 @@ class NDMath(object):
     These functions should work like for numpy-ndarray, except that they
     may be units-aware.
 
-    For instance, `ds`  being a |NDDataset| , just call the np functions like
+    For instance, `ds`  being a `NDDataset` , just call the np functions like
     this. Most of the time it returns a new NDDataset, while in some cases
-    noted below, one get a |ndarray| .
+    noted below, one get a `~numpy.ndarray` .
 
     >>> ds = scp.NDDataset([1., 2., 3.])
     >>> np.sin(ds)
@@ -560,7 +560,7 @@ class NDMath(object):
 
         Parameters
         ----------
-        dataset : |NDDataset| or |array_like|
+        dataset : `NDDataset` or :term:`array-like`
             Input array or object that can be converted to an array.
         dtype : dtype
             The type of the output array. If dtype is not given, infer the data type
@@ -650,7 +650,7 @@ class NDMath(object):
 
         Parameters
         ----------
-        dataset : |NDDataset|
+        dataset : `NDDataset`
             Input dataset.
         decimals : int, optional
             Number of decimal places to round to (default: 0).  If
@@ -712,7 +712,7 @@ class NDMath(object):
             the result will broadcast correctly against the input array.
             If the default value is passed, then `keepdims` will not be
             passed through to the `all` method of sub-classes of
-            |ndarray| , however any non-default value will be.  If the
+            `~numpy.ndarray` , however any non-default value will be.  If the
             sub-class' method does not implement `keepdims` any
             exceptions will be raised.
 
@@ -961,14 +961,14 @@ class NDMath(object):
             the result will broadcast correctly against the input array.
             If the default value is passed, then `keepdims` will not be
             passed through to the `any` method of sub-classes of
-            |ndarray| , however any non-default value will be.  If the
+            `~numpy.ndarray` , however any non-default value will be.  If the
             sub-class' method does not implement `keepdims` any
             exceptions will be raised.
 
         Returns
         -------
         any
-            A new boolean or |ndarray| is returned.
+            A new boolean or `~numpy.ndarray` is returned.
 
         See Also
         --------
@@ -1380,7 +1380,7 @@ class NDMath(object):
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to extract the diagonal.
         offset : int, optional
             Offset of the diagonal from the main diagonal.  Can be positive or
@@ -1436,7 +1436,7 @@ class NDMath(object):
     @_from_numpy_method
     def empty(cls, shape, dtype=None, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type, without initializing entries.
+        Return a new `NDDataset` of given shape and type, without initializing entries.
 
         Parameters
         ----------
@@ -1491,15 +1491,15 @@ class NDMath(object):
     @_from_numpy_method
     def empty_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return a new uninitialized |NDDataset| .
+        Return a new uninitialized `NDDataset` .
 
-        The returned |NDDataset| have the same shape and type as a given array. Units,
+        The returned `NDDataset` have the same shape and type as a given array. Units,
         coordset, ... can be added in
         kwargs.
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
@@ -1603,20 +1603,20 @@ class NDMath(object):
         ----------
         function : callable
             The function is called with N parameters, where N is the rank of
-            `shape` or from the provided `coordset` .
+            `shape` or from the provided `CoordSet` .
         shape : (N,) tuple of ints, optional
             Shape of the output array, which also determines the shape of
             the coordinate arrays passed to `function` . It is optional only if
-            `coordset` is None.
+            `CoordSet` is None.
         dtype : data-type, optional
             Data-type of the coordinate arrays passed to `function` .
             By default, `dtype` is float.
         units : str, optional
             Dataset units.
             When None, units will be determined from the function results.
-        coordset : |Coordset| instance, optional
+        coordset : `CoordSet` instance, optional
             If provided, this determine the shape and coordinates of each dimension of
-            the returned |NDDataset| . If shape is also passed it will be ignored.
+            the returned `NDDataset` . If shape is also passed it will be ignored.
         **kwargs
             Other kwargs are passed to the final object constructor.
 
@@ -1716,7 +1716,7 @@ class NDMath(object):
     @_from_numpy_method
     def full(cls, shape, fill_value=0.0, dtype=None, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type, filled with `fill_value` .
+        Return a new `NDDataset` of given shape and type, filled with `fill_value` .
 
         Parameters
         ----------
@@ -1768,15 +1768,15 @@ class NDMath(object):
     @_from_numpy_method
     def full_like(cls, dataset, fill_value=0.0, dtype=None, **kwargs):
         """
-        Return a |NDDataset| of fill_value.
+        Return a `NDDataset` of fill_value.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units,
+        The returned `NDDataset` have the same shape and type as a given array. Units,
         coordset, ... can be added in
         kwargs
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to copy the array structure.
         fill_value : scalar
             Fill value.
@@ -1885,7 +1885,7 @@ class NDMath(object):
     @_from_numpy_method
     def identity(cls, n, dtype=None, **kwargs):
         """
-        Return the identity |NDDataset| of a given shape.
+        Return the identity `NDDataset` of a given shape.
 
         The identity array is a square array with ones on
         the main diagonal.
@@ -2096,7 +2096,7 @@ class NDMath(object):
     @_from_numpy_method
     def ones(cls, shape, dtype=None, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type, filled with ones.
+        Return a new `NDDataset` of given shape and type, filled with ones.
 
         Parameters
         ----------
@@ -2161,15 +2161,15 @@ class NDMath(object):
     @_from_numpy_method
     def ones_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return |NDDataset| of ones.
+        Return `NDDataset` of ones.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units,
+        The returned `NDDataset` have the same shape and type as a given array. Units,
         coordset, ... can be added in
         kwargs.
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
@@ -2225,7 +2225,7 @@ class NDMath(object):
         Parameters
         ----------
         func : function
-            Function to apply to the |NDDataset| .
+            Function to apply to the `NDDataset` .
             \*args` , and `\*\*kwargs` are passed into `func` .
             Alternatively a `(callable, data_keyword)` tuple where
             `data_keyword` is a string indicating the keyword of
@@ -2243,7 +2243,7 @@ class NDMath(object):
         Notes
         -----
         Use `pipe` when chaining together functions that expect
-        a |NDDataset| .
+        a `NDDataset` .
         """
         if isinstance(func, tuple):
             func, target = func
@@ -2581,7 +2581,7 @@ class NDMath(object):
     @_from_numpy_method
     def zeros(cls, shape, dtype=None, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type, filled with zeros.
+        Return a new `NDDataset` of given shape and type, filled with zeros.
 
         Parameters
         ----------
@@ -2638,14 +2638,14 @@ class NDMath(object):
     @_from_numpy_method
     def zeros_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return a |NDDataset| of zeros.
+        Return a `NDDataset` of zeros.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units,
+        The returned `NDDataset` have the same shape and type as a given array. Units,
         coordset, ... can be added in kwargs.
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
@@ -3291,7 +3291,7 @@ class _ufunc:
             Returns
             -------
             out
-                |NDDataset|
+                `NDDataset`
 
             See Also
             --------
@@ -3300,7 +3300,7 @@ class _ufunc:
             Notes
             -----
             Numpy Ufuncs referenced in our documentation can be directly applied to
-            |NDDataset| or |Coord| type
+            `NDDataset` or  `Coord` type
             of SpectrochemPy objects.
             Most of these Ufuncs, however, instead of returning a numpy array, will
             return the same type of object.

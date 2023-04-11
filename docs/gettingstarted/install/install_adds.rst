@@ -3,7 +3,7 @@
 Install optional dependencies
 =============================
 
-Depending on your project, you may complete |scpy| with additional but optional dependencies that are only used
+Depending on your project, you may complete `SpectroChemPy` with additional but optional dependencies that are only used
 for specific methods.
 For example, :mod:`cantera_utilities.py` requires the ``cantera`` package.
 
@@ -13,7 +13,7 @@ the method requiring that dependency is called.
 Examples and test data
 ----------------------
 
-When installing the |scpy| package, the data and examples used in documentation and for testing are not provided.
+When installing the `SpectroChemPy` package, the data and examples used in documentation and for testing are not provided.
 If you want to try the documentation examples, you need to install them separately using:
 
 .. sourcecode:: bash
@@ -31,7 +31,7 @@ Cantera
 Cantera is a suite of tools for problems involving chemical kinetics, thermodynamics and transport process
 (see `cantera documentation <https://cantera.org>`__).
 
-We provide some functionalities based on cantera in |scpy| . If you want to use it you need first to install cantera:
+We provide some functionalities based on cantera in `SpectroChemPy` . If you want to use it you need first to install cantera:
 
 .. sourcecode:: bash
 

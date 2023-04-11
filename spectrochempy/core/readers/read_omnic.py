@@ -55,11 +55,11 @@ def read_omnic(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
@@ -226,11 +226,11 @@ def read_spg(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
@@ -291,7 +291,7 @@ def read_spg(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of `read_omnic` , except that the type of file
+    This method is an alias of `read_omnic`\ , except that the type of file
     is contrain to *.spg.
 
     Examples
@@ -320,11 +320,11 @@ def read_spa(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
@@ -381,7 +381,7 @@ def read_spa(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
@@ -389,7 +389,7 @@ def read_spa(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of `read_omnic` , except that the type of file
+    This method is an alias of `read_omnic`\ , except that the type of file
     is contrain to *.spa.
 
     Examples
@@ -409,9 +409,9 @@ def read_spa(*paths, **kwargs):
 
 def read_srs(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ` .srs` .
+    Open a Thermo Nicolet file or a list of files with extension `.srs` .
 
-    Open Omnic file or a list of files with extension ` .srs` and set
+    Open Omnic file or a list of files with extension `.srs` and set
     data/metadata in the current dataset.
 
     Parameters
@@ -420,11 +420,11 @@ def read_srs(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
@@ -479,15 +479,15 @@ def read_srs(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
+    read_spa : Read Omnic \*.Spa single spectra.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
     read_matlab : Read Matlab files.
 
     Notes
     -----
-    This method is an alias of `read_omnic` , except that the type of file
+    This method is an alias of `read_omnic`\ , except that the type of file
     is constrained to *.srs.
 
     Examples
@@ -1249,22 +1249,28 @@ def _read_header(fid, pos):
     Notes
     -----
         So far, the header structure is as follows:
+
         - starts with b'\x01' , b'\x02', b'\x03' ... maybe indicating the header "type"
         - nx (UInt32): 4 bytes behind
         - xunits (UInt8): 8 bytes behind. So far, we have the following correspondence:
-            `x\01`: wavenumbers, cm-1
-            `x\02`: datapoints (interferogram)
-            `x\03`: wavelength, nm
-            `x\04': wavelength, um
-            `x\20': Raman shift, cm-1
-        - data units (UInt8): 12 bytes behind. So far, we have the following correspondence:
-            `x\11`: absorbance
-            `x\10`: transmittance (%)
-            `x\0B`: reflectance (%)
-            `x\0C`: Kubelka_Munk
-            `x\16`:  Volts (interferogram)
-            `x\1A`:  photoacoustic
-            `x\1F`: Raman intensity
+
+            * `x\01` : wavenumbers, cm-1
+            * `x\02` : datapoints (interferogram)
+            * `x\03` : wavelength, nm
+            * `x\04' : wavelength, um
+            * `x\20' : Raman shift, cm-1
+
+        - data units (UInt8): 12 bytes behind. So far, we have the following
+          correspondence:
+
+            * `x\11` : absorbance
+            * `x\10` : transmittance (%)
+            * `x\0B` : reflectance (%)
+            * `x\0C` : Kubelka_Munk
+            * `x\16` :  Volts (interferogram)
+            * `x\1A` :  photoacoustic
+            * `x\1F` : Raman intensity
+
         - first x value (float32), 16 bytes behind
         - last x value (float32), 20 bytes behind
         - ... unknown
@@ -1283,12 +1289,13 @@ def _read_header(fid, pos):
         - spectrum history (text), 208 bytes behind
 
         For "rapid-scan" srs files:
+
         - series name (text), 938 bytes behind
         - collection length (float32), 1002 bytes behind
         - last y (float 32), 1006 bytes behind
         - first y (float 32), 1010 bytes behind
         - ny (UInt32), 1026
-        ... y unit could be at pos+1030 with 01 = minutes ?
+        - ... y unit could be at pos+1030 with 01 = minutes ?
         - history (text), 1200 bytes behind (only initila hgistopry.
            When reprocessed, updated history is at the end of the file after the
            b`\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF` sequence

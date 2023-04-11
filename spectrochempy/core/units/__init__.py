@@ -332,13 +332,12 @@ def set_nmr_context(larmor):
 
     Parameters
     ----------
-    larmor : |Quantity| or float
+    larmor : `Quantity` or `float`
         The Larmor frequency of the current nucleus.
         If it is not a quantity it is assumed to be given in MHz.
 
     Examples
     --------
-
     First we set the NMR context,
 
     >>> from spectrochempy.core.units import ur, set_nmr_context

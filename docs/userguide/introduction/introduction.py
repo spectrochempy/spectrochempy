@@ -39,8 +39,8 @@
 #
 # The `SpectroChemPy` project is essentially a library written in
 # [python](https://www.python.org) language and provides objects,
-# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset)
-# and [Project]((../../reference/generated/spectrochempy.Project.html#spectrochempy.Project)),
+# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html)
+# and [Project]((../../reference/generated/spectrochempy.Project.html)),
 # to hold data, equipped with methods to analyze, transform or display these data in a
 # simple way through a python type interface.
 #
@@ -70,7 +70,8 @@
 # %% [markdown]
 # ### Loading the API
 #
-# Before using SpectroChemPy, we need to load the **API (Application Programming Interface)**: it exposes many
+# Before using SpectroChemPy, we need to load the **API
+# (Application Programming Interface)**: it exposes many
 # objects and functions.
 #
 # To load the API, you must import it using one of the following syntax.
@@ -89,7 +90,11 @@ nd = scp.NDDataset()
 # %% [markdown]
 # **Syntax 2** (discouraged)
 #
-# With a wild `*` import. In this second syntax, the access to objects/functions can be greatly simplified. For example, we can use directly `NDDataset` without a prefix instead of `scp.NDDataset` but there is always a risk of overwriting some variables or functions already present in the namespace. Therefore, the first syntax is generally highly recommended.
+# With a wild `*` import. In this second syntax, the access to objects/functions can be
+# greatly simplified. For example, we can use directly `NDDataset` without a prefix
+# instead of `scp.NDDataset` but there is always a risk of overwriting some variables or
+# functions already present in the namespace. Therefore, the first syntax is generally
+# highly recommended.
 
 # %%
 from spectrochempy import *  # noqa
@@ -109,7 +114,8 @@ nd = NDDataset()
 # %% [markdown]
 # ## NDDataset, the main object
 #
-# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset) is a python object, actually a container, which can represent most of your
+# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html)
+# is a python object, actually a container, which can represent most of your
 # multidimensional spectroscopic data.
 #
 # For instance, in the following we read data from a series of FTIR experiments,
@@ -119,21 +125,25 @@ nd = NDDataset()
 nd = NDDataset.read_omnic("irdata/nh4y-activation.spg")
 
 # %% [markdown]
-# Note that for this example, we use data stored in a `test` directory. For your own usage, you probably have to give the full pathname.
+# Note that for this example, we use data stored in a `test` directory. For your own
+# usage, you probably have to give the full pathname.
 
 # %% [markdown]
 # ### Display dataset information
 
 # %% [markdown]
-# Several ways are available to display the data we have just read and that are now stored in the dataset
+# Several ways are available to display the data we have just read and that are now
+# stored in the dataset
 #
-# * **Printing** them, using the print function of python to get a short text version of the dataset information.
+# * **Printing** them, using the print function of python to get a short text version
+# of the dataset information.
 
 # %%
 print(nd)
 
 # %% [markdown]
-# * **Displaying html**, inside a jupyter notebook, by just typing the name of the dataset (must be the last
+# * **Displaying html**, inside a jupyter notebook, by just typing the name of the
+# dataset (must be the last
 # instruction of a cell, however!)
 
 # %%
@@ -177,7 +187,8 @@ prefs.colormap = "magma"
 _ = nd.plot(method="image")  # or nd.plot_image()
 
 # %% [markdown]
-# Note that as we plot wavenumbers as abscissa, by convention the coordinates' direction is reversed.
+# Note that as we plot wavenumbers as abscissa, by convention the coordinates' direction
+# is reversed.
 #
 # This can be changed by using the keyword argument `reversed = False` .
 
@@ -185,7 +196,8 @@ _ = nd.plot(method="image")  # or nd.plot_image()
 # ### Processing a dataset
 
 # %% [markdown]
-# Some arithmetic can be performed on such dataset. Here is an example where we subtract one reference spectrum to
+# Some arithmetic can be performed on such dataset. Here is an example where we subtract
+# one reference spectrum to
 # the whole nddataset that we have read above (`nd` ).
 
 # %% [markdown]
@@ -196,7 +208,8 @@ ref = nd[0]
 _ = ref.plot()
 
 # %% [markdown]
-# Now suppress this ref spectrum to all other spectra of the whole dataset (additionally we mask the region of
+# Now suppress this ref spectrum to all other spectra of the whole dataset (additionally
+# we mask the region of
 # saturation
 
 # %%
@@ -207,4 +220,5 @@ nds[:, 1290.0:890.0] = scp.MASKED
 _ = nds.plot_stack()
 
 # %% [markdown]
-# More details on available processing and analysis functions will be given later in this user guide.
+# More details on available processing and analysis functions will be given later in
+# this user guide.

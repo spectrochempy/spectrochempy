@@ -41,7 +41,7 @@ class IrisKernel(tr.HasTraits):
     Pre-defined kernels can be chosen among: {``'langmuir'``\ , ``'ca'``\ ,
     ``'reactant-first-order'``\ , ``'product-first-order'``\ , ``'diffusion'``\ },
     a custom kernel function - a 2-variable lambda
-    function `K`\ ``(p, q)`` or a function returning a |ndarray| can be passed.
+    function `K`\ ``(p, q)`` or a function returning a `~numpy.ndarray` can be passed.
     `p` and `q` contain the values of an external experimental variable and an internal
     physico-chemical parameter, respectively.
 
@@ -51,10 +51,10 @@ class IrisKernel(tr.HasTraits):
         The 1D or 2D dataset for the kernel is defined.
     K : any of [ ``'langmuir'`` , ``'ca'`` , ``'reactant-first-order'`` , ``'product-first-order'`` , ``'diffusion'`` ] or `callable` or `NDDataset`
         Predefined or user-defined Kernel for the integral equation.
-    p : |Coord| or ``iterable``
+    p :  `Coord` or ``iterable``
         External variable. Must be provided if the kernel `K` is passed as a `str` or
         `callable` .
-    q : |Coord| or ``iterable`` of 3 values
+    q :  `Coord` or ``iterable`` of 3 values
         Internal variable. Must be provided if the kernel `K` is passed as a `str` or
         `callable`.
     """
@@ -807,7 +807,7 @@ class IRIS(DecompositionAnalysis):
 
         Parameters
         ----------
-        index : `int`, `list` or `tuple` of `int`, optional, default: `None`
+        index : `int`\ , `list` or `tuple` of `int`\ , optional, default: `None`
             Index(es) of the inversions (*i.e.,* of the lambda values) to consider.
             If `None` plots for all indices.
         %(kwargs)s

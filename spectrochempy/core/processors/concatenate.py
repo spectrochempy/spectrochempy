@@ -35,7 +35,7 @@ def concatenate(*datasets, **kwargs):
 
     Parameters
     ----------
-    *datasets : positional `NDDataset` arguments
+    \*datasets : positional `NDDataset` arguments
         The dataset(s) to be concatenated to the current dataset. The datasets
         must have the same shape, except in the dimension corresponding to axis
         (the last, by default).
@@ -192,7 +192,7 @@ def stack(*datasets):
     """
     Stack of `NDDataset` objects along a new dimension.
 
-    Any number of |NDDataset| objects can be stacked. For this operation
+    Any number of `NDDataset` objects can be stacked. For this operation
     to be defined the following must be true :
 
     #. all inputs must be valid dataset objects,
@@ -201,17 +201,17 @@ def stack(*datasets):
 
     Parameters
     ----------
-    *datasets : a series of |NDDataset|
+    *datasets : a series of `NDDataset`
         The dataset to be stacked to the current dataset.
 
     Returns
     --------
     out
-        A |NDDataset| created from the stack of the `datasets` datasets.
+        A `NDDataset` created from the stack of the `datasets` datasets.
 
     See Also
     --------
-    concatenate : Concatenate |NDDataset| objects along a given dimension.
+    concatenate : Concatenate `NDDataset` objects along a given dimension.
 
     Examples
     --------

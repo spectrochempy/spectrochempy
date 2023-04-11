@@ -8,7 +8,7 @@ Install a Docker container
 ***************************
 
 Docker is an open platform for shipping, and running applications. It allows to run
-|scpy| in an unified environment whatever the host platform is,
+`SpectroChemPy` in an unified environment whatever the host platform is,
 avoiding all potential installation problems as the images created have been tested before being shipped.
 
 
@@ -68,8 +68,8 @@ Additional steps on windows
    TO BE COMPLETED
 
 
-Executing a |scpy| Docker container
-=========================================
+Executing a `SpectroChemPy` Docker container
+============================================
 
 This be done using the following ``Docker run`` command :
 

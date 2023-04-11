@@ -36,7 +36,7 @@ class Meta(object):
 
     Parameters
     ----------
-    **data : keywords
+    \**data : keywords
         The dictionary can be already inited with some keywords.
 
     Examples
@@ -196,9 +196,12 @@ class Meta(object):
 
     def get(self, key, default=None):
         """
+        Dictionary get method.
+
         Parameters
         ----------
-        key
+        key : str
+            key to retrieve.
         """
         return self._data.get(key, default)
 

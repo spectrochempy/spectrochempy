@@ -44,6 +44,7 @@ def conda_package_to_pip(package):
     Convert a conda package to its pip equivalent.
 
     In most cases they are the same, those are the exceptions:
+
     - Packages that should be excluded (in ``EXCLUDE``\ )
     - Packages that should be renamed (in ``RENAME``\ )
     - A package requiring a specific version, in conda is defined with a single

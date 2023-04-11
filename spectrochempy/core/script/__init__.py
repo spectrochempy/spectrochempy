@@ -32,18 +32,18 @@ class Script(HasTraits):
 
     Parameters
     ----------
-    name : str
+    name : `str`
         Name of the script. The name should be unique.
-    content : str
+    content : `str`
         Content of sthe script.
-    parent : instance of |Project|
+    parent : instance of `Project`
         Parent project.
-    priority: int
-        Default=50.
+    priority: `int`, optional, default: 50
+        priority.
 
     See Also
     --------
-    Project: Object containing `NDDataset`\'s, sub-|Project|\'s and |Script| .
+    Project: Object containing `NDDataset`\'s, sub-\ `Project`\ 's and `Script`\ .
 
     Examples
     --------

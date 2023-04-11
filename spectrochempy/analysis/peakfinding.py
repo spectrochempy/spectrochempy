@@ -58,7 +58,7 @@ def find_peaks(
     ----------
     dataset : `NDDataset`
         A 1D NDDataset or a 2D NDdataset with `len(X.y) == 1` .
-    height : `float` or |array-like|\ , optional, default: `None`
+    height : `float` or :term:`array-like`\ , optional, default: `None`
         Required height of peaks. Either a number, `None` , an array matching
         `x` or a 2-element sequence of the former. The first element is
         always interpreted as the minimal and the second, if supplied, as the
@@ -67,7 +67,7 @@ def find_peaks(
         The length of the filter window used to interpolate the maximum. window_length
         must be a positive odd integer.
         If set to one, the actual maximum is returned.
-    threshold : `float` or |array-like|\ , optional
+    threshold : `float` or :term:`array-like`\ , optional
         Required threshold of peaks, the vertical distance to its neighbouring
         samples. Either a number, `None` , an array matching `x` or a
         2-element sequence of the former. The first element is always
@@ -77,12 +77,12 @@ def find_peaks(
         Required minimal horizontal distance in samples between
         neighbouring peaks. Smaller peaks are removed first until the condition
         is fulfilled for all remaining peaks.
-    prominence : `float` or |array-like|\ , optional
+    prominence : `float` or :term:`array-like`\ , optional
         Required prominence of peaks. Either a number, `None` , an array
         matching `x` or a 2-element sequence of the former. The first
         element is always interpreted as the  minimal and the second, if
         supplied, as the maximal required prominence.
-    width : `float` or |array-like|\ , optional
+    width : `float` or :term:`array-like`\ , optional
         Required width of peaks in samples. Either a number, `None` , an array
         matching `x` or a 2-element sequence of the former. The first
         element is always interpreted as the  minimal and the second, if
@@ -98,7 +98,7 @@ def find_peaks(
         Used for calculation of the peaks width, thus it is only used if `width`
         is given. See argument  `rel_height` in `peak_widths` of the scipy documentation
         for a full description of its effects.
-    plateau_size : `float` or |array-like|\ , optional
+    plateau_size : `float` or :term:`array-like`\ , optional
         Required size of the flat top of peaks in samples. Either a number,
         `None` , an array matching `x` or a 2-element sequence of the former.
         The first element is always interpreted as the minimal and the second,
@@ -111,7 +111,7 @@ def find_peaks(
 
     Returns
     -------
-    peaks : |ndarray|
+    peaks : `~numpy.ndarray`
         Indices of peaks in `dataset` that satisfy all given conditions.
 
     properties : `dict`

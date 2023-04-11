@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements a subclass of |NDArray| with complex/quaternion related attributes.
+This module implements a subclass of  `NDArray` with complex/quaternion related attributes.
 """
 
 __all__ = []
@@ -38,48 +38,64 @@ class NDComplexArray(NDArray):
 
     def __init__(self, data=None, **kwargs):
         """
-        This class provides the complex/quaternion related functionalities to |NDArray| .
+        This class provides the complex/quaternion related functionalities to  `NDArray` .
 
         It is a subclass bringing complex and quaternion related attributes.
 
         Parameters
         ----------
         data : array of complex number or quaternion.
-            Data array contained in the object. The data can be a list, a tuple, a |ndarray| , a ndarray-like,
-            a |NDArray| or any subclass of |NDArray| . Any size or shape of data is accepted. If not given, an empty
-            |NDArray| will be inited.
-            At the initialisation the provided data will be eventually casted to a numpy-ndarray.
-            If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements will
-            be used to accordingly set those of the created object. If possible, the provided data will not be copied
-            for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
+            Data array contained in the object. The data can be a list, a tuple, a
+            `~numpy.ndarray` , a ndarray-like,
+            a  `NDArray` or any subclass of  `NDArray` . Any size or shape of data is
+            accepted. If not given, an empty `NDArray` will be inited.
+            At the initialisation the provided data will be eventually casted to a
+            `numpy.ndarray`\ .
+            If a subclass of  `NDArray` is passed which already contains some mask,
+            labels, or units, these elements will
+            be used to accordingly set those of the created object. If possible, the
+            provided data will not be copied
+            for `data` input, but will be passed by reference, so you should make a
+            copy of the `data` before passing
             them if that's the desired behavior or set the `copy` argument to True.
 
         Other Parameters
         ----------------
         dims : list of chars, optional.
-            if specified the list must have a length equal to the number od data dimensions (ndim) and the chars must be
-            taken among among x,y,z,u,v,w or t. If not specified, the dimension names are automatically attributed in
+            if specified the list must have a length equal to the number od data
+            dimensions (ndim) and the chars must be
+            taken among among x,y,z,u,v,w or t. If not specified, the dimension names
+            are automatically attributed in
             this order.
         name : str, optional
-            A user friendly name for this object. If not given, the automatic `id` given at the object creation will be
+            A user friendly name for this object. If not given, the automatic `id`
+            given at the object creation will be
             used as a name.
         labels : array of objects, optional
             Labels for the `data` . labels can be used only for 1D-datasets.
-            The labels array may have an additional dimension, meaning several series of labels for the same data.
-            The given array can be a list, a tuple, a |ndarray| , a ndarray-like, a |NDArray| or any subclass of
-            |NDArray| .
+            The labels array may have an additional dimension, meaning several series
+            of labels for the same data.
+            The given array can be a list, a tuple, a `~numpy.ndarray` , a ndarray-like,
+            a  `NDArray` or any subclass of `NDArray` .
         mask : array of bool or `NOMASK` , optional
-            Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
-            a tuple, or a |ndarray| . Each values in the array must be `False` where the data are *valid* and True when
-            they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray` , or any
-            array object (such as a |NDArray| or subclass of it), providing a `mask` here will causes the mask from the
+            Mask for the data. The mask array must have the same shape as the data.
+            The given array can be a list,
+            a tuple, or a `~numpy.ndarray` . Each values in the array must be `False`
+            where the data are *valid* and True when
+            they are not (like in numpy masked arrays). If `data` is already a
+            :class:`~numpy.ma.MaskedArray` , or any
+            array object (such as a  `NDArray` or subclass of it), providing a `mask`
+            here will causes the mask from the
             masked array to be ignored.
-        units : |Unit| instance or str, optional
-            Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
-            explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+        units : `Unit` instance or str, optional
+            Units of the data. If data is a `Quantity` then `units` is set to the unit
+            of the `data`; if a unit is also
+            explicitly provided an error is raised. Handling of units use the
+            `pint <https://pint.readthedocs.org/>`_
             package.
         title : str, optional
-            The title of the dimension. It will later be used for instance for labelling plots of the data.
+            The title of the dimension. It will later be used for instance for
+            labelling plots of the data.
             It is optional but recommended to give a title to each ndarray.
         dlabel :  str, optional.
             Alias of `title` .
@@ -87,7 +103,8 @@ class NDComplexArray(NDArray):
             Additional metadata for this object. Must be dict-like but no
             further restriction is placed on meta.
         author : str, optional.
-            name(s) of the author(s) of this dataset. BNy default, name of the computer note where this dataset is
+            name(s) of the author(s) of this dataset. BNy default, name of the computer
+            note where this dataset is
             created.
         description : str, optional.
             A optional description of the nd-dataset. A shorter alias is `desc` .
@@ -98,7 +115,7 @@ class NDComplexArray(NDArray):
 
         See Also
         --------
-        NDDataset : Object which subclass |NDArray| with the addition of coordinates.
+        NDDataset : Object which subclass  `NDArray` with the addition of coordinates.
 
         Examples
         --------
@@ -374,9 +391,12 @@ class NDComplexArray(NDArray):
         """
         Set the object data as complex.
 
-        When nD-dimensional array are set to complex, we assume that it is along the first dimension.
-        Two succesives rows are merged to form a complex rows. This means that the number of row must be even
-        If the complexity is to be applied in other dimension, either transpose/swapdims your data before applying this
+        When nD-dimensional array are set to complex, we assume that it is along the
+        first dimension.
+        Two succesives rows are merged to form a complex rows. This means that the
+        number of row must be even
+        If the complexity is to be applied in other dimension, either transpose/swapdims
+        your data before applying this
         function in order that the complex dimension is the first in the array.
 
         Parameters
@@ -598,7 +618,8 @@ class NDComplexArray(NDArray):
 
         if data.shape[-1] % 2 != 0:
             raise ValueError(
-                "An array of real data to be transformed to complex must have an even number of columns!."
+                "An array of real data to be transformed to complex must have an even "
+                "number of columns!."
             )
 
         data = data.astype(np.float64)
@@ -629,19 +650,22 @@ class NDComplexArray(NDArray):
         if data.dtype not in TYPE_COMPLEX:
             if data.shape[1] % 2 != 0:
                 raise ValueError(
-                    "An array of real data to be transformed to quaternion must have even number of columns!."
+                    "An array of real data to be transformed to quaternion must have "
+                    "even number of columns!."
                 )
             # convert to double precision complex
             data = self._make_complex(data)
 
         if data.shape[0] % 2 != 0:
             raise ValueError(
-                "An array data to be transformed to quaternion must have even number of rows!."
+                "An array data to be transformed to quaternion must have even number "
+                "of rows!."
             )
 
         r = data[::2]
         i = data[1::2]
-        #  _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(), i.real.flatten(), i.imag.flatten())))
+        #  _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(),
+        #  i.real.flatten(), i.imag.flatten())))
         #  _data = _data.reshape(r.shape)
 
         self._dtype = None  # reset dtyep

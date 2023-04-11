@@ -80,7 +80,7 @@ def read_labspec(*paths, **kwargs):
         `tests/tests_readers` directory
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory`
-         are returned (and merged if `merge`
+        are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol
         (default=True)
     recursive : bool, optional

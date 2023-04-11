@@ -42,10 +42,10 @@ from spectrochempy.utils.system import get_user_and_node
 @tr.signature_has_traits
 class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     """
-    The main N-dimensional dataset class used by |scpy|\ .
+    The main N-dimensional dataset class used by  `SpectroChemPy`\ .
 
     The `NDDataset` is the main object use by SpectroChemPy. Like numpy
-    |ndarray|\ s, `NDDataset` have the capability to be sliced, sorted and subject to
+    `~numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and subject to
     mathematical operations. But, in addition, `NDDataset` may have units,
     can be masked and each dimensions can have coordinates also with units. This make
     `NDDataset` aware of unit compatibility,
@@ -53,28 +53,28 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     application of mathematical operations.
     In addition or in replacement of numerical data for coordinates,
     `NDDataset` can also have labeled coordinates where labels can be different kind of
-    objects (`str`\ , `datetime`\ , |ndarray| or other `NDDataset`\ 's, etc...).
+    objects (`str`\ , `datetime`\ , `~numpy.ndarray` or other `NDDataset`\ 's, etc...).
 
     Parameters
     ----------
-    data : |array-like|
+    data : :term:`array-like`
         Data array contained in the object. The data can be a list, a tuple,
-        a |ndarray|, a subclass of |ndarray|, another `NDDataset` or a |Coord| object.
+        a `~numpy.ndarray`, a subclass of `~numpy.ndarray`, another `NDDataset` or a  `Coord` object.
         Any size or shape of data is accepted. If not given, an empty
         `NDDataset` will be inited.
         At the initialisation the provided data will be eventually cast to
-        a |ndarray|\ .
+        a `~numpy.ndarray`\ .
         If the provided objects is passed which already contains some
         mask, or units, these elements will be used if possible to accordingly set
         those of the created object. If possible, the provided data will not be copied
         for `data` input, but will be passed by reference, so you should
         make a copy of the `data` before passing them if that's the desired behavior
         or set the `copy` argument to `True`\ .
-    coordset : |CoordSet| instance, optional
+    coordset : `CoordSet` instance, optional
         It contains the coordinates for the different dimensions of the `data`\ .
-        if `coordset` is provided, it must specify the `coord` and `labels` for all
+        if `CoordSet` is provided, it must specify the `coord` and `labels` for all
         dimensions of the `data`\ . Multiple `coord`\ 's can be specified in a
-        |CoordSet| instance for each dimension.
+        `CoordSet` instance for each dimension.
     coordunits : `list`\ , optional, default: `None`
         A list of units corresponding to the dimensions in the order of the
         coordset.
@@ -101,21 +101,20 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         Labels for the `data`\ . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning several
         series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray| , a ndarray-like,
-        a |NDArray| or any subclass of
-        |NDArray| .
+        The given array can be a list, a tuple, a `~numpy.ndarray` , a ndarray-like,
+        a  `NDArray` or any subclass of `NDArray` .
     mask : :term:`array-like` of `bool` or `NOMASK` , optional
         Mask for the data. The mask array must have the same shape as the
         data. The given array can be a list,
-        a tuple, or a |ndarray| . Each values in the array must be `False`
+        a tuple, or a `~numpy.ndarray` . Each values in the array must be `False`
         where the data are *valid* and True when
         they are not (like in numpy masked arrays). If `data` is already a
         :class:`~numpy.ma.MaskedArray` , or any
-        array object (such as a |NDArray| or subclass of it), providing a
+        array object (such as a  `NDArray` or subclass of it), providing a
         `mask` here, will cause the mask from the
         masked array to be ignored.
-    units : |Unit| instance or `str`, optional
-        Units of the data. If data is a |Quantity| then `units` is set to
+    units : `Unit` instance or `str`, optional
+        Units of the data. If data is a `Quantity` then `units` is set to
         the unit of the `data`\ ; if a unit is also
         explicitly provided an error is raised. Handling of units use the
         `pint <https://pint.readthedocs.org/>`__
@@ -158,7 +157,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     Notes
     -----
     The underlying array in a `NDDataset` object can be accessed through the
-    `data` attribute, which will return a conventional |ndarray|\ .
+    `data` attribute, which will return a conventional `~numpy.ndarray`\ .
     """
 
     # Examples
@@ -869,7 +868,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         Returns
         -------
-        |Coord|
+         `Coord`
             Coordinates along the given axis.
         """
         idx = self._get_dims_index(dim)[0]  # should generate an error if the
@@ -893,7 +892,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def coordset(self):
         """
-        |CoordSet| instance.
+        `CoordSet` instance.
 
         Contains the coordinates of the various dimensions of the dataset.
         It's a readonly property. Use set_coords to change one or more coordinates at once.
@@ -913,7 +912,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def coordnames(self):
         """
-        List of the |Coord| names.
+        List of the  `Coord` names.
 
         Read only property.
         """
@@ -923,7 +922,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def coordtitles(self):
         """
-        List of the |Coord| titles.
+        List of the  `Coord` titles.
 
         Read only property. Use set_coordtitle to eventually set titles.
         """
@@ -933,7 +932,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def coordunits(self):
         """
-        List of the |Coord| units.
+        List of the  `Coord` units.
 
         Read only property. Use set_coordunits to eventually set units.
         """
@@ -995,7 +994,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def modeldata(self):
         """
-        |ndarray| - models data.
+        `~numpy.ndarray` - models data.
 
         Data eventually generated by modelling of the data.
         """
@@ -1029,7 +1028,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def parent(self):
         """
-        |Project| instance.
+        `Project` instance.
 
         The parent project of the dataset.
         """
@@ -1100,7 +1099,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         Returns
         -------
-        |NDDataset|
+        `NDDataset`
             Sorted dataset.
         """
 
@@ -1175,7 +1174,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         Returns
         -------
-        |NDDataset|
+        `NDDataset`
             The input array, but with all or a subset of the
             dimensions of length 1 removed.
 
@@ -1214,7 +1213,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         Returns
         -------
-        |NDDataset|
+        `NDDataset`
             View of `a` with the number of dimensions increased.
 
         See Also
@@ -1239,7 +1238,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         Returns
         -------
-        |NDDataset|
+        `NDDataset`
             Swaped dataset.
 
         See Also
@@ -1254,7 +1253,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def T(self):
         """
-        Transposed |NDDataset| .
+        Transposed `NDDataset` .
 
         The same object is returned if `ndim` is less than 2.
         """
@@ -1266,7 +1265,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         Returns
         -------
-        |NDDataset|
+        `NDDataset`
             A sub dataset defined by the input indices.
         """
 
@@ -1327,7 +1326,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         Returns
         -------
-        |ndarray|
+        `~numpy.ndarray`
             The numpy masked array from the NDDataset data.
 
         Examples
@@ -1377,7 +1376,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         # ----------
         # data: array_like
         #     Values for this array. Must be an `numpy.ndarray` , ndarray like,
-        #     or castable to an |ndarray| .
+        #     or castable to an `~numpy.ndarray` .
         # coords: sequence or dict of array_like objects, optional
         #     Coordinates (tick labels) to use for indexing along each dimension.
         #     If dict-like, should be a mapping from dimension names to the

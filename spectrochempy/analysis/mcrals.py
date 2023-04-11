@@ -231,7 +231,7 @@ It should be using one of the following syntax:
 * ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc, extraOutputGetConc``
 
 where ``Ccurr`` is the current `C` dataset, ``\*argsGetConc`` are the parameters needed
-to completely specify the function. `hardC` is a |ndarray| or `NDDataset` of shape
+to completely specify the function. `hardC` is a `~numpy.ndarray` or `NDDataset` of shape
 ``(C.y, len(hardConc)``\ , ``newArgsGetConc`` are the updated parameters for the next
 iteration (can be None), and ``extraOutputGetConc`` can be any other relevant output to
 be kept in `extraOutputGetConc` attribute, a list of ``extraOutputGetConc`` at each
@@ -329,7 +329,7 @@ It should be using one of the following syntax:
 * ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt, newArgsGetSpec, extraOutputGetSpec``
 
 where ``Stcurr`` is the current `St` dataset, ``\*argsGetSpec`` are the parameters
-needed to completely specify the function. `hardSt` is a |ndarray| or `NDDataset` of
+needed to completely specify the function. `hardSt` is a `~numpy.ndarray` or `NDDataset` of
 shape ``(C.y, len(hardSpec)``\ , ``newArgsGetSpec`` are the updated parameters for the
 next iteration (can be None), and ``extraOutputGetSpec`` can be any other relevant
 output to be kept in `extraOutputGetSpec` attribute, a list of ``extraOutputGetSpec``
@@ -938,7 +938,7 @@ at each iterations.
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-        Y : array-like or list of array-like
+        Y : :term:`array-like` or list of :term:`array-like`
             Initial concentration or spectra.
 
         Returns
@@ -959,7 +959,7 @@ at each iterations.
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-        Y : array-like or list of array-like
+        Y : :term:`array-like` or list of :term:`array-like`
             Initial concentration or spectra.
         %(kwargs)s
 
@@ -1048,26 +1048,26 @@ at each iterations.
 # Utilities
 # --------------------------------------------------------------------------------------
 def _unimodal_2D(a, axis, idxes, tol, mod):
-    """Force unimodality on given lines or columnns od a 2D ndarray
-
-    a: ndarray
-
-    axis: int
-        axis along which the correction is applied
-
-    idxes: list of int
-        indexes at which the correction is applied
-
-    mod : str
-        When set to `"strict"`\ , values deviating from unimodality are reset to the
-        value of the previous point. When set to `"smooth"`\ , both values (deviating
-        point and previous point) are modified to avoid "steps" in the profile.
-
-    tol: float
-        Tolerance parameter for unimodality. Correction is applied only if:
-        `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
-        `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
-    """
+    # """Force unimodality on given lines or columnns od a 2D ndarray
+    #
+    # a: ndarray
+    #
+    # axis: int
+    #     axis along which the correction is applied
+    #
+    # idxes: list of int
+    #     indexes at which the correction is applied
+    #
+    # mod : str
+    #     When set to `"strict"`\ , values deviating from unimodality are reset to the
+    #     value of the previous point. When set to `"smooth"`\ , both values (deviating
+    #     point and previous point) are modified to avoid "steps" in the profile.
+    #
+    # tol: float
+    #     Tolerance parameter for unimodality. Correction is applied only if:
+    #     `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
+    #     `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
+    # """
 
     if axis == 0:
         a_ = a
@@ -1081,25 +1081,25 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
 
 
 def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
-    """force unimodal concentration
-
-    makes a vector unimodal
-
-    parameters:
-    ----------
-    a : 1D ndarray
-
-    mod : str
-        When set to `"strict"`\ , values deviating from unimodality are reset to the value
-        of the previous point. When set to `"smooth"`\ , both values (deviating point and
-        previous point) are modified to avoid "steps"
-        in the profile.
-
-    tol: float
-        Tolerance parameter for unimodality. Correction is applied only if:
-        `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
-        `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
-    """
+    # """force unimodal concentration
+    #
+    # makes a vector unimodal
+    #
+    # Parameters
+    # ----------
+    # a : 1D ndarray
+    #
+    # mod : str
+    #     When set to `"strict"`\ , values deviating from unimodality are reset to the value
+    #     of the previous point. When set to `"smooth"`\ , both values (deviating point and
+    #     previous point) are modified to avoid "steps"
+    #     in the profile.
+    #
+    # tol: float
+    #     Tolerance parameter for unimodality. Correction is applied only if:
+    #     `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
+    #     `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
+    # """
 
     maxid = np.argmax(a)
     curmax = max(a)

@@ -36,11 +36,11 @@ def read_spc(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
@@ -93,8 +93,8 @@ def read_spc(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spa : Read Omnic *.spa spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic \*.spa spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.

@@ -23,7 +23,7 @@ def make_zipfile(file, **kwargs):
 
     Parameters
     ----------
-    file :  file or str
+    file :  `file` or `str`
         The file to be zipped.
     **kwargs
         Additional keyword parameters.

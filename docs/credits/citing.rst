@@ -1,9 +1,9 @@
 .. _citing:
 
-Citing  |scpy|
+Citing  `SpectroChemPy`
 ==========================================
 
-When using |scpy| for your own work, you are kindly requested to cite it this
+When using `SpectroChemPy` for your own work, you are kindly requested to cite it this
 way::
 
   Travert Arnaud, Fernandez Christian ({{ year }}). SpectroChemPy, a framework for processing,

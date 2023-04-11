@@ -20,7 +20,7 @@ def write_matlab(*args, **kwargs):
 
     Parameters
     ----------
-    *args
+    \*args
     **kwargs
 
     Returns

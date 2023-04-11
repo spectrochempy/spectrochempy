@@ -10,7 +10,7 @@ Installation using Conda
 
 The following steps have been checked only with windows 10 but should work with previous versions as well.
 
-We highly recommend that all new users install |scpy| interface via Conda. You can install Spectrochempy in a dedicated environment (recommended, steps 4 and 5. below). You can also use your base environment or an existing environment (then skip steps 4 and 5.)
+We highly recommend that all new users install `SpectroChemPy` interface via Conda. You can install Spectrochempy in a dedicated environment (recommended, steps 4 and 5. below). You can also use your base environment or an existing environment (then skip steps 4 and 5.)
 
 #.  Open a command prompt (Select the Start button and type cmd), or preferably     open the Anaconda Prompt in the Anaconda start Menu.
 
@@ -72,7 +72,7 @@ We highly recommend that all new users install |scpy| interface via Conda. You c
         and place it in an easily accessible place (e.g. the Windows Startmenu
         Folder).
 
-#. Install |scpy|
+#. Install `SpectroChemPy`
 
    The conda installer has to solve all packages dependencies and is definitely
    a bit slow. So we recommend to install `mamba <https://github.com/mamba-org/mamba>`__

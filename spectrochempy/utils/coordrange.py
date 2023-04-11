@@ -83,7 +83,7 @@ def trim_ranges(*ranges, reversed=False):
 
     Parameters
     -----------
-    *ranges :  iterable
+    \*ranges :  iterable
         An interval or a set of intervals.
         set of  intervals. If none is given, the range will be a set of an empty
         interval [[]]. The interval

@@ -7,9 +7,9 @@
 Public API reference
 ####################
 
-The |scpy| :term:`API` publicly exposes many objects and functions.
+The `SpectroChemPy` :term:`API` publicly exposes many objects and functions.
 They are listed below exhaustively.
-What is not listed here is reserved for developers and should not normally be necessary for normal use of |scpy| .
+What is not listed here is reserved for developers and should not normally be necessary for normal use of `SpectroChemPy` .
 
 .. contents:: Table of Contents
 
@@ -46,12 +46,12 @@ However instead of the second syntax, one can always use the following way to im
 The NDDataset Object
 ********************
 
-The |NDDataset| is the main object use by |scpy| .
+The `NDDataset` is the main object use by `SpectroChemPy` .
 
-Like numpy |ndarray|\ s, |NDDataset| have the capability to be sliced, sorted and subject to mathematical operations.
+Like `numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and subject to mathematical operations.
 
-But, in addition, |NDDataset| may have units, can be masked and each dimension can also have coordinated with units.
-This make |NDDataset| aware of unit compatibility, *e.g.,*\ , for binary operation such as additions or subtraction or
+But, in addition, `NDDataset` may have units, can be masked and each dimension can also have coordinated with units.
+This make `NDDataset` aware of unit compatibility, *e.g.,*\ , for binary operation such as additions or subtraction or
 during the application of mathematical operations. In addition or in replacement of numerical data for coordinates,
 NDDataset can also have labeled coordinates where labels can be different kinds of objects (strings, datetime, numpy
 nd.ndarray or other NDDatasets, etc...).
@@ -69,9 +69,9 @@ This offers a lot of flexibility in using NDDatasets that, we hope, will be usef
 Coordinates-related objects
 ===========================
 
-|NDDataset| in |scpy| in contrast to numpy nd-arrays can have coordinates for each dimension.
-The individual coordinates are represented by a specific object: |Coord|\ .
-All coordinates of a |NDDataset| are grouped in a particular object: |CoordSet|\ .
+`NDDataset` in `SpectroChemPy` in contrast to numpy nd-arrays can have coordinates for each dimension.
+The individual coordinates are represented by a specific object: `Coord`\ .
+All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`\ .
 
 .. autosummary::
     :nosignatures:
@@ -85,7 +85,7 @@ All coordinates of a |NDDataset| are grouped in a particular object: |CoordSet|\
 Creating NDDataset
 ==================
 
-A |NDDataset| can be created using the |NDDataset| class constructor, for instance here we create a dataset from a
+A `NDDataset` can be created using the `NDDataset` class constructor, for instance here we create a dataset from a
 `~numpy.random.random` two-dimensional array:
 
 .. ipython:: python
@@ -94,7 +94,7 @@ A |NDDataset| can be created using the |NDDataset| class constructor, for instan
     X = np.random.random((4,4))
     nd = NDDataset(X)
 
-The above code in |scpy| can be simplified using the `random` creation method:
+The above code in `SpectroChemPy` can be simplified using the `random` creation method:
 
 .. ipython:: python
 
@@ -103,7 +103,7 @@ The above code in |scpy| can be simplified using the `random` creation method:
 
 (see the :ref:`userguide` for a large set of examples on how to use this constructor.)
 
-Many SpectroChemPy methods mimics `numpy` equivalent, but output a |NDDataset| object.
+Many SpectroChemPy methods mimics `numpy` equivalent, but output a `NDDataset` object.
 
 
 Basic creation methods

@@ -34,7 +34,7 @@ from spectrochempy.application.metaconfigurable import MetaConfigurable
 def available_styles():
     """
     All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
-    which are available in |scpy|
+    which are available in  `SpectroChemPy`
 
     Returns
     -------

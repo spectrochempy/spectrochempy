@@ -278,7 +278,7 @@ def ignored(*exc):
 
     Parameters
     ----------
-    *exc : Exception
+    \*exc : Exception
         One or several exceptions to ignore.
 
     Examples

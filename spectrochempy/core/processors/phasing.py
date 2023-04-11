@@ -141,13 +141,13 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     ----------
     dataset : nddataset
         Input dataset.
-    phc0 : float or |Quantity| , optional, default=0 degree
+    phc0 : float or `Quantity` , optional, default=0 degree
         Zero order phase in degrees.
-    phc1 : float or |Quantity| , optional, default=0 degree
+    phc1 : float or `Quantity` , optional, default=0 degree
         First order phase in degrees.
-    exptc : float or |Quantity| , optional, default=0 us
+    exptc : float or `Quantity` , optional, default=0 us
         Exponential decay constant. If not 0, phc1 is ignored.
-    pivot: float or |Quantity| , optional, default=0 in units of the x coordinate
+    pivot: float or `Quantity` , optional, default=0 in units of the x coordinate
         Units if any must be compatible with last dimension units.
 
     Returns
@@ -194,9 +194,9 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     ----------
     dataset : nddataset
         Input dataset.
-    phc0 : float or |Quantity| , optional, default=0 degree
+    phc0 : float or `Quantity` , optional, default=0 degree
         Zero order phase in degrees.
-    exptc : float or |Quantity| , optional, default=0 us
+    exptc : float or `Quantity` , optional, default=0 us
         Exponential decay constant.
 
     Returns

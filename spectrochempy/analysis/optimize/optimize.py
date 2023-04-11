@@ -931,28 +931,26 @@ def _optimize(
     xtol=1e-8,
     callback=None,
 ):
-    """
-    Parameters
-    ----------
-    func
-    fp0
-    args
-    constraints
-    method
-    maxfun
-    maxiter
-    ftol
-    xtol
-    callback
-
-
-    #  Internal/external transformation
-    #  These transformations are used in the MINUIT package,
-    #  and described in detail
-    #  in the section 1.3.1 of the MINUIT User's Guide.
-
-
-    """
+    # """
+    # Parameters
+    # ----------
+    # func
+    # fp0
+    # args
+    # constraints
+    # method
+    # maxfun
+    # maxiter
+    # ftol
+    # xtol
+    # callback
+    #
+    #
+    # #  Internal/external transformation
+    # #  These transformations are used in the MINUIT package,
+    # #  and described in detail
+    # #  in the section 1.3.1 of the MINUIT User's Guide.
+    # """
 
     global keys
 

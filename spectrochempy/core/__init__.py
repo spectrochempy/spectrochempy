@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Package defining the *core* methods of the |scpy| API.
+Package defining the *core* methods of the  `SpectroChemPy` API.
 
 Most the API methods such as plotting, processing, analysis, etc...
 

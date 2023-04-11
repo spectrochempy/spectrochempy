@@ -156,7 +156,6 @@ class BaselineCorrection(HasTraits):
         **kwargs
             Optional keyword parameters (see Other Parameters).
 
-
         Other Parameters
         ----------------
         dim : str or int, keyword parameter, optional, default='x'.
@@ -445,7 +444,7 @@ def basc(dataset, *ranges, **kwargs):
     ----------
     dataset : a [NDDataset| instance
         The dataset where to calculate the baseline.
-    *ranges : a variable number of pair-tuples
+    \*ranges : a variable number of pair-tuples
         The regions taken into account for the manual baseline correction.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -500,7 +499,6 @@ def abc(dataset, dim=-1, **kwargs):
         The dataset dimentsion where to calculate the baseline. Default is -1.
     **kwargs
         Optional keyword parameters (see Other Parameters).
-
 
     Returns
     -------

@@ -526,7 +526,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
             Training data.
 
         Y : any
@@ -539,8 +539,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         See Also
         --------
-        fit_transform :  Fit the model with an input dataset ``X`` and apply the
-                         dimensionality reduction on ``X``.
+        fit_transform :  Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``.
         fit_reduce : Alias of `fit_transform` (Deprecated).
         """
         self._fitted = False  # reinit this flag
@@ -719,7 +718,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
@@ -845,6 +844,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
+
         Y : any
             Depends on the model.
         %(kwargs)s
@@ -909,7 +909,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
     def components(self):
         """
-        |NDDataset| with components in feature space (:term:`n_components`\ , :term:`n_features`\ ).
+        `NDDataset` with components in feature space (:term:`n_components`\ , :term:`n_features`\ ).
 
         See Also
         --------
@@ -937,9 +937,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset|
+        X : `NDDataset`
             Original dataset that was fitted.
-        X_hat : |NDDataset|
+        X_hat : `NDDataset`
             Inverse transformed (reconstructed) dataset from a decomposition model.
         %(kwargs)s
 
@@ -950,15 +950,16 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Other Parameters
         ----------------
-        colors : `tuple` or |ndarray| of 3 colors, optional
+        colors : `tuple` or `~numpy.ndarray` of 3 colors, optional
             Colors for `X` , `X_hat` and residuals ``E`` .
             in the case of 2D, The default colormap is used for `X` .
-            By default, the three colors are :py:const:`NBlue` , :py:const:`NGreen`
-            and :py:const:`NRed`  (which are colorblind friendly).
+            By default, the three colors are :const:`NBlue` , :const:`NGreen`
+            and :const:`NRed`  (which are colorblind friendly).
         offset : `float`, optional, default: `None`
-            Specify the separation (in percent) between the `X` , `X_hat` and `E` .
-        nb_traces : `int` or ``'all'``, optional
-            Number of lines to display. Default is ``'all'`` .
+            Specify the separation (in percent) between the
+            :math:`X` , :math:`X_hat` and :math:`E`\ .
+        nb_traces : `int` or ``'all'``\ , optional
+            Number of lines to display. Default is ``'all'``\ .
         **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the `X` dataset.
         """
@@ -1139,12 +1140,12 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,:term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ ,:term:`n_features`\ )
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
-        Y : |array-like| of shape (:term:`n_observations`\ ,) or (:term:`n_observations`\ ,:term:`n_targets`\ )
+        Y : :term:`array-like` of shape (:term:`n_observations`\ ,) or (:term:`n_observations`\ ,:term:`n_targets`\ )
             Target values. Will be cast to `X`\ 's dtype if necessary.
-        sample_weight : |array-like| of shape (:term:`n_observations`\ ,), default: `None`
+        sample_weight : :term:`array-like` of shape (:term:`n_observations`\ ,), default: `None`
             Individual weights for each observation.
 
         Returns
@@ -1283,7 +1284,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| matrix, shape (:term:`n_observations`\ ,:term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` matrix, shape (:term:`n_observations`\ ,:term:`n_features`\ )
             Observations. If `X` is not set, the input `X` for `fit` is used.
 
         Returns
@@ -1331,13 +1332,13 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ , :term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
             Test samples.
 
-        Y : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,)
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ ,)
             True values for `X`\ .
 
-        sample_weight : |array-like| of shape (:term:`n_observations`\ ,), default: `None`
+        sample_weight : :term:`array-like` of shape (:term:`n_observations`\ ,), default: `None`
             Sample weights.
 
         Returns

@@ -35,7 +35,7 @@ def autosub(
     ref : `NDDataset`
          1D reference data, with a size matching the axis to subtract.
          (axis parameter).  # TODO : optionally use title of axis.
-    *ranges : pair(s) of values
+    \*ranges : pair(s) of values
         Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized.
     dim : `str` or `int` , optional, default='x'
@@ -54,7 +54,7 @@ def autosub(
     --------
     out : `NDDataset`
         The subtracted dataset.
-    coefs : |ndarray| .
+    coefs : `~numpy.ndarray` .
         The table of subtraction coefficients
         (only if `return_coefs` is set to `True` ).
 

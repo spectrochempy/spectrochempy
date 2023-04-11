@@ -425,8 +425,8 @@ for reproducible results across multiple function calls.""",
         n_components : int
             Number of components to plot.
         **kwargs
-            Extra arguments: `colors` (default: `[NBlue, NRed]` ) to set the colors
-            of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]` ).
+            Extra arguments: `colors` (default: ``[NBlue, NRed]`` ) to set the colors
+            of the bar plot and scatter plot; ``ylims`` (default ``[(0, 100), "auto"]``\ ).
 
         Returns
         -------
@@ -489,7 +489,7 @@ for reproducible results across multiple function calls.""",
             If several columns of labels are present indicates which column has to be
             used to show labels.
         labels_every : int, optional, default: 1
-        `   Do not label all points, but only every value indicated by this parameter.
+            Do not label all points, but only every value indicated by this parameter.
         """
 
         self.prefs = self.X.preferences

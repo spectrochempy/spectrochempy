@@ -22,13 +22,14 @@ def read_zip(*paths, **kwargs):
     Parameters
     ----------
     *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+        The data source(s) can be specified by the name or a list of name for the
+        file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e. no `filename` , nor `content` ),
@@ -43,36 +44,45 @@ def read_zip(*paths, **kwargs):
 
     Other Parameters
     ----------------
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
+    protocol : 'str'\ , optional
+        One of {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}
         Protocol used for reading. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
-    directory : str, optional
-        From where to read the specified `filename` . If not specified, read in the default `datadir` specified in
+        is inferred (whenever it is possible) from the file name extension.
+    directory : `str`\ , optional
+        From where to read the specified `filename`\ . If not specified, read in the
+        default ``datadir`` specified in
         SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
+    merge : `bool`, optional
+        Default value is False. If True, and several filenames have been provided as
+        arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False).
-    sortbydate : bool, optional
+    sortbydate : `bool`, optional
         Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
+    description: `str`\ , optional
         A Custom description.
     origin : {'omnic', 'tga'}, optional
-        in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
+        in order to properly interpret CSV file it can be necessary to set the origin
+        of the spectra.
         Up to now only 'omnic' and 'tga' have been implemented.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
         By default it is the one set in SpectroChemPy `Preferences` .
     content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
+        Instead of passing a filename for further reading, a bytes content can be
+        directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly
+        useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the `tests/tests_readers` directory.
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True).
-    recursive : bool, optional
-        Read also in subfolders. (default=False).
+        For examples on how to use this feature, one can look in the
+        ``tests/tests_readers`` directory.
+    listdir : `bool`, optional, default: `True`
+        If `True` and filename is None, all files present in the provided `directory`
+        are returned (and merged if `merge`
+        is True. It is assumed that all the files correspond to current
+        reading protocol.
+    recursive : bool, optional, default=False
+        Read also in subfolders.
 
     See Also
     --------
@@ -80,8 +90,8 @@ def read_zip(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
+    read_spa : Read Omnic \*.Spa single spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.

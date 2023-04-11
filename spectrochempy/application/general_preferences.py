@@ -20,7 +20,7 @@ from spectrochempy.utils.file import pathclean
 # ======================================================================================
 class GeneralPreferences(MetaConfigurable):
     """
-    Preferences that apply to the |scpy| application in general.
+    Preferences that apply to the  `SpectroChemPy` application in general.
 
     They should be accessible from the main API.
     """
