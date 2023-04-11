@@ -155,9 +155,15 @@ def _read_mat(*args, **kwargs):
             # for 3D or higher datasets ?
             datasets.append(dataset)
 
+        elif data.dtype.char == "U":
+            # this is an array of string
+            warn(
+                f"The mat file contains an array of strings named '{name}' which will not be converted to NDDataset"
+            )
+            continue
+
         elif all(
-            name_ in data.dtype.names
-            for name_ in ["moddate", "axisscale", "imageaxisscale"]
+            name_ in data.dtype.names for name_ in ["moddate", "axisscale", "imagesize"]
         ):
             # this is probably a DSO object
             dataset = _read_dso(dataset, name, data)
