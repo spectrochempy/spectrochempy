@@ -19,6 +19,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Readers: add download() method
 
 .. section
 
