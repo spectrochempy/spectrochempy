@@ -39,6 +39,7 @@ from apigen import Apigen
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
 warnings.filterwarnings(action="ignore", category=RemovedInSphinx70Warning)
 warnings.filterwarnings(action="ignore", module="debugpy")
+warnings.filterwarnings(action="ignore", category=FutureWarning)
 
 # CONSTANT
 PROJECTNAME = "spectrochempy"
