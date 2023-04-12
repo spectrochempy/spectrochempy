@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements the |NDArray| base class.
+This module implements the  `NDArray` base class.
 """
 
 __all__ = []
@@ -74,28 +74,37 @@ numpyprintoptions()
 # ======================================================================================
 class NDArray(HasTraits):
     """
-    The basic |NDArray| object.
+    The basic  `NDArray` object.
 
-    The |NDArray| class is an array (numpy |ndarray|-like) container, usually not intended to be used directly,
+    The  `NDArray` class is an array (numpy :term:`array-like`) container, usually not
+    intended to be used directly,
     as its basic functionalities may be quite limited, but to be subclassed.
 
-    Indeed, both the classes `NDDataset` and |Coord| which respectively implement a full dataset (with
-    coordinates) and the coordinates in a given dimension, are derived from |NDArray| in |scpy| .
+    Indeed, both the classes `NDDataset` and  `Coord` which respectively implement a
+    full dataset (with
+    coordinates) and the coordinates in a given dimension, are derived from  `NDArray`
+    in  `SpectroChemPy` .
 
-    The key distinction from raw numpy |ndarray| is the presence of optional properties such as dimension names,
+    The key distinction from raw numpy `~numpy.ndarray` is the presence of optional
+    properties such as dimension names,
     labels, masks, units and/or extensible metadata dictionary.
 
     Parameters
     ----------
     data : array of floats
-        Data array contained in the object. The data can be a list, a tuple, a |ndarray| , a ndarray-like,
-        a |NDArray| or any subclass of |NDArray| . Any size or shape of data is accepted. If not given, an empty
-        |NDArray| will be inited.
-        At the initialisation the provided data will be eventually cast to a numpy-ndarray.
-        If a subclass of |NDArray| is passed which already contains some mask, labels, or units, these elements
+        Data array contained in the object. The data can be a list, a tuple, a
+        `~numpy.ndarray` , a ndarray-like,
+        a  `NDArray` or any subclass of  `NDArray` . Any size or shape of data is
+        accepted. If not given, an empty `NDArray` will be inited.
+        At the initialisation the provided data will be eventually cast to a
+        `numpy.ndarray`\ .
+        If a subclass of  `NDArray` is passed which already contains some mask, labels,
+        or units, these elements
         will
-        be used to accordingly set those of the created object. If possible, the provided data will not be copied
-        for `data` input, but will be passed by reference, so you should make a copy of the `data` before passing
+        be used to accordingly set those of the created object. If possible, the
+        provided data will not be copied
+        for `data` input, but will be passed by reference, so you should make a copy of
+        the `data` before passing
         them if that's the desired behavior or set the `copy` argument to True.
     **kwargs
         Optional keywords parameters. See Other Parameters.
@@ -103,31 +112,43 @@ class NDArray(HasTraits):
     Other Parameters
     ----------------
     dtype : str or dtype, optional, default=np.float64
-        If specified, the data will be cast to this dtype, else the data will be cast to float64.
+        If specified, the data will be cast to this dtype, else the data will be cast
+        to float64.
     dims : list of chars, optional
-        If specified the list must have a length equal to the number of data dimensions (ndim).
-        If not specified, dimension names are automatically attributed in the order given by
+        If specified the list must have a length equal to the number of data dimensions
+        (ndim).
+        If not specified, dimension names are automatically attributed in the order
+        given by
         `DEFAULT_DIM_NAME` .
     name : str, optional
-        A user-friendly name for this object. If not given, the automatic `id` given at the object creation will be
+        A user-friendly name for this object. If not given, the automatic `id` given at
+        the object creation will be
         used as a name.
     labels : array of objects, optional
         Labels for the `data` . Note that the labels can be used only for 1D-datasets.
-        The labels array may have an additional dimension, meaning several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray| , a ndarray-like, a |NDArray| or any subclass of
-        |NDArray| .
+        The labels array may have an additional dimension, meaning several series of
+        labels for the same data.
+        The given array can be a list, a tuple, a `~numpy.ndarray` , a ndarray-like, a
+        `NDArray` or any subclass of `NDArray` .
     mask : array of bool or `NOMASK` , optional
-        Mask for the data. The mask array must have the same shape as the data. The given array can be a list,
-        a tuple, or a |ndarray| . Each values in the array must be `False` where the data are *valid* and True when
-        they are not (like in numpy masked arrays). If `data` is already a :class:`~numpy.ma.MaskedArray` , or any
-        array object (such as a |NDArray| or subclass of it), providing a `mask` here will cause the mask from the
+        Mask for the data. The mask array must have the same shape as the data. The
+        given array can be a list,
+        a tuple, or a `~numpy.ndarray` . Each values in the array must be `False` where
+        the data are *valid* and True when
+        they are not (like in numpy masked arrays). If `data` is already a
+        :class:`~numpy.ma.MaskedArray` , or any
+        array object (such as a  `NDArray` or subclass of it), providing a `mask` here
+        will cause the mask from the
         masked array to be ignored.
-    units : |Unit| instance or str, optional
-        Units of the data. If data is a |Quantity| then `units` is set to the unit of the `data`; if a unit is also
-        explicitly provided an error is raised. Handling of units use the `pint <https://pint.readthedocs.org/>`_
+    units : `Unit` instance or str, optional
+        Units of the data. If data is a `Quantity` then `units` is set to the unit of
+        the `data`; if a unit is also
+        explicitly provided an error is raised. Handling of units use the
+        `pint <https://pint.readthedocs.org/>`_
         package.
     title : str, optional
-        The title of the dimension. It will later be used for instance for labelling plots of the data.
+        The title of the dimension. It will later be used for instance for labelling
+        plots of the data.
         It is optional but recommended giving a title to each ndarray.
     dlabel :  str, optional
         Alias of `title` .
@@ -139,9 +160,9 @@ class NDArray(HasTraits):
 
     See Also
     --------
-    NDDataset : Object which subclass |NDArray| with the addition of coordinates.
-    Coord : Object which subclass |NDArray| (coordinates object).
-    LinearCoord : Object which subclass |NDArray| (Linear coordinates object).
+    NDDataset : Object which subclass  `NDArray` with the addition of coordinates.
+    Coord : Object which subclass  `NDArray` (coordinates object).
+    LinearCoord : Object which subclass  `NDArray` (Linear coordinates object).
 
     Examples
     --------
@@ -461,7 +482,8 @@ class NDArray(HasTraits):
 
         if by is None:
             warnings.warn(
-                "parameter `by` should be set to `value` or `label` , use `value` by default"
+                "parameter `by` should be set to `value` or `label` , use `value` "
+                "by default"
             )
             by = "value"
 
@@ -533,8 +555,10 @@ class NDArray(HasTraits):
         if kdims is not None:
             if dims is not None:
                 warnings.warn(
-                    "the unnamed arguments are interpreted as `dims` . But a named argument `dims` or `axis`"
-                    "(DEPRECATED) has been specified. \nThe unnamed arguments will thus be ignored.",
+                    "the unnamed arguments are interpreted as `dims` . But a named "
+                    "argument `dims` or `axis`"
+                    "(DEPRECATED) has been specified. \nThe unnamed arguments will "
+                    "thus be ignored.",
                     UserWarning,
                 )
             dims = kdims
@@ -557,7 +581,8 @@ class NDArray(HasTraits):
         return dims
 
     def _get_dims_index(self, dims):
-        # get the index(es) corresponding to the given dim(s) which can be expressed as integer or string
+        # get the index(es) corresponding to the given dim(s) which can be expressed
+        # as integer or string
 
         if dims is None:
             return
@@ -584,7 +609,8 @@ class NDArray(HasTraits):
 
             else:
                 raise TypeError(
-                    f"Dimensions must be specified as string or integer index, but a value of type "
+                    f"Dimensions must be specified as string or integer index, but a "
+                    f"value of type "
                     f"{type(dim)} has been passed (value:{dim})!"
                 )
 
@@ -677,11 +703,13 @@ class NDArray(HasTraits):
         return None
 
     def _loc2index(self, loc, dim=None, *, units=None):
-        # Return the index of a location (label or values such as coordinates) along a 1D array.
+        # Return the index of a location (label or values such as coordinates) along a
+        # 1D array.
         # Do not apply for multidimensional arrays (ndim>1)
         if self.ndim > 1:
             raise NotImplementedError(
-                f"not implemented for {type(self).__name__} objects which are not 1-dimensional "
+                f"not implemented for {type(self).__name__} objects which are "
+                f"not 1-dimensional "
                 f"(current ndim:{self.ndim})"
             )
 
@@ -692,7 +720,8 @@ class NDArray(HasTraits):
             and units != self.units
         ):
             raise ValueError(
-                f"Units of the location {loc} {units} are not compatible with those of this array:"
+                f"Units of the location {loc} {units} are not compatible with those of"
+                f" this array:"
                 f" {self.units}"
             )
 
@@ -707,7 +736,8 @@ class NDArray(HasTraits):
                 error = None
                 if np.all(loc > data.max()) or np.all(loc < data.min()):
                     info_(
-                        f"This coordinate ({loc}) is outside the axis limits ({data.min()}-{data.max()}).\n"
+                        f"This coordinate ({loc}) is outside the axis limits "
+                        f"({data.min()}-{data.max()}).\n"
                         f"The closest limit index is returned"
                     )
                     error = "out_of_limits"
@@ -768,7 +798,8 @@ class NDArray(HasTraits):
                 test = Ellipsis in _keys
             except ValueError as e:
                 if e.args[0].startswith("The truth "):
-                    # probably an array of index (Fancy indexing)  # should not happen anymore with the test above
+                    # probably an array of index (Fancy indexing)
+                    # should not happen anymore with the test above
                     test = False
             return test
 
@@ -1162,7 +1193,7 @@ class NDArray(HasTraits):
     @property
     def data(self):
         """
-        The `data` array (|ndarray|).
+        The `data` array (`~numpy.ndarray`).
 
         If there is no data but labels, then the labels are returned instead of data.
         """
@@ -1191,7 +1222,7 @@ class NDArray(HasTraits):
         unitless : True if data has no units.
         has_units : True if data has units.
 
-         Notes
+        Notes
         -----
         `Dimensionless` is different of `unitless` which means no unit.
         """
@@ -1204,7 +1235,8 @@ class NDArray(HasTraits):
         """
         Names of the dimensions (list).
 
-        The name of the dimensions are 'x', 'y', 'z'.... depending on the number of dimension.
+        The name of the dimensions are 'x', 'y', 'z'....
+        depending on the number of dimension.
         """
         ndim = self.ndim
         if ndim > 0:
@@ -1222,7 +1254,8 @@ class NDArray(HasTraits):
 
         if not is_sequence(values) or len(values) != self.ndim:
             raise ValueError(
-                f"a sequence of chars with a length of {self.ndim} is expected, but `{values}` "
+                f"a sequence of chars with a length of {self.ndim} is expected, "
+                f"but `{values}` "
                 f"has been provided"
             )
 
@@ -1262,15 +1295,18 @@ class NDArray(HasTraits):
 
     def get_axis(self, *args, **kwargs):
         """
-        Helper function to determine an axis index whatever the syntax used (axis index or dimension names).
+        Helper function to determine an axis index whatever the syntax used (axis index
+        or dimension names).
 
         Parameters
         ----------
         dim, axis, dims : str, int, or list of str or index
-            The axis indexes or dimensions names - they can be specified as argument or using keyword 'axis', 'dim'
+            The axis indexes or dimensions names - they can be specified as argument or
+            using keyword 'axis', 'dim'
             or 'dims'.
         negative_axis : bool, optional, default=False
-            If True a negative index is returned for the axis value (-1 for the last dimension, etc...).
+            If True a negative index is returned for the axis value (-1 for the last
+            dimension, etc...).
         allows_none : bool, optional, default=False
             If True, if input is none then None is returned.
         only_first : bool, optional, default: True
@@ -1331,7 +1367,7 @@ class NDArray(HasTraits):
 
         Returns
         -------
-        |ndarray|
+        `~numpy.ndarray`
             The labels at the desired level or None.
         """
         if not self.is_labeled:
@@ -1490,7 +1526,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |ndarray|
+        other : `~numpy.ndarray`
             The ndarray object for which we want to compare units compatibility.
 
         Returns
@@ -1524,7 +1560,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Unit| , |Quantity| or str
+        other : `Unit` , `Quantity` or str
             Destination units.
         force : bool, optional, default=`False`
             If True the change of units is forced, even for incompatible units.
@@ -1574,11 +1610,14 @@ class NDArray(HasTraits):
     @property
     def labels(self):
         """
-        An array of labels for `data` (|ndarray| of str).
+        An array of labels for `data` (`~numpy.ndarray` of str).
 
-        An array of objects of any type (but most generally string), with the last dimension size equal to that of the
-        dimension of data. Note that's labelling is possible only for 1D data. One classical application is
-        the labelling of coordinates to display informative strings instead of numerical values.
+        An array of objects of any type (but most generally string), with the last
+        dimension size equal to that of the
+        dimension of data. Note that's labelling is possible only for 1D data. One
+        classical application is
+        the labelling of coordinates to display informative strings instead of
+        numerical values.
         """
         return self._labels
 
@@ -1589,7 +1628,8 @@ class NDArray(HasTraits):
 
         if self.ndim > 1:
             warnings.warn(
-                "We cannot set the labels for multidimentional data - Thus, these labels are ignored"
+                "We cannot set the labels for multidimentional data - Thus, these "
+                "labels are ignored"
             )
         else:
             # make sure labels array is of type np.ndarray or Quantity arrays
@@ -1604,17 +1644,20 @@ class NDArray(HasTraits):
 
             else:
                 if (self.data is not None) and (labels.shape[0] != self.shape[0]):
-                    # allow the fact that the labels may have been passed in a transposed array
+                    # allow the fact that the labels may have been passed in a
+                    # transposed array
                     if labels.ndim > 1 and (labels.shape[-1] == self.shape[0]):
                         labels = labels.T
                     else:
                         raise ValueError(
-                            f"labels {labels.shape} and data {self.shape} shape mismatch!"
+                            f"labels {labels.shape} and data {self.shape} "
+                            f"shape mismatch!"
                         )
 
                 if np.any(self._labels):
                     info_(
-                        f"{type(self).__name__} is already a labeled array.\nThe explicitly provided labels will "
+                        f"{type(self).__name__} is already a labeled array.\nThe "
+                        f"explicitly provided labels will "
                         f"be appended to the current labels"
                     )
 
@@ -1643,7 +1686,7 @@ class NDArray(HasTraits):
     @property
     def mask(self):
         """
-        Mask for the data (|ndarray| of bool).
+        Mask for the data (`~numpy.ndarray` of bool).
         """
         if not self.is_masked:
             return NOMASK
@@ -1681,7 +1724,8 @@ class NDArray(HasTraits):
                 # this should happen when a new mask is added to an existing one
                 # mask to be combined to an existing one
                 info_(
-                    f"{type(self).__name__} is already a masked array.\n The new mask will be combined with the "
+                    f"{type(self).__name__} is already a masked array.\n The new "
+                    f"mask will be combined with the "
                     f"current array's mask."
                 )
                 self._mask |= mask  # combine (is a copy!)
@@ -1694,7 +1738,7 @@ class NDArray(HasTraits):
     @property
     def masked_data(self):
         """
-        The actual masked `data` array - Readonly property (|ma.ndarray|).
+        The actual masked `data` array - Readonly property (`numpy.ma.ndarray`).
         """
         if self.is_masked and not self.is_empty:
             return self._umasked(self.data, self.mask)
@@ -1704,7 +1748,7 @@ class NDArray(HasTraits):
     @property
     def meta(self):
         """
-        Additional metadata (|Meta|).
+        Additional metadata (`Meta`).
         """
         return self._meta
 
@@ -1781,7 +1825,8 @@ class NDArray(HasTraits):
         A tuple with the size of each dimension - Readonly property.
 
         The number of `data` element on each dimension (possibly complex).
-        For only labelled array, there is no data, so it is the 1D and the size is the size of the array of labels.
+        For only labelled array, there is no data, so it is the 1D and the size is the
+        size of the array of labels.
         """
         if self.data is None and self.is_labeled:
             return (self.labels.shape[0],)
@@ -1863,7 +1908,7 @@ class NDArray(HasTraits):
 
     def swapdims(self, dim1, dim2, inplace=False):
         """
-        Interchange a two dims of a |NDArray| .
+        Interchange a two dims of a  `NDArray` .
 
         Parameters
         ----------
@@ -1909,7 +1954,7 @@ class NDArray(HasTraits):
     @property
     def T(self):
         """
-        Transposed array (|NDArray|).
+        Transposed array ( `NDArray`).
 
         The same object is returned if `ndim` is less than 2.
 
@@ -1943,7 +1988,7 @@ class NDArray(HasTraits):
 
         Parameters
         ----------
-        other : |Quantity| or str
+        other : `Quantity` or str
             Destination units.
         inplace : bool, optional, default=`False`
             Flag to say that the method return a new object (default)
@@ -1981,7 +2026,8 @@ class NDArray(HasTraits):
         >>> ndd.to('second')
         Traceback (most recent call last):
         ...
-        pint.errors.DimensionalityError: Cannot convert from 'meter' ([length]) to 'second' ([time])
+        pint.errors.DimensionalityError: Cannot convert from 'meter' ([length]) to
+        'second' ([time])
 
         However, we can force the change
 
@@ -2221,7 +2267,7 @@ class NDArray(HasTraits):
     @property
     def umasked_data(self):
         """
-        The actual array with mask and unit (|Quantity|).
+        The actual array with mask and unit (`Quantity`).
 
         (Readonly property).
         """
@@ -2239,7 +2285,7 @@ class NDArray(HasTraits):
     @property
     def units(self):
         """
-        |Unit| - The units of the data.
+        `Unit` - The units of the data.
         """
         return self._units
 
@@ -2267,7 +2313,7 @@ class NDArray(HasTraits):
     @property
     def values(self):
         """
-        |Quantity| - The actual values (data, units) contained in this object (Readonly property).
+        `Quantity` - The actual values (data, units) contained in this object (Readonly property).
         """
 
         if self.data is not None:

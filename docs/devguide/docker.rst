@@ -7,7 +7,7 @@ Building Docker images
 **********************
 
 Docker is an open platform for developing, shipping, and running applications. It allows to develop and run
-|scpy| in an unified environment whatever the host platform is. For the end-user it should also help to
+`SpectroChemPy` in an unified environment whatever the host platform is. For the end-user it should also help to
 avoid all installation problems as the images created have been tested before being shipped.
 
 If you like to understand better how it works you can go to the
@@ -21,7 +21,7 @@ see :ref:`install_docker_details`
 Building the environment image locally
 =======================================
 
-To build a |scpy| image you can do it using the ``Docker build`` command in the directory where is located the
+To build a `SpectroChemPy` image you can do it using the ``Docker build`` command in the directory where is located the
 ``Dockerfile`` :
 
 .. sourcecode:: bash

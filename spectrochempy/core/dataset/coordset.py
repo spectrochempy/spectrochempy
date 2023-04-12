@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements class |CoordSet| .
+This module implements class `CoordSet` .
 """
 
 __all__ = ["CoordSet"]
@@ -47,7 +47,7 @@ class CoordSet(HasTraits):
 
     Parameters
     ----------
-    *coords : |NDarray| , |NDArray| subclass or |CoordSet| sequence of objects.
+    \*coords : `NDArray` ,  `NDArray` subclass or `CoordSet` sequence of objects.
         If an instance of CoordSet is found, instead of an array, this means
         that all coordinates in this coords describe the same axis.
         It is assumed that the coordinates are passed in the order of the
@@ -59,12 +59,12 @@ class CoordSet(HasTraits):
 
     Other Parameters
     ----------------
-    x : |NDarray| , |NDArray| subclass or |CoordSet|
+    x : `NDArray` ,  `NDArray` subclass or `CoordSet`
         A single coordinate associated to the 'x'-dimension.
         If a coord was already passed in the argument, this will overwrite
         the previous. It is thus not recommended to simultaneously use
         both way to initialize the coordinates to avoid such conflicts.
-    y, z, u, ... : |NDarray| , |NDArray| subclass or |CoordSet|
+    y, z, u, ... : `NDArray` ,  `NDArray` subclass or `CoordSet`
         Same as `x` for the others dimensions.
     dims : list of string, optional
         Names of the dims to use corresponding to the coordinates. If not

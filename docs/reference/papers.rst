@@ -1,7 +1,7 @@
 .. _papers:
 
 ****************************************
-Papers citing |scpy|
+Papers citing `SpectroChemPy`
 ****************************************
 
 2021

@@ -48,7 +48,7 @@ Glossary
 
     array-like
         An object which can be transformed into a 1D dataset such as a list or tuple of numbers, or a
-        2D or nD dataset such a list of lists or a |ndarray|\ .
+        2D or nD dataset such a list of lists or a `~numpy.ndarray`\ .
 
     n_observations
         Number of ``observations``. When dealing with spectroscopic data, an ``observation``

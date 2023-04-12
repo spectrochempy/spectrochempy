@@ -5,7 +5,7 @@ Reporting Issues
 
 All contributions, bug reports, bug fixes, enhancements requests and ideas are welcome
 
-Bug reports are a very important part of any software project. Helping us to discover issues or proposing enhancements should allow making |scpy| more stable, reliable and adapted to more scientific activities.
+Bug reports are a very important part of any software project. Helping us to discover issues or proposing enhancements should allow making `SpectroChemPy` more stable, reliable and adapted to more scientific activities.
 
 You can report the ``Bug(s)`` you discover or the ``Feature Requests`` to the `Issue Tracker <https://github.com/spectrochempy/spectrochempy/issues>`__
 
@@ -28,7 +28,7 @@ Bug reports should :
 
         >>> nd = NDDataset()
 
-#.  Include the full version string of |scpy| . You can use the built in property
+#.  Include the full version string of `SpectroChemPy` . You can use the built in property
 
     .. sourcecode:: ipython3
 
@@ -37,4 +37,4 @@ Bug reports should :
 
 #. Explain why the current behavior is wrong/not desired and what you expect instead.
 
-The issue will then ishow up to the |scpy| community and be open to comments/ideas from others.
+The issue will then ishow up to the `SpectroChemPy` community and be open to comments/ideas from others.

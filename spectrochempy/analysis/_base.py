@@ -526,9 +526,8 @@ class AnalysisConfigurable(MetaConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
             Training data.
-
         Y : any
             Depends on the model.
 
@@ -539,8 +538,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         See Also
         --------
-        fit_transform :  Fit the model with an input dataset ``X`` and apply the
-                         dimensionality reduction on ``X``.
+        fit_transform :  Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``\ .
         fit_reduce : Alias of `fit_transform` (Deprecated).
         """
         self._fitted = False  # reinit this flag
@@ -719,7 +717,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
@@ -909,7 +907,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
     def components(self):
         """
-        |NDDataset| with components in feature space (:term:`n_components`\ , :term:`n_features`\ ).
+        `NDDataset` with components in feature space (:term:`n_components`\ , :term:`n_features`\ ).
 
         See Also
         --------
@@ -931,12 +929,24 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Plot methods
     # ----------------------------------------------------------------------------------
     @_docstring.dedent
-    def plotmerit(self, *args, **kwargs):
+    def plotmerit(self, X=None, X_hat=None, **kwargs):
         """
-        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
+        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals
+        (:math:`E`\ ) datasets.
 
-        :math:`X`\ and :math:`\hat{X}`\ can be passed as positionbal arguments. If not, the X attribute is
-        used for :math:`X`\ and :math:`\hat{X}`\ is computed by the inverse_transform() method
+        :math:`X` and :math:`\hat{X}` can be passed as arguments. If not,
+        the `X` attribute is used for :math:`X`\ and :math:`\hat{X}`\ is computed by
+        the `inverse_transform` method
+
+        Parameters
+        ----------
+        X : `NDDataset`\ , optional
+            Original dataset. If is not provided (default), the `X`
+            attribute is used and X_hat is computed using `inverse_transform`\ .
+        X_hat : `NDDataset`\ , optional
+            Inverse transformed dataset. if `X` is provided, `X_hat`
+            must also be provided as compuyed externally.
+        %(kwargs)s
 
         Returns
         -------
@@ -945,38 +955,33 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Other Parameters
         ----------------
-        colors : `tuple` or |ndarray| of 3 colors, optional
+        colors : `tuple` or `~numpy.ndarray` of 3 colors, optional
             Colors for `X` , `X_hat` and residuals ``E`` .
             in the case of 2D, The default colormap is used for `X` .
-            By default, the three colors are :py:const:`NBlue` , :py:const:`NGreen`
-            and :py:const:`NRed`  (which are colorblind friendly).
+            By default, the three colors are :const:`NBlue` , :const:`NGreen`
+            and :const:`NRed`  (which are colorblind friendly).
         offset : `float`, optional, default: `None`
-            Specify the separation (in percent) between the `X` , `X_hat` and `E` .
-        nb_traces : `int` or ``'all'``, optional
-            Number of lines to display. Default is ``'all'`` .
+            Specify the separation (in percent) between the
+            :math:`X` , :math:`X_hat` and :math:`E`\ .
+        nb_traces : `int` or ``'all'``\ , optional
+            Number of lines to display. Default is ``'all'``\ .
         **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the `X` dataset.
         """
-        if not self._fitted:
-            raise NotFittedError(
-                "The fit method must be used before using this method."
-            )
-
         colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
 
-        if (
-            len(args) == 2
-            and isinstance(args[0], NDDataset)
-            and isinstance(args[0], NDDataset)
-        ):
-            X = args[0]
-            X_hat = args[1]
-        else:
+        if X is None:
             X = self._X
-            if np.any(self._X_mask):
-                X_hat = self._remove_masked_data(self.inverse_transform())
-            else:
+            if X_hat is None:
+                # compute the inverse transform (this check that the model
+                # is already fitted and handle eventual masking)
                 X_hat = self.inverse_transform()
+        elif X_hat is None:
+            raise ValueError(
+                "If X is provided, AN externally computed X_hat dataset "
+                "must be also provided."
+            )
+
         if X._squeeze_ndim == 1:
             # normally this was done before, but if needed.
             X = X.squeeze()
@@ -985,14 +990,14 @@ class DecompositionAnalysis(AnalysisConfigurable):
         # Number of traces to keep
         nb_traces = kwargs.pop("nb_traces", "all")
         if X.ndim == 2 and nb_traces != "all":
-            inc = int(self._X.shape[0] / nb_traces)
+            inc = int(X.shape[0] / nb_traces)
             X = X[::inc]
             X_hat = X_hat[::inc]
 
         res = X - X_hat
 
         # separation between traces
-        offset = kwargs.pop("offset", 0)
+        offset = kwargs.pop("offset", None)
         if offset is None:
             offset = 0
         ma = max(X.max(), X_hat.max())
@@ -1147,12 +1152,12 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,:term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ ,:term:`n_features`\ )
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
-        Y : |array-like| of shape (:term:`n_observations`\ ,) or (:term:`n_observations`\ ,:term:`n_targets`\ )
+        Y : :term:`array-like` of shape (:term:`n_observations`\ ,) or (:term:`n_observations`\ ,:term:`n_targets`\ )
             Target values. Will be cast to `X`\ 's dtype if necessary.
-        sample_weight : |array-like| of shape (:term:`n_observations`\ ,), default: `None`
+        sample_weight : :term:`array-like` of shape (:term:`n_observations`\ ,), default: `None`
             Individual weights for each observation.
 
         Returns
@@ -1291,7 +1296,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| matrix, shape (:term:`n_observations`\ ,:term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` matrix, shape (:term:`n_observations`\ ,:term:`n_features`\ )
             Observations. If `X` is not set, the input `X` for `fit` is used.
 
         Returns
@@ -1339,13 +1344,13 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : |NDDataset| or |array-like| of shape (:term:`n_observations`\ , :term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
             Test samples.
 
-        Y : |NDDataset| or |array-like| of shape (:term:`n_observations`\ ,)
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ ,)
             True values for `X`\ .
 
-        sample_weight : |array-like| of shape (:term:`n_observations`\ ,), default: `None`
+        sample_weight : :term:`array-like` of shape (:term:`n_observations`\ ,), default: `None`
             Sample weights.
 
         Returns

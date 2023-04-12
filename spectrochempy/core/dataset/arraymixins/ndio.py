@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module define the class |NDIO| in which input/output standard
+This module define the class  `NDIO` in which input/output standard
 methods for a `NDDataset` are defined.
 """
 
@@ -112,7 +112,7 @@ class NDIO(HasTraits):
         Save the current object in SpectroChemPy format.
 
         Default extension is .scp for `NDDataset`\'s and .pscp for
-        |Project|'s.
+         `Project`'s.
 
         Parameters
         ----------

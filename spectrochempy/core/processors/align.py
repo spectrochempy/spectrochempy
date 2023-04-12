@@ -27,7 +27,7 @@ def can_merge_or_align(coord1, coord2):
 
     Parameters
     ----------
-    coord1, coord2 : |Coord|
+    coord1, coord2 :  `Coord`
         Coordinates to merge or align.
 
     Returns
@@ -66,7 +66,7 @@ def align(dataset, *others, **kwargs):
     -----------
     dataset : `NDDataset`
         Dataset on which we want to align other objects.
-    *others : `NDDataset`
+    \*others : `NDDataset`
         Objects to align.
     dim : str. Optional, default='x'
         Along which axis to perform the alignment.
@@ -89,6 +89,7 @@ def align(dataset, *others, **kwargs):
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
     interpolate_sampling : 'auto', int or float. Optional, default='auto'
+        Values:
 
         * 'auto' : sampling is determined automatically from the existing data.
         * int :  if an integer values is specified, then the
@@ -97,7 +98,7 @@ def align(dataset, *others, **kwargs):
         * float : If a float value is provided, it determines the interval
           between the interpolated data.
 
-    coord : |Coord| , optional, default=None
+    coord :  `Coord` , optional, default=None
         Coordinates to use for alignment. Ignore those corresponding to the
         dimensions to align.
     copy : bool, optional, default=True

@@ -38,35 +38,37 @@ This version introduce a full refactoring of the Spectrochempy analysis function
 See the examples in order to understand the changes.
 
 * For a rapid transition note that calling the analysis function is now done in two steps.
-  When before, one was writing::
+  When before, one was writing
 
-  .. ipython:: python
+  .. code-block:: ipython
 
-    scp.set_loglevel("INFO")
-    # init the MCRALS object and fit the model on X dataset using a guess.
-    mcr = scp.MCRALS(X, guess, tol=0.001)
-    # use the MCRALS object attributes
-    mcr.C.T.plot()
-    mcr.St.plot()
+      # change log level
+      scp.set_loglevel("INFO")
+      # init the MCRALS object and fit the model on X dataset using a guess.
+      mcr = scp.MCRALS(X, guess, tol=0.001)
+      # use the MCRALS object attributes
+      mcr.C.T.plot()
+      mcr.St.plot()
+
 
   now one would write:
 
-  .. ipython:: python
+  .. code-block:: ipython
 
-    # init the MCRALS object
-    mcr = scp.MCRALS(log_level="INFO", tol=0.001)
-    # fit the model on X dataset using a guess.
-    mcr.fit(X, guess)
-    # use the MCRALS object attributes
-    mcr.C.T.plot()
-    mcr.St.plot()
-
-* Analysis object methods such as  `reconstruct` and `reduce` have been
-  renamed `inverse_transform` and  `transform`\ , respectively, in line with
-  the method naming in `sklearn`.
+     # init the MCRALS object
+     mcr = scp.MCRALS(log_level="INFO", tol=0.001)
+     # fit the model on X dataset using a guess.
+     mcr.fit(X, guess)
+     # use the MCRALS object attributes
+     mcr.C.T.plot()
+     mcr.St.plot()
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+* Analysis object methods such as  `reconstruct` and `reduce` are now deprecated.
+  Use `inverse_transform` and `transform`\ ,instead, in line with
+  the method naming in `sklearn`\ .

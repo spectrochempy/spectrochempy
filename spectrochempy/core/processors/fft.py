@@ -288,7 +288,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     Returns
     -------
     out
-        Transformed |NDDataset| .
+        Transformed `NDDataset` .
 
     Other Parameters
     ----------------

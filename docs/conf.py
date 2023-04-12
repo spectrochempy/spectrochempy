@@ -133,41 +133,7 @@ todo_include_todos = True
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
 
-rst_epilog = """
-
-.. |scpy| replace:: `SpectroChemPy`
-
-.. |ndarray| replace:: :class:`~numpy.ndarray`
-
-.. |array-like| replace:: :term:`array-like`
-
-.. |ma.ndarray| replace:: :class:`~numpy.ma.array`
-
-.. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
-
-.. |Script| replace:: :class:`~spectrochempy.core.dataset.script.Script`
-
-.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
-
-.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
-
-.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`
-
-.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
-
-.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDMath`
-
-.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta`
-
-.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
-
-.. |Unit| replace:: :class:`~spectrochempy.core.units.units.Unit`
-
-.. |Quantity| replace:: :class:`~spectrochempy.core.units.units.Quantity`
-
-.. |Axes| replace:: :class:`~matplotlib.axes.Axes`
-
-"""
+rst_epilog = ""
 
 # -- Options for HTML output ---------------------------------------------------
 

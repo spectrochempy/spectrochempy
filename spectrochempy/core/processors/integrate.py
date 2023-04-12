@@ -100,7 +100,7 @@ def trapezoid(dataset, **kwargs):
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
         If an integer is provided, it is equivalent to the numpy axis
-        parameter for |ndarray|\ s.
+        parameter for `~numpy.ndarray`\ s.
 
     See Also
     --------
@@ -156,17 +156,17 @@ def simpson(dataset, *args, **kwargs):
     ----------------
     dim : `int` or `str`, optional, default: ``"x"``
         Dimension along which to integrate.
-        If an integer is provided, it is equivalent to the `numpy` axis` parameter
-        for |ndarray|\ s.
+        If an integer is provided, it is equivalent to the `numpy.axis` parameter
+        for `~numpy.ndarray`\ s.
     even : any of [``'avg'``\ , ``'first'``\ , ``'last'``\ }, optional, default: ``'avg'``
 
         * ``'avg'`` : Average two results: 1) use the first N-2 intervals with
-         a trapezoidal rule on the last interval and 2) use the last
-         ``N-2`` intervals with a trapezoidal rule on the first interval.
+          a trapezoidal rule on the last interval and 2) use the last
+          ``N-2`` intervals with a trapezoidal rule on the first interval.
         * ``'first'`` : Use Simpson's rule for the first ``N-2`` intervals with
-         a trapezoidal rule on the last interval.
-        *``'last'`` : Use Simpson's rule for the last ``N-2`` intervals with a
-         trapezoidal rule on the first interval.
+          a trapezoidal rule on the last interval.
+        * ``'last'`` : Use Simpson's rule for the last ``N-2`` intervals with a
+          trapezoidal rule on the first interval.
 
     See Also
     --------

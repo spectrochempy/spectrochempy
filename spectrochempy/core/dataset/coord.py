@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements the class |Coord| .
+This module implements the class  `Coord` .
 """
 
 __all__ = ["Coord", "LinearCoord"]
@@ -35,7 +35,7 @@ class Coord(NDMath, NDArray):
     """
     Explicit coordinates for a dataset along a given axis.
 
-    The coordinates of a `NDDataset` can be created using the |Coord|
+    The coordinates of a `NDDataset` can be created using the  `Coord`
     object.
     This is a single dimension array with either numerical (float)
     values or labels (str, `Datetime` objects, or any other kind of objects) to
@@ -45,9 +45,9 @@ class Coord(NDMath, NDArray):
     Parameters
     ----------
     data : ndarray, tuple or list
-        The actual data array contained in the |Coord| object.
+        The actual data array contained in the  `Coord` object.
         The given array (with a single dimension) can be a list,
-        a tuple, a |ndarray| , or a |ndarray|-like object.
+        a tuple, a `~numpy.ndarray` , or a :term:`array-like` object.
         If an object is passed that contains labels, or units,
         these elements will be used to accordingly set those of the
         created object.
@@ -77,11 +77,10 @@ class Coord(NDMath, NDArray):
         Labels for the `data` . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
         several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray| ,
-        a ndarray-like, a |NDArray| or any subclass of
-        |NDArray| .
-    units : |Unit| instance or str, optional
-        Units of the data. If data is a |Quantity| then `units` is set
+        The given array can be a list, a tuple, a `~numpy.ndarray` ,
+        a ndarray-like, a  `NDArray` or any subclass of `NDArray` .
+    units : `Unit` instance or str, optional
+        Units of the data. If data is a `Quantity` then `units` is set
         to the unit of the `data`; if a unit is also
         explicitly provided an error is raised. Handling of units use
         the `pint <https://pint.readthedocs.org/>`_
@@ -106,8 +105,7 @@ class Coord(NDMath, NDArray):
 
     See Also
     --------
-    NDDataset : Main SpectroChemPy object: an array with masks, units and
-                coordinates.
+    NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
     LinearCoord : linear coordinates.
 
     Examples
@@ -117,8 +115,8 @@ class Coord(NDMath, NDArray):
 
     >>> from spectrochempy import Coord
 
-    We then create a numpy |ndarray| and use it as the numerical `data`
-    axis of our new |Coord| object :
+    We then create a numpy `~numpy.ndarray` and use it as the numerical `data`
+    axis of our new  `Coord` object :
 
     >>> c0 = Coord.arange(1., 12., 2., title='frequency', units='Hz')
     >>> c0
@@ -182,7 +180,7 @@ class Coord(NDMath, NDArray):
     @property
     def data(self):
         """
-        The `data` array (|ndarray|).
+        The `data` array (`~numpy.ndarray`).
 
         If there is no data but labels, then the labels are returned instead of data.
         """
@@ -908,11 +906,10 @@ class LinearCoord(Coord):
         Labels for the `data` . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
         several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray| ,
-        a ndarray-like, a |NDArray| or any subclass of
-        |NDArray| .
-    units : |Unit| instance or str, optional
-        Units of the data. If data is a |Quantity| then `units` is set
+        The given array can be a list, a tuple, a `~numpy.ndarray` ,
+        a ndarray-like, a  `NDArray` or any subclass of `NDArray` .
+    units : `Unit` instance or str, optional
+        Units of the data. If data is a `Quantity` then `units` is set
         to the unit of the `data`; if a unit is also
         explicitly provided an error is raised. Handling of units use
         the `pint <https://pint.readthedocs.org/>`_

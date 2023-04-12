@@ -35,7 +35,7 @@ class SIMPLISMA(DecompositionAnalysis):
     SIMPLe to use Interactive Self-modeling Mixture Analysis (SIMPLISMA).
 
     This class performs a SIMPLISMA analysis of a 2D `NDDataset` .
-    The algorithm is adapted from :cite:t:`windig:1997``\ .
+    The algorithm is adapted from :cite:t:`windig:1997`\ .
 
     Parameters
     ----------

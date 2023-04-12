@@ -471,7 +471,7 @@ def read_dir(directory=None, **kwargs):
     Returns
     --------
     read_dir
-        `NDDataset` or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     Depending on the python version, the order of the datasets in the list may change.
 
@@ -531,7 +531,7 @@ def read_remote(file_or_dir, **kwargs):
     Returns
     --------
     dataset(s)
-        |NDDataset| or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     See Also
     --------

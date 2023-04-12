@@ -95,7 +95,7 @@ class ActionMassKinetics(tr.HasTraits):
         Examples: ``"A + B -> C"`` or ``"2A -> 0.5 D"``\
     species : `dict`, optional
         Dictionary of initial concentrations for the `n_species` species.
-    k : |array-like|
+    k : :term:`array-like`
         Iterable of shape `n_equations` x 2 with the Arrhenius rate parameters
         ((:math:`A_1`\ , :math:`Ea_1`\ ), ... (:math:`A_n`\ , :math:`Ea_n`\ )).
     T : `float`, `Quantity` or `callable`\ , optional, default: 298.0
@@ -220,7 +220,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         Parameters
         ----------
-        t : |array-like| of shape (``t_points`\ , )
+        t : :term:`array-like` of shape (``t_points``\ ,)
             Iterable with time values at which the concentrations are computed.
         method : `str` or `~scipy.integrate.OdeSolver`\ , optional, default: ``'RK45'``
             Integration method to use:
@@ -261,7 +261,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         Returns
         -------
-        C : |ndarray| or `NDDataset`, shape ( ``t_points``\ , ``n_species``\ )
+        C : `~numpy.ndarray` or `NDDataset`, shape ( ``t_points``\ , ``n_species``\ )
             Values of the solution at times `t`\ .
         meta : Bunch object with the following fields defined:
 
@@ -271,10 +271,10 @@ class ActionMassKinetics(tr.HasTraits):
               Found solution as `~scipy.integrate.OdeSolution` instance;
               None if `dense_output` was
               set to False.
-            * t_events : `list` of |ndarray| or `None`
+            * t_events : `list` of `~numpy.ndarray` or `None`
               Contains for each event type a list of arrays at which an event of
               that type event was detected. `None` if events` was None.
-            * y_events : `list` of |ndarray| or `None`
+            * y_events : `list` of `~numpy.ndarray` or `None`
               For each value of `t_events` , the corresponding value of the solution.
               `None` if events was `None`.
             * nfev : `int`
@@ -307,11 +307,11 @@ class ActionMassKinetics(tr.HasTraits):
             the diagonal matrix of rate constants and :math:`C_i^A` is the vector-matrix
             exponentiation of :math:`C_i` by :math:`A`.
 
-            parameters:
+            Parameters
             ----------
             ti: `float`
                 Time.
-            Ci: |ndarray|
+            Ci: `~numpy.ndarray`
                 1D vector of the concentrations at time `ti`\ .
             """
             beta = 1 / R / self._T(ti)
@@ -447,19 +447,19 @@ def _vm_exp(x: Iterable, A: Iterable):
     ... x_n^{A_{nn}} \right]$$
 
 
-    parameters:
+    Parameters
     ----------
     x: (px1) iterable of float
          Columns vector
     A: (pxq) iterable of int
          Matrix
 
-    returns:
+    Returns
     -------
     Vm_exp: (px1) iterable
          x^A vector
 
-    References:
+    References
     ----------
     [1] Chellaboina et al., "Modeling and analysis of mass-action kinetics", IEEE
         control systems (2009),DOI: 10.1109/MCS.2009.932926

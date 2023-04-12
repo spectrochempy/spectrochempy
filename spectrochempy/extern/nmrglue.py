@@ -578,7 +578,7 @@ def fft_positive(data):
 
     This is similar to the transform performed by NMRPipe's FFT function.
 
-    See :py:func:`fft` for documentation of the transformation applied by this
+    See :func:`fft` for documentation of the transformation applied by this
     function.
 
     Parameters

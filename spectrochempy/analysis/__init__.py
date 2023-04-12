@@ -6,5 +6,5 @@
 # ======================================================================================
 """
 Package with modules related to the analysis of `NDDataset`\'s or
-|Project|'s.
+`Project`\ 's.
 """

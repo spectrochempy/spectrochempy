@@ -38,11 +38,12 @@ def is_kernel():
 
 
 class _ExecCommand:
-    """
-    Parameters
-    ----------
-    command : shell command to execute
-    """
+    # """
+    # Parameters
+    # ----------
+    # command : `str`
+    #     shell command to execute
+    # """
 
     def __init__(self, command):
 

@@ -7,7 +7,7 @@ Installation guide
 Prerequisites
 *************
 
-|scpy| requires a working `Python <http://www.python.org/>`_ installation
+`SpectroChemPy` requires a working `Python <http://www.python.org/>`_ installation
 (version 3.7 to 3.10).
 
 We highly recommend installing
@@ -20,11 +20,11 @@ distribution.
 Miniconda is lighter (400 MB disk space) while Anaconda (3 GB minimum disk space
 to download and install)
 is much more complete for scientific applications if you intend using python
-beyond |scpy| . Important packages in Anaconda are also required for |scpy|
+beyond `SpectroChemPy` . Important packages in Anaconda are also required for `SpectroChemPy`
 (e.g., `Matplotib <https://matplotlib.org>`_,
 `Numpy <https://numpy.org>`_, `Scipy <https://www.scipy.org>`_,
 `Jupyter <https://jupyter.org>`_, …). They are not
-included in Miniconda and will be installed anyway when installing |scpy| .
+included in Miniconda and will be installed anyway when installing `SpectroChemPy` .
 So overall, the difference in installation time/disc space won’t be that big
 whether you choose Miniconda or Anaconda…
 
@@ -38,10 +38,10 @@ whether you choose Miniconda or Anaconda…
 
 For other python distributions, please check their respective documentation.
 
-Installation of |scpy|
+Installation of `SpectroChemPy`
 *****************************************************
 
-|scpy| installation is very similar on the various platforms, except the syntax of some command. We propose here the installation step whether you are on mac/Linux systems, or on Windows.
+`SpectroChemPy` installation is very similar on the various platforms, except the syntax of some command. We propose here the installation step whether you are on mac/Linux systems, or on Windows.
 
 Additionally it is possible to use a docker container or the Google Colaboratory cloud platform.
 

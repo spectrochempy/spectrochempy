@@ -94,7 +94,7 @@ from spectrochempy import ur
 #
 # *  `mask`: Data can be partially masked at will
 # *  `units`: Data can have units, allowing units-aware operations
-# *  `coordset`: Data can have a set of coordinates, one or several by dimensions
+# *  `CoordSet`: Data can have a set of coordinates, one or several by dimensions
 #
 # Additional metadata can also be added to the instances of this class
 # through the `meta` properties.
@@ -574,7 +574,7 @@ d3D.set_coordset({"t": coord0, "u": coord2, "v": [coord1, coord1b]})
 d3D
 
 # %% [markdown]
-# **D.** It is also possible to use directly the `coordset` property
+# **D.** It is also possible to use directly the `CoordSet` property
 
 # %%
 d3D.coordset = coord0, [coord1, coord1b], coord2

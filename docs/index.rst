@@ -14,7 +14,7 @@ Processing, analyzing and modeling spectroscopic data
     :hidden:
     :caption: Summary
 
-|scpy| is a framework for processing, analyzing and modeling **Spectro**\ scopic
+`SpectroChemPy` is a framework for processing, analyzing and modeling **Spectro**\ scopic
 data for **Chem**\ istry with **Py**\ thon. It is a cross-platform software, running on Linux, Windows or OS X.
 
 Among its major features:
@@ -45,7 +45,7 @@ Among its major features:
 
 .. warning::
 
-    |scpy| is still experimental and under active development.
+    `SpectroChemPy` is still experimental and under active development.
     Its current design is subject to major changes, reorganizations,
     bugs and crashes!!! Please report any issues to the
     `Issue Tracker <https://github.com/spectrochempy/spectrochempy/issues>`__

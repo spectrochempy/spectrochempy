@@ -19,7 +19,6 @@ from spectrochempy.analysis._base import (
     NotFittedError,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.plots import NBlue, NRed
@@ -180,7 +179,7 @@ for reproducible results across multiple function calls.""",
         # warn th user:
         if "n_components" in kwargs:
             raise KeyError(
-                "`n_components` is not a valid parameter anymore. Did-you mean "
+                "`n_components` is not a valid parameter. Did-you mean "
                 "`used_components`?"
             )
 
@@ -426,8 +425,8 @@ for reproducible results across multiple function calls.""",
         n_components : int
             Number of components to plot.
         **kwargs
-            Extra arguments: `colors` (default: `[NBlue, NRed]` ) to set the colors
-            of the bar plot and scatter plot; `ylims` (default `[(0, 100), "auto"]` ).
+            Extra arguments: `colors` (default: ``[NBlue, NRed]`` ) to set the colors
+            of the bar plot and scatter plot; ``ylims`` (default ``[(0, 100), "auto"]``\ ).
 
         Returns
         -------
@@ -476,8 +475,8 @@ for reproducible results across multiple function calls.""",
 
         Parameters
         ----------
-        *args : NDDataset and/or series of 2 or 3 ints or iterabble of 2 or 3 int, optional
-            The NDDataset contains the sores to plot. If not provided PCA.scores
+        *args : `NDDataset` and/or series of 2 or 3 ints or iterabble of 2 or 3 int, optional
+            The `NDDataset` contains the sores to plot. If not provided `PCA.scores`
             is used. The 2 or 3 int are the PC on which the projection is shown. If not
             provided, default to [1,2], i.e. bidimensional plot on PCs #1 and #2.
         colormap : str
@@ -499,15 +498,12 @@ for reproducible results across multiple function calls.""",
         `~matplotlib.axes.Axes`
             The axes
         """
-        if not self._fitted:
-            raise NotFittedError()
-
         self.prefs = self.X.preferences
 
         # checks args
         if len(args) > 0:
-            if isinstance(args[0], NDDataset):
-                scores = args[0]
+            scores = args[0]
+            if hasattr(scores, "_implements") and not scores._implements("NDDataset"):
                 if len(args) > 1:
                     pcs = args[1:]
                 else:

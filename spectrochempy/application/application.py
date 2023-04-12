@@ -567,7 +567,7 @@ class SpectroChemPy(Application):
     "Icon for the application"
 
     running = tr.Bool(False)
-    "Running status of the |scpy| application"
+    "Running status of the  `SpectroChemPy` application"
 
     name = tr.Unicode("SpectroChemPy")
     "Running name of the application"
@@ -576,10 +576,10 @@ class SpectroChemPy(Application):
         "SpectroChemPy is a framework for processing, analysing and modelling "
         "Spectroscopic data for Chemistry with Python."
     )
-    "Short description of the |scpy| application"
+    "Short description of the  `SpectroChemPy` application"
 
     long_description = tr.Unicode()
-    "Long description of the |scpy| application"
+    "Long description of the  `SpectroChemPy` application"
 
     @tr.default("long_description")
     def _get_long_description(self):
@@ -999,7 +999,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     # ----------------------------------------------------------------------------------
     def start(self):
         """
-        Start the |scpy| API.
+        Start the  `SpectroChemPy` API.
 
         All configuration must have been done before calling this function.
         """
