@@ -503,7 +503,7 @@ for reproducible results across multiple function calls.""",
         # checks args
         if len(args) > 0:
             scores = args[0]
-            if hasattr(scores, "_implements") and not scores._implements("NDDataset"):
+            if hasattr(scores, "_implements") and scores._implements("NDDataset"):
                 if len(args) > 1:
                     pcs = args[1:]
                 else:

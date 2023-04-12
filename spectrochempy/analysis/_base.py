@@ -931,8 +931,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def plotmerit(self, X=None, X_hat=None, **kwargs):
         """
-        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals
-        (:math:`E`\ ) datasets.
+        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
 
         :math:`X` and :math:`\hat{X}` can be passed as arguments. If not,
         the `X` attribute is used for :math:`X`\ and :math:`\hat{X}`\ is computed by
