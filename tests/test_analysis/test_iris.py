@@ -112,7 +112,7 @@ def test_IRIS():
     f1 = iris1.f.copy()
     assert f1.shape == (1, q[2], X.shape[1])
 
-    X_hat = iris1.reconstruct()
+    X_hat = iris1.inverse_transform()
     assert X_hat.squeeze().shape == X.shape
 
     # test with callable

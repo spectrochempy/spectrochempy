@@ -731,7 +731,7 @@ class IRIS(DecompositionAnalysis):
     def SM(self):
         return self._outfit[2]
 
-    def reconstruct(self):
+    def inverse_transform(self):  # override the decomposition method
         """
         Transform data back to the original space.
 
@@ -822,7 +822,7 @@ class IRIS(DecompositionAnalysis):
             Subplots.
         """
         X = self.X
-        X_hat = self.reconstruct()
+        X_hat = self.inverse_transform()
         axeslist = []
         if index is None:
             index = range(len(self._lambdas))
