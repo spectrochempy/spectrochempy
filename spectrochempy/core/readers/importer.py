@@ -217,7 +217,10 @@ class Importer(HasTraits):
                     res = _read_remote(self.objtype(), filename, **kwargs)
 
                 except OSError as e:
-                    raise e
+                    if kwargs.get("remote"):
+                        raise e
+                    else:
+                        raise FileNotFoundError(f"{filename} not found")
 
                 except IOError as e:
                     warning_(str(e))
