@@ -8,7 +8,7 @@ Prerequisites
 *************
 
 `SpectroChemPy` requires a working `Python <http://www.python.org/>`_ installation
-(version 3.7 to 3.10).
+(version 3.8 to 3.10).
 
 We highly recommend installing
 `Anaconda <https://www.anaconda.com/distribution/>`_ or
@@ -32,7 +32,7 @@ whether you choose Miniconda or Anaconda…
   or `Miniconda download page <https://docs.conda.io/en/latest/miniconda.html>`_
   to get one of these distributions.
 * Choose your platform and download one of the available installers,
-  *e.g.*, the 3.7 or + version (up to now it has been tested upon 3.10).
+  *e.g.*, the 3.8 or + version (up to now it has been tested upon 3.10).
 * Install the version which you just downloaded, following the instructions
   on the download page.
 

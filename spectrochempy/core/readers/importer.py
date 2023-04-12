@@ -645,7 +645,7 @@ def _download_from_url(url, dst, replace=False):
 def _is_relative_to(path, base):
     # try to emulate the pathlib is_relative_to method which does not work on python
     # 3.7 (needed for Colab!)
-    # TODO: replace if Colab is (unlikely) updated to a compatible version
+    # TODO: replace as Colab is updated to 3.9
     pparts = path.parts
     bparts = base.parts
     if bparts[-1] in pparts:
