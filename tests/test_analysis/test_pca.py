@@ -136,6 +136,10 @@ def test_pca():
     pca.plotmerit(offset=0, nb_traces=10)
     plt.show()
 
+    X_hat = pca.inverse_transform()
+    pca.plotmerit(dataset, X_hat, offset=0, nb_traces=10)
+    plt.show()
+
     # printev
     pca.printev(n_components=4)
     s = pca.__str__(n_components=4)

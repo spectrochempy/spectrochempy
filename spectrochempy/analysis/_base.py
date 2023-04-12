@@ -970,15 +970,12 @@ class DecompositionAnalysis(AnalysisConfigurable):
         colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
 
         if X is None:
-            X = self._X
+            X = self.X  # we need to use self.X here not self._X because the mask
+            # are restored automatically
             if X_hat is None:
                 # compute the inverse transform (this check that the model
                 # is already fitted and handle eventual masking)
-                # (BUT NOT WORKING!)
-                if np.any(self._X_mask):
-                    X_hat = self._remove_masked_data(self.inverse_transform())
-                else:
-                    X_hat = self.inverse_transform()
+                X_hat = self.inverse_transform()
         elif X_hat is None:
             raise ValueError(
                 "If X is provided, An externally computed X_hat dataset "
