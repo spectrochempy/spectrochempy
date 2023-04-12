@@ -974,10 +974,14 @@ class DecompositionAnalysis(AnalysisConfigurable):
             if X_hat is None:
                 # compute the inverse transform (this check that the model
                 # is already fitted and handle eventual masking)
-                X_hat = self.inverse_transform()
+                # (BUT NOT WORKING!)
+                if np.any(self._X_mask):
+                    X_hat = self._remove_masked_data(self.inverse_transform())
+                else:
+                    X_hat = self.inverse_transform()
         elif X_hat is None:
             raise ValueError(
-                "If X is provided, AN externally computed X_hat dataset "
+                "If X is provided, An externally computed X_hat dataset "
                 "must be also provided."
             )
 
