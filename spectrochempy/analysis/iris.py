@@ -822,7 +822,7 @@ class IRIS(DecompositionAnalysis):
             Subplots.
         """
         X = self.X
-        X_hat = self.inverse_transform()
+        X_hat = self.reconstruct()
         axeslist = []
         if index is None:
             index = range(len(self._lambdas))
