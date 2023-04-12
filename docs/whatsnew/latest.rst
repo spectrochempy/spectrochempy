@@ -1,9 +1,9 @@
 :orphan:
 
-What's new in revision 0.5.6.dev238
+What's new in revision 0.5.6.dev239
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.5.6.dev238.
+These are the changes in SpectroChemPy-0.5.6.dev239.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 New features
@@ -43,7 +43,9 @@ See the examples in order to understand the changes.
      mcr.C.T.plot()
      mcr.St.plot()
 
+Deprecations
+~~~~~~~~~~~~
 
-* Analysis object methods such as  `reconstruct` and `reduce` have been
-  renamed `inverse_transform` and `transform`\ , respectively, in line with
+* Analysis object methods such as  `reconstruct` and `reduce` are now deprecated.
+  Use `inverse_transform` and `transform`\ ,instead, in line with
   the method naming in `sklearn`\ .
