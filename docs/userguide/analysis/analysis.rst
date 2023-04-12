@@ -18,4 +18,5 @@ in the gallery (:ref:`examples-index`\).
    peak_finding
    peak_integration
    fitting
+   pca
    mcr_als

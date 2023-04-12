@@ -8,9 +8,10 @@
 In this module, methods are provided to download external datasets
 from public database.
 """
-__all__ = ["download_iris", "download_nist_ir"]
+__all__ = ["download_iris", "download_nist_ir", "download"]
 __dataset_methods__ = __all__
 
+import shutil
 from io import StringIO
 from pathlib import Path
 
@@ -20,6 +21,7 @@ import requests
 from spectrochempy.core import error_, info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.readers.importer import read
 from spectrochempy.core.readers.read_jcamp import read_jcamp
 from spectrochempy.utils.misc import is_iterable
 from spectrochempy.utils.optional import import_optional_dependency
@@ -216,6 +218,51 @@ def download_nist_ir(CAS, index="all"):
         return out[0]
     else:
         return out
+
+
+def download(url):
+    """
+    Download data from an url
+
+    Parameters
+    ----------
+    url : str
+        url to a readable file
+
+    Returns
+    -------
+    list of NDDataset or NDDataset
+        The dataset(s).
+
+    See Also
+    --------
+    read : Read data from experimental data.
+    """
+
+    # https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
+
+    local_filename = url.split("/")[-1]
+
+    try:
+        response = requests.get(url, stream=True, timeout=10)
+    except OSError:
+        error_("OSError: could not connect")
+        return None
+
+    with response as r:
+        r.raise_for_status()
+        with open(local_filename, "wb") as f:
+            shutil.copyfileobj(r.raw, f)
+            ds = read(local_filename)
+
+            if isinstance(ds, NDDataset):
+                ds.history = f"Downloaded from {url}"
+            elif isinstance(ds, list):
+                for ds_ in ds:
+                    ds_.history = f"Downloaded from {url}"
+
+    Path(local_filename).unlink()
+    return ds
 
 
 # ======================================================================================

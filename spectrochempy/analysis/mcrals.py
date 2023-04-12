@@ -47,10 +47,10 @@ class MCRALS(DecompositionAnalysis):
         """
     Multivariate Curve Resolution Alternating Least Squares (MCRALS).
 
-    :term:`MCR-ALS` (``Multivariate Curve Resolution Alternating Least Squares``\ )
+    :term:`MCR-ALS` ( ``Multivariate Curve Resolution Alternating Least Squares`` )
     resolve's a set (or several sets) of spectra :math:`X` of an evolving mixture
     (or a set of mixtures) into the spectra :math:`S^T` of "pure" species and their
-    concentration profiles :math:`C`\ .
+    concentration profiles :math:`C` .
 
     In terms of matrix equation:
 
@@ -70,7 +70,7 @@ class MCRALS(DecompositionAnalysis):
 
     # Developer notes
     # ----------------
-    # Private traits with internal validation (see Traitlets librairie for more
+    # Private traits with internal validation (see Traitlets library for more
     # information)
     # Notice that variable not defined this way lack this type validation, so they are
     # more prone to errors.
@@ -105,7 +105,7 @@ class MCRALS(DecompositionAnalysis):
             " If an array of indexes is passed, the corresponding profiles are "
             "considered non-negative, not the others. "
             "For instance ``[0, 2]`` indicates that profile \#0 and \#2 are "
-            "non-negative while profile \#1 *can* be negative. If set to ``[]``\ , "
+            "non-negative while profile \#1 *can* be negative. If set to ``[]`` , "
             "all profiles can be negative."
         ),
     ).tag(config=True)
@@ -664,7 +664,7 @@ at each iterations.
     @tr.default("_components")
     def _components_default(self):
         if self._fitted:
-            # note: _outfit = (C, St, C_hard, St_soft, extOutput)
+            # note: _outfit = (C, St, C_hard, St_soft, extraOutputGetConc, extraOutputGetSpec)
             return self._outfit[1]
         else:
             raise NotFittedError("The model was not yet fitted. Execute `fit` first!")

@@ -528,7 +528,6 @@ class AnalysisConfigurable(MetaConfigurable):
         ----------
         X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
             Training data.
-
         Y : any
             Depends on the model.
 
@@ -539,7 +538,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         See Also
         --------
-        fit_transform :  Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``.
+        fit_transform :  Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``\ .
         fit_reduce : Alias of `fit_transform` (Deprecated).
         """
         self._fitted = False  # reinit this flag
@@ -844,7 +843,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-
         Y : any
             Depends on the model.
         %(kwargs)s
@@ -931,16 +929,23 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Plot methods
     # ----------------------------------------------------------------------------------
     @_docstring.dedent
-    def plotmerit(self, X, X_hat, **kwargs):
+    def plotmerit(self, X=None, X_hat=None, **kwargs):
         """
-        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
+        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals
+        (:math:`E`\ ) datasets.
+
+        :math:`X` and :math:`\hat{X}` can be passed as arguments. If not,
+        the `X` attribute is used for :math:`X`\ and :math:`\hat{X}`\ is computed by
+        the `inverse_transform` method
 
         Parameters
         ----------
-        X : `NDDataset`
-            Original dataset that was fitted.
-        X_hat : `NDDataset`
-            Inverse transformed (reconstructed) dataset from a decomposition model.
+        X : `NDDataset`\ , optional
+            Original dataset. If is not provided (default), the `X`
+            attribute is used and X_hat is computed using `inverse_transform`\ .
+        X_hat : `NDDataset`\ , optional
+            Inverse transformed dataset. if `X` is provided, `X_hat`
+            must also be provided as compuyed externally.
         %(kwargs)s
 
         Returns
@@ -963,12 +968,19 @@ class DecompositionAnalysis(AnalysisConfigurable):
         **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the `X` dataset.
         """
-        if not self._fitted:
-            raise NotFittedError(
-                "The fit method must be used before using this method."
-            )
-
         colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
+
+        if X is None:
+            X = self._X
+            if X_hat is None:
+                # compute the inverse transform (this check that the model
+                # is already fitted and handle eventual masking)
+                X_hat = self.inverse_transform()
+        elif X_hat is None:
+            raise ValueError(
+                "If X is provided, AN externally computed X_hat dataset "
+                "must be also provided."
+            )
 
         if X._squeeze_ndim == 1:
             # normally this was done before, but if needed.
@@ -985,7 +997,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         res = X - X_hat
 
         # separation between traces
-        offset = kwargs.pop("offset", 0)
+        offset = kwargs.pop("offset", None)
         if offset is None:
             offset = 0
         ma = max(X.max(), X_hat.max())

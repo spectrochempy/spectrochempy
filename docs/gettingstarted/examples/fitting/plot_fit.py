@@ -114,5 +114,3 @@ ax.autoscale(enable=True, axis="y")
 som = f1.inverse_transform()
 f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2)
 scp.show()
-
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

@@ -369,20 +369,20 @@ def _round_ranges(ranges, decimals=2):
 
 
 def _update_ranges(ranges, coord, decimals=2):
-    """
-    Return valid ranges
-
-    Ranges outside the coord limits (if any), are replaced
-    by the min or max the coords. Ranges with the limits or including
-    the limits are unchanged.
-
-    Returns
-    -------
-    `list`
-        list of ranges
-    `bool`
-        True if changed
-    """
+    # """
+    # Return valid ranges
+    #
+    # Ranges outside the coord limits (if any), are replaced
+    # by the min or max the coords. Ranges with the limits or including
+    # the limits are unchanged.
+    #
+    # Returns
+    # -------
+    # `list`
+    #     list of ranges
+    # `bool`
+    #     True if changed
+    # """
     ranges = list(ranges)
     changed = False
     # sort coord id needed

@@ -175,7 +175,7 @@ for reproducible results across multiple function calls.""",
         **kwargs,
     ):
         # we have changed the name n_components use in sklearn by
-        # used_components (in order  to avoid conflict with the rest of the progrma)
+        # used_components (in order  to avoid conflict with the rest of the program)
         # warn th user:
         if "n_components" in kwargs:
             raise KeyError(
@@ -459,8 +459,7 @@ for reproducible results across multiple function calls.""",
 
     def scoreplot(
         self,
-        scores,
-        *pcs,
+        *args,
         colormap="viridis",
         color_mapping="index",
         show_labels=False,
@@ -471,12 +470,15 @@ for reproducible results across multiple function calls.""",
         """
         2D or 3D scoreplot of observations.
 
+        Plots the projection of each observation/spectrum onto the span of two or
+        three selected principal components.
+
         Parameters
         ----------
-        scores : NDDataset object
-            The NDDataset containing the scores to plot
-        *pcs : a series of int argument or a list/tuple
-            Must contain 2 or 3 elements.
+        *args : `NDDataset` and/or series of 2 or 3 ints or iterabble of 2 or 3 int, optional
+            The `NDDataset` contains the sores to plot. If not provided `PCA.scores`
+            is used. The 2 or 3 int are the PC on which the projection is shown. If not
+            provided, default to [1,2], i.e. bidimensional plot on PCs #1 and #2.
         colormap : str
             A matplotlib colormap.
         color_mapping : 'index' or 'labels'
@@ -489,16 +491,29 @@ for reproducible results across multiple function calls.""",
             If several columns of labels are present indicates which column has to be
             used to show labels.
         labels_every : int, optional, default: 1
-            Do not label all points, but only every value indicated by this parameter.
-        """
+        `   Do not label all points, but only every value indicated by this parameter.
 
+        Returns
+        -------
+        `~matplotlib.axes.Axes`
+            The axes
+        """
         self.prefs = self.X.preferences
 
         # checks args
-        if hasattr(scores, "_implements") and not scores._implements("NDDataset"):
-            raise ValueError(
-                "The fist argument of scoreplot must be the score NDDataset"
-            )
+        if len(args) > 0:
+            scores = args[0]
+            if hasattr(scores, "_implements") and not scores._implements("NDDataset"):
+                if len(args) > 1:
+                    pcs = args[1:]
+                else:
+                    pcs = 1, 2
+            else:
+                scores = self.scores
+                pcs = args
+        else:
+            scores = self.scores
+            pcs = 1, 2
 
         if isinstance(pcs[0], (list, tuple, set)):
             pcs = pcs[0]
@@ -523,7 +538,12 @@ for reproducible results across multiple function calls.""",
         # labels
         scatterlabels = None
         if show_labels:
-            scatterlabels = scores.y.labels[:, labels_column]
+            if scores.y.labels is None:
+                raise ValueError("You set show_label to true but score.y has no label")
+            elif scores.y.labels.ndim == 1:
+                scatterlabels = scores.y.labels
+            else:
+                scatterlabels = scores.y.labels[:, labels_column]
 
         if len(pcs) == 2:
             # bidimensional score plot

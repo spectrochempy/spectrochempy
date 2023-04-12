@@ -19,6 +19,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Readers: add download() method
 
 .. section
 
@@ -62,13 +63,12 @@ See the examples in order to understand the changes.
      mcr.C.T.plot()
      mcr.St.plot()
 
-
-* Analysis object methods such as  `reconstruct` and `reduce` have been
-  renamed `inverse_transform` and `transform`\ , respectively, in line with
-  the method naming in `sklearn`.
-
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+* Analysis object methods such as  `reconstruct` and `reduce` are now deprecated.
+  Use `inverse_transform` and `transform`\ ,instead, in line with
+  the method naming in `sklearn`\ .

@@ -42,17 +42,14 @@ import spectrochempy as scp
 # The ALS algorithm allows applying soft or hard constraints (e.g., non negativity,
 # unimodality, equality to a given profile) to the spectra or concentration profiles
 # of pure species. This property makes MCR-ALS an extremely flexible
-# and powerful method. Its current implementation in Scpy is limited to soft constraints
-# but is expected to cover more
-# advanced features in further releases.
+# and powerful method.
 #
-# In, this tutorial the application of MCS-ALS as implemented in Scpy to a 'classical'
-# dataset form the literature is
-# presented.
+# In this tutorial, the application of MCS-ALS as implemented in Scpy to a 'classical'
+# dataset form the literature is presented.
 #
 # ## The (minimal) dataset
 #
-# In this example, we perform the MCR ALS optimization of a dataset corresponding to
+# Here, we perform the MCR ALS optimization of a dataset corresponding to
 # a HPLC-DAD run, from Jaumot et al. Chemolab, 76 (2005),
 # pp. 101-110 and Jaumot et al. Chemolab, 140 (2015) pp. 1-12. This dataset (and others)
 # can be loaded from the
@@ -210,7 +207,7 @@ mcr.fit(X, St0)
 # ##### To get help about the different configuration parameters
 
 # %%
-# print(mcr.help)
+# help(mcr)
 
 # %%
 # It is possible to chain fit runs, without recomputing everything for example for
@@ -244,10 +241,12 @@ assert np.max(np.abs(mcr.St - mcr1.St)) < 1e-13
 # %% [markdown]
 # #### Solutions
 #
-# The solutions of the MCR ALS optimization are the optimized concentration and pure
-# spectra matrices. They can be
-# obtained by the MCRALS.transform() method. Let's
-# generate a MCRALS
+# The solutions of the MCR ALS optimization are the optimized concentration (C) and pure
+# spectra (St) datasets. They are stored as in the `C` and `St` attribute of the MCRAL object.
+# As MCRALS is derived from to the `DecompositionAnalysis` class, C and St can also be obtained
+# by `MCRALS.transform()` and MCRALS.components, respectively.
+#
+#  Let's generate a MCRALS
 #  object with the default settings, and get the solution datasets C and St. Note that
 #  the default log_level is "WARNING" so we do not see any output here.
 

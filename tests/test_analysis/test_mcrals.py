@@ -32,8 +32,8 @@ def expon(t, c0, l, noise):
         return c0 * (np.exp(l * t.data)) + noise * np.random.randn(len(t.data))
 
 
-def get_C(x):
-    return x
+def get_C(C):
+    return C
 
 
 def get_C_a(C, a):
@@ -46,6 +46,10 @@ def get_C_kb(C, b=1):
 
 def get_C_akb(C, a, b=1):
     return C * b / a
+
+
+def get_St(St):
+    return St
 
 
 @pytest.fixture()
@@ -145,7 +149,7 @@ def test_MCRALS(model, data):
     # test plot
     mcr.C.T.plot(title="Concentration")
     mcr.St.plot(title="Components")
-    mcr.plotmerit(D, X_hat, offset=0, nb_traces=5)
+    mcr.plotmerit(offset=0, nb_traces=5)
     show()
 
     # reset to default
@@ -200,6 +204,14 @@ def test_MCRALS(model, data):
     )
     set_loglevel("WARNING")
     mcr.fit(D, C0)
+
+    # guess = C0, hard modeling of spectra
+    mcr.reset()  # we reset everything to default
+    mcr.hardSpec = [0, 1]
+    mcr.getSpec = get_St
+    mcr.tol = 30.0
+    mcr.fit(D, C0)
+    assert "converged !" in mcr.log[-15:]
 
     # guess = C0.data, test with other parameters
     mcr = MCRALS(

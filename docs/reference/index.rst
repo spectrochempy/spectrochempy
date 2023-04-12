@@ -187,7 +187,7 @@ Creation from from external sources
     read_zip
     read_carroucell
     download_nist_ir
-
+    download
 
 Export a NDDataset
 ==================

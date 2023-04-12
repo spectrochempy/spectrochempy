@@ -11,6 +11,7 @@ from unittest import mock
 
 import numpy as np
 import pytest
+import requests
 
 import spectrochempy as scp
 
@@ -89,3 +90,14 @@ def test_download_nist():
     CAS = 2146363  # Acenaphthylene, dodecahydro-
     ds = scp.download_nist_ir(CAS)
     assert ds is None
+
+
+def test_download():
+    ds = scp.download("http://www.eigenvector.com/data/Corn/corn.mat")
+    assert len(ds) == 7
+
+    with pytest.raises(requests.exceptions.HTTPError):
+        scp.download("http://www.eigenvector.com/does_not_exist.mat")
+
+    with pytest.raises(TypeError):
+        scp.download("https://www.spectrochempy.fr/latest/index.html")
