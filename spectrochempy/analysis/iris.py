@@ -821,11 +821,8 @@ class IRIS(DecompositionAnalysis):
         `list` of `~matplotlib.axes.Axes`
             Subplots.
         """
-        if not self._fitted:
-            raise NotFittedError("The fit method must be used before using this method")
-
         X = self.X
-        X_hat = self.reconstruct()
+        X_hat = self.inverse_transform()
         axeslist = []
         if index is None:
             index = range(len(self._lambdas))
