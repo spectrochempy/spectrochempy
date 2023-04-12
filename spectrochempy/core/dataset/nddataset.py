@@ -454,7 +454,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         raise AttributeError
 
     def __setattr__(self, key, value):
-
         if key in DEFAULT_DIM_NAME:  # syntax such as ds.x, ds.y, etc...
             # Note the above test is important to avoid errors with traitlets
             # even if it looks redundant with the following

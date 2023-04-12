@@ -200,18 +200,23 @@ class Importer(HasTraits):
                 return
         datasets = []
         for filename in files[key]:
-            filename = pathclean(filename)
+            if (
+                isinstance(filename, str)
+                and not filename.startswith("http://")
+                and not filename.startswith("https://")
+            ):
+                filename = pathclean(filename)
             read_ = getattr(self, f"_read_{key[1:]}")
             try:
                 res = read_(self.objtype(), filename, **kwargs)
                 # sometimes read_ can return None (e.g. non labspec text file)
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 # try to get the file from github
                 kwargs["read_method"] = read_
                 try:
                     res = _read_remote(self.objtype(), filename, **kwargs)
 
-                except OSError:
+                except OSError as e:
                     raise e
 
                 except IOError as e:
@@ -222,7 +227,7 @@ class Importer(HasTraits):
                     warning_(str(e))
                     res = None
 
-                except Exception:
+                except Exception as e:
                     raise e
 
             except IOError as e:
@@ -576,10 +581,11 @@ def _get_url_content_and_save(url, dst, replace):
         r = requests.get(url, allow_redirects=True)
 
         # write downloaded file
+        r.raise_for_status()
         _write_downloaded_file(r.content, dst)
 
     except OSError:
-        raise FileNotFoundError(f"Not found locally or on github (url:{url}")
+        raise FileNotFoundError(f"Not found locally or at url:{url}")
 
 
 def _download_full_testdata_directory():
@@ -607,26 +613,30 @@ def _download_from_url(url, dst, replace=False):
     # ##
     # ##    Do not forget to change the fork in the following url
     # ##
-    if not str(url).startswith("https://"):
-        # try on github
+    if not str(url).startswith("https://") and not str(url).startswith("http://"):
+        # download on github
         url = (
             f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
             f"testdata/{url}"
         )
-    # first determine if it is a directory
-    r = requests.get(url + "/__index__", allow_redirects=True)
-    index = None
-    if r.status_code == 200:
-        index = yaml.load(r.content, Loader=yaml.CLoader)
 
-    if index is None:
-        _get_url_content_and_save(url, dst, replace)
+        # first determine if it is a directory
+        r = requests.get(url + "/__index__", allow_redirects=True)
+        index = None
+        if r.status_code == 200:
+            index = yaml.load(r.content, Loader=yaml.CLoader)
 
+        if index is None:
+            _get_url_content_and_save(url, dst, replace)
+
+        else:
+            for filename in index["files"]:
+                _get_url_content_and_save(f"{url}/{filename}", dst / filename, replace)
+            for folder in index["folders"]:
+                _download_from_url(f"{url}/{folder}", dst / folder)
     else:
-        for filename in index["files"]:
-            _get_url_content_and_save(f"{url}/{filename}", dst / filename, replace)
-        for folder in index["folders"]:
-            _download_from_url(f"{url}/{folder}", dst / folder)
+        # download url
+        _get_url_content_and_save(url, dst, replace)
 
 
 def _is_relative_to(path, base):
@@ -661,25 +671,31 @@ def _read_remote(*args, **kwargs):
     datadir = prefs.datadir
 
     dataset, path = args
-    # path of the required files
-    path = pathclean(path)
-
-    if _is_relative_to(path, datadir):
-        # try to make it relative for remote downloading
-        relative_path = _relative_to(path, datadir)
-    else:
-        # assume it is already relative
-        relative_path = path
-
-    # in principle the data came from github. Try to download it
+    is_url = str(path).startswith("http://") or str(path).startswith("https://")
 
     replace = kwargs.pop("replace_existing", False)
-    dst = datadir / relative_path
-    if dst.name != "testdata":
-        _download_from_url(relative_path, dst, replace)
+    if not is_url:
+        path = pathclean(path)
+
+        if _is_relative_to(path, datadir):
+            # try to make it relative for remote downloading on github
+            relative_path = _relative_to(path, datadir)
+        else:
+            # assume it is already relative
+            relative_path = path
+
+        # in principle the data came from github. Try to download it
+        dst = datadir / relative_path
+        if dst.name != "testdata":
+            _download_from_url(relative_path, dst, replace)
+        else:
+            # we are going to download the whole testdata directory -> use a faster method
+            _download_full_testdata_directory()
+
     else:
-        # we are going to download the whole testdata directory -> use a faster method
-        _download_full_testdata_directory()
+        # download localy
+        dst = pathclean(path.split("/")[-1])
+        _download_from_url(path, dst, replace)
 
     if not kwargs.pop("download_only", False):
         read_method = kwargs.pop("read_method", read)

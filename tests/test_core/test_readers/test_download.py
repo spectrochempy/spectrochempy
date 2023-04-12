@@ -93,11 +93,23 @@ def test_download_nist():
 
 
 def test_download():
-    ds = scp.download("http://www.eigenvector.com/data/Corn/corn.mat")
-    assert len(ds) == 7
+    ds1 = scp.read_remote("http://www.eigenvector.com/data/Corn/corn.mat")
+    assert len(ds1) == 7
 
-    with pytest.raises(requests.exceptions.HTTPError):
-        scp.download("http://www.eigenvector.com/does_not_exist.mat")
+    with pytest.raises(FileNotFoundError):
+        scp.read_remote("http://www.eigenvector.com/does_not_exist.mat")
 
     with pytest.raises(TypeError):
-        scp.download("https://www.spectrochempy.fr/latest/index.html")
+        scp.read_remote("https://www.spectrochempy.fr/latest/index.html")
+
+    scp.pathclean("corn.mat").unlink()
+
+    #
+    # ds = scp.download("http://www.eigenvector.com/data/Corn/corn.mat")
+    #
+    #
+    # with pytest.raises(requests.exceptions.HTTPError):
+    #     scp.download("http://www.eigenvector.com/does_not_exist.mat")
+    #
+    # with pytest.raises(TypeError):
+    #     scp.download("https://www.spectrochempy.fr/latest/index.html")

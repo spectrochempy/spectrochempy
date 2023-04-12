@@ -179,7 +179,14 @@ def check_filenames(*args, **kwargs):
     filenames = None
 
     if args:
-        if isinstance(args[0], (str, Path, PosixPath, WindowsPath)):
+        if (
+            isinstance(args[0], str)
+            and (args[0].startswith("http://") or args[0].startswith("https://"))
+            and kwargs.get("remote")
+        ):
+            # return url
+            return args
+        elif isinstance(args[0], (str, Path, PosixPath, WindowsPath)):
             # one or several filenames are passed - make Path objects
             filenames = pathclean(args)
         elif isinstance(args[0], bytes):
@@ -658,7 +665,12 @@ def check_filename_to_open(*args, **kwargs):
             raise (FileNotFoundError)
 
         # deal with some specific cases
-        key = filenames[0].suffix.lower()
+        if isinstance(filenames[0], Path):
+            # all filename should be Path, except case of urls
+            key = filenames[0].suffix.lower()
+        elif filenames[0].startswith("http://") or filenames[0].startswith("https://"):
+            key = pathclean(filenames[0]).suffix.lower()
+
         if not key:
             if re.match(r"^fid$|^ser$|^[1-3][ri]*$", filenames[0].name) is not None:
                 key = ".topspin"
