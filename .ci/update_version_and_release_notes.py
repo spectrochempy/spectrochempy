@@ -174,7 +174,8 @@ def make_release_note_index(revision):
 
     # Create or update file with the current version number
     if revision == "unreleased":
-        revision = gitversion.split("+")[0]
+        revision = gitversion.split(".dev")[0]
+        revision = revision + ".dev"
 
     content = (WN / "changelog.rst").read_text()
 
