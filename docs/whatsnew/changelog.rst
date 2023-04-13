@@ -1,4 +1,3 @@
-:orphan:
 
 What's new in revision {{ revision }}
 ---------------------------------------------------------------------------------------
@@ -7,7 +6,7 @@ These are the changes in SpectroChemPy-{{ revision }}.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 ..
-   Do not remove the `revision` marker. It will be replaced during doc building.
+   Do not remove the ``revision`` marker. It will be replaced during doc building.
    Also do not delete the section titles.
    Add your list of changes between (Add here) and (section) comments
    keeping a blank line before and after this list.
@@ -19,7 +18,6 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-- Readers: add download() method
 
 .. section
 
@@ -34,41 +32,9 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-This version introduce a full refactoring of the Spectrochempy analysis functions.
-See the examples in order to understand the changes.
-
-* For a rapid transition note that calling the analysis function is now done in two steps.
-  When before, one was writing
-
-  .. code-block:: ipython
-
-      # change log level
-      scp.set_loglevel("INFO")
-      # init the MCRALS object and fit the model on X dataset using a guess.
-      mcr = scp.MCRALS(X, guess, tol=0.001)
-      # use the MCRALS object attributes
-      mcr.C.T.plot()
-      mcr.St.plot()
-
-
-  now one would write:
-
-  .. code-block:: ipython
-
-     # init the MCRALS object
-     mcr = scp.MCRALS(log_level="INFO", tol=0.001)
-     # fit the model on X dataset using a guess.
-     mcr.fit(X, guess)
-     # use the MCRALS object attributes
-     mcr.C.T.plot()
-     mcr.St.plot()
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
-
-* Analysis object methods such as  `reconstruct` and `reduce` are now deprecated.
-  Use `inverse_transform` and `transform`\ ,instead, in line with
-  the method naming in `sklearn`\ .
