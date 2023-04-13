@@ -222,7 +222,9 @@ def _check_for_updates(*args):
                 f"{date.isoformat(date.today())}%%NOT_YET_DISPLAYED%%"
                 f"SpectroChemPy v.{new_release} is available.\n"
                 f"Please consider updating, using pip or conda, for bug fixes and new "
-                f"features! "
+                f"features! \n"
+                f"WARNING: Version 0.6 has made some important changes "
+                f"that may require modification of existing scripts."
             )
     else:  # pragma: no cover
         if fil.exists():
