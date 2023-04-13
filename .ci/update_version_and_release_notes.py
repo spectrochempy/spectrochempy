@@ -204,6 +204,8 @@ def make_release_note_index(revision):
     else:
         # in principle this happens for release, create the related rst file
         (WN / f"v{revision}.rst").write_text(changelog_content)
+        # copy it to latest for display in menu
+        (WN / "latest.rst").write_text(changelog_content)
         # void changelog (keep only section titles)
         (WN / "changelog.rst").write_text(
             """

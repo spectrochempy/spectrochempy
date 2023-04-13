@@ -1,9 +1,9 @@
 :orphan:
 
-What's new in revision 0.6.2.dev3
+What's new in revision 0.6.2.dev4
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.6.2.dev3.
+These are the changes in SpectroChemPy-0.6.2.dev4.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 Bug fixes
