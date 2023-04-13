@@ -13,7 +13,7 @@
                 <dt>Other versions</dt>
                 {% for slug, url in versions %}
                     {% if slug != current_version %}
-                        <dd><a href="{{ base_url }}{{ url }}">{{ slug.upper() }}</a></dd>
+                        <dd><a href="{{ base_url }}/../{{ url }}">{{ slug.upper() }}</a></dd>
                     {% endif %}
                 {% endfor %}
             </dl>
