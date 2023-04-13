@@ -71,13 +71,13 @@ mcr = scp.MCRALS(log_level="INFO")
 #
 # Then we execute the optimization process using the `fit` method with
 # the ``X`` and ``guess``dataset as input arguments.
-mcr.fit(X, guess)
+_ = mcr.fit(X, guess)
 
 # %%
 # Plotting the results
 # --------------------
 #
-# The optimization has converged. We can get the concentration :math:`C` (`C`\ ) and
+# The optimization has converged. We can get the concentration :math:`C` (C) and
 # pure spectra profiles :math:`S^T` (St) and plot them
 _ = mcr.C.T.plot()
 _ = mcr.St.plot()
@@ -91,5 +91,6 @@ _ = mcr.St.plot()
 _ = mcr.plotmerit(nb_traces=5)
 
 # %%
+# The following line not necessary in Jupyter notebook can be uncommented if necessary
 
 # scp.show()
