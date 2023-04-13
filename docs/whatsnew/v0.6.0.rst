@@ -1,9 +1,9 @@
 :orphan:
 
-What's new in revision 0.5.6.dev239
+What's new in revision 0.6.0
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.5.6.dev239.
+These are the changes in SpectroChemPy-0.6.0.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 New features
