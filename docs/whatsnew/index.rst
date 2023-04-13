@@ -27,7 +27,6 @@ Version 0.5
 .. toctree::
     :maxdepth: 2
 
-    v0.6.2.dev2
     v0.5.5
     v0.5.4
     v0.5.3
@@ -41,7 +40,6 @@ Version 0.4
 .. toctree::
     :maxdepth: 2
 
-    v0.6.2.dev2
     v0.4.10
     v0.4.9
     v0.4.7
@@ -58,7 +56,6 @@ Version 0.3
 .. toctree::
     :maxdepth: 2
 
-    v0.6.2.dev2
     v0.3.3
     v0.3.2
     v0.3.1
@@ -70,7 +67,6 @@ Version 0.2
 .. toctree::
     :maxdepth: 2
 
-    v0.6.2.dev2
     v0.2.23
     v0.2.22
     v0.2.21
@@ -97,5 +93,4 @@ Version 0.1
 .. toctree::
     :maxdepth: 2
 
-    v0.6.2.dev2
     v0.1.0
