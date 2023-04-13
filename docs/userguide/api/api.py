@@ -76,12 +76,11 @@ print(f" description : {scp.description}")
 #  having a
 #  criticality larger than that passed to the `set_loglevel()` function will be shown.
 #
-#  For instance, the `DEBUG` level can be triggered by using one of the three
+#  For instance, the `DEBUG` level can be triggered by using one of the
 #  equivalent instructions
 #
 # ```python
 # scp.set_loglevel('DEBUG')
-# scp.set_loglevel(scp.DEBUG)
 # scp.set_loglevel(10)
 # ```
 #
@@ -94,19 +93,19 @@ print(f"Default: {scp.get_loglevel()}")  # print the current loglevel
 # %% [markdown]
 # It yields `30` the numerical value corresponding to the `WARNING` level. Now, the
 # next instruction
-# lowers the loglevel to `ÌNFO`:
+# lowers the loglevel to ``"INFO"``\ :
 # %%
-scp.set_loglevel(scp.INFO)  # set loglevel to 'INFO'
+scp.set_loglevel(scp.INFO)
 
 
 # %% [markdown]
-# We see that the API then delivers the INFO message: "changed default log_level to
-# INFO" .
+# We see that the API then delivers the INFO message:
+# ``"changed default log_level to INFO"``\ .
 
 # %% [markdown]
-# And  finally, the next instructions reset the loglevel to `WARNING` level (default),
-# and print it.
-# As seen below, no message `changed default log_level to ...` is delivered
+# And  finally, the next instructions reset the loglevel to ``"WARNING"``
+# level (default), and print it.
+# As seen below, no message ``"changed default log_level to ..."`` is delivered
 
 # %%
 scp.set_loglevel("WARNING")  # reset to default
@@ -125,7 +124,7 @@ scp.debug_("this is a debug message!")
 # %% [markdown]
 # As expected, only the info message was displayed.
 #
-# If we change the loglevel to ``DEBUG``, then the two messages will be printed:
+# If we change the loglevel to `DEBUG` , then the two messages will be printed:
 
 # %%
 scp.set_loglevel(scp.DEBUG)
@@ -146,10 +145,10 @@ scp.debug_("this is a debug message!")
 # %% [markdown]
 #
 # ### Error handling
-# If something goes wrong with during a cell execution,  a ``traceback`` is displayed.
+# If something goes wrong with during a cell execution,  a `traceback` is displayed.
 #
-# For instance, the object or method ``toto`` does not exist in the API, so an error
-# (`ImportError`) is generated
+# For instance, the object or method `toto` does not exist in the API, so an error
+# (`ImportError` ) is generated
 # when trying to import this from the API.
 #
 # Here we catch the error with a conventional `try-except` structure

@@ -28,7 +28,7 @@
 #     """
 #     Plot a 2D dataset as a contoured map.
 #
-#     Alias of plot_2D (with `method` argument set to ``map``.
+#     Alias of plot_2D (with `method` argument set to `map` .
 #     """
 #     kwargs['method'] = 'map'
 #     return plotly(dataset, **kwargs)
@@ -40,7 +40,7 @@
 #     """
 #     Plot a 2D dataset as a stacked plot.
 #
-#     Alias of plot_2D (with `method` argument set to ``stack``).
+#     Alias of plot_2D (with `method` argument set to `stack` ).
 #     """
 #     kwargs['method'] = 'stack'
 #     return plotly(dataset, **kwargs)
@@ -52,7 +52,7 @@
 #     """
 #     Plot a 2D dataset as an image plot.
 #
-#     Alias of plot_2D (with `method` argument set to ``image``).
+#     Alias of plot_2D (with `method` argument set to `image` ).
 #     """
 #     kwargs['method'] = 'image'
 #     return plotly(dataset, **kwargs)
@@ -64,7 +64,7 @@
 #     """
 #     Plot a 2D dataset as a a 3D-surface.
 #
-#     Alias of plot_2D (with `method` argument set to ``surface``.
+#     Alias of plot_2D (with `method` argument set to `surface` .
 #     """
 #     kwargs['method'] = 'surface'
 #     return plotly(dataset, **kwargs)
@@ -78,7 +78,7 @@
 #
 #     Parameters
 #     ----------
-#     dataset; |NDDataset|
+#     dataset; `NDDataset`
 #         The dataset to plot
 #     kwargs: any
 #         Additional keyword arguments
@@ -486,7 +486,7 @@
 #     """
 #     Parameters
 #     ----------
-#     p : |NDDataset|
+#     p : `NDDataset`
 #     """
 #     dimx = p.dims[-1]
 #     x = getattr(p, dimx).data
@@ -536,7 +536,7 @@
 #     reduce the number of spectra to display
 #     Parameters
 #     ----------
-#     ds: |NDDataset|
+#     ds: `NDDataset`
 #         The dataset to simplify
 #
 #     Returns

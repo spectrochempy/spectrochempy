@@ -23,7 +23,7 @@ from traitlets import (
     observe,
 )
 
-from spectrochempy.utils.traits import MetaConfigurable
+from spectrochempy.application.metaconfigurable import MetaConfigurable
 
 # from spectrochempy.core import warning_
 
@@ -34,7 +34,7 @@ from spectrochempy.utils.traits import MetaConfigurable
 def available_styles():
     """
     All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
-    which are available in |scpy|
+    which are available in  `SpectroChemPy`
 
     Returns
     -------
@@ -333,7 +333,7 @@ class PlotPreferences(MetaConfigurable):
         config=True, kind=""
     )
     mathtext_bf = Unicode("dejavusans:bold", help=r"""bold""").tag(config=True, kind="")
-    mathtext_sf = Unicode("sans\-serif", help=r"""""").tag(
+    mathtext_sf = Unicode(r"sans\-serif", help=r"""""").tag(
         config=True, kind=""
     )  # noqa: W605
     mathtext_fontset = Unicode(
@@ -882,7 +882,7 @@ class PlotPreferences(MetaConfigurable):
     )
 
     def __init__(self, **kwargs):
-        super().__init__(section="PlotPreferences", **kwargs)
+        super().__init__(**kwargs)
         for key in plt.rcParams:
             lis = key.split(".")
             if len(lis) > 1:

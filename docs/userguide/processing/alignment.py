@@ -73,7 +73,7 @@ _ = scp.multiplot_map(
 
 # %% [markdown]
 # The four datasets `nd1` to `nd4` have some overlapping in both dimensions. But if we want for example to add `nd2`
-# with `nd4`. This will fail because the dimension are not aligned.
+# with `nd4` . This will fail because the dimension are not aligned.
 
 # %%
 try:

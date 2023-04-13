@@ -5,228 +5,260 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implement the NNMF (Non Negative Matrix Factorization) class.
+Implementation of NMF model (using scikit-learn library)
 """
+import logging
 
-__all__ = ["NNMF"]
+import traitlets as tr
+from numpy.random import RandomState
+from sklearn import decomposition
 
-__dataset_methods__ = []
+from spectrochempy.analysis._base import DecompositionAnalysis
+from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.docstrings import _docstring
 
-from sys import stdout
-from time import time
-
-import numpy as np
-from numpy.linalg import norm
-from traitlets import Float, HasTraits, Int
-
-from spectrochempy.core import INFO, debug_, get_loglevel, info_, set_loglevel
-from spectrochempy.utils.traits import NDDatasetType
+__all__ = ["NMF"]
+__configurables__ = ["NMF"]
 
 
-class NNMF(HasTraits):
-    """
-    Performs a Non Negative Matrix Factorization of a |NDDataset| .
+# ======================================================================================
+# class NMF
+# ======================================================================================
+@signature_has_configurable_traits
+class NMF(DecompositionAnalysis):
+    _docstring.delete_params("DecompositionAnalysis.see_also", "NMF")
+
+    __doc__ = _docstring.dedent(
+        """
+    Non-Negative Matrix Factorization (NMF).
+
+    Use `sklearn.decomposition.NMF`\ .
+
+    Find two non-negative matrices, *i.e.,* matrices with all non-negative elements,
+    (``W``\ , ``H``\ ) whose product approximates the non-negative matrix `X`.
+    This factorization can be used for example for dimensionality reduction,
+    source separation or topic extraction.
 
     Parameters
     ----------
-    dataset: |NDDataset|
-        The data to be analysed.
-    Ci: |NDDataset|
-        Initial concentration profile.
-    Sti: |NDDataset|
-        Initial Spectral profile.
-    **kwargs
-        Optional keyword parameters. See Other Parameters below.
+    %(AnalysisConfigurable.parameters)s
 
-    Returns
-    -------
-    C, St: |NDDataset|
-        Optimized concentration and spectral profile.
-
-    Other Parameters
-    ----------------
-    tol: float, optional
-        Tolerance for a relative stopping condition.
-    maxtime: float, optional
-        Time limit.
-    maxiter: float
-        Limit number of iterations.
-    verbose:
-        Print calculation details
-
-    Notes
-    -----
-    Algorithm based on
-
-    C.-J. Lin. Projected gradient methods for non-negative matrix factorization.
-    Neural Computation, 19(2007), 2756-2779.
-
-    If you find this tool useful, please cite the above work.
-    Author : Chih-Jen Lin, National Taiwan University
-    Copyright (c) 2005-2008 Chih-Jen Lin
-    See LICENCES in the root directory.
-
-    The current code is based on the Python translation by Anthony Di Franco:
-    https://www.csie.ntu.edu.tw/~cjlin/nmf/others/nmf.py
+    See Also
+    --------
+    %(DecompositionAnalysis.see_also.no_NMF)s
     """
+    )
 
-    tol = Float()
-    maxtime = Float()
-    maxit = Int()
-    C = NDDatasetType()
-    St = NDDatasetType()
+    # ----------------------------------------------------------------------------------
+    # Runtime Parameters,
+    # only those specific to NMF, the other being defined in AnalysisConfigurable.
+    # ----------------------------------------------------------------------------------
+    # define here only the variable that you use in fit or transform functions
+    _nmf = tr.Instance(
+        decomposition.NMF,
+        help="The instance of sklearn.decomposition.NMF used in this model",
+    )
 
-    def __init__(self, dataset, Ci, Sti, **kwargs):
-        super().__init__()
+    # ----------------------------------------------------------------------------------
+    # Configuration parameters
+    # ----------------------------------------------------------------------------------
 
-        tol = kwargs.get("tol", 0.1)
-        maxtime = kwargs.get("maxtime", 60)
-        maxit = kwargs.get("maxiter", 100)
+    used_components = tr.Integer(
+        default_value=None,
+        allow_none=True,
+        help="Number of components to use. If None is passed, all are used.",
+    ).tag(config=True)
 
-        if kwargs.get("verbose", False) and get_loglevel() > INFO:
-            set_loglevel(INFO)
+    init = tr.Enum(
+        ["random", "nndsvd", "nndsvda", "nndsvdar", "custom"],
+        default_value=None,
+        allow_none=True,
+        help=(
+            "Method used to initialize the procedure.\n\n"
+            "Valid options:\n\n"
+            "* `None` : 'nndsvda' if n_components <= min(n_samples, n_features), "
+            "otherwise random.\n"
+            "* `random` : non-negative random matrices, scaled with:\n"
+            "  sqrt(X.mean() / n_components)\n"
+            "* `nndsvd` : Nonnegative Double Singular Value Decomposition (NNDSVD) "
+            "initialization (better for sparseness)\n"
+            "* `nndsvda` : NNDSVD with zeros filled with the average of X "
+            "(better when sparsity is not desired)\n"
+            "* `nndsvdar` NNDSVD with zeros filled with small random values "
+            "(generally faster, less accurate alternative to NNDSVDa "
+            "for when sparsity is not desired)\n"
+            "* `custom` : use custom matrices W and H."
+        ),
+    ).tag(config=True)
 
-        self.C = Ci.copy()
-        self.St = Sti.copy()
+    solver = tr.Enum(
+        ["cd", "mu"],
+        default_value="cd",
+        help=(
+            "Numerical solver to use:\n"
+            "- 'cd' is a Coordinate Descent solver.\n"
+            "- 'mu' is a Multiplicative Update solver."
+        ),
+    ).tag(config=True)
 
-        self.C.data, self.St.data = self.nmf(
-            dataset.data, self.C.data, self.St.data, tol, maxtime, maxit
-        )
+    beta_loss = tr.Union(
+        (tr.Float(), tr.Enum(["frobenius", "kullback-leibler", "itakura-saito"])),
+        default_value="frobenius",
+        help=(
+            "Beta divergence to be minimized, measuring the distance between X"
+            "and the dot product WH. Note that values different from 'frobenius' "
+            "(or 2) and 'kullback-leibler' (or 1) lead to significantly slower fits.\n"
+            "Note that for beta_loss <= 0 (or 'itakura-saito'), the input matrix X "
+            "cannot contain zeros. Used only in 'mu' solver."
+        ),
+    ).tag(config=True)
 
-        self.C.name = "Optimmized concentration profile"
-        self.C.history = "nnmf optimization"
-        self.St.name = "Optimized spectral profile"
-        self.St.history = "nnmf optimization"
+    tol = tr.Float(default_value=1e-4, help="Tolerance of the stopping condition.").tag(
+        config=True
+    )
 
-    def nmf(self, V, Winit, Hinit, tol, maxtime, maxiter):
-        """
-        NMF by alternative non-negative least squares using projected gradients.
+    max_iter = tr.Integer(
+        default_value=200, help="Maximum number of iterations before timing out."
+    ).tag(config=True)
 
-        Parameters
-        ==========
-        V: |ndarray|
-            numpy array to be analysed
-        Winit,Hinit: |ndarray|
-            Initial solutions for concentration and spectral profile..
-        tol: float
-            Tolerance for a relative stopping condition.
-        maxtime: float
-            Limit of time.
-        maxiter: int
-            Limit number for iterations.
+    random_state = tr.Union(
+        (tr.Integer(), tr.Instance(RandomState)),
+        allow_none=True,
+        default_value=None,
+        help=(
+            "Used for initialisation (when `init` == 'nndsvdar' or 'random'), and "
+            "in Coordinate Descent. Pass an int, for reproducible results across "
+            "multiple function calls."
+        ),
+    ).tag(config=True)
 
-        Returns
-        =======
-        W,H: |ndarray|
-            Output solution.
-        """
+    alpha_W = tr.Float(
+        default_value=0.0,
+        help="Constant that multiplies the regularization terms of `W` . Set it to zero"
+        "(default) to have no regularization on `W` .",
+    ).tag(config=True)
 
-        W = Winit
-        H = Hinit
+    alpha_H = tr.Union(
+        (tr.Float(), tr.Enum(["same"])),
+        default_value="same",
+        help=(
+            "Constant that multiplies the regularization terms of `H` . Set it to zero"
+            'to have no regularization on `H` . If "same" (default), it takes the same'
+            "value as `alpha_W` ."
+        ),
+    ).tag(config=True)
 
-        initt = time()
+    l1_ratio = tr.Float(
+        default_value=0.0,
+        help=(
+            "The regularization mixing parameter, with 0 <= l1_ratio <= 1.\n"
+            "- For l1_ratio = 0 the penalty is an elementwise L2 penalty (aka Frobenius "
+            "Norm).\n"
+            "- For l1_ratio = 1 it is an elementwise L1 penalty.\n"
+            "- For 0 < l1_ratio < 1, the penalty is a combination of L1 and L2."
+        ),
+    ).tag(config=True)
 
-        gradW = np.dot(W, np.dot(H, H.T)) - np.dot(V, H.T)
-        gradH = np.dot(np.dot(W.T, W), H) - np.dot(W.T, V)
-        initgrad = norm(np.r_[gradW, gradH.T])
-        info_(f"Init gradient norm {initgrad:.3f}")
-        tolW = max(0.001, tol) * initgrad
-        tolH = tolW
+    shuffle = tr.Bool(
+        default_value=False,
+        help="If true, randomize the order of coordinates in the CD solver.",
+    ).tag(config=True)
 
-        for myiter in range(1, maxiter):
-            # stopping condition
-            projnorm = norm(
-                np.r_[
-                    gradW[np.logical_or(gradW < 0, W > 0)],
-                    gradH[np.logical_or(gradH < 0, H > 0)],
-                ]
+    # ----------------------------------------------------------------------------------
+    # Initialization
+    # ----------------------------------------------------------------------------------
+    def __init__(
+        self,
+        *,
+        log_level="WARNING",
+        warm_start=False,
+        copy=True,
+        **kwargs,
+    ):
+        # we have changed the name n_components use in sklearn by
+        # used_components (in order  to avoid conflict with the rest of the program)
+        # warn th user:
+        if "n_components" in kwargs:
+            raise KeyError(
+                "`n_components` is not a valid parameter. Did-you mean "
+                "`used_components`?"
             )
 
-            if projnorm < tol * initgrad or time() - initt > maxtime:
-                break
+        # call the super class for initialisation of the configuration parameters
+        # to do before anything else!
+        super().__init__(
+            log_level=log_level,
+            warm_start=warm_start,
+            copy=copy,
+            **kwargs,
+        )
 
-            (W, gradW, iterW) = self.nlssubprob(V.T, H.T, W.T, tolW, 1000)
-            W = W.T
-            gradW = gradW.T
+        # initialize sklearn NMF
+        self._nmf = decomposition.NMF(
+            n_components=self.used_components,
+            init=self.init,
+            beta_loss=self.beta_loss,
+            tol=self.tol,
+            max_iter=self.max_iter,
+            random_state=self.random_state,
+            alpha_W=self.alpha_W,
+            alpha_H=self.alpha_H,
+            l1_ratio=self.l1_ratio,
+            verbose=self.parent.log_level == logging.INFO,
+        )
 
-            if iterW == 1:
-                tolW *= 0.1
+    # ----------------------------------------------------------------------------------
+    # Private methods (overloading abstract classes)
+    # ----------------------------------------------------------------------------------
+    def _fit(self, X, Y=None):
+        # this method is called by the abstract class fit.
+        # Input X is a np.ndarray
+        # Y is ignored in this model
 
-            (H, gradH, iterH) = self.nlssubprob(V, W, H, tolH, 1000)
+        # call the sklearn _fit function on data
+        # _outfit is a tuple handle the eventual output of _fit for further processing.
 
-            if iterH == 1:
-                tolH *= 0.1
+        # The _outfit members are np.ndarrays
+        _outfit = self._nmf.fit(X)
+        self._n_components = int(
+            self._nmf.n_components
+        )  # cast the returned int64 to int
+        return _outfit
 
-            if myiter % 10 == 0:
-                stdout.write(".")
+    def _transform(self, X):
+        return self._nmf.transform(X)
 
-        info_(f"\nIter = {myiter} Final proj-grad norm {projnorm:.3f}")
-        return W, H
+    def _inverse_transform(self, X_transform):
+        # we need to  set self._nmf.components_ to a compatible size but without
+        # destroying the full matrix:
+        store_components_ = self._nmf.components_
+        self._nmf.components_ = self._nmf.components_[: X_transform.shape[1]]
+        X = self._nmf.inverse_transform(X_transform)
+        # restore
+        self._nmf.components_ = store_components_
+        return X
 
-    @staticmethod
-    def nlssubprob(V, W, Hinit, tol, maxiter):
+    def _get_components(self):
+        self._components = self._nmf.components_
+        return self._components
+
+    _docstring.keep_params("analysis_fit.parameters", "X")
+
+    @_docstring.dedent
+    def fit(self, X):
         """
+        Fit the NMF  model on X.
+
         Parameters
         ----------
-        V, W
-            Constant matrices.
-        Hinit
-            initial solution.
-        tol: stopping tolerance.
-        maxiter: limit of iterations.
+        %(analysis_fit.parameters.X)s
 
         Returns
         -------
-        H, grad
-            Output solution and gradient.
+        %(analysis_fit.returns)s
 
+        See Also
+        --------
+        %(analysis_fit.see_also)s
         """
-
-        H = Hinit
-        WtV = np.dot(W.T, V)
-        WtW = np.dot(W.T, W)
-
-        alpha = 1
-        beta = 0.1
-
-        for n_iter in range(1, maxiter + 1):
-            grad = np.dot(WtW, H) - WtV
-            if norm(grad * np.logical_or(grad < 0, H > 0)) < tol:
-                break
-
-        Hp = H
-
-        # search step size
-        for inner_iter in range(20):
-            # gradient step
-            Hn = H - alpha * grad
-            # gradient step
-            Hn *= Hn > 0
-            d = Hn - H
-            gradd = np.dot(grad.ravel(), d.ravel())
-            dQd = np.dot(np.dot(WtW, d).ravel(), d.ravel())
-            suff_decr = 0.99 * gradd + 0.5 * dQd < 0
-            if inner_iter == 0:
-                decr_alpha = not suff_decr
-                Hp = H
-            if decr_alpha:
-                if suff_decr:
-                    H = Hn
-                    break
-                alpha *= beta
-            else:
-                if not suff_decr or (Hp == Hn).all():
-                    H = Hp
-                    break
-                alpha /= beta
-                Hp = Hn
-
-        if n_iter == maxiter:
-            debug_("Max iter in nlssubprob")
-
-        return H, grad, n_iter
-
-
-# ============================================================================
-if __name__ == "__main__":
-    pass
+        return super().fit(X, Y=None)

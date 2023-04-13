@@ -7,7 +7,15 @@
 import ast
 import re
 
-from traitlets import Float, HasTraits, Instance, TraitError, Unicode, validate
+from traitlets import (
+    Float,
+    HasTraits,
+    Instance,
+    TraitError,
+    Unicode,
+    signature_has_traits,
+    validate,
+)
 
 from spectrochempy.core import error_
 from spectrochempy.core.project.abstractproject import AbstractProject
@@ -15,6 +23,7 @@ from spectrochempy.core.project.abstractproject import AbstractProject
 __all__ = ["Script", "run_script", "run_all_scripts"]
 
 
+@signature_has_traits
 class Script(HasTraits):
     """
     Executable scripts.
@@ -23,18 +32,18 @@ class Script(HasTraits):
 
     Parameters
     ----------
-    name : str
+    name : `str`
         Name of the script. The name should be unique.
-    content : str
+    content : `str`
         Content of sthe script.
-    parent : instance of |Project|
+    parent : instance of `Project`
         Parent project.
-    priority: int
-        Default=50.
+    priority: `int`, optional, default: 50
+        priority.
 
     See Also
     --------
-    Project: Object containing |NDDataset|s, sub-|Project|s and |Scripts| .
+    Project: Object containing `NDDataset`\'s, sub-\ `Project`\ 's and `Script`\ .
 
     Examples
     --------
@@ -54,7 +63,9 @@ class Script(HasTraits):
     _priority = Float(min=0.0, max=100.0)
     _parent = Instance(AbstractProject, allow_none=True)
 
-    def __init__(self, name="unamed_script", content=None, parent=None, priority=50.0):
+    def __init__(
+        self, name="unamed_script", content=None, parent=None, priority=50.0, **kwargs
+    ):
 
         self.name = name
         self.content = content
@@ -141,7 +152,7 @@ class Script(HasTraits):
     @staticmethod
     def _implements(name=None):
         """
-        Utility to check if the current object implement `Project`.
+        Utility to check if the current object implement `Project` .
 
         Rather than isinstance(obj, Project) use object._implements('Project').
         This is useful to check type without importing the module
@@ -206,12 +217,12 @@ def run_script(script, localvars=None):
         The script to execute.
     localvars : dict, optional
         If provided it will be used for evaluating the script. In general,
-        it can be `localvrs`=``locals()``.
+        it can be `localvrs`=`locals()` .
 
     Returns
     -------
     out
-        Output of the script if any
+        Output of the script if any.
     """
 
     return script.execute(localvars)

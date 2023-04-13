@@ -56,15 +56,15 @@ def read_carroucell(directory=None, **kwargs):
     Returns
     --------
     nddataset
-        |NDDataset| or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     See Also
     --------
     read_topspin : Read TopSpin Bruker NMR spectra.
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic .spg grouped spectra.
+    read_spa : Read Omnic .spa single spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.

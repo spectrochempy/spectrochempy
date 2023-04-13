@@ -35,7 +35,7 @@ style : str, optional, default: `dataset.preferences.style` (scpy)
     styles for plotting.
 use_plotly : bool, optional, default: `preferences.use_plotly` (False)
     Should we use plotly instead of matplotlib for plotting.
-twinx : :class:`~matplotlib.Axes` instance, optional, default: None
+twinx : :class:`~matplotlib.axes.Axes` instance, optional, default: None
     If this is not None, then a twin axes will be created with a
     common x dimension.
 clear : bool, optional, default: True
@@ -111,7 +111,7 @@ def plot_scatter(dataset, **kwargs):
     """
     Plot a 1D dataset as a scatter plot (points can be added on lines).
 
-    Alias of plot (with `method` argument set to ``scatter``.
+    Alias of plot (with `method` argument set to `scatter` .
     """
 
 
@@ -120,7 +120,7 @@ def plot_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
 
-    Alias of plot (with `method` argument set to ``pen``.
+    Alias of plot (with `method` argument set to `pen` .
     """
 
 
@@ -129,7 +129,7 @@ def plot_scatter_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
 
-    Alias of plot (with `method` argument set to ``scatter_pen``.
+    Alias of plot (with `method` argument set to `scatter_pen` .
     """
 
 
@@ -138,7 +138,7 @@ def plot_bar(dataset, **kwargs):
     """
     Plot a 1D dataset with bars.
 
-    Alias of plot (with `method` argument set to ``bar``.
+    Alias of plot (with `method` argument set to `bar` .
     """
 
 
@@ -249,12 +249,12 @@ def plot_1D(dataset, method=None, **kwargs):
     dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
         Source of data to plot.
     method : str, optional, default: dataset.preference.method_1D
-        The method can be one among ``pen``, ``bar``, ``scatter`` or ``scatter+pen``.
-        Default values is ``pen``, i.e., solid lines are drawn. This default can be changed
-        using ``dataset.preference.method_1D``.
-        To draw a Bar graph, use method ``bar``.
-        For a Scatter plot, use method ``scatter``.
-        For pen and scatter simultaneously, use method ``scatter+pen``.
+        The method can be one among `pen` , `bar` , `scatter` or `scatter+pen` .
+        Default values is `pen` , i.e., solid lines are drawn. This default can be changed
+        using `dataset.preference.method_1D` .
+        To draw a Bar graph, use method `bar` .
+        For a Scatter plot, use method `scatter` .
+        For pen and scatter simultaneously, use method `scatter+pen` .
     **kwargs
         Optional keyword parameters (see Other Parameters).
 

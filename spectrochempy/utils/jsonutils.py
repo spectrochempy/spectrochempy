@@ -14,8 +14,6 @@ import pickle
 
 import numpy as np
 
-__all__ = ["json_serialiser", "json_decoder"]
-
 
 def fromisoformat(s):
     try:

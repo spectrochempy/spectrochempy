@@ -136,7 +136,7 @@ directive to the deprecated functions or methods.
 
 .. code-block:: python
 
-    from spectrochempy.utils.exceptions import deprecated
+    from spectrochempy.utils.decorators import deprecated
 
     @deprecated("This function is deprecated and may be removed in future version")
     def old_func():

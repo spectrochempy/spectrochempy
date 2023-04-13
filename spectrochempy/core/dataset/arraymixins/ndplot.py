@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module defines the |NDPlot| class in which generic |NDDataset| plot methods are defined.
+This module defines the `NDPlot` class in which generic `NDDataset` plot methods are defined.
 """
 
 __all__ = ["plot"]
@@ -32,7 +32,7 @@ from spectrochempy.utils.plots import _Axes, _Axes3D, get_figure
 go = import_optional_dependency("plotly.graph_objects", errors="ignore")
 HAS_PLOTLY = go is not None
 
-# from spectrochempy.utils import deprecated
+# from spectrochempy.utils.decorators import deprecated
 
 
 # ======================================================================================
@@ -341,9 +341,9 @@ class PreferencesSet(Meta):
 # ======================================================================================
 class NDPlot(HasTraits):
     """
-    Plotting interface for |NDDataset| .
+    Plotting interface for `NDDataset` .
 
-    This class is used as basic plotting interface of the |NDDataset| .
+    This class is used as basic plotting interface of the `NDDataset` .
     """
 
     # Instance of the current matplotlib axis defined for a NDArray object.
@@ -371,8 +371,8 @@ class NDPlot(HasTraits):
         """
         Generic plot function.
 
-        This apply to a |NDDataset| but actually delegate the work to a plotter defined by the keyword parameter
-        ``method``.
+        This apply to a `NDDataset` but actually delegate the work to a plotter defined
+        by the keyword parameter `method` .
 
         Parameters
         ----------
@@ -380,7 +380,7 @@ class NDPlot(HasTraits):
             Specify with plot method to use.
         **kwargs
             Any optional parameters to pass to the plot method.
-            See plot_1D, plot_2D and plot_3D for a  liste of possible arguments.
+            See plot_1D, plot_2D and plot_3D for a list of possible arguments.
 
         Returns
         -------
@@ -724,7 +724,7 @@ class NDPlot(HasTraits):
     @property
     def preferences(self):
         """
-        |Meta| instance object - Additional metadata.
+        `Meta` instance object - Additional metadata.
         """
         return self._preferences
 

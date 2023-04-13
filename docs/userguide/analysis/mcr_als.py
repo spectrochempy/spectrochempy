@@ -42,17 +42,14 @@ import spectrochempy as scp
 # The ALS algorithm allows applying soft or hard constraints (e.g., non negativity,
 # unimodality, equality to a given profile) to the spectra or concentration profiles
 # of pure species. This property makes MCR-ALS an extremely flexible
-# and powerful method. Its current implementation in Scpy is limited to soft constraints
-# but is expected to cover more
-# advanced features in further releases.
+# and powerful method.
 #
-# In, this tutorial the application of MCS-ALS as implemented in Scpy to a 'classical'
-# dataset form the literature is
-# presented.
+# In this tutorial, the application of MCS-ALS as implemented in Scpy to a 'classical'
+# dataset form the literature is presented.
 #
 # ## The (minimal) dataset
 #
-# In this example, we perform the MCR ALS optimization of a dataset corresponding to
+# Here, we perform the MCR ALS optimization of a dataset corresponding to
 # a HPLC-DAD run, from Jaumot et al. Chemolab, 76 (2005),
 # pp. 101-110 and Jaumot et al. Chemolab, 140 (2015) pp. 1-12. This dataset (and others)
 # can be loaded from the
@@ -70,7 +67,7 @@ A = scp.read_matlab("matlabdata/als2004dataset.MAT")
 
 # %%
 for a in A:
-    print(a.name + ": " + str(a.shape))
+    print(f"{a.name} : {a.shape}")
 
 # %% [markdown]
 # In this tutorial, we are first interested in the dataset named ('m1') that contains
@@ -146,12 +143,22 @@ _ = St0.plot()
 # #### ALS Optimization
 # With this guess 'St0' and the dataset 'X' we can create a MCRALS object. At this point
 # of the tutorial, we will use
-# all the default parameters. We switch to `log_level = "INFO"` have a summary of the
-# ALS iterations:
+# all the default parameters.
+
+# %% [markdown]
+# First, we create an instance of a MCRALS object:
 
 # %%
-scp.set_loglevel("INFO")
-mcr = scp.MCRALS(X, St0)
+mcr = scp.MCRALS(log_level="INFO")
+
+
+# %% [markdown]
+# The `fit` method of `mcr` is now used to start the iteration process.
+# As the log level has been set to  "INFO" at the MCRALS instance creation,
+# so we have a summary of the ALS iterations
+
+# %%
+mcr.fit(X, St0)
 
 # %% [markdown]
 # The optimization has converged within few iterations. The figures reported for each
@@ -175,7 +182,8 @@ mcr = scp.MCRALS(X, St0)
 # For instance:
 
 # %%
-mcr = scp.MCRALS(X, St0, tol=0.01)
+mcr.tol = 0.01
+mcr.fit(X, St0)
 
 # %% [markdown]
 # As could be expected more iterations have been necessary to reach this stricter
@@ -186,24 +194,65 @@ mcr = scp.MCRALS(X, St0, tol=0.01)
 # it is no converging.
 # If for instance the 'tol' is set very low, the optimization will be stopped when
 # either the maximum number
-# of iterations is reached (maxit, 50 by default) or when no improvement is during 5
+# of iterations is reached (max_iter, 50 by default) or when no improvement is during 5
 # successive iterations (maxdiv).
 
 # %%
-mcr = scp.MCRALS(X, St0, tol=0.001)
+mcr.tol = 0.001
+mcr.fit(X, St0)
+
+# %% [markdown]
+# #### More information about the MCRALS estimator
+#
+# ##### To get help about the different configuration parameters
+
+# %%
+# help(mcr)
+
+# %%
+# It is possible to chain fit runs, without recomputing everything for example for
+# optimization of some parameters
+
+mcr = scp.MCRALS(tol=0.001, log_level="INFO")
+mcr.fit(X, St0)
+
+# %%
+mcr1 = scp.MCRALS(tol=0.1, log_level="INFO")
+mcr1.fit(X, St0)
+
+# %%
+mcr1.tol = 0.01
+mcr1.fit(
+    X, (mcr1.C.copy(), mcr1.St.copy())
+)  # reuse C and ST computed at the previous run
+print("second run with the output of the first")
+
+# %%
+mcr1.tol = 0.001
+mcr1.fit(X, (mcr1.C, mcr1.St))
+print("third run with the output of the second")
+
+# %%
+import numpy as np
+
+assert np.max(np.abs(mcr.C - mcr1.C)) < 1e-13
+assert np.max(np.abs(mcr.St - mcr1.St)) < 1e-13
 
 # %% [markdown]
 # #### Solutions
 #
-# The solutions of the MCR ALS optimization are the optimized concentration and pure
-# spectra matrices. They can be
-# obtained by the MCRALS.transform() method. Let's reset the `log_level` to default,
-# generate a MCRALS
-#  object with the default settings, and get the solution datasets C and St.
+# The solutions of the MCR ALS optimization are the optimized concentration (C) and pure
+# spectra (St) datasets. They are stored as in the `C` and `St` attribute of the MCRAL object.
+# As MCRALS is derived from to the `DecompositionAnalysis` class, C and St can also be obtained
+# by `MCRALS.transform()` and MCRALS.components, respectively.
+#
+#  Let's generate a MCRALS
+#  object with the default settings, and get the solution datasets C and St. Note that
+#  the default log_level is "WARNING" so we do not see any output here.
 
 # %%
-scp.set_loglevel("WARNING")
-mcr1 = scp.MCRALS(X, St0)
+mcr1 = scp.MCRALS()
+mcr1.fit(X, St0)
 
 # %% [markdown]
 # As the dimensions of C are such that the rows' direction (C.y) corresponds to the
@@ -240,9 +289,11 @@ _ = mcr1.St.plot()
 # both normalizations:
 
 # %%
-mcr2 = scp.MCRALS(X, St0, normSpec="euclid")
+mcr2 = scp.MCRALS(normSpec="euclid")
+mcr2.fit(X, St0)
 
-mcr3 = scp.MCRALS(X, St0, normSpec="max")
+mcr3 = scp.MCRALS(normSpec="max")
+mcr3.fit(X, St0)
 
 _ = mcr1.St.plot()
 _ = mcr2.St.plot()
@@ -277,42 +328,26 @@ _ = mcr3.C.T.plot()
 # Let's first analyse our dataset using PCA and plot a screeplot:
 
 # %%
-pca = scp.PCA(X)
-pca.printev(n_pc=10)
-_ = pca.screeplot(n_pc=8)
+pca = scp.PCA(used_components=8)
+pca.fit(X)
+pca.printev()
+_ = pca.screeplot()
 
 # %% [markdown]
 # The number of significant PC's is clearly larger or equal to 2. It is, however,
-# difficult tto determine whether
+# difficult to determine whether
 # it should be set to 3 or 4...  Let's look at the score and loading matrices:
 #
 
 # %%
-S, LT = pca.reduce(n_pc=8)
-_ = S.T.plot()
-_ = LT.plot()
+scores = pca.transform()
+_ = pca.loadings.plot()
+_ = scores.T.plot()
 
 # %% [markdown]
 # Examination of the scores and loadings indicate that the 4th component has structured,
 # nonrandom scores and loadings.
 # Hence, we will fix the number of pure species to 4.
-#
-# NB: The PCA.transform() can also be used with n_pc='auto' to determine automatically
-# the number of components using
-# the method of
-# Thomas P. Minka (Automatic Choice of Dimensionality for PCA. NIPS 2000: 598-604).
-# This type of methods,
-# however, often lead to too many PC's for the chemist because they recover all
-# contributions to the data variance:
-# chemical AND non-chemical, thus including non-gaussian noise, baseline changes,
-# background absorption...
-#
-# 29 in the present case:
-
-# %%
-pca = scp.PCA(X)
-S3, LT3 = scp.PCA(X).reduce(n_pc="auto")
-S3.shape
 
 # %% [markdown]
 # #### Determination of initial concentrations using EFA
@@ -322,15 +357,18 @@ S3.shape
 #
 
 # %%
-efa = scp.EFA(X)
-C0 = efa.get_conc(n_pc=4)
+efa = scp.EFA()
+efa.fit(X)
+efa.used_components = 4
+C0 = efa.transform()
 _ = C0.T.plot()
 
 # %% [markdown]
 # The MCR ALS can then be launched using this new guess:
 
 # %%
-mcr4 = scp.MCRALS(X, guess=C0, maxit=100, normSpec="euclid")
+mcr4 = scp.MCRALS(max_iter=100, normSpec="euclid")
+mcr4.fit(X, C0)
 
 # %%
 _ = mcr4.C.T.plot()
@@ -358,7 +396,8 @@ surf = X2.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5)
 _ = X2.plot(method="map")
 
 # %%
-mcr5 = scp.MCRALS(X2, guess=St0, unimodConc=None)
+mcr5 = scp.MCRALS(unimodConc=[])
+mcr5.fit(X2, St0)
 
 # %%
 _ = mcr5.C.T.plot()

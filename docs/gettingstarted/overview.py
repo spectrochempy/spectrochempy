@@ -35,7 +35,7 @@
 # The purpose of this page is to give you some quick examples of what can be done with
 # SpectroChemPy.
 #
-# See the [gallery of examples](gallery/auto_examples/index.rst) and consult the
+# See the [gallery of examples](../gallery/auto_examples/index.rst) and consult the
 # [user's guide](../userguide/introduction/introduction.ipynb)
 # for more information on using SpectroChemPy
 #
@@ -159,5 +159,7 @@ _ = ds.plot(colormap="magma")
 
 # %% jupyter={"source_hidden": true} pycharm={"name": "#%%\n"}
 
-iris = scp.IRIS(ds, "langmuir", q=[-8, -1, 50], reg_par=[-10, 1, 12])
+iris = scp.IRIS(reg_par=[-10, 1, 12])
+K = scp.IrisKernel(ds, "langmuir", q=[-8, -1, 50])
+iris.fit(ds, K)
 _ = iris.plotdistribution(-7, colormap="magma")

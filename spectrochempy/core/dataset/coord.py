@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements the class |Coord| .
+This module implements the class  `Coord` .
 """
 
 __all__ = ["Coord", "LinearCoord"]
@@ -16,7 +16,7 @@ import textwrap
 import numpy as np
 from traitlets import All, Bool, CFloat, CInt, Instance, Integer, Unicode, Union
 from traitlets import default as traitdefault
-from traitlets import observe
+from traitlets import observe, signature_has_traits
 
 from spectrochempy.core import error_
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath, _set_operators
@@ -30,11 +30,12 @@ from spectrochempy.utils.print import colored_output
 # ======================================================================================
 # Coord
 # ======================================================================================
+@signature_has_traits
 class Coord(NDMath, NDArray):
     """
     Explicit coordinates for a dataset along a given axis.
 
-    The coordinates of a |NDDataset| can be created using the |Coord|
+    The coordinates of a `NDDataset` can be created using the  `Coord`
     object.
     This is a single dimension array with either numerical (float)
     values or labels (str, `Datetime` objects, or any other kind of objects) to
@@ -44,9 +45,9 @@ class Coord(NDMath, NDArray):
     Parameters
     ----------
     data : ndarray, tuple or list
-        The actual data array contained in the |Coord| object.
+        The actual data array contained in the  `Coord` object.
         The given array (with a single dimension) can be a list,
-        a tuple, a |ndarray| , or a |ndarray|-like object.
+        a tuple, a `~numpy.ndarray` , or a :term:`array-like` object.
         If an object is passed that contains labels, or units,
         these elements will be used to accordingly set those of the
         created object.
@@ -73,14 +74,13 @@ class Coord(NDMath, NDArray):
         the automatic `id` given at the object creation will be
         used as a name..
     labels : array of objects, optional
-        Labels for the `data`. labels can be used only for 1D-datasets.
+        Labels for the `data` . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
         several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray| ,
-        a ndarray-like, a |NDArray| or any subclass of
-        |NDArray| .
-    units : |Unit| instance or str, optional
-        Units of the data. If data is a |Quantity| then `units` is set
+        The given array can be a list, a tuple, a `~numpy.ndarray` ,
+        a ndarray-like, a  `NDArray` or any subclass of `NDArray` .
+    units : `Unit` instance or str, optional
+        Units of the data. If data is a `Quantity` then `units` is set
         to the unit of the `data`; if a unit is also
         explicitly provided an error is raised. Handling of units use
         the `pint <https://pint.readthedocs.org/>`_
@@ -90,12 +90,12 @@ class Coord(NDMath, NDArray):
         for labelling plots of the data.
         It is optional but recommended to give a title to each ndarray.
     dlabel :  str, optional
-        Alias of `title`.
+        Alias of `title` .
     copy : bool, optional
         Perform a copy of the passed object. Default is False.
     linear : bool, optional
         If set to True, the coordinate is considered as a
-        ``LinearCoord`` object.
+        `LinearCoord` object.
     offset : float, optional
         Only used is linear is True.
         If omitted a value of 0.0 is taken for the coordinate offset.
@@ -105,8 +105,7 @@ class Coord(NDMath, NDArray):
 
     See Also
     --------
-    NDDataset : Main SpectroChemPy object: an array with masks, units and
-                coordinates.
+    NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
     LinearCoord : linear coordinates.
 
     Examples
@@ -116,8 +115,8 @@ class Coord(NDMath, NDArray):
 
     >>> from spectrochempy import Coord
 
-    We then create a numpy |ndarray| and use it as the numerical `data`
-    axis of our new |Coord| object :
+    We then create a numpy `~numpy.ndarray` and use it as the numerical `data`
+    axis of our new  `Coord` object :
 
     >>> c0 = Coord.arange(1., 12., 2., title='frequency', units='Hz')
     >>> c0
@@ -181,7 +180,7 @@ class Coord(NDMath, NDArray):
     @property
     def data(self):
         """
-        The `data` array (|ndarray|).
+        The `data` array (`~numpy.ndarray`).
 
         If there is no data but labels, then the labels are returned instead of data.
         """
@@ -810,7 +809,7 @@ class Coord(NDMath, NDArray):
         #         if inplace:
         #             raise Exception(
         #                     "A LinearCoord object cannot be transformed to a non linear coordinate "
-        #                     "`inplace`. "
+        #                     "`inplace` . "
         #                     "Use to() instead of ito() and leave the `inplace` attribute to False"
         #             )
         #         else:
@@ -862,6 +861,7 @@ class Coord(NDMath, NDArray):
             return increment
 
 
+@signature_has_traits
 class LinearCoord(Coord):
     """
     Linear coordinates.
@@ -903,14 +903,13 @@ class LinearCoord(Coord):
         the automatic `id` given at the object creation will be
         used as a name.
     labels : array of objects, optional
-        Labels for the `data`. labels can be used only for 1D-datasets.
+        Labels for the `data` . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
         several series of labels for the same data.
-        The given array can be a list, a tuple, a |ndarray| ,
-        a ndarray-like, a |NDArray| or any subclass of
-        |NDArray| .
-    units : |Unit| instance or str, optional
-        Units of the data. If data is a |Quantity| then `units` is set
+        The given array can be a list, a tuple, a `~numpy.ndarray` ,
+        a ndarray-like, a  `NDArray` or any subclass of `NDArray` .
+    units : `Unit` instance or str, optional
+        Units of the data. If data is a `Quantity` then `units` is set
         to the unit of the `data`; if a unit is also
         explicitly provided an error is raised. Handling of units use
         the `pint <https://pint.readthedocs.org/>`_
@@ -920,7 +919,7 @@ class LinearCoord(Coord):
         for labelling plots of the data.
         It is optional but recommended to give a title to each ndarray.
     dlabel : str, optional.
-        Alias of `title`.
+        Alias of `title` .
     meta : dict-like object, optional.
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
@@ -946,7 +945,7 @@ class LinearCoord(Coord):
     >>> c1 = LinearCoord(offset=2.0, increment=2.0, size=10)
 
     Alternatively, linear coordinates can be created using the
-    ``linear`` keyword
+    `linear` keyword
 
     >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
     """

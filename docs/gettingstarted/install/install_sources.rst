@@ -6,7 +6,7 @@ Installation from sources (master or develop versions)
 Installing git
 ---------------
 
-To install |scpy| from sources, you first need to install ``git`` on your system if it is not already present.
+To install `SpectroChemPy` from sources, you first need to install ``git`` on your system if it is not already present.
 
 Git is a free and open source distributed control system used in well-known software repositories, such as
 `GitHub <https://github.com>`__ or `Bitbucket <https://bitbucket.org>`__. For this project, we use a GitHub
@@ -40,7 +40,7 @@ To check whether or not *git* is correctly installed, use this command in the te
    $ git --version
 
 Cloning the repository locally
--------------------------------
+------------------------------
 
 The fastest way is to type these commands in a terminal on your machine:
 
@@ -50,7 +50,7 @@ The fastest way is to type these commands in a terminal on your machine:
    $ cd spectrochempy
    $ git remote add upstream https://github.com/spectrochempy/spectrochempy.git
 
-These commands create the directory ``spectrochempy`` and connects your repository to the ``upstream`` (master branch) |scpy| repository.
+These commands create the directory ``spectrochempy`` and connects your repository to the ``upstream`` (master branch) `SpectroChemPy` repository.
 
 .. _installing_conda:
 
@@ -62,7 +62,7 @@ Create a conda environment
 * Make sure your conda is up to date (``conda update conda``)
 
 
-* ``cd`` to the |scpy| source directory (*i.e.,* ``spectrochempy`` created previously)
+* ``cd`` to the `SpectroChemPy` source directory (*i.e.,* ``spectrochempy`` created previously)
 
 * Create and activate an environment using python v.3.x.
 
@@ -77,11 +77,11 @@ Create a conda environment
      $ mamba env create -n scpy -f environment.yml
      $ conda activate scpy
 
-  If you prefer to work with ``3.7`` or ``3.8`` python version, you just change ``-v 3.9`` by ``-v 3.8`` or ``3.7`` .
+  If you prefer to work with ``3.8`` python version, you just change ``-v 3.9`` by ``-v 3.8`` or ``3.7`` .
   Of course, you can also name your environment differently by replacing ``scpy`` by the name of your choice.
 
-Install |scpy| in this environment
-----------------------------------
+Install `SpectroChemPy` in this environment
+-------------------------------------------
 
 .. sourcecode:: bash
 
@@ -117,8 +117,8 @@ To return to the base environment:
    (scpy) $ conda deactivate
 
 
-Updating |scpy|
----------------
+Updating `SpectroChemPy`
+------------------------
 
 One definite advantage of installing for git sources is that you can update your version very easily.
 

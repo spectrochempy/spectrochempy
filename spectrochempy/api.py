@@ -92,7 +92,7 @@ from spectrochempy.core import *  # noqa: F403, F401, E402
 ALL += core.__all__
 
 if not IN_IPYTHON:
-    # needed in Windows terminal - but must not be inited in Jupyter notebook
+    # needed in terminal - but must not in Jupyter notebook
     from colorama import init as initcolor
 
     initcolor()

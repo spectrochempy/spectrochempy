@@ -41,7 +41,7 @@ def multiplot_scatter(datasets, **kwargs):
     """
     Plot a multiplot with 1D scatter type plots.
 
-    Alias of multiplot (with `method` argument set to ``scatter``.
+    Alias of multiplot (with `method` argument set to `scatter` .
     """
     kwargs["method"] = "scatter"
     return multiplot(datasets, **kwargs)
@@ -51,7 +51,7 @@ def multiplot_lines(datasets, **kwargs):
     """
     Plot a multiplot with 1D linetype plots.
 
-    Alias of multiplot (with `method` argument set to ``lines``.
+    Alias of multiplot (with `method` argument set to `lines` .
     """
     kwargs["method"] = "lines"
     return multiplot(datasets, **kwargs)
@@ -61,7 +61,7 @@ def multiplot_stack(datasets, **kwargs):
     """
     Plot a multiplot with 2D stack type plots.
 
-    Alias of multiplot (with `method` argument set to ``stack``.
+    Alias of multiplot (with `method` argument set to `stack` .
     """
     kwargs["method"] = "stack"
     return multiplot(datasets, **kwargs)
@@ -71,7 +71,7 @@ def multiplot_map(datasets, **kwargs):
     """
     Plot a multiplot with 2D map type plots.
 
-    Alias of multiplot (with `method` argument set to ``map``.
+    Alias of multiplot (with `method` argument set to `map` .
     """
     kwargs["method"] = "map"
     return multiplot(datasets, **kwargs)
@@ -81,7 +81,7 @@ def multiplot_image(datasets, **kwargs):
     """
     Plot a multiplot with 2D image type plots.
 
-    Alias of multiplot (with `method` argument set to ``image``.
+    Alias of multiplot (with `method` argument set to `image` .
     """
     kwargs["method"] = "image"
     return multiplot(datasets, **kwargs)
@@ -95,7 +95,7 @@ def plot_with_transposed(dataset, **kwargs):
     Plot a 2D dataset as a stacked plot with its transposition in a second
     axe.
 
-    Alias of plot_2D (with `method` argument set to ``with_transposed``).
+    Alias of plot_2D (with `method` argument set to `with_transposed` ).
     """
     kwargs["method"] = "with_transposed"
     axes = multiplot(dataset, **kwargs)
@@ -131,12 +131,12 @@ def multiplot(
         The labels that will be used as title of each axes.
     method : str, default to `map` for 2D and `lines` for 1D data
         Type of plot to draw in all axes (`lines` , `scatter` , `stack` , `map`
-        ,`image` or `with_transposed`).
+        ,`image` or `with_transposed` ).
     nrows, ncols : int, default=1
         Number of rows/cols of the subplot grid. ncol*nrow must be equal
         to the number of datasets to plot.
     sharex, sharey : bool or {'none', 'all', 'row', 'col'}, default=False
-        Controls sharing of properties among x (`sharex`) or y (`sharey`)
+        Controls sharing of properties among x (`sharex` ) or y (`sharey` )
         axes::
 
         - True or 'all' : x- or y-axis will be shared among all subplots.
@@ -153,13 +153,13 @@ def multiplot(
         for 2D plot, z is the intensity axis (i.e., contour levels for maps or
         the vertical axis for stack plot), y is the third axis.
     figsize : 2-tuple of floats
-        ``(width, height)`` tuple in inches.
+        `(width, height)` tuple in inches.
     dpi : float
         Dots per inch
     facecolor : color
-        The figure patch facecolor; defaults to rc ``figure.facecolor``.
+        The figure patch facecolor; defaults to rc `figure.facecolor` .
     edgecolor : color
-        The figure patch edge color; defaults to rc ``figure.edgecolor``.
+        The figure patch edge color; defaults to rc `figure.edgecolor` .
     linewidth : float
         The figure patch edge linewidth; the default linewidth of the frame.
     frameon : bool

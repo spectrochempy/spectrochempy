@@ -5,11 +5,50 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+from os import environ
+
 import numpy as np
+import pytest
 
 import spectrochempy as scp
-from spectrochempy.analysis.models import asymmetricvoigtmodel
+from spectrochempy.analysis.optimize._models import asymmetricvoigtmodel
+from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_EFA_docstrings():
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.analysis.efa"
+    chd.check_docstrings(
+        module,
+        obj=scp.EFA,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
+
+
+def test_example():
+    # Init the model
+    model = scp.EFA()
+    # Read an experimental 2D spectra (N x M )
+    X = scp.read("irdata/nh4y-activation.spg")
+    # Fit the model
+    model.fit(X)
+    # Display components spectra (2 x M)
+    model.used_components = 2
+    _ = model.components.plot(title="Components")
+    # Get the abstract concentration profile based on the FIFO EFA analysis
+    c = model.transform()
+    # Plot the transposed concentration matrix  (2 x N)
+    _ = c.T.plot(title="Concentration")
+    scp.show()
 
 
 def test_EFA(IR_dataset_2D):
@@ -31,15 +70,14 @@ def test_EFA(IR_dataset_2D):
     data = np.zeros((ncomponents, ntimes), dtype=np.float64)
 
     data[0] = asymmetricvoigtmodel().f(
-        t, ampl=4, width=10, ratio=0.5, asym=0.4, pos=50.0
+        t, ampl=4, width=20, ratio=0.5, asym=0.4, pos=50.0
     )  # compound 1
     data[1] = asymmetricvoigtmodel().f(
-        t, ampl=5, width=20, ratio=0.2, asym=0.9, pos=120.0
+        t, ampl=5, width=40, ratio=0.2, asym=0.9, pos=120.0
     )  # compound 2
 
     dsc = scp.NDDataset(data=data, coords=[c, t])
-    dsc.plot()
-    show()
+    dsc.plot(title="concentration")
 
     ####################################################################################
     # 2) absorption spectra
@@ -49,32 +87,33 @@ def test_EFA(IR_dataset_2D):
     w = scp.Coord(np.arange(1, 5, 1), units="nm", title="wavelength")
 
     dss = scp.NDDataset(data=spec, coords=[c, w])
-    dss.plot()
+    dss.plot(title="spectra")
 
-    #####################################################################################
+    ####################################################################################
     # 3) simulated data matrix
     # ************************
 
     dataset = scp.dot(dsc.T, dss)
-    dataset.data = np.random.normal(dataset.data, 0.2)
+    dataset.data = np.random.normal(dataset.data, 0.03)
     dataset.title = "intensity"
 
-    dataset.plot()
+    dataset.plot_map()
     show()
 
     ####################################################################################
     # 4) evolving factor analysis (EFA)
     # *********************************
 
-    efa = scp.EFA(dataset)
+    efa = scp.EFA()
+    efa.fit(dataset)
 
     ####################################################################################
     # Plots of the log(EV) for the forward and backward analysis
     #
 
-    efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.y.labels)
+    efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.x.labels)
 
-    efa.b_ev.T.plot(yscale="log")
+    efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.x.labels)
 
     ####################################################################################
     # Looking at these EFA curves, it is quite obvious that only two components
@@ -83,11 +122,11 @@ def test_EFA(IR_dataset_2D):
     # We can consider that the third EFA components is mainly due to the noise,
     # and so we can use it to set a cut of values
 
-    n_pc = 2
+    n_pc = efa.used_components = 2  # what is important here is to set used_components
     efa.cutoff = np.max(efa.f_ev[:, n_pc].data)
 
-    f2 = efa.f_ev
-    b2 = efa.b_ev
+    f2 = efa.f_ev[:, :n_pc]
+    b2 = efa.b_ev[:, :n_pc]
 
     # we concatenate the datasets to plot them in a single figure
     both = scp.concatenate(f2, b2)
@@ -96,6 +135,28 @@ def test_EFA(IR_dataset_2D):
     # ##################################################################################
     # # Get the abstract concentration profile based on the FIFO EFA analysis
     # #
-    c = efa.get_conc(n_pc)
+
+    c = efa.transform()
     c.T.plot()
-    scp.show()
+
+    scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+
+    ds = IR_dataset_2D.copy()
+    #
+    # columns masking
+    ds[:, 1230.0:920.0] = MASKED  # do not forget to use float in slicing
+    ds[:, 5900.0:5890.0] = MASKED
+    #
+    # difference spectra
+    ds -= ds[-1]
+    #
+    # row masking
+    ds[10:12] = MASKED
+
+    efa = scp.EFA(used_components=4)
+    efa.fit(ds)
+
+    C = efa.transform()
+    C.T.plot()
+
+    show()

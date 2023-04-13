@@ -28,11 +28,11 @@ class BaselineCorrector:
     Wrapper of BaselineCorrection(X), with widgets for dataset slicing,
     input parameters and graphical output.
     Should be run in jupyter notebook (does not always run properly in jupyter lab)
-    with the widget backend (magic `%matplotlib widget`).
+    with the widget backend (magic `%matplotlib widget` ).
 
     Parameters
     ----------
-    X : |NDDataset|, default: None
+    X : `NDDataset`\, default: None
         The NDDataset to process. If None, an upload button can be used to load data.
     initial_ranges : list, optional, default: None
         The initial regions where to compute the baseline. If not given, 5% on each
@@ -40,11 +40,11 @@ class BaselineCorrector:
 
     Attributes
     ----------
-    original : |NDDataset|
+    original : `NDDataset`
         The (sliced) NDDataset, without baseline correction.
-    corrected : |NDDataset|
+    corrected : `NDDataset`
         The baseline corrected NDDataset.
-    baseline : |NDDataset|
+    baseline : `NDDataset`
         The baselines.
 
     See Also
@@ -369,16 +369,20 @@ def _round_ranges(ranges, decimals=2):
 
 
 def _update_ranges(ranges, coord, decimals=2):
-    """return valid ranges
-
-    Ranges outside the coord limits (if any), are replaced
-    by the min or max the coords. Ranges with the limits or including
-    the limits are unchanged.
-    returns:
-    --------
-     list of ranges
-     Bool True if changed
-    """
+    # """
+    # Return valid ranges
+    #
+    # Ranges outside the coord limits (if any), are replaced
+    # by the min or max the coords. Ranges with the limits or including
+    # the limits are unchanged.
+    #
+    # Returns
+    # -------
+    # `list`
+    #     list of ranges
+    # `bool`
+    #     True if changed
+    # """
     ranges = list(ranges)
     changed = False
     # sort coord id needed

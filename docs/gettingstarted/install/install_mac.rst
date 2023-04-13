@@ -12,8 +12,8 @@ The following steps have been checked only with OSX-Catalina but should work
 with previous versions as well and
 hopefully on the more recent OSX version.
 
-As said before, we highly recommend that all new users install |scpy|
-interface via Conda. You can install |scpy| in a dedicated
+As said before, we highly recommend that all new users install `SpectroChemPy`
+interface via Conda. You can install `SpectroChemPy` in a dedicated
 environment (recommended, steps 4. and 5. below). You can also use your base
 environment or an existing environment
 (then skip steps 4. and 5.)
@@ -37,7 +37,7 @@ environment or an existing environment
         (base)  ~ $ conda config --add channels cantera
 
     Note that the last line about cantera is only require if you intend to work
-    the kinetics modules of |scpy| .
+    the kinetics modules of `SpectroChemPy` .
 
 #.  **Recommended**: you should create a dedicated environment in order to
     isolate the changes made on the installed library from any other previous
@@ -89,7 +89,7 @@ environment or an existing environment
 
        The result shows that your are using your environment by default.
 
-#. Install |scpy|
+#. Install `SpectroChemPy`
 
    The conda installer has to solve all packages dependencies and is definitely
    a bit slow. So we recommend to install `mamba <https://github.com/mamba-org/mamba>`__

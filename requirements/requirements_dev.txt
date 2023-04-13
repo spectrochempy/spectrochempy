@@ -59,4 +59,5 @@ nbsphinx
 jupyter_sphinx
 json5
 sphinx-copybutton
-pandoc
+sphinxcontrib-bibtex
+pandoc==2.19

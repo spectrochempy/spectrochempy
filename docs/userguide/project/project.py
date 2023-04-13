@@ -100,7 +100,7 @@ proj.add_datasets(nd1, nd2)
 proj
 
 # %% [markdown]
-# It is also possible to add other projects as sub-project (using the `add_project`)
+# It is also possible to add other projects as sub-project (using the `add_project` )
 
 # %% [markdown]
 # ## Remove an element from a project

@@ -37,7 +37,7 @@ figsize : tuple, optional
 fontsize : int, optional
     The font size in pixels, default is 10 (or read from preferences).
 style : str
-autolayout : `bool`, optional, default=True
+autolayout : `bool` , optional, default=True
     if True, layout will be set automatically.
 output : str
     A string containing a path to a filename. The output format is deduced
@@ -56,7 +56,7 @@ use_plotly : bool, optional
 data_only : `bool` [optional, default=`False`]
     Only the plot is done. No addition of axes or label specifications
     (current if any or automatic settings are kept.
-method : str [optional among ``map``, ``stack``, ``image`` or ``3D``]
+method : str [optional among `map` , `stack` , `image` or `3D`]
     The type of plot,
 projections : `bool` [optional, default=False]
 style : str, optional, default='notebook'
@@ -79,7 +79,7 @@ def plot_stack(dataset, **kwargs):
     """
     Plot a 2D dataset as a stack plot.
 
-    Alias of plot_2D (with `method` argument set to ``stack``).
+    Alias of plot_2D (with `method` argument set to `stack` ).
     """
 
 
@@ -88,7 +88,7 @@ def plot_map(dataset, **kwargs):
     """
     Plot a 2D dataset as a contoured map.
 
-    Alias of plot_2D (with `method` argument set to ``map``.
+    Alias of plot_2D (with `method` argument set to `map` .
     """
 
 
@@ -97,7 +97,7 @@ def plot_image(dataset, **kwargs):
     """
     Plot a 2D dataset as an image plot.
 
-    Alias of plot_2D (with `method` argument set to ``image``).
+    Alias of plot_2D (with `method` argument set to `image` ).
     """
 
 
@@ -108,12 +108,12 @@ def plot_2D(dataset, method=None, **kwargs):
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         The dataset to plot.
     method : ['stack', 'map', 'image'] , optional
         The method of plot of the dataset, which will determine the plotter to use.
         Default method is given 'stack' but this can be changed using
-        ``dataset.preference.method_2D``.
+        `dataset.preference.method_2D` .
     **kwargs
         Optional keyword parameters (see Other Parameters).
 

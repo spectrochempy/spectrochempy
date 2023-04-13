@@ -4,8 +4,6 @@
 
 import collections
 
-__all__ = ["OrderedSet"]
-
 
 class OrderedSet(collections.abc.MutableSet):
     def __init__(self, iterable=None):

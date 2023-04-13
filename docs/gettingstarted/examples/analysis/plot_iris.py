@@ -10,10 +10,8 @@
 =========================
 
 In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide catalyst.
-
 """
 # %%
-
 import spectrochempy as scp
 
 # %%
@@ -22,7 +20,7 @@ import spectrochempy as scp
 X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 
 # %%
-# ``X`` has two coordinates:
+# `X` has two coordinates:
 # * `wavenumbers` named "x"
 # * and `timestamps` (*i.e.,* the time of recording) named "y".
 
@@ -32,11 +30,11 @@ print(X.coordset)
 # Setting new coordinates
 # -----------------------
 #
-# The ``y`` coordinates of the dataset is the acquisition timestamp.
+# The `y` coordinates of the dataset is the acquisition timestamp.
 # However, each spectrum has been recorded with a given pressure of CO
 # in the infrared cell.
 #
-# Hence, it would be interesting to add pressure coordinates to the ``y`` dimension:
+# Hence, it would be interesting to add pressure coordinates to the `y` dimension:
 
 pressures = [
     0.003,
@@ -76,7 +74,7 @@ print(X.y)
 X.coordset
 
 # %%
-# By default, the current coordinate is the first one (here `c_times`).
+# By default, the current coordinate is the first one (here `c_times` ).
 # For example, it will be used by default for
 # plotting:
 
@@ -89,7 +87,7 @@ _ = X.plot_map(colorbar=True)
 # To seamlessly work with the second coordinates (pressures), we can change the default
 # coordinate:
 
-X.y.select(2)  # to select coordinate ``_2``
+X.y.select(2)  # to select coordinate `_2`
 X.y.default
 
 # %%
@@ -103,29 +101,44 @@ _ = X_.plot_map()
 # %%
 # IRIS analysis without regularization
 # ------------------------------------
-# %%
 # Perform IRIS without regularization (the loglevel can be set to `INFO` to have
 # information on the running process)
 
-scp.set_loglevel(scp.INFO)
-iris = scp.IRIS(X_, "langmuir", q=[-8, -1, 50])
+iris1 = scp.IRIS(log_level="INFO")
+
+# %%
+# first we compute the kernel object
+K = scp.IrisKernel(X_, "langmuir", q=[-8, -1, 50])
+
+# %%
+# The actual kernel is given by the `kernel` attribute
+kernel = K.kernel
+kernel
+
+# %%
+# Now we fit the model - we can pass either the Kernel object or the kernel NDDataset
+iris1.fit(X_, K)
 
 # %%
 # Plots the results
 
-iris.plotdistribution()
-_ = iris.plotmerit()
+iris1.plotdistribution()
+_ = iris1.plotmerit()
 
 # %%
 # With regularization and a manual search
 # ---------------------------------------
 # %%
 # Perform  IRIS with regularization, manual search
+iris2 = scp.IRIS(reg_par=[-10, 1, 12])
 
-iris = scp.IRIS(X_, "langmuir", q=[-8, -1, 50], reg_par=[-10, 1, 12])
-iris.plotlcurve(title="L curve, manual search")
-iris.plotdistribution(-7)
-_ = iris.plotmerit(-7)
+# %%
+# We keep the same kernel object as previously - performs the fit.
+iris2.fit(X_, K)
+
+iris2.plotlcurve(title="L curve, manual search")
+iris2.plotdistribution(-7)
+_ = iris2.plotmerit(-7)
 
 # %%
 # Automatic search
@@ -133,15 +146,16 @@ _ = iris.plotmerit(-7)
 # %%
 # Now try an automatic search of the regularization parameter:
 
-iris = scp.IRIS(X_, "langmuir", q=[-8, -1, 50], reg_par=[-10, 1])
-iris.plotlcurve(title="L curve, automated search")
+iris3 = scp.IRIS(reg_par=[-10, 1])
+iris3.fit(X_, K)
+iris3.plotlcurve(title="L curve, automated search")
 
 
 # %%
 # The data corresponding to the largest curvature of the L-curve
 # are at the second last position of output data:
 
-iris.plotdistribution(-2)
-_ = iris.plotmerit(-2)
+iris3.plotdistribution(-2)
+_ = iris3.plotmerit(-2)
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

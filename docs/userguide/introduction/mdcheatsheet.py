@@ -73,11 +73,11 @@
 # ## Monospace font
 
 # %% [markdown]
-# Surround text with a grave accent (\`) also called a back single quotation mark, for example:
+# Surround text with a grave accent (\` ) also called a back single quotation mark, for example:
 # ```
 # `string`
 # ```
-# You can use the monospace font for `file paths`, `file names`,`message text` ...
+# You can use the monospace font for `file paths` , `file names` ,`message text` ...
 
 # %% [markdown]
 # ## Line breaks
@@ -202,7 +202,7 @@
 
 # %% [markdown]
 # ## Horizontal lines
-# On a new line, enter three asterisks: ``***``
+# On a new line, enter three asterisks: `***`
 # ***
 
 # %% [markdown]
@@ -213,7 +213,7 @@
 # ```
 #
 # For the text inside the parentheses, replace any spaces and special characters with a hyphen. For example,
-# if your section is called `processing_functions`, you'd enter:
+# if your section is called `processing_functions` , you'd enter:
 # ```
 # [processing_functions](#processing_functions)
 # ```

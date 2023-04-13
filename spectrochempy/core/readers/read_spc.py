@@ -28,7 +28,7 @@ from spectrochempy.core.units import Quantity
 # ======================================================================================
 def read_spc(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ``.spg``.
+    Open a Thermo Nicolet file or a list of files with extension ` .spg` .
 
     Parameters
     -----------
@@ -36,15 +36,15 @@ def read_spc(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -58,8 +58,8 @@ def read_spc(*paths, **kwargs):
     Other Parameters
     -----------------
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -77,7 +77,7 @@ def read_spc(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -93,8 +93,8 @@ def read_spc(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spa : Read Omnic *.spa spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
+    read_spa : Read Omnic \*.spa spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.

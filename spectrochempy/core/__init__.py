@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Package defining the *core* methods of the |scpy| API.
+Package defining the *core* methods of the  `SpectroChemPy` API.
 
 Most the API methods such as plotting, processing, analysis, etc...
 
@@ -32,7 +32,8 @@ class timeit:
     def __exit__(self, type, value, traceback):
         self.time = perf_counter() - self.time
         self.readout = f"Elapsed Time for {self.msg}: {self.time:.6f} seconds\n"
-        # print(self.readout)
+        if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
+            print(self.readout)
 
 
 # ======================================================================================
@@ -47,14 +48,14 @@ with timeit("app"):
 
 with timeit("application"):
     from spectrochempy.application import (
-        __version__ as version,
-        __release__ as release,
-        __copyright__ as copyright,
-        __license__ as license,
-        __release_date__ as release_date,
-        __author__ as authors,
-        __contributor__ as contributors,
-        __url__ as url,
+        version,
+        release,
+        copyright,
+        license,
+        release_date,
+        authors,
+        contributors,
+        url,
         DEBUG,
         WARNING,
         ERROR,
@@ -216,7 +217,8 @@ with timeit("units"):
     ]
 
 # START THE app
-_started = app.start()
+with timeit("start app"):
+    _started = app.start()
 
 # ======================================================================================
 if __name__ == "__main__":

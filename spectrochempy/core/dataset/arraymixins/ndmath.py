@@ -354,7 +354,7 @@ def _logical_binary_ufuncs():
 
 class NDMath(object):
     """
-    This class provides the math and some other array manipulation functionalities to |NDArray| or |Coord| .
+    This class provides the math and some other array manipulation functionalities to  `NDArray` or  `Coord` .
 
     Below is a list of mathematical functions (numpy) implemented (or
     planned for implementation).
@@ -364,9 +364,9 @@ class NDMath(object):
     These functions should work like for numpy-ndarray, except that they
     may be units-aware.
 
-    For instance, `ds`  being a |NDDataset| , just call the np functions like
+    For instance, `ds`  being a `NDDataset` , just call the np functions like
     this. Most of the time it returns a new NDDataset, while in some cases
-    noted below, one get a |ndarray| .
+    noted below, one get a `~numpy.ndarray` .
 
     >>> ds = scp.NDDataset([1., 2., 3.])
     >>> np.sin(ds)
@@ -556,11 +556,11 @@ class NDMath(object):
 
         `abs` is a shorthand for this function. For complex input, a + ib, the absolute
         value is
-        :math:`\\sqrt{ a^2 + b^2}`.
+        :math:`\\sqrt{ a^2 + b^2}` .
 
         Parameters
         ----------
-        dataset : array_like
+        dataset : `NDDataset` or :term:`array-like`
             Input array or object that can be converted to an array.
         dtype : dtype
             The type of the output array. If dtype is not given, infer the data type
@@ -568,8 +568,8 @@ class NDMath(object):
 
         Returns
         -------
-        absolute
-            An ndarray containing the absolute value of each element in dataset.
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
+            The absolute value of each element in dataset.
         """
 
         if not cls.has_complex_dims:
@@ -615,7 +615,7 @@ class NDMath(object):
         Returns
         -------
         conjugated
-            Same object or a copy depending on the ``inplace`` flag.
+            Same object or a copy depending on the `inplace` flag.
 
         See Also
         --------
@@ -650,7 +650,7 @@ class NDMath(object):
 
         Parameters
         ----------
-        dataset : |NDDataset|
+        dataset : `NDDataset`
             Input dataset.
         decimals : int, optional
             Number of decimal places to round to (default: 0).  If
@@ -703,7 +703,7 @@ class NDMath(object):
             Input array or object that can be converted to an array.
         dim : None or int or str, optional
             Axis or axes along which a logical AND reduction is performed.
-            The default (``axis=None``) is to perform a logical AND over all
+            The default (`axis=None` ) is to perform a logical AND over all
             the dimensions of the input array. `axis` may be negative, in
             which case it counts from the last to the first axis.
         keepdims : bool, optional
@@ -712,7 +712,7 @@ class NDMath(object):
             the result will broadcast correctly against the input array.
             If the default value is passed, then `keepdims` will not be
             passed through to the `all` method of sub-classes of
-            `ndarray`, however any non-default value will be.  If the
+            `~numpy.ndarray` , however any non-default value will be.  If the
             sub-class' method does not implement `keepdims` any
             exceptions will be raised.
 
@@ -759,7 +759,7 @@ class NDMath(object):
         -------
         amax
             Maximum of the data. If `dim` is None, the result is a scalar value.
-            If `dim` is given, the result is an array of dimension ``ndim - 1``.
+            If `dim` is given, the result is an array of dimension `ndim - 1` .
 
         See Also
         --------
@@ -863,7 +863,7 @@ class NDMath(object):
         -------
         amin
             Minimum of the data. If `dim` is None, the result is a scalar value.
-            If `dim` is given, the result is an array of dimension ``ndim - 1``.
+            If `dim` is given, the result is an array of dimension `ndim - 1` .
 
         See Also
         --------
@@ -944,7 +944,7 @@ class NDMath(object):
         """
         Test whether any array element along a given axis evaluates to True.
 
-        Returns single boolean unless `dim` is not ``None``
+        Returns single boolean unless `dim` is not `None`
 
         Parameters
         ----------
@@ -952,7 +952,7 @@ class NDMath(object):
             Input array or object that can be converted to an array.
         dim : None or int or tuple of ints, optional
             Axis or axes along which a logical OR reduction is performed.
-            The default (``axis=None``) is to perform a logical OR over all
+            The default (`axis=None` ) is to perform a logical OR over all
             the dimensions of the input array. `axis` may be negative, in
             which case it counts from the last to the first axis.
         keepdims : bool, optional
@@ -961,14 +961,14 @@ class NDMath(object):
             the result will broadcast correctly against the input array.
             If the default value is passed, then `keepdims` will not be
             passed through to the `any` method of sub-classes of
-            `ndarray`, however any non-default value will be.  If the
+            `~numpy.ndarray` , however any non-default value will be.  If the
             sub-class' method does not implement `keepdims` any
             exceptions will be raised.
 
         Returns
         -------
         any
-            A new boolean or `ndarray` is returned.
+            A new boolean or `~numpy.ndarray` is returned.
 
         See Also
         --------
@@ -1070,12 +1070,12 @@ class NDMath(object):
             If this is a tuple, the minimum is selected over multiple dimensions,
             instead of a single dimension or all the dimensions as before.
         weights : array_like, optional
-            An array of weights associated with the values in `dataset`. Each value in
+            An array of weights associated with the values in `dataset` . Each value in
             `a` contributes to the average according to its associated weight.
             The weights array can either be 1-D (in which case its length must be
             the size of `dataset` along the given axis) or of the same shape as
-            `dataset`.
-            If `weights=None`, then all data in `dataset` are assumed to have a
+            `dataset` .
+            If `weights=None` , then all data in `dataset` are assumed to have a
             weight equal to one.  The 1-D calculation is::
 
                 avg = sum(a * weights) / sum(weights)
@@ -1140,11 +1140,11 @@ class NDMath(object):
         Clip (limit) the values in a dataset.
 
         Given an interval, values outside the interval are clipped to
-        the interval edges.  For example, if an interval of ``[0, 1]``
+        the interval edges.  For example, if an interval of `[0, 1]`
         is specified, values smaller than 0 become 0, and values larger
         than 1 become 1.
 
-        No check is performed to ensure ``a_min < a_max``.
+        No check is performed to ensure `a_min < a_max` .
 
         Parameters
         ----------
@@ -1163,9 +1163,9 @@ class NDMath(object):
         Returns
         -------
         clip
-            An array with the elements of `a`, but where values
-            < `a_min` are replaced with `a_min`, and those > `a_max`
-            with `a_max`.
+            An array with the elements of `a` , but where values
+            < `a_min` are replaced with `a_min` , and those > `a_max`
+            with `a_max` .
         """
         # if len(args) > 2 or len(args) == 0:
         #     raise ValueError('Clip requires at least one argument or at most two
@@ -1314,7 +1314,7 @@ class NDMath(object):
         """
         Extract a diagonal or construct a diagonal array.
 
-        See the more detailed documentation for ``numpy.diagonal`` if you use this
+        See the more detailed documentation for `numpy.diagonal` if you use this
         function to extract a diagonal and wish to write to the resulting array;
         whether it returns a copy or a view depends on what version of numpy you
         are using.
@@ -1380,7 +1380,7 @@ class NDMath(object):
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to extract the diagonal.
         offset : int, optional
             Offset of the diagonal from the main diagonal.  Can be positive or
@@ -1436,7 +1436,7 @@ class NDMath(object):
     @_from_numpy_method
     def empty(cls, shape, dtype=None, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type, without initializing entries.
+        Return a new `NDDataset` of given shape and type, without initializing entries.
 
         Parameters
         ----------
@@ -1474,7 +1474,7 @@ class NDMath(object):
 
         Notes
         -----
-        `empty`, unlike `zeros`, does not set the array values to zero,
+        `empty` , unlike `zeros` , does not set the array values to zero,
         and may therefore be marginally faster.  On the other hand, it requires
         the user to manually set all the values in the array, and should be
         used with caution.
@@ -1491,15 +1491,15 @@ class NDMath(object):
     @_from_numpy_method
     def empty_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return a new uninitialized |NDDataset| .
+        Return a new uninitialized `NDDataset` .
 
-        The returned |NDDataset| have the same shape and type as a given array. Units,
+        The returned `NDDataset` have the same shape and type as a given array. Units,
         coordset, ... can be added in
         kwargs.
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
@@ -1509,7 +1509,7 @@ class NDMath(object):
         Returns
         -------
         emptylike
-            Array of `fill_value` with the same shape and type as `dataset`.
+            Array of `fill_value` with the same shape and type as `dataset` .
 
         Other Parameters
         ----------------
@@ -1534,7 +1534,7 @@ class NDMath(object):
         Notes
         -----
         This function does *not* initialize the returned array; to do that use
-        for instance `zeros_like`, `ones_like` or `full_like` instead.  It may be
+        for instance `zeros_like` , `ones_like` or `full_like` instead.  It may be
         marginally faster than the functions that do set the array values.
         """
 
@@ -1553,7 +1553,7 @@ class NDMath(object):
         N : int
             Number of rows in the output.
         M : int, optional
-            Number of columns in the output. If None, defaults to `N`.
+            Number of columns in the output. If None, defaults to `N` .
         k : int, optional
             Index of the diagonal: 0 (the default) refers to the main diagonal,
             a positive value refers to an upper diagonal, and a negative value
@@ -1596,27 +1596,27 @@ class NDMath(object):
         """
         Construct a nddataset by executing a function over each coordinate.
 
-        The resulting array therefore has a value ``fn(x, y, z)`` at coordinate
-        ``(x, y, z)`` .
+        The resulting array therefore has a value `fn(x, y, z)` at coordinate
+        `(x, y, z)` .
 
         Parameters
         ----------
         function : callable
             The function is called with N parameters, where N is the rank of
-            `shape` or from the provided `coordset`.
+            `shape` or from the provided `CoordSet` .
         shape : (N,) tuple of ints, optional
             Shape of the output array, which also determines the shape of
-            the coordinate arrays passed to `function`. It is optional only if
-            `coordset` is None.
+            the coordinate arrays passed to `function` . It is optional only if
+            `CoordSet` is None.
         dtype : data-type, optional
-            Data-type of the coordinate arrays passed to `function`.
+            Data-type of the coordinate arrays passed to `function` .
             By default, `dtype` is float.
         units : str, optional
             Dataset units.
             When None, units will be determined from the function results.
-        coordset : |Coordset| instance, optional
+        coordset : `CoordSet` instance, optional
             If provided, this determine the shape and coordinates of each dimension of
-            the returned |NDDataset| . If shape is also passed it will be ignored.
+            the returned `NDDataset` . If shape is also passed it will be ignored.
         **kwargs
             Other kwargs are passed to the final object constructor.
 
@@ -1625,7 +1625,7 @@ class NDMath(object):
         fromfunction
             The result of the call to `function` is passed back directly.
             Therefore the shape of `fromfunction` is completely determined by
-            `function`.
+            `function` .
 
         See Also
         --------
@@ -1680,7 +1680,7 @@ class NDMath(object):
             An iterable object providing data for the array.
         dtype : data-type
             The data-type of the returned array.
-        count : int, optional
+        count : `int`, optional
             The number of items to read from iterable. The default is -1, which means
             all data is read.
         **kwargs
@@ -1693,14 +1693,12 @@ class NDMath(object):
 
         See Also
         --------
-        fromfunction : Construct a nddataset by executing a function over each
-        coordinate.
+        fromfunction : Construct a nddataset by executing a function over each coordinate.
 
         Notes
         -----
             Specify count to improve performance. It allows fromiter to pre-allocate the
-             output array,
-            instead of resizing it on demand.
+             output array, instead of resizing it on demand.
 
         Examples
         --------
@@ -1718,16 +1716,16 @@ class NDMath(object):
     @_from_numpy_method
     def full(cls, shape, fill_value=0.0, dtype=None, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type, filled with `fill_value`.
+        Return a new `NDDataset` of given shape and type, filled with `fill_value` .
 
         Parameters
         ----------
         shape : int or sequence of ints
-            Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+            Shape of the new array, e.g., `(2, 3)` or `2` .
         fill_value : scalar
             Fill value.
         dtype : data-type, optional
-            The desired data-type for the array, e.g., `np.int8`.  Default is
+            The desired data-type for the array, e.g., `np.int8` .  Default is
             fill_value.dtype.
         **kwargs
             Optional keyword parameters (see Other Parameters).
@@ -1735,7 +1733,7 @@ class NDMath(object):
         Returns
         -------
         full
-            Array of `fill_value`.
+            Array of `fill_value` .
 
         Other Parameters
         ----------------
@@ -1770,15 +1768,15 @@ class NDMath(object):
     @_from_numpy_method
     def full_like(cls, dataset, fill_value=0.0, dtype=None, **kwargs):
         """
-        Return a |NDDataset| of fill_value.
+        Return a `NDDataset` of fill_value.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units,
+        The returned `NDDataset` have the same shape and type as a given array. Units,
         coordset, ... can be added in
         kwargs
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to copy the array structure.
         fill_value : scalar
             Fill value.
@@ -1790,7 +1788,7 @@ class NDMath(object):
         Returns
         -------
         fulllike
-            Array of `fill_value` with the same shape and type as `dataset`.
+            Array of `fill_value` with the same shape and type as `dataset` .
 
         Other Parameters
         ----------------
@@ -1843,7 +1841,7 @@ class NDMath(object):
         """
         Return numbers spaced evenly on a log scale (a geometric progression).
 
-        This is similar to `logspace`, but with endpoints specified directly.
+        This is similar to `logspace` , but with endpoints specified directly.
         Each output sample is a constant multiple of the previous.
 
         Parameters
@@ -1852,9 +1850,9 @@ class NDMath(object):
             The starting value of the sequence.
         stop : number
             The final value of the sequence, unless `endpoint` is False.
-            In that case, ``num + 1`` values are spaced over the
+            In that case, `num + 1` values are spaced over the
             interval in log-space, of which all but the last (a sequence of
-            length `num`) are returned.
+            length `num` ) are returned.
         num : int, optional
             Number of samples to generate.  Default is 50.
         endpoint : bool, optional
@@ -1887,7 +1885,7 @@ class NDMath(object):
     @_from_numpy_method
     def identity(cls, n, dtype=None, **kwargs):
         """
-        Return the identity |NDDataset| of a given shape.
+        Return the identity `NDDataset` of a given shape.
 
         The identity array is a square array with ones on
         the main diagonal.
@@ -1897,7 +1895,7 @@ class NDMath(object):
         n : int
             Number of rows (and columns) in `n` x `n` output.
         dtype : data-type, optional
-            Data-type of the output.  Defaults to ``float``.
+            Data-type of the output.  Defaults to `float` .
         **kwargs
             Other parameters to be passed to the object constructor (units, coordset,
             mask ...).
@@ -1979,19 +1977,19 @@ class NDMath(object):
         """
         Return numbers spaced evenly on a log scale.
 
-        In linear space, the sequence starts at ``base ** start``
-        (`base` to the power of `start`) and ends with ``base ** stop``
+        In linear space, the sequence starts at `base ** start`
+        (`base` to the power of `start` ) and ends with `base ** stop`
         (see `endpoint` below).
 
         Parameters
         ----------
         start : array_like
-            ``base ** start`` is the starting value of the sequence.
+            `base ** start` is the starting value of the sequence.
         stop : array_like
-            ``base ** stop`` is the final value of the sequence, unless `endpoint`
-            is False.  In that case, ``num + 1`` values are spaced over the
+            `base ** stop` is the final value of the sequence, unless `endpoint`
+            is False.  In that case, `num + 1` values are spaced over the
             interval in log-space, of which all but the last (a sequence of
-            length `num`) are returned.
+            length `num` ) are returned.
         num : int, optional
             Number of samples to generate.  Default is 50.
         endpoint : bool, optional
@@ -1999,7 +1997,7 @@ class NDMath(object):
             Default is True.
         base : float, optional
             The base of the log space. The step size between the elements in
-            ``ln(samples) / ln(base)`` (or ``log_base(samples)``) is uniform.
+            `ln(samples) / ln(base)` (or `log_base(samples)` ) is uniform.
             Default is 10.0.
         dtype : dtype
             The type of the output array.  If `dtype` is not given, infer the data
@@ -2098,21 +2096,21 @@ class NDMath(object):
     @_from_numpy_method
     def ones(cls, shape, dtype=None, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type, filled with ones.
+        Return a new `NDDataset` of given shape and type, filled with ones.
 
         Parameters
         ----------
         shape : int or sequence of ints
-            Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+            Shape of the new array, e.g., `(2, 3)` or `2` .
         dtype : data-type, optional
-            The desired data-type for the array, e.g., `numpy.int8`.  Default is
+            The desired data-type for the array, e.g., `numpy.int8` .  Default is
         **kwargs
             Optional keyword parameters (see Other Parameters).
 
         Returns
         -------
         ones
-            Array of `ones`.
+            Array of `ones` .
 
         Other Parameters
         ----------------
@@ -2163,15 +2161,15 @@ class NDMath(object):
     @_from_numpy_method
     def ones_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return |NDDataset| of ones.
+        Return `NDDataset` of ones.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units,
+        The returned `NDDataset` have the same shape and type as a given array. Units,
         coordset, ... can be added in
         kwargs.
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
@@ -2181,7 +2179,7 @@ class NDMath(object):
         Returns
         -------
         oneslike
-            Array of `1` with the same shape and type as `dataset`.
+            Array of `1` with the same shape and type as `dataset` .
 
         Other Parameters
         ----------------
@@ -2222,30 +2220,30 @@ class NDMath(object):
 
     def pipe(self, func, *args, **kwargs):
         """
-        Apply func(self, *args, **kwargs).
+        Apply func(self, \*args, \*\*kwargs).
 
         Parameters
         ----------
         func : function
-            Function to apply to the |NDDataset| .
-            `*args`, and `**kwargs` are passed into `func`.
+            Function to apply to the `NDDataset` .
+            \*args` , and `\*\*kwargs` are passed into `func` .
             Alternatively a `(callable, data_keyword)` tuple where
             `data_keyword` is a string indicating the keyword of
             `callable` that expects the array object.
         *args
-            Positional arguments passed into `func`.
+            Positional arguments passed into `func` .
         **kwargs
-            Keyword arguments passed into `func`.
+            Keyword arguments passed into `func` .
 
         Returns
         -------
         pipe
-           The return type of `func`.
+           The return type of `func` .
 
         Notes
         -----
-        Use ``.pipe`` when chaining together functions that expect
-        a |NDDataset| .
+        Use `pipe` when chaining together functions that expect
+        a `NDDataset` .
         """
         if isinstance(func, tuple):
             func, target = func
@@ -2267,7 +2265,7 @@ class NDMath(object):
         """
         Range of values (maximum - minimum) along a dimension.
 
-        The name of the function comes from the acronym for 'peak to peak'.
+        The name of the function comes from the acronym for 'peak to peak' .
 
         Parameters
         ----------
@@ -2357,7 +2355,7 @@ class NDMath(object):
             the same as the array type.
         ddof : int, optional
             Means Delta Degrees of Freedom.  The divisor used in calculations
-            is ``N - ddof``, where ``N`` represents the number of elements.
+            is `N - ddof` , where `N` represents the number of elements.
             By default `ddof` is zero.
         keepdims : bool, optional
             If this is set to True, the dimensions which are reduced are left
@@ -2377,16 +2375,16 @@ class NDMath(object):
         Notes
         -----
         The standard deviation is the square root of the average of the squared
-        deviations from the mean, i.e., ``std = sqrt(mean(abs(x - x.mean())**2))``.
+        deviations from the mean, i.e., `std = sqrt(mean(abs(x - x.mean())**2))` .
 
         The average squared deviation is normally calculated as
-        ``x.sum() / N``, where ``N = len(x)``.  If, however, `ddof` is specified,
-        the divisor ``N - ddof`` is used instead. In standard statistical
-        practice, ``ddof=1`` provides an unbiased estimator of the variance
-        of the infinite population. ``ddof=0`` provides a maximum likelihood
+        `x.sum() / N` , where `N = len(x)` .  If, however, `ddof` is specified,
+        the divisor `N - ddof` is used instead. In standard statistical
+        practice, `ddof=1` provides an unbiased estimator of the variance
+        of the infinite population. `ddof=0` provides a maximum likelihood
         estimate of the variance for normally distributed variables. The
         standard deviation computed in this function is the square root of
-        the estimated variance, so even with ``ddof=1``, it will not be an
+        the estimated variance, so even with `ddof=1` , it will not be an
         unbiased estimate of the standard deviation per se.
 
         Note that, for complex numbers, `std` takes the absolute
@@ -2512,7 +2510,7 @@ class NDMath(object):
             the same as the array type.
         ddof : int, optional
             Means Delta Degrees of Freedom.  The divisor used in calculations
-            is ``N - ddof``, where ``N`` represents the number of elements.
+            is `N - ddof` , where `N` represents the number of elements.
             By default `ddof` is zero.
         keepdims : bool, optional
             If this is set to True, the dimensions which are reduced are left
@@ -2532,13 +2530,13 @@ class NDMath(object):
         Notes
         -----
         The variance is the average of the squared deviations from the mean,
-        i.e.,  ``var = mean(abs(x - x.mean())**2)``.
+        i.e.,  `var = mean(abs(x - x.mean())**2)` .
 
-        The mean is normally calculated as ``x.sum() / N``, where ``N = len(x)``.
-        If, however, `ddof` is specified, the divisor ``N - ddof`` is used
-        instead.  In standard statistical practice, ``ddof=1`` provides an
+        The mean is normally calculated as `x.sum() / N` , where `N = len(x)` .
+        If, however, `ddof` is specified, the divisor `N - ddof` is used
+        instead.  In standard statistical practice, `ddof=1` provides an
         unbiased estimator of the variance of a hypothetical infinite population.
-        ``ddof=0`` provides a maximum likelihood estimate of the variance for
+        `ddof=0` provides a maximum likelihood estimate of the variance for
         normally distributed variables.
 
         Note that for complex numbers, the absolute value is taken before
@@ -2547,7 +2545,7 @@ class NDMath(object):
         For floating-point input, the variance is computed using the same
         precision the input has.  Depending on the input data, this can cause
         the results to be inaccurate, especially for `float32` (see example
-        below).  Specifying a higher-accuracy accumulator using the ``dtype``
+        below).  Specifying a higher-accuracy accumulator using the `dtype`
         keyword can alleviate this issue.
 
         Examples
@@ -2583,15 +2581,15 @@ class NDMath(object):
     @_from_numpy_method
     def zeros(cls, shape, dtype=None, **kwargs):
         """
-        Return a new |NDDataset| of given shape and type, filled with zeros.
+        Return a new `NDDataset` of given shape and type, filled with zeros.
 
         Parameters
         ----------
         shape : int or sequence of ints
-            Shape of the new array, e.g., ``(2, 3)`` or ``2``.
+            Shape of the new array, e.g., `(2, 3)` or `2` .
         dtype : data-type, optional
-            The desired data-type for the array, e.g., `numpy.int8`.  Default is
-            `numpy.float64`.
+            The desired data-type for the array, e.g., `numpy.int8` .  Default is
+            `numpy.float64` .
         **kwargs
             Optional keyword parameters (see Other Parameters).
 
@@ -2640,14 +2638,14 @@ class NDMath(object):
     @_from_numpy_method
     def zeros_like(cls, dataset, dtype=None, **kwargs):
         """
-        Return a |NDDataset| of zeros.
+        Return a `NDDataset` of zeros.
 
-        The returned |NDDataset| have the same shape and type as a given array. Units,
+        The returned `NDDataset` have the same shape and type as a given array. Units,
         coordset, ... can be added in kwargs.
 
         Parameters
         ----------
-        dataset : |NDDataset| or array-like
+        dataset : `NDDataset` or array-like
             Object from which to copy the array structure.
         dtype : data-type, optional
             Overrides the data type of the result.
@@ -2658,7 +2656,7 @@ class NDMath(object):
         Returns
         -------
         zeorslike
-            Array of `fill_value` with the same shape and type as `dataset`.
+            Array of `fill_value` with the same shape and type as `dataset` .
 
         Other Parameters
         ----------------
@@ -3283,7 +3281,7 @@ class _ufunc:
         doc = f"""
             {_unary_ufuncs()[self.name].split('->')[-1].strip()}
 
-            Wrapper of the numpy.ufunc function ``np.{self.name}(dataset)``.
+            Wrapper of the numpy.ufunc function `np.{self.name}(dataset)` .
 
             Parameters
             ----------
@@ -3293,7 +3291,7 @@ class _ufunc:
             Returns
             -------
             out
-                |NDDataset|
+                `NDDataset`
 
             See Also
             --------
@@ -3302,7 +3300,7 @@ class _ufunc:
             Notes
             -----
             Numpy Ufuncs referenced in our documentation can be directly applied to
-            |NDDataset| or |Coord| type
+            `NDDataset` or  `Coord` type
             of SpectrochemPy objects.
             Most of these Ufuncs, however, instead of returning a numpy array, will
             return the same type of object.

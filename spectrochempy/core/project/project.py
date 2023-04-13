@@ -29,6 +29,7 @@ from spectrochempy.utils.traits import NDDatasetType
 # ======================================================================================
 # Project class
 # ======================================================================================
+@tr.signature_has_traits
 class Project(AbstractProject, NDIO):
     """
     A manager for projects, datasets and scripts.
@@ -40,7 +41,7 @@ class Project(AbstractProject, NDIO):
     ----------
     *args : Series of objects, optional
         Argument type will be interpreted correctly if they are of type
-        |NDDataset| , |Project| , or other objects such as |Script| .
+        `NDDataset` ,  `Project` , or other objects such as `Script` .
         This is optional, as they can be added later.
     argnames : list, optional
         If not None, this list gives the names associated to each
@@ -50,7 +51,7 @@ class Project(AbstractProject, NDIO):
     name : str, optional
         The name of the project.  If the name is not provided, it will be
         generated automatically.
-    **meta : dict
+    \**meta : dict
         Any other attributes to describe the project.
 
     See Also
@@ -412,7 +413,7 @@ class Project(AbstractProject, NDIO):
     @staticmethod
     def _implements(name=None):
         """
-        Utility to check if the current object implement `Project`.
+        Utility to check if the current object implement `Project` .
 
         Rather than isinstance(obj, Project) use object._implements('Project').
         This is useful to check type without importing the module.
@@ -437,7 +438,7 @@ class Project(AbstractProject, NDIO):
 
         Parameters
         ----------
-        *datasets : series of |NDDataset|
+        *datasets : series of `NDDataset`
             Datasets to add to the current project.
             The name of the entries in the project will be identical to the
             names of the datasets.
@@ -464,7 +465,7 @@ class Project(AbstractProject, NDIO):
 
         Parameters
         ----------
-        dataset : |NDDataset|
+        dataset : `NDDataset`
             Datasets to add.
             The name of the entry will be the name of the dataset, except
             if parameter `name` is defined.
@@ -576,7 +577,7 @@ class Project(AbstractProject, NDIO):
 
         Parameters
         ----------
-        scripts : |Script| instances
+        scripts : `Script` instances
         """
         for sc in scripts:
             self.add_script(sc)
@@ -587,7 +588,7 @@ class Project(AbstractProject, NDIO):
 
         Parameters
         ----------
-        script : a |Script| instance
+        script : a `Script` instance
         name : str
         """
         script.parent = self

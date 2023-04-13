@@ -36,14 +36,14 @@ def read_opus(*paths, **kwargs):
     *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
         The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        except if `merge` is set to False. If a source is not provided (i.e. no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -59,7 +59,7 @@ def read_opus(*paths, **kwargs):
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
-        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified, read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been provided as arguments,
@@ -73,7 +73,7 @@ def read_opus(*paths, **kwargs):
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For examples on how to use this feature, one can look in the `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True).
@@ -86,8 +86,8 @@ def read_opus(*paths, **kwargs):
     read_topspin : Read TopSpin Bruker NMR spectra.
     read_omnic : Read Omnic spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
+    read_spa : Read Omnic \*.Spa single spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
@@ -95,12 +95,12 @@ def read_opus(*paths, **kwargs):
 
     Examples
     ---------
-    Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
+    Reading a single OPUS file  (providing a windows type filename relative to the default `Datadir` )
 
     >>> scp.read_opus('irdata\\\\OPUS\\\\test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
-    Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
+    Reading a single OPUS file  (providing a unix/python type filename relative to the default `Datadir` )
     Note that here read_opus is called as a classmethod of the NDDataset class
 
     >>> scp.NDDataset.read_opus('irdata/OPUS/test.0000')

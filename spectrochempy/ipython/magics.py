@@ -14,6 +14,8 @@ from IPython.utils.text import get_text_list
 
 from spectrochempy import error_, warning_
 
+__all__ = ["SpectroChemPyMagics"]
+
 
 # ======================================================================================
 # Magic ipython Classes
@@ -22,6 +24,9 @@ from spectrochempy import error_, warning_
 class SpectroChemPyMagics(Magics):
     """
     This class implements the addscript ipython magic function.
+
+    The ipython extensions`can be loaded via `%load_ext spectrochempy.ipython`
+    or be configured to be autoloaded by IPython at startup time.
     """
 
     @line_cell_magic
@@ -147,7 +152,7 @@ class SpectroChemPyMagics(Magics):
 
 def load_ipython_extension(ipython):
     """
-    The ipython extensions`can be loaded via `%load_ext spectrochempy.ipython` or be configured to be
-    autoloaded by IPython at startup time.
+    The ipython extensions`can be loaded via `%load_ext spectrochempy.ipython`
+    or be configured to be autoloaded by IPython at startup time.
     """
     ipython.register_magics(SpectroChemPyMagics)

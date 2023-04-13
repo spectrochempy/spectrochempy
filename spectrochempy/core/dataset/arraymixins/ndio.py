@@ -5,8 +5,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module define the class |NDIO| in which input/output standard
-methods for a |NDDataset| are defined.
+This module define the class  `NDIO` in which input/output standard
+methods for a `NDDataset` are defined.
 """
 
 __all__ = ["load"]
@@ -39,9 +39,9 @@ SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 # ======================================================================================
 class NDIO(HasTraits):
     """
-    Import/export interface from |NDDataset| .
+    Import/export interface from `NDDataset` .
 
-    This class is used as basic import/export interface of the |NDDataset| .
+    This class is used as basic import/export interface of the `NDDataset` .
     """
 
     _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
@@ -111,8 +111,8 @@ class NDIO(HasTraits):
         """
         Save the current object in SpectroChemPy format.
 
-        Default extension is *.scp for |NDDataset|'s and *.pscp for
-        |Project|'s.
+        Default extension is .scp for `NDDataset`\'s and .pscp for
+         `Project`'s.
 
         Parameters
         ----------
@@ -132,18 +132,22 @@ class NDIO(HasTraits):
         ---------
 
         Read some data from an OMNIC file
+
         >>> nd = scp.read_omnic('wodger.spg')
         >>> assert nd.name == 'wodger'
 
         Write it in SpectroChemPy format (.scp)
         (return a `pathlib` object)
+
         >>> filename = nd.save()
 
         Check the existence of the scp fie
+
         >>> assert filename.is_file()
         >>> assert filename.name == 'wodger.scp'
 
         Remove this file
+
         >>> filename.unlink()
         """
 
@@ -171,7 +175,7 @@ class NDIO(HasTraits):
 
     def save_as(self, filename="", **kwargs):
         """
-        Save the current |NDDataset| in SpectroChemPy format (*.scp).
+        Save the current `NDDataset` in SpectroChemPy format (\*.scp).
 
         Parameters
         ----------
@@ -193,24 +197,27 @@ class NDIO(HasTraits):
 
         Notes
         -----
-        Adapted from :class:`numpy.savez`.
+        Adapted from :class:`numpy.savez` .
 
         Examples
         --------
-
         Read some data from an OMNIC file
+
         >>> nd = scp.read_omnic('wodger.spg')
         >>> assert nd.name == 'wodger'
 
         Write it in SpectroChemPy format (.scp)
         (return a `pathlib` object)
+
         >>> filename = nd.save_as('new_wodger')
 
-        Check the existence of the scp fie
+        Check the existence of the scp file
+
         >>> assert filename.is_file()
         >>> assert filename.name == 'new_wodger.scp'
 
         Remove this file
+
         >>> filename.unlink()
         """
         if filename:
@@ -245,7 +252,7 @@ class NDIO(HasTraits):
 
         Parameters
         ----------
-        filename :  `str`, `pathlib` or `file` objects
+        filename :  `str` , `pathlib` or `file` objects
             The name of the file to read (or a file objects.
         **kwargs
             Optional keyword parameters (see Other Parameters).
@@ -262,7 +269,7 @@ class NDIO(HasTraits):
 
         Notes
         -----
-        Adapted from `numpy.load`.
+        Adapted from `numpy.load` .
 
         Examples
         --------

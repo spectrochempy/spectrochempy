@@ -128,7 +128,7 @@ X[
 subplot = X[:, 2300.0:1900.0:].plot()
 
 # %% [markdown]
-# The same mechanism can be used along the first dimension (`y`).
+# The same mechanism can be used along the first dimension (`y` ).
 # For instance, to select and plot the same region and the spectra recorded between 80 and 180 minutes:
 
 # %%

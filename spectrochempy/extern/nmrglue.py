@@ -37,8 +37,6 @@ from warnings import warn
 
 import numpy as np
 
-__all__ = []
-
 
 def create_blank_udic(ndim):
     """
@@ -580,7 +578,7 @@ def fft_positive(data):
 
     This is similar to the transform performed by NMRPipe's FFT function.
 
-    See :py:func:`fft` for documentation of the transformation applied by this
+    See :func:`fft` for documentation of the transformation applied by this
     function.
 
     Parameters
@@ -688,7 +686,7 @@ def guess_udic(dic, data, strip_fake=False):
     data : ndarray
         Array of NMR data.
     strip_fake: bool
-        If data is proceed (i.e. read using `bruker.read_pdata`) and the Bruker
+        If data is proceed (i.e. read using `bruker.read_pdata` ) and the Bruker
         processing parameters STSI and/or STSR are set, the returned sweep
         width and carrier frequencies is changed to values that are incorrect
         but instead can are intended to trick the normal unit_conversion object

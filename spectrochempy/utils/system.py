@@ -4,14 +4,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-__all__ = [
-    "get_user_and_node",
-    "get_user",
-    "get_node",
-    "is_kernel",
-    "sh",
-]
-
 import getpass
 import platform
 import sys
@@ -46,11 +38,12 @@ def is_kernel():
 
 
 class _ExecCommand:
-    """
-    Parameters
-    ----------
-    command : shell command to execute
-    """
+    # """
+    # Parameters
+    # ----------
+    # command : `str`
+    #     shell command to execute
+    # """
 
     def __init__(self, command):
 

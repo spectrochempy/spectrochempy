@@ -109,7 +109,7 @@ dataset[:, 1290.0:920.0] = scp.MASKED
 # ```
 # which has the effect of displaying the figures in independent windows using default
 # matplotlib backend (e.g.,
-# `Tk`), with all the interactivity of matplotlib.
+# `Tk` ), with all the interactivity of matplotlib.
 #
 # But you can explicitly request a different GUI backend:
 # ```ipython3
@@ -364,9 +364,9 @@ prefs.figure_figsize = (5, 3)
 _ = dataset.plot()
 
 # %% [markdown]
-# You can also, for an individual plot use specialised plot commands, such as `plot_stack()`, `plot_map()`,
-# `plot_waterfall()`, `plot_surface()` or `plot_image()` , or equivalently the generic `plot` function with
-# the `method` parameter, i.e., `plot(method='stack')`, `plot(method='map')`, etc...
+# You can also, for an individual plot use specialised plot commands, such as `plot_stack()` , `plot_map()` ,
+# `plot_waterfall()` , `plot_surface()` or `plot_image()` , or equivalently the generic `plot` function with
+# the `method` parameter, i.e., `plot(method='stack')` , `plot(method='map')` , etc...
 #
 # These modes are illustrated below:
 # %%
@@ -435,12 +435,12 @@ prefs
 # %% [markdown]
 # **Warning**: Note that with respect to matplotlib,the parameters in the `dataset.preferences` dictionary
 # have a slightly different name, e.g. `figure_figsize` (SpectroChemPy) instead of `figure.figsize` (matplotlib syntax)
-# (this is because in SpectroChemPy, dot (`.` ) cannot be used in parameter name,
-# and thus it is replaced by an underscore (`_`))
+# (this is because in SpectroChemPy, dot (` .` ) cannot be used in parameter name,
+# and thus it is replaced by an underscore (`_` ))
 #
 
 # %% [markdown]
-# To display the current values of **all parameters** corresponding to one group, e.g. `lines`, type:
+# To display the current values of **all parameters** corresponding to one group, e.g. `lines` , type:
 
 # %%
 prefs.lines

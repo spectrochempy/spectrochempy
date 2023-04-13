@@ -1,16 +1,11 @@
-
-:orphan:
-
 {{ fullname | escape | underline}}
 
 
 .. currentmodule:: {{ module }}
 
+
 .. auto{{ objtype }}:: {{ objname }}
+    :noindex:
 
-
-.. include:: /gettingstarted/gallery/backreferences/{{fullname}}.examples
-
-.. raw:: html
-
-   <div style='clear:both'></div>
+.. minigallery:: {{fullname}}
+    :add-heading:

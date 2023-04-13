@@ -50,12 +50,12 @@ It is a cross-platform software, running on Linux, Windows or OS X.
 
 import warnings
 
+import numpy as np
+
 # warnings.filterwarnings(action="error", category=DeprecationWarning)
-# warnings.filterwarnings(action="ignore", module="matplotlib")  # , category=UserWarning)
 warnings.filterwarnings(
     action="once", module="spectrochempy", category=DeprecationWarning
 )
-import numpy as np
 
 warnings.filterwarnings(
     action="error", module="spectrochempy", category=np.VisibleDeprecationWarning
@@ -63,12 +63,11 @@ warnings.filterwarnings(
 
 warnings.filterwarnings(action="ignore", module="jupyter")  # , category=UserWarning)
 warnings.filterwarnings(action="ignore", module="pykwalify")  # , category=UserWarning)
-warnings.filterwarnings(
-    action="error", category=FutureWarning
-)  # , category=UserWarning)
+warnings.filterwarnings(action="ignore", module="matplotlib")
+warnings.filterwarnings(action="ignore", category=FutureWarning)
 
 from spectrochempy import api
-from spectrochempy.api import *  # noqa: F401
+from spectrochempy.api import *
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset

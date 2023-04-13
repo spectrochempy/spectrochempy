@@ -12,17 +12,6 @@ import warnings
 from os import environ
 from pathlib import Path, PosixPath, WindowsPath
 
-__all__ = [
-    "get_filenames",
-    "get_directory_name",
-    "pathclean",
-    "patterns",
-    "check_filenames",
-    "check_filename_to_open",
-    "check_filename_to_save",
-    "download_testdata",
-]
-
 
 # ======================================================================================
 # Utility functions
@@ -63,7 +52,9 @@ def patterns(filetypes, allcase=True):
 
 def pathclean(paths):
     """
-    Clean a path or a series of path in order to be compatible with windows and unix-based system.
+    Clean a path or a series of path.
+
+    The aim is to be compatible with windows and unix-based system.
 
     Parameters
     ----------
@@ -72,8 +63,8 @@ def pathclean(paths):
 
     Returns
     -------
-    out : a pathlib object or a list of pathlib objects
-        Cleaned path(s)
+    pathlib or list of pathlib
+        Cleaned path(s).
 
     Examples
     --------
@@ -156,7 +147,7 @@ def check_filenames(*args, **kwargs):
 
     Parameters
     ----------
-    *args
+    \*args
         If passed it is a str, a list of str or a dictionary containing filenames or a byte's contents.
     **kwargs
         Optional keywords parameters. See Other parameters
@@ -188,7 +179,14 @@ def check_filenames(*args, **kwargs):
     filenames = None
 
     if args:
-        if isinstance(args[0], (str, Path, PosixPath, WindowsPath)):
+        if (
+            isinstance(args[0], str)
+            and (args[0].startswith("http://") or args[0].startswith("https://"))
+            and kwargs.get("remote")
+        ):
+            # return url
+            return args
+        elif isinstance(args[0], (str, Path, PosixPath, WindowsPath)):
             # one or several filenames are passed - make Path objects
             filenames = pathclean(args)
         elif isinstance(args[0], bytes):
@@ -344,12 +342,12 @@ def get_filenames(*filenames, **kwargs):
     directory : `str` or pathlib object, optional.
         The directory where to look at. If not specified, read in
         current directory, or in the datadir if unsuccessful.
-    filetypes : `list`, optional, default=['all files, '.*)'].
+    filetypes : `list` , optional, default=['all files, '.*)'].
         File type filter.
-    dictionary : `bool`, optional, default=True
+    dictionary : `bool` , optional, default=True
         Whether a dictionary or a list should be returned.
     listdir : bool, default=False
-        Read all file (possibly limited by `filetypes` in a given `directory`.
+        Read all file (possibly limited by `filetypes` in a given `directory` .
     recursive : bool, optional,  default=False.
         Read also subfolders.
 
@@ -667,7 +665,12 @@ def check_filename_to_open(*args, **kwargs):
             raise (FileNotFoundError)
 
         # deal with some specific cases
-        key = filenames[0].suffix.lower()
+        if isinstance(filenames[0], Path):
+            # all filename should be Path, except case of urls
+            key = filenames[0].suffix.lower()
+        elif filenames[0].startswith("http://") or filenames[0].startswith("https://"):
+            key = pathclean(filenames[0]).suffix.lower()
+
         if not key:
             if re.match(r"^fid$|^ser$|^[1-3][ri]*$", filenames[0].name) is not None:
                 key = ".topspin"

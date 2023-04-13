@@ -30,33 +30,33 @@ def autosub(
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         Dataset to which we want to subtract the reference data.
-    ref : |NDDataset|
+    ref : `NDDataset`
          1D reference data, with a size matching the axis to subtract.
          (axis parameter).  # TODO : optionally use title of axis.
-    *ranges : pair(s) of values
+    \*ranges : pair(s) of values
         Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized.
-    dim : `str` or `int`, optional, default='x'
+    dim : `str` or `int` , optional, default='x'
         Tells on which dimension to perform the subtraction.
         If dim is an integer it refers to the axis index.
     method : str, optional, default='vardiff'
         'vardiff': minimize the difference of the variance.
         'ssdiff': minimize the sum of squares difference of sum of squares.
-    return_coefs : `bool`, optional, default=`False`
+    return_coefs : `bool` , optional, default=`False`
          Returns the table of coefficients.
-    inplace : `bool`, optional, default=`False`
+    inplace : `bool` , optional, default=`False`
         True if the subtraction is done in place.
         In this case we do not need to catch the function output.
 
     Returns
     --------
-    out : |NDDataset|
+    out : `NDDataset`
         The subtracted dataset.
-    coefs : `ndarray`.
+    coefs : `~numpy.ndarray` .
         The table of subtraction coefficients
-        (only if `return_coefs` is set to `True`).
+        (only if `return_coefs` is set to `True` ).
 
     See Also
     --------

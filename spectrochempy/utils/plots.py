@@ -12,22 +12,6 @@ import mpl_toolkits.mplot3d.axes3d as maxes3D
 import numpy as np
 from matplotlib import pyplot as plt
 
-__all__ = [
-    "cmyk2rgb",
-    "NBlack",
-    "NRed",
-    "NBlue",
-    "NGreen",
-    "figure",
-    "show",
-    "get_figure",  # Plotly specific
-    "get_plotly_figure",
-    "colorscale",
-    "make_attr",
-    "make_label",
-    "plot_method",
-]
-
 
 @maxes.subplot_class_factory
 class _Axes(maxes.Axes):
@@ -327,7 +311,7 @@ def plot_method(type, doc):
 
 Parameters
 ----------
-dataset : |NDDataset|
+dataset : `NDDataset`
     The dataset to plot.
 **kwargs
     Optional keyword parameters (see Other Parameters).
@@ -395,6 +379,7 @@ NBlack = (0, 0, 0)
 NRed = cmyk2rgb(0, 77, 100, 0)
 NBlue = cmyk2rgb(100, 30, 0, 0)
 NGreen = cmyk2rgb(85, 0, 60, 10)
+# TODO : make a color cycle based on these colors
 
 
 def figure(preferences=None, **kwargs):

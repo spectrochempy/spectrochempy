@@ -10,8 +10,6 @@ from collections.abc import Mapping
 
 from numpy.lib.format import read_array
 
-__all__ = ["make_zipfile", "ScpFile"]
-
 
 # ======================================================================================
 # ZIP UTILITIES
@@ -25,7 +23,7 @@ def make_zipfile(file, **kwargs):
 
     Parameters
     ----------
-    file :  file or str
+    file :  `file` or `str`
         The file to be zipped.
     **kwargs
         Additional keyword parameters.
@@ -45,14 +43,14 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
     """
     ScpFile(fid).
 
-    (largely inspired by ``NpzFile`` object in numpy).
+    (largely inspired by `NpzFile` object in numpy).
 
-    `ScpFile` is used to load files stored in ``.scp`` or ``.pscp``
+    `ScpFile` is used to load files stored in ` .scp` or ` .pscp`
     format.
 
-    It assumes that files in the archive have a ``.npy`` extension in
-    the case of the dataset's ``.scp`` file format) ,  ``.scp``  extension
-    in the case of project's ``.pscp`` file format and finally ``pars.json``
+    It assumes that files in the archive have a ` .npy` extension in
+    the case of the dataset's ` .scp` file format) ,  ` .scp`  extension
+    in the case of project's ` .pscp` file format and finally `pars.json`
     files which contains other information on the structure and  attributes of
     the saved objects. Other files are ignored.
 
@@ -65,7 +63,7 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
     Attributes
     ----------
     files : list of str
-        List of all files in the archive with a ``.npy`` extension.
+        List of all files in the archive with a ` .npy` extension.
     zip : ZipFile instance
         The ZipFile object initialized with the zipped archive.
     """

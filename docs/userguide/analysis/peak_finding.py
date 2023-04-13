@@ -226,10 +226,10 @@ _ = evol.plot(ls=":")
 # select among these peaks:
 #
 # **Parameters relative to "peak intensity":**
-# - `height`: minimal required height of the peaks (single number) or minimal
+# - `height`\ : minimal required height of the peaks (single number) or minimal
 # and maximal heights
 # (sequence of two numbers)
-# - `prominence`: minimal prominence of the peak to be detected
+# - `prominence`\ : minimal prominence of the peak to be detected
 # (single number) or minimal and maximal prominence (sequence of 2 numbers). In brief
 # the "prominence" of a peak
 # measures how much a peak stands out from its surrounding and is the vertical distance
@@ -237,18 +237,18 @@ _ = evol.plot(ls=":")
 # lowest "contour line". It should not be confused with the height as a peak can have
 # an important height but a small
 # prominence when surrounded by other peaks (see below for an illustration).
-#     - in addition to the prominence, the user can define `wlen`, the width (in points)
+#     - in addition to the prominence, the user can define `wlen` , the width (in points)
 #     of the window used to look
 #     at neighboring minima, the peak maximum being is at the center of the window.
-# - `threshold`: a single number (the minimal required threshold) or a sequence of two
+# - `threshold`\ : a single number (the minimal required threshold) or a sequence of two
 # numbers (minimal and maximal).
 # The thresholds are the difference of height of the
 # maximum with its two neighboring points (useful to detect spikes for instance)
 #
 # **Parameters relative to "peak spacing":**
-# - `distance`: the required minimal horizontal distance between neighbouring peaks.
+# - `distance`\ : the required minimal horizontal distance between neighbouring peaks.
 # Smaller peaks are removed first.
-# - `width`: Required minimal width of peaks in samples (single number) or minimal and
+# - `width`\ : Required minimal width of peaks in samples (single number) or minimal and
 # maximal width. The width is
 # assessed from the peak height,
 # prominence and neighboring signal. - In addition the user can define `rel_height`
@@ -336,7 +336,7 @@ _ = ax.legend()
 # If the concept of "peak height" is pretty clear, it is worth examining further some
 # peak properties as defined and
 # used in `find_peaks()` . They can be obtained (and used) by passing the parameters
-# `height`, `prominence`,
+# `height` , `prominence` ,
 # `threshold`  and `width` . Then `find_peaks()` will return the corresponding properties
 # of the detected peaks in the
 # `properties` dictionary.
@@ -353,7 +353,7 @@ _ = ax.legend()
 #
 # Let's illustrate this for the second-highest peak which height is comprised between
 # ~ 0.15 and 0.22 and see which
-# properties are returned when, on top of `height`, we pass `prominence=0`: this will
+# properties are returned when, on top of `height` , we pass `prominence=0`\ : this will
 # return the properties
 # associated to the prominence and warrant that this peak will not be rejected on the
 # prominence criterion.
@@ -381,7 +381,7 @@ properties
 # align="center" />
 #
 # The following code shows how to plot the maximum and the two "base points" from the
-# previous output of `find_peaks()`:
+# previous output of `find_peaks()`\ :
 
 # %%
 ax = s.plot_pen()
@@ -412,7 +412,7 @@ print(f"calc. prominence = {prominence:0.4fK}")
 
 # %% Finally, we illustrate how the use of the `wlen` parameter - which limits the
 # search of the "base [markdown]
-# Finally, the figure below shows how the prominence can be affected by `wlen`, the
+# Finally, the figure below shows how the prominence can be affected by `wlen` , the
 # size of the window used to determine the peaks' bases.
 #
 # <img src="images/prominence_wlen.png" alt="prominence_def"
@@ -497,7 +497,7 @@ _ = ax.axvline(wr, linestyle="--", color="green")
 #
 # The self-contained code snippet below can be used to display in a matplotlib plot
 # and print the various
-# peak properties of a single peak as returned by `find_peaks()`:
+# peak properties of a single peak as returned by `find_peaks()`\ :
 
 # %%
 # user defined parameters ------------------------------

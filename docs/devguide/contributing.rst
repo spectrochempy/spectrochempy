@@ -23,14 +23,14 @@ In this guide, we will talk about some basic but very useful contributions such 
 Be prepared to work on the code
 ===============================
 
-To contribute further to the code and documentation, you will need learning how to work with GitHub and the |scpy| Code base.
+To contribute further to the code and documentation, you will need learning how to work with GitHub and the `SpectroChemPy` Code base.
 
 .. _contributing.version_control:
 
 Version control, Git, and GitHub
 ---------------------------------
 
-The code of |scpy| is hosted on `GitHub <https://www.github.com/spectrochempy/spectrochempy>`__. To contribute, you will need to register for a `free GitHub account <https://github.com/signup/free>`__. Actually, you may have already done so by submitting issues, so you are also almost ready to contribute to the code.
+The code of `SpectroChemPy` is hosted on `GitHub <https://www.github.com/spectrochempy/spectrochempy>`__. To contribute, you will need to register for a `free GitHub account <https://github.com/signup/free>`__. Actually, you may have already done so by submitting issues, so you are also almost ready to contribute to the code.
 
 The reason we use `Git <https://git-scm.com/>`__ for version control of our code is to allow multiple people to work on this project simultaneously.
 
@@ -104,23 +104,23 @@ Then you will need to clone your fork to your machine. The fastest way is to typ
    cd localfolder
    git remote add upstream https://github.com/spectrochempy/spectrochempy.git
 
-This creates the directory ``localfolder`` and connects your repository to the upstream (main project) |scpy| repository.
+This creates the directory ``localfolder`` and connects your repository to the upstream (main project) `SpectroChemPy` repository.
 
 .. _contributing_environment:
 
 Creating a Python development environment
 ------------------------------------------
 
-To test out code and documentation changes, you'll need to build |scpy| from source, which requires a Python environment.
+To test out code and documentation changes, you'll need to build `SpectroChemPy` from source, which requires a Python environment.
 
 * Install either `Anaconda <https://www.anaconda.com/download/>`_, `miniconda
   <https://conda.io/miniconda.html>`_, or `miniforge <https://github.com/conda-forge/miniforge>`_
 * Make sure your conda is up to date (``conda update conda`` )
 * Make sure that you have :ref:`cloned the repository <contributing.forking>`
 
-* ``cd`` to the |scpy| source directory (*i.e.,* ``localfolder`` created previously)
+* ``cd`` to the `SpectroChemPy` source directory (*i.e.,* ``localfolder`` created previously)
 
-We'll now install |scpy| in development mode following 2 steps:
+We'll now install `SpectroChemPy` in development mode following 2 steps:
 
 1. Create and activate the environment. This will create a new environment and will not touch
    any of your other existing environments, nor any existing Python installation.
@@ -148,7 +148,7 @@ We'll now install |scpy| in development mode following 2 steps:
       mamba env create -f .ci/scpy3.9.yml
       conda activate scpy3.9
 
-2. Install |scpy|
+2. Install `SpectroChemPy`
 
    Once your environment is created and activated, we must install SpectroChemPy
    in development mode.

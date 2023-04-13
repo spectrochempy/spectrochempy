@@ -5,6 +5,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Package with modules related to the analysis of |NDDataset|'s or
-|Project|'s.
+Package with modules related to the analysis of `NDDataset`\'s or
+`Project`\ 's.
 """

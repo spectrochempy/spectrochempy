@@ -18,23 +18,25 @@ import spectrochempy as scp
 
 # %%
 # Load a dataset
-
-dataset = scp.read_omnic("irdata/nh4y-activation.spg")
-dataset = dataset[:, 2000.0:4000.0]  # remember float number to slice from coordinates
+dataset = scp.read_omnic("irdata/nh4y-activation.spg")[::5]
 print(dataset)
-dataset.plot_stack()
+_ = dataset.plot()
 
 # %%
-# Create a PCA object
-pca = scp.PCA(dataset, centered=False)
+# Create a PCA object and fit the dataset so that the explained variance is greater or
+# equal to 99.9%
+pca = scp.PCA(used_components=0.999)
+pca.fit(dataset)
 
 # %%
-# Reduce the dataset to a lower dimensionality (number of
-# components is automatically determined)
+# The number of fitted components is given by the n_components attribute
+# (We obtain 23 components)
+pca.n_components
 
-S, LT = pca.reduce(n_pc=0.99)
-
-print(LT)
+# %%
+# Transform the dataset to a lower dimensionality using all the fitted components
+scores = pca.transform()
+scores
 
 # %%
 # Finally, display the results graphically
@@ -43,30 +45,58 @@ _ = pca.screeplot()
 
 # %%
 # Score Plot
-_ = pca.scoreplot(1, 2)
+_ = pca.scoreplot(scores, 1, 2)
 
 # %%
 # Score Plot for 3 PC's in 3D
-_ = pca.scoreplot(1, 2, 3)
+_ = pca.scoreplot(scores, 1, 2, 3)
+
+# %%
+# Displays 4 loadings
+_ = pca.loadings[:4].plot(legend=True)
+
+# %%
+# Here we do a masking of the saturated region between 882 and 1280 cm^-1
+dataset[
+    :, 882.0:1280.0
+] = scp.MASKED  # remember: use float numbers for slicing (not integer)
+_ = dataset.plot()
+
+# %%
+# Apply the PCA model
+pca = scp.PCA(used_components=0.999)
+pca.fit(dataset)
+pca.n_components
+
+# %%
+# As seen above, now only 4 components instead of 23 are necessary to 99.9% of
+# explained variance.
+_ = pca.screeplot()
+
+# %%
+# Displays the loadings
+_ = pca.loadings.plot(legend=True)
+
+# %%
+# Let's plot the scores
+scores = pca.transform()
+_ = pca.scoreplot(scores, 1, 2)
 
 # %% labeling scoreplot with spectra labels
 # Our dataset has already two columns of labels for the spectra but there are little
 # too long for display on plots.
-S.y.labels
+scores.y.labels
 
 # %%
 # So we define some short labels for each component, and add them as a third column:
 labels = [lab[:6] for lab in dataset.y.labels[:, 1]]
-# we cannot change directly the label as S is read-only, but use the method `labels`
-pca.labels(labels)  # Note this does not replace previous labels, but adds a column.
+scores.y.labels = labels  # Note this does not replace previous labels,
+# but adds a column.
 
 # %%
 # now display thse
-_ = pca.scoreplot(1, 2, show_labels=True, labels_column=2, labels_every=5)
+_ = pca.scoreplot(scores, 1, 2, show_labels=True, labels_column=2)
 
 # %%
-# Displays the 4-first loadings
-
-LT[:4].plot_stack()
-
-scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# uncomment the line below to see plot if needed (not necessary in jupyter notebook)
+scp.show()

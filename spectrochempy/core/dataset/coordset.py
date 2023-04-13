@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements class |CoordSet| .
+This module implements class `CoordSet` .
 """
 
 __all__ = ["CoordSet"]
@@ -25,6 +25,7 @@ from traitlets import (
     Unicode,
     default,
     observe,
+    signature_has_traits,
     validate,
 )
 
@@ -37,6 +38,7 @@ from spectrochempy.utils.print import colored_output, convert_to_html
 # ======================================================================================
 # CoordSet
 # ======================================================================================
+@signature_has_traits
 class CoordSet(HasTraits):
     """
     A collection of Coord objects for a NDArray object with validation.
@@ -45,7 +47,7 @@ class CoordSet(HasTraits):
 
     Parameters
     ----------
-    *coords : |NDarray| , |NDArray| subclass or |CoordSet| sequence of objects.
+    \*coords : `NDArray` ,  `NDArray` subclass or `CoordSet` sequence of objects.
         If an instance of CoordSet is found, instead of an array, this means
         that all coordinates in this coords describe the same axis.
         It is assumed that the coordinates are passed in the order of the
@@ -57,12 +59,12 @@ class CoordSet(HasTraits):
 
     Other Parameters
     ----------------
-    x : |NDarray| , |NDArray| subclass or |CoordSet|
+    x : `NDArray` ,  `NDArray` subclass or `CoordSet`
         A single coordinate associated to the 'x'-dimension.
         If a coord was already passed in the argument, this will overwrite
         the previous. It is thus not recommended to simultaneously use
         both way to initialize the coordinates to avoid such conflicts.
-    y, z, u, ... : |NDarray| , |NDArray| subclass or |CoordSet|
+    y, z, u, ... : `NDArray` ,  `NDArray` subclass or `CoordSet`
         Same as `x` for the others dimensions.
     dims : list of string, optional
         Names of the dims to use corresponding to the coordinates. If not
@@ -242,7 +244,7 @@ class CoordSet(HasTraits):
 
                 else:
                     raise KeyError(
-                        f"Probably an invalid key (`{key}`) for coordinates has been passed. "
+                        f"Probably an invalid key (`{key}` ) for coordinates has been passed. "
                         f"Valid keys are among:{DEFAULT_DIM_NAME}"
                     )
 
@@ -268,7 +270,7 @@ class CoordSet(HasTraits):
     @staticmethod
     def _implements(name=None):
         """
-        Utility to check if the current object implement `CoordSet`.
+        Utility to check if the current object implement `CoordSet` .
 
         Rather than isinstance(obj, CoordSet) use object._implements('CoordSet').
 
@@ -603,7 +605,7 @@ class CoordSet(HasTraits):
         -----
         If the args are not named, then the attributions are made in coordinate's  name
         alphabetical order :
-        e.g, the first title will be for the `x` coordinates, the second for the `y`,
+        e.g, the first title will be for the `x` coordinates, the second for the `y` ,
         etc.
         """
         if len(args) == 1 and (is_sequence(args[0]) or isinstance(args[0], CoordSet)):
@@ -636,13 +638,13 @@ class CoordSet(HasTraits):
             is the recommended way to set units as this will be less prone to errors.
         force : bool, optional, default=False
             Whether or not the new units must be compatible with the current units. See
-            the `Coord`.`to` method.
+            the `Coord` .`to` method.
 
         Notes
         -----
         If the args are not named, then the attributions are made in coordinate's name
         alphabetical order :
-        e.g, the first units will be for the `x` coordinates, the second for the `y`, etc.
+        e.g, the first units will be for the `x` coordinates, the second for the `y` , etc.
         """
         force = kwargs.pop("force", False)
 

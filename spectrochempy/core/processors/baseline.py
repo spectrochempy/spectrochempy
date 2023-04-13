@@ -15,38 +15,43 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.interpolate
 from matplotlib.widgets import SpanSelector
-from traitlets import Float, HasTraits, Int, List, Tuple, Unicode
+from traitlets import Enum, Float, HasTraits, Int, List, Tuple, Unicode
 
 from spectrochempy.core import debug_, warning_
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.processors.smooth import smooth
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.utils.coordrange import trim_ranges
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.traits import NDDatasetType
 
 
+@signature_has_configurable_traits
+# Note: with this decorator
+# Configurable traits are added to the signature as keywords if they are not yet present.
 class BaselineCorrection(HasTraits):
     """
     Baseline Correction processor.
 
-    2 methods are proposed :
+    Two methods are proposed :
 
-    * ``sequential`` (default) = classical polynom fit or spline
+    - ``'sequential'`` (default) = classical polynom fit or spline
       interpolation with separate fitting of each row (spectrum)
-    * ``multivariate`` = SVD modeling of baseline, polynomial fit of PC's
-      and calculation of the modelled baseline spectra.
+    - ``'multivariate'`` = SVD modeling of baseline, polynomial fit of PC's
+      and calculation of the modeled baseline spectra.
 
-    Interactive mode is proposed using the interactive function : :meth:`run`.
+    Interactive mode is proposed using the interactive method `run` .
 
     Parameters
     ----------
-    dataset : |NDDataset|
+    dataset : `NDDataset`
         The dataset to be transformed.
 
     See Also
     --------
     abc : Automatic baseline correction.
+    BaselineCorrector : A helper widget to use in Jupyter notebooks
 
     Examples
     --------
@@ -67,9 +72,17 @@ class BaselineCorrection(HasTraits):
     """
 
     dataset = NDDatasetType()
+
+    # hidden parameters (not passed in the constructor)
     corrected = NDDatasetType()
-    method = Unicode("sequential")
-    interpolation = Unicode("polynomial")
+    method = Enum(
+        ["sequential", "multivariate"],
+        default_value="sequential",
+        help="Method used for baseline resolution.",
+    ).tag(config=True)
+    interpolation = Unicode(
+        "polynomial",
+    )
     axis = Int(-1)
     dim = Unicode("")
     ranges = List(List(minlen=2, maxlen=2))
@@ -79,13 +92,17 @@ class BaselineCorrection(HasTraits):
     figsize = Tuple((7, 5))
     sps = List()
 
-    def __init__(self, dataset, *args, **kwargs):
+    def __init__(self, dataset, **kwargs):
+
+        super().__init__(**kwargs)
+
         self.dataset = dataset
+
         self.corrected = self.dataset.copy()
-        if args or kwargs:
+        if kwargs:
             warning_(
                 "DEPRECATION WARNING: Pass all arguments such range, and method definition in the "
-                "``compute`` method, not during the initialisation of the BaselineCorrection instance.\n"
+                "`compute` method, not during the initialisation of the BaselineCorrection instance.\n"
                 "Here they are ignored."
             )
 
@@ -139,7 +156,6 @@ class BaselineCorrection(HasTraits):
         **kwargs
             Optional keyword parameters (see Other Parameters).
 
-
         Other Parameters
         ----------------
         dim : str or int, keyword parameter, optional, default='x'.
@@ -155,7 +171,7 @@ class BaselineCorrection(HasTraits):
             If the correction method polynomial,
             this give the polynomial order to use.
         npc : int, keyword parameter, optional, default=5
-            Number of components to keep for the ``multivariate`` method
+            Number of components to keep for the `multivariate` method
         zoompreview : float, keyword parameter, optional, default=1.0
             The zoom factor for the preview in interactive mode
         figsize : tuple, keyword parameter, optional, default=(8, 6)
@@ -419,33 +435,35 @@ def basc(dataset, *ranges, **kwargs):
 
     2 methods are proposed :
 
-    * ``sequential`` (default) = classical polynom fit or spline
+    * `sequential` (default) = classical polynom fit or spline
       interpolation with separate fitting of each row (spectrum)
-    * ``multivariate`` = SVD modeling of baseline, polynomial fit of PC's
+    * `multivariate` = SVD modeling of baseline, polynomial fit of PC's
       and calculation of the modelled baseline spectra.
 
     Parameters
     ----------
     dataset : a [NDDataset| instance
         The dataset where to calculate the baseline.
-    *ranges : a variable number of pair-tuples
+    \*ranges : a variable number of pair-tuples
         The regions taken into account for the manual baseline correction.
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
     Other Parameters
     ----------------
-    dim : str or int, keyword parameter, optional, default='x'.
-        Specify on which dimension to apply the apodization method. If `dim` is specified as an integer
+    dim : str or int, keyword parameter, optional, default: 'x'.
+        Specify on which dimension to apply the apodization method.
+        If `dim` is specified as an integer
         it is equivalent  to the usual `axis` numpy parameter.
-    method : str, keyword parameter, optional, default='sequential'
+    method : str, keyword parameter, optional, default: 'sequential'
         Correction method among ['multivariate','sequential']
     interpolation : string, keyword parameter, optional, default='polynomial'
-        Interpolation method for the computation of the baseline, among ['polynomial','pchip']
-    order : int, keyword parameter, optional, default=6
+        Interpolation method for the computation of the baseline,
+        among ['polynomial','pchip']
+    order : int, keyword parameter, optional, default: 6
         If the correction method polynomial, this give the polynomial order to use.
-    npc : int, keyword parameter, optional, default=5
-        Number of components to keep for the ``multivariate`` method
+    npc : int, keyword parameter, optional, default: 5
+        Number of components to keep for the `multivariate` method
 
     See Also
     --------
@@ -454,24 +472,8 @@ def basc(dataset, *ranges, **kwargs):
 
     Notes
     -----
-    For more flexibility and functionality, it is advised to use the BaselineCorrection processor instead.
-
-    Examples
-    --------
-    .. plot::
-        :include-source:
-
-        import spectrochempy as scp
-        nd = scp.read('irdata/nh4y-activation.spg')
-        ndp = nd[:, 1291.0:5999.0]
-
-        ranges=[[5996., 5998.], [1290., 1300.],
-                [2205., 2301.], [5380., 5979.],
-                [3736., 5125.]]
-
-        ndcorr = scp.basc(ndp, *ranges,method='multivariate', interpolation='pchip', npc=8)
-        ndcorr.plot()
-        scp.show()
+    For more flexibility and functionality, it is advised to use the BaselineCorrection
+    processor instead.
     """
     blc = BaselineCorrection(dataset)
     if not ranges and dataset.meta.regions is not None:
@@ -497,7 +499,6 @@ def abc(dataset, dim=-1, **kwargs):
         The dataset dimentsion where to calculate the baseline. Default is -1.
     **kwargs
         Optional keyword parameters (see Other Parameters).
-
 
     Returns
     -------
@@ -602,7 +603,7 @@ def abc(dataset, dim=-1, **kwargs):
 
 def ab(dataset, dim=-1, **kwargs):
     """
-    Alias of `abc`.
+    Alias of `abc` .
     """
     return abs(dataset, dim, **kwargs)
 

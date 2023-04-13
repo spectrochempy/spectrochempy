@@ -95,7 +95,7 @@ _ = X.detrend(type="constant").plot()
 # ## Automatic linear baseline correction `abc`
 
 # %% [markdown]
-# When the baseline to remove is a simple linear correction, one can use ``abc`` .
+# When the baseline to remove is a simple linear correction, one can use `abc` .
 # This performs an automatic baseline correction.
 
 # %%
@@ -108,10 +108,10 @@ _ = scp.abc(X).plot()
 #
 # - spectral ranges which s/he considers as belonging to the baseline - the type of
 # polynomial(s) used to model the
-# baseline in and between these regions (keyword: `interpolation`) - the method used
+# baseline in and between these regions (keyword: `interpolation` ) - the method used
 # to apply the correction to
 # spectra: sequentially to each spectrum, or using a multivariate approach
-# (keyword: `method`).
+# (keyword: `method` ).
 #
 # ### Range selection
 #
@@ -163,8 +163,8 @@ _ = Xcorr.plot()
 # [scipy.interpolate.PchipInterpolator()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html)
 # to which we refer the interested readers. The other interpolation method is the
-# classical polynomial interpolation (`interpolation='polynomial'`) in which case the
-# order can also be set (e.g. `order=3`, the default value being 6).
+# classical polynomial interpolation (`interpolation='polynomial'` ) in which case the
+# order can also be set (e.g. `order=3` , the default value being 6).
 # In this case, the base methods used for the interpolation are those of the
 # [polynomial module](
 # https://numpy.org/doc/stable/reference/routines.polynomials.polynomial.html)
@@ -234,8 +234,8 @@ _ = blc.corrected.plot()
 #
 # The `method` option defines whether the selected baseline regions of the spectra
 # should be taken 'as is'
-# this is the default `method='sequential'`), or modeled using a multivariate
-# approach (`method='multivariate'`).
+# this is the default `method='sequential'` ), or modeled using a multivariate
+# approach (`method='multivariate'` ).
 #
 # The `'multivariate'` option is useful when the signal‐to‐noise ratio is low
 # and/or when the baseline changes in
@@ -248,7 +248,7 @@ _ = blc.corrected.plot()
 # (for detail: see [Vilmin et al. Analytica Chimica Acta 891
 # (2015)](http://dx.doi.org/10.1016/j.aca.2015.06.006)).
 #
-# If this option is selected, the user should also choose `npc`, the number of
+# If this option is selected, the user should also choose `npc` , the number of
 # principal components used to model the
 # baseline. In a sense, this parameter has the same role as the `order` parameter,
 # except that it will affect how well
@@ -310,7 +310,7 @@ blc.show_regions(axes["axe21"])
 # ### Widget for "advanced" baseline corrections
 
 # %% [markdown]
-# The ``BaselineCorrector`` widget can be used in either Jupyter notebook or Jupyter
+# The `BaselineCorrector` widget can be used in either Jupyter notebook or Jupyter
 # lab.
 #
 # The buttons are the following:

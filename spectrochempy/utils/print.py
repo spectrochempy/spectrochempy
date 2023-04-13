@@ -9,23 +9,6 @@ import re
 import numpy as np
 from colorama import Fore, Style
 
-__all__ = [
-    "numpyprintoptions",
-    "insert_masked_print",
-    "TBlack",
-    "TBold",
-    "TRed",
-    "TGreen",
-    "TBlue",
-    "TCyan",
-    "TMagenta",
-    "TYellow",
-    "colored",
-    "colored_output",
-    "pstr",
-    "convert_to_html",
-]
-
 
 def pstr(object, **kwargs):
     if hasattr(object, "_implements") and object._implements() in [
@@ -237,7 +220,7 @@ class _MaskedPrintOption(object):
 
     def enable(self, shrink=1):
         # """
-        # Set the enabling shrink to `shrink`.
+        # Set the enabling shrink to `shrink` .
         #
         # """
         self._enabled = shrink
@@ -287,7 +270,7 @@ def _replace_dtype_fields(dtype, primitive_dtype):
     # Construct a dtype description list from a given dtype.
     #
     # Returns a new dtype object, with all fields and subtypes in the given type
-    # recursively replaced with `primitive_dtype`.
+    # recursively replaced with `primitive_dtype` .
     #
     # Arguments are coerced to dtypes first.
     #
@@ -325,7 +308,7 @@ def insert_masked_print(ds, mask_string="--"):
 
     Parameters
     ----------
-    ds : |NDDataset| instance
+    ds : `NDDataset` instance
     mask_string : str
     """
     from spectrochempy.utils.constants import NOMASK

@@ -50,24 +50,27 @@ ERROR_MSGS = {
 }
 
 
-common_doc = """
-copy : bool, optional, Default: True
+_common_doc = """
+copy : `bool`, optional, default: `True`
     Perform a copy of the passed object.
-inplace : bool, optional, default: False
+inplace : `bool`, optional, default: `False`
     By default, the method returns a newly allocated object.
-    If `inplace` is set to True, the input object is returned.
+    If `inplace` is set to `True`, the input object is returned.
 **kwargs : keyword parameters, optional
     See Other Parameters.
 """
 
 
 class DocstringProcessor(docrep.DocstringProcessor):
+
+    param_like_sections = ["See Also"] + docrep.DocstringProcessor.param_like_sections
+
     def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
 
         regex = re.compile(r"(?=^[*]{0,2}\b\w+\b\s?:?\s?)", re.MULTILINE | re.DOTALL)
-        plist = regex.split(common_doc.strip())[1:]
+        plist = regex.split(_common_doc.strip())[1:]
         params = {
             k.strip("*"): f"{k.strip()} : {v.strip()}"
             for k, v in (re.split(r"\s?:\s?", p, maxsplit=1) for p in plist)
@@ -75,10 +78,10 @@ class DocstringProcessor(docrep.DocstringProcessor):
         self.params.update(params)
         self.params.update(
             {
-                "out": "object\n"
+                "out": "`object`\n"
                 "    Input object or a newly allocated object\n"
                 "    depending on the `inplace` flag.",
-                "new": "object\n" "    Newly allocated object.",
+                "new": "`object`\n" "    Newly allocated object.",
             }
         )
 

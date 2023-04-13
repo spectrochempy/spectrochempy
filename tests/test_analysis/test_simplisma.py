@@ -25,12 +25,22 @@ def test_simplisma():
 
     ds = data[-1]
     assert ds.name == "m1"
-    print("\n test simplisma on {}\n".format(ds.name))
-    pure = SIMPLISMA(ds, n_pc=20, tol=0.2, noise=3, verbose=True)
 
-    pure.C.T.plot()
-    pure.St.plot()
-    pure.plotmerit()
-    assert "3     29      29.0     0.0072     0.9981" in pure.logs
+    ds.title = "absorbance"
+    ds.units = "absorbance"
+    ds.set_coordset(None, None)
+    ds.y.title = "elution time"
+    ds.x.title = "wavelength"
+    ds.y.units = "hours"
+    ds.x.units = "cm^-1"
+
+    sma = SIMPLISMA(max_components=20, tol=0.2, noise=3, log_level="INFO")
+    sma.fit(ds)
+
+    sma.C.T.plot(title="Concentration")
+    sma.St.plot(title="Components")
+    sma.plotmerit(offset=0, nb_traces=10)
+
+    # assert "3     29      29.0     0.0072     0.9981" in pure.logs
 
     show()

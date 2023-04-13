@@ -8,3 +8,4 @@ from spectrochempy.utils.packages import generate_api
 
 # in analysis package some classes are configurbles: list them!
 __all__, __configurables__ = generate_api(__file__, configurables=True)
+pass

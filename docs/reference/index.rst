@@ -7,15 +7,15 @@
 Public API reference
 ####################
 
-The |scpy| API publicly exposes many objects and functions.
+The `SpectroChemPy` :term:`API` publicly exposes many objects and functions.
 They are listed below exhaustively.
-What is not listed here is reserved for developers and should not normally be necessary for normal use of |scpy| .
+What is not listed here is reserved for developers and should not normally be necessary for normal use of `SpectroChemPy` .
 
 .. contents:: Table of Contents
 
-****************
+***************
 Loading the API
-****************
+***************
 
 To use the API, you must import it using one of the following syntax:
 
@@ -26,7 +26,7 @@ To use the API, you must import it using one of the following syntax:
 
 .. ipython:: python
 
-    from spectrochempy import *
+    from spectrochempy import *  # strongly discouraged
     nd = NDDataset()
 
 With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example,
@@ -34,23 +34,30 @@ we can use `NDDataset` without a prefix instead of `scp.NDDataset` which is the 
 of overwriting some variables or functions already present in the namespace. Therefore, the first syntax is generally
 highly recommended.
 
+However instead of the second syntax, one can always use the following way to import objects or functions:
 
-*********************
+.. ipython:: python
+
+    from spectrochempy import NDDataset
+    nd = NDDataset()
+
+
+********************
 The NDDataset Object
-*********************
+********************
 
-The NDDataset is the main object use by |scpy| .
+The `NDDataset` is the main object use by `SpectroChemPy` .
 
-Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to mathematical operations.
+Like `numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and subject to mathematical operations.
 
-But, in addition, NDDataset may have units, can be masked and each dimension can also have coordinated with units.
-This make NDDataset aware of unit compatibility, *e.g.,*, for binary operation such as additions or subtraction or
+But, in addition, `NDDataset` may have units, can be masked and each dimension can also have coordinated with units.
+This make `NDDataset` aware of unit compatibility, *e.g.,*\ , for binary operation such as additions or subtraction or
 during the application of mathematical operations. In addition or in replacement of numerical data for coordinates,
 NDDataset can also have labeled coordinates where labels can be different kinds of objects (strings, datetime, numpy
 nd.ndarray or other NDDatasets, etc...).
 
 This offers a lot of flexibility in using NDDatasets that, we hope, will be useful for applications. See the
-**Tutorials** for more information about such possible applications.
+:ref:`userguide` for more information about such possible applications.
 
 .. autosummary::
     :nosignatures:
@@ -59,13 +66,12 @@ This offers a lot of flexibility in using NDDatasets that, we hope, will be usef
     NDDataset
 
 
-***************************
 Coordinates-related objects
-***************************
+===========================
 
-|NDDataset| in |scpy| in contrast to numpy nd-arrays can have coordinates for each dimension.
-The individual coordinates are represented by a specific object: |Coord| .
-All coordinates of a |NDDataset| are grouped in a particular object: |CoordSet| .
+`NDDataset` in `SpectroChemPy` in contrast to numpy nd-arrays can have coordinates for each dimension.
+The individual coordinates are represented by a specific object: `Coord`\ .
+All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`\ .
 
 .. autosummary::
     :nosignatures:
@@ -76,12 +82,11 @@ All coordinates of a |NDDataset| are grouped in a particular object: |CoordSet| 
     CoordSet
 
 
-*******************
 Creating NDDataset
-*******************
+==================
 
-A |NDDataset| can be created using the |NDDataset| class constructor, for instance here we create a dataset from a
-random two-dimensional array:
+A `NDDataset` can be created using the `NDDataset` class constructor, for instance here we create a dataset from a
+`~numpy.random.random` two-dimensional array:
 
 .. ipython:: python
 
@@ -89,7 +94,7 @@ random two-dimensional array:
     X = np.random.random((4,4))
     nd = NDDataset(X)
 
-The above code in |scpy| can be simplified using the ``random`` creation method:
+The above code in `SpectroChemPy` can be simplified using the `random` creation method:
 
 .. ipython:: python
 
@@ -98,11 +103,11 @@ The above code in |scpy| can be simplified using the ``random`` creation method:
 
 (see the :ref:`userguide` for a large set of examples on how to use this constructor.)
 
-Many SpectroChemPy methods mimics numpy equivalent, but output a NDDataset object.
+Many SpectroChemPy methods mimics `numpy` equivalent, but output a `NDDataset` object.
 
 
 Basic creation methods
-=======================
+----------------------
 
 .. autosummary::
     :nosignatures:
@@ -123,7 +128,7 @@ Basic creation methods
 
 
 Creation from existing data
-============================
+---------------------------
 
 .. autosummary::
     :nosignatures:
@@ -135,7 +140,7 @@ Creation from existing data
 
 
 Creation from numerical ranges
-==============================
+------------------------------
 
 .. autosummary::
     :nosignatures:
@@ -148,7 +153,7 @@ Creation from numerical ranges
 
 
 Creation from from external sources
-====================================
+-----------------------------------
 
 .. autosummary::
     :nosignatures:
@@ -182,10 +187,10 @@ Creation from from external sources
     read_zip
     read_carroucell
     download_nist_ir
+    download
 
-******************
 Export a NDDataset
-******************
+==================
 
 .. autosummary::
     :nosignatures:
@@ -205,10 +210,8 @@ Export a NDDataset
     to_xarray
 
 
-
-**************************
 Select data in a NDDataset
-**************************
+==========================
 
 .. autosummary::
     :nosignatures:
@@ -217,9 +220,8 @@ Select data in a NDDataset
     take
 
 
-********************
 Plotting functions
-********************
+==================
 
 .. autosummary::
     :nosignatures:
@@ -249,19 +251,19 @@ Plotting functions
     multiplot_with_transposed
     show
 
-************
-Processing
-************
 
-Transpose-like oprations
-========================
+**********
+Processing
+**********
+
+Transpose-like operations
+=========================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     transpose
-    NDDataset.T
     swapdims
 
 
@@ -396,13 +398,13 @@ Complex
     :nosignatures:
     :toctree: generated/
 
-    NDDataset.real
-    NDDataset.imag
-    NDDataset.RR
-    NDDataset.RI
-    NDDataset.IR
-    NDDataset.II
-    NDDataset.component
+    real
+    imag
+    RR
+    RI
+    IR
+    II
+    component
     conj
     conjugate
     abs
@@ -571,24 +573,92 @@ Miscellaneous
     pipe
 
 
-********************
-Fitting
-********************
+********
+Analysis
+********
+
+
+Linear regression
+=================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    Fit
-    ParameterScript
-    FitParameters
-    CurveFit
     LSTSQ
     NNLS
 
 
-Fitting models
-==============
+Non-linear optimization and curve fit
+=====================================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    Optimize
+
+Evolving factor analysis
+========================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    EFA
+
+Integral inversion solver for spectroscopic data
+================================================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    IRIS
+    IrisKernel
+
+Multivariate Curve Resolution - Alternating Least Squares
+=========================================================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    MCRALS
+
+Non-Negative Matrix Factorization
+=================================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    NMF
+
+Singular value decomposition and Principal component analysis
+=============================================================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    PCA
+    SVD
+
+SIMPLe to use Interactive Self-modeling Mixture Analysis
+========================================================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    SIMPLISMA
+
+Utilities
+=========
+
+Lineshape models
+----------------
 
 .. autosummary::
     :nosignatures:
@@ -601,23 +671,24 @@ Fitting models
     sigmoidmodel
     polynomialbaseline
 
-
-*******************
-Analysis
-*******************
+Find peaks
+----------
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
     find_peaks
-    EFA
-    PCA
-    NNMF
-    SIMPLISMA
-    MCRALS
-    IRIS
-    kern
+
+Kinetic
+--------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    ActionMassKinetics
+    PFR
 
 ********************
 Project management

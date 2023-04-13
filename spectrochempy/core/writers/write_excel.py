@@ -27,7 +27,7 @@ def write_excel(*args, **kwargs):
         Protocol used for writing. If not provided, the correct protocol
         is inferred (whnever it is possible) from the file name extension.
     directory : str, optional
-        Where to write the specified `filename`. If not specified, write in the current directory.
+        Where to write the specified `filename` . If not specified, write in the current directory.
     description: str, optional
         A Custom description.
 
@@ -49,7 +49,7 @@ def write_excel(*args, **kwargs):
 
 
 write_xls = write_excel
-write_xls.__doc__ = "This method is an alias of `write_excel`."
+write_xls.__doc__ = "This method is an alias of `write_excel` ."
 
 
 @exportermethod

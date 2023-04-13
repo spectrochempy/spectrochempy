@@ -20,7 +20,7 @@ def write_matlab(*args, **kwargs):
 
     Parameters
     ----------
-    *args
+    \*args
     **kwargs
 
     Returns
@@ -41,7 +41,7 @@ def write_matlab(*args, **kwargs):
 
 
 write_mat = write_matlab
-write_mat.__doc__ = "This method is an alias of `write_matlab`."
+write_mat.__doc__ = "This method is an alias of `write_matlab` ."
 
 
 @exportermethod

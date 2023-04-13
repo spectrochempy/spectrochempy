@@ -180,10 +180,10 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     ----------
     dataset : Dataset
         Input dataset.
-    lb : float or |Quantity| , optional, default=1 Hz
+    lb : float or `Quantity` , optional, default=1 Hz
         Exponential line broadening,
         If it is not a quantity with units, it is assumed to be a broadening expressed in Hz.
-    shifted : float or `quantity`, optional, default=0 us
+    shifted : float or `quantity` , optional, default=0 us
         Shift the data time origin by this amount. If it is not a quantity
         it is assumed to be expressed in the data units of the last
         dimension.
@@ -256,15 +256,15 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     ----------
     dataset : ndarray
         Dataset we want to apodize using an Lorentz Multiplication.
-    lb : float or `quantity`, optional, default=0 Hz
+    lb : float or `quantity` , optional, default=0 Hz
         Inverse exponential width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
-    gb : float or `quantity`, optional, default=1 Hz
+    gb : float or `quantity` , optional, default=1 Hz
         Gaussian broadening width.
         If it is not a quantity with units,
         it is assumed to be a broadening expressed in Hz.
-    shifted : float or `quantity`, optional, default=0 us
+    shifted : float or `quantity` , optional, default=0 us
         Shift the data time origin by this amount. If it is not a quantity
         it is assumed to be expressed in the data units of the last
         dimension.
@@ -348,7 +348,7 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
         This processing parameter mimics the behaviour of the SSB parameter on bruker TOPSPIN software:
         Typical values are 1 for a pure sine function and 2 for a pure cosine function.
         Values greater than 2 give a mixed sine/cosine function. Note that all values smaller than 2, for example 0,
-        have the same effect as :math:`\text{ssb}=1`, namely a pure sine function.
+        have the same effect as :math:`\text{ssb}=1` , namely a pure sine function.
     pow : enum [1,2], optional, default=1
         Exponent value - If pow=2 a Squared Sine Bell window multiplication is performed.
 
@@ -398,7 +398,12 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
 
 def sine(dataset, *args, **kwargs):
     """
-    Strictly equivalent to :meth:`sp`.
+    Strictly equivalent to :meth:`sp` .
+
+    Returns
+    -------
+    `NDDataset`
+        Modified dataset.
 
     See Also
     --------
@@ -409,7 +414,17 @@ def sine(dataset, *args, **kwargs):
 
 def sinm(dataset, ssb=1, **kwargs):
     """
-    Equivalent to :meth:`sp`, with pow = 1 (sine bell apodization window).
+    Equivalent to :meth:`sp` , with pow = 1 (sine bell apodization window).
+
+    Returns
+    -------
+    `NDDataset`
+        Modified dataset.
+
+    Returns
+    -------
+    `NDDataset`
+        Modified dataset.
 
     See Also
     --------
@@ -420,7 +435,7 @@ def sinm(dataset, ssb=1, **kwargs):
 
 def qsin(dataset, ssb=1, **kwargs):
     """
-    Equivalent to :meth:`sp`, with pow = 2 (squared sine bell apodization window).
+    Equivalent to :meth:`sp` , with pow = 2 (squared sine bell apodization window).
 
     See Also
     --------
@@ -563,7 +578,8 @@ def hann(dataset, **kwargs):
 
     Parameters
     ----------
-    dataset : array.
+    dataset : `NDDataset`
+        Input dataset.
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
@@ -616,7 +632,7 @@ def triang(dataset, **kwargs):
     Returns
     -------
     apodized
-        Dataset
+        Dataset.
     apod_arr
         The apodization array only if 'retapod' is True.
 

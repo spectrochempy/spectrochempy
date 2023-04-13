@@ -14,6 +14,7 @@ import pytest
 import spectrochempy.utils.exceptions
 from spectrochempy import NDDataset  # , preferences as prefs
 from spectrochempy.core import preferences as prefs
+from spectrochempy.core.common import dialogs
 from spectrochempy.core.readers.importer import (
     ALIAS,
     FILETYPES,

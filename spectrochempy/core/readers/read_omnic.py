@@ -32,8 +32,8 @@ def read_omnic(*paths, **kwargs):
     """
     Open a Thermo Nicolet OMNIC file.
 
-    Open Omnic file or a list of files with extension ``.spg`` , ``.spa`` or
-    ``.srs`` and set data/metadata in the current dataset.
+    Open Omnic file or a list of files with extension ` .spg` , ` .spa` or
+    ` .srs` and set data/metadata in the current dataset.
 
     The collected metadata are:
     - names of spectra
@@ -55,15 +55,15 @@ def read_omnic(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -77,8 +77,8 @@ def read_omnic(*paths, **kwargs):
     Other Parameters
     -----------------
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -96,7 +96,7 @@ def read_omnic(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -121,13 +121,13 @@ def read_omnic(*paths, **kwargs):
     Examples
     ---------
     Reading a single OMNIC file  (providing a windows type filename relative
-    to the default ``datadir``)
+    to the default `datadir` )
 
     >>> scp.read_omnic('irdata\\\\nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Reading a single OMNIC file  (providing a unix/python type filename
-    relative to the default ``datadir``)
+    relative to the default `datadir` )
     Note that here read_omnic is called as a classmethod of the NDDataset class
 
     >>> scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
@@ -215,9 +215,9 @@ def read_omnic(*paths, **kwargs):
 
 def read_spg(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ``.spg``.
+    Open a Thermo Nicolet file or a list of files with extension ` .spg` .
 
-    Open Omnic file or a list of files with extension ``.spg`` and set
+    Open Omnic file or a list of files with extension ` .spg` and set
     data/metadata in the current dataset.
 
     Parameters
@@ -226,15 +226,15 @@ def read_spg(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -248,8 +248,8 @@ def read_spg(*paths, **kwargs):
     Other Parameters
     -----------------
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -267,7 +267,7 @@ def read_spg(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -281,17 +281,17 @@ def read_spg(*paths, **kwargs):
     read : Generic read method.
     read_dir : Read a set of data from a directory.
     read_omnnic : Read Omnic files.
-    read_spa : Read Omnic files *.spa.
-    read_srs : Read Omnic files *.srs.
+    read_spa : Read Omnic files .spa.
+    read_srs : Read Omnic files .srs.
     read_opus : Read Bruker OPUS files.
     read_topspin : Read TopSpin NMR files.
-    read_csv : Read *.csv.
-    read_matlab : Read MATLAB files *.mat.
+    read_csv : Read .csv.
+    read_matlab : Read MATLAB files .mat.
     read_zip : Read zipped group of files.
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file
+    This method is an alias of `read_omnic`\ , except that the type of file
     is contrain to *.spg.
 
     Examples
@@ -309,9 +309,9 @@ def read_spg(*paths, **kwargs):
 
 def read_spa(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ``.spa``.
+    Open a Thermo Nicolet file or a list of files with extension ` .spa` .
 
-    Open Omnic file or a list of files with extension ``.spa`` and set
+    Open Omnic file or a list of files with extension ` .spa` and set
     data/metadata in the current dataset.
 
     Parameters
@@ -320,15 +320,15 @@ def read_spa(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -346,8 +346,8 @@ def read_spa(*paths, **kwargs):
         of the spa file if present or None if absent. When set to 'backgroung' returns
         the backgroung interferogram of the spa file if present or None if absent.
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -365,7 +365,7 @@ def read_spa(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -381,7 +381,7 @@ def read_spa(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
@@ -389,7 +389,7 @@ def read_spa(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file
+    This method is an alias of `read_omnic`\ , except that the type of file
     is contrain to *.spa.
 
     Examples
@@ -409,9 +409,9 @@ def read_spa(*paths, **kwargs):
 
 def read_srs(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ``.srs``.
+    Open a Thermo Nicolet file or a list of files with extension `.srs` .
 
-    Open Omnic file or a list of files with extension ``.srs`` and set
+    Open Omnic file or a list of files with extension `.srs` and set
     data/metadata in the current dataset.
 
     Parameters
@@ -420,15 +420,15 @@ def read_srs(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name
         for the file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename`, nor `content`),
+        no `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -444,8 +444,8 @@ def read_srs(*paths, **kwargs):
     return_bg : bool, optional
         Default value is False. When set to 'True' returns the series background
     directory : str, optional
-        From where to read the specified `filename`. If not specified,
-        read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified,
+        read in the default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
         Default value is False. If True, and several filenames have been
@@ -463,7 +463,7 @@ def read_srs(*paths, **kwargs):
         particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
         For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided
         `directory` are returned (and merged if `merge`
@@ -479,15 +479,15 @@ def read_srs(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic \*.spg grouped spectra.
+    read_spa : Read Omnic \*.Spa single spectra.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
     read_matlab : Read Matlab files.
 
     Notes
     -----
-    This method is an alias of ``read_omnic``, except that the type of file
+    This method is an alias of `read_omnic`\ , except that the type of file
     is constrained to *.srs.
 
     Examples
@@ -706,6 +706,13 @@ def _read_spg(*args, **kwargs):
         title=xtitles[0],
         units=xunits[0],
     )
+    # _x = Coord.linspace(
+    #     firstx[0],
+    #     lastx[0],
+    #     int(nx[0]),
+    #     title=xtitles[0],
+    #     units=xunits[0],
+    # )
 
     _y = Coord(
         timestamps,
@@ -883,6 +890,13 @@ def _read_spa(*args, **kwargs):
 
         spacing = (lastx - firstx) / (nx - 1)
 
+        # _x = Coord.linspace(
+        #     firstx,
+        #     lastx,
+        #     int(nx),
+        #     title=xtitle,
+        #     units=xunit,
+        # )
         _x = LinearCoord(
             offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit
         )
@@ -904,6 +918,12 @@ def _read_spa(*args, **kwargs):
             title="data points",
             units=None,
         )
+        #
+        # _x = Coord.arange(
+        #     len(intensities),
+        #     title="data points",
+        #     units=None,
+        # )
 
     dataset.set_coordset(y=_y, x=_x)
     dataset.name = spa_name  # to be consistent with omnic behaviour
@@ -1064,6 +1084,13 @@ def _read_srs(*args, **kwargs):
 
     # now add coordinates
     spacing = (info["lastx"] - info["firstx"]) / (info["nx"] - 1)
+    # _x = Coord.linspace(
+    #     info["firstx"],
+    #     info["lastx"],
+    #     int(info["nx"]),
+    #     title=info["xtitle"],
+    #     units=info["xunits"],
+    # )
     _x = LinearCoord(
         offset=info["firstx"],
         increment=spacing,
@@ -1222,22 +1249,28 @@ def _read_header(fid, pos):
     Notes
     -----
         So far, the header structure is as follows:
+
         - starts with b'\x01' , b'\x02', b'\x03' ... maybe indicating the header "type"
         - nx (UInt32): 4 bytes behind
         - xunits (UInt8): 8 bytes behind. So far, we have the following correspondence:
-            `x\01`: wavenumbers, cm-1
-            `x\02`: datapoints (interferogram)
-            `x\03`: wavelength, nm
-            `x\04': wavelength, um
-            `x\20': Raman shift, cm-1
-        - data units (UInt8): 12 bytes behind. So far, we have the following correspondence:
-            `x\11`: absorbance
-            `x\10`: transmittance (%)
-            `x\0B`: reflectance (%)
-            `x\0C`: Kubelka_Munk
-            `x\16`:  Volts (interferogram)
-            `x\1A`:  photoacoustic
-            `x\1F`: Raman intensity
+
+            * `x\01` : wavenumbers, cm-1
+            * `x\02` : datapoints (interferogram)
+            * `x\03` : wavelength, nm
+            * `x\04' : wavelength, um
+            * `x\20' : Raman shift, cm-1
+
+        - data units (UInt8): 12 bytes behind. So far, we have the following
+          correspondence:
+
+            * `x\11` : absorbance
+            * `x\10` : transmittance (%)
+            * `x\0B` : reflectance (%)
+            * `x\0C` : Kubelka_Munk
+            * `x\16` :  Volts (interferogram)
+            * `x\1A` :  photoacoustic
+            * `x\1F` : Raman intensity
+
         - first x value (float32), 16 bytes behind
         - last x value (float32), 20 bytes behind
         - ... unknown
@@ -1256,12 +1289,13 @@ def _read_header(fid, pos):
         - spectrum history (text), 208 bytes behind
 
         For "rapid-scan" srs files:
+
         - series name (text), 938 bytes behind
         - collection length (float32), 1002 bytes behind
         - last y (float 32), 1006 bytes behind
         - first y (float 32), 1010 bytes behind
         - ny (UInt32), 1026
-        ... y unit could be at pos+1030 with 01 = minutes ?
+        - ... y unit could be at pos+1030 with 01 = minutes ?
         - history (text), 1200 bytes behind (only initila hgistopry.
            When reprocessed, updated history is at the end of the file after the
            b`\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF` sequence

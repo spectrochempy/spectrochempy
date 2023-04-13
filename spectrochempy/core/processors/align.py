@@ -27,7 +27,7 @@ def can_merge_or_align(coord1, coord2):
 
     Parameters
     ----------
-    coord1, coord2 : |Coord|
+    coord1, coord2 :  `Coord`
         Coordinates to merge or align.
 
     Returns
@@ -60,13 +60,13 @@ def can_merge_or_align(coord1, coord2):
 
 def align(dataset, *others, **kwargs):
     """
-    Align individual |NDDataset| along given dimensions using various methods.
+    Align individual `NDDataset` along given dimensions using various methods.
 
     Parameters
     -----------
-    dataset : |NDDataset|
-        Dataset on which we want to salign other objects.
-    *others : |NDDataset|
+    dataset : `NDDataset`
+        Dataset on which we want to align other objects.
+    \*others : `NDDataset`
         Objects to align.
     dim : str. Optional, default='x'
         Along which axis to perform the alignment.
@@ -79,23 +79,26 @@ def align(dataset, *others, **kwargs):
         If align is defined :
 
         * 'outer' means that a union of the different coordinates is
-        achieved (missing values are masked).
+          achieved (missing values are masked).
         * 'inner' means that the intersection of the coordinates is used.
         * 'first' means that the first dataset is used as reference.
         * 'last' means that the last dataset is used as reference.
         * 'interpolate' means that interpolation is performed relative to
-        the first dataset.
+          the first dataset.
+
     interpolate_method : enum ['linear','pchip']. Optional, default='linear'
         Method of interpolation to performs for the alignment.
     interpolate_sampling : 'auto', int or float. Optional, default='auto'
+        Values:
 
         * 'auto' : sampling is determined automatically from the existing data.
         * int :  if an integer values is specified, then the
           sampling interval for the interpolated data will be split in
           this number of points.
         * float : If a float value is provided, it determines the interval
-        between the interpolated data.
-    coord : |Coord| , optional, default=None
+          between the interpolated data.
+
+    coord :  `Coord` , optional, default=None
         Coordinates to use for alignment. Ignore those corresponding to the
         dimensions to align.
     copy : bool, optional, default=True
@@ -105,7 +108,7 @@ def align(dataset, *others, **kwargs):
 
     Returns
     --------
-    aligned_datasets : tuple of |NDDataset|
+    tuple of `NDDataset`
         Same objects as datasets with dimensions aligned.
 
     Raises
@@ -246,7 +249,7 @@ def align(dataset, *others, **kwargs):
             if method in ["outer", "interpolate"]:
                 # in this case we do a union of the coords (masking the
                 # missing values)
-                # For method=`interpolate`, the interpolation will be
+                # For method=`interpolate` , the interpolation will be
                 # performed in a second step
                 new_coord._data = sorted(coord_data | new_coord_data)
 

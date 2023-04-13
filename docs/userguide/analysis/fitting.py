@@ -44,7 +44,7 @@ from spectrochempy import ur
 # In the first example, we find the least square solution of a simple linear equation.
 #
 # Let's first create a NDDataset with some data. We have for instance some noisy data
-# that represent the distance `d` traveled by some objects versus time `t`:
+# that represent the distance ``d`` traveled by some objects versus time ``t``\ :
 
 
 # %%
@@ -54,7 +54,7 @@ def func(t, v, var):
     return d
 
 
-time = scp.LinearCoord.linspace(0, 10, 20, title="time", units="hour")
+time = scp.Coord.linspace(0, 10, 20, title="time", units="hour")
 d = scp.NDDataset.fromfunction(
     func,
     v=100.0 * ur("km/hr"),
@@ -71,7 +71,7 @@ d = scp.NDDataset.fromfunction(
 # %%
 prefs = d.preferences
 prefs.figure.figsize = (7, 3)
-d.plot_scatter(markersize=7, mfc="red")
+d.plot_scatter(markersize=7, mfc="red", label="Original data")
 
 # %% [markdown]
 # We want to fit a line through these data-points of equation
@@ -84,25 +84,29 @@ d.plot_scatter(markersize=7, mfc="red")
 # Using LSTSQ, the solution is found very easily:
 
 # %%
-lst = scp.LSTSQ(time, d)
+lst = scp.LSTSQ()
+lst.fit(time, d)
 
-v, d0 = lst.transform()
+v, d0 = lst.coef, lst.intercept
 print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
+
+dfit = lst.predict()
+dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
+
 
 # %% [markdown]
 # <div class="alert alert-info">
 # <b>Note</b>
 #
 # In the particular case where the variation is proportional to the x dataset
-# coordinate, the same result can be obtained directly using `d` as a single
-# parameter on LSTSQ (as `t` is the `x` coordinate axis!)
+# coordinate, the same result can be obtained directly using ``d`` as a single
+# parameter on LSTSQ (as ``t  `` is the ``x`` coordinate axis!)
 # </div>
 
 # %%
-lst = scp.LSTSQ(d)
-
-v, d0 = lst.transform()
-print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
+lst = scp.LSTSQ()
+lst.fit(d)
+v, d0 = lst.coef, lst.intercept
 
 # %% [markdown]
 # and the final plot
@@ -113,10 +117,9 @@ d.plot_scatter(
     mfc="red",
     mec="black",
     label="Original data",
-    title="Least-square fitting " "example",
+    title=f"Linear regression, $r^2={lst.score():.3f} ",
 )
-dfit = lst.inverse_transform()
-
+dfit = lst.predict()
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 
@@ -151,9 +154,10 @@ d2.plot_scatter(markersize=7, mfc="red")
 
 # %%
 X = time**2
-lst = scp.LSTSQ(X, d2)
+lst = scp.LSTSQ()
+lst.fit(X, d2)
 
-v, d0 = lst.transform()
+v, d0 = lst.coef, lst.intercept
 print("acceleration : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 
 # %%
@@ -164,7 +168,7 @@ d2.plot_scatter(
     label="Original data",
     title="Least-square fitting " "example on quadratic data",
 )
-dfit = lst.inverse_transform()
+dfit = lst.predict()
 
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
@@ -175,14 +179,15 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 # When fitting data with LSTSQ, it happens that we get some negative values were
 # it should not, for instance having a negative distance at time 0.
 #
-# In this case, we can use the NNLS method of fitting. It operates as ``LSTSQ``
+# In this case, we can use the NNLS method of fitting. It operates as `LSTSQ`
 # but keep the Y values always positive.
 
 # %%
 X = time**2
-lst = scp.NNLS(X, d2)
+nls = scp.NNLS()
+nls.fit(X, d2)
 
-v, d0 = lst.transform()
+v, d0 = lst.coef, lst.intercept
 print("acceleration : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
 
 # %%
@@ -191,14 +196,14 @@ d2.plot_scatter(
     mfc="red",
     mec="black",
     label="Original data",
-    title="Non-negative Least-square fitting " "example",
+    title="Non-negative Least-square fitting example",
 )
-dfit = lst.inverse_transform()
+dfit = lst.predict()
 
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 
 # %% [markdown]
-# ## NDDataset modelling using the Fit method
+# ## NDDataset modelling using non-linear optimisation method
 
 # %% [markdown]
 # First we will load an IR dataset
@@ -227,7 +232,7 @@ ndOH.plot()
 # %% [markdown]
 # We can perform a linear baseline correction to start with this data (see the
 # [baseline tutorial](../processing/baseline.ipynb)).
-# For removing a linear baseline, the fastest method is however to use the ``abc`` (
+# For removing a linear baseline, the fastest method is however to use the `abc` (
 # automatic baseline correction)
 
 # %%
@@ -253,7 +258,7 @@ pks.plot_scatter(
     marker="v",
     color="black",
     clear=False,  # we need to keep the previous output on ax
-    data_only=True,  # we dont need to redraw all things like labels, etc...
+    data_only=True,  # we don't need to redraw all things like labels, etc...
     ylim=(-0.05, 1.3),
 )
 
@@ -286,7 +291,7 @@ $ gasym: 0.1, 0, 1
 MODEL: LINE_1
 shape: asymmetricvoigtmodel
     * ampl:  1.0, 0.0, none
-    $ pos:   3624.61, 3520.0, 3570.0
+    $ pos:   3624.61, 3610.0, 3640.0
     > ratio: gratio
     > asym: gasym
     $ width: 200, 0, 1000
@@ -294,7 +299,7 @@ shape: asymmetricvoigtmodel
 MODEL: LINE_2
 shape: asymmetricvoigtmodel
     $ ampl:  0.2, 0.0, none
-    $ pos:   3541.68, 3400.0, 3700.0
+    $ pos:   3541.68, 3520.0, 3560.0
     > ratio: gratio
     > asym: gasym
     $ width: 200, 0, 1000
@@ -310,20 +315,21 @@ shape: asymmetricvoigtmodel
 #
 # Each individual model component is identified by the keyword `MODEL`
 #
-# A `MODEL` have a name, *e.g.*, `MODEL: LINE_1`.
+# A `MODEL` have a name, *e.g.*, `MODEL: LINE_1` .
 #
-# Then come for each model components its `shape`, *i.e.,* the shape of the line.
+# Then come for each model components its `shape` , *i.e.,* the shape of the line.
 #
 # Come after the definition of the model parameters depending on the shape, e.g., for
 # a `gaussianmodel` we have three
-# parameters: `amplitude` (`ampl`), `width` and `position` (`pos`) of the line.
+# parameters: `amplitude` (`ampl`\ ), `width` and `position` (`pos`\ ) of the line.
 #
 # To define a given parameter, we have to write its `name` and a set of 3 values:
 # the expected `value` and 2 limits
-# for the allowed variations : `low_bound`,  `high_bound`
+# for the allowed variations : `low_bound`\ ,  `high_bound`\ :
+#
 # ```
 # name : value, low_bound,  high_bound
-# ````
+# ```
 # These parameters are preceded by a mark saying what kind of parameter it will behave
 # in the fit procedure:
 #
@@ -331,10 +337,10 @@ shape: asymmetricvoigtmodel
 # * `*` denotes fixed parameters
 # * `>` say that the given parameters is actually defined in a COMMON block
 #
-# `COMMON`is the common block containing parameters to which a parameter in the MODEL
+# `COMMON`\ is the common block containing parameters to which a parameter in the MODEL
 # blocks can make reference using
-# the  `>` markers.  (`>` obviously is forbidden in the COMMON block)
-# common block parameters should not have a `_`(underscore) in their names
+# the  `>` markers.  (\ `>` obviously is forbidden in the COMMON block)
+# common block parameters should not have a `_`\ (underscore) in their names
 #
 # With this parameter script definition, you can thus make rather complex search for
 # modelling, as you can make
@@ -343,7 +349,7 @@ shape: asymmetricvoigtmodel
 # The line shape can be (up to now) in the following list of shape (for 1D models -
 # see below for 2D):
 #
-# * PolynomialBaseline -> `polynomialbaseline`:
+# * PolynomialBaseline -> `polynomialbaseline`\ :
 #
 #   Arbitrary-degree polynomial (degree limited to 10, however). As a linear
 #   baseline is automatically calculated
@@ -364,7 +370,7 @@ shape: asymmetricvoigtmodel
 #   ```
 #
 #
-# * Gaussian Model -> `gaussianmodel`:
+# * Gaussian Model -> `gaussianmodel`\ :
 #
 #   Normalized 1D gaussian function.
 #
@@ -381,7 +387,7 @@ shape: asymmetricvoigtmodel
 #   ```
 #
 #
-# * Lorentzian Model -> `lorentzianmodel`:
+# * Lorentzian Model -> `lorentzianmodel`\ :
 #
 #   A standard Lorentzian function (also known as the Cauchy distribution).
 #
@@ -398,7 +404,7 @@ shape: asymmetricvoigtmodel
 #   ```
 #
 #
-# * Voigt Model -> `voigtmodel`:
+# * Voigt Model -> `voigtmodel`\ :
 #
 #   A Voigt model constructed as the convolution of a `GaussianModel` and
 #   a `LorentzianModel` -- commonly used for spectral line fitting.
@@ -413,7 +419,7 @@ shape: asymmetricvoigtmodel
 #   ```
 #
 #
-# * Asymmetric Voigt Model -> `asymmetricvoigtmodel`:
+# * Asymmetric Voigt Model -> `asymmetricvoigtmodel`\ :
 #
 #   An asymmetric Voigt model
 #   (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)
@@ -429,9 +435,21 @@ shape: asymmetricvoigtmodel
 #   ```
 
 # %%
-f1 = scp.Fit(ndOHcorr, script, silent=False)
-f1.run(maxiter=10000, every=100)
-ndOHcorr.plot(plot_model=True, lw=2)
+f1 = scp.Optimize(log_level="INFO")
+f1.script = script
+f1.max_iter = 2000
+# f1.autobase = True
+f1.fit(ndOHcorr)
+
+# Show the result
+ndOHcorr.plot()
+ax = (f1.components[:]).plot(clear=False)
+ax.autoscale(enable=True, axis="y")
+
+# plotmerit
+som = f1.inverse_transform()
+f1.plotmerit(offset=0, kind="scatter")
+
 
 # %% [markdown]
 # <div class='alert alert-warning'>

@@ -8,49 +8,39 @@
 SpectroChemPy documentation build configuration file
 """
 
-#
 import inspect
 import os
 import sys
 import warnings
 from datetime import datetime
 
-#
 import sphinx_rtd_theme  # Theme for the website
 
-#
 import spectrochempy as scp  # isort:skip
 
 # set a filename and default folder by default for notebook which have file dialogs
 os.environ["TUTORIAL_FILENAME"] = "wodger.spg"
 os.environ["TUTORIAL_FOLDER"] = "irdata/subdir"
 
-# set a flag to deactivate TQDM
-os.environ["USE_TQDM"] = "No"
 
-#
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation general, use os.path.abspath to make it absolute, like shown
 # here: sys.path.insert(0, os.path.abspath('.'))
 
-#
+
 # -- General configuration ---------------------------------------------------
 
-#
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
 
-#
 # Add any Sphinx extension module names here, as strings.
 # They can be extensions coming with Sphinx (named 'sphinx.ext.*') or your
 # custom ones.
 
-#
 # hack to make import
 sys._called_from_sphinx = True
 
-#
 # Sphinx Extensions
 source = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(source, "docs", "sphinxext"))
@@ -69,148 +59,99 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "sphinx.ext.napoleon",
-    "autodoc_traitlets",
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
+    "sphinxcontrib.bibtex",
 ]
 
-#
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
-#
 # The suffix of source filenames.
 source_suffix = ".rst"
 
-#
 # The encoding of source files.
 source_encoding = "utf-8"
 
-#
 # The master toctree document.
 master_doc = "index"
 
-#
 # General information about the project.
 
-#
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-#
-version = scp.application.__version__  # .split('+')[0]
+version = scp.application.version  # .split('+')[0]
 release = version.split("+")[0]
 project = f"SpectroChemPy v{version}"
-copyright = scp.application.__copyright__
+copyright = scp.application.copyright
 
-#
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
 # today = ''
 # Else, today_fmt is used as the format for a strftime call.
 today_fmt = "%B %d, %Y"
 
-#
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_templates", "_static", "**.ipynb_checkpoints", "gallery", "~temp"]
+exclude_patterns = [
+    "_templates",
+    "_static",
+    "**.ipynb_checkpoints",
+    "gallery/auto_examples/*.md5",
+    "gallery/auto_examples/*.py",
+    # "gallery/auto_examples/*.ipynb",
+    "~temp",
+]
 
-#
 # The reST default role (used for this markup: `text` ) to use for all
 # documents.
-default_role = "obj"
+default_role = "py:obj"
 
-#
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = False
 
-#
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
 add_module_names = False
 
-#
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
 # show_authors = False
 
-#
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 
-#
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
 
 
-#
 # Show Todo box
 todo_include_todos = True
 
-#
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
 
-#
-rst_epilog = """
-
-.. |scpy| replace:: **SpectroChemPy**
-
-.. |ndarray| replace:: :class:`~numpy.ndarray`
-
-.. |ma.ndarray| replace:: :class:`~numpy.ma.array`
-
-.. |Project| replace:: :class:`~spectrochempy.core.projects.project.Project`
-
-.. |Script| replace:: :class:`~spectrochempy.core.dataset.scripts.Script`
-
-.. |NDArray| replace:: :class:`~spectrochempy.core.dataset.ndarray.NDArray`
-
-.. |NDDataset| replace:: :class:`~spectrochempy.core.dataset.nddataset.NDDataset`
-
-.. |Coord| replace:: :class:`~spectrochempy.core.dataset.ndcoord.Coord`
-
-.. |CoordSet| replace:: :class:`~spectrochempy.core.dataset.ndcoordset.CoordSet`
-
-.. |NDIO| replace:: :class:`~spectrochempy.core.dataset.ndio.NDIO`
-
-.. |NDMath| replace:: :class:`~spectrochempy.core.dataset.ndmath.NDMath`
-
-.. |Meta| replace:: :class:`~spectrochempy.core.dataset.ndmeta.Meta`
-
-.. |NDPlot| replace:: :class:`~spectrochempy.core.dataset.ndplot.NDPlot`
-
-.. |Unit| replace:: :class:`~spectrochempy.core.units.units.Unit`
-
-.. |Quantity| replace:: :class:`~spectrochempy.core.units.units.Quantity`
-
-.. |Axes| replace:: :class:`~matplotlib.Axes`
-
-"""
-
-#
 # -- Options for HTML output ---------------------------------------------------
 
-#
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-#
 html_theme = "sphinx_rtd_theme"
 
-#
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
     "logo_only": True,
     "display_version": True,
-    "collapse_navigation": True,
-    "navigation_depth": 3,
+    "collapse_navigation": False,
+    "navigation_depth": 5,
+    "sticky_navigation": True,
+    "prev_next_buttons_location": "both",
 }
 
-#
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
@@ -222,64 +163,51 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 
-#
 html_logo = "_static/scpy.png"
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 
-#
 html_favicon = "_static/scpy.ico"
 
-#
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 html_css_files = [
-    "theme_override.css",
+    "css/spectrochempy.css",
 ]
-#
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
 html_last_updated_fmt = "%b %d, %Y"
 
-#
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
 html_use_smartypants = True
 
-#
 # Custom sidebar templates, maps document names to template names.
 # html_sidebars = {}
 
-#
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 # html_additional_pages = {}
 
-#
 # If true, links to the reST sources are added to the pages.
 html_show_sourcelink = True
 
 # Don't add .txt suffix to source files:
 html_sourcelink_suffix = ""
-#
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False
 
-#
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 html_show_copyright = True
 
-#
 # Output file base name for HTML help builder.
 htmlhelp_basename = "spectrochempydoc"
 
-#
 trim_doctests_flags = True
 
-#
 # Remove matplotlib agg warnings from generated doc when using plt.show
 warnings.filterwarnings(
     "ignore",
@@ -288,11 +216,10 @@ warnings.filterwarnings(
     " non-GUI backend, so cannot show the figure.",
 )
 
-#
 html_context = {
     "current_version": "latest" if ("dev" in version) else "stable",
     "release": release,
-    "base_url": "https://www.spectrochempy.fr",
+    "base_url": "..",
     "versions": (
         ("latest", '/latest/index.html"'),
         ("stable", "/stable/index.html"),
@@ -305,10 +232,8 @@ html_context = {
     "bibyear": "{" + f"{datetime.today().year}" + "}",
 }
 
-#
 # -- Options for LaTeX output ----------------------------------------------------------
 
-#
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass  [
 # howto/manual]).
@@ -323,17 +248,14 @@ latex_documents = [
     ),
 ]
 
-#
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
 latex_logo = "_static/scpy.png"
 
-#
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
 latex_use_parts = False
 
-#
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     "papersize": "a4paper",  # ''letterpaper',
@@ -349,31 +271,24 @@ latex_elements = {
 """,
 }
 
-#
 # If false, no module index is generated.
 latex_use_modindex = True
 
-#
 # If true, show page references after internal links.
 # latex_show_pagerefs = False
 
-#
 # If true, show URL addresses after external links.
 # latex_show_urls = False
 
-#
 # Documents to append as an appendix to all manuals.
 # latex_appendices = []
 
-#
 # If false, no module index is generated.
 # latex_domain_indices = True
 
 
-#
 # -- Options for PDF output ---------------------------------------
 
-#
 # Grouping the document tree into PDF files. List of tuples
 # (source start file, target name, title, author).
 pdf_documents = [
@@ -385,47 +300,36 @@ pdf_documents = [
     ),
 ]
 
-#
 # A comma-separated list of custom stylesheets. Example:
 pdf_stylesheets = ["sphinx", "kerning", "a4"]
 
-#
 # Create a compressed PDF
 # Use True/False or 1/0
 # Example: compressed=True
 # pdf_compressed=False
 
-#
 # A colon-separated list of folders to search for fonts. Example:
 # pdf_font_path=['/usr/share/fonts', '/usr/share/texmf-dist/fonts/']
 
-#
 # Language to be used for hyphenation support
 pdf_language = "en_EN"
 
-#
 # If false, no index is generated.
 # pdf_use_index = True
 
-#
 # If false, no modindex is generated.
 # pdf_use_modindex = True
 
-#
 # If false, no coverpage is generated.
 # pdf_use_coverpage = True
 
 
-#
 # Sphinx-gallery ---------------------------------------------------------------
-
-#
 # Generate the plots for the gallery
 
-#
 sphinx_gallery_conf = {
     "plot_gallery": "True",
-    "backreferences_dir": "gettingstarted/gallery/backreferences",
+    "backreferences_dir": "gallery/backreferences",
     "doc_module": ("spectrochempy",),
     "reference_url": {
         "spectrochempy": None,
@@ -433,7 +337,7 @@ sphinx_gallery_conf = {
     # path to the examples scripts
     "examples_dirs": "gettingstarted/examples",
     # path where to save gallery generated examples=======
-    "gallery_dirs": "gettingstarted/gallery/auto_examples",
+    "gallery_dirs": "gallery/auto_examples",
     "abort_on_example_error": False,
     "expected_failing_examples": [],
     "download_all_examples": False,
@@ -444,14 +348,12 @@ suppress_warnings = [
 
 # nbsphinx ---------------------------------------------------------------------
 
-#
 # List of arguments to be passed to the kernel that executes the notebooks:
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'jpg', 'png'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
 ]
 
-#
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = "always"
 nbsphinx_allow_errors = True
@@ -460,10 +362,7 @@ nbsphinx_prolog = """
 """
 nbsphinx_epilog = """
 """
-copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
-copybutton_prompt_is_regexp = True
 
-#
 # Use this kernel instead of the one stored in the notebook metadata:
 nbsphinx_kernel_name = "python3"
 
@@ -473,10 +372,15 @@ nbsphinx_custom_formats = {
     # ".md": ["jupytext.reads", {"fmt": "Rmd"}],
 }
 
+# Configure sphinxcontrib-bibtex
 
-# configuration for intersphinx ------------------------------------------------
+bibtex_bibfiles = ["reference/bibliography.bib"]
+bibtex_default_style = "plain"
+bibtex_reference_style = "author_year"
+bibtex_cite_id = "{key}"
 
-#
+# configuration for intersphinx --------------------------------------------------------
+
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "ipython": ("https://ipython.readthedocs.io/en/stable/", None),
@@ -484,13 +388,12 @@ intersphinx_mapping = {
     "SciPy": ("https://docs.scipy.org/doc/scipy/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
+    "traitlets": ("https://traitlets.readthedocs.io/en/stable/", None),
 }
 
+# linkcode -----------------------------------------------------------------------------
 
-#
-# linkcode ---------------------------------------------------------------------
 
-#
 def linkcode_resolve(domain, info):
     # Resolve function for the linkcode extension.
     def find_source():
@@ -518,32 +421,25 @@ def linkcode_resolve(domain, info):
     return f"https://github.com/spectrochempy/spectrochempy/blob/{tag}/{filename}"
 
 
-#
-# Autosummary ------------------------------------------------------------------
+# Autosummary --------------------------------------------------------------------------
 
-#
-autosummary_generate = True
+pattern = os.environ.get("SPHINX_NOAPI")
+include_api = pattern is None
+autosummary_generate = True if include_api else ["index"]
 
-#
 autodoc_typehints = "none"
-
-#
 napoleon_use_param = False
 napoleon_use_rtype = False
 
-#
 numpydoc_class_members_toctree = True
 numpydoc_show_class_members = False
 numpydoc_use_plots = True
 
-#
 autoclass_content = "both"
 # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
 
-#
-autodoc_default_flags = ["autosummary"]
-
-#
+autodoc_default_options = {"autosummary": include_api}
+autodoc_class_signature = "mixed"
 exclusions = (
     "_*",
     "add_traits",
@@ -594,9 +490,11 @@ exclusions = (
 )
 
 
-#
 def autodoc_skip_member(app, what, name, obj, skip, options):
-    doc = True if obj.__doc__ is not None else False
+    doc = (
+        True if obj.__doc__ is not None and "#NOT_IN_DOC" not in obj.__doc__ else False
+    )
+
     exclude = name in exclusions or "trait" in name or name.startswith("_") or not doc
     return skip or exclude
 
@@ -653,6 +551,6 @@ def setup(app):
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
-    app.add_css_file("theme_override.css")  # also can be a full URL
-    # Ignore .ipynb files
+    app.add_css_file("css/spectrochempy.css")  # also can be a full URL
+    # # Ignore .ipynb files
     app.registry.source_suffix.pop(".ipynb", None)

@@ -17,9 +17,9 @@ About the spectrochempy documentation
 -------------------------------------
 
 The documentation is written in **reStructuredText**, which is almost like writing
-in plain English, and built using `Sphinx <https://www.sphinx-doc.org/en/master/>`__. The
+in plain English, and built using `Sphinx <https://www.sphinx-doc.org/en/master/>`__ . The
 Sphinx Documentation has an excellent `introduction to reST
-<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`__. Review the Sphinx docs to perform more
+<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`__ . Review the Sphinx docs to perform more
 complex changes to the documentation as well.
 
 It worth to note that:

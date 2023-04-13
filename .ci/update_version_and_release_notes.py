@@ -214,7 +214,7 @@ These are the changes in SpectroChemPy-{{ revision }}.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
 
 ..
-   Do not remove the `revision` marker. It will be replaced during doc building.
+   Do not remove the ``revision`` marker. It will be replaced during doc building.
    Also do not delete the section titles.
    Add your list of changes between (Add here) and (section) comments
    keeping a blank line before and after this list.
@@ -270,13 +270,17 @@ Deprecations
         f.write(
             """.. _release:
 
+..
+   Do not modify this file as it is automatically generated.
+   See '.ci/update_version_and_release_notes.py' if you need to change the output.
+
 *************
 Release notes
 *************
 
-This is the list of changes to SpectroChemPy between each release. For full details,
-see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_.
-For install and upgrade instructions, see :ref:`installation`.
+This is the list of changes to `SpectroChemPy` between each release. For full details,
+see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_ .
+For install and upgrade instructions, see :ref:`installation`\ .
 """
         )
         for i, vers in enumerate(dicvers):

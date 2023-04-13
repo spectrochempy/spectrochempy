@@ -17,32 +17,6 @@ from datetime import datetime, timezone
 import numpy as np
 from quaternion import as_float_array, as_quat_array
 
-__all__ = [
-    "TYPE_INTEGER",
-    "TYPE_COMPLEX",
-    "TYPE_FLOAT",
-    "TYPE_BOOL",
-    "EPSILON",
-    "INPLACE",
-    "typequaternion",
-    "make_new_object",
-    "getdocfrom",
-    "dict_compare",
-    "htmldoc",
-    "is_iterable",
-    "is_sequence",
-    "is_number",
-    "spacing_",
-    "largest_power_of_2",
-    "get_component",
-    "interleaved2quaternion",
-    "interleaved2complex",
-    "as_quaternion",
-    "quat_as_complex_array",
-    "get_n_decimals",
-    "gt_eps",
-]
-
 #
 # constants
 #
@@ -101,15 +75,6 @@ def _codechange(code_obj, changes):
     return code(*values)
 
 
-class _DummyFile(object):
-    """
-    A writeable object.
-    """
-
-    def write(self, s):
-        pass
-
-
 # ======================================================================================
 # Public methods
 # ======================================================================================
@@ -119,9 +84,11 @@ def as_quaternion(*args):
 
     Parameters
     ----------
-    *args : ndarray with dtype:float or complex
-        The quaternion array components: If there is 4 components, then we assume it is the four components of the
-        quaternion array: w, x, y, z. If there is only two, they are casted to complex and correspond respectively
+    *args : `ndarray` with dtype: `float` or `complex`
+        The quaternion array components: If there is 4 components, then we assume it is
+        the four components of the
+        quaternion array: w, x, y, z. If there is only two, they are casted to complex
+        and correspond respectively
         to w + i.x and y + j.z.
     """
     if len(args) == 4:
@@ -144,6 +111,7 @@ def quat_as_complex_array(arr):
     ----------
     arr : quaternion ndarray
         The arr will be separated into (w + i.x) and (y + i.z).
+
     Returns
     -------
     tuple
@@ -229,8 +197,9 @@ def get_component(data, select="REAL"):
 
     Parameters
     ----------
-    data : ndarray
-    select : str, optional, default='REAL'
+    data : `ndarray`
+        Input data array.
+    select : `str`, optional, default: 'REAL'
         If 'REAL', only real component in all dimensions will be selected.
         Else a string must specify which real (R) or imaginary (I) component
         has to be selected along a specific dimension. For instance,
@@ -244,9 +213,11 @@ def get_component(data, select="REAL"):
         A component of the complex or hypercomplex array.
 
     .. warning::
-        The definition is somewhat different from Bruker, as we order the component in the order of the dimensions in
+        The definition is somewhat different from Bruker, as we order the component in
+        the order of the dimensions in
         dataset:
-        e.g., for dims = ['y','x'], 'IR' means that the `y` component is imaginary while the `x` is real.
+        e.g., for dims = ['y','x'], 'IR' means that the `y` component is imaginary
+        while the `x` is real.
     """
     if not select:
         return data

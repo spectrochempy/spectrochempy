@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -22,49 +22,61 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.8
+#     version: 3.9.16
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
 #       version_major: 2
 #       version_minor: 0
 # ---
-# %% [markdown] {"slideshow": {"slide_type": "slide"}}
+
+# %% [markdown]
 # # Introduction
 #
-# The **SpectroChemPy** project was developed to provide advanced tools for processing and
-# analyzing spectroscopic data, initially for internal purposes in the
-# [LCS (https://www.lcs.ensicaen.fr)](https://www.lcs.ensicaen.fr).
+# The `SpectroChemPy` project was developed to provide advanced tools for processing and
+# analyzing spectroscopic data, initially for internal purposes within the
+# [LCS (https://www.lcs.ensicaen.fr)] (https://www.lcs.ensicaen.fr).
 #
-# **SpectroChemPy** is essentially a library written in python language and which proposes objects (`NDDataset`, and
-# `Project`) to contain data, equipped with methods to analyze, transform or display
-# this data in a simple way by the user.
+# The `SpectroChemPy` project is essentially a library written in
+# [python](https://www.python.org) language and provides objects,
+# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html)
+# and [Project]((../../reference/generated/spectrochempy.Project.html)),
+# to hold data, equipped with methods to analyze, transform or display these data in a
+# simple way through a python type interface.
 #
-#  The processed data are mainly spectroscopic data from techniques such as IR, Raman or NMR, but they are not limited
-# to this type of application, as any type of numerical data arranged in tabular form can generally serve as the main
-# input.
+# The processed data are mainly spectroscopic data from techniques such as IR, Raman or
+# NMR, but they are not limited to this type of application, as any type of data can be
+# used.
 
-# %% [markdown] {"slideshow": {"slide_type": "slide"}}
+# %% [markdown]
 # ## How to get started
-#
-# <div class='alert alert-info'>
-# <b>Note</b>
 #
 # We assume that the SpectroChemPy package has been correctly
 # installed. if is not the case, please go to [SpectroChemPy installation
 # procedure](../../gettingstarted/install/index.rst).
 # </div>
 
-# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}, "slideshow": {"slide_type": "subslide"}}
-# [interface](interface.ipynb)
-
-# %% [markdown] {"slideshow": {"slide_type": "slide"}}
-# ## Loading the API
+# %% [markdown]
+# ### Writing and executing SpectroChemPy scripts
 #
-# Before using SpectroChemPy, we need to load the **API (Application Programming Interface)**: it exposes many
+# If you are already an experienced `python` user, you can certainly use your favorite
+# IDE to run your scripts, debug them and display the results. But if you want an easier
+# way, especially if you are a beginner, we recommend you to use `Jupyter Lab` to do it.
+# To get started, you can follow links below:
+
+# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}}
+# [Jupyter Lab interface](interface.ipynb).
+
+# %% [markdown]
+# ### Loading the API
+#
+# Before using SpectroChemPy, we need to load the **API
+# (Application Programming Interface)**: it exposes many
 # objects and functions.
 #
 # To load the API, you must import it using one of the following syntax.
+#
+# **Syntax 1** (recommended)
 #
 # In the first syntax we load the library into a namespace called `scp`
 # (we recommend this name, but you can choose whatever
@@ -76,25 +88,25 @@ import spectrochempy as scp
 nd = scp.NDDataset()
 
 # %% [markdown]
-# or in the second syntax, with a wild `*` import.
+# **Syntax 2** (discouraged)
+#
+# With a wild `*` import. In this second syntax, the access to objects/functions can be
+# greatly simplified. For example, we can use directly `NDDataset` without a prefix
+# instead of `scp.NDDataset` but there is always a risk of overwriting some variables or
+# functions already present in the namespace. Therefore, the first syntax is generally
+# highly recommended.
 
 # %%
-from spectrochempy import *  # noqa: F403
+from spectrochempy import *  # noqa
 
 nd = NDDataset()
 
 # %% [markdown]
-# With the second syntax, as often in python, the access to objects/functions can be greatly simplified. For example,
-# we can use directly `NDDataset` without a prefix instead of `scp.NDDataset`
-# which is the first syntax but there is always a
-# risk of overwriting some variables or functions already present in the namespace.
-# Therefore, the first syntax is generally highly recommended.
-#
-# Alternatively, you can also load only the objects and function required by your application:
-#
+# Alternatively, you can also load only the objects and function required by your
+# application:
 
 # %%
-from spectrochempy import NDDataset  # SYNTAX 3
+from spectrochempy import NDDataset
 
 nd = NDDataset()
 
@@ -102,33 +114,36 @@ nd = NDDataset()
 # %% [markdown]
 # ## NDDataset, the main object
 #
-# NDDataset is a python object, actually a container, which can represent most of your multidimensional spectroscopic
-# data.
+# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html)
+# is a python object, actually a container, which can represent most of your
+# multidimensional spectroscopic data.
 #
-# For instance, in the following we read data from a series of FTIR experiments, provided  by the OMNIC software:
+# For instance, in the following we read data from a series of FTIR experiments,
+# provided  by the OMNIC software:
 
 # %%
-import os
-
-nd = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
+nd = NDDataset.read_omnic("irdata/nh4y-activation.spg")
 
 # %% [markdown]
-# Note that for this example, we use data stored in a ``test`` directory. For your own usage, you probably have to
-# give the full pathname (see ... for the way to overcome this using `preferences` setting)
+# Note that for this example, we use data stored in a `test` directory. For your own
+# usage, you probably have to give the full pathname.
 
 # %% [markdown]
 # ### Display dataset information
 
 # %% [markdown]
-# Several ways are available to display the data we have just read and that are now stored in the dataset
+# Several ways are available to display the data we have just read and that are now
+# stored in the dataset
 #
-# * **Printing** them, using the print function of python to get a short text version of the dataset information.
+# * **Printing** them, using the print function of python to get a short text version
+# of the dataset information.
 
 # %%
 print(nd)
 
 # %% [markdown]
-# * **Displaying html**, inside a jupyter notebook, by just typing the name of the dataset (must be the last
+# * **Displaying html**, inside a jupyter notebook, by just typing the name of the
+# dataset (must be the last
 # instruction of a cell, however!)
 
 # %%
@@ -172,16 +187,18 @@ prefs.colormap = "magma"
 _ = nd.plot(method="image")  # or nd.plot_image()
 
 # %% [markdown]
-# Note that as we plot wavenumbers as abscissa, by convention the coordinates' direction is reversed.
+# Note that as we plot wavenumbers as abscissa, by convention the coordinates' direction
+# is reversed.
 #
-# This can be changed by using the keyword argument `reversed = False`.
+# This can be changed by using the keyword argument `reversed = False` .
 
 # %% [markdown]
 # ### Processing a dataset
 
 # %% [markdown]
-# Some arithmetic can be performed on such dataset. Here is an example where we subtract one reference spectrum to
-# the whole nddataset that we have read above (`nd`).
+# Some arithmetic can be performed on such dataset. Here is an example where we subtract
+# one reference spectrum to
+# the whole nddataset that we have read above (`nd` ).
 
 # %% [markdown]
 # Let's take, e.g., the last row as reference
@@ -191,7 +208,8 @@ ref = nd[0]
 _ = ref.plot()
 
 # %% [markdown]
-# Now suppress this ref spectrum to all other spectra of the whole dataset (additionally we mask the region of
+# Now suppress this ref spectrum to all other spectra of the whole dataset (additionally
+# we mask the region of
 # saturation
 
 # %%
@@ -202,10 +220,5 @@ nds[:, 1290.0:890.0] = scp.MASKED
 _ = nds.plot_stack()
 
 # %% [markdown]
-# More details on available processing and analysis function will be given later in this user guide.
-
-# %% [markdown]
-# This was a short overview of the possibilities. To go further you can **Continue with ...**
-
-# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}}
-# [Data structures](../objects.rst)
+# More details on available processing and analysis functions will be given later in
+# this user guide.

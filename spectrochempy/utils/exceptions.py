@@ -8,7 +8,6 @@
 SpectroChemPy specific exceptions
 """
 from contextlib import contextmanager
-from warnings import warn
 
 import pint
 import pytz
@@ -265,55 +264,6 @@ class WrongFileFormatError(SpectroChemPyError):
     """ """
 
 
-# noinspection PyDeprecation
-def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=""):
-    """
-    Deprecation decorator.
-
-    Parameters
-    ----------
-    name : str
-        If name is specified, kind is mandatory set to attribute
-        and the deprecated function is no more acting as a decorator.
-    kind : str
-        By default, it is method.
-    replace : str, optional, default:None
-        Name of the method that replace the deprecated one or None
-    extra_msg : str
-        Additional message.
-    removed : str, optional
-        Version string when this method will be removed
-    """
-
-    def output_warning_message(name, kind, replace, removed, extra_msg):
-        sreplace = f"Use `{replace}` instead. " if replace is not None else ""
-        msg = f" The `{name}` {kind} is now deprecated. {sreplace}"
-        sremoved = f"version {removed}" if removed else "future version"
-        msg += f"`{name}` {kind} will be removed in {sremoved}. "
-        msg += extra_msg
-        warn(
-            msg,
-            category=DeprecationWarning,
-        )
-
-    if name is not None:
-        kind = "attribute"
-        output_warning_message(name, kind, replace, removed, extra_msg)
-        return
-
-    def deprecation_decorator(func):
-        def wrapper(*args, **kwargs):
-            name = func.__qualname__
-            if name.endswith("__init__"):
-                name = name.split(".", maxsplit=1)[0]
-            output_warning_message(name, kind, replace, removed, extra_msg)
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return deprecation_decorator
-
-
 @contextmanager
 def ignored(*exc):
     """
@@ -328,7 +278,7 @@ def ignored(*exc):
 
     Parameters
     ----------
-    *exc : Exception
+    \*exc : Exception
         One or several exceptions to ignore.
 
     Examples

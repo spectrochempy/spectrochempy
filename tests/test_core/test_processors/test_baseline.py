@@ -95,7 +95,7 @@ def test_basecor_multivariate(IR_dataset_2D):
 
     dataset = IR_dataset_2D[:15]
 
-    basc = BaselineCorrection(dataset)
+    basc = BaselineCorrection(dataset, figsize=(10, 10))
     s = basc(
         [6000.0, 3500.0], [1800.0, 1500.0], method="multivariate", interpolation="pchip"
     )

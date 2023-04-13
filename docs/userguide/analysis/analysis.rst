@@ -4,6 +4,8 @@ Analysis
 **********
 
 Below you will find some tutorials on analysis process.
+These tutorial pages can be supplemented very effectively by a review of the examples
+in the gallery (:ref:`examples-index`\).
 
 .. note::
 
@@ -16,4 +18,5 @@ Below you will find some tutorials on analysis process.
    peak_finding
    peak_integration
    fitting
+   pca
    mcr_als

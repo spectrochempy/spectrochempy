@@ -78,8 +78,8 @@ def ls(dataset, pts=0.0, **kwargs):
 
     Returns
     -------
-    dataset
-        dataset left shifted and zero filled.
+    `NDDataset`
+        Modified dataset.
 
     Other Parameters
     ----------------
@@ -198,7 +198,7 @@ def fsh(dataset, pts, **kwargs):
     Returns
     -------
     dataset
-        dataset shifted
+        dataset shifted.
 
     Other Parameters
     ----------------
@@ -242,7 +242,7 @@ def fsh2(dataset, pts, **kwargs):
     Returns
     -------
     dataset
-        dataset shifted
+        dataset shifted.
 
     Other Parameters
     ----------------

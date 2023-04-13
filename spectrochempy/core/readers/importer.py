@@ -200,19 +200,27 @@ class Importer(HasTraits):
                 return
         datasets = []
         for filename in files[key]:
-            filename = pathclean(filename)
+            if (
+                isinstance(filename, str)
+                and not filename.startswith("http://")
+                and not filename.startswith("https://")
+            ):
+                filename = pathclean(filename)
             read_ = getattr(self, f"_read_{key[1:]}")
             try:
                 res = read_(self.objtype(), filename, **kwargs)
                 # sometimes read_ can return None (e.g. non labspec text file)
-            except FileNotFoundError as e:
+            except FileNotFoundError:
                 # try to get the file from github
                 kwargs["read_method"] = read_
                 try:
                     res = _read_remote(self.objtype(), filename, **kwargs)
 
-                except OSError:
-                    raise e
+                except OSError as e:
+                    if kwargs.get("remote"):
+                        raise e
+                    else:
+                        raise FileNotFoundError(f"{filename} not found")
 
                 except IOError as e:
                     warning_(str(e))
@@ -222,7 +230,7 @@ class Importer(HasTraits):
                     warning_(str(e))
                     res = None
 
-                except Exception:
+                except Exception as e:
                     raise e
 
             except IOError as e:
@@ -294,16 +302,18 @@ def read(*paths, **kwargs):
     Parameters
     ----------
     *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
+        The data source(s) can be specified by the name or a list of name for the
+        file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  **kwargs )*
+        *e.g.,( file1, file2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, **kwargs *)*
+        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename`, nor `content`),
+        except if `merge` is set to False. If a source is not provided (i.e. no
+        `filename` , nor `content` ),
         a dialog box will be opened to select files.
     **kwargs
         Optional keyword parameters (see Other Parameters).
@@ -311,7 +321,7 @@ def read(*paths, **kwargs):
     Returns
     --------
     read
-        |NDDataset| or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     Other Parameters
     ----------------
@@ -319,10 +329,12 @@ def read(*paths, **kwargs):
         Protocol used for reading. If not provided, the correct protocol
         is inferred (whenever it is possible) from the file name extension.
     directory : str, optional
-        From where to read the specified `filename`. If not specified, read in the default ``datadir`` specified in
+        From where to read the specified `filename` . If not specified, read in the
+        default `datadir` specified in
         SpectroChemPy Preferences.
     merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
+        Default value is False. If True, and several filenames have been provided as
+        arguments,
         then a single dataset with merged (stacked along the first
         dimension) is returned (default=False).
     sortbydate : bool, optional
@@ -330,16 +342,17 @@ def read(*paths, **kwargs):
     description : str, optional
         A Custom description.
     origin : {'omnic', 'tga'}, optional
-        In order to properly interpret CSV file it can be necessary to set the origin of the spectra.
+        In order to properly interpret CSV file it can be necessary to set the origin
+        of the spectra.
         Up to now only 'omnic' and 'tga' have been implemented.
     csv_delimiter : str, optional
         Set the column delimiter in CSV file.
-        By default it is the one set in SpectroChemPy ``Preferences``.
+        By default it is the one set in SpectroChemPy `Preferences` .
     content : bytes object, optional
         Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
         to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the ``tests/tests_readers`` directory.
+        For examples on how to use this feature, one can look in the `tests/tests_readers` directory.
     listdir : bool, optional
         If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
         is True. It is assumed that all the files correspond to current reading protocol (default=True)
@@ -352,9 +365,9 @@ def read(*paths, **kwargs):
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
     read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
-    read_spc : Read Galactic *.spc files.
+    read_spg : Read Omnic .spg grouped spectra.
+    read_spa : Read Omnic .spa single spectra.
+    read_spc : Read Galactic .spc files.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
@@ -362,12 +375,12 @@ def read(*paths, **kwargs):
 
     Examples
     ---------
-    Reading a single OPUS file  (providing a windows type filename relative to the default ``Datadir``)
+    Reading a single OPUS file  (providing a windows type filename relative to the default `Datadir` )
 
     >>> scp.read('irdata\\\\OPUS\\\\test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
-    Reading a single OPUS file  (providing a unix/python type filename relative to the default ``Datadir``)
+    Reading a single OPUS file  (providing a unix/python type filename relative to the default `Datadir` )
     Note that here read_opus is called as a classmethod of the NDDataset class
 
     >>> scp.NDDataset.read('irdata/OPUS/test.0000')
@@ -451,12 +464,12 @@ def read_dir(directory=None, **kwargs):
     Open a list of readable files in a and store data/metadata in a dataset or a list of datasets according to the
     following rules :
 
-    * 2D spectroscopic data (e.g. valid *.spg files or matlab arrays, etc...) from
+    * 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
       distinct files are stored in distinct NDdatasets.
-    * 1D spectroscopic data (e.g., *.spa files) in a given directory are grouped
+    * 1D spectroscopic data (e.g., .spa files) in a given directory are grouped
       into single NDDataset, providing their unique dimension are compatible. If not,
       an error is generated.
-    * non readable files are ignored
+    * non-readable files are ignored
 
     Parameters
     ----------
@@ -466,7 +479,7 @@ def read_dir(directory=None, **kwargs):
     Returns
     --------
     read_dir
-        |NDDataset| or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     Depending on the python version, the order of the datasets in the list may change.
 
@@ -475,8 +488,8 @@ def read_dir(directory=None, **kwargs):
     read_topspin : Read TopSpin Bruker NMR spectra.
     read_omnic : Read Omnic spectra.
     read_opus : Read OPUS spectra.
-    read_spg : Read Omnic *.spg grouped spectra.
-    read_spa : Read Omnic *.Spa single spectra.
+    read_spg : Read Omnic .spg grouped spectra.
+    read_spa : Read Omnic .Spa single spectra.
     read_srs : Read Omnic series.
     read_csv : Read CSV files.
     read_zip : Read Zip files.
@@ -526,7 +539,7 @@ def read_remote(file_or_dir, **kwargs):
     Returns
     --------
     dataset(s)
-        |NDDataset| or list of |NDDataset| .
+        `NDDataset` or list of `NDDataset` .
 
     See Also
     --------
@@ -571,10 +584,11 @@ def _get_url_content_and_save(url, dst, replace):
         r = requests.get(url, allow_redirects=True)
 
         # write downloaded file
+        r.raise_for_status()
         _write_downloaded_file(r.content, dst)
 
     except OSError:
-        raise FileNotFoundError(f"Not found locally or on github (url:{url}")
+        raise FileNotFoundError(f"Not found locally or at url:{url}")
 
 
 def _download_full_testdata_directory():
@@ -602,32 +616,36 @@ def _download_from_url(url, dst, replace=False):
     # ##
     # ##    Do not forget to change the fork in the following url
     # ##
-    if not str(url).startswith("https://"):
-        # try on github
+    if not str(url).startswith("https://") and not str(url).startswith("http://"):
+        # download on github
         url = (
             f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
             f"testdata/{url}"
         )
-    # first determine if it is a directory
-    r = requests.get(url + "/__index__", allow_redirects=True)
-    index = None
-    if r.status_code == 200:
-        index = yaml.load(r.content, Loader=yaml.CLoader)
 
-    if index is None:
-        _get_url_content_and_save(url, dst, replace)
+        # first determine if it is a directory
+        r = requests.get(url + "/__index__", allow_redirects=True)
+        index = None
+        if r.status_code == 200:
+            index = yaml.load(r.content, Loader=yaml.CLoader)
 
+        if index is None:
+            _get_url_content_and_save(url, dst, replace)
+
+        else:
+            for filename in index["files"]:
+                _get_url_content_and_save(f"{url}/{filename}", dst / filename, replace)
+            for folder in index["folders"]:
+                _download_from_url(f"{url}/{folder}", dst / folder)
     else:
-        for filename in index["files"]:
-            _get_url_content_and_save(f"{url}/{filename}", dst / filename, replace)
-        for folder in index["folders"]:
-            _download_from_url(f"{url}/{folder}", dst / folder)
+        # download url
+        _get_url_content_and_save(url, dst, replace)
 
 
 def _is_relative_to(path, base):
     # try to emulate the pathlib is_relative_to method which does not work on python
     # 3.7 (needed for Colab!)
-    # TODO: replace if Colab is (unlikely) updated to a compatible version
+    # TODO: replace as Colab is updated to 3.9
     pparts = path.parts
     bparts = base.parts
     if bparts[-1] in pparts:
@@ -656,25 +674,31 @@ def _read_remote(*args, **kwargs):
     datadir = prefs.datadir
 
     dataset, path = args
-    # path of the required files
-    path = pathclean(path)
-
-    if _is_relative_to(path, datadir):
-        # try to make it relative for remote downloading
-        relative_path = _relative_to(path, datadir)
-    else:
-        # assume it is already relative
-        relative_path = path
-
-    # in principle the data came from github. Try to download it
+    is_url = str(path).startswith("http://") or str(path).startswith("https://")
 
     replace = kwargs.pop("replace_existing", False)
-    dst = datadir / relative_path
-    if dst.name != "testdata":
-        _download_from_url(relative_path, dst, replace)
+    if not is_url:
+        path = pathclean(path)
+
+        if _is_relative_to(path, datadir):
+            # try to make it relative for remote downloading on github
+            relative_path = _relative_to(path, datadir)
+        else:
+            # assume it is already relative
+            relative_path = path
+
+        # in principle the data came from github. Try to download it
+        dst = datadir / relative_path
+        if dst.name != "testdata":
+            _download_from_url(relative_path, dst, replace)
+        else:
+            # we are going to download the whole testdata directory -> use a faster method
+            _download_full_testdata_directory()
+
     else:
-        # we are going to download the whole testdata directory -> use a faster method
-        _download_full_testdata_directory()
+        # download localy
+        dst = pathclean(path.split("/")[-1])
+        _download_from_url(path, dst, replace)
 
     if not kwargs.pop("download_only", False):
         read_method = kwargs.pop("read_method", read)
