@@ -1,15 +1,10 @@
 :orphan:
 
-What's new in revision 0.6.0
+What's new in revision 0.6.1.dev0
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-0.6.0.
+These are the changes in SpectroChemPy-0.6.1.dev0.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
-
-New features
-~~~~~~~~~~~~
-
-- Readers: add download() method
 
 Breaking changes
 ~~~~~~~~~~~~~~~~

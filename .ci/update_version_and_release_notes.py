@@ -165,7 +165,7 @@ def make_zenodo(version):
 
 def make_release_note_index(revision):
 
-    # remove old rev files
+    # remove old last revision files
     files = WN.glob("v*.dev*.rst")
     for file in files:
         file.unlink()
@@ -207,6 +207,8 @@ def make_release_note_index(revision):
         # void changelog (keep only section titles)
         (WN / "changelog.rst").write_text(
             """
+:orphan:
+
 What's new in revision {{ revision }}
 ---------------------------------------------------------------------------------------
 
