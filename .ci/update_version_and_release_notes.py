@@ -286,7 +286,11 @@ For install and upgrade instructions, see :ref:`installation`\ .
 """
         )
         for i, vers in enumerate(dicvers):
-            latest = "\n    latest" if i == 0 and ".dev" in revision else ""
+            latest = (
+                "\n    latest"
+                if i == 0 and ".dev" in revision
+                else f"\n    v{revision}"
+            )
             f.write(
                 f"""
 Version {vers}
