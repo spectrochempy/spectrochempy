@@ -1,12 +1,12 @@
 .. _release:
 
-..
-   Do not modify this file as it is automatically generated.
-   See '.ci/update_version_and_release_notes.py' if you need to change the output.
-
 *************
 Release notes
 *************
+
+..
+   Do not modify this file as it is automatically generated.
+   See '.ci/update_version_and_release_notes.py' if you need to change the output.
 
 This is the list of changes to `SpectroChemPy` between each release. For full details,
 see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_ .
