@@ -44,23 +44,18 @@
    {% endif %}
    {% endblock %}
 
-    .. _sphx_glr_backref_{{fullname}}:
-
-    .. minigallery:: {{fullname}}
-        :add-heading:
-
    {% block methods_documentation %}
    {% if methods %}
    .. rubric:: Methods Documentation
 
    {% for item in methods %}
    .. automethod:: {{ item }}
-
-   .. _sphx_glr_backref_{{fullname}}.{{item}}:
-
-   .. minigallery:: {{fullname}}.{{item}}
-       :add-heading:
-
    {%- endfor %}
    {% endif %}
    {% endblock %}
+
+
+.. rubric:: Examples using {{fullname}}
+.. _sphx_glr_backref_{{fullname}}:
+
+.. minigallery:: {{fullname}}
