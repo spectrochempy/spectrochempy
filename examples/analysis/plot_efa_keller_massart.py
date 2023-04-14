@@ -16,6 +16,7 @@ In this example, we perform the Evolving Factor Analysis of a TEST dataset
 """
 # %%
 import numpy as np
+
 import spectrochempy as scp
 
 # sphinx_gallery_thumbnail_number = 5

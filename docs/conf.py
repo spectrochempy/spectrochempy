@@ -329,15 +329,14 @@ pdf_language = "en_EN"
 
 sphinx_gallery_conf = {
     "plot_gallery": "True",
+    "examples_dirs": "../examples",
+    "gallery_dirs": "gallery/auto_examples",
     "backreferences_dir": "gallery/backreferences",
-    "doc_module": ("spectrochempy",),
+    "doc_module": "spectrochempy",
     "reference_url": {
         "spectrochempy": None,
     },
-    # path to the examples scripts
-    "examples_dirs": "gettingstarted/examples",
     # path where to save gallery generated examples=======
-    "gallery_dirs": "gallery/auto_examples",
     "abort_on_example_error": False,
     "expected_failing_examples": [],
     "download_all_examples": False,
