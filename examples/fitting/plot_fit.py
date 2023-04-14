@@ -17,6 +17,7 @@ equation.
 
 # %%
 import os
+
 import spectrochempy as scp
 
 # %%

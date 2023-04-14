@@ -17,6 +17,7 @@ In this example, we perform the Evolving Factor Analysis
 
 # %%
 import os
+
 import spectrochempy as scp
 
 # %%

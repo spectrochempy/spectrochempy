@@ -21,8 +21,9 @@ Here we will focus on a single run. For the user convenience, this dataset is pr
 in the spectrochempy_data as 'METING9.mat'\.
 """
 
-import spectrochempy as scp
 import numpy as np
+
+import spectrochempy as scp
 
 # %%
 # Load the dataset
