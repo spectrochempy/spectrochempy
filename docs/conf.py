@@ -553,3 +553,4 @@ def setup(app):
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
     # # Ignore .ipynb files
     app.registry.source_suffix.pop(".ipynb", None)
+    app.registry.source_suffix.pop(".py", None)
