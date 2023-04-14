@@ -19,6 +19,7 @@ import yaml
 from traitlets import Dict, HasTraits, List, Type, Unicode
 
 from spectrochempy.core import info_, warning_
+from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 from spectrochempy.utils.file import (
     check_filename_to_open,
@@ -293,6 +294,33 @@ def _importer_method(func):
 # --------------------------------------------------------------------------------------
 # Generic Read function
 # --------------------------------------------------------------------------------------
+
+_docstring.get_sections(
+    """
+See Also
+--------
+read : Generic reader inferring protocol from the filename extension.
+read_dir : Read an entire directory.
+read_topspin : Read TopSpin Bruker NMR spectra.
+read_omnic : Read Omnic spectra.
+read_opus : Read OPUS spectra.
+read_labspec : Read Raman LABSPEC spectra.
+read_spg : Read Omnic .spg grouped spectra.
+read_spa : Read Omnic .spa single spectra.
+read_spc : Read Galactic .spc files.
+read_srs : Read Omnic series.
+read_csv : Read CSV files.
+read_zip : Read Zip files.
+read_matlab : Read Matlab files.
+""",
+    sections=["See Also"],
+    base="_Importer",
+)
+
+_docstring.delete_params("_Importer.see_also", "read")
+
+
+@_docstring.dedent
 def read(*paths, **kwargs):
     """
     Generic read method.
@@ -301,86 +329,83 @@ def read(*paths, **kwargs):
 
     Parameters
     ----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
+    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
         The data source(s) can be specified by the name or a list of name for the
         file(s) to be loaded:
 
-        *e.g.,( file1, file2, ...,  \*\*kwargs )*
+        * *e.g.,* ( filename1, filename2, ...,  \*\*kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
+        * *e.g.,* ( **[** *filename1, filename2, ...* **]**, \*\*kwargs *)*
 
         The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no
-        `filename` , nor `content` ),
+        except if ``merge`` is set to `False`.
+
+        If a source is not provided (*i.e.,* no ``paths`` , nor ``content``\ ),
         a dialog box will be opened to select files.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    %(kwargs)s
 
     Returns
     --------
-    read
-        `NDDataset` or list of `NDDataset` .
+    `NDDataset` or list of `NDDataset` .
 
     Other Parameters
     ----------------
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
-        Protocol used for reading. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the file name extension.
-    directory : str, optional
-        From where to read the specified `filename` . If not specified, read in the
-        default `datadir` specified in
-        SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as
-        arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False).
-    sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True).
-    description : str, optional
+    protocol : `str`\ , optional
+        ``Protocol`` used for reading. It can be one of {``'scp'``\ , ``'omnic'``\ ,
+        ``'opus'``\ , ``'topspin'``\ , ``'matlab'``\ , ``'jcamp'``\ , ``'csv'``\ ,
+        ``'excel'``\ }. If not provided, the correct protocol
+        is inferred (whenever it is possible) from the filename extension.
+    directory : `~pathlib.Path` object objects or valid urls, optional
+        From where to read the files.
+    merge : `bool`\ , optional, default: `False`
+        If `True` and several filenames or a ``directory`` have been provided as
+        arguments, then a single `NDDataset` with merged (stacked along the first
+        dimension) is returned.
+    sortbydate : `bool`, optional, default: `True`
+        Sort multiple filename by acquisition date.
+    description : `str`, optional
         A Custom description.
-    origin : {'omnic', 'tga'}, optional
-        In order to properly interpret CSV file it can be necessary to set the origin
-        of the spectra.
-        Up to now only 'omnic' and 'tga' have been implemented.
-    csv_delimiter : str, optional
+    origin : one of {``'omnic'``\ , ``'tga'``\ }, optional
+        Used when reading with the CSV protocol. In order to properly interpret CSV file
+        it can be necessary to set the origin of the spectra.
+        Up to now only ``'omnic'`` and ``'tga'`` have been implemented.
+    csv_delimiter : `str`\ , optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
-        By default it is the one set in SpectroChemPy `Preferences` .
-    content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the `tests/tests_readers` directory.
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True)
-    recursive : bool, optional
-        Read also in subfolders. (default=False)
+    content : `bytes` object, optional
+        Instead of passing a filename for further reading, a bytes content can be
+        directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly
+        useful for a GUI Dash application to handle drag and drop of files into a
+        Browser. For examples on how to use this feature, one can look in the
+        ``tests/tests_readers`` directory.
+    iterdir : `bool`\ , optional, default: `True`
+        If `True` and no filename was provided, all files present in the provided
+        ``directory`` are returned (and merged if ``merge`` is `True`\ .
+        It is assumed that all the files correspond to current reading protocol.
+
+        .. versionchanged:: 0.6.2
+
+            ``iterdir`` replace the deprecated ``listdir`` argument.
+
+    recursive : `bool`, optional, default: `False`
+        Read also in subfolders.
 
     See Also
     --------
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic .spg grouped spectra.
-    read_spa : Read Omnic .spa single spectra.
-    read_spc : Read Galactic .spc files.
-    read_srs : Read Omnic series.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
-    read_matlab : Read Matlab files.
+    %(_Importer.see_also.no_read)s
 
     Examples
     ---------
-    Reading a single OPUS file  (providing a windows type filename relative to the default `Datadir` )
+    Reading a single OPUS file  (providing a windows type filename relative
+    to the default `~spectrochempy.preferences.datadir` )
 
     >>> scp.read('irdata\\\\OPUS\\\\test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
-    Reading a single OPUS file  (providing a unix/python type filename relative to the default `Datadir` )
+    Reading a single OPUS file  (providing a unix/python type filename relative
+    to the default ``datadir`` )
     Note that here read_opus is called as a classmethod of the NDDataset class
 
     >>> scp.NDDataset.read('irdata/OPUS/test.0000')
@@ -454,20 +479,41 @@ def read(*paths, **kwargs):
         except KeyError:
             raise ProtocolError(protocol, list(importer.protocols.values()))
 
+    # deprecated kwargs
+    listdir = kwargs.pop("listdir", True)
+    if "listdir" in kwargs and "iterdir" not in kwargs:
+        kwargs["iterdir"] = listdir
+        warning_(
+            "argument `listdir` is deprecated, use ìterdir` instead",
+            category=DeprecationWarning,
+        )
+
     return importer(*paths, **kwargs)
 
 
+# for some reason the doctring.getsection modify the signature of the function
+# when used as a decorator, so we use it as a function
+_docstring.get_sections(
+    read.__doc__,
+    sections=["Parameters", "Other Parameters", "Returns"],
+    base="_Importer",
+)
+
+_docstring.delete_params("_Importer.see_also", "read_dir")
+
+
+@_docstring.dedent
 def read_dir(directory=None, **kwargs):
     """
     Read an entire directory.
 
-    Open a list of readable files in a and store data/metadata in a dataset or a list of datasets according to the
-    following rules :
+    Open a list of readable files in a and store data/metadata in a dataset or a list of
+    datasets according to the following rules :
 
     * 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
-      distinct files are stored in distinct NDdatasets.
-    * 1D spectroscopic data (e.g., .spa files) in a given directory are grouped
-      into single NDDataset, providing their unique dimension are compatible. If not,
+      distinct files are stored in distinct `NDdataset`\ s.
+    * 1D spectroscopic data (e.g., .spa files) in a given directory are merged
+      into single `NDDataset`\ , providing their unique dimension are compatible. If not,
       an error is generated.
     * non-readable files are ignored
 
@@ -478,22 +524,12 @@ def read_dir(directory=None, **kwargs):
 
     Returns
     --------
-    read_dir
-        `NDDataset` or list of `NDDataset` .
-
-    Depending on the python version, the order of the datasets in the list may change.
+    %(_Importer.returns)s
+        Depending on the python version, the order of the datasets in the list may change.
 
     See Also
     --------
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_spg : Read Omnic .spg grouped spectra.
-    read_spa : Read Omnic .Spa single spectra.
-    read_srs : Read Omnic series.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
-    read_matlab : Read Matlab files.
+    %(_Importer.see_also.no_read_dir)s
 
     Examples
     --------
@@ -505,36 +541,44 @@ def read_dir(directory=None, **kwargs):
 
     >>> B = scp.NDDataset.read_dir()
     """
-    kwargs["listdir"] = True
+    kwargs["iterdir"] = True
     importer = Importer()
     return importer(directory, **kwargs)
 
 
+@_docstring.dedent
 def read_remote(file_or_dir, **kwargs):
     """
-    Download and read files or an entire directory on github spectrochempy_data
-    repository.
+    Download and read files or an entire directory from any url
 
-    This is done only if the data are not yet downloaded and present in the DATADIR
-    directory.
+    The first usage in spectrochempy is the loading of test files in the ``github
+    spectrochempy_data`` repository. This is done only if the data are not yet
+    downloaded and present in the `~spectrochempy.preferences.datadir` directory.
+
+    It can also be used to download and read file or directory from any url.
 
     Parameters
     ----------
-    file_or_dir : str or pathlib
-        Folder where are located the files to read
-        (it should be written as if it was locally downloaded already).
-    **kwargs : optional keywords parameters
-        See Other Parameters.
+    path : `str`, `~pathlib.Path` object or an url.
+        When a file or folder is specified, it must be written as if it were present
+        locally exactly as for the `read` function. The correponding file or directory
+        is downloaded from the ``github spectrochemp_data`` repository.
+        Otherwise it should be a full and valid url.
+    %(kwargs)s
 
     Other Parameters
     ----------------
-    merge : bool, optional, default: False
-        By default files read are noot merged
-    replace_existing: bool, optional, default: False
+    merge : `bool`\ , optional, default: `False`
+        If `True` and a folder have been provided as `path` argument,
+        then a single dataset with merged (stacked along the first dimension)
+        is returned. The same happen for url if a directry contining several files
+        is specified for the `path` argument.
+    replace_existing: `bool`, optional, default: `False`
         By default, existing files are not replaced so not downloaded.
     download_only: bool, optional, default: False
         If True, only downloading and saving of the files is performed, with no
         attempt to read their content.
+    read_only:
 
     Returns
     --------

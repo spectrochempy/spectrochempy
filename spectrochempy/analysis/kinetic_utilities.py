@@ -212,7 +212,7 @@ class ActionMassKinetics(tr.HasTraits):
         .. math::
             dC / dt =  (B - A).T  K C^A
 
-            C(t0) = C0
+            C(t_0) = C_0
 
         where :math:`A` and :math:`B` are the stoichiometry matrices,
         :math:`K` is the diagonal matrix of rate constants and :math:`C^A` is the
