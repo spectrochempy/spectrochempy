@@ -20,85 +20,45 @@ import scipy.io as sio
 
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
-
+from spectrochempy.utils.docstrings import _docstring
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
+_docstring.delete_params("Importer.see_also", "read_matlab")
+
+
+@_docstring.dedent
 def read_matlab(*paths, **kwargs):
     """
-    Read a matlab file with extension ` .mat` and return its content as a list.
+    Read a matlab file with extension :file:`.mat` and return its content as a list.
 
-    The array of numbers (i.e. matlab matrices) and Eigenvector's DataSet Object (DSO, see
-    `DSO <https://www.eigenvector.com/software/dataset.htm>`_ ) are returned as NDDatasets.  The
-    content not recognized by SpectroChemPy is returned as a tuple (name, object).
+    The array of numbers (*i.e.,* matlab matrices) and Eigenvector's DataSet Object
+    (``DSO``, see `DSO <https://www.eigenvector.com/software/dataset.htm>`__ ) are
+    returned as NDDatasets.  The content not recognized by SpectroChemPy is returned
+    as a tuple (name, object).
 
     Parameters
-    -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
-
-        *e.g.,( file1, file2, ...,  \*\*kwargs )*
-
-        If the list of filenames are enclosed into brackets:
-
-        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
-
-        The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename` , nor `content` ),
-        a dialog box will be opened to select files.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    ----------
+    %(Importer.parameters)s
 
     Returns
     --------
-    read_matlab
-        `NDDataset` or list of `NDDataset` .
+    %(Importer.returns)s
 
     Other Parameters
     ----------------
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel'}, optional
-        Protocol used for reading. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
-    directory : str, optional
-        From where to read the specified `filename` . If not specified, read in the default `datadir` specified in
-        SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False)
-    description: str, optional
-        A Custom description.
-    content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the `tests/tests_readers` directory
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True)
-    recursive : bool, optional
-        Read also in subfolders. (default=False)
+    %(Importer.other_parameters)s
+
+    See Also
+    ---------
+    %(Importer.see_also.no_read_matlab)s
 
     Examples
     ---------
 
     >>> scp.read_matlab('matlabdata/dso.mat')
     NDDataset: [float64] unitless (shape: (y:20, x:426))
-
-    See `read_omnic` for more examples of use
-    See Also
-    --------
-    read : Read generic files.
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic .spg grouped spectra.
-    read_spa : Read Omnic .spa single spectra.
-    read_srs : Read Omnic series.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
     """
     kwargs["filetypes"] = ["MATLAB files (*.mat *.dso)"]
     kwargs["protocol"] = ["matlab", "mat", "dso"]

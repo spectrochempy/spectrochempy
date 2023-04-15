@@ -20,70 +20,38 @@ import numpy as np
 
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
-
+from spectrochempy.utils.docstrings import _docstring
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
+_docstring.delete_params("Importer.see_also", "read_quadera")
+
+
+@_docstring.dedent
 def read_quadera(*paths, **kwargs):
     """
-    Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file with extension `.asc` .
+    Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file with extension :file:`.asc`\ .
 
     Parameters
-    -----------
-    paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
-
-        - e.g.,( file1, file2, ...,  **kwargs )
-
-        If the list of filenames are enclosed into brackets:
-
-        - e.g., ( [file1, file2, ... ], **kwargs )
-
-        The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename` , nor `content` ),
-        a dialog box will be opened to select files.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    ----------
+    %(Importer.parameters)s
 
     Returns
     --------
-    `NDDataset` or list of `NDDataset` .
+    %(Importer.returns)s
 
     Other Parameters
     ----------------
-    timestamp: bool, optional
-        returns the acquisition timestamp as Coord (Default=True).
-        If set to false, returns the time relative to the acquisition time of the data
-    protocol : {'scp', 'omnic', 'opus', 'topspin', 'matlab', 'jcamp', 'csv', 'excel', 'asc'}, optional
-        Protocol used for reading. If not provided, the correct protocol
-        is inferred (whnever it is possible) from the file name extension.
-    directory : str, optional
-        From where to read the specified `filename` . If not specified, read in the
-        default `datadir` specified in
-        SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as
-        arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False)
-    description: str, optional
-        A Custom description.
-    content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be
-        directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly
-        useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the
-        `tests/tests_readers` directory
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are
-        returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol
-        (default=True)
-    recursive : bool, optional
-        Read also in subfolders. (default=False)
+    timestamp: `bool`\ , optional, default: `True`
+        Returns the acquisition timestamp as `Coord`.
+        If set to `False`\ , returns the time relative to the acquisition time of the
+        data
+    %(Importer.other_parameters)s
+
+    See Also
+    ---------
+    %(Importer.see_also.no_read_quadera)s
 
     Notes
     ------
@@ -91,19 +59,6 @@ def read_quadera(*paths, **kwargs):
     other channels are typically
     within few seconds, and the data of other channels are NOT interpolated
     Todo: check with users whether data interpolation should be made
-
-    See Also
-    --------
-    read : Read generic files.
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic \*.spg grouped spectra.
-    read_spa : Read Omnic \*.spa single spectra.
-    read_srs : Read Omnic series.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
 
     Examples
     ---------

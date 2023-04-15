@@ -303,18 +303,19 @@ _docstring.get_sections(
 See Also
 --------
 read : Generic reader inferring protocol from the filename extension.
+read_zip : Read Zip archives (containing spectrochempy readable files)
 read_dir : Read an entire directory.
-read_topspin : Read TopSpin Bruker NMR spectra.
-read_omnic : Read Omnic spectra.
 read_opus : Read OPUS spectra.
-read_labspec : Read Raman LABSPEC spectra.
-read_spg : Read Omnic .spg grouped spectra.
-read_spa : Read Omnic .spa single spectra.
-read_spc : Read Galactic .spc files.
-read_srs : Read Omnic series.
-read_csv : Read CSV files.
-read_zip : Read Zip files.
-read_matlab : Read Matlab files.
+read_labspec : Read Raman LABSPEC spectra (:file:`.txt`\ ).
+read_omnic : Read Omnic spectra (:file:`.spa`\ , :file:`.spg`\ , :file:`.srs`\ ).
+read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`\ ).
+read_galactic : Read Galactic files (:file:`.spc`\ ).
+read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+read_topspin : Read TopSpin Bruker NMR spectra.
+read_csv : Read CSV files (:file:`.csv`\ ).
+read_jcamp : Read Infrared JCAMP-DX files (:file:`.jdx`\ , :file:`.dx`\ ).
+read_matlab : Read Matlab files (:file:`.mat`\ , :file:`.dso`\ ).
+read_carroucell : Read files in a directory after a carroucell experiment.
 """,
     sections=["See Also"],
     base="Importer",
@@ -350,8 +351,9 @@ def read(*paths, **kwargs):
     %(kwargs)s
 
     Returns
-    --------
-    `NDDataset` or list of `NDDataset` .
+    -------
+    object : `NDDataset` or list of `NDDataset`
+        The returned dataset(s).
 
     Other Parameters
     ----------------
@@ -381,8 +383,7 @@ def read(*paths, **kwargs):
         directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a GUI Dash application to handle drag and drop of files into a
-        Browser. For examples on how to use this feature, one can look in the
-        ``tests/tests_readers`` directory.
+        Browser.
     iterdir : `bool`\ , optional, default: `True`
         If `True` and no filename was provided, all files present in the provided
         ``directory`` are returned (and merged if ``merge`` is `True`\ .
@@ -432,7 +433,8 @@ def read(*paths, **kwargs):
     >>> scp.read(p)
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
-    Multiple files not merged (return a list of datasets). Note that a directory is specified
+    Multiple files not merged (return a list of datasets).
+    Note that a directory is specified
 
     >>> le = scp.read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
     >>> len(le)
@@ -445,7 +447,8 @@ def read(*paths, **kwargs):
     >>> scp.read('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
     NDDataset: [float64] a.u. (shape: (y:3, x:2567))
 
-    Multiple files to merge : they are passed as a list instead of using the keyword `merge`
+    Multiple files to merge : they are passed as a list instead of using the keyword
+    `merge`
 
     >>> scp.read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
     NDDataset: [float64] a.u. (shape: (y:3, x:2567))
@@ -456,7 +459,8 @@ def read(*paths, **kwargs):
     >>> len(le)
     3
 
-    Read without a filename. This has the effect of opening a dialog for file(s) selection
+    Read without a filename. This has the effect of opening a dialog for file(s)
+    selection
 
     >>> nd = scp.read()
 
@@ -527,7 +531,7 @@ def read_dir(directory=None, **kwargs):
 
     * 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
       distinct files are stored in distinct `NDdataset`\ s.
-    * 1D spectroscopic data (e.g., .spa files) in a given directory are merged
+    * 1D spectroscopic data (e.g., :file:`.spa` files) in a given directory are merged
       into single `NDDataset`\ , providing their unique dimension are compatible.
       If not, an error is generated.
     * non-readable files are ignored
@@ -570,8 +574,9 @@ def read_remote(file_or_dir, **kwargs):
     """
     Download and read files or an entire directory from any url
 
-    The first usage in spectrochempy is the loading of test files in the ``github
-    spectrochempy_data`` repository. This is done only if the data are not yet
+    The first usage in spectrochempy is the loading of test files in the
+    `spectrochempy_data repository <https://github.com/spectrochempy/spectrochempy_data>`__\ .
+    This is done only if the data are not yet
     downloaded and present in the `~spectrochempy.preferences.datadir` directory.
 
     It can also be used to download and read file or directory from any url.
@@ -585,13 +590,13 @@ def read_remote(file_or_dir, **kwargs):
         Otherwise it should be a full and valid url.
     %(kwargs)s
 
-    Other Parameters
-    ----------------
-    %(Importer.other_parameters)s
-
     Returns
     --------
     %(Importer.returns)s
+
+    Other Parameters
+    ----------------
+    %(Importer.other_parameters)s
 
     See Also
     --------

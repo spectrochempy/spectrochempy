@@ -23,59 +23,54 @@ from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.file import get_directory_name, get_filenames
 
+_docstring.delete_params("Importer.see_also", "read_carroucell")
 
+
+@_docstring.dedent
 def read_carroucell(directory=None, **kwargs):
     """
-    Open .spa files in a directory after a carroucell experiment.
+    Open :file:`.spa` files in a directory after a :term:`carroucell` experiment.
 
-    The files for a given sample are grouped in NDDatasets (sorted by acquisition date).
-    The NDDatasets are returned in a list sorted by sample number.
+    The files for a given sample are grouped in `NDDataset`\ s (sorted by
+    acquisition date).
+    The `NDDataset`\ s are returned in a list sorted by sample number.
     When the file containing the temperature data is present, the temperature is read
     and assigned as a label to each spectrum.
 
     Parameters
     ----------
-    directory : str, optional
+    directory : `str`, optional
         If not specified, opens a dialog box.
-    **kwargs
-        Optional keyword parameters. See Other Parameters.
+    %(kwargs)s
+
+    Returns
+    -------
+    %(Importer.returns)s
 
     Other Parameters
     ----------------
-    spectra : arraylike of 2 int (min, max), optional, default=None
+    spectra : :term:`array-like` of 2 `int` (``min`` , ``max`` ), optional, default: `None`
         The first and last spectrum to be loaded as determined by their number.
-         If None all spectra are loaded.
-    discardbg : bool, optional, default=True
-        If True : do not load background (sample #9).
-    delta_clocks : int, optional, default=0
-        Difference in seconds between the clocks used for spectra and temperature acquisition.
-        Defined as t(thermocouple clock) - t(spectrometer clock).
-
-    Returns
-    --------
-    nddataset
-        `NDDataset` or list of `NDDataset` .
+        If `None` all spectra are loaded.
+    discardbg : `bool`, optional, default: `True`
+        If `True` : do not load background (sample #9).
+    delta_clocks : `int`, optional, default:  0
+        Difference in seconds between the clocks used for spectra and temperature
+        acquisition. Defined as ``t(thermocouple clock) - t(spectrometer clock)`` .
 
     See Also
     --------
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_spg : Read Omnic .spg grouped spectra.
-    read_spa : Read Omnic .spa single spectra.
-    read_srs : Read Omnic series.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
-    read_matlab : Read Matlab files.
+    %(Importer.see_also.no_read_carroucell)s
 
     Notes
     ------
     All files are expected to be present in the same directory and their filenames
-    are expected to be in the format : X_samplename_YYY.spa
-    and for the background files : X_BCKG_YYYBG.spa
-    where X is the sample holder number and YYY the spectrum number.
+    are expected to be in the format : :file:`X_samplename_YYY.spa`
+    and for the background files : :file:`X_BCKG_YYYBG.spa`
+    where ``X`` is the sample holder number and ``YYY`` the spectrum number.
 
     Examples
     --------
