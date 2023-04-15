@@ -20,6 +20,13 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* `read` and the more specific `read_remote`method now handle any url pointing
+  to a spectrochempy readeable file. An url to a compressed (zip) files are also accepted.
+
+  .. sourcecode::ipython
+      lst = scp.read("https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip")
+      lst[-1].plot()
+
 
 .. section
 
@@ -27,7 +34,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- documentation information for new releases
+*  documentation information for new releases
 
 .. section
 
