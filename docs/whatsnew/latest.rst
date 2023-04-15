@@ -9,14 +9,18 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* `read` and the more specific `read_remote`method now handle any url pointing
+* `read` and the more specific `read_remote` method now handle any url pointing
   to a spectrochempy readeable file. An url to a compressed (zip) files are also accepted.
 
-  .. sourcecode::ipython
+  example:
+
+    .. code-block:: ipython
+
       lst = scp.read("https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip")
+      # lst contains 7 NDDatasets,, display the last
       lst[-1].plot()
 
 Bug fixes
 ~~~~~~~~~
 
-*  documentation information for new releases
+*  Documentation information for new releases.
