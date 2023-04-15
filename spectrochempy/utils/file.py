@@ -161,7 +161,7 @@ def check_filenames(*args, **kwargs):
     processed :
     expno :
     procno :
-    listdir :
+    iterdir :
     glob :
 
     See Also
@@ -182,7 +182,7 @@ def check_filenames(*args, **kwargs):
         if (
             isinstance(args[0], str)
             and (args[0].startswith("http://") or args[0].startswith("https://"))
-            and kwargs.get("remote")
+            # and kwargs.get("remote")
         ):
             # return url
             return args
@@ -205,7 +205,8 @@ def check_filenames(*args, **kwargs):
             return args[0]
 
     if not filenames:
-        # look into keywords (only the case where a str or pathlib filename is given are accepted)
+        # look into keywords (only the case where a str or pathlib filename is given are
+        # accepted)
         filenames = kwargs.pop("filename", None)
         filenames = [pathclean(filenames)] if pathclean(filenames) is not None else None
 
@@ -273,8 +274,7 @@ def check_filenames(*args, **kwargs):
 
 
 def _topspin_check_filename(filename, **kwargs):
-
-    if kwargs.get("listdir", False) or kwargs.get("glob", None) is not None:
+    if kwargs.get("iterdir", False) or kwargs.get("glob", None) is not None:
         # when we list topspin dataset we have to read directories, not directly files
         # we can retrieve them using glob patterns
         glob = kwargs.get("glob", None)
@@ -346,7 +346,7 @@ def get_filenames(*filenames, **kwargs):
         File type filter.
     dictionary : `bool` , optional, default=True
         Whether a dictionary or a list should be returned.
-    listdir : bool, default=False
+    iterdir : bool, default=False
         Read all file (possibly limited by `filetypes` in a given `directory` .
     recursive : bool, optional,  default=False.
         Read also subfolders.
@@ -442,10 +442,10 @@ def get_filenames(*filenames, **kwargs):
     else:
         # no filenames:
         # open a file dialog
-        # except if a directory is specified or listdir is True.
+        # except if a directory is specified or iterdir is True.
 
         getdir = kwargs.get(
-            "listdir",
+            "iterdir",
             directory is not None or kwargs.get("protocol", None) == ["topspin"]
             # or kwargs.get("protocol", None) == ["carroucell"],
         )

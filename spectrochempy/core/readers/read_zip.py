@@ -137,63 +137,53 @@ def _read_zip(*args, **kwargs):
 
         datasets = []
 
-        # for file in filelist:
-        #
-        #   # make a pathlib object (but this doesn't work with python 3.7)
-        #     file = zipfile.Path(zf, at=file.filename)      # TODO:
-        #
-        #     if file.name.startswith('__MACOSX'):
-        #         continue  # bypass non-data files
-        #
-        #     # seek the parent directory containing the files to read
-        #     if not file.is_dir():
-        #         continue
-        #
-        #     parent = file
-        #     break
-        #
-        #
-        # for count, children in enumerate(parent.iterdir()):
-        #
-        #     if count == only:
-        #         # limits to only this number of files
-        #         break
-        #
-        #     _ , extension = children.name.split('.')
-        #     if extension == 'DS_Store':
-        #         only += 1
-        #         continue
-        #
-        #     read_ = getattr(NDDataset, f"read_{extension}")
-        #
-        #     datasets.append(read_(children.name, content=children.read_bytes(), **kwargs))
+        files = []
+        dirs = []
 
-        # 3.7 compatible code
-
-        # seek the parent directory containing the files to read
         for file in filelist:
-            if not file.filename.startswith("__") and file.is_dir():
-                parent = file.filename
-                break
+            if "__MACOSX" in file.filename:
+                continue  # bypass non-data files
+            if ".DS_Store" in file.filename:
+                continue
 
-        count = 0
-        for file in filelist:
-            if (
-                not file.is_dir()
-                and file.filename.startswith(parent)
-                and "DS_Store" not in file.filename
-            ):
-                # read it
-                datasets.append(
-                    NDDataset.read(
-                        {file.filename: zf.read(file.filename)},
-                        origin=kwargs.get("origin", None),
-                    )
-                )
-                count += 1
+            # make a pathlib object (but this doesn't work with python 3.7)
+            file = zipfile.Path(zf, at=file.filename)
+            # seek the parent directory containing the files to read
+            if not file.is_dir():
+                files.append(file)
+            else:
+                dirs.append(file)
+
+        def extract(children, **kwargs):
+            # remove zip filetype and protocol
+            # to use the one associated with the file extension
+            origin = kwargs.get("origin", None)
+            return NDDataset.read(
+                children.name, content=children.read_bytes(), origin=origin
+            )
+
+        # we assume that only a single dir or a single file is zipped
+        # But this can be changed later
+        if dirs:
+            # a single directory
+            count = 0
+            for children in dirs[0].iterdir():
                 if count == only:
+                    # limits to only this number of files
                     break
-    return datasets
+                elif "__MACOSX" in str(children.name):
+                    continue  # bypass non-data files
+                elif ".DS_Store" in str(children.name):
+                    continue
+                else:
+                    # print(count, children)
+                    # TODO: why this pose problem in pycharm-debug?????
+                    datasets.append(extract(children, **kwargs))
+                    count += 1
+
+            return datasets
+        else:
+            return extract(files[0], **kwargs)
 
 
 # --------------------------------------------------------------------------------------
