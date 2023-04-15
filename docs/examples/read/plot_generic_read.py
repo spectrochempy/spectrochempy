@@ -66,10 +66,11 @@ for nd in dataset_list:
     print(f"{nd.name} : {nd.shape}")
 
 # %%
-# The eigenvector.com website contains the same data in a zipped format:
-# https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip.
+# The `eigenvector.com <eigenvector.com>`__ website contains the same data in a
+# compressed (zipped) format:
+# `corn.mat_.zip <https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip>`__ .
 # This can also be used by the `read` method.
 dataset_list = scp.read(
     "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip"
 )
-dataset_list[-1].plot()
+_ = dataset_list[-1].plot()
