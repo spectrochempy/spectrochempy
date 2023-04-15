@@ -264,16 +264,16 @@ def test_importer(monkeypatch, fs):
     assert len(nd) == 4
     assert isinstance(nd, list)
 
-    nd = read(listdir=True, directory=DATADIR / "fakedir")
+    nd = read(iterdir=True, directory=DATADIR / "fakedir")
     assert len(nd) == 4
     assert not isinstance(nd, list)
 
     # if a directory is passed as a keyword, the behavior is different:
-    # a dialog for file selection occurs except if listdir is set to True
-    nd = read(directory=DATADIR / "fakedir", listdir=False)
+    # a dialog for file selection occurs except if iterdir is set to True
+    nd = read(directory=DATADIR / "fakedir", iterdir=False)
     assert nd.shape == (2, 3)  # -> file selection dialog
 
-    nd = read(directory=DATADIR / "fakedir", listdir=True)
+    nd = read(directory=DATADIR / "fakedir", iterdir=True)
     assert nd.shape == (4, 3)  # -> directory selection dialog
 
     # read_dir()

@@ -653,7 +653,7 @@ def _read_spg(*args, **kwargs):
         fid.seek(position6B[i] + 2)  # go to line and skip 2 bytes
         spa_title_pos = _fromfile(fid, "uint32", 1)
 
-        # read filename
+        # read omnic filename
         spa_title = _readbtext(fid, spa_title_pos, 256)
         spectitles.append(spa_title)
 

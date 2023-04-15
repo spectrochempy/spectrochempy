@@ -68,7 +68,7 @@ ALIAS = [
 
 # --------------------------------------------------------------------------------------
 class Importer(HasTraits):
-    # Private _Importer class
+    # Private Importer class
 
     objtype = Type()
     datasets = List()
@@ -207,6 +207,9 @@ class Importer(HasTraits):
                 and not filename.startswith("https://")
             ):
                 filename = pathclean(filename)
+            else:
+                #    kwargs["remote"] = True
+                kwargs["read_only"] = kwargs.get("read_only", True)
             read_ = getattr(self, f"_read_{key[1:]}")
             try:
                 res = read_(self.objtype(), filename, **kwargs)
@@ -314,10 +317,10 @@ read_zip : Read Zip files.
 read_matlab : Read Matlab files.
 """,
     sections=["See Also"],
-    base="_Importer",
+    base="Importer",
 )
 
-_docstring.delete_params("_Importer.see_also", "read")
+_docstring.delete_params("Importer.see_also", "read")
 
 
 @_docstring.dedent
@@ -391,10 +394,20 @@ def read(*paths, **kwargs):
 
     recursive : `bool`, optional, default: `False`
         Read also in subfolders.
+    replace_existing: `bool`, optional, default: `False`
+        Used only when url are specified. By default, existing files are not replaced
+        so not downloaded.
+    download_only: `bool`, optional, default: `False`
+        Used only when url are specified.  If True, only downloading and saving of the
+        files is performed, with no attempt to read their content.
+    read_only: `bool`, optional, default: `True`
+        Used only when url are specified.  If True, saving of the
+        files is performed in the current directory, or in the directory specified by
+        the directory parameter.
 
     See Also
     --------
-    %(_Importer.see_also.no_read)s
+    %(Importer.see_also.no_read)s
 
     Examples
     ---------
@@ -478,6 +491,8 @@ def read(*paths, **kwargs):
             kwargs["filetypes"] = [importer.filetypes[protocol]]
         except KeyError:
             raise ProtocolError(protocol, list(importer.protocols.values()))
+        except TypeError as e:
+            print(e)
 
     # deprecated kwargs
     listdir = kwargs.pop("listdir", True)
@@ -491,15 +506,15 @@ def read(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-# for some reason the doctring.getsection modify the signature of the function
+# for some reasons the doctring.getsection modify the signature of the function
 # when used as a decorator, so we use it as a function
 _docstring.get_sections(
     read.__doc__,
     sections=["Parameters", "Other Parameters", "Returns"],
-    base="_Importer",
+    base="Importer",
 )
 
-_docstring.delete_params("_Importer.see_also", "read_dir")
+_docstring.delete_params("Importer.see_also", "read_dir")
 
 
 @_docstring.dedent
@@ -513,8 +528,8 @@ def read_dir(directory=None, **kwargs):
     * 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
       distinct files are stored in distinct `NDdataset`\ s.
     * 1D spectroscopic data (e.g., .spa files) in a given directory are merged
-      into single `NDDataset`\ , providing their unique dimension are compatible. If not,
-      an error is generated.
+      into single `NDDataset`\ , providing their unique dimension are compatible.
+      If not, an error is generated.
     * non-readable files are ignored
 
     Parameters
@@ -524,12 +539,13 @@ def read_dir(directory=None, **kwargs):
 
     Returns
     --------
-    %(_Importer.returns)s
-        Depending on the python version, the order of the datasets in the list may change.
+    %(Importer.returns)s
+        Depending on the python version, the order of the datasets in the list
+        may change.
 
     See Also
     --------
-    %(_Importer.see_also.no_read_dir)s
+    %(Importer.see_also.no_read_dir)s
 
     Examples
     --------
@@ -544,6 +560,9 @@ def read_dir(directory=None, **kwargs):
     kwargs["iterdir"] = True
     importer = Importer()
     return importer(directory, **kwargs)
+
+
+_docstring.delete_params("Importer.see_also", "read_remote")
 
 
 @_docstring.dedent
@@ -568,34 +587,15 @@ def read_remote(file_or_dir, **kwargs):
 
     Other Parameters
     ----------------
-    merge : `bool`\ , optional, default: `False`
-        If `True` and a folder have been provided as `path` argument,
-        then a single dataset with merged (stacked along the first dimension)
-        is returned. The same happen for url if a directry contining several files
-        is specified for the `path` argument.
-    replace_existing: `bool`, optional, default: `False`
-        By default, existing files are not replaced so not downloaded.
-    download_only: bool, optional, default: False
-        If True, only downloading and saving of the files is performed, with no
-        attempt to read their content.
-    read_only:
+    %(Importer.other_parameters)s
 
     Returns
     --------
-    dataset(s)
-        `NDDataset` or list of `NDDataset` .
+    %(Importer.returns)s
 
     See Also
     --------
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_spg : Read Omnic \*.spg grouped spectra.
-    read_spa : Read Omnic \*.spa single spectra.
-    read_srs : Read Omnic series.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
-    read_matlab : Read Matlab files.
+    %(Importer.see_also.no_read_remote)s
 
     Examples
     --------
@@ -619,7 +619,7 @@ def _write_downloaded_file(content, dst):
     info_(f"{dst.name} has been downloaded and written in {dst.parent}")
 
 
-def _get_url_content_and_save(url, dst, replace):
+def _get_url_content_and_save(url, dst, replace, read_only=False):
 
     if not replace and dst.exists():
         return
@@ -627,9 +627,14 @@ def _get_url_content_and_save(url, dst, replace):
     try:
         r = requests.get(url, allow_redirects=True)
 
-        # write downloaded file
         r.raise_for_status()
-        _write_downloaded_file(r.content, dst)
+
+        # write downloaded file
+        if not read_only:
+            _write_downloaded_file(r.content, dst)
+
+        # in all case return the content
+        return r.content
 
     except OSError:
         raise FileNotFoundError(f"Not found locally or at url:{url}")
@@ -656,12 +661,9 @@ def _download_full_testdata_directory():
         _write_downloaded_file(uncompressed, dst)
 
 
-def _download_from_url(url, dst, replace=False):
-    # ##
-    # ##    Do not forget to change the fork in the following url
-    # ##
+def _download_from_url(url, dst, replace=False, read_only=False):
     if not str(url).startswith("https://") and not str(url).startswith("http://"):
-        # download on github
+        # download on github (always save the downloaded files)
         url = (
             f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
             f"testdata/{url}"
@@ -674,16 +676,17 @@ def _download_from_url(url, dst, replace=False):
             index = yaml.load(r.content, Loader=yaml.CLoader)
 
         if index is None:
-            _get_url_content_and_save(url, dst, replace)
+            return _get_url_content_and_save(url, dst, replace)
 
         else:
+            # download folder
             for filename in index["files"]:
                 _get_url_content_and_save(f"{url}/{filename}", dst / filename, replace)
             for folder in index["folders"]:
                 _download_from_url(f"{url}/{folder}", dst / folder)
     else:
-        # download url
-        _get_url_content_and_save(url, dst, replace)
+        # download url, eventually save it
+        return _get_url_content_and_save(url, dst, replace, read_only)
 
 
 def _is_relative_to(path, base):
@@ -721,7 +724,12 @@ def _read_remote(*args, **kwargs):
     is_url = str(path).startswith("http://") or str(path).startswith("https://")
 
     replace = kwargs.pop("replace_existing", False)
+    read_only = kwargs.pop("read_only", True)  # by default we do not write the
+    download_only = kwargs.pop("download_only", False)
+
+    # downloaded file
     if not is_url:
+        # case where we try to download the github testdata
         path = pathclean(path)
 
         if _is_relative_to(path, datadir):
@@ -733,20 +741,26 @@ def _read_remote(*args, **kwargs):
 
         # in principle the data came from github. Try to download it
         dst = datadir / relative_path
-        if dst.name != "testdata":
-            _download_from_url(relative_path, dst, replace)
-        else:
-            # we are going to download the whole testdata directory -> use a faster method
+        if dst.name == "testdata":
+            # we are going to download the whole testdata directory
+            # -> use a faster method
             _download_full_testdata_directory()
+            return
+        else:
+            content = _download_from_url(relative_path, dst, replace)
 
     else:
-        # download localy
+        # download url content localy or in a byte string depending on
         dst = pathclean(path.split("/")[-1])
-        _download_from_url(path, dst, replace)
+        # a content will be returned when read_only is true (as the file is not written)
+        content = _download_from_url(path, dst, replace, read_only)
 
-    if not kwargs.pop("download_only", False):
+    if not download_only:
         read_method = kwargs.pop("read_method", read)
-        return read_method(dataset, dst, **kwargs)
+        if content is None:
+            return read_method(dataset, dst, **kwargs)
+        else:
+            return read_method(dataset, dst, content=content)
 
 
 # ======================================================================================

@@ -9,7 +9,7 @@ This module implements the `NDDataset` class.
 """
 
 __all__ = ["NDDataset"]
-
+import signal
 import sys
 import textwrap
 from datetime import datetime, tzinfo
@@ -403,7 +403,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             or "_validate" in item
             or "_changed" in item
         ):
-            # raise an error so that traits, ipython operation and more ... will be handled correctly
+            # raise an error so that traits, ipython operation and more ...
+            # will be handled correctly
             raise AttributeError
 
         # syntax such as ds.x, ds.y, etc...
@@ -454,6 +455,9 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         raise AttributeError
 
     def __setattr__(self, key, value):
+        # TODO: entering this function in debug stepping mode kill the program
+        #    need to investigate further, why!
+
         if key in DEFAULT_DIM_NAME:  # syntax such as ds.x, ds.y, etc...
             # Note the above test is important to avoid errors with traitlets
             # even if it looks redundant with the following
@@ -488,7 +492,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             else:
                 raise AttributeError(f"Coordinate `{key}` is not used.")
         else:
-            super().__setattr__(key, value)
+            # print(key, value)
+            super(NDDataset, self).__setattr__(key, value)
 
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
