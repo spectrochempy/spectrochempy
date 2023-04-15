@@ -23,100 +23,53 @@ from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.units import ur
-
+from spectrochempy.utils.docstrings import _docstring
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
+_docstring.delete_params("Importer.see_also", "read_omnic")
+
+
+@_docstring.dedent
 def read_omnic(*paths, **kwargs):
     """
     Open a Thermo Nicolet OMNIC file.
 
-    Open Omnic file or a list of files with extension ` .spg` , ` .spa` or
-    ` .srs` and set data/metadata in the current dataset.
+    Open Omnic file or a list of :file:`.spg`\ , :file:`.spa` or
+    :file:`.srs` files and set data/metadata in the current dataset.
 
     The collected metadata are:
     - names of spectra
     - acquisition dates (UTC)
     - units of spectra (absorbance, transmittance, reflectance, Log(1/R),
     Kubelka-Munk, Raman intensity, photoacoustics, volts)
-    - units of xaxis (wavenumbers in cm^-1, wavelengths in nm or micrometer,
-    Raman shift in cm^-1)
+    - units of xaxis (wavenumbers in :math:`cm^{-1}`, wavelengths in nm or micrometer,
+    Raman shift in :math:`cm^{-1}`)
     - spectra history (but only incorporated in the NDDataset if a single
     spa is read)
 
     An error is generated if attempt is made to inconsistent datasets: units
-    of spectra and
-    xaxis, limits and number of points of the xaxis.
+    of spectra and xaxis, limits and number of points of the xaxis.
 
     Parameters
-    -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name
-        for the file(s) to be loaded:
-
-        *e.g.,( file1, file2, ...,  \*\*kwargs )*
-
-        If the list of filenames are enclosed into brackets:
-
-        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
-
-        The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename` , nor `content` ),
-        a dialog box will be opened to select files.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    ----------
+    %(Importer.parameters)s
 
     Returns
     --------
-    out
-        The dataset or a list of dataset corresponding to a (set of) .spg,
-        .spa or .srs file(s).
+    %(Importer.returns)s
 
     Other Parameters
-    -----------------
-    directory : str, optional
-        From where to read the specified `filename` . If not specified,
-        read in the default `datadir` specified in
-        SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been
-        provided as arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False).
-    sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True).
-    description : str, optional
-        A Custom description.
-    content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content
-        can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is
-        particularly useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the
-        `tests/tests_readers` directory.
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided
-        `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current
-        reading protocol (default=True).
-    recursive : bool, optional
-        Read also in subfolders. (default=False).
+    ----------------
+    %(Importer.other_parameters)s
 
     See Also
-    --------
-    read : Generic read method.
-    read_dir : Read a set of data from a directory.
-    read_spg : Read Omnic files .spg.
-    read_spa : Read Omnic files .spa.
-    read_srs : Read Omnic files .srs.
-    read_opus : Read Bruker OPUS files.
-    read_topspin : Read TopSpin NMR files.
-    read_csv : Read .csv.
-    read_matlab : Read MATLAB files .mat.
-    read_zip : Read zipped group of files.
+    ---------
+    read_spg : Read grouped Omnic spectra.
+    read_spa : Read single Omnic spectra.
+    read_srs : Read series Omnic spectra.
+    %(Importer.see_also.no_read_omnic)s
 
     Examples
     ---------
@@ -213,86 +166,34 @@ def read_omnic(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
+@_docstring.dedent
 def read_spg(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ` .spg` .
-
-    Open Omnic file or a list of files with extension ` .spg` and set
-    data/metadata in the current dataset.
+    Open a Thermo Nicolet file or a list of files with extension ``.spg``\ .
 
     Parameters
-    -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name
-        for the file(s) to be loaded:
-
-        *e.g.,( file1, file2, ...,  \*\*kwargs )*
-
-        If the list of filenames are enclosed into brackets:
-
-        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
-
-        The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename` , nor `content` ),
-        a dialog box will be opened to select files.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    ----------
+    %(Importer.parameters)s
 
     Returns
     --------
-    read_spg
-        The dataset or a list of dataset corresponding to a (set of) .spg
-        file(s).
+    %(Importer.returns)s
 
     Other Parameters
-    -----------------
-    directory : str, optional
-        From where to read the specified `filename` . If not specified,
-        read in the default `datadir` specified in
-        SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been
-        provided as arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False).
-    sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True).
-    description : str, optional
-        A Custom description.
-    content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content
-        can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is
-        particularly useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the
-        `tests/tests_readers` directory.
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided
-        `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current
-        reading protocol (default=True).
-    recursive : bool, optional
-        Read also in subfolders. (default=False).
+    ----------------
+    %(Importer.other_parameters)s
 
     See Also
-    --------
-    read : Generic read method.
-    read_dir : Read a set of data from a directory.
-    read_omnnic : Read Omnic files.
-    read_spa : Read Omnic files .spa.
-    read_srs : Read Omnic files .srs.
-    read_opus : Read Bruker OPUS files.
-    read_topspin : Read TopSpin NMR files.
-    read_csv : Read .csv.
-    read_matlab : Read MATLAB files .mat.
-    read_zip : Read zipped group of files.
+    ---------
+    read_spg : Read grouped Omnic spectra.
+    read_spa : Read single Omnic spectra.
+    read_srs : Read series Omnic spectra.
+    %(Importer.see_also.no_read_omnic)s
 
     Notes
     -----
     This method is an alias of `read_omnic`\ , except that the type of file
-    is contrain to *.spg.
+    is contrain to ``.spg``.
 
     Examples
     ---------
@@ -307,90 +208,31 @@ def read_spg(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
+@_docstring.dedent
 def read_spa(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ` .spa` .
-
-    Open Omnic file or a list of files with extension ` .spa` and set
-    data/metadata in the current dataset.
+    Open a Thermo Nicolet file or a list of files with extension ``.spa``\ .
 
     Parameters
-    -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name
-        for the file(s) to be loaded:
-
-        *e.g.,( file1, file2, ...,  \*\*kwargs )*
-
-        If the list of filenames are enclosed into brackets:
-
-        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
-
-        The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename` , nor `content` ),
-        a dialog box will be opened to select files.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    ----------
+    %(Importer.parameters)s
 
     Returns
     --------
-    read_spa
-        The dataset or a list of dataset corresponding to the (set of) .spa
-        file(s).
+    %(Importer.returns)s
 
     Other Parameters
-    -----------------
-    return_ifg : str or None, optional
-        Default value is None. When set to 'sample' returns the sample interferogram
-        of the spa file if present or None if absent. When set to 'backgroung' returns
-        the backgroung interferogram of the spa file if present or None if absent.
-    directory : str, optional
-        From where to read the specified `filename` . If not specified,
-        read in the default `datadir` specified in
-        SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been
-        provided as arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False).
-    sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
-    content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content
-        can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is
-        particularly useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the
-        `tests/tests_readers` directory.
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided
-        `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current
-        reading protocol (default=True).
-    recursive : bool, optional
-        Read also in subfolders. (default=False).
+    ----------------
+    %(Importer.other_parameters)s
 
     See Also
-    --------
-    read : Generic read method.
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic \*.spg grouped spectra.
-    read_srs : Read Omnic series.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
-    read_matlab : Read Matlab files.
+    ---------
+    %(Importer.see_also)s
 
     Notes
     -----
     This method is an alias of `read_omnic`\ , except that the type of file
-    is contrain to *.spa.
+    is contrain to ``.spa``\ .
 
     Examples
     ---------
@@ -407,88 +249,34 @@ def read_spa(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
+@_docstring.dedent
 def read_srs(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension `.srs` .
-
-    Open Omnic file or a list of files with extension `.srs` and set
-    data/metadata in the current dataset.
+    Open a Thermo Nicolet file or a list of files with extension ``.srs`` .
 
     Parameters
-    -----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name
-        for the file(s) to be loaded:
-
-        *e.g.,( file1, file2, ...,  \*\*kwargs )*
-
-        If the list of filenames are enclosed into brackets:
-
-        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
-
-        The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e.
-        no `filename` , nor `content` ),
-        a dialog box will be opened to select files.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    ----------
+    %(Importer.parameters)s
 
     Returns
     --------
-    NDDataset
-        The dataset or a list of dataset corresponding to a (set of) series
-        or backgroun files.
+    %(Importer.returns)s
+        When return_bg is set to 'True', the series background is returned.
 
     Other Parameters
-    -----------------
+    ----------------
     return_bg : bool, optional
         Default value is False. When set to 'True' returns the series background
-    directory : str, optional
-        From where to read the specified `filename` . If not specified,
-        read in the default `datadir` specified in
-        SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been
-        provided as arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False).
-    sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
-    content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content
-        can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is
-        particularly useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the
-        `tests/tests_readers` directory.
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided
-        `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current
-        reading protocol (default=True)
-    recursive : bool, optional
-        Read also in subfolders. (default=False).
+    %(Importer.other_parameters)s
 
     See Also
-    --------
-    read : Generic read method.
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_labspec : Read Raman LABSPEC spectra.
-    read_spg : Read Omnic \*.spg grouped spectra.
-    read_spa : Read Omnic \*.Spa single spectra.
-    read_csv : Read CSV files.
-    read_zip : Read Zip files.
-    read_matlab : Read Matlab files.
+    ---------
+    %(Importer.see_also)s
 
     Notes
     -----
     This method is an alias of `read_omnic`\ , except that the type of file
-    is constrained to *.srs.
+    is constrained to ``.srs``\ .
 
     Examples
     ---------

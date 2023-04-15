@@ -95,15 +95,12 @@
     ps
     qsin
     read
-    read_bruker_nmr
     read_carroucell
     read_csv
     read_ddr
     read_dir
-    read_dx
     read_hdr
     read_jcamp
-    read_jdx
     read_labspec
     read_mat
     read_matlab

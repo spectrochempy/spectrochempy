@@ -82,8 +82,9 @@ All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`\
     CoordSet
 
 
+******************
 Creating NDDataset
-==================
+******************
 
 A `NDDataset` can be created using the `NDDataset` class constructor, for instance here we create a dataset from a
 `~numpy.random.random` two-dimensional array:
@@ -107,7 +108,7 @@ Many SpectroChemPy methods mimics `numpy` equivalent, but output a `NDDataset` o
 
 
 Basic creation methods
-----------------------
+======================
 
 .. autosummary::
     :nosignatures:
@@ -128,7 +129,7 @@ Basic creation methods
 
 
 Creation from existing data
----------------------------
+===========================
 
 .. autosummary::
     :nosignatures:
@@ -140,7 +141,7 @@ Creation from existing data
 
 
 Creation from numerical ranges
-------------------------------
+==============================
 
 .. autosummary::
     :nosignatures:
@@ -151,26 +152,33 @@ Creation from numerical ranges
     logspace
     geomspace
 
-
-Creation from from external sources
------------------------------------
+Select data in a NDDataset
+==========================
 
 .. autosummary::
-    :template: method.rst
+    :nosignatures:
+    :toctree: generated/
+
+    take
+
+*************
+Import/export
+*************
+
+Import a NDataset from external source
+======================================
+.. autosummary::
     :nosignatures:
     :toctree: generated/
 
     load
     read
-    read_bruker_nmr
     read_carroucell
     read_csv
     read_ddr
     read_dir
-    read_dx
     read_hdr
     read_jcamp
-    read_jdx
     read_labspec
     read_mat
     read_matlab
@@ -188,7 +196,6 @@ Creation from from external sources
     read_zip
     read_carroucell
     download_nist_ir
-    download
 
 Export a NDDataset
 ==================
@@ -211,18 +218,9 @@ Export a NDDataset
     to_xarray
 
 
-Select data in a NDDataset
-==========================
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    take
-
-
-Plotting functions
-==================
+********
+Plotting
+********
 
 .. autosummary::
     :nosignatures:

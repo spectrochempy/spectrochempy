@@ -16,6 +16,9 @@ Glossary
         or `Jupyter Lab <https://docs.jupyter.org/en/latest/>`__\ )
         without knowing all the details of the implementation of these methods or protocols.
 
+    Carroucell
+        Multisample FTIR cell.
+
     SVD
         ``Singular Value Decomposition``\ .
 

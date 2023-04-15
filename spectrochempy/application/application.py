@@ -977,16 +977,16 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 
         warnings.showwarning = self._custom_warning
 
-        # exception handler
-        if ipy is not None:  # pragma: no cover
-            ipy.set_custom_exc((Exception,), self._ipython_catch_exceptions)
-        else:
-            sys.excepthook = self._catch_exceptions
-
-            # load our custom magic extensions
-            # --------------------------------------------------------------------
-            if ipy is not None:
-                ipy.register_magics(SpectroChemPyMagics)
+        # # exception handler
+        # if ipy is not None:  # pragma: no cover
+        #     ipy.set_custom_exc((Exception,), self._ipython_catch_exceptions)
+        # else:
+        #     sys.excepthook = self._catch_exceptions
+        #
+        #     # load our custom magic extensions
+        #     # --------------------------------------------------------------------
+        #     if ipy is not None:
+        #         ipy.register_magics(SpectroChemPyMagics)
 
     def reset_preferences(self):
         """

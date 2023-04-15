@@ -20,6 +20,7 @@ import numpy as np
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.utils.docstrings import _docstring
 
 try:
     locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format
@@ -35,76 +36,32 @@ except Exception:  # pragma: no cover
 # ======================================================================================
 # Public functions
 # ======================================================================================
+_docstring.delete_params("Importer.see_also", "read_csv")
+
+
+@_docstring.dedent
 def read_csv(*paths, **kwargs):
     """
-    Open a \*.csv file or a list of \*.csv files.
+    Open a :file:`.csv` file or a list of :file:`.csv` files.
 
     This is limited to 1D array - csv file must have two columns [index, data]
     without header.
 
     Parameters
     ----------
-    *paths : str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional
-        The data source(s) can be specified by the name or a list of name for the file(s) to be loaded:
-
-        *e.g.,( file1, file2, ...,  \*\*kwargs )*
-
-        If the list of filenames are enclosed into brackets:
-
-        *e.g.,* ( **[** *file1, file2, ...* **]**, \*\*kwargs *)*
-
-        The returned datasets are merged to form a single dataset,
-        except if `merge` is set to False. If a source is not provided (i.e. no `filename` , nor `content` ),
-        a dialog box will be opened to select files.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    %(Importer.parameters)s
 
     Returns
     --------
-    read_csv
-        `NDDataset` or list of `NDDataset` .
+    %(Importer.returns)s
 
     Other Parameters
     ----------------
-    directory : str, optional
-        From where to read the specified `filename` . If not specified, read in the default `datadir` specified in
-        SpectroChemPy Preferences.
-    merge : bool, optional
-        Default value is False. If True, and several filenames have been provided as arguments,
-        then a single dataset with merged (stacked along the first
-        dimension) is returned (default=False).
-    sortbydate : bool, optional
-        Sort multiple spectra by acquisition date (default=True).
-    description: str, optional
-        A Custom description.
-    origin : {'omnic', 'tga'}, optional
-        in order to properly interpret CSV file it can be necessary to set the origin of the spectra.
-        Up to now only 'omnic' and 'tga' have been implemented.
-    csv_delimiter : str, optional
-        Set the column delimiter in CSV file.
-        By default it is the one set in SpectroChemPy `Preferences` .
-    content : bytes object, optional
-        Instead of passing a filename for further reading, a bytes content can be directly provided as bytes objects.
-        The most convenient way is to use a dictionary. This feature is particularly useful for a GUI Dash application
-        to handle drag and drop of files into a Browser.
-        For examples on how to use this feature, one can look in the `tests/tests_readers` directory.
-    listdir : bool, optional
-        If True and filename is None, all files present in the provided `directory` are returned (and merged if `merge`
-        is True. It is assumed that all the files correspond to current reading protocol (default=True).
-    recursive : bool, optional
-        Read also in subfolders. (default=False).
+    %(Importer.other_parameters)s
 
     See Also
     --------
-    read_topspin : Read TopSpin Bruker NMR spectra.
-    read_omnic : Read Omnic spectra.
-    read_opus : Read OPUS spectra.
-    read_spg : Read Omnic \*.spg grouped spectra.
-    read_spa : Read Omnic \*.Spa single spectra.
-    read_srs : Read Omnic series.
-    read_zip : Read Zip files.
-    read_matlab : Read Matlab files.
-    read : Generic file reading.
+    %(Importer.see_also.no_read_csv)s
 
     Examples
     ---------
@@ -116,14 +73,12 @@ def read_csv(*paths, **kwargs):
     (known origin for now : tga or omnic)
     # TODO: define some template to allow adding new origins
 
-    >>> scp.read_csv('agirdata/P350/TGA/tg.csv', origin='tga')
-    NDDataset: [float64] wt.% (shape: (y:1, x:3247))
+    >>> A = scp.read_csv('agirdata/P350/TGA/tg.csv', origin='tga')
 
     Sometimes the delimiteur needs to be adjusted
 
     >>> prefs = scp.preferences
-    >>> scp.read_csv('irdata/IR.CSV', directory=prefs.datadir, origin='omnic', csv_delimiter=',')
-    NDDataset: [float64] a.u. (shape: (y:1, x:3736))
+    >>> B = scp.read_csv('irdata/IR.CSV', origin='omnic', csv_delimiter=',')
     """
     kwargs["filetypes"] = ["CSV files (*.csv)"]
     kwargs["protocol"] = ["csv"]
