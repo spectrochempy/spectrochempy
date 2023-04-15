@@ -4,8 +4,7 @@
 .. currentmodule:: {{ module }}
 
 
-.. auto{{ objtype }}:: {{ objname }}
-    :noindex:
+.. autofunction:: {{ objname }}
 
 .. _sphx_glr_backref_{{fullname}}:
 

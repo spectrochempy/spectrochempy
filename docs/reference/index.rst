@@ -156,6 +156,7 @@ Creation from from external sources
 -----------------------------------
 
 .. autosummary::
+    :template: method.rst
     :nosignatures:
     :toctree: generated/
 
