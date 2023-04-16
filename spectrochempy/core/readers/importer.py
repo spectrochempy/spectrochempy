@@ -141,8 +141,8 @@ class Importer(HasTraits):
             if all(self.datasets) is None:
                 return None
 
-            prefs = self.datasets[0].preferences
             try:
+                prefs = self.datasets[0].preferences
                 prefs.reset()
             except (FileNotFoundError, AttributeError):
                 pass
@@ -263,8 +263,8 @@ class Importer(HasTraits):
 
         # several datasets returned (only if several files have been passed) and the `merge` keyword argument is False
         merged = kwargs.get("merge", False)
-        shapes = {nd.shape for nd in datasets}
-        if len(shapes) == 1:
+        shapes = {nd.shape if hasattr(nd, "shape") else None for nd in datasets}
+        if len(shapes) == 1 and None not in shapes:
             # homogeneous set of files
             dim0 = shapes.pop()[0]
             if dim0 == 1:

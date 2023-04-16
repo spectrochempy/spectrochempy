@@ -13,7 +13,7 @@ import numpy as np
 
 from spectrochempy.core.writers.exporter import Exporter, exportermethod
 
-__all__ = ["write_jcamp", "write_jdx"]
+__all__ = ["write_jcamp"]
 __dataset_methods__ = __all__
 
 
@@ -50,10 +50,6 @@ def write_jcamp(*args, **kwargs):
     kwargs["filetypes"] = ["JCAMP-DX files (*.jdx)"]
     kwargs["suffix"] = ".jdx"
     return exporter(*args, **kwargs)
-
-
-write_jdx = write_jcamp
-write_jdx.__doc__ = "This method is an alias of `write_jcamp` ."
 
 
 @exportermethod

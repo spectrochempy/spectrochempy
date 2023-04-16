@@ -74,3 +74,6 @@ dataset_list = scp.read(
     "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip"
 )
 _ = dataset_list[-1].plot()
+_ = dataset_list[-2].plot()
+_ = dataset_list[-3].plot()
+_ = dataset_list[-4].plot()
