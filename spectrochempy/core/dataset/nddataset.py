@@ -9,7 +9,7 @@ This module implements the `NDDataset` class.
 """
 
 __all__ = ["NDDataset"]
-import signal
+# import signal
 import sys
 import textwrap
 from datetime import datetime, tzinfo
