@@ -71,8 +71,7 @@ _ = C0.T.plot()
 # %%
 # We can get a better estimate of the concentration (C) and pure spectra profiles (St)
 # by soft MCR-ALS:
-scp.set_loglevel("INFO")
-mcr_1 = scp.MCRALS()
+mcr_1 = scp.MCRALS(log_level="INFO")
 _ = mcr_1.fit(D, C0)
 
 mcr_1.C.T.plot()

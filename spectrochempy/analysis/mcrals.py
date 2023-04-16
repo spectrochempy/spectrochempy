@@ -22,8 +22,8 @@ import warnings
 
 import dill
 import numpy as np
+import scipy
 import traitlets as tr
-from scipy.optimize import nnls
 from sklearn import decomposition
 
 from spectrochempy.analysis._base import (
@@ -38,8 +38,45 @@ from spectrochempy.utils.docstrings import _docstring
 
 
 # utility
-def lstsq(a, b, rcond=None):
-    return np.linalg.lstsq(a, b, rcond)[0]
+# -------
+def lstsq(X, Y, rcond=None):
+    # Least-squares solution to a linear matrix equation X @ W = Y
+    # Return W
+    W = np.linalg.lstsq(X, Y, rcond)[0]
+    return W
+
+
+def nnls(X, Y, withres=False):
+    # Non negative least-squares solution to a linear matrix equation X @ W = Y
+    # Return W >= 0
+    # TODO: look at may be faster algorithm: see: https://gist.github.com/vene/7224672
+    nsamp, nfeat = X.shape
+    nsamp, ntarg = Y.shape
+    W = np.empty((nfeat, ntarg))
+    residuals = 0
+    for i in range(ntarg):
+        Y_ = Y[:, i]
+        W[:, i], res = scipy.optimize.nnls(X, Y_)
+        residuals += res**2
+    return (W, np.sqrt(residuals)) if withres else W
+
+
+def lstsq_nnls(X, Y, nonneg=[], withres=False):
+    # Least-squares  solution to a linear matrix equation X @ W = Y
+    # with partial nonnegativity (indicated by the nonneg list of targets)
+    # Return W with eventually some column non negative.
+    nsamp, nfeat = X.shape
+    nsamp, ntarg = Y.shape
+    W = np.empty((nfeat, ntarg))
+    residuals = 0
+    for i in range(ntarg):
+        Y_ = Y[:, i]
+        if i in nonneg:
+            W[:, i], res = scipy.optimize.nnls(X, Y_)
+        else:
+            W[:, i], res = np.linalg.lstsq(X, Y_)[:2]
+        residuals += res**2
+    return (W, np.sqrt(residuals)) if withres else W
 
 
 # DEVNOTE:
@@ -737,15 +774,12 @@ at each iterations.
 
             niter += 1
 
-            # Compute C
-            # ---------
-            C = lstsq(St.T, X.T).T
-
-            # Force non-negative concentration
-            # --------------------------------
+            # Compute C taking into account non-negativity
+            # --------------------------------------------
             if np.any(self.nonnegConc):
-                for s in self.nonnegConc:
-                    C[:, s] = C[:, s].clip(min=0)
+                C = lstsq_nnls(St.T, X.T, self.nonnegConc).T
+            else:
+                C = lstsq(St.T, X.T, self.nonnegConc).T
 
             # Force unimodal concentration
             # ----------------------------
@@ -817,16 +851,16 @@ at each iterations.
             # stores C in C_hard
             C_hard = C.copy()
 
-            # compute St
-            St = lstsq(C, X)
+            # Compute St taking into account non-negativity
+            # --------------------------------------------
+            if np.any(self.nonnegSpec):
+                St = lstsq_nnls(C, X, self.nonnegSpec)
+            else:
+                St = lstsq(C, X)
 
             # stores St in St_soft
+            # --------------------
             St_soft = St.copy()
-
-            # Force non-negative spectra
-            # --------------------------
-            if np.any(self.nonnegSpec):
-                St[self.nonnegSpec, :] = St[self.nonnegSpec, :].clip(min=0)
 
             # Force unimodal spectra
             # ----------------------------
@@ -867,7 +901,10 @@ at each iterations.
                 St[self.hardSpec, :] = fixedSt[self.hardSt_to_St_idx, :]
 
             # recompute C for consistency(soft modeling)
-            C = lstsq(St.T, X.T).T  # no sure why , rcond=-1 was used.
+            # TODO: should we take into account non negativity here????
+            C = lstsq_nnls(
+                St.T, X.T, self.nonnegConc
+            ).T  # also no sure why rcond=-1 was used instead of None
 
             # rescale spectra & concentrations
             if self.normSpec == "max":
@@ -881,7 +918,8 @@ at each iterations.
 
             # compute residuals
             # -----------------
-            Xhat = np.dot(C, St)
+            Xhat = C @ St  # official way for 2D matrix is to write
+            #       matrix multiplication as X @ St
             stdev2 = np.std(Xhat - X)
             change = 100 * (stdev2 - stdev) / stdev
             stdev = stdev2
