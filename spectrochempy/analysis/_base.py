@@ -58,13 +58,14 @@ class NotFittedError(exceptions.SpectroChemPyError):
 
 # ======================================================================================
 # A decorator to transform np.ndarray output from models to NDDataset
-# according to the X input
+# according to the X (default) or Y input
 # ======================================================================================
 class _set_output(object):
     def __init__(
         self,
         method,
         *args,
+        meta_from="_X",
         units="keep",
         title="keep",
         typex=None,
@@ -73,6 +74,7 @@ class _set_output(object):
     ):
         self.method = method
         update_wrapper(self, method)
+        self.meta_from = meta_from
         self.units = units
         self.title = title
         self.typex = typex
@@ -112,7 +114,7 @@ class _set_output(object):
         # Now set the NDDataset attributes from the original X
 
         # determine the input X dataset
-        X = obj._X
+        X = getattr(obj, self.meta_from)
 
         if self.units is not None:
             if self.units == "keep":
@@ -167,6 +169,19 @@ class _set_output(object):
                         title="components",
                     ),
                 )
+            if self.typesingle == "targets":
+                # occurs when the data are 1D such as PLS intercept...
+                if X.coordset[0].labels is not None:
+                    labels = X.coordset[0].labels
+                else:
+                    labels = ["#%d" % (i + 1) for i in range(X.shape[-1])]
+                X_transf.set_coordset(
+                    x=Coord(
+                        None,
+                        labels=labels,
+                        title="targets",
+                    ),
+                )
 
         # eventually restore masks
         X_transf = obj._restore_masked_data(X_transf, axis=axis)
@@ -175,7 +190,13 @@ class _set_output(object):
 
 
 def _wrap_ndarray_output_to_nddataset(
-    method=None, units="keep", title="keep", typex=None, typey=None, typesingle=None
+    method=None,
+    meta_from="_X",
+    units="keep",
+    title="keep",
+    typex=None,
+    typey=None,
+    typesingle=None,
 ):
     # wrap _set_output to allow for deferred calling
     if method:
@@ -186,6 +207,7 @@ def _wrap_ndarray_output_to_nddataset(
         def wrapper(method):
             return _set_output(
                 method,
+                meta_from=meta_from,
                 units=units,
                 title=title,
                 typex=typex,
@@ -975,7 +997,389 @@ class DecompositionAnalysis(AnalysisConfigurable):
             if X_hat is None:
                 # compute the inverse transform (this check that the model
                 # is already fitted and handle eventual masking)
-                X_hat = self.inverse_transform()
+                if np.any(self._X_mask):
+                    X_hat = self._remove_masked_data(self.inverse_transform())
+                else:
+                    X_hat = self.inverse_transform()
+        elif X_hat is None:
+            raise ValueError(
+                "If X is provided, An externally computed X_hat dataset "
+                "must be also provided."
+            )
+
+        if X._squeeze_ndim == 1:
+            # normally this was done before, but if needed.
+            X = X.squeeze()
+            X_hat = X_hat.squeeze()
+
+        # Number of traces to keep
+        nb_traces = kwargs.pop("nb_traces", "all")
+        if X.ndim == 2 and nb_traces != "all":
+            inc = int(X.shape[0] / nb_traces)
+            X = X[::inc]
+            X_hat = X_hat[::inc]
+
+        res = X - X_hat
+
+        # separation between traces
+        offset = kwargs.pop("offset", None)
+        if offset is None:
+            offset = 0
+        ma = max(X.max(), X_hat.max())
+        mao = ma * offset / 100
+        mad = ma * offset / 100 + ma / 10
+        _ = (X - X.min()).plot(color=colX, **kwargs)
+        _ = (X_hat - X_hat.min() - mao).plot(
+            clear=False, ls="dashed", cmap=None, color=colXhat
+        )
+        ax = (res - res.min() - mad).plot(clear=False, cmap=None, color=colRes)
+
+        #             color=colXhat)
+        #     ax.plot(res.T.masked_data - 1.2 * ma,
+        #             color=colRes)
+
+        # if X.x is not None and X.x.data is not None:
+        #     ax.plot(X.x.data, X_hat.T.masked_data - ma, '-',
+        #             color=colXhat)
+        #     ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, '-',
+        #             color=colRes)
+        # else:
+        #     ax.plot(X_hat.T.masked_data - ma,
+        #             color=colXhat)
+        #     ax.plot(res.T.masked_data - 1.2 * ma,
+        #             color=colRes)
+        ax.autoscale(enable=True, axis="y")
+        ax.set_title(f"{self.name} plot of merit")
+        ax.yaxis.set_visible(False)
+        return ax
+
+    _docstring.get_sections(_docstring.dedent(plotmerit.__doc__), base="plotmerit")
+
+    @property
+    def Y(self):
+        """
+        The `Y` input.
+        """
+        # We use Y property only to show this information to the end-user. Internally
+        # we use _Y attribute to refer to the input data
+        if self._Y_is_missing:
+            raise NotFittedError
+        Y = self._Y
+        return Y
+
+
+# ======================================================================================
+# Base class CrossDecompositionAnalysis
+# ======================================================================================
+
+
+class CrossDecompositionAnalysis(DecompositionAnalysis):
+    """
+    Abstract class to write analysis decomposition models such as `PLS`, ...
+
+    Subclass this to get a minimal structure
+
+    See Also
+    --------
+    PLSRegression : Perform a Partial Least Square Regression .
+    """
+
+    # This class is a subclass of DecompositionAnalysis, so we define only additional
+    # attributes and methods necessary for decomposition model.
+
+    # Get doc sections for reuse in subclass
+    _docstring.get_sections(
+        _docstring.dedent(__doc__),
+        base="CrossDecompositionAnalysis",
+        sections=["See Also"],
+    )
+
+    # ----------------------------------------------------------------------------------
+    # Public methods
+    # ----------------------------------------------------------------------------------
+
+    @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None)
+    @_docstring.dedent
+    def predict(self, X=None, copy=True):
+        """
+        Predict targets of given observations.
+
+        Parameters
+        ----------
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+            New data, where :term:`n_observations` is the number of observations
+            and :term:`n_features` is the number of features.
+            if not provided, the input dataset of the `fit` method will be used.
+        copy: bool, default=True
+            Whether to copy X and Y, or perform in-place normalization.
+
+        Returns
+        -------
+        y_pred: `~spectrochempy.core.dataset.nddataset.NDDataset`
+            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , `n_targets \ ).
+        """
+        if not self._fitted:
+            raise NotFittedError()
+
+        if X is None:
+            X = self._X_preprocessed
+        elif isinstance(X, NDDataset):
+            X = X.data
+
+        return self._predict(X, copy)
+
+    @_docstring.dedent
+    def score(self, X=None, Y=None, sample_weight=None):
+        """
+        Return the coefficient of determination of the prediction.
+
+        The coefficient of determination :math:`R^2` is defined as
+        :math:`(1 - \\frac{u}{v})` , where :math:`u` is the residual
+        sum of squares ``((y_true - y_pred)** 2).sum()`` and :math:`v`
+        is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()`` .
+        The best possible score is ``1.0`` and it can be negative (because the
+        model can be arbitrarily worse). A constant model that always predicts
+        the expected value of `Y`\ , disregarding the input features, would get
+        a :math:`R^2` score of 0.0.
+
+        Parameters
+        ----------
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+            Test samples. If not given, the X attribute is used.
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_targets`\ ), optional
+            True values for `X`.
+        sample_weight: `NDDataset` or array-like of shape (n_samples,), default=None
+            Sample weights.
+
+        Returns
+        -------
+        score: float
+            :math:`R^2` of `self.predict(X)` w.r.t `Y`
+        """
+        if not self._fitted:
+            raise NotFittedError()
+
+        if X is None:
+            X = self._X_preprocessed
+        elif isinstance(X, NDDataset):
+            X = X.data
+
+        if Y is None:
+            Y = self._Y_preprocessed
+        elif isinstance(Y, NDDataset):
+            Y = Y.data
+
+        if isinstance(sample_weight, NDDataset):
+            sample_weight = sample_weight.data
+
+        return self._score(X, Y, sample_weight)
+
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
+    @_docstring.dedent
+    def transform(self, X=None, Y=None, both=False, copy=True, **kwargs):
+        """
+        Apply dimensionality reduction to `X`\ and `Y`\.
+
+        Parameters
+        ----------
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+            New data, where :term:`n_observations` is the number of observations
+            and :term:`n_features` is the number of features.
+            if not provided, the input dataset of the `fit` method will be used.
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+            New data, where :term:`n_observations` is the number of observations
+            and :term:`n_features` is the number of features.
+            if not provided, the input dataset of the `fit` method will be used.
+        both: bool, default=False
+            whether to also apply the dimensionality reduction to Y
+        copy: bool, default=True
+            Whether to copy X and Y, or perform in-place normalization.
+        %(kwargs)s
+
+        Returns
+        -------
+        x_score, y_score: `~spectrochempy.core.dataset.nddataset.NDDataset` or tuple of
+        `~spectrochempy.core.dataset.nddataset.NDDataset` `
+            Datasets with shape (:term:`n_observations`\ , :term:`n_components`\ ).
+
+        Other Parameters
+        ----------------
+        n_components : `int`, optional
+            The number of components to use for the reduction. If not given
+            the number of components is eventually the one specified or determined
+            in the `fit` process.
+        """
+        if not self._fitted:
+            raise NotFittedError()
+
+        # Fire the validation and preprocessing
+        self._X = X if X is not None else self.X
+        self._Y = Y if Y is not None else self.Y
+
+        # Get the processed ndarray data
+        newX = self._X_preprocessed
+        newY = self._Y_preprocessed
+
+        if both:
+            return self._transform(newX, newY, copy)
+        else:
+            return self._transform(newX, copy)
+
+    # Get doc sections for reuse in subclass
+    _docstring.get_sections(
+        _docstring.dedent(transform.__doc__),
+        base="analysis_transform",
+        sections=["Parameters", "Other Parameters", "Returns"],
+    )
+    _docstring.keep_params("analysis_transform.parameters", "X")
+
+    @_wrap_ndarray_output_to_nddataset
+    @_docstring.dedent
+    def inverse_transform(self, X_transform=None, Y_transform=None, **kwargs):
+        """
+        Transform data back to its original space.
+
+        In other words, return reconstructed `X` and `Y` whose reduce/transform would
+        be `X_transform` and `Y_transform`.
+
+        Parameters
+        ----------
+        X_transform : array-like of shape (:term:`n_observations`\ , :term:`n_components`\ ), optional
+            Reduced `X` data, where `n_observations` is the number of observations
+            and `n_components` is the number of components. If `X_transform` is not
+            provided, a transform of `X` provided in `fit` is performed first.
+        %(kwargs)s
+
+        Returns
+        -------
+        `~spectrochempy.core.dataset.nddataset.NDDataset`
+            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
+
+        See Also
+        --------
+        reconstruct : Alias of inverse_transform (Deprecated).
+        """
+        if not self._fitted:
+            raise NotFittedError
+
+        # get optional n_components
+        n_components = kwargs.pop(
+            "n_components", kwargs.pop("n_pc", self._n_components)
+        )
+        if n_components > self._n_components:
+            warnings.warn(
+                "The number of components required for reduction "
+                "cannot be greater than the fitted model components : "
+                f"{self._n_components}. We then use this latter value."
+            )
+
+        if isinstance(X_transform, NDDataset):
+            X_transform = X_transform.data
+            if n_components > X_transform.shape[1]:
+                warnings.warn(
+                    "The number of components required for reduction "
+                    "cannot be greater than the X_transform size : "
+                    f"{X_transform.shape[1]}. We then use this latter value."
+                )
+        elif X_transform is None:
+            X_transform = self.transform(**kwargs)
+
+        X = self._inverse_transform(X_transform)
+
+        return X
+
+    _docstring.get_sections(
+        _docstring.dedent(inverse_transform.__doc__),
+        base="analysis_inverse_transform",
+        sections=["Parameters", "Returns"],
+    )
+    # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
+
+    @_docstring.dedent
+    def fit_transform(self, X, Y=None, **kwargs):
+        """
+        Fit the model with `X` and apply the dimensionality reduction on `X`\ .
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+        Y : any
+            Depends on the model.
+        %(kwargs)s
+
+        Returns
+        -------
+        %(analysis_transform.returns)s
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
+        """
+        try:
+            self.fit(X, Y)
+        except TypeError:
+            # the current model does not use Y
+            self.fit(X)
+        X_transform = self.transform(X, **kwargs)
+        return X_transform
+
+    # ----------------------------------------------------------------------------------
+    # Plot methods
+    # ----------------------------------------------------------------------------------
+    @_docstring.dedent
+    def plotmerit(self, X=None, X_hat=None, **kwargs):
+        """
+        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
+
+        :math:`X` and :math:`\hat{X}` can be passed as arguments. If not,
+        the `X` attribute is used for :math:`X`\ and :math:`\hat{X}`\ is computed by
+        the `inverse_transform` method
+
+        Parameters
+        ----------
+        X : `NDDataset`\ , optional
+            Original dataset. If is not provided (default), the `X`
+            attribute is used and X_hat is computed using `inverse_transform`\ .
+        X_hat : `NDDataset`\ , optional
+            Inverse transformed dataset. if `X` is provided, `X_hat`
+            must also be provided as compuyed externally.
+        %(kwargs)s
+
+        Returns
+        -------
+        `~matplotlib.axes.Axes`
+            Matplotlib subplot axe.
+
+        Other Parameters
+        ----------------
+        colors : `tuple` or `~numpy.ndarray` of 3 colors, optional
+            Colors for `X` , `X_hat` and residuals ``E`` .
+            in the case of 2D, The default colormap is used for `X` .
+            By default, the three colors are :const:`NBlue` , :const:`NGreen`
+            and :const:`NRed`  (which are colorblind friendly).
+        offset : `float`, optional, default: `None`
+            Specify the separation (in percent) between the
+            :math:`X` , :math:`X_hat` and :math:`E`\ .
+        nb_traces : `int` or ``'all'``\ , optional
+            Number of lines to display. Default is ``'all'``\ .
+        **others : Other keywords parameters
+            Parameters passed to the internal `plot` method of the `X` dataset.
+        """
+        colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
+
+        if X is None:
+            X = self._X
+            if X_hat is None:
+                # compute the inverse transform (this check that the model
+                # is already fitted and handle eventual masking)
+                if np.any(self._X_mask):
+                    X_hat = self._remove_masked_data(self.inverse_transform())
+                else:
+                    X_hat = self.inverse_transform()
         elif X_hat is None:
             raise ValueError(
                 "If X is provided, An externally computed X_hat dataset "
