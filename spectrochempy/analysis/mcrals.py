@@ -23,6 +23,7 @@ import warnings
 import dill
 import numpy as np
 import traitlets as tr
+from scipy.optimize import nnls
 from sklearn import decomposition
 
 from spectrochempy.analysis._base import (
@@ -34,6 +35,11 @@ from spectrochempy.core import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
+
+
+# utility
+def lstsq(a, b, rcond=None):
+    return np.linalg.lstsq(a, b, rcond)[0]
 
 
 # DEVNOTE:
@@ -457,7 +463,7 @@ at each iterations.
             n_components = Cdata.shape[1]
             info_(f"Concentration profile initialized with {n_components} components")
             # compute initial spectra (using the Xdata eventually masked
-            Stdata = np.linalg.lstsq(Cdata, Xdata, rcond=None)[0]
+            Stdata = lstsq(Cdata, Xdata)
             info_("Spectra profile computed")
             # if everything went well here, C and St are set, we return
             # after having removed the eventual C mask!
@@ -480,8 +486,7 @@ at each iterations.
         n_components = Stdata.shape[0]
         info_(f"Spectra profile initialized with {n_components} components")
         # compute initial concentration
-        Ctdata = np.linalg.lstsq(Stdata.T, Xdata.T, rcond=None)[0]
-        Cdata = Ctdata.T
+        Cdata = lstsq(Stdata.T, Xdata.T).T
         info_("Concentration profile computed")
         # if everything went well here, C and St are set, we return
         # after having removed the eventual St mask!
@@ -729,8 +734,12 @@ at each iterations.
         Xpca = pca.inverse_transform(Xtransf)
 
         while change >= self.tol and niter < self.max_iter and ndiv < self.maxdiv:
-            C = np.linalg.lstsq(St.T, X.T, rcond=None)[0].T
+
             niter += 1
+
+            # Compute C
+            # ---------
+            C = lstsq(St.T, X.T).T
 
             # Force non-negative concentration
             # --------------------------------
@@ -769,11 +778,7 @@ at each iterations.
             # ------------------------------------------
             if self.closureConc:
                 if self.closureMethod == "scaling":
-                    Q = np.linalg.lstsq(
-                        C[:, self.closureConc],
-                        self.closureTarget.T,
-                        rcond=None,
-                    )[0]
+                    Q = lstsq(C[:, self.closureConc], self.closureTarget.T)
                     C[:, self.closureConc] = np.dot(C[:, self.closureConc], np.diag(Q))
                 elif self.closureMethod == "constantSum":
                     totalConc = np.sum(C[:, self.closureConc], axis=1)
@@ -813,7 +818,7 @@ at each iterations.
             C_hard = C.copy()
 
             # compute St
-            St = np.linalg.lstsq(C, X, rcond=None)[0]
+            St = lstsq(C, X)
 
             # stores St in St_soft
             St_soft = St.copy()
@@ -862,7 +867,7 @@ at each iterations.
                 St[self.hardSpec, :] = fixedSt[self.hardSt_to_St_idx, :]
 
             # recompute C for consistency(soft modeling)
-            C = np.linalg.lstsq(St.T, X.T, rcond=-1)[0].T
+            C = lstsq(St.T, X.T).T  # no sure why , rcond=-1 was used.
 
             # rescale spectra & concentrations
             if self.normSpec == "max":
