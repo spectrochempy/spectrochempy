@@ -9,7 +9,12 @@ __dataset_methods__ = __all__
 
 import io
 
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import (
+    ALIAS,
+    FILETYPES,
+    Importer,
+    _importer_method,
+)
 from spectrochempy.utils.docstrings import _docstring
 
 # ======================================================================================
@@ -97,14 +102,15 @@ def _read_zip(*args, **kwargs):
                 dirs.append(file)
 
         def extract(children, **kwargs):
-            # remove zip filetype and protocol
-            # to use the one associated with the file extension
+            extension = children.name.split(".")[-1]
+            if extension.lower() not in list(zip(*(ALIAS + FILETYPES)))[0]:
+                return
             origin = kwargs.get("origin", None)
             return NDDataset.read(
                 children.name, content=children.read_bytes(), origin=origin
             )
 
-        # we assume that only a single dir or a single file is zipped
+        # we assume that only a single dir
         # But this can be changed later
         if dirs:
             # a single directory
@@ -120,12 +126,20 @@ def _read_zip(*args, **kwargs):
                 else:
                     # print(count, children)
                     # TODO: why this pose problem in pycharm-debug?????
-                    datasets.append(extract(children, **kwargs))
+                    d = extract(children, **kwargs)
+                    if d is not None:
+                        datasets.append(d)
                     count += 1
-
-            return datasets
         else:
-            return extract(files[0], **kwargs)
+            for file in files:
+                d = extract(file, **kwargs)
+                if d is not None:
+                    datasets.append(d)
+
+        if len(datasets) == 1:
+            return datasets[0]
+        else:
+            return datasets
 
 
 # --------------------------------------------------------------------------------------

@@ -7,18 +7,16 @@
 # flake8: noqa
 """
 MCR-ALS optimization example with kinetic constraints
-===========================================================
+=====================================================
 
 In this example, we perform the MCR ALS optimization of the UV-vis of spectra resulting
 from a three-component reaction `A` \-> `B` \-> `C` which was investigated by UV–Vis
-spectroscopy. Full details of the reaction and data acquisition conditions can be found
-in .
-
-The data has been provided by the Biosystems Data Analysis Group of the University of
-Amsterdam [32].
-
-Here we will focus on a single run. For the user convenience, this dataset is present
-in the spectrochempy_data as 'METING9.mat'\.
+spectroscopy. Full details on the reaction and data acquisition conditions can be found
+in :cite:t:`bijlsma:2001` .
+The data can be downloded from the author website `Biosystems Data Analysis group
+University of Amsterdam
+<http://www.bdagroup.nl/content/Downloads/datasets/datasets.php>`__
+(Copyright 2005 Biosystems Data Analysis Group ; Universiteit van Amsterdam )
 """
 
 import numpy as np
@@ -26,11 +24,28 @@ import numpy as np
 import spectrochempy as scp
 
 # %%
-# Load the dataset
-ds = scp.read_matlab("matlabdata/METING9.MAT")
+# Loading a NDDataset
+# -------------------
+# DownLoad the data at
+# (`Kinetic data set (UV-VIS) <http://www.bdagroup.nl/content/Downloads/datasets/18_sb_uv_vis.zip>`__ )
+# using the `read` function.
+data = scp.read("http://www.bdagroup.nl/content/Downloads/datasets/18_sb_uv_vis.zip")
 
 # %%
-# The first array contains the time in seconds since the start of the reaction (t=0).
+# For sake of demonstration, we will focus only on a single run.
+# For example, we extract only the data for the run ``#9`` (dataset name: ``'x9b'`` ).
+#
+# Let's search it. Data is a list of pairs of NDDataset, a pair of each run.
+# The name we are looking for is the name of the second dataset in a apir.
+for pair in data:
+    if pair[1].name == "x9b":
+        ds = pair
+        break
+
+# %%
+# now we have the required pair of dataset.
+#
+# The first dataset incontains the time in seconds since the start of the reaction (t=0).
 # The first column of the matrix contains the wavelength axis and the remaining columns
 # are the measured UV-VIS spectra (wavelengths x timepoints)
 print("\n NDDataset names: " + str([d.name for d in ds]))

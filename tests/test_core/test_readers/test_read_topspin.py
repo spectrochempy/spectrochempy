@@ -23,15 +23,6 @@ NMRDATA = DATADIR / "nmrdata"
 #     not NMRDATA.exists(),
 #     reason="Experimental data not available for testing",
 # )
-def test_deprecated():
-    with pytest.deprecated_call():
-        scp.read_bruker_nmr(nmrdir / "topspin_2d", expno=1, remove_digital_filter=True)
-
-
-# @pytest.mark.skipif(
-#     not NMRDATA.exists(),
-#     reason="Experimental data not available for testing",
-# )
 def test_readtopspin():
 
     # A.plot()

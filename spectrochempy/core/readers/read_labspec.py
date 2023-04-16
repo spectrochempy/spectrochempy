@@ -75,10 +75,7 @@ def _read_txt(*args, **kwargs):
     content = kwargs.get("content", False)
 
     if content:
-        pass
-        # fid = io.StringIO(content)
-        # TODO: get the l list of string
-
+        lines = content.decode("utf-8").splitlines()
     else:
         fid = open(filename, "r", encoding="utf-8")
         try:

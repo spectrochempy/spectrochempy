@@ -9,14 +9,14 @@
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 
-def test_read_jdx(JDX_2D):
+def test_read_jcamp(JDX_2D):
 
     # read
-    Y = NDDataset.read_jdx({"some2Dspectra.jdx": JDX_2D.encode("utf8")})
+    Y = NDDataset.read_jcamp({"some2Dspectra.jdx": JDX_2D.encode("utf8")})
     assert str(Y.coordset) == "CoordSet: [x:wavenumbers, y:acquisition timestamp (GMT)]"
     assert Y.shape == (3, 20)
 
-    f = Y.write_jdx("2D.jdx", confirm=False)
+    f = Y.write_jcamp("2D.jdx", confirm=False)
     Y = NDDataset.read(f)
     assert str(Y.coordset) == "CoordSet: [x:wavenumbers, y:acquisition timestamp (GMT)]"
     assert Y.shape == (3, 20)
