@@ -49,7 +49,7 @@ def read_opus(*paths, **kwargs):
 
     See Also
     ---------
-    %(Importer.see_also.no_opus)s
+    %(Importer.see_also.no_read_opus)s
 
     Examples
     ---------
