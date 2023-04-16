@@ -107,7 +107,7 @@ figure.constrained_layout.wspace         : 0.02
 figure.dpi                               : 96.0
 figure.edgecolor                         : white
 figure.facecolor                         : white
-figure.figsize                           : 6.8, 4.4
+figure.figsize                           : 5.5, 3.5
 figure.frameon                           : True
 figure.subplot.bottom                    : 0.12
 figure.subplot.hspace                    : 0.0

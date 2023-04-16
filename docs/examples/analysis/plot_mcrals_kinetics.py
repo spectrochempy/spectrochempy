@@ -119,4 +119,5 @@ _ = mcr_2.C_hard.T.plot(clear=False)
 _ = mcr_2.St.plot()
 _ = mcr_2.plotmerit(offset=0, nb_traces=10)
 
+# %%
 scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

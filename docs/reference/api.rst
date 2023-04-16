@@ -141,7 +141,6 @@
     write_csv
     write_excel
     write_jcamp
-    write_jdx
     write_mat
     write_matlab
     write_xls

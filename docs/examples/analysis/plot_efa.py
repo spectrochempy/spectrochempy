@@ -39,7 +39,6 @@ dataset[:, 5997.0:5993.0] = scp.MASKED
 # dataset -= dataset[-1]
 dataset.plot_stack(title="NH4_Y activation dataset")
 
-
 # %%
 #  Evolving Factor Analysis
 efa1 = scp.EFA()
@@ -65,8 +64,6 @@ efa1.cutoff = efa1.f_ev[:, 3].max()
 C1 = efa1.transform()
 C1.T.plot(title="EFA determined concentrations", legend=C1.x.labels)
 
-scp.show()  # Uncomment to show plot if needed (not necessary in jupyter notebook)
-
 # %%
 # Fit transform : Get the concentration in too commands
 # The number of desired components can be passed to the EFA model,
@@ -82,15 +79,17 @@ assert C1 == C2
 St = efa2.get_components()
 St.plot(title="components", legend=St.y.labels)
 
-scp.show()
-
 # %%
 # Compare with PCA
 pca = scp.PCA(used_components=3)
 C3 = pca.fit_transform(dataset)
 
+# %%
 C3.T.plot(title="PCA scores")
+
+# %%
 LT = pca.loadings
 LT.plot(title="PCA components", legend=LT.y.labels)
 
+# %%
 scp.show()

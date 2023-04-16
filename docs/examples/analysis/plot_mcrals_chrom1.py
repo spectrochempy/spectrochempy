@@ -12,7 +12,7 @@ MCR-ALS optimization example (original example from Jaumot)
 In this example, we perform the MCR ALS optimization of a dataset
 corresponding to a HPLC-DAD run, from :cite:t:`jaumot:2005` and :cite:t:`jaumot:2015`\ .
 
-This dataset (and others) can be loaded from the
+This dataset (and others) can be downloaded from the
 `Multivariate Curve Resolution Homepage
 <https://mcrals.wordpress.com/download/example-data-sets>`_\ .
 
@@ -54,6 +54,11 @@ for ds in datasets:
 # The experimental data as :math:`X` (``X``) and the ``guess`` are thus:
 X = datasets[-1]
 guess = datasets[3]
+
+# %%
+# Plot of X and of the guess:
+_ = X.plot()
+_ = guess.plot()
 
 # %%
 # Create a MCR-ALS object
