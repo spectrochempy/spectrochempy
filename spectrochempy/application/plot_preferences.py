@@ -631,7 +631,7 @@ class PlotPreferences(MetaConfigurable):
     figure_titleweight = Unicode("normal", help=r"""weight of the figure title""").tag(
         config=True, kind=""
     )
-    figure_figsize = Tuple((6.8, 4.4), help=r"""figure size in inches""").tag(
+    figure_figsize = Tuple((6, 4), help=r"""figure size in inches""").tag(
         config=True, kind=""
     )
     figure_dpi = Float(96.0, help=r"""figure dots per inch""").tag(config=True, kind="")

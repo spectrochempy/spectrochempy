@@ -27,17 +27,14 @@ nd = scp.NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
 # %%
 # and select only the OH region:
-
 ndOH = nd[54, 3800.0:3300.0]
 # masking
 ndOH[:, 3505.0:3500.0] = scp.MASKED
-# ndOH.plot()
+ndOH.plot()
 
 # %%
 # Perform a Fit
 # Fit parameters are defined in a script (a single text as below)
-
-
 script = """
 #-----------------------------------------------------------
 # syntax for parameters definition:
@@ -77,7 +74,6 @@ shape: asymmetricvoigtmodel
 
 # %%
 # create an Optimize object
-
 f1 = scp.Optimize(log_level="INFO")
 
 # %%
@@ -89,19 +85,16 @@ f1.script = script
 # reset dry and continue to show starting model
 f1.dry = True
 f1.autobase = True
-
 f1.fit(ndOH)
 
 # get some information
 scp.info_(f"numbers of components: {f1.n_components}")
-
 ndOH.plot()
 ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
-scp.show()
 
+# %%
 # Now perform a fit with maximum 1000 iterations
-
 f1.max_iter = 1000
 f1.fit(ndOH)
 
@@ -114,4 +107,6 @@ ax.autoscale(enable=True, axis="y")
 # plotmerit
 som = f1.inverse_transform()
 f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2)
+
+# %%
 scp.show()

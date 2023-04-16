@@ -66,9 +66,9 @@ efa.fit(dataset)
 # %%
 # Plots of the log(EV) for the forward and backward analysis
 #
-
 efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.x.labels)
 
+# %%
 efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.x.labels)
 
 # %%
@@ -87,7 +87,6 @@ b2 = efa.b_ev[:, :n_pc]
 # we concatenate the datasets to plot them in a single figure
 both = scp.concatenate(f2, b2)
 both.T.plot(yscale="log")
-scp.show()
 
 # %%
 # Get the abstract concentration profile based on the FIFO EFA analysis
@@ -95,4 +94,5 @@ scp.show()
 C = efa.transform()
 C.T.plot(title="EFA concentration")
 
+# %%
 scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)

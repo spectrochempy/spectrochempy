@@ -92,7 +92,6 @@ X.y.default
 
 # %%
 # Let's now plot the spectral range of interest. The default coordinate is now used:
-
 X_ = X[:, 2250.0:1950.0]
 print(X_.y.default)
 _ = X_.plot()
@@ -103,7 +102,6 @@ _ = X_.plot_map()
 # ------------------------------------
 # Perform IRIS without regularization (the loglevel can be set to `INFO` to have
 # information on the running process)
-
 iris1 = scp.IRIS(log_level="INFO")
 
 # %%
@@ -121,14 +119,12 @@ iris1.fit(X_, K)
 
 # %%
 # Plots the results
-
 iris1.plotdistribution()
 _ = iris1.plotmerit()
 
 # %%
 # With regularization and a manual search
 # ---------------------------------------
-# %%
 # Perform  IRIS with regularization, manual search
 iris2 = scp.IRIS(reg_par=[-10, 1, 12])
 
@@ -150,7 +146,6 @@ iris3 = scp.IRIS(reg_par=[-10, 1])
 iris3.fit(X_, K)
 iris3.plotlcurve(title="L curve, automated search")
 
-
 # %%
 # The data corresponding to the largest curvature of the L-curve
 # are at the second last position of output data:
@@ -158,4 +153,5 @@ iris3.plotlcurve(title="L curve, automated search")
 iris3.plotdistribution(-2)
 _ = iris3.plotmerit(-2)
 
+# %%
 scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
