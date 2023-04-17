@@ -56,7 +56,7 @@ from sklearn.cross_decomposition import PLSRegression
 # protein and starch values for each of the samples. This dataset (and others) can be loaded from
 # [http://www.eigenvector.com](http://www.eigenvector.com/data/).
 # %%
-A = scp.download("http://www.eigenvector.com/data/Corn/corn.mat")
+A = scp.read_remote("http://www.eigenvector.com/data/Corn/corn.mat")
 
 # %% [markdown]
 # The .mat file contains 7 eigenvectors's datasets which are thus returned in A as a list of 7
