@@ -982,7 +982,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         if ipy is not None:  # pragma: no cover
             ipy.set_custom_exc((Exception,), self._ipython_catch_exceptions)
         else:
-            if environ.get("SCPY_TESTING", 0) != 0:
+            if environ.get("SCPY_TESTING", 0) == 0 and "pytest" not in sys.argv[0]:
                 # catch exception only when pytest is not running
                 sys.excepthook = self._catch_exceptions
 
