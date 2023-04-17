@@ -214,7 +214,7 @@ class Importer(HasTraits):
             try:
                 res = read_(self.objtype(), filename, **kwargs)
                 # sometimes read_ can return None (e.g. non labspec text file)
-            except FileNotFoundError:
+            except (FileNotFoundError, OSError):
                 # try to get the file from github
                 kwargs["read_method"] = read_
                 try:
