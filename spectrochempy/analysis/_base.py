@@ -135,7 +135,7 @@ class _set_output(object):
                 X_transf.set_coordset(
                     y=Coord(
                         None,
-                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[0])],
+                        labels=["#%d" % (i) for i in range(X_transf.shape[0])],
                         title="components",
                     ),
                     x=X.coord(-1),
@@ -145,7 +145,7 @@ class _set_output(object):
                     y=X.coord(0),  # cannot use X.y in case of transposed X
                     x=Coord(
                         None,
-                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
                         title="components",
                     ),
                 )
@@ -153,7 +153,7 @@ class _set_output(object):
                 X_transf.set_coordset(
                     y=Coord(
                         None,
-                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
                         title="components",
                     ),
                     x=X.coord(1),
@@ -163,7 +163,7 @@ class _set_output(object):
                 X_transf.set_coordset(
                     x=Coord(
                         None,
-                        labels=["#%d" % (i + 1) for i in range(X_transf.shape[-1])],
+                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
                         title="components",
                     ),
                 )
