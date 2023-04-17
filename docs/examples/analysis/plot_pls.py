@@ -40,7 +40,7 @@ _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 # We are interested to predict the moisture content:
 y = Y[:, 0]
 
-# We select arbitrarily the 57 first samples to train the model and the 27 remaining ones
+# We select arbitrarily the 57 first samples to train the model and the remaining ones
 # to test the model.
 X_train = X[:57]
 X_test = X[57:]
@@ -56,9 +56,17 @@ pls.fit(X_train, y_train)
 y_train_hat = pls.predict()
 y_test_hat = pls.predict(X_test)
 
+# Parity plot comparing the predicted and actual values, for
+# both train set and est set
 plt.figure()
-plt.plot(y_train.data, y_train_hat.data, "o")
-plt.plot(y_test.data, y_test_hat.data, "x")
+plt.scatter(y_train.data, y_train_hat.data, c="b", s=30, alpha=0.3, label="train")
+plt.scatter(y_test.data, y_test_hat.data, c="r", s=30, alpha=0.3, label="test")
+plt.xlim(9.0, 11.5)
+plt.xlabel("measured moisture")
+plt.ylim(9.0, 11.5)
+plt.ylabel("predicted moisture")
+plt.legend()
+plt.tight_layout()
 
 
 # %%
