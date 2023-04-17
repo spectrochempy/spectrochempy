@@ -214,17 +214,8 @@ class Importer(HasTraits):
             try:
                 res = read_(self.objtype(), filename, **kwargs)
                 # sometimes read_ can return None (e.g. non labspec text file)
-
-            except OSError as e:
-                # in windows, passing an url gives [Errno 22] Invalid argument
-                if e.args[0] == 22:
-                    kwargs["read_method"] = read_
-                    res = _read_remote(self.objtype(), filename, **kwargs)
-                else:
-                    raise e
-
             except FileNotFoundError:
-                # try to get the file from github or url
+                # try to get the file from github
                 kwargs["read_method"] = read_
                 try:
                     res = _read_remote(self.objtype(), filename, **kwargs)
