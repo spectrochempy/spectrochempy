@@ -696,9 +696,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
                 "rotatingfile": {
                     "class": "logging.handlers.RotatingFileHandler",
                     "level": "DEBUG",
-                    "filename": str(
-                        _get_log_dir() / f"spectrochempy_{sys.version[:4]}.log"
-                    ),
+                    "filename": str(_get_log_dir() / "spectrochempy.log"),
                     "maxBytes": 262144,
                     "backupCount": 5,
                 },
