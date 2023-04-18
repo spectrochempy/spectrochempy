@@ -38,9 +38,11 @@ X.plot(cmap=None)
 Y = ds_list[3]
 _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 
+# %%
 # We are interested to predict the moisture content:
 y = Y[:, 0]
 
+# %%
 # Select the 57 first samples to train the model and the remaining ones
 # to test the model:
 X_train = X[:57]
@@ -53,6 +55,7 @@ y_test = y[57:]
 pls = scp.PLS(used_components=5)
 pls.fit(X_train, y_train)
 
+# %%
 # Parity plot comparing the predicted and actual values, for
 # both train set and est set
 

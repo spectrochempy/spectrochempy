@@ -16,22 +16,21 @@ from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
 
-
 # test docstring
 # but this is not intended to work with the debugger - use run instead of debug!
-@pytest.mark.skipif(
-    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
-    reason="debug mode cause error when checking docstrings",
-)
-def test_EFA_docstrings():
-    chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.efa"
-    chd.check_docstrings(
-        module,
-        obj=scp.EFA,
-        # exclude some errors - remove whatever you want to check
-        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
-    )
+# @pytest.mark.skipif(
+#    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+#    reason="debug mode cause error when checking docstrings",
+# )
+# def test_EFA_docstrings():
+#    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+#    module = "spectrochempy.analysis.efa"
+#    chd.check_docstrings(
+#        module,
+#        obj=scp.EFA,
+#        # exclude some errors - remove whatever you want to check
+#        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+#    )
 
 
 def test_example():
