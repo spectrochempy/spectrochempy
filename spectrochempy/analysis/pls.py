@@ -147,7 +147,11 @@ class PLS(CrossDecompositionAnalysis):
         self._intercept = self._pls.intercept_
         self._n_iter = self._pls.n_iter_
         self._n_feature_in = self._pls.n_features_in_
+
         # todo: check self.feature_names_in = self._pls.feature_names_in_
+
+        # for compatibility with superclass methods
+        self._n_components = self.used_components
 
     def _fit_transform(self, X, Y=None):
         # Learn and apply the dimension reduction on the train data.
@@ -160,7 +164,7 @@ class PLS(CrossDecompositionAnalysis):
 
     def _inverse_transform(self, X_transform, Y_transform=None):
         # Transform data back to its original space.
-        return self._pls.inverse_transform(X_transform, Y_transform=Y_transform)
+        return self._pls.inverse_transform(X_transform, Y=Y_transform)
 
     def _transform(self, X, Y=None, copy=True):
         # Apply the dimension reduction.

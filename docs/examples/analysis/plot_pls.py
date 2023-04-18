@@ -16,6 +16,7 @@ from their NIR spectra.
 # Import the spectrochempy API package
 import spectrochempy as scp
 import matplotlib.pyplot as plt
+import numpy as np
 
 # %%
 # Load a dataset
@@ -40,33 +41,22 @@ _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 # We are interested to predict the moisture content:
 y = Y[:, 0]
 
-# We select arbitrarily the 57 first samples to train the model and the remaining ones
-# to test the model.
+# Select the 57 first samples to train the model and the remaining ones
+# to test the model:
 X_train = X[:57]
 X_test = X[57:]
 y_train = y[:57]
 y_test = y[57:]
-
 
 # %%
 # Create a PLS object and fit the train datasets:
 pls = scp.PLS(used_components=5)
 pls.fit(X_train, y_train)
 
-y_train_hat = pls.predict()
-y_test_hat = pls.predict(X_test)
-
 # Parity plot comparing the predicted and actual values, for
 # both train set and est set
-plt.figure()
-plt.scatter(y_train.data, y_train_hat.data, c="b", s=30, alpha=0.3, label="train")
-plt.scatter(y_test.data, y_test_hat.data, c="r", s=30, alpha=0.3, label="test")
-plt.xlim(9.0, 11.5)
-plt.xlabel("measured moisture")
-plt.ylim(9.0, 11.5)
-plt.ylabel("predicted moisture")
-plt.legend()
-plt.tight_layout()
 
-
-# %%
+pls.plotparity(label="calibration")
+pls.plotparity(y_test, pls.predict(X_test), c="red", clear=False, label="validation")
+plt.legend(loc="lower right")
+plt.show()

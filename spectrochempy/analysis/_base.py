@@ -14,6 +14,7 @@ import warnings
 from copy import copy
 from functools import partial, update_wrapper
 
+import matplotlib.pyplot as plt
 import numpy as np
 import traitlets as tr
 from sklearn import linear_model
@@ -1220,7 +1221,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         if both:
             return self._transform(newX, newY, copy)
         else:
-            return self._transform(newX, copy)
+            return self._transform(newX, None, copy)
 
     # Get doc sections for reuse in subclass
     _docstring.get_sections(
@@ -1263,31 +1264,24 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         if not self._fitted:
             raise NotFittedError
 
-        # get optional n_components
-        n_components = kwargs.pop(
-            "n_components", kwargs.pop("n_pc", self._n_components)
-        )
-        if n_components > self._n_components:
-            warnings.warn(
-                "The number of components required for reduction "
-                "cannot be greater than the fitted model components : "
-                f"{self._n_components}. We then use this latter value."
-            )
-
         if isinstance(X_transform, NDDataset):
             X_transform = X_transform.data
-            if n_components > X_transform.shape[1]:
-                warnings.warn(
-                    "The number of components required for reduction "
-                    "cannot be greater than the X_transform size : "
-                    f"{X_transform.shape[1]}. We then use this latter value."
-                )
+
         elif X_transform is None:
-            X_transform = self.transform(**kwargs)
+            X_transform = self.transform(**kwargs).data
 
-        X = self._inverse_transform(X_transform)
+        if isinstance(Y_transform, NDDataset):
+            Y_transform = Y_transform.data
 
-        return X
+        elif Y_transform is None:
+            Y_transform = self.transform(**kwargs).data
+
+        if Y_transform is None:
+            X = self._inverse_transform(X_transform)
+            return X
+        else:
+            X, Y = self._inverse_transform(X_transform, X_transform)
+            return X, Y
 
     _docstring.get_sections(
         _docstring.dedent(inverse_transform.__doc__),
@@ -1328,23 +1322,89 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # Plot methods
     # ----------------------------------------------------------------------------------
     @_docstring.dedent
-    def plotmerit(self, X=None, X_hat=None, **kwargs):
+    def plotparity(
+        self,
+        Y=None,
+        Y_hat=None,
+        clear=True,
+        s=None,
+        c=None,
+        marker=None,
+        cmap=None,
+        norm=None,
+        vmin=None,
+        vmax=None,
+        alpha=0.5,
+        linewidths=None,
+        edgecolors=None,
+        plotnonfinite=False,
+        data=None,
+        **kwargs,
+    ):
         """
-        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
+        Plot the predicted (:math:`\hat{Y}`\ ) vs measured (:math:`Y`\ ) values
 
-        :math:`X` and :math:`\hat{X}` can be passed as arguments. If not,
-        the `X` attribute is used for :math:`X`\ and :math:`\hat{X}`\ is computed by
+        :math:`Y` and :math:`\hat{Y}` can be passed as arguments. If not,
+        the `Y` attribute is used for :math:`Y`\ and :math:`\hat{Y}`\ is computed by
         the `inverse_transform` method
 
         Parameters
         ----------
-        X : `NDDataset`\ , optional
-            Original dataset. If is not provided (default), the `X`
-            attribute is used and X_hat is computed using `inverse_transform`\ .
-        X_hat : `NDDataset`\ , optional
-            Inverse transformed dataset. if `X` is provided, `X_hat`
-            must also be provided as compuyed externally.
-        %(kwargs)s
+        Y : `NDDataset`\ , optional
+            Measured values. If is not provided (default), the `Y`
+            attribute is used and Y_hat is computed using `inverse_transform`\ .
+        Y_hat : `NDDataset`\ , optional
+            Predicted values. if `Y` is provided, `Y_hat`
+            must also be provided as computed externally.
+        clear: bool, optional
+            whether to plot on a new axes. Default is True
+        s: float or array-like, shape (n, ), optional
+            The marker size in points**2 (typographic points are 1/72 in.).
+            Default is rcParams['lines.markersize'] ** 2.
+        c: array-like or list of colors or color, optional
+            The marker colors. Possible values:
+            - A scalar or sequence of n numbers to be mapped to colors using cmap and norm.
+            - A 2D array in which the rows are RGB or RGBA.
+            - A sequence of colors of length n.
+            - A single color format string.
+            see `~matplotlib.pyplot.scatter` for details.
+        marker: `markerMarkerStyle`, default: rcParams["scatter.marker"] (default: 'o')
+            The marker style. marker can be either an instance of the class or the text
+            shorthand for a particular marker. See `~matplotlib.markers` for more information.
+        cmap: `str` or `Colormap`, default: rcParams["image.cmap"] (default: 'viridis')
+            The Colormap instance or registered colormap name used to map scalar data to colors.
+            This parameter is ignored if c is RGB(A).
+        norm: str or Normalize, optional
+            The normalization method used to scale scalar data to the [0, 1] range before mapping
+            to colors using cmap. By default, a linear scaling is used, mapping the lowest value to
+            0 and the highest to 1.
+            If given, this can be one of the following:
+            - An instance of Normalize or one of its subclasses (see Colormap Normalization).
+            - A scale name, i.e. one of "linear", "log", "symlog", "logit", etc. For a list of available scales, call
+            matplotlib.scale.get_scale_names(). In that case, a suitable Normalize subclass is dynamically generated
+            and instantiated.
+            This parameter is ignored if c is RGB(A).
+        vmin, vmax: float, optional
+            When using scalar data and no explicit norm, vmin and vmax define the data range that the colormap covers.
+            By default, the colormap covers the complete value range of the supplied data. It is an error to use
+            vmin/vmax when a norm instance is given (but using a str norm name together with vmin/vmax is acceptable).
+            This parameter is ignored if c is RGB(A).
+        alpha: float, default: 0.5
+            The alpha blending value, between 0 (transparent) and 1 (opaque).
+        linewidths: float or array-like, default: rcParams["lines.linewidth"] (default: 1.5)
+            The linewidth of the marker edges. Note: The default edgecolors is 'face'. You may want to change this
+            as well.
+        edgecolors: {'face', 'none', None} or color or sequence of color, default: rcParams["scatter.edgecolors"],
+        (default: 'face')
+            The edge color of the marker. Possible values:
+            'face': The edge color will always be the same as the face color.
+            'none': No patch boundary will be drawn.
+            A color or sequence of colors.
+            For non-filled markers, edgecolors is ignored. Instead, the color is determined like with 'face',
+            i.e. from c, colors, or facecolors.
+        plotnonfinite: bool, default: False
+            Whether to plot points with nonfinite c (i.e. inf, -inf or nan). If True the points are drawn with the bad
+            colormap color (see Colormap.set_bad).
 
         Returns
         -------
@@ -1353,95 +1413,78 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         Other Parameters
         ----------------
-        colors : `tuple` or `~numpy.ndarray` of 3 colors, optional
-            Colors for `X` , `X_hat` and residuals ``E`` .
-            in the case of 2D, The default colormap is used for `X` .
-            By default, the three colors are :const:`NBlue` , :const:`NGreen`
-            and :const:`NRed`  (which are colorblind friendly).
-        offset : `float`, optional, default: `None`
-            Specify the separation (in percent) between the
-            :math:`X` , :math:`X_hat` and :math:`E`\ .
-        nb_traces : `int` or ``'all'``\ , optional
-            Number of lines to display. Default is ``'all'``\ .
-        **others : Other keywords parameters
-            Parameters passed to the internal `plot` method of the `X` dataset.
+        todo: add color cycler `
+        alpha : float, optional
+            By default alpha = 0.5.
+        s: size of the scatter plot
         """
-        colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
 
-        if X is None:
-            X = self._X
-            if X_hat is None:
+        if Y is None:
+            Y = self.Y
+            if Y_hat is None:
                 # compute the inverse transform (this check that the model
                 # is already fitted and handle eventual masking)
-                if np.any(self._X_mask):
-                    X_hat = self._remove_masked_data(self.inverse_transform())
-                else:
-                    X_hat = self.inverse_transform()
-        elif X_hat is None:
+                Y_hat = self.predict(self.X)
+        elif Y_hat is None:
             raise ValueError(
-                "If X is provided, An externally computed X_hat dataset "
+                "If Y is provided, An externally computed Y_hat dataset "
                 "must be also provided."
             )
 
-        if X._squeeze_ndim == 1:
+        if Y._squeeze_ndim == 1:
             # normally this was done before, but if needed.
-            X = X.squeeze()
-            X_hat = X_hat.squeeze()
+            Y = Y.squeeze()
+            Y_hat = Y_hat.squeeze()
 
-        # Number of traces to keep
-        nb_traces = kwargs.pop("nb_traces", "all")
-        if X.ndim == 2 and nb_traces != "all":
-            inc = int(X.shape[0] / nb_traces)
-            X = X[::inc]
-            X_hat = X_hat[::inc]
-
-        res = X - X_hat
-
-        # separation between traces
-        offset = kwargs.pop("offset", None)
-        if offset is None:
-            offset = 0
-        ma = max(X.max(), X_hat.max())
-        mao = ma * offset / 100
-        mad = ma * offset / 100 + ma / 10
-        _ = (X - X.min()).plot(color=colX, **kwargs)
-        _ = (X_hat - X_hat.min() - mao).plot(
-            clear=False, ls="dashed", cmap=None, color=colXhat
-        )
-        ax = (res - res.min() - mad).plot(clear=False, cmap=None, color=colRes)
-
-        #             color=colXhat)
-        #     ax.plot(res.T.masked_data - 1.2 * ma,
-        #             color=colRes)
-
-        # if X.x is not None and X.x.data is not None:
-        #     ax.plot(X.x.data, X_hat.T.masked_data - ma, '-',
-        #             color=colXhat)
-        #     ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, '-',
-        #             color=colRes)
-        # else:
-        #     ax.plot(X_hat.T.masked_data - ma,
-        #             color=colXhat)
-        #     ax.plot(res.T.masked_data - 1.2 * ma,
-        #             color=colRes)
-        ax.autoscale(enable=True, axis="y")
-        ax.set_title(f"{self.name} plot of merit")
-        ax.yaxis.set_visible(False)
+        if clear:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+        else:
+            ax = plt.gca()
+        if len(Y.shape) == 1:
+            plt.scatter(
+                Y.data,
+                Y_hat.data,
+                s=s,
+                c=c,
+                marker=marker,
+                cmap=cmap,
+                norm=norm,
+                vmin=vmin,
+                vmax=vmax,
+                alpha=alpha,
+                linewidths=linewidths,
+                edgecolors=edgecolors,
+                plotnonfinite=plotnonfinite,
+                data=data,
+                **kwargs,
+            )
+        else:
+            for col in Y.shape[1]:
+                plt.scatter(
+                    Y.data[:, col],
+                    Y_hat.data[:, col],
+                    s=s,
+                    c=c,
+                    marker=marker,
+                    cmap=cmap,
+                    norm=norm,
+                    vmin=vmin,
+                    vmax=vmax,
+                    alpha=alpha,
+                    linewidths=linewidths,
+                    edgecolors=edgecolors,
+                    plotnonfinite=plotnonfinite,
+                    data=data,
+                    **kwargs,
+                )
+        plt.legend()
+        plt.xlabel("measured values")
+        plt.ylabel("predicted values")
+        plt.tight_layout()
         return ax
 
-    _docstring.get_sections(_docstring.dedent(plotmerit.__doc__), base="plotmerit")
-
-    @property
-    def Y(self):
-        """
-        The `Y` input.
-        """
-        # We use Y property only to show this information to the end-user. Internally
-        # we use _Y attribute to refer to the input data
-        if self._Y_is_missing:
-            raise NotFittedError
-        Y = self._Y
-        return Y
+    _docstring.get_sections(_docstring.dedent(plotparity.__doc__), base="plotparity")
 
 
 # ======================================================================================
