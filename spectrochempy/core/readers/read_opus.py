@@ -147,7 +147,7 @@ def _read_opus(*args, **kwargs):
         data = opus_data["AB"][:npt]
         dataset.data = np.array(data[np.newaxis], dtype="float32")
     except KeyError:
-        raise IOError(
+        raise KeyError(
             f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method"
         )
     # todo: read background

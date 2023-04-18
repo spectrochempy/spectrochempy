@@ -208,7 +208,6 @@ class Importer(HasTraits):
             ):
                 filename = pathclean(filename)
             else:
-                #    kwargs["remote"] = True
                 kwargs["read_only"] = kwargs.get("read_only", True)
             read_ = getattr(self, f"_read_{key[1:]}")
             try:
@@ -218,6 +217,7 @@ class Importer(HasTraits):
                 # try to get the file from github
                 kwargs["read_method"] = read_
                 try:
+
                     res = _read_remote(self.objtype(), filename, **kwargs)
 
                 except OSError as e:
@@ -238,6 +238,10 @@ class Importer(HasTraits):
                     raise e
 
             except IOError as e:
+                warning_(str(e))
+                res = None
+
+            except KeyError as e:
                 warning_(str(e))
                 res = None
 
