@@ -39,7 +39,9 @@ def example_run(path):
     serr = None
     try:
         pipe = subprocess.Popen(
-            ["python", str(path), "--nodisplay"], stdout=subprocess.PIPE
+            ["python", str(path), "--nodisplay"],
+            stdout=subprocess.PIPE,
+            encoding="utf8",
         )
         (so, serr) = pipe.communicate()
     except Exception:
@@ -60,5 +62,6 @@ def test_example(example):
     print("Testing ", example)
     if example.suffix == ".py":
         e, message, err = example_run(example)
+        # this give unicoderror on workflow with window
         print(e, message.decode("utf8"), err)
         assert not e, message.decode("utf8")
