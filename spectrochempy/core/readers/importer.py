@@ -675,7 +675,7 @@ def _download_from_url(url, dst, replace=False, read_only=False):
         # download on github (always save the downloaded files)
         url = (
             f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
-            f"testdata/{url}"
+            f"testdata/{url.as_posix()}"
         )
 
         # first determine if it is a directory
