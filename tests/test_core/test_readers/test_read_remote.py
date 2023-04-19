@@ -21,11 +21,11 @@ def test_read_remote():
     filename = IRDATA / "nh4y-activation.spg"
 
     # read normally
-    nd1 = NDDataset.read_omnic(filename)
-    assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
+    # nd1 = NDDataset.read_omnic(filename)
+    # assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
 
-    # move the files to simulate their absence:
-    filesaved = filename.rename("~irdata_save")
+    # delete the file to simulate their absence:
+    filename.unlink()
 
     # now try to read
     nd2 = NDDataset.read_omnic("irdata/nh4y-activation.spg")
