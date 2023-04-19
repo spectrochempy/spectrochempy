@@ -7,10 +7,15 @@
 # flake8: noqa
 
 
+import sys
+
 # --------------------------------------------------------------------------------------
 # Testing examples and notebooks (Py version) in docs
 # --------------------------------------------------------------------------------------
 import pytest
+
+if sys.platform.startswith("win") or sys.platform == "darwin":
+    pytest.skip("example testing on windows and macos", allow_module_level=True)
 
 pytestmark = pytest.mark.slow
 
