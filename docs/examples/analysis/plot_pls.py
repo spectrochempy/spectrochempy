@@ -6,17 +6,16 @@
 # ======================================================================================
 # flake8: noqa
 """
-NDDataset PCA analysis example
+PLS regression example
 -------------------------------
 In this example, we perform a PLS regression to predict the composition of corn samples
 from their NIR spectra.
-"""
 
+"""
 # %%
 # Import the spectrochempy API package
 import spectrochempy as scp
 import matplotlib.pyplot as plt
-import numpy as np
 
 # %%
 # Load a dataset
@@ -31,7 +30,7 @@ X = ds_list[4]
 X.title = "reflectance"
 X.x.title = "Wavelength"
 X.x.units = "nm"
-X.plot(cmap=None)
+_ = X.plot(cmap=None)
 
 # %%
 # The values of the properties we want to predict are in the `'propval'` dataset:
@@ -58,8 +57,9 @@ pls.fit(X_train, y_train)
 # %%
 # Parity plot comparing the predicted and actual values, for
 # both train set and est set
-
-pls.plotparity(label="calibration")
-pls.plotparity(y_test, pls.predict(X_test), c="red", clear=False, label="validation")
-plt.legend(loc="lower right")
-plt.show()
+ax = pls.plotparity(label="calibration")
+_ = pls.plotparity(
+    y_test, pls.predict(X_test), c="red", label="validation", clear=False
+)
+ax.legend(loc="lower right")
+scp.show()
