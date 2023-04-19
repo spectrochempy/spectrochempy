@@ -59,14 +59,14 @@ class NotFittedError(exceptions.SpectroChemPyError):
 
 # ======================================================================================
 # A decorator to transform np.ndarray output from models to NDDataset
-# according to the X (default) or Y input
+# according to the X (default) and/or Y input
 # ======================================================================================
 class _set_output(object):
     def __init__(
         self,
         method,
         *args,
-        meta_from="_X",
+        meta_from="_X",  # the attribute or tuple of attributes from which meta data are taken
         units="keep",
         title="keep",
         typex=None,
@@ -99,8 +99,8 @@ class _set_output(object):
         if args and type(args[0]) == type(obj):
             args = args[1:]
 
-        # get the sklearn data output
-        data = self.method(obj, *args, **kwargs)
+        # get the sklearn data output - one or two arrays depending on the method and *args
+        skl_output = self.method(obj, *args, **kwargs)
 
         # restore eventually masked rows and columns
         axis = "both"
@@ -109,85 +109,104 @@ class _set_output(object):
         elif self.typey is not None:
             axis = 1
 
-        # make a new dataset with this data
-        X_transf = NDDataset(data)
-
-        # Now set the NDDataset attributes from the original X
-
-        # determine the input X dataset
-        X = getattr(obj, self.meta_from)
-
-        if self.units is not None:
-            if self.units == "keep":
-                X_transf.units = X.units
+        # if a single array was returned...
+        if not isinstance(skl_output, tuple):
+            # ... make a tuple of 1 array:
+            data_tuple = (skl_output,)
+            # ... and a tuple of 1 from_meta element:
+            if not isinstance(self.meta_from, tuple):
+                meta_from_tuple = (self.meta_from,)
             else:
-                X_transf.units = self.units
-        X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
-        X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
-        if self.title is not None:
-            if self.title == "keep":
-                X_transf.title = X.title
-            else:
-                X_transf.title = self.title
-        # make coordset
-        M, N = X.shape
-        if X_transf.shape == X.shape and self.typex is None and self.typey is None:
-            X_transf.set_coordset(y=X.coord(0), x=X.coord(1))
+                # ensure that the first one
+                meta_from_tuple = (self.meta_from[0],)
         else:
-            if self.typey == "components":
-                X_transf.set_coordset(
-                    y=Coord(
-                        None,
-                        labels=["#%d" % (i) for i in range(X_transf.shape[0])],
-                        title="components",
-                    ),
-                    x=X.coord(-1),
-                )
-            if self.typex == "components":
-                X_transf.set_coordset(
-                    y=X.coord(0),  # cannot use X.y in case of transposed X
-                    x=Coord(
-                        None,
-                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                        title="components",
-                    ),
-                )
-            if self.typex == "features":
-                X_transf.set_coordset(
-                    y=Coord(
-                        None,
-                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                        title="components",
-                    ),
-                    x=X.coord(1),
-                )
-            if self.typesingle == "components":
-                # occurs when the data are 1D such as ev_ratio...
-                X_transf.set_coordset(
-                    x=Coord(
-                        None,
-                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                        title="components",
-                    ),
-                )
-            if self.typesingle == "targets":
-                # occurs when the data are 1D such as PLS intercept...
-                if X.coordset[0].labels is not None:
-                    labels = X.coordset[0].labels
+            data_tuple = skl_output
+            meta_from_tuple = self.meta_from
+
+        out = []
+        for data, meta_from in zip(data_tuple, meta_from_tuple):
+            X_transf = NDDataset(data)
+
+            # Now set the NDDataset attributes from the original X
+
+            # determine the input X dataset
+            X = getattr(obj, meta_from)
+
+            if self.units is not None:
+                if self.units == "keep":
+                    X_transf.units = X.units
                 else:
-                    labels = ["#%d" % (i + 1) for i in range(X.shape[-1])]
-                X_transf.set_coordset(
-                    x=Coord(
-                        None,
-                        labels=labels,
-                        title="targets",
-                    ),
-                )
+                    X_transf.units = self.units
+            X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
+            X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
+            if self.title is not None:
+                if self.title == "keep":
+                    X_transf.title = X.title
+                else:
+                    X_transf.title = self.title
+            # make coordset
+            M, N = X.shape
+            if X_transf.shape == X.shape and self.typex is None and self.typey is None:
+                X_transf.set_coordset(y=X.coord(0), x=X.coord(1))
+            else:
+                if self.typey == "components":
+                    X_transf.set_coordset(
+                        y=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[0])],
+                            title="components",
+                        ),
+                        x=X.coord(-1),
+                    )
+                if self.typex == "components":
+                    X_transf.set_coordset(
+                        y=X.coord(0),  # cannot use X.y in case of transposed X
+                        x=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                    )
+                if self.typex == "features":
+                    X_transf.set_coordset(
+                        y=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                        x=X.coord(1),
+                    )
+                if self.typesingle == "components":
+                    # occurs when the data are 1D such as ev_ratio...
+                    X_transf.set_coordset(
+                        x=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                    )
+                if self.typesingle == "targets":
+                    # occurs when the data are 1D such as PLS intercept...
+                    if X.coordset[0].labels is not None:
+                        labels = X.coordset[0].labels
+                    else:
+                        labels = ["#%d" % (i + 1) for i in range(X.shape[-1])]
+                    X_transf.set_coordset(
+                        x=Coord(
+                            None,
+                            labels=labels,
+                            title="targets",
+                        ),
+                    )
 
-        # eventually restore masks
-        X_transf = obj._restore_masked_data(X_transf, axis=axis)
+            # eventually restore masks
+            X_transf = obj._restore_masked_data(X_transf, axis=axis)
+            out.append(X_transf.squeeze())
 
-        return X_transf.squeeze()
+        if len(out) == 1:
+            return out[0]
+        else:
+            return tuple(out)
 
 
 def _wrap_ndarray_output_to_nddataset(
@@ -1172,7 +1191,9 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         return self._score(X, Y, sample_weight)
 
-    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
+    @_wrap_ndarray_output_to_nddataset(
+        units=None, title=None, meta_from=("_X", "_Y"), typex="components"
+    )
     @_docstring.dedent
     def transform(self, X=None, Y=None, both=False, copy=True, **kwargs):
         """
@@ -1189,7 +1210,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
         both: bool, default=False
-            whether to also apply the dimensionality reduction to Y
+            whether to also apply the dimensionality reduction to Y when neither X nor Y are provided
         copy: bool, default=True
             Whether to copy X and Y, or perform in-place normalization.
         %(kwargs)s
@@ -1200,12 +1221,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         `~spectrochempy.core.dataset.nddataset.NDDataset` `
             Datasets with shape (:term:`n_observations`\ , :term:`n_components`\ ).
 
-        Other Parameters
-        ----------------
-        n_components : `int`, optional
-            The number of components to use for the reduction. If not given
-            the number of components is eventually the one specified or determined
-            in the `fit` process.
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1218,7 +1233,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         newX = self._X_preprocessed
         newY = self._Y_preprocessed
 
-        if both:
+        if both or (Y is not None):
             return self._transform(newX, newY, copy)
         else:
             return self._transform(newX, None, copy)
@@ -1231,9 +1246,11 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     )
     _docstring.keep_params("analysis_transform.parameters", "X")
 
-    @_wrap_ndarray_output_to_nddataset
+    @_wrap_ndarray_output_to_nddataset(meta_from=("_X", "_Y"))
     @_docstring.dedent
-    def inverse_transform(self, X_transform=None, Y_transform=None, **kwargs):
+    def inverse_transform(
+        self, X_transform=None, Y_transform=None, both=False, **kwargs
+    ):
         """
         Transform data back to its original space.
 
@@ -1273,7 +1290,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         if isinstance(Y_transform, NDDataset):
             Y_transform = Y_transform.data
 
-        elif Y_transform is None:
+        elif Y_transform is None and both is True:
             Y_transform = self.transform(**kwargs).data
 
         if Y_transform is None:
@@ -1291,15 +1308,17 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
 
     @_docstring.dedent
-    def fit_transform(self, X, Y=None, **kwargs):
+    def fit_transform(self, X, Y, both=False):
         """
-        Fit the model with `X` and apply the dimensionality reduction on `X`\ .
+        Fit the model with `X` and `Y` and apply the dimensionality reduction on `X`
+        and optionally on `Y`\ .
 
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-        Y : any
-            Depends on the model.
+        %(analysis_fit.parameters.Y)s
+        both: bool, optional
+            Whether to apply the dimensionality reduction on `X` and `Y` .
         %(kwargs)s
 
         Returns
@@ -1310,13 +1329,12 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         ----------------
         %(analysis_transform.other_parameters)s
         """
-        try:
-            self.fit(X, Y)
-        except TypeError:
-            # the current model does not use Y
-            self.fit(X)
-        X_transform = self.transform(X, **kwargs)
-        return X_transform
+
+        self.fit(X, Y)
+        if both:
+            return self.transform(X, Y)
+        else:
+            return self.transform(X)
 
     # ----------------------------------------------------------------------------------
     # Plot methods

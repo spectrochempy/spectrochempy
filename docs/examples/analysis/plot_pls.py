@@ -15,7 +15,6 @@ from their NIR spectra.
 # %%
 # Import the spectrochempy API package
 import spectrochempy as scp
-import matplotlib.pyplot as plt
 
 # %%
 # Load a dataset
@@ -56,10 +55,15 @@ pls.fit(X_train, y_train)
 
 # %%
 # Parity plot comparing the predicted and actual values, for
-# both train set and est set
+# both train set and est setpls.
 ax = pls.plotparity(label="calibration")
 _ = pls.plotparity(
     y_test, pls.predict(X_test), c="red", label="validation", clear=False
 )
 ax.legend(loc="lower right")
+
+pls.plotmerit()
+
+# %%
+# uncomment the line below to see plot if needed (not necessary in jupyter notebook)
 scp.show()
