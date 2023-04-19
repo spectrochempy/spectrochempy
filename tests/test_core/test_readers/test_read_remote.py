@@ -25,8 +25,8 @@ def test_read_remote():
     assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
 
     # move the files to simulate their absence:
-    filesaved = filename.rename("~irdata_save")
-
+    filesaved = filename.with_suffix(".nonexist")
+    filename.rename(filesaved)
     # now try to read
     nd2 = NDDataset.read_omnic("irdata/nh4y-activation.spg")
     assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
