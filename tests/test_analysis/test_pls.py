@@ -7,10 +7,10 @@
 # flake8: noqa
 
 """
-Tests for the PCA module
+Tests for the PLS module
 
 """
-import matplotlib.pyplot as plt
+
 from numpy.testing import assert_almost_equal
 from sklearn.cross_decomposition import PLSRegression
 
@@ -18,7 +18,7 @@ from spectrochempy.analysis.pls import PLS
 from spectrochempy.core.readers.download import download
 
 
-# test pca
+# test pls
 # ---------
 def test_pls():
 
