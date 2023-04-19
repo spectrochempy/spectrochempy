@@ -63,5 +63,5 @@ def test_example(example):
     if example.suffix == ".py":
         e, message, err = example_run(example)
         # this give unicoderror on workflow with window
-        print(e, message.decode("utf8"), err)
-        assert not e, message.decode("utf8")
+        print(e, message, err)
+        assert not e, message
