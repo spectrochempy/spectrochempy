@@ -28,13 +28,13 @@ __configurables__ = ["PLS"]
 # ======================================================================================
 @signature_has_configurable_traits
 class PLS(CrossDecompositionAnalysis):
-    _docstring.delete_params("DecompositionAnalysis.see_also", "PCA")
+    _docstring.delete_params("DecompositionAnalysis.see_also", "PLS")
 
     __doc__ = _docstring.dedent(
         """
-    Principal Component Anamysis (PCA).
+    Partial Least Squares regression (PCR).
 
-    The Principal Component Analysis analysis is using the
+    The  Partial Least Squares regression is using the
     `sklearn.cross_decomposition.PLSRegression` model.
 
     Parameters
@@ -49,7 +49,7 @@ class PLS(CrossDecompositionAnalysis):
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
-    # only those specific to PCA, the other being defined in AnalysisConfigurable.
+    # only those specific to PLS, the other being defined in AnalysisConfigurable.
     # ----------------------------------------------------------------------------------
     # define here only the variable that you use in fit or transform functions
     _pls = tr.Instance(
