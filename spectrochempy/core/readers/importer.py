@@ -100,9 +100,11 @@ class Importer(HasTraits):
         self.default_key = kwargs.pop("default_key", ".scp")
 
         if "merge" not in kwargs.keys():
-            # if merge is not specified, but the args are provided as a single list, then will are supposed to merge
-            # the datasets. If merge is specified then it has priority.
-            # This is not useful for the 1D datasets, as if they are compatible they are merged automatically
+            # if merge is not specified, but the args are provided as a single list,
+            # then will are supposed to merge the datasets. If merge is specified then
+            # it has priority.
+            # This is not useful for the 1D datasets, as if they are compatible they
+            # are merged automatically
             if args and len(args) == 1 and isinstance(args[0], (list, tuple)):
                 kwargs["merge"] = True
 
@@ -211,10 +213,7 @@ class Importer(HasTraits):
             try:
                 dataset = read_(self.objtype(), filename, **kwargs)
 
-            except (FileNotFoundError, OSError) as exc:
-                if kwargs.get("remote"):
-                    raise exc
-
+            except (FileNotFoundError, OSError):
                 try:
                     # Try to get the file from github
                     kwargs["read_method"] = read_
