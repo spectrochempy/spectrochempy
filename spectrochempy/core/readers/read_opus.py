@@ -10,7 +10,6 @@ This module extend NDDataset with the import method for OPUS generated data file
 __all__ = ["read_opus"]
 __dataset_methods__ = __all__
 
-import io
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
@@ -18,7 +17,7 @@ from brukeropusreader.opus_parser import parse_data, parse_meta
 
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.utils.docstrings import _docstring
 
 # ======================================================================================
@@ -132,12 +131,8 @@ def _read_opus(*args, **kwargs):
     debug_("Bruker OPUS import")
 
     dataset, filename = args
-    content = kwargs.get("content", None)
 
-    if content:
-        fid = io.BytesIO(content)
-    else:
-        fid = open(filename, "rb")
+    fid, kwargs = _openfid(filename, **kwargs)
 
     opus_data = _read_data(fid)
 

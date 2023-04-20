@@ -68,7 +68,7 @@ def pathclean(paths):
 
     Examples
     --------
-    >>> from spectrochempy.utils import pathclean
+    >>> from spectrochempy.utils.file import pathclean
 
     Using unix/mac way to write paths
     >>> filename = pathclean('irdata/nh4y-activation.spg')

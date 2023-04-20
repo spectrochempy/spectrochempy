@@ -7,13 +7,12 @@
 __all__ = ["read_zip"]
 __dataset_methods__ = __all__
 
-import io
-
 from spectrochempy.core.readers.importer import (
     ALIAS,
     FILETYPES,
     Importer,
     _importer_method,
+    _openfid,
 )
 from spectrochempy.utils.docstrings import _docstring
 
@@ -70,12 +69,8 @@ def _read_zip(*args, **kwargs):
 
     # read zip file
     _, filename = args
-    content = kwargs.pop("content", None)
 
-    if content:
-        fid = io.BytesIO(content)
-    else:
-        fid = open(filename, "rb")
+    fid, kwargs = _openfid(filename, **kwargs)
 
     with zipfile.ZipFile(fid) as zf:
 

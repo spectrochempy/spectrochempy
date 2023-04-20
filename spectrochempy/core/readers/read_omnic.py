@@ -21,7 +21,7 @@ import numpy as np
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.docstrings import _docstring
 
@@ -298,18 +298,14 @@ def _read_spg(*args, **kwargs):
     # read spg file
 
     dataset, filename = args
-    sortbydate = kwargs.pop("sortbydate", True)
-    content = kwargs.get("content", False)
 
-    if content:
-        fid = io.BytesIO(content)
-    else:
-        fid = open(filename, "rb")
+    fid, kwargs = _openfid(filename, **kwargs)
 
     # Read name:
     # The name starts at position hex 1e = decimal 30. Its max length
     # is 256 bytes. It is the original filename under which the group has been saved: it
-    # won't match with the actual filename if a subsequent renaming has been done in the OS.
+    # won't match with the actual filename if a subsequent renaming has been done in the
+    # OS.
 
     spg_title = _readbtext(fid, 30, 256)
 
@@ -520,7 +516,8 @@ def _read_spg(*args, **kwargs):
     dataset._date = datetime.now(timezone.utc)
 
     dataset.history = f"Imported from spg file {filename}."
-    if sortbydate:
+
+    if kwargs.pop("sortbydate", True):
         dataset.sort(dim="y", inplace=True)
         dataset.history = "Sorted by date"
 
@@ -532,12 +529,8 @@ def _read_spg(*args, **kwargs):
 @_importer_method
 def _read_spa(*args, **kwargs):
     dataset, filename = args
-    content = kwargs.get("content", False)
 
-    if content:
-        fid = io.BytesIO(content)
-    else:
-        fid = open(filename, "rb")
+    fid, kwargs = _openfid(filename, **kwargs)
 
     return_ifg = kwargs.get("return_ifg", None)
 

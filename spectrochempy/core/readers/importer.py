@@ -10,6 +10,8 @@ This module define a generic class to import directories, files and contents.
 __all__ = ["read", "read_dir", "read_remote"]
 __dataset_methods__ = __all__
 
+import io
+import re
 from io import BytesIO
 from warnings import warn
 from zipfile import ZipFile
@@ -199,61 +201,40 @@ class Importer(HasTraits):
                 protocol = [protocol]
             if key and key[1:] not in protocol and self.alias[key[1:]] not in protocol:
                 return
+
         datasets = []
         for filename in files[key]:
-            if (
-                isinstance(filename, str)
-                and not filename.startswith("http://")
-                and not filename.startswith("https://")
-            ):
-                filename = pathclean(filename)
-            else:
-                kwargs["read_only"] = kwargs.get("read_only", True)
+
             read_ = getattr(self, f"_read_{key[1:]}")
+
+            dataset = None
             try:
-                res = read_(self.objtype(), filename, **kwargs)
-                # sometimes read_ can return None (e.g. non labspec text file)
-            except (FileNotFoundError, OSError):
-                # try to get the file from github
-                kwargs["read_method"] = read_
+                dataset = read_(self.objtype(), filename, **kwargs)
+
+            except (FileNotFoundError, OSError) as exc:
+                if kwargs.get("remote"):
+                    raise exc
+
                 try:
-
-                    res = _read_remote(self.objtype(), filename, **kwargs)
-
-                except OSError as e:
-                    if kwargs.get("remote"):
-                        raise e
-                    else:
-                        raise FileNotFoundError(f"{filename} not found")
-
-                except IOError as e:
-                    warning_(str(e))
-                    res = None
-
-                except NotImplementedError as e:
-                    warning_(str(e))
-                    res = None
+                    # Try to get the file from github
+                    kwargs["read_method"] = read_
+                    info_(
+                        "Attempt to download from the "
+                        "GitHub repository `spectrochempy_data`..."
+                    )
+                    dataset = _read_remote(self.objtype(), filename, **kwargs)
 
                 except Exception as e:
-                    raise e
+                    raise FileNotFoundError(f"{filename} cannot be read.") from e
 
-            except IOError as e:
+            except Exception as e:
                 warning_(str(e))
-                res = None
 
-            except KeyError as e:
-                warning_(str(e))
-                res = None
-
-            except NotImplementedError as e:
-                warning_(str(e))
-                res = None
-
-            if res is not None:
-                if not isinstance(res, list):
-                    datasets.append(res)
+            if dataset is not None:
+                if not isinstance(dataset, list):
+                    datasets.append(dataset)
                 else:
-                    datasets.extend(res)
+                    datasets.extend(dataset)
 
         if len(datasets) > 1:
             datasets = self._do_merge(datasets, **kwargs)
@@ -299,7 +280,7 @@ def _importer_method(func):
 
 
 # --------------------------------------------------------------------------------------
-# Generic Read function
+# Public Generic Read function
 # --------------------------------------------------------------------------------------
 
 _docstring.get_sections(
@@ -611,13 +592,111 @@ def read_remote(file_or_dir, **kwargs):
 
     >>> A = scp.read_remote('irdata/subdir')
     """
-    kwargs["remote"] = True
-    if "merge" not in kwargs:
-        kwargs["merge"] = False  # by default, no attempt to merge
-    if "replace_existing" not in kwargs:
-        kwargs["replace_existing"] = False  # by default we download only if needed.
     importer = Importer()
     return importer(file_or_dir, **kwargs)
+
+
+# ======================================================================================
+# Private read functions
+# ======================================================================================
+@_importer_method
+def _read_dir(*args, **kwargs):
+    _, directory = args
+    directory = get_directory_name(directory)
+    files = get_filenames(directory, **kwargs)
+    datasets = []
+    valid_extensions = list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]
+    for key in [key for key in files.keys() if key[1:] in valid_extensions]:
+        if key:
+            importer = Importer()
+            nd = importer(files[key], **kwargs)
+            if nd is not None:
+                if not isinstance(nd, list):
+                    nd = [nd]
+                datasets.extend(nd)
+    return datasets
+
+
+@_importer_method
+def _read_scp(*args, **kwargs):
+    dataset, filename = args
+    return dataset.load(filename, **kwargs)
+
+
+@_importer_method
+def _read_(*args, **kwargs):
+    dataset, filename = args
+
+    if kwargs.pop("remote", False):
+        return Importer._read_remote(*args, **kwargs)
+    elif not filename or filename.is_dir():
+        return Importer._read_dir(*args, **kwargs)
+
+    # protocol = kwargs.get("protocol", None)
+    # if protocol and ".scp" in protocol:
+    #     return dataset.load(filename, **kwargs)
+    #
+    # elif filename and filename.name in ("fid", "ser", "1r", "2rr", "3rrr"):
+    #     # probably an Topspin NMR file
+    #     return dataset.read_topspin(filename, **kwargs)
+    # elif filename:
+    #     # try scp format
+    #     try:
+    #         return dataset.load(filename, **kwargs)
+    #     except Exception:
+    #         # lets try some common format
+    #         for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
+    #             try:
+    #                 _read = getattr(dataset, f"read_{key}")
+    #                 f = f"{filename}.{key}"
+    #                 return _read(f, **kwargs)
+    #             except Exception:
+    #                 pass
+    #         raise NotImplementedError
+
+
+# ======================================================================================
+# Private functions
+# ======================================================================================
+def _openfid(filename, mode="rb", **kwargs):
+    # Return a file ID
+
+    # First check if we have an url
+    is_url = (
+        isinstance(filename, str)
+        and re.match(r"http[s]?:[\/]{2}", filename) is not None
+    )
+
+    # Check if Content has been passed?
+    content = kwargs.pop("content", False)
+
+    encoding = "utf8"
+    if is_url:
+        # by default we set the read_only flag to True when reading remote url
+        kwargs["read_only"] = kwargs.get("read_only", True)
+
+        # use request to read the remote content
+        r = requests.get(filename, allow_redirects=True)
+        r.raise_for_status()
+        content = r.content
+        encoding = r.encoding
+
+    else:
+        # Transform filename to a Path object is not yet the case
+        filename = pathclean(filename) if isinstance(filename, str) else filename
+
+    # Create the file ID
+    if content:
+        # if a content has been passed, then it has priority
+        fid = (
+            io.BytesIO(content)
+            if mode == "rb"
+            else io.StringIO(content.decode(encoding))
+        )
+    else:
+        fid = open(filename, mode=mode)
+
+    return fid, kwargs
 
 
 def _write_downloaded_file(content, dst):
@@ -675,7 +754,7 @@ def _download_from_url(url, dst, replace=False, read_only=False):
         # download on github (always save the downloaded files)
         url = (
             f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
-            f"testdata/{url}"
+            f"testdata/{url.as_posix()}"
         )
 
         # first determine if it is a directory
@@ -730,39 +809,35 @@ def _read_remote(*args, **kwargs):
     datadir = prefs.datadir
 
     dataset, path = args
-    is_url = str(path).startswith("http://") or str(path).startswith("https://")
 
-    replace = kwargs.pop("replace_existing", False)
-    read_only = kwargs.pop("read_only", True)  # by default we do not write the
+    kwargs["remote"] = True
+    kwargs["merge"] = kwargs.get("merge", False)  # by default, no attempt to merge
+
     download_only = kwargs.pop("download_only", False)
+    replace = kwargs.pop(
+        "replace_existing", False
+    )  # by default we download only if needed.
 
     # downloaded file
-    if not is_url:
-        # case where we try to download the github testdata
-        path = pathclean(path)
+    # we try to download the github testdata
+    path = pathclean(path)
 
-        if _is_relative_to(path, datadir):
-            # try to make it relative for remote downloading on github
-            relative_path = _relative_to(path, datadir)
-        else:
-            # assume it is already relative
-            relative_path = path
-
-        # in principle the data came from github. Try to download it
-        dst = datadir / relative_path
-        if dst.name == "testdata":
-            # we are going to download the whole testdata directory
-            # -> use a faster method
-            _download_full_testdata_directory()
-            return
-        else:
-            content = _download_from_url(relative_path, dst, replace)
-
+    if _is_relative_to(path, datadir):
+        # try to make it relative for remote downloading on github
+        relative_path = _relative_to(path, datadir)
     else:
-        # download url content localy or in a byte string depending on
-        dst = pathclean(path.split("/")[-1])
-        # a content will be returned when read_only is true (as the file is not written)
-        content = _download_from_url(path, dst, replace, read_only)
+        # assume it is already relative
+        relative_path = path
+
+    # Try to download it
+    dst = datadir / relative_path
+    if dst.name == "testdata":
+        # we are going to download the whole testdata directory
+        # -> use a faster method
+        _download_full_testdata_directory()
+        return
+    else:
+        content = _download_from_url(relative_path, dst, replace)
 
     if not download_only:
         read_method = kwargs.pop("read_method", read)
@@ -770,65 +845,6 @@ def _read_remote(*args, **kwargs):
             return read_method(dataset, dst, **kwargs)
         else:
             return read_method(dataset, dst, content=content)
-
-
-# ======================================================================================
-# Private functions
-# ======================================================================================
-@_importer_method
-def _read_dir(*args, **kwargs):
-    _, directory = args
-    directory = get_directory_name(directory)
-    files = get_filenames(directory, **kwargs)
-    datasets = []
-    valid_extensions = list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]
-    for key in [key for key in files.keys() if key[1:] in valid_extensions]:
-        if key:
-            importer = Importer()
-            nd = importer(files[key], **kwargs)
-            if nd is not None:
-                if not isinstance(nd, list):
-                    nd = [nd]
-                datasets.extend(nd)
-    return datasets
-
-
-@_importer_method
-def _read_scp(*args, **kwargs):
-    dataset, filename = args
-    return dataset.load(filename, **kwargs)
-
-
-@_importer_method
-def _read_(*args, **kwargs):
-    dataset, filename = args
-
-    if kwargs.pop("remote", False):
-        return Importer._read_remote(*args, **kwargs)
-    elif not filename or filename.is_dir():
-        return Importer._read_dir(*args, **kwargs)
-
-    # protocol = kwargs.get("protocol", None)
-    # if protocol and ".scp" in protocol:
-    #     return dataset.load(filename, **kwargs)
-    #
-    # elif filename and filename.name in ("fid", "ser", "1r", "2rr", "3rrr"):
-    #     # probably an Topspin NMR file
-    #     return dataset.read_topspin(filename, **kwargs)
-    # elif filename:
-    #     # try scp format
-    #     try:
-    #         return dataset.load(filename, **kwargs)
-    #     except Exception:
-    #         # lets try some common format
-    #         for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
-    #             try:
-    #                 _read = getattr(dataset, f"read_{key}")
-    #                 f = f"{filename}.{key}"
-    #                 return _read(f, **kwargs)
-    #             except Exception:
-    #                 pass
-    #         raise NotImplementedError
 
 
 # --------------------------------------------------------------------------------------

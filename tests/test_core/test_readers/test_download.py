@@ -93,12 +93,16 @@ def test_download_nist():
 
 
 def test_download():
+    ds1 = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
+    assert len(ds1) == 7
+
+    ds1 = scp.read_mat("http://www.eigenvector.com/data/Corn/corn.mat")
+    assert len(ds1) == 7
+
     ds1 = scp.read_remote("http://www.eigenvector.com/data/Corn/corn.mat")
     assert len(ds1) == 7
 
-    ds2 = scp.read_remote(
-        "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip"
-    )
+    ds2 = scp.read("https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip")
     assert len(ds2) == 7
 
     with pytest.raises(FileNotFoundError):
