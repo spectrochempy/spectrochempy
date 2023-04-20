@@ -123,4 +123,4 @@ def test_pls():
 
     # check plots
     pls1.plotmerit()
-    pls1.plotparity()
+    pls1.parityplot()

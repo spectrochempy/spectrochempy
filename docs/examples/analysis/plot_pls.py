@@ -56,13 +56,12 @@ pls.fit(X_train, y_train)
 # %%
 # Parity plot comparing the predicted and actual values, for
 # both train set and est setpls.
-ax = pls.plotparity(label="calibration")
-_ = pls.plotparity(
+ax = pls.parityplot(label="calibration")
+_ = pls.parityplot(
     y_test, pls.predict(X_test), c="red", label="validation", clear=False
 )
 ax.legend(loc="lower right")
 
-pls.plotmerit()
 
 # %%
 # uncomment the line below to see plot if needed (not necessary in jupyter notebook)

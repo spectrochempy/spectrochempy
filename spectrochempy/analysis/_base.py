@@ -1340,7 +1340,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # Plot methods
     # ----------------------------------------------------------------------------------
     @_docstring.dedent
-    def plotparity(
+    def parityplot(
         self,
         Y=None,
         Y_hat=None,
@@ -1496,13 +1496,22 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
                     data=data,
                     **kwargs,
                 )
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        xymin = min(xmin, ymin)
+        print(xymin)
+        xymax = max(xmax, ymax)
+        ax.set_xlim(xymin, xymax)
+        ax.set_ylim(xymin, xymax)
+        plt.plot([xymin, xymax], [xymin, xymax])
         plt.legend()
         plt.xlabel("measured values")
         plt.ylabel("predicted values")
         plt.tight_layout()
+
         return ax
 
-    _docstring.get_sections(_docstring.dedent(plotparity.__doc__), base="plotparity")
+    _docstring.get_sections(_docstring.dedent(parityplot.__doc__), base="parityplot")
 
 
 # ======================================================================================
