@@ -63,3 +63,6 @@ def test_read_remote():
     # now try a using generic read
     with pytest.raises(FileNotFoundError):
         scp.read("irdata/nh4y-acti.spg")
+
+    # finally restore the deleted file
+    scp.read_omnic(filename)
