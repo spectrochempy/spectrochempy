@@ -10,9 +10,10 @@
 # TODO: Add example to improve coverage
 import pytest
 
-import spectrochempy
+import spectrochempy as scp
 from spectrochempy import NDDataset, info_
 from spectrochempy import preferences as prefs
+from spectrochempy.core.common import dialogs
 
 DATADIR = prefs.datadir
 CARROUCELL_FOLDER = DATADIR / "irdata/carroucell_samp"
@@ -31,9 +32,9 @@ def test_read_carroucell(monkeypatch):
     # Before testing we need to download the data locally if not yet done:
     # because read carrousel is not designed to download itself.
     # Use the read_remote for that:
-    NDDataset.read_remote("irdata/carroucell_samp", replace_existing=False)
+    scp.read_remote("irdata/carroucell_samp", replace_existing=False)
 
-    nd = NDDataset.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
+    nd = scp.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
     for x in nd:
         info_("  " + x.name + ": " + str(x.shape))
     assert len(nd) == 11
@@ -42,9 +43,7 @@ def test_read_carroucell(monkeypatch):
     nd = NDDataset.read_carroucell("irdata/carroucell_samp", spectra=(1, 1))
     assert isinstance(nd, NDDataset)
 
-    monkeypatch.setattr(
-        spectrochempy.core.common.dialogs, "open_dialog", dialog_carroucell
-    )
+    monkeypatch.setattr(dialogs, "open_dialog", dialog_carroucell)
     monkeypatch.setenv("KEEP_DIALOGS", "True")
     nd = NDDataset.read_carroucell(spectra=(1, 3))
     assert nd[3].shape == (3, 11098)

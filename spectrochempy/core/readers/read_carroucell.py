@@ -21,8 +21,8 @@ import xlrd
 
 from spectrochempy.core import info_
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.read_omnic import read_omnic
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.file import get_directory_name, get_filenames
 
@@ -129,7 +129,7 @@ def _read_carroucell(*args, **kwargs):
     curprefix = prefix(spafiles[0])
     for f in spafiles[1:]:
         if prefix(f) != curprefix:
-            ds = NDDataset.read_omnic(
+            ds = read_omnic(
                 curfilelist, sortbydate=True, directory=directory, name=curprefix
             )
             datasets.append(ds)
@@ -137,9 +137,7 @@ def _read_carroucell(*args, **kwargs):
             curprefix = prefix(f)
         else:
             curfilelist.append(f)
-    ds = NDDataset.read_omnic(
-        curfilelist, sortbydate=True, directory=directory, name=curprefix
-    )
+    ds = read_omnic(curfilelist, sortbydate=True, directory=directory, name=curprefix)
     datasets.append(ds)
 
     # Now manage temperature

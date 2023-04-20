@@ -592,6 +592,7 @@ def read_remote(file_or_dir, **kwargs):
 
     >>> A = scp.read_remote('irdata/subdir')
     """
+    kwargs["remote"] = True
     importer = Importer()
     return importer(file_or_dir, **kwargs)
 
