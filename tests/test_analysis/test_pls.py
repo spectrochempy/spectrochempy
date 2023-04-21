@@ -22,7 +22,7 @@ from spectrochempy.core.readers.download import download
 # ---------
 def test_pls():
 
-    datasets = download("http://www.eigenvector.com/data/Corn/corn.mat")
+    datasets = read("http://www.eigenvector.com/data/Corn/corn.mat")
     Xc = datasets[-3][:57]  # corn spectra, calibration
     Xv = datasets[-3][57:]  # corn spectra, validation
     Yc = datasets[4][:57]  # properties values, calibration

@@ -18,7 +18,7 @@ import spectrochempy as scp
 
 # %%
 # Load a dataset
-ds_list = scp.download("http://www.eigenvector.com/data/Corn/corn.mat")
+ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
 for ds in ds_list:
     print(ds.name)
 # %%
