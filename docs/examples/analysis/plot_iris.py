@@ -148,7 +148,8 @@ iris3.plotlcurve(title="L curve, automated search")
 
 # %%
 # The data corresponding to the largest curvature of the L-curve
-# are at the second last position of output data:
+# are at the second last position of output data.
+# sphinx_gallery_thumbnail_number = 11
 
 iris3.plotdistribution(-2)
 _ = iris3.plotmerit(-2)
