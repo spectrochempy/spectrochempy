@@ -32,10 +32,11 @@ class PLS(CrossDecompositionAnalysis):
 
     __doc__ = _docstring.dedent(
         """
-    Partial Least Squares regression (PCR).
+    Partial Least Squares regression (PLS)
 
-    The  Partial Least Squares regression is using the
-    `sklearn.cross_decomposition.PLSRegression` model.
+    The  Partial Least Squares regression wraps the
+    `sklearn.cross_decomposition.PLSRegression` model, with few
+    additional methods.
 
     Parameters
     ----------
