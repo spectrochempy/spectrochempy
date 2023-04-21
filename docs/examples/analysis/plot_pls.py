@@ -60,8 +60,7 @@ ax = pls.parityplot(label="calibration")
 _ = pls.parityplot(
     y_test, pls.predict(X_test), c="red", label="validation", clear=False
 )
-ax.legend(loc="lower right")
-
+_ = ax.legend(loc="lower right")
 
 # %%
 # uncomment the line below to see plot if needed (not necessary in jupyter notebook)

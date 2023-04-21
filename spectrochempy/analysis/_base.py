@@ -1499,7 +1499,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         xmin, xmax = ax.get_xlim()
         ymin, ymax = ax.get_ylim()
         xymin = min(xmin, ymin)
-        print(xymin)
         xymax = max(xmax, ymax)
         ax.set_xlim(xymin, xymax)
         ax.set_ylim(xymin, xymax)
