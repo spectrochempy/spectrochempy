@@ -19,10 +19,9 @@ import spectrochempy as scp
 # %%
 # Load a dataset
 ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
-for ds in ds_list:
-    print(ds.name)
+
 # %%
-# The dataset named `'m5spec'`, contains the NIR spectra of 80 corn samples recorded on the same
+# The 5th dataset named `'m5spec'`, contains the NIR spectra of 80 corn samples recorded on the same
 # instrument. Let's assign this NDDataset specta to `X`, add few informations and plot it:
 # %%
 X = ds_list[4]
@@ -54,8 +53,9 @@ pls = scp.PLS(used_components=5)
 pls.fit(X_train, y_train)
 
 # %%
-# Parity plot comparing the predicted and actual values, for
-# both train set and est setpls.
+# Finally we generate a parity plot comparing the predicted and actual values, for
+# both train set and test set. We choose this plot for the thumbnail gallery
+# sphinx_gallery_thumbnail_number = 3
 ax = pls.parityplot(label="calibration")
 _ = pls.parityplot(
     y_test, pls.predict(X_test), c="red", label="validation", clear=False
