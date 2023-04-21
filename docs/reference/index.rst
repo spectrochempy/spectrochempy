@@ -596,6 +596,15 @@ Non-linear optimization and curve fit
 
     Optimize
 
+Partial Least Square regression
+========================================================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    PLS
+
 Evolving factor analysis
 ========================
 
