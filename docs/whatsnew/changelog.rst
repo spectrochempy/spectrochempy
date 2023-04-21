@@ -20,6 +20,8 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* `PLS` (Partial Least Squares regression) method added
+
 * `read` and the more specific `read_remote` method now handle any url pointing
   to a spectrochempy readeable file. An url to a compressed (zip) files are also accepted.
 
