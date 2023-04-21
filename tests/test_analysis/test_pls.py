@@ -15,7 +15,7 @@ from numpy.testing import assert_almost_equal
 from sklearn.cross_decomposition import PLSRegression
 
 from spectrochempy.analysis.pls import PLS
-from spectrochempy.core.readers.download import download
+from spectrochempy.core.readers.importer import read
 
 
 # test pls
