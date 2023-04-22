@@ -240,19 +240,19 @@ def check_filenames(*args, **kwargs):
                     "Keyword `directory` will be ignored!"
                 )
             elif not directory and kw_directory:
-                filename = kw_directory / filename
+                filename = pathclean(kw_directory / filename)
 
             # check if the file exists here
             if not directory or str(directory).startswith("."):
                 # search first in the current directory
                 directory = Path.cwd()
 
-            f = directory / filename
+            f = pathclean(directory / filename)
 
             fexist = f if f.exists() else _get_file_for_protocol(f, **kwargs)
 
             if fexist is None:
-                f = datadir / filename
+                f = pathclean(datadir / filename)
                 fexist = f if f.exists() else _get_file_for_protocol(f, **kwargs)
 
             if fexist:
@@ -403,7 +403,7 @@ def get_filenames(*filenames, **kwargs):
         if filenames:
             # prepend to the filename (incompatibility between filename and directory specification
             # will result to a error
-            filenames = [directory / filename for filename in filenames]
+            filenames = [pathclean(directory / filename) for filename in filenames]
         else:
             directory = get_directory_name(directory)
 
@@ -431,11 +431,11 @@ def get_filenames(*filenames, **kwargs):
         # else in the current directory, and finally in the default preference data directory
         temp = []
         for i, filename in enumerate(filenames):
-            if not (directory / filename).exists():
+            if not (pathclean(directory / filename)).exists():
                 # the filename provided doesn't exists in the working directory
                 # try in the data directory
                 directory = pathclean(prefs.datadir)
-                if not (directory / filename).exists():
+                if not (pathclean(directory / filename)).exists():
                     raise IOError(f"Can't find  this filename {filename}")
             temp.append(directory / filename)
 
