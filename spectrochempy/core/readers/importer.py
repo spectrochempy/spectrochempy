@@ -226,7 +226,7 @@ class Importer(HasTraits):
                     # Try to get the file from github
                     kwargs["read_method"] = read_
                     info_(
-                        "File/directroy not found locally: Attempt to download it from "
+                        "File/directory not found locally: Attempt to download it from "
                         "the GitHub repository `spectrochempy_data`..."
                     )
                     dataset = _read_remote(self.objtype(), filename, **kwargs)
@@ -697,7 +697,7 @@ def _openfid(filename, mode="rb", **kwargs):
 
     else:
         # Transform filename to a Path object is not yet the case
-        filename = pathclean(filename) if isinstance(filename, str) else filename
+        filename = pathclean(filename)
 
     # Create the file ID
     if content:
