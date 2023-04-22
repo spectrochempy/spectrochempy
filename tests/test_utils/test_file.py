@@ -105,15 +105,15 @@ def test_check_filename():
     # return a dictionary (after opening a dialog)
     filenames = check_filenames()
     assert isinstance(filenames, dict)
-    assert filenames == {".spg": [prefs.datadir / filename]}
+    assert filenames == {".spg": [prefs.datadir / pathclean(filename)]}
 
     filenames = check_filenames(filename)
     assert isinstance(filenames, list)
-    assert filenames[0] == prefs.datadir / filename
+    assert filenames[0] == prefs.datadir / pathclean(filename)
 
     filenames = check_filenames([filename])
     assert isinstance(filenames, list)
-    assert filenames[0] == prefs.datadir / filename
+    assert filenames[0] == prefs.datadir / pathclean(filename)
 
     # return the dictionary itself
     filenames = check_filenames({"xxx": [filename]})

@@ -58,8 +58,8 @@ def pathclean(paths):
 
     Parameters
     ----------
-    paths :  str or a list of str
-        Path to clean. It may contain windows or conventional python separators.
+    paths :  `str` or a `list` of `str`
+        Path to clean. It may contain Windows or conventional python separators.
 
     Returns
     -------
