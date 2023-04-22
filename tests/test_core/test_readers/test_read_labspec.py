@@ -27,7 +27,7 @@ def test_read_labspec():
 
     # with read_dir
     # First download data as read_dir will not
-    scp.read_remote(RAMANDIR / "subdir", replace_existing=False)
+    scp.read(RAMANDIR / "subdir", replace_existing=False)
 
     nd = scp.read_dir(directory=RAMANDIR / "subdir")
     assert nd.shape == (6, 1024)

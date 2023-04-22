@@ -381,7 +381,10 @@ def get_filenames(*filenames, **kwargs):
     directory = None
     if len(filenames) == 1:
         # check if it is a directory
-        f = get_directory_name(filenames[0])
+        try:
+            f = get_directory_name(filenames[0])
+        except OSError:
+            f = None
         if f and f.is_dir():
             # this specify a directory not a filename
             directory = f
@@ -575,6 +578,8 @@ def get_directory_name(directory, **kwargs):
     directory = pathclean(directory)
 
     if directory:
+
+        # Search locally
         if directory.is_dir():
             # nothing else to do
             return directory
@@ -587,9 +592,9 @@ def get_directory_name(directory, **kwargs):
             return data_dir / directory
 
         else:
-            # raise ValueError(f'"{dirname}" is not a valid directory')
-            warnings.warn(f'"{directory}" is not a valid directory')
-            return None
+            raise OSError(f'"{str(directory)}" is not a valid directory')
+            # warnings.warn(f'"{directory}" is not a valid directory')
+            # return None
 
     else:
         # open a file dialog
@@ -687,6 +692,3 @@ def check_filename_to_open(*args, **kwargs):
     else:
         # probably no args (which means that we are coming from a dialog or from a full list of a directory
         return filenames
-
-
-# EOF

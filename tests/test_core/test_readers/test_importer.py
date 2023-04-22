@@ -121,19 +121,20 @@ def test_importer(monkeypatch, fs):
     # try to read unexistent scp file
     f = DATADIR / "fakedir/fakescp.scp"
     with pytest.raises(FileNotFoundError):
-        read(f)
+        read(f, local_only=True)  # local_only to avoid remote search
+        # (which do not work with the monkeypatch - problem with certificates)
 
     # make fake file
     fs.create_file(f)
     monkeypatch.setattr(NDDataset, "load", fake_dataset)
 
-    nd = read(f)
+    nd = read(f, local_only=True)
     assert nd == fake_dataset(f)
 
-    nd = read(f.stem, directory=DATADIR / "fakedir/", protocol="scp")
+    nd = read(f.stem, directory=DATADIR / "fakedir/", protocol="scp", local_only=True)
     assert nd == fake_dataset(f)
 
-    nd = read(f.stem, directory=DATADIR / "fakedir/")
+    nd = read(f.stem, directory=DATADIR / "fakedir/", local_only=True)
     assert nd == fake_dataset(f)
 
     # Generic read without parameters and dialog cancel
@@ -142,25 +143,25 @@ def test_importer(monkeypatch, fs):
         "KEEP_DIALOGS", "True"
     )  # we ask to display dialogs as we will mock them.
 
-    nd = read()
+    nd = read(local_only=True)
     assert nd is None
 
     # read as class method
-    nd1 = NDDataset.read()
+    nd1 = NDDataset.read(local_only=True)
     assert nd1 is None
 
     # NDDataset instance as first arguments
     nd = NDDataset()
-    nd2 = nd.read()
+    nd2 = nd.read(local_only=True)
     assert nd2 is None
 
-    nd = read(default_filter="matlab")
+    nd = read(default_filter="matlab", local_only=True)
     assert nd is None
 
     # Check if Filetype is not known
     f = DATADIR / "fakedir/not_exist_fake.fk"
     with pytest.raises(TypeError):
-        read_fake(f)
+        read_fake(f, local_only=True)
 
     # Make fake type acceptable
     FILETYPES.append(("fake", "FAKE files (*.fk)"))
@@ -171,43 +172,43 @@ def test_importer(monkeypatch, fs):
     # Check not existing filename
     f = DATADIR / "fakedir/not_exist_fake.fk"
     with pytest.raises(FileNotFoundError):
-        read_fake(f)
+        read_fake(f, local_only=True)
 
     # Generic read with a wrong protocol
     with pytest.raises(spectrochempy.utils.exceptions.ProtocolError):
-        read(f, protocol="wrongfake")
+        read(f, protocol="wrongfake", local_only=True)
 
     # Generic read with a wrong file extension
     with pytest.raises(TypeError):
         g = DATADIR / "fakedir/otherfake.farfelu"
-        read(g)
+        read(g, local_only=True)
 
     # Mock file
     f = DATADIR / "fakedir/fake.fk"
     fs.create_file(f)
 
     # specific read_(protocol) function
-    nd = read_fk(f)
+    nd = read_fk(f, local_only=True)
     assert nd == fake_dataset()
 
     # should also be a Class function
-    nd = NDDataset.read_fk(f)
+    nd = NDDataset.read_fk(f, local_only=True)
     assert nd == fake_dataset()
 
     # and a NDDataset instance function
-    nd = NDDataset().read_fk(f)
+    nd = NDDataset().read_fk(f, local_only=True)
     assert nd == fake_dataset()
 
     # single file without protocol inferred from filename
-    nd = read(f)
+    nd = read(f, local_only=True)
     assert nd == fake_dataset()
 
     # single file read with protocol specified
-    nd = read(f, protocol="fake")
+    nd = read(f, protocol="fake", local_only=True)
     assert nd == fake_dataset()
 
     # attribute a new name
-    nd = read(f, name="toto")
+    nd = read(f, name="toto", local_only=True)
     assert nd.name == "toto"
 
     # mock some fake file and assume they exists
@@ -226,30 +227,30 @@ def test_importer(monkeypatch, fs):
     # l = list(pathclean("/Users/christian/test_data/fakedir").iterdir())
 
     # multiple compatible 1D files automatically merged
-    nd = read(f1, f2, f3)
+    nd = read(f1, f2, f3, local_only=True)
     assert nd.shape == (3, 3)
 
-    nd = read([f1, f2, f3], name="fake_merged")
+    nd = read([f1, f2, f3], name="fake_merged", local_only=True)
     assert nd.shape == (3, 3)
     assert nd.name == "fake_merged"
 
     # multiple compatible 1D files not merged if the merge keyword is set to False
-    nd = read([f1, f2, f3], names=["a", "c", "b"], merge=False)
+    nd = read([f1, f2, f3], names=["a", "c", "b"], merge=False, local_only=True)
     assert isinstance(nd, list)
     assert len(nd) == 3 and nd[0] == fake_dataset()
     assert nd[1].name == "c"
 
     # do not merge inhomogeneous dataset
-    nd = read([f1, f2, f5])
+    nd = read([f1, f2, f5], local_only=True)
     assert isinstance(nd, list)
 
     # too short list of names.  Not applied
-    nd = read([f1, f2, f3], names=["a", "c"], merge=False)
+    nd = read([f1, f2, f3], names=["a", "c"], merge=False, local_only=True)
     assert nd[0].name.startswith("NDDataset")
 
     monkeypatch.setattr(spectrochempy.core.common.dialogs, "open_dialog", dialog_open)
-    nd = (
-        read()
+    nd = read(
+        local_only=True
     )  # should open a dialog (but to selects individual filename (here only simulated)
     assert nd.shape == (2, 3)
 
@@ -257,45 +258,49 @@ def test_importer(monkeypatch, fs):
     monkeypatch.setattr(pathlib.Path, "glob", directory_glob)
 
     # directory selection
-    nd = read(protocol="fake", directory=DATADIR / "fakedir")
+    nd = read(protocol="fake", directory=DATADIR / "fakedir", local_only=True)
     assert nd.shape == (4, 3)
 
-    nd = read(protocol="fake", directory=DATADIR / "fakedir", merge=False)
+    nd = read(
+        protocol="fake", directory=DATADIR / "fakedir", merge=False, local_only=True
+    )
     assert len(nd) == 4
     assert isinstance(nd, list)
 
-    nd = read(iterdir=True, directory=DATADIR / "fakedir")
+    nd = read(iterdir=True, directory=DATADIR / "fakedir", local_only=True)
     assert len(nd) == 4
     assert not isinstance(nd, list)
 
     # if a directory is passed as a keyword, the behavior is different:
     # a dialog for file selection occurs except if iterdir is set to True
-    nd = read(directory=DATADIR / "fakedir", iterdir=False)
+    nd = read(directory=DATADIR / "fakedir", iterdir=False, local_only=True)
     assert nd.shape == (2, 3)  # -> file selection dialog
 
-    nd = read(directory=DATADIR / "fakedir", iterdir=True)
+    nd = read(directory=DATADIR / "fakedir", iterdir=True, local_only=True)
     assert nd.shape == (4, 3)  # -> directory selection dialog
 
     # read_dir()
 
-    nd = read_dir(DATADIR / "fakedir")
+    nd = read_dir(DATADIR / "fakedir", local_only=True)
     assert nd.shape == (4, 3)
 
-    nd1 = read_dir()
+    nd1 = read_dir(local_only=True)
     assert nd1 == nd
 
     nd = read_dir(
-        directory=DATADIR / "fakedir"
+        directory=DATADIR / "fakedir", local_only=True
     )  # open a dialog to eventually select directory inside the specified
     # one
     assert nd.shape == (4, 3)
 
     fs.create_file(DATADIR / "fakedir/subdir/fakesub1.fk")
-    nd = read_dir(directory=DATADIR / "fakedir", recursive=True)
+    nd = read_dir(directory=DATADIR / "fakedir", recursive=True, local_only=True)
     assert nd.shape == (5, 3)
 
     # no merging
-    nd = read_dir(directory=DATADIR / "fakedir", recursive=True, merge=False)
+    nd = read_dir(
+        directory=DATADIR / "fakedir", recursive=True, merge=False, local_only=True
+    )
     assert len(nd) == 5
     assert isinstance(nd, list)
 

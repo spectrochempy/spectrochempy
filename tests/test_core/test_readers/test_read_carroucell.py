@@ -29,10 +29,10 @@ def dialog_carroucell(*args, **kwargs):
 #         )
 def test_read_carroucell(monkeypatch):
 
-    # Before testing we need to download the data locally if not yet done:
-    # because read carrousel is not designed to download itself.
-    # Use the read_remote for that:
-    scp.read_remote("irdata/carroucell_samp", replace_existing=False)
+    # # Before testing we need to download the data locally if not yet done:
+    # # because read carrousel is not designed to download itself.
+    # # Use the read_remote for that:
+    # scp.read("irdata/carroucell_samp", replace_existing=False)
 
     nd = scp.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
     for x in nd:
@@ -40,13 +40,13 @@ def test_read_carroucell(monkeypatch):
     assert len(nd) == 11
     assert nd[3].shape == (2, 11098)
 
-    nd = NDDataset.read_carroucell("irdata/carroucell_samp", spectra=(1, 1))
+    nd = scp.read_carroucell("irdata/carroucell_samp", spectra=(1, 1))
     assert isinstance(nd, NDDataset)
 
     monkeypatch.setattr(dialogs, "open_dialog", dialog_carroucell)
     monkeypatch.setenv("KEEP_DIALOGS", "True")
-    nd = NDDataset.read_carroucell(spectra=(1, 3))
+    nd = scp.read_carroucell(spectra=(1, 3))
     assert nd[3].shape == (3, 11098)
 
-    nd = NDDataset.read_carroucell(spectra=(2, 3), discardbg=False)
+    nd = scp.read_carroucell(spectra=(2, 3), discardbg=False)
     assert nd[3].shape == (2, 11098)

@@ -12,6 +12,7 @@ the default application preferences and IPython magic functions.
 """
 
 import inspect
+import io
 import json
 import logging
 import pprint
@@ -22,9 +23,9 @@ import time
 import traceback
 import warnings
 from datetime import date, timedelta
-from io import StringIO
 from os import environ
 from pathlib import Path
+from zipfile import ZipFile
 
 import matplotlib as mpl
 import numpy as np
@@ -261,8 +262,29 @@ def _display_needs_update_message():
         return message
 
 
-CHECK_UPDATE = threading.Thread(target=_check_for_updates, args=(1,))
-CHECK_UPDATE.start()
+# --------------------------------------------------------------------------------------
+# Testdata
+# --------------------------------------------------------------------------------------
+def _download_full_testdata_directory(datadir):
+
+    url = "https://github.com/spectrochempy/spectrochempy_data/archive/refs/heads/master.zip"
+
+    resp = requests.get(url, stream=True, allow_redirects=True)
+    zipfile = ZipFile(io.BytesIO(resp.content))
+    files = [zipfile.open(file_name) for file_name in zipfile.namelist()]
+
+    for file in files:
+        name = file.name
+        if name.endswith("/") or "testdata/" not in name:  # dir
+            continue
+        uncompressed = zipfile.read(name)
+        p = list(pathclean(name).parts)[2:]
+        dst = datadir.joinpath("/".join(p))
+        if not dst.parent.exists():
+            # create the eventually missing subdirectory
+            dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_bytes(uncompressed)
+
 
 # --------------------------------------------------------------------------------------
 # Other info
@@ -704,7 +726,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
                     "class": "logging.StreamHandler",
                     "formatter": "console",
                     "level": "INFO",
-                    "stream": StringIO(),
+                    "stream": io.StringIO(),
                 },
             },
             "loggers": {
@@ -1191,6 +1213,11 @@ config_manager = app.config_manager
 config_dir = app.config_dir
 reset_preferences = app.reset_preferences
 
-# ======================================================================================
-if __name__ == "__main__":
-    pass
+
+CHECK_UPDATE = threading.Thread(target=_check_for_updates)
+CHECK_UPDATE.start()
+
+DOWNLOAD_TESTDATA = threading.Thread(
+    target=_download_full_testdata_directory, args=(preferences.datadir,)
+)
+DOWNLOAD_TESTDATA.start()

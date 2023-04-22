@@ -15,7 +15,7 @@ DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
 
 
-def test_read_remote():
+def test_read():
 
     filename = IRDATA / "nh4y-activation.spg"
 
@@ -33,23 +33,10 @@ def test_read_remote():
     # delete file to simulate its absence:
     filename.unlink()
 
-    # now try a direct call to read_remote
-    assert not filename.exists()
-    nd2 = scp.read_remote("irdata/nh4y-activation.spg")
-    assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
-    assert filename.exists()
-
     # now try to download from github s not found locally (use _read_remote)
     # but file doesn't exist on github
     with pytest.raises(FileNotFoundError):
         scp.read_omnic("irdata/nh4y-active.spg")
-
-    # now try a direct call to read_remote
-    with pytest.raises(FileNotFoundError):
-        scp.read_remote("irdata/nh4y-active.spg")
-
-    # delete file to simulate its absence:
-    filename.unlink()
 
     # now try a using generic read
     assert not filename.exists()
@@ -57,12 +44,6 @@ def test_read_remote():
     assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
     assert filename.exists()
 
-    # delete file to simulate its absence:
-    filename.unlink()
-
-    # now try a using generic read
+    # now try a using generic read with a missing
     with pytest.raises(FileNotFoundError):
         scp.read("irdata/nh4y-acti.spg")
-
-    # finally restore the deleted file
-    scp.read_omnic(filename)
