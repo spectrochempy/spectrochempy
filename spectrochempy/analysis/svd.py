@@ -261,8 +261,3 @@ class SVD(DecompositionAnalysis):
         Return Vector of singular values .
         """
         return self._outfit[1]
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

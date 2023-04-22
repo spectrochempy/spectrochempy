@@ -621,7 +621,3 @@ for reproducible results across multiple function calls.""",
             ax.legend(handles=leg, loc="best")
 
         return ax
-
-
-if __name__ == "__main__":
-    pass

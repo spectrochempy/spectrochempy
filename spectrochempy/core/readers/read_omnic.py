@@ -1216,8 +1216,3 @@ def _getintensities(fid, pos):
     # Read and return spectral intensities
     fid.seek(intensity_pos)
     return _fromfile(fid, "float32", int(nintensities))
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

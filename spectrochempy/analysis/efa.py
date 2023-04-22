@@ -241,8 +241,3 @@ class EFA(DecompositionAnalysis):
         if self.cutoff is not None:
             b = np.max((b, np.ones_like(b) * self.cutoff), axis=0)
         return b
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

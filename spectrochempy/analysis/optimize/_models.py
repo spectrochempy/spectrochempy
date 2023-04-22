@@ -327,7 +327,3 @@ class sigmoidmodel(object):
     def f(self, x, ampl, pos, asym, **kargs):
         w = 1.0 / (1.0 + np.exp(asym * (x - pos) / ampl))
         return ampl * w
-
-
-if __name__ == "__main__":
-    pass

@@ -159,8 +159,3 @@ def _read_asc(*args, **kwargs):
     dataset._modified = dataset._created
 
     return dataset
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

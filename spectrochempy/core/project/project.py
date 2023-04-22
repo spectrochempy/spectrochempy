@@ -621,8 +621,3 @@ def makescript(priority=50):
         return wrapper
 
     return decorator
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

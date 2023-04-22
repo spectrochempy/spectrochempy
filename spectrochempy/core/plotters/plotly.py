@@ -570,7 +570,3 @@
 #         if not b:
 #             keep.append(ds[i])
 #     return keep
-#
-#
-# if __name__ == '__main__':
-#     pass

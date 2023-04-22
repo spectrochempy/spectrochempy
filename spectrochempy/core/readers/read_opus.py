@@ -199,8 +199,3 @@ def _read_data(fid):
     meta_data = parse_meta(data)
     opus_data = parse_data(data, meta_data)
     return opus_data
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

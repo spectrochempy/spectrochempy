@@ -194,7 +194,3 @@ def _read_carroucell(*args, **kwargs):
 
     # several datasets returned, sorted by sample #
     return sorted(datasets, key=lambda ds: re.split("-|_", ds.name)[0])
-
-
-if __name__ == "__main__":
-    pass

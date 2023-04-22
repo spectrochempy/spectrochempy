@@ -238,8 +238,3 @@ def _read_dso(dataset, name, data):
 
         dataset.history = "Imported by spectrochempy."
     return dataset
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

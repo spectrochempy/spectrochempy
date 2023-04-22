@@ -104,8 +104,3 @@ def trim_ranges(*ranges, reversed=False):
     [[1, 4], [5, 10]]
     """
     return _CoordRange(*ranges, reversed=reversed).ranges
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

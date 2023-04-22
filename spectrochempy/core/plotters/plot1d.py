@@ -605,7 +605,3 @@ def plot_1D(dataset, method=None, **kwargs):
         )
 
     return ax
-
-
-if __name__ == "__main__":
-    pass
