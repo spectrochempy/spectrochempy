@@ -267,6 +267,11 @@ def _display_needs_update_message():
 # --------------------------------------------------------------------------------------
 def _download_full_testdata_directory(datadir):
 
+    # this process is relatively long, so we do not want to do it several time:
+    downloaded = datadir / "__downloaded__"
+    if downloaded.exists():
+        return
+
     url = "https://github.com/spectrochempy/spectrochempy_data/archive/refs/heads/master.zip"
 
     resp = requests.get(url, stream=True, allow_redirects=True)
@@ -284,6 +289,9 @@ def _download_full_testdata_directory(datadir):
             # create the eventually missing subdirectory
             dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_bytes(uncompressed)
+
+    # write the "__downloaded__" file to avoid this process to run several file.
+    downloaded.touch(exist_ok=True)
 
 
 # --------------------------------------------------------------------------------------

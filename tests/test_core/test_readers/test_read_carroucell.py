@@ -31,7 +31,7 @@ def test_read_carroucell(monkeypatch):
 
     # # Before testing we need to download the data locally if not yet done:
     # # because read carrousel is not designed to download itself.
-    # # Use the read_remote for that:
+    # # Use the read for that:
     # scp.read("irdata/carroucell_samp", replace_existing=False)
 
     nd = scp.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
