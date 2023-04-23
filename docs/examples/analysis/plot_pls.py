@@ -50,7 +50,7 @@ y_test = y[57:]
 
 # %%
 # Then we create a PLSRegression object and fit the train datasets:
-pls = scp.PLS(used_components=5)
+pls = scp.PLSRegression(used_components=5)
 _ = pls.fit(X_train, y_train)
 
 # %%
