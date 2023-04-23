@@ -10,17 +10,17 @@ Glossary
     :sorted:
 
     API
-        API stands for ``Application Programming Interface``, which is a set of methods
+        API stands for ``Application Programming Interface``\ , which is a set of methods
         and protocols for using the SpectroChemPy (especially
         in `Jupyter Notebooks <https://docs.jupyter.org/en/latest/>`__
         or `Jupyter Lab <https://docs.jupyter.org/en/latest/>`__\ )
         without knowing all the details of the implementation of these methods or protocols.
 
     Carroucell
-        Multisample FTIR cell as described in :cite:`zholobenko:2020`.
+        Multisample FTIR cell as described in :cite:t:`zholobenko:2020`.
 
     SVD
-        ``Singular Value Decomposition``\ .
+        SVD stands for ``Singular Value Decomposition``\ .
         SVD decomposes a matrix :math:`\mathbf{X}(n,m)` (typically of set of :math:`n` spectra) as:
 
         .. math:: \mathbf{X} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^t + \mathbf{E}
@@ -56,8 +56,8 @@ Glossary
 
         .. math:: \mathbf{X} = \mathbf{T} \mathbf{P}^t + \mathbf{E}
 
-        where :math:`\mathbf{T} \equiv :math:`U \Sigma` is called the :term:scores: matrix and :math:`\mathbf{P}^t` the
-        loadings matrix. The columns of :math:`\mathbf{T}` are called the score vectors and the lines of
+        where :math:`\mathbf{T} \equiv U \Sigma` is called the :term:`scores` matrix and :math:`\mathbf{P}^t` the
+        :term:`loadings` matrix. The columns of :math:`\mathbf{T}` are called the score vectors and the lines of
         :math:`\mathbf{P}^t` are called loading vectors. Together, the n-th score and loading vectors are related to
         a *latent variable* called the n-th principal component.
 
@@ -75,21 +75,21 @@ Glossary
                    S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y))
 
         :math:`S_X` and :math:`S_Y` are :math:`n \times k` matrices often called score matrices, and :math:`L_X^T`
-        and :math:L_Y^T` are, respectively, :math:`k \times l` and :math:`k \times m` loading matrices.
+        and :math:`L_Y^T` are, respectively, :math:`k \times l` and :math:`k \times m` loading matrices.
         Matrices :math:`E_X` and :math:`E_Y`  are the error terms or residuals.
         As indicated by the third equation, the decompositions of :math:`X` and `Y` are made to maximise
         the covariance of the score matrices.
 
     EFA
-        ``Evolving Factor Analysis``\ .
+        EFA stands for ``Evolving Factor Analysis``\ .
         EFA examines the evolution of the singular values or :term:`rank` of a dataset :math:`X` by systematically
         carrying out a :term:`PCA` of submatrices of :math:`X`. It is often used to guess predminance regions of
         appearing/disappearing species in an evolving mixture. See :cite:`maeder:1986` for the original case study
         and :cite:`maeder:2009` for more recent references.
 
     MCR-ALS
-        ``Multivariate Curve Resolution by Alternating Least Squares``
-        resolve's a set of spectra :math:`X` of an evolving mixture
+        MCR-ALS stands for ``Multivariate Curve Resolution by Alternating Least Squares`` .
+        MCR-ALS resolve's a set of spectra :math:`X` of an evolving mixture
         into the spectral profiles  :math:`S` of "pure" species and their
         concentration profiles :math:`C`\ , such as:
 
@@ -99,10 +99,10 @@ Glossary
         hard constraints (e.g. equality of concention(s) or of some spectra  to given profiles).
 
     ALS
-        ``Alternating least squares`` minimization.
-        The algorithm at the heart of term:`MCR-ALS` which successively resolves :math:`C` and :math`St`
+        ALS stands for ``Alternating least squares`` minimization.
+        The algorithm at the heart of term:`MCR-ALS` which successively resolves :math:`C` and :math:`St`
         by least squares, after application of the relevant constraints. It checks how
-        :math:\hat{X} = C \cdot St` is close to :math:`X` and either stops or goes for a new loop.
+        :math:`\hat{X} = C \cdot St` is close to :math:`X` and either stops or goes for a new loop.
 
     closure
         Constraint where the sum of concentrations is fixed to a target value.
