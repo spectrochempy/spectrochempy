@@ -64,12 +64,12 @@ class SVD(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "SVD")
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Singular Value Decomposition (SVD).
 
-    The SVD is commonly written as :math:`X = U \\Sigma V^{T}` .
+    The SVD is commonly written as :math:`X = U \Sigma V^{T}`\ .
 
-    This class has the attributes : U, s = diag(S) and VT=V :math:`^T` .
+    This class has the attributes : U, s = diag(S) and VT=V :math:`^T`\ .
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.

@@ -147,7 +147,7 @@ def check_filenames(*args, **kwargs):
 
     Parameters
     ----------
-    \*args
+    *args
         If passed it is a str, a list of str or a dictionary containing filenames or a byte's contents.
     **kwargs
         Optional keywords parameters. See Other parameters

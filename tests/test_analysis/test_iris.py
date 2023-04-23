@@ -59,7 +59,7 @@ def test_analysis_iris_kernel():
     q0 = scp.Coord(
         np.logspace(-10, 1, 10),
         name="reduced adsorption energy",
-        title="$\Delta_{ads}G^{0}/RT$",
+        title=r"$\Delta_{ads}G^{0}/RT$",
         units="",
     )
     k4 = scp.IrisKernel(X, "langmuir", p=p0, q=q0)

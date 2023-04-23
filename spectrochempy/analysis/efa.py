@@ -28,13 +28,13 @@ class EFA(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "EFA")
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Evolving Factor Analysis (EFA).
 
-    Evolving factor analysis (`EFA`) is a method that allows model-free resolution of
+    Evolving factor analysis (`EFA`\ ) is a method that allows model-free resolution of
     overlapping peaks into concentration profiles and normalized spectra of components.
 
-    Originally developed for GC and GC-MS experiments (See e.g.,
+    Originally developed for GC and GC-MS experiments (See *e.g.,*
     :cite:t:`maeder:1986` , :cite:t:`roach:1992`\ ), it is also suitable for
     analysis spectra such as those obtained by Operando FTIR for example.
 
