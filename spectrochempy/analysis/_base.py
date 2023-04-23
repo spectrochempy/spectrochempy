@@ -1127,8 +1127,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
-        copy : `bool`\ , default: `True`
-            Whether to copy X and Y, or perform in-place normalization.
 
         Returns
         -------
@@ -1241,9 +1239,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         base="cross_decomposition_transform",
         sections=["Parameters", "Other Parameters", "Returns"],
     )
-    _docstring.keep_params(
-        "cross_decomposition_transform.parameters", "X", "Y", "both", "copy"
-    )
+    _docstring.keep_params("cross_decomposition_transform.parameters", "X", "Y", "both")
 
     @_wrap_ndarray_output_to_nddataset(meta_from=("_X", "_Y"))
     @_docstring.dedent

@@ -156,9 +156,9 @@ class PLS(CrossDecompositionAnalysis):
         # Transform data back to its original space.
         return self._pls.inverse_transform(X_transform, Y=Y_transform)
 
-    def _transform(self, X, Y=None, copy=True):
+    def _transform(self, X, Y=None):
         # Apply the dimension reduction.
-        return self._pls.transform(X, Y, copy)
+        return self._pls.transform(X, Y)
 
     def _predict(self, X):
         # Predict targets of given samples.
