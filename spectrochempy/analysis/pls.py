@@ -42,9 +42,6 @@ class PLS(CrossDecompositionAnalysis):
     ----------
     %(AnalysisConfigurable.parameters)s
 
-    See Also
-    --------
-    %(DecompositionAnalysis.see_also.no_PLS)s
     """
     )
 
