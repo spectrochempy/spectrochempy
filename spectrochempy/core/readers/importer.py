@@ -765,7 +765,7 @@ def _download_full_testdata_directory():
 
 def _download_from_github(path, dst, replace=False):
     # download on github (always save the downloaded files)
-    relative_path = str(pathclean(path))
+    relative_path = str(pathclean(path).as_posix())
     path = (
         f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
         f"testdata/{relative_path}"

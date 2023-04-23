@@ -172,7 +172,7 @@ def check_filenames(*args, **kwargs):
     Examples
     --------
     """
-    from spectrochempy.application import info_
+    # from spectrochempy.application import info_
     from spectrochempy.core import preferences as prefs
 
     datadir = pathclean(prefs.datadir)
@@ -251,12 +251,12 @@ def check_filenames(*args, **kwargs):
             f = pathclean(directory / filename)
 
             fexist = f if f.exists() else _get_file_for_protocol(f, **kwargs)
-            info_(f"fexist  {fexist}")
+            # info_(f"fexist  {fexist}")
             if fexist is None:
                 f = pathclean(datadir / filename)
-                info_(f"f (line 255) {f}")
+                # info_(f"f (line 255) {f}")
                 fexist = f if f.exists() else _get_file_for_protocol(f, **kwargs)
-                info_(f"fexist  {fexist}")
+                # info_(f"fexist  {fexist}")
 
             if fexist:
                 filename = fexist
@@ -269,7 +269,6 @@ def check_filenames(*args, **kwargs):
             if not isinstance(filename, list):
                 filename = [filename]
 
-            # print(filename)
             filenames_.extend(filename)
 
         filenames = filenames_
