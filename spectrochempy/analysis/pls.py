@@ -152,10 +152,6 @@ class PLS(CrossDecompositionAnalysis):
         #
         return self._pls.fit_transform(X, Y)
 
-    # todo ?: def _get_feature_names_out([input_features])
-
-    # todo ? : def _get_params([deep])
-
     def _inverse_transform(self, X_transform, Y_transform=None):
         # Transform data back to its original space.
         return self._pls.inverse_transform(X_transform, Y=Y_transform)
@@ -186,6 +182,8 @@ class PLS(CrossDecompositionAnalysis):
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
+        Y :  :term:`array-like` of shape (n_samples,) or (n_samples, n_targets)
+            Target vectors, where n_samples is the number of samples and n_targets is the number of response variables.
 
         Returns
         -------
