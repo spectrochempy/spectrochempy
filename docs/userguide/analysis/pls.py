@@ -76,7 +76,7 @@ X = A[-3]
 X.title = "absorbance"
 X.x.title = "Wavelength"
 X.x.units = "nm"
-X.plot(cmap=None)
+_ = X.plot(cmap=None)
 
 # %%
 X_ = X.detrend()
@@ -141,7 +141,7 @@ _ = ax.legend(loc="lower right")
 # passed.
 
 # %%
-print(f"R**2 training datastet: {pls.score():.3}")
+print(f"R**2 training dataset: {pls.score():.3}")
 print(f"R**2 test dataset: {pls.score(X_test, y_test):.3}")
 
 # %% [markdown]
