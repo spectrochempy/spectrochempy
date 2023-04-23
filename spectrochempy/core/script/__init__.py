@@ -240,7 +240,3 @@ def run_all_scripts(project):
     # TODO: complete this run_all_script function
 
     project
-
-
-if __name__ == "__main__":
-    pass

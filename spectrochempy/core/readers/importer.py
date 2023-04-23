@@ -7,10 +7,11 @@
 """
 This module define a generic class to import directories, files and contents.
 """
-__all__ = ["read", "read_dir", "read_remote"]
+__all__ = ["read", "read_dir"]  # , "read_remote"]
 __dataset_methods__ = __all__
 
-from io import BytesIO
+import io
+import re
 from warnings import warn
 from zipfile import ZipFile
 
@@ -36,7 +37,8 @@ FILETYPES = [
     ("opus", "Bruker OPUS files (*.[0-9]*)"),
     (
         "topspin",
-        "Bruker TOPSPIN fid or series or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
+        "Bruker TOPSPIN fid or series or processed data files "
+        "(fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
     ),
     ("matlab", "MATLAB files (*.mat)"),
     ("dso", "Data Set Object files (*.dso)"),
@@ -98,9 +100,11 @@ class Importer(HasTraits):
         self.default_key = kwargs.pop("default_key", ".scp")
 
         if "merge" not in kwargs.keys():
-            # if merge is not specified, but the args are provided as a single list, then will are supposed to merge
-            # the datasets. If merge is specified then it has priority.
-            # This is not useful for the 1D datasets, as if they are compatible they are merged automatically
+            # if merge is not specified, but the args are provided as a single list,
+            # then will are supposed to merge the datasets. If merge is specified then
+            # it has priority.
+            # This is not useful for the 1D datasets, as if they are compatible they
+            # are merged automatically
             if args and len(args) == 1 and isinstance(args[0], (list, tuple)):
                 kwargs["merge"] = True
 
@@ -199,57 +203,48 @@ class Importer(HasTraits):
                 protocol = [protocol]
             if key and key[1:] not in protocol and self.alias[key[1:]] not in protocol:
                 return
+
         datasets = []
         for filename in files[key]:
-            if (
-                isinstance(filename, str)
-                and not filename.startswith("http://")
-                and not filename.startswith("https://")
-            ):
-                filename = pathclean(filename)
-            else:
-                #    kwargs["remote"] = True
-                kwargs["read_only"] = kwargs.get("read_only", True)
+
             read_ = getattr(self, f"_read_{key[1:]}")
+
+            dataset = None
             try:
-                res = read_(self.objtype(), filename, **kwargs)
-                # sometimes read_ can return None (e.g. non labspec text file)
-            except FileNotFoundError:
-                # try to get the file from github
-                kwargs["read_method"] = read_
+                # read locally or using url if filename is an url
+                dataset = read_(self.objtype(), filename, **kwargs)
+
+            except (FileNotFoundError, OSError) as exc:
+                # file was not found.
+                # it is an url we raise an error
+                local_only = kwargs.get("local_only", False)
+                if _is_url(filename) or local_only:
+                    raise (FileNotFoundError) from exc
+
+                # else, we try on github
                 try:
-                    res = _read_remote(self.objtype(), filename, **kwargs)
+                    # Try to get the file from github
+                    kwargs["read_method"] = read_
+                    info_(
+                        "File/directory not found locally: Attempt to download it from "
+                        "the GitHub repository `spectrochempy_data`..."
+                    )
+                    dataset = _read_remote(self.objtype(), filename, **kwargs)
 
-                except OSError as e:
-                    if kwargs.get("remote"):
-                        raise e
-                    else:
-                        raise FileNotFoundError(f"{filename} not found")
-
-                except IOError as e:
-                    warning_(str(e))
-                    res = None
-
-                except NotImplementedError as e:
-                    warning_(str(e))
-                    res = None
+                except (FileNotFoundError) as exc:
+                    raise (FileNotFoundError) from exc
 
                 except Exception as e:
-                    raise e
+                    warning_(str(e))
 
-            except IOError as e:
+            except Exception as e:
                 warning_(str(e))
-                res = None
 
-            except NotImplementedError as e:
-                warning_(str(e))
-                res = None
-
-            if res is not None:
-                if not isinstance(res, list):
-                    datasets.append(res)
+            if dataset is not None:
+                if not isinstance(dataset, list):
+                    datasets.append(dataset)
                 else:
-                    datasets.extend(res)
+                    datasets.extend(dataset)
 
         if len(datasets) > 1:
             datasets = self._do_merge(datasets, **kwargs)
@@ -295,7 +290,7 @@ def _importer_method(func):
 
 
 # --------------------------------------------------------------------------------------
-# Generic Read function
+# Public Generic Read function
 # --------------------------------------------------------------------------------------
 
 _docstring.get_sections(
@@ -566,54 +561,156 @@ def read_dir(directory=None, **kwargs):
     return importer(directory, **kwargs)
 
 
-_docstring.delete_params("Importer.see_also", "read_remote")
+# _docstring.delete_params("Importer.see_also", "read_remote")
+# @_docstring.dedent
+# def read_remote(file_or_dir, **kwargs):
+#     """
+#     Download and read files or an entire directory from any url
+#
+#     The first usage in spectrochempy is the loading of test files in the
+#     `spectrochempy_data repository <https://github.com/spectrochempy/spectrochempy_data>`__\ .
+#     This is done only if the data are not yet
+#     downloaded and present in the `~spectrochempy.preferences.datadir` directory.
+#
+#     It can also be used to download and read file or directory from any url.
+#
+#     Parameters
+#     ----------
+#     path : `str`, `~pathlib.Path` object or an url.
+#         When a file or folder is specified, it must be written as if it were present
+#         locally exactly as for the `read` function. The correponding file or directory
+#         is downloaded from the ``github spectrochemp_data`` repository.
+#         Otherwise it should be a full and valid url.
+#     %(kwargs)s
+#
+#     Returns
+#     --------
+#     %(Importer.returns)s
+#
+#     Other Parameters
+#     ----------------
+#     %(Importer.other_parameters)s
+#
+#     See Also
+#     --------
+#     %(Importer.see_also.no_read_remote)s
+#
+#     Examples
+#     --------
+#
+#     >>> A = scp.read_remote('irdata/subdir')
+#     """
+#     kwargs["remote"] = True
+#     importer = Importer()
+#     return importer(file_or_dir, **kwargs)
+#
+
+# ======================================================================================
+# Private read functions
+# ======================================================================================
+@_importer_method
+def _read_dir(*args, **kwargs):
+    _, directory = args
+    directory = get_directory_name(directory)
+    files = get_filenames(directory, **kwargs)
+    datasets = []
+    valid_extensions = list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]
+    for key in [key for key in files.keys() if key[1:] in valid_extensions]:
+        if key:
+            importer = Importer()
+            nd = importer(files[key], **kwargs)
+            if nd is not None:
+                if not isinstance(nd, list):
+                    nd = [nd]
+                datasets.extend(nd)
+    return datasets
 
 
-@_docstring.dedent
-def read_remote(file_or_dir, **kwargs):
-    """
-    Download and read files or an entire directory from any url
+@_importer_method
+def _read_scp(*args, **kwargs):
+    dataset, filename = args
+    return dataset.load(filename, **kwargs)
 
-    The first usage in spectrochempy is the loading of test files in the
-    `spectrochempy_data repository <https://github.com/spectrochempy/spectrochempy_data>`__\ .
-    This is done only if the data are not yet
-    downloaded and present in the `~spectrochempy.preferences.datadir` directory.
 
-    It can also be used to download and read file or directory from any url.
+@_importer_method
+def _read_(*args, **kwargs):
+    dataset, filename = args
 
-    Parameters
-    ----------
-    path : `str`, `~pathlib.Path` object or an url.
-        When a file or folder is specified, it must be written as if it were present
-        locally exactly as for the `read` function. The correponding file or directory
-        is downloaded from the ``github spectrochemp_data`` repository.
-        Otherwise it should be a full and valid url.
-    %(kwargs)s
+    if kwargs.pop("remote", False):
+        return Importer._read_remote(*args, **kwargs)
+    elif not filename or filename.is_dir():
+        return Importer._read_dir(*args, **kwargs)
+    else:
+        raise FileNotFoundError
 
-    Returns
-    --------
-    %(Importer.returns)s
+    # protocol = kwargs.get("protocol", None)
+    # if protocol and ".scp" in protocol:
+    #     return dataset.load(filename, **kwargs)
+    #
+    # elif filename and filename.name in ("fid", "ser", "1r", "2rr", "3rrr"):
+    #     # probably an Topspin NMR file
+    #     return dataset.read_topspin(filename, **kwargs)
+    # elif filename:
+    #     # try scp format
+    #     try:
+    #         return dataset.load(filename, **kwargs)
+    #     except Exception:
+    #         # lets try some common format
+    #         for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
+    #             try:
+    #                 _read = getattr(dataset, f"read_{key}")
+    #                 f = f"{filename}.{key}"
+    #                 return _read(f, **kwargs)
+    #             except Exception:
+    #                 pass
+    #         raise NotImplementedError
 
-    Other Parameters
-    ----------------
-    %(Importer.other_parameters)s
 
-    See Also
-    --------
-    %(Importer.see_also.no_read_remote)s
+# ======================================================================================
+# Private functions
+# ======================================================================================
+def _is_url(filename):
+    return (
+        isinstance(filename, str)
+        and re.match(r"http[s]?:[\/]{2}", filename) is not None
+    )
 
-    Examples
-    --------
 
-    >>> A = scp.read_remote('irdata/subdir')
-    """
-    kwargs["remote"] = True
-    if "merge" not in kwargs:
-        kwargs["merge"] = False  # by default, no attempt to merge
-    if "replace_existing" not in kwargs:
-        kwargs["replace_existing"] = False  # by default we download only if needed.
-    importer = Importer()
-    return importer(file_or_dir, **kwargs)
+def _openfid(filename, mode="rb", **kwargs):
+    # Return a file ID
+
+    # Check if Content has been passed?
+    content = kwargs.get("content", False)
+
+    # default encoding
+    encoding = "utf-8"
+
+    if _is_url(filename):
+        # by default we set the read_only flag to True when reading remote url
+        kwargs["read_only"] = kwargs.get("read_only", True)
+
+        # use request to read the remote content
+        r = requests.get(filename, allow_redirects=True)
+        r.raise_for_status()
+        content = r.content
+        encoding = r.encoding
+
+    else:
+        # Transform filename to a Path object is not yet the case
+        filename = pathclean(filename)
+
+    # Create the file ID
+    if content:
+        # if a content has been passed, then it has priority
+        fid = (
+            io.BytesIO(content)
+            if mode == "rb"
+            else io.StringIO(content.decode(encoding))
+        )
+    else:
+        fid = open(filename, mode=mode)
+
+    return fid, kwargs
 
 
 def _write_downloaded_file(content, dst):
@@ -653,7 +750,7 @@ def _download_full_testdata_directory():
     url = "https://github.com/spectrochempy/spectrochempy_data/archive/refs/heads/master.zip"
 
     resp = requests.get(url)
-    zipfile = ZipFile(BytesIO(resp.content))
+    zipfile = ZipFile(io.BytesIO(resp.content))
     files = [zipfile.open(file_name) for file_name in zipfile.namelist()]
 
     for file in files:
@@ -666,32 +763,29 @@ def _download_full_testdata_directory():
         _write_downloaded_file(uncompressed, dst)
 
 
-def _download_from_url(url, dst, replace=False, read_only=False):
-    if not str(url).startswith("https://") and not str(url).startswith("http://"):
-        # download on github (always save the downloaded files)
-        url = (
-            f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
-            f"testdata/{url}"
-        )
+def _download_from_github(path, dst, replace=False):
+    # download on github (always save the downloaded files)
+    relative_path = str(pathclean(path).as_posix())
+    path = (
+        f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
+        f"testdata/{relative_path}"
+    )
 
-        # first determine if it is a directory
-        r = requests.get(url + "/__index__", allow_redirects=True)
-        index = None
-        if r.status_code == 200:
-            index = yaml.load(r.content, Loader=yaml.CLoader)
+    # first determine if it is a directory
+    r = requests.get(path + "/__index__", allow_redirects=True)
+    index = None
+    if r.status_code == 200:
+        index = yaml.load(r.content, Loader=yaml.CLoader)
 
-        if index is None:
-            return _get_url_content_and_save(url, dst, replace)
+    if index is None:
+        return _get_url_content_and_save(path, dst, replace)
 
-        else:
-            # download folder
-            for filename in index["files"]:
-                _get_url_content_and_save(f"{url}/{filename}", dst / filename, replace)
-            for folder in index["folders"]:
-                _download_from_url(f"{url}/{folder}", dst / folder)
     else:
-        # download url, eventually save it
-        return _get_url_content_and_save(url, dst, replace, read_only)
+        # download folder
+        for filename in index["files"]:
+            _get_url_content_and_save(f"{path}/{filename}", dst / filename, replace)
+        for folder in index["folders"]:
+            _download_from_github(f"{relative_path}/{folder}", dst / folder)
 
 
 def _is_relative_to(path, base):
@@ -724,109 +818,52 @@ def _read_remote(*args, **kwargs):
     from spectrochempy.core import preferences as prefs
 
     datadir = prefs.datadir
-
     dataset, path = args
-    is_url = str(path).startswith("http://") or str(path).startswith("https://")
-
-    replace = kwargs.pop("replace_existing", False)
-    read_only = kwargs.pop("read_only", True)  # by default we do not write the
+    kwargs["merge"] = kwargs.get("merge", False)  # by default, no attempt to merge
+    read_method = kwargs.pop("read_method", read)
     download_only = kwargs.pop("download_only", False)
+    replace = kwargs.pop(
+        "replace_existing", False
+    )  # by default we download only if needed.
 
     # downloaded file
-    if not is_url:
-        # case where we try to download the github testdata
-        path = pathclean(path)
+    # we try to download the github testdata
+    path = pathclean(path)
 
-        if _is_relative_to(path, datadir):
-            # try to make it relative for remote downloading on github
-            relative_path = _relative_to(path, datadir)
-        else:
-            # assume it is already relative
-            relative_path = path
+    # we need to download additional files for topspin
+    topspin = True if "topspin" in read_method.__name__ else False
+    # we have to treat a special case: topspin, where the parent directory need
+    # to be downloaded with the required file
+    if topspin:
+        savedpath = path
+        m = re.match(r"(.*)(\/pdata\/\d+\/\d+[r|i]{1,2}|ser|fid)", str(path))
+        if m is not None:
+            path = pathclean(m[1])
 
-        # in principle the data came from github. Try to download it
-        dst = datadir / relative_path
-        if dst.name == "testdata":
-            # we are going to download the whole testdata directory
-            # -> use a faster method
-            _download_full_testdata_directory()
-            return
-        else:
-            content = _download_from_url(relative_path, dst, replace)
-
+    if _is_relative_to(path, datadir):
+        # try to make it relative for remote downloading on github
+        relative_path = _relative_to(path, datadir)
     else:
-        # download url content localy or in a byte string depending on
-        dst = pathclean(path.split("/")[-1])
-        # a content will be returned when read_only is true (as the file is not written)
-        content = _download_from_url(path, dst, replace, read_only)
+        # assume it is already relative
+        relative_path = path
+
+    # Try to download it
+    dst = datadir / relative_path
+    if dst.name == "testdata":
+        # we are going to download the whole testdata directory
+        # -> use a faster method
+        _download_full_testdata_directory()
+        return
+    else:
+        content = _download_from_github(relative_path, dst, replace)
 
     if not download_only:
-        read_method = kwargs.pop("read_method", read)
         if content is None:
-            return read_method(dataset, dst, **kwargs)
+            if topspin:
+                return read_method(
+                    dataset, dst / _relative_to(savedpath, dst), **kwargs
+                )
+            else:
+                return read_method(dataset, dst, **kwargs)
         else:
-            return read_method(dataset, dst, content=content)
-
-
-# ======================================================================================
-# Private functions
-# ======================================================================================
-@_importer_method
-def _read_dir(*args, **kwargs):
-    _, directory = args
-    directory = get_directory_name(directory)
-    files = get_filenames(directory, **kwargs)
-    datasets = []
-    valid_extensions = list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]
-    for key in [key for key in files.keys() if key[1:] in valid_extensions]:
-        if key:
-            importer = Importer()
-            nd = importer(files[key], **kwargs)
-            if nd is not None:
-                if not isinstance(nd, list):
-                    nd = [nd]
-                datasets.extend(nd)
-    return datasets
-
-
-@_importer_method
-def _read_scp(*args, **kwargs):
-    dataset, filename = args
-    return dataset.load(filename, **kwargs)
-
-
-@_importer_method
-def _read_(*args, **kwargs):
-    dataset, filename = args
-
-    if kwargs.pop("remote", False):
-        return Importer._read_remote(*args, **kwargs)
-    elif not filename or filename.is_dir():
-        return Importer._read_dir(*args, **kwargs)
-
-    # protocol = kwargs.get("protocol", None)
-    # if protocol and ".scp" in protocol:
-    #     return dataset.load(filename, **kwargs)
-    #
-    # elif filename and filename.name in ("fid", "ser", "1r", "2rr", "3rrr"):
-    #     # probably an Topspin NMR file
-    #     return dataset.read_topspin(filename, **kwargs)
-    # elif filename:
-    #     # try scp format
-    #     try:
-    #         return dataset.load(filename, **kwargs)
-    #     except Exception:
-    #         # lets try some common format
-    #         for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
-    #             try:
-    #                 _read = getattr(dataset, f"read_{key}")
-    #                 f = f"{filename}.{key}"
-    #                 return _read(f, **kwargs)
-    #             except Exception:
-    #                 pass
-    #         raise NotImplementedError
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass
+            return read_method(dataset, dst, content=content, **kwargs)

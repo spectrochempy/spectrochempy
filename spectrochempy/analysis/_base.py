@@ -245,23 +245,23 @@ def _wrap_ndarray_output_to_nddataset(
 class AnalysisConfigurable(MetaConfigurable):
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Abstract class to write analysis model estimators.
 
     Analysis model class must subclass this to get a minimal structure
 
     Parameters
     ----------
-    log_level : any of [ ``"INFO"`` , ``"DEBUG"`` , ``"WARNING"`` , ``"ERROR"`` ], optional, default: ``"WARNING"``
+    log_level : any of [``"INFO"``\ , ``"DEBUG"``\ , ``"WARNING"``\ , ``"ERROR"``\ ], optional, default: ``"WARNING"``
         The log level at startup.
-    warm_start : `bool`\ , optional, default:`False`
+    warm_start : `bool`\ , optional, default: `False`
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
         it may be possible to reuse previous model learned from the previous parameter
         value, saving time.
 
         When `warm_start` is `True`\ , the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to `fit`.
+        initialize the new model in a subsequent call to `fit`\ .
     %(copy)s
     """
     )
@@ -563,7 +563,7 @@ class AnalysisConfigurable(MetaConfigurable):
     # Public methods and property
     # ----------------------------------------------------------------------------------
     def fit(self, X, Y=None):
-        """
+        r"""
         Fit the model with ``X`` as input dataset.
 
         Parameters
@@ -754,7 +754,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     @_docstring.dedent
     def transform(self, X=None, **kwargs):
-        """
+        r"""
         Apply dimensionality reduction to `X`\ .
 
         Parameters
@@ -814,7 +814,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset
     @_docstring.dedent
     def inverse_transform(self, X_transform=None, **kwargs):
-        """
+        r"""
         Transform data back to its original space.
 
         In other words, return an input `X_original` whose reduce/transform would
@@ -879,7 +879,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     @_docstring.dedent
     def fit_transform(self, X, Y=None, **kwargs):
-        """
+        r"""
         Fit the model with `X` and apply the dimensionality reduction on `X`\ .
 
         Parameters
@@ -923,7 +923,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):
-        """
+        r"""
         Return the component's dataset: (selected :term:`n_components`\ , :term:`n_features`\ ).
 
         Parameters
@@ -948,7 +948,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
     def components(self):
-        """
+        r"""
         `NDDataset` with components in feature space (:term:`n_components`\ , :term:`n_features`\ ).
 
         See Also
@@ -972,7 +972,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     @_docstring.dedent
     def plotmerit(self, X=None, X_hat=None, **kwargs):
-        """
+        r"""
         Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
 
         :math:`X` and :math:`\hat{X}` can be passed as arguments. If not,
@@ -1074,7 +1074,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     @property
     def Y(self):
-        """
+        r"""
         The `Y` input.
         """
         # We use Y property only to show this information to the end-user. Internally
@@ -1530,7 +1530,8 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     positive = tr.Bool(
         default_value=False,
-        help="When set to `True` , forces the coefficients (\ `coef`\ ) to be positive.",
+        help=r"When set to `True` , forces the coefficients (\ `coef`\ ) "
+        r"to be positive.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -1616,7 +1617,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
     # Public methods
     # ----------------------------------------------------------------------------------
     def fit(self, X, Y=None, sample_weight=None):
-        """
+        r"""
         Fit linear model.
 
         Parameters
@@ -1702,7 +1703,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     @property
     def coef(self):
-        """
+        r"""
         Estimated coefficients for the linear regression problem.
 
         If multiple targets are passed during the fit (Y 2D), this is a 2D array of
@@ -1736,7 +1737,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     @property
     def intercept(self):
-        """
+        r"""
         Return a float or an array of shape (:term:`n_targets`\ ,).
 
         Independent term in the linear model. Set to ``0.0`` if `fit_intercept` is `False`.
@@ -1760,7 +1761,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         return B
 
     def predict(self, X=None):
-        """
+        r"""
         Predict features using the linear model.
 
         Parameters
@@ -1799,11 +1800,11 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         return predicted
 
     def score(self, X=None, Y=None, sample_weight=None):
-        """
+        r"""
         Return the coefficient of determination of the prediction.
 
         The coefficient of determination :math:`R^2` is defined as
-        :math:`(1 - \\frac{u}{v})` , where :math:`u` is the residual
+        :math:`(1 - \frac{u}{v})` , where :math:`u` is the residual
         sum of squares ``((y_true - y_pred)** 2).sum()`` and :math:`v`
         is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()`` .
         The best possible score is ``1.0`` and it can be negative (because the

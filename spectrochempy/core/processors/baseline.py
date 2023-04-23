@@ -848,7 +848,3 @@ def _polybase(data, **kwargs):
         baseline = baseline[0]
 
     return baseline
-
-
-if __name__ == "__main__":
-    pass

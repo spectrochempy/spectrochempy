@@ -11,7 +11,6 @@ from public database.
 __all__ = ["download_iris", "download_nist_ir", "download"]
 __dataset_methods__ = __all__
 
-import shutil
 from io import StringIO
 from pathlib import Path
 
@@ -236,35 +235,32 @@ def download(url):
 
     See Also
     --------
-    read : Read data from experimental data.
+    read : Read data from local or remote file or directory
     """
-
-    # https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
-
-    local_filename = url.split("/")[-1]
-
-    try:
-        response = requests.get(url, stream=True, timeout=10)
-    except OSError:
-        error_("OSError: could not connect")
-        return None
-
-    with response as r:
-        r.raise_for_status()
-        with open(local_filename, "wb") as f:
-            shutil.copyfileobj(r.raw, f)
-            ds = read(local_filename)
-
-            if isinstance(ds, NDDataset):
-                ds.history = f"Downloaded from {url}"
-            elif isinstance(ds, list):
-                for ds_ in ds:
-                    ds_.history = f"Downloaded from {url}"
-
-    Path(local_filename).unlink()
-    return ds
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass
+    #
+    # # https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
+    #
+    # local_filename = url.split("/")[-1]
+    #
+    # try:
+    #     response = requests.get(url, stream=True, timeout=10)
+    # except OSError:
+    #     error_("OSError: could not connect")
+    #     return None
+    #
+    # with response as r:
+    #     r.raise_for_status()
+    #     with open(local_filename, "wb") as f:
+    #         shutil.copyfileobj(r.raw, f)
+    #         ds = read(local_filename)
+    #
+    #         if isinstance(ds, NDDataset):
+    #             ds.history = f"Downloaded from {url}"
+    #         elif isinstance(ds, list):
+    #             for ds_ in ds:
+    #                 ds_.history = f"Downloaded from {url}"
+    #
+    # Path(local_filename).unlink()
+    # return ds
+    #
+    return read(url, history=f"Downloaded from {url}")

@@ -3367,7 +3367,3 @@ api_funcs = _update_api_funclist(NDMath)
 for funcname in api_funcs:
     setattr(thismodule, funcname, getattr(NDMath, funcname))
     thismodule.__all__.append(funcname)
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

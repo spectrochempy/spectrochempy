@@ -103,14 +103,14 @@ def make_units_compatibility(func):
 # PolynomialBaseline
 # ======================================================================================
 class polynomialbaseline(object):
-    """
+    r"""
     Arbitrary-degree polynomial (degree limited to 10, however).
 
     As a linear baseline is automatically calculated, this polynom is always of
     greater or equal to order 2 (parabolic function).
 
     .. math::
-        f(x) = ampl * \\sum_{i=2}^{max} c_i*x^i
+        f(x) = ampl * \sum_{i=2}^{max} c_i*x^i
     """
 
     type = "1D"
@@ -140,11 +140,11 @@ class polynomialbaseline(object):
 # # Gaussian2DModel
 # #===============================================================================
 # class gaussian2dmodel(object):
-#    """
+#    r"""
 #    Two dimensional Gaussian model (*not* normalized - peak value is 1).
 #
 #    .. math::
-#        A e^{\\frac{-(x-\\iso_x)^2}{2 \\gb_x^2}} e^{\\frac{-(y-\\iso_y)^2}{2 \\gb_y^2}}
+#        A e^{\frac{-(x-\iso_x)^2}{2 \gb_x^2}} e^{\frac{-(y-\iso_y)^2}{2 \gb_y^2}}
 #
 #    """
 #    args = ['amp','gbx','gby','posx','posy']
@@ -327,7 +327,3 @@ class sigmoidmodel(object):
     def f(self, x, ampl, pos, asym, **kargs):
         w = 1.0 / (1.0 + np.exp(asym * (x - pos) / ampl))
         return ampl * w
-
-
-if __name__ == "__main__":
-    pass

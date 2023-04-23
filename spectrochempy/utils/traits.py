@@ -98,8 +98,3 @@ class CoordType(SpectroChemPyType):
             kwargs["klass"] = Coord
         super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
         self.metadata.update({"dtype": dtype})
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

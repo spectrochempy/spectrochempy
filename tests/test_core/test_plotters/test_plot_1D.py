@@ -121,8 +121,3 @@ def test_issue_375():
     #     os.remove('multiple_IR_dataset_1D_scatter.png')
     #     raise AssertionError('comparison fails')
     # os.remove('multiple_IR_dataset_1D_scatter.png')
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

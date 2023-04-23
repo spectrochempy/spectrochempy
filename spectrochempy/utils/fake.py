@@ -94,8 +94,3 @@ def generate_fake():
 
     # d.plot()
     return d, specs, concs
-
-
-if __name__ == "__main__":
-
-    pass

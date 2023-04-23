@@ -11,7 +11,6 @@ Plugin module to extend NDDataset with the import methods method.
 __all__ = ["read_matlab", "read_mat"]
 __dataset_methods__ = __all__
 
-import io
 from datetime import datetime
 from warnings import warn
 
@@ -19,7 +18,7 @@ import numpy as np
 import scipy.io as sio
 
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.utils.docstrings import _docstring
 
 # ======================================================================================
@@ -75,12 +74,8 @@ read_mat = read_matlab
 @_importer_method
 def _read_mat(*args, **kwargs):
     _, filename = args
-    content = kwargs.get("content", False)
 
-    if content:
-        fid = io.BytesIO(content)
-    else:
-        fid = open(filename, "rb")
+    fid, kwargs = _openfid(filename, **kwargs)
 
     dic = sio.loadmat(fid)
 
@@ -243,8 +238,3 @@ def _read_dso(dataset, name, data):
 
         dataset.history = "Imported by spectrochempy."
     return dataset
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

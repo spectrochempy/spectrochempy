@@ -251,7 +251,3 @@ def _get_copy(datasets):
         if isinstance(datasets[0], (list, tuple)):
             datasets = datasets[0]
     return [ds.copy() for ds in datasets]
-
-
-if __name__ == "__main__":
-    pass

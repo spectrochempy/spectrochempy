@@ -145,10 +145,3 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
 
     def __contains__(self, key):
         return self.files.__contains__(key)
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass
-
-# EOF

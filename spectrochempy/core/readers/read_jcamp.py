@@ -344,8 +344,3 @@ def _readl(fid):
         keyword = ""
         text = line.strip()
     return keyword, text
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

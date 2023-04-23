@@ -51,7 +51,7 @@ class Project(AbstractProject, NDIO):
     name : str, optional
         The name of the project.  If the name is not provided, it will be
         generated automatically.
-    \**meta : dict
+    **meta : dict
         Any other attributes to describe the project.
 
     See Also
@@ -621,8 +621,3 @@ def makescript(priority=50):
         return wrapper
 
     return decorator
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

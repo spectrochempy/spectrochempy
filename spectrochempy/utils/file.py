@@ -18,14 +18,14 @@ from pathlib import Path, PosixPath, WindowsPath
 # ======================================================================================
 def download_testdata():
     from spectrochempy.core import preferences
-    from spectrochempy.core.readers.importer import read_remote
+    from spectrochempy.core.readers.importer import read
     from spectrochempy.utils.file import pathclean
 
     datadir = pathclean(preferences.datadir)
     # this process is relatively long, so we do not want to do it several time:
     downloaded = datadir / "__downloaded__"
     if not downloaded.exists():
-        read_remote(datadir, download_only=True)
+        read(datadir, download_only=True)
         downloaded.touch(exist_ok=True)
 
 
@@ -58,8 +58,8 @@ def pathclean(paths):
 
     Parameters
     ----------
-    paths :  str or a list of str
-        Path to clean. It may contain windows or conventional python separators.
+    paths :  `str` or a `list` of `str`
+        Path to clean. It may contain Windows or conventional python separators.
 
     Returns
     -------
@@ -68,7 +68,7 @@ def pathclean(paths):
 
     Examples
     --------
-    >>> from spectrochempy.utils import pathclean
+    >>> from spectrochempy.utils.file import pathclean
 
     Using unix/mac way to write paths
     >>> filename = pathclean('irdata/nh4y-activation.spg')
@@ -147,7 +147,7 @@ def check_filenames(*args, **kwargs):
 
     Parameters
     ----------
-    \*args
+    *args
         If passed it is a str, a list of str or a dictionary containing filenames or a byte's contents.
     **kwargs
         Optional keywords parameters. See Other parameters
@@ -172,6 +172,7 @@ def check_filenames(*args, **kwargs):
     Examples
     --------
     """
+    # from spectrochempy.application import info_
     from spectrochempy.core import preferences as prefs
 
     datadir = pathclean(prefs.datadir)
@@ -240,20 +241,22 @@ def check_filenames(*args, **kwargs):
                     "Keyword `directory` will be ignored!"
                 )
             elif not directory and kw_directory:
-                filename = kw_directory / filename
+                filename = pathclean(kw_directory / filename)
 
             # check if the file exists here
             if not directory or str(directory).startswith("."):
                 # search first in the current directory
                 directory = Path.cwd()
 
-            f = directory / filename
+            f = pathclean(directory / filename)
 
             fexist = f if f.exists() else _get_file_for_protocol(f, **kwargs)
-
+            # info_(f"fexist  {fexist}")
             if fexist is None:
-                f = datadir / filename
+                f = pathclean(datadir / filename)
+                # info_(f"f (line 255) {f}")
                 fexist = f if f.exists() else _get_file_for_protocol(f, **kwargs)
+                # info_(f"fexist  {fexist}")
 
             if fexist:
                 filename = fexist
@@ -381,7 +384,10 @@ def get_filenames(*filenames, **kwargs):
     directory = None
     if len(filenames) == 1:
         # check if it is a directory
-        f = get_directory_name(filenames[0])
+        try:
+            f = get_directory_name(filenames[0])
+        except OSError:
+            f = None
         if f and f.is_dir():
             # this specify a directory not a filename
             directory = f
@@ -400,7 +406,7 @@ def get_filenames(*filenames, **kwargs):
         if filenames:
             # prepend to the filename (incompatibility between filename and directory specification
             # will result to a error
-            filenames = [directory / filename for filename in filenames]
+            filenames = [pathclean(directory / filename) for filename in filenames]
         else:
             directory = get_directory_name(directory)
 
@@ -428,11 +434,11 @@ def get_filenames(*filenames, **kwargs):
         # else in the current directory, and finally in the default preference data directory
         temp = []
         for i, filename in enumerate(filenames):
-            if not (directory / filename).exists():
+            if not (pathclean(directory / filename)).exists():
                 # the filename provided doesn't exists in the working directory
                 # try in the data directory
                 directory = pathclean(prefs.datadir)
-                if not (directory / filename).exists():
+                if not (pathclean(directory / filename)).exists():
                     raise IOError(f"Can't find  this filename {filename}")
             temp.append(directory / filename)
 
@@ -575,6 +581,8 @@ def get_directory_name(directory, **kwargs):
     directory = pathclean(directory)
 
     if directory:
+
+        # Search locally
         if directory.is_dir():
             # nothing else to do
             return directory
@@ -587,9 +595,9 @@ def get_directory_name(directory, **kwargs):
             return data_dir / directory
 
         else:
-            # raise ValueError(f'"{dirname}" is not a valid directory')
-            warnings.warn(f'"{directory}" is not a valid directory')
-            return None
+            raise OSError(f'"{str(directory)}" is not a valid directory')
+            # warnings.warn(f'"{directory}" is not a valid directory')
+            # return None
 
     else:
         # open a file dialog
@@ -687,6 +695,3 @@ def check_filename_to_open(*args, **kwargs):
     else:
         # probably no args (which means that we are coming from a dialog or from a full list of a directory
         return filenames
-
-
-# EOF
