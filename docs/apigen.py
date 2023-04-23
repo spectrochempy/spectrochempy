@@ -80,7 +80,6 @@ class Apigen:
                 )
             ):
                 # we keep only the members in __all__
-                # print(f">>>>>>>>>>>>>>>>   {_name}\t\t{_type}")
                 if "partial" not in str(_type):
                     continue
 
@@ -95,7 +94,7 @@ class Apigen:
 
             module = ".".join(objname.split(".")[1:])
             module = module + "." if module else ""
-            print(f"{module}{_name}\t\t{_type}")
+            # print(f"{module}{_name}\t\t{_type}")
 
             res.append(f"{module}{_name}")
 
@@ -114,11 +113,11 @@ class Apigen:
         results = []
         for pkg_name in pkgs:
 
-            print(pkg_name)
+            # print(pkg_name)
             pkg = import_item(pkg_name)
             try:
                 alls = getattr(pkg, "__all__")
-                print(f"\t__all__ : {alls}")
+                #  print(f"\t__all__ : {alls}")
 
             except AttributeError:
                 # warn("This module has no __all__ attribute")

@@ -51,7 +51,7 @@ class Project(AbstractProject, NDIO):
     name : str, optional
         The name of the project.  If the name is not provided, it will be
         generated automatically.
-    \**meta : dict
+    **meta : dict
         Any other attributes to describe the project.
 
     See Also

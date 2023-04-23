@@ -203,23 +203,23 @@ def _wrap_ndarray_output_to_nddataset(
 class AnalysisConfigurable(MetaConfigurable):
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Abstract class to write analysis model estimators.
 
     Analysis model class must subclass this to get a minimal structure
 
     Parameters
     ----------
-    log_level : any of [ ``"INFO"`` , ``"DEBUG"`` , ``"WARNING"`` , ``"ERROR"`` ], optional, default: ``"WARNING"``
+    log_level : any of [``"INFO"``\ , ``"DEBUG"``\ , ``"WARNING"``\ , ``"ERROR"``\ ], optional, default: ``"WARNING"``
         The log level at startup.
-    warm_start : `bool`\ , optional, default:`False`
+    warm_start : `bool`\ , optional, default: `False`
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
         it may be possible to reuse previous model learned from the previous parameter
         value, saving time.
 
         When `warm_start` is `True`\ , the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to `fit`.
+        initialize the new model in a subsequent call to `fit`\ .
     %(copy)s
     """
     )
