@@ -10,12 +10,33 @@
 Tests for the PLS module
 
 """
+from os import environ
 
+import pytest
 from numpy.testing import assert_almost_equal
 from sklearn.cross_decomposition import PLSRegression
 
+import spectrochempy as scp
 from spectrochempy.analysis.pls import PLS
 from spectrochempy.core.readers.importer import read
+from spectrochempy.utils import docstrings as chd
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_PLS_docstrings():
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.analysis.pls"
+    chd.check_docstrings(
+        module,
+        obj=scp.PLS,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
 
 
 # test pls

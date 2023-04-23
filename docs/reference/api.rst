@@ -29,6 +29,7 @@
     Optimize
     PCA
     PFR
+    PLS
     Project
     Quantity
     SIMPLISMA

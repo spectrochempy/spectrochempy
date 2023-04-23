@@ -53,6 +53,12 @@ def test_base_docstrings():
         obj=scp.analysis._base.LinearRegressionAnalysis,
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
+    # analyse CrossDecompositionAnalysis
+    chd.check_docstrings(
+        module,
+        obj=scp.analysis._base.CrossDecompositionAnalysis,
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
 
 
 def test_analysisconfigurable():
