@@ -93,11 +93,6 @@ def test_pls():
     y_hat_ = pls1_.predict(Xv_array)
     assert (y_hat.data == y_hat_).all
 
-    # same with copy=False
-    y_hat = pls1.predict(Xv, copy=False)
-    y_hat_ = pls1_.predict(Xv_array, copy=False)
-    assert (y_hat.data == y_hat_).all
-
     # check transform() with calibration data
     x_scores = pls1.transform()  # this is equivalent to pls1.transform(Xc)
     x_scores_ = pls1_.transform(Xc_array)
@@ -116,11 +111,6 @@ def test_pls():
     # check transform() with X and y validation data
     x_scores, y_scores = pls1.transform(Xv, yv)
     x_scores_, y_scores_ = pls1_.transform(Xv_array, yv_array)
-    assert (y_scores.data == y_scores_).all
-
-    # same as above with in-place normalization
-    x_scores, y_scores = pls1.transform(Xv, yv, copy=False)
-    x_scores_, y_scores_ = pls1_.transform(Xv_array, yv_array, copy=False)
     assert (y_scores.data == y_scores_).all
 
     # check fit_transform() with calibration data

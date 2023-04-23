@@ -110,7 +110,7 @@ y_test = Y[57:, "Moisture"]
 
 # %%
 pls = scp.PLS(used_components=5)
-pls.fit(X_train, y_train)
+_ = pls.fit(X_train, y_train)
 
 # %% [markdown]
 # The scores and loading matrices are stored in the `x_scores`,`x_loadings`, `y_scores` and `y_loadings`

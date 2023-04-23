@@ -85,13 +85,6 @@ class PLS(CrossDecompositionAnalysis):
         "is less than tol, where u corresponds to the left singular vector.",
     ).tag(config=True)
 
-    copy = tr.Bool(
-        default_value=True,
-        help="Whether to copy X and Y in fit before applying centering, and potentially"
-        " scaling. If False, these operations will be done inplace, modifying both "
-        " NDDatasets.",
-    ).tag(config=True)
-
     # ----------------------------------------------------------------------------------
     # Initialization
     # ----------------------------------------------------------------------------------
@@ -116,7 +109,6 @@ class PLS(CrossDecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=True,
             **kwargs,
         )
 
@@ -125,7 +117,6 @@ class PLS(CrossDecompositionAnalysis):
             n_components=self.used_components,
             scale=self.scale,
             max_iter=self.max_iter,
-            copy=self.copy,
             tol=self.tol,
         )
 
@@ -173,9 +164,9 @@ class PLS(CrossDecompositionAnalysis):
         # Apply the dimension reduction.
         return self._pls.transform(X, Y, copy)
 
-    def _predict(self, X, copy=True):
+    def _predict(self, X):
         # Predict targets of given samples.
-        return self._pls.predict(X, copy)
+        return self._pls.predict(X)
 
     def _score(self, X, Y, sample_weight=None):
         # this method is called by the abstract class score.
@@ -204,7 +195,7 @@ class PLS(CrossDecompositionAnalysis):
         --------
         %(analysis_fit.see_also)s
         """
-        super().fit(X, Y)
+        return super().fit(X, Y)
 
     @property
     @_wrap_ndarray_output_to_nddataset(
@@ -296,10 +287,6 @@ class PLS(CrossDecompositionAnalysis):
     @property
     def n_iter(self):
         return self._n_iter_
-
-    @property
-    def n_features_in(self):
-        return self._n_feature_in
 
     # ----------------------------------------------------------------------------------
     # Reporting specific to PCA

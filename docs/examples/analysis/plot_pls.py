@@ -51,7 +51,7 @@ y_test = y[57:]
 # %%
 # Then we create a PLS object and fit the train datasets:
 pls = scp.PLS(used_components=5)
-pls.fit(X_train, y_train)
+_ = pls.fit(X_train, y_train)
 
 # %%
 # Finally we generate a parity plot comparing the predicted and actual values, for

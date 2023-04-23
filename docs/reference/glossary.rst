@@ -25,7 +25,7 @@ Glossary
 
         .. math:: \mathbf{X} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^t + \mathbf{E}
 
-        where :math:`\mathbf{U}(n,k)` and :math:`V^t(k,m)` are matrices regrouping so-called left
+        where :math:`\mathbf{U}(n,k)` and :math:`\mathbf{V}^t(k,m)` are matrices regrouping so-called left
         and right singular vectors of size :math:`k \leq \min(n,m)`. The factorization is exact (null
         error :math:`E`) whan :math:`k = \min(n,m)`. Among other properties, left and right singular
         vectors form two orthonormal basis of :math:`k`-dimensional spaces.
@@ -39,7 +39,7 @@ Glossary
         number of linear independent lines or columns of :math:`X`.
 
         The singular values :math:`\sigma_i` are generally chosen in descending order, so that the first
-        component -  :math:`\sigma_1 u_1v_1^t` models most of the dataset :math:`\mathbf{X}`, the second
+        component -  :math:`\sigma_1 \mathbf{u}_1\mathbf{v}_1^t` models most of the dataset :math:`\mathbf{X}`, the second
         component models most of the remaining part of :math:`\mathbf{X}`, etc... Overall, the dataset
         can thus be reconstructed by the sum of the first :math:`r` components:
 
@@ -56,12 +56,13 @@ Glossary
 
         .. math:: \mathbf{X} = \mathbf{T} \mathbf{P}^t + \mathbf{E}
 
-        where :math:`\mathbf{T} \equiv U \Sigma` is called the :term:`scores` matrix and :math:`\mathbf{P}^t` the
+        where :math:`\mathbf{T} \equiv U \Sigma` is called the :term:`scores` matrix and
+        :math:`\mathbf{P}^t \equiv \mathbf{V}^t` the
         :term:`loadings` matrix. The columns of :math:`\mathbf{T}` are called the score vectors and the lines of
         :math:`\mathbf{P}^t` are called loading vectors. Together, the n-th score and loading vectors are related to
         a *latent variable* called the n-th principal component.
 
-        Hence, :math:`\mathbf{T}`and :math:`\mathbf{P}` can then be viewed as collections of :math:`n` and :math:`m`
+        Hence, :math:`\mathbf{T}` and :math:`\mathbf{P}` can then be viewed as collections of :math:`n` and :math:`m`
         vectors in k-dimensional spaces in which each observation/spectrum or feature/wavelength can be located.
 
     PLS
@@ -71,13 +72,15 @@ Glossary
         :math:`k` latent variables according to the master equations :
 
         .. math::  X = S_X L_Y^T + E_X
+
                    Y = S_Y L_Y^T + E_Y
+
                    S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y))
 
         :math:`S_X` and :math:`S_Y` are :math:`n \times k` matrices often called score matrices, and :math:`L_X^T`
         and :math:`L_Y^T` are, respectively, :math:`k \times l` and :math:`k \times m` loading matrices.
         Matrices :math:`E_X` and :math:`E_Y`  are the error terms or residuals.
-        As indicated by the third equation, the decompositions of :math:`X` and `Y` are made to maximise
+        As indicated by the third equation, the decompositions of :math:`X` and :math:`Y` are made to maximise
         the covariance of the score matrices.
 
     EFA
@@ -93,7 +96,7 @@ Glossary
         into the spectral profiles  :math:`S` of "pure" species and their
         concentration profiles :math:`C`\ , such as:
 
-        .. math:: X = C . S^T + E
+        .. math:: X = C \cdot S^T + E
 
         subjected to various soft constraints (such as non-negativity, unimodality, closure ...) or
         hard constraints (e.g. equality of concention(s) or of some spectra  to given profiles).

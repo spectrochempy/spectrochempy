@@ -1117,7 +1117,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
     @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None)
     @_docstring.dedent
-    def predict(self, X=None, copy=True):
+    def predict(self, X=None):
         """
         Predict targets of given observations.
 
@@ -1143,7 +1143,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         elif isinstance(X, NDDataset):
             X = X.data
 
-        return self._predict(X, copy)
+        return self._predict(X)
 
     @_docstring.dedent
     def score(self, X=None, Y=None, sample_weight=None):
@@ -1195,7 +1195,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         units=None, title=None, meta_from=("_X", "_Y"), typex="components"
     )
     @_docstring.dedent
-    def transform(self, X=None, Y=None, both=False, copy=True, **kwargs):
+    def transform(self, X=None, Y=None, both=False, **kwargs):
         r"""
         Apply dimensionality reduction to `X`\ and `Y`\ .
 
@@ -1211,8 +1211,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             if not provided, the input dataset of the `fit` method will be used.
         both : `bool`, default: `False`
             Whether to also apply the dimensionality reduction to Y when neither X nor Y are provided.
-        copy : `bool`, default: `True`
-            Whether to copy X and Y, or perform in-place normalization.
         %(kwargs)s
 
         Returns
@@ -1233,9 +1231,9 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         newY = self._Y_preprocessed
 
         if both or (Y is not None):
-            return self._transform(newX, newY, copy)
+            return self._transform(newX, newY)
         else:
-            return self._transform(newX, None, copy)
+            return self._transform(newX, None)
 
     # Get doc sections for reuse in subclass
     _docstring.get_sections(
