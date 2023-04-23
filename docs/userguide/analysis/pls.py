@@ -38,15 +38,15 @@ import spectrochempy as scp
 # according to the master equations :
 # $$ X = S_X L_Y^T + E_X $$
 # $$ Y = S_Y L_Y^T + E_Y $$
-# $$ S_X, S_y = \argmax_{S_X, S_Y}(\cov(S_X, S_Y)) $$
+# $$ S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y)) $$
 # $S_X$ and $S_Y$ are $n \times k$ matrices often called score matrices, and $L_X^T$ and $ L_Y^T$ are,
 # respectively, $k \times l$ and $k \times m$ loading matrices. Matrices $E_X$ and $E_X$ are the error
 # terms or residuals.
 # As indicated by the third equation, the decompositions of X and Y are made to maximise
-# the covariance between the score matrices.
+# the covariance of the score matrices.
 #
 # The implementation of PLS in spectrochempy is based on the [Scikit-Learn implementation of
-# PLS]# (https://scikit-learn.org/stable/modules/generated/sklearn.cross_decomposition.PLSRegression.htm)
+# PLS](https://scikit-learn.org/stable/modules/generated/sklearn.cross_decomposition.PLSRegression.html)
 # with similar methods and attributes on the one hand, and some that are specific to spectrochempy.
 #
 # ## Loading of the dataset

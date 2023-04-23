@@ -17,11 +17,11 @@ Glossary
         without knowing all the details of the implementation of these methods or protocols.
 
     Carroucell
-        Multisample FTIR cell.
+        Multisample FTIR cell as described in :cite:`zholobenko:2020`.
 
     SVD
         ``Singular Value Decomposition``\ .
-        decomposes a matrix :math:`\mathbf{X}(n,m)` (typically of set of :math:`n` spectra) as:
+        SVD decomposes a matrix :math:`\mathbf{X}(n,m)` (typically of set of :math:`n` spectra) as:
 
         .. math:: \mathbf{X} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^t + \mathbf{E}
 
@@ -35,7 +35,7 @@ Glossary
 
         :math:`\Sigma` is a diagonal :math:`k\times k` matrix which diagonal elements :math:`\sigma_i`
         are called the  *singular values* of the matrix :math:`X`. The number :math:`r` of non-negligible
-        (formally non-null) sigular values is called the *rank* of :math:`X` and determines the
+        (formally non-null) sigular values is called the :term:`rank` of :math:`X` and determines the
         number of linear independent lines or columns of :math:`X`.
 
         The singular values :math:`\sigma_i` are generally chosen in descending order, so that the first
@@ -61,22 +61,48 @@ Glossary
         :math:`\mathbf{P}^t` are called loading vectors. Together, the n-th score and loading vectors are related to
          a *latent varaiable* called the n-th principal component.
 
+         Hence, :math:`\mathbf{T}`and :math:`\mathbf{P}` can then be viewed as collections of :math:`n` and :math:`m`
+         vectors in k-dimensional spaces in which each observation/spectrum or feature/wavelength can be located.
+
+    PLS
+        ``Partial Least Squares`` regression (or Projection on Latent Structures) is a statistical method to
+        estimate :math:`n \times l` dependant or predicted variables :math:`Y` from :math:`n \times m`
+        explanatory or observed variables :math:`X` by projecting both of them on new spaces spanned by
+        :math:`k` latent variables according to the master equations :
+
+        .. math::  X = S_X L_Y^T + E_X
+                   Y = S_Y L_Y^T + E_Y
+                   S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y))
+
+        :math:`S_X` and :math:`S_Y` are :math:`n \times k` matrices often called score matrices, and :math:`L_X^T`
+        and :math:L_Y^T` are, respectively, :math:`k \times l` and :math:`k \times m` loading matrices.
+        Matrices :math:`E_X` and :math:`E_Y`  are the error terms or residuals.
+        As indicated by the third equation, the decompositions of :math:`X` and `Y` are made to maximise
+        the covariance of the score matrices.
+
     EFA
         ``Evolving Factor Analysis``\ .
+        EFA examines the evolution of the singular values or :term:`rank` of a dataset :math:`X` by systematically
+        carrying out a :term:`PCA` of submatrices of :math:`X`. It is often used to guess predminance regions of
+        appearing/disappearing species in an evolving mixture. See :cite:`maeder:1986` for the original case study
+        and :cite:`maeder:2009` for more recent references.
 
     MCR-ALS
-        ``Multivariate Curve Resolution Alternating Least Squares``
+        ``Multivariate Curve Resolution by Alternating Least Squares``
         resolve's a set of spectra :math:`X` of an evolving mixture
-        into the spectra :math:`S` of "pure" species and their
+        into the spectral profiles  :math:`S` of "pure" species and their
         concentration profiles :math:`C`\ , such as:
 
-        .. math:: X = C . S^T
+        .. math:: X = C . S^T + E
+
+        subjected to various soft constraints (such as non-negativity, unimodality, closure ...) or
+        hard constraints (e.g. equality of concention(s) or of some spectra  to given profiles).
 
     ALS
         ``Alternating least squares`` minimization.
-        The MCR algorithm which successively resolves C and St by least squares, after
-        application of the relevant constraints. It checks how CSt is close to X and either
-        stops or goes for a new loop.
+        The algorithm at the heart of term:`MCR-ALS` which successively resolves :math:`C` and :math`St`
+        by least squares, after application of the relevant constraints. It checks how
+        :math:\hat{X} = C \cdot St` is close to :math:`X` and either stops or goes for a new loop.
 
     closure
         Constraint where the sum of concentrations is fixed to a target value.
@@ -107,3 +133,6 @@ Glossary
     n_targets
         Number of ``targets``. A target is a property to predict using cross-decomposition methods such as PLS.
         Typically a tartget is a composition variable such as a concentration.
+
+    rank
+        Number of linearly independent number or columns of a matrix
