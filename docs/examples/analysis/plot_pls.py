@@ -55,7 +55,8 @@ pls.fit(X_train, y_train)
 
 # %%
 # Finally we generate a parity plot comparing the predicted and actual values, for
-# both train set and test set. We choose this plot for the thumbnail gallery
+# both train set and test set.
+
 # sphinx_gallery_thumbnail_number = 3
 ax = pls.parityplot(label="calibration")
 _ = pls.parityplot(

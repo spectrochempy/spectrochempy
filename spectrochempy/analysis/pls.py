@@ -68,27 +68,29 @@ class PLS(CrossDecompositionAnalysis):
         [1, min(n_samples, n_features, n_targets)].""",
     ).tag(config=True)
 
-    scale = tr.Bool(default_value=True, help="""Whether to scale X and Y""")
+    scale = tr.Bool(default_value=True, help="""Whether to scale X and Y""").tag(
+        config=True
+    )
 
     max_iter = tr.Int(
         default_value=500,
         help="""The maximum number of iterations of the power method
         when algorithm='nipals'. Ignored otherwise""",
-    )
+    ).tag(config=True)
 
     tol = tr.Float(
         default_value=1.0e-6,
-        help="""The tolerance used as convergence criteria in the power method:
-        the algorithm stops whenever the squared norm of u_i - u_{i-1} is less than tol,
+        help="""The tolerance used as convergence criteria in the power method:"
+        the algorithm stops whenever the squared norm of u_i - u_{i-1} is less than tol,"
         where u corresponds to the left singular vector.""",
     ).tag(config=True)
 
     copy = tr.Bool(
         default_value=True,
-        help="""Whether to copy X and Y in fit before applying centering, and potentially
-        scaling.If False, these operations will be done inplace, modifying both
+        help="""Whether to copy X and Y in fit before applying centering, and potentially"
+        scaling. If False, these operations will be done inplace, modifying both"
         NDDatasets""",
-    )
+    ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
     # Initialization
@@ -118,7 +120,7 @@ class PLS(CrossDecompositionAnalysis):
             **kwargs,
         )
 
-        # initialize sklearn PCA
+        # initialize sklearn PLS
         self._pls = cross_decomposition.PLSRegression(
             n_components=self.used_components,
             scale=self.scale,

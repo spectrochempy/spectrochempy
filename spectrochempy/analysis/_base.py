@@ -1092,7 +1092,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
 class CrossDecompositionAnalysis(DecompositionAnalysis):
     """
-    Abstract class to write analysis decomposition models such as `PLS`, ...
+    Abstract class to write analysis cross decomposition models such as `PLS`, ...
 
     Subclass this to get a minimal structure
 
@@ -1102,7 +1102,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     """
 
     # This class is a subclass of DecompositionAnalysis, so we define only additional
-    # attributes and methods necessary for decomposition model.
+    # attributes and methods necessary for cross decomposition model.
 
     # Get doc sections for reuse in subclass
     _docstring.get_sections(
@@ -1133,7 +1133,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Returns
         -------
         y_pred: `~spectrochempy.core.dataset.nddataset.NDDataset`
-            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , `n_targets \ ).
+            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , :term:`n_targets \ ).
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1241,10 +1241,12 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # Get doc sections for reuse in subclass
     _docstring.get_sections(
         _docstring.dedent(transform.__doc__),
-        base="analysis_transform",
+        base="cross_decomposition_transform",
         sections=["Parameters", "Other Parameters", "Returns"],
     )
-    _docstring.keep_params("analysis_transform.parameters", "X")
+    _docstring.keep_params(
+        "cross_decomposition_transform.parameters", "X", "Y", "both", "copy"
+    )
 
     @_wrap_ndarray_output_to_nddataset(meta_from=("_X", "_Y"))
     @_docstring.dedent
@@ -1345,18 +1347,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Y=None,
         Y_hat=None,
         clear=True,
-        s=None,
-        c=None,
-        marker=None,
-        cmap=None,
-        norm=None,
-        vmin=None,
-        vmax=None,
-        alpha=0.5,
-        linewidths=None,
-        edgecolors=None,
-        plotnonfinite=False,
-        data=None,
         **kwargs,
     ):
         """
@@ -1376,6 +1366,14 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             must also be provided as computed externally.
         clear: bool, optional
             whether to plot on a new axes. Default is True
+        %(kwargs)s
+        Returns
+        -------
+        `~matplotlib.axes.Axes`
+            Matplotlib subplot axe.
+
+        Other Parameters
+        ----------------
         s: float or array-like, shape (n, ), optional
             The marker size in points**2 (typographic points are 1/72 in.).
             Default is rcParams['lines.markersize'] ** 2.
@@ -1424,15 +1422,20 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Whether to plot points with nonfinite c (i.e. inf, -inf or nan). If True the points are drawn with the bad
             colormap color (see Colormap.set_bad).
 
-        Returns
-        -------
-        `~matplotlib.axes.Axes`
-            Matplotlib subplot axe.
-
-        Other Parameters
-        ----------------
-
         """
+
+        s = kwargs.pop("s", None)
+        c = kwargs.pop("c", None)
+        marker = kwargs.pop("marker", None)
+        cmap = kwargs.pop("cmap", None)
+        norm = kwargs.pop("norm", None)
+        vmin = kwargs.pop("vmin", None)
+        vmax = kwargs.pop("vmax", None)
+        alpha = kwargs.pop("alpha", 0.5)
+        linewidths = kwargs.pop("linewidths", None)
+        edgecolors = kwargs.pop("edgecolors", None)
+        plotnonfinite = kwargs.pop("plotnonfinite", False)
+        data = kwargs.pop("data", None)
 
         if Y is None:
             Y = self.Y

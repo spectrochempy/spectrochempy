@@ -34,19 +34,20 @@ import spectrochempy as scp
 #
 # PLS (standing for Partial Least Squares regression ) is a statistical method to estimate
 # $n \times l$ dependant or predicted variables $Y$ from $n \times m$ explanatory or observed
-# variables $X$ by # projecting both of them on new spaces spanned by $k$ latent variables,
-# according to :
-# $$ X = S L^T + E $$
-# $$ Y = P Q^T + F $$
-# Where $S$ and $P$  matrices are such that the product of the first column of $S$ - the score vector $s_1$ -
-# by the first line of $L^T$ - the loading vector $l_1$ - are those that best explain the variance
-# of the dataset. These score and loading vectors are together called the ‘first component’. The
-# second component best explain the remaining variance, etc...
+# variables $X$ by projecting both of them on new spaces spanned by $k$ latent variables,
+# according to the master equations :
+# $$ X = S_X L_Y^T + E_X $$
+# $$ Y = S_Y L_Y^T + E_Y $$
+# $$ S_X, S_y = \argmax_{S_X, S_Y}(\cov(S_X, S_Y)) $$
+# $S_X$ and $S_Y$ are $n \times k$ matrices often called score matrices, and $L_X^T$ and $ L_Y^T$ are,
+# respectively, $k \times l$ and $k \times m$ loading matrices. Matrices $E_X$ and $E_X$ are the error
+# terms or residuals.
+# As indicated by the third equation, the decompositions of X and Y are made to maximise
+# the covariance between the score matrices.
 #
-# The implementation of PLS in spectrochempy is based on the [Scikit-Learn](https://scikit-learn.org/)
-# implementation of
-# [PLS](https://scikit-learn.org/stable/modules/generated/sklearn.cross_decomposition.PLSRegression.htm)
-# with similar methods and attributes on the one hands, and some that are specific to spectrochempy.
+# The implementation of PLS in spectrochempy is based on the [Scikit-Learn implementation of
+# PLS]# (https://scikit-learn.org/stable/modules/generated/sklearn.cross_decomposition.PLSRegression.htm)
+# with similar methods and attributes on the one hand, and some that are specific to spectrochempy.
 #
 # ## Loading of the dataset
 # Here we show how PLS is implemented in Scpy on a dataset consisting of 80 samples of corn measured
@@ -112,18 +113,36 @@ pls = scp.PLS(used_components=5)
 pls.fit(X_train, y_train)
 
 # %% [markdown]
-# We can generate a parity plot to comparie the predicted and actual values, for
+# The scores and loading matrices are stored in the `x_scores`,`x_loadings`, `y_scores` and `y_loadings`
+# attributes. Let's for instance, plot the $S_X$ matrix:
+
+# %%
+pls.x_loadings.plot()
+
+# %% [markdown]
+# Once fitted, the PLS model can be used to predict the property values of another dataset, for instance:
+
+# %%
+y_test_hat = pls.predict(X_test)
+_ = y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
+
+# %% [markdown]
+# We can generate a parity plot to compare the predicted and actual values, for
 # both train set and test set.
 
 # %%
 ax = pls.parityplot(label="calibration")
-_ = pls.parityplot(
-    y_test, pls.predict(X_test), c="red", label="validation", clear=False
-)
+_ = pls.parityplot(y_test, y_test_hat, c="red", label="validation", clear=False)
 _ = ax.legend(loc="lower right")
 
 # %% [markdown]
-# The goodness of fit can also be obtained using the `score` attribute. As expected, the goodness of fit is slightly
-# lower for the validation than for the calibration.
+# The goodness of fit (as expressed by R**2) can also be obtained using the `score()` method. For the training dataset
+# it is obtained by passing no arguments, while for validation datastets the `X` and experimental `Y` values must be
+# passed.
+
+# %%
 print(f"R**2 training datastet: {pls.score():.3}")
-print(f"R**2 test datastet: {pls.score(X_test, y_test):.3}")
+print(f"R**2 test dataset: {pls.score(X_test, y_test):.3}")
+
+# %% [markdown]
+# As expected, the goodness of fit is slightly lower for the validation than for the calibration.

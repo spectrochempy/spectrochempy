@@ -9,7 +9,7 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* `PLS` (Partial Least Squares regression) method added
+* `PLS` (Partial Least Squares regression) method added.
 
 * `read` method now handle any url pointing
   to a spectrochempy readeable file. An url to a compressed (zip) files are also accepted.
