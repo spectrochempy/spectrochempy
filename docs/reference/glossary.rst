@@ -59,10 +59,10 @@ Glossary
         where :math:`\mathbf{T} \equiv :math:`U \Sigma` is called the :term:scores: matrix and :math:`\mathbf{P}^t` the
         loadings matrix. The columns of :math:`\mathbf{T}` are called the score vectors and the lines of
         :math:`\mathbf{P}^t` are called loading vectors. Together, the n-th score and loading vectors are related to
-         a *latent varaiable* called the n-th principal component.
+        a *latent variable* called the n-th principal component.
 
-         Hence, :math:`\mathbf{T}`and :math:`\mathbf{P}` can then be viewed as collections of :math:`n` and :math:`m`
-         vectors in k-dimensional spaces in which each observation/spectrum or feature/wavelength can be located.
+        Hence, :math:`\mathbf{T}`and :math:`\mathbf{P}` can then be viewed as collections of :math:`n` and :math:`m`
+        vectors in k-dimensional spaces in which each observation/spectrum or feature/wavelength can be located.
 
     PLS
         ``Partial Least Squares`` regression (or Projection on Latent Structures) is a statistical method to
