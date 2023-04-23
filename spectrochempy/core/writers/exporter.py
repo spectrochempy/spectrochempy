@@ -146,8 +146,3 @@ def _write_scp(*args, **kwargs):
     dataset, filename = args
     dataset.filename = filename
     return dataset.dump(filename, **kwargs)
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

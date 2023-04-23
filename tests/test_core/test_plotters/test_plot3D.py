@@ -28,8 +28,3 @@ def test_plot2D_as_3D():
     X.plot_surface(colorbar=True)
 
     show()
-
-
-# =============================================================================
-if __name__ == "__main__":
-    pass

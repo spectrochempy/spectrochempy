@@ -67,14 +67,14 @@ class PCA(DecompositionAnalysis):
     # sklearn PCA is always on centered data
     standardized = tr.Bool(
         default_value=False,
-        help="If True the data are scaled to unit standard deviation: "
-        ":math:`X' = X / \\sigma`",
+        help=r"If True the data are scaled to unit standard deviation: "
+        ":math:`X' = X / \sigma`",
     ).tag(config=True)
 
     scaled = tr.Bool(
         default_value=False,
-        help="If True the data are scaled in the interval ``[0-1]`` : "
-        ":math:`X' = (X - min(X)) / (max(X)-min(X))``",
+        help="If True the data are scaled in the interval ``[0-1]``\ : "
+        ":math:`X' = (X - min(X)) / (max(X)-min(X))`",
     ).tag(config=True)
 
     used_components = tr.Union(
@@ -621,7 +621,3 @@ for reproducible results across multiple function calls.""",
             ax.legend(handles=leg, loc="best")
 
         return ax
-
-
-if __name__ == "__main__":
-    pass

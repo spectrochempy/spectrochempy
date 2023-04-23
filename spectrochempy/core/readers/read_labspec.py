@@ -4,7 +4,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
+r"""
 This module extend NDDataset with the import method for Labspec \*.txt generated data files.
 """
 

@@ -471,9 +471,3 @@ class NDIO(HasTraits):
 
 
 load = NDIO.load  # make plot accessible directly from the scp API
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass
-
-# EOF

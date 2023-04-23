@@ -41,12 +41,12 @@ from spectrochempy.utils.system import get_user_and_node
 # ======================================================================================
 @tr.signature_has_traits
 class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
-    """
+    r"""
     The main N-dimensional dataset class used by  `SpectroChemPy`\ .
 
     The `NDDataset` is the main object use by SpectroChemPy. Like numpy
-    `~numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and subject to
-    mathematical operations. But, in addition, `NDDataset` may have units,
+    `~numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and
+    subject to mathematical operations. But, in addition, `NDDataset` may have units,
     can be masked and each dimensions can have coordinates also with units. This make
     `NDDataset` aware of unit compatibility,
     *e.g.,* for binary operation such as additions or subtraction or during the
@@ -59,7 +59,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     ----------
     data : :term:`array-like`
         Data array contained in the object. The data can be a list, a tuple,
-        a `~numpy.ndarray`, a subclass of `~numpy.ndarray`, another `NDDataset` or a  `Coord` object.
+        a `~numpy.ndarray`, a subclass of `~numpy.ndarray`, another `NDDataset` or a
+        `Coord` object.
         Any size or shape of data is accepted. If not given, an empty
         `NDDataset` will be inited.
         At the initialisation the provided data will be eventually cast to

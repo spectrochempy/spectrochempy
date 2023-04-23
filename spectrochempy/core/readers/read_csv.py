@@ -7,10 +7,11 @@
 __all__ = ["read_csv"]
 __dataset_methods__ = __all__
 
+import csv
+
 # --------------------------------------------------------------------------------------
 # standard and other imports
 # --------------------------------------------------------------------------------------
-import io
 import locale
 import warnings
 from datetime import datetime
@@ -19,7 +20,7 @@ import numpy as np
 
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.utils.docstrings import _docstring
 
 try:
@@ -93,61 +94,67 @@ def read_csv(*paths, **kwargs):
 def _read_csv(*args, **kwargs):
     # read csv file
     dataset, filename = args
-    content = kwargs.get("content", None)
     delimiter = kwargs.get("csv_delimiter", prefs.csv_delimiter)
 
-    def _open():
-        if content is not None:
-            f = io.StringIO(content.decode("utf-8"))
-        else:
-            f = open(filename, "r")
-        return f
+    fid, kwargs = _openfid(filename, mode="r", **kwargs)
 
-    try:
-        fid = _open()
-        d = np.loadtxt(fid, unpack=True, delimiter=delimiter)
-        fid.close()
-    except ValueError:
-        # it might be that the delimiter is not correct (default is ','), but
-        # french excel export with the french locale for instance, use ";".
-        _delimiter = ";"
-        try:
-            fid = _open()
-            if fid:
-                fid.close()
-            fid = _open()
-            d = np.loadtxt(fid, unpack=True, delimiter=_delimiter)
-            fid.close()
+    txt = fid.read()
+    fid.close()
 
-        except Exception:  # pragma: no cover
-            # in french, very often the decimal '.' is replaced by a
-            # comma:  Let's try to correct this
-            if fid:
-                fid.close()
-            if not isinstance(fid, io.StringIO):
-                with open(fid, "r") as fid_:
-                    txt = fid_.read()
-            else:
-                txt = fid.read()
-            txt = txt.replace(",", ".")
-            fil = io.StringIO(txt)
-            try:
-                d = np.loadtxt(fil, unpack=True, delimiter=delimiter)
-            except Exception:
-                raise IOError(
-                    "{} is not a .csv file or its structure cannot be recognized"
-                )
+    # We assume this csv file contains only numbers # TODO: write a more general reader
+    if ";" in txt:
+        # look like the delimiter is ;
+        # if comma is also present, it could be that french writer was used.
+        txt = txt.replace(",", ".")
+        delimiter = ";"
+
+    d = [row for row in csv.reader(txt.splitlines(), delimiter=delimiter)]
+    d = np.array(d).T
 
     # First column is the x coordinates
     coordx = Coord(d[0])
 
-    # create a second coordinate for dimension y of size 1
+    # Create a second coordinate for dimension y of size 1
     coordy = Coord([0])
 
     # and data is the second column -  we make it a vector
     data = d[1].reshape((1, coordx.size))
 
-    # update the dataset
+    # try:
+    #     d = np.loadtxt(fid, unpack=True, delimiter=delimiter)
+    #     fid.close()
+    #
+    # except ValueError:
+    #     # it might be that the delimiter is not correct (default is ','), but
+    #     # french excel export with the french locale for instance, use ";".
+    #     _delimiter = ";"
+    #     try:
+    #         if fid:
+    #             fid.close()
+    #         fid, kwargs = _openfid(filename, mode="r", **kwargs)
+    #         d = np.loadtxt(fid, unpack=True, delimiter=_delimiter)
+    #         fid.close()
+    #
+    #     except Exception:  # pragma: no cover
+    #         # in french, very often the decimal '.' is replaced by a
+    #         # comma:  Let's try to correct this
+    #         if fid:
+    #             fid.close()
+    #         fid, kwargs = _openfid(filename, mode="r", **kwargs)
+    #         txt = fid.read()
+    #         fid.close()
+    #
+    #         txt = txt.replace(",", ".")
+    #
+    #         fid = io.StringIO(txt)
+    #         try:
+    #             d = np.loadtxt(fid, unpack=True, delimiter=delimiter)
+    #         except Exception:
+    #             raise IOError(
+    #                 "{} is not a .csv file or its structure cannot be recognized"
+    #             )
+
+    # Update the dataset
     dataset.data = data
     dataset.set_coordset(y=coordy, x=coordx)
 
@@ -239,8 +246,3 @@ def _add_tga_info(dataset, **kwargs):
     dataset.origin = "tga"
 
     return dataset
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

@@ -137,7 +137,3 @@ if NO_DISPLAY:
     environ["TEST_NMR_FOLDER"] = str(
         DATADIR / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
     )
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

@@ -10,7 +10,6 @@ This module extend NDDataset with the import method for Thermo galactic (spc) da
 __all__ = ["read_spc"]
 __dataset_methods__ = __all__
 
-import io
 import struct
 from datetime import datetime
 from warnings import warn
@@ -19,7 +18,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils.docstrings import _docstring
 
@@ -68,13 +67,10 @@ def read_spc(*paths, **kwargs):
 @_importer_method
 def _read_spc(*args, **kwargs):
     dataset, filename = args
-    content = kwargs.get("content", False)
 
-    if content:
-        fid = io.BytesIO(content)
-    else:
-        fid = open(filename, "rb")
-        content = fid.read()
+    fid, kwargs = _openfid(filename, **kwargs)
+
+    content = fid.read()
 
     # extract version
     _, Fversn = struct.unpack("cc".encode("utf8"), content[:2])
@@ -536,8 +532,3 @@ def _read_spc(*args, **kwargs):
 
     fid.close()
     return dataset
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

@@ -25,10 +25,10 @@ def test_read_csv():
 
     prefs.csv_delimiter = ","
 
-    A = NDDataset.read_csv("agirdata/P350/TGA/tg.csv", directory=DATADIR, origin="tga")
+    A = scp.read_csv("agirdata/P350/TGA/tg.csv", directory=DATADIR, origin="tga")
     assert A.shape == (1, 3247)
 
-    B = NDDataset.read_csv("irdata/IR.CSV", origin="omnic")
+    B = scp.read_csv("irdata/IR.CSV", origin="omnic")
     assert B.shape == (1, 3736)
 
     # Read CSV content
@@ -38,5 +38,5 @@ def test_read_csv():
     assert C.shape == (1, 3736)
 
     # wrong origin parameters
-    D = NDDataset.read_csv("irdata/IR.CSV", origin="opus")
+    D = scp.read_csv("irdata/IR.CSV", origin="opus")
     assert not D

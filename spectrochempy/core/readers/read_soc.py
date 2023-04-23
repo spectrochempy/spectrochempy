@@ -171,8 +171,3 @@ def _read_sdr(*args, **kwargs):
     ds = _read_spa(*args, **kwargs)
     ds.history[-1] = "Imported from sdr file(s)"
     return ds
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

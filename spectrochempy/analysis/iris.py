@@ -988,8 +988,3 @@ def _isPD(B):  # pragma: no cover
         return True
     except np.linalg.LinAlgError:
         return False
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

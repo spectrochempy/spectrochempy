@@ -428,8 +428,3 @@ def remove_args_units(func):
         return func(*args, **kwargs)
 
     return new_func
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

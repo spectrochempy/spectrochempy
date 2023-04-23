@@ -178,7 +178,3 @@ def json_serialiser(byte_obj, encoding=None):
             }
 
     raise ValueError(f"No encoding handler for data type {type(byte_obj)}")
-
-
-if __name__ == "__main__":
-    pass

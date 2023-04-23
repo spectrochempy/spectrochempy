@@ -558,8 +558,3 @@ class SIMPLISMA(DecompositionAnalysis):
         s.name = "Standard deviation spectra"
         s.description = "Standard deviation spectra matrix from SIMPLISMA:"  # + logs
         return s
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

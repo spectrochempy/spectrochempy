@@ -807,7 +807,3 @@ def _get_clevels(data, prefs, **kwargs):
         clevelc = sorted(list(np.concatenate((clevel, clevelneg))))
 
     return clevelc
-
-
-if __name__ == "__main__":
-    pass
