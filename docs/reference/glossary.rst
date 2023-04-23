@@ -21,9 +21,45 @@ Glossary
 
     SVD
         ``Singular Value Decomposition``\ .
+        decomposes a matrix :math:`\mathbf{X}(n,m)` (typically of set of :math:`n` spectra) as:
+
+        .. math:: \mathbf{X} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^t + \mathbf{E}
+
+        where :math:`\mathbf{U}(n,k)` and :math:`V^t(k,m)` are matrices regrouping so-called left
+        and right singular vectors of size :math:`k \leq \min(n,m)`. The factorization is exact (null
+        error :math:`E`) whan :math:`k = \min(n,m)`. Among other properties, left and right singular
+        vectors form two orthonormal basis of :math:`k`-dimensional spaces.
+        Hence, for :math:`\mathbf{U}`:
+
+        .. math:: \mathbf{u}_i\mathbf{u}_j^t = \delta_{ij}
+
+        :math:`\Sigma` is a diagonal :math:`k\times k` matrix which diagonal elements :math:`\sigma_i`
+        are called the  *singular values* of the matrix :math:`X`. The number :math:`r` of non-negligible
+        (formally non-null) sigular values is called the *rank* of :math:`X` and determines the
+        number of linear independent lines or columns of :math:`X`.
+
+        The singular values :math:`\sigma_i` are generally chosen in descending order, so that the first
+        component -  :math:`\sigma_1 u_1v_1^t` models most of the dataset :math:`\mathbf{X}`, the second
+        component models most of the remaining part of :math:`\mathbf{X}`, etc... Overall, the dataset
+        can thus be reconstructed by the sum of the first :math:`r` components:
+
+        .. math:: \mathbf{X} = \sum_{i=1}^{r} \sigma_i \mathbf{u}_i\mathbf{u}_j^t
+
+        Finally, the sum of these singular values is equal to the total variance of the spectra and each singular
+        value represents the amount of variance captured by each component:
+
+        .. math:: \% \textrm{variance explained} = \frac{\sigma_i}{\sum_{i=  1}^r \sigma_i} \times 100
 
     PCA
         ``Principal Component Analysis``\ .
+        PCA is directly related to the :term:`SVD`. Its master equation is:
+
+        .. math:: \mathbf{X} = \mathbf{T} \mathbf{P}^t + \mathbf{E}
+
+        where :math:`\mathbf{T} \equiv :math:`U \Sigma` is called the :term:scores: matrix and :math:`\mathbf{P}^t` the
+        loadings matrix. The columns of :math:`\mathbf{T}` are called the score vectors and the lines of
+        :math:`\mathbf{P}^t` are called loading vectors. Together, the n-th score and loading vectors are related to
+         a *latent varaiable* called the n-th principal component.
 
     EFA
         ``Evolving Factor Analysis``\ .
@@ -38,16 +74,20 @@ Glossary
 
     ALS
         ``Alternating least squares`` minimization.
-        *Describe this*
+        The MCR algorithm which successively resolves C and St by least squares, after
+        application of the relevant constraints. It checks how CSt is close to X and either
+        stops or goes for a new loop.
 
     closure
-        Constraints
+        Constraint where the sum of concentrations is fixed to a target value.
 
     unimodality
-        *Describe this*
+        Constraint where the profile has a single maximum ir minimum.
 
     regularization
-        *Describe this*
+        Technique used to reduce the errors of over-fitting a function on given data
+        by adding, e.g. a smoothness constraint which extent is tuned by a regularization
+        parameter :math:`\lambda` .
 
     array-like
         An object which can be transformed into a 1D dataset such as a list or tuple of numbers, or a
@@ -62,4 +102,8 @@ Glossary
         at a single frequency/energy or any derived quantity.
 
     n_components
-        Number of underlying components for spectroscopic data.
+        Number of underlying components or latent variables for spectroscopic data.
+
+    n_targets
+        Number of ``targets``. A target is a property to predict using cross-decomposition methods such as PLS.
+        Typically a tartget is a composition variable such as a concentration.
