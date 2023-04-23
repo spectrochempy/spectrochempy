@@ -5,10 +5,30 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+import os
 
 import pytest
 
+import spectrochempy as scp
 from spectrochempy.core.units import ur
+from spectrochempy.utils import docstrings as chd
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    os.environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_findpeaks_docstrings():
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.analysis.peakfinding"
+    chd.check_docstrings(
+        module,
+        obj=scp.find_peaks,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
 
 
 def test_findpeaks(IR_dataset_1D):

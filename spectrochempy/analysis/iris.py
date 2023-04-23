@@ -338,15 +338,6 @@ class IRIS(DecompositionAnalysis):
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_IRIS)s
-
-    Examples
-    --------
-    >>> X = scp.read("irdata/CO@Mo_Al2O3.SPG")
-    >>> p = [0.003, 0.004, 0.009, 0.014, 0.021, 0.026, 0.036, 0.051, 0.093, 0.150,
-    ...      0.203, 0.300, 0.404, 0.503, 0.602, 0.702, 0.801, 0.905, 1.004]
-    >>> iris = scp.IRIS(X[:,2250.0:1960.0], "langmuir", q = [-8, -1, 10])
-    >>> iris.f
-    NDDataset: [float64] unitless (shape: (z:1, y:10, x:301))
     """
     )
 
@@ -812,14 +803,14 @@ class IRIS(DecompositionAnalysis):
             If `None` plots for all indices.
         %(kwargs)s
 
-        Other Parameters
-        ----------------
-        %(plotmerit.other_parameters)s
-
         Returns
         -------
         `list` of `~matplotlib.axes.Axes`
             Subplots.
+
+        Other Parameters
+        ----------------
+        %(plotmerit.other_parameters)s
         """
         X = self.X
         X_hat = self.inverse_transform()

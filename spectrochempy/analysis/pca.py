@@ -68,13 +68,13 @@ class PCA(DecompositionAnalysis):
     standardized = tr.Bool(
         default_value=False,
         help=r"If True the data are scaled to unit standard deviation: "
-        ":math:`X' = X / \sigma`",
+        ":math:`X' = X / \sigma`\ .",
     ).tag(config=True)
 
     scaled = tr.Bool(
         default_value=False,
         help="If True the data are scaled in the interval ``[0-1]``\ : "
-        ":math:`X' = (X - min(X)) / (max(X)-min(X))`",
+        ":math:`X' = (X - min(X)) / (max(X)-min(X))`\ .",
     ).tag(config=True)
 
     used_components = tr.Union(
@@ -95,7 +95,7 @@ the percentage specified by used_components.
 If `svd_solver == 'arpack'` , the number of components must be strictly less than the
 minimum of n_features and n_observations. Hence, the None case results in::
 
-    used_components == min(n_observations, n_features) - 1""",
+    used_components == min(n_observations, n_features) - 1.""",
     ).tag(config=True)
 
     whiten = tr.Bool(
@@ -397,7 +397,7 @@ for reproducible results across multiple function calls.""",
 
         Parameters
         ----------
-        n_pc : int, optional
+        n_components : int, optional
             The number of components to print.
         """
         if not self._fitted:
@@ -491,12 +491,12 @@ for reproducible results across multiple function calls.""",
             If several columns of labels are present indicates which column has to be
             used to show labels.
         labels_every : int, optional, default: 1
-        `   Do not label all points, but only every value indicated by this parameter.
+            Do not label all points, but only every value indicated by this parameter.
 
         Returns
         -------
         `~matplotlib.axes.Axes`
-            The axes
+            The matplotlib axes.
         """
         self.prefs = self.X.preferences
 

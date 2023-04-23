@@ -767,7 +767,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Returns
         -------
-        `~spectrochempy.core.dataset.nddataset.NDDataset`
+        `NDDataset`
             Dataset with shape (:term:`n_observations`\ , :term:`n_components`\ ).
 
         Other Parameters
@@ -1127,13 +1127,13 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
-        copy: bool, default=True
+        copy : `bool`\ , default: `True`
             Whether to copy X and Y, or perform in-place normalization.
 
         Returns
         -------
-        y_pred: `~spectrochempy.core.dataset.nddataset.NDDataset`
-            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , :term:`n_targets \ ).
+        `NDDataset`
+            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , :term:`n_targets` \ ).
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1147,11 +1147,11 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
     @_docstring.dedent
     def score(self, X=None, Y=None, sample_weight=None):
-        """
+        r"""
         Return the coefficient of determination of the prediction.
 
         The coefficient of determination :math:`R^2` is defined as
-        :math:`(1 - \\frac{u}{v})` , where :math:`u` is the residual
+        :math:`(1 - \frac{u}{v})` , where :math:`u` is the residual
         sum of squares ``((y_true - y_pred)** 2).sum()`` and :math:`v`
         is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()`` .
         The best possible score is ``1.0`` and it can be negative (because the
@@ -1165,13 +1165,13 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Test samples. If not given, the X attribute is used.
         Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_targets`\ ), optional
             True values for `X`.
-        sample_weight: `NDDataset` or array-like of shape (n_samples,), default=None
+        sample_weight : `NDDataset` or :term:`array-like` of shape (:term:`n_samples`\ ,), default: `None`
             Sample weights.
 
         Returns
         -------
-        score: float
-            :math:`R^2` of `self.predict(X)` w.r.t `Y`
+        `float`
+            :math:`R^2` of `predict`\ (X) w.r.t `Y`\ .
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1196,8 +1196,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     )
     @_docstring.dedent
     def transform(self, X=None, Y=None, both=False, copy=True, **kwargs):
-        """
-        Apply dimensionality reduction to `X`\ and `Y`\.
+        r"""
+        Apply dimensionality reduction to `X`\ and `Y`\ .
 
         Parameters
         ----------
@@ -1209,16 +1209,15 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
-        both: bool, default=False
-            whether to also apply the dimensionality reduction to Y when neither X nor Y are provided
-        copy: bool, default=True
+        both : `bool`, default: `False`
+            Whether to also apply the dimensionality reduction to Y when neither X nor Y are provided.
+        copy : `bool`, default: `True`
             Whether to copy X and Y, or perform in-place normalization.
         %(kwargs)s
 
         Returns
         -------
-        x_score, y_score: `~spectrochempy.core.dataset.nddataset.NDDataset` or tuple of
-        `~spectrochempy.core.dataset.nddataset.NDDataset` `
+        x_score, y_score: `NDDataset` or tuple of `NDDataset`
             Datasets with shape (:term:`n_observations`\ , :term:`n_components`\ ).
 
         """
@@ -1312,24 +1311,19 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     @_docstring.dedent
     def fit_transform(self, X, Y, both=False):
         """
-        Fit the model with `X` and `Y` and apply the dimensionality reduction on `X`
-        and optionally on `Y`\ .
+        Fit the model with `X` and `Y` and apply the dimensionality reduction on `X` and optionally on `Y`\ .
 
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-        %(analysis_fit.parameters.Y)s
-        both: bool, optional
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+            Training data.
+        both : `bool`\ , optional
             Whether to apply the dimensionality reduction on `X` and `Y` .
-        %(kwargs)s
 
         Returns
         -------
         %(analysis_transform.returns)s
-
-        Other Parameters
-        ----------------
-        %(analysis_transform.other_parameters)s
         """
 
         self.fit(X, Y)
@@ -1349,12 +1343,12 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         clear=True,
         **kwargs,
     ):
-        """
-        Plot the predicted (:math:`\hat{Y}`\ ) vs measured (:math:`Y`\ ) values
+        r"""
+        Plot the predicted (:math:`\hat{Y}`\ ) vs measured (:math:`Y`\ ) values.
 
         :math:`Y` and :math:`\hat{Y}` can be passed as arguments. If not,
         the `Y` attribute is used for :math:`Y`\ and :math:`\hat{Y}`\ is computed by
-        the `inverse_transform` method
+        the `inverse_transform` method.
 
         Parameters
         ----------
@@ -1362,11 +1356,12 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Measured values. If is not provided (default), the `Y`
             attribute is used and Y_hat is computed using `inverse_transform`\ .
         Y_hat : `NDDataset`\ , optional
-            Predicted values. if `Y` is provided, `Y_hat`
-            must also be provided as computed externally.
-        clear: bool, optional
-            whether to plot on a new axes. Default is True
+            Predicted values. if `Y` is provided, `Y_hat` must also be provided as
+            computed externally.
+        clear : `bool`\ , optional
+            Whether to plot on a new axes. Default is True.
         %(kwargs)s
+
         Returns
         -------
         `~matplotlib.axes.Axes`
@@ -1374,54 +1369,69 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         Other Parameters
         ----------------
-        s: float or array-like, shape (n, ), optional
+        s : `float` or :term:`array-like`, shape (n, ), optional
             The marker size in points**2 (typographic points are 1/72 in.).
             Default is rcParams['lines.markersize'] ** 2.
-        c: array-like or list of colors or color, optional
+        c : :term:`array-like` or `list` of colors or color, optional
             The marker colors. Possible values:
-            - A scalar or sequence of n numbers to be mapped to colors using cmap and norm.
+
+            - A scalar or sequence of n numbers to be mapped to colors using cmap
+              and norm.
             - A 2D array in which the rows are RGB or RGBA.
             - A sequence of colors of length n.
             - A single color format string.
-            see `~matplotlib.pyplot.scatter` for details.
-        marker: `markerMarkerStyle`, default: rcParams["scatter.marker"] (default: 'o')
+              see `~matplotlib.pyplot.scatter` for details.
+
+        marker : `markerMarkerStyle`, default: rcParams["scatter.marker"] (default: 'o')
             The marker style. marker can be either an instance of the class or the text
-            shorthand for a particular marker. See `~matplotlib.markers` for more information.
-        cmap: `str` or `Colormap`, default: rcParams["image.cmap"] (default: 'viridis')
-            The Colormap instance or registered colormap name used to map scalar data to colors.
+            shorthand for a particular marker. See `~matplotlib.markers` for more
+            information.
+        cmap : `str` or `Colormap`, default: rcParams["image.cmap"] (default: 'viridis')
+            The Colormap instance or registered colormap name used to map scalar data
+            to colors.
             This parameter is ignored if c is RGB(A).
-        norm: str or Normalize, optional
-            The normalization method used to scale scalar data to the [0, 1] range before mapping
-            to colors using cmap. By default, a linear scaling is used, mapping the lowest value to
+        norm : `str` or Normalize, optional
+            The normalization method used to scale scalar data to the [0, 1] range
+            before mapping
+            to colors using cmap. By default, a linear scaling is used, mapping the
+            lowest value to
             0 and the highest to 1.
             If given, this can be one of the following:
-            - An instance of Normalize or one of its subclasses (see Colormap Normalization).
-            - A scale name, i.e. one of "linear", "log", "symlog", "logit", etc. For a list of available scales, call
-            matplotlib.scale.get_scale_names(). In that case, a suitable Normalize subclass is dynamically generated
-            and instantiated.
+
+            - An instance of Normalize or one of its subclasses
+              (see Colormap Normalization).
+            - A scale name, i.e. one of "linear", "log", "symlog", "logit", etc.
+              For a list of available scales, call
+              matplotlib.scale.get_scale_names(). In that case, a suitable Normalize
+              subclass is dynamically generated
+              and instantiated.
+              This parameter is ignored if c is RGB(A).
+
+        vmin, vmax : `float`\ , optional
+            When using scalar data and no explicit norm, vmin and vmax define the data
+            range that the colormap covers.
+            By default, the colormap covers the complete value range of the supplied
+            data. It is an error to use
+            vmin/vmax when a norm instance is given (but using a str norm name together
+            with vmin/vmax is acceptable).
             This parameter is ignored if c is RGB(A).
-        vmin, vmax: float, optional
-            When using scalar data and no explicit norm, vmin and vmax define the data range that the colormap covers.
-            By default, the colormap covers the complete value range of the supplied data. It is an error to use
-            vmin/vmax when a norm instance is given (but using a str norm name together with vmin/vmax is acceptable).
-            This parameter is ignored if c is RGB(A).
-        alpha: float, default: 0.5
+        alpha : `float`\ , default: 0.5
             The alpha blending value, between 0 (transparent) and 1 (opaque).
-        linewidths: float or array-like, default: rcParams["lines.linewidth"] (default: 1.5)
-            The linewidth of the marker edges. Note: The default edgecolors is 'face'. You may want to change this
-            as well.
-        edgecolors: {'face', 'none', None} or color or sequence of color, default: rcParams["scatter.edgecolors"],
-        (default: 'face')
+        linewidths : `float` or array-like, default: rcParams["lines.linewidth"] (default: 1.5)
+            The linewidth of the marker edges. Note: The default edgecolors is 'face'.
+            You may want to change this as well.
+        edgecolors : {'face', 'none', None} or color or sequence of color, default: rcParams["scatter.edgecolors"], (default: 'face')
             The edge color of the marker. Possible values:
             'face': The edge color will always be the same as the face color.
             'none': No patch boundary will be drawn.
             A color or sequence of colors.
-            For non-filled markers, edgecolors is ignored. Instead, the color is determined like with 'face',
+            For non-filled markers, edgecolors is ignored. Instead, the color is
+            determined like with 'face',
             i.e. from c, colors, or facecolors.
-        plotnonfinite: bool, default: False
-            Whether to plot points with nonfinite c (i.e. inf, -inf or nan). If True the points are drawn with the bad
+        plotnonfinite : `bool`\ , default: False
+            Whether to plot points with nonfinite c (i.e. inf, -inf or nan).
+            If True the points are drawn with the bad
             colormap color (see Colormap.set_bad).
-
         """
 
         s = kwargs.pop("s", None)

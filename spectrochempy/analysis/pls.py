@@ -32,7 +32,7 @@ class PLS(CrossDecompositionAnalysis):
 
     __doc__ = _docstring.dedent(
         """
-    Partial Least Squares regression (PLS)
+    Partial Least Squares regression (PLS).
 
     The  Partial Least Squares regression wraps the
     `sklearn.cross_decomposition.PLSRegression` model, with few
@@ -44,7 +44,7 @@ class PLS(CrossDecompositionAnalysis):
 
     See Also
     --------
-    %(DecompositionAnalysis.see_also.no_PCA)s
+    %(DecompositionAnalysis.see_also.no_PLS)s
     """
     )
 
@@ -64,32 +64,32 @@ class PLS(CrossDecompositionAnalysis):
 
     used_components = tr.Int(
         default_value=2,
-        help="""Number of components to keep. Should be in the range
-        [1, min(n_samples, n_features, n_targets)].""",
+        help="Number of components to keep. Should be in the range [1, min(n_samples, "
+        "n_features, n_targets)].",
     ).tag(config=True)
 
-    scale = tr.Bool(default_value=True, help="""Whether to scale X and Y""").tag(
+    scale = tr.Bool(default_value=True, help="Whether to scale X and Y.").tag(
         config=True
     )
 
     max_iter = tr.Int(
         default_value=500,
-        help="""The maximum number of iterations of the power method
-        when algorithm='nipals'. Ignored otherwise""",
+        help="The maximum number of iterations of the power method when "
+        "algorithm='nipals'. Ignored otherwise.",
     ).tag(config=True)
 
     tol = tr.Float(
         default_value=1.0e-6,
-        help="""The tolerance used as convergence criteria in the power method:"
-        the algorithm stops whenever the squared norm of u_i - u_{i-1} is less than tol,"
-        where u corresponds to the left singular vector.""",
+        help="The tolerance used as convergence criteria in the power method:"
+        "the algorithm stops whenever the squared norm of u_i - u_{i-1} "
+        "is less than tol, where u corresponds to the left singular vector.",
     ).tag(config=True)
 
     copy = tr.Bool(
         default_value=True,
-        help="""Whether to copy X and Y in fit before applying centering, and potentially"
-        scaling. If False, these operations will be done inplace, modifying both"
-        NDDatasets""",
+        help="Whether to copy X and Y in fit before applying centering, and potentially"
+        " scaling. If False, these operations will be done inplace, modifying both "
+        " NDDatasets.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
