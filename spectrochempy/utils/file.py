@@ -269,6 +269,7 @@ def check_filenames(*args, **kwargs):
             if not isinstance(filename, list):
                 filename = [filename]
 
+            # print(filename)
             filenames_.extend(filename)
 
         filenames = filenames_

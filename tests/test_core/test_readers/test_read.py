@@ -17,18 +17,18 @@ IRDATA = DATADIR / "irdata"
 
 def test_read():
 
-    filename = IRDATA / "nh4y-activation.spg"
+    filename = IRDATA / "CO@Mo_Al2O3.SPG"
 
     # read normally
     nd1 = scp.read_omnic(filename)
-    assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
+    assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
 
     # delete file to simulate its absence:
     filename.unlink()
 
     # now try to download from github s not found locally (use _read_remote)
-    nd2 = scp.read_omnic("irdata/nh4y-activation.spg")
-    assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
+    nd2 = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
+    assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
 
     # delete file to simulate its absence:
     filename.unlink()
@@ -40,8 +40,8 @@ def test_read():
 
     # now try a using generic read
     assert not filename.exists()
-    nd2 = scp.read("irdata/nh4y-activation.spg")
-    assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
+    nd2 = scp.read("irdata/CO@Mo_Al2O3.SPG")
+    assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
     assert filename.exists()
 
     # now try a using generic read with a missing
