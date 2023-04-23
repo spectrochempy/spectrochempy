@@ -33,7 +33,7 @@ def test_PLS_docstrings():
     module = "spectrochempy.analysis.pls"
     chd.check_docstrings(
         module,
-        obj=scp.PLS,
+        obj=scp.PLSRegression,
         # exclude some errors - remove whatever you want to check
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
