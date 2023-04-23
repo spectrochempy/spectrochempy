@@ -26,6 +26,9 @@ __configurables__ = ["PLS"]
 # ======================================================================================
 # class PLS
 # ======================================================================================
+_docstring.delete_params("AnalysisConfigurable.parameters", "copy")
+
+
 @signature_has_configurable_traits
 class PLS(CrossDecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "PLS")
@@ -40,7 +43,7 @@ class PLS(CrossDecompositionAnalysis):
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters)s
+    %(AnalysisConfigurable.parameters.no_copy)s
 
     See Also
     --------
