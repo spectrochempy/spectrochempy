@@ -186,7 +186,7 @@ class _set_output(object):
                         ),
                     )
                 if self.typesingle == "targets":
-                    # occurs when the data are 1D such as PLS intercept...
+                    # occurs when the data are 1D such as PLSRegression intercept...
                     if X.coordset[0].labels is not None:
                         labels = X.coordset[0].labels
                     else:
@@ -1092,7 +1092,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
 class CrossDecompositionAnalysis(DecompositionAnalysis):
     """
-    Abstract class to write analysis cross decomposition models such as `PLS`, ...
+    Abstract class to write analysis cross decomposition models such as `PLSRegression`, ...
 
     Subclass this to get a minimal structure
 

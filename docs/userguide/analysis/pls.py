@@ -24,7 +24,7 @@
 #     version: 3.10.8
 # ---
 # %% [markdown]
-# # Partial Least Squares Regression (PLS)
+# # Partial Least Squares Regression (PLSRegression)
 
 # %%
 import spectrochempy as scp
@@ -32,7 +32,7 @@ import spectrochempy as scp
 # %% [markdown]
 # ## Introduction
 #
-# PLS (standing for Partial Least Squares regression ) is a statistical method to estimate
+# PLSRegression (standing for Partial Least Squares regression ) is a statistical method to estimate
 # $n \times l$ dependant or predicted variables $Y$ from $n \times m$ explanatory or observed
 # variables $X$ by projecting both of them on new spaces spanned by $k$ latent variables,
 # according to the master equations :
@@ -45,12 +45,12 @@ import spectrochempy as scp
 # As indicated by the third equation, the decompositions of X and Y are made to maximise
 # the covariance of the score matrices.
 #
-# The implementation of PLS in spectrochempy is based on the [Scikit-Learn implementation of
-# PLS](https://scikit-learn.org/stable/modules/generated/sklearn.cross_decomposition.PLSRegression.html)
+# The implementation of PLSRegression in spectrochempy is based on the [Scikit-Learn implementation of
+# PLSRegression](https://scikit-learn.org/stable/modules/generated/sklearn.cross_decomposition.PLSRegression.html)
 # with similar methods and attributes on the one hand, and some that are specific to spectrochempy.
 #
 # ## Loading of the dataset
-# Here we show how PLS is implemented in Scpy on a dataset consisting of 80 samples of corn measured
+# Here we show how PLSRegression is implemented in Scpy on a dataset consisting of 80 samples of corn measured
 # on 3 different NIR spectrometers, together with moisture, oil,
 # protein and starch values for each of the samples. This dataset (and others) can be loaded from
 # [http://www.eigenvector.com](http://www.eigenvector.com/data/).
@@ -106,10 +106,10 @@ y_train = Y[:57, "Moisture"]
 y_test = Y[57:, "Moisture"]
 
 # %% [markdown]
-# Then we create a PLS object with 5 components and fit the train datasets:
+# Then we create a PLSRegression object with 5 components and fit the train datasets:
 
 # %%
-pls = scp.PLS(used_components=5)
+pls = scp.PLSRegression(used_components=5)
 _ = pls.fit(X_train, y_train)
 
 # %% [markdown]

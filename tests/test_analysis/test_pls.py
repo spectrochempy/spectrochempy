@@ -7,17 +7,17 @@
 # flake8: noqa
 
 """
-Tests for the PLS module
+Tests for the PLSRegression module
 
 """
 from os import environ
 
 import pytest
 from numpy.testing import assert_almost_equal
-from sklearn.cross_decomposition import PLSRegression
+from sklearn.cross_decomposition import PLSRegression as sklPLSRegression
 
 import spectrochempy as scp
-from spectrochempy.analysis.pls import PLS
+from spectrochempy.analysis.pls import PLSRegression
 from spectrochempy.core.readers.importer import read
 from spectrochempy.utils import docstrings as chd
 
@@ -59,14 +59,14 @@ def test_pls():
     Yv_array = Yv.data
     yv_array = yv.data
 
-    pls1 = PLS(used_components=5)
+    pls1 = PLSRegression(used_components=5)
     pls1.fit(Xc, yc)
-    pls1_ = PLSRegression(n_components=5)
+    pls1_ = sklPLSRegression(n_components=5)
     pls1_.fit(Xc_array, yc_array)
 
-    pls2 = PLS(used_components=5)
+    pls2 = PLSRegression(used_components=5)
     pls2.fit(Xc, Yc)
-    pls2_ = PLSRegression(n_components=10)
+    pls2_ = sklPLSRegression(n_components=10)
     pls2_.fit(Xc_array, Yc_array)
 
     # check fit is OK and that appropriate X metadata are passed to loadings and scores

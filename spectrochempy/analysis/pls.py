@@ -19,23 +19,23 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
-__all__ = ["PLS"]
-__configurables__ = ["PLS"]
+__all__ = ["PLSRegression"]
+__configurables__ = ["PLSRegression"]
 
 
 # ======================================================================================
-# class PLS
+# class PLSRegression
 # ======================================================================================
 _docstring.delete_params("AnalysisConfigurable.parameters", "copy")
 
 
 @signature_has_configurable_traits
-class PLS(CrossDecompositionAnalysis):
-    _docstring.delete_params("DecompositionAnalysis.see_also", "PLS")
+class PLSRegression(CrossDecompositionAnalysis):
+    _docstring.delete_params("DecompositionAnalysis.see_also", "PLSRegression")
 
     __doc__ = _docstring.dedent(
         """
-    Partial Least Squares regression (PLS).
+    Partial Least Squares regression (PLSRegression).
 
     The  Partial Least Squares regression wraps the
     `sklearn.cross_decomposition.PLSRegression` model, with few
@@ -50,7 +50,7 @@ class PLS(CrossDecompositionAnalysis):
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
-    # only those specific to PLS, the other being defined in AnalysisConfigurable.
+    # only those specific to PLSRegression, the other being defined in AnalysisConfigurable.
     # ----------------------------------------------------------------------------------
     # define here only the variable that you use in fit or transform functions
     _pls = tr.Instance(
@@ -112,7 +112,7 @@ class PLS(CrossDecompositionAnalysis):
             **kwargs,
         )
 
-        # initialize sklearn PLS
+        # initialize sklearn PLSRegression
         self._pls = cross_decomposition.PLSRegression(
             n_components=self.used_components,
             scale=self.scale,
@@ -170,14 +170,14 @@ class PLS(CrossDecompositionAnalysis):
         return self._pls.score(X, Y, sample_weight=sample_weight)
 
     # ----------------------------------------------------------------------------------
-    # Public methods and properties specific to PLS
+    # Public methods and properties specific to PLSRegression
     # ----------------------------------------------------------------------------------
     _docstring.keep_params("analysis_fit.parameters", "X")
 
     @_docstring.dedent
     def fit(self, X, Y):
         """
-        Fit the PLS model on X and Y.
+        Fit the PLSRegression model on X and Y.
 
         Parameters
         ----------
@@ -291,7 +291,7 @@ class PLS(CrossDecompositionAnalysis):
     # ----------------------------------------------------------------------------------
 
     # ----------------------------------------------------------------------------------
-    # Plot methods specific to PLS
+    # Plot methods specific to PLSRegression
     # ----------------------------------------------------------------------------------
 
 
