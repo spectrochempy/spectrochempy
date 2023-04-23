@@ -24,20 +24,18 @@
 #     version: 3.10.8
 # ---
 # %% [markdown]
-# # Principal Component Analysis
+# # Partial Least Squares Regression (PLS)
 
 # %%
 import spectrochempy as scp
-
-from sklearn.cross_decomposition import PLSRegression
-
 
 # %% [markdown]
 # ## Introduction
 #
 # PLS (standing for Partial Least Squares regression ) is a statistical method to estimate
-# $nxl$ dependant or predicted variables $Y$ from $nxm$ explanatory or observed varaibles $X$ by
-# projecting both of them on new spaces spanned by $k$ latent variables, according to:
+# $n \times l$ dependant or predicted variables $Y$ from $n \times m$ explanatory or observed
+# variables $X$ by # projecting both of them on new spaces spanned by $k$ latent variables,
+# according to :
 # $$ X = S L^T + E $$
 # $$ Y = P Q^T + F $$
 # Where $S$ and $P$  matrices are such that the product of the first column of $S$ - the score vector $s_1$ -
@@ -51,12 +49,12 @@ from sklearn.cross_decomposition import PLSRegression
 # with similar methods and attributes on the one hands, and some that are specific to spectrochempy.
 #
 # ## Loading of the dataset
-# Here we show how PLSis implemented in Scpy on a dataset consisting of 80 samples of corn measured
+# Here we show how PLS is implemented in Scpy on a dataset consisting of 80 samples of corn measured
 # on 3 different NIR spectrometers, together with moisture, oil,
 # protein and starch values for each of the samples. This dataset (and others) can be loaded from
 # [http://www.eigenvector.com](http://www.eigenvector.com/data/).
 # %%
-A = scp.read_remote("http://www.eigenvector.com/data/Corn/corn.mat")
+A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
 
 # %% [markdown]
 # The .mat file contains 7 eigenvectors's datasets which are thus returned in A as a list of 7
@@ -69,7 +67,8 @@ for a in A:
 # In this tutorial, we are first interested in the dataset named `'m5spec'`, corresponding to the 80 spectra
 # on one of the instruments and `'propvals'` giving the property values of the 80 corn samples.
 #
-# Let's name the specta NDDataset `X` , add few informations about the x-scale and plot it:
+# Let's name the specta NDDataset `X` , add few informations about the x-scale and plot it, before and
+# after detrend:
 
 # %%
 X = A[-3]
@@ -83,52 +82,48 @@ X_ = X.detrend()
 _ = X_.plot(cmap=None)
 # %% [markdown]
 # Let's plot the properties of the sample:
+
+# %%
 Y = A[3]
 _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 
+# %% [markdown]
+# Standardization of the values allows better visualization:
+
+# %%
 Y_std = (Y - Y.mean(dim=0)) / Y.std(dim=0)
 _ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
 
-n_targets = Y.shape[1]
+# %% [markdown]
+# First we select 57 first samples (2/3 of the total) ) to train/calibrate the model and the remaining ones
+# to test/validate the model, and we restrict first our nanalysust to the moisture contentt:
+
 # %%
+X_train = X[:57]
+X_test = X[57:]
+y_train = Y[:57, "Moisture"]
+y_test = Y[57:, "Moisture"]
 
 # %% [markdown]
-pls = PLSRegression(n_components=27)
-pls.fit(X_.data, Y_std.data)
-#
-# Yhat = pls.predict(X_.data)
-# plt.figure()
-# c = ["b", "g", "r", "grey"]
-# for prop, i in zip(Y.x.labels, range(n_targets)):
-#     print(i)
-#     _ = plt.scatter(
-#         Y_std.data[:, i],
-#         Yhat[:, i],
-#         s=50,
-#         c=c[i],
-#         alpha=0.3,
-#         label=prop,
-#     )
-#     _ = plt.legend()
-
-pls.transform(X_.data, Y_std.data)
-# %%
-scp_pls = scp.PLS(used_components=27)
-scp_pls.fit(X_, Y_std)
-
-scp_pls.x_loadings.plot()
-scp_pls.x_weights.plot()
-scp_pls.x_rotations.plot()
-scp_pls.x_scores.T.plot()
+# Then we create a PLS object with 5 components and fit the train datasets:
 
 # %%
-scp_pls.y_loadings.plot()
-scp_pls.y_weights.plot()
-scp_pls.y_rotations.plot()
-scp_pls.y_scores.T.plot()
+pls = scp.PLS(used_components=5)
+pls.fit(X_train, y_train)
+
+# %% [markdown]
+# We can generate a parity plot to comparie the predicted and actual values, for
+# both train set and test set.
 
 # %%
-scp_pls.coef.plot()
-scp.show()
+ax = pls.parityplot(label="calibration")
+_ = pls.parityplot(
+    y_test, pls.predict(X_test), c="red", label="validation", clear=False
+)
+_ = ax.legend(loc="lower right")
 
-scp_pls.intercept.plot()
+# %% [markdown]
+# The goodness of fit can also be obtained using the `score` attribute. As expected, the goodness of fit is slightly
+# lower for the validation than for the calibration.
+print(f"R**2 training datastet: {pls.score():.3}")
+print(f"R**2 test datastet: {pls.score(X_test, y_test):.3}")

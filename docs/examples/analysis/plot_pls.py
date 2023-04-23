@@ -8,7 +8,7 @@
 """
 PLS regression example
 -------------------------------
-In this example, we perform a PLS regression to predict the composition of corn samples
+In this example, we perform a PLS regression to predict the moisture of corn samples
 from their NIR spectra.
 
 """
@@ -17,10 +17,11 @@ from their NIR spectra.
 import spectrochempy as scp
 
 # %%
-# Load a dataset
+# The data set is available to download from the Eigenvector Archive:
 ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
 
-# %%
+# This data set, originally taken at Cargil,  consists of 80 samples of corn measured on 3 different NIR spectrometers
+# together with the moisture, oil, protein and starch values for each of the samples is also included.
 # The 5th dataset named `'m5spec'`, contains the NIR spectra of 80 corn samples recorded on the same
 # instrument. Let's assign this NDDataset specta to `X`, add few informations and plot it:
 # %%
@@ -31,24 +32,24 @@ X.x.units = "nm"
 _ = X.plot(cmap=None)
 
 # %%
-# The values of the properties we want to predict are in the `'propval'` dataset:
+# The values of the properties we want to predict are in the 4th dattaset named `'propval'` dataset:
 Y = ds_list[3]
 _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 
 # %%
 # We are interested to predict the moisture content:
-y = Y[:, 0]
+y = Y[:, "Moisture"]
 
 # %%
-# Select the 57 first samples to train the model and the remaining ones
-# to test the model:
+# First we select 57 first samples (2/3 of the total) )to train/calibrate the model and the remaining ones
+# to test/validate the model:
 X_train = X[:57]
 X_test = X[57:]
 y_train = y[:57]
 y_test = y[57:]
 
 # %%
-# Create a PLS object and fit the train datasets:
+# Then we create a PLS object and fit the train datasets:
 pls = scp.PLS(used_components=5)
 pls.fit(X_train, y_train)
 

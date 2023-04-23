@@ -1431,10 +1431,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         Other Parameters
         ----------------
-        todo: add color cycler `
-        alpha : float, optional
-            By default alpha = 0.5.
-        s: size of the scatter plot
+
         """
 
         if Y is None:
@@ -1454,6 +1451,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Y = Y.squeeze()
             Y_hat = Y_hat.squeeze()
 
+        plt.style.use(["default"])
+        plt.rcParams.update({"font.size": 14})
         if clear:
             fig = plt.figure()
             ax = fig.add_subplot(111)
