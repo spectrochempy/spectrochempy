@@ -39,10 +39,10 @@ import spectrochempy as scp
 # $$ X = S_X L_Y^T + E_X $$
 # $$ Y = S_Y L_Y^T + E_Y $$
 # $$ S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y)) $$
-# $S_X$ and $S_Y$ are $n \times k$ matrices often called score matrices, and $L_X^T$ and $ L_Y^T$ are,
-# respectively, $k \times l$ and $k \times m$ loading matrices. Matrices $E_X$ and $E_X$ are the error
+# $S_X$ and $S_Y$ are $n \times k$ matrices often called score matrices, and $L_X^T$ and $L_Y^T$ are,
+# respectively, $k \times l$ and $k \times m$ loading matrices. Matrices $E_X$ and $E_Y$ are the error
 # terms or residuals.
-# As indicated by the third equation, the decompositions of X and Y are made to maximise
+# As indicated by the third equation, the decompositions of $X$ and $Y$ are made to maximise
 # the covariance of the score matrices.
 #
 # The implementation of PLSRegression in spectrochempy is based on the [Scikit-Learn implementation of
@@ -96,8 +96,9 @@ Y_std = (Y - Y.mean(dim=0)) / Y.std(dim=0)
 _ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
-# First we select 57 first samples (2/3 of the total) ) to train/calibrate the model and the remaining ones
-# to test/validate the model, and we restrict first our nanalysust to the moisture contentt:
+# ## Running PLSRegression
+# First we select 57 first samples (2/3 of the total) to train/calibrate the model and the remaining ones
+# to test/validate the model, and we restrict first our analysis to the moisture content:
 
 # %%
 X_train = X[:57]
@@ -136,13 +137,13 @@ _ = pls.parityplot(y_test, y_test_hat, c="red", label="validation", clear=False)
 _ = ax.legend(loc="lower right")
 
 # %% [markdown]
-# The goodness of fit (as expressed by R**2) can also be obtained using the `score()` method. For the training dataset
-# it is obtained by passing no arguments, while for validation datastets the `X` and experimental `Y` values must be
+# The goodness of fit (as expressed by R-squared) can also be obtained using the `score()` method. For the training dataset
+# it is obtained by passing no arguments, while for validation datasets, $X$ and $Y$ must be
 # passed.
 
 # %%
-print(f"R**2 training dataset: {pls.score():.3}")
-print(f"R**2 test dataset: {pls.score(X_test, y_test):.3}")
+print(f"R-squared training dataset: {pls.score():.3}")
+print(f"R-squared test dataset: {pls.score(X_test, y_test):.3}")
 
 # %% [markdown]
 # As expected, the goodness of fit is slightly lower for the validation than for the calibration.
