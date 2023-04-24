@@ -79,7 +79,7 @@ dependencies:
     - sphinx=5.3
     - sphinx_rtd_theme=1.2
     - autodocsumm
-    - sphinx-gallery<=0.7.0
+    - sphinx-gallery
     - nbsphinx
     - jupyter_sphinx
     - json5
