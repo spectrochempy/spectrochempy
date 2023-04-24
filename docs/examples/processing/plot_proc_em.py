@@ -53,4 +53,9 @@ new1.plot(color="r", clear=False, label=" em = 20 hz")
 curve2.plot(color="b", clear=False)
 new2.plot(dcolor="b", clear=False, label=" em = 30 HZ, shifted = ")
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# %%
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

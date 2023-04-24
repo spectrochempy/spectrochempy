@@ -96,6 +96,8 @@ _ = mcr.St.plot()
 _ = mcr.plotmerit(nb_traces=5)
 
 # %%
-# The following line not necessary in Jupyter notebook can be uncommented if necessary
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
 
+# %%
 # scp.show()

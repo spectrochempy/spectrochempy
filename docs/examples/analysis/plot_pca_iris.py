@@ -87,6 +87,10 @@ _ = pca.scoreplot(scores, 1, 2, color_mapping="labels")
 # better distinguishing versicolor from viginica.
 ax = pca.scoreplot(scores, 1, 2, 3, color_mapping="labels")
 ax.view_init(10, 75)
+
 # %%
-# uncomment to show plot if needed (not necessary in jupyter notebook)
-scp.show()
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

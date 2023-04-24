@@ -98,5 +98,8 @@ scores.y.labels = labels  # Note this does not replace previous labels,
 _ = pca.scoreplot(scores, 1, 2, show_labels=True, labels_column=2)
 
 # %%
-# uncomment the line below to see plot if needed (not necessary in jupyter notebook)
-scp.show()
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

@@ -20,6 +20,7 @@ import spectrochempy as scp
 # The data set is available to download from the Eigenvector Archive:
 ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
 
+# %%
 # This data set, originally taken at Cargil,  consists of 80 samples of corn measured on
 # 3 different NIR spectrometers together with the moisture, oil, protein and starch
 # values for each of the samples is also included.
@@ -43,7 +44,7 @@ _ = Y.T.plot(cmap=None, legend=Y.x.labels)
 y = Y[:, "Moisture"]
 
 # %%
-# First we select 57 first samples (2/3 of the total) )to train/calibrate the model and the remaining ones
+# First we select 57 first samples (2/3 of the total) to train/calibrate the model and the remaining ones
 # to test/validate the model:
 X_train = X[:57]
 X_test = X[57:]
@@ -67,5 +68,8 @@ _ = pls.parityplot(
 _ = ax.legend(loc="lower right")
 
 # %%
-# uncomment the line below to see plot if needed (not necessary in jupyter notebook)
-scp.show()
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()
