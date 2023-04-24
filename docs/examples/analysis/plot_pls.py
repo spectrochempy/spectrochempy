@@ -20,10 +20,12 @@ import spectrochempy as scp
 # The data set is available to download from the Eigenvector Archive:
 ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
 
-# This data set, originally taken at Cargil,  consists of 80 samples of corn measured on 3 different NIR spectrometers
-# together with the moisture, oil, protein and starch values for each of the samples is also included.
-# The 5th dataset named `'m5spec'`, contains the NIR spectra of 80 corn samples recorded on the same
-# instrument. Let's assign this NDDataset specta to `X`, add few informations and plot it:
+# This data set, originally taken at Cargil,  consists of 80 samples of corn measured on
+# 3 different NIR spectrometers together with the moisture, oil, protein and starch
+# values for each of the samples is also included.
+# The 5th dataset named `'m5spec'`, contains the NIR spectra of 80 corn samples recorded
+# on the same instrument. Let's assign this NDDataset specta to `X`, add few
+# informations and plot it:
 # %%
 X = ds_list[4]
 X.title = "reflectance"

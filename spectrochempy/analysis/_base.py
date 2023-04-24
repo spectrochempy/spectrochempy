@@ -43,7 +43,9 @@ class NotFittedError(exceptions.SpectroChemPyError):
 
     Parameters
     ----------
-    attr :
+    attr : method, optional
+        The method from which the error was issued. In general it is determined
+        automatically.
     """
 
     def __init__(self, attr=None):
@@ -99,8 +101,8 @@ class _set_output(object):
         if args and type(args[0]) == type(obj):
             args = args[1:]
 
-        # get the sklearn data output - one or two arrays depending on the method and *args
-        skl_output = self.method(obj, *args, **kwargs)
+        # get the method output - one or two arrays depending on the method and *args
+        output = self.method(obj, *args, **kwargs)
 
         # restore eventually masked rows and columns
         axis = "both"
@@ -110,9 +112,9 @@ class _set_output(object):
             axis = 1
 
         # if a single array was returned...
-        if not isinstance(skl_output, tuple):
+        if not isinstance(output, tuple):
             # ... make a tuple of 1 array:
-            data_tuple = (skl_output,)
+            data_tuple = (output,)
             # ... and a tuple of 1 from_meta element:
             if not isinstance(self.meta_from, tuple):
                 meta_from_tuple = (self.meta_from,)
@@ -120,7 +122,7 @@ class _set_output(object):
                 # ensure that the first one
                 meta_from_tuple = (self.meta_from[0],)
         else:
-            data_tuple = skl_output
+            data_tuple = output
             meta_from_tuple = self.meta_from
 
         out = []
@@ -554,7 +556,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # Set a X.data by default
         self._X_preprocessed = X.data
 
-    def _fit(self, X, Y=None):
+    def _fit(self, X, Y=None):  # pragma: no cover
         #  Intended to be replaced in the subclasses by user defined function
         #  (with the same name)
         raise NotImplementedError("fit method has not yet been implemented")
@@ -736,15 +738,15 @@ class DecompositionAnalysis(AnalysisConfigurable):
         # return a np.ndarray
         self._Y_preprocessed = Y.data
 
-    def _transform(self, *args, **kwargs):
+    def _transform(self, *args, **kwargs):  # pragma:  no cover
         # to be overriden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("transform has not yet been implemented")
 
-    def _inverse_transform(self, *args, **kwargs):
+    def _inverse_transform(self, *args, **kwargs):  # pragma:  no cover
         # to be overriden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("inverse_transform has not yet been implemented")
 
-    def _get_components(self, n_components=None):
+    def _get_components(self, n_components=None):  # pragma:  no cover
         # to be overriden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("get_components has not yet been implemented")
 
@@ -830,7 +832,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Returns
         -------
-        `~spectrochempy.core.dataset.nddataset.NDDataset`
+        `NDDataset`
             Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
 
         Other Parameters
@@ -1088,8 +1090,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
 # ======================================================================================
 # Base class CrossDecompositionAnalysis
 # ======================================================================================
-
-
 class CrossDecompositionAnalysis(DecompositionAnalysis):
     """
     Abstract class to write analysis cross decomposition models such as `PLSRegression`, ...
@@ -1112,6 +1112,13 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     )
 
     # ----------------------------------------------------------------------------------
+    # Private methods that should be most of the time overloaded in subclass
+    # ----------------------------------------------------------------------------------
+    def _predict(self, *args, **kwargs):  # pragma:  no cover
+        # to be overriden in subclass such as PLSRegression, ...
+        raise NotImplementedError("predict has not yet been implemented")
+
+    # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
 
@@ -1131,7 +1138,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Returns
         -------
         `NDDataset`
-            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , :term:`n_targets` \ ).
+            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , :term:`n_targets`\ ).
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1151,7 +1158,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         The coefficient of determination :math:`R^2` is defined as
         :math:`(1 - \frac{u}{v})` , where :math:`u` is the residual
         sum of squares ``((y_true - y_pred)** 2).sum()`` and :math:`v`
-        is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()`` .
+        is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()``\ .
         The best possible score is ``1.0`` and it can be negative (because the
         model can be arbitrarily worse). A constant model that always predicts
         the expected value of `Y`\ , disregarding the input features, would get
@@ -1262,7 +1269,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         Returns
         -------
-        `~spectrochempy.core.dataset.nddataset.NDDataset`
+        `NDDataset`
             Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
 
         Other Parameters

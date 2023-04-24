@@ -602,7 +602,7 @@ Partial Least Square regression
     :nosignatures:
     :toctree: generated/
 
-    PLS
+    PLSRegression
 
 Evolving factor analysis
 ========================
