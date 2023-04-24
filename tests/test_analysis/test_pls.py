@@ -12,6 +12,7 @@ Tests for the PLSRegression module
 """
 from os import environ
 
+import matplotlib.pyplot as plt
 import pytest
 from numpy.testing import assert_almost_equal
 from sklearn.cross_decomposition import PLSRegression as sklPLSRegression
@@ -20,6 +21,8 @@ import spectrochempy as scp
 from spectrochempy.analysis.pls import PLSRegression
 from spectrochempy.core.readers.importer import read
 from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.testing import assert_dataset_equal
 
 
 # test docstring
@@ -134,6 +137,23 @@ def test_pls():
     assert_almost_equal(yv_hat.data, yv_hat_.squeeze(), 3)
     # todo: check why only 3 decimals
 
+    # Test masked data, x axis
+    pls2 = PLSRegression(used_components=5)
+    Xc[:, 1600.0:1800.0] = MASKED  # corn spectra, calibration
+    pls2.fit(Xc, yc)
+
+    assert pls2._X.shape == (57, 599), "missing row or col should be removed"
+    assert pls2.X.shape == (57, 700), "missing row or col restored"
+    assert_dataset_equal(
+        pls2.X,
+        Xc,
+        data_only=True,
+    ), "input dataset should be reflected in the internal variable X (where mask is restored)"
+
     # check plots
     pls1.plotmerit()
+    plt.show()
     pls1.parityplot()
+    plt.show()
+    pls2.plotmerit()
+    plt.show()
