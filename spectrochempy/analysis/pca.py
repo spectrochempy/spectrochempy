@@ -171,7 +171,6 @@ for reproducible results across multiple function calls.""",
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         # we have changed the name n_components use in sklearn by
@@ -188,7 +187,6 @@ for reproducible results across multiple function calls.""",
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 
@@ -196,7 +194,6 @@ for reproducible results across multiple function calls.""",
         self._pca = decomposition.PCA(
             n_components=self.used_components,
             whiten=self.whiten,
-            copy=copy,
             svd_solver=self.svd_solver,
             tol=self.tol,
             iterated_power=self.iterated_power,

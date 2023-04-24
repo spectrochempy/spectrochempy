@@ -88,7 +88,6 @@ class EFA(DecompositionAnalysis):
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         # We have changed the name n_components use in sklearn by
@@ -105,7 +104,6 @@ class EFA(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 

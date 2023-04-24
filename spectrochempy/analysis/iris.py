@@ -380,7 +380,6 @@ class IRIS(DecompositionAnalysis):
         self,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         # call the super class for initialisation of the configuration parameters
@@ -388,7 +387,6 @@ class IRIS(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
         # no validation of reg_par triggred when it is None

@@ -26,9 +26,6 @@ __configurables__ = ["PLSRegression"]
 # ======================================================================================
 # class PLSRegression
 # ======================================================================================
-_docstring.delete_params("AnalysisConfigurable.parameters", "copy")
-
-
 @signature_has_configurable_traits
 class PLSRegression(CrossDecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "PLSRegression")
@@ -43,7 +40,7 @@ class PLSRegression(CrossDecompositionAnalysis):
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters.no_copy)s
+    %(AnalysisConfigurable.parameters)s
 
     """
     )

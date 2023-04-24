@@ -366,7 +366,6 @@ at each iterations.
         *args,
         log_level=logging.WARNING,
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         if len(args) > 0:
@@ -403,7 +402,6 @@ at each iterations.
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 
