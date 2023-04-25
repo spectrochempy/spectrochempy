@@ -48,7 +48,6 @@
     cs
     dc
     detrend
-    download
     download_iris
     download_nist_ir
     em
