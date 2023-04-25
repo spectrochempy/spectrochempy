@@ -188,7 +188,7 @@ class NMF(DecompositionAnalysis):
 
         # initialize sklearn NMF
         self._nmf = decomposition.NMF(
-            n_components=self.used_components,
+            n_components=self.n_components,
             init=self.init,
             beta_loss=self.beta_loss,
             tol=self.tol,
