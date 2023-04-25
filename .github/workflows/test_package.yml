@@ -42,19 +42,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
+        pythonVersion: ["3.8", "3.10"]
+        exclude:
+          - os: windows-latest
+            pythonVersion: 3.8
+          - os: macos-latest
+            pythonVersion: 3.8
         include:
-        - os: ubuntu-latest
-          path: ~/.venv
-          pythonVersion: "3.10"
-        - os: ubuntu-latest
-          path: ~/.venv
-          pythonVersion: "3.8"
-        - os: macos-latest
-          path: ~/.venv
-          pythonVersion: "3.10"
-        - os: windows-latest
-          path: $HOME\.venv
-          pythonVersion: "3.10"
+          - os: ubuntu-latest
+            path: ~/.venv
+          - os: macos-latest
+            path: ~/.venv
+          - os: windows-latest
+            path: $HOME\.venv
 
     steps:
       - name: Checkout spectrochempy repository
