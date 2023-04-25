@@ -45,13 +45,16 @@ jobs:
         include:
         - os: ubuntu-latest
           path: ~/.venv
-          pythonVersion: ["3.10" , "3.8"]
+          pythonVersion: "3.10"
+        - os: ubuntu-latest
+          path: ~/.venv
+          pythonVersion: "3.8"
         - os: macos-latest
           path: ~/.venv
-          pythonVersion: ["3.10"]
+          pythonVersion: "3.10"
         - os: windows-latest
           path: $HOME\.venv
-          pythonVersion: ["3.10"]
+          pythonVersion: "3.10"
 
     steps:
       - name: Checkout spectrochempy repository
