@@ -31,7 +31,7 @@ except (IOError, OSError):
 # Here, the number of components  wich is used by the model is automatically determined
 # using `n_components="mle"`\. Warning: `mle` cannot be used when
 # n_observations < n_features.
-pca = scp.PCA(used_components="mle")
+pca = scp.PCA(n_components="mle")
 # %%
 # Fit dataset with the PCA model
 pca.fit(dataset)
@@ -43,9 +43,9 @@ pca.n_components
 pca.cumulative_explained_variance[-1].value
 # %%
 # We can also specify the amount of explained variance to compute how much components
-# are needed (a number between 0 and 1 for used_components is required to do this).
+# are needed (a number between 0 and 1 for n_components is required to do this).
 # we found 4 components in this case
-pca = scp.PCA(used_components=0.999)
+pca = scp.PCA(n_components=0.999)
 pca.fit(dataset)
 pca.n_components
 # %%

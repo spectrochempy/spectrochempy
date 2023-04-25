@@ -113,13 +113,13 @@ pca.n_components
 # As the main purpose of PCA is dimensionality reduction, we generally limit the PCA to a limited number of components.
 # This can be done by either reseting the number of components of an existing object:
 # %%
-pca.used_components = 8
+pca.n_components = 8
 pca.fit(X)
 
 # %% [markdown]
 # Or directly by creating a PCA instance with the desired number of components:
 # %%
-pca = scp.PCA(used_components=8)
+pca = scp.PCA(n_components=8)
 pca.fit(X)
 
 # %% [markdown]
@@ -161,7 +161,7 @@ _ = pca.loadings.plot()
 # the original dataset $X$ and the resitua,s $E = X - \hat{X}$. This can be done using
 # the `plotmerit()` method which plots both $X$, $\hat{X}$ (in dotted lines) and the residuals (in red):
 # %%
-pca = scp.PCA(used_components=4)
+pca = scp.PCA(n_components=4)
 pca.fit(X)
 _ = pca.plotmerit()
 

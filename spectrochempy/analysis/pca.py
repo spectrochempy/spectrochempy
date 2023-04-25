@@ -77,25 +77,25 @@ class PCA(DecompositionAnalysis):
         ":math:`X' = (X - min(X)) / (max(X)-min(X))`\ .",
     ).tag(config=True)
 
-    used_components = tr.Union(
+    n_components = tr.Union(
         (tr.Enum(["mle"]), tr.Int(), tr.Float()),
         allow_none=True,
         default_value=None,
         help="""Number of components to keep.
-if `used_components` is not set all components are kept::
+if `n_components` is not set all components are kept::
 
-    used_components == min(n_observations, n_features)
+    n_components == min(n_observations, n_features)
 
-If ``used_components == 'mle'`` and ``svd_solver == 'full'`` , Minka's MLE is used to guess
-the dimension. Use of ``used_components == 'mle'`` will interpret `svd_solver == 'auto'`
+If ``n_components == 'mle'`` and ``svd_solver == 'full'`` , Minka's MLE is used to guess
+the dimension. Use of ``n_components == 'mle'`` will interpret `svd_solver == 'auto'`
 as ``svd_solver == 'full'`` .
-If `0 < used_components < 1` and `svd_solver == 'full'` , select the number of
+If `0 < n_components < 1` and `svd_solver == 'full'` , select the number of
 components such that the amount of variance that needs to be explained is greater than
-the percentage specified by used_components.
+the percentage specified by n_components.
 If `svd_solver == 'arpack'` , the number of components must be strictly less than the
 minimum of n_features and n_observations. Hence, the None case results in::
 
-    used_components == min(n_observations, n_features) - 1.""",
+    n_components == min(n_observations, n_features) - 1.""",
     ).tag(config=True)
 
     whiten = tr.Bool(
@@ -113,7 +113,7 @@ their data respect some hard-wired assumptions.""",
         default_value="auto",
         help="""If auto :
 The solver is selected by a default policy based on `X.shape`
-and `used_components`: if the input data is larger than 500x500 and the number of
+and `n_components`: if the input data is larger than 500x500 and the number of
 components to extract is lower than 80% of the smallest dimension of the data, then the
 more efficient 'randomized' method is enabled. Otherwise the exact full SVD is computed
 and optionally truncated afterwards.
@@ -121,8 +121,8 @@ If full :
 run exact full SVD calling the standard LAPACK solver via `scipy.linalg.svd` and select
 the components by postprocessing
 If arpack :
-run SVD truncated to used_components calling ARPACK solver via `scipy.sparse.linalg.svds` .
-It requires strictly 0 < used_components < min(X.shape)
+run SVD truncated to n_components calling ARPACK solver via `scipy.sparse.linalg.svds` .
+It requires strictly 0 < n_components < min(X.shape)
 If randomized :
 run randomized SVD by the method of Halko et al.""",
     ).tag(config=True)
@@ -174,14 +174,6 @@ for reproducible results across multiple function calls.""",
         copy=True,
         **kwargs,
     ):
-        # we have changed the name n_components use in sklearn by
-        # used_components (in order  to avoid conflict with the rest of the program)
-        # warn th user:
-        if "n_components" in kwargs:
-            raise KeyError(
-                "`n_components` is not a valid parameter. Did-you mean "
-                "`used_components`?"
-            )
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
@@ -194,7 +186,7 @@ for reproducible results across multiple function calls.""",
 
         # initialize sklearn PCA
         self._pca = decomposition.PCA(
-            n_components=self.used_components,
+            n_components=self.n_components,
             whiten=self.whiten,
             copy=copy,
             svd_solver=self.svd_solver,
@@ -231,21 +223,21 @@ for reproducible results across multiple function calls.""",
 
         self._X_preprocessed = X.data
 
-        # final check on the configuration used_components parameter
+        # final check on the configuration n_components parameter
         # (which can be done only when X is defined in fit arguments)
         n_observations, n_features = X.shape
 
-        n_components = self.used_components
+        n_components = self.n_components
         if n_components is None:
             pass
         elif n_components == "mle":
             if n_observations < n_features:
                 raise ValueError(
-                    "used_components='mle' is only supported if n_observations >= n_features"
+                    "n_components='mle' is only supported if n_observations >= n_features"
                 )
         elif not 0 <= n_components <= min(n_observations, n_features):
             raise ValueError(
-                "used_components=%r must be between 0 and "
+                "n_components=%r must be between 0 and "
                 "min(n_observations, n_features)=%r with "
                 "svd_solver='full'" % (n_components, min(n_observations, n_features))
             )
@@ -278,6 +270,7 @@ for reproducible results across multiple function calls.""",
         self._n_components = int(
             self._pca.n_components_
         )  # cast the returned int64 to int
+        self.n_components = self._n_components
         return _outfit
 
     def _transform(self, X):

@@ -62,12 +62,12 @@ def test_pls():
     Yv_array = Yv.data
     yv_array = yv.data
 
-    pls1 = PLSRegression(used_components=5)
+    pls1 = PLSRegression(n_components=5)
     pls1.fit(Xc, yc)
     pls1_ = sklPLSRegression(n_components=5)
     pls1_.fit(Xc_array, yc_array)
 
-    pls2 = PLSRegression(used_components=5)
+    pls2 = PLSRegression(n_components=5)
     pls2.fit(Xc, Yc)
     pls2_ = sklPLSRegression(n_components=10)
     pls2_.fit(Xc_array, Yc_array)
@@ -138,7 +138,7 @@ def test_pls():
     # todo: check why only 3 decimals
 
     # Test masked data, x axis
-    pls2 = PLSRegression(used_components=5)
+    pls2 = PLSRegression(n_components=5)
     Xc[:, 1600.0:1800.0] = MASKED  # corn spectra, calibration
     pls2.fit(Xc, yc)
 

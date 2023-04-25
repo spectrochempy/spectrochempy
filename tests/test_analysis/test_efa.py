@@ -42,7 +42,7 @@ def test_example():
     # Fit the model
     model.fit(X)
     # Display components spectra (2 x M)
-    model.used_components = 2
+    model.n_components = 2
     _ = model.components.plot(title="Components")
     # Get the abstract concentration profile based on the FIFO EFA analysis
     c = model.transform()
@@ -122,7 +122,7 @@ def test_EFA(IR_dataset_2D):
     # We can consider that the third EFA components is mainly due to the noise,
     # and so we can use it to set a cut of values
 
-    n_pc = efa.used_components = 2  # what is important here is to set used_components
+    n_pc = efa.n_components = 2  # what is important here is to set n_components
     efa.cutoff = np.max(efa.f_ev[:, n_pc].data)
 
     f2 = efa.f_ev[:, :n_pc]
@@ -153,7 +153,7 @@ def test_EFA(IR_dataset_2D):
     # row masking
     ds[10:12] = MASKED
 
-    efa = scp.EFA(used_components=4)
+    efa = scp.EFA(n_components=4)
     efa.fit(ds)
 
     C = efa.transform()

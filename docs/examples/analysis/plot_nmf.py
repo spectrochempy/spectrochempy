@@ -45,7 +45,7 @@ _ = dataset.plot()
 #
 # As argument of the object constructor we define log_level to ``"INFO"`` to
 # obtain verbose output during fit, and we set the number of component to use at 4.
-model = scp.NMF(used_components=4, log_level="INFO")
+model = scp.NMF(n_components=4, log_level="INFO")
 
 # %%
 # Fit the model

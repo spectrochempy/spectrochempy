@@ -175,14 +175,6 @@ class NMF(DecompositionAnalysis):
         copy=True,
         **kwargs,
     ):
-        # we have changed the name n_components use in sklearn by
-        # used_components (in order  to avoid conflict with the rest of the program)
-        # warn th user:
-        if "n_components" in kwargs:
-            raise KeyError(
-                "`n_components` is not a valid parameter. Did-you mean "
-                "`used_components`?"
-            )
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!

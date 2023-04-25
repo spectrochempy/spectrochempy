@@ -110,7 +110,7 @@ y_test = Y[57:, "Moisture"]
 # Then we create a PLSRegression object with 5 components and fit the train datasets:
 
 # %%
-pls = scp.PLSRegression(used_components=5)
+pls = scp.PLSRegression(n_components=5)
 _ = pls.fit(X_train, y_train)
 
 # %% [markdown]

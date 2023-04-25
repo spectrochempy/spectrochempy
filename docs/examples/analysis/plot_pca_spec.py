@@ -25,7 +25,7 @@ _ = dataset.plot()
 # %%
 # Create a PCA object and fit the dataset so that the explained variance is greater or
 # equal to 99.9%
-pca = scp.PCA(used_components=0.999)
+pca = scp.PCA(n_components=0.999)
 pca.fit(dataset)
 
 # %%
@@ -64,7 +64,7 @@ _ = dataset.plot()
 
 # %%
 # Apply the PCA model
-pca = scp.PCA(used_components=0.999)
+pca = scp.PCA(n_components=0.999)
 pca.fit(dataset)
 pca.n_components
 

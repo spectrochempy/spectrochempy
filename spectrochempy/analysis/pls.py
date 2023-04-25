@@ -62,7 +62,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     # Configuration parameters
     # ----------------------------------------------------------------------------------
 
-    used_components = tr.Int(
+    n_components = tr.Int(
         default_value=2,
         help="Number of components to keep. Should be in the range [1, min(n_samples, "
         "n_features, n_targets)].",
@@ -95,14 +95,6 @@ class PLSRegression(CrossDecompositionAnalysis):
         warm_start=False,
         **kwargs,
     ):
-        # we have changed the name n_components use in sklearn by
-        # used_components (in order  to avoid conflict with the rest of the program)
-        # warn th user:
-        if "n_components" in kwargs:
-            raise KeyError(
-                "`n_components` is not a valid parameter. Did-you mean "
-                "`used_components`?"
-            )
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
@@ -114,7 +106,7 @@ class PLSRegression(CrossDecompositionAnalysis):
 
         # initialize sklearn PLSRegression
         self._pls = cross_decomposition.PLSRegression(
-            n_components=self.used_components,
+            n_components=self.n_components,
             scale=self.scale,
             max_iter=self.max_iter,
             tol=self.tol,
@@ -145,7 +137,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         # todo: check self.feature_names_in = self._pls.feature_names_in_
 
         # for compatibility with superclass methods
-        self._n_components = self.used_components
+        self._n_components = self.n_components
 
     def _fit_transform(self, X, Y=None):
         # Learn and apply the dimension reduction on the train data.

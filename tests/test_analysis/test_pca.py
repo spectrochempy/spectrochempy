@@ -57,8 +57,8 @@ def test_pca():
     ), "input dataset should be reflected in the internal variable X"
 
     # set n_components during init
-    pca = PCA(used_components=5)
-    assert pca.used_components == 5
+    pca = PCA(n_components=5)
+    assert pca.n_components == 5
     try:
         # the private attribute _n_components should not exist at this time
         _ = pca._n_components
@@ -70,7 +70,7 @@ def test_pca():
     except NotFittedError:
         pass
 
-    pca = PCA(used_components=6)
+    pca = PCA(n_components=6)
     try:
         # _X initialized only when fit is used
         _ = pca._X.shape
@@ -84,25 +84,25 @@ def test_pca():
     # now the n_components has been defined
     assert pca.n_components == 6
 
-    # try a wrong number of used_components  <= min(n_observations, n_features)
+    # try a wrong number of n_components  <= min(n_observations, n_features)
     try:
 
-        pca = PCA(used_components=56)
+        pca = PCA(n_components=56)
         pca.fit(dataset)
     except ValueError:
         pass
 
     # try other ways to define n_components
     try:
-        pca = PCA(used_components="mle")
+        pca = PCA(n_components="mle")
         pca.fit(dataset)
     except ValueError as exc:
         assert (
             exc.args[0]
-            == "used_components='mle' is only supported if n_observations >= n_features"
+            == "n_components='mle' is only supported if n_observations >= n_features"
         )
 
-    pca = PCA(used_components=0.99)  # in % of explained variance
+    pca = PCA(n_components=0.99)  # in % of explained variance
     pca.fit(dataset)
     assert pca.n_components == 7
 
@@ -120,7 +120,7 @@ def test_pca():
 
     # much better fit when masking eratic data
     # more variance explained with less components
-    pca = PCA(used_components=0.999)  # in % of explained variance
+    pca = PCA(n_components=0.999)  # in % of explained variance
     pca.fit(dataset)
     assert pca.n_components == 4
 
