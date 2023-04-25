@@ -29,6 +29,7 @@
     Optimize
     PCA
     PFR
+    PLSRegression
     Project
     Quantity
     SIMPLISMA
@@ -107,7 +108,6 @@
     read_omnic
     read_opus
     read_quadera
-    read_remote
     read_sdr
     read_soc
     read_spa

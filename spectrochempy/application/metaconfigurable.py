@@ -24,7 +24,7 @@ class MetaConfigurable(Configurable):
     executions of the main application.
     """
 
-    name = tr.Unicode(allow_none=True)
+    name = tr.Unicode(allow_none=True, help="Object name")
 
     def __init__(self, **kwargs):
         # keep only the current config section

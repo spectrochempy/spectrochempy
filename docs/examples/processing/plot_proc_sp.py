@@ -90,4 +90,9 @@ new5.plot(
     legend="best",
 )
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# %%
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

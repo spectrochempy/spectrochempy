@@ -96,8 +96,3 @@ def get_pkg_path(data_name, package=None):
         return os.path.dirname(path)
 
     return path
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

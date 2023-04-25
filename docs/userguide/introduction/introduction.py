@@ -40,7 +40,7 @@
 # The `SpectroChemPy` project is essentially a library written in
 # [python](https://www.python.org) language and provides objects,
 # [NDDataset](../../reference/generated/spectrochempy.NDDataset.html)
-# and [Project]((../../reference/generated/spectrochempy.Project.html)),
+# and [Project](../../reference/generated/spectrochempy.Project.html),
 # to hold data, equipped with methods to analyze, transform or display these data in a
 # simple way through a python type interface.
 #

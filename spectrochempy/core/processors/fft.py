@@ -635,8 +635,3 @@ def ht(dataset, N=None):
     # correct the real data as sometimes it changes
     z.real = dataset.real
     return z
-
-
-# ======================================================================================
-if __name__ == "__main__":  # pragma: no cover
-    pass

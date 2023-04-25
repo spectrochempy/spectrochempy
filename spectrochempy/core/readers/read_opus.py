@@ -10,7 +10,6 @@ This module extend NDDataset with the import method for OPUS generated data file
 __all__ = ["read_opus"]
 __dataset_methods__ = __all__
 
-import io
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
@@ -18,7 +17,7 @@ from brukeropusreader.opus_parser import parse_data, parse_meta
 
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.coord import Coord, LinearCoord
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.utils.docstrings import _docstring
 
 # ======================================================================================
@@ -132,12 +131,8 @@ def _read_opus(*args, **kwargs):
     debug_("Bruker OPUS import")
 
     dataset, filename = args
-    content = kwargs.get("content", None)
 
-    if content:
-        fid = io.BytesIO(content)
-    else:
-        fid = open(filename, "rb")
+    fid, kwargs = _openfid(filename, **kwargs)
 
     opus_data = _read_data(fid)
 
@@ -147,7 +142,7 @@ def _read_opus(*args, **kwargs):
         data = opus_data["AB"][:npt]
         dataset.data = np.array(data[np.newaxis], dtype="float32")
     except KeyError:
-        raise IOError(
+        raise KeyError(
             f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method"
         )
     # todo: read background
@@ -204,8 +199,3 @@ def _read_data(fid):
     meta_data = parse_meta(data)
     opus_data = parse_data(data, meta_data)
     return opus_data
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

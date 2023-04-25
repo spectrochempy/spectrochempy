@@ -36,13 +36,14 @@ jobs:
 
     defaults:
       run:
-        shell: bash -l {0}
+        shell: bash {0}
+        # do not use -l flag (do not work with macos when bash is se in login mode)
 
     strategy:
-      max-parallel: 4
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest] # , , macos-latest, windows-latest
-        pythonVersion: ["3.10" , "3.8"]
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        pythonVersion: ["3.10"] # , "3.8"]
 
     steps:
       - name: Checkout code
@@ -55,29 +56,21 @@ jobs:
         with:
           python-version: ${{ matrix.pythonVersion }}
 
-      - name: Install spectrochempy
-        run: |
-          python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install .
-
       - name: Install dependencies for testing
         run: |
-          python3 -m pip install pytest
-          python3 -m pip install pytest-doctestplus
-          python3 -m pip install pytest-flake8
-          python3 -m pip install pytest-mock
-          python3 -m pip install pyfakefs
-          python3 -m pip install cffconvert
-          python3 -m pip install coverage
-          python3 -m pip install numpydoc>=1.2
-
-      - name: Install optional libraries needed for tests
-        run: |
-          python3 -m pip install xarray
+          python --version
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install pytest pytest-doctestplus pytest-flake8 pytest-mock
+          python -m pip install pyfakefs
+          python -m pip install cffconvert
+          python -m pip install coverage
+          python -m pip install numpydoc>=1.2
+          python -m pip install xarray
+          python -m pip install .
 
       - name: List final packages used for tests
         run: |
-          python3 -m pip list
+          python -m pip list
 
       - name: Test with coverage
         run: |

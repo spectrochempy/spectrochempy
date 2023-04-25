@@ -677,10 +677,3 @@ class NDComplexArray(NDArray):
     def __setitem__(self, items, value):
 
         super().__setitem__(items, value)
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass
-
-# end of module

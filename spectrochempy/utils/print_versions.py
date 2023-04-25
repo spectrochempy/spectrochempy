@@ -112,5 +112,5 @@ def show_versions(file=sys.stdout):
             print(f"{dep}: (Can't determine version string)", file=file)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     show_versions()

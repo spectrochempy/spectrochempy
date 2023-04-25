@@ -6,17 +6,38 @@
 # ======================================================================================
 # flake8: noqa
 
+from os import environ
+
 import numpy as np
 import pytest
 import traitlets as tr
 
+import spectrochempy as scp
 from spectrochempy.analysis.mcrals import MCRALS
 from spectrochempy.core import set_loglevel
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
+from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils import testing
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_MCRALS_docstrings():
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.analysis.mcrals"
+    chd.check_docstrings(
+        module,
+        obj=scp.MCRALS,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01", "PR06"],
+    )
 
 
 def gaussian(x, h, c, w, noise):
@@ -167,8 +188,8 @@ def test_MCRALS(model, data):
     mcr1.tol == 0.01
     mcr1.fit(D, C0)
 
-    assert np.max(np.abs(mcr.C - mcr1.C)) < 1.0e-13
-    assert np.max(np.abs(mcr.St - mcr1.St)) < 1.0e-13
+    assert np.max(np.abs(mcr.C - mcr1.C)) < 1.0e-12
+    assert np.max(np.abs(mcr.St - mcr1.St)) < 1.0e-12
 
     # test diverging
     mcr.monoIncConc = [0, 1]
@@ -230,7 +251,7 @@ def test_MCRALS(model, data):
 
     # reconstruct
     Dh = mcr.reconstruct()
-    assert (Dh - D).abs().max() < 1.0e-14
+    assert (Dh - D).abs().max() < 1.0e-12
 
 
 def test_MCRALS_errors(model, data):

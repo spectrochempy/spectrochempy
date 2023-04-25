@@ -63,7 +63,7 @@ _ = D.plot()
 print("compute EFA...")
 efa = scp.EFA()
 efa.fit(D[:, 300.0:500.0])
-efa.used_components = 3
+efa.n_components = 3
 C0 = efa.transform()
 C0 = C0 / C0.max(dim="y") * 5.0
 _ = C0.T.plot()
@@ -119,4 +119,8 @@ _ = mcr_2.St.plot()
 _ = mcr_2.plotmerit(offset=0, nb_traces=10)
 
 # %%
-scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

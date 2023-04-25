@@ -45,7 +45,7 @@ def import_optional_dependency(
     errors: str = "raise",
     min_version: str | None = None,
 ):
-    """
+    r"""
     Import an optional dependency.
 
     By default, if a dependency is missing an ImportError with a nice

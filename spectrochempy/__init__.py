@@ -80,8 +80,3 @@ def __getattr__(name):
     if hasattr(NDDataset, name):
         return getattr(NDDataset, name)
     raise AttributeError
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass
