@@ -22,9 +22,6 @@ New features
       # lst contains 7 NDDatasets,, display the last
       lst[-1].plot()
 
-* Download from urls can also be done using the `download` method.
-  However `read` offers more options such as merging.
-
 * Automatically download the github repository ``spectrochempy_data`` which contains the files
   for the examples and tests. The files are downloaded in the directory scp.preferences.datadir.
   When the program is run for the first time, the availability of the files may take several
