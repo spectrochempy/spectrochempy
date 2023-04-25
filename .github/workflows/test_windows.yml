@@ -1,4 +1,4 @@
-name: Tests
+name: Tests-windows
 
 on:
   push:
@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        pythonVersion: [3.10"]
+        pythonVersion: ["3.10"]
     steps:
       - name: Checkout spectrochempy repository
         uses: actions/checkout@v3
