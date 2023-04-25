@@ -90,10 +90,12 @@ jobs:
 
       - name: Test with coverage
         run: |
+          source ./.venv/bin/activate
           coverage run -m pytest tests
 
       - name: Coverage report to xml
         run: |
+          source ./.venv/bin/activate
           coverage xml
 
       - name: Code Climate reporting
