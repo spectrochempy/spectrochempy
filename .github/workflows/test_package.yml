@@ -94,13 +94,13 @@ jobs:
           python -m pip install xarray
 
       - name: Activate virtual environment on posix
-        if : ${{ matrix.os != 'window-latest' }}
+        if : ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'}}
         run: |
           source ${{ matrix.path }}/bin/activate
           echo PATH=$PATH >> $GITHUB_ENV
 
       - name: Activate virtual environment on Windows
-        if : ${{ matrix.os == 'window-latest' }}
+        if : ${{ matrix.os == 'windows-latest' }}
         run: |
           ${{ matrix.path }}\Scripts\activate.bat
           echo PATH=$PATH >> $GITHUB_ENV
