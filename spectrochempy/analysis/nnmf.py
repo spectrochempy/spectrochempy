@@ -14,7 +14,7 @@ from numpy.random import RandomState
 from sklearn import decomposition
 
 from spectrochempy.analysis._base import DecompositionAnalysis
-from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["NMF"]
@@ -175,6 +175,9 @@ class NMF(DecompositionAnalysis):
         copy=True,
         **kwargs,
     ):
+        if "used_components" in kwargs:
+            deprecated("used_components", replace="n_components", removed="0.7")
+            kwargs["max_components"] = kwargs.pop("n_pc")
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!

@@ -19,7 +19,7 @@ from spectrochempy.analysis._base import (
     NotFittedError,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.plots import NBlue, NRed
 
@@ -174,6 +174,9 @@ for reproducible results across multiple function calls.""",
         copy=True,
         **kwargs,
     ):
+        if "used_components" in kwargs:
+            deprecated("used_components", replace="n_components", removed="0.7")
+            kwargs["max_components"] = kwargs.pop("n_pc")
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
