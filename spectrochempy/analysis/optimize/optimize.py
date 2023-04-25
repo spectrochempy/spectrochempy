@@ -109,7 +109,6 @@ class Optimize(DecompositionAnalysis):
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         """ """
@@ -120,7 +119,6 @@ class Optimize(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 

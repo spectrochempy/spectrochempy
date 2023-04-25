@@ -61,10 +61,15 @@ def test_base_docstrings():
     )
 
 
+class Foo(AnalysisConfigurable):
+    a = tr.Integer(None, allow_none=True, help="trait a").tag(config=True)
+    b = tr.Unicode("foo_b", help="this is a trait b").tag(config=True)
+
+    def _fit(self, X):
+        return X
+
+
 def test_analysisconfigurable():
-    class Foo(AnalysisConfigurable):
-        a = tr.Integer(None, allow_none=True, help="trait a").tag(config=True)
-        b = tr.Unicode("foo_b", help="this is a trait b").tag(config=True)
 
     foo = Foo()
     assert isinstance(foo, AnalysisConfigurable)
@@ -92,15 +97,8 @@ def test_analysisconfigurable():
     with pytest.raises(KeyError):
         _ = Foo(j=1)
 
-    # with
-
 
 def test_analysisconfigurable_validation():
-    class Foo(AnalysisConfigurable):
-        """a test for mask"""
-
-        def _fit(self, X):
-            return X
 
     # case of 2D array (the classical case for decomposition problems)
     foo = Foo()

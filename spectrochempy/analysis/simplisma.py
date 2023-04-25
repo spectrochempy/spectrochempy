@@ -94,7 +94,6 @@ class SIMPLISMA(DecompositionAnalysis):
         *args,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         if len(args) > 0:
@@ -121,7 +120,6 @@ class SIMPLISMA(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 

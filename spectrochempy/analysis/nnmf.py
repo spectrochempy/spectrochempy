@@ -172,7 +172,6 @@ class NMF(DecompositionAnalysis):
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         if "used_components" in kwargs:
@@ -184,7 +183,6 @@ class NMF(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 

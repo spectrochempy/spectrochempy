@@ -264,7 +264,6 @@ class AnalysisConfigurable(MetaConfigurable):
 
         When `warm_start` is `True`\ , the existing fitted model attributes is used to
         initialize the new model in a subsequent call to `fit`\ .
-    %(copy)s
     """
     )
 
@@ -274,8 +273,6 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
-    _copy = tr.Bool(default_value=True, help="If True, input X data are copied")
-
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows and columns")
     _X = NDDatasetType(allow_none=True, help="Data to fit a model")
@@ -309,7 +306,6 @@ class AnalysisConfigurable(MetaConfigurable):
         *,
         log_level=logging.WARNING,
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         """ """
@@ -354,22 +350,19 @@ class AnalysisConfigurable(MetaConfigurable):
             # until the fit method has been executed
             self._fitted = False
 
-        # Copy passed data if required (True is the default)
-        self._copy = copy
-
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
     def _make_dataset(self, d):
-        # Transform an array-like object to NDDataset (optionally copy data)
+        # Transform an array-like object to NDDataset
         # or a list of array-like to a list of NDQataset
         if d is None:
             return
         if isinstance(d, (tuple, list)):
             d = [self._make_dataset(item) for item in d]
         elif not isinstance(d, NDDataset):
-            d = NDDataset(d, copy=self._copy)
-        elif self._copy:
+            d = NDDataset(d, copy=True)
+        else:
             d = d.copy()
         return d
 
@@ -398,7 +391,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # not only some individual data (if this is what you wanted, this
         # will fail)
 
-        if not hasattr(X, "mask"):
+        if not hasattr(X, "mask") or not np.any(X._mask):
             return X
 
         # remove masked rows and columns
@@ -506,7 +499,6 @@ class AnalysisConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         # validation fired when self._X is assigned
         X = proposal.value
-
         # for the following we need X with two dimensions
         # So let's generate the un-squeezed X
         if X.ndim == 1:
@@ -589,7 +581,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         # fire the X and eventually Y validation and preprocessing.
         # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
-        self._X = X  # self._make_dataset(X)
+        self._X = X
         if Y is not None:
             self._Y = Y
 
@@ -705,9 +697,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         # validation of the _Y attribute: fired when self._Y is assigned
         Y = proposal.value
 
-        # we need a dataset or a list of NDDataset with eventually  a copy of the
-        # original data (default being to copy them)
-
+        # we need a dataset or a list of NDDataset
         Y = self._make_dataset(Y)
         return Y
 
@@ -1562,7 +1552,6 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
 
@@ -1571,14 +1560,12 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 
         # initialize sklearn LinearRegression
         self._linear_regression = linear_model.LinearRegression(
             fit_intercept=self.fit_intercept,
-            copy_X=copy,
             n_jobs=None,  # not used for the moment (XXX: should we add this?)
             positive=self.positive,
         )
@@ -1595,9 +1582,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         # validation of the _Y attribute: fired when self._Y is assigned
         Y = proposal.value
 
-        # we need a dataset or a list of NDDataset with eventually  a copy of the
-        # original data (default being to copy them)
-
+        # we need a dataset or a list of NDDataset
         Y = self._make_dataset(Y)
         return Y
 
