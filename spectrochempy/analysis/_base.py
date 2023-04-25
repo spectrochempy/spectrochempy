@@ -1200,9 +1200,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
-        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
-            New data, where :term:`n_observations` is the number of observations
-            and :term:`n_features` is the number of features.
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_targets`\ ), optional
+            New data, where :term:`n_targets` is the number of variables to predict.
             if not provided, the input dataset of the `fit` method will be used.
         both : `bool`, default: `False`
             Whether to also apply the dimensionality reduction to Y when neither X nor Y are provided.
@@ -1255,6 +1254,9 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Reduced `X` data, where `n_observations` is the number of observations
             and `n_components` is the number of components. If `X_transform` is not
             provided, a transform of `X` provided in `fit` is performed first.
+        Y_transform : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , `n_components`\ ), optional
+            New data, where :term:`n_targets` is the number of variables to predict. If `Y_transform` is not
+            provided, a transform of `Y` provided in `fit` is performed first.
         %(kwargs)s
 
         Returns
