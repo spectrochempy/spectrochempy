@@ -42,7 +42,16 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
-        pythonVersion: ["3.10"] # , "3.8"]
+        include:
+        - os: ubuntu-latest
+          path: ~/.venv
+          pythonVersion: ["3.10" , "3.8"]
+        - os: macos-latest
+          path: ~/.venv
+          pythonVersion: ["3.10"]
+        - os: windows-latest
+          path: $HOME\.venv
+          pythonVersion: ["3.10"]
 
     steps:
       - name: Checkout spectrochempy repository
@@ -61,16 +70,15 @@ jobs:
         uses: actions/cache@v3
         id: cache-venv
         with:
-          path: ./.venv/
+          path: ${{ matrix.path }}
           key: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-${{ hashFiles('requirements/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-${{ hashFiles('requirements/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-
 
       - name: Install dependencies for testing
         # Run only if dependencies have changed
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
-          python -m venv ./.venv
+          python -m venv ${{ matrix.path }}
           source ./.venv/bin/activate
           python --version
           python -m pip install -r requirements/requirements.txt
@@ -82,21 +90,30 @@ jobs:
           python -m pip install numpydoc>=1.2
           python -m pip install xarray
 
+      - name: Activate virtual environment on posix
+        if : ${{ matrix.os != 'window-latest' }}
+        run: |
+          source ${{ matrix.path }}/bin/activate
+          echo PATH=$PATH >> $GITHUB_ENV
+
+      - name: Activate virtual environment on Windows
+        if : ${{ matrix.os == 'window-latest' }}
+        run: |
+          ${{ matrix.path }}\Scripts\activate.bat
+          echo PATH=$PATH >> $GITHUB_ENV
+
       - name: Install spectrochempy
         run: |
-          source ./.venv/bin/activate
           python -m pip install --no-deps .
           python -m pip list
 
       - name: Test with coverage
         run: |
-          source ./.venv/bin/activate
           coverage run -m pytest tests
 
       - name: Coverage report to xml
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
         run: |
-          source ./.venv/bin/activate
           coverage xml
 
       - name: Code Climate reporting
