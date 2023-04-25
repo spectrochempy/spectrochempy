@@ -50,7 +50,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     # only those specific to PLSRegression, the other being defined in AnalysisConfigurable.
     # ----------------------------------------------------------------------------------
     # define here only the variable that you use in fit or transform functions
-    _pls = tr.Instance(
+    _plsregression = tr.Instance(
         cross_decomposition.PLSRegression,
         help="The instance of sklearn.cross_decomposition.PLSRegression used in this model",
     )
@@ -102,7 +102,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         )
 
         # initialize sklearn PLSRegression
-        self._pls = cross_decomposition.PLSRegression(
+        self._plsregression = cross_decomposition.PLSRegression(
             n_components=self.n_components,
             scale=self.scale,
             max_iter=self.max_iter,
@@ -116,22 +116,22 @@ class PLSRegression(CrossDecompositionAnalysis):
     def _fit(self, X, Y):
         # this method is called by the abstract class fit.
         # Input X and Y are np.ndarray
-        self._pls.fit(X, Y)
-        self._x_weights = self._pls.x_weights_.T
-        self._y_weights = self._pls.y_weights_.T
-        self._x_loadings = self._pls.x_loadings_.T
-        self._y_loadings = self._pls.y_loadings_.T
-        self._x_scores = self._pls.x_scores_
-        self._y_scores = self._pls.y_scores_
-        self._x_rotations = self._pls.x_rotations_.T
-        self._y_rotations = self._pls.y_rotations_.T
+        self._plsregression.fit(X, Y)
+        self._x_weights = self._plsregression.x_weights_.T
+        self._y_weights = self._plsregression.y_weights_.T
+        self._x_loadings = self._plsregression.x_loadings_.T
+        self._y_loadings = self._plsregression.y_loadings_.T
+        self._x_scores = self._plsregression.x_scores_
+        self._y_scores = self._plsregression.y_scores_
+        self._x_rotations = self._plsregression.x_rotations_.T
+        self._y_rotations = self._plsregression.y_rotations_.T
 
-        self._coef = self._pls.coef_.T
-        self._intercept = self._pls.intercept_
-        self._n_iter = self._pls.n_iter_
-        self._n_feature_in = self._pls.n_features_in_
+        self._coef = self._plsregression.coef_.T
+        self._intercept = self._plsregression.intercept_
+        self._n_iter = self._plsregression.n_iter_
+        self._n_feature_in = self._plsregression.n_features_in_
 
-        # todo: check self.feature_names_in = self._pls.feature_names_in_
+        # todo: check self.feature_names_in = self._plsregression.feature_names_in_
 
         # for compatibility with superclass methods
         self._n_components = self.n_components
@@ -139,24 +139,24 @@ class PLSRegression(CrossDecompositionAnalysis):
     def _fit_transform(self, X, Y=None):
         # Learn and apply the dimension reduction on the train data.
         #
-        return self._pls.fit_transform(X, Y)
+        return self._plsregression.fit_transform(X, Y)
 
     def _inverse_transform(self, X_transform, Y_transform=None):
         # Transform data back to its original space.
-        return self._pls.inverse_transform(X_transform, Y=Y_transform)
+        return self._plsregression.inverse_transform(X_transform, Y=Y_transform)
 
     def _transform(self, X, Y=None):
         # Apply the dimension reduction.
-        return self._pls.transform(X, Y)
+        return self._plsregression.transform(X, Y)
 
     def _predict(self, X):
         # Predict targets of given samples.
-        return self._pls.predict(X)
+        return self._plsregression.predict(X)
 
     def _score(self, X, Y, sample_weight=None):
         # this method is called by the abstract class score.
         # Input X, Y, sample_weights are np.ndarray
-        return self._pls.score(X, Y, sample_weight=sample_weight)
+        return self._plsregression.score(X, Y, sample_weight=sample_weight)
 
     # ----------------------------------------------------------------------------------
     # Public methods and properties specific to PLSRegression
