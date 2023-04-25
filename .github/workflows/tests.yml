@@ -1,0 +1,101 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - feature/*
+
+  schedule:
+    - cron: '00 0 * * *'
+
+  pull_request:
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-package:
+
+    # prevent cron jobs from running on forks or release
+    if: |
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy'
+       && !startsWith(github.ref, 'refs/release/')) || (
+       github.event_name != 'schedule'
+       && !startsWith(github.ref, 'refs/release/'))
+
+    name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash {0}
+        # do not use -l flag (do not work with macos when bash is se in login mode)
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+        pythonVersion: ["3.8", "3.10"]
+        exclude:
+          - os: macos-latest
+            pythonVersion: 3.8
+
+    steps:
+      - name: Checkout spectrochempy repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.pythonVersion }}
+        id: setup_python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.pythonVersion }}
+
+      - name: cache virtualenv
+        # Cache virtual environment to avoid installing dependencies at each runs
+        uses: actions/cache@v3
+        id: cache-venv
+        with:
+          path: ./.venv/
+          key: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-${{ hashFiles('requirements/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-
+
+      - name: Install dependencies for testing
+        # Run only if dependencies have changed
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: |
+          python -m venv ./.venv/
+          source ./.venv/bin/activate
+          python --version
+          python -m pip install -r requirements/requirements_test.txt
+
+      - name: Install spectrochempy
+        run: |
+          source ./.venv/bin/activate
+          python -m pip install --no-deps .
+          python -m pip list
+
+      - name: Test with coverage
+        run: |
+          source ./.venv/bin/activate
+          coverage run -m pytest tests
+
+      - name: Coverage report to xml
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
+        run: |
+          source ./.venv/bin/activate
+          coverage xml
+
+      - name: Code Climate reporting
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
+        uses: paambaati/codeclimate-action@v3.2.0
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}

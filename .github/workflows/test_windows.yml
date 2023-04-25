@@ -41,21 +41,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        pythonVersion: ["3.8", "3.10"]
-        exclude:
-          - os: windows-latest
-            pythonVersion: 3.8
-          - os: macos-latest
-            pythonVersion: 3.8
-        include:
-          - os: ubuntu-latest
-            path: ~/.venv
-          - os: macos-latest
-            path: ~/.venv
-          - os: windows-latest
-            path: $HOME\.venv
-
+        os: [windows-latest]
+        pythonVersion: [3.10"]
     steps:
       - name: Checkout spectrochempy repository
         uses: actions/checkout@v3
@@ -81,46 +68,18 @@ jobs:
         # Run only if dependencies have changed
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
-          python -m venv ${{ matrix.path }}
-          source ./.venv/bin/activate
+          python -m venv $HOME\.venv
+          $HOME\.venv\Scripts\activate.bat
           python --version
-          python -m pip install -r requirements/requirements.txt
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install pytest pytest-doctestplus pytest-flake8 pytest-mock
-          python -m pip install pyfakefs
-          python -m pip install cffconvert
-          python -m pip install coverage
-          python -m pip install numpydoc>=1.2
-          python -m pip install xarray
-
-      - name: Activate virtual environment on posix
-        if : ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'}}
-        run: |
-          source ${{ matrix.path }}/bin/activate
-          echo PATH=$PATH >> $GITHUB_ENV
-
-      - name: Activate virtual environment on Windows
-        if : ${{ matrix.os == 'windows-latest' }}
-        run: |
-          ${{ matrix.path }}\Scripts\activate.bat
-          echo PATH=$PATH >> $GITHUB_ENV
+          python -m pip install -r requirements/requirements_test.txt
 
       - name: Install spectrochempy
         run: |
+          $HOME\.venv\Scripts\activate.bat
           python -m pip install --no-deps .
           python -m pip list
 
       - name: Test with coverage
         run: |
-          coverage run -m pytest tests
-
-      - name: Coverage report to xml
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
-        run: |
-          coverage xml
-
-      - name: Code Climate reporting
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
-        uses: paambaati/codeclimate-action@v3.2.0
-        env:
-          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+          $HOME\.venv\Scripts\activate.bat
+          python -m pytest tests
