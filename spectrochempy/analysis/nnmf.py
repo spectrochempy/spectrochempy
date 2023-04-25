@@ -14,7 +14,7 @@ from numpy.random import RandomState
 from sklearn import decomposition
 
 from spectrochempy.analysis._base import DecompositionAnalysis
-from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["NMF"]
@@ -63,7 +63,7 @@ class NMF(DecompositionAnalysis):
     # Configuration parameters
     # ----------------------------------------------------------------------------------
 
-    used_components = tr.Integer(
+    n_components = tr.Integer(
         default_value=None,
         allow_none=True,
         help="Number of components to use. If None is passed, all are used.",
@@ -172,30 +172,23 @@ class NMF(DecompositionAnalysis):
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
-        # we have changed the name n_components use in sklearn by
-        # used_components (in order  to avoid conflict with the rest of the program)
-        # warn th user:
-        if "n_components" in kwargs:
-            raise KeyError(
-                "`n_components` is not a valid parameter. Did-you mean "
-                "`used_components`?"
-            )
+        if "used_components" in kwargs:
+            deprecated("used_components", replace="n_components", removed="0.6.5")
+            kwargs["n_components"] = kwargs.pop("used_components")
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 
         # initialize sklearn NMF
         self._nmf = decomposition.NMF(
-            n_components=self.used_components,
+            n_components=self.n_components,
             init=self.init,
             beta_loss=self.beta_loss,
             tol=self.tol,

@@ -19,4 +19,5 @@ in the gallery (:ref:`examples-index`\).
    peak_integration
    fitting
    pca
+   pls
    mcr_als

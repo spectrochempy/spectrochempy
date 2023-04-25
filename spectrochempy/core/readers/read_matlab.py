@@ -12,11 +12,11 @@ __all__ = ["read_matlab", "read_mat"]
 __dataset_methods__ = __all__
 
 from datetime import datetime
-from warnings import warn
 
 import numpy as np
 import scipy.io as sio
 
+from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.utils.docstrings import _docstring
@@ -112,7 +112,7 @@ def _read_mat(*args, **kwargs):
 
         elif data.dtype.char == "U":
             # this is an array of string
-            warn(
+            info_(
                 f"The mat file contains an array of strings named '{name}' which will not be converted to NDDataset"
             )
             continue
@@ -125,7 +125,7 @@ def _read_mat(*args, **kwargs):
             datasets.append(dataset)
 
         else:
-            warn(f"unsupported data type : {data.dtype}")
+            warning_(f"unsupported data type : {data.dtype}")
             # TODO: implement DSO reader
             datasets.append([name, data])
 

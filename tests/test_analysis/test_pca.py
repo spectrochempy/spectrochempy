@@ -10,15 +10,37 @@
 Tests for the PCA module
 
 """
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
 
+import spectrochempy as scp
 from spectrochempy.analysis._base import NotFittedError
 from spectrochempy.analysis.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils import exceptions, testing
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    os.environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_PCA_docstrings():
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.analysis.pca"
+    chd.check_docstrings(
+        module,
+        obj=scp.PCA,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
 
 
 # test pca
@@ -35,8 +57,8 @@ def test_pca():
     ), "input dataset should be reflected in the internal variable X"
 
     # set n_components during init
-    pca = PCA(used_components=5)
-    assert pca.used_components == 5
+    pca = PCA(n_components=5)
+    assert pca.n_components == 5
     try:
         # the private attribute _n_components should not exist at this time
         _ = pca._n_components
@@ -48,7 +70,7 @@ def test_pca():
     except NotFittedError:
         pass
 
-    pca = PCA(used_components=6)
+    pca = PCA(n_components=6)
     try:
         # _X initialized only when fit is used
         _ = pca._X.shape
@@ -62,25 +84,25 @@ def test_pca():
     # now the n_components has been defined
     assert pca.n_components == 6
 
-    # try a wrong number of used_components  <= min(n_observations, n_features)
+    # try a wrong number of n_components  <= min(n_observations, n_features)
     try:
 
-        pca = PCA(used_components=56)
+        pca = PCA(n_components=56)
         pca.fit(dataset)
     except ValueError:
         pass
 
     # try other ways to define n_components
     try:
-        pca = PCA(used_components="mle")
+        pca = PCA(n_components="mle")
         pca.fit(dataset)
     except ValueError as exc:
         assert (
             exc.args[0]
-            == "used_components='mle' is only supported if n_observations >= n_features"
+            == "n_components='mle' is only supported if n_observations >= n_features"
         )
 
-    pca = PCA(used_components=0.99)  # in % of explained variance
+    pca = PCA(n_components=0.99)  # in % of explained variance
     pca.fit(dataset)
     assert pca.n_components == 7
 
@@ -98,7 +120,7 @@ def test_pca():
 
     # much better fit when masking eratic data
     # more variance explained with less components
-    pca = PCA(used_components=0.999)  # in % of explained variance
+    pca = PCA(n_components=0.999)  # in % of explained variance
     pca.fit(dataset)
     assert pca.n_components == 4
 

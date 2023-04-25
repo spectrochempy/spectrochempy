@@ -88,7 +88,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    max_iter = tr.Integer(50, help="Maximum number of :term:`ALS` iteration").tag(
+    max_iter = tr.Integer(50, help="Maximum number of :term:`ALS` iteration.").tag(
         config=True
     )
 
@@ -366,7 +366,6 @@ at each iterations.
         *args,
         log_level=logging.WARNING,
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         if len(args) > 0:
@@ -403,7 +402,6 @@ at each iterations.
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 
@@ -984,14 +982,14 @@ at each iterations.
         ----------
         %(analysis_inverse_transform.parameters)s
 
+        Returns
+        -------
+        `NDDataset`
+            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
+
         Other Parameters
         ----------------
         %(analysis_transform.other_parameters)s
-
-        Returns
-        -------
-        `~spectrochempy.core.dataset.nddataset.NDDataset`
-            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ )
         """
         return super().inverse_transform(X_transform, **kwargs)
 

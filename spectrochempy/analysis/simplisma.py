@@ -64,14 +64,14 @@ class SIMPLISMA(DecompositionAnalysis):
         default_value=False,
         help=(
             "If True, the determination of purest variables is carried out "
-            "interactively"
+            "interactively."
         ),
     ).tag(config=True)
     max_components = tr.Integer(
         default_value=2,
         help=(
             "The maximum number of pure compounds. Used only for non interactive"
-            "analysis"
+            "analysis."
         ),
     ).tag(config=True)
     tol = tr.Float(
@@ -82,7 +82,7 @@ class SIMPLISMA(DecompositionAnalysis):
         default_value=3,
         help=(
             "A correction factor (%) for low intensity variables (0 - no offset, "
-            "15 - large offset"
+            "15 - large offset."
         ),
     ).tag(config=True)
 
@@ -94,7 +94,6 @@ class SIMPLISMA(DecompositionAnalysis):
         *args,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         if len(args) > 0:
@@ -121,7 +120,6 @@ class SIMPLISMA(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 

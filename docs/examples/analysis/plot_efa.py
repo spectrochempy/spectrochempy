@@ -57,7 +57,7 @@ b.T[:5].plot(yscale="log", legend=b.x.labels)
 # Show results with 3 components (which seems to already explain a large part of the dataset)
 # we use the magnitude of the 4th component for the cut-off value (assuming it
 # corresponds mostly to noise)
-efa1.used_components = 3
+efa1.n_components = 3
 efa1.cutoff = efa1.f_ev[:, 3].max()
 
 # get concentration
@@ -69,7 +69,7 @@ C1.T.plot(title="EFA determined concentrations", legend=C1.x.labels)
 # The number of desired components can be passed to the EFA model,
 # followed by the fit_transform method:
 
-efa2 = scp.EFA(used_components=3)
+efa2 = scp.EFA(n_components=3)
 C2 = efa2.fit_transform(dataset)
 assert C1 == C2
 
@@ -81,7 +81,7 @@ St.plot(title="components", legend=St.y.labels)
 
 # %%
 # Compare with PCA
-pca = scp.PCA(used_components=3)
+pca = scp.PCA(n_components=3)
 C3 = pca.fit_transform(dataset)
 
 # %%
@@ -92,4 +92,8 @@ LT = pca.loadings
 LT.plot(title="PCA components", legend=LT.y.labels)
 
 # %%
-scp.show()
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

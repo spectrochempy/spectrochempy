@@ -14,6 +14,7 @@ import warnings
 from copy import copy
 from functools import partial, update_wrapper
 
+import matplotlib.pyplot as plt
 import numpy as np
 import traitlets as tr
 from sklearn import linear_model
@@ -42,7 +43,9 @@ class NotFittedError(exceptions.SpectroChemPyError):
 
     Parameters
     ----------
-    attr :
+    attr : method, optional
+        The method from which the error was issued. In general it is determined
+        automatically.
     """
 
     def __init__(self, attr=None):
@@ -58,13 +61,14 @@ class NotFittedError(exceptions.SpectroChemPyError):
 
 # ======================================================================================
 # A decorator to transform np.ndarray output from models to NDDataset
-# according to the X input
+# according to the X (default) and/or Y input
 # ======================================================================================
 class _set_output(object):
     def __init__(
         self,
         method,
         *args,
+        meta_from="_X",  # the attribute or tuple of attributes from which meta data are taken
         units="keep",
         title="keep",
         typex=None,
@@ -73,6 +77,7 @@ class _set_output(object):
     ):
         self.method = method
         update_wrapper(self, method)
+        self.meta_from = meta_from
         self.units = units
         self.title = title
         self.typex = typex
@@ -96,8 +101,8 @@ class _set_output(object):
         if args and type(args[0]) == type(obj):
             args = args[1:]
 
-        # get the sklearn data output
-        data = self.method(obj, *args, **kwargs)
+        # get the method output - one or two arrays depending on the method and *args
+        output = self.method(obj, *args, **kwargs)
 
         # restore eventually masked rows and columns
         axis = "both"
@@ -106,76 +111,114 @@ class _set_output(object):
         elif self.typey is not None:
             axis = 1
 
-        # make a new dataset with this data
-        X_transf = NDDataset(data)
-
-        # Now set the NDDataset attributes from the original X
-
-        # determine the input X dataset
-        X = obj._X
-
-        if self.units is not None:
-            if self.units == "keep":
-                X_transf.units = X.units
+        # if a single array was returned...
+        if not isinstance(output, tuple):
+            # ... make a tuple of 1 array:
+            data_tuple = (output,)
+            # ... and a tuple of 1 from_meta element:
+            if not isinstance(self.meta_from, tuple):
+                meta_from_tuple = (self.meta_from,)
             else:
-                X_transf.units = self.units
-        X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
-        X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
-        if self.title is not None:
-            if self.title == "keep":
-                X_transf.title = X.title
-            else:
-                X_transf.title = self.title
-        # make coordset
-        M, N = X.shape
-        if X_transf.shape == X.shape and self.typex is None and self.typey is None:
-            X_transf.set_coordset(y=X.coord(0), x=X.coord(1))
+                # ensure that the first one
+                meta_from_tuple = (self.meta_from[0],)
         else:
-            if self.typey == "components":
-                X_transf.set_coordset(
-                    y=Coord(
-                        None,
-                        labels=["#%d" % (i) for i in range(X_transf.shape[0])],
-                        title="components",
-                    ),
-                    x=X.coord(-1),
-                )
-            if self.typex == "components":
-                X_transf.set_coordset(
-                    y=X.coord(0),  # cannot use X.y in case of transposed X
-                    x=Coord(
-                        None,
-                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                        title="components",
-                    ),
-                )
-            if self.typex == "features":
-                X_transf.set_coordset(
-                    y=Coord(
-                        None,
-                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                        title="components",
-                    ),
-                    x=X.coord(1),
-                )
-            if self.typesingle == "components":
-                # occurs when the data are 1D such as ev_ratio...
-                X_transf.set_coordset(
-                    x=Coord(
-                        None,
-                        labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                        title="components",
-                    ),
-                )
+            data_tuple = output
+            meta_from_tuple = self.meta_from
 
-        # eventually restore masks
-        X_transf = obj._restore_masked_data(X_transf, axis=axis)
+        out = []
+        for data, meta_from in zip(data_tuple, meta_from_tuple):
+            X_transf = NDDataset(data)
 
-        return X_transf.squeeze()
+            # Now set the NDDataset attributes from the original X
+
+            # determine the input X dataset
+            X = getattr(obj, meta_from)
+
+            if self.units is not None:
+                if self.units == "keep":
+                    X_transf.units = X.units
+                else:
+                    X_transf.units = self.units
+            X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
+            X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
+            if self.title is not None:
+                if self.title == "keep":
+                    X_transf.title = X.title
+                else:
+                    X_transf.title = self.title
+            # make coordset
+            M, N = X.shape
+            if X_transf.shape == X.shape and self.typex is None and self.typey is None:
+                X_transf.set_coordset(y=X.coord(0), x=X.coord(1))
+            else:
+                if self.typey == "components":
+                    X_transf.set_coordset(
+                        y=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[0])],
+                            title="components",
+                        ),
+                        x=X.coord(-1),
+                    )
+                if self.typex == "components":
+                    X_transf.set_coordset(
+                        y=X.coord(0),  # cannot use X.y in case of transposed X
+                        x=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                    )
+                if self.typex == "features":
+                    X_transf.set_coordset(
+                        y=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                        x=X.coord(1),
+                    )
+                if self.typesingle == "components":
+                    # occurs when the data are 1D such as ev_ratio...
+                    X_transf.set_coordset(
+                        x=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                    )
+                if self.typesingle == "targets":
+                    # occurs when the data are 1D such as PLSRegression intercept...
+                    if X.coordset[0].labels is not None:
+                        labels = X.coordset[0].labels
+                    else:
+                        labels = ["#%d" % (i + 1) for i in range(X.shape[-1])]
+                    X_transf.set_coordset(
+                        x=Coord(
+                            None,
+                            labels=labels,
+                            title="targets",
+                        ),
+                    )
+
+            # eventually restore masks
+            X_transf = obj._restore_masked_data(X_transf, axis=axis)
+            out.append(X_transf.squeeze())
+
+        if len(out) == 1:
+            return out[0]
+        else:
+            return tuple(out)
 
 
 def _wrap_ndarray_output_to_nddataset(
-    method=None, units="keep", title="keep", typex=None, typey=None, typesingle=None
+    method=None,
+    meta_from="_X",
+    units="keep",
+    title="keep",
+    typex=None,
+    typey=None,
+    typesingle=None,
 ):
     # wrap _set_output to allow for deferred calling
     if method:
@@ -186,6 +229,7 @@ def _wrap_ndarray_output_to_nddataset(
         def wrapper(method):
             return _set_output(
                 method,
+                meta_from=meta_from,
                 units=units,
                 title=title,
                 typex=typex,
@@ -220,7 +264,6 @@ class AnalysisConfigurable(MetaConfigurable):
 
         When `warm_start` is `True`\ , the existing fitted model attributes is used to
         initialize the new model in a subsequent call to `fit`\ .
-    %(copy)s
     """
     )
 
@@ -230,8 +273,6 @@ class AnalysisConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
-    _copy = tr.Bool(default_value=True, help="If True, input X data are copied")
-
     _fitted = tr.Bool(False, help="False if the model was not yet fitted")
     _masked_rc = tr.Tuple(allow_none=True, help="List of masked rows and columns")
     _X = NDDatasetType(allow_none=True, help="Data to fit a model")
@@ -265,7 +306,6 @@ class AnalysisConfigurable(MetaConfigurable):
         *,
         log_level=logging.WARNING,
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
         """ """
@@ -310,22 +350,19 @@ class AnalysisConfigurable(MetaConfigurable):
             # until the fit method has been executed
             self._fitted = False
 
-        # Copy passed data if required (True is the default)
-        self._copy = copy
-
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
     def _make_dataset(self, d):
-        # Transform an array-like object to NDDataset (optionally copy data)
+        # Transform an array-like object to NDDataset
         # or a list of array-like to a list of NDQataset
         if d is None:
             return
         if isinstance(d, (tuple, list)):
             d = [self._make_dataset(item) for item in d]
         elif not isinstance(d, NDDataset):
-            d = NDDataset(d, copy=self._copy)
-        elif self._copy:
+            d = NDDataset(d, copy=True)
+        else:
             d = d.copy()
         return d
 
@@ -354,7 +391,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # not only some individual data (if this is what you wanted, this
         # will fail)
 
-        if not hasattr(X, "mask"):
+        if not hasattr(X, "mask") or not np.any(X._mask):
             return X
 
         # remove masked rows and columns
@@ -462,7 +499,6 @@ class AnalysisConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         # validation fired when self._X is assigned
         X = proposal.value
-
         # for the following we need X with two dimensions
         # So let's generate the un-squeezed X
         if X.ndim == 1:
@@ -512,7 +548,7 @@ class AnalysisConfigurable(MetaConfigurable):
         # Set a X.data by default
         self._X_preprocessed = X.data
 
-    def _fit(self, X, Y=None):
+    def _fit(self, X, Y=None):  # pragma: no cover
         #  Intended to be replaced in the subclasses by user defined function
         #  (with the same name)
         raise NotImplementedError("fit method has not yet been implemented")
@@ -545,7 +581,7 @@ class AnalysisConfigurable(MetaConfigurable):
 
         # fire the X and eventually Y validation and preprocessing.
         # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
-        self._X = X  # self._make_dataset(X)
+        self._X = X
         if Y is not None:
             self._Y = Y
 
@@ -661,9 +697,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         # validation of the _Y attribute: fired when self._Y is assigned
         Y = proposal.value
 
-        # we need a dataset or a list of NDDataset with eventually  a copy of the
-        # original data (default being to copy them)
-
+        # we need a dataset or a list of NDDataset
         Y = self._make_dataset(Y)
         return Y
 
@@ -694,15 +728,15 @@ class DecompositionAnalysis(AnalysisConfigurable):
         # return a np.ndarray
         self._Y_preprocessed = Y.data
 
-    def _transform(self, *args, **kwargs):
+    def _transform(self, *args, **kwargs):  # pragma:  no cover
         # to be overriden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("transform has not yet been implemented")
 
-    def _inverse_transform(self, *args, **kwargs):
+    def _inverse_transform(self, *args, **kwargs):  # pragma:  no cover
         # to be overriden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("inverse_transform has not yet been implemented")
 
-    def _get_components(self, n_components=None):
+    def _get_components(self, n_components=None):  # pragma:  no cover
         # to be overriden in subclass such as PCA, MCRALS, ...
         raise NotImplementedError("get_components has not yet been implemented")
 
@@ -725,7 +759,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Returns
         -------
-        `~spectrochempy.core.dataset.nddataset.NDDataset`
+        `NDDataset`
             Dataset with shape (:term:`n_observations`\ , :term:`n_components`\ ).
 
         Other Parameters
@@ -788,7 +822,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Returns
         -------
-        `~spectrochempy.core.dataset.nddataset.NDDataset`
+        `NDDataset`
             Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
 
         Other Parameters
@@ -1044,6 +1078,447 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
 
 # ======================================================================================
+# Base class CrossDecompositionAnalysis
+# ======================================================================================
+class CrossDecompositionAnalysis(DecompositionAnalysis):
+    """
+    Abstract class to write analysis cross decomposition models such as `PLSRegression`, ...
+
+    Subclass this to get a minimal structure
+
+    See Also
+    --------
+    PLSRegression : Perform a Partial Least Square Regression .
+    """
+
+    # This class is a subclass of DecompositionAnalysis, so we define only additional
+    # attributes and methods necessary for cross decomposition model.
+
+    # Get doc sections for reuse in subclass
+    _docstring.get_sections(
+        _docstring.dedent(__doc__),
+        base="CrossDecompositionAnalysis",
+        sections=["See Also"],
+    )
+
+    # ----------------------------------------------------------------------------------
+    # Private methods that should be most of the time overloaded in subclass
+    # ----------------------------------------------------------------------------------
+    def _predict(self, *args, **kwargs):  # pragma:  no cover
+        # to be overriden in subclass such as PLSRegression, ...
+        raise NotImplementedError("predict has not yet been implemented")
+
+    # ----------------------------------------------------------------------------------
+    # Public methods
+    # ----------------------------------------------------------------------------------
+
+    @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None)
+    @_docstring.dedent
+    def predict(self, X=None):
+        """
+        Predict targets of given observations.
+
+        Parameters
+        ----------
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+            New data, where :term:`n_observations` is the number of observations
+            and :term:`n_features` is the number of features.
+            if not provided, the input dataset of the `fit` method will be used.
+
+        Returns
+        -------
+        `NDDataset`
+            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , :term:`n_targets`\ ).
+        """
+        if not self._fitted:
+            raise NotFittedError()
+
+        if X is None:
+            X = self._X_preprocessed
+        elif isinstance(X, NDDataset):
+            X = X.data
+
+        return self._predict(X)
+
+    @_docstring.dedent
+    def score(self, X=None, Y=None, sample_weight=None):
+        r"""
+        Return the coefficient of determination of the prediction.
+
+        The coefficient of determination :math:`R^2` is defined as
+        :math:`(1 - \frac{u}{v})` , where :math:`u` is the residual
+        sum of squares ``((y_true - y_pred)** 2).sum()`` and :math:`v`
+        is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()``\ .
+        The best possible score is ``1.0`` and it can be negative (because the
+        model can be arbitrarily worse). A constant model that always predicts
+        the expected value of `Y`\ , disregarding the input features, would get
+        a :math:`R^2` score of 0.0.
+
+        Parameters
+        ----------
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+            Test samples. If not given, the X attribute is used.
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_targets`\ ), optional
+            True values for `X`.
+        sample_weight : `NDDataset` or :term:`array-like` of shape (:term:`n_samples`\ ,), default: `None`
+            Sample weights.
+
+        Returns
+        -------
+        `float`
+            :math:`R^2` of `predict`\ (X) w.r.t `Y`\ .
+        """
+        if not self._fitted:
+            raise NotFittedError()
+
+        if X is None:
+            X = self._X_preprocessed
+        elif isinstance(X, NDDataset):
+            X = X.data
+
+        if Y is None:
+            Y = self._Y_preprocessed
+        elif isinstance(Y, NDDataset):
+            Y = Y.data
+
+        if isinstance(sample_weight, NDDataset):
+            sample_weight = sample_weight.data
+
+        return self._score(X, Y, sample_weight)
+
+    @_wrap_ndarray_output_to_nddataset(
+        units=None, title=None, meta_from=("_X", "_Y"), typex="components"
+    )
+    @_docstring.dedent
+    def transform(self, X=None, Y=None, both=False, **kwargs):
+        r"""
+        Apply dimensionality reduction to `X`\ and `Y`\ .
+
+        Parameters
+        ----------
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+            New data, where :term:`n_observations` is the number of observations
+            and :term:`n_features` is the number of features.
+            if not provided, the input dataset of the `fit` method will be used.
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_targets`\ ), optional
+            New data, where :term:`n_targets` is the number of variables to predict.
+            if not provided, the input dataset of the `fit` method will be used.
+        both : `bool`, default: `False`
+            Whether to also apply the dimensionality reduction to Y when neither X nor Y are provided.
+        %(kwargs)s
+
+        Returns
+        -------
+        x_score, y_score: `NDDataset` or tuple of `NDDataset`
+            Datasets with shape (:term:`n_observations`\ , :term:`n_components`\ ).
+
+        """
+        if not self._fitted:
+            raise NotFittedError()
+
+        # Fire the validation and preprocessing
+        self._X = X if X is not None else self.X
+        self._Y = Y if Y is not None else self.Y
+
+        # Get the processed ndarray data
+        newX = self._X_preprocessed
+        newY = self._Y_preprocessed
+
+        if both or (Y is not None):
+            return self._transform(newX, newY)
+        else:
+            return self._transform(newX, None)
+
+    # Get doc sections for reuse in subclass
+    _docstring.get_sections(
+        _docstring.dedent(transform.__doc__),
+        base="cross_decomposition_transform",
+        sections=["Parameters", "Other Parameters", "Returns"],
+    )
+    _docstring.keep_params("cross_decomposition_transform.parameters", "X", "Y", "both")
+
+    @_wrap_ndarray_output_to_nddataset(meta_from=("_X", "_Y"))
+    @_docstring.dedent
+    def inverse_transform(
+        self, X_transform=None, Y_transform=None, both=False, **kwargs
+    ):
+        """
+        Transform data back to its original space.
+
+        In other words, return reconstructed `X` and `Y` whose reduce/transform would
+        be `X_transform` and `Y_transform`.
+
+        Parameters
+        ----------
+        X_transform : array-like of shape (:term:`n_observations`\ , :term:`n_components`\ ), optional
+            Reduced `X` data, where `n_observations` is the number of observations
+            and `n_components` is the number of components. If `X_transform` is not
+            provided, a transform of `X` provided in `fit` is performed first.
+        Y_transform : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , `n_components`\ ), optional
+            New data, where :term:`n_targets` is the number of variables to predict. If `Y_transform` is not
+            provided, a transform of `Y` provided in `fit` is performed first.
+        %(kwargs)s
+
+        Returns
+        -------
+        `NDDataset`
+            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
+
+        Other Parameters
+        ----------------
+        %(analysis_transform.other_parameters)s
+
+        See Also
+        --------
+        reconstruct : Alias of inverse_transform (Deprecated).
+        """
+        if not self._fitted:
+            raise NotFittedError
+
+        if isinstance(X_transform, NDDataset):
+            X_transform = X_transform.data
+
+        elif X_transform is None:
+            X_transform = self.transform(**kwargs).data
+
+        if isinstance(Y_transform, NDDataset):
+            Y_transform = Y_transform.data
+
+        elif Y_transform is None and both is True:
+            Y_transform = self.transform(**kwargs).data
+
+        if Y_transform is None:
+            X = self._inverse_transform(X_transform)
+            return X
+        else:
+            X, Y = self._inverse_transform(X_transform, X_transform)
+            return X, Y
+
+    _docstring.get_sections(
+        _docstring.dedent(inverse_transform.__doc__),
+        base="analysis_inverse_transform",
+        sections=["Parameters", "Returns"],
+    )
+    # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
+
+    @_docstring.dedent
+    def fit_transform(self, X, Y, both=False):
+        """
+        Fit the model with `X` and `Y` and apply the dimensionality reduction on `X` and optionally on `Y`\ .
+
+        Parameters
+        ----------
+        %(analysis_fit.parameters.X)s
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+            Training data.
+        both : `bool`\ , optional
+            Whether to apply the dimensionality reduction on `X` and `Y` .
+
+        Returns
+        -------
+        %(analysis_transform.returns)s
+        """
+
+        self.fit(X, Y)
+        if both:
+            return self.transform(X, Y)
+        else:
+            return self.transform(X)
+
+    # ----------------------------------------------------------------------------------
+    # Plot methods
+    # ----------------------------------------------------------------------------------
+    @_docstring.dedent
+    def parityplot(
+        self,
+        Y=None,
+        Y_hat=None,
+        clear=True,
+        **kwargs,
+    ):
+        r"""
+        Plot the predicted (:math:`\hat{Y}`\ ) vs measured (:math:`Y`\ ) values.
+
+        :math:`Y` and :math:`\hat{Y}` can be passed as arguments. If not,
+        the `Y` attribute is used for :math:`Y`\ and :math:`\hat{Y}`\ is computed by
+        the `inverse_transform` method.
+
+        Parameters
+        ----------
+        Y : `NDDataset`\ , optional
+            Measured values. If is not provided (default), the `Y`
+            attribute is used and Y_hat is computed using `inverse_transform`\ .
+        Y_hat : `NDDataset`\ , optional
+            Predicted values. if `Y` is provided, `Y_hat` must also be provided as
+            computed externally.
+        clear : `bool`\ , optional
+            Whether to plot on a new axes. Default is True.
+        %(kwargs)s
+
+        Returns
+        -------
+        `~matplotlib.axes.Axes`
+            Matplotlib subplot axe.
+
+        Other Parameters
+        ----------------
+        s : `float` or :term:`array-like`, shape (n, ), optional
+            The marker size in points**2 (typographic points are 1/72 in.).
+            Default is rcParams['lines.markersize'] ** 2.
+        c : :term:`array-like` or `list` of colors or color, optional
+            The marker colors. Possible values:
+
+            - A scalar or sequence of n numbers to be mapped to colors using cmap
+              and norm.
+            - A 2D array in which the rows are RGB or RGBA.
+            - A sequence of colors of length n.
+            - A single color format string.
+              see `~matplotlib.pyplot.scatter` for details.
+
+        marker : `markerMarkerStyle`, default: rcParams["scatter.marker"] (default: 'o')
+            The marker style. marker can be either an instance of the class or the text
+            shorthand for a particular marker. See `~matplotlib.markers` for more
+            information.
+        cmap : `str` or `Colormap`, default: rcParams["image.cmap"] (default: 'viridis')
+            The Colormap instance or registered colormap name used to map scalar data
+            to colors.
+            This parameter is ignored if c is RGB(A).
+        norm : `str` or Normalize, optional
+            The normalization method used to scale scalar data to the [0, 1] range
+            before mapping
+            to colors using cmap. By default, a linear scaling is used, mapping the
+            lowest value to
+            0 and the highest to 1.
+            If given, this can be one of the following:
+
+            - An instance of Normalize or one of its subclasses
+              (see Colormap Normalization).
+            - A scale name, i.e. one of "linear", "log", "symlog", "logit", etc.
+              For a list of available scales, call
+              matplotlib.scale.get_scale_names(). In that case, a suitable Normalize
+              subclass is dynamically generated
+              and instantiated.
+              This parameter is ignored if c is RGB(A).
+
+        vmin, vmax : `float`\ , optional
+            When using scalar data and no explicit norm, vmin and vmax define the data
+            range that the colormap covers.
+            By default, the colormap covers the complete value range of the supplied
+            data. It is an error to use
+            vmin/vmax when a norm instance is given (but using a str norm name together
+            with vmin/vmax is acceptable).
+            This parameter is ignored if c is RGB(A).
+        alpha : `float`\ , default: 0.5
+            The alpha blending value, between 0 (transparent) and 1 (opaque).
+        linewidths : `float` or array-like, default: rcParams["lines.linewidth"] (default: 1.5)
+            The linewidth of the marker edges. Note: The default edgecolors is 'face'.
+            You may want to change this as well.
+        edgecolors : {'face', 'none', None} or color or sequence of color, default: rcParams["scatter.edgecolors"], (default: 'face')
+            The edge color of the marker. Possible values:
+            'face': The edge color will always be the same as the face color.
+            'none': No patch boundary will be drawn.
+            A color or sequence of colors.
+            For non-filled markers, edgecolors is ignored. Instead, the color is
+            determined like with 'face',
+            i.e. from c, colors, or facecolors.
+        plotnonfinite : `bool`\ , default: False
+            Whether to plot points with nonfinite c (i.e. inf, -inf or nan).
+            If True the points are drawn with the bad
+            colormap color (see Colormap.set_bad).
+        """
+
+        s = kwargs.pop("s", None)
+        c = kwargs.pop("c", None)
+        marker = kwargs.pop("marker", None)
+        cmap = kwargs.pop("cmap", None)
+        norm = kwargs.pop("norm", None)
+        vmin = kwargs.pop("vmin", None)
+        vmax = kwargs.pop("vmax", None)
+        alpha = kwargs.pop("alpha", 0.5)
+        linewidths = kwargs.pop("linewidths", None)
+        edgecolors = kwargs.pop("edgecolors", None)
+        plotnonfinite = kwargs.pop("plotnonfinite", False)
+        data = kwargs.pop("data", None)
+
+        if Y is None:
+            Y = self.Y
+            if Y_hat is None:
+                # compute the inverse transform (this check that the model
+                # is already fitted and handle eventual masking)
+                Y_hat = self.predict(self.X)
+        elif Y_hat is None:
+            raise ValueError(
+                "If Y is provided, An externally computed Y_hat dataset "
+                "must be also provided."
+            )
+
+        if Y._squeeze_ndim == 1:
+            # normally this was done before, but if needed.
+            Y = Y.squeeze()
+            Y_hat = Y_hat.squeeze()
+
+        plt.style.use(["default"])
+        plt.rcParams.update({"font.size": 14})
+        if clear:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+        else:
+            ax = plt.gca()
+        if len(Y.shape) == 1:
+            plt.scatter(
+                Y.data,
+                Y_hat.data,
+                s=s,
+                c=c,
+                marker=marker,
+                cmap=cmap,
+                norm=norm,
+                vmin=vmin,
+                vmax=vmax,
+                alpha=alpha,
+                linewidths=linewidths,
+                edgecolors=edgecolors,
+                plotnonfinite=plotnonfinite,
+                data=data,
+                **kwargs,
+            )
+        else:
+            for col in Y.shape[1]:
+                plt.scatter(
+                    Y.data[:, col],
+                    Y_hat.data[:, col],
+                    s=s,
+                    c=c,
+                    marker=marker,
+                    cmap=cmap,
+                    norm=norm,
+                    vmin=vmin,
+                    vmax=vmax,
+                    alpha=alpha,
+                    linewidths=linewidths,
+                    edgecolors=edgecolors,
+                    plotnonfinite=plotnonfinite,
+                    data=data,
+                    **kwargs,
+                )
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+        xymin = min(xmin, ymin)
+        xymax = max(xmax, ymax)
+        ax.set_xlim(xymin, xymax)
+        ax.set_ylim(xymin, xymax)
+        plt.plot([xymin, xymax], [xymin, xymax])
+        plt.legend()
+        plt.xlabel("measured values")
+        plt.ylabel("predicted values")
+        plt.tight_layout()
+
+        return ax
+
+    _docstring.get_sections(_docstring.dedent(parityplot.__doc__), base="parityplot")
+
+
+# ======================================================================================
 # Base class LinearRegressionAnalysis
 # ======================================================================================
 class LinearRegressionAnalysis(AnalysisConfigurable):
@@ -1079,7 +1554,6 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
 
@@ -1088,14 +1562,12 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 
         # initialize sklearn LinearRegression
         self._linear_regression = linear_model.LinearRegression(
             fit_intercept=self.fit_intercept,
-            copy_X=copy,
             n_jobs=None,  # not used for the moment (XXX: should we add this?)
             positive=self.positive,
         )
@@ -1112,9 +1584,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         # validation of the _Y attribute: fired when self._Y is assigned
         Y = proposal.value
 
-        # we need a dataset or a list of NDDataset with eventually  a copy of the
-        # original data (default being to copy them)
-
+        # we need a dataset or a list of NDDataset
         Y = self._make_dataset(Y)
         return Y
 

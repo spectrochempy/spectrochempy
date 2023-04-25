@@ -45,7 +45,7 @@ _ = dataset.plot()
 #
 # As argument of the object constructor we define log_level to ``"INFO"`` to
 # obtain verbose output during fit, and we set the number of component to use at 4.
-model = scp.NMF(used_components=4, log_level="INFO")
+model = scp.NMF(n_components=4, log_level="INFO")
 
 # %%
 # Fit the model
@@ -75,6 +75,8 @@ ax = St.plot(title="Components", colormap=None, legend=St.y.labels)
 ax.set_yticks([])
 
 # %%
-# uncomment the line below to see plot if needed (not necessary in jupyter notebook)
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
 
+# %%
 # scp.show()

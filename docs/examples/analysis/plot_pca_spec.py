@@ -25,7 +25,7 @@ _ = dataset.plot()
 # %%
 # Create a PCA object and fit the dataset so that the explained variance is greater or
 # equal to 99.9%
-pca = scp.PCA(used_components=0.999)
+pca = scp.PCA(n_components=0.999)
 pca.fit(dataset)
 
 # %%
@@ -64,7 +64,7 @@ _ = dataset.plot()
 
 # %%
 # Apply the PCA model
-pca = scp.PCA(used_components=0.999)
+pca = scp.PCA(n_components=0.999)
 pca.fit(dataset)
 pca.n_components
 
@@ -98,5 +98,8 @@ scores.y.labels = labels  # Note this does not replace previous labels,
 _ = pca.scoreplot(scores, 1, 2, show_labels=True, labels_column=2)
 
 # %%
-# uncomment the line below to see plot if needed (not necessary in jupyter notebook)
-scp.show()
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

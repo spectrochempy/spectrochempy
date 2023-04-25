@@ -39,4 +39,9 @@ path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
 ndd = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
 _ = scp.plot(ndd)
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# %%
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

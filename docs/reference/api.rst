@@ -29,6 +29,7 @@
     Optimize
     PCA
     PFR
+    PLSRegression
     Project
     Quantity
     SIMPLISMA

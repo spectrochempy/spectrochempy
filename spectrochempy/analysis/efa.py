@@ -15,7 +15,7 @@ from spectrochempy.analysis._base import (
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.core import info_
-from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["EFA"]
@@ -58,7 +58,7 @@ class EFA(DecompositionAnalysis):
     >>> # Fit the model
     >>> _ = model.fit(X)
     >>> # Display components spectra (2 x M)
-    >>> model.used_components = 2
+    >>> model.n_components = 2
     >>> _ = model.components.plot(title="Component spectra")
     >>> # Get the abstract concentration profile based on the FIFO EFA analysis
     >>> c = model.transform()
@@ -76,7 +76,7 @@ class EFA(DecompositionAnalysis):
         config=True
     )
 
-    used_components = tr.Int(
+    n_components = tr.Int(
         allow_none=True, default_value=None, help="Number of components to keep."
     ).tag(config=True)
 
@@ -88,26 +88,19 @@ class EFA(DecompositionAnalysis):
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
-        # We have changed the name n_components use in sklearn by
-        # used_components (in order  to avoid conflict with the rest of the program)
-        # warn th user:
-        if "n_components" in kwargs:
-            raise KeyError(
-                "`n_components` is not a valid parameter. Did-you mean "
-                "`used_components`?"
-            )
 
         # Call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
+        if "used_components" in kwargs:
+            deprecated("used_components", replace="n_components", removed="0.6.5")
+            kwargs["n_components"] = kwargs.pop("used_components")
 
     def _fit(self, X, Y=None):
         # X has already been validated and eventually
@@ -160,8 +153,8 @@ class EFA(DecompositionAnalysis):
         f, b = self._outfit
         M = f.shape[0]
         K = self._n_components
-        if self.used_components is not None:
-            K = min(K, self.used_components)
+        if self.n_components is not None:
+            K = min(K, self.n_components)
         c = np.zeros((M, K))
         for i in range(M):
             c[i] = np.min((f[i, :K], b[i, :K][::-1]), axis=0)

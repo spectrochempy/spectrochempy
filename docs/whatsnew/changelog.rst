@@ -20,6 +20,8 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* `PLSRegression` (Partial Least Squares regression) method added.
+
 * `read` method now handle any url pointing
   to a spectrochempy readeable file. An url to a compressed (zip) files are also accepted.
 
@@ -30,9 +32,6 @@ New features
       lst = scp.read("https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip")
       # lst contains 7 NDDatasets,, display the last
       lst[-1].plot()
-
-* Download from urls can also be done using the `download` method.
-  However `read` offers more options such as merging.
 
 * Automatically download the github repository ``spectrochempy_data`` which contains the files
   for the examples and tests. The files are downloaded in the directory scp.preferences.datadir.
@@ -54,9 +53,14 @@ Breaking changes
 .. Add here new breaking changes (do not delete this comment)
 
 * The `read_remote` method has been removed. Use `read` instead.
+* The `download` method has been removed. Use `read` instead.
+* The `copy` parameter of `Decomposition` methods has been removed.
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+* The `used_components` parameter and attribute of `PCA`, `NNMF`,
+  `EFA` is replaced by `n_components`
