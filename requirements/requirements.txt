@@ -19,7 +19,7 @@ jinja2
 matplotlib
 numba
 numpy
-numpydoc
+numpydoc>=1.2
 pint
 pytz
 requests
