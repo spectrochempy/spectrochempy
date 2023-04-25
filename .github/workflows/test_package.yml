@@ -85,7 +85,7 @@ jobs:
       - name: Install spectrochempy
         run: |
           source ./.venv/bin/activate
-          python -m pip install -e --no-deps .
+          python -m pip install --no-deps .
           python -m pip list
 
       - name: Test with coverage
