@@ -56,9 +56,14 @@ Breaking changes
 .. Add here new breaking changes (do not delete this comment)
 
 * The `read_remote` method has been removed. Use `read` instead.
+* The `download` method has been removed. Use `read` instead.
+* The `copy` parameter of `Decomposition` methods has been removed.
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+* The `used_components` parameter and attribute of `PCA`, `NNMF`,
+  `EFA` is replaced by `n_components`

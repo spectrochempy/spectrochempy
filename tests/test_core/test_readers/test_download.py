@@ -90,31 +90,3 @@ def test_download_nist():
     CAS = 2146363  # Acenaphthylene, dodecahydro-
     ds = scp.download_nist_ir(CAS)
     assert ds is None
-
-
-def test_download():
-
-    # download from url
-    ds = scp.download("http://www.eigenvector.com/data/Corn/corn.mat")
-    assert len(ds) == 7
-    # assert "Downloaded from " in str(ds[0].history)  # FIXME: add history
-
-    # generic read
-    ds1 = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
-    assert len(ds1) == 7
-
-    # specific
-    ds2 = scp.read_mat("http://www.eigenvector.com/data/Corn/corn.mat")
-    assert len(ds2) == 7
-
-    # generic read of a zipped file
-    ds3 = scp.read("https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip")
-    assert len(ds3) == 7
-
-    # doesn't exist
-    with pytest.raises(FileNotFoundError):
-        scp.read("http://www.eigenvector.com/does_not_exist.mat")
-
-    # not a scpy readable type
-    with pytest.raises(TypeError):
-        scp.read("https://www.spectrochempy.fr/latest/index.html")
