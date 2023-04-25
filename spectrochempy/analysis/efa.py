@@ -99,8 +99,8 @@ class EFA(DecompositionAnalysis):
             **kwargs,
         )
         if "used_components" in kwargs:
-            deprecated("used_components", replace="n_components", removed="0.7")
-            kwargs["max_components"] = kwargs.pop("n_pc")
+            deprecated("used_components", replace="n_components", removed="0.6.5")
+            kwargs["n_components"] = kwargs.pop("used_components")
 
     def _fit(self, X, Y=None):
         # X has already been validated and eventually

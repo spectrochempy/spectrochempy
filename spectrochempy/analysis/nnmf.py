@@ -63,7 +63,7 @@ class NMF(DecompositionAnalysis):
     # Configuration parameters
     # ----------------------------------------------------------------------------------
 
-    used_components = tr.Integer(
+    n_components = tr.Integer(
         default_value=None,
         allow_none=True,
         help="Number of components to use. If None is passed, all are used.",
@@ -175,8 +175,8 @@ class NMF(DecompositionAnalysis):
         **kwargs,
     ):
         if "used_components" in kwargs:
-            deprecated("used_components", replace="n_components", removed="0.7")
-            kwargs["max_components"] = kwargs.pop("n_pc")
+            deprecated("used_components", replace="n_components", removed="0.6.5")
+            kwargs["n_components"] = kwargs.pop("used_components")
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
