@@ -5,13 +5,11 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
-
-
-import sys
-
 # --------------------------------------------------------------------------------------
 # Testing examples and notebooks (Py version) in docs
 # --------------------------------------------------------------------------------------
+import sys
+
 import pytest
 
 if sys.platform.startswith("win") or sys.platform == "darwin":
