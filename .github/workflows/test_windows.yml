@@ -60,7 +60,7 @@ jobs:
         uses: actions/cache@v3
         id: cache-venv
         with:
-          path: ${{ matrix.path }}
+          path: $HOME\.venv
           key: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-${{ hashFiles('requirements/requirements.txt') }}
           restore-keys: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-
 
