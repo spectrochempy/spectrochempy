@@ -4,18 +4,16 @@ DEPENDENCIES template
 ---------------------------------------------------------------------------------------
 Change SpectroChemPy project dependencies here only.
 
-requirements[_dev].text, environment[_dev].yml and .conda/meta.yaml will be created
-or updated accordingly
-
+requirements[_dev][_test].text, environment[_dev][_test].yml and .conda/meta.yaml will
+be created or updated accordingly
 #}
     # specific dependencies
     - quadprog
     - brukeropusreader
     - quaternion
-{%- if CANTERA %}
+{% if CANTERA -%}
     - cantera
 {%- endif %}
-
     # dependencies for the core package
     - cffconvert
     - colorama
@@ -26,7 +24,7 @@ or updated accordingly
     - matplotlib
     - numba
     - numpy
-    - numpydoc
+    - numpydoc>=1.2
     - pint
     - pytz
     - requests
@@ -40,33 +38,34 @@ or updated accordingly
     - widgetsnbextension=4.0.5
     - jupyterlab_widgets=3.0.5
     - ipympl
-
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
-
     # Jupyter lab
     - jupyterlab
     - nodejs
-
-{% if DEV -%}
-    # DEV dependencies
+{% if TEST %}
+    # TEST dependencies
     # ----------------
-    # From here, the dependencies are essentially for development.
-    # They should not be necessary for the user of  spectrochempy.
+    - coverage
     - pytest
     - pytest-doctestplus
     - pytest-flake8
     - pytest-mock
     - pyfakefs
     - pep8-naming
+    - xarray
+{%- endif %}
+{% if DEV -%}
+    # DEV dependencies
+    # ----------------
+    # From here, the dependencies are essentially for development.
+    # They should not be necessary for the user of  spectrochempy.
     - scikit-image
-    - coverage
     - black
     - pre-commit
     - mamba
-    - docrep
     - jupytext
     - sphinx=5.3
     - sphinx_rtd_theme=1.2
@@ -81,5 +80,6 @@ or updated accordingly
     - conda-build
     - conda-verify
     - anaconda-client
+    - numpydoc>=1.2
 {% endif %}
 #EOF
