@@ -1,4 +1,4 @@
-name: Tests-windows
+name: Tests
 
 on:
   push:
@@ -41,8 +41,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest]
-        pythonVersion: ["3.10"]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        pythonVersion: ["3.8", "3.10"]
+        exclude:
+          - os: macos-latest
+            pythonVersion: 3.8
+          - os: windows-latest
+            pythonVersion: 3.8
     steps:
       - name: Checkout spectrochempy repository
         uses: actions/checkout@v3
@@ -57,30 +62,33 @@ jobs:
 
       - name: cache virtualenv
         # Cache virtual environment to avoid installing dependencies at each runs
-        uses: actions/cache@v3
-        id: cache-venv
-        with:
-          path: ./.venv
-          key: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-${{ hashFiles('requirements/requirements.txt') }}
-          restore-keys: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-
+        id: cache-virtualenv
+        uses: syphar/restore-virtualenv@v1
 
       - name: Install dependencies for testing
         # Run only if dependencies have changed
-        if: steps.cache-venv.outputs.cache-hit != 'true'
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
-          python -m venv ./.venv
-          ./.venv/Scripts/activate.bat
           python --version
           python -m pip install -r requirements/requirements_test.txt
 
       - name: Install spectrochempy
         run: |
-          ./.venv/Scripts/activate.bat
           python -m pip install --upgrade pip
           python -m pip install --no-deps .
           python -m pip list
 
       - name: Test with coverage
         run: |
-          ./.venv/Scripts/activate.bat
-          python -m pytest tests
+          coverage run -m pytest tests
+
+      - name: Coverage report to xml
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
+        run: |
+          coverage xml
+
+      - name: Code Climate reporting
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
+        uses: paambaati/codeclimate-action@v3.2.0
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
