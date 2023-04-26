@@ -37,48 +37,6 @@ from spectrochempy.utils.decorators import deprecated, signature_has_configurabl
 from spectrochempy.utils.docstrings import _docstring
 
 
-# utility
-# -------
-def lstsq(X, Y, rcond=None):
-    # Least-squares solution to a linear matrix equation X @ W = Y
-    # Return W
-    W = np.linalg.lstsq(X, Y, rcond)[0]
-    return W
-
-
-def nnls(X, Y, withres=False):
-    # Non negative least-squares solution to a linear matrix equation X @ W = Y
-    # Return W >= 0
-    # TODO: look at may be faster algorithm: see: https://gist.github.com/vene/7224672
-    nsamp, nfeat = X.shape
-    nsamp, ntarg = Y.shape
-    W = np.empty((nfeat, ntarg))
-    residuals = 0
-    for i in range(ntarg):
-        Y_ = Y[:, i]
-        W[:, i], res = scipy.optimize.nnls(X, Y_)
-        residuals += res**2
-    return (W, np.sqrt(residuals)) if withres else W
-
-
-def lstsq_nnls(X, Y, nonneg=[], withres=False):
-    # Least-squares  solution to a linear matrix equation X @ W = Y
-    # with partial nonnegativity (indicated by the nonneg list of targets)
-    # Return W with eventually some column non negative.
-    nsamp, nfeat = X.shape
-    nsamp, ntarg = Y.shape
-    W = np.empty((nfeat, ntarg))
-    residuals = 0
-    for i in range(ntarg):
-        Y_ = Y[:, i]
-        if i in nonneg:
-            W[:, i], res = scipy.optimize.nnls(X, Y_)
-        else:
-            W[:, i], res = np.linalg.lstsq(X, Y_)[:2]
-        residuals += res**2
-    return (W, np.sqrt(residuals)) if withres else W
-
-
 # DEVNOTE:
 # the following decorator allow to correct signature and docs of traitlets.HasTraits
 # derived class
@@ -137,6 +95,17 @@ class MCRALS(DecompositionAnalysis):
 
     maxdiv = tr.Integer(
         5, help="Maximum number of successive non-converging iterations."
+    ).tag(config=True)
+
+    C_solver = tr.Enum(
+        ["lstsq", "nnls", "pnnls"],
+        default_value="lstsq",
+        help=(
+            "solver used to solve  C @ St = X for C. It set to ``'lstsq'`` (default) uses ordinary least squares "
+            "with `~numpy.linalg.lstsq`, if set to ``'nnls'``: Non-negative least squares are applied sequentially "
+            "on all profiles, if set to ``'pnnls'``: non-negative least squares are applied on profiles indigated by"
+            "``'nonnegConc`` and ordinary least squares on other profiles"
+        ),
     ).tag(config=True)
 
     nonnegConc = tr.Union(
@@ -303,6 +272,17 @@ MCR ALS iterations.
 `hardC` (index ``O``\ ) corresponds to the second profile of `C` (index ``1``\ ).""",
     ).tag(config=True)
 
+    St_solver = tr.Enum(
+        ["lstsq", "nnls", "pnnls"],
+        default_value="lstsq",
+        help=(
+            "solver used to solve  C @ St = X for St. It set to ``'lstsq'`` (default) uses ordinary least squares "
+            "with `~numpy.linalg.lstsq`, if set to ``'nnls'``: Non-negative least squares are applied sequentially "
+            "on all profiles, if set to ``'pnnls'``: non-negative least squares are applied on profiles indigated by"
+            "``'nonnegSpec`` and ordinary least squares on other profiles"
+        ),
+    ).tag(config=True)
+
     nonnegSpec = tr.Union(
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
@@ -457,6 +437,23 @@ at each iterations.
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
+
+    def _solve_C(self, St):
+        if self.C_solver == "lstsq":
+            return _lstsq(St.T, self._X.data.T).T
+        elif self.C_solver == "nnls":
+            return _nnls(St.T, self._X.data.T).T
+        elif self.C_solver == "pnnls":
+            return _pnnls(St.T, self._X.data.T, nonneg=self.nonnegConc).T
+
+    def _solve_St(self, C):
+        if self.C_solver == "lstsq":
+            return _lstsq(C, self._X.data)
+        elif self.C_solver == "nnls":
+            return _nnls(C, self._X.data)
+        elif self.C_solver == "pnnls":
+            return _pnnls(C, self._X.data, nonneg=self.nonnegSpec)
+
     def _guess_profile(self, profile):
         """
         Set or guess an initial profile.
@@ -482,9 +479,6 @@ at each iterations.
                 f"of X [{self._X_shape}]."
             )
 
-        # data array
-        Xdata = self._X.data
-
         # mask info
         if np.any(self._X_mask):
             masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
@@ -494,20 +488,20 @@ at each iterations.
             # The data are validated in _C_validate()
             # if it fails here due to shape mismatch, it goes to the except
 
-            Cdata = profile.copy()
-            n_components = Cdata.shape[1]
+            C = profile.copy()
+            n_components = C.shape[1]
             info_(f"Concentration profile initialized with {n_components} components")
-            # compute initial spectra (using the Xdata eventually masked
-            Stdata = lstsq(Cdata, Xdata)
+            # compute initial spectra (using X eventually masked
+            St = self._solve_St(C)
             info_("Spectra profile computed")
             # if everything went well here, C and St are set, we return
             # after having removed the eventual C mask!
             if np.any(self._X_mask):
-                Cdata = Cdata[~masked_rows]
+                C = C[~masked_rows]
             # update the number of components
             self._n_components = n_components
 
-            return Cdata, Stdata
+            return C, St
 
         except np.linalg.LinAlgError as exc:
             if "Incompatible dimensions" not in exc.args[0]:
@@ -517,20 +511,20 @@ at each iterations.
         # Again if something is wrong we let it raise the error
         # as there is no other possibility (but this should not occur as we did
         # already the test on the dimension's compatibility.
-        Stdata = profile.copy()
-        n_components = Stdata.shape[0]
+        St = profile.copy()
+        n_components = St.shape[0]
         info_(f"Spectra profile initialized with {n_components} components")
         # compute initial concentration
-        Cdata = lstsq(Stdata.T, Xdata.T).T
+        C = self._solve_C(St)
         info_("Concentration profile computed")
         # if everything went well here, C and St are set, we return
         # after having removed the eventual St mask!
         if np.any(self._X_mask):
-            Stdata = Stdata[:, ~masked_columns]
+            St = St[:, ~masked_columns]
         # update the number of components
         self._n_components = n_components
 
-        return Cdata, Stdata
+        return C, St
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def _C_2_NDDataset(self, C):
@@ -696,6 +690,8 @@ at each iterations.
                 self.closureTarget = self.closureTarget
                 self.hardC_to_C_idx = self.hardC_to_C_idx
                 self.hardSt_to_St_idx = self.hardSt_to_St_idx
+                self.C_solver = self.C_solver
+                self.St_solver = self.St_solver
                 self.nonnegConc = self.nonnegConc
                 self.nonnegSpec = self.nonnegSpec
                 self.unimodConc = self.unimodConc
@@ -704,7 +700,7 @@ at each iterations.
     @tr.default("_components")
     def _components_default(self):
         if self._fitted:
-            # note: _outfit = (C, St, C_hard, St_soft, extraOutputGetConc, extraOutputGetSpec)
+            # note: _outfit = (C, St, C_constrained, St_unconstrained, extraOutputGetConc, extraOutputGetSpec)
             return self._outfit[1]
         else:
             raise NotFittedError("The model was not yet fitted. Execute `fit` first!")
@@ -721,28 +717,28 @@ at each iterations.
         if isinstance(profiles, (list, tuple)):
             # we assume that the starting C and St are already computed
             # (for ex. from a previous run of fit)
-            Cdata, Stdata = [item.data for item in profiles]
-            self._n_components = Cdata.shape[1]
+            C, St = [item.data for item in profiles]
+            self._n_components = C.shape[1]
             # eventually remove mask
             if np.any(self._X_mask):
                 masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
-                Stdata = Stdata[:, ~masked_columns]
-                Cdata = Cdata[~masked_rows]
+                St = St[:, ~masked_columns]
+                C = C[~masked_rows]
         else:
             # not passed explicitly, try to guess
-            Cdata, Stdata = self._guess_profile(profiles.data)
+            C, St = self._guess_profile(profiles.data)
 
         # we do a last validation
         shape = self._X.shape
-        if shape[0] != Cdata.shape[0]:
+        if shape[0] != C.shape[0]:
             # An error will be raised before if X is None.
             raise ValueError("The dimensions of C do not match those of X.")
-        if shape[1] != Stdata.shape[1]:
+        if shape[1] != St.shape[1]:
             # An error will be raised before if X is None.
             raise ValueError("The dimensions of St do not match those of X.")
         # return the list of C and St data
         # (with mask removed to fit the size of the _X data)
-        self._Y_preprocessed = (Cdata, Stdata)
+        self._Y_preprocessed = (C, St)
 
     def _fit(self, X, Y):
         # this method is called by the abstract class fit.
@@ -772,15 +768,18 @@ at each iterations.
 
             niter += 1
 
-            # Compute C taking into account non-negativity
-            # --------------------------------------------
+            # Compute C
+            # ------------------------------------------
+            C = self._solve_C(St)
+
+            # Force non-negative concentration
+            # ------------------------------------------
             if np.any(self.nonnegConc):
-                C = lstsq_nnls(St.T, X.T, self.nonnegConc).T
-            else:
-                C = lstsq(St.T, X.T, self.nonnegConc).T
+                for s in self.nonnegConc:
+                    C[:, s] = C[:, s].clip(min=0)
 
             # Force unimodal concentration
-            # ----------------------------
+            # ------------------------------------------
             if np.any(self.unimodConc):
                 C = _unimodal_2D(
                     C,
@@ -791,7 +790,7 @@ at each iterations.
                 )
 
             # Force monotonic increase
-            # ------------------------
+            # ------------------------------------------
             if np.any(self.monoIncConc):
                 for s in self.monoIncConc:
                     for curid in np.arange(ny - 1):
@@ -799,7 +798,7 @@ at each iterations.
                             C[curid + 1, s] = C[curid, s]
 
             # Force monotonic decrease
-            # ----------------------------------------------
+            # ------------------------------------------
             if np.any(self.monoDecConc):
                 for s in self.monoDecConc:
                     for curid in np.arange(ny - 1):
@@ -810,7 +809,7 @@ at each iterations.
             # ------------------------------------------
             if self.closureConc:
                 if self.closureMethod == "scaling":
-                    Q = lstsq(C[:, self.closureConc], self.closureTarget.T)
+                    Q = _lstsq(C[:, self.closureConc], self.closureTarget.T)
                     C[:, self.closureConc] = np.dot(C[:, self.closureConc], np.diag(Q))
                 elif self.closureMethod == "constantSum":
                     totalConc = np.sum(C[:, self.closureConc], axis=1)
@@ -846,22 +845,20 @@ at each iterations.
 
                 C[:, self.hardConc] = fixedC[:, self.hardC_to_C_idx]
 
-            # stores C in C_hard
-            C_hard = C.copy()
+            # stores C in C_constrained
+            # ------------------------------------------
+            C_constrained = C.copy()
 
             # Compute St taking into account non-negativity
             # --------------------------------------------
-            if np.any(self.nonnegSpec):
-                St = lstsq_nnls(C, X, self.nonnegSpec)
-            else:
-                St = lstsq(C, X)
+            St = self._solve_St(C)
 
-            # stores St in St_soft
-            # --------------------
-            St_soft = St.copy()
+            # stores St in St_unconstrained
+            # ------------------------------------------
+            St_unconstrained = St.copy()
 
             # Force unimodal spectra
-            # ----------------------------
+            # ------------------------------------------
             if np.any(self.unimodSpec):
                 St = _unimodal_2D(
                     St,
@@ -872,7 +869,7 @@ at each iterations.
                 )
 
             # External spectral profile
-            # -----------------------------
+            # ------------------------------------------
             extraOutputGetSpec = []
             if np.any(self.hardSpec):
                 _St = self._St_2_NDDataset(St)
@@ -898,13 +895,12 @@ at each iterations.
                 print(self.hardSt_to_St_idx)
                 St[self.hardSpec, :] = fixedSt[self.hardSt_to_St_idx, :]
 
-            # recompute C for consistency(soft modeling)
-            # TODO: should we take into account non negativity here????
-            C = lstsq_nnls(
-                St.T, X.T, self.nonnegConc
-            ).T  # also no sure why rcond=-1 was used instead of None
+            # recompute C for consistency
+            # ------------------------------------------
+            C = self._solve_C(St)
 
-            # rescale spectra & concentrations
+            # rescale spectra and concentrations
+            # ------------------------------------------
             if self.normSpec == "max":
                 alpha = np.max(St, axis=1).reshape(self._n_components, 1)
                 St = St / alpha
@@ -915,19 +911,20 @@ at each iterations.
                 C = C * alpha.T
 
             # compute residuals
-            # -----------------
-            Xhat = C @ St  # official way for 2D matrix is to write
-            #       matrix multiplication as X @ St
+            # ------------------------------------------
+            Xhat = C @ St
             stdev2 = np.std(Xhat - X)
             change = 100 * (stdev2 - stdev) / stdev
             stdev = stdev2
 
-            stdev_PCA = np.std(Xhat - Xpca)  #
-
+            stdev_PCA = np.std(Xhat - Xpca)
             info_(
                 f"{niter:3d}{' '*6}{stdev_PCA:10f}{' '*6}"
                 f"{stdev2:10f}{' '*6}{change:10f}"
             )
+
+            # check convergence
+            # ------------------------------------------
 
             if change > 0:
                 ndiv += 1
@@ -954,7 +951,14 @@ at each iterations.
 
         # return _fit results
         self._components = St
-        _outfit = (C, St, C_hard, St_soft, extraOutputGetConc, extraOutputGetSpec)
+        _outfit = (
+            C,
+            St,
+            C_constrained,
+            St_unconstrained,
+            extraOutputGetConc,
+            extraOutputGetSpec,
+        )
         return _outfit
 
     def _transform(self, X=None):
@@ -1056,19 +1060,35 @@ at each iterations.
 
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
-    def C_hard(self):
+    def C_constrained(self):
         """
-        The hard concentration profiles.
+        The constrained concentration profiles, obtained after applying  the hard and soft constraints
         """
         return self._outfit[2]
 
     @property
-    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
-    def St_soft(self):
+    @deprecated(replace="C_constrained")
+    def C_hard(self):
         """
-        The soft spectra profiles.
+        Deprecated. Equivalent to `C_constrained`.
+        """
+        return self.C_constrained
+
+    @property
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
+    def St_unconstrained(self):
+        """
+        The soft spectra profiles, obtained after solving $C_{\textrm{constrained}} \cdot St = X$ for $St$.
         """
         return self._outfit[3]
+
+    @property
+    @deprecated(replace="St_unconstrained")
+    def S_soft(self):
+        """
+        Deprecated. Equivalent to `C_constrained`.
+        """
+        return self.St_unconstrained
 
     @property
     def extraOutputGetConc(self):
@@ -1088,6 +1108,48 @@ at each iterations.
 # --------------------------------------------------------------------------------------
 # Utilities
 # --------------------------------------------------------------------------------------
+
+# LS solvers for W in the linear matrix equation X @ W = Y
+def _lstsq(X, Y, rcond=None):
+    # Least-squares solution to a linear matrix equation X @ W = Y
+    # Return W
+    W = np.linalg.lstsq(X, Y, rcond)[0]
+    return W
+
+
+def _nnls(X, Y, withres=False):
+    # Non negative least-squares solution to a linear matrix equation X @ W = Y
+    # Return W >= 0
+    # TODO: look at may be faster algorithm: see: https://gist.github.com/vene/7224672
+    nsamp, nfeat = X.shape
+    nsamp, ntarg = Y.shape
+    W = np.empty((nfeat, ntarg))
+    residuals = 0
+    for i in range(ntarg):
+        Y_ = Y[:, i]
+        W[:, i], res = scipy.optimize.nnls(X, Y_)
+        residuals += res**2
+    return (W, np.sqrt(residuals)) if withres else W
+
+
+def _pnnls(X, Y, nonneg=[], withres=False):
+    # Least-squares  solution to a linear matrix equation X @ W = Y
+    # with partial nonnegativity (indicated by the nonneg list of targets)
+    # Return W with eventually some column non negative.
+    nsamp, nfeat = X.shape
+    nsamp, ntarg = Y.shape
+    W = np.empty((nfeat, ntarg))
+    residuals = 0
+    for i in range(ntarg):
+        Y_ = Y[:, i]
+        if i in nonneg:
+            W[:, i], res = scipy.optimize.nnls(X, Y_)
+        else:
+            W[:, i], res = np.linalg.lstsq(X, Y_)[:2]
+        residuals += res**2
+    return (W, np.sqrt(residuals)) if withres else W
+
+
 def _unimodal_2D(a, axis, idxes, tol, mod):
     # """Force unimodality on given lines or columnns od a 2D ndarray
     #
