@@ -59,4 +59,9 @@ _ = scp.plot_multiple(
 # check that style reinit to default
 _ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
-# scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# %%
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

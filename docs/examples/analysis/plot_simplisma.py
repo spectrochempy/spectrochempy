@@ -55,7 +55,9 @@ _ = simpl.components.plot(title="Components")
 # after reconstruction oto the original data space
 simpl.plotmerit(offset=0, nb_traces=5)
 
+# %%
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
 
 # %%
-# uncomment the line below to see plot if needed (not necessary in jupyter notebook)
 # scp.show()

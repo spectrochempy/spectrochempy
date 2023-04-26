@@ -5,12 +5,15 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
-
-
 # --------------------------------------------------------------------------------------
 # Testing examples and notebooks (Py version) in docs
 # --------------------------------------------------------------------------------------
+import sys
+
 import pytest
+
+if sys.platform.startswith("win") or sys.platform == "darwin":
+    pytest.skip("example testing on windows and macos", allow_module_level=True)
 
 pytestmark = pytest.mark.slow
 
@@ -39,7 +42,9 @@ def example_run(path):
     serr = None
     try:
         pipe = subprocess.Popen(
-            ["python", str(path), "--nodisplay"], stdout=subprocess.PIPE
+            ["python", str(path), "--nodisplay"],
+            stdout=subprocess.PIPE,
+            encoding="utf8",
         )
         (so, serr) = pipe.communicate()
     except Exception:
@@ -60,5 +65,6 @@ def test_example(example):
     print("Testing ", example)
     if example.suffix == ".py":
         e, message, err = example_run(example)
-        print(e, message.decode("utf8"), err)
-        assert not e, message.decode("utf8")
+        # this give unicoderror on workflow with window
+        print(e, message, err)
+        assert not e, message

@@ -819,7 +819,3 @@ class NDPlot(HasTraits):
 
 
 plot = NDPlot.plot  # make plot accessible directly from the scp API
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

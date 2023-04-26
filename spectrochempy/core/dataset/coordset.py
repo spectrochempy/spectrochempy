@@ -1108,8 +1108,3 @@ class CoordSet(HasTraits):
 
         if change.name == "_updated" and change.new:
             self._updated = False  # reset
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

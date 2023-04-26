@@ -52,10 +52,3 @@ def test_npy(ds1):
     # if no dataset then is it equivalent to np.dot
     x = dot(a.data.T, b.data)
     assert isinstance(x, np.ndarray)
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass
-
-# end of module

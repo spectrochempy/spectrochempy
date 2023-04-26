@@ -148,10 +148,16 @@ iris3.plotlcurve(title="L curve, automated search")
 
 # %%
 # The data corresponding to the largest curvature of the L-curve
-# are at the second last position of output data:
+# are at the second last position of output data.
+
+# sphinx_gallery_thumbnail_number = 11
 
 iris3.plotdistribution(-2)
 _ = iris3.plotmerit(-2)
 
 # %%
-scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

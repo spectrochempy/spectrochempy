@@ -1,0 +1,48 @@
+# ======================================================================================
+#
+# This file is auto-generated from environment_test.yml file.
+#
+# !!! DO NOT MODIFY !!!
+#
+# See in `environment_test.yml` for more information.
+#
+# ======================================================================================
+quadprog
+brukeropusreader
+numpy-quaternion
+cffconvert
+colorama
+dill
+docrep
+ipython
+jinja2
+matplotlib
+numba
+numpy
+numpydoc>=1.2
+pint
+pytz
+requests
+scipy
+tqdm
+traitlets
+scikit-learn
+xlrd
+pyyaml
+ipywidgets==8.0.4
+widgetsnbextension==4.0.5
+jupyterlab_widgets==3.0.5
+ipympl
+setuptools
+setuptools_scm
+gitpython
+jupyterlab
+nodejs
+coverage
+pytest
+pytest-doctestplus
+pytest-flake8
+pytest-mock
+pyfakefs
+pep8-naming
+xarray

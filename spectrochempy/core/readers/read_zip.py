@@ -7,13 +7,13 @@
 __all__ = ["read_zip"]
 __dataset_methods__ = __all__
 
-import io
-
 from spectrochempy.core.readers.importer import (
     ALIAS,
     FILETYPES,
     Importer,
     _importer_method,
+    _openfid,
+    read,
 )
 from spectrochempy.utils.docstrings import _docstring
 
@@ -66,16 +66,10 @@ def _read_zip(*args, **kwargs):
     # Below we assume that files to read are in a unique directory
     import zipfile
 
-    from spectrochempy.core.dataset.nddataset import NDDataset
-
     # read zip file
     _, filename = args
-    content = kwargs.pop("content", None)
 
-    if content:
-        fid = io.BytesIO(content)
-    else:
-        fid = open(filename, "rb")
+    fid, kwargs = _openfid(filename, **kwargs)
 
     with zipfile.ZipFile(fid) as zf:
 
@@ -93,7 +87,7 @@ def _read_zip(*args, **kwargs):
             if ".DS_Store" in file.filename:
                 continue
 
-            # make a pathlib object (but this doesn't work with python 3.7)
+            # make a pathlib object (python > 3.7)
             file = zipfile.Path(zf, at=file.filename)
             # seek the parent directory containing the files to read
             if not file.is_dir():
@@ -105,13 +99,10 @@ def _read_zip(*args, **kwargs):
             extension = children.name.split(".")[-1]
             if extension.lower() not in list(zip(*(ALIAS + FILETYPES)))[0]:
                 return
-            origin = kwargs.get("origin", None)
-            return NDDataset.read(
-                children.name, content=children.read_bytes(), origin=origin
-            )
+            origin = kwargs.get("origin", "")
+            return read(children.name, content=children.read_bytes(), origin=origin)
 
-        # we assume that only a single dir
-        # But this can be changed later
+        # We assume that we have only a single dir with not subdir
         if dirs:
             # a single directory
             count = 0
@@ -129,7 +120,7 @@ def _read_zip(*args, **kwargs):
                     d = extract(children, **kwargs)
                     if d is not None:
                         datasets.append(d)
-                    count += 1
+                        count += 1
         else:
             for file in files:
                 d = extract(file, **kwargs)
@@ -140,8 +131,3 @@ def _read_zip(*args, **kwargs):
             return datasets[0]
         else:
             return datasets
-
-
-# --------------------------------------------------------------------------------------
-if __name__ == "__main__":
-    pass

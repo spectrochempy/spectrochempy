@@ -19,7 +19,7 @@ jinja2
 matplotlib
 numba
 numpy
-numpydoc
+numpydoc>=1.2
 pint
 pytz
 requests
@@ -38,18 +38,18 @@ setuptools_scm
 gitpython
 jupyterlab
 nodejs
+coverage
 pytest
 pytest-doctestplus
 pytest-flake8
 pytest-mock
 pyfakefs
 pep8-naming
+xarray
 scikit-image
-coverage
 black
 pre-commit
 mamba
-docrep
 jupytext
 sphinx==5.3
 sphinx_rtd_theme==1.2
@@ -61,3 +61,4 @@ json5
 sphinx-copybutton
 sphinxcontrib-bibtex
 pandoc==2.19
+numpydoc>=1.2

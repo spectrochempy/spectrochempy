@@ -109,4 +109,8 @@ som = f1.inverse_transform()
 f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2)
 
 # %%
-scp.show()
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

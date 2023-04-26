@@ -64,12 +64,12 @@ class SVD(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "SVD")
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Singular Value Decomposition (SVD).
 
-    The SVD is commonly written as :math:`X = U \\Sigma V^{T}` .
+    The SVD is commonly written as :math:`X = U \Sigma V^{T}`\ .
 
-    This class has the attributes : U, s = diag(S) and VT=V :math:`^T` .
+    This class has the attributes : U, s = diag(S) and VT=V :math:`^T`\ .
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.
@@ -87,6 +87,7 @@ class SVD(DecompositionAnalysis):
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> svd = scp.SVD()
     >>> svd.fit(dataset)
+    <svd: U(55, 55), s(55), VT(55, 5549)>
     >>> print(svd.ev.data)
     [1.185e+04      634 ... 0.001089 0.000975]
     >>> print(svd.ev_cum.data)
@@ -117,7 +118,6 @@ class SVD(DecompositionAnalysis):
         *,
         log_level="WARNING",
         warm_start=False,
-        copy=True,
         **kwargs,
     ):
 
@@ -126,7 +126,6 @@ class SVD(DecompositionAnalysis):
         super().__init__(
             log_level=log_level,
             warm_start=warm_start,
-            copy=copy,
             **kwargs,
         )
 
@@ -188,7 +187,7 @@ class SVD(DecompositionAnalysis):
     )
     def singular_values(self):
         """
-        Return a NDDataset containing singular values
+        Return a NDDataset containing singular values.
         """
         s = self._outfit[1]
         return s
@@ -261,8 +260,3 @@ class SVD(DecompositionAnalysis):
         Return Vector of singular values .
         """
         return self._outfit[1]
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

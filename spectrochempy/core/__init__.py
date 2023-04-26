@@ -219,7 +219,3 @@ with timeit("units"):
 # START THE app
 with timeit("start app"):
     _started = app.start()
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

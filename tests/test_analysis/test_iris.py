@@ -5,10 +5,30 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+from os import environ
 
 import numpy as np
+import pytest
 
 import spectrochempy as scp
+from spectrochempy.utils import docstrings as chd
+
+
+# test docstring
+# but this is not intended to work with the debugger - use run instead of debug!
+@pytest.mark.skipif(
+    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
+    reason="debug mode cause error when checking docstrings",
+)
+def test_IRIS_docstrings():
+    chd.PRIVATE_CLASSES = []  # do not test private class docstring
+    module = "spectrochempy.analysis.iris"
+    chd.check_docstrings(
+        module,
+        obj=scp.IRIS,
+        # exclude some errors - remove whatever you want to check
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+    )
 
 
 def test_analysis_iris_kernel():
@@ -59,7 +79,7 @@ def test_analysis_iris_kernel():
     q0 = scp.Coord(
         np.logspace(-10, 1, 10),
         name="reduced adsorption energy",
-        title="$\Delta_{ads}G^{0}/RT$",
+        title=r"$\Delta_{ads}G^{0}/RT$",
         units="",
     )
     k4 = scp.IrisKernel(X, "langmuir", p=p0, q=q0)

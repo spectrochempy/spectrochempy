@@ -19,7 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   test-package:
 
     # prevent cron jobs from running on forks or release
@@ -36,54 +35,55 @@ jobs:
 
     defaults:
       run:
-        shell: bash -l {0}
+        shell: bash {0}
+        # do not use -l flag (do not work with macos when bash is se in login mode)
 
     strategy:
-      max-parallel: 4
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest] # , , macos-latest, windows-latest
-        pythonVersion: ["3.10" , "3.8"]
-
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        pythonVersion: ["3.8", "3.10"]
+        exclude:
+          - os: macos-latest
+            pythonVersion: 3.8
+          - os: windows-latest
+            pythonVersion: 3.8
     steps:
-      - name: Checkout code
+      - name: Checkout spectrochempy repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Set up Python ${{ matrix.pythonVersion }}
+        id: setup_python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.pythonVersion }}
 
-      - name: Install spectrochempy
-        run: |
-          python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install .
+      - name: cache virtualenv
+        # Cache virtual environment to avoid installing dependencies at each runs
+        id: cache-virtualenv
+        uses: syphar/restore-virtualenv@v1
 
       - name: Install dependencies for testing
+        # Run only if dependencies have changed
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
-          python3 -m pip install pytest
-          python3 -m pip install pytest-doctestplus
-          python3 -m pip install pytest-flake8
-          python3 -m pip install pytest-mock
-          python3 -m pip install pyfakefs
-          python3 -m pip install cffconvert
-          python3 -m pip install coverage
-          python3 -m pip install numpydoc>=1.2
+          python --version
+          python -m pip install -r requirements/requirements_test.txt
 
-      - name: Install optional libraries needed for tests
+      - name: Install spectrochempy
         run: |
-          python3 -m pip install xarray
-
-      - name: List final packages used for tests
-        run: |
-          python3 -m pip list
+          python -m pip install --upgrade pip
+          python -m pip install --no-deps .
+          python -m pip list
 
       - name: Test with coverage
         run: |
           coverage run -m pytest tests
 
       - name: Coverage report to xml
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
         run: |
           coverage xml
 

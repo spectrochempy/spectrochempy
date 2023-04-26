@@ -126,7 +126,3 @@ def smooth(dataset, window_length=5, window="flat", **kwargs):
         new = data
 
     return new
-
-
-if __name__ == "__main__":
-    pass

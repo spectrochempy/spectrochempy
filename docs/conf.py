@@ -44,7 +44,7 @@ sys._called_from_sphinx = True
 # Sphinx Extensions
 source = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(source, "docs", "sphinxext"))
-# print (sys.path)
+
 extensions = [
     "nbsphinx",
     "sphinx_copybutton",

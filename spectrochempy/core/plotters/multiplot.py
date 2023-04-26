@@ -442,7 +442,3 @@ def multiplot(
         fig.canvas.mpl_connect("figure_leave_event", _onenter)
 
     return axes
-
-
-if __name__ == "__main__":
-    pass

@@ -185,7 +185,6 @@ Import a NDataset from external source
     read_omnic
     read_opus
     read_quadera
-    read_remote
     read_sdr
     read_soc
     read_spa
@@ -595,6 +594,15 @@ Non-linear optimization and curve fit
     :toctree: generated/
 
     Optimize
+
+Partial Least Square regression
+===============================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    PLSRegression
 
 Evolving factor analysis
 ========================

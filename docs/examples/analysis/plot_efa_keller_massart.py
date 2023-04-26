@@ -77,7 +77,7 @@ efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.x.labels)
 # input.
 # We can consider that the third EFA components is mainly due to the noise,
 # and so we can use it to set a cut of values
-n_pc = efa.used_components = 2
+n_pc = efa.n_components = 2
 
 efa.cutoff = np.max(efa.f_ev[:, n_pc].data)
 f2 = efa.f_ev[:, :n_pc]
@@ -95,4 +95,8 @@ C = efa.transform()
 C.T.plot(title="EFA concentration")
 
 # %%
-scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+# This ends the example ! The following line can be uncommented if no plot shows when running
+# the .py script
+
+# %%
+# scp.show()

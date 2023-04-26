@@ -35,7 +35,7 @@ dependencies:
     - matplotlib
     - numba
     - numpy
-    - numpydoc
+    - numpydoc>=1.2
     - pint
     - pytz
     - requests
@@ -49,32 +49,32 @@ dependencies:
     - widgetsnbextension=4.0.5
     - jupyterlab_widgets=3.0.5
     - ipympl
-
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
-
     # Jupyter lab
     - jupyterlab
     - nodejs
 
-# DEV dependencies
+    # TEST dependencies
     # ----------------
-    # From here, the dependencies are essentially for development.
-    # They should not be necessary for the user of  spectrochempy.
+    - coverage
     - pytest
     - pytest-doctestplus
     - pytest-flake8
     - pytest-mock
     - pyfakefs
     - pep8-naming
+    - xarray
+# DEV dependencies
+    # ----------------
+    # From here, the dependencies are essentially for development.
+    # They should not be necessary for the user of  spectrochempy.
     - scikit-image
-    - coverage
     - black
     - pre-commit
     - mamba
-    - docrep
     - jupytext
     - sphinx=5.3
     - sphinx_rtd_theme=1.2
@@ -89,5 +89,6 @@ dependencies:
     - conda-build
     - conda-verify
     - anaconda-client
+    - numpydoc>=1.2
 
 #EOF

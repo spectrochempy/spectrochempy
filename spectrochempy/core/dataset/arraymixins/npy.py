@@ -106,8 +106,3 @@ def dot(a, b, strict=True, out=None):
         new.units = a.units * b.units
 
     return new
-
-
-# ======================================================================================
-if __name__ == "__main__":
-    pass

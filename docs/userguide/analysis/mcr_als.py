@@ -328,7 +328,7 @@ _ = mcr3.C.T.plot()
 # Let's first analyse our dataset using PCA and plot a screeplot:
 
 # %%
-pca = scp.PCA(used_components=8)
+pca = scp.PCA(n_components=8)
 pca.fit(X)
 pca.printev()
 _ = pca.screeplot()
@@ -359,7 +359,7 @@ _ = scores.T.plot()
 # %%
 efa = scp.EFA()
 efa.fit(X)
-efa.used_components = 4
+efa.n_components = 4
 C0 = efa.transform()
 _ = C0.T.plot()
 
