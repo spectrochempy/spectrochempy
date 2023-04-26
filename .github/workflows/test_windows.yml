@@ -60,7 +60,7 @@ jobs:
         uses: actions/cache@v3
         id: cache-venv
         with:
-          path: $HOME\.venv
+          path: ./.venv
           key: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-${{ hashFiles('requirements/requirements.txt') }}
           restore-keys: ${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}-venv-
 
@@ -68,18 +68,19 @@ jobs:
         # Run only if dependencies have changed
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
-          python -m venv $HOME\.venv
-          $HOME\.venv\Scripts\activate.bat
+          python -m venv ./.venv
+          ./.venv/Scripts/activate.bat
           python --version
           python -m pip install -r requirements/requirements_test.txt
 
       - name: Install spectrochempy
         run: |
-          $HOME\.venv\Scripts\activate.bat
+          ./.venv/Scripts/activate.bat
+          python -m pip install --upgrade pip
           python -m pip install --no-deps .
           python -m pip list
 
       - name: Test with coverage
         run: |
-          $HOME\.venv\Scripts\activate.bat
+          ./.venv/Scripts/activate.bat
           python -m pytest tests
