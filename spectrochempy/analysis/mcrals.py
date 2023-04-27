@@ -32,6 +32,7 @@ from spectrochempy.analysis._base import (
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.core import info_
+from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
@@ -81,6 +82,7 @@ class MCRALS(DecompositionAnalysis):
     # They will be written in a file from which the default can be modified)
     # Obviously, the parameters can also be modified at runtime as usual by assignment.
     # ----------------------------------------------------------------------------------
+
     tol = tr.Float(
         0.1,
         help=(
@@ -184,12 +186,27 @@ while profile ``#1`` *can* decrease.""",
 if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
     ).tag(config=True)
 
-    closureConc = tr.List(
+    closureConc = tr.Union(
+        (tr.Enum(["all"]), tr.List()),
         default_value=[],
         help="""Defines the concentration profiles subjected to closure constraint.
-If set to ``[]``\ , no constraint is applied. If an array of indexes is
-passed, the corresponding profile will be constrained so that their
+If set to ``[]``\ , no constraint is applied. If set to ``'all'`` or if an array of indexes is
+passed, the corresponding profiles will be constrained so that their
 weighted sum equals the `closureTarget`\ .""",
+    ).tag(config=True)
+
+    unimodConc = tr.Union(
+        (tr.Enum(["all"]), tr.List()),
+        default_value="all",
+        help=(
+            "Unimodality constraint on concentrations. If set to ``'all'`` "
+            "(default) all concentrations profiles are considered unimodal. "
+            "If an array of indexes is passed, the corresponding profiles are "
+            "considered unimodal, not the others."
+            "For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are "
+            "unimodal while profile ``#1`` *can* be multimodal. If set to ``[]``\ , "
+            "all profiles can be multimodal."
+        ),
     ).tag(config=True)
 
     closureTarget = tr.Union(
@@ -467,7 +484,7 @@ at each iterations.
             return
 
         # check the dimensions compatibility
-        # however as the dimension of profile should match the initial shape
+        # As the dimension of profile should match the initial shape
         # of X we use self._X_shape not self._X.shape (because for this masked columns
         # or rows have already been removed.
         if (self._X_shape[1] != profile.shape[1]) and (
@@ -484,47 +501,48 @@ at each iterations.
             masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
 
         # make the profile
-        try:  # first try on concentration
-            # The data are validated in _C_validate()
-            # if it fails here due to shape mismatch, it goes to the except
-
+        if profile.shape[0] == self._X_shape[0]:
+            # this should be a concentration profile.
             C = profile.copy()
-            n_components = C.shape[1]
-            info_(f"Concentration profile initialized with {n_components} components")
-            # compute initial spectra (using X eventually masked
+            self._n_components = C.shape[1]
+            info_(
+                f"Concentration profile initialized with {self._n_components} components"
+            )
+
+            # compute initial spectra (using X eventually masked)
+            # ... NonnegConc can be used by the solver, so must be validated:
+            proposal_nonnegConc = Meta()
+            proposal_nonnegConc.value = self.nonnegConc
+            self.nonnegConc = self._validate_nonnegConc(proposal_nonnegConc)
+            # ... Now solve
             St = self._solve_St(C)
-            info_("Spectra profile computed")
+            info_("Initial spectra profile computed")
             # if everything went well here, C and St are set, we return
             # after having removed the eventual C mask!
             if np.any(self._X_mask):
                 C = C[~masked_rows]
-            # update the number of components
-            self._n_components = n_components
-
             return C, St
 
-        except np.linalg.LinAlgError as exc:
-            if "Incompatible dimensions" not in exc.args[0]:
-                raise exc
-            pass
+        else:  # necessarily: profile.shape[1] == profile.shape[0]
+            St = profile.copy()
+            self._n_components = St.shape[0]
+            info_(f"Spectra profile initialized with {self._n_components} components")
 
-        # Again if something is wrong we let it raise the error
-        # as there is no other possibility (but this should not occur as we did
-        # already the test on the dimension's compatibility.
-        St = profile.copy()
-        n_components = St.shape[0]
-        info_(f"Spectra profile initialized with {n_components} components")
-        # compute initial concentration
-        C = self._solve_C(St)
-        info_("Concentration profile computed")
-        # if everything went well here, C and St are set, we return
-        # after having removed the eventual St mask!
-        if np.any(self._X_mask):
-            St = St[:, ~masked_columns]
-        # update the number of components
-        self._n_components = n_components
+            # compute initial spectra
+            # ... NonnegSpec can be used by the solver, so must be validated:
+            proposal_nonnegSpec = Meta()
+            proposal_nonnegSpec.value = self.nonnegSpec
+            self.nonnegSpec = self._validate_nonnegConc(proposal_nonnegSpec)
+            # ... Now solve
+            C = self._solve_C(St)
+            info_("Initial concentration profile computed")
+            # if everything went well here, C and St are set, we return
+            # after having removed the eventual St mask!
+            if np.any(self._X_mask):
+                St = St[:, ~masked_columns]
+            # update the number of components
 
-        return C, St
+            return C, St
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def _C_2_NDDataset(self, C):
@@ -586,6 +604,20 @@ at each iterations.
                 f"`unimodConc` configuration (value:{unimodConc})"
             )
         return unimodConc
+
+    @tr.validate("closureConc")
+    def _validate_closureConc(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
+        closureConc = proposal.value
+        if closureConc == "all":
+            closureConc = self._n_components
+        elif len(closureConc) > self._n_components:
+            raise ValueError(
+                f"The model contains only {self._n_components} components, please check "
+                f"the 'closureConc' configuration (value:{closureConc})"
+            )
+        return closureConc
 
     @tr.validate("closureTarget")
     def _validate_closureTarget(self, proposal):
@@ -696,6 +728,7 @@ at each iterations.
                 self.nonnegSpec = self.nonnegSpec
                 self.unimodConc = self.unimodConc
                 self.unimodSpec = self.unimodSpec
+                self.closureConc = self.closureConc
 
     @tr.default("_components")
     def _components_default(self):
@@ -725,7 +758,7 @@ at each iterations.
                 St = St[:, ~masked_columns]
                 C = C[~masked_rows]
         else:
-            # not passed explicitly, try to guess
+            # not passed explicitly, try to guess.
             C, St = self._guess_profile(profiles.data)
 
         # we do a last validation
