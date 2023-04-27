@@ -67,13 +67,15 @@ class SIMPLISMA(DecompositionAnalysis):
             "interactively."
         ),
     ).tag(config=True)
-    max_components = tr.Integer(
+
+    n_components = tr.Integer(
         default_value=2,
         help=(
             "The maximum number of pure compounds. Used only for non interactive"
             "analysis."
         ),
     ).tag(config=True)
+
     tol = tr.Float(
         default_value=0.1,
         help="The convergence criterion on the percent of unexplained variance.",
@@ -111,10 +113,13 @@ class SIMPLISMA(DecompositionAnalysis):
             if verbose:
                 log_level = "INFO"
 
-        # unimodMod deprecation
         if "n_pc" in kwargs:
-            deprecated("n_pc", replace="max_components", removed="0.6.5")
-            kwargs["max_components"] = kwargs.pop("n_pc")
+            deprecated("n_pc", replace="n_components", removed="0.6.5")
+            kwargs["n_components"] = kwargs.pop("n_pc")
+
+        if "max_components" in kwargs:
+            deprecated("max_components", replace="n_components", removed="0.6.5")
+            kwargs["n_components"] = kwargs.pop("max_components")
 
         # call the super class for initialisation
         super().__init__(
@@ -126,8 +131,8 @@ class SIMPLISMA(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Private validation methods and default getter
     # ----------------------------------------------------------------------------------
-    @tr.validate("max_components")
-    def _max_components_validate(self, proposal):
+    @tr.validate("n_components")
+    def _n_components_validate(self, proposal):
         n = proposal.value
         if n < 2:
             raise ValueError(
@@ -197,7 +202,7 @@ class SIMPLISMA(DecompositionAnalysis):
         interactive = self.interactive
         tol = self.tol
         noise = self.noise
-        n_components = self.max_components
+        n_components = self.n_components
         M, N = X.shape
         xdata = np.arange(N)
 
