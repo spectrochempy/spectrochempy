@@ -112,6 +112,7 @@ class EFA(DecompositionAnalysis):
         M, N = X.shape
         K = min(M, N)
 
+        percent_done_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
         # ------------------------------------------------------------------------------
         # forward analysis
         # ------------------------------------------------------------------------------
@@ -122,9 +123,9 @@ class EFA(DecompositionAnalysis):
             k = s.size
             f[i, :k] = s**2
             percent_done = int(i / (2 * M) * 100)
-            if percent_done in [10, 20, 30, 40, 50]:
+            if percent_done in percent_done_list:
                 info_(f"Evolving Factor Analysis: {percent_done}% \r")
-
+                del percent_done_list[0]
         # ------------------------------------------------------------------------------
         # backward analysis
         # ------------------------------------------------------------------------------
@@ -135,8 +136,9 @@ class EFA(DecompositionAnalysis):
             k = s.size
             b[i, :k] = s**2
             percent_done = int(100 - i / (2 * M) * 100)
-            if percent_done in [60, 70, 80, 90, 100]:
+            if percent_done in percent_done_list:
                 info_(f"Evolving Factor Analysis: {percent_done} % \r")
+                del percent_done_list[0]
 
         # store the components number (real or desired)
         self._n_components = K
