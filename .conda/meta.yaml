@@ -46,7 +46,7 @@ requirements:
     - matplotlib
     - numba
     - numpy
-    - numpydoc
+    - numpydoc>=1.2
     - pint
     - pytz
     - requests
@@ -60,12 +60,10 @@ requirements:
     - widgetsnbextension=4.0.5
     - jupyterlab_widgets=3.0.5
     - ipympl
-
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
-
     # Jupyter lab
     - jupyterlab
     - nodejs

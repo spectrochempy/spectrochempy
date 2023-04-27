@@ -15,7 +15,7 @@ authors:
   given-names: Christian
   orcid: https://orcid.org/0000-0002-5476-3148
 cff-version: 1.2.0
-date-released: '2023-04-13'
+date-released: '2023-04-25'
 identifiers:
 - description: Persistent identifier for all versions of SpectroChemPy
   type: doi
@@ -27,4 +27,4 @@ title: SpectroChemPy, a framework for processing, analyzing and modeling spectro
   data for chemistry with Python
 type: software
 url: https://www.spectrochempy.fr
-version: 0.6.1
+version: 0.6.2

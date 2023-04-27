@@ -67,28 +67,5 @@ dependencies:
     - pyfakefs
     - pep8-naming
     - xarray
-# DEV dependencies
-    # ----------------
-    # From here, the dependencies are essentially for development.
-    # They should not be necessary for the user of  spectrochempy.
-    - scikit-image
-    - black
-    - pre-commit
-    - mamba
-    - jupytext
-    - sphinx=5.3
-    - sphinx_rtd_theme=1.2
-    - autodocsumm
-    - sphinx-gallery
-    - nbsphinx
-    - jupyter_sphinx
-    - json5
-    - sphinx-copybutton
-    - sphinxcontrib-bibtex
-    - pandoc=2.19
-    - conda-build
-    - conda-verify
-    - anaconda-client
-    - numpydoc>=1.2
 
 #EOF

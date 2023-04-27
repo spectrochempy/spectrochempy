@@ -1,10 +1,10 @@
 # ======================================================================================
 #
-# This file is auto-generated from environment_dev.yml file.
+# This file is auto-generated from environment_test.yml file.
 #
 # !!! DO NOT MODIFY !!!
 #
-# See in `environment_dev.yml` for more information.
+# See in `environment_test.yml` for more information.
 #
 # ======================================================================================
 quadprog
@@ -46,19 +46,3 @@ pytest-mock
 pyfakefs
 pep8-naming
 xarray
-scikit-image
-black
-pre-commit
-mamba
-jupytext
-sphinx==5.3
-sphinx_rtd_theme==1.2
-autodocsumm
-sphinx-gallery
-nbsphinx
-jupyter_sphinx
-json5
-sphinx-copybutton
-sphinxcontrib-bibtex
-pandoc==2.19
-numpydoc>=1.2

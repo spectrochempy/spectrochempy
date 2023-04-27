@@ -19,7 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   test-package:
 
     # prevent cron jobs from running on forks or release
@@ -42,34 +41,41 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        pythonVersion: ["3.10"] # , "3.8"]
-
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        pythonVersion: ["3.8", "3.10"]
+        exclude:
+          - os: macos-latest
+            pythonVersion: 3.8
+          - os: windows-latest
+            pythonVersion: 3.8
     steps:
-      - name: Checkout code
+      - name: Checkout spectrochempy repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Set up Python ${{ matrix.pythonVersion }}
+        id: setup_python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.pythonVersion }}
 
+      - name: cache virtualenv
+        # Cache virtual environment to avoid installing dependencies at each runs
+        id: cache-virtualenv
+        uses: syphar/restore-virtualenv@v1
+
       - name: Install dependencies for testing
+        # Run only if dependencies have changed
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
           python --version
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install pytest pytest-doctestplus pytest-flake8 pytest-mock
-          python -m pip install pyfakefs
-          python -m pip install cffconvert
-          python -m pip install coverage
-          python -m pip install numpydoc>=1.2
-          python -m pip install xarray
-          python -m pip install .
+          python -m pip install -r requirements/requirements_test.txt
 
-      - name: List final packages used for tests
+      - name: Install spectrochempy
         run: |
+          python -m pip install --upgrade pip
+          python -m pip install --no-deps .
           python -m pip list
 
       - name: Test with coverage
@@ -77,6 +83,7 @@ jobs:
           coverage run -m pytest tests
 
       - name: Coverage report to xml
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
         run: |
           coverage xml
 
