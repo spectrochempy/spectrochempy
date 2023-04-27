@@ -775,8 +775,7 @@ at each iterations.
             # Force non-negative concentration
             # ------------------------------------------
             if np.any(self.nonnegConc):
-                for s in self.nonnegConc:
-                    C[:, s] = C[:, s].clip(min=0)
+                C[:, self.nonnegConc] = C[:, self.nonnegConc].clip(min=0)
 
             # Force unimodal concentration
             # ------------------------------------------
