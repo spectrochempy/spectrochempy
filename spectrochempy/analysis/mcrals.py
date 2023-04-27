@@ -102,9 +102,9 @@ class MCRALS(DecompositionAnalysis):
         default_value="lstsq",
         help=(
             "solver used to solve  C @ St = X for C. It set to ``'lstsq'`` (default) uses ordinary least squares "
-            "with `~numpy.linalg.lstsq`, if set to ``'nnls'``: Non-negative least squares are applied sequentially "
-            "on all profiles, if set to ``'pnnls'``: non-negative least squares are applied on profiles indigated by"
-            "``'nonnegConc`` and ordinary least squares on other profiles"
+            "with `~numpy.linalg.lstsq`, if set to ``'nnls'``\ : Non-negative least squares are applied sequentially "
+            "on all profiles, if set to ``'pnnls'``\ : non-negative least squares are applied on profiles indigated by"
+            "``'nonnegConc'`` and ordinary least squares on other profiles"
         ),
     ).tag(config=True)
 
@@ -277,9 +277,9 @@ MCR ALS iterations.
         default_value="lstsq",
         help=(
             "solver used to solve  C @ St = X for St. It set to ``'lstsq'`` (default) uses ordinary least squares "
-            "with `~numpy.linalg.lstsq`, if set to ``'nnls'``: Non-negative least squares are applied sequentially "
-            "on all profiles, if set to ``'pnnls'``: non-negative least squares are applied on profiles indigated by"
-            "``'nonnegSpec`` and ordinary least squares on other profiles"
+            "with `~numpy.linalg.lstsq`, if set to ``'nnls'``\ : Non-negative least squares are applied sequentially "
+            "on all profiles, if set to ``'pnnls'``\ : non-negative least squares are applied on profiles indigated by"
+            "``'nonnegSpec'`` and ordinary least squares on other profiles"
         ),
     ).tag(config=True)
 
