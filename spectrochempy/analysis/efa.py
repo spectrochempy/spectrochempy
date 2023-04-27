@@ -121,7 +121,9 @@ class EFA(DecompositionAnalysis):
             s = np.linalg.svd(X[: i + 1], compute_uv=False)
             k = s.size
             f[i, :k] = s**2
-            info_(f"Evolving Factor Analysis: {int(i / (2 * M) * 100)}% \r")
+            percent_done = int(i / (2 * M) * 100)
+            if percent_done in [10, 20, 30, 40, 50]:
+                info_(f"Evolving Factor Analysis: {percent_done}% \r")
 
         # ------------------------------------------------------------------------------
         # backward analysis
@@ -132,7 +134,9 @@ class EFA(DecompositionAnalysis):
             s = np.linalg.svd(X[i:M], compute_uv=False)
             k = s.size
             b[i, :k] = s**2
-            info_(f"Evolving Factor Analysis: {int(100 - i / (2 * M) * 100)} % \r")
+            percent_done = int(100 - i / (2 * M) * 100)
+            if percent_done in [60, 70, 80, 90, 100]:
+                info_(f"Evolving Factor Analysis: {percent_done} % \r")
 
         # store the components number (real or desired)
         self._n_components = K
