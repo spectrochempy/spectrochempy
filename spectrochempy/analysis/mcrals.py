@@ -101,10 +101,10 @@ class MCRALS(DecompositionAnalysis):
         ["lstsq", "nnls", "pnnls"],
         default_value="lstsq",
         help=(
-            "solver used to solve  C @ St = X for C. It set to ``'lstsq'`` (default) uses ordinary least squares "
+            "Solver used to solve  C @ St = X for C. It set to ``'lstsq'`` (default) uses ordinary least squares "
             "with `~numpy.linalg.lstsq`, if set to ``'nnls'``\ : Non-negative least squares are applied sequentially "
             "on all profiles, if set to ``'pnnls'``\ : non-negative least squares are applied on profiles indigated by"
-            "``'nonnegConc'`` and ordinary least squares on other profiles"
+            "``'nonnegConc'`` and ordinary least squares on other profiles."
         ),
     ).tag(config=True)
 
@@ -276,10 +276,10 @@ MCR ALS iterations.
         ["lstsq", "nnls", "pnnls"],
         default_value="lstsq",
         help=(
-            "solver used to solve  C @ St = X for St. It set to ``'lstsq'`` (default) uses ordinary least squares "
+            "Solver used to solve  C @ St = X for St. It set to ``'lstsq'`` (default) uses ordinary least squares "
             "with `~numpy.linalg.lstsq`, if set to ``'nnls'``\ : Non-negative least squares are applied sequentially "
             "on all profiles, if set to ``'pnnls'``\ : non-negative least squares are applied on profiles indigated by"
-            "``'nonnegSpec'`` and ordinary least squares on other profiles"
+            "``'nonnegSpec'`` and ordinary least squares on other profiles."
         ),
     ).tag(config=True)
 
@@ -1061,7 +1061,7 @@ at each iterations.
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def C_constrained(self):
         """
-        The constrained concentration profiles, obtained after applying  the hard and soft constraints
+        The constrained concentration profiles, i.e. after applying the hard and soft constraints.
         """
         return self._outfit[2]
 
