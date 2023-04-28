@@ -226,7 +226,7 @@ class NMF(DecompositionAnalysis):
         # destroying the full matrix:
         store_components_ = self._nmf.components_
         self._nmf.components_ = self._nmf.components_[: X_transform.shape[1]]
-        X = self._nmf.inverse_transform(X_transform)
+        X = self._nmf.inverse_transform(X_transform)  #
         # restore
         self._nmf.components_ = store_components_
         return X

@@ -856,7 +856,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
                     f"{X_transform.shape[1]}. We then use this latter value."
                 )
         elif X_transform is None:
-            X_transform = self.transform(**kwargs)
+            X_transform = self.transform(**kwargs).data
 
         X = self._inverse_transform(X_transform)
 

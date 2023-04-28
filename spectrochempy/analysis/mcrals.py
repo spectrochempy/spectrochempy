@@ -186,35 +186,43 @@ while profile ``#1`` *can* decrease.""",
 if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
     ).tag(config=True)
 
-    closureConc = tr.Union(
-        (tr.Enum(["all"]), tr.List()),
-        default_value=[],
-        help="""Defines the concentration profiles subjected to closure constraint.
-If set to ``[]``\ , no constraint is applied. If set to ``'all'`` or if an array of indexes is
-passed, the corresponding profiles will be constrained so that their
-weighted sum equals the `closureTarget`\ .""",
-    ).tag(config=True)
-
     unimodConc = tr.Union(
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
         help=(
-            "Unimodality constraint on concentrations. If set to ``'all'`` "
-            "(default) all concentrations profiles are considered unimodal. "
-            "If an array of indexes is passed, the corresponding profiles are "
-            "considered unimodal, not the others."
-            "For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are "
-            "unimodal while profile ``#1`` *can* be multimodal. If set to ``[]``\ , "
-            "all profiles can be multimodal."
+            """Unimodality constraint on concentrations.
+
+* ``'all'`` (default) : all concentrations profiles are considered unimodal.
+
+* array of indexes : the corresponding profiles are considered unimodal, not the others.
+For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while
+profile ``#1`` *can* be multimodal.
+
+ * ``[]``\ : all profiles can be multimodal."""
         ),
+    ).tag(config=True)
+
+    closureConc = tr.Union(
+        (tr.Enum(["all"]), tr.List()),
+        default_value=[],
+        help="""Defines the concentration profiles subjected to closure constraint.
+
+* ``[]``\ : no constraint is applied.
+
+* ``'all'`` : all profile are constrained so that their weighted sum equals the `closureTarget`
+
+* array of indexes : the corresponding profiles are constrained so that their
+    weighted sum equals the `closureTarget`\ .""",
     ).tag(config=True)
 
     closureTarget = tr.Union(
         (tr.Enum(["default"]), Array()),
         default_value="default",
         help="""The value of the sum of concentrations profiles subjected to closure.
-If set to ``'default'``\ , the total concentration is set to ``1.0`` for all observations.
-If an array is passed: the values of concentration for each observation. Hence,
+
+* ``'default'``\ : the total concentration is set to ``1.0`` for all observations.
+
+* an array of size `n_observations` : the values of concentration for each observation. Hence,
 ``np.ones(X.shape[0])`` would be equivalent to ``'default'``\ .""",
     ).tag(config=True)
 
@@ -223,7 +231,7 @@ If an array is passed: the values of concentration for each observation. Hence,
         default_value="scaling",
         help="""The method used to enforce :term:`closure` .
 
-* ``'scaling'`` recompute the concentration profiles using linear algebra:
+* ``'scaling'`` recompute the concentration profiles using least squares:
 
    .. code-block:: python
 
@@ -464,11 +472,11 @@ at each iterations.
             return _pnnls(St.T, self._X.data.T, nonneg=self.nonnegConc).T
 
     def _solve_St(self, C):
-        if self.C_solver == "lstsq":
+        if self.St_solver == "lstsq":
             return _lstsq(C, self._X.data)
-        elif self.C_solver == "nnls":
+        elif self.St_solver == "nnls":
             return _nnls(C, self._X.data)
-        elif self.C_solver == "pnnls":
+        elif self.St_solver == "pnnls":
             return _pnnls(C, self._X.data, nonneg=self.nonnegSpec)
 
     def _guess_profile(self, profile):
@@ -611,7 +619,7 @@ at each iterations.
             return proposal.value
         closureConc = proposal.value
         if closureConc == "all":
-            closureConc = self._n_components
+            closureConc = np.arange(self._n_components)
         elif len(closureConc) > self._n_components:
             raise ValueError(
                 f"The model contains only {self._n_components} components, please check "
@@ -924,7 +932,6 @@ at each iterations.
                 else:
                     fixedSt = output.data
 
-                print(self.hardSt_to_St_idx)
                 St[self.hardSpec, :] = fixedSt[self.hardSt_to_St_idx, :]
 
             # recompute C for consistency
