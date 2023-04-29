@@ -32,7 +32,6 @@ from spectrochempy.analysis._base import (
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.core import info_
-from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
@@ -562,11 +561,6 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
             )
 
             # compute initial spectra (using X eventually masked)
-            # ... NonnegConc can be used by the solver, so must be validated:
-            proposal_nonnegConc = Meta()
-            proposal_nonnegConc.value = self.nonnegConc
-            self.nonnegConc = self._validate_nonnegConc(proposal_nonnegConc)
-            # ... Now solve
             St = self._solve_St(C)
             info_("Initial spectra profile computed")
             # if everything went well here, C and St are set, we return
@@ -581,11 +575,6 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
             info_(f"Spectra profile initialized with {self._n_components} components")
 
             # compute initial spectra
-            # ... NonnegSpec can be used by the solver, so must be validated:
-            proposal_nonnegSpec = Meta()
-            proposal_nonnegSpec.value = self.nonnegSpec
-            self.nonnegSpec = self._validate_nonnegConc(proposal_nonnegSpec)
-            # ... Now solve
             C = self._solve_C(St)
             info_("Initial concentration profile computed")
             # if everything went well here, C and St are set, we return
@@ -762,8 +751,8 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
             )
         return hardSt_to_St_idx
 
-    @tr.observe("_Y_preprocessed")
-    def _Y_preprocessed_change(self, change):
+    @tr.observe("_n_components")
+    def _n_components_change(self, change):
         if self._n_components > 0:
             # perform a validation of default configuration parameters
             # Indeed, if not forced here these parameters are validated only when they
@@ -774,8 +763,6 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
                 self.closureTarget = self.closureTarget
                 self.hardC_to_C_idx = self.hardC_to_C_idx
                 self.hardSt_to_St_idx = self.hardSt_to_St_idx
-                self.solverConc = self.solverConc
-                self.solverSpec = self.solverSpec
                 self.nonnegConc = self.nonnegConc
                 self.nonnegSpec = self.nonnegSpec
                 self.unimodConc = self.unimodConc
