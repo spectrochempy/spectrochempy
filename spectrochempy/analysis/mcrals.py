@@ -260,7 +260,7 @@ profile ``#1`` *can* be multimodal.
 
         .. math::
 
-                C \leftarrow C \cdot \textrm{diag}\left(C^+ c_t\right)
+                C \leftarrow C \cdot \\textrm{diag}\left(C^+ c_t\\right)
 
         where :math:`c_t` is the vector given by `closureTarget` and :math:`C^+`
 is the pseudo inverse of `C`.
@@ -1187,7 +1187,8 @@ profile of `St` (index ``1``\ ).
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def St_unconstrained(self):
         """
-        The soft spectra profiles, obtained after solving $C_{\textrm{constrained}} \cdot St = X$ for $St$.
+        The soft spectra profiles, obtained after solving :math:`C_{\textrm{constrained}} \cdot St = X` for
+        :math:`St`\ .
         """
         return self._outfit[3]
 
