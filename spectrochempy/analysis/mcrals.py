@@ -313,7 +313,7 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         second profile of `C` (index ``1``\ ).
 
         * `"default"': the columns of `hardC` correspond to thos of `C`. This is equivalent to
-        :code:pyhton:`range(len(hardConc))`
+        :code:python:`range(len(hardConc))`
        """,
     ).tag(config=True)
 
@@ -446,7 +446,7 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         profile of `St` (index ``1``\ ).
 
         * `"default"': the lines of `hardSt` correspond to those of `St`. This is equivalent to
-        :code:pyhton:`range(len(hardSpec))`
+        :code:python:`range(len(hardSpec))`
         """,
     ).tag(config=True)
 
