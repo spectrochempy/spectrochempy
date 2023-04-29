@@ -125,7 +125,7 @@ class MCRALS(DecompositionAnalysis):
             - ``'all'`` (default) : all concentrations profiles are considered non-negative.
             - list of indexes : the corresponding profiles are considered non-negative, not the otherrs.
             For instance ``[0, 2]`` indicates that profile \#0 and \#2 are non-negative while profile
-            \#1 *can* be negative.
+\#1 *can* be negative.
             - ``[]`` : all profiles can be negative.
             """
         ),
@@ -134,30 +134,37 @@ class MCRALS(DecompositionAnalysis):
     unimodConc = tr.Union(
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
-        help=(
-            "Unimodality constraint on concentrations. If set to ``'all'`` "
-            "(default) all concentrations profiles are considered unimodal. "
-            "If an array of indexes is passed, the corresponding profiles are "
-            "considered unimodal, not the others."
-            "For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are "
-            "unimodal while profile ``#1`` *can* be multimodal. If set to ``[]``\ , "
-            "all profiles can be multimodal."
-        ),
+        help="""
+             Unimodality constraint on concentrations.
+
+             * `'all'` : all concentrations profiles are considered unimodal.
+
+             * array of indexes : the corresponding profiles are considered unimodal, not the others. For instance
+             ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while profile ``#1`` *can* be multimodal.
+
+             * ``[]`` : all profiles can be multimodal.
+            """,
     ).tag(config=True)
 
     unimodConcMod = tr.Enum(
         ["strict", "smooth"],
         default_value="strict",
-        help="""When set to ``'strict'``\ , values deviating from :term:`unimodality` are
-reset to the value of the previous point. When set to ``'smooth'``\ , both values
-(deviating point and previous point) are modified to avoid steps in the concentration
-profile.""",
+        help="""
+        The method used to enforce :term:`unimodality`.
+
+        * `'strict'`\ : values deviating from :term:`unimodality` are reset to the value of the previous point.
+
+        * ``'smooth'``\ : both values (deviating point and previous point) are modified to avoid steps in the concentration
+profile.
+        """,
     ).tag(config=True)
 
     unimodConcTol = tr.Float(
         default_value=1.1,
-        help="""Tolerance parameter for :term:`unimodality`\ . Correction is applied only
-if:
+        help="""
+        Tolerance parameter for :term:`unimodality`\ .
+
+        Correction is applied only if:
 
 * ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile ``#j``\ ,
 * ``C[i,j] < C[i-1,j] * unimodTol`` on the increasing branch of profile ``#j``\ .""",
@@ -165,32 +172,38 @@ if:
 
     monoDecConc = tr.List(
         default_value=[],
-        help="""Monotonic decrease constraint on concentrations.  If set to ``[]``
-(default) no constraint is applied. If an array of indexes is passed,
-the corresponding profiles are considered do decrease monotonically, not the
+        help="""Monotonic decrease constraint on concentrations.
+
+        * `[]` : no constraint is applied.
+
+        * array of indexes : the corresponding profiles are considered do decrease monotonically, not the
 others. For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are decreasing
 while profile ``#1`` *can* increase.""",
     ).tag(config=True)
 
     monoDecTol = tr.Float(
         default_value=1.1,
-        help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if: ``C[i,j] > C[i-1,j] * unimodTol``  along profile ``#j``\ .""",
+        help="""Tolerance parameter for monotonic decrease.
+
+        Correction is applied only if: ``C[i,j] > C[i-1,j] * unimodTol``  along profile ``#j``\ .""",
     ).tag(config=True)
 
     monoIncConc = tr.List(
         default_value=[],
-        help="""Monotonic increase constraint on concentrations.  If set to ``[]``
-(default) no constraint is applied. If an array of indexes is passed,
-the corresponding profiles are considered to increase monotonically, not the
+        help="""Monotonic increase constraint on concentrations.
+
+        * `[]` : no constraint is applied.
+
+        * array of indexes : the corresponding profiles are considered to increase monotonically, not the
 others. For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are increasing
 while profile ``#1`` *can* decrease.""",
     ).tag(config=True)
 
     monoIncTol = tr.Float(
         default_value=1.1,
-        help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
+        help="""Tolerance parameter for monotonic decrease.
+
+        Correction is applied only if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
     ).tag(config=True)
 
     unimodConc = tr.Union(
@@ -203,8 +216,8 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
             * ``'all'`` (default) : all concentrations profiles are considered unimodal.
 
             * array of indexes : the corresponding profiles are considered unimodal, not the others.
-            For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while
-            profile ``#1`` *can* be multimodal.
+For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while
+profile ``#1`` *can* be multimodal.
 
             * ``[]``\ : all profiles can be multimodal.
             """
@@ -221,8 +234,7 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
 
         * ``'all'`` : all profile are constrained so that their weighted sum equals the `closureTarget`
 
-        * `list` of indexes : the corresponding profiles are constrained so that their weighted sum
-        equals `closureTarget`\ .
+        * `list` of indexes : the corresponding profiles are constrained so that their weighted sum equals `closureTarget`\ .
         """,
     ).tag(config=True)
 
@@ -235,7 +247,7 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         * ``'default'``\ : the total concentration is set to ``1.0`` for all observations.
 
         * an array of size `n_observations` : the values of concentration for each observation. Hence,
-        ``np.ones(X.shape[0])`` would be equivalent to ``'default'``\ .""",
+``np.ones(X.shape[0])`` would be equivalent to ``'default'``\ .""",
     ).tag(config=True)
 
     closureMethod = tr.Enum(
@@ -248,10 +260,10 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
 
         .. math::
 
-                C \leftarrow C \cdot \textrm{diag}\left(C^+ c_t)
+                C \leftarrow C \cdot \textrm{diag}\left(C^+ c_t\right)
 
         where :math:`c_t` is the vector given by `closureTarget` and :math:`C^+`
-        is the pseudo inverse of `C`.
+is the pseudo inverse of `C`.
 
         * ``'constantSum'`` normalize the sum of concentration profiles to `closureTarget`\ :.
         """,
@@ -287,11 +299,11 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         * `hardC` is a `~numpy.ndarray` or `NDDataset` of shape ``n_observations, len(hardConc)``\ ,
         *``newArgsGetConc`` are the updated parameters for the next iteration (can be None),
         * `extraOutputGetConc`` can be any other relevant output to be kept in `extraOutputGetConc` attribute,
-        a list of ``extraOutputGetConc`` at each MCR ALS iterations.
+a list of ``extraOutputGetConc`` at each MCR ALS iterations.
 
         .. note::
             ``getConc`` can be also a serialized function created using dill and base64 python libraries.
-            Normally not used directly, it is here for internal process.""",
+Normally not used directly, it is here for internal process.""",
     ).tag(config=True)
 
     argsGetConc = tr.Tuple(
@@ -308,12 +320,13 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         (tr.Enum(["default"]), tr.List()),
         default_value="default",
         help="""
-        Indicates the correspondence between the indexes of the columns of `hardC` and of the `C` matrix.
-        ``[1, None, 0]`` indicates that the first profile in `hardC` (index ``O``\) corresponds to the
-        second profile of `C` (index ``1``\ ).
+        Correspondence between the indexes of the columns of `hardC` and of the `C` matrix.
 
         * `"default"': the columns of `hardC` correspond to thos of `C`. This is equivalent to
-        :code:python:`range(len(hardConc))`
+:code:`range(len(hardConc))`
+
+        * ``list`` of indices or of ``None``. For instance ``[1, None, 0]`` indicates that the first profile
+        in `hardC` (index ``O``\) corresponds to the second profile of `C` (index ``1``\ ).
        """,
     ).tag(config=True)
 
@@ -321,13 +334,15 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         ["lstsq", "nnls", "pnnls"],
         default_value="lstsq",
         help="""
-            Solver used to solve  :math:`C @ S^t = X` for :math:`S^t`\ .
+            Solver used to solve  :math:`C S^t = X` for :math:`S^t`\ .
 
             * ``'lstsq'`` (default) : uses ordinary least squares with `~numpy.linalg.lstsq`
+
             * ``'nnls'``\ : Non-negative least squares (`~scipy.optimize.nnls`\ ) are applied sequentially on all
-            profiles
+profiles
+
             * ``'pnnls'``\ : non-negative least squares (`~scipy.optimize.nnls`\ ) are applied on profiles indicated in
-            ``'nonnegConc'`` and ordinary least squares on other profiles.
+``'nonnegConc'`` and ordinary least squares on other profiles.
             """,
     ).tag(config=True)
 
@@ -338,9 +353,11 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
             Non-negativity constraint on spectra.
 
             * ``'all'`` (default) : all profiles are considered non-negative.
+
             * list of indexes : the corresponding profiles are considered non-negative, not the others.
-            For instance ``[0, 2]`` indicates that profile \#0 and \#2 are non-negative while profile
-            \#1 *can* be negative.
+For instance ``[0, 2]`` indicates that profile \#0 and \#2 are non-negative while profile
+\#1 *can* be negative.
+
             * ``[]`` : all profiles can be negative.
             """,
     ).tag(config=True)
@@ -363,11 +380,14 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         help="""
         Unimodality constraint on Spectra.
 
+        .. role:: python(code)
+            :language: python
+
         * `[]` : all profiles can be multimodal.
-        * ``'all'`` : all profiles are unimodal (equivalent to :code:python:'range(n_components)').
+        * ``'all'`` : all profiles are unimodal (equivalent to :python:`range(n_components)`).
         * array of indexes : the corresponding profiles are considered unimodal, not the others.
-        For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while profile
-        ``#1`` *can* be multimodal.
+For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while profile
+``#1`` *can* be multimodal.
         """,
     ).tag(config=True)
 
@@ -377,19 +397,21 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         help="""
         Method used to apply unimodality.
 
-        * `"strict"`` : values deviating from unimodality are reset to the value of the previous point.
-        * ``"smooth"`` : both values (deviating point and previous point) are modified to avoid steps
-        in the concentration profile.
-""",
+        * `"strict"`: values deviating from unimodality are reset to the value of the previous point.
+        * ``"smooth"`` : both values (deviating point and previous point) are modified to avoid steps in the
+concentration profile.
+        """,
     ).tag(config=True)
 
     unimodSpecTol = tr.Float(
         default_value=1.1,
         help="""
-        Tolerance parameter for unimodality. Correction is applied only if the
-        deviating point is larger/lower than ``St[j,i] > St[j, i-1] * unimodSpecTol``
-        on the decreasing branch of profile ``#j``\ , ``St[j,i] < St[j, i-1] * unimodTol`` on
-        the increasing branch of profile  ``#j``\ .""",
+        Tolerance parameter for unimodality.
+
+        Correction is applied only if the deviating point ``St[j,i]`` is larger than
+``St[j, i-1] * unimodSpecTol`` on the decreasing branch of profile ``#j``\ , or
+lower than ``St[j, i-1] * unimodTol`` on the increasing branch of profile  ``#j``\ .
+        """,
     ).tag(config=True)
 
     hardSpec = tr.List(
@@ -421,11 +443,11 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
         * `hardSt` is a `~numpy.ndarray` or `NDDataset` of shape ``(n_observations, len(hardSpec)``\ ,
         * ``newArgsGetSpec`` are the updated parameters for the next iteration (can be None),
         * ``extraOutputGetSpec`` can be any other relevant output to be kept in `extraOutputGetSpec` attribute,
-        a list of ``extraOutputGetSpec`` at each iterations.
+a list of ``extraOutputGetSpec`` at each iterations.
 
         .. note::
             ``getSpec`` can be also a serialized function created using dill and base64 python libraries.
-            Normally not used directly, it is here for internal process.""",
+Normally not used directly, it is here for internal process.""",
     ).tag(config=True)
 
     argsGetSpec = tr.Tuple(
@@ -441,12 +463,16 @@ if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
     hardSt_to_St_idx = tr.Union(
         (tr.Enum(["default"]), tr.List()),
         default_value="default",
-        help="""Indicates the correspondence between the indexes of the lines of `hardSt` and of the `St` matrix.
-        ``[1, None, 0]`` indicates that the first profile in `hardSt` (index ``O`` ) corresponds to the second
-        profile of `St` (index ``1``\ ).
+        help="""
+        Indicates the correspondence between the indexes of the lines of `hardSt` and of the `St` matrix.
+``[1, None, 0]`` indicates that the first profile in `hardSt` (index ``O`` ) corresponds to the second
+profile of `St` (index ``1``\ ).
+
+        .. role:: python(code)
+            :language: python
 
         * `"default"': the lines of `hardSt` correspond to those of `St`. This is equivalent to
-        :code:python:`range(len(hardSpec))`
+:python:`range(len(hardSpec))`.
         """,
     ).tag(config=True)
 
