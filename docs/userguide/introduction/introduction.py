@@ -31,7 +31,7 @@
 # ---
 
 # %% [markdown]
-# ## Introduction
+# # Introduction
 #
 # The `SpectroChemPy` project was developed to provide advanced tools for processing and
 # analyzing spectroscopic data, initially for internal purposes within the
@@ -49,14 +49,14 @@
 # used.
 
 # %% [markdown]
-# ### How to get started
+# ## How to get started
 #
 # We assume that the SpectroChemPy package has been correctly
 # installed. if is not the case, please go to [SpectroChemPy installation
 # procedure](../../gettingstarted/install/index.rst).
 
 # %% [markdown]
-# #### Writing and executing SpectroChemPy scripts
+# ### Writing and executing SpectroChemPy scripts
 #
 # If you are already an experienced `python` user, you can certainly use your favorite
 # IDE to run your scripts, debug them and display the results. But if you want an easier
@@ -67,7 +67,7 @@
 # [Jupyter Lab interface](interface.ipynb).
 
 # %% [markdown]
-# #### Loading the API
+# ### Loading the API
 #
 # Before using SpectroChemPy, we need to load the **API
 # (Application Programming Interface)**: it exposes many
@@ -111,7 +111,7 @@ nd = NDDataset()
 
 
 # %% [markdown]
-# ### NDDataset, the main object
+# ## NDDataset, the main object
 #
 # NDDataset is a python object, actually a container, which can represent most of your
 # multidimensional spectroscopic data.
@@ -126,7 +126,7 @@ nd = NDDataset.read_omnic("irdata/nh4y-activation.spg")
 # usage, you probably have to give the full pathname.
 
 # %% [markdown]
-# #### Display dataset information
+# ### Display dataset information
 
 # %% [markdown]
 # Several ways are available to display the data we have just read and that are now
@@ -147,7 +147,7 @@ print(nd)
 nd
 
 # %% [markdown]
-# #### Plotting a dataset
+# ### Plotting a dataset
 #
 # First, we can set some general plotting preferences for this dataset
 
@@ -190,7 +190,7 @@ _ = nd.plot(method="image")  # or nd.plot_image()
 # This can be changed by using the keyword argument `reversed = False` .
 
 # %% [markdown]
-# #### Processing a dataset
+# ### Processing a dataset
 
 # %% [markdown]
 # Some arithmetic can be performed on such dataset. Here is an example where we subtract
