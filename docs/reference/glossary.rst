@@ -65,6 +65,18 @@ Glossary
         Hence, :math:`\mathbf{T}` and :math:`\mathbf{P}` can then be viewed as collections of :math:`n` and :math:`m`
         vectors in k-dimensional spaces in which each observation/spectrum or feature/wavelength can be located.
 
+    score
+    scores
+        In the context of :term:`PCA`\ , scores are vectors :math:`\mathbf{t}_i` of length :term:`n_observations`
+        which, associated to the corresponding :term:`loading` vectors, are related to the so-called
+        i-th principal component describing the variance of a datastet :math:`X`.
+
+    loading
+    loadings
+        In the context of :term:`PCA`\ , loadings are vectors :math:`\mathbf{p}_i` of length :term:`n_features`
+        which, associated to the corresponding :term:`score` vectors, are related to the so-called
+        i-th principal component describing the variance of a datastet :math:`X`.
+
     PLS
         ``Partial Least Squares`` regression (or Projection on Latent Structures) is a statistical method to
         estimate :math:`n \times l` dependant or predicted variables :math:`Y` from :math:`n \times m`
@@ -73,12 +85,12 @@ Glossary
 
         .. math::  X = S_X L_Y^T + E_X
 
-                   Y = S_Y L_Y^T + E_Y
+        .. math::  Y = S_Y L_Y^T + E_Y
 
-                   S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y))
+        .. math::  S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y))
 
-        :math:`S_X` and :math:`S_Y` are :math:`n \times k` matrices often called score matrices, and :math:`L_X^T`
-        and :math:`L_Y^T` are, respectively, :math:`k \times l` and :math:`k \times m` loading matrices.
+        :math:`S_X` and :math:`S_Y` are :math:`n \times k` matrices often called X- and Y-score matrices, and :math:`L_X^T`
+        and :math:`L_Y^T` are, respectively, :math:`k \times l` and :math:`k \times m` X- and Y-loading matrices.
         Matrices :math:`E_X` and :math:`E_Y`  are the error terms or residuals.
         As indicated by the third equation, the decompositions of :math:`X` and :math:`Y` are made to maximise
         the covariance of the score matrices.
@@ -111,7 +123,7 @@ Glossary
         Constraint where the sum of concentrations is fixed to a target value.
 
     unimodality
-        Constraint where the profile has a single maximum ir minimum.
+        Constraint where the profile has a single maximum or minimum.
 
     regularization
         Technique used to reduce the errors of over-fitting a function on given data
@@ -135,7 +147,7 @@ Glossary
 
     n_targets
         Number of ``targets``. A target is a property to predict using cross-decomposition methods such as PLS.
-        Typically a tartget is a composition variable such as a concentration.
+        Typically a target is a composition variable such as a concentration.
 
     rank
         Number of linearly independent number or columns of a matrix
