@@ -29,7 +29,7 @@ import spectrochempy as scp
 #
 # The file type (matlab) is inferred from the extension ``.mat``\ , so we
 # can use the generic API function `read`\ .  Alternatively, one can be more
-# specific by using the `read_matlab`\ function. Both have exactly the same behavior.
+# specific by using the `read_matlab` function. Both have exactly the same behavior.
 datasets = scp.read("matlabdata/als2004dataset.MAT")
 
 # %%
@@ -75,7 +75,7 @@ mcr = scp.MCRALS(log_level="INFO")
 # -----------------------
 #
 # Then we execute the optimization process using the `fit` method with
-# the ``X`` and ``guess``dataset as input arguments.
+# the ``X`` and ``guess`` dataset as input arguments.
 _ = mcr.fit(X, guess)
 
 # %%
