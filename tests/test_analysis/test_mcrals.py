@@ -249,6 +249,23 @@ def test_MCRALS(model, data):
     mcr.fit(D, St0.data)
     assert "converged !" in mcr.log[-15:]
 
+    # solvers nnls
+    mcr = MCRALS(tol=15.0, nonnegConc=[], solverConc="nnls", solverSpec="nnls")
+    mcr.fit(D, St0.data)
+    assert "converged !" in mcr.log[-15:]
+
+    # solverConc pnnls
+    mcr = MCRALS(
+        tol=15.0, nonnegConc=[0], solverConc="pnnls", nonnegSpec=[0], solverSpec="pnnls"
+    )
+    mcr.fit(D, St0.data)
+    assert "converged !" in mcr.log[-15:]
+
+    # solverConc pnnls
+    mcr = MCRALS(tol=15.0, solverConc="pnnls")
+    mcr.fit(D, St0.data)
+    assert "converged !" in mcr.log[-15:]
+
     # reconstruct
     Dh = mcr.reconstruct()
     assert (Dh - D).abs().max() < 1.0e-12
