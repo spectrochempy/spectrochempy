@@ -155,7 +155,7 @@ def test_MCRALS(model, data):
 
     # test current parameters
     params = mcr.parameters()
-    assert len(params) == 29
+    assert len(params) == 31
     assert np.all(params.closureTarget == [1] * 10)
     assert params.tol == 30.0
 
@@ -249,6 +249,23 @@ def test_MCRALS(model, data):
     mcr.fit(D, St0.data)
     assert "converged !" in mcr.log[-15:]
 
+    # solvers nnls
+    mcr = MCRALS(tol=15.0, nonnegConc=[], solverConc="nnls", solverSpec="nnls")
+    mcr.fit(D, St0.data)
+    assert "converged !" in mcr.log[-15:]
+
+    # solverConc pnnls
+    mcr = MCRALS(
+        tol=15.0, nonnegConc=[0], solverConc="pnnls", nonnegSpec=[0], solverSpec="pnnls"
+    )
+    mcr.fit(D, St0.data)
+    assert "converged !" in mcr.log[-15:]
+
+    # solverConc pnnls
+    mcr = MCRALS(tol=15.0, solverConc="pnnls")
+    mcr.fit(D, St0.data)
+    assert "converged !" in mcr.log[-15:]
+
     # reconstruct
     Dh = mcr.reconstruct()
     assert (Dh - D).abs().max() < 1.0e-12
@@ -330,11 +347,11 @@ def test_MCRALS_errors(model, data):
 
     # wrong hardC_to_C_idx
     with pytest.raises(ValueError) as e:
-        mcr.hardC_to_C_idx = [2]
+        mcr.getC_to_C_idx = [2]
     assert "please check the" in e.value.args[0]
 
     with pytest.raises(ValueError) as e:
-        mcr.hardC_to_C_idx = [0, 1, 1]
+        mcr.getC_to_C_idx = [0, 1, 1]
     assert "please check the" in e.value.args[0]
 
     # wrong unimodSpec

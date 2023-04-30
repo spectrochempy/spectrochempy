@@ -71,8 +71,7 @@ _ = C0.T.plot()
 # %%
 # We can get a better estimate of the concentration (C) and pure spectra profiles (St)
 # by soft MCR-ALS:
-scp.set_loglevel("INFO")
-mcr_1 = scp.MCRALS()
+mcr_1 = scp.MCRALS(log_level="INFO")
 _ = mcr_1.fit(D, C0)
 
 mcr_1.C.T.plot()
@@ -107,11 +106,11 @@ mcr_2.argsGetConc = ([0, 1, 2], [0, 1, 2], param_to_optimize)
 mcr_2.fit(X, Ckin)
 
 # %%
-# Now, let\'s compare the concentration profile of the hard-soft MCAR-ALS
+# Now, let\'s compare the concentration profile of MCR-ALS
 # (C = X(C$_{kin}^+$ X)$^+$) with
-# that of the optimized kinetic model (C$_{kin}$):
+# that of the optimized kinetic model (C$_{kin}$ \equiv$ `C_constrained`):
 _ = mcr_2.C.T.plot()
-_ = mcr_2.C_hard.T.plot(clear=False)
+_ = mcr_2.C_constrained.T.plot(clear=False)
 
 # %%
 # Finally, let\'s plot some of the pure spectra profiles St, and the

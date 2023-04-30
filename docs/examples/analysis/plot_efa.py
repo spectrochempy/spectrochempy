@@ -42,7 +42,7 @@ dataset.plot_stack(title="NH4_Y activation dataset")
 # %%
 #  Evolving Factor Analysis
 efa1 = scp.EFA()
-efa1.fit(dataset)
+_ = efa1.fit(dataset)
 
 # %%
 # Forward evolution of the 5 first components

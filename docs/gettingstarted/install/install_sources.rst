@@ -46,7 +46,7 @@ The fastest way is to type these commands in a terminal on your machine:
 
 .. sourcecode:: bash
 
-   $ git clone -depth=50 https://github.com/spectrochempy/spectrochempy.git
+   $ git clone --depth=50 https://github.com/spectrochempy/spectrochempy.git
    $ cd spectrochempy
    $ git remote add upstream https://github.com/spectrochempy/spectrochempy.git
 

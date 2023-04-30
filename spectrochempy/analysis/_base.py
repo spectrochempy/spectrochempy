@@ -856,7 +856,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
                     f"{X_transform.shape[1]}. We then use this latter value."
                 )
         elif X_transform is None:
-            X_transform = self.transform(**kwargs)
+            X_transform = self.transform(**kwargs).data
 
         X = self._inverse_transform(X_transform)
 
@@ -965,7 +965,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def plotmerit(self, X=None, X_hat=None, **kwargs):
         r"""
-        Plot the input (:math:`X`\ ), reconstructed (:math:`\hat{X}`\ ) and residuals (:math:`E`\ ) datasets.
+        Plot the input (`X`\ ), reconstructed (`X_hat`\ ) and residuals.
 
         :math:`X` and :math:`\hat{X}` can be passed as arguments. If not,
         the `X` attribute is used for :math:`X`\ and :math:`\hat{X}`\ is computed by

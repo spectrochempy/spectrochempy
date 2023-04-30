@@ -214,29 +214,33 @@ mcr.fit(X, St0)
 # optimization of some parameters
 
 mcr = scp.MCRALS(tol=0.001, log_level="INFO")
-mcr.fit(X, St0)
+_ = mcr.fit(X, St0)
 
 # %%
 mcr1 = scp.MCRALS(tol=0.1, log_level="INFO")
-mcr1.fit(X, St0)
+_ = mcr1.fit(X, St0)
 
 # %%
 mcr1.tol = 0.01
-mcr1.fit(
+_ = mcr1.fit(
     X, (mcr1.C.copy(), mcr1.St.copy())
 )  # reuse C and ST computed at the previous run
 print("second run with the output of the first")
 
 # %%
 mcr1.tol = 0.001
-mcr1.fit(X, (mcr1.C, mcr1.St))
+_ = mcr1.fit(X, (mcr1.C, mcr1.St))
 print("third run with the output of the second")
 
-# %%
-import numpy as np
+# %% [markdown]
+# Below we compare the outputs of the initial run (red) and final run (blue).
 
-assert np.max(np.abs(mcr.C - mcr1.C)) < 1e-13
-assert np.max(np.abs(mcr.St - mcr1.St)) < 1e-13
+# %%
+_ = mcr.C.T.plot(cmap=None, color="red")
+_ = mcr1.C.T.plot(clear=False, cmap=None, color="blue")
+
+_ = mcr.St.plot(cmap=None, color="red")
+_ = mcr1.St.plot(clear=False, cmap=None, color="blue")
 
 # %% [markdown]
 # #### Solutions

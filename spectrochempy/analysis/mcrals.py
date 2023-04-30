@@ -22,6 +22,7 @@ import warnings
 
 import dill
 import numpy as np
+import scipy
 import traitlets as tr
 from sklearn import decomposition
 
@@ -49,12 +50,12 @@ class MCRALS(DecompositionAnalysis):
 
     :term:`MCR-ALS` ( ``Multivariate Curve Resolution Alternating Least Squares`` )
     resolve's a set (or several sets) of spectra :math:`X` of an evolving mixture
-    (or a set of mixtures) into the spectra :math:`S^T` of "pure" species and their
-    concentration profiles :math:`C` .
+    (or a set of mixtures) into the spectra :math:`S^t` of "pure" species and their
+    concentration profiles :math:`C`\ .
 
     In terms of matrix equation:
 
-    .. math:: X = C.S^T + E
+    .. math:: X = C.S^t + E
 
     where :math:`E` is the matrix of residuals.
 
@@ -80,6 +81,7 @@ class MCRALS(DecompositionAnalysis):
     # They will be written in a file from which the default can be modified)
     # Obviously, the parameters can also be modified at runtime as usual by assignment.
     # ----------------------------------------------------------------------------------
+
     tol = tr.Float(
         0.1,
         help=(
@@ -96,17 +98,33 @@ class MCRALS(DecompositionAnalysis):
         5, help="Maximum number of successive non-converging iterations."
     ).tag(config=True)
 
+    solverConc = tr.Enum(
+        ["lstsq", "nnls", "pnnls"],
+        default_value="lstsq",
+        help=(
+            r"""Solver used to get `C` from `X` and `St`\ .
+
+- `'lstsq'` : uses ordinary least squares with `~numpy.linalg.lstsq`
+- ``'nnls'``\ : Non-negative least squares (`~scipy.optimize.nnls`\ ) are applied
+  sequentially on all profiles
+- ``'pnnls'``\ : non-negative least squares (`~scipy.optimize.nnls`\ ) are applied on
+  profiles indicated in ``'nonnegConc'`` and ordinary least squares on other profiles.
+"""
+        ),
+    ).tag(config=True)
+
     nonnegConc = tr.Union(
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
         help=(
-            "Non-negativity constraint on concentrations. If set to ``'all'`` (default) "
-            "all concentrations profiles are considered non-negative."
-            " If an array of indexes is passed, the corresponding profiles are "
-            "considered non-negative, not the others. "
-            "For instance ``[0, 2]`` indicates that profile \#0 and \#2 are "
-            "non-negative while profile \#1 *can* be negative. If set to ``[]`` , "
-            "all profiles can be negative."
+            r"""Non-negativity constraint on concentrations.
+
+- `'all'` : all concentrations profiles are considered
+  non-negative.
+- list of indexes : the corresponding profiles are considered non-negative,
+  not the others. For instance ``[0, 2]`` indicates that profile \#0 and \#2
+  are non-negative while profile \#1 *can* be negative.
+- ``[]`` : all profiles can be negative. """
         ),
     ).tag(config=True)
 
@@ -114,132 +132,175 @@ class MCRALS(DecompositionAnalysis):
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
         help=(
-            "Unimodality constraint on concentrations. If set to ``'all'`` "
-            "(default) all concentrations profiles are considered unimodal. "
-            "If an array of indexes is passed, the corresponding profiles are "
-            "considered unimodal, not the others."
-            "For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are "
-            "unimodal while profile ``#1`` *can* be multimodal. If set to ``[]``\ , "
-            "all profiles can be multimodal."
+            r"""Unimodality constraint on concentrations.
+
+- `'all'` : all concentrations profiles are considered unimodal.
+- array of indexes : the corresponding profiles are considered unimodal, not the others.
+  For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while
+  profile ``#1`` *can* be multimodal.
+- ``[]``\ : all profiles can be multimodal. """
         ),
     ).tag(config=True)
 
     unimodConcMod = tr.Enum(
         ["strict", "smooth"],
         default_value="strict",
-        help="""When set to ``'strict'``\ , values deviating from :term:`unimodality` are
-reset to the value of the previous point. When set to ``'smooth'``\ , both values
-(deviating point and previous point) are modified to avoid steps in the concentration
-profile.""",
+        help=(
+            r""" Method to apply unimodality.
+
+- `'strict'` : values deviating from :term:`unimodality` are reset to the value of the
+  previous point.
+- ``'smooth'`` : both values (deviating point and previous point) are modified to avoid
+  steps in the concentration profile. """
+        ),
     ).tag(config=True)
 
     unimodConcTol = tr.Float(
         default_value=1.1,
-        help="""Tolerance parameter for :term:`unimodality`\ . Correction is applied only
-if:
+        help=(
+            r"""Tolerance parameter for :term:`unimodality`\ .
 
-* ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile ``#j``\ ,
-* ``C[i,j] < C[i-1,j] * unimodTol`` on the increasing branch of profile ``#j``\ .""",
+Correction is applied only if:
+
+- ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile ``#j``\ ,
+- ``C[i,j] < C[i-1,j] * unimodTol`` on the increasing branch of profile ``#j``\ . """
+        ),
     ).tag(config=True)
 
     monoDecConc = tr.List(
         default_value=[],
-        help="""Monotonic decrease constraint on concentrations.  If set to ``[]``
-(default) no constraint is applied. If an array of indexes is passed,
-the corresponding profiles are considered do decrease monotonically, not the
-others. For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are decreasing
-while profile ``#1`` *can* increase.""",
+        help=(
+            r"""Monotonic decrease constraint on concentrations.
+
+- `[]` : no constraint is applied.
+- array of indexes : the corresponding profiles are considered do decrease
+  monotonically, not the others. For instance ``[0, 2]`` indicates that profile ``#0``
+  and ``#2`` are decreasing while profile ``#1`` *can* increase. """
+        ),
     ).tag(config=True)
 
     monoDecTol = tr.Float(
         default_value=1.1,
-        help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if: ``C[i,j] > C[i-1,j] * unimodTol``  along profile ``#j``\ .""",
+        help=r""" Tolerance parameter for monotonic decrease.
+
+        Correction is applied only if: ``C[i,j] > C[i-1,j] * unimodTol`` . """,
     ).tag(config=True)
 
     monoIncConc = tr.List(
         default_value=[],
-        help="""Monotonic increase constraint on concentrations.  If set to ``[]``
-(default) no constraint is applied. If an array of indexes is passed,
-the corresponding profiles are considered to increase monotonically, not the
-others. For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are increasing
-while profile ``#1`` *can* decrease.""",
+        help=(
+            r"""Monotonic increase constraint on concentrations.
+
+- `[]` : no constraint is applied.
+- array of indexes : the corresponding profiles are considered to increase
+  monotonically, not the others. For instance ``[0, 2]`` indicates that profile
+  ``#0`` and ``#2`` are increasing while profile ``#1`` *can* decrease. """
+        ),
     ).tag(config=True)
 
     monoIncTol = tr.Float(
         default_value=1.1,
-        help="""Tolerance parameter for monotonic decrease. Correction is applied only
-if: ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
+        help="""Tolerance parameter for monotonic decrease.
+
+        Correction is applied only if ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ . """,
     ).tag(config=True)
 
-    closureConc = tr.List(
+    unimodConc = tr.Union(
+        (tr.Enum(["all"]), tr.List()),
+        default_value="all",
+        help=(
+            r""" Unimodality constraint on concentrations.
+
+- `'all'` : all concentrations profiles are considered unimodal.
+- array of indexes : the corresponding profiles are considered unimodal, not the others.
+            For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while
+            profile ``#1`` *can* be multimodal.
+- ``[]``\ : all profiles can be multimodal. """
+        ),
+    ).tag(config=True)
+
+    closureConc = tr.Union(
+        (tr.Enum(["all"]), tr.List()),
         default_value=[],
-        help="""Defines the concentration profiles subjected to closure constraint.
-If set to ``[]``\ , no constraint is applied. If an array of indexes is
-passed, the corresponding profile will be constrained so that their
-weighted sum equals the `closureTarget`\ .""",
+        help=(
+            r""" Defines the concentration profiles subjected to closure constraint.
+
+- `[]`\ : no constraint is applied.
+- ``'all'`` : all profile are constrained so that their weighted sum equals the
+  `closureTarget`
+- `list` of indexes : the corresponding profiles are constrained so that their weighted sum
+  equals `closureTarget`\ . """
+        ),
     ).tag(config=True)
 
     closureTarget = tr.Union(
         (tr.Enum(["default"]), Array()),
         default_value="default",
-        help="""The value of the sum of concentrations profiles subjected to closure.
-If set to ``'default'``\ , the total concentration is set to ``1.0`` for all observations.
-If an array is passed: the values of concentration for each observation. Hence,
-``np.ones(X.shape[0])`` would be equivalent to ``'default'``\ .""",
+        help=(
+            r""" The value of the sum of concentrations profiles subjected to closure.
+
+- ``'default'``\ : the total concentration is set to ``1.0`` for all observations.
+- array of size `n_observations` : the values of concentration for each observation.
+  Hence, ``np.ones(X.shape[0])`` would be equivalent to ``'default'``\ .   """
+        ),
     ).tag(config=True)
 
     closureMethod = tr.Enum(
         ["scaling", "constantSum"],
         default_value="scaling",
-        help="""The method used to enforce :term:`closure` .
+        help=(
+            r""" The method used to enforce :term:`closure` (:cite:t:`omidikia:2018`).
 
-* ``'scaling'`` recompute the concentration profiles using linear algebra:
+- ``'scaling'`` recompute the concentration profiles using least squares:
 
-   .. code-block:: python
+  .. math::
+                C \leftarrow C \cdot \textrm{diag} \left( C_L^{-1} c_t \right)
 
-      C[:, closureConc] = np.dot(
-                            C.[:, closureConc],
-                            np.diag(
-                              np.linalg.lstsq(
-                                C[:, closureConc], closureTarget.T
-                                )[0]
-                            )
-                          )
-
-* ``'constantSum'`` normalize the sum of concentration profiles to `closureTarget`\ .""",
+  where :math:`c_t` is the vector given by `closureTarget` and :math:`C_L^{-1}`
+  is the left inverse of :math:`C`\ .
+- ``'constantSum'`` : normalize the sum of concentration profiles to `closureTarget`\ . """
+        ),
     ).tag(config=True)
 
     hardConc = tr.List(
         default_value=[],
-        help="""Defines hard constraints on the concentration profiles. If set to
-``[]``\ , no constraint is applied. If an array of indexes is passed, the
-corresponding profiles will set by `getC`\ .""",
+        help=(
+            r"""Defines hard constraints on the concentration profiles.
+
+- `[]`\ : no constraint is applied.
+- array of indexes : the corresponding profiles will set by `getConc`\ . """
+        ),
     ).tag(config=True)
 
     getConc = tr.Union(
         (tr.Callable(), tr.Unicode()),
         default_value=None,
         allow_none=True,
-        help="""An external function that will provide ``len(hardConc)`` concentration
-profiles.
+        help=(
+            r"""An external function that provide ``len(hardConc)`` concentration profiles.
 
 It should be using one of the following syntax:
 
-* ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC``
-* ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc``
-* ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc, extraOutputGetConc``
+- ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC``
+- ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc``
+- ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc, extraOutputGetConc``
 
-where ``Ccurr`` is the current `C` dataset, ``\*argsGetConc`` are the parameters needed
-to completely specify the function. `hardC` is a `~numpy.ndarray` or `NDDataset` of shape
-``(C.y, len(hardConc)``\ , ``newArgsGetConc`` are the updated parameters for the next
-iteration (can be None), and ``extraOutputGetConc`` can be any other relevant output to
-be kept in `extraOutputGetConc` attribute, a list of ``extraOutputGetConc`` at each
-MCR ALS iterations.
+with:
 
-.. note::
-    it can be also a serialized function created using dill and base64 python libraries.
-    Normally not used directly, it is here for internal process.""",
+- ``Ccurr`` is the current `C` dataset,
+- ``\*argsGetConc`` are the parameters needed to completely specify the function.
+- ``hardC`` is a `~numpy.ndarray` or `NDDataset` of shape
+  ``n_observations, len(hardConc)``\ ,
+- ``newArgsGetConc`` are the updated parameters for the next iteration (can be None),
+- ``extraOutputGetConc`` can be any other relevant output to be kept in
+  `extraOutputGetConc` attribute, a list of ``extraOutputGetConc`` at each MCR ALS
+  iteration.
+
+    .. note::
+            ``getConc`` can be also a serialized function created using dill and base64
+            python libraries. Normally not used directly, it is here for internal
+            process. """
+        ),
     ).tag(config=True)
 
     argsGetConc = tr.Tuple(
@@ -252,92 +313,146 @@ MCR ALS iterations.
         help="Supplementary keyword arguments passed to the external function.",
     ).tag(config=True)
 
-    hardC_to_C_idx = tr.Union(
+    @property
+    @deprecated(replace="getC_to_C_idx")
+    def hardC_to_C_idx(self):
+        """
+        Deprecated. Equivalent to `getC_to_C_idx`.
+        """
+        return self.getC_to_C_idx
+
+    getC_to_C_idx = tr.Union(
         (tr.Enum(["default"]), tr.List()),
         default_value="default",
-        help="""Indicates the correspondence between the indexes of the columns of
-`hardC` and of the `C` matrix. ``[1, None, 0]`` indicates that the first profile in
-`hardC` (index ``O``\ ) corresponds to the second profile of `C` (index ``1``\ ).""",
+        help=(
+            r""" Correspondence of the profiles returned by `getConc` and `C`.
+
+- `"default"`: the profiles correspond to those of `C`. This is equivalent to
+  :code:`range(len(hardConc))`
+- ``list`` of indices or of ``None``. For instance ``[2, None, 0]`` indicates that the
+  first returned profile corresponds to the 3rd profile of `C`  (index ``2``\ ), the 2nd
+  returned profile does not correspond to any profile in `C`, the 3rd returned profile
+  corresponds to the first `C` profile (index ``0`` ).  """
+        ),
+    ).tag(config=True)
+
+    solverSpec = tr.Enum(
+        ["lstsq", "nnls", "pnnls"],
+        default_value="lstsq",
+        help=(
+            r"""Solver used to get `St` from `X` and `C`\ .
+
+- `'lstsq'` : uses ordinary least squares with `~numpy.linalg.lstsq`
+- ``'nnls'``\ : Non-negative least squares (`~scipy.optimize.nnls`\ ) are applied
+  sequentially on all profiles
+- ``'pnnls'``\ : non-negative least squares (`~scipy.optimize.nnls`\ ) are applied on
+  profiles indicated in ``'nonnegConc'`` and ordinary least squares on other profiles. """
+        ),
     ).tag(config=True)
 
     nonnegSpec = tr.Union(
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
-        help="""Indicates non-negative spectral profile. If set to ``'all'`` (default)
-all spectral profiles are considered non-negative. If an array of indexes is
-passed, the corresponding profiles are considered non-negative, not the others.
-For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are non-negative while
-profile ``#1`` *can* be negative. If set to ``None`` or ``[]``\ , all profiles can be
-negative.""",
+        help=(
+            r""" Non-negativity constraint on spectra.
+
+- `'all'` : all profiles are considered non-negative.
+- list of indexes : the corresponding profiles are considered non-negative, not the
+  others. For instance ``[0, 2]`` indicates that profile \#0 and \#2 are non-negative
+  while profile \#1 *can* be negative.
+- ``[]`` : all profiles can be negative. """
+        ),
     ).tag(config=True)
 
     normSpec = tr.Enum(
         [None, "euclid", "max"],
         default_value=None,
-        help="""Defines whether the spectral profiles should be normalized. If set to
-``None`` no normalization is applied.
-when set to ``"euclid"``\ , spectra are normalized with respect to their total area,
-when set to ``"max"``\ , spectra are normalized with respect to the maximum af their
-value.""",
+        help=(
+            r""" Defines whether the spectral profiles should be normalized.
+
+- `None` no normalization is applied.
+- ``"euclid"`` : spectra are normalized with respect to their total area,
+- ``"max"``\ : spectra are normalized with respect to their maximum value. """
+        ),
     ).tag(config=True)
 
     unimodSpec = tr.Union(
         (tr.Enum(["all"]), tr.List()),
         default_value=[],
-        help="""Unimodality constraint on Spectra. If the list of spectral profiles is
-void, all profiles can be multimodal. If set to ``'all'``\ , all profiles are unimodal.
-If an array of indexes is passed, the corresponding profiles are considered unimodal,
-not the others. For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are
-unimodal while profile ``#1`` *can* be multimodal.""",
+        help=(
+            r""" Unimodality constraint on Spectra.
+
+- `[]` : all profiles can be multimodal.
+- ``'all'`` : all profiles are unimodal (equivalent to :code:`range(n_components)`).
+- array of indexes : the corresponding profiles are considered unimodal, not the others.
+  For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while
+  profile ``#1`` *can* be multimodal.  """
+        ),
     ).tag(config=True)
 
     unimodSpecMod = tr.Enum(
         ["strict", "smooth"],
         default_value="strict",
-        help=""" When set to ``"strict"``\ , values deviating from unimodality are reset
-to the value of the previous point. When set to ``"smooth"``\ , both values (deviating
-point and previous point) are modified to avoid steps
-in the concentration profile.""",
+        help=(
+            r"""Method used to apply unimodality.
+
+- `"strict"` : values deviating from unimodality are reset to the value of the previous
+  point.
+- ``"smooth"`` : both values (deviating point and previous point) are modified to avoid
+  steps in the concentration profile. """
+        ),
     ).tag(config=True)
 
     unimodSpecTol = tr.Float(
         default_value=1.1,
-        help="""Tolerance parameter for unimodality. Correction is applied only if the
-deviating point is larger/lower than ``St[j,i] > St[j, i-1] * unimodSpecTol``
-on the decreasing branch of profile ``#j``\ , ``St[j,i] < St[j, i-1] * unimodTol`` on
-the increasing branch of profile  ``#j``\ .""",
+        help=(
+            r""" Tolerance parameter for unimodality.
+
+Correction is applied only if the deviating point ``St[j, i]`` is larger than
+``St[j, i-1] * unimodSpecTol`` on the decreasing branch of profile
+``#j``\ , or lower than ``St[j, i-1] * unimodTol`` on the increasing branch of
+profile  ``#j``\ . """
+        ),
     ).tag(config=True)
 
     hardSpec = tr.List(
         default_value=[],
-        help="""Defines hard constraints on the spectral profiles. If set to ``[]`` ,
-no constraint is applied. If an array of indexes is passed, the corresponding profiles
-will set by `getSt`\ .""",
+        help=(
+            r"""Defines hard constraints on the spectral profiles.
+
+- `[]` : no constraint is applied.
+- array of indexes : the corresponding profiles will set by `getSpec`\ . """
+        ),
     ).tag(config=True)
 
     getSpec = tr.Union(
         (tr.Callable(), tr.Unicode()),
         default_value=None,
         allow_none=True,
-        help="""An external function that will provide ``len(hardSpec)`` concentration
-profiles.
+        help=(
+            r""" An external function that will provide ``len(hardSpec)`` concentration profiles.
 
 It should be using one of the following syntax:
 
-* ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt``
-* ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt, newArgsGetSpec``
-* ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt, newArgsGetSpec, extraOutputGetSpec``
+- ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt``
+- ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt, newArgsGetSpec``
+- ``getSpec(Stcurr, *argsGetSpec, **kwargsGetSpec) -> hardSt, newArgsGetSpec, extraOutputGetSpec``
 
-where ``Stcurr`` is the current `St` dataset, ``\*argsGetSpec`` are the parameters
-needed to completely specify the function. `hardSt` is a `~numpy.ndarray` or `NDDataset` of
-shape ``(C.y, len(hardSpec)``\ , ``newArgsGetSpec`` are the updated parameters for the
-next iteration (can be None), and ``extraOutputGetSpec`` can be any other relevant
-output to be kept in `extraOutputGetSpec` attribute, a list of ``extraOutputGetSpec``
-at each iterations.
+with:
 
-.. note::
-    it can be also a serialized function created using dill and base64 python libraries.
-    Normally not used directly, it is here for internal process.""",
+- ``Stcurr`` : the current value of `St` in the :term:`ALS` loop,
+- ``*argsGetSpec`` and ``**kwargsGetSpec`` : the parameters needed to completely specify
+  the function.
+- ``hardSt`` : `~numpy.ndarray` or `NDDataset` of shape
+  ``(n_observations, len(hardSpec)``\ ,
+- ``newArgsGetSpec`` : updated parameters for the next ALS iteration (can be None),
+- ``extraOutputGetSpec`` : any other relevant output to be kept in
+  `extraOutputGetSpec` attribute, a list of ``extraOutputGetSpec`` at each iterations.
+
+    .. note::
+        ``getSpec`` can be also a serialized function created using dill and base64
+        python libraries. Normally not used directly, it is here for internal process. """
+        ),
     ).tag(config=True)
 
     argsGetSpec = tr.Tuple(
@@ -350,12 +465,27 @@ at each iterations.
         help="Supplementary keyword arguments passed to the external function.",
     ).tag(config=True)
 
-    hardSt_to_St_idx = tr.Union(
+    @property
+    @deprecated(replace="getSt_to_St_idx")
+    def hardSt_to_St_idx(self):
+        """
+        Deprecated. Equivalent to `getSt_to_St_idx`.
+        """
+        return self.getSt_to_St_idx
+
+    getSt_to_St_idx = tr.Union(
         (tr.Enum(["default"]), tr.List()),
         default_value="default",
-        help="""Indicates the correspondence between the indexes of the lines of
-`hardSt` and of the `St` matrix. ``[1, None, 0]`` indicates that the first profile in
-`hardSt` (index ``O`` ) corresponds to the second profile of `St` (index ``1``\ ).""",
+        help=(
+            r"""Correspondence between the indexes of the spectra returned by `getSpec` and `St`.
+
+- `"default"` : the indexes correspond to those of `St`. This is equivalent
+  to :code:`range(len(hardSpec))`.
+- list of int : corresponding indexes in `St`, i.e. ``[2, None, 0]`` indicates that the
+  first returned profile corresponds to the third `St` profile (index ``2``\ ), the 2nd
+  returned profile does not correspond to any profile in `St`, the 3rd returned profile
+  corresponds to the first `St` profile (index ``0`` ).  """
+        ),
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -373,7 +503,7 @@ at each iterations.
                 "Passing arguments such as MCRALS(X , profile) "
                 "is now deprecated. "
                 "Instead, use MCRAL() followed by MCRALS.fit(X , profile). "
-                "See the documentation and exemples"
+                "See the documentation and examples"
             )
 
         # warn about deprecation
@@ -414,6 +544,23 @@ at each iterations.
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
+
+    def _solve_C(self, St):
+        if self.solverConc == "lstsq":
+            return _lstsq(St.T, self._X.data.T).T
+        elif self.solverConc == "nnls":
+            return _nnls(St.T, self._X.data.T).T
+        elif self.solverConc == "pnnls":
+            return _pnnls(St.T, self._X.data.T, nonneg=self.nonnegConc).T
+
+    def _solve_St(self, C):
+        if self.solverSpec == "lstsq":
+            return _lstsq(C, self._X.data)
+        elif self.solverSpec == "nnls":
+            return _nnls(C, self._X.data)
+        elif self.solverSpec == "pnnls":
+            return _pnnls(C, self._X.data, nonneg=self.nonnegSpec)
+
     def _guess_profile(self, profile):
         """
         Set or guess an initial profile.
@@ -427,7 +574,7 @@ at each iterations.
             return
 
         # check the dimensions compatibility
-        # however as the dimension of profile should match the initial shape
+        # As the dimension of profile should match the initial shape
         # of X we use self._X_shape not self._X.shape (because for this masked columns
         # or rows have already been removed.
         if (self._X_shape[1] != profile.shape[1]) and (
@@ -439,56 +586,43 @@ at each iterations.
                 f"of X [{self._X_shape}]."
             )
 
-        # data array
-        Xdata = self._X.data
-
         # mask info
         if np.any(self._X_mask):
             masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
 
         # make the profile
-        try:  # first try on concentration
-            # The data are validated in _C_validate()
-            # if it fails here due to shape mismatch, it goes to the except
+        if profile.shape[0] == self._X_shape[0]:
+            # this should be a concentration profile.
+            C = profile.copy()
+            self._n_components = C.shape[1]
+            info_(
+                f"Concentration profile initialized with {self._n_components} components"
+            )
 
-            Cdata = profile.copy()
-            n_components = Cdata.shape[1]
-            info_(f"Concentration profile initialized with {n_components} components")
-            # compute initial spectra (using the Xdata eventually masked
-            Stdata = np.linalg.lstsq(Cdata, Xdata, rcond=None)[0]
-            info_("Spectra profile computed")
+            # compute initial spectra (using X eventually masked)
+            St = self._solve_St(C)
+            info_("Initial spectra profile computed")
             # if everything went well here, C and St are set, we return
             # after having removed the eventual C mask!
             if np.any(self._X_mask):
-                Cdata = Cdata[~masked_rows]
+                C = C[~masked_rows]
+            return C, St
+
+        else:  # necessarily: profile.shape[1] == profile.shape[0]
+            St = profile.copy()
+            self._n_components = St.shape[0]
+            info_(f"Spectra profile initialized with {self._n_components} components")
+
+            # compute initial spectra
+            C = self._solve_C(St)
+            info_("Initial concentration profile computed")
+            # if everything went well here, C and St are set, we return
+            # after having removed the eventual St mask!
+            if np.any(self._X_mask):
+                St = St[:, ~masked_columns]
             # update the number of components
-            self._n_components = n_components
 
-            return Cdata, Stdata
-
-        except np.linalg.LinAlgError as exc:
-            if "Incompatible dimensions" not in exc.args[0]:
-                raise exc
-            pass
-
-        # Again if something is wrong we let it raise the error
-        # as there is no other possibility (but this should not occur as we did
-        # already the test on the dimension's compatibility.
-        Stdata = profile.copy()
-        n_components = Stdata.shape[0]
-        info_(f"Spectra profile initialized with {n_components} components")
-        # compute initial concentration
-        Ctdata = np.linalg.lstsq(Stdata.T, Xdata.T, rcond=None)[0]
-        Cdata = Ctdata.T
-        info_("Concentration profile computed")
-        # if everything went well here, C and St are set, we return
-        # after having removed the eventual St mask!
-        if np.any(self._X_mask):
-            Stdata = Stdata[:, ~masked_columns]
-        # update the number of components
-        self._n_components = n_components
-
-        return Cdata, Stdata
+            return C, St
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def _C_2_NDDataset(self, C):
@@ -551,6 +685,20 @@ at each iterations.
             )
         return unimodConc
 
+    @tr.validate("closureConc")
+    def _validate_closureConc(self, proposal):
+        if self._X_is_missing:
+            return proposal.value
+        closureConc = proposal.value
+        if closureConc == "all":
+            closureConc = np.arange(self._n_components)
+        elif len(closureConc) > self._n_components:
+            raise ValueError(
+                f"The model contains only {self._n_components} components, please check "
+                f"the 'closureConc' configuration (value:{closureConc})"
+            )
+        return closureConc
+
     @tr.validate("closureTarget")
     def _validate_closureTarget(self, proposal):
         if self._X_is_missing:
@@ -566,24 +714,24 @@ at each iterations.
             )
         return closureTarget
 
-    @tr.validate("hardC_to_C_idx")
-    def _validate_hardC_to_C_idx(self, proposal):
+    @tr.validate("getC_to_C_idx")
+    def _validate_getC_to_C_idx(self, proposal):
         if self._X_is_missing:
             return proposal.value
-        hardC_to_C_idx = proposal.value
+        getC_to_C_idx = proposal.value
         if not self._n_components:  # not initialized or 0
-            return hardC_to_C_idx
-        if hardC_to_C_idx == "default":
-            hardC_to_C_idx = np.arange(self._n_components).tolist()
+            return getC_to_C_idx
+        if getC_to_C_idx == "default":
+            getC_to_C_idx = np.arange(self._n_components).tolist()
         elif (
-            len(hardC_to_C_idx) > self._n_components
-            or max(hardC_to_C_idx) + 1 > self._n_components
+            len(getC_to_C_idx) > self._n_components
+            or max(getC_to_C_idx) + 1 > self._n_components
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `hardC_to_C_idx`  configuration (value:{hardC_to_C_idx})"
+                f"the `getC_to_C_idx`  configuration (value:{getC_to_C_idx})"
             )
-        return hardC_to_C_idx
+        return getC_to_C_idx
 
     @tr.validate("nonnegSpec")
     def _validate_nonnegSpec(self, proposal):
@@ -623,27 +771,28 @@ at each iterations.
             )
         return unimodSpec
 
-    @tr.validate("hardSt_to_St_idx")
-    def _validate_hardSt_to_St_idx(self, proposal):
+    @tr.validate("getSt_to_St_idx")
+    def _validate_getSt_to_St_idx(self, proposal):
         if self._X_is_missing:
             return proposal.value
-        hardSt_to_St_idx = proposal.value
+        getSt_to_St_idx = proposal.value
         if not self._n_components:  # not initialized or 0
-            return hardSt_to_St_idx
-        if hardSt_to_St_idx == "default":
-            hardSt_to_St_idx = np.arange(self._n_components).tolist()
+            return getSt_to_St_idx
+        if getSt_to_St_idx == "default":
+            getSt_to_St_idx = np.arange(self._n_components).tolist()
         elif (
-            len(hardSt_to_St_idx) > self._n_components
-            or max(hardSt_to_St_idx) + 1 > self._n_components
+            len(getSt_to_St_idx) > self._n_components
+            or max(getSt_to_St_idx) + 1 > self._n_components
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `hardSt_to_St_idx`  configuration (value:{hardSt_to_St_idx})"
+                f"the `getSt_to_St_idx`  configuration (value:{getSt_to_St_idx})"
             )
-        return hardSt_to_St_idx
+        return getSt_to_St_idx
 
-    @tr.observe("_Y_preprocessed")
-    def _Y_preprocessed_change(self, change):
+    @tr.observe("_n_components")
+    # tiggered in _guess_profile
+    def _n_components_change(self, change):
         if self._n_components > 0:
             # perform a validation of default configuration parameters
             # Indeed, if not forced here these parameters are validated only when they
@@ -652,17 +801,18 @@ at each iterations.
             with warnings.catch_warnings():
                 warnings.simplefilter(action="ignore", category=FutureWarning)
                 self.closureTarget = self.closureTarget
-                self.hardC_to_C_idx = self.hardC_to_C_idx
-                self.hardSt_to_St_idx = self.hardSt_to_St_idx
+                self.getC_to_C_idx = self.getC_to_C_idx
+                self.getSt_to_St_idx = self.getSt_to_St_idx
                 self.nonnegConc = self.nonnegConc
                 self.nonnegSpec = self.nonnegSpec
                 self.unimodConc = self.unimodConc
                 self.unimodSpec = self.unimodSpec
+                self.closureConc = self.closureConc
 
     @tr.default("_components")
     def _components_default(self):
         if self._fitted:
-            # note: _outfit = (C, St, C_hard, St_soft, extraOutputGetConc, extraOutputGetSpec)
+            # note: _outfit = (C, St, C_constrained, St_unconstrained, extraOutputGetConc, extraOutputGetSpec)
             return self._outfit[1]
         else:
             raise NotFittedError("The model was not yet fitted. Execute `fit` first!")
@@ -679,28 +829,28 @@ at each iterations.
         if isinstance(profiles, (list, tuple)):
             # we assume that the starting C and St are already computed
             # (for ex. from a previous run of fit)
-            Cdata, Stdata = [item.data for item in profiles]
-            self._n_components = Cdata.shape[1]
+            C, St = [item.data for item in profiles]
+            self._n_components = C.shape[1]
             # eventually remove mask
             if np.any(self._X_mask):
                 masked_rows, masked_columns = self._get_masked_rc(self._X_mask)
-                Stdata = Stdata[:, ~masked_columns]
-                Cdata = Cdata[~masked_rows]
+                St = St[:, ~masked_columns]
+                C = C[~masked_rows]
         else:
-            # not passed explicitly, try to guess
-            Cdata, Stdata = self._guess_profile(profiles.data)
+            # not passed explicitly, try to guess.
+            C, St = self._guess_profile(profiles.data)
 
         # we do a last validation
         shape = self._X.shape
-        if shape[0] != Cdata.shape[0]:
+        if shape[0] != C.shape[0]:
             # An error will be raised before if X is None.
             raise ValueError("The dimensions of C do not match those of X.")
-        if shape[1] != Stdata.shape[1]:
+        if shape[1] != St.shape[1]:
             # An error will be raised before if X is None.
             raise ValueError("The dimensions of St do not match those of X.")
         # return the list of C and St data
         # (with mask removed to fit the size of the _X data)
-        self._Y_preprocessed = (Cdata, Stdata)
+        self._Y_preprocessed = (C, St)
 
     def _fit(self, X, Y):
         # this method is called by the abstract class fit.
@@ -727,17 +877,20 @@ at each iterations.
         Xpca = pca.inverse_transform(Xtransf)
 
         while change >= self.tol and niter < self.max_iter and ndiv < self.maxdiv:
-            C = np.linalg.lstsq(St.T, X.T, rcond=None)[0].T
+
             niter += 1
 
+            # Compute C
+            # ------------------------------------------
+            C = self._solve_C(St)
+
             # Force non-negative concentration
-            # --------------------------------
+            # ------------------------------------------
             if np.any(self.nonnegConc):
-                for s in self.nonnegConc:
-                    C[:, s] = C[:, s].clip(min=0)
+                C[:, self.nonnegConc] = C[:, self.nonnegConc].clip(min=0)
 
             # Force unimodal concentration
-            # ----------------------------
+            # ------------------------------------------
             if np.any(self.unimodConc):
                 C = _unimodal_2D(
                     C,
@@ -748,7 +901,7 @@ at each iterations.
                 )
 
             # Force monotonic increase
-            # ------------------------
+            # ------------------------------------------
             if np.any(self.monoIncConc):
                 for s in self.monoIncConc:
                     for curid in np.arange(ny - 1):
@@ -756,7 +909,7 @@ at each iterations.
                             C[curid + 1, s] = C[curid, s]
 
             # Force monotonic decrease
-            # ----------------------------------------------
+            # ------------------------------------------
             if np.any(self.monoDecConc):
                 for s in self.monoDecConc:
                     for curid in np.arange(ny - 1):
@@ -767,11 +920,7 @@ at each iterations.
             # ------------------------------------------
             if self.closureConc:
                 if self.closureMethod == "scaling":
-                    Q = np.linalg.lstsq(
-                        C[:, self.closureConc],
-                        self.closureTarget.T,
-                        rcond=None,
-                    )[0]
+                    Q = _lstsq(C[:, self.closureConc], self.closureTarget.T)
                     C[:, self.closureConc] = np.dot(C[:, self.closureConc], np.diag(Q))
                 elif self.closureMethod == "constantSum":
                     totalConc = np.sum(C[:, self.closureConc], axis=1)
@@ -805,24 +954,22 @@ at each iterations.
                 else:
                     fixedC = output
 
-                C[:, self.hardConc] = fixedC[:, self.hardC_to_C_idx]
+                C[:, self.hardConc] = fixedC[:, self.getC_to_C_idx]
 
-            # stores C in C_hard
-            C_hard = C.copy()
+            # stores C in C_constrained
+            # ------------------------------------------
+            C_constrained = C.copy()
 
-            # compute St
-            St = np.linalg.lstsq(C, X, rcond=None)[0]
+            # Compute St taking into account non-negativity
+            # --------------------------------------------
+            St = self._solve_St(C)
 
-            # stores St in St_soft
-            St_soft = St.copy()
-
-            # Force non-negative spectra
-            # --------------------------
-            if np.any(self.nonnegSpec):
-                St[self.nonnegSpec, :] = St[self.nonnegSpec, :].clip(min=0)
+            # stores St in St_unconstrained
+            # ------------------------------------------
+            St_unconstrained = St.copy()
 
             # Force unimodal spectra
-            # ----------------------------
+            # ------------------------------------------
             if np.any(self.unimodSpec):
                 St = _unimodal_2D(
                     St,
@@ -833,7 +980,7 @@ at each iterations.
                 )
 
             # External spectral profile
-            # -----------------------------
+            # ------------------------------------------
             extraOutputGetSpec = []
             if np.any(self.hardSpec):
                 _St = self._St_2_NDDataset(St)
@@ -856,13 +1003,14 @@ at each iterations.
                 else:
                     fixedSt = output.data
 
-                print(self.hardSt_to_St_idx)
-                St[self.hardSpec, :] = fixedSt[self.hardSt_to_St_idx, :]
+                St[self.hardSpec, :] = fixedSt[self.getSt_to_St_idx, :]
 
-            # recompute C for consistency(soft modeling)
-            C = np.linalg.lstsq(St.T, X.T, rcond=-1)[0].T
+            # recompute C for consistency
+            # ------------------------------------------
+            C = self._solve_C(St)
 
-            # rescale spectra & concentrations
+            # rescale spectra and concentrations
+            # ------------------------------------------
             if self.normSpec == "max":
                 alpha = np.max(St, axis=1).reshape(self._n_components, 1)
                 St = St / alpha
@@ -873,18 +1021,20 @@ at each iterations.
                 C = C * alpha.T
 
             # compute residuals
-            # -----------------
-            Xhat = np.dot(C, St)
+            # ------------------------------------------
+            Xhat = C @ St
             stdev2 = np.std(Xhat - X)
             change = 100 * (stdev2 - stdev) / stdev
             stdev = stdev2
 
-            stdev_PCA = np.std(Xhat - Xpca)  #
-
+            stdev_PCA = np.std(Xhat - Xpca)
             info_(
                 f"{niter:3d}{' '*6}{stdev_PCA:10f}{' '*6}"
                 f"{stdev2:10f}{' '*6}{change:10f}"
             )
+
+            # check convergence
+            # ------------------------------------------
 
             if change > 0:
                 ndiv += 1
@@ -911,7 +1061,14 @@ at each iterations.
 
         # return _fit results
         self._components = St
-        _outfit = (C, St, C_hard, St_soft, extraOutputGetConc, extraOutputGetSpec)
+        _outfit = (
+            C,
+            St,
+            C_constrained,
+            St_unconstrained,
+            extraOutputGetConc,
+            extraOutputGetSpec,
+        )
         return _outfit
 
     def _transform(self, X=None):
@@ -1013,19 +1170,38 @@ at each iterations.
 
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
-    def C_hard(self):
+    def C_constrained(self):
         """
-        The hard concentration profiles.
+        The constrained concentration profiles, i.e. after applying the hard and soft constraints.
         """
         return self._outfit[2]
 
     @property
-    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
-    def St_soft(self):
+    @deprecated(replace="C_constrained")
+    def C_hard(self):
         """
+        Deprecated. Equivalent to `C_constrained`.
+        """
+        return self.C_constrained
+
+    @property
+    @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
+    def St_unconstrained(self):
+        r"""
         The soft spectra profiles.
+
+        Spectra obtained after solving :math:`C_{\textrm{constrained}} \cdot St = X`
+        for :math:`St`\ .
         """
         return self._outfit[3]
+
+    @property
+    @deprecated(replace="St_unconstrained")
+    def S_soft(self):
+        """
+        Deprecated. Equivalent to `C_constrained`.
+        """
+        return self.St_unconstrained
 
     @property
     def extraOutputGetConc(self):
@@ -1045,6 +1221,48 @@ at each iterations.
 # --------------------------------------------------------------------------------------
 # Utilities
 # --------------------------------------------------------------------------------------
+
+# LS solvers for W in the linear matrix equation X @ W = Y
+def _lstsq(X, Y, rcond=None):
+    # Least-squares solution to a linear matrix equation X @ W = Y
+    # Return W
+    W = np.linalg.lstsq(X, Y, rcond)[0]
+    return W
+
+
+def _nnls(X, Y, withres=False):
+    # Non negative least-squares solution to a linear matrix equation X @ W = Y
+    # Return W >= 0
+    # TODO: look at may be faster algorithm: see: https://gist.github.com/vene/7224672
+    nsamp, nfeat = X.shape
+    nsamp, ntarg = Y.shape
+    W = np.empty((nfeat, ntarg))
+    residuals = 0
+    for i in range(ntarg):
+        Y_ = Y[:, i]
+        W[:, i], res = scipy.optimize.nnls(X, Y_)
+        residuals += res**2
+    return (W, np.sqrt(residuals)) if withres else W
+
+
+def _pnnls(X, Y, nonneg=[], withres=False):
+    # Least-squares  solution to a linear matrix equation X @ W = Y
+    # with partial nonnegativity (indicated by the nonneg list of targets)
+    # Return W with eventually some column non negative.
+    nsamp, nfeat = X.shape
+    nsamp, ntarg = Y.shape
+    W = np.empty((nfeat, ntarg))
+    residuals = 0
+    for i in range(ntarg):
+        Y_ = Y[:, i]
+        if i in nonneg:
+            W[:, i], res = scipy.optimize.nnls(X, Y_)
+        else:
+            W[:, i], res = np.linalg.lstsq(X, Y_)[:2]
+        residuals += res**2
+    return (W, np.sqrt(residuals)) if withres else W
+
+
 def _unimodal_2D(a, axis, idxes, tol, mod):
     # """Force unimodality on given lines or columnns od a 2D ndarray
     #
