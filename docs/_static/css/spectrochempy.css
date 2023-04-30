@@ -62,6 +62,12 @@ div.graphviz {
     line-height: 140%;
 }
 
+/* add some space around titles */
+.rst-content h1, .rst-content h2, .rst-content h3, .rst-content h4, .rst-content h5, .rst-content h6 {
+    margin-bottom: 12px;
+    margin-top: 24px;
+}
+
 /* rubric in API documentation */
 .rst-content p.rubric {
     margin-bottom: 12px;
