@@ -39,8 +39,8 @@
 #
 # The `SpectroChemPy` project is essentially a library written in
 # [python](https://www.python.org) language and provides objects,
-# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html)
-# and [Project](../../reference/generated/spectrochempy.Project.html),
+# [NDDataset](../../reference/generated/spectrochempy.NDDataset.rst)
+# and [Project](../../reference/generated/spectrochempy.Project.rst),
 # to hold data, equipped with methods to analyze, transform or display these data in a
 # simple way through a python type interface.
 #
@@ -54,7 +54,6 @@
 # We assume that the SpectroChemPy package has been correctly
 # installed. if is not the case, please go to [SpectroChemPy installation
 # procedure](../../gettingstarted/install/index.rst).
-# </div>
 
 # %% [markdown]
 # ### Writing and executing SpectroChemPy scripts
@@ -64,7 +63,7 @@
 # way, especially if you are a beginner, we recommend you to use `Jupyter Lab` to do it.
 # To get started, you can follow links below:
 
-# %% [markdown] {"nbsphinx-toctree": {"maxdepth": 3}}
+# %% [markdown]
 # [Jupyter Lab interface](interface.ipynb).
 
 # %% [markdown]
@@ -114,12 +113,10 @@ nd = NDDataset()
 # %% [markdown]
 # ## NDDataset, the main object
 #
-# [NDDataset](../../reference/generated/spectrochempy.NDDataset.html)
-# is a python object, actually a container, which can represent most of your
+# NDDataset is a python object, actually a container, which can represent most of your
 # multidimensional spectroscopic data.
-#
 # For instance, in the following we read data from a series of FTIR experiments,
-# provided  by the OMNIC software:
+# provided  by the OMNIC software
 
 # %%
 nd = NDDataset.read_omnic("irdata/nh4y-activation.spg")
