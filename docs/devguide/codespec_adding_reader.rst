@@ -146,7 +146,7 @@ be added.
 
 For consistency with existing readers, the following guidelines should be followed as closely as possible:
 
-- The NDDataset should be at least bi-dimensional with a first dimension ```` pertaining to the wavelength/frequency dimension
+- The NDDataset should be at least bi-dimensional with a first dimension pertaining to the wavelength/frequency dimension
   and the second dimension ``y`` pertaining to the acquisition time axis, even if the dataset consists of single 1D spectrum.
   For instance
 

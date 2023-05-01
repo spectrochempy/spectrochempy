@@ -248,12 +248,12 @@ class NDIO(HasTraits):
     @classmethod
     def load(cls, filename, **kwargs):
         """
-        Open data from a '*.scp' (NDDataset) or '.pscp' (Project) file.
+        Open data from a '\*.scp' (NDDataset) or '\*.pscp' (Project) file.
 
         Parameters
         ----------
         filename :  `str` , `pathlib` or `file` objects
-            The name of the file to read (or a file objects.
+            The name of the file to read (or a file objects).
         **kwargs
             Optional keyword parameters (see Other Parameters).
 

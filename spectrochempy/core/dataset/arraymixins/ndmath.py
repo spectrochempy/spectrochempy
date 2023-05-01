@@ -2302,23 +2302,24 @@ class NDMath(object):
         Return random floats in the half-open interval [0.0, 1.0).
 
         Results are from the “continuous uniform” distribution over the stated interval.
-        To sample :math:`\\mathrm{Uniform}[a, b), b > a` multiply the output of random
-        by (b-a) and add a:
 
-            (b - a) * random() + a
+        .. note::
+            To sample :math:`\\mathrm{Uniform}[a, b)` with :math:`b > a`, multiply the
+            output of random by (b-a) and
+            add a, i.e.: :math:`(b - a) * \\mathrm{random}() + a`\ .
 
         Parameters
         ----------
         size : int or tuple of ints, optional
             Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples
-             are drawn.
+            are drawn.
             Default is None, in which case a single value is returned.
         dtype : dtype, optional
             Desired dtype of the result, only float64 and float32 are supported.
             The default value is np.float64.
         **kwargs
             Keywords argument used when creating the returned object, such as units,
-            name, title, ...
+            name, title, etc...
 
         Returns
         -------
@@ -2348,7 +2349,7 @@ class NDMath(object):
             Calculate the standard deviation of these values.
         dim : None or int or dimension name , optional
             Dimension or dimensions along which to operate.  By default, flattened input
-             is used.
+            is used.
         dtype : dtype, optional
             Type to use in computing the standard deviation. For arrays of
             integer type the default is float64, for arrays of float types it is

@@ -554,3 +554,4 @@ def setup(app):
     # # Ignore .ipynb files
     app.registry.source_suffix.pop(".ipynb", None)
     app.registry.source_suffix.pop(".py", None)
+    app.registry.source_suffix.pop(".py.md5", None)
