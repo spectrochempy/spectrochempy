@@ -36,7 +36,7 @@ import spectrochempy as scp
 # $n \times l$ dependant or predicted variables $Y$ from $n \times m$ explanatory or observed
 # variables $X$ by projecting both of them on new spaces spanned by $k$ latent variables,
 # according to the master equations :
-# $$ X = S_X L_Y^T + E_X $$
+# $$ X = S_X L_X^T + E_X $$
 # $$ Y = S_Y L_Y^T + E_Y $$
 # $$ S_X, S_y = \textrm{argmax}_{S_X, S_Y}(\textrm{cov}(S_X, S_Y)) $$
 # $S_X$ and $S_Y$ are $n \times k$ matrices often called score matrices, and $L_X^T$ and $L_Y^T$ are,

@@ -83,7 +83,7 @@ Glossary
         explanatory or observed variables :math:`X` by projecting both of them on new spaces spanned by
         :math:`k` latent variables according to the master equations :
 
-        .. math::  X = S_X L_Y^T + E_X
+        .. math::  X = S_X L_X^T + E_X
 
         .. math::  Y = S_Y L_Y^T + E_Y
 
