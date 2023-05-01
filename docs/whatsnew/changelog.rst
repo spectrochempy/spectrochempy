@@ -20,7 +20,6 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-* add `nnl` and `pnnls` solvers to `MCRALS`
 
 .. section
 
