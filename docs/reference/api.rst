@@ -17,6 +17,7 @@
     CoordSet
     DimensionalityError
     EFA
+    FastICA
     FileSelector
     IRIS
     IrisKernel

@@ -151,3 +151,6 @@ Glossary
 
     rank
         Number of linearly independent number or columns of a matrix
+
+    ICA
+        ``Independant Component Analysis``\ .

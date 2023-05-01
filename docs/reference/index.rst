@@ -632,6 +632,15 @@ Multivariate Curve Resolution - Alternating Least Squares
 
     MCRALS
 
+Independant Component Analysis
+==============================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    FastICA
+
 Non-Negative Matrix Factorization
 =================================
 
