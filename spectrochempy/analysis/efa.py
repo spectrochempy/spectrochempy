@@ -99,7 +99,7 @@ class EFA(DecompositionAnalysis):
             **kwargs,
         )
         if "used_components" in kwargs:
-            deprecated("used_components", replace="n_components", removed="0.6.5")
+            deprecated("used_components", replace="n_components", removed="0.7")
             kwargs["n_components"] = kwargs.pop("used_components")
 
     def _fit(self, X, Y=None):

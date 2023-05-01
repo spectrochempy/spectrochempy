@@ -108,17 +108,17 @@ class SIMPLISMA(DecompositionAnalysis):
         # warn about deprecations
         # -----------------------
         if "verbose" in kwargs:
-            deprecated("verbose", replace="log_level='INFO'", removed="0.6.5")
+            deprecated("verbose", replace="log_level='INFO'", removed="0.7")
             verbose = kwargs.pop("verbose")
             if verbose:
                 log_level = "INFO"
 
         if "n_pc" in kwargs:
-            deprecated("n_pc", replace="n_components", removed="0.6.5")
+            deprecated("n_pc", replace="n_components", removed="0.7")
             kwargs["n_components"] = kwargs.pop("n_pc")
 
         if "max_components" in kwargs:
-            deprecated("max_components", replace="n_components", removed="0.6.5")
+            deprecated("max_components", replace="n_components", removed="0.7")
             kwargs["n_components"] = kwargs.pop("max_components")
 
         # call the super class for initialisation
