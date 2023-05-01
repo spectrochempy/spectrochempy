@@ -107,7 +107,7 @@ User's Guide & Tutorials
     userguide/units/units
     userguide/api/api
 
-.. _api_reference:
+.. _reference:
 
 ***********************
 Reference

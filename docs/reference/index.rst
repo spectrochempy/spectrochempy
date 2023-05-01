@@ -1,4 +1,4 @@
-.. _api_reference_:
+.. _api_reference:
 
 .. currentmodule:: spectrochempy
 
