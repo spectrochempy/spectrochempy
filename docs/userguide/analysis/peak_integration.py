@@ -68,7 +68,7 @@ X.plot()
 # Now we can perform some baseline correction
 
 # %%
-blc = scp.BaselineCorrection(X)
+blc = scp.Baseline(X)
 regions = (
     [1740.0, 1800.0],
     [1550.0, 1570.0],

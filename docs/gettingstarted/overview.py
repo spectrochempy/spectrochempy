@@ -114,7 +114,7 @@ _ = smoothed.plot(colormap="magma")
 # %% tags=[]
 region = ds[:, 4000.0:2000.0]
 smoothed = region.smooth(window_length=51, window="hanning")
-blc = scp.BaselineCorrection(smoothed)
+blc = scp.Baseline(smoothed)
 basc = blc.compute(
     [2000.0, 2300.0],
     [3800.0, 3900.0],

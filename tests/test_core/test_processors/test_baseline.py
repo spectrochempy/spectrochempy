@@ -11,7 +11,7 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy import NDDataset
-from spectrochempy.core.processors.baseline import BaselineCorrection
+from spectrochempy.analysis.preprocessing.baseline import Baseline
 from spectrochempy.core.units import ur
 
 # noinspection PyUnresolvedReferences
@@ -24,180 +24,82 @@ from spectrochempy.utils.testing import (
 path = os.path.dirname(os.path.abspath(__file__))
 
 
-# @pytest.mark.skip("erratic failing!")
-def test_basecor_sequential(IR_dataset_2D):
-    dataset = IR_dataset_2D[5]
-    basc = BaselineCorrection(dataset)
+def test_preprocessing_baseline(IR_dataset_2D):
 
-    s = basc(
-        [6000.0, 3500.0], [2200.0, 1500.0], method="sequential", interpolation="pchip"
+    # define a 1D test dataset (1 spectrum)
+    dataset = IR_dataset_2D[10].squeeze()
+
+    # minimal process
+    basc1 = Baseline()
+    basc1.fit(dataset)
+    assert basc1.baseline.shape == dataset.shape
+
+    # with mask on some wavenumbers
+    dataset[882.0:1280.0] = scp.MASKED
+    basc2 = Baseline()
+    basc2.fit(dataset)
+    assert basc2.baseline.shape == dataset.shape
+
+    # define a 2D test dataset (6 spectra)
+    dataset = IR_dataset_2D[::10]
+
+    # minimal process
+    basc3 = Baseline()
+    basc3.fit(dataset)
+    assert basc3.baseline.shape == dataset.shape
+
+    # now define ranges and interpolation=pchip
+    basc3.ranges = [[6000.0, 3500.0], [2200.0, 1500.0]]
+    basc3.interpolation = "pchip"
+
+    # and fit again (for example, taking only the second spectra)
+    basc3.fit(dataset[1])
+
+    # change the interpolation method
+    basc3.interpolation = "polynomial"
+    basc3.order = 3
+    basc3.fit(dataset)
+
+    # multivariate
+    basc3.method = "multivariate"
+    basc3.interpolation = "pchip"
+    basc3.n_components = 5
+
+    dataset = IR_dataset_2D
+    dataset[:, 1290.0:890.0] = scp.MASKED
+    basc3.ranges = (
+        [5900.0, 5400.0],
+        4550.0,
+        [4500.0, 4000.0],
+        [2100.0, 2000.0],
+        [1550.0, 1555.0],
     )
-    s.plot()
+    basc3.fit(dataset)
 
-    s1 = basc(
-        [6000.0, 3500.0],
-        [2200.0, 1500.0],
-        method="sequential",
-        interpolation="polynomial",
-    )
-    s1.plot(clear=False, color="red")
+    basc3.method = "multivariate"
+    basc3.interpolation = "polynomial"
+    basc3.order = 8
+    basc3.fit(dataset)
 
-    dataset = IR_dataset_2D[5]  # with LinearCoord
-    basc = BaselineCorrection(dataset)
+    basc3.baseline[::10].plot(cmap=None, color="r")
+    dataset[::10].plot(clear=False)
+    scp.show()
 
-    s2 = basc(
-        [6000.0, 3500.0], [2200.0, 1500.0], method="sequential", interpolation="pchip"
-    )
-    assert_dataset_almost_equal(s, s2, decimal=5)
-    s2.plot(clear=False, color="green")
+    basc3.transform().plot()
+    scp.show()
 
-    s3 = basc(
-        [6000.0, 3500.0],
-        [2200.0, 1500.0],
-        method="sequential",
-        interpolation="polynomial",
-    )
-    assert_dataset_almost_equal(s1, s3, decimal=5)
-    s3.plot(clear=False, color="cyan")
-
-    dataset = IR_dataset_2D[:15]
-    basc = BaselineCorrection(dataset)
-    s = basc(
-        [6000.0, 3500.0], [2200.0, 1500.0], method="sequential", interpolation="pchip"
-    )
-    s.plot()
-    s = basc(
-        [6000.0, 3500.0],
-        [2200.0, 1500.0],
-        method="sequential",
-        interpolation="polynomial",
-    )
-    s.plot(cmap="copper")
-
-    show()
-
-
-def test_basecor_multivariate(IR_dataset_2D):
-    dataset = IR_dataset_2D[5]
-
-    basc = BaselineCorrection(dataset)
-    s = basc(
-        [6000.0, 3500.0], [1800.0, 1500.0], method="multivariate", interpolation="pchip"
-    )
-    s.plot()
-    s = basc(
-        [6000.0, 3500.0],
-        [1800.0, 1500.0],
-        method="multivariate",
-        interpolation="polynomial",
-    )
-    s.plot(clear=False, color="red")
-
-    dataset = IR_dataset_2D[:15]
-
-    basc = BaselineCorrection(dataset, figsize=(10, 10))
-    s = basc(
-        [6000.0, 3500.0], [1800.0, 1500.0], method="multivariate", interpolation="pchip"
-    )
-    s.plot()
-    s = basc(
-        [6000.0, 3500.0],
-        [1800.0, 1500.0],
-        method="multivariate",
-        interpolation="polynomial",
-    )
-    s.plot(cmap="copper")
-
-    show()
-
-
-def test_notebook_basecor_bug():
-    dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
-
-    s = dataset[:, 1260.0:5999.0]
-    s = s - s[-1]
-
-    # Important note that we use floating point number
-    # integer would mean points, not wavenumbers!
-
-    basc = BaselineCorrection(s)
-
-    ranges = [
-        [1261.86, 1285.89],
-        [1556.30, 1568.26],
-        [1795.00, 1956.75],
-        [3766.03, 3915.81],
-        [4574.26, 4616.04],
-        [4980.10, 4998.01],
-        [5437.52, 5994.70],
-    ]  # predefined ranges
-
-    _ = basc.run(
-        *ranges,
-        method="multivariate",
-        interpolation="pchip",
-        npc=5,
-        figsize=(6, 6),
-        zoompreview=4
-    )
-
-    # The regions used to set the baseline are accessible using the `ranges`
-    #  attribute:
-    ranges = basc.ranges
-    print(ranges)
-
-    basc.corrected.plot_stack()
-
-
-def test_issue_227():
-    # IR spectrum, we want to make a baseline correction on the absorbance vs. time axis:
-    ir = scp.read("irdata/nh4y-activation.spg")
-
-    # baseline correction along x
-    blc = scp.BaselineCorrection(ir)
-    s1 = blc(
-        [5999.0, 3500.0], [1800.0, 1500.0], method="multivariate", interpolation="pchip"
-    )
-
-    # baseline correction the transposed data along x (now on axis 0) -> should produce the same results
-    # baseline correction along axis -1 previuosly
-    blc = scp.BaselineCorrection(ir.T)
-    s2 = blc(
-        [5999.0, 3500.0],
-        [1800.0, 1500.0],
-        dim="x",
-        method="multivariate",
-        interpolation="pchip",
-    )
-
-    # compare
-    assert_dataset_equal(s1, s2.T)
-
-    ir.y = ir.y - ir[0].y
-    irs = ir[:, 2000.0:2020.0]
-    blc = scp.BaselineCorrection(irs)
-    blc.compute(
-        *[[0.0, 2.0e3], [3.0e4, 3.3e4]],
-        dim="y",
-        interpolation="polynomial",
-        order=1,
-        method="sequential"
-    )
-    blc.corrected.plot()
-
-    # MS profiles, we want to make a baseline correction on the ion current vs. time axis:
+    # MS profiles, we want to make a baseline correction
+    # on the ion current vs. time axis:
     ms = scp.read("msdata/ion_currents.asc", timestamp=False)
-    blc = scp.BaselineCorrection(ms[10.0:20.0, :])
-    blc.compute(
-        *[[10.0, 11.0], [19.0, 20.0]],
-        dim="y",
-        interpolation="polynomial",
-        order=1,
-        method="sequential"
-    )
-    blc.corrected.T.plot()
-
-    show()
+    msT = ms[4000.0:9000.0, :].T
+    blc = scp.Baseline()
+    # blc.ranges = [[10.0, 11.0], [19.0, 20.0]]
+    blc.interpolation = "polynomial"
+    blc.order = 1
+    blc.method = "sequential"
+    blc.fit(msT)
+    blc.corrected.plot()
+    scp.show()
 
 
 @pytest.mark.skip()

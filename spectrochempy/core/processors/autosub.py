@@ -60,7 +60,7 @@ def autosub(
 
     See Also
     --------
-    BaselineCorrection : Manual baseline corrections.
+    Baseline : Manual baseline corrections.
     abc : Automatic baseline corrections.
 
     Examples

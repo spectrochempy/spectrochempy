@@ -36,12 +36,12 @@ ndp = (nd - nd[-1])[:, 1291.0:5999.0]
 # integer would mean points, not wavenumbers!
 
 # %%
-# Define the BaselineCorrection object:
+# Define the Baseline object:
 
-ibc = scp.BaselineCorrection(ndp)
+ibc = scp.Baseline(ndp)
 
 # %%
-# Launch the interactive view, using the `BaselineCorrection.run` method:
+# Launch the interactive view, using the `Baseline.run` method:
 
 ranges = [
     [1556.30, 1568.26],

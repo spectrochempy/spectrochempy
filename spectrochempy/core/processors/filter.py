@@ -198,7 +198,7 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
 
     See Also
     --------
-    BaselineCorrection : Manual baseline correction.
+    Baseline : Manual baseline correction.
     abs : Automatic baseline correction.
     autosub : Subtraction of reference.
 

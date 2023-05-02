@@ -10,10 +10,10 @@ from functools import partial
 from IPython.display import display
 from ipywidgets import Layout, widgets
 
+from spectrochempy.analysis.preprocessing.baseline import Baseline
 from spectrochempy.core import info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
-from spectrochempy.core.processors.baseline import BaselineCorrection
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
 from spectrochempy.utils.plots import show
@@ -25,7 +25,7 @@ class BaselineCorrector:
     """
     Launch a GUI for baseline corrections.
 
-    Wrapper of BaselineCorrection(X), with widgets for dataset slicing,
+    Wrapper of Baseline(X), with widgets for dataset slicing,
     input parameters and graphical output.
     Should be run in jupyter notebook (does not always run properly in jupyter lab)
     with the widget backend (magic `%matplotlib widget` ).
@@ -49,7 +49,7 @@ class BaselineCorrector:
 
     See Also
     --------
-    BaselineCorrection : Baseline correction method.
+    Baseline : Baseline correction method.
 
     Notes
     -----
@@ -69,7 +69,7 @@ class BaselineCorrector:
       format. In both dimensions, coordinates or indexes
       can be used (for example, [3000.0::2] or [:100:5] are valid entries).
     - `Method` and `Interpolation` dropdown fields are self explaining,
-      see BaselineCorrection() for details.
+      see Baseline() for details.
     - Ranges should be entered as a series of intervals or wavenumbers, e.g.
 
       ```
@@ -228,7 +228,7 @@ class BaselineCorrector:
                 ranges = _round_ranges(new_ranges)
                 self._ranges_control.value = _ranges_to_str(ranges)
 
-            blc = BaselineCorrection(self.original)
+            blc = Baseline(self.original)
             self.corrected = blc.compute(
                 *ranges,
                 interpolation=self._interpolation_selector.value,

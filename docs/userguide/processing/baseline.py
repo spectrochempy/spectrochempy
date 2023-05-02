@@ -133,10 +133,10 @@ ranges = [5900.0, 5400.0], 4550.0, [4500.0, 4000.0], [2100.0, 2000.0], [1550.0, 
 # After selection of the baseline ranges, the baseline correction can be made using a
 # sequence of 2 commands:
 #
-# 1. Initialize an instance of BaselineCorrection
+# 1. Initialize an instance of Baseline
 
 # %%
-blc = scp.BaselineCorrection(X)
+blc = scp.Baseline(X)
 
 # %% [markdown]
 # 2. compute baseline other the ranges
@@ -220,7 +220,7 @@ ranges = [[5900.0, 5400.0], [4000.0, 4500.0], [2100.0, 2000.0], [1550.0, 1555.0]
 # </div>
 
 # %%
-blc = scp.BaselineCorrection(X)
+blc = scp.Baseline(X)
 blc.compute(*ranges, interpolation="polynomial", order=6)
 
 # %% [markdown]
@@ -261,7 +261,7 @@ _ = blc.corrected.plot()
 # over time. Typical optimum values are `npc=2` or `npc=3` (see Exercises below).
 
 # %%
-blc = scp.BaselineCorrection(X)
+blc = scp.Baseline(X)
 blc.compute(*ranges, interpolation="pchip", method="multivariate", npc=2)
 _ = blc.corrected.plot()
 
@@ -290,7 +290,7 @@ npc = 3  # only used for 'multivariate'
 
 # code: compute baseline, plot original and corrected NDDatasets and ranges
 # --------------------------------------------------------------------------------------
-blc = scp.BaselineCorrection(X)
+blc = scp.Baseline(X)
 Xcorr = blc.compute(
     *ranges, interpolation=interpolation, order=order, method=method, npc=npc
 )
