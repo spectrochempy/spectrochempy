@@ -158,11 +158,11 @@ class _set_output(object):
                             labels=["#%d" % (i) for i in range(X_transf.shape[0])],
                             title="components",
                         ),
-                        x=X.coord(-1),
+                        x=X.coord(-1).copy(),
                     )
                 if self.typex == "components":
                     X_transf.set_coordset(
-                        y=X.coord(0),  # cannot use X.y in case of transposed X
+                        y=X.coord(0).copy(),  # cannot use X.y in case of transposed X
                         x=Coord(
                             None,
                             labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
@@ -176,7 +176,16 @@ class _set_output(object):
                             labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
                             title="components",
                         ),
-                        x=X.coord(1),
+                        x=X.coord(1).copy(),
+                    )
+                if self.typey == "features":
+                    X_transf.set_coordset(
+                        y=X.coord(1).copy(),
+                        x=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
                     )
                 if self.typesingle == "components":
                     # occurs when the data are 1D such as ev_ratio...

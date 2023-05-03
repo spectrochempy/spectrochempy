@@ -9,12 +9,16 @@
 import os
 
 import pytest
+from numpy.testing import assert_almost_equal
+from sklearn.decomposition import FastICA as skl_ICA
 
 import spectrochempy as scp
-from spectrochempy.analysis.fast_ica import FastICA
+from spectrochempy.analysis.fast_ica import FastICA as scp_ICA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
+from spectrochempy.utils.testing import assert_dataset_equal
 
 
 # test docstring
@@ -35,17 +39,10 @@ def test_FastICA_docstrings():
 
 
 def test_fastICA():
-    print("")
-    data = NDDataset.read_matlab(
+    # Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110))
+    ds = NDDataset.read_matlab(
         os.path.join("matlabdata", "als2004dataset.MAT"), merge=False
-    )
-    print("Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110)):")
-    print("")
-    for mat in data:
-        print("    " + mat.name, str(mat.shape))
-
-    ds = data[-1]
-    assert ds.name == "m1"
+    )[-1]
 
     ds.title = "absorbance"
     ds.units = "absorbance"
@@ -53,16 +50,56 @@ def test_fastICA():
     ds.y.title = "elution time"
     ds.x.title = "wavelength"
     ds.y.units = "hours"
-    ds.x.units = "cm^-1"
+    ds.x.units = "au"
 
-    ica = FastICA(n_components=4, log_level="INFO")
+    ds_ = ds.data.copy()
+
+    ica = scp_ICA(n_components=4, random_state=123, log_level="INFO")
     ica.fit(ds)
 
-    ica.A.T.plot(title="Mixing matrix")
-    ica.components.plot(title="Sources")
-    ica.mixing.plot(title="mixing")
-    ica.whitening.plot(title="whitening")
+    ica_ = skl_ICA(n_components=4, random_state=123)
+    ica_.fit(ds_)
+
+    # compare scpy and sklearn FastICA attributes
+    assert_almost_equal(ica.components.data, ica_.components_)
+    assert_almost_equal(ica.mixing.data, ica_.mixing_)
+    assert_almost_equal(ica.mean.data, ica_.mean_)
+    assert_almost_equal(ica.whitening.data, ica_.whitening_)
+    assert ica.n_iter == ica_.n_iter_
+
+    # compare scpy and sklearn FastICA methods
+    U = ica.transform()
+    U_ = ica_.transform(ds_)
+    assert_almost_equal(U.data, U_)
+
+    U = ica.fit_transform(ds)
+    U_ = ica_.fit_transform(ds_)
+    assert_almost_equal(U.data, U_)
+
+    dshat = ica.inverse_transform()
+    dshat_ = ica_.inverse_transform(U_)
+    assert_almost_equal(dshat.data, dshat_)
+
+    # test plots
+    ica.A.T.plot(title="Mixing system A / ica.transform() ")
+    ica.St.plot(title="Source spectra profiles / ica.mixing.T")
+    ica.components.plot(title="Components / W / unmixing matrix")
+    ica.mixing.plot(title="ica.mixing")
+    ica.whitening.plot(title="ica.whitening")
     ica.plotmerit(offset=0, nb_traces=10)
 
-    # todo: complete testing (options, check methods...)
+    # Test masked data, x axis
+    ica2 = scp.FastICA(n_components=4)
+    ds[:, 10:20] = MASKED  # corn spectra, calibration
+    ica2.fit(ds)
+    #
+    assert ica2._X.shape == (51, 86), "missing row or col should be removed"
+    assert ica2.X.shape == (51, 96), "missing row or col restored"
+    assert_dataset_equal(
+        ica2.X, ds, data_only=True
+    ), "input dataset should be reflected in the internal variable X (where mask is restored)"
+
+    ica2.plotmerit()
+
+    # todo: complete testing of options
     show()

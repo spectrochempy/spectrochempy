@@ -32,20 +32,21 @@ class FastICA(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "FastICA")
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Fast algorithm for Independent Component Analysis (FastICA).
 
     A wrapper of `sklearn.decomposition.FastICA`\ .
 
-    :term:`ICA` ( ``Independent Component Analysis`` )
-    resolve's a set (or several sets) of spectra :math:`X` into the spectra :math:`S^t`
-    of undrelying sources and a mixing matrix :math:`A`\ .
+    :term:`ICA` ( ``Independent Component Analysis`` ) extract the underlying sources of
+    the variability of a set of spectra :math:`X` into the spectral profiles :math:`S^t`
+    of the underelying sources and a mixing matrix :math:`A`\ .
 
     In terms of matrix equation:
 
-    .. math:: X = A.S^t + E
+    .. math:: X = \bar{X] + A \cdot S^t + E
 
-    where :math:`E` is the matrix of residuals.
+    where :math:`\bar{X}` is the mean of the dataset and :math:`E` is the matrix of
+    residuals.
 
     Parameters
     ----------
@@ -268,24 +269,32 @@ array of values drawn from a normal distribution is used."""
         return super().fit(X, Y=None)
 
     @property
-    def St(self):
+    @_wrap_ndarray_output_to_nddataset(
+        units=None, title=None, typey="features", typex="components"
+    )
+    def mixing(self):
         """
-        Return ICA sources.
+        The pseudo inverse of components.
 
-        NDDataset of size (`n_components`, `n_features`). This is equal to the unmixing
-        matrix when whiten is False, and equal to `unmixing_matrix @ self.whitening`
-        when whiten is True.
+        NDDataset of size (`n_features`\ , `n_components`\ ). It is the linear operator
+        that maps independent sources to the data, and the transpose of `St`\ .
         """
-        return self.components
+        return self._fast_ica.mixing_
 
     @property
-    def A(self):
+    @_wrap_ndarray_output_to_nddataset(
+        units=None,
+        title=None,
+        typey="components",
+    )
+    def St(self):
         """
-        Return ICA mixing matrix.
+        The spectral profiles of the independant sources.
 
-        NDDataset of size (`n_observations`, `n_components`)
+        NDDataset of size (`n_components`\ , `n_features`\ ). It is the transpose of the
+        ``mixing_`` matrix returned by Scikit-Learn.
         """
-        return self.transform()
+        return self._fast_ica.mixing_.T
 
     @property
     @_wrap_ndarray_output_to_nddataset(
@@ -293,22 +302,23 @@ array of values drawn from a normal distribution is used."""
         title=None,
         typex="components",
     )
-    def mixing(self):
+    def A(self):
         """
-        The pseudo inverse of St.
+        The mixing system A.
 
-        NDDataset of size (`n_features`, `n_components`), It is the linear operator that
-        maps independent sources to the data.
+        NDDataset of size (`n_observations`\ , `n_components`\ ). It is the matrix
+        returned by the `transform()` method.
         """
-        return self._fast_ica.mixing_
+        return self._fast_ica.transform(self.X.data)
 
     @property
     @_wrap_ndarray_output_to_nddataset()
     def mean(self):
         """
-        The mean over features.
+        The mean of X over features.
 
-        Only set if `whiten` is True.
+        Only set if `whiten` is True, it is needed (and used) to reconstruct a dataset
+        by ``inverse_transform(A)``\ .
         """
         return self._fast_ica.mean_
 
