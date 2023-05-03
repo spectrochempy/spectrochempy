@@ -37,13 +37,13 @@ class FastICA(DecompositionAnalysis):
 
     A wrapper of `sklearn.decomposition.FastICA`\ .
 
-    :term:`ICA` ( ``Independent Component Analysis`` ) extract the underlying sources of
+    :term:`ICA` (Independent Component Analysis) extracts the underlying sources of
     the variability of a set of spectra :math:`X` into the spectral profiles :math:`S^t`
     of the underelying sources and a mixing matrix :math:`A`\ .
 
     In terms of matrix equation:
 
-    .. math:: X = \bar{X] + A \cdot S^t + E
+    .. math:: X = \bar{X} + A \cdot S^t + E
 
     where :math:`\bar{X}` is the mean of the dataset and :math:`E` is the matrix of
     residuals.

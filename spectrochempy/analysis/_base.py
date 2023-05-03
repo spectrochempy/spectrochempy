@@ -158,11 +158,12 @@ class _set_output(object):
                             labels=["#%d" % (i) for i in range(X_transf.shape[0])],
                             title="components",
                         ),
-                        x=X.coord(-1).copy(),
+                        x=X.coord(-1).copy() if X.coord(-1) is not None else None,
                     )
                 if self.typex == "components":
                     X_transf.set_coordset(
-                        y=X.coord(0).copy(),  # cannot use X.y in case of transposed X
+                        y=X.coord(0).copy() if X.coord(0) is not None else None,
+                        # cannot use X.y in case of transposed X
                         x=Coord(
                             None,
                             labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
@@ -176,11 +177,11 @@ class _set_output(object):
                             labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
                             title="components",
                         ),
-                        x=X.coord(1).copy(),
+                        x=X.coord(1).copy() if X.coord(1) is not None else None,
                     )
                 if self.typey == "features":
                     X_transf.set_coordset(
-                        y=X.coord(1).copy(),
+                        y=X.coord(1).copy() if X.coord(1) is not None else None,
                         x=Coord(
                             None,
                             labels=["#%d" % (i) for i in range(X_transf.shape[-1])],

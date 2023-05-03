@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-NDDataset PCA analysis example
--------------------------------
+PCA analysis example
+--------------------
 In this example, we perform the PCA dimensionality reduction of a spectra
 dataset
 

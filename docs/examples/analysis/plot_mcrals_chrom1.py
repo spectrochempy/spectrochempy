@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-MCR-ALS optimization example (original example from Jaumot)
-===========================================================
+MCR-ALS example (adapted from Jaumot et al. 2005)
+=================================================
 
 In this example, we perform the MCR ALS optimization of a dataset
 corresponding to a HPLC-DAD run, from :cite:t:`jaumot:2005` and :cite:t:`jaumot:2015`\ .
@@ -16,7 +16,7 @@ This dataset (and others) can be downloaded from the
 `Multivariate Curve Resolution Homepage
 <https://mcrals.wordpress.com/download/example-data-sets>`_\ .
 
-For the user convenience, this dataset is present in the the test data directory
+For the user convenience, this dataset is present in the test data directory
 `scp.preferences.datadir` of SpectroChemPy as ``als2004dataset.MAT``\ .
 """
 # %%
@@ -84,6 +84,7 @@ _ = mcr.fit(X, guess)
 #
 # The optimization has converged. We can get the concentration :math:`C` (C) and
 # pure spectra profiles :math:`S^T` (St) and plot them
+
 _ = mcr.C.T.plot()
 _ = mcr.St.plot()
 

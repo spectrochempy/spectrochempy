@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-MCR-ALS optimization example with kinetic constraints
-=====================================================
+MCR-ALS with kinetic constraints
+================================
 
 In this example, we perform the MCR ALS optimization of the UV-vis of spectra resulting
 from a three-component reaction `A` \-> `B` \-> `C` which was investigated by UV–Vis
@@ -109,6 +109,9 @@ mcr_2.fit(X, Ckin)
 # Now, let\'s compare the concentration profile of MCR-ALS
 # (C = X(C$_{kin}^+$ X)$^+$) with
 # that of the optimized kinetic model (C$_{kin}$ \equiv$ `C_constrained`):
+
+# sphinx_gallery_thumbnail_number = 6
+
 _ = mcr_2.C.T.plot()
 _ = mcr_2.C_constrained.T.plot(clear=False)
 

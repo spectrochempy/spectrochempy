@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-EFA analysis (Keller and Massart original example)
-===================================================
+EFA (Keller and Massart original example)
+=========================================
 
 In this example, we perform the Evolving Factor Analysis of a TEST dataset
 (ref. Keller and Massart, Chemometrics and Intelligent Laboratory Systems,

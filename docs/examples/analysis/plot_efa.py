@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-EFA analysis example
-======================
+EFA example
+===========
 
 In this example, we perform the Evolving Factor Analysis
 

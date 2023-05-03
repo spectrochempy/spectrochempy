@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-PCA analysis example
----------------------
+PCA example (iris dataset)
+--------------------------
 In this example, we perform the PCA dimensionality reduction of the classical `iris`
 dataset (Ronald A. Fisher.
 "The Use of Multiple Measurements in Taxonomic Problems. Annals of Eugenics, 7, pp.179-188, 1936).

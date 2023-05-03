@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-NDDataset SIMPLISMA example
--------------------------------
+SIMPLISMA example
+-----------------
 In this example, we perform the PCA dimensionality reduction of a spectra
 dataset
 
@@ -48,7 +48,10 @@ _ = simpl.C.T.plot(title="Concentration")
 
 # %%
 # Plot components (St)
-_ = simpl.components.plot(title="Components")
+
+# sphinx_gallery_thumbnail_number = 3
+
+_ = simpl.components.plot(title="Pure profiles")
 
 # %%
 # Show the plot of merit
