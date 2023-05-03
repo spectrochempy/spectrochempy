@@ -53,8 +53,11 @@ St = ica.St  # or model.mixing.T
 # %%
 # Plot them
 # ---------
-_ = A.T.plot()
-_ = St.plot(title="Concentration", colormap=None)
+
+# sphinx_gallery_thumbnail_number = 3
+
+_ = A.T.plot(title="Mixing System")
+_ = St.plot(title="Sources spectral profiles", colormap=None)
 
 # %%
 # Reconstruct the dataset
