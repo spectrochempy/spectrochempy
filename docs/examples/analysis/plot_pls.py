@@ -61,9 +61,9 @@ _ = pls.fit(X_train, y_train)
 # both train set and test set.
 
 # sphinx_gallery_thumbnail_number = 3
-ax = pls.parityplot(label="calibration")
+ax = pls.parityplot(label="calibration", s=150)
 _ = pls.parityplot(
-    y_test, pls.predict(X_test), c="red", label="validation", clear=False
+    y_test, pls.predict(X_test), s=150, c="red", label="validation", clear=False
 )
 _ = ax.legend(loc="lower right")
 

@@ -20,8 +20,6 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-* add `nnls` and `pnnls` solvers to `MCRALS`
-
 * add `FastICA` analysis module
 
 .. section

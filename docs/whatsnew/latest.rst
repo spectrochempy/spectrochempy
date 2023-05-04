@@ -9,6 +9,4 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* add `nnls` and `pnnls` solvers to `MCRALS`
-
 * add `FastICA` analysis module
