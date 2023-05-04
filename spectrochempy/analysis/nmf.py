@@ -64,9 +64,9 @@ class NMF(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
 
     n_components = tr.Integer(
-        default_value=None,
+        default_value=2,
         allow_none=True,
-        help="Number of components to use. If None is passed, all are used.",
+        help="Number of components to use.",
     ).tag(config=True)
 
     init = tr.Enum(

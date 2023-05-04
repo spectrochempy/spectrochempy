@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-EFA analysis (Keller and Massart original example)
-===================================================
+EFA (Keller and Massart original example)
+=========================================
 
 In this example, we perform the Evolving Factor Analysis of a TEST dataset
 (ref. Keller and Massart, Chemometrics and Intelligent Laboratory Systems,
@@ -95,8 +95,9 @@ C = efa.transform()
 C.T.plot(title="EFA concentration")
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
 
 # %%
+
 # scp.show()

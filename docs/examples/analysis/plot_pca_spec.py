@@ -6,8 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-NDDataset PCA analysis example
--------------------------------
+PCA analysis example
+--------------------
 In this example, we perform the PCA dimensionality reduction of a spectra
 dataset
 
@@ -98,8 +98,9 @@ scores.y.labels = labels  # Note this does not replace previous labels,
 _ = pca.scoreplot(scores, 1, 2, show_labels=True, labels_column=2)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
 
 # %%
+
 # scp.show()
