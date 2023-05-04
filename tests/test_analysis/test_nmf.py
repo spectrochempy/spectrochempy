@@ -7,7 +7,7 @@
 # flake8: noqa
 
 """
-Tests for the PCA module
+Tests for the NMF module
 
 """
 import os
