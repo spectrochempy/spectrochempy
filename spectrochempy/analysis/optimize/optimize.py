@@ -5,9 +5,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-__all__ = ["Optimize"]
-__configurables__ = __all__
-
 import re
 import sys
 
@@ -41,9 +38,6 @@ class Optimize(DecompositionAnalysis):
     %(AnalysisConfigurable.parameters)s
     """
     )
-
-    name = "Optimize"
-    description = "Non-linear Least-Squares Optimization"
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass

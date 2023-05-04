@@ -837,7 +837,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     @property
     def history(self):
         """
-        Describes the history of actions made on this array (tr.List of strings).
+        Describes the history of actions made on this array (List of strings).
         """
 
         history = []
@@ -1455,7 +1455,9 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         swapdims : Interchange two dimensions of a NDDataset.
         """
         new = super().transpose(*dims, inplace=inplace)
-        new.history = f"Data transposed between dims: {dims}" if dims else ""
+        new.history = (
+            f"Data transposed between dims: {dims}" if dims else "Data transposed"
+        )
 
         return new
 

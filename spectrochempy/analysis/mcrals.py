@@ -293,7 +293,7 @@ It should be using one of the following syntax:
 with:
 
 - ``Ccurr`` is the current `C` dataset,
-- ``\*argsGetConc`` are the parameters needed to completely specify the function.
+- ``argsGetConc`` are the parameters needed to completely specify the function.
 - ``hardC`` is a `~numpy.ndarray` or `NDDataset` of shape
   (:term:`n_observations` , len(``hardConc``\ ),
 - ``newArgsGetConc`` are the updated parameters for the next iteration (can be `None`),
