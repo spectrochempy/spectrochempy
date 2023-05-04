@@ -20,7 +20,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-* add `FastICA` analysis module
+* add `FastICA` analysis module.
 
 .. section
 

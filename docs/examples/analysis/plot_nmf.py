@@ -75,8 +75,9 @@ ax = St.plot(title="Components", colormap=None, legend=St.y.labels)
 ax.set_yticks([])
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
 
 # %%
+
 # scp.show()

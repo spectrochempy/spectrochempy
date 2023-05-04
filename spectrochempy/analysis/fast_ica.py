@@ -111,15 +111,15 @@ class FastICA(DecompositionAnalysis):
   the value of the function, and of its derivative, in the point. The derivative should
   be averaged along its last dimension.
 
-    .. code-block::
+.. code-block::
 
-        def my_g(x):
-            return x ** 3, (3 * x ** 2).mean(axis=-1)
+    def my_g(x):
+        return x ** 3, (3 * x ** 2).mean(axis=-1)
 
-    .. note::
-        ``fun`` can be also a serialized function created using dill and base64
-        python libraries. Normally not used directly, it is here for internal
-        process. """
+.. note::
+    ``fun`` can be also a serialized function created using dill and base64
+    python libraries. Normally not used directly, it is here for internal
+    process. """
         ),
     ).tag(config=True)
 
@@ -129,8 +129,8 @@ class FastICA(DecompositionAnalysis):
         help=(
             """Arguments to send to the functional form.
 
-If empty or None and if :code:`fun=="logcosh"`` , `fun_args` will take value
-:code:`{alpha : 1.0}`."""
+If empty or None and if ``fun=="logcosh"`` , `fun_args` will take value
+``{alpha : 1.0}``."""
         ),
     ).tag(config=True)
 
@@ -162,10 +162,10 @@ array of values drawn from a normal distribution is used."""
             """The solver to use for whitening.
 
 - ``"svd"``\ : is more stable numerically if the problem is degenerate, and often faster
-  when :code:`n_observations <= n_features`\ .
+  when :term:`n_observations` <= :term:`n_features`\ .
 - ``"eigh"``\ : is generally more memory efficient when
-  :code:`n_observations >= n_features`\ , and can be faster when
-  :code:`n_observations >= 50 * n_features`\ . """
+  :term:`n_observations` >= :term:`n_features`\ , and can be faster when
+  :term:`n_observations` >= 50 * :term:`n_features`\ . """
         ),
     ).tag(config=True)
 

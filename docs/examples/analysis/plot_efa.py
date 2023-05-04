@@ -92,8 +92,9 @@ LT = pca.loadings
 LT.plot(title="PCA components", legend=LT.y.labels)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
 
 # %%
+
 # scp.show()

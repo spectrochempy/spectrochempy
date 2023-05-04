@@ -19,7 +19,7 @@ import spectrochempy as scp
 # ----------------------------
 
 # %%
-# Here we use a dataset from Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110)
+# Here we use a dataset from :cite:t:`jaumot:2005`
 
 X = scp.read("matlabdata/als2004dataset.MAT")[-1]
 
@@ -84,4 +84,5 @@ _ = ica.plotmerit(nb_traces=15)
 # running the .py script
 
 # %%
+
 # scp.show()

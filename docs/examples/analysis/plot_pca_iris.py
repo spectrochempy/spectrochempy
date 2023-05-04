@@ -89,8 +89,9 @@ ax = pca.scoreplot(scores, 1, 2, 3, color_mapping="labels")
 ax.view_init(10, 75)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
 
 # %%
+
 # scp.show()

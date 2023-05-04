@@ -122,8 +122,9 @@ _ = mcr_2.St.plot()
 _ = mcr_2.plotmerit(offset=0, nb_traces=10)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
 
 # %%
+
 # scp.show()

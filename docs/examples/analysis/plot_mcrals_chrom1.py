@@ -97,8 +97,9 @@ _ = mcr.St.plot()
 _ = mcr.plotmerit(nb_traces=5)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
 
 # %%
+
 # scp.show()

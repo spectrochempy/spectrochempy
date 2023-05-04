@@ -9,4 +9,4 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* add `FastICA` analysis module
+* add `FastICA` analysis module.

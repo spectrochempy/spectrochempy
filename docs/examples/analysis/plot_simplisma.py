@@ -59,8 +59,9 @@ _ = simpl.components.plot(title="Pure profiles")
 simpl.plotmerit(offset=0, nb_traces=5)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
 
 # %%
+
 # scp.show()
