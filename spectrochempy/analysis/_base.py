@@ -376,6 +376,18 @@ class AnalysisConfigurable(MetaConfigurable):
             d = d.copy()
         return d
 
+    def _make_unsqueezed_dataset(self, d):
+        # add a dimension to 1D Dataset
+        if d.ndim == 1:
+            coordset = d.coordset
+            d._data = d._data[np.newaxis]
+            if np.any(d.mask):
+                d._mask = d._mask[np.newaxis]
+            d.dims = ["y", "x"]  # "y" is the new dimension
+            coordx = coordset[0] if coordset is not None else None
+            d.set_coordset(x=coordx, y=None)
+        return d
+
     def _get_masked_rc(self, mask):
         # Get the mask by row and columns.
         # -------------------------------
@@ -400,9 +412,19 @@ class AnalysisConfigurable(MetaConfigurable):
         # the following however assumes that entire rows or columns are masked,
         # not only some individual data (if this is what you wanted, this
         # will fail)
-
         if not hasattr(X, "mask") or not np.any(X._mask):
             return X
+
+        # It is safe to transform eventual LinearCoord to normal Coord
+        # as when mask is removed it is obviously no more linear!!!
+        # Todo: This will not be needed anymore when I will remove LinearCoord
+        #   (in a next future, I hope
+        if X.coordset is not None:
+            from spectrochempy.core.dataset.coord import Coord, LinearCoord
+
+            for i, c in enumerate(X.coordset):
+                if c is not None and isinstance(c, LinearCoord):
+                    X.coordset[i] = Coord(c)
 
         # remove masked rows and columns
         masked_rows, masked_columns = self._get_masked_rc(X._mask)
@@ -509,16 +531,10 @@ class AnalysisConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         # validation fired when self._X is assigned
         X = proposal.value
+
         # for the following we need X with two dimensions
         # So let's generate the un-squeezed X
-        if X.ndim == 1:
-            coordset = X.coordset
-            X._data = X._data[np.newaxis]
-            if np.any(X.mask):
-                X._mask = X._mask[np.newaxis]
-            X.dims = ["y", "x"]  # "y" is the new dimension
-            coordx = coordset[0] if coordset is not None else None
-            X.set_coordset(x=coordx, y=None)
+        X = self._make_unsqueezed_dataset(X)
 
         # as in fit methods we often use np.linalg library, we cannot handle directly
         # masked data (so we remove them here and they will be restored at the end of
@@ -526,8 +542,10 @@ class AnalysisConfigurable(MetaConfigurable):
         # store the original shape as it will be eventually modified as welle- as the
         # original coordset
         self._X_shape = X.shape
+
         # store the mask because it may be destroyed
         self._X_mask = X._mask.copy()
+
         # and the original coordset
         self._X_coordset = copy(X._coordset)
 
@@ -1053,21 +1071,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
             clear=False, ls="dashed", cmap=None, color=colXhat
         )
         ax = (res - res.min() - mad).plot(clear=False, cmap=None, color=colRes)
-
-        #             color=colXhat)
-        #     ax.plot(res.T.masked_data - 1.2 * ma,
-        #             color=colRes)
-
-        # if X.x is not None and X.x.data is not None:
-        #     ax.plot(X.x.data, X_hat.T.masked_data - ma, '-',
-        #             color=colXhat)
-        #     ax.plot(X.x.data, res.T.masked_data - 1.2 * ma, '-',
-        #             color=colRes)
-        # else:
-        #     ax.plot(X_hat.T.masked_data - ma,
-        #             color=colXhat)
-        #     ax.plot(res.T.masked_data - 1.2 * ma,
-        #             color=colRes)
         ax.autoscale(enable=True, axis="y")
         ax.set_title(f"{self.name} plot of merit")
         ax.yaxis.set_visible(False)
