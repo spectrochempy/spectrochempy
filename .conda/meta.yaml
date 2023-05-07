@@ -45,7 +45,7 @@ requirements:
     - jinja2
     - matplotlib
     - numba
-    - numpy=1.23.5
+    - numpy
     - numpydoc>=1.2
     - pint
     - pytz
