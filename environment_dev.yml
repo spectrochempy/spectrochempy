@@ -45,17 +45,19 @@ dependencies:
     - scikit-learn
     - xlrd
     - pyyaml
-    - ipywidgets=8.0.4
-    - widgetsnbextension=4.0.5
-    - jupyterlab_widgets=3.0.5
-    - ipympl
+
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
+
     # Jupyter lab
     - jupyterlab
     - nodejs
+    - ipywidgets=8.0.4
+    - widgetsnbextension=4.0.5
+    - jupyterlab_widgets=3.0.5
+    - ipympl
 
     # TEST dependencies
     # ----------------
@@ -67,7 +69,8 @@ dependencies:
     - pyfakefs
     - pep8-naming
     - xarray
-# DEV dependencies
+
+    # DEV dependencies
     # ----------------
     # From here, the dependencies are essentially for development.
     # They should not be necessary for the user of  spectrochempy.
@@ -90,5 +93,3 @@ dependencies:
     - conda-verify
     - anaconda-client
     - numpydoc>=1.2
-
-#EOF

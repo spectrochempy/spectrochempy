@@ -29,12 +29,12 @@ traitlets
 scikit-learn
 xlrd
 pyyaml
-ipywidgets==8.0.4
-widgetsnbextension==4.0.5
-jupyterlab_widgets==3.0.5
-ipympl
 setuptools
 setuptools_scm
 gitpython
 jupyterlab
 nodejs
+ipywidgets==8.0.4
+widgetsnbextension==4.0.5
+jupyterlab_widgets==3.0.5
+ipympl
