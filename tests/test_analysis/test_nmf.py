@@ -65,10 +65,10 @@ def test_nmf():
     nmf_ = skl_NMF(n_components=4, random_state=123)
     nmf_.fit(ds_)
 
-    # compare scpy and sklearn FastICA attributes
+    # compare scpy and sklearn NMF attributes
     assert_almost_equal(nmf.components.data, nmf_.components_)
 
-    # compare scpy and sklearn FastICA methods
+    # compare scpy and sklearn NMF methods
     U = nmf.transform()
     U_ = nmf_.transform(ds_)
     assert_almost_equal(U.data, U_)
