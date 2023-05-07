@@ -56,20 +56,19 @@ requirements:
     - scikit-learn
     - xlrd
     - pyyaml
-    - ipywidgets=8.0.4
-    - widgetsnbextension=4.0.5
-    - jupyterlab_widgets=3.0.5
-    - ipympl
+
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
+
     # Jupyter lab
     - jupyterlab
     - nodejs
-
-
-#EOF
+    - ipywidgets=8.0.4
+    - widgetsnbextension=4.0.5
+    - jupyterlab_widgets=3.0.5
+    - ipympl
 
 
   test:

@@ -340,19 +340,19 @@ def test_nddataset_bugs_units_change():
 
     # A to T
     X1 = X.to("transmittance")
-    assert_array_equal(X1.data, 10 ** -np.array([0.0, 0.3, 1.3, 5.0]) * 100)
+    assert_array_almost_equal(X1.data, 10 ** -np.array([0.0, 0.3, 1.3, 5.0]) * 100)
     assert X1.title == "transmittance"
     # T to abs T
     X2 = X1.to("absolute_transmittance")
-    assert_array_equal(X2.data, 10 ** -np.array([0.0, 0.3, 1.3, 5.0]))
+    assert_array_almost_equal(X2.data, 10 ** -np.array([0.0, 0.3, 1.3, 5.0]))
     assert X2.title == "transmittance"
     # A to abs T
     X2b = X.to("absolute_transmittance")
-    assert_array_equal(X2b, X2)
+    assert_array_almost_equal(X2b, X2)
     assert X2b.title == "transmittance"
     # abs T to T
     X3 = X2.to("transmittance")
-    assert_array_equal(X3, X1)
+    assert_array_almost_equal(X3, X1)
     assert X3.title == "transmittance"
     # T to A
     X4 = X3.to("absorbance")

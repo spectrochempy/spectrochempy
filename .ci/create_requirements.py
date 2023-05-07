@@ -175,7 +175,7 @@ if __name__ == "__main__":
         TEST=False, DEV=False, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
     )
     filename = repo_path / "environment.yml"
-    filename.write_text(out_header + out_dependencies)
+    filename.write_text(out_header + out_dependencies.rstrip() + "\n")
 
     generate_pip_requirements(filename, repo_path / "requirements" / "requirements.txt")
 
@@ -187,7 +187,7 @@ if __name__ == "__main__":
         TEST=True, DEV=False, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
     )
     filename = repo_path / "environment_test.yml"
-    filename.write_text(out_test_header + out_test_dependencies)
+    filename.write_text(out_test_header + out_test_dependencies.rstrip() + "\n")
 
     generate_pip_requirements(
         filename, repo_path / "requirements" / "requirements_test.txt"
@@ -201,7 +201,7 @@ if __name__ == "__main__":
         TEST=True, DEV=True, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
     )
     filename = repo_path / "environment_dev.yml"
-    filename.write_text(out_dev_header + out_dev_dependencies)
+    filename.write_text(out_dev_header + out_dev_dependencies.rstrip() + "\n")
 
     generate_pip_requirements(
         filename, repo_path / "requirements" / "requirements_dev.txt"
@@ -209,6 +209,6 @@ if __name__ == "__main__":
 
     # generate meta.yaml for conda recipe ..............................................
     out_meta = file_meta.read_text("utf-8")
-    out_meta = out_meta.replace("DEPENDENCIES", out_dependencies)
+    out_meta = out_meta.replace("DEPENDENCIES", out_dependencies.rstrip() + "\n")
     filename = repo_path / ".conda" / "meta.yaml"
     filename.write_text(out_meta)
