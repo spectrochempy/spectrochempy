@@ -34,18 +34,21 @@ be created or updated accordingly
     - scikit-learn
     - xlrd
     - pyyaml
-    - ipywidgets=8.0.4
-    - widgetsnbextension=4.0.5
-    - jupyterlab_widgets=3.0.5
-    - ipympl
+
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
+
     # Jupyter lab
     - jupyterlab
     - nodejs
-{% if TEST %}
+    - ipywidgets=8.0.4
+    - widgetsnbextension=4.0.5
+    - jupyterlab_widgets=3.0.5
+    - ipympl
+{%- if TEST %}
+
     # TEST dependencies
     # ----------------
     - coverage
@@ -57,7 +60,8 @@ be created or updated accordingly
     - pep8-naming
     - xarray
 {%- endif %}
-{% if DEV -%}
+{%- if DEV %}
+
     # DEV dependencies
     # ----------------
     # From here, the dependencies are essentially for development.
@@ -81,5 +85,4 @@ be created or updated accordingly
     - conda-verify
     - anaconda-client
     - numpydoc>=1.2
-{% endif %}
-#EOF
+{%- endif %}

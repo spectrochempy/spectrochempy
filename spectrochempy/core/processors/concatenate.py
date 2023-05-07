@@ -144,7 +144,7 @@ def concatenate(*datasets, **kwargs):
                     coords[dim]._labels = np.concatenate(labels)
             elif coords[dim]._implements("CoordSet"):
                 if labels != []:
-                    labels = np.array(labels)
+                    labels = np.array(labels, dtype=object)
                     for i, coord in enumerate(coords[dim]):
                         if labels[:i].size != 0:
                             coord._labels = np.concatenate(
