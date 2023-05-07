@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -22,8 +22,9 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.8
+#     version: 3.10.10
 # ---
+
 # %% [markdown]
 # # Baseline corrections
 #
@@ -71,11 +72,8 @@ _ = Xdiff.plot()
 # analysis - constist in shifting
 # the spectra or removing a linear trend. This is done using the detrend() method,
 # which is a wrapper of the [
-# detrend() method]
-# (https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.detrend.html)
-# from the [
-# scipy.signal](https://docs.scipy.org/doc/scipy/reference/signal.html)
-# module to which we refer the interested reader.
+# scipy.signal.detrend](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.detrend.html)
+# method to which we refer the interested reader.
 
 # %% [markdown]
 # ### Linear trend
@@ -127,142 +125,196 @@ _ = scp.abc(X).plot()
 # the baseline
 
 # %%
-ranges = [5900.0, 5400.0], 4550.0, [4500.0, 4000.0], [2100.0, 2000.0], [1550.0, 1555.0]
+ranges = (
+    [5900.0, 5400.0],
+    4550.0,
+    [4230.0, 4330.0],
+    3780,
+    [2100.0, 2000.0],
+    [1550.0, 1555.0],
+    1305.0,
+    840.0,
+)
 
 # %% [markdown]
 # After selection of the baseline ranges, the baseline correction can be made using a
-# sequence of 2 commands:
+# sequence of simple commands:
 #
 # 1. Initialize an instance of Baseline
 
 # %%
-blc = scp.Baseline(X)
+blc = scp.Baseline()
 
 # %% [markdown]
-# 2. compute baseline other the ranges
+# 2. Set the range parameter
 
 # %%
-Xcorr = blc.compute(ranges)
-Xcorr
+blc.ranges = ranges
 
 # %% [markdown]
-# * plot the result (blc.corrected.plot() would lead to the same result)
+# 3. Fit baseline on the dataset
 
 # %%
-_ = Xcorr.plot()
+_ = blc.fit(X)
+
+# %% [markdown]
+# 4. Plot the baseline corrected (using the transform method)
+
+# %%
+_ = blc.transform().plot()
+
+# %% [markdown]
+# <div class='alert alert-info'>
+# <b>Note</b>
+#
+# One can also use the property `corrected` instead of the method `transform()`,
+# both giving equivalent results.
+#
+# ```python
+# _ = blc.corrected.plot()
+# ```
+
+# %% [markdown]
+# Obviously, one can restrict the analysis to one of the spectra only. Below we fit a
+# baseline and display the results on the same plot:
+
+# %%
+X1 = X[0]
+_ = blc.fit(X1)
+
+prefs.figure.figsize = (7, 4)
+_ = X1.plot(label="X")
+_ = blc.baseline.plot(label="Baseline", clear=False, cmap=None, color="red")
+ax = blc.corrected.plot(label="X Corrected", clear=False, color="green", legend="best")
+
+blc.show_regions(ax)
+
+# %% [markdown]
+# To examine which ranges has been used, use the `used_ranges` attribute. Note, the
+# extrema have been automatically added.
+
+# %%
+blc.used_ranges
+
+# %% [markdown]
+# To avoid this, set the `include_limits` parameter to False (note it is necessary to
+# use a new instance of Baseline, else limits will not be removed from those previously
+# set):
+
+# %%
+blc.include_limits = False
+
+_ = blc.fit(X1)
+
+prefs.figure.figsize = (7, 4)
+_ = X1.plot(label="X")
+_ = blc.baseline.plot(label="Baseline", clear=False, cmap=None, color="red")
+_ = blc.corrected.plot(
+    label="X Corrected", clear=False, color="green", legend="best", ylim=(-0.1, 6)
+)
+
+blc.used_ranges
+
+# %% [markdown]
+# Clearly in this case it is not a very good idea. See the divergent part around 6000 cm$^{-1}$.
 
 # %% [markdown]
 # ### Interpolation method
 #
 #
-# The previous correction was made using the default parameters for the interpolation
-# ,i.e. an interpolation using cubic Hermite spline interpolation:
+# The previous baseline fitting was made using the default parameters for the interpolation, *i.e.*, an interpolation using cubic Hermite spline interpolation:
 # `interpolation='pchip'` (`pchip` stands for
 # **P**iecewise **C**ubic **H**ermite
-# **I**nterpolating **P**olynomial). This option triggers the use of
+# **I**nterpolating **P**olynomial).
+
+# %%
+blc.interpolation
+
+# %% [markdown]
+# This option triggers the use of
 # [scipy.interpolate.PchipInterpolator()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html)
 # to which we refer the interested readers. The other interpolation method is the
-# classical polynomial interpolation (`interpolation='polynomial'` ) in which case the
-# order can also be set (e.g. `order=3` , the default value being 6).
+# classical polynomial interpolation (interpolation=`'polynomial'` ) in which case the
+# order can also be set (*e.g.*, `order=3` , the default value being 6).
 # In this case, the base methods used for the interpolation are those of the
 # [polynomial module](
 # https://numpy.org/doc/stable/reference/routines.polynomials.polynomial.html)
 # of spectrochempy, in particular the
-# [polyfit()](
-# https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.polyfit.html#numpy.polynomial.polynomial.polyfit) method.
+# [numpy.polynomial.polynomial.polyfit()](
+# https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.polyfit.html#numpy.polynomial.polynomial.polyfit)
+# method.
 #
-# For instance:
-
-# %% [markdown]
-# First, we put the ranges in a list
+# For the demonstration, we use the same `ranges` definition as above.
 
 # %%
-ranges = [[5900.0, 5400.0], [4000.0, 4500.0], [2100.0, 2000.0], [1550.0, 1555.0]]
+blc = scp.Baseline()
+blc.ranges = ranges
+blc.include_limits = True
+blc.interpolation = "polynomial"
+blc.order = 6
 
 # %% [markdown]
-# <div class='alert alert-warning'>
-# <b>Warning</b>
-#
-# if you use a tuple to define the sequences of ranges:
-#
-# ```ipython3
-# ranges = [5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]
-# ```
-#
-# or
-#
-# ```ipython3
-# ranges = ([5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.])
-# ```
-#
-# then you can call `compute` by directly pass the ranges tuple, or you can unpack
-# it as below.
-#
-# ```ipython3
-# blc.compute(ranges, ....)
-# ```
-#
-#
-# if you use a list instead of tuples:
-#
-# ```ipython3
-# ranges = [[5900.0, 5400.0], [4000., 4500.], [2100., 2000.0], [1550., 1555.]]
-# ```
-#
-# then you **MUST UNPACK** the element when calling `compute`:
-#
-# ```ipython3
-# blc.compute(*ranges, ....)
-# ```
-#
-#
-# </div>
+# Now as before we fit the baseline on X
 
 # %%
-blc = scp.Baseline(X)
-blc.compute(*ranges, interpolation="polynomial", order=6)
+_ = blc.fit(X)
 
 # %% [markdown]
-# The `corrected` attribute contains the corrected NDDataset.
+# and display the corrected NDDataset.
 
 # %%
 _ = blc.corrected.plot()
 
 # %% [markdown]
-# ### Multivariate method
+# As before, we display the baseline for one of the spectra:
 #
-# The `method` option defines whether the selected baseline regions of the spectra
-# should be taken 'as is'
-# this is the default `method='sequential'` ), or modeled using a multivariate
-# approach (`method='multivariate'` ).
-#
-# The `'multivariate'` option is useful when the signal‐to‐noise ratio is low
-# and/or when the baseline changes in
-# various regions of the spectrum are correlated. It consist in (i) modeling the
-# baseline regions by a principal
-# component analysis (PCA), (ii) interpolate the loadings of the first principal
-# components over the whole spectral
-# and (iii) modeling the spectra baselines from the product of the PCA scores and
-# the interpolated loadings.
-# (for detail: see [Vilmin et al. Analytica Chimica Acta 891
-# (2015)](http://dx.doi.org/10.1016/j.aca.2015.06.006)).
-#
-# If this option is selected, the user should also choose `npc` , the number of
-# principal components used to model the
-# baseline. In a sense, this parameter has the same role as the `order` parameter,
-# except that it will affect how well
-# the baseline fits the selected regions, but on *both dimensions: wavelength
-# and acquisition time*. In particular a
-# large value of `npc` will lead to overfit of baseline variation with time and will
-# lead to the same result as the
-# `sequential` method while a too small `value` would miss important principal
-# component underlying the baseline change
-# over time. Typical optimum values are `npc=2` or `npc=3` (see Exercises below).
 
 # %%
-blc = scp.Baseline(X)
-blc.compute(*ranges, interpolation="pchip", method="multivariate", npc=2)
+X1 = X[0]
+_ = blc.fit(X1)
+
+prefs.figure.figsize = (7, 4)
+_ = X1.plot(label="X")
+_ = blc.baseline.plot(label="Baseline", clear=False, cmap=None, color="red")
+_ = blc.corrected.plot(
+    label="X Corrected", clear=False, color="green", legend="best", ylim=(-0.5, 4)
+)
+
+blc.used_ranges
+
+# %% [markdown]
+# ### Multivariate method
+#
+# The `method` option defines whether the baseline regions selected in the spectra should be taken "as is" (this is the default method `"sequential"`) or modeled using a multivariate model (method=`'multivariate'`).
+#
+# The `'multivariate'` option is useful when the signal to noise ratio is low
+# and/or when baseline changes in different regions of the spectrum are
+# different regions of the spectrum are correlated. It consists of (i) modeling the baseline regions
+# by a principal component analysis (PCA), (ii) interpolating the loadings of the first
+# principal components over the whole spectrum
+# and (iii) model the baselines of the spectra from the product of the PCA scores and the interpolated loadings.
+# (For details: see [Vilmin et al. Analytica Chimica Acta 891
+# (2015)](http://dx.doi.org/10.1016/j.aca.2015.06.006)).
+#
+# If this option is selected, the user must also set the `n_components` parameter,
+# i.e. the number of principal components used to model the baseline.
+# In a sense, this parameter has the same role as the `order` parameter, except that it affects
+# how the baseline fits the selected regions on *both dimensions: wavelength and acquisition time*.
+# In particular, a large value of `n_components` will lead to an overfitting
+# of the baseline variation with time and lead to the same result as the
+# while a value that is too small may fail to detect a main component underlying the baseline variation over time.
+# Typical optimal values are `n_components=2` or `n_components=3` (see exercises below).
+#
+# Let's fit the baseline using the `multivariate` method:
+
+# %%
+blc.interpolation = "pchip"
+blc.method = "multivariate"
+blc.n_components = 3
+
+blc.fit(X)
+
 _ = blc.corrected.plot()
 
 # %% [markdown]
@@ -272,9 +324,13 @@ _ = blc.corrected.plot()
 # the cell:
 
 # %%
+# Create a baseline instance and give it a name (here basc)
+# ---------------------------------------------------------
+basc = scp.Baseline()
+
 # user defined parameters
 # -----------------------
-ranges = (
+basc.ranges = (  # ranges can be pair or single values
     [5900.0, 5400.0],
     [4000.0, 4500.0],
     4550.0,
@@ -283,20 +339,18 @@ ranges = (
     [1250.0, 1300.0],
     [800.0, 850.0],
 )
-interpolation = "pchip"  # choose 'polynomial' or 'pchip'
-order = 5  # only used for 'polynomial'
-method = "sequential"  # choose 'sequential' or 'multivariate'
-npc = 3  # only used for 'multivariate'
+basc.interpolation = "pchip"  # choose 'polynomial' or 'pchip'
+basc.order = 5  # only used for 'polynomial'
+basc.method = "sequential"  # choose 'sequential' or 'multivariate'
+basc.n_components = 3  # only used for 'multivariate'
 
-# code: compute baseline, plot original and corrected NDDatasets and ranges
-# --------------------------------------------------------------------------------------
-blc = scp.Baseline(X)
-Xcorr = blc.compute(
-    *ranges, interpolation=interpolation, order=order, method=method, npc=npc
-)
+# fit baseline, plot original and corrected NDDatasets and ranges
+# ---------------------------------------------------------------
+_ = basc.fit(X)
+Xc = basc.corrected
 
-axes = scp.multiplot(
-    [X, Xcorr],
+axs = scp.multiplot(
+    [X, Xc],
     labels=["Original", "Baseline corrected"],
     sharex=True,
     nrow=2,
@@ -304,7 +358,7 @@ axes = scp.multiplot(
     figsize=(7, 6),
     dpi=96,
 )
-blc.show_regions(axes["axe21"])
+basc.show_regions(axs["axe21"])
 
 # %% [markdown]
 # ### Widget for "advanced" baseline corrections

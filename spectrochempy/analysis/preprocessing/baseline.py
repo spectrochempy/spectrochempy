@@ -39,11 +39,19 @@ class Baseline(AnalysisConfigurable):
     :term:`n_features`\ ).
 
     Two general methods are proposed:
+
     - A general ``'sequential'`` method which can be used for both 1D and 2D datasets.
-      It may use a classical ``polynomial fit``, ``spline interpolation``, or ...
       with separate fitting of each observation row (spectrum).
 
-    - A ``'multivariate'`` method which can only be applied to 2D datasets.
+    - A ``'multivariate'`` method which can only be applied to 2D datasets. With this
+      method the 2D dataset is first dimensionnaly reduced into several principal
+      components using the classical :term:`SVD` algorithm.
+      Each components is thus fitted before an inverse transform to recover the
+      original data with baseline correction.
+
+    For both methods, various interpolation algorithm can be used to estimate the
+    baseline. It may be a classical ``polynomial fit``, ``spline interpolation``, or ...
+
 
     # TODO: complete this description
 
@@ -94,12 +102,12 @@ class Baseline(AnalysisConfigurable):
 
     interpolation = tr.CaselessStrEnum(
         ["polynomial", "pchip"],
-        default_value="polynomial",
+        default_value="pchip",
         help="Interpolation method.",
     ).tag(config=True)
 
     order = tr.Integer(
-        default_value=1,
+        default_value=6,
         min=1,
         help="Polynom order to use for polynomial interpolation.",
     ).tag(config=True)
@@ -114,17 +122,19 @@ class Baseline(AnalysisConfigurable):
     ranges = tr.List(
         tr.Union((tr.List(minlen=2, maxlen=2), tr.Float())),
         default_value=[],
-        help="A sequence of features values or feature's ranges which belongs to the "
-        "baseline. Feature ranges are defined as a list of 2 numerical values "
-        "(start, end). Single values are internally converted to a "
-        "pair (start=value, end=start). The limits of the spectra are automatically "
-        "added during the fit process unless the `remove_limit` parameter is "
-        "`True`\ ",
+        help="A sequence of features values or feature's regions which are assumed to "
+        "belong to the baseline. Feature ranges are defined as a list of 2 "
+        "numerical values (start, end). Single values are internally converted to "
+        "a pair (start=value, end=start). The limits of the spectra are "
+        "automatically added during the fit process unless the `remove_limit` "
+        "parameter is `True`\ ",
     ).tag(config=True)
 
-    remove_limit = tr.Bool(
-        default_value=False, help="whether to include the features limits to ranges"
-    )
+    include_limits = tr.Bool(
+        default_value=True,
+        help="Whether to automatically include the features limits "
+        "to the specified ranges.",
+    ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
     # Runtime parameters
@@ -133,6 +143,7 @@ class Baseline(AnalysisConfigurable):
         help="The dataset containing only the sections " "corresponding to _ranges"
     )
     _ranges = tr.List(help="The actual list of ranges after trim and clean-up")
+    _extrema_added_to_ranges = tr.Bool(False)
 
     # ----
     corrected = NDDatasetType()
@@ -140,7 +151,7 @@ class Baseline(AnalysisConfigurable):
     dim = tr.Unicode("")
     zoompreview = tr.Float(1.0)
     figsize = tr.Tuple((7, 5))
-    sps = tr.List()
+    _sps = tr.List()
 
     def __init__(
         self,
@@ -194,14 +205,23 @@ class Baseline(AnalysisConfigurable):
         # clean the result (reorder and suppress overlap)
         return trim_ranges(*ranges)
 
-    @tr.observe("_X", "_ranges")
+    @tr.observe("_X", "ranges", "include_limits")
     def _preprocess_as_X_or_ranges_changed(self, change):
-
         # set X and ranges using the new or current value
-        X = change.new if change.name == "_X" else self._X
-        ranges = change.new if change.name == "ranges" else self.ranges
+        X = None
+        if change.name == "_X":
+            X = change.new
+        elif self._fitted:
+            X = self._X
 
-        if not self.remove_limit:
+        ranges = change.new if change.name == "ranges" else self.ranges.copy()
+        if X is None:
+            # not a lot to here
+            # just return after cleaning ranges
+            self._ranges = ranges = trim_ranges(*ranges)
+            return
+
+        if self.include_limits and X is not None:
             # be sure to extend ranges with the extrema of the x-axis
             # (it will not make a difference if this was already done before)
             lastcoord = X.coordset[X.dims[-1]]  # we have to take into account the
@@ -340,6 +360,16 @@ class Baseline(AnalysisConfigurable):
         """Dataset with baseline removed."""
         return self.transform()
 
+    @_docstring.dedent
+    def parameters(self, default=False):
+        """
+        %(MetaConfigurable.parameters_doc)s
+        """
+        d = super().parameters(default)
+        if not default:
+            d.ranges = self._ranges
+        return d
+
     @property
     def used_ranges(self):
         """
@@ -350,18 +380,18 @@ class Baseline(AnalysisConfigurable):
         """
         return self._ranges
 
+    def show_regions(self, ax):
+        if hasattr(self, "_sps") and self._sps:
+            for sp in self._sps:
+                sp.remove()
+        self._sps = []
+        self.ranges = list(trim_ranges(*self.ranges))
+        for range in self.ranges:
+            range.sort()
+            sp = ax.axvspan(range[0], range[1], facecolor="#2ca02c", alpha=0.5)
+            self._sps.append(sp)
 
-#     def show_regions(self, ax):
-#         if self.sps:
-#             for sp in self.sps:
-#                 sp.remove()
-#         self.sps = []
-#         self.ranges = list(trim_ranges(*self.ranges))
-#         for x in self.ranges:
-#             x.sort()
-#             sp = ax.axvspan(x[0], x[1], facecolor="#2ca02c", alpha=0.5)
-#             self.sps.append(sp)
-#
+
 #     def run(self, *ranges, **kwargs):
 #         """
 #         Interactive version of the baseline correction.

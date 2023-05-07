@@ -25,15 +25,16 @@ class BaselineCorrector:
     """
     Launch a GUI for baseline corrections.
 
-    Wrapper of Baseline(X), with widgets for dataset slicing,
+    Wrapper of Baseline, with widgets for dataset slicing,
     input parameters and graphical output.
     Should be run in jupyter notebook (does not always run properly in jupyter lab)
     with the widget backend (magic `%matplotlib widget` ).
 
     Parameters
     ----------
-    X : `NDDataset`\, default: None
-        The NDDataset to process. If None, an upload button can be used to load data.
+    X : `NDDataset`\ , default: `None`
+        The `NDDataset` to process. If `None`, an upload button can be used to load
+        data.
     initial_ranges : list, optional, default: None
         The initial regions where to compute the baseline. If not given, 5% on each
         side of the spectra will be taken as a starting range's list.
@@ -69,7 +70,7 @@ class BaselineCorrector:
       format. In both dimensions, coordinates or indexes
       can be used (for example, [3000.0::2] or [:100:5] are valid entries).
     - `Method` and `Interpolation` dropdown fields are self explaining,
-      see Baseline() for details.
+      see `Baseline`\  for details.
     - Ranges should be entered as a series of intervals or wavenumbers, e.g.
 
       ```
@@ -106,7 +107,9 @@ class BaselineCorrector:
         self._save_button.on_click(self._save_clicked)
 
         # Parameters widgets
-        self._npc_slider = widgets.IntSlider(description="N pc", value=1, min=1, max=5)
+        self._npc_slider = widgets.IntSlider(
+            description="N components", value=1, min=1, max=5
+        )
         self._order_slider = widgets.IntSlider(
             description="Order", layout=Layout(width="350px"), value=1, min=1, max=6
         )
@@ -228,15 +231,17 @@ class BaselineCorrector:
                 ranges = _round_ranges(new_ranges)
                 self._ranges_control.value = _ranges_to_str(ranges)
 
-            blc = Baseline(self.original)
-            self.corrected = blc.compute(
-                *ranges,
-                interpolation=self._interpolation_selector.value,
-                order=self._order_slider.value,
-                method=self._method_selector.value,
-                npc=self._npc_slider.value,
-            )
-            self.baseline = self.original - self.corrected
+            blc = Baseline()
+            blc.ranges = ranges
+            blc.interpolation = self._interpolation_selector.value
+            blc.order = self._order_slider.value
+            blc.method = self._method_selector.value
+            blc.n_components = self._npc_slider.value
+
+            blc.fit(self.original)
+
+            self.corrected = blc.transform()
+            self.baseline = blc.baseline
 
             self._output.clear_output(True)
             with self._output:
