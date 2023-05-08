@@ -34,10 +34,124 @@
 # the user is expected to have read the [Import](../importexport/import.ipynb)
 # and [Import IR](../importexport/importIR.ipynb) tutorials.
 
+# %% [markdown]
+# Spectrochempy offers two approaches to perform baseline corrections. The first one is to use methods of the NDDataset object directly or via the SpectroChemPy API. The second one is the use of a Baseline object which allows to perform all the correction operations with a maximum of flexibility and settings.
+
+# %% [markdown]
+# ## 1. Baseline correction using NDDataset/API methods
+
+# %% [markdown]
+# Let's focus on the first approach first.
+#
+# As usual we start by importing the SpectroChemPy API
+
 # %%
 import spectrochempy as scp
 
-# %matplotlib inline
+# %% [markdown]
+# As an example, we can use a dataset consisting of 80 samples of corn measured on a NIR spectrometers. This dataset (and others) can be loaded from http://www.eigenvector.com.
+
+# %%
+A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")[4]
+
+# %% [markdown]
+# Add some label for a better reading of the data axis
+
+# %%
+A.title = "absorbance"
+A.units = "a.u."
+A.x.title = "Wavelength"
+A.x.units = "nm"
+
+# %% [markdown]
+# Now plot the original dataset A:
+
+# %%
+prefs = A.preferences
+prefs.figure.figsize = (7, 3)
+prefs.colormap = "magma_r"
+_ = A.plot()
+
+# %%
+A[0, 1856.0].data, A[0, 378].data
+
+# %% [markdown]
+# ### Detrending
+#
+# It is quite clear that this spectrum series has an increasing trend with both a vertical shift and a drift.
+#
+# The `detrend` method can help to remove such trends.
+
+# %% [markdown]
+# #### Constant trend
+#
+# When the trend is simply a shift one can subtract the mean absorbance to each spectrum.
+
+# %%
+Ac = A.detrend(order="constant")
+_ = Ac.plot()
+
+# %% [markdown]
+# #### Linear trend
+# But here the trend is clearly closer to a linear trend. So we can use a linear correction
+# with `A.detrend(order="linear")` or simply `A.detrend()` as "linear" is the default.
+
+# %%
+Al = A.detrend()
+_ = Al.plot()
+
+# %% [markdown]
+# #### Polynomial trend
+#
+# If a higher degree of polynomial is necessary, it is possible to use a nonnegative integer scalar to define order (degree).
+# Note that for degree 2 and 3, the "quadratic" and "cubic" keywords are also available to define 2 and 3-degree of polynomial.
+
+# %%
+Ap = A.detrend(order=2)
+_ = Ap.plot()
+
+# %% [markdown]
+# #### Detrend independently on several data segment
+#
+# For this we must define a vector (`bp`) which contains the location of the break-points, which determine the limits of each segments.
+#
+# For example, let's try on a single spectrum for clarity:
+
+# %%
+# without bp
+A1 = A[0]
+Ab = A1.detrend()
+_ = Ab.plot()
+A1.plot(clear=False)
+ax = (A1 - Ab).plot(clear=False, cmap=None, color="red", ls=":")
+_ = ax.set_ylim([-0.3, 0.8])
+
+# %% [markdown]
+# <div class="alert alert-info">
+# <b>Note</b>
+#
+#  we use float number to define breakpoint as coordinate.
+#  Integer number would mean that we use indice starting at 0 (not the same thing!).
+#  in this case, indice 1856 does not exist as the size of the x axis is 700.</div>
+
+# %%
+# with bp
+bp = [1856.0]
+Ab = A1.detrend(bp=bp)
+_ = Ab.plot()
+A1.plot(clear=False)
+ax = (A1 - Ab).plot(clear=False, cmap=None, color="red", ls=":")
+_ = ax.set_ylim([-0.3, 0.8])
+
+# %% [markdown]
+# ### Automatic linear baseline correction `abc`
+#
+# When the baseline to remove is a simple linear correction, one can use `abc`.
+# This performs an automatic baseline correction. This is very close to detrend(), but use the spectra limit to fit the baseline.
+
+# %%
+Aa = A.abc()
+_ = Aa.plot()
 
 # %% [markdown]
 # Now let's import and plot a typical IR dataset which was recorded during the
@@ -95,9 +209,6 @@ _ = X.detrend(order="constant").plot()
 _ = X.detrend(order=2).plot()
 
 # %% [markdown]
-# ## Automatic linear baseline correction `abc`
-
-# %% [markdown]
 # When the baseline to remove is a simple linear correction, one can use `abc` .
 # This performs an automatic baseline correction.
 
@@ -106,6 +217,8 @@ _ = scp.abc(X).plot()
 
 # %% [markdown]
 # ## Advanced baseline correction using the Baseline class processor
+#
+# The `Baseline` class processor props
 #
 # 'Advanced' baseline correction basically consists for the user to choose:
 #
@@ -419,3 +532,5 @@ out.original, out.corrected, out.baseline
 # - simulate noisy spectra with baseline drifts and compare the performances of
 # `multivariate` vs `sequential` methods
 # </div>
+
+# %%

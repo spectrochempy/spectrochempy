@@ -61,7 +61,7 @@ def basc(dataset, *ranges, **kwargs):
     return blc.transform()
 
 
-def detrend(dataset, order="linear", bp=None, **kwargs):
+def detrend(dataset, order="linear", bp=[], **kwargs):
     """
     Remove polynomial trend along a dimension from dataset.
 
@@ -74,7 +74,7 @@ def detrend(dataset, order="linear", bp=None, **kwargs):
     ----------
     dataset : `NDDataset`
         The input data.
-    order : non-negative `int` or a `str` among ['constant', 'linear', 'quadratic'], optional, default='linear'
+    order : non-negative `int` or a `str` among ['constant', 'linear', 'quadratic', 'cubic'], optional, default='linear'
         The order of the polynomial trend.
 
         * If ``order=0`` or ``'constant'``\ , the mean of data is subtracted to remove

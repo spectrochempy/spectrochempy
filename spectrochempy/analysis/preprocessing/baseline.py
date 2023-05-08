@@ -102,7 +102,10 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True)
 
     order = tr.Union(
-        (tr.Integer(), tr.CaselessStrEnum(["constant", "linear", "quadratic"])),
+        (
+            tr.Integer(),
+            tr.CaselessStrEnum(["constant", "linear", "quadratic", "cubic"]),
+        ),
         default_value=6,
         min=1,
         help="Polynom order to use for polynomial interpolation or detrend.",
@@ -134,7 +137,6 @@ class Baseline(AnalysisConfigurable):
 
     bp = tr.List(
         default_value=[],
-        allow_none=True,
         help="""Breakpoints to define piecewise segments of the data,
 specified as a vector containing coordinate values or indices indicating the location
 of the breakpoints. Breakpoints are useful when you want to compute separate
@@ -170,6 +172,13 @@ baseline/trends for different segments of the data.
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
+    @tr.validate("bp")
+    def _validate_bp(self, proposal):
+        if proposal.value is None:
+            return []
+        else:
+            return sorted(proposal.value)
+
     @tr.validate("n_components")
     def _validate_n_components(self, proposal):
         # n cannot be higher than the size of s
@@ -183,7 +192,9 @@ baseline/trends for different segments of the data.
         # string must be transformed to int
         order = proposal.value
         if isinstance(order, str):
-            order = {"constant": 0, "linear": 1, "quadratic": 2}[order.lower()]
+            order = {"constant": 0, "linear": 1, "quadratic": 2, "cubic": 3}[
+                order.lower()
+            ]
         return order
 
     @tr.validate("ranges")
@@ -338,12 +349,30 @@ baseline/trends for different segments of the data.
         """
         self._fitted = False  # reinit this flag
 
+        # Set X
+        # -----
         # fire the X and _ranges validation and preprocessing.
         self._X = X
 
         # _X_ranges has been computed when X and _ranges were set,
         # but we need increasing order of the coordinates
         self._X_ranges.sort(inplace=True, descend=False)
+
+        # Handling breakpoints
+        # --------------------
+        bpil = [0, self._X.shape[-1] - 1]
+        for bp in self.bp:
+            bpi = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
+            bpil.append(bpil)
+        bpil = sorted(bpil)
+
+        bpstart = 0
+
+        for bpend in bpil[1:]:
+            # loop on segments
+            xb = xbase[bpstart : bpend + 1]
+            yb = ybase[bpstart : bpend + 1]
+
         ybase = self._X_ranges.data
         lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
         xbase = lastcoord.data
