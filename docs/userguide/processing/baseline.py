@@ -37,13 +37,15 @@
 # %%
 import spectrochempy as scp
 
+# %matplotlib inline
+
 # %% [markdown]
 # Now let's import and plot a typical IR dataset which was recorded during the
 # removal of ammonia from a NH4-Y
 # zeolite:
 
 # %%
-X = scp.read_omnic("irdata/nh4y-activation.spg")
+X = scp.read_omnic("irdata/nh4y-activation.spg")[::5]
 X[:, 1290.0:890.0] = scp.MASKED
 
 # %% [markdown]
@@ -67,18 +69,14 @@ Xdiff = X - X[-1]
 _ = Xdiff.plot()
 
 # %% [markdown]
-# ## Detrend
+# ## Detrend  (# TODO replace with data where the effect is more interesting)
 #
 # Other simple baseline corrections - often use in preprocessing prior chemometric
-# analysis - constist in shifting
-# the spectra or removing a linear trend. This is done using the detrend() method,
-# which is a wrapper of the [
-# scipy.signal.detrend](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.detrend.html)
-# method to which we refer the interested reader.
+# analysis - consist in shifting the spectra or removing a trend. This is done using the detrend() method.
 
 # %% [markdown]
 # ### Linear trend
-# Subtract the linear trend of each spectrum (type='linear', default)
+# Subtract the linear trend of each spectrum (This is the default behavior: equivalent to ``X.detrend(order='linear'``))
 
 # %%
 _ = X.detrend().plot()
@@ -88,7 +86,13 @@ _ = X.detrend().plot()
 # Subtract the average absorbance to each spectrum
 
 # %%
-_ = X.detrend(type="constant").plot()
+_ = X.detrend(order="constant").plot()
+
+# %% [markdown]
+# ### Polynomial trend
+
+# %%
+_ = X.detrend(order=2).plot()
 
 # %% [markdown]
 # ## Automatic linear baseline correction `abc`

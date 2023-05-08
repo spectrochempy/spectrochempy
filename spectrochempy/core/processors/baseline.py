@@ -126,7 +126,7 @@ def detrend(dataset, order="linear", bp=None, **kwargs):
     type = kwargs.pop("type", None)
     if type is not None:
         deprecated("type", replace="order", removed="0.7")
-        kwargs["order"] = kwargs.pop("type")
+        order = type
 
     dim = kwargs.pop("dim", None)
     if dim is not None:
@@ -144,7 +144,7 @@ def detrend(dataset, order="linear", bp=None, **kwargs):
     blc.bp = bp
     blc.fit(new)
 
-    return new
+    return blc.transform()
 
 
 def ab(dataset, dim=-1, **kwargs):

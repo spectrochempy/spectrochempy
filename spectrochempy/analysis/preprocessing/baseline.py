@@ -178,6 +178,14 @@ baseline/trends for different segments of the data.
             return npc
         return min(npc, self._X.shape[0])
 
+    @tr.validate("order")
+    def _validate_order(self, proposal):
+        # string must be transformed to int
+        order = proposal.value
+        if isinstance(order, str):
+            order = {"constant": 0, "linear": 1, "quadratic": 2}[order.lower()]
+        return order
+
     @tr.validate("ranges")
     def _validate_ranges(self, proposal):
         ranges = proposal.value
