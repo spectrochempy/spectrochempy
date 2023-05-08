@@ -242,6 +242,24 @@ class Coord(NDMath, NDArray):
     # def values(self):
     #    return super().values
 
+    # def to(self, other, inplace=False, force=False):
+    #
+    #     new = super().to(other, force=force)
+    #
+    #     if inplace:
+    #         self._units = new._units
+    #         self._title = new._title
+    #         self._roi = new._roi
+    #         if not self.linear:
+    #             self._data = new._data
+    #         else:
+    #             self._offset = new._offset
+    #             self._increment = new._increment
+    #             self._linear = new._linear
+    #
+    #     else:
+    #         return new
+
     def to(self, other, inplace=False, force=False):
 
         # The conversion cannot work for LinearCoord
@@ -551,12 +569,27 @@ class Coord(NDMath, NDArray):
             "data",
             "labels",
             "units",
+            "meta",
             "title",
             "name",
             "offset",
             "increment",
             "linear",
             "roi",
+        ]
+        return [
+            "data",
+            "labels",
+            "units",
+            "meta",
+            "title",
+            "name",
+            "offset",
+            "increment",
+            "linear",
+            "size",
+            "roi",
+            "show_datapoints",
         ]
 
     def __getitem__(self, items, **kwargs):

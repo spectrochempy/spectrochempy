@@ -25,11 +25,11 @@ NMRDATA = DATADIR / "nmrdata"
 # )
 def test_readtopspin():
 
-    # A.plot()
+    # read processed()
     nd = scp.read_topspin(nmrdir / "exam2d_HC/3/pdata/1/2rr")
     assert str(nd) == "NDDataset: [quaternion] unitless (shape: (y:1024, x:1024))"
 
-    # Select a TOPSPIN spectra using the full name
+    # read fid
     nd = scp.read_topspin(nmrdir / "topspin_1d/1/fid")
     assert str(nd) == "NDDataset: [complex128] unitless (size: 12411)"
 

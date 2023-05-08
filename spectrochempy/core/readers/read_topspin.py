@@ -18,7 +18,7 @@ from quaternion import as_quat_array
 
 from spectrochempy.core import debug_
 from spectrochempy.core.dataset.baseobjects.meta import Meta
-from spectrochempy.core.dataset.coord import LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.units import ur
 from spectrochempy.extern.nmrglue import read_fid, read_pdata
@@ -851,7 +851,8 @@ def _read_topspin(*args, **kwargs):
             data = datalist
 
     # we now make some rearrangement of the dic to have something more user friendly
-    # we assume that all experiments have similar (important) parameters so that the experiments are compatibles
+    # we assume that all experiments have similar (important) parameters so that the
+    # experiments are compatibles
 
     meta = Meta()  # This is the parameter dictionary
     datatype = path.name.upper() if not processed else f"{data.ndim}D"
@@ -862,7 +863,8 @@ def _read_topspin(*args, **kwargs):
     parmode = int(dic["acqus"].get("PARMODE", data.ndim - 1))
     if parmode + 1 != data.ndim:
         raise KeyError(
-            f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't fit"
+            f"The NMR data were not read properly as the PARMODE+1 parameter "
+            f"({parmode + 1}) doesn't fit"
             f" the actual number of dimensions ({data.ndim})"
         )
 
@@ -998,14 +1000,18 @@ def _read_topspin(*args, **kwargs):
             dw = (1.0 / meta.sw_h[axis]).to("us")
             # coordpoints = np.arange(meta.td[axis])
             # coord = Coord(coordpoints * dw,
-            #             title=f"F{axis + 1} acquisition time")  # TODO: use AQSEQ for >2D data
-            coord = LinearCoord(
-                offset=0.0,
-                increment=dw,
-                units="us",
-                size=meta.td[axis],
-                title=f"F{axis + 1} acquisition time",
-            )
+            #             title=f"F{axis + 1} acquisition time")
+            # TODO: use AQSEQ for >2D data
+            # coord = LinearCoord(
+            #     offset=0.0,
+            #     increment=dw,
+            #     units="us",
+            #     size=meta.td[axis],
+            #     title=f"F{axis + 1} acquisition time",
+            # )
+            size = meta.td[axis]
+            coord = Coord(np.arange(size) * dw)
+            coord.title = f"F{axis + 1} acquisition time"
             coord.meta.larmor = meta.sfo1[axis]
             coords.append(coord)
         else:
@@ -1014,8 +1020,8 @@ def _read_topspin(*args, **kwargs):
             deltaf = -meta.sw_h[axis] / sizem
             first = meta.sfo1[axis] - meta.sf[axis] - deltaf * sizem / 2.0
 
-            # coord = Coord(np.arange(size) * deltaf + first)
-            coord = LinearCoord(offset=first, increment=deltaf, size=size)
+            coord = Coord(np.arange(size) * deltaf + first)
+            # coord = LinearCoord(offset=first, increment=deltaf, size=size)
             coord.meta.larmor = meta.sfo1[axis]  # needed for ppm transformation
             coord.ito("ppm")
             if meta.nuc1 is not None:
@@ -1049,15 +1055,23 @@ def _read_topspin(*args, **kwargs):
 
     # list_meta.append(meta)  # list_coords.append(coords)  # list_data.append(data)
 
-    # # store also the varpars of the series  # varpars = kargs.get('varpars')  # if isinstance(varpars, str):  #  #
-    # varpars = varpars.split()  #     if len(varpars) == 1:  #         # this should be one of the dic parameters  #
-    # lvarpars.append(adic.par[varpars[0]])  # store the variable  #     elif len(varpars) == 2:  #  #
-    # lvarpars.append(adic.par[varpars[0]][  #                             int(varpars[1])])  # store the variable  #
-    # ldates.append(adic.par.DATE)  # and the date  # elif isinstance(varpars, list):  #     # this should be a list
-    # of parameters  #     p = []  #     for var in varpars:  #         p.append(adic.par[var])  #  #
-    # lvarpars.append(p)  # store the variable  #     ldates.append(adic.par.DATE)  # and the date
+    # # store also the varpars of the series  # varpars = kargs.get('varpars')
+    # if isinstance(varpars, str):  #  #
+    # varpars = varpars.split()  #     if len(varpars) == 1:  #
+    # this should be one of the dic parameters  #
+    # lvarpars.append(adic.par[varpars[0]])  # store the variable
+    #     elif len(varpars) == 2:  #  #
+    # lvarpars.append(adic.par[varpars[0]][
+    #                             int(varpars[1])])  # store the variable  #
+    # ldates.append(adic.par.DATE)  # and the date  # elif isinstance(varpars, list):
+    #     # this should be a list
+    # of parameters  #     p = []  #     for var in varpars:
+    #         p.append(adic.par[var])  #  #
+    # lvarpars.append(p)  # store the variable  #     ldates.append(adic.par.DATE)
+    # and the date
 
-    # store temporarily these data  # debug_('data read finished : type : %s' % datatype)  #  #  #  # if len(  #
+    # store temporarily these data
+    # debug_('data read finished : type : %s' % datatype)  #  #  #  # if len(  #
     # list_data) == 1:  # # debug_('One experiment read. Make it the current dataset')
 
 
@@ -1112,7 +1126,8 @@ def _read_topspin(*args, **kwargs):
 #             if not datatype:
 #                 raise KeyError(f"No Bruker binary file could be found in {path}")
 #             elif processed:
-#                 warning_(f"No processed Bruker binary file could be found in {path}. Use fid's.")
+#                 warning_(f"No processed Bruker binary file could be found in {path}.
+#                 Use fid's.")
 #
 #         # we read all parameters file whatever the datatype
 #         npath, par_files = _get_par_files(path, procno, processed)
@@ -1122,9 +1137,11 @@ def _read_topspin(*args, **kwargs):
 #                 dic, data = read(npath, acqus_files=par_files,
 #                                  read_pulseprogram=False)
 #             else:
-#                 dic, data = read_lowmem(npath, acqus_files=par_files, read_pulseprogram=False)
+#                 dic, data = read_lowmem(npath, acqus_files=par_files,
+#                 read_pulseprogram=False)
 #
-#             data = data * np.exp(- 1j * np.pi / 2.)  # -90 phase to be compatible with topspin
+#             data = data * np.exp(- 1j * np.pi / 2.)
+# -90 phase to be compatible with topspin
 #
 #             # look the case when the reshaping was not correct
 #             # for example, this happen when the number
@@ -1164,7 +1181,7 @@ def _read_topspin(*args, **kwargs):
 #             data = _remove_digital_filter(dic, data)
 #
 #         #
-#         ..............................................................................................................
+#         ..............................................................................
 #         # we now make some rearrangement of the dic
 #         # to have something more user friendly
 #         # we assume that all experiments have similar (important)
@@ -1178,7 +1195,8 @@ def _read_topspin(*args, **kwargs):
 #         # we need the ndim of the data
 #         parmode = int(dic['acqus']['PARMODE'])
 #         if parmode + 1 != data.ndim:
-#             raise KeyError(f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't
+#             raise KeyError(f"The NMR data were not read properly as the
+#             PARMODE+1 parameter ({parmode + 1}) doesn't
 #             fit"
 #                            f" the actual number of dimensions ({data.ndim})")
 #
