@@ -244,21 +244,22 @@ class Coord(NDMath, NDArray):
 
     def to(self, other, inplace=False, force=False):
 
-        new = super().to(other, force=force)
-
-        if inplace:
-            self._units = new._units
-            self._title = new._title
-            self._roi = new._roi
-            if not self.linear:
+        # The conversion cannot work for LinearCoord
+        # so, we transform it first to Coord
+        if isinstance(self, LinearCoord):
+            new = Coord(self).to(other, force=force)
+            self.__dict__ = new.__dict__
+            if not inplace:
+                return new
+        else:
+            new = super().to(other, force=force)
+            if inplace:
+                self._units = new._units
+                self._title = new._title
+                self._roi = new._roi
                 self._data = new._data
             else:
-                self._offset = new._offset
-                self._increment = new._increment
-                self._linear = new._linear
-
-        else:
-            return new
+                return new
 
     to.__doc__ = NDArray.to.__doc__
 
