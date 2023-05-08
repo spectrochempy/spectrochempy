@@ -248,18 +248,19 @@ class Coord(NDMath, NDArray):
         # so, we transform it first to Coord
         if isinstance(self, LinearCoord):
             new = Coord(self).to(other, force=force)
-            self.__dict__ = new.__dict__
-            if not inplace:
-                return new
+            self._linear = False
+            self.increment = 1.0
+            self.offset = 0.0
         else:
             new = super().to(other, force=force)
-            if inplace:
-                self._units = new._units
-                self._title = new._title
-                self._roi = new._roi
-                self._data = new._data
-            else:
-                return new
+
+        if inplace:
+            self._units = new._units
+            self._title = new._title
+            self._roi = new._roi
+            self._data = new._data
+        else:
+            return new
 
     to.__doc__ = NDArray.to.__doc__
 
