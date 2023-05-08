@@ -28,7 +28,8 @@
 # %% [markdown]
 # # Baseline corrections
 #
-# This tutorial shows how to make baseline corrections with spectrochempy.
+# This tutorial shows how to make baseline corrections with **SpectroChemPy** using the `Baseline`class processor or equivalent API or dataset methods.
+#
 # As prerequisite,
 # the user is expected to have read the [Import](../importexport/import.ipynb)
 # and [Import IR](../importexport/importIR.ipynb) tutorials.
@@ -100,7 +101,7 @@ _ = X.detrend(type="constant").plot()
 _ = scp.abc(X).plot()
 
 # %% [markdown]
-# ## Advanced baseline correction
+# ## Advanced baseline correction using the Baseline class processor
 #
 # 'Advanced' baseline correction basically consists for the user to choose:
 #

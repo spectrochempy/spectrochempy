@@ -11,6 +11,7 @@ __dataset_methods__ = ["ab", "abc", "dc", "basc"]
 
 import numpy as np
 import scipy.interpolate
+import scipy.signal
 import traitlets as tr
 
 from spectrochempy.analysis._base import (
@@ -38,7 +39,7 @@ class Baseline(AnalysisConfigurable):
     with :term:`n_features` or to 2D dataset with shape (:term:`n_observation`,
     :term:`n_features`\ ).
 
-    Two general methods are proposed:
+    Several methods are proposed:
 
     - A general ``'sequential'`` method which can be used for both 1D and 2D datasets.
       with separate fitting of each observation row (spectrum).
@@ -49,8 +50,21 @@ class Baseline(AnalysisConfigurable):
       Each components is thus fitted before an inverse transform to recover the
       original data with baseline correction.
 
+
     For both methods, various interpolation algorithm can be used to estimate the
-    baseline. It may be a classical ``polynomial fit``, ``spline interpolation``, or ...
+    baseline.
+
+    In the case of a ``'sequential'`` correction, the interpolation options
+    are:
+
+    - ``'abc'`` : A linear baseline is automatically subtracted using the feature limit
+      for reference.
+    - ``'detrend'`` : remove trend from data. Depending on the ``order`` parameter,
+      the detrend can be constant (mean removal), linear (order 1)
+      or quadratic (order 2).
+    - ``'als'`` :
+    - ``'polynomial'`` :
+    - ``'pchip'`` :
 
 
     # TODO: complete this description
@@ -58,38 +72,19 @@ class Baseline(AnalysisConfigurable):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
+
+    See Also
+    --------
+    detrend : `NDDataset` method equivalent to the ``'Baseline.detrend'`` using
+        `scipy.signal.detrend` for linear or constant trend removal.
+    abc : `NDDataset` method to automatically suppress a linear baseline correction
+        equivalent to the ``'Baseline.abc'`` method.
     """
     )
 
-    # Interactive mode is proposed using the interactive method `run` .
-    #
-    # Parameters
-    # ----------
-    # dataset : `NDDataset`
-    #     The dataset to be transformed.
-    #
-    # See Also
-    # --------
-    # abc : Automatic baseline correction.
-    # BaselineCorrector : A helper widget to use in Jupyter notebooks
-    #
-    # Examples
-    # --------
-    # .. plot::
-    #     :include-source:
-    #
-    #     from spectrochempy import *
-    #     nd = NDDataset.read_omnic('irdata/nh4y-activation.spg')
-    #     ndp = nd[:, 1291.0:5999.0]
-    #     bc = Baseline(ndp)
-    #     ranges=[[5996., 5998.], [1290., 1300.],
-    #             [2205., 2301.], [5380., 5979.],
-    #             [3736., 5125.]]
-    #     span = bc.compute(*ranges,method='multivariate',
-    #                       interpolation='pchip', npc=8)
-    #     _ = bc.corrected.plot_stack()
-    #     show()
-    # """
+    #     if not ranges and dataset.meta.regions is not None:
+    #         # use the range stored in metadata
+    #         ranges = dataset.meta.regions["baseline"]
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
@@ -101,15 +96,16 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True)
 
     interpolation = tr.CaselessStrEnum(
-        ["polynomial", "pchip"],
+        ["polynomial", "pchip", "abc", "detrend"],
         default_value="pchip",
         help="Interpolation method.",
     ).tag(config=True)
 
-    order = tr.Integer(
+    order = tr.Union(
+        (tr.Integer(), tr.CaselessStrEnum(["constant", "linear", "quadratic"])),
         default_value=6,
         min=1,
-        help="Polynom order to use for polynomial interpolation.",
+        help="Polynom order to use for polynomial interpolation or detrend.",
     ).tag(config=True)
 
     n_components = tr.Integer(
@@ -136,6 +132,15 @@ class Baseline(AnalysisConfigurable):
         "to the specified ranges.",
     ).tag(config=True)
 
+    bp = tr.List(
+        default_value=[],
+        allow_none=True,
+        help="""Breakpoints to define piecewise segments of the data,
+specified as a vector containing coordinate values or indices indicating the location
+of the breakpoints. Breakpoints are useful when you want to compute separate
+baseline/trends for different segments of the data.
+""",
+    )
     # ----------------------------------------------------------------------------------
     # Runtime parameters
     # ----------------------------------------------------------------------------------
@@ -143,16 +148,10 @@ class Baseline(AnalysisConfigurable):
         help="The dataset containing only the sections " "corresponding to _ranges"
     )
     _ranges = tr.List(help="The actual list of ranges after trim and clean-up")
-    _extrema_added_to_ranges = tr.Bool(False)
 
-    # ----
-    corrected = NDDatasetType()
-    axis = tr.Int(-1)
-    dim = tr.Unicode("")
-    zoompreview = tr.Float(1.0)
-    figsize = tr.Tuple((7, 5))
-    _sps = tr.List()
-
+    # ----------------------------------------------------------------------------------
+    # Initialisation
+    # ----------------------------------------------------------------------------------
     def __init__(
         self,
         log_level="WARNING",
@@ -171,7 +170,7 @@ class Baseline(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
-    @tr.validate("_n_components")
+    @tr.validate("n_components")
     def _validate_n_components(self, proposal):
         # n cannot be higher than the size of s
         npc = proposal.value
@@ -213,6 +212,12 @@ class Baseline(AnalysisConfigurable):
             X = change.new
         elif self._fitted:
             X = self._X
+
+        if self.interpolation not in ["polynomial", "pchip"]:
+            # such as detrend, we work on the full data so range is the full feature
+            # range.
+            self._X_ranges = self._X.copy()
+            return
 
         ranges = change.new if change.name == "ranges" else self.ranges.copy()
         if X is None:
@@ -264,7 +269,7 @@ class Baseline(AnalysisConfigurable):
         # ----------
         if self.method == "sequential":
 
-            if self.interpolation == "polynomial":
+            if self.interpolation in ["polynomial", "detrend"]:
                 polycoef = np.polynomial.polynomial.polyfit(
                     xbase, ybase.T, deg=self.order, rcond=None, full=False
                 )
