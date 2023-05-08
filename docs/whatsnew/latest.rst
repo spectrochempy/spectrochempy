@@ -9,4 +9,10 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* add `FastICA` analysis module.
+* Add `FastICA` module : a fast algorithm for Independent Component Analysis.
+
+Bug fixes
+~~~~~~~~~
+
+* Unit conversion for LinearCoord can return nonlinear coordinates if needed.
+* No use of LinearCoord when using masks.

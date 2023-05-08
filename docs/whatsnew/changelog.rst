@@ -20,7 +20,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-* add `FastICA` analysis module.
+* Add `FastICA` module : a fast algorithm for Independent Component Analysis.
 
 .. section
 
@@ -28,6 +28,8 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* Unit conversion for LinearCoord can return nonlinear coordinates if needed.
+* No use of LinearCoord when using masks.
 
 .. section
 
