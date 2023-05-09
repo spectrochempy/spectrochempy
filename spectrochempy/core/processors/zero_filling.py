@@ -13,7 +13,6 @@ import functools
 import numpy as np
 
 from spectrochempy.core import error_
-from spectrochempy.core.dataset.coord import LinearCoord
 from spectrochempy.utils.misc import largest_power_of_2
 
 
@@ -44,14 +43,6 @@ def _zf_method(method):
 
         # get the lastcoord
         if x.unitless or x.dimensionless or x.units.dimensionality == "[time]":
-
-            if not x.linear:
-                # This method apply only to linear coordinates.
-                # we try to linearize it
-                x = LinearCoord(x)
-
-            if not x.linear:
-                raise TypeError("Coordinate x is not linearisable")
 
             data = method(new.data, **kwargs)
             new._data = data

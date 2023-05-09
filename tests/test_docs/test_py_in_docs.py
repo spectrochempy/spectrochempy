@@ -9,11 +9,16 @@
 # Testing examples and notebooks (Py version) in docs
 # --------------------------------------------------------------------------------------
 import sys
+from os import environ
 
 import pytest
 
-if sys.platform.startswith("win") or sys.platform == "darwin":
+if environ.get("USER", None) is None and (
+    sys.platform.startswith("win") or sys.platform == "darwin"
+):
     pytest.skip("example testing on windows and macos", allow_module_level=True)
+else:
+    print(f"USER : {environ.get('USER', None)}")
 
 pytestmark = pytest.mark.slow
 

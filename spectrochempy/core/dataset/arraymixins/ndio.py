@@ -20,7 +20,7 @@ import numpy as np
 from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance, Unicode, Union
 
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.file import check_filename_to_save, pathclean
@@ -372,21 +372,12 @@ class NDIO(HasTraits):
                                 if v["is_same_dim"]:
                                     _mcoords = []
                                     for mv in v["coords"]:
-                                        if "data" in mv:
-                                            # coords
-                                            _mcoords.append(item_to_attr(Coord(), mv))
-                                        else:
-                                            # likely a linearcoord
-                                            _mcoords.append(
-                                                item_to_attr(LinearCoord(), mv)
-                                            )
+                                        _mcoords.append(item_to_attr(Coord(), mv))
+
                                     cs = CoordSet(*_mcoords[::-1], name=v["name"])
                                     _coords.append(cs)
                                 else:
                                     raise ValueError("Invalid : not a multicoordinate")
-                            else:
-                                # likely a linearcoord
-                                _coords.append(item_to_attr(LinearCoord(), v))
 
                         coords = dict((c.name, c) for c in _coords)
                         obj.set_coordset(coords)

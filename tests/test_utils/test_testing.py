@@ -53,7 +53,7 @@ def test_compare_coords(IR_dataset_2D):
     x1 = IR_dataset_2D.x
     x2 = x1.copy()
 
-    assert x1._implements("LinearCoord")
+    assert x1._implements("Coord")
     testing.assert_coord_equal(x1, x2)
 
     y1 = IR_dataset_2D.y

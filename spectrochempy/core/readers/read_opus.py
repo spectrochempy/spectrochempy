@@ -16,7 +16,7 @@ import numpy as np
 from brukeropusreader.opus_parser import parse_data, parse_meta
 
 from spectrochempy.core import debug_
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.utils.docstrings import _docstring
 
@@ -76,7 +76,8 @@ def read_opus(*paths, **kwargs):
     Multiple files not merged (return a list of datasets). Note that a directory is
     specified
 
-    >>> le = scp.read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS')
+    >>> le = scp.read_opus('test.0000', 'test.0001', 'test.0002',
+    >>>                    directory='irdata/OPUS')
     >>> len(le)
     3
     >>> le[0]
@@ -84,18 +85,21 @@ def read_opus(*paths, **kwargs):
 
     Multiple files merged as the `merge` keyword is set to true
 
-    >>> scp.read_opus('test.0000', 'test.0001', 'test.0002', directory='irdata/OPUS', merge=True)
+    >>> scp.read_opus('test.0000', 'test.0001', 'test.0002',
+    directory='irdata/OPUS', merge=True)
     NDDataset: [float64] a.u. (shape: (y:3, x:2567))
 
     Multiple files to merge : they are passed as a list instead of using the keyword `
     merge`
 
-    >>> scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
+    >>> scp.read_opus(['test.0000', 'test.0001', 'test.0002'],
+    >>>               directory='irdata/OPUS')
     NDDataset: [float64] a.u. (shape: (y:3, x:2567))
 
     Multiple files not merged : they are passed as a list but `merge` is set to false
 
-    >>> le = scp.read_opus(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS', merge=False)
+    >>> le = scp.read_opus(['test.0000', 'test.0001', 'test.0002'],
+    >>>                    directory='irdata/OPUS', merge=False)
     >>> len(le)
     3
 
@@ -143,15 +147,15 @@ def _read_opus(*args, **kwargs):
         dataset.data = np.array(data[np.newaxis], dtype="float32")
     except KeyError:
         raise KeyError(
-            f"{filename} is not an Absorbance spectrum. It cannot be read with the `read_opus` import method"
+            f"{filename} is not an Absorbance spectrum. It cannot be read with the "
+            f"`read_opus` import method"
         )
     # todo: read background
 
     # xaxis
     fxv = opus_data["AB Data Parameter"]["FXV"]
     lxv = opus_data["AB Data Parameter"]["LXV"]
-    # xdata = linspace(fxv, lxv, npt)
-    xaxis = LinearCoord.linspace(fxv, lxv, npt, title="wavenumbers", units="cm^-1")
+    xaxis = Coord.linspace(fxv, lxv, npt)
 
     # yaxis
     name = opus_data["Sample"]["SNM"]
@@ -166,6 +170,8 @@ def _read_opus(*args, **kwargs):
         date_time = datetime.strptime(
             acqdate + "_" + acqtime.split()[0], "%Y/%m/%d_%H:%M:%S"
         )
+    else:  # pragma: no cover
+        raise ValueError("acqdate can not be interpreted.")
     utc_dt = date_time - timedelta(hours=gmt_offset_hour)
     utc_dt = utc_dt.replace(tzinfo=timezone.utc)
     timestamp = utc_dt.timestamp()

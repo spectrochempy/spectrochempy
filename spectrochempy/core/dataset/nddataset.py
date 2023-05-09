@@ -25,7 +25,7 @@ from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
 from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME, NDArray
 from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
@@ -152,7 +152,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     See Also
     --------
     Coord : Explicit coordinates object.
-    LinearCoord : Implicit coordinates object.
     CoordSet : Set of coordinates.
 
     Notes
@@ -256,10 +255,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             _coordset = []
             for c, u, t in zip(coordset, coordunits, coordtitles):
                 if not isinstance(c, CoordSet):
-                    if isinstance(c, LinearCoord):
-                        coord = LinearCoord(c)
-                    else:
-                        coord = Coord(c)
+                    coord = Coord(c)
                     if u is not None:
                         coord.units = u
                     if t is not None:
@@ -483,7 +479,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                     _coordset[idx] = list(value.to_dict().values())[0]
                     _coordset[idx].name = key
                     _coordset[idx]._is_same_dim = True
-                elif isinstance(value, (Coord, LinearCoord)):
+                elif isinstance(value, Coord):
                     value.name = key
                     _coordset[idx] = value
                 else:
@@ -720,7 +716,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 continue
 
             # For coord to be acceptable, we require at least a NDArray, a NDArray subclass or a CoordSet
-            if not isinstance(coord, (LinearCoord, Coord, CoordSet)):
+            if not isinstance(coord, (Coord, CoordSet)):
                 if isinstance(coord, NDArray):
                     coord = coords[k] = Coord(coord)
                 else:

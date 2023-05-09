@@ -15,7 +15,7 @@ from quaternion import as_float_array
 from scipy.signal import hilbert
 
 from spectrochempy.core import error_
-from spectrochempy.core.dataset.coord import LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 from spectrochempy.core.units import ur
@@ -256,6 +256,7 @@ def ifft(dataset, size=None, **kwargs):
 
 
 def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
+
     """
     Apply a complex fast fourier transform.
 
@@ -502,7 +503,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             first = sfo1 - sf - deltaf * sizem / 2.0
 
             # newcoord = type(x)(np.arange(size) * deltaf + first)
-            newcoord = LinearCoord.arange(size) * deltaf + first
+            newcoord = Coord.arange(size) * deltaf + first
             newcoord.show_datapoints = False
             newcoord.name = x.name
             new.title = "intensity"
@@ -524,7 +525,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
                 sw = bf1.to("Hz") * sw / 1.0e6
             deltat = (1.0 / sw).to("us")
 
-            newcoord = LinearCoord.arange(size) * deltat
+            newcoord = Coord.arange(size) * deltat
             newcoord.name = x.name
             newcoord.title = "time"
             newcoord.ito("us")

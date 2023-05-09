@@ -52,24 +52,26 @@ _ = ir.plot()
 print("number of points = ", ir.size)
 
 # %% [markdown]
-# Plotting a zoomed region around the maximum of the interferogram (the so-called `ZPD`: `Zero optical Path
-# Difference` ) we can see that it is located around the 64th points. The FFT processing will need this information,
+# Plotting a zoomed region around the maximum of the interferogram
+# (the so-called `ZPD`: `Zero optical Path Difference` ) we can see that it is located
+# around the 64th points. The FFT processing will need this information,
 # but it will be determined automatically.
 
 # %%
 _ = ir.plot(xlim=(0, 128))
 
 # %% [markdown]
-# The `x` scale of the interferogram can also be displayed as a function of optical path difference. For this we
-# just make `show_datapoints` to False:
+# The `x` scale of the interferogram can also be displayed as a function of optical
+# path difference. For this we just make `show_datapoints` to False:
 
 # %%
 ir.x.show_datapoints = False
 _ = ir.plot(xlim=(-0.04, 0.04))
 
 # %% [markdown]
-# Note that the `x` scale of the interferogram has been calculated using the laser frequency indicated in the original
-# omnic file. It is stored in the `meta` attribute of the NDDataset:
+# Note that the `x` scale of the interferogram has been calculated using the laser
+# frequency indicated in the original omnic file. It is stored in the `meta` attribute
+# of the NDDataset:
 
 # %%
 print(ir.meta.laser_frequency)
@@ -81,8 +83,9 @@ print(ir.meta.laser_frequency)
 ir.x.set_laser_frequency(15798.26 * ur("cm^-1"))
 
 # %% [markdown]
-# Now we can perform the Fourier transform. By default, no zero-filling level is applied prior the Fourier transform
-# for FTIR. To add some level of zero-filling, use the `zf` method.
+# Now we can perform the Fourier transform. By default, no zero-filling level is applied
+# prior the Fourier transform for FTIR. To add some level of zero-filling,
+# use the `zf` method.
 
 # %%
 ird = ir.dc()
@@ -105,8 +108,8 @@ _ = irth.plot(xlim=(3999, 400))
 # %% [markdown]
 # ## Comparison with the OMNIC processing.
 #
-# Here we compare the OMNIC processed spectra of the same interferogram and ours in red. One can see that the results
-# are very close
+# Here we compare the OMNIC processed spectra of the same interferogram and ours in red.
+# One can see that the results are very close
 
 # %%
 irs = scp.read_spa("irdata/interferogram/spectre.SPA")

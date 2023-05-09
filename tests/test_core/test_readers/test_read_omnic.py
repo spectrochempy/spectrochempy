@@ -70,7 +70,7 @@ def test_read_omnic():
     )
     assert str(nd) == "NDDataset: [float64] V (shape: (y:1, x:16384))"
 
-    # imùport IFG from file without IFG
+    # import IFG from file without IFG
     a = scp.read_spa(
         IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA", return_ifg="sample"
     )

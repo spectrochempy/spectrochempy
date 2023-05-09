@@ -162,7 +162,6 @@ class NDArray(HasTraits):
     --------
     NDDataset : Object which subclass  `NDArray` with the addition of coordinates.
     Coord : Object which subclass  `NDArray` (coordinates object).
-    LinearCoord : Object which subclass  `NDArray` (Linear coordinates object).
 
     Examples
     --------
@@ -902,7 +901,7 @@ class NDArray(HasTraits):
             if self.data is not None:
                 dtype = self.dtype
                 data = ""
-                if self._implements("Coord") or self._implements("LinearCoord"):
+                if self._implements("Coord"):
                     size = f" (size: {self.data.size})"
                 units = " " + self._repr_units()
             else:

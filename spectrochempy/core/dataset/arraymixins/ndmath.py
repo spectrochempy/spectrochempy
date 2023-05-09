@@ -1112,7 +1112,7 @@ class NDMath(object):
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
-        LinearCoord: [float64] cm⁻¹ (size: 5549)
+        Coord: [float64] cm⁻¹ (size: 5549)
         >>> m = scp.average(nd, dim='y', weights=np.arange(55))
         >>> m.data
         array([   1.789,    1.789, ...,    1.222,     1.22])
@@ -1636,7 +1636,7 @@ class NDMath(object):
         Create a 1D NDDataset from a function
 
         >>> func1 = lambda t, v: v * t
-        >>> time = scp.LinearCoord.arange(0, 60, 10, units='min')
+        >>> time = scp.Coord.arange(0, 60, 10, units='min')
         >>> d = scp.fromfunction(func1, v=scp.Quantity(134, 'km/hour'), coordset=scp.CoordSet(t=time))
         >>> d.dims
         ['t']
@@ -2077,7 +2077,7 @@ class NDMath(object):
         >>> m
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
-        LinearCoord: [float64] cm⁻¹ (size: 5549)
+        Coord: [float64] cm⁻¹ (size: 5549)
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -2751,8 +2751,6 @@ class NDMath(object):
                 returntype = "NDDataset"
             elif objtype == "Coord" and returntype != "NDDataset":
                 returntype = "Coord"
-            elif objtype == "LinearCoord" and returntype != "NDDataset":
-                returntype = "LinearCoord"
             else:
                 # only the three above type have math capabilities in spectrochempy.
                 pass
@@ -2769,10 +2767,7 @@ class NDMath(object):
             )
 
         # it may be necessary to change the object order regarding the types
-        if (
-            returntype in ["NDDataset", "Coord", "LinearCoord"]
-            and objtypes[0] != returntype
-        ):
+        if returntype in ["NDDataset", "Coord"] and objtypes[0] != returntype:
             inputs.reverse()
             objtypes.reverse()
 
@@ -2853,8 +2848,9 @@ class NDMath(object):
         # If other is None, then it is a unary operation we can pass the following
 
         if other is not None:
-            # First the units may require to be compatible, and if thet are sometimes they may need to be rescales
-            if othertype in ["NDDataset", "Coord", "LinearCoord", "Quantity"]:
+            # First the units may require to be compatible, and if thet are sometimes
+            # they may need to be rescales
+            if othertype in ["NDDataset", "Coord", "Quantity"]:
                 # rescale according to units
                 if not other.unitless:
                     if hasattr(obj, "units"):
@@ -2931,7 +2927,7 @@ class NDMath(object):
                                 obc[obj.dims[idx]].data, otc[other.dims[idx]].data
                             )
 
-            if othertype in ["NDDataset", "Coord", "LinearCoord"]:
+            if othertype in ["NDDataset", "Coord"]:
                 # mask?
                 if is_masked:
                     arg = other._umasked(other.data, other.mask)
@@ -3134,17 +3130,12 @@ class NDMath(object):
                 returntype = "NDDataset"
             elif objtype == "Coord" and returntype != "NDDataset":
                 returntype = "Coord"
-            elif objtype == "LinearCoord" and returntype != "NDDataset":
-                returntype = "LinearCoord"
             else:
                 # only the three above type have math capabilities in spectrochempy.
                 pass
 
         # it may be necessary to change the object order regarding the types
-        if (
-            returntype in ["NDDataset", "Coord", "LinearCoord"]
-            and objtypes[0] != returntype
-        ):
+        if returntype in ["NDDataset", "Coord"] and objtypes[0] != returntype:
             inputs.reverse()
             objtypes.reverse()
 
@@ -3207,12 +3198,7 @@ class NDMath(object):
             fm, objs = self._check_order(fname, objs)
 
             data, units, mask, returntype = self._op(fm, objs)
-            if returntype != "LinearCoord":
-                self._data = data
-            else:
-                from spectrochempy.core.dataset.coord import LinearCoord
-
-                self = LinearCoord(data)
+            self._data = data
             self._units = units
             self._mask = mask
 
@@ -3229,12 +3215,7 @@ class NDMath(object):
 
             new = NDDataset(new)
 
-        if returntype != "LinearCoord":
-            new._data = cpy.deepcopy(data)
-        else:
-            from spectrochempy.core.dataset.coord import LinearCoord
-
-            new = LinearCoord(cpy.deepcopy(data))
+        new._data = cpy.deepcopy(data)
 
         # update the attributes
         new._units = cpy.copy(units)

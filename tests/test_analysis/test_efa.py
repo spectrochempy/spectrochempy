@@ -62,9 +62,7 @@ def test_EFA(IR_dataset_2D):
     ntimes = 250
     ncomponents = 2
 
-    t = scp.LinearCoord.arange(
-        ntimes, units="minutes", title="time"
-    )  # time coordinates
+    t = scp.Coord.arange(ntimes, units="minutes", title="time")  # time coordinates
     c = scp.Coord(range(ncomponents), title="components")  # component coordinates
 
     data = np.zeros((ncomponents, ntimes), dtype=np.float64)

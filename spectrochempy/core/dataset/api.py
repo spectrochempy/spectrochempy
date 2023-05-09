@@ -5,8 +5,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-__all__ = ["Coord", "LinearCoord", "CoordSet", "NDDataset"]
+__all__ = ["Coord", "CoordSet", "NDDataset"]
 
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset

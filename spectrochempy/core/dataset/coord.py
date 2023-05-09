@@ -8,7 +8,7 @@
 This module implements the class  `Coord` .
 """
 
-__all__ = ["Coord", "LinearCoord"]
+__all__ = ["Coord"]
 
 import copy as cpy
 import textwrap
@@ -23,6 +23,7 @@ from spectrochempy.core.dataset.arraymixins.ndmath import NDMath, _set_operators
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.constants import INPLACE, NOMASK
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.misc import spacing_
 from spectrochempy.utils.print import colored_output
 
@@ -93,9 +94,6 @@ class Coord(NDMath, NDArray):
         Alias of `title` .
     copy : bool, optional
         Perform a copy of the passed object. Default is False.
-    linear : bool, optional
-        If set to True, the coordinate is considered as a
-        `LinearCoord` object.
     offset : float, optional
         Only used is linear is True.
         If omitted a value of 0.0 is taken for the coordinate offset.
@@ -106,7 +104,6 @@ class Coord(NDMath, NDArray):
     See Also
     --------
     NDDataset : Main SpectroChemPy object: an array with masks, units and coordinates.
-    LinearCoord : linear coordinates.
 
     Examples
     --------
@@ -139,11 +136,15 @@ class Coord(NDMath, NDArray):
     _html_output = False
     _parent_dim = Unicode(allow_none=True)
 
-    # For linear data generation
+    # For linear data generation (To be suppressed)
     _offset = Union((CFloat(), CInt(), Instance(Quantity)))
     _increment = Union((CFloat(), CInt(), Instance(Quantity)))
     _size = Integer(0)
     _linear = Bool(False)
+
+    _use_time = Bool(False)
+    _show_datapoints = Bool(True)
+    _zpd = Integer()
 
     # ----------------------------------------------------------------------------------
     # initialization
@@ -154,12 +155,6 @@ class Coord(NDMath, NDArray):
 
         if len(self.shape) > 1:
             raise ValueError("Only one 1D arrays can be used to define coordinates")
-
-        self._linear = kwargs.pop("linear", False)
-        self._increment = kwargs.pop("increment", 1.0)
-        self._offset = kwargs.pop("offset", 0.0)
-        self._size = kwargs.pop("size", 0)
-        # self._accuracy = kwargs.pop('accuracy', None)
 
     # ----------------------------------------------------------------------------------
     # readonly property
@@ -549,12 +544,11 @@ class Coord(NDMath, NDArray):
             "data",
             "labels",
             "units",
+            "meta",
             "title",
             "name",
-            "offset",
-            "increment",
-            "linear",
             "roi",
+            "show_datapoints",
         ]
 
     def __getitem__(self, items, **kwargs):
@@ -722,22 +716,22 @@ class Coord(NDMath, NDArray):
         if data is None:
             return
 
-        elif isinstance(data, Coord) and data.linear:
-            # Case of LinearCoord
-            for attr in self.__dir__():
-                try:
-                    if attr in ["linear", "offset", "increment"]:
-                        continue
-                    if attr == "data":
-                        val = data.data
-                    else:
-                        val = getattr(data, f"_{attr}")
-                    if self._copy:
-                        val = cpy.deepcopy(val)
-                    setattr(self, f"_{attr}", val)
-                except AttributeError:
-                    # some attribute of NDDataset are missing in NDArray
-                    pass
+        # elif isinstance(data, Coord) and data.linear:
+        #     # Case of LinearCoord
+        #     for attr in self.__dir__():
+        #         try:
+        #             if attr in ["linear", "offset", "increment"]:
+        #                 continue
+        #             if attr == "data":
+        #                 val = data.data
+        #             else:
+        #                 val = getattr(data, f"_{attr}")
+        #             if self._copy:
+        #                 val = cpy.deepcopy(val)
+        #             setattr(self, f"_{attr}", val)
+        #         except AttributeError:
+        #             # some attribute of NDDataset are missing in NDArray
+        #             pass
 
         elif isinstance(data, NDArray):
             # init data with data from another NDArray or NDArray's subclass
@@ -837,170 +831,37 @@ class Coord(NDMath, NDArray):
                 self._linearize()
             return
 
-    @property
-    def increment(self):
-        return self._increment
+    # @property
+    # def increment(self):
+    #     return self._increment
 
-    @increment.setter
-    def increment(self, val):
-        if isinstance(val, Quantity):
-            if self.has_units:
-                val.ito(self.units)
-                val = val.m
-            else:
-                self.units = val.units
-                val = val.m
-        self._increment = val
-
-    @property
-    def increment_value(self):
-        increment = self.increment
-        if self.units:
-            return Quantity(increment, self._units)
-        else:
-            return increment
-
-
-@signature_has_traits
-class LinearCoord(Coord):
-    """
-    Linear coordinates.
-
-    Such coordinates correspond to a ascending or descending linear
-    sequence of values, fully determined by two parameters, i.e., an offset (off) and an increment (inc) :
-
-    .. math::
-
-        \\mathrm{data} = i*\\mathrm{inc} + \\mathrm{off}.
-
-    Parameters
-    ----------
-    data : a 1D array-like object, optional
-        WWen provided, the `size` parameters is adjusted to the size of
-        the array, and a linearization of the
-        array is performed (only if it is possible: regular spacing in
-        the 1.e5 relative accuracy).
-    offset : float, optional
-        If omitted a value of 0.0 is taken for the coordinate offset.
-    increment : float, optional
-        If omitted a value of 1.0 is taken for the coordinate increment.
-    **kwargs
-        Optional keywords parameters. See other parameters.
-
-    Other Parameters
-    ----------------
-    dtype : str or dtype, optional, default=np.float64
-        If specified, the data will be casted to this dtype, else the
-        type of the data will be used
-    dims : list of chars, optional.
-        if specified the list must have a length equal to the number od
-        data dimensions (ndim) and the chars must be
-        taken among x,y,z,u,v,w or t. If not specified,
-        the dimension names are automatically attributed in
-        this order.
-    name : str, optional
-        A user-friendly name for this object. If not given,
-        the automatic `id` given at the object creation will be
-        used as a name.
-    labels : array of objects, optional
-        Labels for the `data` . labels can be used only for 1D-datasets.
-        The labels array may have an additional dimension, meaning
-        several series of labels for the same data.
-        The given array can be a list, a tuple, a `~numpy.ndarray` ,
-        a ndarray-like, a  `NDArray` or any subclass of `NDArray` .
-    units : `Unit` instance or str, optional
-        Units of the data. If data is a `Quantity` then `units` is set
-        to the unit of the `data`; if a unit is also
-        explicitly provided an error is raised. Handling of units use
-        the `pint <https://pint.readthedocs.org/>`_
-        package.
-    title : str, optional
-        The title of the dimension. It will later be used for instance
-        for labelling plots of the data.
-        It is optional but recommended to give a title to each ndarray.
-    dlabel : str, optional.
-        Alias of `title` .
-    meta : dict-like object, optional.
-        Additional metadata for this object. Must be dict-like but no
-        further restriction is placed on meta.
-    copy : bool, optional
-        Perform a copy of the passed object. Default is False.
-    fill_missing : bool
-        Create a linear coordinate array where missing data are masked.
-
-    See Also
-    --------
-    NDDataset : Main SpectroChemPy object: an array with masks, units and
-    coordinates.
-    Coord : Explicit coordinates.
-
-    Examples
-    --------
-    >>> from spectrochempy import LinearCoord, Coord
-
-    To create a linear coordinate, we need to specify an offset,
-    an increment and
-    the size of the data
-
-    >>> c1 = LinearCoord(offset=2.0, increment=2.0, size=10)
-
-    Alternatively, linear coordinates can be created using the
-    `linear` keyword
-
-    >>> c2 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
-    """
-
-    _use_time = Bool(False)
-    _show_datapoints = Bool(True)
-    _zpd = Integer()
-
-    def __init__(self, data=None, offset=0.0, increment=1.0, **kwargs):
-
-        if data is not None and isinstance(data, Coord) and not data.linear:
-            raise ValueError(
-                "Only linear Coord (with attribute linear set to True, can be transformed into "
-                "LinearCoord class"
-            )
-
-        super().__init__(data, **kwargs)
-
-        # when data is present, we don't need offset and increment, nor size,
-        # we just do linear=True and these parameters are ignored
-
-        if self._data is not None:
-            self._linear = True
-
-        elif not self.linear:
-            # in case it was not already a linear array
-            self.offset = offset
-            self.increment = increment
-            self._linear = True
-
-    @property  # read only
-    def linear(self):
-        return self._linear
-
-    def __dir__(self):
-        # remove some methods with respect to the full NDArray
-        # as they are not useful for Coord.
-
-        return [
-            "data",
-            "labels",
-            "units",
-            "meta",
-            "title",
-            "name",
-            "offset",
-            "increment",
-            "linear",
-            "size",
-            "roi",
-            "show_datapoints",
-        ]
+    # @increment.setter
+    # def increment(self, val):
+    #     if isinstance(val, Quantity):
+    #         if self.has_units:
+    #             val.ito(self.units)
+    #             val = val.m
+    #         else:
+    #             self.units = val.units
+    #             val = val.m
+    #     self._increment = val
+    #
+    # @property
+    # def increment_value(self):
+    #     increment = self.increment
+    #     if self.units:
+    #         return Quantity(increment, self._units)
+    #     else:
+    #         return increment
 
     def set_laser_frequency(self, frequency=15798.26 * ur("cm^-1")):
+        """Set the laser frequency.
 
+        Parameters
+        ----------
+        frequency : `float` or `Quantity`
+            The laser frequency in cm^-1 or Hz.
+        """
         if not isinstance(frequency, Quantity):
             frequency = frequency * ur("cm^-1")
 
@@ -1010,9 +871,7 @@ class LinearCoord(Coord):
         if self._use_time:
             spacing = 1.0 / frequency
             spacing.ito("picoseconds")
-
-            self.increment = spacing.m
-            self.offset = 0
+            self._data = np.arange(self.shape[-1]) * spacing.m
             self._units = ur.picoseconds
             self.title = "time"
 
@@ -1020,16 +879,15 @@ class LinearCoord(Coord):
             frequency.ito("cm^-1")
             spacing = 1.0 / frequency
             spacing.ito("mm")
-
-            self.increment = spacing.m
-            self.offset = -self.increment * self._zpd
+            offset = -spacing.m * self._zpd
+            self._data = np.arange(self.shape[-1]) * spacing.m + offset
             self._units = ur.mm
             self.title = "optical path difference"
 
     @property
     def _use_time_axis(self):
         # private property
-        # True if time scale must be used for interferogram axis. Else it
+        # True if timescale must be used for interferogram axis. Else it
         # will be set to optical path difference.
         return self._use_time
 
@@ -1044,7 +902,6 @@ class LinearCoord(Coord):
     def show_datapoints(self):
         """
         Bool : True if axis must discard values and show only datapoints.
-
         """
         if "laser_frequency" not in self.meta or self.units.dimensionality not in [
             "[time]",
@@ -1068,11 +925,36 @@ class LinearCoord(Coord):
 
     @laser_frequency.setter
     def laser_frequency(self, val):
-        self.meta.aser_frequency = val
+        self.meta.laser_frequency = val
+
+
+# ======================================================================================
+# LinearCoord (Deprecated)
+# TODO : should be removed in version 0.8
+# ======================================================================================
+
+
+@signature_has_traits
+class LinearCoord(Coord):
+    @deprecated(
+        kind="object",
+        replace="Coord",
+        extra_msg="with the `linear` keyword argument",
+        removed="0.8",
+    )
+    def __init__(self, offset=None, increment=None, size=None, **kwargs):
+        # TODO : remove in version 0.8
+        offset = offset if offset is not None else 0.0
+        increment = increment if increment is not None else 1.0
+        size = size if size is not None else 1
+
+        data = np.arange(size) * increment + offset
+
+        super().__init__(data, **kwargs)
 
 
 # ======================================================================================
 # Set the operators
 # ======================================================================================
 _set_operators(Coord, priority=50)
-_set_operators(LinearCoord, priority=50)
+_set_operators(LinearCoord, priority=50)  # Suppress 0.8

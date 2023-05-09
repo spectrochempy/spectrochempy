@@ -12,13 +12,14 @@ import numpy as np
 import pytest
 
 from spectrochempy.core import debug_
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.testing import (
     assert_approx_equal,
     assert_array_equal,
     assert_equal_units,
 )
+from spectrochempy.utils.warnings import assert_produces_warning
 
 
 # ======================================================================================
@@ -432,60 +433,7 @@ def test_coord_not_implemented(name):
 
 
 def test_linearcoord():
-    coord1 = Coord([1, 2.5, 4, 5])
+    from spectrochempy.core.dataset.coord import LinearCoord
 
-    coord2 = Coord(np.array([1, 2.5, 4, 5]))
-    assert coord2 == coord1
-
-    coord3 = Coord(range(10))
-
-    coord4 = Coord(np.arange(10))
-    assert coord4 == coord3
-
-    coord5 = coord4.copy()
-    coord5 += 1
-    assert np.all(coord5.data == coord4.data + 1)
-
-    assert coord5 is not None
-    coord5.linear = True
-
-    coord6 = Coord(linear=True, offset=2.0, increment=2.0, size=10)
-    assert np.all(coord6.data == (coord4.data + 1.0) * 2.0)
-
-    LinearCoord(offset=2.0, increment=2.0, size=10)
-
-    coord0 = LinearCoord.linspace(
-        200.0,
-        300.0,
-        3,
-        labels=["cold", "normal", "hot"],
-        units="K",
-        title="temperature",
-    )
-    coord1 = LinearCoord.linspace(
-        0.0, 60.0, 100, labels=None, units="minutes", title="time-on-stream"
-    )
-    coord2 = LinearCoord.linspace(
-        4000.0, 1000.0, 100, labels=None, units="cm^-1", title="wavenumber"
-    )
-
-    assert coord0.size == 3
-    assert coord1.size == 100
-    assert coord2.size == 100
-
-    coordc = coord0.copy()
-    assert coord0 == coordc
-
-    coordc = coord1.copy()
-    assert coord1 == coordc
-
-    assert_approx_equal(coord1.spacing.m, 0.606060606)
-
-    assert coord1.author is None
-
-    assert not coord1.descendant
-    assert coord2.descendant
-
-    assert coord1.is_1d
-
-    assert coord0.transpose() == coord0
+    with assert_produces_warning(DeprecationWarning, check_stacklevel=False):
+        _ = LinearCoord([1, 2.5, 4, 5])

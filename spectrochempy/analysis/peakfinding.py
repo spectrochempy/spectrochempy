@@ -200,7 +200,7 @@ def find_peaks(
     >>> properties["peak_heights"][0]
     <Quantity(2.26663446, 'absorbance')>
     >>> properties["widths"][0]
-    <Quantity(38.7309614, 'centimeter^-1')>
+    <Quantity(40.166981, 'centimeter^-1')>
     """
 
     X = dataset.squeeze()

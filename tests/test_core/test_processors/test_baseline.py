@@ -42,7 +42,7 @@ def test_basecor_sequential(IR_dataset_2D):
     )
     s1.plot(clear=False, color="red")
 
-    dataset = IR_dataset_2D[5]  # with LinearCoord
+    dataset = IR_dataset_2D[5]
     basc = BaselineCorrection(dataset)
 
     s2 = basc(
