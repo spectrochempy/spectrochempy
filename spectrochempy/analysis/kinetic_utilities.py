@@ -19,7 +19,7 @@ from collections.abc import Iterable
 import numpy as np
 import traitlets as tr
 from scipy.integrate import solve_ivp
-from scipy.optimize import differential_evolution, least_squares, minimize
+from scipy.optimize import differential_evolution, fmin, least_squares, minimize
 
 from spectrochempy.core import debug_, error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
@@ -34,6 +34,22 @@ __all__ = [
 ]
 
 R = 8.314462618153241
+SCIPY_MINIMIZE_METHODS = [
+    "NELDER-MEAD",
+    "POWELL",
+    "CG",
+    "BFGS",
+    "NEWTON-CG",
+    "L-BFGS-B",
+    "TNC",
+    "COBYLA",
+    "SLSQP",
+    "TRUST-CONSTR",
+    "DOGLEG",
+    "TRUST-NCG",
+    "TRUST-KRYLOV",
+    "TRUST-EXACT",
+]
 
 
 # exception used in this module
@@ -44,14 +60,15 @@ class SolverError(SpectroChemPyError):
 # Utility
 # --------
 def _interpret_equation(eq, species):
-    # transform an equation given as a string to a dictionary of species with
-    # integer stoechiometric coefficients.
+    # transform an equation given as a string to dictionaries of species with
+    # integer stoechiometric coefficients for the left (reactants) and right (products)
+    # side of the equation.
 
     regex = r"(((([\.,0-9]*)((?=[a-zA-Z])[a-zA-Z, 1-9]+))(?=\+?))?(?=(->|→)?))"
 
     matches = re.finditer(regex, eq.replace(" ", ""))
-    equation = {}
-    mult = -1  # reactants
+    left, right = {}, {}
+    is_reactant = True
     for match in matches:
         if not match.group(5):
             # no species
@@ -63,18 +80,22 @@ def _interpret_equation(eq, species):
                 f"Available species : {species}"
             )
         coef = match.group(4) if match.group(4) else 1
-        equation[s] = float(coef) * mult
+        try:
+            coef = int(coef)
+        except ValueError:
+            raise ValueError(
+                f"Stoichiometric coeffcients must be integers. Could not "
+                f"convert {coef} in int"
+            )
+        if is_reactant:
+            left[s] = coef
+        else:
+            right[s] = coef
+
         if match.group(6) in ["->", "→"]:
             # shift to products
-            mult = 1
-
-    # normalize the coefficients (for float we assume that they have at the maximum
-    # 2 decimals
-    y = (np.array(list(equation.values())) * 100).astype(int)
-    div = np.gcd.reduce(np.abs(y))
-    equation = {k: int(v * 100 / div) for k, v in equation.items()}
-
-    return equation
+            is_reactant = False
+    return left, right
 
 
 @tr.signature_has_traits
@@ -92,7 +113,7 @@ class ActionMassKinetics(tr.HasTraits):
         Strings giving the ``n_equations`` chemical equation of the network.
         Reactants and products must be separated by a ``"->"`` or "→" symbol,
         The name of each species should match a key of the `species` dictionary.
-        Examples: ``"A + B -> C"`` or ``"2A -> 0.5 D"``\
+        Examples: ``"A + B -> C"`` or ``"2A -> D"``\
     species : `dict`, optional
         Dictionary of initial concentrations for the `n_species` species.
     k : :term:`array-like`
@@ -108,7 +129,8 @@ class ActionMassKinetics(tr.HasTraits):
     _equations = tr.List(tr.Unicode(), help="List of model equations")
     _concentrations = tr.Dict(help="A dictionary of model's species:concentrations")
     _species = tr.List(help="a list of species in this model")
-    _M = Array(help="Stoichiometric matrix M = A+B")
+    _A = Array(help="Stoichiometric matrix A (reactants)")
+    _B = Array(help="Stoichiometric matrix B (producs)")
     _k = Array(help="Arrhenius rate")
     _T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0, help="Temperature")
 
@@ -127,7 +149,7 @@ class ActionMassKinetics(tr.HasTraits):
     # ----------------------------------------------------------------------------------
     @tr.validate("_k")
     def _k_validate(self, proposal):
-        # k must be an iterable of pairs (A_1, Ea_1)
+        # k must be an iterable of pairs (ln A_1, Ea_1)
         k = proposal.value
         # k is an array (even if a list or tuple has been initialy provided (Array)
         if k.shape[-1] != 2:
@@ -154,12 +176,15 @@ class ActionMassKinetics(tr.HasTraits):
     def _stoichio_matrix(self, change):
         # generate stoichio matrix
         equations = change.new
-        M = np.zeros((self.n_equations, self.n_species))
+        A = np.zeros((self.n_equations, self.n_species))
+        B = np.zeros((self.n_equations, self.n_species))
         for i, eq in enumerate(equations):
-            equation = _interpret_equation(eq, self._species)
+            left, right = _interpret_equation(eq, self._species)
             # fill M matrix in the order of the species list
-            M[i] = [equation[k] if k in equation else 0 for k in self._species]
-        self._M = M
+            A[i] = [left[k] if k in left else 0 for k in self._species]
+            B[i] = [right[k] if k in right else 0 for k in self._species]
+        self._A = A
+        self._B = B
 
     # ----------------------------------------------------------------------------------
     # Public properties
@@ -171,7 +196,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
         """
-        return (-self._M).clip(0)
+        return self._A
 
     @property
     def B(self):
@@ -180,7 +205,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
         """
-        return self._M.clip(0)
+        return self._B
 
     @property
     def n_equations(self):
@@ -198,9 +223,37 @@ class ActionMassKinetics(tr.HasTraits):
         return list(self._concentrations.keys())
 
     @property
-    def concentrations(self):
+    def init_concentrations(self):
         """Concentrations."""
         return list(self._concentrations.values())
+
+    def production_rates_str(self):
+        """Return the expressions of production rates as a string"""
+        block = "["
+        for line in (self._B - self._A).T:
+            prod_rate = ""
+            for j, n in enumerate(line):
+                if n == 1:
+                    prod_rate += f" + k[{j}]"
+                elif n == -1:
+                    prod_rate += f" - k[{j}]"
+                elif abs(n) > 0:
+                    prod_rate += f"{n} * k[{j}]"
+                if n != 0:
+                    for k, nu in enumerate(self.A[j]):
+                        if nu == 1:
+                            prod_rate += f" * C[{k}]"
+                        elif nu > 1:
+                            prod_rate += f" * C[{k}]**{nu}"
+            prod_rate += ", "
+            block += prod_rate
+        block += "]"
+        return block
+
+    def k(self, t):
+        """rate constants"""
+        beta = 1 / R / self._T(t)
+        return self._k[:, 0] * np.exp(-beta * self._k[:, 0])
 
     def integrate(self, t, method="RK45", **kwargs):
         """
@@ -323,7 +376,125 @@ class ActionMassKinetics(tr.HasTraits):
         bunch = solve_ivp(
             production_rates,
             (t[0], t[-1]),
-            self.concentrations,
+            self.init_concentrations,
+            t_eval=t,
+            method=method,
+        )
+
+        debug_(bunch.message)
+        if bunch.status != 0:
+            raise SolverError(bunch.message)
+
+        C = bunch.y.T
+        t = bunch.t
+
+        # remove some keys from bunch
+        del bunch.y
+        del bunch.success
+
+        return_dataset = kwargs.get("return_NDDataset", True)
+        if return_dataset:
+            C = NDDataset(C, name="Concentrations")
+            C.y = Coord(t, title="time")
+            C.x = Coord(range(self.n_species), labels=self.species, title="species")
+            C.history = "Created using ActionMassKinetics.integrate"
+            C.meta.update(bunch)
+
+        if kwargs.get("return_meta", False) and not return_dataset:
+            return (C, bunch)
+        return C
+
+    def new_integrate(self, t, method="RK45", **kwargs):
+        """
+        Integrate the kinetic equations at times `t`.
+
+        This function computes and integrates the set of kinetic differential
+        equations given the initial concentration values.
+
+        Parameters
+        ----------
+        t : :term:`array-like` of shape (``t_points``\ ,)
+            Iterable with time values at which the concentrations are computed.
+        method : `str` or `~scipy.integrate.OdeSolver`\ , optional, default: ``'RK45'``
+            Integration method to use:
+
+            * ``'RK45'`` (default): Explicit Runge-Kutta method of order 5(4).
+            * ``'RK23'`` : Explicit Runge-Kutta method of order 3(2).
+            * ``'DOP853'``: Explicit Runge-Kutta method of order 8.
+            * ``'Radau'`` : Implicit Runge-Kutta method of the Radau IIA family of
+              order 5.
+            * ``'BDF'`` : Implicit multi-step variable-order (1 to 5) method based
+              on a backward differentiation formula for the derivative
+              approximation.
+            * ``'LSODA'`` : Adams/BDF method with automatic stiffness detection and
+              switching.
+
+            Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
+            for non-stiff problems and implicit methods ('Radau', 'BDF') for
+            stiff problems. Among Runge-Kutta methods, 'DOP853' is recommended
+            for solving with high precision (low values of `rtol` and `atol` ).
+            If not sure, first try to run 'RK45'. If it makes unusually many
+            iterations, diverges, or fails, your problem is likely to be stiff and
+            you should use 'Radau' or 'BDF'. 'LSODA' can also be a good universal
+            choice, but it might be somewhat less convenient to work with as it
+            wraps old Fortran code.
+            You can also pass an arbitrary class derived from
+            `~scipy.integrate.OdeSolver` which implements the solver.
+        **kwargs
+            Additional keyword parameters. See Other Parameters.
+
+        Other Parameters
+        ----------------
+        return_NDDataset : `bool`\ , optional, default: `True`
+            Whether to return a NDDataset
+        return_meta : `bool`\ , optional, default: `False`
+            Whether to return a dictionary with the solver results.
+            Note that when return_NDDataset is True, meta is always
+            included in the meta attribute of the NDDataset.
+
+        Returns
+        -------
+        C : `~numpy.ndarray` or `NDDataset`, shape ( ``t_points``\ , ``n_species``\ )
+            Values of the solution at times `t`\ .
+        meta : Bunch object with the following fields defined:
+
+            * t : ndarray, shape (t_points,)
+              Time points.
+            * sol : `~scipy.integrate.OdeSolution` or None
+              Found solution as `~scipy.integrate.OdeSolution` instance;
+              None if `dense_output` was
+              set to False.
+            * t_events : `list` of `~numpy.ndarray` or `None`
+              Contains for each event type a list of arrays at which an event of
+              that type event was detected. `None` if events` was None.
+            * y_events : `list` of `~numpy.ndarray` or `None`
+              For each value of `t_events` , the corresponding value of the solution.
+              `None` if events was `None`.
+            * nfev : `int`
+              Number of evaluations of the right-hand side.
+            * njev : `int`
+              Number of evaluations of the Jacobian.
+            * nlu : `int`
+              Number of LU decompositions.
+            * status : `int`
+              Reason for a successful algorithm termination:
+
+                    *  0 : The solver successfully reached the end of `tspan` .
+                    *  1 : A termination event occurred.
+
+            * message : `str`
+              Human-readable description of the termination reason.
+        """
+
+        global_env = {}
+        exec(
+            f"def f_(t, C): k = self.k(t); return{self.production_rates_str()}",
+            global_env,
+        )
+        bunch = solve_ivp(
+            global_env["f_"],
+            (t[0], t[-1]),
+            self.init_concentrations,
             t_eval=t,
             method=method,
         )
@@ -397,7 +568,7 @@ class ActionMassKinetics(tr.HasTraits):
             Chat = self.integrate(Cexp.y.data, return_NDDataset=False)
             return np.sum(np.square(Cexp.data[:, iexp] - Chat[:, i2iexp]))
 
-        method = kwargs.get("method", "Nelder-Mead")
+        method = kwargs.pop("method", "simplex")
         bounds = kwargs.get("bounds", None)
         tol = kwargs.get("tol", None)
         options = kwargs.get("options", {"disp": True})
@@ -414,25 +585,38 @@ class ActionMassKinetics(tr.HasTraits):
                 f"{objective(guess_param, Cexp, iexp, i2iexp, dict_param_to_optimize)}"
             )
         tic = datetime.datetime.now(datetime.timezone.utc)
-        optim_res = minimize(
-            objective,
-            guess_param,
-            args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
-            method=method,
-            bounds=bounds,
-            tol=tol,
-            options=options,
-        )
+
+        if method.upper() == "SIMPLEX":
+            xopt, fopt, iterations, funcalls, warnmess = fmin(
+                objective,
+                guess_param,
+                args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
+                full_output=True,
+                disp=True,
+                **kwargs,
+            )
+            optim_res = {"x": xopt, "nit": iter}
+
+        elif method.upper() in SCIPY_MINIMIZE_METHODS:
+            optim_res = minimize(
+                objective,
+                guess_param,
+                args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
+                method=method,
+                bounds=bounds,
+                tol=tol,
+                options=options,
+            )
         toc = datetime.datetime.now(datetime.timezone.utc)
-        opt_param = optim_res.x
+
         if options["disp"]:
             print(f"         Optimization time: {toc - tic}")
-            print(f"         Final parameters: {opt_param}")
+            print(f"         Final parameters: {optim_res['x']}")
 
         Ckin = self.integrate(Cexp.y.data, return_NDDataset=False)
 
         for i, param in enumerate(dict_param_to_optimize):
-            dict_param_to_optimize[param] = opt_param[i]
+            dict_param_to_optimize[param] = optim_res["x"][i]
 
         return Ckin, (iexp, i2iexp, dict_param_to_optimize), optim_res
 
@@ -993,22 +1177,7 @@ class PFR:
         tol = kwargs.get("tol", None)
         options = kwargs.get("options", {"disp": True})
 
-        if method in [
-            "Nelder-Mead",
-            "Powell",
-            "CG",
-            "BFGS",
-            "Newton-CG",
-            "L-BFGS-B",
-            "TNC",
-            "COBYLA",
-            "SLSQP",
-            "trust-constr",
-            "dogleg",
-            "trust-ncg",
-            "trust-krylov",
-            "trust-exact",
-        ]:
+        if method.upper() in SCIPY_MINIMIZE_METHODS:
             optimizer = "minimize"
 
         elif method in ["trf", "dogbox", "lm"]:

@@ -5,7 +5,10 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+import numpy as np
 import pytest
+
+from spectrochempy import show
 
 # import spectrochempy
 from spectrochempy.analysis import kinetic_utilities as cu
@@ -48,3 +51,35 @@ def test_equations_regex(test_str, expected):
     eq = cu._interpret_equation(test_str, species)
 
     assert expected == eq
+
+
+def test_ABC():
+    reactions = ("A -> B", "B -> C")
+    species_concentrations = {"A": 1.0, "B": 0.0, "C": 0.0}
+    time = np.arange(10)
+    k_exp = np.array(((1.0, 50.0), (1.0, 50.0)))
+    kin_exp = cu.ActionMassKinetics(reactions, species_concentrations, k_exp)
+    C_exp = kin_exp.integrate(time)
+
+    k_guess = np.array(((1.5, 50.0), (1.0, 55.0)))
+    kin_guess = cu.ActionMassKinetics(reactions, species_concentrations, k_guess)
+    res = kin_guess.fit_to_concentrations(
+        C_exp,
+        iexp=[0, 1, 2],
+        i2iexp=[0, 1, 2],
+        dict_param_to_optimize={
+            "k[0].A": 1.1,
+            "k[1].Ea": 49.0,
+        },
+        xtol=0.01,
+        ftol=0.1,
+    )
+    C_opt = kin_guess.integrate(time)
+
+    print(res[2]["x"])
+    assert max(res[2]["x"] - [1.0, 50.0]) < 1e-3
+
+    _ = C_exp.T.plot(markers="o")
+    _ = C_opt.T.plot(clear=False)
+
+    show()
