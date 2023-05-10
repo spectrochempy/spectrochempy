@@ -15,6 +15,7 @@ import logging
 import re
 import warnings
 from collections.abc import Iterable
+from functools import partial
 
 import numpy as np
 import traitlets as tr
@@ -143,6 +144,7 @@ class ActionMassKinetics(tr.HasTraits):
         self._concentrations = species
         self._species = list(self._concentrations.keys())
         self._equations = equations
+        self._production_rates = self._write_production_rates()
 
     # ----------------------------------------------------------------------------------
     # Private methods
@@ -227,7 +229,7 @@ class ActionMassKinetics(tr.HasTraits):
         """Concentrations."""
         return list(self._concentrations.values())
 
-    def production_rates_str(self):
+    def _write_production_rates(self):
         """Return the expressions of production rates as a string"""
         block = "["
         for line in (self._B - self._A).T:
@@ -256,155 +258,6 @@ class ActionMassKinetics(tr.HasTraits):
         return self._arrhenius[:, 0] * np.exp(-beta * self._arrhenius[:, 1])
 
     def integrate(self, t, method="RK45", **kwargs):
-        """
-        Integrate the kinetic equations at times `t`.
-
-        This function computes and integrates the set of kinetic differential
-        equations given the initial concentration values:
-
-        .. math::
-            dC / dt =  (B - A).T  K C^A
-
-            C(t_0) = C_0
-
-        where :math:`A` and :math:`B` are the stoichiometry matrices,
-        :math:`K` is the diagonal matrix of rate constants and :math:`C^A` is the
-        vector-matrix exponentiation of :math:`C` by :math:`A`\ .
-
-        Parameters
-        ----------
-        t : :term:`array-like` of shape (``t_points``\ ,)
-            Iterable with time values at which the concentrations are computed.
-        method : `str` or `~scipy.integrate.OdeSolver`\ , optional, default: ``'RK45'``
-            Integration method to use:
-
-            * ``'RK45'`` (default): Explicit Runge-Kutta method of order 5(4).
-            * ``'RK23'`` : Explicit Runge-Kutta method of order 3(2).
-            * ``'DOP853'``: Explicit Runge-Kutta method of order 8.
-            * ``'Radau'`` : Implicit Runge-Kutta method of the Radau IIA family of
-              order 5.
-            * ``'BDF'`` : Implicit multi-step variable-order (1 to 5) method based
-              on a backward differentiation formula for the derivative
-              approximation.
-            * ``'LSODA'`` : Adams/BDF method with automatic stiffness detection and
-              switching.
-
-            Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
-            for non-stiff problems and implicit methods ('Radau', 'BDF') for
-            stiff problems. Among Runge-Kutta methods, 'DOP853' is recommended
-            for solving with high precision (low values of `rtol` and `atol` ).
-            If not sure, first try to run 'RK45'. If it makes unusually many
-            iterations, diverges, or fails, your problem is likely to be stiff and
-            you should use 'Radau' or 'BDF'. 'LSODA' can also be a good universal
-            choice, but it might be somewhat less convenient to work with as it
-            wraps old Fortran code.
-            You can also pass an arbitrary class derived from
-            `~scipy.integrate.OdeSolver` which implements the solver.
-        **kwargs
-            Additional keyword parameters. See Other Parameters.
-
-        Other Parameters
-        ----------------
-        return_NDDataset : `bool`\ , optional, default: `True`
-            Whether to return a NDDataset
-        return_meta : `bool`\ , optional, default: `False`
-            Whether to return a dictionary with the solver results.
-            Note that when return_NDDataset is True, meta is always
-            included in the meta attribute of the NDDataset.
-
-        Returns
-        -------
-        C : `~numpy.ndarray` or `NDDataset`, shape ( ``t_points``\ , ``n_species``\ )
-            Values of the solution at times `t`\ .
-        meta : Bunch object with the following fields defined:
-
-            * t : ndarray, shape (t_points,)
-              Time points.
-            * sol : `~scipy.integrate.OdeSolution` or None
-              Found solution as `~scipy.integrate.OdeSolution` instance;
-              None if `dense_output` was
-              set to False.
-            * t_events : `list` of `~numpy.ndarray` or `None`
-              Contains for each event type a list of arrays at which an event of
-              that type event was detected. `None` if events` was None.
-            * y_events : `list` of `~numpy.ndarray` or `None`
-              For each value of `t_events` , the corresponding value of the solution.
-              `None` if events was `None`.
-            * nfev : `int`
-              Number of evaluations of the right-hand side.
-            * njev : `int`
-              Number of evaluations of the Jacobian.
-            * nlu : `int`
-              Number of LU decompositions.
-            * status : `int`
-              Reason for a successful algorithm termination:
-
-                    *  0 : The solver successfully reached the end of `tspan` .
-                    *  1 : A termination event occurred.
-
-            * message : `str`
-              Human-readable description of the termination reason.
-        """
-
-        def production_rates(ti, Ci):
-            """
-            Compute the production rates :math:`\frac{dC,dt}`.
-
-            Compute the n_s production rates at time :math:`t_i` according to:
-
-            .. math::
-                dC / dt =  (B - A).T  K C_i^A
-                C_i = C(t_i)
-
-            where :math:`A` and :math:`B` are the stoichiometry matrices, :math:`K` is
-            the diagonal matrix of rate constants and :math:`C_i^A` is the vector-matrix
-            exponentiation of :math:`C_i` by :math:`A`.
-
-            Parameters
-            ----------
-            ti: `float`
-                Time.
-            Ci: `~numpy.ndarray`
-                1D vector of the concentrations at time `ti`\ .
-            """
-            beta = 1 / R / self._T(ti)
-            K = np.diag(self._arrhenius[:, 0] * np.exp(-beta * self._arrhenius[:, 1]))
-            A, B = self.A, self.B
-            BmAt = (B - A).T
-            return np.dot(np.dot(BmAt, K), _vm_exp(Ci, A))
-
-        bunch = solve_ivp(
-            production_rates,
-            (t[0], t[-1]),
-            self.init_concentrations,
-            t_eval=t,
-            method=method,
-        )
-
-        debug_(bunch.message)
-        if bunch.status != 0:
-            raise SolverError(bunch.message)
-
-        C = bunch.y.T
-        t = bunch.t
-
-        # remove some keys from bunch
-        del bunch.y
-        del bunch.success
-
-        return_dataset = kwargs.get("return_NDDataset", True)
-        if return_dataset:
-            C = NDDataset(C, name="Concentrations")
-            C.y = Coord(t, title="time")
-            C.x = Coord(range(self.n_species), labels=self.species, title="species")
-            C.history = "Created using ActionMassKinetics.integrate"
-            C.meta.update(bunch)
-
-        if kwargs.get("return_meta", False) and not return_dataset:
-            return (C, bunch)
-        return C
-
-    def new_integrate(self, t, method="RK45", **kwargs):
         """
         Integrate the kinetic equations at times `t`.
 
@@ -487,12 +340,15 @@ class ActionMassKinetics(tr.HasTraits):
         """
 
         global_env = {}
+        locals_env = {}
         exec(
-            f"def f_(t, C): k = self.k(t); return{self.production_rates_str()}",
+            f"def f_(self, t, C): k = self.k(t); return{self._production_rates}",
             global_env,
+            locals_env,
         )
+
         bunch = solve_ivp(
-            global_env["f_"],
+            partial(locals_env["f_"], self),
             (t[0], t[-1]),
             self.init_concentrations,
             t_eval=t,
@@ -506,10 +362,6 @@ class ActionMassKinetics(tr.HasTraits):
         C = bunch.y.T
         t = bunch.t
 
-        # remove some keys from bunch
-        del bunch.y
-        del bunch.success
-
         return_dataset = kwargs.get("return_NDDataset", True)
         if return_dataset:
             C = NDDataset(C, name="Concentrations")
@@ -520,6 +372,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         if kwargs.get("return_meta", False) and not return_dataset:
             return (C, bunch)
+
         return C
 
     def _modify_kinetics(self, dict_param):

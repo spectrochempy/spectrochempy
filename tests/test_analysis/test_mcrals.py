@@ -267,7 +267,7 @@ def test_MCRALS(model, data):
     assert "converged !" in mcr.log[-15:]
 
     # reconstruct
-    Dh = mcr.reconstruct()
+    Dh = mcr.inverse_transform()
     assert (Dh - D).abs().max() < 1.0e-12
 
 
