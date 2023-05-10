@@ -116,7 +116,7 @@ class ActionMassKinetics(tr.HasTraits):
         Examples: ``"A + B -> C"`` or ``"2A -> D"``\
     species : `dict`, optional
         Dictionary of initial concentrations for the `n_species` species.
-    k : :term:`array-like`
+    arrhenius : :term:`array-like`
         Iterable of shape `n_equations` x 2 with the Arrhenius rate parameters
         ((:math:`A_1`\ , :math:`Ea_1`\ ), ... (:math:`A_n`\ , :math:`Ea_n`\ )).
     T : `float`, `Quantity` or `callable`\ , optional, default: 298.0
@@ -131,12 +131,12 @@ class ActionMassKinetics(tr.HasTraits):
     _species = tr.List(help="a list of species in this model")
     _A = Array(help="Stoichiometric matrix A (reactants)")
     _B = Array(help="Stoichiometric matrix B (producs)")
-    _k = Array(help="Arrhenius rate")
+    _arrhenius = Array(help="Arrhenius rate parameters")
     _T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0, help="Temperature")
 
-    def __init__(self, equations, species, k, T=298.0, **kwargs):
+    def __init__(self, equations, species, arrhenius, T=298.0, **kwargs):
 
-        self._k = k
+        self._arrhenius = arrhenius
         self._T = T
 
         # initialise concentrations, species and equations
@@ -148,15 +148,15 @@ class ActionMassKinetics(tr.HasTraits):
     # Private methods
     # ----------------------------------------------------------------------------------
     @tr.validate("_k")
-    def _k_validate(self, proposal):
-        # k must be an iterable of pairs (ln A_1, Ea_1)
-        k = proposal.value
+    def _arrhenius_validate(self, proposal):
+        # arrhenius must be an iterable of pairs (ln A_1, Ea_1)
+        arrhenius = proposal.value
         # k is an array (even if a list or tuple has been initialy provided (Array)
-        if k.shape[-1] != 2:
+        if arrhenius.shape[-1] != 2:
             raise ValueError("k must be an iterable of pairs: shape=(n_reactions, 2)")
         # Add more validation?
         # ...
-        return k
+        return arrhenius
 
     @tr.validate("_T")
     def _T_validate(self, proposal):
@@ -253,7 +253,7 @@ class ActionMassKinetics(tr.HasTraits):
     def k(self, t):
         """rate constants"""
         beta = 1 / R / self._T(t)
-        return self._k[:, 0] * np.exp(-beta * self._k[:, 0])
+        return self._arrhenius[:, 0] * np.exp(-beta * self._arrhenius[:, 1])
 
     def integrate(self, t, method="RK45", **kwargs):
         """
@@ -368,7 +368,7 @@ class ActionMassKinetics(tr.HasTraits):
                 1D vector of the concentrations at time `ti`\ .
             """
             beta = 1 / R / self._T(ti)
-            K = np.diag(self._k[:, 0] * np.exp(-beta * self._k[:, 1]))
+            K = np.diag(self._arrhenius[:, 0] * np.exp(-beta * self._arrhenius[:, 1]))
             A, B = self.A, self.B
             BmAt = (B - A).T
             return np.dot(np.dot(BmAt, K), _vm_exp(Ci, A))
@@ -526,9 +526,9 @@ class ActionMassKinetics(tr.HasTraits):
         for item in dict_param:
             i_r, p = item.split("[")[-1].split("].")
             if p == "A":
-                self._k[int(i_r), 0] = dict_param[item]
+                self._arrhenius[int(i_r), 0] = dict_param[item]
             elif p == "Ea":
-                self._k[int(i_r), 1] = dict_param[item]
+                self._arrhenius[int(i_r), 1] = dict_param[item]
             else:
                 raise ValueError("something went wrong in parsing the dict of params")
 
