@@ -20,6 +20,7 @@ import numpy as np
 import scipy
 
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.units import Quantity
 
 # Todo:
 # find_peaks_cwt(vector, widths[, wavelet, ...]) Attempt to find the peaks in a 1-D array.
@@ -200,7 +201,7 @@ def find_peaks(
     >>> properties["peak_heights"][0]
     <Quantity(2.26663446, 'absorbance')>
     >>> properties["widths"][0]
-    <Quantity(40.166981, 'centimeter^-1')>
+    <Quantity(38.729003, 'centimeter^-1')>
     """
 
     X = dataset.squeeze()
@@ -222,9 +223,14 @@ def find_peaks(
     dunits = X.units if use_coord else 1
 
     # assume linear x coordinates when use_coord is True!
-    step = np.abs(X.x.increment) if use_coord else 1
+    # TODO: what if the coordinates are not linear?
+    spacing = X.x.spacing
+    if isinstance(spacing, Quantity):
+        spacing = spacing.magnitude
+    step = np.abs(spacing) if use_coord else 1
 
     # transform coord (if exists) to index
+    # TODO: allow units for distance, width, wlen, plateau_size
     distance = int(round(distance / step)) if distance is not None else None
     width = int(round(width / step)) if width is not None else None
     wlen = int(round(wlen / step)) if wlen is not None else None

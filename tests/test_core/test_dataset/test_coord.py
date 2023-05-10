@@ -22,9 +22,9 @@ from spectrochempy.utils.testing import (
 from spectrochempy.utils.warnings import assert_produces_warning
 
 
-# ======================================================================================
+# --------------------------------------------------------------------------------------
 # Coord
-# ======================================================================================
+# --------------------------------------------------------------------------------------
 def test_coord():
     # simple coords
 
@@ -212,9 +212,7 @@ def test_coord():
     )
 
     coord1 = Coord(coord0)
-    assert coord1._data is coord0._data
-    coord1 = Coord(coord0, copy=True)
-    assert coord1._data is not coord0._data
+    assert coord1._data is not coord0._data  # data are always copied in this case
     assert_array_equal(coord1._data, coord0._data)
     assert isinstance(coord0, Coord)
     assert isinstance(coord1, Coord)
@@ -436,4 +434,4 @@ def test_linearcoord():
     from spectrochempy.core.dataset.coord import LinearCoord
 
     with assert_produces_warning(DeprecationWarning, check_stacklevel=False):
-        _ = LinearCoord([1, 2.5, 4, 5])
+        _ = LinearCoord(1, 10, 10)

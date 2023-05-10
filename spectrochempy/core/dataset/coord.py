@@ -10,28 +10,27 @@ This module implements the class  `Coord` .
 
 __all__ = ["Coord"]
 
-import copy as cpy
 import textwrap
 
 import numpy as np
-from traitlets import All, Bool, CFloat, CInt, Instance, Integer, Unicode, Union
-from traitlets import default as traitdefault
-from traitlets import observe, signature_has_traits
+import traitlets as tr
 
 from spectrochempy.core import error_
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath, _set_operators
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.units import Quantity, ur
+from spectrochempy.utils.compare import is_iterable, is_number
 from spectrochempy.utils.constants import INPLACE, NOMASK
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.misc import spacing_
+from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.numutils import get_n_decimals, spacings
 from spectrochempy.utils.print import colored_output
 
 
 # ======================================================================================
 # Coord
 # ======================================================================================
-@signature_has_traits
+@tr.signature_has_traits
 class Coord(NDMath, NDArray):
     """
     Explicit coordinates for a dataset along a given axis.
@@ -92,14 +91,6 @@ class Coord(NDMath, NDArray):
         It is optional but recommended to give a title to each ndarray.
     dlabel :  str, optional
         Alias of `title` .
-    copy : bool, optional
-        Perform a copy of the passed object. Default is False.
-    offset : float, optional
-        Only used is linear is True.
-        If omitted a value of 0.0 is taken for the coordinate offset.
-    increment : float, optional
-        Only used if linear is true.
-        If omitted a value of 1.0 is taken for the coordinate increment.
 
     See Also
     --------
@@ -131,30 +122,51 @@ class Coord(NDMath, NDArray):
     Coord: [labels] [  a   b   c   d   e   f] (size: 6)
     """
 
-    _copy = Bool()
+    _copy = tr.Bool()
 
-    _html_output = False
-    _parent_dim = Unicode(allow_none=True)
+    _html_output = tr.Bool(False)
+    _parent_dim = tr.Unicode(allow_none=True)
+    _parent = tr.Instance(
+        "spectrochempy.core.dataset.nddataset.NDDataset", allow_none=True
+    )
+    _use_time = tr.Bool(False)
+    _show_datapoints = tr.Bool(True)
+    _zpd = tr.Integer()
 
-    # For linear data generation (To be suppressed)
-    _offset = Union((CFloat(), CInt(), Instance(Quantity)))
-    _increment = Union((CFloat(), CInt(), Instance(Quantity)))
-    _size = Integer(0)
-    _linear = Bool(False)
+    _linear = tr.Bool(False)
+    _sigdigits = tr.Int(4)
 
-    _use_time = Bool(False)
-    _show_datapoints = Bool(True)
-    _zpd = Integer()
+    # specific to NMR
+    _larmor = tr.Instance(Quantity, allow_none=True)
 
     # ----------------------------------------------------------------------------------
     # initialization
     # ----------------------------------------------------------------------------------
     def __init__(self, data=None, **kwargs):
 
+        # check if data is iterable
+        if data is not None and not is_iterable(data):
+            raise ValueError("Data for coordinates must be an iterable or None")
+
+        # specific case of NMR (initialize unit context NMR)
+        larmor = kwargs.pop("larmor", None)
+
+        # extract parameters for linearization and data rounding
+        self._sigdigits = kwargs.pop("sigdigits", 4)
+
+        # initialize the object
         super().__init__(data=data, **kwargs)
 
-        if len(self.shape) > 1:
-            raise ValueError("Only one 1D arrays can be used to define coordinates")
+        # set the larmor frequency if any
+        if larmor is not None:
+            self.larmor = larmor
+
+    # ----------------------------------------------------------------------------------
+    # default values
+    # ----------------------------------------------------------------------------------
+    @tr.default("_larmor")
+    def _default_larmor(self):
+        return None
 
     # ----------------------------------------------------------------------------------
     # readonly property
@@ -173,25 +185,48 @@ class Coord(NDMath, NDArray):
         # Return a correct result only if the data are sorted  # return  # bool(self.data[0] > self.data[-1])
 
     @property
+    @_docstring.dedent
     def data(self):
-        """
-        The `data` array (`~numpy.ndarray`).
+        """%(data)s
 
-        If there is no data but labels, then the labels are returned instead of data.
+        Notes
+        -----
+        The data are always returned as a 1D array of float rounded to the number
+        of significant digits given by the `sigdigits` parameters.
+        If the spacing between the data is constant with the accuracy given by the
+        significant digits, the data are thus linearized
+        and the `linear` attribute is set to True.
         """
-        if self.linear:
-            data = np.arange(self.size) * self._increment + self._offset
-            # if hasattr(data, "units"):
-            #    data = data.m
-        else:
-            data = self._data
-
-        return data
+        return super().data
 
     @data.setter
     def data(self, data):
-
+        # set the data
         self._set_data(data)
+
+        # check if data is 1D
+        if self.has_data and len(self.shape) > 1:
+            raise ValueError("Only one 1D arrays can be used to define coordinates")
+
+        # linearize the data if possible or at least round it
+        # to the number of significant digits
+        if self.has_data and self.dtype.kind not in "M":
+
+            # First try to linearize the data if it is not a datetime
+            self._linear = False
+            self.linearize(self._sigdigits)
+            if self._linear:
+                # the data has been linearized, that's it!
+                return
+
+            # well, the data cannot be linearized with the given significant digits,
+            # at least round the data to the number of significant digits
+            if self._data.size < 1:
+                nd = self.sigdigits + 1
+            else:
+                maxval = np.max(np.abs(self._data))
+                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else 2
+            self._data = np.around(self._data, max(nd, 2))
 
     @property
     def default(self):
@@ -204,21 +239,6 @@ class Coord(NDMath, NDArray):
     # are not useful for this Coord class
     # ----------------------------------------------------------------------------------
     # NDarray methods
-
-    @property
-    def is_complex(self):
-        return False  # always real
-
-    @property
-    def is_empty(self):
-        """
-        True if the `data` array is empty or size=0, and if no label are present
-        - Readonly property (bool).
-        """
-        if not self.linear:
-            return super().is_empty
-
-        return False
 
     @property
     def ndim(self):
@@ -237,25 +257,18 @@ class Coord(NDMath, NDArray):
     # def values(self):
     #    return super().values
 
+    @_docstring.dedent
     def to(self, other, inplace=False, force=False):
-
+        """%(to)s"""
         new = super().to(other, force=force)
 
         if inplace:
             self._units = new._units
             self._title = new._title
             self._roi = new._roi
-            if not self.linear:
-                self._data = new._data
-            else:
-                self._offset = new._offset
-                self._increment = new._increment
-                self._linear = new._linear
-
+            self._data = new._data
         else:
             return new
-
-    to.__doc__ = NDArray.to.__doc__
 
     @property
     def masked_data(self):
@@ -268,44 +281,11 @@ class Coord(NDMath, NDArray):
     @property
     def linear(self):
         """
-        Flag to specify if the data can be constructed using a linear variation (bool).
+        Whether the coordinates axis is linear (i.e. regularly spaced)
         """
-        return self._linear
-
-    @linear.setter
-    def linear(self, val):
-
-        self._linear = (
-            val  # it val is true this provoque the linearization (  # see observe)
-        )
-
-        # if val and self._data is not None:  #     # linearisation of the data, if possible  #     self._linearize()
-
-    @property
-    def offset(self):
-        """
-        Starting value for linear array
-        """
-        return self._offset
-
-    @offset.setter
-    def offset(self, val):
-        if isinstance(val, Quantity):
-            if self.has_units:
-                val.ito(self.units)
-                val = val.m
-            else:
-                self.units = val.units
-                val = val.m
-        self._offset = val
-
-    @property
-    def offset_value(self):
-        offset = self.offset
-        if self.units:
-            return Quantity(offset, self._units)
-        else:
-            return offset
+        if self.has_data and self.dtype.kind not in "M":
+            return self._linear
+        return False
 
     @property
     def mask(self):
@@ -330,24 +310,6 @@ class Coord(NDMath, NDArray):
     def remove_masks(self, **kwargs):
         raise NotImplementedError
 
-    @property
-    def size(self):
-        """
-        Size of the underlying `data` array - Readonly property (int).
-        """
-
-        if self.linear:
-            # the provided size is returned i or its default
-            return self._size
-        else:
-            return super().size
-
-    @property
-    def shape(self):
-        if self.linear:
-            return (self._size,)
-        return super().shape
-
     def std(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -359,18 +321,6 @@ class Coord(NDMath, NDArray):
 
     def swapaxes(self, *args, **kwargs):
         raise NotImplementedError
-
-    @property
-    def spacing(self):
-        """
-        Return coordinates spacing.
-
-        It will be a scalar if the coordinates are uniformly spaced,
-        else an array of the different spacings
-        """
-        if self.linear:
-            return self.increment * self.units
-        return spacing_(self.data) * self.units
 
     def squeeze(self, *args, **kwargs):
         raise NotImplementedError
@@ -484,8 +434,12 @@ class Coord(NDMath, NDArray):
         return None
 
     @property
-    def descendant(self):
-        return (self.data[-1] - self.data[0]) < 0
+    def is_complex(self):
+        return False  # always real
+
+    @property
+    def is_descendant(self):
+        return (self._data[-1] - self._data[0]) < 0
 
     @property
     def dims(self):
@@ -494,9 +448,6 @@ class Coord(NDMath, NDArray):
     @property
     def is_1d(self):
         return True
-
-    def transpose(self, **kwargs):
-        return self
 
     # ----------------------------------------------------------------------------------
     # public methods
@@ -524,6 +475,34 @@ class Coord(NDMath, NDArray):
         """
         return self._loc2index(loc)
 
+    # TODO: new method to replace the old loc2index
+    # def loc2index(self, *loc):
+    #     """
+    #     Return the index(es) corresponding to given location(s).
+    #
+    #     Parameters
+    #     ----------
+    #     *loc : int, float, label or str
+    #         Value(s) corresponding to given location(s) on the coordinate's axis.
+    #
+    #     Returns
+    #     -------
+    #     int
+    #         The corresponding index.
+    #     """
+    #     if self.is_empty:
+    #         raise IndexError("Can not search location on an empty array")
+    #
+    #     # in case several location has been passed
+    #     if len(loc) > 1:
+    #         return [self.loc2index(loc_) for loc_ in loc]
+    #
+    #     res = self._interpret_key(*loc)
+    #     return res if not isinstance(res, tuple) else res[0]
+
+    def transpose(self, **kwargs):
+        return self
+
     # ----------------------------------------------------------------------------------
     # special methods
     # ----------------------------------------------------------------------------------
@@ -548,11 +527,23 @@ class Coord(NDMath, NDArray):
             "title",
             "name",
             "roi",
+            "linear",
+            "sigdigits",
+            "larmor",
             "show_datapoints",
         ]
 
-    def __getitem__(self, items, **kwargs):
+    def __getattr__(self, attr):
+        if attr.startswith("_"):
+            # raise an error so that traits, ipython operation and more ...
+            # will be handled correctly
+            raise AttributeError
+        if attr in ("default", "coords"):
+            # this is in case these attributes are called while it is not a coordset.
+            return self
+        raise AttributeError
 
+    def __getitem__(self, items, **kwargs):
         if isinstance(items, list):
             # Special case of fancy indexing
             items = (items,)
@@ -574,30 +565,7 @@ class Coord(NDMath, NDArray):
 
         # slicing by index of all internal array
         if new.data is not None:
-            udata = new.data[keys]
-
-            if new.linear:
-                # if self.increment > 0:
-                #     new._offset = udata.min()
-                # else:
-                #     new._offset = udata.max()
-                new._size = udata.size
-                if new._size > 1:
-                    inc = np.diff(udata)
-                    variation = (inc.max() - inc.min()) / udata.ptp()
-                    if variation < 1.0e-5:
-                        new._increment = np.mean(inc)  # np.round(np.mean(
-                        # inc), 5)
-                        new._offset = udata[0]
-                        new._data = None
-                        new._linear = True
-                    else:
-                        new._linear = False
-                else:
-                    new._linear = False
-
-            if not new.linear:
-                new._data = np.asarray(udata)
+            new._data = new.data[keys]
 
         if self.is_labeled:
             # case only of 1D dataset such as Coord
@@ -628,6 +596,20 @@ class Coord(NDMath, NDArray):
 
     def __str__(self):
         return repr(self)
+
+    # ----------------------------------------------------------------------------------
+    # private methods and properties
+    # ----------------------------------------------------------------------------------
+    @property
+    def _axis_reversed(self):
+        # Whether the axis is usually _axis_reversed for plotting.
+        # This is usually the case of ppm and IR wavenumber.
+
+        if self.units == "ppm":
+            return True
+        if self.units == "1 / centimeter" and "raman" not in self.title.lower():
+            return True
+        return False
 
     def _cstr(self, header="  coordinates: ... \n", print_size=True, **kwargs):
 
@@ -670,152 +652,21 @@ class Coord(NDMath, NDArray):
         out = self._repr_value().rstrip()
         return out
 
-    # ----------------------------------------------------------------------------------
-    # Private properties and methods
-    # ----------------------------------------------------------------------------------
-    @traitdefault("_increment")
-    def _increment_default(self):
-        return 1.0
-
-    def _linearize(self):
-
-        if not self.linear or self._data is None:
-            return
-
-        self._linear = False  # to avoid action of the observer
-
-        if self._squeeze_ndim > 1:
-            error_(NotImplementedError, "Linearization is only implemented for 1D data")
-            return
-
-        data = self._data.squeeze()
-
-        # try to find an increment
-        if data.size > 1:
-            inc = np.diff(data)
-            variation = (inc.max() - inc.min()) / data.ptp()
-            if variation < 1.0e-5:
-                self._increment = (
-                    data.ptp() / (data.size - 1) * np.sign(inc[0])
-                )  # np.mean(inc)  # np.round(np.mean(inc), 5)
-                self._offset = data[0]
-                self._size = data.size
-                self._data = None
-                self._linear = True
-            else:
-                self._linear = False
-        else:
-            self._linear = False
-
-    @traitdefault("_offset")
-    def _offset_default(self):
-        return 0
-
-    def _set_data(self, data):
-
-        if data is None:
-            return
-
-        # elif isinstance(data, Coord) and data.linear:
-        #     # Case of LinearCoord
-        #     for attr in self.__dir__():
-        #         try:
-        #             if attr in ["linear", "offset", "increment"]:
-        #                 continue
-        #             if attr == "data":
-        #                 val = data.data
-        #             else:
-        #                 val = getattr(data, f"_{attr}")
-        #             if self._copy:
-        #                 val = cpy.deepcopy(val)
-        #             setattr(self, f"_{attr}", val)
-        #         except AttributeError:
-        #             # some attribute of NDDataset are missing in NDArray
-        #             pass
-
-        elif isinstance(data, NDArray):
-            # init data with data from another NDArray or NDArray's subclass
-            # No need to check the validity of the data
-            # because the data must have been already
-            # successfully initialized for the passed NDArray.data
-            for attr in self.__dir__():
-                try:
-                    val = getattr(data, f"_{attr}")
-                    if self._copy:
-                        val = cpy.deepcopy(val)
-                    setattr(self, f"_{attr}", val)
-                except AttributeError:
-                    # some attribute of NDDataset are missing in NDArray
-                    pass
-
-        elif isinstance(data, Quantity):
-            self._data = np.array(data.magnitude, subok=True, copy=self._copy)
-            self._units = data.units
-
-        elif hasattr(data, "mask"):
-            # an object with data and mask attributes
-            self._data = np.array(data.data, subok=True, copy=self._copy)
-            if isinstance(data.mask, np.ndarray) and data.mask.shape == data.data.shape:
-                self.mask = np.array(data.mask, dtype=np.bool_, copy=False)
-
-        elif (
-            not hasattr(data, "shape")
-            or not hasattr(data, "__getitem__")
-            or not hasattr(data, "__array_struct__")
-        ):
-            # Data doesn't look like a numpy array, try converting it to
-            # one. Non-numerical input are converted to an array of objects.
-            self._data = np.array(data, subok=True, copy=False)
-
-        else:
-            data = np.array(data, subok=True, copy=self._copy)
-            if data.dtype == np.object_:  # likely None value
-                data = data.astype(float)
-            self._data = data
-
-        if self.linear:
-            # we try to replace data by only an offset and an increment
-            self._linearize()
-
     @staticmethod
     def _unittransform(new, units):
         oldunits = new.units
-        if not new.linear:
-            udata = (new.data * oldunits).to(units)
-            new._data = udata.m
-            new._units = udata.units
-        else:
-            offset = (new.offset * oldunits).to(units)
-            increment = (new.increment * oldunits).to(units)
-            new._offset = offset.m
-            new._increment = increment.m
-            new._units = increment.units
-
+        udata = (new.data * oldunits).to(units)
+        new._data = udata.m
+        new._units = udata.units
         if new._roi is not None:
             roi = (np.array(new._roi) * oldunits).to(units)
             new._roi = list(roi)
-
-        # if new._linear:
-        #     # try to make it linear as well
-        #     new._linearize()
-        #     if not new._linear and new._implements("LinearCoord"):
-        #         # can't be linearized -> Coord
-        #         if inplace:
-        #             raise Exception(
-        #                     "A LinearCoord object cannot be transformed to a non linear coordinate "
-        #                     "`inplace` . "
-        #                     "Use to() instead of ito() and leave the `inplace` attribute to False"
-        #             )
-        #         else:
-        #             from spectrochempy import Coord
-        #
-        #             new = Coord(new)
         return new
 
     # ----------------------------------------------------------------------------------
     # Events
     # ----------------------------------------------------------------------------------
-    @observe(All)
+    @tr.observe(tr.All)
     def _anytrait_changed(self, change):
         # ex: change {
         #   'owner': object, # The HasTraits instance
@@ -825,42 +676,26 @@ class Coord(NDMath, NDArray):
         #   'type': 'change', # The event type of the notification, usually
         #   'change'
         # }
+        pass
 
-        if change.name in ["_linear", "_increment", "_offset", "_size"]:
-            if self._linear:
-                self._linearize()
-            return
-
-    # @property
-    # def increment(self):
-    #     return self._increment
-
-    # @increment.setter
-    # def increment(self, val):
-    #     if isinstance(val, Quantity):
-    #         if self.has_units:
-    #             val.ito(self.units)
-    #             val = val.m
-    #         else:
-    #             self.units = val.units
-    #             val = val.m
-    #     self._increment = val
-    #
-    # @property
-    # def increment_value(self):
-    #     increment = self.increment
-    #     if self.units:
-    #         return Quantity(increment, self._units)
-    #     else:
-    #         return increment
+    # ----------------------------------------------------------------------------------
+    # Public methods and properties
+    # ----------------------------------------------------------------------------------
 
     def set_laser_frequency(self, frequency=15798.26 * ur("cm^-1")):
-        """Set the laser frequency.
+        """
+        Set the laser frequency.
+
+        This method is used to set the laser frequency of the dataset.
+        The laser frequency is used to convert the x-axis from optical path
+        difference to time. The laser frequency is also used to calculate
+        the wavenumber axis.
 
         Parameters
         ----------
-        frequency : `float` or `Quantity`
-            The laser frequency in cm^-1 or Hz.
+        frequency : `float` or `Quantity`\ , optional, default=15798.26 * ur("cm^-1")
+            The laser frequency in cm^-1 or Hz. If the value is in cm^-1, the
+            frequency is converted to Hz using the current speed of light value.
         """
         if not isinstance(frequency, Quantity):
             frequency = frequency * ur("cm^-1")
@@ -917,6 +752,17 @@ class Coord(NDMath, NDArray):
         self._show_datapoints = val
 
     @property
+    def larmor(self):
+        """
+        Return larmor frequency in NMR spectroscopy context.
+        """
+        return self._larmor
+
+    @larmor.setter
+    def larmor(self, val):
+        self._larmor = val
+
+    @property
     def laser_frequency(self):
         """
         Laser frequency if needed (Quantity).
@@ -927,19 +773,101 @@ class Coord(NDMath, NDArray):
     def laser_frequency(self, val):
         self.meta.laser_frequency = val
 
+    def linearize(self, sigdigits=3):
+        """
+        Linearize the coordinate's data.
+
+        Make coordinates with an equally distributed spacing, when possible, i.e.,
+        if the spacings are not too different when rounded to the number of
+        significant digits passed in parameters.
+        If the spacings are too different, the coordinates are not linearized.
+        In this case, the `linear` attribute is set to False.
+
+        Parameters
+        ----------
+        sigdigits :  Int, optional, default=3
+            The number of significant digit for coordinates values.
+        """
+        from spectrochempy.application import warning_
+
+        if not self.has_data or self.data.size < 3:
+            return
+
+        data = self._data.squeeze()
+
+        self._sigdigits = sigdigits
+
+        spacing = spacings(self._data, sigdigits)
+
+        makeitlinear = is_number(spacing)
+
+        if not makeitlinear and is_iterable(spacing):
+            # may be the variation in % are small enough (0.1%)
+            variation = (
+                (np.max(spacing) - np.min(spacing)) * 100.0 / np.max(spacing) / 2.0
+            )
+            if variation <= 0.1:
+                makeitlinear = True
+
+        if makeitlinear:
+            # single spacing with this precision
+            # we set the number with their full precision
+            # rounding will be made if necessary when reading the data property
+            nd = get_n_decimals(np.diff(self._data).max(), self._sigdigits)
+            data = np.around(data, nd)
+            self._data = np.linspace(data[0], data[-1], data.size)
+            self._linear = True
+        else:
+            warning_(
+                "The coordinates spacing is not enough uniform to allow linearization.",
+                category=UserWarning,
+            )
+            self._linear = False
+
+    @property
+    def sigdigits(self):
+        """
+        Number of significant digits for rounding coordinate values.
+
+        Note
+        ----
+        The number of significant digits is used when linearizing the coordinates. It is
+        also used when setting the coordinates values at the Coord initialization
+        or everytime the data array is changed.
+        """
+        return self._sigdigits
+
+    @sigdigits.setter
+    def sigdigits(self, val):
+        self._sigdigits = val
+
+    @property
+    def spacing(self):
+        """
+        Coordinate spacing.
+
+        It will be a scalar if the coordinates are uniformly spaced, else
+        an array of the different spacings.
+
+        Note
+        ----
+        The spacing is returned in the units of the coordinate.
+        """
+        units = self.units if self.units is not None else 1
+        if self.has_data:
+            return spacings(self._data) * units
+        return None
+
 
 # ======================================================================================
 # LinearCoord (Deprecated)
 # TODO : should be removed in version 0.8
 # ======================================================================================
-
-
-@signature_has_traits
+@tr.signature_has_traits
 class LinearCoord(Coord):
     @deprecated(
         kind="object",
         replace="Coord",
-        extra_msg="with the `linear` keyword argument",
         removed="0.8",
     )
     def __init__(self, offset=None, increment=None, size=None, **kwargs):

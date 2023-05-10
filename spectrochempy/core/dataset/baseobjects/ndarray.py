@@ -43,6 +43,7 @@ from spectrochempy.core.units import (
 )
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import INPLACE, MASKED, NOMASK, MaskedConstant
+from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.misc import (
     TYPE_FLOAT,
@@ -288,7 +289,7 @@ class NDArray(HasTraits):
         if attrs is None:
             attrs = self.__dir__()
 
-        for attr in ["name"]:
+        for attr in ["name", "linear"]:
             if attr in attrs:
                 attrs.remove(attr)
 
@@ -378,7 +379,7 @@ class NDArray(HasTraits):
             new = self.copy()
 
         # slicing by index of all internal array
-        if new.data is not None:
+        if new._data is not None:
             udata = new.masked_data[keys]
             new._data = np.asarray(udata)
 
@@ -891,6 +892,7 @@ class NDArray(HasTraits):
         return strunits
 
     def _repr_value(self):
+
         numpyprintoptions(precision=4, edgeitems=0, spc=1, linewidth=120)
 
         prefix = type(self).__name__ + ": "
@@ -1190,9 +1192,11 @@ class NDArray(HasTraits):
         return new
 
     @property
+    @_docstring.get_docstring(base="data")
+    @_docstring.dedent
     def data(self):
         """
-        The `data` array (`~numpy.ndarray`).
+        Data array (`~numpy.ndarray`).
 
         If there is no data but labels, then the labels are returned instead of data.
         """
@@ -1270,13 +1274,11 @@ class NDArray(HasTraits):
     @property
     def dtype(self):
         """
-        Data type (np.dtype).
+        Return the data type.
         """
         if self.is_empty:
-            self._dtype = None
-        else:
-            self._dtype = self.data.dtype
-        return self._dtype
+            return None
+        return self._data.dtype
 
     @property
     def filename(self):
@@ -1384,11 +1386,9 @@ class NDArray(HasTraits):
     @property
     def has_data(self):
         """
-        True if the `data` array is not empty and size > 0.
-
-        (Readonly property).
+        True if the `data` array is not empty.
         """
-        if (self.data is None) or (self.data.size == 0):
+        if self._data is None or self._data.size == 0:
             return False
 
         return True
@@ -1981,6 +1981,8 @@ class NDArray(HasTraits):
         if title:
             self._title = title
 
+    @_docstring.get_docstring(base="to")
+    @_docstring.dedent
     def to(self, other, inplace=False, force=False):
         """
         Return the object with data rescaled to different units.

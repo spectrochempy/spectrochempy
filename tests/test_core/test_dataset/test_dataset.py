@@ -21,6 +21,8 @@ from spectrochempy.utils.testing import (
     RandomSeedContext,
     assert_array_almost_equal,
     assert_array_equal,
+    assert_coord_almost_equal,
+    assert_coord_equal,
     assert_dataset_almost_equal,
     assert_dataset_equal,
     assert_equal,
@@ -440,7 +442,7 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     assert plane0.shape == (1, 100, 3)
     assert plane0.size == 300
     assert plane0.dims == ["z", "y", "x"]
-    assert_dataset_equal(plane0.z, da.z[0])
+    assert_coord_equal(plane0.z, da.z[0])
     da1 = plane0.squeeze()
     assert da1.shape == (100, 3)
     assert da1.dims == ["y", "x"]
@@ -452,10 +454,10 @@ def test_nddataset_slicing_by_index(ref_ds, ds1):
     assert plane1.dims == ["z", "y", "x"]
     da2 = plane1.squeeze()
     assert da2.dims == ["z", "x"]
-    assert_dataset_almost_equal(da2.z, coords[-1], decimal=2)  # remember
+    assert_coord_almost_equal(da2.z, coords[-1], decimal=2)  # remember
     # coordinates
     # are ordered by name!
-    assert_dataset_almost_equal(da2.x, coords[0])
+    assert_coord_almost_equal(da2.x, coords[0])
     # another selection
     row0 = plane0[:, 0]
     assert type(row0) == type(da)

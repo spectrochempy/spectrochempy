@@ -8,9 +8,9 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.14.5
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 #   language_info:
@@ -22,8 +22,9 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.7.9
+#     version: 3.10.10
 # ---
+
 # %% [markdown]
 # # Peak Maxima Finding
 #
@@ -547,3 +548,20 @@ for i in range(len(peaks)):
 
 # %% [markdown]
 # -- this is the end of this tutorial --
+
+# %%
+dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")
+X = dataset[0, 1800.0:1300.0]
+peaks, properties = X.find_peaks(height=1.5, distance=50.0, width=0.0)
+len(peaks.x)
+
+# %%
+peaks.x.values
+
+# %%
+properties["peak_heights"][0]
+
+# %%
+properties["widths"][0]
+
+# %%

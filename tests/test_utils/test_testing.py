@@ -79,6 +79,7 @@ def test_compare_coords(IR_dataset_2D):
 
     # almost equal coords
     x4 = x1.copy()
+    x4.sigdigits = 7
     x4.data += 1.0e-6
     with testing.raises(AssertionError):
         testing.assert_coord_equal(x1, x4)
