@@ -20,7 +20,7 @@ from functools import partial
 import numpy as np
 import traitlets as tr
 from scipy.integrate import solve_ivp
-from scipy.optimize import differential_evolution, fmin, least_squares, minimize
+from scipy.optimize import differential_evolution, least_squares, minimize
 
 from spectrochempy.core import debug_, error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
@@ -421,7 +421,7 @@ class ActionMassKinetics(tr.HasTraits):
             Chat = self.integrate(Cexp.y.data, return_NDDataset=False)
             return np.sum(np.square(Cexp.data[:, iexp] - Chat[:, i2iexp]))
 
-        method = kwargs.pop("method", "simplex")
+        method = kwargs.pop("method", "Nelder-Mead")
         bounds = kwargs.get("bounds", None)
         tol = kwargs.get("tol", None)
         options = kwargs.get("options", {"disp": True})
@@ -439,27 +439,15 @@ class ActionMassKinetics(tr.HasTraits):
             )
         tic = datetime.datetime.now(datetime.timezone.utc)
 
-        if method.upper() == "SIMPLEX":
-            xopt, fopt, iterations, funcalls, warnmess = fmin(
-                objective,
-                guess_param,
-                args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
-                full_output=True,
-                disp=True,
-                **kwargs,
-            )
-            optim_res = {"x": xopt, "nit": iter}
-
-        elif method.upper() in SCIPY_MINIMIZE_METHODS:
-            optim_res = minimize(
-                objective,
-                guess_param,
-                args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
-                method=method,
-                bounds=bounds,
-                tol=tol,
-                options=options,
-            )
+        optim_res = minimize(
+            objective,
+            guess_param,
+            args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
+            method=method,
+            bounds=bounds,
+            tol=tol,
+            options=options,
+        )
         toc = datetime.datetime.now(datetime.timezone.utc)
 
         if options["disp"]:
