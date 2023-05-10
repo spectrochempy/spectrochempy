@@ -50,6 +50,7 @@ def test_equations_regex(test_str, left_expected, right_expected):
     left, right = cu._interpret_equation(test_str, species)
 
     assert left_expected == left
+    assert right_expected == right
 
 
 def test_ABC():
