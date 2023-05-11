@@ -341,8 +341,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         and x.units.dimensionality != "[time]"
     ):
         error_(
+            Exception,
             "fft apply only to dimensions with [time] dimensionality or dimensionless coords\n"
-            "fft processing was thus cancelled"
+            "fft processing was thus cancelled",
         )
         error = True
 
@@ -353,20 +354,27 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         and not x.dimensionless
     ):
         error_(
+            Exception,
             "ifft apply only to dimensions with [frequency] dimensionality or with ppm units "
-            "or dimensionless coords.\n ifft processing was thus cancelled"
+            "or dimensionless coords.\n ifft processing was thus cancelled",
         )
         error = True
 
     # Should not be masked
     elif new.is_masked:
         error_(
-            "current fft or ifft processing does not support masked data as input.\n processing was thus cancelled"
+            Exception,
+            "current fft or ifft processing does not support masked data as input.\n processing was thus cancelled",
         )
         error = True
 
     # Coordinates should be uniformly spaced (linear coordinate)
     if not x.linear:
+        error_(
+            "fft or ifft processing only support linear coordinates.\n"
+            "Processing was thus cancelled"
+        )
+
         error = True
 
     if hasattr(x, "_use_time_axis"):

@@ -38,18 +38,29 @@ def _zf_method(method):
             swapped = True
 
         x = new.coordset[dim]
+
+        if not x.linear:
+            # this method is not valid for non-linear coordinates
+            error_(
+                "zero-filling apply only to linear coordinates\n"
+                "The processing was thus cancelled"
+            )
+            return dataset  # return the original dataset
+
         if hasattr(x, "_use_time_axis"):
             x._use_time_axis = True  # we need to have dimensionless or time units
 
         # get the lastcoord
         if x.unitless or x.dimensionless or x.units.dimensionality == "[time]":
-
+            # we can apply the method
             data = method(new.data, **kwargs)
             new._data = data
 
-            # we needs to increase the x coordinates array
-            x._size = new._data.shape[-1]
-
+            # we need to increase the x coordinates array to match the new data size
+            offset = x.data[0]
+            size = x.size
+            inc = x._data.ptp() / (size - 1)
+            x._data = np.arange(offset, offset + new._data.shape[-1] * inc, inc)
             # update with the new td
             new.meta.td[-1] = x.size
             new.history = f"`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}"
@@ -59,6 +70,7 @@ def _zf_method(method):
                 "zero-filling apply only to dimensions with [time] dimensionality or dimensionless coords\n"
                 "The processing was thus cancelled"
             )
+            return dataset  # return the original dataset
 
         # restore original data order if it was swapped
         if swapped:
