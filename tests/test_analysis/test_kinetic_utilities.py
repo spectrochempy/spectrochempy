@@ -71,8 +71,7 @@ def test_ABC():
             "k[0].A": 1.1,
             "k[1].Ea": 49.0,
         },
-        xtol=0.01,
-        ftol=0.1,
+        optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
     )
     C_opt = kin_guess.integrate(time)
 
