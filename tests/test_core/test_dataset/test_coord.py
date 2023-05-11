@@ -21,37 +21,62 @@ from spectrochempy.utils.testing import (
 )
 from spectrochempy.utils.warnings import assert_produces_warning
 
-
 # --------------------------------------------------------------------------------------
 # Coord
 # --------------------------------------------------------------------------------------
+
+
 def test_coord():
     # simple coords
+    # init with invalid data
+    with pytest.raises(ValueError):
+        # value must be iterable
+        Coord(1)
 
+    # init with a list of values
     a = Coord([1, 2, 3], name="x")
     assert a.id is not None
     assert not a.is_empty
     assert not a.is_masked
     assert_array_equal(a.data, np.array([1, 2, 3]))
-    assert not a.is_labeled
+    assert a.dtype == np.dtype(float)
+    assert a.size == 3
+    assert a.ndim == 1
+    assert a.shape == (3,)
+    assert a.is_labeled is False
     assert a.units is None
-    assert a.unitless
-    debug_(repr(a.meta))
+    assert a.unitless is True
     assert not a.meta
     assert a.name == "x"
+    assert a.title == "<untitled>"
+
+    # larmor frequency
+    a = Coord([1, 2, 3], name="x", units="ppm", larmor=104.7 * ur.MHz)
+    assert a.larmor == 104.7 * ur.MHz
+    assert a.reversed is True
+    assert a.units == ur.ppm
+
+    # init with size 1
+    a = Coord([1.001], name="x")
+    assert a.data[0] == 1.001, "signdigit default=4"
+
+    a = Coord([1.0001])
+    assert a.data[0] == 1.0, "signdigit default=4"
+
+    # init with size 0 object
+    a = Coord([])
+    assert np.all(a.data == np.array([]))
 
     # set properties
-
     a.title = "xxxx"
     assert a.title == "xxxx"
     a.name = "y"
     assert a.name == "y"
     a.meta = None
-    a.meta = {"val": 125}  # need to be an OrderedDic
+    a.meta = {"val": 125}
     assert a.meta["val"] == 125
 
-    # now with labels
-
+    # init now with labels and values
     x = np.arange(10)
     y = list("abcdefghij")
     a = Coord(x, labels=y, title="processors", name="x")
@@ -60,14 +85,12 @@ def test_coord():
     assert isinstance(a.labels, np.ndarray)
 
     # any kind of object can be a label
-
     assert a.labels.dtype == "O"
     # even an array
     a._labels[3] = x
     assert a._labels[3][2] == 2
 
     # coords can be defined only with labels
-
     y = list("abcdefghij")
     a = Coord(labels=y, title="processors")
     assert a.title == "processors"
@@ -270,6 +293,39 @@ def test_coord():
     assert coord0.T == coord0
     assert_array_equal(coord0.masked_data, coord0.data)
 
+    # test default
+    assert a.default is a
+
+
+def test_coord_to():
+    # related to issue #643
+    ### The following code works perfectly
+
+    c0 = Coord.linspace(
+        start=8000.0, stop=1250.0, num=6, labels=None, units="cm^-1", title="wavenumber"
+    )
+
+    from spectrochempy import NDDataset
+
+    ds = NDDataset(np.random.random((6,)), coords=[c0])
+    ds.x = c0
+    assert ds.x.linear == True
+
+    ds.x.ito("nm")  # check ito works
+    assert ds.x.linear == False, "ito should have changed the coord to non-linear"
+
+    assert ds.x.units == ur.nm, "ito should have changed the coord units to nm"
+    assert (
+        ds.x[0].value == 1250.0 * ur.nm
+    ), "ito should have changed the coord values to nm"
+
+    x = ds.x.to("cm^-1")  # check to works  (back to linear)
+    assert x.linear == True, "to should have changed the coord to linear"
+    assert x.units == ur.cm**-1, "to should have changed the coord units to cm^-1"
+    assert (
+        x[0].value == 8000.0 * ur.cm**-1
+    ), "to should have changed the coord values to cm^-1"
+
 
 def test_coord_slicing():
     # slicing by index
@@ -417,7 +473,6 @@ NOTIMPL = [
     "argmax",
     "argmin",
     "asfortranarray",
-    "origin",
 ]
 
 

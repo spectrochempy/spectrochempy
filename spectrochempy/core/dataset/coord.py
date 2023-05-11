@@ -66,13 +66,13 @@ class Coord(NDMath, NDArray):
     dims : list of chars, optional.
         if specified the list must have a length equal to the number od
         data dimensions (ndim) and the chars must be
-        taken among among x,y,z,u,v,w or t. If not specified,
+        taken among x,y,z,u,v,w or t. If not specified,
         the dimension names are automatically attributed in
         this order.
     name : str, optional
-        A user friendly name for this object. If not given,
+        A user-friendly name for this object. If not given,
         the automatic `id` given at the object creation will be
-        used as a name..
+        used as a name.
     labels : array of objects, optional
         Labels for the `data` . labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning
@@ -173,9 +173,7 @@ class Coord(NDMath, NDArray):
     # ----------------------------------------------------------------------------------
     @property
     def reversed(self):
-        """bool - Whether the axis is reversed (readonly
-        property).
-        """
+        """Whether the axis is reversed."""
         if self.units == "ppm":
             return True
         elif self.units == "1 / centimeter" and "raman" not in self.title.lower():
@@ -221,11 +219,11 @@ class Coord(NDMath, NDArray):
 
             # well, the data cannot be linearized with the given significant digits,
             # at least round the data to the number of significant digits
-            if self._data.size < 1:
-                nd = self.sigdigits + 1
-            else:
-                maxval = np.max(np.abs(self._data))
-                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else 2
+            # if self._data.size < 1:  # pragma: no cover
+            #     nd = self.sigdigits + 1
+            # else:
+            maxval = np.max(np.abs(self._data))
+            nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else 2
             self._data = np.around(self._data, max(nd, 2))
 
     @property
@@ -245,7 +243,7 @@ class Coord(NDMath, NDArray):
         if self.linear:
             return 1
         ndim = super().ndim
-        if ndim > 1:
+        if ndim > 1:  # pragma: no cover
             raise ValueError("Coordinate's array should be 1-dimensional!")
         return ndim
 
@@ -263,11 +261,16 @@ class Coord(NDMath, NDArray):
         new = super().to(other, force=force)
 
         if inplace:
+            # update the current object
+            self.data = new._data  # here we assign to the data attribute to fire
+            # the linearisation (eventually) and the rounding
+            # the _linear attribute is set to True if the data are linearized
             self._units = new._units
             self._title = new._title
             self._roi = new._roi
-            self._data = new._data
         else:
+            new.data = new._data  # here we assign to the data attribute to fire
+            # the linearisation (eventually) and the rounding
             return new
 
     @property
@@ -409,12 +412,7 @@ class Coord(NDMath, NDArray):
         dtype : str or dtype
             Typecode or data-type to which the array is cast.
         """
-        if not self.linear:
-            self._data = self._data.astype(dtype, **kwargs)
-        else:
-            self._increment = np.array(self._increment).astype(dtype, **kwargs)[()]
-            self._offset = np.array(self._offset).astype(dtype, **kwargs)[()]
-        return self
+        self._data = self._data.astype(dtype, **kwargs)
 
     def average(self, *args, **kwargs):
         raise NotImplementedError
@@ -424,14 +422,6 @@ class Coord(NDMath, NDArray):
 
     def get_axis(self, *args, **kwargs):
         return super().get_axis(*args, **kwargs)
-
-    @property
-    def origin(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @property
-    def author(self):
-        return None
 
     @property
     def is_complex(self):
