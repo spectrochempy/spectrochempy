@@ -1261,7 +1261,7 @@ def test_nddataset_bug_462():
     A.x = scp.Coord(np.arange(0.0, 100.0, 1), title="coord1")
     A.write("A.scp", confirm=False)
     B = scp.read("A.scp")
-    assert B.x == A.x, "incorrect encoding/decoding"
+    assert B.x == A.x
 
     C = scp.random((10, 100))
     C.x = [

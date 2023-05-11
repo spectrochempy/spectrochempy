@@ -289,7 +289,7 @@ class NDArray(HasTraits):
         if attrs is None:
             attrs = self.__dir__()
 
-        for attr in ["name", "linear"]:
+        for attr in ["name", "linear", "show_datapoints"]:
             if attr in attrs:
                 attrs.remove(attr)
 

@@ -24,8 +24,12 @@ def is_iterable(obj):
     """
     from spectrochempy.core.units import Quantity
 
-    # Quantity has a method iter, but we don't want to use it as an iterable.
-    return hasattr(obj, "__iter__") and not isinstance(obj, Quantity)
+    # I don't know why Quantity has a method iter,
+    # but we don't want to use it as an iterable if it is not.
+    if isinstance(obj, Quantity) and not hasattr(obj, "shape"):
+        return False
+
+    return hasattr(obj, "__iter__")
 
 
 def is_number(obj):

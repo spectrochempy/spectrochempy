@@ -367,14 +367,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
     # Coordinates should be uniformly spaced (linear coordinate)
     if not x.linear:
-        # try to linearize it
-        x.linear = True
-        if not x.linear:
-            # linearization failed
-            error = True
+        error = True
 
     if hasattr(x, "_use_time_axis"):
-        x._use_time_axis = True  # we need to havze dimentionless or time units
+        x._use_time_axis = True  # we need to have dimentionless or time units
 
     if not error:
         # OK we can proceed
@@ -384,7 +380,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         if not inv:
             td = x.size
 
-        # if no size (or si) parameter then use the size of the data (size not used for inverse transform
+        # if no size (or si) parameter then use the size of the data
+        # (size not used for inverse transform
         if size is None or inv:
             size = kwargs.get("si", x.size)
 

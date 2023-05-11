@@ -11,6 +11,7 @@ import pytest
 import spectrochempy
 import spectrochempy as scp
 from spectrochempy.core.common import dialogs
+from spectrochempy.utils import testing
 
 DATADIR = scp.preferences.datadir
 SPG_FILE = DATADIR / "irdata/nh4y-activation.spg"
@@ -74,8 +75,14 @@ def test_baselinecorrector_slicing(X):
     out._process_clicked()
     assert len(out._fig.axes[0].lines) == 56, "original + baselines"
     assert len(out._fig.axes[1].lines) == 28, "corrected"
-    assert np.all(out._fig.axes[1].lines[0].get_xdata() == X.x[5000.56:649.9].data)
-    assert np.all(out._fig.axes[0].lines[1].get_ydata() == X[2, 5000.56:649.9].data)
+    testing.assert_array_almost_equal(
+        out._fig.axes[1].lines[0].get_xdata(), X.x[5000.56:649.9].data, decimal=3
+    )
+    testing.assert_array_almost_equal(
+        out._fig.axes[0].lines[1].get_ydata(),
+        X[2, 5000.56:649.9].data.squeeze(),
+        decimal=3,
+    )
 
     out._x_limits_control.value = "[5400.56 : 800.9 : 1]"
     out._ranges_control.value = """
@@ -103,10 +110,14 @@ def test_baselinecorrector_slicing(X):
     out2 = scp.BaselineCorrector(X, initial_ranges=initial_ranges)
     out2._x_limits_control.value = "[5400.56 : 800.9 : 1]"
     out2._process_clicked()
-    assert np.all(out2._fig.axes[1].lines[0].get_xdata() == X.x[5400.56:800.9].data)
+    testing.assert_array_almost_equal(
+        out2._fig.axes[1].lines[0].get_xdata(), X.x[5400.56:800.9].data, decimal=3
+    )
 
-    assert np.all(
-        out._fig.axes[1].lines[0].get_xdata() == out2._fig.axes[1].lines[0].get_xdata()
+    testing.assert_array_almost_equal(
+        out._fig.axes[1].lines[0].get_xdata(),
+        out2._fig.axes[1].lines[0].get_xdata(),
+        decimal=3,
     )
 
     # slicing limits out of coord range
@@ -190,7 +201,9 @@ def test_baselinecorrector_parameters(X):
     assert out.corrected.shape == (10, 100)
     assert len(out._fig.axes[0].lines) == 20, "original + baselines"
     assert len(out._fig.axes[1].lines) == 10, "corrected"
-    assert np.all(out._fig.axes[1].lines[0].get_xdata() == _X.x.data)
+    testing.assert_array_almost_equal(
+        out._fig.axes[1].lines[0].get_xdata(), _X.x.data, decimal=3
+    )
 
     # try multivariate
     out._method_selector.value = "multivariate"

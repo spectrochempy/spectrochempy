@@ -39,7 +39,7 @@ def _zf_method(method):
 
         x = new.coordset[dim]
         if hasattr(x, "_use_time_axis"):
-            x._use_time_axis = True  # we need to havze dimentionless or time units
+            x._use_time_axis = True  # we need to have dimensionless or time units
 
         # get the lastcoord
         if x.unitless or x.dimensionless or x.units.dimensionality == "[time]":

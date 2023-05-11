@@ -1009,7 +1009,8 @@ def _read_topspin(*args, **kwargs):
             deltaf = -meta.sw_h[axis] / sizem
             first = meta.sfo1[axis] - meta.sf[axis] - deltaf * sizem / 2.0
 
-            coord = Coord(np.arange(size) * deltaf + first)
+            coordpoints = np.arange(size) * deltaf + first
+            coord = Coord(coordpoints)
             coord.meta.larmor = meta.sfo1[axis]  # needed for ppm transformation
             coord.ito("ppm")
             if meta.nuc1 is not None:
