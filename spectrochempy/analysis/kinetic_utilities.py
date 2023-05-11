@@ -257,7 +257,7 @@ class ActionMassKinetics(tr.HasTraits):
         beta = 1 / R / self._T(t)
         return self._arrhenius[:, 0] * np.exp(-beta * self._arrhenius[:, 1])
 
-    def integrate(self, t, method="RK45", **kwargs):
+    def integrate(self, t, method="LSODA", **kwargs):
         """
         Integrate the kinetic equations at times `t`.
 
@@ -386,7 +386,13 @@ class ActionMassKinetics(tr.HasTraits):
                 raise ValueError("something went wrong in parsing the dict of params")
 
     def fit_to_concentrations(
-        self, Cexp, iexp, i2iexp, dict_param_to_optimize, **kwargs
+        self,
+        Cexp,
+        iexp,
+        i2iexp,
+        dict_param_to_optimize,
+        ivp_solver_kwargs={},
+        optimizer_kwargs={},
     ):
         """
         Fit rate parameters and concentrations to a concentration profile.
@@ -402,11 +408,14 @@ class ActionMassKinetics(tr.HasTraits):
         i2iexp : `int`
             Correspondence between optimized (external) concentration profile and
             experimental concentration profile.
-        dict_param_to_optimize : `dict`
+        dict_param_to_optimize : `dict` or None
             rate parameters to optimize. Keys should be 'k[i].A' and 'k[i].Ea' for
             pre-exponential factor.
-        **kwargs
-            Parameters for the optimization (see `~scipy.optimize.minimize`\ ).
+        ivp_solver_kwargs : `dict`
+            keyword arguments for the ode solver. Defaults are the same as for
+            `~scipy.integrate.solve_ivp`\ , except for `method=LSDOA`
+        optimizer_kwargs: `dict`
+            keyword arguments the optimization (see `~scipy.optimize.minimize`\ ).
 
         Returns
         --------
@@ -414,47 +423,52 @@ class ActionMassKinetics(tr.HasTraits):
             A result dictionary.
         """
 
-        def objective(params, Cexp, iexp, i2iexp, dict_param_to_optimize):
+        def objective(params, Cexp, iexp, i2iexp, dict_param_to_optimize, method):
+
             for param, item in zip(params, dict_param_to_optimize):
                 dict_param_to_optimize[item] = param
             self._modify_kinetics(dict_param_to_optimize)
-            Chat = self.integrate(Cexp.y.data, return_NDDataset=False)
+            Chat = self.integrate(Cexp.y.data, return_NDDataset=False, method=method)
             return np.sum(np.square(Cexp.data[:, iexp] - Chat[:, i2iexp]))
 
-        method = kwargs.pop("method", "Nelder-Mead")
-        bounds = kwargs.get("bounds", None)
-        tol = kwargs.get("tol", None)
-        options = kwargs.get("options", {"disp": True})
+        optimizer_method = optimizer_kwargs.get("Method", "Nelder-Mead")
+        optimizer_bounds = optimizer_kwargs.get("bounds", None)
+        optimizer_tol = optimizer_kwargs.get("tol", None)
+        optimizer_options = optimizer_kwargs.get("options", {"disp": True})
+
+        ivp_solver_method = ivp_solver_kwargs.get("method", "LSODA")
 
         guess_param = np.zeros((len(dict_param_to_optimize)))
         for i, param in enumerate(dict_param_to_optimize):
             guess_param[i] = dict_param_to_optimize[param]
 
-        if options["disp"]:
+        if optimizer_options["disp"]:
             print("Optimization of the parameters.")
             print(f"         Initial parameters: {guess_param}")
             print(
                 f"         Initial function value: "
-                f"{objective(guess_param, Cexp, iexp, i2iexp, dict_param_to_optimize)}"
+                f"{objective(guess_param, Cexp, iexp, i2iexp, dict_param_to_optimize, ivp_solver_method)}"
             )
         tic = datetime.datetime.now(datetime.timezone.utc)
 
         optim_res = minimize(
             objective,
             guess_param,
-            args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
-            method=method,
-            bounds=bounds,
-            tol=tol,
-            options=options,
+            args=(Cexp, iexp, i2iexp, dict_param_to_optimize, ivp_solver_method),
+            method=optimizer_method,
+            bounds=optimizer_bounds,
+            tol=optimizer_tol,
+            options=optimizer_options,
         )
         toc = datetime.datetime.now(datetime.timezone.utc)
 
-        if options["disp"]:
+        if optimizer_options["disp"]:
             print(f"         Optimization time: {toc - tic}")
             print(f"         Final parameters: {optim_res['x']}")
 
-        Ckin = self.integrate(Cexp.y.data, return_NDDataset=False)
+        Ckin = self.integrate(
+            Cexp.y.data, return_NDDataset=False, method=ivp_solver_method
+        )
 
         for i, param in enumerate(dict_param_to_optimize):
             dict_param_to_optimize[param] = optim_res["x"][i]
