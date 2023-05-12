@@ -97,9 +97,18 @@ class Coord(NDMath, NDArray):
     sigdigits : int, optional, default=4
         Number of significant digits to be used for rounding and linearizing
         the data.
-    larmor : `Quantity` instance, optional
+    larmor : `float` or `Quantity` instance, optional
         The Larmor frequency of the nucleus. This is used only for NMR
         data.
+    offset : `float` instance, optional
+        The offset of the axis. This is used to generate an evenly values spaced axis
+        together with `ìncrement` and `size`\ .
+    increment : `float` instance, optional
+        The increment between two consecutive values of the axis. This is used to
+        generate an evenly values spaced axis together with `offset` and `size`\ .
+    size : `int` instance, optional
+        The size of the axis. This is used to generate an evenly values spaced axis
+        together with `offset` and `increment`\ .
 
     See Also
     --------
