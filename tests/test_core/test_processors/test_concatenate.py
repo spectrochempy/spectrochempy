@@ -148,8 +148,8 @@ def test_bug_243():
 
     D = scp.zeros((10, 100))
 
-    x = scp.LinearCoord(offset=0.0, increment=1.0, size=100)
-    y = scp.LinearCoord(offset=0.0, increment=1.0, size=10)
+    x = scp.Coord.arange(100)
+    y = scp.Coord.arange(10)
 
     D.set_coordset(x=x, y=y)
     D1 = D[:, 0.0:10.0]

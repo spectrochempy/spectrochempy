@@ -225,20 +225,11 @@ def compare_coords(this, other, approx=False, decimal=6, data_only=False):
         # if 'title' in attrs:  #    attrs.remove('title')
         # #TODO: should we use title for comparison?
 
-    if other.linear == this.linear:
-        # To còmpare linear coordinates
-        attrs += ["offset", "increment", "linear", "size"]
-
     for attr in attrs:
         if attr != "units":
             sattr = getattr(this, f"_{attr}")
-            if this.linear and attr == "data":
-                # allow comparison of LinearCoord and Coord
-                sattr = this.data
             if hasattr(other, f"_{attr}"):
                 oattr = getattr(other, f"_{attr}")
-                if other.linear and attr == "data":
-                    oattr = other.data
                 # to avoid deprecation warning issue for unequal array
                 if sattr is None and oattr is not None:
                     raise AssertionError(f"`{attr}` of {this} is None.")
@@ -272,15 +263,6 @@ def compare_coords(this, other, approx=False, decimal=6, data_only=False):
                             f"attributes are not "
                             f"equal",
                         )
-
-                elif attr in ["offset", "increment"] and approx:
-                    assert_approx_equal(
-                        sattr,
-                        oattr,
-                        significant=decimal,
-                        err_msg=f"{thistype}.{attr} attributes "
-                        f"are not almost equal to %d decimals" % decimal,
-                    )
 
                 else:
                     eq &= np.all(sattr == oattr)
@@ -363,7 +345,6 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
             "roi",
             "size",
             "name",
-            "show_datapoints",
             "modeldata",
             "processeddata",
             "baselinedata",

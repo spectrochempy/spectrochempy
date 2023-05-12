@@ -6,8 +6,6 @@
 # ======================================================================================
 # flake8: noqa
 
-import pytest
-
 import spectrochempy as scp
 
 DATADIR = scp.preferences.datadir

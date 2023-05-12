@@ -65,7 +65,7 @@ def test_pca():
     except NotFittedError:
         pass
     try:
-        # so the n_components public attrribute.
+        # so the n_components public attribute.
         _ = pca.n_components
     except NotFittedError:
         pass

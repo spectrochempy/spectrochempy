@@ -47,7 +47,7 @@ from spectrochempy.core.units import ur
 path = scp.pathclean("nmrdata/bruker/tests/nmr/topspin_1d")
 
 # the method pathclean allow to write pth in linux or window style indifferently
-dataset = scp.NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
+dataset = scp.read_topspin(path, expno=1, remove_digital_filter=True)
 dataset = dataset / dataset.max()  # normalization
 
 # store original data
@@ -72,7 +72,8 @@ _ = nd.em(lb=300.0 * ur.Hz)
 _ = nd.plot(data_only=True, clear=False, color="g")
 
 # %% [markdown]
-# **Warning:** processing function are most of the time applied inplace. Use `inplace=False` option to avoid this if
+# **Warning:** processing function are most of the time applied inplace. Use
+# `inplace=False` option to avoid this if
 # necessary
 
 # %%

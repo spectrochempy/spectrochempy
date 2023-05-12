@@ -282,23 +282,6 @@ def getdocfrom(origin):
     return decorated
 
 
-def gt_eps(arr):
-    """
-    Lambda function to check that an array has at least some values greater than
-    epsilon.
-
-    Parameters
-    ----------
-    arr : array to check
-
-    Returns
-    --------
-    bool : results of checking
-        True means that at least some values are greater than epsilon.
-    """
-    return np.any(arr > EPSILON)
-
-
 def htmldoc(text):
     """
     Format docstring in html for a nice display in IPython.

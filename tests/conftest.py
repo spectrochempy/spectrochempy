@@ -285,7 +285,7 @@ def dsm():
     ).copy()
 
 
-dataset = NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
+dataset = spectrochempy.read(datadir / "irdata" / "nh4y-activation.spg")
 
 
 @pytest.fixture(scope="function")

@@ -19,10 +19,8 @@ import pprint
 import subprocess
 import sys
 import threading
-import time
 import traceback
 import warnings
-from datetime import date, timedelta
 from os import environ
 from pathlib import Path
 from zipfile import ZipFile
@@ -39,7 +37,7 @@ from IPython.core.magics.code import extract_symbols
 from IPython.display import clear_output, publish_display_data
 from IPython.utils.text import get_text_list
 from jinja2 import Template
-from pkg_resources import DistributionNotFound, get_distribution, parse_version
+from pkg_resources import DistributionNotFound, get_distribution
 from setuptools_scm import get_version
 from traitlets.config.application import Application
 from traitlets.config.configurable import Config
@@ -47,7 +45,6 @@ from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.application.general_preferences import GeneralPreferences
 from spectrochempy.utils.file import pathclean
-from spectrochempy.utils.version import Version
 
 # ======================================================================================
 # Setup
@@ -165,101 +162,6 @@ def _get_release_date():
 
 release_date = _get_release_date()
 "Last release date of this package"
-
-
-def _get_pypi_version():
-    """
-    Get the last released pypi version
-    """
-    url = "https://pypi.python.org/pypi/spectrochempy/json"
-
-    connection_timeout = 30  # secondss
-    start_time = time.time()
-    while True:
-        try:
-            response = requests.get(url)
-            if response.status_code != 200:
-                return
-            break  # exit the while loop in case of success
-
-        except (ConnectionError, requests.exceptions.RequestException):
-            if time.time() > start_time + connection_timeout:
-                # 'Unable to get updates after {} seconds of ConnectionErrors'
-                return
-            else:
-                time.sleep(1)  # attempting once every second
-
-    releases = json.loads(response.text)["releases"]
-    versions = sorted(releases, key=parse_version)
-    last_version = versions[-1]
-    release_date = date.fromisoformat(
-        releases[last_version][0]["upload_time_iso_8601"].split("T")[0]
-    )
-    return Version(last_version), release_date
-
-
-def _check_for_updates(*args):
-
-    old = Version(version)
-    res = _get_pypi_version()
-    if res is not None:
-        _version, _release_date = res
-    else:
-        # probably a ConnectionError
-        return
-
-    new_release = None
-
-    if _version > old:  # pragma: no cover  # TODO: change back the comparison sign
-        new_version = _version.public
-        if not _version.is_devrelease:
-            new_release = new_version
-
-    fil = Path.home() / ".scpy_update"
-    if new_release and environ.get("DOC_BUILDING") is None:  # pragma: no cover
-        if not fil.exists():  # This new version is checked for the first time
-            # write the information: date of writing, status, message
-            fil.write_text(
-                f"{date.isoformat(date.today())}%%NOT_YET_DISPLAYED%%"
-                f"SpectroChemPy v.{new_release} is available.\n"
-                f"Please consider updating, using pip or conda, for bug fixes and new "
-                f"features! \n"
-                f"WARNING: Version 0.6 has made some important changes "
-                f"that may require modification of existing scripts."
-            )
-    else:  # pragma: no cover
-        if fil.exists():
-            fil.unlink()
-
-
-def _display_needs_update_message():
-    fil = Path.home() / ".scpy_update"
-    message = None
-    if fil.exists():
-        try:
-            msg = fil.read_text()
-            check_date, status, message = msg.split("%%")
-            if status == "NOT_YET_DISPLAYED":
-                fil.write_text(f"{date.isoformat(date.today())}%%DISPLAYED%%{message}")
-            else:
-                # don't notice again if the message was already displayed in the last 7 days
-                last_view_delay = date.today() - date.fromisoformat(check_date)
-                if last_view_delay < timedelta(days=3):
-                    message = None
-        except Exception:
-            pass
-
-    if message:
-        # TODO : find how to make a non blocking dialog
-        # may be something like this:
-        # https://stackoverflow.com/questions/61251055/showinfo-and-showwarning-appearing-in-the-background-in-tkinter-messagebox
-        # import tkinter as tk
-        # from tkinter.messagebox import showinfo
-        # root = tk.Tk()
-        # root.withdraw()
-        # showinfo("New version available", message)
-        # root.mainloop()
-        return message
 
 
 # --------------------------------------------------------------------------------------
@@ -1067,11 +969,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 
         self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
 
-        # display needs for update
-        msg = _display_needs_update_message()
-        if msg:
-            self.log.warning(msg)
-
         # Eventually write the default config file
         # --------------------------------------
         self._make_default_config_file()
@@ -1222,9 +1119,18 @@ config_dir = app.config_dir
 reset_preferences = app.reset_preferences
 
 
-CHECK_UPDATE = threading.Thread(target=_check_for_updates)
-CHECK_UPDATE.start()
+# --------------------------------------------------------------------------------------
+# Check for new release in a separate thread
+# --------------------------------------------------------------------------------------
+from spectrochempy.application._check_update import check_update
 
+DISPLAY_UPDATE = threading.Thread(target=check_update, args=(version,))
+DISPLAY_UPDATE.start()
+
+
+# --------------------------------------------------------------------------------------
+# Download data in a separate thread
+# --------------------------------------------------------------------------------------
 DOWNLOAD_TESTDATA = threading.Thread(
     target=_download_full_testdata_directory, args=(preferences.datadir,)
 )

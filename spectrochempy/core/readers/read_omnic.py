@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 
 from spectrochempy.core import info_
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import ur
@@ -83,7 +83,7 @@ def read_omnic(*paths, **kwargs):
     relative to the default `datadir` )
     Note that here read_omnic is called as a classmethod of the NDDataset class
 
-    >>> scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
+    >>> scp.read_omnic('irdata/nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Single file specified with pathlib.Path object
@@ -193,7 +193,7 @@ def read_spg(*paths, **kwargs):
     Notes
     -----
     This method is an alias of `read_omnic`\ , except that the type of file
-    is contrain to ``.spg``.
+    is constrained to ``.spg``.
 
     Examples
     ---------
@@ -480,23 +480,13 @@ def _read_spg(*args, **kwargs):
     dataset.filename = filename
 
     # now add coordinates
-    # _x = Coord(np.around(np.linspace(firstx[0], lastx[0], nx[0]), 3),
-    #           title=xtitles[0], units=xunits[0])
-    spacing = (lastx[0] - firstx[0]) / int(nx[0] - 1)
-    _x = LinearCoord(
-        offset=firstx[0],
-        increment=spacing,
-        size=int(nx[0]),
+    _x = Coord.linspace(
+        firstx[0],
+        lastx[0],
+        nx[0],
         title=xtitles[0],
         units=xunits[0],
     )
-    # _x = Coord.linspace(
-    #     firstx[0],
-    #     lastx[0],
-    #     int(nx[0]),
-    #     title=xtitles[0],
-    #     units=xunits[0],
-    # )
 
     _y = Coord(
         timestamps,
@@ -669,17 +659,12 @@ def _read_spa(*args, **kwargs):
         xunit = info["xunits"]
         xtitle = info["xtitle"]
 
-        spacing = (lastx - firstx) / (nx - 1)
-
-        # _x = Coord.linspace(
-        #     firstx,
-        #     lastx,
-        #     int(nx),
-        #     title=xtitle,
-        #     units=xunit,
-        # )
-        _x = LinearCoord(
-            offset=firstx, increment=spacing, size=nx, title=xtitle, units=xunit
+        _x = Coord.linspace(
+            firstx,
+            lastx,
+            int(nx),
+            title=xtitle,
+            units=xunit,
         )
 
     else:  # interferogram
@@ -692,19 +677,12 @@ def _read_spa(*args, **kwargs):
         spa_name += ": Sample IFG"
         dataset.units = "V"
         dataset.title = "detector signal"
-        _x = LinearCoord(
-            offset=0,
-            increment=1,
-            size=len(intensities),
+
+        _x = Coord.arange(
+            len(intensities),
             title="data points",
             units=None,
         )
-        #
-        # _x = Coord.arange(
-        #     len(intensities),
-        #     title="data points",
-        #     units=None,
-        # )
 
     dataset.set_coordset(y=_y, x=_x)
     dataset.name = spa_name  # to be consistent with omnic behaviour
@@ -864,18 +842,10 @@ def _read_srs(*args, **kwargs):
     dataset.origin = "omnic"
 
     # now add coordinates
-    spacing = (info["lastx"] - info["firstx"]) / (info["nx"] - 1)
-    # _x = Coord.linspace(
-    #     info["firstx"],
-    #     info["lastx"],
-    #     int(info["nx"]),
-    #     title=info["xtitle"],
-    #     units=info["xunits"],
-    # )
-    _x = LinearCoord(
-        offset=info["firstx"],
-        increment=spacing,
-        size=info["nx"],
+    _x = Coord.linspace(
+        info["firstx"],
+        info["lastx"],
+        int(info["nx"]),
         title=info["xtitle"],
         units=info["xunits"],
     )

@@ -13,9 +13,8 @@ from spectrochempy.utils.testing import (
     assert_approx_equal,  # assert_array_equal,; assert_array_almost_equal,
 )
 
+
 # import matplotlib.pyplot as plt
-
-
 def test_models():
 
     model = scp.asymmetricvoigtmodel()
@@ -61,7 +60,7 @@ def test_models():
     assert_approx_equal(array[pos].m, max, significant=4)
 
     # x is a Coord object
-    x2 = scp.LinearCoord.arange(1000)
+    x2 = scp.Coord.arange(1000)
     width = 100.0
     array = model.f(x2, ampl, pos, width, ratio, asym)
     assert isinstance(array, scp.NDDataset)
@@ -69,7 +68,7 @@ def test_models():
     assert array.units == ampl.units
 
     # x is a Coord object with units
-    x3 = scp.LinearCoord.linspace(0.0, 0.999, 1000, units="m", title="distance")
+    x3 = scp.Coord.linspace(0.0, 0.999, 1000, units="m", title="distance")
     width = 100.0 * ur("mm")
     pos = 0.5
     array = model.f(x3, ampl, pos, width, ratio, asym)

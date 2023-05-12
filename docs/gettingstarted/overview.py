@@ -132,7 +132,7 @@ _ = basc.plot()
 # #### IRIS processing
 
 # %% tags=[]
-ds = scp.NDDataset.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
+ds = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
 pressure = [
     0.00300,
     0.00400,

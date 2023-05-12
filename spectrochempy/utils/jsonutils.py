@@ -75,10 +75,6 @@ def json_serialiser(byte_obj, encoding=None):
 
         objnames = byte_obj.__dir__()
 
-        # particular case of Linear Coordinates
-        if byte_obj._implements("LinearCoord"):
-            objnames.remove("data")
-
         dic = {}
         for name in objnames:
 
