@@ -15,7 +15,7 @@ import textwrap
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.core import error_
+from spectrochempy.core import debug_, error_
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath, _set_operators
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.units import Quantity, ur
@@ -135,6 +135,7 @@ class Coord(NDMath, NDArray):
 
     _linear = tr.Bool(False)
     _sigdigits = tr.Int(4)
+    _rounding = tr.Bool(True)
 
     # specific to NMR
     _larmor = tr.Instance(Quantity, allow_none=True)
@@ -162,6 +163,12 @@ class Coord(NDMath, NDArray):
 
         # extract parameters for linearization and data rounding
         self._sigdigits = kwargs.pop("sigdigits", 4)
+
+        # if data is a Coord, rounding may have been set already
+        if isinstance(data, Coord):
+            self._rounding = data._rounding
+        else:
+            self._rounding = kwargs.pop("rounding", True)  # rounding of data by default
 
         # initialize the object
         super().__init__(data=data, **kwargs)
@@ -230,10 +237,10 @@ class Coord(NDMath, NDArray):
             # at least round the data to the number of significant digits
             # if self._data.size < 1:  # pragma: no cover
             #     nd = self.sigdigits + 1
-            # else:
-            maxval = np.max(np.abs(self._data))
-            nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else 2
-            self._data = np.around(self._data, max(nd, 2))
+            if self._rounding:
+                maxval = np.max(np.abs(self._data))
+                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else 2
+                self._data = np.around(self._data, max(nd, 2))
 
     @property
     def default(self):
@@ -794,8 +801,6 @@ class Coord(NDMath, NDArray):
         sigdigits :  Int, optional, default=3
             The number of significant digit for coordinates values.
         """
-        from spectrochempy.application import warning_
-
         if not self.has_data or self.data.size < 3:
             return
 
@@ -819,14 +824,13 @@ class Coord(NDMath, NDArray):
             # single spacing with this precision
             # we set the number with their full precision
             # rounding will be made if necessary when reading the data property
-            nd = get_n_decimals(np.diff(self._data).max(), self._sigdigits)
-            data = np.around(data, nd)
+            # nd = get_n_decimals(np.diff(self._data).max(), self._sigdigits)
+            # data = np.around(data, nd)
             self._data = np.linspace(data[0], data[-1], data.size)
             self._linear = True
         else:
-            warning_(
-                "The coordinates spacing is not enough uniform to allow linearization.",
-                category=UserWarning,
+            debug_(
+                "The coordinates spacing is not enough uniform to allow linearization."
             )
             self._linear = False
 

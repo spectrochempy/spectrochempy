@@ -537,7 +537,7 @@ def test_linearcoord():
     from spectrochempy.core.dataset.coord import LinearCoord
 
     with assert_produces_warning(DeprecationWarning, check_stacklevel=False):
-        _ = LinearCoord(1, 10, 10)
+        _ = LinearCoord(offset=0, increment=10, size=10)
 
     # test it for creation using offset and increment
     coord0 = LinearCoord(offset=1, increment=10, size=10)
