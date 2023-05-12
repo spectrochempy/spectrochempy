@@ -229,12 +229,9 @@ class Coord(NDMath, NDArray):
             # First try to linearize the data if it is not a datetime
             self._linear = False
             self.linearize(self._sigdigits)
-            if self._linear:
-                # the data has been linearized, that's it!
-                return
 
             # well, the data cannot be linearized with the given significant digits,
-            # at least round the data to the number of significant digits
+            # now eventually round the data to the number of significant digits
             # if self._data.size < 1:  # pragma: no cover
             #     nd = self.sigdigits + 1
             if self._rounding:
