@@ -289,7 +289,7 @@ class NDArray(HasTraits):
         if attrs is None:
             attrs = self.__dir__()
 
-        for attr in ["name", "linear", "show_datapoints"]:
+        for attr in ["name", "linear"]:
             if attr in attrs:
                 attrs.remove(attr)
 
@@ -661,7 +661,8 @@ class NDArray(HasTraits):
                     return slice(None)
             else:
                 if key < 0:  # reverse indexing
-                    axis, dim = self.get_axis(dim)
+                    axis, dim = self.get_axis(dim) if self.ndim > 1 else (0, dim)
+                    # get axis is not defined for Coord for example
                     start = self.shape[axis] + key
             stop = start + 1  # in order to keep a non squeezed slice
             return slice(start, stop, 1)

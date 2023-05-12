@@ -111,8 +111,8 @@ def test_basecor_multivariate(IR_dataset_2D):
     show()
 
 
-def test_notebook_basecor_bug():
-    dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
+def test_notebook_basecor_bug(IR_dataset_2D):
+    dataset = IR_dataset_2D
 
     s = dataset[:, 1260.0:5999.0]
     s = s - s[-1]
@@ -149,9 +149,9 @@ def test_notebook_basecor_bug():
     basc.corrected.plot_stack()
 
 
-def test_issue_227():
+def test_issue_227(IR_dataset_2D):
+    ir = IR_dataset_2D
     # IR spectrum, we want to make a baseline correction on the absorbance vs. time axis:
-    ir = scp.read("irdata/nh4y-activation.spg")
 
     # baseline correction along x
     blc = scp.BaselineCorrection(ir)

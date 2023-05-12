@@ -345,7 +345,6 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
             "roi",
             "size",
             "name",
-            "show_datapoints",
             "modeldata",
             "processeddata",
             "baselinedata",

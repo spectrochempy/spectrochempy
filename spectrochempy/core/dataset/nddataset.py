@@ -504,7 +504,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             "created",
             "modified",
             "origin",
-            "show_datapoints",
             "roi",
             "modeldata",
             "processeddata",

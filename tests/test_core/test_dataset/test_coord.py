@@ -35,11 +35,13 @@ def test_coord():
 
     # init with a list of values
     a = Coord([1, 2, 3], name="x")
+    assert_array_equal(a.data, np.array([1, 2, 3]))
+    assert a.dtype == np.dtype(float)
+    assert a.is_1d
+    assert not a.is_descendant
     assert a.id is not None
     assert not a.is_empty
     assert not a.is_masked
-    assert_array_equal(a.data, np.array([1, 2, 3]))
-    assert a.dtype == np.dtype(float)
     assert a.size == 3
     assert a.ndim == 1
     assert a.shape == (3,)
@@ -122,7 +124,6 @@ def test_coord():
         Coord(data=np.ones((2, 10)))
 
     # unitless coordinates
-
     coord0 = Coord(
         data=np.linspace(4000, 1000, 10),
         labels=list("abcdefghij"),
@@ -135,7 +136,6 @@ def test_coord():
     assert repr(coord0) == "Coord: [float64] unitless (size: 10)"
 
     # dimensionless coordinates
-
     coord0 = Coord(
         data=np.linspace(4000, 1000, 10),
         labels=list("abcdefghij"),
@@ -296,8 +296,28 @@ def test_coord():
     # test default
     assert a.default is a
 
+    # loc2index
+    coord0 = Coord(
+        data=np.linspace(4000, 1000, 10),
+        labels=list("abcdefghij"),
+        units="s",
+        mask=None,
+        title="wavelength",
+    )
+    assert coord0.loc2index(3500.0) == 1
 
-def test_coord_to():
+    # check few additional methods
+
+    # transpose (no effect)
+    coord1 = coord0.T
+    assert coord1 is coord0
+    coord1 = coord0.transpose()
+    assert coord1 is coord0
+
+    # default and coord attributes (when they are call but it is not a CoordSet
+    assert coord1 is coord1.default
+    assert coord1 is coord1.coords
+
     # related to issue #643
     ### The following code works perfectly
 
@@ -326,14 +346,9 @@ def test_coord_to():
         x[0].value == 8000.0 * ur.cm**-1
     ), "to should have changed the coord values to cm^-1"
 
-
-def test_coord_slicing():
     # slicing by index
-
     coord0 = Coord(data=np.linspace(4000, 1000, 10), mask=None, title="wavelength")
-
     assert coord0[0] == 4000.0
-
     coord1 = Coord(
         data=np.linspace(4000, 1000, 10), units="cm^-1", mask=None, title="wavelength"
     )
@@ -342,9 +357,7 @@ def test_coord_slicing():
     assert coord1[0].values == 4000.0 * (1.0 / ur.cm)
 
     # slicing with labels
-
     labs = list("abcdefghij")
-
     coord0 = Coord(
         data=np.linspace(4000, 1000, 10),
         labels=labs,
@@ -360,12 +373,46 @@ def test_coord_slicing():
     assert coord0["c":"d"] == coord0[2:4]  # label included
 
     # slicing only-labels coordinates
-
-    y = list("abcdefghij")
-    a = Coord(labels=y, name="x")
+    a = Coord(labels=labs, name="x")
     assert a.name == "x"
     assert isinstance(a.labels, np.ndarray)
     assert_array_equal(a.values, a.labels)
+
+    # fancy indexing
+    c = coord0[[0, 2, 4]]
+    assert isinstance(c, Coord)
+    assert c.shape == (3,)
+    assert c[0] == coord0[0]
+    assert c[1] == coord0[2]
+    assert c[2] == coord0[4]
+
+    #  slicing result to None (when the resulting coord is empty)
+    c = coord0[5000.0:5500.0]
+    assert c is None
+
+    # axis reversed?
+    coord0.units = "cm^-1"
+    assert coord0.reversed
+
+    # printing
+    s = str(coord0)
+    assert "Coord: [float64] cm" in s
+    assert "(size: 10)" in s
+
+    s = coord0._repr_html_()
+    assert "<div><font color='darkcyan'>[  a   b ..." in s
+
+    c = Coord()
+    assert "<div><font color='blue'>Undefined</font></div>" in c._repr_html_()
+
+    # several row of label
+    coord0.labels = list("klmnopqrst")
+    s = coord0._repr_html_()
+    assert "<br/>          [  k   l ...   s   t]]" in s
+
+    # spacing
+    sp = coord0.spacing
+    assert sp == -333.3 * ur.cm**-1
 
 
 # Math
@@ -473,6 +520,7 @@ NOTIMPL = [
     "argmax",
     "argmin",
     "asfortranarray",
+    "get_axis",
 ]
 
 
@@ -490,3 +538,9 @@ def test_linearcoord():
 
     with assert_produces_warning(DeprecationWarning, check_stacklevel=False):
         _ = LinearCoord(1, 10, 10)
+
+    # test it for creation using offset and increment
+    coord0 = LinearCoord(offset=1, increment=10, size=10)
+    assert isinstance(coord0, LinearCoord)
+    assert coord0[0] == 1
+    assert_array_equal(coord0.data, Coord.arange(1, 100, 10).data)

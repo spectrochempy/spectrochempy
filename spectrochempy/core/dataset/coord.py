@@ -110,7 +110,7 @@ class Coord(NDMath, NDArray):
     >>> c0
     Coord: [float64] Hz (size: 6)
 
-    We can take a series of str to create a non numerical but labelled
+    We can take a series of str to create a non-numerical but labelled
     axis :
 
     >>> tarr = list('abcdef')
@@ -403,16 +403,32 @@ class Coord(NDMath, NDArray):
     def asfortranarray(self, *args, **kwargs):
         raise NotImplementedError
 
-    def astype(self, dtype=None, **kwargs):
-        """
-        Cast the data to a specified type.
-
-        Parameters
-        ----------
-        dtype : str or dtype
-            Typecode or data-type to which the array is cast.
-        """
-        self._data = self._data.astype(dtype, **kwargs)
+    # TODO: make it work
+    # def astype(self, dtype=None, **kwargs):
+    #     """
+    #     Cast the data to a specified type.
+    #
+    #     Parameters
+    #     ----------
+    #     dtype : str or dtype
+    #         Typecode or data-type to which the array is cast.
+    #     """
+    #     if dtype is None:
+    #         return self # no copy
+    #
+    #     if isinstance(dtype, str):
+    #         dtype = np.dtype(dtype) # convert to dtype
+    #
+    #     if kwargs.pop("copy", False) or not kwargs.pop("inplace", False):
+    #         new = self.copy()
+    #     else:
+    #         new = self  # no copy
+    #         kwargs["copy"] = False
+    #
+    #     data = self._data.astype(dtype, **kwargs)
+    #     new._data = data
+    #
+    #     return new
 
     def average(self, *args, **kwargs):
         raise NotImplementedError
@@ -421,7 +437,7 @@ class Coord(NDMath, NDArray):
         raise NotImplementedError
 
     def get_axis(self, *args, **kwargs):
-        return super().get_axis(*args, **kwargs)
+        raise NotImplementedError
 
     @property
     def is_complex(self):
@@ -520,7 +536,6 @@ class Coord(NDMath, NDArray):
             "linear",
             "sigdigits",
             "larmor",
-            "show_datapoints",
         ]
 
     def __getattr__(self, attr):
@@ -567,7 +582,7 @@ class Coord(NDMath, NDArray):
                 f"Empty array of shape {new._data.shape} resulted from slicing.\n"
                 f"Check the indexes and make sure to use floats for location slicing",
             )
-            new = None
+            return None
 
         new._mask = NOMASK
 
@@ -576,30 +591,22 @@ class Coord(NDMath, NDArray):
         new.name = self.name
         return new
 
-    def __setitem__(self, items, value):
-
-        if self.linear:
-            error_(Exception, "Linearly defined array are readonly")
-            return
-
-        super().__setitem__(items, value)
-
     def __str__(self):
         return repr(self)
 
     # ----------------------------------------------------------------------------------
     # private methods and properties
     # ----------------------------------------------------------------------------------
-    @property
-    def _axis_reversed(self):
-        # Whether the axis is usually _axis_reversed for plotting.
-        # This is usually the case of ppm and IR wavenumber.
-
-        if self.units == "ppm":
-            return True
-        if self.units == "1 / centimeter" and "raman" not in self.title.lower():
-            return True
-        return False
+    # @property
+    # def _axis_reversed(self):
+    #     # Whether the axis is usually _axis_reversed for plotting.
+    #     # This is usually the case of ppm and IR wavenumber.
+    #
+    #     if self.units == "ppm":
+    #         return True
+    #     if self.units == "1 / centimeter" and "raman" not in self.title.lower():
+    #         return True
+    #     return False
 
     def _cstr(self, header="  coordinates: ... \n", print_size=True, **kwargs):
 
@@ -763,7 +770,7 @@ class Coord(NDMath, NDArray):
     def laser_frequency(self, val):
         self.meta.laser_frequency = val
 
-    def linearize(self, sigdigits=3):
+    def linearize(self, sigdigits=4):
         """
         Linearize the coordinate's data.
 
