@@ -79,13 +79,13 @@ def test_compare_coords(IR_dataset_2D):
 
     # almost equal coords
     x4 = x1.copy()
-    x4.sigdigits = 7
-    x4.data += 1.0e-6
+    x4.sigdigits = 6
+    x4 += 1.0e-6
     with testing.raises(AssertionError):
         testing.assert_coord_equal(x1, x4)
     testing.assert_coord_almost_equal(x1, x4)
     with testing.raises(AssertionError):
-        testing.assert_coord_equal(x1, x4, decimal=7)
+        testing.assert_coord_almost_equal(x1, x4, decimal=7)
 
 
 def test_compare_dataset(IR_dataset_1D):

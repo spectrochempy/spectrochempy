@@ -91,6 +91,15 @@ class Coord(NDMath, NDArray):
         It is optional but recommended to give a title to each ndarray.
     dlabel :  str, optional
         Alias of `title` .
+    rounding : bool, optional, default=True
+        If True, the data will be rounded to the number of significant
+        digits given by `sigdigits`\ .
+    sigdigits : int, optional, default=4
+        Number of significant digits to be used for rounding and linearizing
+        the data.
+    larmor : `Quantity` instance, optional
+        The Larmor frequency of the nucleus. This is used only for NMR
+        data.
 
     See Also
     --------
@@ -229,6 +238,8 @@ class Coord(NDMath, NDArray):
             # First try to linearize the data if it is not a datetime
             self._linear = False
             self.linearize(self._sigdigits)
+            if self._linear:
+                return
 
             # well, the data cannot be linearized with the given significant digits,
             # now eventually round the data to the number of significant digits
@@ -236,8 +247,9 @@ class Coord(NDMath, NDArray):
             #     nd = self.sigdigits + 1
             if self._rounding:
                 maxval = np.max(np.abs(self._data))
-                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else 2
-                self._data = np.around(self._data, max(nd, 2))
+                rounding = 2
+                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
+                self._data = np.around(self._data, max(nd, rounding))
 
     @property
     def default(self):
@@ -795,7 +807,7 @@ class Coord(NDMath, NDArray):
 
         Parameters
         ----------
-        sigdigits :  Int, optional, default=3
+        sigdigits :  Int, optional, default=4
             The number of significant digit for coordinates values.
         """
         if not self.has_data or self.data.size < 3:
@@ -821,8 +833,8 @@ class Coord(NDMath, NDArray):
             # single spacing with this precision
             # we set the number with their full precision
             # rounding will be made if necessary when reading the data property
-            # nd = get_n_decimals(np.diff(self._data).max(), self._sigdigits)
-            # data = np.around(data, nd)
+            nd = get_n_decimals(np.diff(self._data).max(), self._sigdigits)
+            data = np.around(data, nd)
             self._data = np.linspace(data[0], data[-1], data.size)
             self._linear = True
         else:
