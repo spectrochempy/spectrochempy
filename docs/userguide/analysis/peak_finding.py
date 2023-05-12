@@ -548,20 +548,3 @@ for i in range(len(peaks)):
 
 # %% [markdown]
 # -- this is the end of this tutorial --
-
-# %%
-dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")
-X = dataset[0, 1800.0:1300.0]
-peaks, properties = X.find_peaks(height=1.5, distance=50.0, width=0.0)
-len(peaks.x)
-
-# %%
-peaks.x.values
-
-# %%
-properties["peak_heights"][0]
-
-# %%
-properties["widths"][0]
-
-# %%
