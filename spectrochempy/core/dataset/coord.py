@@ -61,7 +61,7 @@ class Coord(NDMath, NDArray):
     Other Parameters
     ----------------
     dtype : str or dtype, optional, default=np.float64
-        If specified, the data will be casted to this dtype, else the
+        If specified, the data will be cast to this dtype, else the
         type of the data will be used.
     dims : list of chars, optional.
         if specified the list must have a length equal to the number od
@@ -147,6 +147,15 @@ class Coord(NDMath, NDArray):
         # check if data is iterable
         if data is not None and not is_iterable(data):
             raise ValueError("Data for coordinates must be an iterable or None")
+
+        # in case Coord replace old LinearCoord object
+        # without changing the arguments
+        _offset = kwargs.pop("offset", 0)
+        _increment = kwargs.pop("increment", None)
+        _size = kwargs.pop("size", None)
+
+        if data is None and _size is not None and _increment is not None:
+            data = np.arange(_size) * _increment + _offset
 
         # specific case of NMR (initialize unit context NMR)
         larmor = kwargs.pop("larmor", None)
@@ -867,15 +876,9 @@ class LinearCoord(Coord):
         replace="Coord",
         removed="0.8",
     )
-    def __init__(self, offset=None, increment=None, size=None, **kwargs):
+    def __init__(self, **kwargs):
         # TODO : remove in version 0.8
-        offset = offset if offset is not None else 0.0
-        increment = increment if increment is not None else 1.0
-        size = size if size is not None else 1
-
-        data = np.arange(size) * increment + offset
-
-        super().__init__(data, **kwargs)
+        super().__init__(**kwargs)
 
 
 # ======================================================================================
