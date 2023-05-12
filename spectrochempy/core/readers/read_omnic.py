@@ -83,7 +83,7 @@ def read_omnic(*paths, **kwargs):
     relative to the default `datadir` )
     Note that here read_omnic is called as a classmethod of the NDDataset class
 
-    >>> scp.NDDataset.read_omnic('irdata/nh4y-activation.spg')
+    >>> scp.read_omnic('irdata/nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Single file specified with pathlib.Path object

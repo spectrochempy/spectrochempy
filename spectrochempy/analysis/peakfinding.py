@@ -191,7 +191,7 @@ def find_peaks(
     Examples
     --------
 
-    >>> dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")
+    >>> dataset = scp.read("irdata/nh4y-activation.spg")
     >>> X = dataset[0, 1800.0:1300.0]
     >>> peaks, properties = X.find_peaks(height=1.5, distance=50.0, width=0.0)
     >>> len(peaks.x)

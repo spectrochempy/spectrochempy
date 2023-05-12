@@ -417,7 +417,7 @@ def read(*paths, **kwargs):
     to the default ``datadir`` )
     Note that here read_opus is called as a classmethod of the NDDataset class
 
-    >>> scp.NDDataset.read('irdata/OPUS/test.0000')
+    >>> scp.read('irdata/OPUS/test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
     Single file specified with pathlib.Path object
@@ -554,7 +554,7 @@ def read_dir(directory=None, **kwargs):
     >>> len(A)
     4
 
-    >>> B = scp.NDDataset.read_dir()
+    >>> B = scp.read_dir()
     """
     kwargs["iterdir"] = True
     importer = Importer()

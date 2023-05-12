@@ -500,7 +500,7 @@ class Coord(NDMath, NDArray):
         Examples
         --------
 
-        >>> dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")
+        >>> dataset = scp.read("irdata/nh4y-activation.spg")
         >>> dataset.x.loc2index(1644.0)
         4517
         """
