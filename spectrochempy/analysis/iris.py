@@ -356,7 +356,7 @@ class IRIS(DecompositionAnalysis):
     _Y_preprocessed = Array(help="preprocessed Y")
     _q = CoordType()
     _channels = CoordType()
-    _lambdas = CoordType(rounding=False)
+    _lambdas = CoordType().tag(rounding=False)
     _regularization = tr.Bool(False)
     _search_reg = tr.Bool(False)
 
