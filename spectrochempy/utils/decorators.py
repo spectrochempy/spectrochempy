@@ -214,7 +214,7 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
         elif type_ == "Union":
             type_ = value.info_text
         else:
-            print(name, value, type_)
+            # print(name, value, type_)
             type_ = f"`{type_.lower()}`"
 
         default = value.default_value

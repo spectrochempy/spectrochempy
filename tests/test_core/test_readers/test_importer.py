@@ -129,13 +129,13 @@ def test_importer(monkeypatch, fs):
     monkeypatch.setattr(NDDataset, "load", fake_dataset)
 
     nd = read(f, local_only=True)
-    assert nd == fake_dataset(f)
+    assert nd == fake_dataset(f).squeeze()
 
     nd = read(f.stem, directory=DATADIR / "fakedir/", protocol="scp", local_only=True)
-    assert nd == fake_dataset(f)
+    assert nd == fake_dataset(f).squeeze()
 
     nd = read(f.stem, directory=DATADIR / "fakedir/", local_only=True)
-    assert nd == fake_dataset(f)
+    assert nd == fake_dataset(f).squeeze()
 
     # Generic read without parameters and dialog cancel
     monkeypatch.setattr(spectrochempy.core.common.dialogs, "open_dialog", dialog_cancel)
@@ -189,23 +189,23 @@ def test_importer(monkeypatch, fs):
 
     # specific read_(protocol) function
     nd = read_fk(f, local_only=True)
-    assert nd == fake_dataset()
+    assert nd == fake_dataset().squeeze()
 
     # should also be a Class function
     nd = NDDataset.read_fk(f, local_only=True)
-    assert nd == fake_dataset()
+    assert nd == fake_dataset().squeeze()
 
     # and a NDDataset instance function
     nd = NDDataset().read_fk(f, local_only=True)
-    assert nd == fake_dataset()
+    assert nd == fake_dataset().squeeze()
 
     # single file without protocol inferred from filename
     nd = read(f, local_only=True)
-    assert nd == fake_dataset()
+    assert nd == fake_dataset().squeeze()
 
     # single file read with protocol specified
     nd = read(f, protocol="fake", local_only=True)
-    assert nd == fake_dataset()
+    assert nd == fake_dataset().squeeze()
 
     # attribute a new name
     nd = read(f, name="toto", local_only=True)
@@ -237,7 +237,7 @@ def test_importer(monkeypatch, fs):
     # multiple compatible 1D files not merged if the merge keyword is set to False
     nd = read([f1, f2, f3], names=["a", "c", "b"], merge=False, local_only=True)
     assert isinstance(nd, list)
-    assert len(nd) == 3 and nd[0] == fake_dataset()
+    assert len(nd) == 3 and nd[0] == fake_dataset().squeeze()
     assert nd[1].name == "c"
 
     # do not merge inhomogeneous dataset
@@ -306,9 +306,9 @@ def test_importer(monkeypatch, fs):
 
     # Simulate reading a content
     nd = read({"somename.fk": "a fake content"})
-    assert nd == fake_dataset(content=True)
+    assert nd == fake_dataset(content=True).squeeze()
     nd = read_fake({"somename.fk": "a fake content"})
-    assert nd == fake_dataset(content=True)
+    assert nd == fake_dataset(content=True).squeeze()
 
     # read multiple contents and merge them
     nd = read(

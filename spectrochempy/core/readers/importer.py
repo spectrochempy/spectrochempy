@@ -153,6 +153,11 @@ class Importer(HasTraits):
         else:
             return None
 
+        # squeeze 1D spectra
+        for nd in self.datasets:
+            if nd._squeeze_ndim == 1:
+                nd.squeeze(inplace=True)
+
         if len(self.datasets) == 1:
             nd = self.datasets[0]  # a single dataset is returned
             name = kwargs.pop("name", None)

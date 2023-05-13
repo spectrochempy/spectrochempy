@@ -11,24 +11,52 @@ Processing RAMAN spectra
 Various examples of processing RAMAN spectra
 """
 # %%
-# temporaire
-import os
-os.environ["SCPY_TESTING"] = "1"
-
-# %%
+# Import API
 import spectrochempy as scp
 
 # %%
-# define the folder where are the spectra
+# ## Importing spectra
+# Define the folder where are the spectra
 datadir = scp.preferences.datadir
 ramandir = datadir / "ramandata"
 
 # %%
-# read a single spectrum
+# Read a single spectrum
 A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
 
 # %%
-# plot the spectrum
+# Plot the spectrum
 _ = A.plot()
+scp.show()
+
+# %%
+# Crop the spectrum to a useful region
+B = A[100.0:]
+_ = B.plot()
+scp.show()
+
+# %%
+# ## Baseline correction
+# Let's try to remove the baseline using differents methods
+# For this we use the `Baseline` processor
+#
+# First, we define the baseline processor
+blc = scp.Baseline()
+
+# %%
+# Now we can try the Baseline methods
+# ### Detrending
+blc.interpolation = "detrend"
+blc.order = 1  # linear detrending
+blc.fit(B)
+Bcorr = blc.transform()
+baseline = blc.baseline
+Bcorr.plot()
+baseline.plot(clear=False, color="r")
+scp.show()
+
+# %%
 
 
+# %%
+scp.show()

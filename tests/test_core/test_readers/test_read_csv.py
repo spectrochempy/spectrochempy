@@ -26,16 +26,16 @@ def test_read_csv():
     prefs.csv_delimiter = ","
 
     A = scp.read_csv("agirdata/P350/TGA/tg.csv", directory=DATADIR, origin="tga")
-    assert A.shape == (1, 3247)
+    assert A.shape == (3247,)
 
     B = scp.read_csv("irdata/IR.CSV", origin="omnic")
-    assert B.shape == (1, 3736)
+    assert B.shape == (3736,)
 
     # Read CSV content
     p = DATADIR / "irdata" / "IR.CSV"
     content = p.read_bytes()
     C = scp.read_csv({"somename.csv": content})
-    assert C.shape == (1, 3736)
+    assert C.shape == (3736,)
 
     # wrong origin parameters
     D = scp.read_csv("irdata/IR.CSV", origin="opus")

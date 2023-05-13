@@ -107,16 +107,14 @@ class Baseline(AnalysisConfigurable):
             tr.CaselessStrEnum(["constant", "linear", "quadratic", "cubic"]),
         ),
         default_value=6,
-        min=1,
         help="Polynom order to use for polynomial interpolation or detrend.",
-    ).tag(config=True)
+    ).tag(config=True, min=1)
 
     n_components = tr.Integer(
         default_value=5,
-        min=1,
         help="Number of components to use for the multivariate method "
         "(:term:`n_observation` >= `n_components`).",
-    ).tag(config=True)
+    ).tag(config=True, min=1)
 
     ranges = tr.List(
         tr.Union((tr.List(minlen=2, maxlen=2), tr.Float())),
@@ -384,7 +382,10 @@ baseline/trends for different segments of the data.
             xb = xbase[bpstart : bpend + 1]
             yb = ybase[bpstart : bpend + 1]
             baseline[bpstart : bpend + 1] = self._fit(xb, yb)
-        self._outfit = [baseline, bpil, ]
+        self._outfit = [
+            baseline,
+            bpil,
+        ]
 
         # if the process was successful, _fitted is set to True so that other method
         # which needs fit will be possibly used.

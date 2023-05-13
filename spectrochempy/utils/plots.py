@@ -455,6 +455,8 @@ def get_figure(**kwargs):
     if not n or clear:
         # create a figure
         prefs = kwargs.pop("preferences", None)
+        if prefs is None:
+            return None
 
         figsize = kwargs.get("figsize", prefs.figure_figsize)
         dpi = kwargs.get("dpi", prefs.figure_dpi)

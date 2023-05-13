@@ -30,7 +30,7 @@ def test_read_SOC():
             with open(fname, "wb") as f:
                 f.write(response.content)
             ds = scp.read_soc(fname)
-            assert str(ds) == "NDDataset: [float64] unitless (shape: (y:1, x:599))"
+            assert str(ds) == "NDDataset: [float64] unitless (size: 599)"
             assert ds.title == "reflectance"
             if i == 0:
                 ds_ = scp.read_ddr(fname)
