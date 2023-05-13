@@ -353,7 +353,7 @@ baseline/trends for different segments of the data.
             # ALS fitted baseline
             # see
             # https://stackoverflow.com/questions/29156532/python-baseline-correction-library
-            # def baseline_als(y, lam, p, niter=10):
+            # For now, this doesn't work with masked data
             mu = self.mu
             p = self.asymmetry
             D = sparse.diags([1, -2, 1], [0, -1, -2], shape=(N, N - 2))
@@ -411,6 +411,12 @@ baseline/trends for different segments of the data.
 
         # Set X
         # -----
+        X = X.copy()
+        if self.model == "als":  # ALS doesn't work with masked data (see _fit)
+            # so we will remove the mask and restore it after the fit
+            self.Xmasked = X.copy()
+            X.remove_masks()
+
         # fire the X and _ranges validation and preprocessing.
         self._X = X
 
@@ -419,7 +425,7 @@ baseline/trends for different segments of the data.
         self._X_ranges.sort(inplace=True, descend=False)
 
         # _X_ranges is now ready, we can fit. _Xranges contains
-        # only the baseline data to fit.
+        # only the baseline data to fit
         ybase = self._X_ranges.data  # baseline data
         lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
         xbase = lastcoord.data  # baseline x-axis
@@ -470,7 +476,11 @@ baseline/trends for different segments of the data.
 
     def transform(self):
         """Return a dataset with baseline removed."""
-        return self.X - self.baseline
+        if self.model == "als" and hasattr(self, "Xmasked"):
+            corrected = self.Xmasked - self.baseline
+        else:
+            corrected = self.X - self.baseline
+        return corrected
 
     @property
     def corrected(self):

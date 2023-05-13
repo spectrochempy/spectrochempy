@@ -28,7 +28,7 @@ def test_preprocessing_baseline(IR_dataset_2D):
 
     # define a 1D test dataset (1 spectrum)
     dataset = IR_dataset_2D[10].squeeze()
-    dataset[:, 1290.0:890.0] = scp.MASKED
+    dataset[1290.0:890.0] = scp.MASKED
     # minimal process
     basc1 = Baseline()
     basc1.fit(dataset)
