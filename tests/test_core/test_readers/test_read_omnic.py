@@ -53,7 +53,7 @@ def test_read_omnic():
     assert_dataset_equal(nd, nds)
 
     nd = scp.read_spa(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")
-    assert str(nd) == "NDDataset: [float64] a.u. (size: 5549)"
+    assert str(nd) == "NDDataset: [float64] a.u. (shape: (y:1, x:5549))"
 
     nd2 = scp.read_spg(
         IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA"
@@ -62,13 +62,13 @@ def test_read_omnic():
 
     # test import sample IFG
     nd = scp.read_spa(IRDATA / "carroucell_samp" / "2-BaSO4_0.SPA", return_ifg="sample")
-    assert str(nd) == "NDDataset: [float64] V (size: 16384)"
+    assert str(nd) == "NDDataset: [float64] V (shape: (y:1, x:16384))"
 
     # test import background IFG
     nd = scp.read_spa(
         IRDATA / "carroucell_samp" / "2-BaSO4_0.SPA", return_ifg="background"
     )
-    assert str(nd) == "NDDataset: [float64] V (size: 16384)"
+    assert str(nd) == "NDDataset: [float64] V (shape: (y:1, x:16384))"
 
     # import IFG from file without IFG
     a = scp.read_spa(
@@ -82,7 +82,7 @@ def test_read_omnic():
 
     # rapid_sca series, import bg
     a = scp.read_srs("irdata/omnic_series/rapid_scan.srs", return_bg=True)
-    assert str(a) == "NDDataset: [float64] V (size: 4160)"
+    assert str(a) == "NDDataset: [float64] V (shape: (y:1, x:4160))"
 
     # non-rapid scan series
     a = scp.read_srs("irdata/omnic_series/GC_Demo.srs")

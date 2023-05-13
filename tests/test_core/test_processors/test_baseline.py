@@ -28,11 +28,31 @@ def test_preprocessing_baseline(IR_dataset_2D):
 
     # define a 1D test dataset (1 spectrum)
     dataset = IR_dataset_2D[10].squeeze()
-
+    dataset[:, 1290.0:890.0] = scp.MASKED
     # minimal process
     basc1 = Baseline()
     basc1.fit(dataset)
-    assert basc1.baseline.shape == dataset.shape
+    corr = basc1.transform()
+    baseline = basc1.baseline
+    assert baseline.shape == dataset.shape
+    dataset.plot()
+    corr.plot(clear=False, color="g")
+    baseline.plot(clear=False, color="r")
+    scp.show()
+
+    # als process
+    basc1 = Baseline(log_level="INFO")
+    basc1.model = "als"
+    basc1.mu = 0.5 * 10**9
+    basc1.asymmetry = 0.001
+    basc1.fit(dataset)
+    corr = basc1.transform()
+    baseline = basc1.baseline
+    assert baseline.shape == dataset.shape
+    dataset.plot()
+    corr.plot(clear=False, color="g")
+    baseline.plot(clear=False, color="r")
+    scp.show()
 
     # with mask on some wavenumbers
     dataset[882.0:1280.0] = scp.MASKED
@@ -50,19 +70,19 @@ def test_preprocessing_baseline(IR_dataset_2D):
 
     # now define ranges and interpolation=pchip
     basc3.ranges = [[6000.0, 3500.0], [2200.0, 1500.0]]
-    basc3.interpolation = "pchip"
+    basc3.model = "pchip"
 
     # and fit again (for example, taking only the second spectra)
     basc3.fit(dataset[1])
 
     # change the interpolation method
-    basc3.interpolation = "polynomial"
+    basc3.model = "polynomial"
     basc3.order = 3
     basc3.fit(dataset)
 
     # multivariate
-    basc3.method = "multivariate"
-    basc3.interpolation = "pchip"
+    basc3.multivariate = True
+    basc3.model = "pchip"
     basc3.n_components = 5
 
     dataset = IR_dataset_2D
@@ -76,9 +96,8 @@ def test_preprocessing_baseline(IR_dataset_2D):
     )
     basc3.fit(dataset)
 
-    basc3.method = "multivariate"
-    basc3.interpolation = "polynomial"
-    basc3.order = 8
+    basc3.model = "polynomial"
+    basc3.order = 6
     basc3.fit(dataset)
 
     basc3.baseline[::10].plot(cmap=None, color="r")
@@ -94,9 +113,8 @@ def test_preprocessing_baseline(IR_dataset_2D):
     msT = ms[4000.0:9000.0, :].T
     blc = scp.Baseline()
     # blc.ranges = [[10.0, 11.0], [19.0, 20.0]]
-    blc.interpolation = "polynomial"
+    blc.model = "polynomial"
     blc.order = 1
-    blc.method = "sequential"
     blc.fit(msT)
     blc.corrected.plot()
     scp.show()

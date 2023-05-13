@@ -7,18 +7,20 @@
 """
 This module implements the `Baseline` class for baseline corrections.
 """
-__dataset_methods__ = ["ab", "abc", "dc", "basc"]
 
 import numpy as np
 import scipy.interpolate
 import scipy.signal
 import traitlets as tr
+from scipy import sparse
+from scipy.sparse.linalg import spsolve
 
 from spectrochempy.analysis._base import (
     AnalysisConfigurable,
     NotFittedError,
     _wrap_ndarray_output_to_nddataset,
 )
+from spectrochempy.application import info_
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import signature_has_configurable_traits
@@ -39,7 +41,7 @@ class Baseline(AnalysisConfigurable):
     with :term:`n_features` or to 2D dataset with shape (:term:`n_observation`,
     :term:`n_features`\ ).
 
-    Several methods are proposed:
+    Several processing are proposed:
 
     - A general ``'sequential'`` method which can be used for both 1D and 2D datasets.
       with separate fitting of each observation row (spectrum).
@@ -51,7 +53,7 @@ class Baseline(AnalysisConfigurable):
       original data with baseline correction.
 
 
-    For both methods, various interpolation algorithm can be used to estimate the
+    For both methods, various models can be used to estimate the
     baseline.
 
     In the case of a ``'sequential'`` correction, the interpolation options
@@ -89,16 +91,34 @@ class Baseline(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------
-    method = tr.CaselessStrEnum(
-        ["sequential", "multivariate"],
-        default_value="sequential",
-        help="Method used for baseline resolution.",
+    multivariate = tr.Bool(
+        default_value=False,
+        help="For 2D datasets, if `True`, a multivariate method is used to fit a "
+        "baseline on the principal components determined using a SVD decomposition"
+        "followed by an inverse-transform to retrieve the baseline corrected "
+        "dataset. If `False`, a sequential method is used which "
+        "consists in fitting a baseline on each row (observations) of "
+        "the dataset.",
     ).tag(config=True)
 
-    interpolation = tr.CaselessStrEnum(
-        ["polynomial", "pchip", "abc", "detrend"],
+    model = tr.CaselessStrEnum(
+        ["polynomial", "pchip", "abc", "als", "detrend"],
         default_value="pchip",
-        help="Interpolation method.",
+        help="""The model used to determine the baseline.
+
+The following models are required that the ranges parameter is provided
+(see `ranges` parameter for more details):
+
+* 'polynomial': the baseline is determined by a nth-degree polynomial interpolation.
+  It uses the `order` parameter to determine the degree of the polynomial.
+* 'pchip': the baseline is determined by a piecewise cubic hermite interpolation.
+
+The others models do not require the `ranges` parameter to be provided:
+
+* 'detrend': the baseline is determined by a constant, linear or polynomial
+  trend removal. The order of the trend is determined by the `order` parameter.
+* 'als': the baseline is determined by an asymmetric least square algorithm.
+""",
     ).tag(config=True)
 
     order = tr.Union(
@@ -110,6 +130,28 @@ class Baseline(AnalysisConfigurable):
         help="Polynom order to use for polynomial interpolation or detrend.",
     ).tag(config=True, min=1)
 
+    mu = tr.Float(
+        default_value=1e5,
+        help="The smoothness parameter for the ALS method. Larger values make the "
+        "baseline stiffer. Values should be in the range (0, 1e9).",
+    ).tag(config=True)
+
+    asymmetry = tr.Float(
+        default_value=0.05,
+        help="The asymmetry parameter for the ALS method. It is typically between 0.001 "
+        "and 0.1. 0.001 gives almost the same fit as the unconstrained least squares",
+    ).tag(config=True)
+
+    tol = tr.Float(
+        default_value=1e-3,
+        help="The tolerance parameter for the ALS method. Smaller values make the "
+        "fitting better but potentially increases the number of iterations and the "
+        "running time. Values should be in the range (0, 1).",
+    ).tag(config=True)
+
+    max_iter = tr.Integer(50, help="Maximum number of :term:`ALS` iteration.").tag(
+        config=True
+    )
     n_components = tr.Integer(
         default_value=5,
         help="Number of components to use for the multivariate method "
@@ -133,7 +175,7 @@ class Baseline(AnalysisConfigurable):
         "to the specified ranges.",
     ).tag(config=True)
 
-    bp = tr.List(
+    breakpoints = tr.List(
         default_value=[],
         help="""Breakpoints to define piecewise segments of the data,
 specified as a vector containing coordinate values or indices indicating the location
@@ -170,8 +212,8 @@ baseline/trends for different segments of the data.
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
-    @tr.validate("bp")
-    def _validate_bp(self, proposal):
+    @tr.validate("breakpoints")
+    def _validate_breakpoints(self, proposal):
         if proposal.value is None:
             return []
         else:
@@ -183,7 +225,7 @@ baseline/trends for different segments of the data.
         npc = proposal.value
         if self._X_is_missing:
             return npc
-        return min(npc, self._X.shape[0])
+        return max(1, min(npc, self._X.shape[0]))
 
     @tr.validate("order")
     def _validate_order(self, proposal):
@@ -230,9 +272,9 @@ baseline/trends for different segments of the data.
         elif self._fitted:
             X = self._X
 
-        if self.interpolation not in ["polynomial", "pchip"]:
-            # such as detrend, we work on the full data so range is the full feature
-            # range.
+        if self.model not in ["polynomial", "pchip"]:
+            # such as detrend, or als we work on the full data so range is the
+            # full feature range.
             self._X_ranges = self._X.copy()
             return
 
@@ -272,7 +314,7 @@ baseline/trends for different segments of the data.
         self._X_ranges = concatenate(s)
 
         # we will also do necessary validation of other parameters:
-        if self.method == "multivariate":
+        if self.multivariate:
             self.n_components = self.n_components  # fire the validation
 
     def _fit(self, xbase, ybase):
@@ -280,48 +322,68 @@ baseline/trends for different segments of the data.
 
         lastcoord = self._X.coordset[self._X.dims[-1]]
         x = lastcoord.data
-        M, N = self._X.shape
+        M, N = self._X.shape if self._X.ndim == 2 else (1, self._X.shape[0])
 
-        # sequential
-        # ----------
-        if self.method == "sequential":
-
-            if self.interpolation in ["polynomial", "detrend"]:
-                polycoef = np.polynomial.polynomial.polyfit(
-                    xbase, ybase.T, deg=self.order, rcond=None, full=False
-                )
-                baseline = np.polynomial.polynomial.polyval(x, polycoef)
-
-            elif self.interpolation == "pchip":
-                baseline = np.zeros_like(self._X)
-                for i in range(M):
-                    interp = scipy.interpolate.PchipInterpolator(xbase, ybase[i])
-                    baseline[i] = interp(x)
-
-        elif self.method == "multivariate":
-            # SVD of ybase
+        if not self.multivariate:
+            # sequential method
+            Y = ybase
+            _store = np.zeros((M, N))
+        else:
+            # multivariate method
             U, s, Vt = np.linalg.svd(ybase, full_matrices=False, compute_uv=True)
+            M = self.n_components
+            Y = Vt[0:M]
+            _store = np.zeros((M, N))
 
-            # select npc loadings & compute scores
-            npc = self.n_components
-            baseline_loadings = np.zeros((npc, N))
+        if self.model in ["polynomial", "detrend"]:
+            # polynomial interpolation or detrend process
+            # using parameter `order` and predetermined ranges
+            polycoef = np.polynomial.polynomial.polyfit(
+                xbase, Y.T, deg=self.order, rcond=None, full=False
+            )
+            _store = np.polynomial.polynomial.polyval(x, polycoef)
 
-            Pt = Vt[0:npc]
-            T = U[:, 0:npc] @ np.diag(s)[0:npc, 0:npc]
+        elif self.model == "pchip":
+            # pchip interpolation
+            for i in range(M):
+                interp = scipy.interpolate.PchipInterpolator(xbase, Y[i])
+                _store[i] = interp(x)
 
-            if self.interpolation == "pchip":
-                for i in range(npc):
-                    interp = scipy.interpolate.PchipInterpolator(xbase, Pt[i])
-                    baseline_loadings[i] = interp(x)
+        elif self.model == "als":
+            # ALS fitted baseline
+            # see
+            # https://stackoverflow.com/questions/29156532/python-baseline-correction-library
+            # def baseline_als(y, lam, p, niter=10):
+            mu = self.mu
+            p = self.asymmetry
+            D = sparse.diags([1, -2, 1], [0, -1, -2], shape=(N, N - 2))
+            w = np.ones(N)
+            w_old = 1e5
+            y = ybase.squeeze()
+            iter = 0
+            while True:
+                W = sparse.spdiags(w, 0, N, N)
+                Z = W + mu * D.dot(D.transpose())
+                z = spsolve(Z, w * y)
+                w = p * (y > z) + (1 - p) * (y < z)
+                change = np.sum(np.abs(w_old - w)) / N
+                info_(change)
+                if change <= self.tol:
+                    info_(f"Convergence reached in {iter} iterations")
+                    break
+                if iter >= self.max_iter:
+                    info_(f"Maximum number of iterations {self.max_iter} reached")
+                    break
+                w_old = w
+                iter += 1
+            _store = z[::-1] if self._X.x.is_descendant else z
 
-            elif self.interpolation == "polynomial":
-                polycoef = np.polynomial.polynomial.polyfit(
-                    xbase, Pt.T, deg=self.order, rcond=None, full=False
-                )
-
-                baseline_loadings = np.polynomial.polynomial.polyval(x, polycoef)
-
-            baseline = T @ baseline_loadings
+        # inverse transform to get the baseline in the original data space
+        if self.multivariate:
+            T = U[:, 0:M] @ np.diag(s)[0:M, 0:M]
+            baseline = T @ _store
+        else:
+            baseline = _store
 
         # unsqueeze data (needed to restore masks properly)
         if baseline.ndim == 1:
@@ -362,29 +424,34 @@ baseline/trends for different segments of the data.
         lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
         xbase = lastcoord.data  # baseline x-axis
 
-        # Handling breakpoints
-        # --------------------
-        # inclde the extrama of the x-axis as breakpoints
-        bpil = [0, self._X.shape[-1] - 1]
-        # breakpoints can be provided as indices or as values.
-        # we convert them to indices.
-        for bp in self.bp:
-            bpil = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
-            bpil.append(bpil)
-        # sort and remove duplicates
-        bpil = sorted(list(set(bpil)))
+        # # Handling breakpoints  # TODO: to make it work
+        # # --------------------
+        # # include the extrema of the x-axis as breakpoints
+        # bpil = [0, self._X.shape[-1] - 1]
+        # # breakpoints can be provided as indices or as values.
+        # # we convert them to indices.
+        # for bp in self.breakpoints:
+        #     bpil = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
+        #     bpil.append(bpil)
+        # # sort and remove duplicates
+        # bpil = sorted(list(set(bpil)))
+        #
+        # # loop on breakpoints pairs
+        # baseline = np.zeros_like(self._X)
+        # bpstart = 0
+        # for bpend in bpil[1:]:
+        #     # fit the baseline on each segment
+        #     xb = xbase[bpstart : bpend + 1]
+        #     yb = ybase[bpstart : bpend + 1]
+        #     baseline[bpstart : bpend + 1] = self._fit(xb, yb)
+        # self._outfit = [
+        #     baseline,
+        #     bpil,
+        # ]
 
-        # loop on breakpoints pairs
-        baseline = np.zeros_like(self._X)
-        bpstart = 0
-        for bpend in bpil[1:]:
-            # fit the baseline on each segment
-            xb = xbase[bpstart : bpend + 1]
-            yb = ybase[bpstart : bpend + 1]
-            baseline[bpstart : bpend + 1] = self._fit(xb, yb)
+        baseline = self._fit(xbase, ybase)
         self._outfit = [
             baseline,
-            bpil,
         ]
 
         # if the process was successful, _fitted is set to True so that other method

@@ -370,7 +370,18 @@ class NDArray(HasTraits):
             inplace = True
 
         # Eventually get a better representation of the indexes
-        keys = self._make_index(items)
+        try:
+            keys = self._make_index(items)
+        except IndexError as e:
+            if "Could not find this location" in str(e) and self._squeeze_ndim == 1:
+                # Try to use the next dimension if items is not already a tuple
+                if not isinstance(items, tuple):
+                    new_items = (slice(None), items)
+                    keys = self._make_index(new_items)
+                else:
+                    raise e
+            else:
+                raise e
 
         # init returned object
         if inplace:

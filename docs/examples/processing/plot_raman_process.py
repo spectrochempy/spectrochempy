@@ -44,7 +44,7 @@ scp.show()
 blc = scp.Baseline()
 
 # %%
-# Now we can try the Baseline methods
+# Now we can try the various baseline methods
 # ### Detrending
 blc.interpolation = "detrend"
 blc.order = 1  # linear detrending
@@ -56,7 +56,21 @@ baseline.plot(clear=False, color="r")
 scp.show()
 
 # %%
+# Clearly, this is not a good method for this spectrum because the baseline is not linear
+# let's try with a polynomial detrend of order 2
+blc.order = 2
+blc.fit(B)
+Bcorr = blc.transform()
+baseline = blc.baseline
+Bcorr.plot()
+baseline.plot(clear=False, color="r")
+scp.show()
 
+# ### Asymmetric Least Squares
+blc.interpolation = "als"
+
+# %%
+# Not much better, let's try with the asymmetric least squares method
 
 # %%
 scp.show()
