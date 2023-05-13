@@ -329,7 +329,7 @@ baseline/trends for different segments of the data.
         if baseline.ndim == 1:
             baseline = baseline[np.newaxis]
 
-        return (baseline,)
+        return baseline
 
     # ----------------------------------------------------------------------------------
     # Public methods/properties
@@ -358,26 +358,33 @@ baseline/trends for different segments of the data.
         # but we need increasing order of the coordinates
         self._X_ranges.sort(inplace=True, descend=False)
 
+        # _X_ranges is now ready, we can fit. _Xranges contains
+        # only the baseline data to fit.
+        ybase = self._X_ranges.data  # baseline data
+        lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
+        xbase = lastcoord.data  # baseline x-axis
+
         # Handling breakpoints
         # --------------------
+        # inclde the extrama of the x-axis as breakpoints
         bpil = [0, self._X.shape[-1] - 1]
+        # breakpoints can be provided as indices or as values.
+        # we convert them to indices.
         for bp in self.bp:
-            bpi = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
+            bpil = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
             bpil.append(bpil)
-        bpil = sorted(bpil)
+        # sort and remove duplicates
+        bpil = sorted(list(set(bpil)))
 
+        # loop on breakpoints pairs
+        baseline = np.zeros_like(self._X)
         bpstart = 0
-
         for bpend in bpil[1:]:
-            # loop on segments
+            # fit the baseline on each segment
             xb = xbase[bpstart : bpend + 1]
             yb = ybase[bpstart : bpend + 1]
-
-        ybase = self._X_ranges.data
-        lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
-        xbase = lastcoord.data
-
-        self._outfit = self._fit(xbase, ybase)
+            baseline[bpstart : bpend + 1] = self._fit(xb, yb)
+        self._outfit = [baseline, bpil, ]
 
         # if the process was successful, _fitted is set to True so that other method
         # which needs fit will be possibly used.

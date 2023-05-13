@@ -1029,7 +1029,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
                 args[1] if args and len(args) > 1 else kwargs.get("message", None)
             )
         else:
-            raise KeyError("wrong argiments have been passed to error_")
+            raise KeyError("wrong arguments have been passed to error_")
         self._catch_exceptions(etype, emessage, None)
 
     def warning_(self, msg, *args, **kwargs):
