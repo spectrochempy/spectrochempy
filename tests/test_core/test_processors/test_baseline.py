@@ -25,15 +25,13 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 
 def test_preprocessing_baseline(IR_dataset_2D):
-
     # define a 1D test dataset (1 spectrum)
     dataset = IR_dataset_2D[10].squeeze()
-    dataset[1290.0:890.0] = scp.MASKED
     # minimal process
-    basc1 = Baseline()
-    basc1.fit(dataset)
-    corr = basc1.transform()
-    baseline = basc1.baseline
+    blc = Baseline()
+    blc.fit(dataset)
+    corr = blc.transform()
+    baseline = blc.baseline
     assert baseline.shape == dataset.shape
     dataset.plot()
     corr.plot(clear=False, color="g")
@@ -41,13 +39,13 @@ def test_preprocessing_baseline(IR_dataset_2D):
     scp.show()
 
     # als process
-    basc1 = Baseline(log_level="INFO")
-    basc1.model = "als"
-    basc1.mu = 0.5 * 10**9
-    basc1.asymmetry = 0.001
-    basc1.fit(dataset)
-    corr = basc1.transform()
-    baseline = basc1.baseline
+    blc = Baseline(log_level="INFO")
+    blc.model = "als"
+    blc.mu = 0.5 * 10**9
+    blc.asymmetry = 0.001
+    blc.fit(dataset)
+    corr = blc.transform()
+    baseline = blc.baseline
     assert baseline.shape == dataset.shape
     dataset.plot()
     corr.plot(clear=False, color="g")
@@ -56,9 +54,29 @@ def test_preprocessing_baseline(IR_dataset_2D):
 
     # with mask on some wavenumbers
     dataset[882.0:1280.0] = scp.MASKED
-    basc2 = Baseline()
-    basc2.fit(dataset)
-    assert basc2.baseline.shape == dataset.shape
+    blc = Baseline()
+    blc.fit(dataset)
+    corr = blc.transform()
+    baseline = blc.baseline
+    assert baseline.shape == dataset.shape
+    dataset.plot()
+    corr.plot(clear=False, color="g")
+    baseline.plot(clear=False, color="r")
+    scp.show()
+
+    # als process with mask
+    blc = Baseline(log_level="INFO")
+    blc.model = "als"
+    blc.mu = 0.5 * 10**9
+    blc.asymmetry = 0.001
+    blc.fit(dataset)
+    corr = blc.transform()
+    baseline = blc.baseline
+    assert baseline.shape == dataset.shape
+    dataset.plot()
+    corr.plot(clear=False, color="g")
+    baseline.plot(clear=False, color="r")
+    scp.show()
 
     # define a 2D test dataset (6 spectra)
     dataset = IR_dataset_2D[::10]
@@ -142,3 +160,39 @@ def test_ab_nmr(NMR_dataset_1D):
     base.plot(xlim=(150, -150), ylim=[-2, 10], clear=False, color="y")
 
     show()
+
+
+def test_baseline_sequential_als(IR_dataset_2D):
+    # test ALS in sequential mode on a 2D spectra dataset
+
+    blc = scp.Baseline(
+        log_level="INFO",
+    )
+
+    blc.multivariate = False  # use a sequential baseline correction approach
+    blc.model = "als"  # use a als model
+    blc.mu = 10**8  # set the regularization parameter mu (smoothness)
+    blc.asymmetry = 0.002
+
+    ndp = IR_dataset_2D[::5]
+    ndp[:, 1290.0:890.0] = scp.MASKED
+
+    blc.fit(ndp)
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+
+    _ = corrected[0].plot()
+    _ = baseline[0].plot(clear=False, color="red", ls="-")
+    _ = ndp[0].plot(clear=False, color="green", ls="--")
+
+    _ = corrected[-1].plot()
+    _ = baseline[-1].plot(clear=False, color="red", ls="-")
+    _ = ndp[10].plot(clear=False, color="green", ls="--")
+
+    _ = corrected.plot()
+
+    scp.show()
+
+    # it works but not very well adapted to a situation where the regularization
+    # parameter mu and may be asymmetry should be adapted to each spectra.

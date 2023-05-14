@@ -41,33 +41,33 @@ class Baseline(AnalysisConfigurable):
     with :term:`n_features` or to 2D dataset with shape (:term:`n_observation`,
     :term:`n_features`\ ).
 
-    Several processing are proposed:
+    Several models are proposed which can be used to estimate the baseline in two
+    ways : sequentially or using a multivariate approach.
 
-    - A general ``'sequential'`` method which can be used for both 1D and 2D datasets.
-      with separate fitting of each observation row (spectrum).
+    - The ``'sequential'`` approach which can be used for both 1D and 2D datasets
+      consists in fitting the baseline sequentially for each observation row (spectrum).
 
-    - A ``'multivariate'`` method which can only be applied to 2D datasets. With this
-      method the 2D dataset is first dimensionnaly reduced into several principal
+    - The ``'multivariate'`` approac which can only be applied to 2D datasets.
+      The 2D dataset is first dimensionnaly reduced into several principal
       components using the classical :term:`SVD` algorithm.
-      Each components is thus fitted before an inverse transform to recover the
-      original data with baseline correction.
+      Each components is then fitted before an inverse transform performed to recover
+      the original data with baseline correction.
 
-
-    For both methods, various models can be used to estimate the
+    In both approach, various models can be used to estimate the
     baseline.
-
-    In the case of a ``'sequential'`` correction, the interpolation options
-    are:
 
     - ``'abc'`` : A linear baseline is automatically subtracted using the feature limit
       for reference.
     - ``'detrend'`` : remove trend from data. Depending on the ``order`` parameter,
       the detrend can be constant (mean removal), linear (order 1)
       or quadratic (order 2).
-    - ``'als'`` :
-    - ``'polynomial'`` :
-    - ``'pchip'`` :
-
+    - ``'als'`` : Asymmetric Least Squares Smoothing baseline correction. This method
+      is based on the work of Eilers and Boelens (:cite:`Eilers:2005`\ ).
+    - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
+      the polynomial is defined by the ``order`` parameter. The baseline is then obtained by evaluating the
+      polynomial at each feature defined in predefined `ranges`\ .
+    - ``'pchip'`` : Fit a piecewise cubic Hermite interpolating polynomial (PCHIP) to
+      the data  (:cite:`Fritsch:1980`\ ).
 
     # TODO: complete this description
 
@@ -200,7 +200,6 @@ baseline/trends for different segments of the data.
         warm_start=False,
         **kwargs,
     ):
-
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
@@ -263,7 +262,7 @@ baseline/trends for different segments of the data.
         # clean the result (reorder and suppress overlap)
         return trim_ranges(*ranges)
 
-    @tr.observe("_X", "ranges", "include_limits")
+    @tr.observe("_X", "ranges", "include_limits", "model", "multivariate")
     def _preprocess_as_X_or_ranges_changed(self, change):
         # set X and ranges using the new or current value
         X = None
@@ -272,10 +271,14 @@ baseline/trends for different segments of the data.
         elif self._fitted:
             X = self._X
 
+        if not self._fitted and X is None:
+            # nothing to do
+            return
+
         if self.model not in ["polynomial", "pchip"]:
             # such as detrend, or als we work on the full data so range is the
             # full feature range.
-            self._X_ranges = self._X.copy()
+            self._X_ranges = X.copy()
             return
 
         ranges = change.new if change.name == "ranges" else self.ranges.copy()
@@ -357,26 +360,28 @@ baseline/trends for different segments of the data.
             mu = self.mu
             p = self.asymmetry
             D = sparse.diags([1, -2, 1], [0, -1, -2], shape=(N, N - 2))
-            w = np.ones(N)
-            w_old = 1e5
-            y = ybase.squeeze()
-            iter = 0
-            while True:
-                W = sparse.spdiags(w, 0, N, N)
-                Z = W + mu * D.dot(D.transpose())
-                z = spsolve(Z, w * y)
-                w = p * (y > z) + (1 - p) * (y < z)
-                change = np.sum(np.abs(w_old - w)) / N
-                info_(change)
-                if change <= self.tol:
-                    info_(f"Convergence reached in {iter} iterations")
-                    break
-                if iter >= self.max_iter:
-                    info_(f"Maximum number of iterations {self.max_iter} reached")
-                    break
-                w_old = w
-                iter += 1
-            _store = z[::-1] if self._X.x.is_descendant else z
+
+            for i in range(M):
+                w = np.ones(N)
+                w_old = 1e5
+                y = Y[i].squeeze()
+                iter = 0
+                while True:
+                    W = sparse.spdiags(w, 0, N, N)
+                    Z = W + mu * D.dot(D.transpose())
+                    z = spsolve(Z, w * y)
+                    w = p * (y > z) + (1 - p) * (y < z)
+                    change = np.sum(np.abs(w_old - w)) / N
+                    info_(change)
+                    if change <= self.tol:
+                        info_(f"Convergence reached in {iter} iterations")
+                        break
+                    if iter >= self.max_iter:
+                        info_(f"Maximum number of iterations {self.max_iter} reached")
+                        break
+                    w_old = w
+                    iter += 1
+                _store[i] = z[::-1] if self._X.x.is_descendant else z
 
         # inverse transform to get the baseline in the original data space
         if self.multivariate:

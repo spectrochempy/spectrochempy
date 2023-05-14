@@ -27,13 +27,11 @@ A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
 # %%
 # Plot the spectrum
 _ = A.plot()
-scp.show()
 
 # %%
 # Crop the spectrum to a useful region
 B = A[100.0:]
 _ = B.plot()
-scp.show()
 
 # %%
 # ## Baseline correction
@@ -41,36 +39,57 @@ scp.show()
 # For this we use the `Baseline` processor
 #
 # First, we define the baseline processor
-blc = scp.Baseline()
+blc = scp.Baseline(log_level="INFO")
 
 # %%
 # Now we can try the various baseline methods
 # ### Detrending
-blc.interpolation = "detrend"
+blc.model = "detrend"
 blc.order = 1  # linear detrending
 blc.fit(B)
-Bcorr = blc.transform()
+
+# %%
+# The baseline is now stored in the `baseline` attribute of the processor
+corr = blc.transform()
 baseline = blc.baseline
-Bcorr.plot()
-baseline.plot(clear=False, color="r")
-scp.show()
+
+
+# %%
+# Let's plot the result of the correction
+#
+# As we will use thii type of plot several times,
+# we define a function for it
+def plot_result():
+    B.plot()
+    corr.plot(clear=False, color="g")
+    baseline.plot(clear=False, color="r")
+
+
+plot_result()
 
 # %%
 # Clearly, this is not a good method for this spectrum because the baseline is not linear
 # let's try with a polynomial detrend of order 2
-blc.order = 2
+blc.order = 2  # quadratic detrending
 blc.fit(B)
-Bcorr = blc.transform()
+corr = blc.transform()
 baseline = blc.baseline
-Bcorr.plot()
-baseline.plot(clear=False, color="r")
-scp.show()
-
-# ### Asymmetric Least Squares
-blc.interpolation = "als"
+plot_result()
 
 # %%
 # Not much better, let's try with the asymmetric least squares method
 
+# ### Asymmetric Least Squares
+blc.model = "als"
+blc.mu = 10**7  # smoothness
+blc.asymmetry = 0.01
+blc.fit(B)
+corr = blc.transform()
+baseline = blc.baseline
+plot_result()
+
 # %%
-scp.show()
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script
+
+# scp.show()
