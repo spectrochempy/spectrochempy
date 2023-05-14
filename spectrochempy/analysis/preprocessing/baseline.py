@@ -365,11 +365,14 @@ baseline/trends for different segments of the data.
                 w = np.ones(N)
                 w_old = 1e5
                 y = Y[i].squeeze()
+                # make the data positive (to allow the use of NNMF instead of SVD)
+                mi = y.min()
+                y -= mi
                 iter = 0
                 while True:
                     W = sparse.spdiags(w, 0, N, N)
-                    Z = W + mu * D.dot(D.transpose())
-                    z = spsolve(Z, w * y)
+                    C = W + mu * D.dot(D.transpose())
+                    z = spsolve(C, w * y)
                     w = p * (y > z) + (1 - p) * (y < z)
                     change = np.sum(np.abs(w_old - w)) / N
                     info_(change)
@@ -381,6 +384,8 @@ baseline/trends for different segments of the data.
                         break
                     w_old = w
                     iter += 1
+                # do not forget to add to mi to get the original data back
+                z += mi
                 _store[i] = z[::-1] if self._X.x.is_descendant else z
 
         # inverse transform to get the baseline in the original data space

@@ -15,7 +15,7 @@ Various examples of processing RAMAN spectra
 import spectrochempy as scp
 
 # %%
-# ## Importing spectra
+# ## Importing a 1D spectra
 # Define the folder where are the spectra
 datadir = scp.preferences.datadir
 ramandir = datadir / "ramandata"
@@ -89,7 +89,33 @@ baseline = blc.baseline
 plot_result()
 
 # %%
+# This is better
+
+# %%
+# ## ALS on 2D spectra (series of spectra)
+
+# First, we read the series of spectra
+
+C = scp.read_labspec("Activation.txt", directory=ramandir)
+C = C[::10]  # for sake of speed, we keep only 1 spectrum over 10
+
+# %%
+# Let's plot the series of spectra
+C.plot()
+
+# %%
+# Now we apply the ALS method on the series of spectra
+#
+# We keep the same parameters as before and fit the new dataset
+
+blc.fit(C)
+corr = blc.transform()
+baseline = blc.baseline
+corr.plot()
+
+
+# %%
 # This ends the example ! The following line can be uncommented if no plot shows when
 # running the .py script
 
-# scp.show()
+scp.show()
