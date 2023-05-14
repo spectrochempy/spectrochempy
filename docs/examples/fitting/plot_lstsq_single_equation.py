@@ -117,8 +117,7 @@ distance_fitted3 = lstsq.predict()
 distance_fitted3.plot_pen(clear=False, color="g", label="Fitted line", legend=True)
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script with python
 
-# %%
 # scp.show()

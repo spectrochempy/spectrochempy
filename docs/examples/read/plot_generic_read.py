@@ -79,8 +79,7 @@ _ = dataset_list[-3].plot()
 _ = dataset_list[-4].plot()
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script with python
 
-# %%
 # scp.show()

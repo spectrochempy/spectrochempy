@@ -62,12 +62,12 @@ class Baseline(AnalysisConfigurable):
       the detrend can be constant (mean removal), linear (order 1)
       or quadratic (order 2).
     - ``'als'`` : Asymmetric Least Squares Smoothing baseline correction. This method
-      is based on the work of Eilers and Boelens (:cite:`Eilers:2005`\ ).
+      is based on the work of Eilers and Boelens (:cite:`eilers:2005`\ ).
     - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
       the polynomial is defined by the ``order`` parameter. The baseline is then obtained by evaluating the
       polynomial at each feature defined in predefined `ranges`\ .
     - ``'pchip'`` : Fit a piecewise cubic Hermite interpolating polynomial (PCHIP) to
-      the data  (:cite:`Fritsch:1980`\ ).
+      the data  (:cite:`fritsch:1980`\ ).
 
     # TODO: complete this description
 

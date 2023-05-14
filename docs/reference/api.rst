@@ -11,7 +11,7 @@
    :toctree: generated/
 
     ActionMassKinetics
-    BaselineCorrection
+    Baseline
     BaselineCorrector
     Coord
     CoordSet
@@ -22,7 +22,6 @@
     IRIS
     IrisKernel
     LSTSQ
-    LinearCoord
     MCRALS
     NDDataset
     NMF

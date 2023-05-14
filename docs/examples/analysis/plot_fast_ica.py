@@ -16,7 +16,7 @@ import spectrochempy as scp
 
 # %%
 # Load, prepare and plot the dataset
-# ----------------------------
+# ----------------------------------
 
 # %%
 # Here we use a dataset from :cite:t:`jaumot:2005`
@@ -81,8 +81,6 @@ _ = ica.plotmerit(nb_traces=15)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
-# running the .py script
-
-# %%
+# running the .py script with python
 
 # scp.show()

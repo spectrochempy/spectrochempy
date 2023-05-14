@@ -108,7 +108,7 @@ def test_models():
 # def test_compare_shapes():
 #     # compare voigt with gaussian and lorentzian
 #     # do the same for various models
-#     x = scp.LinearCoord.arange(1000)
+#     x = scp.Coord.arange(1000)
 #     kwargs = dict(
 #         ampl=1.0,
 #         width=100,

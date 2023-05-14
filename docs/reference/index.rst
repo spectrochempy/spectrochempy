@@ -78,7 +78,6 @@ All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`\
     :toctree: generated/
 
     Coord
-    LinearCoord
     CoordSet
 
 
@@ -468,13 +467,14 @@ Baseline correction
     :nosignatures:
     :toctree: generated/
 
-    BaselineCorrection
+    Baseline
     BaselineCorrector
     autosub
     ab
     abc
     basc
     detrend
+    als
     dc
 
 

@@ -218,13 +218,13 @@ _ = scp.abc(X).plot()
 # %% [markdown]
 # ## Advanced baseline correction using the Baseline class processor
 #
-# The `Baseline` class processor props
+# The `Baseline` class processor proposes a more advanced baseline correction
 #
 # 'Advanced' baseline correction basically consists for the user to choose:
 #
 # - spectral ranges which s/he considers as belonging to the baseline - the type of
 # polynomial(s) used to model the
-# baseline in and between these regions (keyword: `interpolation` ) - the method used
+# baseline in and between these regions (keyword: `model` ) - the method used
 # to apply the correction to
 # spectra: sequentially to each spectrum, or using a multivariate approach
 # (keyword: `method` ).
@@ -305,6 +305,10 @@ _ = X1.plot(label="X")
 _ = blc.baseline.plot(label="Baseline", clear=False, cmap=None, color="red")
 ax = blc.corrected.plot(label="X Corrected", clear=False, color="green", legend="best")
 
+# %% [markdown]
+# The method `show_regions` can be used to display the regions used for the baseline
+
+# %%
 blc.show_regions(ax)
 
 # %% [markdown]
@@ -337,23 +341,25 @@ blc.used_ranges
 # Clearly in this case it is not a very good idea. See the divergent part around 6000 cm$^{-1}$.
 
 # %% [markdown]
-# ### Interpolation method
+# ### Polynomial and pchip interpolation
 #
 #
-# The previous baseline fitting was made using the default parameters for the interpolation, *i.e.*, an interpolation using cubic Hermite spline interpolation:
-# `interpolation='pchip'` (`pchip` stands for
+# The previous baseline fitting was made using the default parameters for the model to use, *i.e.*, an interpolation using cubic Hermite spline interpolation:
+# `model='pchip'` (`pchip` stands for
 # **P**iecewise **C**ubic **H**ermite
 # **I**nterpolating **P**olynomial).
 
 # %%
-blc.interpolation
+blc.model
 
 # %% [markdown]
 # This option triggers the use of
 # [scipy.interpolate.PchipInterpolator()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.PchipInterpolator.html)
-# to which we refer the interested readers. The other interpolation method is the
-# classical polynomial interpolation (interpolation=`'polynomial'` ) in which case the
+# to which we refer the interested readers.
+#
+# The other interpolation method is the
+# classical polynomial interpolation (model=`'polynomial'` ) in which case the
 # order can also be set (*e.g.*, `order=3` , the default value being 6).
 # In this case, the base methods used for the interpolation are those of the
 # [polynomial module](
@@ -366,7 +372,6 @@ blc.interpolation
 # For the demonstration, we use the same `ranges` definition as above.
 
 # %%
-blc = scp.Baseline()
 blc.ranges = ranges
 blc.include_limits = True
 blc.interpolation = "polynomial"

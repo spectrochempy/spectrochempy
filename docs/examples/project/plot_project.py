@@ -107,8 +107,7 @@ proj["tgscatter"] = scp.Script("tgscatter", script_source_2)
 proj.tgscatter()
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script with python
 
-# %%
 # scp.show()
