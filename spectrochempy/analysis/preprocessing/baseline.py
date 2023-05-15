@@ -38,20 +38,21 @@ class Baseline(AnalysisConfigurable):
     Baseline Correction processor.
 
     The baseline correction can be applied to 1D datasets consisting in a single row
-    with :term:`n_features` or to 2D dataset with shape (:term:`n_observation`,
+    with :term:`n_features` or to a 2D dataset with shape (:term:`n_observation`,
     :term:`n_features`\ ).
 
-    Several models are proposed which can be used to estimate the baseline in two
-    ways : sequentially or using a multivariate approach.
+    When dealing with 2D datasets, the baseline correction can be applied either sequentially (default) or using a multivariate approach (parameter
+    `multivariate`set to `True).
 
     - The ``'sequential'`` approach which can be used for both 1D and 2D datasets
       consists in fitting the baseline sequentially for each observation row (spectrum).
 
-    - The ``'multivariate'`` approac which can only be applied to 2D datasets.
+    - The ``'multivariate'`` approach can only be applied to 2D datasets (at least 3
+      observations).
       The 2D dataset is first dimensionnaly reduced into several principal
-      components using the classical :term:`SVD` algorithm.
+      components using a conventional Singular Value Decomposition :term:`SVD` or a non negative matrix factorization (`NMF`).
       Each components is then fitted before an inverse transform performed to recover
-      the original data with baseline correction.
+      the baseline correction.
 
     In both approach, various models can be used to estimate the
     baseline.
@@ -59,10 +60,12 @@ class Baseline(AnalysisConfigurable):
     - ``'abc'`` : A linear baseline is automatically subtracted using the feature limit
       for reference.
     - ``'detrend'`` : remove trend from data. Depending on the ``order`` parameter,
-      the detrend can be constant (mean removal), linear (order 1)
-      or quadratic (order 2).
+      the detrend can be constant (mean removal), linear (order=1), quadratic (order=2)
+      or `cubic`(order=3).
     - ``'als'`` : Asymmetric Least Squares Smoothing baseline correction. This method
       is based on the work of Eilers and Boelens (:cite:`eilers:2005`\ ).
+    - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
+      (:cite:`ryan:1988`\ ).
     - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
       the polynomial is defined by the ``order`` parameter. The baseline is then obtained by evaluating the
       polynomial at each feature defined in predefined `ranges`\ .
@@ -102,7 +105,7 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True)
 
     model = tr.CaselessStrEnum(
-        ["polynomial", "pchip", "abc", "als", "detrend"],
+        ["polynomial", "pchip", "abc", "detrend", "als", "snip"],
         default_value="pchip",
         help="""The model used to determine the baseline.
 
@@ -118,6 +121,8 @@ The others models do not require the `ranges` parameter to be provided:
 * 'detrend': the baseline is determined by a constant, linear or polynomial
   trend removal. The order of the trend is determined by the `order` parameter.
 * 'als': the baseline is determined by an asymmetric least square algorithm.
+* 'snip': the baseline is determined by a simple non-iterative peak detection
+  algorithm.
 """,
     ).tag(config=True)
 
@@ -141,6 +146,11 @@ The others models do not require the `ranges` parameter to be provided:
         help="The asymmetry parameter for the ALS method. It is typically between 0.001 "
         "and 0.1. 0.001 gives almost the same fit as the unconstrained least squares",
     ).tag(config=True)
+
+    snip_width = tr.Integer(
+        help="The width of the window used to determine the baseline using the SNIP "
+        "algorithm."
+    ).tag(config=True, min=0)
 
     tol = tr.Float(
         default_value=1e-3,
@@ -351,6 +361,26 @@ baseline/trends for different segments of the data.
             for i in range(M):
                 interp = scipy.interpolate.PchipInterpolator(xbase, Y[i])
                 _store[i] = interp(x)
+
+        elif self.model == "snip":
+            # SNIP baseline correction
+            # based on :cite:`Ryan1976` ,
+            # and  https://stackoverflow.com/questions/57350711/
+            # baseline-correction-for-spectroscopic-data
+
+            # SNIP algorithm needs a positive spectrum
+            offset = np.min(Y)
+
+            # First phase: transform the data Y -> G(Y)
+            G = np.log(np.log(np.sqrt(Y - offset + 1) + 1) + 1)
+
+            # Second phase: multipass peak clipping loop
+            # on the scanned window
+            for w in range(self.snip_width):
+                mean = (np.roll(G, -w, axis=1) + np.roll(G, w, axis=1)) / 2
+                G[:, w : N - w] = np.minimum(G[:, w : N - w], mean[:, w : N - w])
+            # inverse transform G^-1
+            _store = (np.exp(np.exp(G) - 1) - 1) ** 2 - 1 + offset
 
         elif self.model == "als":
             # ALS fitted baseline

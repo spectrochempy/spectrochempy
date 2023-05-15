@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+# %%
 # ======================================================================================
 # Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+
+# %%
 """
 NDDataset baseline correction
 ==============================
@@ -19,26 +22,56 @@ interactively, using the `multivariate` method and a `pchip` interpolation.
 # spectrochempy library.
 
 # %%
-
 import spectrochempy as scp
 
 # %%
-# Load data:
+# Load data
 
+# %%
 datadir = scp.preferences.datadir
 nd = scp.NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 
 # %%
-# Do some slicing to keep only the interesting region:
+# Do some slicing to keep only the interesting region
 
-ndp = nd[:, 1291.0:5999.0]
+# %%
+nd = nd[:, 1291.0:5999.0]
 # Important:  notice that we use floating point number
 # integer would mean points, not wavenumbers!
 
 # %%
 # Plot the dataset
 
-_ = ndp.plot()
+
+# %%
+_ = nd.plot()
+
+
+# %%
+import numpy as np
+
+ndp = nd.copy()
+
+# make it positive and detrended
+# ndp = nd.detrend('linear')
+print(nd.min())
+ndp -= ndp.min()
+
+# apply LLS transformation
+G = ndp.copy()
+# G.data = np.log(np.log(np.sqrt(ndp.data+1)+1)+1)
+G.data = np.log(np.log(np.sqrt(ndp.data + 1) + 1) + 1)
+G = G.detrend()
+offset = G.min()
+G -= offset
+_ = G.plot()
+
+# %%
+pca = scp.NMF(n_components=4, max_iter=10000)  # , solver='mu', init='nndsvda')
+pca.fit(G)
+
+comp = (np.exp(np.exp(pca.components) - 1) - 1) ** 2 - 1 + offset
+comp.plot()
 
 
 # %%
@@ -48,6 +81,7 @@ _ = ndp.plot()
 # correction model to use, here a `pchip` interpolation (piecewise cubic
 # Hermite interpolation).
 
+# %%
 blc = scp.Baseline(
     log_level="INFO",
     multivariate=True,  # use a multivariate baseline correction approach

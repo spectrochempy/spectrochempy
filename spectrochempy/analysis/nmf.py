@@ -212,7 +212,7 @@ class NMF(DecompositionAnalysis):
         # _outfit is a tuple handle the eventual output of _fit for further processing.
 
         # The _outfit members are np.ndarrays
-        _outfit = self._nmf.fit(X)
+        _outfit = self._nmf.fit(X * 100.0)
         self._n_components = int(
             self._nmf.n_components
         )  # cast the returned int64 to int
