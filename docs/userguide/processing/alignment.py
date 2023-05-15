@@ -46,7 +46,7 @@ import spectrochempy as scp
 # required aligned coordinates.
 
 # %%
-dataset = scp.NDDataset.read_omnic("irdata/nh4y-activation.spg")
+dataset = scp.read_omnic("irdata/nh4y-activation.spg")
 dataset.y = dataset.y - dataset.y[0]  # remove offset in the time
 dataset.y.title = "time"
 prefs = dataset.preferences

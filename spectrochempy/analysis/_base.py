@@ -415,17 +415,6 @@ class AnalysisConfigurable(MetaConfigurable):
         if not hasattr(X, "mask") or not np.any(X._mask):
             return X
 
-        # It is safe to transform eventual LinearCoord to normal Coord
-        # as when mask is removed it is obviously no more linear!!!
-        # Todo: This will not be needed anymore when I will remove LinearCoord
-        #   (in a next future, I hope
-        if X.coordset is not None:
-            from spectrochempy.core.dataset.coord import Coord, LinearCoord
-
-            for i, c in enumerate(X.coordset):
-                if c is not None and isinstance(c, LinearCoord):
-                    X.coordset[i] = Coord(c)
-
         # remove masked rows and columns
         masked_rows, masked_columns = self._get_masked_rc(X._mask)
 

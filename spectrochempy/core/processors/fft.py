@@ -15,7 +15,7 @@ from quaternion import as_float_array
 from scipy.signal import hilbert
 
 from spectrochempy.core import error_
-from spectrochempy.core.dataset.coord import LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 from spectrochempy.core.units import ur
@@ -256,6 +256,7 @@ def ifft(dataset, size=None, **kwargs):
 
 
 def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
+
     """
     Apply a complex fast fourier transform.
 
@@ -340,8 +341,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         and x.units.dimensionality != "[time]"
     ):
         error_(
+            Exception,
             "fft apply only to dimensions with [time] dimensionality or dimensionless coords\n"
-            "fft processing was thus cancelled"
+            "fft processing was thus cancelled",
         )
         error = True
 
@@ -352,28 +354,31 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         and not x.dimensionless
     ):
         error_(
+            Exception,
             "ifft apply only to dimensions with [frequency] dimensionality or with ppm units "
-            "or dimensionless coords.\n ifft processing was thus cancelled"
+            "or dimensionless coords.\n ifft processing was thus cancelled",
         )
         error = True
 
     # Should not be masked
     elif new.is_masked:
         error_(
-            "current fft or ifft processing does not support masked data as input.\n processing was thus cancelled"
+            Exception,
+            "current fft or ifft processing does not support masked data as input.\n processing was thus cancelled",
         )
         error = True
 
     # Coordinates should be uniformly spaced (linear coordinate)
     if not x.linear:
-        # try to linearize it
-        x.linear = True
-        if not x.linear:
-            # linearization failed
-            error = True
+        error_(
+            "fft or ifft processing only support linear coordinates.\n"
+            "Processing was thus cancelled"
+        )
+
+        error = True
 
     if hasattr(x, "_use_time_axis"):
-        x._use_time_axis = True  # we need to havze dimentionless or time units
+        x._use_time_axis = True  # we need to have dimentionless or time units
 
     if not error:
         # OK we can proceed
@@ -383,7 +388,8 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         if not inv:
             td = x.size
 
-        # if no size (or si) parameter then use the size of the data (size not used for inverse transform
+        # if no size (or si) parameter then use the size of the data
+        # (size not used for inverse transform
         if size is None or inv:
             size = kwargs.get("si", x.size)
 
@@ -502,7 +508,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             first = sfo1 - sf - deltaf * sizem / 2.0
 
             # newcoord = type(x)(np.arange(size) * deltaf + first)
-            newcoord = LinearCoord.arange(size) * deltaf + first
+            newcoord = Coord.arange(size) * deltaf + first
             newcoord.show_datapoints = False
             newcoord.name = x.name
             new.title = "intensity"
@@ -524,7 +530,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
                 sw = bf1.to("Hz") * sw / 1.0e6
             deltat = (1.0 / sw).to("us")
 
-            newcoord = LinearCoord.arange(size) * deltat
+            newcoord = Coord.arange(size) * deltat
             newcoord.name = x.name
             newcoord.title = "time"
             newcoord.ito("us")

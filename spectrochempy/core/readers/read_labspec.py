@@ -16,7 +16,7 @@ import datetime
 import numpy as np
 
 from spectrochempy.core.dataset.baseobjects.meta import Meta
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.utils.docstrings import _docstring
 
@@ -128,13 +128,6 @@ def _read_txt(*args, **kwargs):
         _x = Coord(rawdata[0, 1:], title="Raman shift", units="1/cm")
         _y = Coord(rawdata[1:, 0], title="Time", units="s")
         date_acq, _y = _transf_meta(_y, meta)
-
-    # try to transform to linear coord
-    _x.linear = True
-
-    # if success linear should still be True
-    if _x.linear:
-        _x = LinearCoord(_x)
 
     # set dataset metadata
     dataset.data = data

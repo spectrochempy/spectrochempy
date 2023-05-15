@@ -131,7 +131,7 @@ np.sqrt(dx)
 # dataset.
 
 # %%
-d2D = scp.NDDataset.read_omnic("irdata/nh4y-activation.spg")
+d2D = scp.read_omnic("irdata/nh4y-activation.spg")
 prefs = d2D.preferences
 prefs.colormap = "magma"
 prefs.colorbar = False

@@ -15,7 +15,6 @@ __dataset_methods__ = __all__
 import numpy as np
 
 from spectrochempy.core import error_, warning_
-from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.misc import get_n_decimals
@@ -117,11 +116,6 @@ def align(dataset, *others, **kwargs):
         Issued when the dimensions given in `dim` or `dims` argument are not
         compatibles (units, titles, etc.).
     """
-    # DEVELOPER NOTE
-    # There is probably better methods, but to simplify dealing with
-    # LinearCoord, we transform them in Coord before treatment (going back
-    # to linear if possible at the end of the process)
-
     # TODO: Perform an alignment along numeric labels
     # TODO: add example in docs
 
@@ -133,8 +127,6 @@ def align(dataset, *others, **kwargs):
 
     # should we align on given external coordinates
     extern_coord = kwargs.pop("coord", None)
-    if extern_coord and extern_coord._implements("LinearCoord"):
-        extern_coord = Coord(extern_coord, linear=False, copy=True)
 
     # what's the method to use (by default='outer')
     method = kwargs.pop("method", "outer")
@@ -211,9 +203,6 @@ def align(dataset, *others, **kwargs):
 
         ndec = get_n_decimals(new_coord.data.max(), 1.0e-5)
 
-        if new_coord._implements("LinearCoord"):
-            new_coord = Coord(new_coord, linear=False, copy=True)
-
         # loop on all object
         for index, object in _objects.items():
 
@@ -228,8 +217,6 @@ def align(dataset, *others, **kwargs):
 
             # get the current object coordinates and check compatibility
             coord = obj.coordset[dim]
-            if coord._implements("LinearCoord") or coord.linear:
-                coord = Coord(coord, linear=False, copy=True)
 
             if not coord.is_units_compatible(ref_coord):
                 # not compatible, stop everything

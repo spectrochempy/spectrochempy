@@ -16,7 +16,7 @@ from warnings import warn
 
 import numpy as np
 
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import Quantity
@@ -30,6 +30,7 @@ _docstring.delete_params("Importer.see_also", "read_spc")
 
 @_docstring.dedent
 def read_spc(*paths, **kwargs):
+    # type: (*str, **kwargs) -> NDDataset
     """
     Read GRAMS/Thermo Scientific Galactic files or a list of files with extension :file:`.spc`\ .
 
@@ -429,14 +430,14 @@ def _read_spc(*args, **kwargs):
     #         w_title = "Double interferogram"
 
     if not txvals:  # evenly spaced x data
-        spacing = (Flast - Ffirst) / (Fnpts - 1)
-        _x = LinearCoord(
-            offset=Ffirst,
-            increment=spacing,
-            size=Fnpts,
+        _x = Coord.linspace(
+            Ffirst,
+            Flast,
+            Fnpts,
             title=x_title,
             units=x_unit,
         )
+
     else:
         _x = Coord(
             data=np.frombuffer(content, offset=512, dtype=float32_dtype, count=Fnpts),
@@ -495,7 +496,14 @@ def _read_spc(*args, **kwargs):
         dataset.description += "Source Instrument: " + ssource + "\n"
     if (
         Fcmnt
-        != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        != b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        b"\x00\x00\x00\x00"
     ):
         dataset.description += "Memo: " + scmnt + "\n"
     if Flogoff:

@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-from spectrochempy.core.dataset.coord import LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.docstrings import add_docstring
 from spectrochempy.utils.plots import make_label, plot_method
 
@@ -228,7 +228,7 @@ def plot_2D(dataset, method=None, **kwargs):
         show_x_points = x.show_datapoints
     if show_x_points:
         # remove data and units for display
-        x = LinearCoord.arange(xsize)
+        x = Coord.arange(xsize)
 
     discrete_data = False
 
@@ -281,7 +281,7 @@ def plot_2D(dataset, method=None, **kwargs):
         show_y_points = y.show_datapoints
     if show_y_points:
         # remove data and units for display
-        y = LinearCoord.arange(ysize)
+        y = Coord.arange(ysize)
 
     if y is not None and (not y.is_empty or y.is_labeled):
         ydata = y.data

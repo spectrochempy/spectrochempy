@@ -58,7 +58,7 @@ import spectrochempy as scp
 # (see also [Import IR Data](../importexport/importIR.ipynb)).
 
 # %%
-dataset = scp.NDDataset.read("irdata/nh4y-activation.spg")
+dataset = scp.read("irdata/nh4y-activation.spg")
 
 # %% [markdown]
 # ## Preparing the data

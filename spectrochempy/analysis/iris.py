@@ -356,7 +356,7 @@ class IRIS(DecompositionAnalysis):
     _Y_preprocessed = Array(help="preprocessed Y")
     _q = CoordType()
     _channels = CoordType()
-    _lambdas = CoordType()
+    _lambdas = CoordType().tag(rounding=False)
     _regularization = tr.Bool(False)
     _search_reg = tr.Bool(False)
 
@@ -392,7 +392,7 @@ class IRIS(DecompositionAnalysis):
         # no validation of reg_par triggred when it is None
         # so we need to init self._lambdas manually else itt will not be inited
         if self.reg_par is None:
-            self._lambdas = Coord([0], title="lambda")
+            self._lambdas = Coord([0], title="lambda", rounding=False)
 
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
@@ -418,7 +418,7 @@ class IRIS(DecompositionAnalysis):
             )
 
         # create the lambdas coordinate
-        self._lambdas = Coord(_lambdas, title="lambda")
+        self._lambdas = Coord(_lambdas, title="lambda", rounding=False)
 
         # return the validated reg_par with no transformation
         return reg_par

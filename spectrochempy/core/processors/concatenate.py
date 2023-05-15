@@ -138,8 +138,8 @@ def concatenate(*datasets, **kwargs):
                 for ds in datasets:
                     labels.append(ds.coordset[dim].labels)
 
-            if coords[dim]._implements() in ["Coord", "LinearCoord"]:
-                coords[dim] = Coord(coords[dim], linear=False)
+            if coords[dim]._implements() in ["Coord"]:
+                coords[dim] = Coord(coords[dim])
                 if labels != []:
                     coords[dim]._labels = np.concatenate(labels)
             elif coords[dim]._implements("CoordSet"):

@@ -22,7 +22,7 @@ from spectrochempy.core.dataset.arraymixins.ndmath import (
     _comp_ufuncs,
     _unary_ufuncs,
 )
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity, Unit, ur
@@ -927,7 +927,7 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     mxd = nd.mean(dim="y")  # cannot make n
     assert str(mxd) == "NDDataset: [float64] a.u. (size: 5549)"
-    assert str(mxd.x) == "LinearCoord: [float64] cm⁻¹ (size: 5549)"
+    assert str(mxd.x) == "Coord: [float64] cm⁻¹ (size: 5549)"
 
     # ----
     nd2 = NDDataset([[0, 1, 2], [3, 4, 5]])  # no coord (check issues
@@ -1013,8 +1013,8 @@ def test_coord_add_units_with_different_scale():
 
 
 def test_linearcoord_add_units_with_different_scale():
-    d1 = LinearCoord.arange(3.0, units="m")
-    d2 = LinearCoord.arange(3.0, units="cm")
+    d1 = Coord.arange(3.0, units="m")
+    d2 = Coord.arange(3.0, units="cm")
 
     x = d1 + 1.0 * ur.cm
     assert np.around(x.data[1], 2) == 1.01
@@ -1041,7 +1041,7 @@ def test_from_function_docstring():
         d = v * t
         return d
 
-    time = scp.LinearCoord.arange(0, 60, 10, units="min")
+    time = scp.Coord.arange(0, 60, 10, units="min")
     scp.fromfunction(
         func1, v=scp.Quantity(134, "km/hour"), coordset=scp.CoordSet(t=time)
     )

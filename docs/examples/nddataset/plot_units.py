@@ -100,7 +100,7 @@ except Exception as e:
 
 ""
 ds.x = ds.x.to("nanometer")
-print(ds.x)  # The LinearCoord object is transformed into a Coord object
+print(ds.x)
 _ = ds.plot()
 
 # %%

@@ -14,7 +14,7 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.units import DimensionalityError, ur
 
@@ -269,7 +269,7 @@ def test_coordset_del(coord0, coord1, coord2):
 
 
 def test_coordset_copy(coord0, coord1):
-    coord2 = LinearCoord.linspace(200.0, 300.0, 3, units="K", title="temperature")
+    coord2 = Coord.linspace(200.0, 300.0, 3, units="K", title="temperature")
 
     coordsa = CoordSet(coord0, coord1, coord2)
 

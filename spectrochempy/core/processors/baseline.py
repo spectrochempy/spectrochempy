@@ -197,7 +197,7 @@ class BaselineCorrection(HasTraits):
 
         # most of the time we need sorted axis, so let's do it now
         is_descendant = False
-        if lastcoord.descendant:
+        if lastcoord.is_descendant:
             new.sort(dim=dim, inplace=True, descend=False)
             is_descendant = True
             lastcoord = new.coordset[dim]

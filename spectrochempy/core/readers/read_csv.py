@@ -109,7 +109,7 @@ def _read_csv(*args, **kwargs):
         delimiter = ";"
 
     d = [row for row in csv.reader(txt.splitlines(), delimiter=delimiter)]
-    d = np.array(d).T
+    d = np.array(d, dtype=float).T
 
     # First column is the x coordinates
     coordx = Coord(d[0])

@@ -30,7 +30,7 @@ from traitlets import (
 )
 
 from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME, NDArray
-from spectrochempy.core.dataset.coord import Coord, LinearCoord
+from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.misc import is_sequence
 from spectrochempy.utils.print import colored_output, convert_to_html
 
@@ -75,7 +75,6 @@ class CoordSet(HasTraits):
     See Also
     --------
     Coord : Explicit coordinates object.
-    LinearCoord : Implicit coordinates object.
     NDDataset: The main object of SpectroChempy which makes use of CoordSet.
 
     Examples
@@ -184,7 +183,7 @@ class CoordSet(HasTraits):
                 if not isinstance(coord, CoordSet):
                     if isinstance(coord, list):
                         coord = CoordSet(*coord[::-1], sorted=False)
-                    elif not isinstance(coord, LinearCoord):  # else
+                    else:
                         coord = Coord(coord, copy=True)
                 else:
                     coord = cpy.deepcopy(coord)
@@ -206,7 +205,7 @@ class CoordSet(HasTraits):
             # remove the already used kwargs (Fix: deprecation warning in Traitlets - all args, kwargs must be used)
             del kwargs[key]
 
-            # prepare values to be either Coord, LinearCoord or CoordSet
+            # prepare values to be either Coord or CoordSet
             if isinstance(coord, (list, tuple)):
                 coord = CoordSet(
                     *coord, sorted=False
@@ -218,12 +217,13 @@ class CoordSet(HasTraits):
                 )  # make sure it's a Coord  # (even if it is None -> Coord(None)
 
             elif isinstance(coord, str) and coord in DEFAULT_DIM_NAME:
-                # may be a reference to another coordinates (e.g. same coordinates for various dimensions)
+                # may be a reference to another coordinates (e.g. same coordinates for
+                # various dimensions)
                 self._references[key] = coord  # store this reference
                 continue
 
             # Populate the coords with coord and coord's name.
-            if isinstance(coord, (NDArray, Coord, LinearCoord, CoordSet)):  # NDArray,
+            if isinstance(coord, (NDArray, Coord, CoordSet)):
                 if key in self.available_names or (
                     len(key) == 2
                     and key.startswith("_")
@@ -236,7 +236,8 @@ class CoordSet(HasTraits):
                     self._append(coord)
 
                 elif not self.is_empty and key in self.names:
-                    # append when a coordinate with this name is already set in passed arg.
+                    # append when a coordinate with this name is already set in passed
+                    # arg.
                     # replace it
                     idx = self.names.index(key)
                     coord.name = key
@@ -291,7 +292,7 @@ class CoordSet(HasTraits):
             return None
 
         for id, coord in enumerate(coords):
-            if coord and not isinstance(coord, (Coord, LinearCoord, CoordSet)):
+            if coord and not isinstance(coord, (Coord, CoordSet)):
                 raise TypeError(
                     "At this point all passed coordinates should be of type Coord or CoordSet!"
                 )  # coord =  #
