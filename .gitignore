@@ -135,5 +135,5 @@ coverage.json
 
 scp_data/stylesheets/mydefault.mplstyle
 docs/userguide/reference/api.rst
-/_ressources/
-/_tools/
+_ressources
+_tools
