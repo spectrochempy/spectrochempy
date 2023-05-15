@@ -49,17 +49,17 @@ class Baseline(AnalysisConfigurable):
 
     - The ``'multivariate'`` approach can only be applied to 2D datasets (at least 3
       observations).
-      The 2D dataset is first dimensionnaly reduced into several principal
-      components using a conventional Singular Value Decomposition :term:`SVD` or a non negative matrix factorization (`NMF`).
-      Each components is then fitted before an inverse transform performed to recover
+      The 2D dataset is first dimensional reduced into several principal
+      components using a conventional Singular Value Decomposition :term:`SVD` or a non-negative matrix factorization (`NMF`).
+      Each component is then fitted before an inverse transform performed to recover
       the baseline correction.
 
-    In both approach, various models can be used to estimate the
+    In both approaches, various models can be used to estimate the
     baseline.
 
     - ``'abc'`` : A linear baseline is automatically subtracted using the feature limit
       for reference.
-    - ``'detrend'`` : remove trend from data. Depending on the ``order`` parameter,
+    - ``'detrend'`` : remove trends from data. Depending on the ``order`` parameter,
       the detrend can be constant (mean removal), linear (order=1), quadratic (order=2)
       or `cubic`(order=3).
     - ``'als'`` : Asymmetric Least Squares Smoothing baseline correction. This method
@@ -109,7 +109,7 @@ class Baseline(AnalysisConfigurable):
         default_value="pchip",
         help="""The model used to determine the baseline.
 
-The following models are required that the ranges parameter is provided
+The following models are required that the `ranges` parameter is provided
 (see `ranges` parameter for more details):
 
 * 'polynomial': the baseline is determined by a nth-degree polynomial interpolation.
@@ -371,15 +371,25 @@ baseline/trends for different segments of the data.
             # SNIP algorithm needs a positive spectrum
             offset = np.min(Y)
 
-            # First phase: transform the data Y -> G(Y)
+            # First phase: transform the data Y -> G = LLS(Y - offset)
             G = np.log(np.log(np.sqrt(Y - offset + 1) + 1) + 1)
 
             # Second phase: multipass peak clipping loop
             # on the scanned window
-            for w in range(self.snip_width):
+            for w in range(self.snip_width - 8):
                 mean = (np.roll(G, -w, axis=1) + np.roll(G, w, axis=1)) / 2
                 G[:, w : N - w] = np.minimum(G[:, w : N - w], mean[:, w : N - w])
-            # inverse transform G^-1
+
+            # Third phase: reduce progressively the snip_width for the last passes
+            f = np.sqrt(2)
+            for w in range(self.snip_width - 8, self.snip_width):
+                w = int(np.ceil(w / f))  # decrease the window size by factor f
+                mean = (np.roll(G, -w, axis=1) + np.roll(G, w, axis=1)) / 2
+                G[:, w : N - w] = np.minimum(G[:, w : N - w], mean[:, w : N - w])
+                f = f * np.sqrt(2)  # in next iteration the window size will
+                # be decreased by another factor sqrt(2)
+
+            # Last phase: do an inverse transform G -> Y = LLS^-1(G) + offset
             _store = (np.exp(np.exp(G) - 1) - 1) ** 2 - 1 + offset
 
         elif self.model == "als":

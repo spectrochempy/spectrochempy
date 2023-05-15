@@ -17,7 +17,8 @@ Various examples of processing RAMAN spectra
 import spectrochempy as scp
 
 # %%
-# ## Importing a 1D spectra
+# Importing a 1D spectra
+# ----------------------
 # Define the folder where are the spectra
 datadir = scp.preferences.datadir
 ramandir = datadir / "ramandata"
@@ -36,7 +37,8 @@ B = A[60.0:]
 _ = B.plot()
 
 # %%
-# ## Baseline correction
+# Baseline correction
+# -------------------
 # Let's try to remove the baseline using differents methods
 # For this we use the `Baseline` processor
 #
@@ -47,7 +49,8 @@ blc = scp.Baseline(log_level="INFO")
 # Now we can try the various baseline methods.
 
 # %%
-# ### Detrending
+# Detrending
+# ~~~~~~~~~~
 # the `detrend` method is not strictly speaking a method to calculate a bottom line,
 # but it can be useful as a preprocessing to remove a trend.
 # Let's define the model to be used for detrending
@@ -100,7 +103,8 @@ plot_result(B, corr, baseline)
 Bd = blc.corrected
 
 # %%
-# ### Asymmetric Least Squares smoothing
+# Asymmetric Least Squares smoothing
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 blc.model = "als"
 
 # %%
@@ -123,7 +127,7 @@ plot_result(Bd, corr, baseline)
 # `snip` method. This method requires to adjust the with of the window (usually set to
 # the FWHM of the characteristic peaks).
 blc.model = "snip"
-blc.snip_width = 38  # FWHM of the peaks
+blc.snip_width = 55  # FWHM of the peaks
 Bs = A[55.0:]
 blc.fit(Bs)
 corr = blc.transform()
@@ -132,26 +136,25 @@ plot_result(Bs, corr, baseline)
 
 
 # %%
-# ## ALS on 2D spectra (series of spectra)
-
+# Baseline correction 2D spectra (series of spectra)
+# --------------------------------------------------
 # First, we read the series of spectra
 
 C = scp.read_labspec("Activation.txt", directory=ramandir)
-C = C[::5][
-    5:
-]  # for sake of speed, we keep only 1 spectrum over 5 and discard the first 5 spectra
+# C = C[20:]  # discard the first 20 spectra
 C.plot()
 
-# %%
-# Let's plot the series of spectra
-C.plot()
 
 # %%
 # Now we apply the ALS method on the series of spectra
 #
 # We keep the same parameters as before and fit the new dataset
+# The baseline is calculated for each spectrum of the series. So the process is
+# a very slow!  For the demonstration we will the limit the series to 1 spectrum
+# over 10.
+
 blc.model = "als"
-blc.fit(C)
+blc.fit(C[::10])
 corr = blc.transform()
 baseline = blc.baseline
 corr.plot()
@@ -164,6 +167,17 @@ corr = blc.transform()
 baseline = blc.baseline
 corr.plot()
 
+# %%
+# Denoising
+# ---------
+D = corr.copy()
+estimator = scp.NMF(n_components=5)
+offset = D.min()
+G = scp.LLS(D - offset)
+estimator.fit(G)
+comp = scp.invLLS(estimator.inverse_transform()) + offset
+
+comp[::10].plot()
 
 # %%
 # This ends the example ! The following line can be removed or when the example is run as a notebook (*.ipynb).
