@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# %%
 # ======================================================================================
 # Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -150,7 +149,7 @@ C.plot()
 #
 # We keep the same parameters as before and fit the new dataset
 # The baseline is calculated for each spectrum of the series. So the process is
-# a very slow!  For the demonstration we will the limit the series to 1 spectrum
+# very slow!  For the demonstration we will the limit the series to 1 spectrum
 # over 10.
 
 blc.model = "als"
@@ -173,9 +172,9 @@ corr.plot()
 D = corr.copy()
 estimator = scp.NMF(n_components=5)
 offset = D.min()
-G = scp.LLS(D - offset)
+G = scp.lls(D - offset)
 estimator.fit(G)
-comp = scp.invLLS(estimator.inverse_transform()) + offset
+comp = scp.lls_inv(estimator.inverse_transform()) + offset
 
 comp[::10].plot()
 
