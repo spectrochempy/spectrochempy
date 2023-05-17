@@ -16,13 +16,6 @@ from pathlib import Path
 import pytest
 from traitlets import import_item
 
-if environ.get("USER", None) is None and (
-    sys.platform.startswith("win") or sys.platform == "darwin"
-):
-    pytest.skip("example testing on windows and macos", allow_module_level=True)
-else:
-    print(f"USER : {environ.get('USER', None)}")
-
 pytestmark = pytest.mark.slow
 
 repo = Path(__file__).parent.parent.parent
@@ -33,12 +26,11 @@ scripts = list((repo / "docs").glob("**/*.py"))
 # remove some scripts
 for item in scripts[:]:
     if (
-        "checkpoints" in str(item)
+        "checkpoint" in str(item)
         or "make.py" in str(item)
         or "conf.py" in str(item)
         or "apigen.py" in str(item)
         or "gallery" in str(item)
-        or ".py" not in str(item)
     ):
         scripts.remove(item)
 
@@ -105,6 +97,8 @@ def test_examples(example):
     )
 
     print("*" * 80 + "\nTesting " + str(example))
-    parts = example.parts
-    module = ".".join(parts[parts.index("spectrochempy") :])[0:-3]
+    parts = list(example.parts)
+    parts[-1] = parts[-1][0:-3]
+    sel = parts[-parts[::-1].index("spectrochempy") - 1 :]
+    module = ".".join(sel)
     import_item(module)
