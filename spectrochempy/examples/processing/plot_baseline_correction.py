@@ -13,8 +13,9 @@ NDDataset baseline correction
 ==============================
 
 In this example, we perform a baseline correction of a 2D NDDataset
-interactively, using the `multivariate` method and a `pchip` interpolation.
+interactively, using the `multivariate` method and a `pchip`/'polynomial' interpolation.
 
+For comparison we also use the `als`and. `snip`models.
 """
 
 # %%
@@ -35,7 +36,7 @@ nd = scp.NDDataset.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 # Do some slicing to keep only the interesting region
 
 # %%
-nd = nd[:, 1291.0:5999.0]
+ndp = nd[:, 1291.0:5999.0]
 # Important:  notice that we use floating point number
 # integer would mean points, not wavenumbers!
 
@@ -44,35 +45,22 @@ nd = nd[:, 1291.0:5999.0]
 
 
 # %%
-_ = nd.plot()
+_ = ndp.plot()
 
 
 # %%
-import numpy as np
-
-ndp = nd.copy()
-
-# make it positive and detrended
-# ndp = nd.detrend('linear')
-print(nd.min())
-ndp -= ndp.min()
-
-# apply LLS transformation
-G = ndp.copy()
-# G.data = np.log(np.log(np.sqrt(ndp.data+1)+1)+1)
-G.data = np.log(np.log(np.sqrt(ndp.data + 1) + 1) + 1)
-G = G.detrend()
-offset = G.min()
-G -= offset
-_ = G.plot()
+# Remove a basic linear baseline using `abc`
 
 # %%
-pca = scp.NMF(n_components=4, max_iter=10000)  # , solver='mu', init='nndsvda')
-pca.fit(G)
+ndp = ndp.abc()
 
-comp = (np.exp(np.exp(pca.components) - 1) - 1) ** 2 - 1 + offset
-comp.plot()
+# %%
+# Make it positive
 
+# %%
+offset = ndp.min()
+ndp -= offset
+_ = ndp.plot()
 
 # %%
 # Define the Baseline object for a multivariate baseline correction model.
@@ -92,6 +80,8 @@ blc = scp.Baseline(
 # %%
 # Now we select the regions ( `ranges` ) to use for the baseline correction.
 
+
+# %%
 blc.ranges = [
     [1556.30, 1568.26],
     [1795.00, 1956.75],
@@ -105,7 +95,8 @@ blc.ranges = [
 # %%
 # We can now fit the baseline correction model to the data:
 
-blc.fit(ndp)
+# %%
+_ = blc.fit(ndp)
 
 # %%
 # The baseline is now stored in the `baseline` attribute of the processor:
@@ -113,12 +104,14 @@ blc.fit(ndp)
 # The corrected dataset (the dataset after the baseline subtraction) is
 # stored in the `corrected` attribute of the processor:
 
+# %%
 baseline = blc.baseline
 corrected = blc.corrected
 
 # %%
 # Plot the result of the correction
 
+# %%
 _ = corrected.plot()
 
 # %%
@@ -126,6 +119,7 @@ _ = corrected.plot()
 # for some individual spectra to, for example, check the quality of the
 # correction:
 
+# %%
 _ = corrected[0].plot()
 _ = baseline[0].plot(clear=False, color="red", ls="-")
 _ = ndp[0].plot(clear=False, color="green", ls="--")
@@ -141,8 +135,10 @@ _ = ndp[10].plot(clear=False, color="green", ls="--")
 # model is perhaps not the best choice for this dataset. We can try to use a
 # `polynomial` model instead:
 
+
+# %%
 blc.model = "polynomial"
-blc.order = 3  # cubic polynomial
+blc.order = 5
 blc.fit(ndp)
 
 baseline = blc.baseline
@@ -160,8 +156,10 @@ _ = corrected.plot()
 
 
 # %%
-# This looks better and smoother.
-#
+# This looks better and smoother. But not perfect.
+
+
+# %%
 # We can also try to use a `als` (Asymmetric Least Squares) model
 # instead. This model is based on the work of Eilers and Boelens (2005)
 # and performs a baseline correction by iteratively fitting asymmetrically
@@ -172,7 +170,9 @@ _ = corrected.plot()
 # the baseline will be. The `assymetry` parameter is a parameter
 # which control the assymetry if the ALS algorithm.
 
-blc.multivariate = False
+
+# %%
+blc.multivariate = False  # use a sequential approach
 blc.model = "als"
 blc.mu = 10**9
 blc.asymmetry = 0.005
@@ -187,7 +187,7 @@ _ = ndp[0].plot(clear=False, color="green", ls="--")
 
 _ = corrected[-1].plot()
 _ = baseline[-1].plot(clear=False, color="red", ls="-")
-_ = ndp[10].plot(clear=False, color="green", ls="--")
+_ = ndp[-1].plot(clear=False, color="green", ls="--")
 
 _ = corrected.plot()
 
@@ -196,4 +196,5 @@ _ = corrected.plot()
 # This ends the example ! The following line can be uncommented if no plot shows when
 # running the .py script with python
 
+# %%
 # scp.show()
