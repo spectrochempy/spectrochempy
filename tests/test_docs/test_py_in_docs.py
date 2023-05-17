@@ -105,5 +105,6 @@ def test_examples(example):
 
     print("*" * 80 + "\nTesting " + str(example))
     parts = example.parts
-    module = ".".join(parts[parts.index("spectrochempy") :])[0:-3]
+    sel = parts[parts[::-1].index("spectrochempy") :][::-1]
+    module = ".".join(sel)[0:-3]
     import_item(module)
