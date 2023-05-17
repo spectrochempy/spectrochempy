@@ -1,4 +1,12 @@
-from spectrochempy.analysis.preprocessing.baseline import *
+from spectrochempy.analysis.preprocessing.baseline import (
+    Baseline,
+    abc,
+    als,
+    basc,
+    dc,
+    detrend,
+    snip,
+)
 from spectrochempy.analysis.preprocessing.utils import lls, lls_inv
 
 __all__ = [
