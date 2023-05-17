@@ -40,8 +40,9 @@ def nbsphinx_script_run(path):
     so = None
     serr = None
     try:
+        print(sys.executable)
         pipe = subprocess.Popen(
-            ["python", str(path), "--nodisplay"],
+            [sys.executable, "-m", str(path), "--nodisplay"],
             stdout=subprocess.PIPE,
             encoding="utf8",
         )
@@ -62,11 +63,11 @@ def test_nbsphinx_script_(script):
         return
 
     print("Testing ", script)
-    if script.suffix == ".py":
-        e, message, err = nbsphinx_script_run(script)
-        # this give unicoderror on workflow with window
-        print(e, message, err)
-        assert not e, message
+
+    e, message, err = nbsphinx_script_run(script)
+    # this give unicoderror on workflow with window
+    print(e, message, err)
+    assert not e, message
 
 
 examples = list((repo / "spectrochempy" / "examples").glob("**/*.py"))
