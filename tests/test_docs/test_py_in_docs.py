@@ -35,7 +35,6 @@ for item in scripts[:]:
         scripts.remove(item)
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="do not work on windows")
 def nbsphinx_script_run(path):
     pipe = None
     so = None
@@ -53,6 +52,7 @@ def nbsphinx_script_run(path):
     return pipe.returncode, so, serr
 
 
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="do not work on windows")
 @pytest.mark.parametrize("script", scripts)
 def test_nbsphinx_script_(script):
     # some test will failed due to the magic commands or for other known reasons
