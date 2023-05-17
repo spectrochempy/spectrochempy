@@ -329,7 +329,7 @@ pdf_language = "en_EN"
 
 sphinx_gallery_conf = {
     "plot_gallery": "True",
-    "examples_dirs": "examples",
+    "examples_dirs": "../spectrochempy/examples",
     "gallery_dirs": "gallery/auto_examples",
     "backreferences_dir": "gallery/backreferences",
     "doc_module": "spectrochempy",
