@@ -721,8 +721,9 @@ and `St`.
         if getC_to_C_idx == "default":
             getC_to_C_idx = np.arange(self._n_components).tolist()
         elif (
-            len(getC_to_C_idx) > self._n_components
-            or max(getC_to_C_idx) + 1 > self._n_components
+            len(getC_to_C_idx)
+            > self._n_components
+            #   or max(getC_to_C_idx) + 1 > self._n_components
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
