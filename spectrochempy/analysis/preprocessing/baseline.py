@@ -705,7 +705,7 @@ def basc(dataset, *ranges, **kwargs):
 
 
 @_docstring.dedent
-def detrend(dataset, order="linear", breakpoints=[]):
+def detrend(dataset, order="linear", breakpoints=[], **kwargs):
     """
     Remove polynomial trend along a dimension from dataset.
 
@@ -743,13 +743,14 @@ def detrend(dataset, order="linear", breakpoints=[]):
     %(Baseline.see_also.no_detrend)s
     """
 
+    # kwargs will be removed in version 0.8
     inplace = kwargs.pop("inplace", None)
     if inplace is not None:
         warning_("inplace parameter was removed in version 0.7 and has no more effect.")
 
     type = kwargs.pop("type", None)
     if type is not None:
-        deprecated("type", replace="order", removed="0.7")
+        deprecated("type", replace="order", removed="0.8")
         order = type
 
     dim = kwargs.pop("dim", None)
@@ -757,7 +758,7 @@ def detrend(dataset, order="linear", breakpoints=[]):
         deprecated(
             "dim",
             extra_msg="Transpose your data before processing if needed.",
-            removed="0.7",
+            removed="0.8",
         )
 
     blc = Baseline()

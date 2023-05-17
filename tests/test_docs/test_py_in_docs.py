@@ -79,11 +79,7 @@ def test_nbsphinx_script_(script):
 
 examples = list((repo / "spectrochempy" / "examples").glob("**/*.py"))
 for example in examples[:]:
-    if (
-        example.stem == "__init__"
-        or example.suffix != ".py"
-        or str(example).endswith("-checkpoints")
-    ):
+    if example.stem == "__init__" or "checkpoint" in str(example):
         examples.remove(example)
 
 import matplotlib as mpl
