@@ -21,7 +21,7 @@ from spectrochempy.analysis._base import (
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.analysis.preprocessing.utils import lls, lls_inv
-from spectrochempy.application import debug_, info_
+from spectrochempy.application import debug_, info_, warning_
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.processors.filter import smooth
 from spectrochempy.core.processors.utils import _units_agnostic_method
@@ -31,7 +31,50 @@ from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.traits import NDDatasetType
 
+__all__ = [
+    "Baseline",
+    "abc",
+    "dc",
+    "basc",
+    "detrend",
+    "als",
+    "snip",
+    "lls",
+    "lls_inv",
+]
 
+_common_see_also = """
+See Also
+--------
+Baseline : Manual baseline correction.
+basc : NDDataset method performing a baseline correction using the `Baseline` class.
+abc : NDDataset method performing an automatic baseline correction.
+als : NDDataset method performing an Asymmetric Least Squares Smoothing baseline.
+    correction.
+snip : NDDataset method performing a Simple Non-Iterative Peak (SNIP) detection
+    algorithm.
+autosub: NDDataset method performing a subtraction of reference.
+detrend : NDDataset method performing a remove polynomial trend along a dimension
+    from dataset.
+"""
+
+_docstring.get_sections(
+    _docstring.dedent(_common_see_also),
+    base="Baseline",
+    sections=["See Also"],
+)
+_docstring.delete_params("Baseline.see_also", "Baseline")
+_docstring.delete_params("Baseline.see_also", "basc")
+_docstring.delete_params("Baseline.see_also", "abc")
+_docstring.delete_params("Baseline.see_also", "als")
+_docstring.delete_params("Baseline.see_also", "snip")
+_docstring.delete_params("Baseline.see_also", "autosub")
+_docstring.delete_params("Baseline.see_also", "detrend")
+
+
+# ======================================================================================
+# Baseline class processor
+# ======================================================================================
 @signature_has_configurable_traits
 # Note: with this decorator
 # Configurable traits are added to the signature as keywords if they are not yet present.
@@ -83,10 +126,7 @@ class Baseline(AnalysisConfigurable):
 
     See Also
     --------
-    detrend : `NDDataset` method equivalent to the ``'Baseline.detrend'`` for linear
-        or constant trend removal.
-    abc : `NDDataset` method to automatically suppress a linear baseline correction
-        equivalent to the ``'Baseline.abc'`` method.
+    %(Baseline.see_also.no_Baseline)s
     """
     )
 
@@ -102,9 +142,8 @@ class Baseline(AnalysisConfigurable):
         help="For 2D datasets, if `True`, a multivariate method is used to fit a "
         "baseline on the principal components determined using a SVD decomposition"
         "followed by an inverse-transform to retrieve the baseline corrected "
-        "dataset. If `False`, a sequential method is used which "
-        "consists in fitting a baseline on each row (observations) of "
-        "the dataset.",
+        "dataset. If `False`, a sequential method is used which consists in fitting a "
+        "baseline on each row (observations) of the dataset.",
     ).tag(config=True)
 
     model = tr.CaselessStrEnum(
@@ -125,8 +164,16 @@ The others models do not require the `ranges` parameter to be provided:
   trend removal. The order of the trend is determined by the `order` parameter.
 * 'als': the baseline is determined by an asymmetric least square algorithm.
 * 'snip': the baseline is determined by a simple non-iterative peak detection
-  algorithm.
+  algorithm (for th).
 """,
+    ).tag(config=True)
+
+    lls = tr.Bool(
+        default_value=False,
+        help="If `True`, the baseline is determined on data transformed using the "
+        "log-log-square transform. This compress the dynamic range of signal and thus "
+        "emphasize smaller features. This parameter is always `True` for the 'snip' "
+        "model.",
     ).tag(config=True)
 
     order = tr.Union(
@@ -200,7 +247,7 @@ baseline/trends for different segments of the data.
     # Runtime parameters
     # ----------------------------------------------------------------------------------
     _X_ranges = NDDatasetType(
-        help="The dataset containing only the sections " "corresponding to _ranges"
+        help="The dataset containing only the sections corresponding to _ranges"
     )
     _ranges = tr.List(help="The actual list of ranges after trim and clean-up")
 
@@ -233,7 +280,7 @@ baseline/trends for different segments of the data.
 
     @tr.validate("n_components")
     def _validate_n_components(self, proposal):
-        # n cannot be higher than the size of s
+        # n_components cannot be higher than the number of observations
         npc = proposal.value
         if self._X_is_missing:
             return npc
@@ -241,7 +288,7 @@ baseline/trends for different segments of the data.
 
     @tr.validate("order")
     def _validate_order(self, proposal):
-        # string must be transformed to int
+        # order provided as string must be transformed to int
         order = proposal.value
         if isinstance(order, str):
             order = {"constant": 0, "linear": 1, "quadratic": 2, "cubic": 3}[
@@ -251,6 +298,7 @@ baseline/trends for different segments of the data.
 
     @tr.validate("ranges")
     def _validate_ranges(self, proposal):
+        # ranges must be transformed using trim_range
         ranges = proposal.value
 
         if isinstance(ranges, tuple) and len(ranges) == 1:
@@ -344,19 +392,33 @@ baseline/trends for different segments of the data.
         # get the number of observations and features
         M, N = self._X.shape if self._X.ndim == 2 else (1, self._X.shape[0])
 
+        # eventually transform the compress y data dynamic using log-log-square
+        # operator. lls requires positive data.
+        if self.model == "snip":
+            self.lls = True
+        offset_lls = ybase.min() if self.lls else 0
+        Y = ybase if not self.lls else lls(ybase - offset_lls)
+
+        # when using `nmf` multivariate factorization, it works much better when data
+        # start at zero so we will remove the minimum value of the data and restore it
+        # after the fit
+        offset_nmf = Y.min() if self.multivariate == "nmf" else 0
+        Y = Y - offset_nmf
+
         # initialization varies according to the approach used (multivariate or not)
+        # ---------------------------------------------------------------------------
         if not self.multivariate:
             # sequential method
-            Y = ybase
             _store = np.zeros((M, N))
         else:
             # multivariate method
-            U, s, Vt = np.linalg.svd(ybase, full_matrices=False, compute_uv=True)
+            U, s, Vt = np.linalg.svd(Y, full_matrices=False, compute_uv=True)
             M = self.n_components
             Y = Vt[0:M]
             _store = np.zeros((M, N))
 
-        # Polynomial interpolation or detrend ..........................................
+        # Polynomial interpolation or detrend
+        # ------------------------------------
         if self.model in ["polynomial", "detrend"]:
             # polynomial interpolation or detrend process
             # using parameter `order` and predetermined ranges
@@ -365,50 +427,52 @@ baseline/trends for different segments of the data.
             )
             _store = np.polynomial.polynomial.polyval(x, polycoef)
 
-        # pchip interpolation (piecewise cubic hermite interpolation) using ranges ....
+        # PChip interpolation (piecewise cubic hermite interpolation) using ranges
+        # -------------------------------------------------------------------------
         elif self.model == "pchip":
             # pchip interpolation
             for i in range(M):
                 interp = scipy.interpolate.PchipInterpolator(xbase, Y[i])
                 _store[i] = interp(x)
 
-        # Simple Non-Iterative Peak (SNIP) detection algorithm .........................
+        # Simple Non-Iterative Peak (SNIP) detection algorithm
+        # -----------------------------------------------------
+        # based on :cite:`Ryan1988` ,
+        # and  https://stackoverflow.com/questions/57350711/
+        # baseline-correction-for-spectroscopic-data
+
         elif self.model == "snip":
             # SNIP baseline correction
-            # based on :cite:`Ryan1988` ,
-            # and  https://stackoverflow.com/questions/57350711/
-            # baseline-correction-for-spectroscopic-data
 
-            # SNIP algorithm needs a positive spectrum
-            offset = np.min(Y)
-
-            # First phase: transform the data Y -> G = LLS(Y - offset)
-            G = lls(Y - offset)
+            # First phase: transform the data Y -> LLS(Y - offset)
+            # This has been done already, so proceed to the next phase
 
             # Second phase: multipass peak clipping loop
             # on the scanned window
             for w in range(self.snip_width - 8):
-                mean = (np.roll(G, -w, axis=1) + np.roll(G, w, axis=1)) / 2
-                G[:, w : N - w] = np.minimum(G[:, w : N - w], mean[:, w : N - w])
+                mean = (np.roll(Y, -w, axis=1) + np.roll(Y, w, axis=1)) / 2
+                Y[:, w : N - w] = np.minimum(Y[:, w : N - w], mean[:, w : N - w])
 
             # Third phase: reduce progressively the snip_width for the last passes by a
             # factor sqrt(2) (cf. ryan:1988)
             f = np.sqrt(2)
             for w in range(self.snip_width - 8, self.snip_width):
                 w = int(np.ceil(w / f))  # decrease the window size by factor f
-                mean = (np.roll(G, -w, axis=1) + np.roll(G, w, axis=1)) / 2
-                G[:, w : N - w] = np.minimum(G[:, w : N - w], mean[:, w : N - w])
+                mean = (np.roll(Y, -w, axis=1) + np.roll(Y, w, axis=1)) / 2
+                Y[:, w : N - w] = np.minimum(Y[:, w : N - w], mean[:, w : N - w])
                 f = f * np.sqrt(2)  # in next iteration the window size will
                 # be decreased by another factor sqrt(2)
 
-            # Last phase: do an inverse transform G -> Y = LLS^-1(G) + offset
-            _store = lls_inv(G) + offset
+            # Last phase: do an inverse transform Y = LLS^-1(G) + offset
+            # will be done later
+            _store = Y
 
-        # ALS baseline correction ......................................................
+        # ALS baseline correction
+        # -----------------------
+        # see
+        # https://stackoverflow.com/questions/29156532/python-baseline-correction-library
         elif self.model == "als":
             # ALS fitted baseline
-            # see
-            # https://stackoverflow.com/questions/29156532/python-baseline-correction-library
             # For now, this doesn't work with masked data
             mu = self.mu
             p = self.asymmetry
@@ -441,13 +505,21 @@ baseline/trends for different segments of the data.
                 z += mi
                 _store[i] = z[::-1] if self._X.x.is_descendant else z
 
-        # inverse transform to get the baseline in the original data space .............
+        # inverse transform to get the baseline in the original data space
         # this depends on the approach used (multivariate or not)
         if self.multivariate:
             T = U[:, 0:M] @ np.diag(s)[0:M, 0:M]
             baseline = T @ _store
         else:
             baseline = _store
+
+        # eventually inverse lls transform
+        if self.lls:
+            baseline = lls_inv(baseline) + offset_lls
+
+        # eventually add the offset for nmf
+        if self.multivariate == "nmf":
+            baseline += offset_nmf
 
         # unsqueeze data (needed to restore masks properly)
         if baseline.ndim == 1:
@@ -576,19 +648,22 @@ baseline/trends for different segments of the data.
         if hasattr(self, "_sps") and self._sps:
             for sp in self._sps:
                 sp.remove()
-        self._sps = []
-        self.ranges = list(trim_ranges(*self.ranges))
-        for range in self.ranges:
+        # self._sps = []
+        for range in self._ranges:
             range.sort()
             sp = ax.axvspan(range[0], range[1], facecolor="#2ca02c", alpha=0.5)
-            self._sps.append(sp)
+            # self._sps.append(sp)
 
 
 # ======================================================================================
-# API functions
+# API / NDDataset functions
 # ======================================================================================
+# Instead of using directly the Baseline class, we provide here some functions
+# which are eventually more user friendly and which can be used directly on NDDataset or
+# called from the API.
 
 
+@_docstring.dedent
 def basc(dataset, *ranges, **kwargs):
     r"""
     Compute a baseline correction using the Baseline class processor.
@@ -612,8 +687,7 @@ def basc(dataset, *ranges, **kwargs):
 
     See Also
     --------
-    Baseline : Manual baseline corrections.
-    abc : Automatic baseline correction.
+    %(Baseline.see_also.no_basc)s
 
     Notes
     -----
@@ -630,14 +704,13 @@ def basc(dataset, *ranges, **kwargs):
     return blc.transform()
 
 
-def detrend(dataset, order="linear", bp=[], **kwargs):
+@_docstring.dedent
+def detrend(dataset, order="linear", breakpoints=[]):
     """
     Remove polynomial trend along a dimension from dataset.
 
     Depending on the ``order``parameter, `detrend` removes the best-fit polynomial line
     (in the least squares sense) from the data and returns the remaining data.
-
-    See examples section for the different syntax.
 
     Parameters
     ----------
@@ -659,38 +732,20 @@ def detrend(dataset, order="linear", bp=[], **kwargs):
         containing coordinate values or indices indicating the location of the
         breakpoints. Breakpoints are useful when you want to compute separate trends
         for different segments of the data.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
 
     Returns
     -------
     `NDDataset`
         The detrended dataset.
 
-    Other Parameters
-    ----------------
-    inplace : bool, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new
-        object
-
     See Also
     --------
-    Baseline : Manual baseline correction.
-    abc : Automatic baseline correction.
-    autosub : Subtraction of reference.
-
-    Examples
-    --------
-
-    >>> dataset = scp.read("irdata/nh4y-activation.spg")
-    >>> dataset.detrend(order='constant')
-    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
+    %(Baseline.see_also.no_detrend)s
     """
-    if not kwargs.pop("inplace", False):
-        # default
-        new = dataset.copy()
-    else:
-        new = dataset
+
+    inplace = kwargs.pop("inplace", None)
+    if inplace is not None:
+        warning_("inplace parameter was removed in version 0.7 and has no more effect.")
 
     type = kwargs.pop("type", None)
     if type is not None:
@@ -706,19 +761,85 @@ def detrend(dataset, order="linear", bp=[], **kwargs):
         )
 
     blc = Baseline()
-    blc.interpolation = "detrend"
+    blc.model = "detrend"
     blc.order = order
-    blc.bp = bp
-    blc.fit(new)
+    blc.breakpoints = breakpoints
+    blc.fit(dataset)
 
     return blc.transform()
 
 
-def ab(dataset, dim=-1, **kwargs):
+@_docstring.dedent
+def als(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     """
-    Alias of `abc` .
+    Asymmetric Least Squares Smoothing baseline correction.
+
+    This method is based on the work of Eilers and Boelens (:cite:`eilers:2005`\ ).
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The input data.
+    mu : `float`, optional, default:1e5
+        The smoothness parameter for the ALS method. Larger values make the
+        baseline stiffer. Values should be in the range (0, 1e9)
+    asymmetry : `float`, optional, default:0.05,
+        The asymmetry parameter for the ALS method. It is typically between 0.001
+        and 0.1. 0.001 gives almost the same fit as the unconstrained least squares.
+    tol = `float`, optional, default:1e-3
+        The tolerance parameter for the ALS method. Smaller values make the fitting better but potentially increases the number of iterations and the running time. Values should be in the range (0, 1).
+    max_iter = `int`, optional, default:50
+        Maximum number of :term:`ALS` iteration.
+
+    Returns
+    -------
+    `NDDataset`
+        The baseline corrected dataset.
+
+    See Also
+    --------
+    %(Baseline.see_also.no_als)s
     """
-    return abs(dataset, dim, **kwargs)
+    blc = Baseline()
+    blc.model = "als"
+    blc.asymmetry = asymmetry
+    blc.tol = tol
+    blc.max_iter = max_iter
+    blc.fit(dataset)
+
+    return blc.transform()
+
+
+@_docstring.dedent
+def snip(dataset, snip_width=50):
+    """
+    Simple Non-Iterative Peak (SNIP) detection algorithm
+
+    See :cite:t:`ryan:1988` .
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The input data.
+    snip_width : `int`, optional, default:50
+        The width of the window used to determine the baseline using the SNIP algorithm.
+
+
+    Returns
+    -------
+    `NDDataset`
+        The baseline corrected dataset.
+
+    See Also
+    --------
+    %(Baseline.see_also.no_als)s
+    """
+    blc = Baseline()
+    blc.model = "snip"
+    blc.snip_width = snip_width
+    blc.fit(dataset)
+
+    return blc.transform()
 
 
 @_units_agnostic_method
@@ -754,6 +875,7 @@ def dc(dataset, **kwargs):
 # ======================================================================================
 # abc # TODO: some work to perform on this
 # ======================================================================================
+@_docstring.dedent
 def abc(dataset, dim=-1, **kwargs):
     """
     Automatic baseline correction.
@@ -805,8 +927,7 @@ def abc(dataset, dim=-1, **kwargs):
 
     See Also
     --------
-    BaselineCorrection : Manual baseline corrections.
-    basc : Manual baseline correction.
+    %(Baseline.see_also.no_abc)s
 
     Notes
     -----

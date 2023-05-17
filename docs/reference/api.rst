@@ -36,9 +36,9 @@
     SVD
     Script
     Unit
-    ab
     abc
     align
+    als
     asymmetricvoigtmodel
     autosub
     bartlett
@@ -64,6 +64,8 @@
     ht
     ifft
     interpolate
+    lls
+    lls_inv
     lorentzianmodel
     ls
     mc
@@ -130,6 +132,7 @@
     sine
     sinm
     smooth
+    snip
     sp
     stack
     trapezoid

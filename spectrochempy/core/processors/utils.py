@@ -13,7 +13,6 @@ import functools
 def _units_agnostic_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
-
         # On which axis do we want to shift (get axis from arguments)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
@@ -31,7 +30,7 @@ def _units_agnostic_method(method):
         data = method(new.data, **kwargs)
         new._data = data
 
-        new.history = f"`{method.__name__}` shift performed on dimension `{dim}` with parameters: {kwargs}"
+        new.history = f"`{method.__name__}` performed on dimension `{dim}` with parameters: {kwargs}"
 
         # restore original data order if it was swapped
         if swapped:

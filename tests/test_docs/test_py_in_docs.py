@@ -8,10 +8,13 @@
 # --------------------------------------------------------------------------------------
 # Testing examples and notebooks (Py version) in docs
 # --------------------------------------------------------------------------------------
+import subprocess
 import sys
 from os import environ
+from pathlib import Path
 
 import pytest
+from traitlets import import_item
 
 if environ.get("USER", None) is None and (
     sys.platform.startswith("win") or sys.platform == "darwin"
@@ -22,12 +25,12 @@ else:
 
 pytestmark = pytest.mark.slow
 
-from pathlib import Path
-
 repo = Path(__file__).parent.parent.parent
 
+# get nbsphinx scripts located mainly in the userguide
 scripts = list((repo / "docs").glob("**/*.py"))
 
+# remove some scripts
 for item in scripts[:]:
     if (
         "checkpoints" in str(item)
@@ -35,13 +38,12 @@ for item in scripts[:]:
         or "conf.py" in str(item)
         or "apigen.py" in str(item)
         or "gallery" in str(item)
+        or ".py" not in str(item)
     ):
         scripts.remove(item)
 
 
-def example_run(path):
-    import subprocess
-
+def nbsphinx_script_run(path):
     pipe = None
     so = None
     serr = None
@@ -58,18 +60,55 @@ def example_run(path):
     return pipe.returncode, so, serr
 
 
-@pytest.mark.parametrize("example", scripts)
-def test_example(example):
+@pytest.mark.parametrize("script", scripts)
+def test_nbsphinx_script_(script):
     # some test will failed due to the magic commands or for other known reasons
     # SKIP THEM
-    name = example.name
+    name = script.name
     if name in []:
-        print(example, " ---> test skipped - DO IT MANUALLY")
+        print(script, " ---> test skipped - DO IT MANUALLY")
         return
 
-    print("Testing ", example)
-    if example.suffix == ".py":
-        e, message, err = example_run(example)
+    print("Testing ", script)
+    if script.suffix == ".py":
+        e, message, err = nbsphinx_script_run(script)
         # this give unicoderror on workflow with window
         print(e, message, err)
         assert not e, message
+
+
+examples = list((repo / "spectrochempy" / "examples").glob("**/*.py"))
+for example in examples[:]:
+    if (
+        example.stem == "__init__"
+        or example.suffix != ".py"
+        or str(example).endswith("-checkpoints")
+    ):
+        examples.remove(example)
+
+import matplotlib as mpl
+
+import spectrochempy as scp  # to avoid imporing it in example test (already impported)
+
+
+@pytest.mark.parametrize("example", examples)
+def test_examples(example):
+
+    scp.NO_DISPLAY = True
+    scp.NO_DIALOG = True
+    mpl.use("agg", force=True)
+    from os import environ
+
+    # set test file and folder in environment
+    # set a test file in environment
+    DATADIR = scp.pathclean(scp.preferences.datadir)
+    environ["TEST_FILE"] = str(DATADIR / "irdata" / "nh4y-activation.spg")
+    environ["TEST_FOLDER"] = str(DATADIR / "irdata" / "subdir")
+    environ["TEST_NMR_FOLDER"] = str(
+        DATADIR / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
+    )
+
+    print("*" * 80 + "\nTesting " + str(example))
+    parts = example.parts
+    module = ".".join(parts[parts.index("spectrochempy") :])[0:-3]
+    import_item(module)
