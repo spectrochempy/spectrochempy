@@ -24,7 +24,6 @@ from spectrochempy.analysis.preprocessing.utils import lls, lls_inv
 from spectrochempy.application import debug_, info_, warning_
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.processors.filter import smooth
-from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
@@ -34,7 +33,6 @@ from spectrochempy.utils.traits import NDDatasetType
 __all__ = [
     "Baseline",
     "abc",
-    "dc",
     "basc",
     "detrend",
     "als",
@@ -336,7 +334,7 @@ baseline/trends for different segments of the data.
             # nothing to do
             return
 
-        if self.model not in ["polynomial", "pchip"]:
+        if self.model not in ["polynomial", "pchip", "abc"]:
             # such as detrend, or als we work on the full data so range is the
             # full feature range.
             self._X_ranges = X.copy()
@@ -344,7 +342,7 @@ baseline/trends for different segments of the data.
 
         ranges = change.new if change.name == "ranges" else self.ranges.copy()
         if X is None:
-            # not a lot to here
+            # not a lot to do here
             # just return after cleaning ranges
             self._ranges = ranges = trim_ranges(*ranges)
             return
@@ -355,7 +353,11 @@ baseline/trends for different segments of the data.
             lastcoord = X.coordset[X.dims[-1]]  # we have to take into account the
             # possibility of transposed data, so we can't use directly X.x
             x = lastcoord.data
-            ranges += [[x[0], x[2]], [x[-3], x[-1]]]
+            if self.model != "abc":
+                ranges += [[x[0], x[2]], [x[-3], x[-1]]]
+            else:
+                r = (x[-1] - x[-1]) * 0.05
+                ranges += [[x[0], x[0] + r], [x[-1] - r, x[-1]]]
 
         # trim, order and clean up ranges (save it in self._ranges)
         self._ranges = ranges = trim_ranges(*ranges)
@@ -405,7 +407,7 @@ baseline/trends for different segments of the data.
         offset_nmf = Y.min() if self.multivariate == "nmf" else 0
         Y = Y - offset_nmf
 
-        # initialization varies according to the approach used (multivariate or not)
+        # Initialization varies according to the approach used (multivariate or not)
         # ---------------------------------------------------------------------------
         if not self.multivariate:
             # sequential method
@@ -417,9 +419,10 @@ baseline/trends for different segments of the data.
             Y = Vt[0:M]
             _store = np.zeros((M, N))
 
-        # Polynomial interpolation or detrend
-        # ------------------------------------
-        if self.model in ["polynomial", "detrend"]:
+        # -----------------------------------------
+        # Polynomial interpolation, detrend or abc
+        # -----------------------------------------
+        if self.model in ["polynomial", "detrend", "abc"]:
             # polynomial interpolation or detrend process
             # using parameter `order` and predetermined ranges
             polycoef = np.polynomial.polynomial.polyfit(
@@ -427,6 +430,7 @@ baseline/trends for different segments of the data.
             )
             _store = np.polynomial.polynomial.polyval(x, polycoef)
 
+        # -------------------------------------------------------------------------
         # PChip interpolation (piecewise cubic hermite interpolation) using ranges
         # -------------------------------------------------------------------------
         elif self.model == "pchip":
@@ -435,12 +439,12 @@ baseline/trends for different segments of the data.
                 interp = scipy.interpolate.PchipInterpolator(xbase, Y[i])
                 _store[i] = interp(x)
 
+        # -----------------------------------------------------
         # Simple Non-Iterative Peak (SNIP) detection algorithm
         # -----------------------------------------------------
         # based on :cite:`Ryan1988` ,
         # and  https://stackoverflow.com/questions/57350711/
         # baseline-correction-for-spectroscopic-data
-
         elif self.model == "snip":
             # SNIP baseline correction
 
@@ -467,8 +471,9 @@ baseline/trends for different segments of the data.
             # will be done later
             _store = Y
 
+        # ------------------------
         # ALS baseline correction
-        # -----------------------
+        # ------------------------
         # see
         # https://stackoverflow.com/questions/29156532/python-baseline-correction-library
         elif self.model == "als":
@@ -825,7 +830,6 @@ def snip(dataset, snip_width=50):
     snip_width : `int`, optional, default:50
         The width of the window used to determine the baseline using the SNIP algorithm.
 
-
     Returns
     -------
     `NDDataset`
@@ -833,7 +837,7 @@ def snip(dataset, snip_width=50):
 
     See Also
     --------
-    %(Baseline.see_also.no_als)s
+    %(Baseline.see_also.no_snip)s
     """
     blc = Baseline()
     blc.model = "snip"
@@ -843,41 +847,45 @@ def snip(dataset, snip_width=50):
     return blc.transform()
 
 
-@_units_agnostic_method
-def dc(dataset, **kwargs):
+@_docstring.dedent
+def abc(dataset, model="linear", window=0.05, nbzone=32, mult=4, order=5, **kwargs):
     """
-    Time domain baseline correction.
+    Automatic baseline correction.
 
     Parameters
     ----------
-    dataset : nddataset
-        The time domain daatset to be corrected.
-    kwargs : dict, optional
-        Additional parameters.
+    dataset : `NDDataset`
+        The input data.
+    model : `str`, optional, default: 'linear'
+        The baseline correction model to use. Available models are:
 
-    Returns
-    -------
-    dc
-        DC corrected array.
+        * ``'linear'``: linear baseline correction using the limits of the dataset.
 
-    Other Parameters
-    ----------------
-    len : float, optional
-        Proportion in percent of the data at the end of the dataset to take into account. By default, 25%.
+    See Also
+    --------
+    %(Baseline.see_also.no_abc)s
+
+    # TODO add other methods
     """
 
-    len = int(kwargs.pop("len", 0.25) * dataset.shape[-1])
-    dc = np.mean(np.atleast_2d(dataset)[..., -len:])
-    dataset -= dc
+    blc = Baseline()
+    blc.model = "abc"
+    if model == "linear":
+        blc.ranges = []
+        blc.include_limits = True
+        blc.order = 1
+    else:
+        raise ValueError(f"Unknown model {model}")
+    blc.fit(dataset)
 
-    return dataset
+    return blc.transform()
 
 
 # ======================================================================================
 # abc # TODO: some work to perform on this
 # ======================================================================================
 @_docstring.dedent
-def abc(dataset, dim=-1, **kwargs):
+def abc_old(dataset, dim=-1, **kwargs):
     """
     Automatic baseline correction.
 

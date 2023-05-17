@@ -3,7 +3,6 @@ from spectrochempy.analysis.preprocessing.baseline import (
     abc,
     als,
     basc,
-    dc,
     detrend,
     snip,
 )
@@ -12,7 +11,6 @@ from spectrochempy.analysis.preprocessing.utils import lls, lls_inv
 __all__ = [
     "Baseline",
     "abc",
-    "dc",
     "basc",
     "detrend",
     "als",
@@ -21,4 +19,4 @@ __all__ = [
     "lls_inv",
 ]
 __configurables__ = ["Baseline"]
-__dataset_methods__ = ["basc", "detrend", "als", "snip"]  # "abc", "dc",
+__dataset_methods__ = ["basc", "detrend", "als", "snip", "abc"]

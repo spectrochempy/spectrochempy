@@ -11,7 +11,7 @@ dimension (1) of 2D arrays.
 Adapted from NMRGLUE proc_base (New BSD License)
 """
 
-__all__ = ["rs", "ls", "roll", "cs", "fsh", "fsh2"]
+__all__ = ["rs", "ls", "roll", "cs", "fsh", "fsh2", "dc"]
 __dataset_methods__ = __all__
 
 import numpy as np
@@ -266,3 +266,33 @@ def fsh2(dataset, pts, **kwargs):
     data = _fft_positive(data)
 
     return data
+
+
+@_units_agnostic_method
+def dc(dataset, **kwargs):
+    """
+    Time domain baseline correction.
+
+    Parameters
+    ----------
+    dataset : nddataset
+        The time domain daatset to be corrected.
+    kwargs : dict, optional
+        Additional parameters.
+
+    Returns
+    -------
+    dc
+        DC corrected array.
+
+    Other Parameters
+    ----------------
+    len : float, optional
+        Proportion in percent of the data at the end of the dataset to take into account. By default, 25%.
+    """
+
+    len = int(kwargs.pop("len", 0.25) * dataset.shape[-1])
+    dc = np.mean(np.atleast_2d(dataset)[..., -len:])
+    dataset -= dc
+
+    return dataset

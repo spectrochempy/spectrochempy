@@ -137,7 +137,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 # %%
 # with bp
 bp = [1856.0]
-Ab = A1.detrend(bp=bp)
+Ab = A1.detrend(breakpoints=bp)
 _ = Ab.plot()
 A1.plot(clear=False)
 ax = (A1 - Ab).plot(clear=False, cmap=None, color="red", ls=":")
@@ -147,7 +147,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 # ### Automatic linear baseline correction `abc`
 #
 # When the baseline to remove is a simple linear correction, one can use `abc`.
-# This performs an automatic baseline correction. This is very close to detrend(), but use the spectra limit to fit the baseline.
+# This performs an automatic linear baseline correction. This is very close to detrend(), but use the spectra limit to fit the baseline. This is useful when the spectra limits are signal free.
 
 # %%
 Aa = A.abc()
