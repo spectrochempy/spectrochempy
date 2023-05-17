@@ -16,13 +16,6 @@ from pathlib import Path
 import pytest
 from traitlets import import_item
 
-if environ.get("USER", None) is None and (
-    sys.platform.startswith("win") or sys.platform == "darwin"
-):
-    pytest.skip("example testing on windows and macos", allow_module_level=True)
-else:
-    print(f"USER : {environ.get('USER', None)}")
-
 pytestmark = pytest.mark.slow
 
 repo = Path(__file__).parent.parent.parent
