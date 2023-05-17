@@ -34,9 +34,8 @@ for item in scripts[:]:
     ):
         scripts.remove(item)
 
-pytest.mark.skipif(sys.platform.startswith("win"), reason="do not work on windows")
 
-
+@pytest.mark.skipif(sys.platform.startswith("win"), reason="do not work on windows")
 def nbsphinx_script_run(path):
     pipe = None
     so = None
