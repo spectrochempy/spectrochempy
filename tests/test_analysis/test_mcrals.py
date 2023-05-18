@@ -345,11 +345,6 @@ def test_MCRALS_errors(model, data):
         mcr.closureTarget = [0, 1, 1]
     assert "please check the" in e.value.args[0]
 
-    # wrong hardC_to_C_idx
-    with pytest.raises(ValueError) as e:
-        mcr.getC_to_C_idx = [2]
-    assert "please check the" in e.value.args[0]
-
     with pytest.raises(ValueError) as e:
         mcr.getC_to_C_idx = [0, 1, 1]
     assert "please check the" in e.value.args[0]

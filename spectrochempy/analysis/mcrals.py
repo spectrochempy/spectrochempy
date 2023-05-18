@@ -322,14 +322,14 @@ with:
         (tr.Enum(["default"]), tr.List()),
         default_value="default",
         help=(
-            r"""Correspondence of the profiles returned by `getConc` and `C`.
+            r"""Correspondence of the profiles returned by `getConc` and `C[:,hardConc]`.
 
-- ``'default'``: the profiles correspond to those of `C`. This is equivalent to
-  ``range(len(hardConc))``
-- `list` of indexes or of `None`. For instance ``[2, None, 0]`` indicates that the
-  first returned profile corresponds to the 3rd profile of `C`  (index ``2``\ ), the 2nd
-  returned profile does not correspond to any profile in `C`, the 3rd returned profile
-  corresponds to the first `C` profile (index ``0`` )."""
+- ``'default'``: the profiles correspond to those of `C[:,hardConc]`. This is equivalent
+  to ``range(len(hardConc))``
+- `list` of indexes or of `None`. For instance ``[2, 1, 0]`` indicates that the
+  third profile returned by `getC` (index ``2``\ ) corresponds to the 1st profile of
+  `C[:, hardConc]`, the 2nd returned profile (index ``1``\ ) corresponds to
+  second profile of `C[:, hardConc]`, etc..."""
         ),
     ).tag(config=True)
 
