@@ -22,7 +22,7 @@ import traitlets as tr
 from scipy.integrate import solve_ivp
 from scipy.optimize import differential_evolution, least_squares, minimize
 
-from spectrochempy.core import debug_, error_
+from spectrochempy.core import error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
@@ -114,32 +114,32 @@ class ActionMassKinetics(tr.HasTraits):
 
     Parameters
     ----------
-    equations : 'dict' or `list` or `tuple` of `str`
-        Strings giving the ``n_equations`` chemical equation of the network.
+    reactions : 'dict' or `list` or `tuple` of `str`
+        Strings giving the ``n_reactions`` chemical equation of the network.
         Reactants and products must be separated by a ``"->"`` or "→" symbol,
         The name of each species should match a key of the `species` dictionary.
         Examples: ``"A + B -> C"`` or ``"2A -> D"``\
     species : `dict`, optional
         Dictionary of initial concentrations for the `n_species` species.
     arrhenius : :term:`array-like`
-        Iterable of shape `n_equations` x 1, `n_equations` x 2  or `n_equations` x 3
+        Iterable of shape `n_reactions` x 1, `n_reactions` x 2  or `n_reactions` x 3
         with either the isothermal rate constants (:math:`k_1`\ , ..., :math:`k_n`\ ) or
         the Arrhenius rate parameters ((:math:`A_1`\ , :math:`b_1`\ , :math:`Ea_1`\ ), ...
          (:math:`A_n`\ , :math:`b_n`\ , :math:`Ea_n`\ )) or  ((:math:`A_1`\ ,
          :math:`Ea_1`\ ), ...)).  If a 2-column iterable is provided the temperature
          exponents are set to 0.
     T : `float`\ , `Quantity`\ , `callable` or None, optional, default: None
-        Temperature. If None, the system is considered isothermal and
+        Temperature. If None, the system is considered isothermal and T = 298.0
         If it is not a temperature quantity, the unit is assumed to be
         in Kelvin. A function can also be provided which output a temperature `T` in K
         vs. time `t`\ .
     """
 
     # internal parameters
-    _equations = tr.Union(
-        (tr.List(tr.Unicode()), tr.Dict()), help="List or dict of model equations"
+    _reactions = tr.Union(
+        (tr.List(tr.Unicode()), tr.Dict()), help="List or dict of model reactions"
     )
-    _equations_names = tr.List(tr.Unicode(), help="List of model equations names")
+    _reactions_names = tr.List(tr.Unicode(), help="List of model reactions names")
     _init_concentrations = tr.Dict(
         help="A dictionary of model's species: initial " "concentrations"
     )
@@ -149,26 +149,28 @@ class ActionMassKinetics(tr.HasTraits):
     _arrhenius = Array(help="Arrhenius-like rate constant parameters")
     _T = tr.Union(
         (tr.Float(), tr.Callable()),
-        allow_none=True,
-        default_value=None,
+        allow_none=False,
+        default_value=298.0,
         help="Temperature",
     )
 
-    def __init__(self, equations, species, arrhenius, T=None, **kwargs):
+    def __init__(self, reactions, species_concentrations, arrhenius, T=298.0, **kwargs):
+
+        # initialise concentrations, species, reactions, arrhenius, T
+        self._init_concentrations = species_concentrations
+        self._species = list(self._init_concentrations.keys())
+
+        if isinstance(reactions, (list, tuple)):
+            self._reactions = reactions
+            self._reactions_names = [f"equation {i}" for i in range(len(reactions))]
+        if isinstance(reactions, dict):
+            self._reactions = list(reactions.values())
+            self._reactions_names = list(reactions.keys())
 
         self._arrhenius = arrhenius
         self._T = T
 
-        # initialise concentrations, species and equations
-        self._init_concentrations = species
-        self._species = list(self._init_concentrations.keys())
-
-        if isinstance(equations, (list, tuple)):
-            self._equations = equations
-            self._equations_names = [f"equation {i}" for i in range(len(equations))]
-        if isinstance(equations, dict):
-            self._equations = list(equations.values())
-            self._equations_names = list(equations.keys())
+        self._reaction_rates = self._write_reaction_rates()
         self._production_rates = self._write_production_rates()
         self._jacobian = self._write_jacobian()
 
@@ -183,31 +185,63 @@ class ActionMassKinetics(tr.HasTraits):
         # - triplets of arrhenius parameters  ((A_1, b_1, Ea_1), ... (A_n, b_n, E_a_n))
         arrhenius = proposal.value
         # k is an array (even if a list or tuple has been initially provided (Array)
-        if arrhenius.shape[-1] == 2:
-            # add temperature exponents = 0
+        if len(arrhenius.shape) == 1:
+            # this id a 1D array
+            if arrhenius.shape[-1] != self.n_reactions:
+                raise ValueError(
+                    f"arrhenius should contain {self.n_reactions} rate "
+                    f"constants, {arrhenius.shape[-1]} have been provided"
+                )
+            if any(arrhenius < 0):
+                warnings.warn(
+                    "at least a rate constant is negative... are you sure of " "that ?!"
+                )
+        elif arrhenius.shape[-1] == 2:
+            # this is a 2D array with lines == [A, Ea]
+            if arrhenius.shape[0] != self.n_reactions:
+                raise ValueError(
+                    f"arrhenius should contain {self.n_reactions} rate "
+                    f"constants, {arrhenius.shape[0]} have been provided"
+                )
+            if (arrhenius < 0).any():
+                warnings.warn(
+                    "a least a pre-exp factor or activation energy is "
+                    "negative... ae you sure of that ?!"
+                )
+            # now add temperature exponents = 0
             arrhenius = np.array(
                 [arrhenius[:, 0].T, np.zeros(arrhenius.shape[0]).T, arrhenius[:, 1].T]
             ).T
-
+        elif arrhenius.shape[-1] == 3:
+            # this is a 2D array with lines == [A, b, Ea]
+            if arrhenius.shape[0] != self.n_reactions:
+                raise ValueError(
+                    f"arrhenius should contain {self.n_reactions} rate "
+                    f"constants, {arrhenius.shape[0]} have been provided"
+                )
+            if (arrhenius[:, [0, 2]] < 0).any():
+                warnings.warn(
+                    "a least a pre-exp factor or activation energy is "
+                    "negative... are you sure of that ?!"
+                )
         return arrhenius
 
     @tr.validate("_T")
     def _T_validate(self, proposal):
         Tp = proposal.value
-
         if isinstance(Tp, Quantity):
             T = Tp.to("K").magnitude
         else:
             T = Tp
         return T
 
-    @tr.observe("_equations")
+    @tr.observe("_reactions")
     def _stoichio_matrix(self, change):
         # generate stoichio matrix
-        equations = change.new
-        A = np.zeros((self.n_equations, self.n_species))
-        B = np.zeros((self.n_equations, self.n_species))
-        for i, eq in enumerate(equations):
+        reactions = change.new
+        A = np.zeros((self.n_reactions, self.n_species))
+        B = np.zeros((self.n_reactions, self.n_species))
+        for i, eq in enumerate(reactions):
             left, right = _interpret_equation(eq, self._species)
             A[i] = [left[k] if k in left else 0 for k in self._species]
             B[i] = [right[k] if k in right else 0 for k in self._species]
@@ -237,9 +271,9 @@ class ActionMassKinetics(tr.HasTraits):
         return self._B
 
     @property
-    def n_equations(self):
-        """Number of reaction equations"""
-        return len(self._equations)
+    def n_reactions(self):
+        """Number of reaction reactions"""
+        return len(self._reactions)
 
     @property
     def n_species(self):
@@ -350,7 +384,16 @@ class ActionMassKinetics(tr.HasTraits):
         print(self._write_jacobian().replace(" ],", "],\n"))
 
     def integrate(
-        self, t, k_dt=None, method="LSODA", left_op=None, c_names=None, **kwargs
+        self,
+        t,
+        k_dt=None,
+        method="LSODA",
+        left_op=None,
+        c_names=None,
+        use_jac=False,
+        atol=1e-6,
+        rtol=1e-3,
+        **kwargs,
     ):
         """
         Integrate the kinetic equations at times `t`.
@@ -362,9 +405,11 @@ class ActionMassKinetics(tr.HasTraits):
         ----------
         t : :term:`array-like` of shape (``t_points``\ ,)
             Iterable with time values at which the concentrations are computed.
+
         k_dt : `float` or `None'
-            Resolution of the time grid used to compute k(T(t)). Used only for non
+            Resolution of the time grid used to compute `k(T(t))`\ . Used only for non
             isothermal reaction.
+
         method : `str` or `~scipy.integrate.OdeSolver`\ , optional, default: ``'LSODA'``
             Integration method to use:
 
@@ -392,6 +437,34 @@ class ActionMassKinetics(tr.HasTraits):
             you should use 'Radau' or 'BDF'.
             You can also pass an arbitrary class derived from
             `~scipy.integrate.OdeSolver` which implements the solver.
+
+        left_op : array_like, optional
+            A (m x n_species) array to left multiply the (n_species, n_times) array
+            obtained after integration:
+            `C.T = left_op @ C.T`\ . Can be used to pool and/or remove some
+            concentration profiles in/from the output matrix of concentrations
+
+        c_names : list of str
+            List of names for each concentration profile. Used if `left_op` is not None
+            to name/rename the output concentration profiles.
+
+        use_jac : `Bool`
+            Whether to use the jacobian. Useful for stiff problems, can slightly
+            increase the execution time for non-stiff problems.
+
+        atol, rtol : `float` or `array_like`, optional
+            Relative and absolute tolerances. The solver keeps the local error estimates
+            less than `atol + rtol * abs(y)`. Here `rtol` controls a relative accuracy
+            (number of correct digits), while `atol` controls absolute accuracy
+            (number of correct decimal places). To achieve the desired `rtol`, set
+            `atol < min(rtol * C)` so that `rtol` dominates the allowable error.
+            If `atol > rtol * C` the number of correct digits is not guaranteed.
+            Conversely, to achieve the desired `atol` set `rtol` such that
+            `max(rtol * C) < atol` is always smaller than atol. If components of C have
+            different scales, it might be beneficial to set different atol values for
+            different components by passing array_like with shape (n_species,) for
+            atol. Default values are `rtol=1e-3` and `atol=1e-6`\ .
+
         **kwargs
             Additional keyword parameters. See Other Parameters.
 
@@ -437,12 +510,16 @@ class ActionMassKinetics(tr.HasTraits):
             * message : `str`
               Human-readable description of the termination reason.
         """
+        # uncomment for debugging and optimization
+        # import time
+        # t0 = time.time()
 
         global_env = {}
         locals_env = {}
 
         if callable(self._T):
-            # non-isothermal: a grid of k_i values spaced by k_time_resolution is computed
+            # non-isothermal: a grid of k_i values spaced by k_dt time intervals
+            # is computed
             t_grid = np.arange(0, t[-1] + k_dt, k_dt)
             T_grid = np.expand_dims(self._T(t_grid), axis=1)
             k_grid = (
@@ -451,18 +528,28 @@ class ActionMassKinetics(tr.HasTraits):
                 * np.exp(-self._arrhenius[:, 2] / 8.314 / T_grid)
             )
 
-            # now we define f_ = dC/dt
+            # uncomment for debugging and optimization
+            # t1 = time.time()
+
             exec(
-                f"def f_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return{self._production_rates}",
+                f"def f_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return self._BmAt @ {self._reaction_rates}",
                 global_env,
                 locals_env,
             )
-            # and the jacobian
-            exec(
-                f"def jac_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return{self._jacobian}",
-                global_env,
-                locals_env,
-            )
+
+            if use_jac:
+                # define jac_ = d[dC/dt]/dCi
+                exec(
+                    f"def jac_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return{self._jacobian}",
+                    global_env,
+                    locals_env,
+                )
+                jac = partial(locals_env["jac_"], self, k_grid, k_dt)
+            else:
+                jac = None
+
+            # uncomment for debugging and optimization
+            # t2 = time.time()
 
             bunch = solve_ivp(
                 partial(locals_env["f_"], self, k_grid, k_dt),
@@ -470,15 +557,22 @@ class ActionMassKinetics(tr.HasTraits):
                 self.init_concentrations,
                 t_eval=t,
                 method=method,
-                atol=1.0e-3,
-                rtol=1.0e-2,
-                jac=partial(locals_env["jac_"], self, k_grid, k_dt),
+                atol=atol,
+                rtol=rtol,
+                jac=jac,
             )
+
+            # uncomment for debugging and optimization
+            # t3 = time.time()
 
         else:
             if self._T is None:
                 # _arrhenius is 1D array of rate constants
                 k = self._arrhenius
+
+                # uncomment for debugging and optimization
+                # t1 = time.time()
+
             else:
                 # isothermal, the k_i are computed once
                 k = (
@@ -487,16 +581,27 @@ class ActionMassKinetics(tr.HasTraits):
                     * np.exp(-self._arrhenius[:, 2] / R / self._T)
                 )
 
+            # uncomment for debugging and optimization
+            # t1 = time.time()
+
             exec(
                 f"def f_(self, k, t, C): return{self._production_rates}",
                 global_env,
                 locals_env,
             )
-            exec(
-                f"def jac_(self, k, t, C): return{self._jacobian}",
-                global_env,
-                locals_env,
-            )
+            if use_jac:
+                # define jac_ = d[dC/dt]/dCi
+                exec(
+                    f"def jac_(self, k, t, C): return{self._jacobian}",
+                    global_env,
+                    locals_env,
+                )
+                jac = partial(locals_env["jac_"], self, k)
+            else:
+                jac = None
+
+            # uncomment for debugging and optimization
+            # t2 = time.time()
 
             bunch = solve_ivp(
                 partial(locals_env["f_"], self, k),
@@ -504,17 +609,26 @@ class ActionMassKinetics(tr.HasTraits):
                 self.init_concentrations,
                 t_eval=t,
                 method=method,
-                atol=1.0e-3,
-                rtol=1.0e-2,
-                jac=partial(locals_env["jac_"], self, k),
+                atol=atol,
+                rtol=rtol,
+                jac=jac,
             )
 
-        debug_(bunch.message)
+            # uncomment for debugging and optimization
+            # t2 = time.time()
+
+        # uncomment for debugging (warning: debug_() multiply the exec time by 4...)
+        # debug_(bunch.message)
+        # t4 = time.time()
+
         if bunch.status != 0:
             raise SolverError(bunch.message)
 
         C = (left_op @ bunch.y).T if left_op is not None else bunch.y.T
         t = bunch.t
+
+        # uncomment for debugging and optimization
+        # t5 = time.time()
 
         return_dataset = kwargs.get("return_NDDataset", True)
         if return_dataset:
@@ -522,27 +636,51 @@ class ActionMassKinetics(tr.HasTraits):
             C.y = Coord(t, title="time")
             if left_op is None:
                 C.x = Coord(range(self.n_species), labels=self.species, title="species")
-            else:
+            elif c_names is not None:
                 C.x = Coord(range(left_op.shape[0]), labels=c_names, title="species")
+            else:
+                C.x = Coord(
+                    range(left_op.shape[0]),
+                    labels=[f"species #{i}" for i in range(left_op.shape[0])],
+                    title="species",
+                )
             C.history = "Created using ActionMassKinetics.integrate"
             C.meta.update(bunch)
 
+        # uncomment for debugging and optimization
+        # t6 = time.time()
+        # print(f"time compute k       : {t1 - t0:f}, {100*(t1 - t0)/(t6-t0):f}%")
+        # print(f"time load f (and jac): {t2 - t1:f}, {100*(t2 - t1)/(t6-t0):f}%")
+        # print(f"time integration     : {t3 - t2:f}, {100*(t3 - t2)/(t6-t0):f}%")
+        # print(f"time debug           : {t4 - t3:f}, {100*(t4 - t3)/(t6-t0):f}%")
+        # print(f"time C,t             : {t5 - t4:f}, {100*(t5 - t4)/(t6-t0):f}%")
+        # print(f"time to NDDataset    : {t6 - t5:f}, {100*(t6 - t5)/(t6-t0):f}%")
+
         if kwargs.get("return_meta", False) and not return_dataset:
             return (C, bunch)
-
-        return C
+        else:
+            return C
 
     def _modify_kinetics(self, dict_param, left_op=None):
-        for item in dict_param:
-            i_r, p = item.split("[")[-1].split("].")
-            if p == "A":
-                self._arrhenius[int(i_r), 0] = dict_param[item]
-            elif p == "b":
-                self._arrhenius[int(i_r), 1] = dict_param[item]
-            elif p == "Ea":
-                self._arrhenius[int(i_r), 2] = dict_param[item]
-            else:
-                raise ValueError("something went wrong in parsing the dict of params")
+
+        if len(self._arrhenius.shape) == 2:
+            for item in dict_param:
+                i_r, p = item.split("[")[-1].split("].")
+                if p == "A":
+                    self._arrhenius[int(i_r), 0] = dict_param[item]
+                elif p == "b":
+                    self._arrhenius[int(i_r), 1] = dict_param[item]
+                elif p == "Ea":
+                    self._arrhenius[int(i_r), 2] = dict_param[item]
+                else:
+                    raise ValueError(
+                        "something went wrong in parsing the dict of params"
+                    )
+        else:
+            for item in dict_param:
+                i_r = item.split("[")[-1].split("]")[0]
+                self._arrhenius[int(i_r)] = dict_param[item]
+
         if left_op is not None:
             self._arrhenius = left_op @ self._arrhenius
 
