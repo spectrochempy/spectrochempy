@@ -411,7 +411,7 @@ baseline/trends for different segments of the data.
         if not self.multivariate:
             # sequential method
             _store = np.zeros((M, N))
-        else:
+        else:  # TODO: NMF factorization too
             # multivariate method
             U, s, Vt = np.linalg.svd(Y, full_matrices=False, compute_uv=True)
             M = self.n_components
@@ -468,7 +468,7 @@ baseline/trends for different segments of the data.
 
             # Last phase: do an inverse transform Y = LLS^-1(G) + offset
             # will be done later
-            _store = Y
+            _store = Y[:, ::-1] if self._X.x.is_descendant else Y
 
         # ------------------------
         # ALS baseline correction
@@ -571,34 +571,28 @@ baseline/trends for different segments of the data.
         lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
         xbase = lastcoord.data  # baseline x-axis
 
-        # # Handling breakpoints  # TODO: to make it work
-        # # --------------------
-        # # include the extrema of the x-axis as breakpoints
-        # bpil = [0, self._X.shape[-1] - 1]
-        # # breakpoints can be provided as indices or as values.
-        # # we convert them to indices.
-        # for bp in self.breakpoints:
-        #     bpil = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
-        #     bpil.append(bpil)
-        # # sort and remove duplicates
-        # bpil = sorted(list(set(bpil)))
-        #
+        # Handling breakpoints  # TODO: to make it work
+        # --------------------
+        # include the extrema of the x-axis as breakpoints
+        bpil = [0, self._X.shape[-1] - 1]
+        # breakpoints can be provided as indices or as values.
+        # we convert them to indices.
+        for bp in self.breakpoints:
+            bpil = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
+            bpil.append(bpil)
+        # sort and remove duplicates
+        bpil = sorted(list(set(bpil)))
         # # loop on breakpoints pairs
-        # baseline = np.zeros_like(self._X)
-        # bpstart = 0
-        # for bpend in bpil[1:]:
-        #     # fit the baseline on each segment
-        #     xb = xbase[bpstart : bpend + 1]
-        #     yb = ybase[bpstart : bpend + 1]
-        #     baseline[bpstart : bpend + 1] = self._fit(xb, yb)
-        # self._outfit = [
-        #     baseline,
-        #     bpil,
-        # ]
-
-        baseline = self._fit(xbase, ybase)
+        baseline = np.zeros_like(self._X)
+        bpstart = 0
+        for bpend in bpil[1:]:
+            # fit the baseline on each segment
+            xb = xbase[bpstart : bpend + 1]
+            yb = ybase[bpstart : bpend + 1]
+            baseline[bpstart : bpend + 1] = self._fit(xb, yb)
         self._outfit = [
             baseline,
+            bpil,
         ]
 
         # if the process was successful, _fitted is set to True so that other method

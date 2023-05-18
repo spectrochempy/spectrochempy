@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# %%
 # ======================================================================================
 # Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -141,7 +142,7 @@ plot_result(Bs, corr, baseline)
 
 C = scp.read_labspec("Activation.txt", directory=ramandir)
 # C = C[20:]  # discard the first 20 spectra
-C.plot()
+_ = C.plot()
 
 
 # %%
@@ -156,7 +157,7 @@ blc.model = "als"
 blc.fit(C[::10])
 corr = blc.transform()
 baseline = blc.baseline
-corr.plot()
+_ = corr.plot()
 
 # %%
 # or the `snip` method (which is much faster)
@@ -164,21 +165,21 @@ blc.model = "snip"
 blc.fit(C)
 corr = blc.transform()
 baseline = blc.baseline
-corr.plot()
+_ = corr[::10].plot()
 
 # %%
 # Denoising
 # ---------
 D = corr.copy()
-estimator = scp.NMF(n_components=5)
+estimator = scp.PCA(n_components=4)  # , max_iter=10000)
 offset = D.min()
-G = scp.lls(D - offset)
-estimator.fit(G)
-comp = scp.lls_inv(estimator.inverse_transform()) + offset
+estimator.fit(D)
+G = estimator.inverse_transform()
 
-comp[::10].plot()
+_ = G[::10].plot()
 
 # %%
-# This ends the example ! The following line can be removed or when the example is run as a notebook (*.ipynb).
+# This ends the example ! The following line can be removed or commented
+# when the example is run as a notebook (*.ipynb).
 
-scp.show()
+# scp.show()
