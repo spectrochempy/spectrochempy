@@ -566,14 +566,18 @@ baseline/trends for different segments of the data.
 
         # fire the X and _ranges validation and preprocessing.
         self._X = X
-        descend = self._X.x.is_descendant
+
+        # get the last axis coordinates
+        Xx = self._X.coordset[self._X.dims[-1]]
 
         # _X_ranges has been computed when X and _ranges were set,
         # but we need increasing order of the coordinates
         self._X_ranges.sort(inplace=True, descend=False)
 
         # to simplify further operation we also sort the self._X data
+        descend = Xx.is_descendant
         self._X.sort(inplace=True, descend=False)
+        Xx = self._X.coordset[self._X.dims[-1]]  # get it again after sorting
 
         # _X_ranges is now ready, we can fit. _Xranges contains
         # only the baseline data to fit
@@ -584,11 +588,11 @@ baseline/trends for different segments of the data.
         # Handling breakpoints
         # --------------------
         # include the extrema of the x-axis as breakpoints
-        bplist = [self._X.x.data[0], self._X.x.data[-1]]
+        bplist = [Xx.data[0], Xx.data[-1]]
         # breakpoints can be provided as indices or as values.
         # we convert them to values
         for bp in self.breakpoints:
-            bp = self._X.x.data[bp] if not isinstance(bp, TYPE_FLOAT) else bp
+            bp = Xx.data[bp] if not isinstance(bp, TYPE_FLOAT) else bp
             bplist.append(bp)
         # sort and remove duplicates
         bplist = sorted(list(set(bplist)))
@@ -596,10 +600,10 @@ baseline/trends for different segments of the data.
         # # loop on breakpoints pairs
         baseline = np.zeros_like(self._X.data)
         istart = lastcoord.loc2index(bplist[0])
-        ixstart = self._X.x.loc2index(bplist[0])
+        ixstart = Xx.loc2index(bplist[0])
         for end in bplist[1:]:
             iend = lastcoord.loc2index(end)
-            ixend = self._X.x.loc2index(end)
+            ixend = Xx.loc2index(end)
             # fit the baseline on each segment
             xb = xbase[istart : iend + 1]
             yb = ybase[..., istart : iend + 1]
