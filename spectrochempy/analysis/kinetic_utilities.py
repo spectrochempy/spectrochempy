@@ -564,7 +564,7 @@ class ActionMassKinetics(tr.HasTraits):
             # t3 = time.time()
 
         else:
-            if self._T is None:
+            if len(self._arrhenius.shape) == 1:
                 # _arrhenius is 1D array of rate constants
                 k = self._arrhenius
 
