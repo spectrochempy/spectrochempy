@@ -58,7 +58,7 @@ def test_ABC():
     species_concentrations = {"A": 1.0, "B": 0.0, "C": 0.0}
     time = np.arange(10)
     k_exp = np.array(((1.0, 50.0), (1.0, 50.0)))
-    kin_exp = cu.ActionMassKinetics(reactions, species_concentrations, k_exp)
+    kin_exp = cu.ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
     C_exp = kin_exp.integrate(time)
 
     k_guess = np.array(((1.5, 50.0), (1.0, 55.0)))
