@@ -42,7 +42,7 @@ def nbsphinx_script_run(path):
     try:
         print(sys.executable)
         pipe = subprocess.Popen(
-            [sys.executable, "-m", str(path), "--nodisplay"],
+            [sys.executable, str(path), "--nodisplay"],
             stdout=subprocess.PIPE,
             encoding="utf8",
         )
@@ -53,7 +53,7 @@ def nbsphinx_script_run(path):
     return pipe.returncode, so, serr
 
 
-@pytest.mark.skipif(sys.platform.startswith("win"), reason="do not work on windows")
+# @pytest.mark.skipif(sys.platform.startswith("win"), reason="do not work on windows")
 @pytest.mark.parametrize("script", scripts)
 def test_nbsphinx_script_(script):
     # some test will failed due to the magic commands or for other known reasons
