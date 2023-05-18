@@ -566,39 +566,20 @@ baseline/trends for different segments of the data.
 
         # fire the X and _ranges validation and preprocessing.
         self._X = X
+        descend = self._X.x.is_descendant
 
         # _X_ranges has been computed when X and _ranges were set,
         # but we need increasing order of the coordinates
         self._X_ranges.sort(inplace=True, descend=False)
+
+        # to simplify further operation we also sort the self._X data
+        self._X.sort(inplace=True, descend=False)
 
         # _X_ranges is now ready, we can fit. _Xranges contains
         # only the baseline data to fit
         ybase = self._X_ranges.data  # baseline data
         lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
         xbase = lastcoord.data  # baseline x-axis
-
-        # # Handling breakpoints
-        # # --------------------
-        # # include the extrema of the x-axis as breakpoints
-        # bplist = [0, self._X.shape[-1] - 1]
-        # # breakpoints can be provided as indices or as values.
-        # # we convert them to indices.
-        # for bp in self.breakpoints:
-        #     bp = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
-        #     bplist.append(bp)
-        # # sort and remove duplicates
-        # bplist = sorted(list(set(bplist)))
-        #
-        # # # loop on breakpoints pairs
-        # baseline = np.zeros_like(self._X.data)
-        # bpstart = 0
-        # for bpend in bplist[1:]:
-        #     # fit the baseline on each segment
-        #     xb = xbase[bpstart : bpend + 1]
-        #     yb = ybase[..., bpstart : bpend + 1]
-        #     Xpart = self._X[..., bpstart : bpend + 1]
-        #     baseline[..., bpstart : bpend + 1] = self._fit(xb, yb, Xpart)
-        #     bpstart = bpend + 1
 
         # Handling breakpoints
         # --------------------
@@ -614,7 +595,8 @@ baseline/trends for different segments of the data.
 
         # # loop on breakpoints pairs
         baseline = np.zeros_like(self._X.data)
-        istart = ixstart = 0
+        istart = lastcoord.loc2index(bplist[0])
+        ixstart = self._X.x.loc2index(bplist[0])
         for end in bplist[1:]:
             iend = lastcoord.loc2index(end)
             ixend = self._X.x.loc2index(end)
@@ -625,6 +607,11 @@ baseline/trends for different segments of the data.
             baseline[..., ixstart : ixend + 1] = self._fit(xb, yb, Xpart)
             istart = iend + 1
             ixstart = ixend + 1
+
+        # sort back o the original order
+        if descend:
+            baseline = baseline[..., ::-1]
+            self._X.sort(inplace=True, descend=True)
 
         self._outfit = (baseline, bplist)  # store the result
 

@@ -492,7 +492,7 @@ class Coord(NDMath, NDArray):
     # ----------------------------------------------------------------------------------
     # public methods
     # ----------------------------------------------------------------------------------
-    def loc2index(self, loc):
+    def loc2index(self, loc, return_error=False):
         """
         Return the index corresponding to a given location.
 
@@ -513,7 +513,13 @@ class Coord(NDMath, NDArray):
         >>> dataset.x.loc2index(1644.0)
         4517
         """
-        return self._loc2index(loc)
+        res = self._loc2index(loc)
+        if isinstance(res, tuple):
+            if return_error:
+                return res
+            else:
+                return res[0]
+        return res
 
     # TODO: new method to replace the old loc2index
     # def loc2index(self, *loc):
