@@ -382,16 +382,16 @@ baseline/trends for different segments of the data.
         if self.multivariate:
             self.n_components = self.n_components  # fire the validation
 
-    def _fit(self, xbase, ybase):
+    def _fit(self, xbase, ybase, Xpart):
         # core _fit method:
         # calculate the baseline according to the current approch and model
 
         # get the last coordinate of the dataset
-        lastcoord = self._X.coordset[self._X.dims[-1]]
+        lastcoord = Xpart.coordset[Xpart.dims[-1]]
         x = lastcoord.data
 
         # get the number of observations and features
-        M, N = self._X.shape if self._X.ndim == 2 else (1, self._X.shape[0])
+        M, N = Xpart.shape if Xpart.ndim == 2 else (1, Xpart.shape[0])
 
         # eventually transform the compress y data dynamic using log-log-square
         # operator. lls requires positive data.
@@ -571,28 +571,31 @@ baseline/trends for different segments of the data.
         lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
         xbase = lastcoord.data  # baseline x-axis
 
-        # Handling breakpoints  # TODO: to make it work
+        # Handling breakpoints
         # --------------------
         # include the extrema of the x-axis as breakpoints
-        bpil = [0, self._X.shape[-1] - 1]
+        bplist = [0, self._X.shape[-1] - 1]
         # breakpoints can be provided as indices or as values.
         # we convert them to indices.
         for bp in self.breakpoints:
-            bpil = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
-            bpil.append(bpil)
+            bp = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
+            bplist.append(bp)
         # sort and remove duplicates
-        bpil = sorted(list(set(bpil)))
+        bplist = sorted(list(set(bplist)))
+
         # # loop on breakpoints pairs
         baseline = np.zeros_like(self._X)
         bpstart = 0
-        for bpend in bpil[1:]:
+        for bpend in bplist[1:]:
             # fit the baseline on each segment
             xb = xbase[bpstart : bpend + 1]
-            yb = ybase[bpstart : bpend + 1]
-            baseline[bpstart : bpend + 1] = self._fit(xb, yb)
+            yb = ybase[..., bpstart : bpend + 1]
+            Xpart = self._X[..., bpstart : bpend + 1]
+            baseline[..., bpstart : bpend + 1] = self._fit(xb, yb, Xpart)
+
         self._outfit = [
             baseline,
-            bpil,
+            bplist,
         ]
 
         # if the process was successful, _fitted is set to True so that other method
@@ -841,7 +844,7 @@ def snip(dataset, snip_width=50):
 
 
 @_docstring.dedent
-def abc(dataset, model="linear", window=0.05, nbzone=32, mult=4, order=5, **kwargs):
+def abc(dataset, model="linear", breakpoints=[]):
     """
     Automatic baseline correction.
 
@@ -863,6 +866,7 @@ def abc(dataset, model="linear", window=0.05, nbzone=32, mult=4, order=5, **kwar
 
     blc = Baseline()
     blc.model = "abc"
+    blc.breakpoints = breakpoints
     if model == "linear":
         blc.ranges = []
         blc.include_limits = True

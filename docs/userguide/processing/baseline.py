@@ -38,7 +38,7 @@
 # Spectrochempy offers two approaches to perform baseline corrections. The first one is to use methods of the NDDataset object directly or via the SpectroChemPy API. The second one is the use of a Baseline object which allows to perform all the correction operations with a maximum of flexibility and settings.
 
 # %% [markdown]
-# ## 1. Baseline correction using NDDataset/API methods
+# ## Baseline correction using NDDataset or API methods
 
 # %% [markdown]
 # Let's focus on the first approach first.
@@ -72,9 +72,6 @@ prefs.figure.figsize = (7, 3)
 prefs.colormap = "magma_r"
 _ = A.plot()
 
-# %%
-A[0, 1856.0].data, A[0, 378].data
-
 # %% [markdown]
 # ### Detrending
 #
@@ -88,8 +85,8 @@ A[0, 1856.0].data, A[0, 378].data
 # When the trend is simply a shift one can subtract the mean absorbance to each spectrum.
 
 # %%
-Ac = A.detrend(order="constant")
-_ = Ac.plot()
+A1 = A.detrend(order="constant")  # Here we use a NDDataset method
+_ = A1.plot()
 
 # %% [markdown]
 # #### Linear trend
@@ -97,8 +94,10 @@ _ = Ac.plot()
 # with `A.detrend(order="linear")` or simply `A.detrend()` as "linear" is the default.
 
 # %%
-Al = A.detrend()
-_ = Al.plot()
+A2 = scp.detrend(
+    A
+)  # Here we use the API method (this is fully equivalent to the NDDataset method)
+_ = A2.plot()
 
 # %% [markdown]
 # #### Polynomial trend
@@ -107,8 +106,8 @@ _ = Al.plot()
 # Note that for degree 2 and 3, the "quadratic" and "cubic" keywords are also available to define 2 and 3-degree of polynomial.
 
 # %%
-Ap = A.detrend(order=2)
-_ = Ap.plot()
+A3 = A.detrend(order="quadratic")  # one can also use `order=2`
+_ = A3.plot()
 
 # %% [markdown]
 # #### Detrend independently on several data segment
@@ -119,11 +118,14 @@ _ = Ap.plot()
 
 # %%
 # without bp
-A1 = A[0]
-Ab = A1.detrend()
-_ = Ab.plot()
-A1.plot(clear=False)
-ax = (A1 - Ab).plot(clear=False, cmap=None, color="red", ls=":")
+R = A[0]
+R1 = R.detrend()
+
+# plots
+_ = R.plot(label="original")
+R1.plot(label="detrended", clear=False)
+ax = (R - R1).plot(label="trend", clear=False, cmap=None, color="red", ls=":")
+ax.legend(loc="upper left")
 _ = ax.set_ylim([-0.3, 0.8])
 
 # %% [markdown]
@@ -136,11 +138,13 @@ _ = ax.set_ylim([-0.3, 0.8])
 
 # %%
 # with bp
-bp = [1856.0]
-Ab = A1.detrend(breakpoints=bp)
-_ = Ab.plot()
-A1.plot(clear=False)
-ax = (A1 - Ab).plot(clear=False, cmap=None, color="red", ls=":")
+bp = [1300.0, 1856.0]  # warning must be float to set location, in int for indices
+R2 = R.abc(breakpoints=bp)
+R1 = R.abc()
+_ = R.plot()
+R2.plot(clear=False)
+ax = (R - R2).plot(clear=False, cmap=None, color="red", ls=":")
+(R - R1).plot(label="trend", clear=False, cmap=None, color="violet", ls=":")
 _ = ax.set_ylim([-0.3, 0.8])
 
 # %% [markdown]
