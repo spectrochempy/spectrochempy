@@ -424,8 +424,6 @@ class ActionMassKinetics(tr.HasTraits):
               on a backward differentiation formula for the derivative
               approximation.
 
-            * ``'Euler'`` : Simple Euler integration
-
             'LSODA' is generally faster and seems a good choice for the systems
             treated in scpy so far.
             Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') can be used
@@ -618,6 +616,7 @@ class ActionMassKinetics(tr.HasTraits):
             # t2 = time.time()
 
         # uncomment for debugging (warning: debug_() multiply the exec time by 4...)
+        # from from spectrochempy.core import debug_
         # debug_(bunch.message)
         # t4 = time.time()
 
