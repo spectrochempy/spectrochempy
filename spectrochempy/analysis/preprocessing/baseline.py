@@ -358,6 +358,12 @@ baseline/trends for different segments of the data.
                 r = (x[-1] - x[-1]) * 0.05
                 ranges += [[x[0], x[0] + r], [x[-1] - r, x[-1]]]
 
+        if self.breakpoints:
+            # we should also include breakpoints in the ranges
+            inc = lastcoord.spacing
+            inc = inc.m if hasattr(inc, "magnitude") else inc
+            ranges += [[bp - inc, bp + inc] for bp in self.breakpoints]
+
         # trim, order and clean up ranges (save it in self._ranges)
         self._ranges = ranges = trim_ranges(*ranges)
 
@@ -571,28 +577,54 @@ baseline/trends for different segments of the data.
         lastcoord = self._X_ranges.coordset[self._X_ranges.dims[-1]]
         xbase = lastcoord.data  # baseline x-axis
 
+        # # Handling breakpoints
+        # # --------------------
+        # # include the extrema of the x-axis as breakpoints
+        # bplist = [0, self._X.shape[-1] - 1]
+        # # breakpoints can be provided as indices or as values.
+        # # we convert them to indices.
+        # for bp in self.breakpoints:
+        #     bp = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
+        #     bplist.append(bp)
+        # # sort and remove duplicates
+        # bplist = sorted(list(set(bplist)))
+        #
+        # # # loop on breakpoints pairs
+        # baseline = np.zeros_like(self._X.data)
+        # bpstart = 0
+        # for bpend in bplist[1:]:
+        #     # fit the baseline on each segment
+        #     xb = xbase[bpstart : bpend + 1]
+        #     yb = ybase[..., bpstart : bpend + 1]
+        #     Xpart = self._X[..., bpstart : bpend + 1]
+        #     baseline[..., bpstart : bpend + 1] = self._fit(xb, yb, Xpart)
+        #     bpstart = bpend + 1
+
         # Handling breakpoints
         # --------------------
         # include the extrema of the x-axis as breakpoints
-        bplist = [0, self._X.shape[-1] - 1]
+        bplist = [self._X.x.data[0], self._X.x.data[-1]]
         # breakpoints can be provided as indices or as values.
-        # we convert them to indices.
+        # we convert them to values
         for bp in self.breakpoints:
-            bp = self._X.x.loc2index(bp) if isinstance(bp, TYPE_FLOAT) else bp
+            bp = self._X.x.data[bp] if not isinstance(bp, TYPE_FLOAT) else bp
             bplist.append(bp)
         # sort and remove duplicates
         bplist = sorted(list(set(bplist)))
 
         # # loop on breakpoints pairs
         baseline = np.zeros_like(self._X.data)
-        bpstart = 0
-        for bpend in bplist[1:]:
+        istart = ixstart = 0
+        for end in bplist[1:]:
+            iend = lastcoord.loc2index(end)
+            ixend = self._X.x.loc2index(end)
             # fit the baseline on each segment
-            xb = xbase[bpstart : bpend + 1]
-            yb = ybase[..., bpstart : bpend + 1]
-            Xpart = self._X[..., bpstart : bpend + 1]
-            baseline[..., bpstart : bpend + 1] = self._fit(xb, yb, Xpart)
-            bpstart = bpend + 1
+            xb = xbase[istart : iend + 1]
+            yb = ybase[..., istart : iend + 1]
+            Xpart = self._X[..., ixstart : ixend + 1]
+            baseline[..., ixstart : ixend + 1] = self._fit(xb, yb, Xpart)
+            istart = iend + 1
+            ixstart = ixend + 1
 
         self._outfit = (baseline, bplist)  # store the result
 
