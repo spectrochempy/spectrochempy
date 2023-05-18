@@ -139,14 +139,13 @@ _ = ax.set_ylim([-0.3, 0.8])
 # %%
 # with bp
 bp = [1300.0, 1856.0]  # warning must be float to set location, in int for indices
-R2 = R.abc(breakpoints=bp)
-R1 = R.abc()
+R2 = R.detrend(breakpoints=bp)
 _ = R.plot()
 R2.plot(clear=False)
 ax = (R - R2).plot(clear=False, cmap=None, color="red", ls=":")
 (R - R1).plot(label="trend", clear=False, cmap=None, color="violet", ls=":")
 _ = ax.set_ylim([-0.3, 0.8])
-
+scp.show()
 # %% [markdown]
 # ### Automatic linear baseline correction `abc`
 #

@@ -584,7 +584,7 @@ baseline/trends for different segments of the data.
         bplist = sorted(list(set(bplist)))
 
         # # loop on breakpoints pairs
-        baseline = np.zeros_like(self._X)
+        baseline = np.zeros_like(self._X.data)
         bpstart = 0
         for bpend in bplist[1:]:
             # fit the baseline on each segment
@@ -592,11 +592,9 @@ baseline/trends for different segments of the data.
             yb = ybase[..., bpstart : bpend + 1]
             Xpart = self._X[..., bpstart : bpend + 1]
             baseline[..., bpstart : bpend + 1] = self._fit(xb, yb, Xpart)
+            bpstart = bpend + 1
 
-        self._outfit = [
-            baseline,
-            bplist,
-        ]
+        self._outfit = (baseline, bplist)  # store the result
 
         # if the process was successful, _fitted is set to True so that other method
         # which needs fit will be possibly used.
