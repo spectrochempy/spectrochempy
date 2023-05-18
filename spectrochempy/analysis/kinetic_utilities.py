@@ -15,13 +15,14 @@ import logging
 import re
 import warnings
 from collections.abc import Iterable
+from functools import partial
 
 import numpy as np
 import traitlets as tr
 from scipy.integrate import solve_ivp
 from scipy.optimize import differential_evolution, least_squares, minimize
 
-from spectrochempy.core import debug_, error_
+from spectrochempy.core import error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
@@ -34,6 +35,22 @@ __all__ = [
 ]
 
 R = 8.314462618153241
+SCIPY_MINIMIZE_METHODS = [
+    "NELDER-MEAD",
+    "POWELL",
+    "CG",
+    "BFGS",
+    "NEWTON-CG",
+    "L-BFGS-B",
+    "TNC",
+    "COBYLA",
+    "SLSQP",
+    "TRUST-CONSTR",
+    "DOGLEG",
+    "TRUST-NCG",
+    "TRUST-KRYLOV",
+    "TRUST-EXACT",
+]
 
 
 # exception used in this module
@@ -41,17 +58,22 @@ class SolverError(SpectroChemPyError):
     """Error raised if solve_ivp (integrate) return a status < 0"""
 
 
+# ------------------------------------------------------------------------------------
+# ACTION MASS KINETICS
+# ------------------------------------------------------------------------------------
+
 # Utility
 # --------
 def _interpret_equation(eq, species):
-    # transform an equation given as a string to a dictionary of species with
-    # integer stoechiometric coefficients.
+    # transform an equation given as a string to dictionaries of species with
+    # integer stoechiometric coefficients for the left (reactants) and right (products)
+    # side of the equation.
 
     regex = r"(((([\.,0-9]*)((?=[a-zA-Z])[a-zA-Z, 1-9]+))(?=\+?))?(?=(->|→)?))"
 
     matches = re.finditer(regex, eq.replace(" ", ""))
-    equation = {}
-    mult = -1  # reactants
+    left, right = {}, {}
+    is_reactant = True
     for match in matches:
         if not match.group(5):
             # no species
@@ -63,18 +85,22 @@ def _interpret_equation(eq, species):
                 f"Available species : {species}"
             )
         coef = match.group(4) if match.group(4) else 1
-        equation[s] = float(coef) * mult
+        try:
+            coef = int(coef)
+        except ValueError:
+            raise ValueError(
+                f"Stoichiometric coeffcients must be integers. Could not "
+                f"convert {coef} in int"
+            )
+        if is_reactant:
+            left[s] = coef
+        else:
+            right[s] = coef
+
         if match.group(6) in ["->", "→"]:
             # shift to products
-            mult = 1
-
-    # normalize the coefficients (for float we assume that they have at the maximum
-    # 2 decimals
-    y = (np.array(list(equation.values())) * 100).astype(int)
-    div = np.gcd.reduce(np.abs(y))
-    equation = {k: int(v * 100 / div) for k, v in equation.items()}
-
-    return equation
+            is_reactant = False
+    return left, right
 
 
 @tr.signature_has_traits
@@ -88,78 +114,140 @@ class ActionMassKinetics(tr.HasTraits):
 
     Parameters
     ----------
-    equations : `list` or `tuple` of `str`
-        Strings giving the ``n_equations`` chemical equation of the network.
+    reactions : 'dict' or `list` or `tuple` of `str`
+        Strings giving the ``n_reactions`` chemical equation of the network.
         Reactants and products must be separated by a ``"->"`` or "→" symbol,
         The name of each species should match a key of the `species` dictionary.
-        Examples: ``"A + B -> C"`` or ``"2A -> 0.5 D"``\
+        Examples: ``"A + B -> C"`` or ``"2A -> D"``\
     species : `dict`, optional
         Dictionary of initial concentrations for the `n_species` species.
-    k : :term:`array-like`
-        Iterable of shape `n_equations` x 2 with the Arrhenius rate parameters
-        ((:math:`A_1`\ , :math:`Ea_1`\ ), ... (:math:`A_n`\ , :math:`Ea_n`\ )).
-    T : `float`, `Quantity` or `callable`\ , optional, default: 298.0
-        Temperature. If it is not a temperature quantity, the unit is assumed to be
-        in Kelvin. A function can also be provided which output a temperature `T`
+    arrhenius : :term:`array-like`
+        Iterable of shape `n_reactions` x 1, `n_reactions` x 2  or `n_reactions` x 3
+        with either the isothermal rate constants (:math:`k_1`\ , ..., :math:`k_n`\ ) or
+        the Arrhenius rate parameters ((:math:`A_1`\ , :math:`b_1`\ , :math:`Ea_1`\ ), ...
+         (:math:`A_n`\ , :math:`b_n`\ , :math:`Ea_n`\ )) or  ((:math:`A_1`\ ,
+         :math:`Ea_1`\ ), ...)).  If a 2-column iterable is provided the temperature
+         exponents are set to 0.
+    T : `float`\ , `Quantity`\ , `callable` or None, optional, default: None
+        Temperature. If None, the system is considered isothermal and T = 298.0
+        If it is not a temperature quantity, the unit is assumed to be
+        in Kelvin. A function can also be provided which output a temperature `T` in K
         vs. time `t`\ .
     """
 
     # internal parameters
-    _equations = tr.List(tr.Unicode(), help="List of model equations")
-    _concentrations = tr.Dict(help="A dictionary of model's species:concentrations")
+    _reactions = tr.Union(
+        (tr.List(tr.Unicode()), tr.Dict()), help="List or dict of model reactions"
+    )
+    _reactions_names = tr.List(tr.Unicode(), help="List of model reactions names")
+    _init_concentrations = tr.Dict(
+        help="A dictionary of model's species: initial " "concentrations"
+    )
     _species = tr.List(help="a list of species in this model")
-    _M = Array(help="Stoichiometric matrix M = A+B")
-    _k = Array(help="Arrhenius rate")
-    _T = tr.Union((tr.Float(), tr.Callable()), default_value=298.0, help="Temperature")
+    _A = Array(help="Stoichiometric matrix A (reactants)")
+    _B = Array(help="Stoichiometric matrix B (products)")
+    _arrhenius = Array(help="Arrhenius-like rate constant parameters")
+    _T = tr.Union(
+        (tr.Float(), tr.Callable()),
+        allow_none=False,
+        default_value=298.0,
+        help="Temperature",
+    )
 
-    def __init__(self, equations, species, k, T=298.0, **kwargs):
+    def __init__(self, reactions, species_concentrations, arrhenius, T=298.0, **kwargs):
 
-        self._k = k
+        # initialise concentrations, species, reactions, arrhenius, T
+        self._init_concentrations = species_concentrations
+        self._species = list(self._init_concentrations.keys())
+
+        if isinstance(reactions, (list, tuple)):
+            self._reactions = reactions
+            self._reactions_names = [f"equation {i}" for i in range(len(reactions))]
+        if isinstance(reactions, dict):
+            self._reactions = list(reactions.values())
+            self._reactions_names = list(reactions.keys())
+
+        self._arrhenius = arrhenius
         self._T = T
 
-        # initialise concentrations, species and equations
-        self._concentrations = species
-        self._species = list(self._concentrations.keys())
-        self._equations = equations
+        self._reaction_rates = self._write_reaction_rates()
+        self._production_rates = self._write_production_rates()
+        self._jacobian = self._write_jacobian()
 
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
-    @tr.validate("_k")
-    def _k_validate(self, proposal):
-        # k must be an iterable of pairs (A_1, Ea_1)
-        k = proposal.value
-        # k is an array (even if a list or tuple has been initialy provided (Array)
-        if k.shape[-1] != 2:
-            raise ValueError("k must be an iterable of pairs: shape=(n_reactions, 2)")
-        # Add more validation?
-        # ...
-        return k
+    @tr.validate("_arrhenius")
+    def _arrhenius_validate(self, proposal):
+        # arrhenius can be an iterable of:
+        # - single k values (k_1, ... k_n)
+        # - pairs of arrhenius parameters ((A_1, Ea_1), ... (A_n, E_a_n))
+        # - triplets of arrhenius parameters  ((A_1, b_1, Ea_1), ... (A_n, b_n, E_a_n))
+        arrhenius = proposal.value
+        # k is an array (even if a list or tuple has been initially provided (Array)
+        if len(arrhenius.shape) == 1:
+            # this id a 1D array
+            if arrhenius.shape[-1] != self.n_reactions:
+                raise ValueError(
+                    f"arrhenius should contain {self.n_reactions} rate "
+                    f"constants, {arrhenius.shape[-1]} have been provided"
+                )
+            if any(arrhenius < 0):
+                warnings.warn(
+                    "at least a rate constant is negative... are you sure of " "that ?!"
+                )
+        elif arrhenius.shape[-1] == 2:
+            # this is a 2D array with lines == [A, Ea]
+            if arrhenius.shape[0] != self.n_reactions:
+                raise ValueError(
+                    f"arrhenius should contain {self.n_reactions} rate "
+                    f"constants, {arrhenius.shape[0]} have been provided"
+                )
+            if (arrhenius < 0).any():
+                warnings.warn(
+                    "a least a pre-exp factor or activation energy is "
+                    "negative... ae you sure of that ?!"
+                )
+            # now add temperature exponents = 0
+            arrhenius = np.array(
+                [arrhenius[:, 0].T, np.zeros(arrhenius.shape[0]).T, arrhenius[:, 1].T]
+            ).T
+        elif arrhenius.shape[-1] == 3:
+            # this is a 2D array with lines == [A, b, Ea]
+            if arrhenius.shape[0] != self.n_reactions:
+                raise ValueError(
+                    f"arrhenius should contain {self.n_reactions} rate "
+                    f"constants, {arrhenius.shape[0]} have been provided"
+                )
+            if (arrhenius[:, [0, 2]] < 0).any():
+                warnings.warn(
+                    "a least a pre-exp factor or activation energy is "
+                    "negative... are you sure of that ?!"
+                )
+        return arrhenius
 
     @tr.validate("_T")
     def _T_validate(self, proposal):
         Tp = proposal.value
-
         if isinstance(Tp, Quantity):
-            Tp = Tp.to("K").magnitude
-
-        if isinstance(Tp, float):
-            # if T float, transform it to a callable
-            T = lambda t: Tp
+            T = Tp.to("K").magnitude
         else:
             T = Tp
         return T
 
-    @tr.observe("_equations")
+    @tr.observe("_reactions")
     def _stoichio_matrix(self, change):
         # generate stoichio matrix
-        equations = change.new
-        M = np.zeros((self.n_equations, self.n_species))
-        for i, eq in enumerate(equations):
-            equation = _interpret_equation(eq, self._species)
-            # fill M matrix in the order of the species list
-            M[i] = [equation[k] if k in equation else 0 for k in self._species]
-        self._M = M
+        reactions = change.new
+        A = np.zeros((self.n_reactions, self.n_species))
+        B = np.zeros((self.n_reactions, self.n_species))
+        for i, eq in enumerate(reactions):
+            left, right = _interpret_equation(eq, self._species)
+            A[i] = [left[k] if k in left else 0 for k in self._species]
+            B[i] = [right[k] if k in right else 0 for k in self._species]
+        self._A = A
+        self._B = B
+        self._BmAt = (B - A).T
 
     # ----------------------------------------------------------------------------------
     # Public properties
@@ -171,7 +259,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
         """
-        return (-self._M).clip(0)
+        return self._A
 
     @property
     def B(self):
@@ -180,12 +268,12 @@ class ActionMassKinetics(tr.HasTraits):
 
         Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
         """
-        return self._M.clip(0)
+        return self._B
 
     @property
-    def n_equations(self):
-        """Number of reaction equations"""
-        return len(self._equations)
+    def n_reactions(self):
+        """Number of reaction reactions"""
+        return len(self._reactions)
 
     @property
     def n_species(self):
@@ -195,36 +283,138 @@ class ActionMassKinetics(tr.HasTraits):
     @property
     def species(self):
         """Components names."""
-        return list(self._concentrations.keys())
+        return list(self._init_concentrations.keys())
 
     @property
-    def concentrations(self):
+    def init_concentrations(self):
         """Concentrations."""
-        return list(self._concentrations.values())
+        return list(self._init_concentrations.values())
 
-    def integrate(self, t, method="RK45", **kwargs):
+    def _write_reaction_rates(self):
+        """Return the expressions of production rates as a string"""
+        block = "["
+        for j, line in enumerate(self._A):
+            reac_rate = f"k[{j}]"
+            for k, nu in enumerate(line):
+                if nu == 1:
+                    reac_rate += f" * C[{k}]"
+                elif nu > 1:
+                    reac_rate += f" * C[{k}]**{nu}"
+            reac_rate += ", "
+            block += reac_rate
+        block += "]"
+        return block
+
+    def _print_reaction_rates(self):
+        print(self._write_reaction_rates().replace(",", ",\n"))
+
+    def _write_production_rates(self):
+        """Return the expressions of production rates as a string"""
+        block = "["
+        for line in (self._B - self._A).T:
+            prod_rate = ""
+            if not line.any():
+                # only zeors => spectator species
+                prod_rate = "0"
+            else:
+                for j, n in enumerate(line):
+                    if n != 0:
+                        if n == 1:
+                            prod_rate += f" + k[{j}]"
+                        elif n == -1:
+                            prod_rate += f" - k[{j}]"
+                        elif n > 1:
+                            prod_rate += f" + {n} * k[{j}]"
+                        elif n < -1:
+                            prod_rate += f" {n} * k[{j}]"
+
+                        for k, nu in enumerate(self.A[j]):
+                            if nu == 1:
+                                prod_rate += f" * C[{k}]"
+                            elif nu > 1:
+                                prod_rate += f" * C[{k}]**{nu}"
+            prod_rate += ", "
+            block += prod_rate
+        block += "]"
+        return block
+
+    def _print_production_rates(self):
+        print(self._write_production_rates().replace(",", ",\n"))
+
+    def _write_jacobian(self):
+        """Return the expressions of the jacobian of the production rates as a string"""
+        block = "["
+        for i, line in enumerate((self._B - self._A).T):
+            jac = "["
+            for j in range(self.n_species):
+                # compute jac[i,j] = d(dCidt)/dCj
+                is_null = True
+                for k, n in enumerate(line):
+                    if self.A[k, j] > 0 and n != 0:
+                        # the stoichiometruc coef. of reactant j is non-null
+                        # and reactant i is involved
+                        is_null = False
+                        if n == 1:
+                            jac += f" + k[{k}]"
+                        elif n == -1:
+                            jac += f" - k[{k}]"
+                        elif n > 1:
+                            jac += f" + {n} * k[{j}]"
+                        elif n < -1:
+                            jac += f" {n} * k[{j}]"
+
+                        for jj, nu in enumerate(self.A[k]):
+                            if nu == 1:
+                                jac += f" * C[{jj}]" if jj != j else ""
+                            elif nu > 1:
+                                jac += (
+                                    f" * C[{jj}]**{nu}"
+                                    if jj != j
+                                    else f" * {nu} * C[{jj}]**{nu-1}"
+                                )
+                if is_null:
+                    jac += "0,"
+                else:
+                    jac += ", "
+            block += jac + " ],"
+        block += "]"
+        return block
+
+    def _print_jacobian(self):
+        print(self._write_jacobian().replace(" ],", "],\n"))
+
+    def integrate(
+        self,
+        t,
+        k_dt=None,
+        method="LSODA",
+        left_op=None,
+        c_names=None,
+        use_jac=False,
+        atol=1e-6,
+        rtol=1e-3,
+        **kwargs,
+    ):
         """
         Integrate the kinetic equations at times `t`.
 
         This function computes and integrates the set of kinetic differential
-        equations given the initial concentration values:
-
-        .. math::
-            dC / dt =  (B - A).T  K C^A
-
-            C(t_0) = C_0
-
-        where :math:`A` and :math:`B` are the stoichiometry matrices,
-        :math:`K` is the diagonal matrix of rate constants and :math:`C^A` is the
-        vector-matrix exponentiation of :math:`C` by :math:`A`\ .
+        equations given the initial concentration values.
 
         Parameters
         ----------
         t : :term:`array-like` of shape (``t_points``\ ,)
             Iterable with time values at which the concentrations are computed.
-        method : `str` or `~scipy.integrate.OdeSolver`\ , optional, default: ``'RK45'``
+
+        k_dt : `float` or `None'
+            Resolution of the time grid used to compute `k(T(t))`\ . Used only for non
+            isothermal reaction.
+
+        method : `str` or `~scipy.integrate.OdeSolver`\ , optional, default: ``'LSODA'``
             Integration method to use:
 
+            * ``'LSODA'`` (default): Adams/BDF method with automatic stiffness detection and
+              switching.
             * ``'RK45'`` (default): Explicit Runge-Kutta method of order 5(4).
             * ``'RK23'`` : Explicit Runge-Kutta method of order 3(2).
             * ``'DOP853'``: Explicit Runge-Kutta method of order 8.
@@ -233,20 +423,46 @@ class ActionMassKinetics(tr.HasTraits):
             * ``'BDF'`` : Implicit multi-step variable-order (1 to 5) method based
               on a backward differentiation formula for the derivative
               approximation.
-            * ``'LSODA'`` : Adams/BDF method with automatic stiffness detection and
-              switching.
 
-            Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') should be used
+            'LSODA' is generally faster and seems a good choice for the systems
+            treated in scpy so far.
+            Explicit Runge-Kutta methods ('RK23', 'RK45', 'DOP853') can be used
             for non-stiff problems and implicit methods ('Radau', 'BDF') for
             stiff problems. Among Runge-Kutta methods, 'DOP853' is recommended
             for solving with high precision (low values of `rtol` and `atol` ).
             If not sure, first try to run 'RK45'. If it makes unusually many
             iterations, diverges, or fails, your problem is likely to be stiff and
-            you should use 'Radau' or 'BDF'. 'LSODA' can also be a good universal
-            choice, but it might be somewhat less convenient to work with as it
-            wraps old Fortran code.
+            you should use 'Radau' or 'BDF'.
             You can also pass an arbitrary class derived from
             `~scipy.integrate.OdeSolver` which implements the solver.
+
+        left_op : array_like, optional
+            A (m x n_species) array to left multiply the (n_species, n_times) array
+            obtained after integration:
+            `C.T = left_op @ C.T`\ . Can be used to pool and/or remove some
+            concentration profiles in/from the output matrix of concentrations
+
+        c_names : list of str
+            List of names for each concentration profile. Used if `left_op` is not None
+            to name/rename the output concentration profiles.
+
+        use_jac : `Bool`
+            Whether to use the jacobian. Useful for stiff problems, can slightly
+            increase the execution time for non-stiff problems.
+
+        atol, rtol : `float` or `array_like`, optional
+            Relative and absolute tolerances. The solver keeps the local error estimates
+            less than `atol + rtol * abs(y)`. Here `rtol` controls a relative accuracy
+            (number of correct digits), while `atol` controls absolute accuracy
+            (number of correct decimal places). To achieve the desired `rtol`, set
+            `atol < min(rtol * C)` so that `rtol` dominates the allowable error.
+            If `atol > rtol * C` the number of correct digits is not guaranteed.
+            Conversely, to achieve the desired `atol` set `rtol` such that
+            `max(rtol * C) < atol` is always smaller than atol. If components of C have
+            different scales, it might be beneficial to set different atol values for
+            different components by passing array_like with shape (n_species,) for
+            atol. Default values are `rtol=1e-3` and `atol=1e-6`\ .
+
         **kwargs
             Additional keyword parameters. See Other Parameters.
 
@@ -292,77 +508,189 @@ class ActionMassKinetics(tr.HasTraits):
             * message : `str`
               Human-readable description of the termination reason.
         """
+        # uncomment for debugging and optimization
+        # import time
+        # t0 = time.time()
 
-        def production_rates(ti, Ci):
-            """
-            Compute the production rates :math:`\frac{dC,dt}`.
+        global_env = {}
+        locals_env = {}
 
-            Compute the n_s production rates at time :math:`t_i` according to:
+        if callable(self._T):
+            # non-isothermal: a grid of k_i values spaced by k_dt time intervals
+            # is computed
+            t_grid = np.arange(0, t[-1] + k_dt, k_dt)
+            T_grid = np.expand_dims(self._T(t_grid), axis=1)
+            k_grid = (
+                self._arrhenius[:, 0]
+                * np.power(T_grid, self._arrhenius[:, 1])
+                * np.exp(-self._arrhenius[:, 2] / 8.314 / T_grid)
+            )
 
-            .. math::
-                dC / dt =  (B - A).T  K C_i^A
-                C_i = C(t_i)
+            # uncomment for debugging and optimization
+            # t1 = time.time()
 
-            where :math:`A` and :math:`B` are the stoichiometry matrices, :math:`K` is
-            the diagonal matrix of rate constants and :math:`C_i^A` is the vector-matrix
-            exponentiation of :math:`C_i` by :math:`A`.
+            exec(
+                f"def f_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return self._BmAt @ {self._reaction_rates}",
+                global_env,
+                locals_env,
+            )
 
-            Parameters
-            ----------
-            ti: `float`
-                Time.
-            Ci: `~numpy.ndarray`
-                1D vector of the concentrations at time `ti`\ .
-            """
-            beta = 1 / R / self._T(ti)
-            K = np.diag(self._k[:, 0] * np.exp(-beta * self._k[:, 1]))
-            A, B = self.A, self.B
-            BmAt = (B - A).T
-            return np.dot(np.dot(BmAt, K), _vm_exp(Ci, A))
+            if use_jac:
+                # define jac_ = d[dC/dt]/dCi
+                exec(
+                    f"def jac_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return{self._jacobian}",
+                    global_env,
+                    locals_env,
+                )
+                jac = partial(locals_env["jac_"], self, k_grid, k_dt)
+            else:
+                jac = None
 
-        bunch = solve_ivp(
-            production_rates,
-            (t[0], t[-1]),
-            self.concentrations,
-            t_eval=t,
-            method=method,
-        )
+            # uncomment for debugging and optimization
+            # t2 = time.time()
 
-        debug_(bunch.message)
+            bunch = solve_ivp(
+                partial(locals_env["f_"], self, k_grid, k_dt),
+                (t[0], t[-1]),
+                self.init_concentrations,
+                t_eval=t,
+                method=method,
+                atol=atol,
+                rtol=rtol,
+                jac=jac,
+            )
+
+            # uncomment for debugging and optimization
+            # t3 = time.time()
+
+        else:
+            if len(self._arrhenius.shape) == 1:
+                # _arrhenius is 1D array of rate constants
+                k = self._arrhenius
+
+                # uncomment for debugging and optimization
+                # t1 = time.time()
+
+            else:
+                # isothermal, the k_i are computed once
+                k = (
+                    self._arrhenius[:, 0]
+                    * self._T ** self._arrhenius[:, 1]
+                    * np.exp(-self._arrhenius[:, 2] / R / self._T)
+                )
+
+            # uncomment for debugging and optimization
+            # t1 = time.time()
+
+            exec(
+                f"def f_(self, k, t, C): return{self._production_rates}",
+                global_env,
+                locals_env,
+            )
+            if use_jac:
+                # define jac_ = d[dC/dt]/dCi
+                exec(
+                    f"def jac_(self, k, t, C): return{self._jacobian}",
+                    global_env,
+                    locals_env,
+                )
+                jac = partial(locals_env["jac_"], self, k)
+            else:
+                jac = None
+
+            # uncomment for debugging and optimization
+            # t2 = time.time()
+
+            bunch = solve_ivp(
+                partial(locals_env["f_"], self, k),
+                (t[0], t[-1]),
+                self.init_concentrations,
+                t_eval=t,
+                method=method,
+                atol=atol,
+                rtol=rtol,
+                jac=jac,
+            )
+
+            # uncomment for debugging and optimization
+            # t2 = time.time()
+
+        # uncomment for debugging (warning: debug_() multiply the exec time by 4...)
+        # from from spectrochempy.core import debug_
+        # debug_(bunch.message)
+        # t4 = time.time()
+
         if bunch.status != 0:
             raise SolverError(bunch.message)
 
-        C = bunch.y.T
+        C = (left_op @ bunch.y).T if left_op is not None else bunch.y.T
         t = bunch.t
 
-        # remove some keys from bunch
-        del bunch.y
-        del bunch.success
+        # uncomment for debugging and optimization
+        # t5 = time.time()
 
         return_dataset = kwargs.get("return_NDDataset", True)
         if return_dataset:
             C = NDDataset(C, name="Concentrations")
             C.y = Coord(t, title="time")
-            C.x = Coord(range(self.n_species), labels=self.species, title="species")
+            if left_op is None:
+                C.x = Coord(range(self.n_species), labels=self.species, title="species")
+            elif c_names is not None:
+                C.x = Coord(range(left_op.shape[0]), labels=c_names, title="species")
+            else:
+                C.x = Coord(
+                    range(left_op.shape[0]),
+                    labels=[f"species #{i}" for i in range(left_op.shape[0])],
+                    title="species",
+                )
             C.history = "Created using ActionMassKinetics.integrate"
             C.meta.update(bunch)
 
+        # uncomment for debugging and optimization
+        # t6 = time.time()
+        # print(f"time compute k       : {t1 - t0:f}, {100*(t1 - t0)/(t6-t0):f}%")
+        # print(f"time load f (and jac): {t2 - t1:f}, {100*(t2 - t1)/(t6-t0):f}%")
+        # print(f"time integration     : {t3 - t2:f}, {100*(t3 - t2)/(t6-t0):f}%")
+        # print(f"time debug           : {t4 - t3:f}, {100*(t4 - t3)/(t6-t0):f}%")
+        # print(f"time C,t             : {t5 - t4:f}, {100*(t5 - t4)/(t6-t0):f}%")
+        # print(f"time to NDDataset    : {t6 - t5:f}, {100*(t6 - t5)/(t6-t0):f}%")
+
         if kwargs.get("return_meta", False) and not return_dataset:
             return (C, bunch)
-        return C
+        else:
+            return C
 
-    def _modify_kinetics(self, dict_param):
-        for item in dict_param:
-            i_r, p = item.split("[")[-1].split("].")
-            if p == "A":
-                self._k[int(i_r), 0] = dict_param[item]
-            elif p == "Ea":
-                self._k[int(i_r), 1] = dict_param[item]
-            else:
-                raise ValueError("something went wrong in parsing the dict of params")
+    def _modify_kinetics(self, dict_param, left_op=None):
+
+        if len(self._arrhenius.shape) == 2:
+            for item in dict_param:
+                i_r, p = item.split("[")[-1].split("].")
+                if p == "A":
+                    self._arrhenius[int(i_r), 0] = dict_param[item]
+                elif p == "b":
+                    self._arrhenius[int(i_r), 1] = dict_param[item]
+                elif p == "Ea":
+                    self._arrhenius[int(i_r), 2] = dict_param[item]
+                else:
+                    raise ValueError(
+                        "something went wrong in parsing the dict of params"
+                    )
+        else:
+            for item in dict_param:
+                i_r = item.split("[")[-1].split("]")[0]
+                self._arrhenius[int(i_r)] = dict_param[item]
+
+        if left_op is not None:
+            self._arrhenius = left_op @ self._arrhenius
 
     def fit_to_concentrations(
-        self, Cexp, iexp, i2iexp, dict_param_to_optimize, **kwargs
+        self,
+        Cexp,
+        iexp,
+        i2iexp,
+        dict_param_to_optimize,
+        ivp_solver_kwargs={},
+        optimizer_kwargs={},
     ):
         """
         Fit rate parameters and concentrations to a concentration profile.
@@ -378,11 +706,14 @@ class ActionMassKinetics(tr.HasTraits):
         i2iexp : `int`
             Correspondence between optimized (external) concentration profile and
             experimental concentration profile.
-        dict_param_to_optimize : `dict`
+        dict_param_to_optimize : `dict` or None
             rate parameters to optimize. Keys should be 'k[i].A' and 'k[i].Ea' for
             pre-exponential factor.
-        **kwargs
-            Parameters for the optimization (see `~scipy.optimize.minimize`\ ).
+        ivp_solver_kwargs : `dict`
+            keyword arguments for the ode solver. Defaults are the same as for
+            `~scipy.integrate.solve_ivp`\ , except for `method=LSDOA`
+        optimizer_kwargs: `dict`
+            keyword arguments the optimization (see `~scipy.optimize.minimize`\ ).
 
         Returns
         --------
@@ -390,92 +721,113 @@ class ActionMassKinetics(tr.HasTraits):
             A result dictionary.
         """
 
-        def objective(params, Cexp, iexp, i2iexp, dict_param_to_optimize):
+        def objective(
+            params,
+            Cexp,
+            iexp,
+            i2iexp,
+            dict_param_to_optimize,
+            optimizer_left_op,
+            ivp_solver_method,
+            k_dt,
+            C_op,
+        ):
+            """returns the SSE on concentrationb profiles"""
+
             for param, item in zip(params, dict_param_to_optimize):
                 dict_param_to_optimize[item] = param
-            self._modify_kinetics(dict_param_to_optimize)
-            Chat = self.integrate(Cexp.y.data, return_NDDataset=False)
+
+            self._modify_kinetics(dict_param_to_optimize, optimizer_left_op)
+
+            Chat = self.integrate(
+                Cexp.y.data,
+                return_NDDataset=False,
+                method=ivp_solver_method,
+                k_dt=k_dt,
+                left_op=C_op,
+            )
             return np.sum(np.square(Cexp.data[:, iexp] - Chat[:, i2iexp]))
 
-        method = kwargs.get("method", "Nelder-Mead")
-        bounds = kwargs.get("bounds", None)
-        tol = kwargs.get("tol", None)
-        options = kwargs.get("options", {"disp": True})
+        # optimizer (kw)arguments:
+        # ... parameters for scipy.minimize
+        optimizer_method = optimizer_kwargs.get("Method", "Nelder-Mead")
+        optimizer_bounds = optimizer_kwargs.get("bounds", None)
+        optimizer_tol = optimizer_kwargs.get("tol", None)
+        optimizer_options = optimizer_kwargs.get("options", {"disp": True})
+        # optimizer_callback = optimizer_kwargs.get("callback", None)
+        # ... other parameters
+        optimizer_left_op = optimizer_kwargs.get("left_op", None)
 
-        guess_param = np.zeros((len(dict_param_to_optimize)))
+        # ivp solver (kw)arguments:
+        # ... parameters for integrate.ivp_solve
+        ivp_solver_method = ivp_solver_kwargs.get("method", "LSODA")
+        # ... other parameters
+        ivp_solver_k_dt = ivp_solver_kwargs.get("k_dt", None)
+        ivp_solver_left_op = ivp_solver_kwargs.get("left_op", None)
+
+        # get x0
+        x0 = np.zeros(len(dict_param_to_optimize))
         for i, param in enumerate(dict_param_to_optimize):
-            guess_param[i] = dict_param_to_optimize[param]
+            x0[i] = dict_param_to_optimize[param]
 
-        if options["disp"]:
-            print("Optimization of the parameters.")
-            print(f"         Initial parameters: {guess_param}")
-            print(
-                f"         Initial function value: "
-                f"{objective(guess_param, Cexp, iexp, i2iexp, dict_param_to_optimize)}"
+        if optimizer_options["disp"]:
+            init_val = objective(
+                x0,
+                Cexp,
+                iexp,
+                i2iexp,
+                dict_param_to_optimize,
+                optimizer_left_op,
+                ivp_solver_method,
+                ivp_solver_k_dt,
+                ivp_solver_left_op,
             )
+            print("Optimization of the parameters.")
+            print(f"         Initial parameters: {x0}")
+            print(f"         Initial function value: {init_val:f}")
         tic = datetime.datetime.now(datetime.timezone.utc)
+
         optim_res = minimize(
             objective,
-            guess_param,
-            args=(Cexp, iexp, i2iexp, dict_param_to_optimize),
-            method=method,
-            bounds=bounds,
-            tol=tol,
-            options=options,
+            x0,
+            args=(
+                Cexp,
+                iexp,
+                i2iexp,
+                dict_param_to_optimize,
+                optimizer_left_op,
+                ivp_solver_method,
+                ivp_solver_k_dt,
+                ivp_solver_left_op,
+            ),
+            method=optimizer_method,
+            bounds=optimizer_bounds,
+            tol=optimizer_tol,
+            options=optimizer_options,
         )
         toc = datetime.datetime.now(datetime.timezone.utc)
-        opt_param = optim_res.x
-        if options["disp"]:
-            print(f"         Optimization time: {toc - tic}")
-            print(f"         Final parameters: {opt_param}")
 
-        Ckin = self.integrate(Cexp.y.data, return_NDDataset=False)
+        if optimizer_options["disp"]:
+            print(f"         Optimization time: {toc - tic}")
+            print(f"         Final parameters: {optim_res['x']}")
+
+        Ckin = self.integrate(
+            Cexp.y.data,
+            return_NDDataset=False,
+            method=ivp_solver_method,
+            k_dt=ivp_solver_k_dt,
+            left_op=ivp_solver_left_op,
+        )
 
         for i, param in enumerate(dict_param_to_optimize):
-            dict_param_to_optimize[param] = opt_param[i]
+            dict_param_to_optimize[param] = optim_res["x"][i]
 
         return Ckin, (iexp, i2iexp, dict_param_to_optimize), optim_res
 
 
-def _vm_exp(x: Iterable, A: Iterable):
-    """
-    Vector matrix exponentiation
-
-    The vector-matrix exponentiation is the operation that maps x
-    and A to its vector-matrix power $x^A$ which given by:
-    $$ \left[ x_1^{A_{11}}x_2^{A_{21}} ... x_n^{A_{n1}} \;\; x_1^{A_{1n}}x_2^{A_{2n}}
-    ... x_n^{A_{nn}} \right]$$
-
-
-    Parameters
-    ----------
-    x: (px1) iterable of float
-         Columns vector
-    A: (pxq) iterable of int
-         Matrix
-
-    Returns
-    -------
-    Vm_exp: (px1) iterable
-         x^A vector
-
-    References
-    ----------
-    [1] Chellaboina et al., "Modeling and analysis of mass-action kinetics", IEEE
-        control systems (2009),DOI: 10.1109/MCS.2009.932926
-    [2] Gjerrit Meinsma, "Dimensional and Scaling Analysis" SIAM review, Vol. 61, No. 1,
-        pp. 159–184 (2009), DOI: 10.1137/16M1107127
-    """
-    out = [1] * len(A)
-    for i, A_i in enumerate(A):
-        for x_j, A_ij in zip(x, A_i):
-            out[i] *= x_j**A_ij
-    return out
-
-
-# --------
+# ------------------------------------------------------------------------------------
 # CANTERA UTILITIES
-# -------
+# ------------------------------------------------------------------------------------
 ct = import_optional_dependency("cantera", errors="ignore")
 
 
@@ -993,22 +1345,7 @@ class PFR:
         tol = kwargs.get("tol", None)
         options = kwargs.get("options", {"disp": True})
 
-        if method in [
-            "Nelder-Mead",
-            "Powell",
-            "CG",
-            "BFGS",
-            "Newton-CG",
-            "L-BFGS-B",
-            "TNC",
-            "COBYLA",
-            "SLSQP",
-            "trust-constr",
-            "dogleg",
-            "trust-ncg",
-            "trust-krylov",
-            "trust-exact",
-        ]:
+        if method.upper() in SCIPY_MINIMIZE_METHODS:
             optimizer = "minimize"
 
         elif method in ["trf", "dogbox", "lm"]:

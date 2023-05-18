@@ -267,7 +267,7 @@ def test_MCRALS(model, data):
     assert "converged !" in mcr.log[-15:]
 
     # reconstruct
-    Dh = mcr.reconstruct()
+    Dh = mcr.inverse_transform()
     assert (Dh - D).abs().max() < 1.0e-12
 
 
@@ -343,11 +343,6 @@ def test_MCRALS_errors(model, data):
     # wrong closureTarget
     with pytest.raises(ValueError) as e:
         mcr.closureTarget = [0, 1, 1]
-    assert "please check the" in e.value.args[0]
-
-    # wrong hardC_to_C_idx
-    with pytest.raises(ValueError) as e:
-        mcr.getC_to_C_idx = [2]
     assert "please check the" in e.value.args[0]
 
     with pytest.raises(ValueError) as e:

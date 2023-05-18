@@ -22,7 +22,6 @@
     IRIS
     IrisKernel
     LSTSQ
-    LinearCoord
     MCRALS
     NDDataset
     NMF
