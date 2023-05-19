@@ -78,7 +78,6 @@ All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`\
     :toctree: generated/
 
     Coord
-    LinearCoord
     CoordSet
 
 
