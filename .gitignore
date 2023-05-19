@@ -65,18 +65,13 @@ __pycache__/
 /.pytest_cache/
 
 # Sphinx documentation
-docs/api/generated
-docs/_build/
-docs/index.doctree
-docs/modules/
+docs/reference/generated
+docs/reference/api.rst
+build/
+docs/gallery/
 docs/savefig/
-docs/_templates_old
-generated/
 dist/
 build/
-*/gen_modules/
-gallery
-
 
 # tests
 tests/figures
@@ -113,9 +108,6 @@ process.pscp
 # unknown
 .goutputstream*
 
-
-# Html Documentation
-/spectrochempy_docs/
 *.py-donotwork
 /patch.diff
 
@@ -134,6 +126,5 @@ essai.py
 coverage.json
 
 scp_data/stylesheets/mydefault.mplstyle
-docs/userguide/reference/api.rst
 _ressources
 _tools
