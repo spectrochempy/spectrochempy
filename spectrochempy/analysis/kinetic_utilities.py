@@ -124,10 +124,10 @@ class ActionMassKinetics(tr.HasTraits):
     arrhenius : :term:`array-like`
         Iterable of shape `n_reactions` x 1, `n_reactions` x 2  or `n_reactions` x 3
         with either the isothermal rate constants (:math:`k_1`\ , ..., :math:`k_n`\ ) or
-        the Arrhenius rate parameters ((:math:`A_1`\ , :math:`b_1`\ , :math:`Ea_1`\ ), ...
-         (:math:`A_n`\ , :math:`b_n`\ , :math:`Ea_n`\ )) or  ((:math:`A_1`\ ,
-         :math:`Ea_1`\ ), ...)).  If a 2-column iterable is provided the temperature
-         exponents are set to 0.
+        the Arrhenius rate parameters ((:math:`A_1`\ , :math:`b_1`\ , :math:`Ea_1`\ ),
+        ... (:math:`A_n`\ , :math:`b_n`\ , :math:`Ea_n`\ )) or  ((:math:`A_1`\ ,
+        :math:`Ea_1`\ ), ...)).  If a 2-column iterable is provided the temperature
+        exponents are set to 0.
     T : `float`\ , `Quantity`\ , `callable` or None, optional, default: None
         Temperature. If None, the system is considered isothermal and T = 298.0
         If it is not a temperature quantity, the unit is assumed to be
