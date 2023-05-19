@@ -11,7 +11,6 @@ It also defines
 the default application preferences and IPython magic functions.
 """
 
-import inspect
 import io
 import json
 import logging
@@ -719,7 +718,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         self, message, category, filename, lineno, file=None, line=None
     ):
         with self._fmtcontext():
-            self._formatter(message)
             self.log.warning(f"({category.__name__}) {message}")
 
     # ----------------------------------------------------------------------------------
@@ -971,7 +969,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         Formatted info message.
         """
         with self._fmtcontext():
-            self._formatter(msg)
             self.log.info(msg, *args, **kwargs)
 
     def debug_(self, msg, *args, **kwargs):
@@ -979,7 +976,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         Formatted debug message.
         """
         with self._fmtcontext():
-            self._formatter(msg)
             self.log.debug("DEBUG | " + msg, *args, **kwargs)
 
     def error_(self, *args, **kwargs):
@@ -1011,23 +1007,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         self._from_warning_ = True
         warnings.warn(msg, *args, **kwargs)
         self._from_warning_ = False
-
-    def _formatter(self, *args):
-        # We need a custom formatter (maybe there is a better way to do this suing
-        # the logging library directly?)
-
-        rootfolder = Path(__file__).parent
-        st = 2
-        if "_showwarnmsg" in inspect.stack()[2][3]:
-            st = 4 if self._from_warning_ else 3
-
-        filename = Path(inspect.stack()[st][1])
-        try:
-            module = filename.relative_to(rootfolder)
-        except ValueError:
-            module = filename
-        line = inspect.stack()[st][2]
-        func = inspect.stack()[st][3]
 
     # ----------------------------------------------------------------------------------
     # Private methods
