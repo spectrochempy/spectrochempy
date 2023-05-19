@@ -54,7 +54,7 @@ def nbsphinx_script_run(path):
 
 
 # @pytest.mark.skipif(sys.platform.startswith("win"), reason="do not work on windows")
-@pytest.mark.parametrize("script", scripts)
+@pytest.mark.parametrize("script", sorted(scripts, key=lambda script: script.stem))
 def test_nbsphinx_script_(script):
     # some test will failed due to the magic commands or for other known reasons
     # SKIP THEM
@@ -81,7 +81,7 @@ import matplotlib as mpl
 import spectrochempy as scp  # to avoid imporing it in example test (already impported)
 
 
-@pytest.mark.parametrize("example", examples)
+@pytest.mark.parametrize("example", sorted(examples, key=lambda example: example.stem))
 def test_examples(example):
 
     scp.NO_DISPLAY = True
