@@ -45,6 +45,7 @@ Breaking changes
 * The rounding of the data is now done in the `Coord` class automatically to at least
   2 decimals everytime the `data` are modified and during Coord initialisation,
   unless the parameter `bounding` is set to `False` during intialisation.
+* Issue #647. ActionMassKinetics has been optimized and refactored.
 
 
 .. section

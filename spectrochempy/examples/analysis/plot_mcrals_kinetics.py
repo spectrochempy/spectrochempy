@@ -32,7 +32,7 @@ import spectrochempy as scp
 data = scp.read("http://www.bdagroup.nl/content/Downloads/datasets/18_sb_uv_vis.zip")
 
 # %%
-# For sake of demonstration, we will focus only on a single run.
+# For sake of demonstration, we will focus on a single run.
 # For example, we extract only the data for the run ``#9`` (dataset name: ``'x9b'`` ).
 #
 # Let's search it. Data is a list of pairs of NDDataset, a pair of each run.
@@ -51,11 +51,12 @@ for pair in data:
 print("\n NDDataset names: " + str([d.name for d in ds]))
 
 # %%
-# We load the experimental spectra (in `ds[1]`\)
-# and add the `y` (time) and `x` (wavelength) coordinates:
+# We load the experimental spectra (in `ds[1]`\), add the `y` (time) and `x`
+# (wavelength) coordinates, and keep one spectrum of out 4:
 D = scp.NDDataset(ds[1][:, 1:].data.T)
 D.y = scp.Coord(ds[0].data.squeeze(), title="time") / 60
 D.x = scp.Coord(ds[1][:, 0].data.squeeze(), title="wavelength / cm$^{-1}$")
+D = D[::4]
 _ = D.plot()
 
 # %%
@@ -74,8 +75,8 @@ _ = C0.T.plot()
 mcr_1 = scp.MCRALS(log_level="INFO")
 _ = mcr_1.fit(D, C0)
 
-mcr_1.C.T.plot()
-mcr_1.St.plot()
+_ = mcr_1.C.T.plot()
+_ = mcr_1.St.plot()
 
 # %%
 # Kinetic constraints can be added, i.e., imposing that the concentration profiles obey
@@ -83,7 +84,7 @@ mcr_1.St.plot()
 # roughly estimated rate constants:
 reactions = ("A -> B", "B -> C")
 species_concentrations = {"A": 5.0, "B": 0.0, "C": 0.0}
-k0 = np.array(((0.5, 0.0), (0.05, 0.0)))
+k0 = np.array((0.5, 0.05))
 kin = scp.ActionMassKinetics(reactions, species_concentrations, k0)
 
 # %%
@@ -96,12 +97,12 @@ _ = Ckin.T.plot(clear=False, cmap=None)
 # %%
 # Even though very approximate, the same values can be used to run a hard-soft MCR-ALS:
 X = D[:, 300.0:500.0]
-param_to_optimize = {"k[0].A": 0.5, "k[1].A": 0.05}
+param_to_optimize = {"k[0]": 0.5, "k[1]": 0.05}
 mcr_2 = scp.MCRALS()
 mcr_2.hardConc = [0, 1, 2]
 mcr_2.getConc = kin.fit_to_concentrations
 mcr_2.argsGetConc = ([0, 1, 2], [0, 1, 2], param_to_optimize)
-
+mcr_2.kwargsGetConc = {"ivp_solver_kwargs": {"return_NDDataset": False}}
 
 mcr_2.fit(X, Ckin)
 
@@ -119,7 +120,7 @@ _ = mcr_2.C_constrained.T.plot(clear=False)
 # Finally, let\'s plot some of the pure spectra profiles St, and the
 #  reconstructed dataset  (X_hat = C St) vs original dataset (X) and residuals.
 _ = mcr_2.St.plot()
-_ = mcr_2.plotmerit(offset=0, nb_traces=10)
+_ = mcr_2.plotmerit(nb_traces=10)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

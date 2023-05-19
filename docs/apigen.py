@@ -113,11 +113,14 @@ class Apigen:
         results = []
         for pkg_name in pkgs:
 
-            # print(pkg_name)
+            if pkg_name.startswith("spectrochempy.examples") or pkg_name.startswith(
+                "spectrochempy.extern"
+            ):
+                continue
+
             pkg = import_item(pkg_name)
             try:
                 alls = getattr(pkg, "__all__")
-                #  print(f"\t__all__ : {alls}")
 
             except AttributeError:
                 # warn("This module has no __all__ attribute")
