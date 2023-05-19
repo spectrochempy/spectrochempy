@@ -15,7 +15,7 @@ import textwrap
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.core import debug_, error_
+from spectrochempy.core import error_
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath, _set_operators
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.units import Quantity, ur
@@ -847,9 +847,10 @@ class Coord(NDMath, NDArray):
             self._data = np.linspace(data[0], data[-1], data.size)
             self._linear = True
         else:
-            debug_(
-                "The coordinates spacing is not enough uniform to allow linearization."
-            )
+            # from spectrochempy.core import debug_
+            # debug_(
+            #    "The coordinates spacing is not enough uniform to allow linearization."
+            # )
             self._linear = False
 
     @property
