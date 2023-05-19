@@ -91,6 +91,8 @@ class Coord(NDMath, NDArray):
         It is optional but recommended to give a title to each ndarray.
     dlabel :  str, optional
         Alias of `title` .
+    linearize_below : float, optional, default=0.1
+        variation of spacing in % below which the coordinate is linearized. Set it to
     rounding : bool, optional, default=True
         If True, the data will be rounded to the number of significant
         digits given by `sigdigits`\ .
@@ -151,6 +153,7 @@ class Coord(NDMath, NDArray):
     _show_datapoints = tr.Bool(True)
     _zpd = tr.Integer()
 
+    _linearize_below = tr.Float(0.1)
     _linear = tr.Bool(False)
     _sigdigits = tr.Int(4)
     _rounding = tr.Bool(True)
@@ -178,6 +181,8 @@ class Coord(NDMath, NDArray):
 
         # specific case of NMR (initialize unit context NMR)
         larmor = kwargs.pop("larmor", None)
+
+        self._linearize_below = kwargs.pop("linearize_below", False)
 
         # extract parameters for linearization and data rounding
         self._sigdigits = kwargs.pop("sigdigits", 4)
@@ -242,6 +247,7 @@ class Coord(NDMath, NDArray):
 
         # linearize the data if possible or at least round it
         # to the number of significant digits
+
         if self.has_data and self.dtype.kind not in "M":
 
             # First try to linearize the data if it is not a datetime
@@ -835,7 +841,7 @@ class Coord(NDMath, NDArray):
             variation = (
                 (np.max(spacing) - np.min(spacing)) * 100.0 / np.max(spacing) / 2.0
             )
-            if variation <= 0.1:
+            if variation <= self._linearize_below:
                 makeitlinear = True
 
         if makeitlinear:
@@ -849,8 +855,8 @@ class Coord(NDMath, NDArray):
         else:
             # from spectrochempy.core import debug_
             # debug_(
-            #    "The coordinates spacing is not enough uniform to allow linearization."
-            # )
+            #      "The coordinates spacing is not enough uniform to allow linearization."
+            #  )
             self._linear = False
 
     @property
