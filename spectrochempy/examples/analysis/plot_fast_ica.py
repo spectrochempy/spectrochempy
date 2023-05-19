@@ -16,7 +16,7 @@ import spectrochempy as scp
 
 # %%
 # Load, prepare and plot the dataset
-# ----------------------------
+# ----------------------------------
 
 # %%
 # Here we use a dataset from :cite:t:`jaumot:2005`
