@@ -168,7 +168,6 @@ release_date = _get_release_date()
 # Testdata
 # --------------------------------------------------------------------------------------
 def _download_full_testdata_directory(datadir):
-
     # this process is relatively long, so we do not want to do it several time:
     downloaded = datadir / "__downloaded__"
     if downloaded.exists():
@@ -264,21 +263,6 @@ def _get_config_dir():
         config.mkdir(exist_ok=True)
 
     return config
-
-
-def _get_log_dir():
-
-    # first look for SCP_LOGS
-    logdir = environ.get("SCP_LOGS")
-
-    if logdir is not None and Path(logdir).exists():
-        return Path(logdir)
-
-    logdir = _find_or_create_spectrochempy_dir() / "logs"
-    if not logdir.exists():
-        logdir.mkdir(exist_ok=True)
-
-    return logdir
 
 
 # ======================================================================================
@@ -421,7 +405,6 @@ class DataDir(tr.HasTraits):
 
     @tr.default("path")
     def _get_path_default(self, **kwargs):  # pragma: no cover
-
         super().__init__(**kwargs)
 
         # create a directory testdata in .spectrochempy to avoid an error if the following do not work
@@ -625,13 +608,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     logging_config = tr.Dict(
         {
             "handlers": {
-                "rotatingfile": {
-                    "class": "logging.handlers.RotatingFileHandler",
-                    "level": "DEBUG",
-                    "filename": str(_get_log_dir() / "spectrochempy.log"),
-                    "maxBytes": 262144,
-                    "backupCount": 5,
-                },
                 "string": {
                     "class": "logging.StreamHandler",
                     "formatter": "console",
@@ -642,7 +618,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             "loggers": {
                 "SpectroChemPy": {
                     "level": "DEBUG",
-                    "handlers": ["console", "rotatingfile", "string"],
+                    "handlers": ["console", "string"],
                 },
             },
         }
@@ -706,7 +682,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     # Initialisation of the application
     # ----------------------------------------------------------------------------------
     def __init__(self, **kwargs):
-
         super().__init__(**kwargs)
         self.debug_("*" * 40)
         self.initialize()
@@ -751,7 +726,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     # Initialisation of the configurables
     # ----------------------------------------------------------------------------------
     def _init_all_preferences(self):
-
         # Get preferences from the config files
         # ---------------------------------------------------------------------
         if not self.config:
@@ -759,7 +733,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 
         configfiles = []
         if self.config_dir:
-
             lis = self.config_dir.iterdir()
             for fil in lis:
                 if fil.suffix == ".py":
@@ -987,12 +960,11 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 
     @contextmanager
     def _fmtcontext(self):
-        fmt = self.log_format, self.log.handlers[1].formatter
+        fmt = self.log_format
         try:
             yield fmt
         finally:
-            self.log_format = fmt[0]
-            self.log.handlers[1].setFormatter(fmt[1])
+            self.log_format = fmt
 
     def info_(self, msg, *args, **kwargs):
         """
@@ -1056,12 +1028,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             module = filename
         line = inspect.stack()[st][2]
         func = inspect.stack()[st][3]
-
-        # rotatingfilehandler formatter (DEBUG)
-        formatter = logging.Formatter(
-            f"<%(asctime)s:{module}/{func}::{line}> %(message)s"
-        )
-        self.log.handlers[1].setFormatter(formatter)
 
     # ----------------------------------------------------------------------------------
     # Private methods
