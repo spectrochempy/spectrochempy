@@ -64,7 +64,7 @@ blc.order = "linear"
 
 # %%
 # Now we can fit the model to the data
-blc.fit(B)
+_ = blc.fit(B)
 
 # %%
 # The baseline is now stored in the `baseline` attribute of the processor
@@ -99,19 +99,19 @@ plot_result(B, corr, baseline)
 # %%
 # Ok this is a good start.
 # But we can do better with more specific baseline correction methods.
-# Let's try the asymmetric least squares smoothing model, on this detrended spectrum:
+# Let's try the asymmetric least squares smoothing model ( `asls` ), on this detrended spectrum:
 Bd = blc.corrected
 
 # %%
 # Asymmetric Least Squares smoothing
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-blc.model = "als"
+blc.model = "asls"
 
 # %%
 # We need to define the smoothness and asymmetry parameters
 # The smoothness parameter is a positive number that controls the smoothness of the baseline.
 # The larger this number is, the smoother the resulting baseline.
-# The asymmetry parameter controls the asymmetry for the ALS resolution.
+# The asymmetry parameter controls the asymmetry for the AsLS resolution.
 blc.mu = 10**7  # smoothness
 blc.asymmetry = 0.01
 
@@ -124,10 +124,10 @@ plot_result(Bd, corr, baseline)
 
 # %%
 # The correction appears to be good, but let's see if we can do better by using the
-# `snip` method. This method requires to adjust the with of the window (usually set to
+# `snip` method. This method requires to adjust the with of a window (usually set to
 # the FWHM of the characteristic peaks).
 blc.model = "snip"
-blc.snip_width = 55  # FWHM of the peaks
+blc.snip_width = 55  # estimated FWHM of the peaks (expressed in point. TODO: alternatively use true coordinates)
 Bs = A[55.0:]
 blc.fit(Bs)
 corr = blc.transform()
@@ -146,14 +146,17 @@ _ = C.plot()
 
 
 # %%
-# Now we apply the ALS method on the series of spectra
+# Now we apply the AsLS method on the series of spectra
 #
 # We keep the same parameters as before and fit the new dataset
 # The baseline is calculated for each spectrum of the series. So the process is
 # very slow!  For the demonstration we will the limit the series to 1 spectrum
 # over 10.
 
-blc.model = "als"
+blc.model = "asls"
+blc.log_level = (
+    "WARNING"  # supress output of asls (to long for the moment:  TODO optimize this)
+)
 blc.fit(C[::10])
 corr = blc.transform()
 baseline = blc.baseline

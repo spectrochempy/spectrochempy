@@ -1,7 +1,7 @@
 from spectrochempy.analysis.preprocessing.baseline import (
     Baseline,
     abc,
-    als,
+    asls,
     basc,
     detrend,
     snip,
@@ -13,10 +13,10 @@ __all__ = [
     "abc",
     "basc",
     "detrend",
-    "als",
+    "asls",
     "snip",
     "lls",
     "lls_inv",
 ]
 __configurables__ = ["Baseline"]
-__dataset_methods__ = ["basc", "detrend", "als", "snip", "abc"]
+__dataset_methods__ = ["basc", "detrend", "asls", "snip", "abc"]

@@ -15,7 +15,7 @@ NDDataset baseline correction
 In this example, we perform a baseline correction of a 2D NDDataset
 interactively, using the `multivariate` method and a `pchip`/'polynomial' interpolation.
 
-For comparison we also use the `als`and. `snip`models.
+For comparison we also use the `asls`and. `snip`models.
 """
 
 # %%
@@ -144,18 +144,18 @@ _ = corrected.plot()
 
 
 # %%
-# We can also try to use a `als` (Asymmetric Least Squares) model
+# We can also try to use a `asls` (Asymmetric Least Squares) model
 # instead. This model is based on the work of Eilers and Boelens (2005)
 # and performs a baseline correction by iteratively fitting asymmetrically
 # weighted least squares regression curves to the data.
-# The `als` model has two parameters: `mu` and `assymetry`.
+# The `asls` model has two parameters: `mu` and `assymetry`.
 # The `mu` parameter is a regularisation parameters which control
 # the smoothness of the baseline. The larger `mu` is, the smoother
 # the baseline will be. The `assymetry` parameter is a parameter
-# which control the assymetry if the ALS algorithm.
+# which control the assymetry if the AsLS algorithm.
 
 blc.multivariate = False  # use a sequential approach
-blc.model = "als"
+blc.model = "asls"
 blc.mu = 10**9
 blc.asymmetry = 0.002
 blc.fit(ndp)

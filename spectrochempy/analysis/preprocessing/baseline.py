@@ -34,7 +34,7 @@ __all__ = [
     "abc",
     "basc",
     "detrend",
-    "als",
+    "asls",
     "snip",
     "lls",
     "lls_inv",
@@ -46,7 +46,7 @@ See Also
 Baseline : Manual baseline correction.
 basc : NDDataset method performing a baseline correction using the `Baseline` class.
 abc : NDDataset method performing an automatic baseline correction.
-als : NDDataset method performing an Asymmetric Least Squares Smoothing baseline.
+asls : NDDataset method performing an Asymmetric Least Squares Smoothing baseline.
     correction.
 snip : NDDataset method performing a Simple Non-Iterative Peak (SNIP) detection
     algorithm.
@@ -63,7 +63,7 @@ _docstring.get_sections(
 _docstring.delete_params("Baseline.see_also", "Baseline")
 _docstring.delete_params("Baseline.see_also", "basc")
 _docstring.delete_params("Baseline.see_also", "abc")
-_docstring.delete_params("Baseline.see_also", "als")
+_docstring.delete_params("Baseline.see_also", "asls")
 _docstring.delete_params("Baseline.see_also", "snip")
 _docstring.delete_params("Baseline.see_also", "autosub")
 _docstring.delete_params("Baseline.see_also", "detrend")
@@ -105,7 +105,7 @@ class Baseline(AnalysisConfigurable):
     - ``'detrend'`` : remove trends from data. Depending on the ``order`` parameter,
       the detrend can be constant (mean removal), linear (order=1), quadratic (order=2)
       or `cubic`(order=3).
-    - ``'als'`` : Asymmetric Least Squares Smoothing baseline correction. This method
+    - ``'asls'`` : Asymmetric Least Squares Smoothing baseline correction. This method
       is based on the work of Eilers and Boelens (:cite:`eilers:2005`\ ).
     - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
       (:cite:`ryan:1988`\ ).
@@ -144,7 +144,7 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True)
 
     model = tr.CaselessStrEnum(
-        ["polynomial", "pchip", "abc", "detrend", "als", "snip"],
+        ["polynomial", "pchip", "abc", "detrend", "asls", "snip"],
         default_value="pchip",
         help="""The model used to determine the baseline.
 
@@ -159,7 +159,7 @@ The others models do not require the `ranges` parameter to be provided:
 
 * 'detrend': the baseline is determined by a constant, linear or polynomial
   trend removal. The order of the trend is determined by the `order` parameter.
-* 'als': the baseline is determined by an asymmetric least square algorithm.
+* 'asls': the baseline is determined by an asymmetric least square algorithm.
 * 'snip': the baseline is determined by a simple non-iterative peak detection
   algorithm (for th).
 """,
@@ -184,13 +184,13 @@ The others models do not require the `ranges` parameter to be provided:
 
     mu = tr.Float(
         default_value=1e5,
-        help="The smoothness parameter for the ALS method. Larger values make the "
+        help="The smoothness parameter for the AsLS method. Larger values make the "
         "baseline stiffer. Values should be in the range (0, 1e9).",
     ).tag(config=True)
 
     asymmetry = tr.Float(
         default_value=0.05,
-        help="The asymmetry parameter for the ALS method. It is typically between 0.001 "
+        help="The asymmetry parameter for the AsLS method. It is typically between 0.001 "
         "and 0.1. 0.001 gives almost the same fit as the unconstrained least squares",
     ).tag(config=True)
 
@@ -201,12 +201,12 @@ The others models do not require the `ranges` parameter to be provided:
 
     tol = tr.Float(
         default_value=1e-3,
-        help="The tolerance parameter for the ALS method. Smaller values make the "
+        help="The tolerance parameter for the AsLS method. Smaller values make the "
         "fitting better but potentially increases the number of iterations and the "
         "running time. Values should be in the range (0, 1).",
     ).tag(config=True)
 
-    max_iter = tr.Integer(50, help="Maximum number of :term:`ALS` iteration.").tag(
+    max_iter = tr.Integer(50, help="Maximum number of :term:`AsLS` iteration.").tag(
         config=True
     )
     n_components = tr.Integer(
@@ -334,7 +334,7 @@ baseline/trends for different segments of the data.
             return
 
         if self.model not in ["polynomial", "pchip", "abc"]:
-            # such as detrend, or als we work on the full data so range is the
+            # such as detrend, or asls we work on the full data so range is the
             # full feature range.
             self._X_ranges = X.copy()
             return
@@ -477,12 +477,12 @@ baseline/trends for different segments of the data.
             _store = Y[:, ::-1] if self._X.x.is_descendant else Y
 
         # ------------------------
-        # ALS baseline correction
+        # AsLS baseline correction
         # ------------------------
         # see
         # https://stackoverflow.com/questions/29156532/python-baseline-correction-library
-        elif self.model == "als":
-            # ALS fitted baseline
+        elif self.model == "asls":
+            # AsLS fitted baseline
             # For now, this doesn't work with masked data
             mu = self.mu
             p = self.asymmetry
@@ -559,7 +559,7 @@ baseline/trends for different segments of the data.
         # Set X
         # -----
         X = X.copy()
-        if self.model == "als":  # ALS doesn't work with masked data (see _fit)
+        if self.model == "asls":  # AsLS doesn't work with masked data (see _fit)
             # so we will remove the mask and restore it after the fit
             self.Xmasked = X.copy()
             X.remove_masks()
@@ -635,7 +635,7 @@ baseline/trends for different segments of the data.
 
     def transform(self):
         """Return a dataset with baseline removed."""
-        if self.model == "als" and hasattr(self, "Xmasked"):
+        if self.model == "asls" and hasattr(self, "Xmasked"):
             corrected = self.Xmasked - self.baseline
         else:
             corrected = self.X - self.baseline
@@ -793,7 +793,7 @@ def detrend(dataset, order="linear", breakpoints=[], **kwargs):
 
 
 @_docstring.dedent
-def als(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
+def asls(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     """
     Asymmetric Least Squares Smoothing baseline correction.
 
@@ -804,15 +804,15 @@ def als(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     dataset : `NDDataset`
         The input data.
     mu : `float`, optional, default:1e5
-        The smoothness parameter for the ALS method. Larger values make the
+        The smoothness parameter for the AsLS method. Larger values make the
         baseline stiffer. Values should be in the range (0, 1e9)
     asymmetry : `float`, optional, default:0.05,
-        The asymmetry parameter for the ALS method. It is typically between 0.001
+        The asymmetry parameter for the AsLS method. It is typically between 0.001
         and 0.1. 0.001 gives almost the same fit as the unconstrained least squares.
     tol = `float`, optional, default:1e-3
-        The tolerance parameter for the ALS method. Smaller values make the fitting better but potentially increases the number of iterations and the running time. Values should be in the range (0, 1).
+        The tolerance parameter for the AsLS method. Smaller values make the fitting better but potentially increases the number of iterations and the running time. Values should be in the range (0, 1).
     max_iter = `int`, optional, default:50
-        Maximum number of :term:`ALS` iteration.
+        Maximum number of :term:`AsLS` iteration.
 
     Returns
     -------
@@ -824,7 +824,7 @@ def als(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     %(Baseline.see_also.no_als)s
     """
     blc = Baseline()
-    blc.model = "als"
+    blc.model = "asls"
     blc.asymmetry = asymmetry
     blc.tol = tol
     blc.max_iter = max_iter

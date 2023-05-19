@@ -38,9 +38,9 @@ def test_preprocessing_baseline(IR_dataset_2D):
     baseline.plot(clear=False, color="r")
     scp.show()
 
-    # als process
+    # asls process
     blc = Baseline(log_level="INFO")
-    blc.model = "als"
+    blc.model = "asls"
     blc.mu = 0.5 * 10**9
     blc.asymmetry = 0.001
     blc.fit(dataset)
@@ -64,9 +64,9 @@ def test_preprocessing_baseline(IR_dataset_2D):
     baseline.plot(clear=False, color="r")
     scp.show()
 
-    # als process with mask
+    # asls process with mask
     blc = Baseline(log_level="INFO")
-    blc.model = "als"
+    blc.model = "asls"
     blc.mu = 0.5 * 10**9
     blc.asymmetry = 0.001
     blc.fit(dataset)
@@ -162,15 +162,15 @@ def test_ab_nmr(NMR_dataset_1D):
     show()
 
 
-def test_baseline_sequential_als(IR_dataset_2D):
-    # test ALS in sequential mode on a 2D spectra dataset
+def test_baseline_sequential_asls(IR_dataset_2D):
+    # test AsLS in sequential mode on a 2D spectra dataset
 
     blc = scp.Baseline(
         log_level="INFO",
     )
 
     blc.multivariate = False  # use a sequential baseline correction approach
-    blc.model = "als"  # use a als model
+    blc.model = "asls"  # use a asls model
     blc.mu = 10**8  # set the regularization parameter mu (smoothness)
     blc.asymmetry = 0.002
 
