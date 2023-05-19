@@ -182,7 +182,7 @@ class Coord(NDMath, NDArray):
         # specific case of NMR (initialize unit context NMR)
         larmor = kwargs.pop("larmor", None)
 
-        self._linearize_below = kwargs.pop("linearize_below", False)
+        self._linearize_below = kwargs.pop("linearize_below", 0.1)
 
         # extract parameters for linearization and data rounding
         self._sigdigits = kwargs.pop("sigdigits", 4)
