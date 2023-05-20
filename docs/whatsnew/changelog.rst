@@ -30,6 +30,7 @@ Bug fixes
 
 * Issue #643. Conversion from linear to non linear coord was not working properly.
   This was due to the use of the LinearCoord class which is now deprecated and replaced by Coord.
+* File logging has been removed due to its bad impact on the performance.
 
 .. section
 
