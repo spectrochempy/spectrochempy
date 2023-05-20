@@ -29,12 +29,8 @@ import numpy as np
 import requests
 import traitlets as tr
 from IPython import get_ipython
-from IPython.core.error import UsageError
 from IPython.core.interactiveshell import InteractiveShell
-from IPython.core.magic import Magics, line_cell_magic, magics_class
-from IPython.core.magics.code import extract_symbols
 from IPython.display import clear_output, publish_display_data
-from IPython.utils.text import get_text_list
 from jinja2 import Template
 from pkg_resources import DistributionNotFound, get_distribution
 from setuptools_scm import get_version
@@ -42,8 +38,9 @@ from traitlets.config.application import Application
 from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
 
+from spectrochempy.application.datadir import DataDir
 from spectrochempy.application.general_preferences import GeneralPreferences
-from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.file import find_or_create_spectrochempy_dir, pathclean
 
 # ======================================================================================
 # Setup
@@ -220,18 +217,6 @@ cite = (
 # Directories
 
 
-def _find_or_create_spectrochempy_dir():
-    directory = Path.home() / ".spectrochempy"
-
-    directory.mkdir(exist_ok=True)  # Create directory only if it does not exist
-
-    if directory.is_file():  # pragma: no cover
-        msg = "Intended SpectroChemPy directory `{0}` is actually a file."
-        raise IOError(msg.format(directory))
-
-    return directory
-
-
 def _get_config_dir():
     """
     Determines the SpectroChemPy configuration directory name and
@@ -257,217 +242,11 @@ def _get_config_dir():
     if scp is not None and Path(scp).exists():
         return Path(scp)
 
-    config = _find_or_create_spectrochempy_dir() / "config"
+    config = find_or_create_spectrochempy_dir() / "config"
     if not config.exists():
         config.mkdir(exist_ok=True)
 
     return config
-
-
-# ======================================================================================
-# Magic ipython function
-# ======================================================================================
-@magics_class
-class SpectroChemPyMagics(Magics):
-    """
-    This class implements the addscript ipython magic function.
-    """
-
-    @line_cell_magic
-    def addscript(self, pars="", cell=None):
-        """
-        This works both as **%addscript** and as **%%addscript**.
-
-        This magic command can either take a local filename, element in the
-        namespace or history range (see %history),
-        or the current cell content.
-
-
-        Usage:
-
-            %addscript  -p project  n1-n2 n3-n4 ... n5 .. n6 ...
-
-            or
-
-            %%addscript -p project
-            ...code lines ...
-
-
-        Options:
-
-            -p <string>         Name of the project where the script will be stored.
-                                If not provided, a project with a standard
-                                name : `proj` is searched.
-            -o <string>         script name.
-            -s <symbols>        Specify function or classes to load from python
-                                source.
-            -a                  append to the current script instead of
-                                overwriting it.
-            -n                  Search symbol in the current namespace.
-
-
-        Examples
-        --------
-
-        .. sourcecode:: ipython
-
-           In[1]: %addscript myscript.py
-
-           In[2]: %addscript 7-27
-
-           In[3]: %addscript -s MyClass,myfunction myscript.py
-           In[4]: %addscript MyClass
-
-           In[5]: %addscript mymodule.myfunction
-        """
-        opts, args = self.parse_options(pars, "p:o:s:n:a")
-
-        # append = 'a' in opts
-        # mode = 'a' if append else 'w'
-        search_ns = "n" in opts
-
-        if not args and not cell and not search_ns:  # pragma: no cover
-            raise UsageError(
-                "Missing filename, input history range, "
-                "or element in the user namespace.\n "
-                "If no argument are given then the cell content "
-                "should "
-                "not be empty"
-            )
-        name = "script"
-        if "o" in opts:
-            name = opts["o"]
-
-        proj = "proj"
-        if "p" in opts:
-            proj = opts["p"]
-        if proj not in self.shell.user_ns:  # pragma: no cover
-            raise ValueError(
-                f"Cannot find any project with name `{proj}` in the namespace."
-            )
-        # get the proj object
-        projobj = self.shell.user_ns[proj]
-
-        contents = ""
-        if search_ns:
-            contents += (
-                "\n" + self.shell.find_user_code(opts["n"], search_ns=search_ns) + "\n"
-            )
-
-        args = " ".join(args)
-        if args.strip():
-            contents += (
-                "\n" + self.shell.find_user_code(args, search_ns=search_ns) + "\n"
-            )
-
-        if "s" in opts:  # pragma: no cover
-            try:
-                blocks, not_found = extract_symbols(contents, opts["s"])
-            except SyntaxError:
-                # non python code
-                logging.error("Unable to parse the input as valid Python code")
-                return None
-
-            if len(not_found) == 1:
-                warnings.warn(f"The symbol `{not_found[0]}` was not found")
-            elif len(not_found) > 1:
-                sym = get_text_list(not_found, wrap_item_with="`")
-                warnings.warn(f"The symbols {sym} were not found")
-
-            contents = "\n".join(blocks)
-
-        if cell:
-            contents += "\n" + cell
-
-        # import delayed to avoid circular import error
-        from spectrochempy.core.script import Script
-
-        script = Script(name, content=contents)
-        projobj[name] = script
-
-        return f"Script {name} created."
-
-        # @line_magic  # def runscript(self, pars=''):  #     """  #  #  # """  #     opts,
-        # args = self.parse_options(pars, '')  #  #     if  # not args:  #         raise UsageError('Missing script
-        # name')  #  #  # return args
-
-
-# ======================================================================================
-# DataDir class
-# ======================================================================================
-class DataDir(tr.HasTraits):
-    """
-    A class used to determine the path to the testdata directory.
-    """
-
-    path = tr.Instance(Path)
-
-    @tr.default("path")
-    def _get_path_default(self, **kwargs):  # pragma: no cover
-        super().__init__(**kwargs)
-
-        # create a directory testdata in .spectrochempy to avoid an error if the following do not work
-        path = _find_or_create_spectrochempy_dir() / "testdata"
-        path.mkdir(exist_ok=True)
-
-        # try to use the conda installed testdata (spectrochempy_data package)
-        try:
-            conda_env = environ["CONDA_PREFIX"]
-            _path = Path(conda_env) / "share" / "spectrochempy_data" / "testdata"
-            if not _path.exists():
-                _path = (
-                    Path(conda_env) / "share" / "spectrochempy_data"
-                )  # depending on the version of spectrochempy_data
-            if _path.exists():
-                path = _path
-
-        except KeyError:
-            pass
-
-        return path
-
-    def listing(self):
-        """
-        Create a str representing a listing of the testdata folder.
-
-        Returns
-        -------
-        `str`
-            Display of the datadir content
-        """
-        strg = f"{self.path.name}\n"  # os.path.basename(self.path) + "\n"
-
-        def _listdir(strg, initial, nst):
-            nst += 1
-            for fil in pathclean(initial).glob(
-                "*"
-            ):  # glob.glob(os.path.join(initial, '*')):
-                filename = fil.name  # os.path.basename(f)
-                if filename.startswith("."):  # pragma: no cover
-                    continue
-                if (
-                    not filename.startswith("acqu")
-                    and not filename.startswith("pulse")
-                    and filename not in ["ser", "fid"]
-                ):
-                    strg += "   " * nst + f"|__{filename}\n"
-                if fil.is_dir():
-                    strg = _listdir(strg, fil, nst)
-            return strg
-
-        return _listdir(strg, self.path, -1)
-
-    @classmethod
-    def class_print_help(cls):
-        # to work with --help-all
-        """"""  # TODO: make some useful help
-
-    def __str__(self):
-        return self.listing()
-
-    def _repr_html_(self):  # pragma: no cover
-        # _repr_html is needed to output in notebooks
-        return self.listing().replace("\n", "<br/>").replace(" ", "&nbsp;")
 
 
 # ======================================================================================
@@ -888,11 +667,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             if environ.get("SCPY_TESTING", 0) == 0 and "pytest" not in sys.argv[0]:
                 # catch exception only when pytest is not running
                 sys.excepthook = self._catch_exceptions
-
-        # load our custom magic extensions
-        # --------------------------------------------------------------------
-        if ipy is not None:
-            ipy.register_magics(SpectroChemPyMagics)
 
     def reset_preferences(self):
         """

@@ -557,6 +557,18 @@ def get_filenames(*filenames, **kwargs):
         return filenames
 
 
+def find_or_create_spectrochempy_dir():
+    directory = Path.home() / ".spectrochempy"
+
+    directory.mkdir(exist_ok=True)  # Create directory only if it does not exist
+
+    if directory.is_file():  # pragma: no cover
+        msg = "Intended SpectroChemPy directory `{0}` is actually a file."
+        raise IOError(msg.format(directory))
+
+    return directory
+
+
 def get_directory_name(directory, **kwargs):
     """
     Return a valid directory name.
