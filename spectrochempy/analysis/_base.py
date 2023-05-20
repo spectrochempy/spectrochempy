@@ -637,9 +637,9 @@ class AnalysisConfigurable(MetaConfigurable):
         """
         Return ``log`` output.
         """
-        # A string handler (#2) is defined for the Spectrochempy logger,
+        # A string handler (#1) is defined for the Spectrochempy logger,
         # thus we will return it's content
-        return app.log.handlers[2].stream.getvalue().rstrip()
+        return app.log.handlers[1].stream.getvalue().rstrip()
 
     @property
     def X(self):

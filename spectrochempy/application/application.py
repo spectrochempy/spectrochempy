@@ -11,7 +11,6 @@ It also defines
 the default application preferences and IPython magic functions.
 """
 
-import inspect
 import io
 import json
 import logging
@@ -168,7 +167,6 @@ release_date = _get_release_date()
 # Testdata
 # --------------------------------------------------------------------------------------
 def _download_full_testdata_directory(datadir):
-
     # this process is relatively long, so we do not want to do it several time:
     downloaded = datadir / "__downloaded__"
     if downloaded.exists():
@@ -264,21 +262,6 @@ def _get_config_dir():
         config.mkdir(exist_ok=True)
 
     return config
-
-
-def _get_log_dir():
-
-    # first look for SCP_LOGS
-    logdir = environ.get("SCP_LOGS")
-
-    if logdir is not None and Path(logdir).exists():
-        return Path(logdir)
-
-    logdir = _find_or_create_spectrochempy_dir() / "logs"
-    if not logdir.exists():
-        logdir.mkdir(exist_ok=True)
-
-    return logdir
 
 
 # ======================================================================================
@@ -421,7 +404,6 @@ class DataDir(tr.HasTraits):
 
     @tr.default("path")
     def _get_path_default(self, **kwargs):  # pragma: no cover
-
         super().__init__(**kwargs)
 
         # create a directory testdata in .spectrochempy to avoid an error if the following do not work
@@ -625,13 +607,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     logging_config = tr.Dict(
         {
             "handlers": {
-                "rotatingfile": {
-                    "class": "logging.handlers.RotatingFileHandler",
-                    "level": "DEBUG",
-                    "filename": str(_get_log_dir() / "spectrochempy.log"),
-                    "maxBytes": 262144,
-                    "backupCount": 5,
-                },
                 "string": {
                     "class": "logging.StreamHandler",
                     "formatter": "console",
@@ -642,7 +617,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             "loggers": {
                 "SpectroChemPy": {
                     "level": "DEBUG",
-                    "handlers": ["console", "rotatingfile", "string"],
+                    "handlers": ["console", "string"],
                 },
             },
         }
@@ -706,7 +681,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     # Initialisation of the application
     # ----------------------------------------------------------------------------------
     def __init__(self, **kwargs):
-
         super().__init__(**kwargs)
         self.debug_("*" * 40)
         self.initialize()
@@ -744,14 +718,12 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         self, message, category, filename, lineno, file=None, line=None
     ):
         with self._fmtcontext():
-            self._formatter(message)
             self.log.warning(f"({category.__name__}) {message}")
 
     # ----------------------------------------------------------------------------------
     # Initialisation of the configurables
     # ----------------------------------------------------------------------------------
     def _init_all_preferences(self):
-
         # Get preferences from the config files
         # ---------------------------------------------------------------------
         if not self.config:
@@ -759,7 +731,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 
         configfiles = []
         if self.config_dir:
-
             lis = self.config_dir.iterdir()
             for fil in lis:
                 if fil.suffix == ".py":
@@ -987,19 +958,17 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 
     @contextmanager
     def _fmtcontext(self):
-        fmt = self.log_format, self.log.handlers[1].formatter
+        fmt = self.log_format
         try:
             yield fmt
         finally:
-            self.log_format = fmt[0]
-            self.log.handlers[1].setFormatter(fmt[1])
+            self.log_format = fmt
 
     def info_(self, msg, *args, **kwargs):
         """
         Formatted info message.
         """
         with self._fmtcontext():
-            self._formatter(msg)
             self.log.info(msg, *args, **kwargs)
 
     def debug_(self, msg, *args, **kwargs):
@@ -1007,7 +976,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         Formatted debug message.
         """
         with self._fmtcontext():
-            self._formatter(msg)
             self.log.debug("DEBUG | " + msg, *args, **kwargs)
 
     def error_(self, *args, **kwargs):
@@ -1039,29 +1007,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         self._from_warning_ = True
         warnings.warn(msg, *args, **kwargs)
         self._from_warning_ = False
-
-    def _formatter(self, *args):
-        # We need a custom formatter (maybe there is a better way to do this suing
-        # the logging library directly?)
-
-        rootfolder = Path(__file__).parent
-        st = 2
-        if "_showwarnmsg" in inspect.stack()[2][3]:
-            st = 4 if self._from_warning_ else 3
-
-        filename = Path(inspect.stack()[st][1])
-        try:
-            module = filename.relative_to(rootfolder)
-        except ValueError:
-            module = filename
-        line = inspect.stack()[st][2]
-        func = inspect.stack()[st][3]
-
-        # rotatingfilehandler formatter (DEBUG)
-        formatter = logging.Formatter(
-            f"<%(asctime)s:{module}/{func}::{line}> %(message)s"
-        )
-        self.log.handlers[1].setFormatter(formatter)
 
     # ----------------------------------------------------------------------------------
     # Private methods
