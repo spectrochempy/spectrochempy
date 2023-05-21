@@ -434,6 +434,7 @@ baseline/trends for different segments of the data.
             else:
                 # multivariate SVD method
                 U, s, Vt = np.linalg.svd(Y, full_matrices=False, compute_uv=True)
+                T = U[:, 0:M] @ np.diag(s)[0:M, 0:M]
                 Y = Vt[0:M]
 
         # -----------------------------------------
@@ -529,10 +530,7 @@ baseline/trends for different segments of the data.
 
         # inverse transform to get the baseline in the original data space
         # this depends on the approach used (multivariate or not)
-        if self.multivariate and self.multivariate != "nmf":
-            T = U[:, 0:M] @ np.diag(s)[0:M, 0:M]
-            baseline = T @ _store
-        elif self.multivariate == "nmf":
+        if self.multivariate:
             baseline = T @ _store
         else:
             baseline = _store
