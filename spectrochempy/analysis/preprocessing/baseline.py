@@ -429,7 +429,8 @@ baseline/trends for different segments of the data.
                 from sklearn.decomposition import NMF
 
                 nmf = NMF(n_components=M, init="random", random_state=0)
-                Y = nmf.fit_transform(Y)
+                T = nmf.fit_transform(Y)
+                Y = nmf.components_
             else:
                 # multivariate SVD method
                 U, s, Vt = np.linalg.svd(Y, full_matrices=False, compute_uv=True)
@@ -528,11 +529,11 @@ baseline/trends for different segments of the data.
 
         # inverse transform to get the baseline in the original data space
         # this depends on the approach used (multivariate or not)
-        if self.multivariate or self.multivariate == "svd":
+        if self.multivariate and self.multivariate != "nmf":
             T = U[:, 0:M] @ np.diag(s)[0:M, 0:M]
             baseline = T @ _store
         elif self.multivariate == "nmf":
-            baseline = _store @ nmf.components_
+            baseline = T @ _store
         else:
             baseline = _store
 

@@ -124,7 +124,7 @@ def test_preprocessing_baseline(IR_dataset_2D):
     # nmf multivariate
     basc3.multivariate = "nmf"
     basc3.model = "polynomial"
-    basc3.order = "pchip"
+    basc3.order = 6
     basc3.n_components = 5
     basc3.fit(dataset)
 
@@ -132,7 +132,6 @@ def test_preprocessing_baseline(IR_dataset_2D):
     dataset[::10].plot(clear=False)
 
     basc3.transform().plot()
-    scp.show()
 
     # MS profiles, we want to make a baseline correction
     # on the ion current vs. time axis:
