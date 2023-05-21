@@ -36,7 +36,6 @@ def test_preprocessing_baseline(IR_dataset_2D):
     dataset.plot()
     corr.plot(clear=False, color="g")
     baseline.plot(clear=False, color="r")
-    scp.show()
 
     # asls process
     blc = Baseline(log_level="INFO")
@@ -50,7 +49,6 @@ def test_preprocessing_baseline(IR_dataset_2D):
     dataset.plot()
     corr.plot(clear=False, color="g")
     baseline.plot(clear=False, color="r")
-    scp.show()
 
     # with mask on some wavenumbers
     dataset[882.0:1280.0] = scp.MASKED
@@ -62,7 +60,6 @@ def test_preprocessing_baseline(IR_dataset_2D):
     dataset.plot()
     corr.plot(clear=False, color="g")
     baseline.plot(clear=False, color="r")
-    scp.show()
 
     # asls process with mask
     blc = Baseline(log_level="INFO")
@@ -76,7 +73,6 @@ def test_preprocessing_baseline(IR_dataset_2D):
     dataset.plot()
     corr.plot(clear=False, color="g")
     baseline.plot(clear=False, color="r")
-    scp.show()
 
     # define a 2D test dataset (6 spectra)
     dataset = IR_dataset_2D[::10]
@@ -88,7 +84,8 @@ def test_preprocessing_baseline(IR_dataset_2D):
 
     # now define ranges and interpolation=pchip
     basc3.ranges = [[6000.0, 3500.0], [2200.0, 1500.0]]
-    basc3.model = "pchip"
+    basc3.model = "polynomial"
+    basc3.order = "pchip"
 
     # and fit again (for example, taking only the second spectra)
     basc3.fit(dataset[1])
@@ -100,7 +97,8 @@ def test_preprocessing_baseline(IR_dataset_2D):
 
     # multivariate
     basc3.multivariate = True
-    basc3.model = "pchip"
+    basc3.model = "polynomial"
+    basc3.order = "pchip"
     basc3.n_components = 5
 
     dataset = IR_dataset_2D
@@ -120,7 +118,18 @@ def test_preprocessing_baseline(IR_dataset_2D):
 
     basc3.baseline[::10].plot(cmap=None, color="r")
     dataset[::10].plot(clear=False)
-    scp.show()
+
+    basc3.transform().plot()
+
+    # nmf multivariate
+    basc3.multivariate = "nmf"
+    basc3.model = "polynomial"
+    basc3.order = "pchip"
+    basc3.n_components = 5
+    basc3.fit(dataset)
+
+    basc3.baseline[::10].plot(cmap=None, color="r")
+    dataset[::10].plot(clear=False)
 
     basc3.transform().plot()
     scp.show()
@@ -136,30 +145,6 @@ def test_preprocessing_baseline(IR_dataset_2D):
     blc.fit(msT)
     blc.corrected.plot()
     scp.show()
-
-
-@pytest.mark.skip()
-def test_ab_nmr(NMR_dataset_1D):
-    dataset = NMR_dataset_1D.copy()
-    dataset /= dataset.real.data.max()  # nromalize
-
-    dataset.em(10.0 * ur.Hz, inplace=True)
-    dataset = dataset.fft(tdeff=8192, size=2**15)
-    dataset = dataset[150.0:-150.0] + 1.0
-
-    dataset.plot()
-
-    transf = dataset.copy()
-    transfab = transf.ab(window=0.25)
-    transfab.plot(clear=False, color="r")
-
-    transf = dataset.copy()
-    base = transf.ab(mode="poly", dryrun=True)
-    transfab = transf - base
-    transfab.plot(xlim=(150, -150), clear=False, color="b")
-    base.plot(xlim=(150, -150), ylim=[-2, 10], clear=False, color="y")
-
-    show()
 
 
 def test_baseline_sequential_asls(IR_dataset_2D):
@@ -196,3 +181,27 @@ def test_baseline_sequential_asls(IR_dataset_2D):
 
     # it works but not very well adapted to a situation where the regularization
     # parameter mu and may be asymmetry should be adapted to each spectra.
+
+
+@pytest.mark.skip()
+def test_ab_nmr(NMR_dataset_1D):
+    dataset = NMR_dataset_1D.copy()
+    dataset /= dataset.real.data.max()  # nromalize
+
+    dataset.em(10.0 * ur.Hz, inplace=True)
+    dataset = dataset.fft(tdeff=8192, size=2**15)
+    dataset = dataset[150.0:-150.0] + 1.0
+
+    dataset.plot()
+
+    transf = dataset.copy()
+    transfab = transf.ab(window=0.25)
+    transfab.plot(clear=False, color="r")
+
+    transf = dataset.copy()
+    base = transf.ab(mode="poly", dryrun=True)
+    transfab = transf - base
+    transfab.plot(xlim=(150, -150), clear=False, color="b")
+    base.plot(xlim=(150, -150), ylim=[-2, 10], clear=False, color="y")
+
+    show()

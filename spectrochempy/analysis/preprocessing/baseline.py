@@ -92,7 +92,7 @@ class Baseline(AnalysisConfigurable):
 
     - The ``'multivariate'`` approach can only be applied to 2D datasets (at least 3
       observations).
-      The 2D dataset is first dimensional reduced into several principal
+      The 2D dataset is first dimensionally reduced into several principal
       components using a conventional Singular Value Decomposition :term:`SVD` or a non-negative matrix factorization (`NMF`).
       Each component is then fitted before an inverse transform performed to recover
       the baseline correction.
@@ -110,10 +110,7 @@ class Baseline(AnalysisConfigurable):
     - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
       (:cite:`ryan:1988`\ ).
     - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
-      the polynomial is defined by the ``order`` parameter. The baseline is then obtained by evaluating the
-      polynomial at each feature defined in predefined `ranges`\ .
-    - ``'pchip'`` : Fit a piecewise cubic Hermite interpolating polynomial (PCHIP) to
-      the data  (:cite:`fritsch:1980`\ ).
+      the polynomial is defined by the ``order`` parameter. The baseline is then obtained by evaluating the polynomial at each feature defined in predefined `ranges`\ .
 
     # TODO: complete this description
 
@@ -134,10 +131,14 @@ class Baseline(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------
-    multivariate = tr.Bool(
+    multivariate = tr.Union(
+        (tr.Bool(), tr.CaselessStrEnum(["nmf", "svd"])),
         default_value=False,
-        help="For 2D datasets, if `True`, a multivariate method is used to fit a "
-        "baseline on the principal components determined using a SVD decomposition"
+        help="For 2D datasets, if `True` or if multivariate='svd' or 'nmf' , a "
+        "multivariate method is used to fit a "
+        "baseline on the principal components determined using a SVD decomposition "
+        " if `multivariate='svd'`\ /`True` or a NMF factorization if "
+        "`multivariate='nmf'`\ ,"
         "followed by an inverse-transform to retrieve the baseline corrected "
         "dataset. If `False`, a sequential method is used which consists in fitting a "
         "baseline on each row (observations) of the dataset.",
@@ -148,12 +149,11 @@ class Baseline(AnalysisConfigurable):
         default_value="pchip",
         help="""The model used to determine the baseline.
 
-The following models are required that the `ranges` parameter is provided
+The following model requires that the `ranges` parameter is provided
 (see `ranges` parameter for more details):
 
 * 'polynomial': the baseline is determined by a nth-degree polynomial interpolation.
   It uses the `order` parameter to determine the degree of the polynomial.
-* 'pchip': the baseline is determined by a piecewise cubic hermite interpolation.
 
 The others models do not require the `ranges` parameter to be provided:
 
@@ -176,10 +176,14 @@ The others models do not require the `ranges` parameter to be provided:
     order = tr.Union(
         (
             tr.Integer(),
-            tr.CaselessStrEnum(["constant", "linear", "quadratic", "cubic"]),
+            tr.CaselessStrEnum(["constant", "linear", "quadratic", "cubic", "pchip"]),
         ),
-        default_value=6,
-        help="Polynom order to use for polynomial interpolation or detrend.",
+        default_value=1,
+        help="""Polynom order to use for polynomial/pchip interpolation or detrend.
+        * If an integer id provided, it is the order of the polynom to fit, "
+        * If a string if provided among  constant', 'linear', 'quadratic' and 'cubic',
+          it is equivalent to order O (constant) to 3 (cubic).
+        * If a string equal to `pchip` is provided, the polynomial interpolation is replaced by a piecewise cubic hermite interpolation (see `scipy.interpolate.PchipInterpolator`\ """,
     ).tag(config=True, min=1)
 
     mu = tr.Float(
@@ -287,7 +291,7 @@ baseline/trends for different segments of the data.
     def _validate_order(self, proposal):
         # order provided as string must be transformed to int
         order = proposal.value
-        if isinstance(order, str):
+        if isinstance(order, str) and order != "pchip":
             order = {"constant": 0, "linear": 1, "quadratic": 2, "cubic": 3}[
                 order.lower()
             ]
@@ -333,7 +337,7 @@ baseline/trends for different segments of the data.
             # nothing to do
             return
 
-        if self.model not in ["polynomial", "pchip", "abc"]:
+        if self.model not in ["polynomial", "abc"]:
             # such as detrend, or asls we work on the full data so range is the
             # full feature range.
             self._X_ranges = X.copy()
@@ -417,17 +421,24 @@ baseline/trends for different segments of the data.
         if not self.multivariate:
             # sequential method
             _store = np.zeros((M, N))
-        else:  # TODO: NMF factorization too
-            # multivariate method
-            U, s, Vt = np.linalg.svd(Y, full_matrices=False, compute_uv=True)
+        else:
             M = self.n_components
-            Y = Vt[0:M]
             _store = np.zeros((M, N))
+            if self.multivariate == "nmf":
+                # mutivariate NMF factorization
+                from sklearn.decomposition import NMF
+
+                nmf = NMF(n_components=M, init="random", random_state=0)
+                Y = nmf.fit_transform(Y)
+            else:
+                # multivariate SVD method
+                U, s, Vt = np.linalg.svd(Y, full_matrices=False, compute_uv=True)
+                Y = Vt[0:M]
 
         # -----------------------------------------
         # Polynomial interpolation, detrend or abc
         # -----------------------------------------
-        if self.model in ["polynomial", "detrend", "abc"]:
+        if self.model in ["polynomial", "detrend", "abc"] and self.order != "pchip":
             # polynomial interpolation or detrend process
             # using parameter `order` and predetermined ranges
             polycoef = np.polynomial.polynomial.polyfit(
@@ -438,7 +449,7 @@ baseline/trends for different segments of the data.
         # -------------------------------------------------------------------------
         # PChip interpolation (piecewise cubic hermite interpolation) using ranges
         # -------------------------------------------------------------------------
-        elif self.model == "pchip":
+        elif self.model == "polynomial" and self.order == "pchip":
             # pchip interpolation
             for i in range(M):
                 interp = scipy.interpolate.PchipInterpolator(xbase, Y[i])
@@ -517,9 +528,11 @@ baseline/trends for different segments of the data.
 
         # inverse transform to get the baseline in the original data space
         # this depends on the approach used (multivariate or not)
-        if self.multivariate:
+        if self.multivariate or self.multivariate == "svd":
             T = U[:, 0:M] @ np.diag(s)[0:M, 0:M]
             baseline = T @ _store
+        elif self.multivariate == "nmf":
+            baseline = _store @ nmf.components_
         else:
             baseline = _store
 
@@ -821,7 +834,7 @@ def asls(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
 
     See Also
     --------
-    %(Baseline.see_also.no_als)s
+    %(Baseline.see_also.no_asls)s
     """
     blc = Baseline()
     blc.model = "asls"

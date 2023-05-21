@@ -44,7 +44,7 @@ _ = ndp.plot()
 
 
 # %%
-# Remove a basic linear baseline using `abc`
+# Remove a basic linear baseline using `abc`:
 
 ndp = ndp.abc()
 
@@ -65,7 +65,8 @@ _ = ndp.plot()
 blc = scp.Baseline(
     log_level="INFO",
     multivariate=True,  # use a multivariate baseline correction approach
-    model="pchip",  # use a pchip interpolation model
+    model="polynomial",  # use a polynomial model
+    order="pchip",  # with a pchip interpolation method
     n_components=5,
 )
 
@@ -118,11 +119,19 @@ _ = ndp[10].plot(clear=False, color="green", ls="--")
 # The baseline correction looks ok in some part of the spectra
 # but not in others where the variation seems a little to rigid.
 # This is may be due to the fact that the `pchip` interpolation
-# model is perhaps not the best choice for this dataset. We can try to use a
-# `polynomial` model instead:
+# is perhaps not the best choice for this dataset. We can try to use a
+# n-th degree `polynomial` model instead:
+
+# %%
+# We don't need to redefine a new Baseline object, we can just change
+# the model and the order of the polynomial:
 
 blc.model = "polynomial"
-blc.order = 5
+blc.order = 5  # use a 5th degree polynomial
+
+# %%
+# and fit again the baseline correction model to the data:
+
 blc.fit(ndp)
 
 baseline = blc.baseline
@@ -141,7 +150,6 @@ _ = corrected.plot()
 
 # %%
 # This looks better and smoother. But not perfect.
-
 
 # %%
 # We can also try to use a `asls` (Asymmetric Least Squares) model
