@@ -103,6 +103,13 @@ corrected = blc.corrected
 _ = corrected.plot()
 
 # %%
+# We can have a more detailled representation using plotmerit
+
+# %%
+ax = blc.plotmerit(nb_traces=2, offset=50)
+blc.show_regions(ax)
+
+# %%
 # We can also plot the baseline and the corrected dataset together:
 # for some individual spectra to, for example, check the quality of the
 # correction:

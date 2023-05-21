@@ -27,6 +27,7 @@ from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
+from spectrochempy.utils.plots import NBlue, NGreen, NRed
 from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = [
@@ -687,6 +688,74 @@ baseline/trends for different segments of the data.
             range.sort()
             sp = ax.axvspan(range[0], range[1], facecolor="#2ca02c", alpha=0.5)
             # self._sps.append(sp)
+
+    # ----------------------------------------------------------------------------------
+    # Plot methods
+    # ----------------------------------------------------------------------------------
+    @_docstring.dedent
+    def plotmerit(self, **kwargs):
+        r"""
+        Plot the original, baseline and corrected dataset.
+
+        Parameters
+        ----------
+        %(kwargs)s
+
+        Returns
+        -------
+        `~matplotlib.axes.Axes`
+            Matplotlib subplot axe.
+
+        Other Parameters
+        ----------------
+        colors : `tuple` or `~numpy.ndarray` of 3 colors, optional
+            Colors for original , baseline and corrected data.
+            in the case of 2D, The default colormap is used for the original data.
+            By default, the three colors are :const:`NBlue` , :const:`NGreen`
+            and :const:`NRed`  (which are colorblind friendly).
+        offset : `float`, optional, default: `None`
+            Specify the separation (in percent) between the
+            original and corrected data.
+        nb_traces : `int` or ``'all'``\ , optional
+            Number of lines to display. Default is ``'all'``\ .
+        **others : Other keywords parameters
+            Parameters passed to the internal `plot` method of the datasets.
+        """
+        colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
+
+        X = self.X  # we need to use self.X here not self._X because the mask
+        # are restored automatically
+        Xc = self.transform()
+        bas = self.baseline
+
+        if X._squeeze_ndim == 1:
+            X = X.squeeze()
+            Xc = Xc.squeeze()
+            bas = bas.squeeze()
+
+        # Number of traces to keep
+        nb_traces = kwargs.pop("nb_traces", "all")
+        if X.ndim == 2 and nb_traces != "all":
+            inc = int(X.shape[0] / nb_traces)
+            X = X[::inc]
+            Xc = Xc[::inc]
+            bas = bas[::inc]
+
+        # separation between traces
+        offset = kwargs.pop("offset", None)
+        if offset is None:
+            offset = 0
+        ma = max(X.max(), Xc.max())
+        mao = ma * offset / 100
+        _ = (X - X.min()).plot(color=colX, **kwargs)
+        _ = (Xc - Xc.min() - mao).plot(
+            clear=False, ls="dashed", cmap=None, color=colXhat
+        )
+        ax = (bas - X.min()).plot(clear=False, cmap=None, color=colRes)
+        ax.autoscale(enable=True, axis="y")
+        ax.set_title(f"{self.name} plot of merit")
+        ax.yaxis.set_visible(False)
+        return ax
 
 
 # ======================================================================================
