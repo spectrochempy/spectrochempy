@@ -893,7 +893,6 @@ class NDArray(HasTraits):
         return strunits
 
     def _repr_value(self):
-
         numpyprintoptions(precision=4, edgeitems=0, spc=1, linewidth=120)
 
         prefix = type(self).__name__ + ": "
@@ -2069,9 +2068,8 @@ class NDArray(HasTraits):
 
             try:
                 # noinspection PyUnresolvedReferences
-                if new.meta.larmor:  # _origin in ['topspin', 'nmr']
-                    # noinspection PyUnresolvedReferences
-                    set_nmr_context(new.meta.larmor)
+                if new._implements("Coord") and new.larmor:
+                    set_nmr_context(new.larmor)
                     with ur.context("nmr"):
                         new = self._unittransform(new, units)
 
