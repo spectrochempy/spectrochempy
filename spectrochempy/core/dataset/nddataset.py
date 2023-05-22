@@ -224,7 +224,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     def __init__(
         self, data=None, coordset=None, coordunits=None, coordtitles=None, **kwargs
     ):
-
         super().__init__(data, **kwargs)
 
         self._created = datetime.utcnow()
@@ -320,7 +319,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         ] + NDIO().__dir__()
 
     def __getitem__(self, items, **kwargs):
-
         saveditems = items
 
         # coordinate selection to test first
@@ -378,24 +376,12 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     def __getattr__(self, item):
         # when the attribute was not found
         if (
-            item
+            item.startswith("_")
+            or item
             in [
-                "__numpy_ufunc__",
                 "interface",
-                "_pytestfixturefunction",
-                "__dataclass_fields__",
-                "_ipython_canary_method_should_not_exist_",
-                "_baseclass",
-                "_fill_value",
-                "_ax_lines",
-                "_axcb",
                 "clevels",
-                "__wrapped__",
                 "coords",
-                "__await__",
-                "__aiter__",
-                "__name__",
-                "__qualname__",
             ]
             or "_validate" in item
             or "_changed" in item
@@ -407,7 +393,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         # syntax such as ds.x, ds.y, etc...
 
         if item[0] in self.dims or self._coordset:
-
             # look also properties
             attribute = None
             index = 0
@@ -585,7 +570,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     @tr.observe(tr.All)
     def _anytrait_changed(self, change):
-
         # ex: change {
         #   'owner': object, # The HasTraits instance
         #   'new': 6, # The new value
@@ -706,7 +690,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             return
 
         for k, coord in enumerate(coords):
-
             if (
                 coord is not None
                 and not isinstance(coord, CoordSet)

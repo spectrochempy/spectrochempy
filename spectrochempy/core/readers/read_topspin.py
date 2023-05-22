@@ -786,7 +786,6 @@ def _read_topspin(*args, **kwargs):
     procs_files = _get_files(f_procno, "proc")
 
     if not processed:
-
         dic, data = read_fid(f_expno, acqus_files=acqus_files, procs_files=procs_files)
 
         # apply a -90 phase shift to be compatible with topspin
@@ -816,7 +815,6 @@ def _read_topspin(*args, **kwargs):
             data = _remove_digital_filter(dic, data)
 
     else:
-
         dic, datalist = read_pdata(
             f_procno,
             acqus_files=acqus_files,
@@ -871,14 +869,12 @@ def _read_topspin(*args, **kwargs):
     keys_units = dict(nmr_valid_meta)
 
     for item in keys:
-
         if item[:4] in ["acqu", "proc"]:
             dim = parmode
             if len(item) > 4 and item[4] in ["2", "3"]:
                 dim = parmode + 1 - int(item[4])
 
             for key in sorted(dic[item]):
-
                 if key.startswith("_") or key.lower() not in valid_keys:
                     continue
 
@@ -900,7 +896,6 @@ def _read_topspin(*args, **kwargs):
                     pass
 
         else:
-
             meta[item.lower()] = dic[item]
 
     # Warning: from now all parameter keys are lowercase.
@@ -1001,7 +996,7 @@ def _read_topspin(*args, **kwargs):
                 coordpoints * dw, title=f"F{axis + 1} acquisition time"
             )  # TODO: use AQSEQ for >2D data
 
-            coord.meta.larmor = meta.sfo1[axis]
+            coord.larmor = meta.sfo1[axis]
             coords.append(coord)
         else:
             size = meta.si[axis]
@@ -1011,7 +1006,7 @@ def _read_topspin(*args, **kwargs):
 
             coordpoints = np.arange(size) * deltaf + first
             coord = Coord(coordpoints)
-            coord.meta.larmor = meta.sfo1[axis]  # needed for ppm transformation
+            coord.larmor = meta.sfo1[axis]  # needed for ppm transformation
             coord.ito("ppm")
             if meta.nuc1 is not None:
                 nuc1 = meta.nuc1[axis]
