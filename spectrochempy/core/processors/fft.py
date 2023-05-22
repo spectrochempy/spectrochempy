@@ -32,7 +32,6 @@ from spectrochempy.utils.misc import (
 # ======================================================================================
 def _fft(data):
     if data.dtype == typequaternion:
-
         dr = get_component(data, "R")
         fr = np.fft.fftshift(np.fft.fft(dr), -1)
         di = get_component(data, "I")
@@ -49,7 +48,6 @@ def _fft(data):
 
 def _ifft(data):
     if data.dtype == typequaternion:
-
         fr = get_component(data, "R")
         dr = np.fft.ifft(np.fft.ifftshift(fr, -1))
         fi = get_component(data, "I")
@@ -66,7 +64,6 @@ def _ifft(data):
 
 def _fft_positive(data):
     if data.dtype == typequaternion:
-
         dr = get_component(data, "R")
         fr = np.fft.fftshift(np.fft.ifft(dr).astype(data.dtype)) * data.shape[-1]
         di = get_component(data, "I")
@@ -83,7 +80,6 @@ def _fft_positive(data):
 
 def _ifft_positive(data):
     if data.dtype == typequaternion:
-
         fr = get_component(data, "R")
         dr = np.fft.fft(np.fft.ifftshift(fr, -1)) * data.shape[-1]
         fi = get_component(data, "I")
@@ -256,7 +252,6 @@ def ifft(dataset, size=None, **kwargs):
 
 
 def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
-
     """
     Apply a complex fast fourier transform.
 
@@ -536,7 +531,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             newcoord.ito("us")
 
         if is_nmr and not inv:
-            newcoord.meta.larmor = bf1  # needed for ppm transformation
+            newcoord.larmor = bf1  # needed for ppm transformation
             ppm = kwargs.get("ppm", True)
             if ppm:
                 newcoord.ito("ppm")
