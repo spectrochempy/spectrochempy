@@ -13,7 +13,7 @@ NDDataset baseline correction
 ==============================
 
 In this example, we perform a baseline correction of a 2D NDDataset
-interactively, using the `multivariate` method and a `pchip`/'polynomial' interpolation.
+interactively, using the ``multivariate`` method and a ``pchip``\ /``polynomial`` interpolation.
 
 For comparison we also use the `asls`and. `snip`models.
 """
@@ -191,7 +191,7 @@ _ = corrected.plot()
 scp.show()
 
 # %%
-# Finall, we will use the snip model
+# Finally, we will use the snip model
 
 blc.multivariate = False  # use a sequential approach
 blc.model = "snip"

@@ -181,10 +181,11 @@ The others models do not require the `ranges` parameter to be provided:
         ),
         default_value=1,
         help="""Polynom order to use for polynomial/pchip interpolation or detrend.
-        * If an integer id provided, it is the order of the polynom to fit, "
-        * If a string if provided among  constant', 'linear', 'quadratic' and 'cubic',
-          it is equivalent to order O (constant) to 3 (cubic).
-        * If a string equal to `pchip` is provided, the polynomial interpolation is replaced by a piecewise cubic hermite interpolation (see `scipy.interpolate.PchipInterpolator`\ """,
+* If an integer id provided, it is the order of the polynom to fit, "
+* If a string if provided among  constant', 'linear', 'quadratic' and 'cubic',
+  it is equivalent to order O (constant) to 3 (cubic).
+* If a string equal to `pchip` is provided, the polynomial interpolation is replaced
+  by a piecewise cubic hermite interpolation (see `scipy.interpolate.PchipInterpolator`\ """,
     ).tag(config=True, min=1)
 
     mu = tr.Float(

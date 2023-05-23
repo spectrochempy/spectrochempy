@@ -58,8 +58,8 @@ blc.model = "detrend"
 
 # %%
 # Now we need to define the order of the detrending either as an integer giving the
-# degree of the polynomial trend or a string among {`constant`, `linear`, `quadratic`,
-# `cubic`}
+# degree of the polynomial trend or a string among {`constant`\ , `linear`\ , `quadratic`\ ,
+# `cubic`\ }
 blc.order = "linear"
 
 # %%
