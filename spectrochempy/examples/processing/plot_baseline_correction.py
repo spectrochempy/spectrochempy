@@ -44,9 +44,9 @@ _ = ndp.plot()
 
 
 # %%
-# Remove a basic linear baseline using `abc`:
+# Remove a basic linear baseline using `basc`:
 
-ndp = ndp.abc()
+ndp = ndp.basc()
 
 # %%
 # Make it positive

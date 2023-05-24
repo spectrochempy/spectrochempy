@@ -32,14 +32,8 @@
 # `Baseline`class processor - which allows performing all the implemented correction
 # operations with a maximum of flexibility and settings - or using equivalent
 # SpectroChemPy API or NDDataset methods which allow performing specific corrections
-# operations in slightly more straightforward way.
+# operations in a more direct way.
 #
-#
-# | API method | NDDataset method | Shord destcription
-# |---|---|
-# |`scp.basc(D, <options>)` | `D.basc(<options)` | general baseline correction |
-# |`scp.detrend(D, <options>)` | `D.detrend(<options>)` | remove constant, linear or polynomial trend |
-# | `scp.nips(A, <options>)` | scp.nips(A, <options>)` |
 # As prerequisite,
 # the user is expected to have read the [Import](../importexport/import.ipynb)
 # and [Import IR](../importexport/importIR.ipynb) tutorials.
@@ -121,7 +115,8 @@ _ = A3.plot()
 # %% [markdown]
 # #### Detrend independently on several data segment
 #
-# For this we must define a vector (`bp`) which contains the location of the break-points, which determine the limits of each segments.
+# For this we must define a vector (`bp`) which contains the location of the break-points,
+# which determine the limits of each segments.
 #
 # For example, let's try on a single spectrum for clarity:
 
@@ -155,19 +150,22 @@ ax = (R - R2).plot(clear=False, cmap=None, color="red", ls=":")
 _ = ax.set_ylim([-0.3, 0.8])
 
 # %% [markdown]
-# ### Automatic linear baseline correction `abc`
+# ### Automatic linear baseline correction
 #
-# When the baseline to remove is a simple linear correction, one can use `abc`.
-# This performs an automatic linear baseline correction. This is very close to detrend(), but use the spectra limit to fit the baseline. This is useful when the spectra limits are signal free.
+# When the baseline to remove is a simple linear correction, one can use `basc` without
+# enteroing any parameter. This performs an automatic linear baseline correction.
+# This is close to detrend(oreder=1), exceot that the linear baseline is fitted on the
+# the spectra limit to fit the baseline. This is useful when the spectra limits are
+# signal free.
 
 # %%
-Aa = A.abc()
+Aa = A.basc()
 _ = Aa.plot()
 
 # %%
 # with bp
 bp = [1300.0, 1856.0]  # warning must be float to set location, in int for indices
-R2 = R.abc(breakpoints=bp)
+R2 = R.basc(breakpoints=bp)
 _ = R.plot()
 R2.plot(clear=False)
 ax = (R - R2).plot(clear=False, cmap=None, color="red", ls=":")
@@ -234,7 +232,7 @@ _ = X.detrend(order=2).plot()
 # This performs an automatic baseline correction.
 
 # %%
-_ = scp.abc(X).plot()
+_ = scp.basc(X).plot()
 
 # %% [markdown]
 # ## Advanced baseline correction using the Baseline class processor
