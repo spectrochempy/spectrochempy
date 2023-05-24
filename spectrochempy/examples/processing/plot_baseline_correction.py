@@ -103,10 +103,10 @@ corrected = blc.corrected
 _ = corrected.plot()
 
 # %%
-# We can have a more detailled representation using plotmerit
+# We can have a more detailed representation using plot
 
 # %%
-ax = blc.plotmerit(nb_traces=2, offset=50)
+ax = blc.plot(nb_traces=2, offset=50)
 blc.show_regions(ax)
 
 # %%

@@ -839,7 +839,7 @@ def basc(dataset, *ranges, **kwargs):
 
     See Also
     --------
-    %(Baseline.see_also.no_baseline_correct)s
+    %(Baseline.see_also.no_basc)s
 
     Notes
     -----
