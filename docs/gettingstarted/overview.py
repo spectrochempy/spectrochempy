@@ -117,7 +117,8 @@ smoothed = region.smooth(window_length=51, window="hanning")
 blc = scp.Baseline()
 blc.ranges = [[2000.0, 2300.0], [3800.0, 3900.0]]
 blc.multivariate = True
-blc.model = "pchip"
+blc.model = "polynomial"
+blc.order = "pchip"
 blc.n_components = 5
 
 _ = blc.fit(smoothed)
