@@ -690,7 +690,7 @@ baseline/trends for different segments of the data.
     # Plot methods
     # ----------------------------------------------------------------------------------
     @_docstring.dedent
-    def plotmerit(self, **kwargs):
+    def plot(self, **kwargs):
         r"""
         Plot the original, baseline and corrected dataset.
 
