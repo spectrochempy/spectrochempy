@@ -32,7 +32,7 @@ from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = [
     "Baseline",
-    "abc",
+    "baseline",
     "basc",
     "detrend",
     "asls",
@@ -45,8 +45,8 @@ _common_see_also = """
 See Also
 --------
 Baseline : Manual baseline correction.
-basc : NDDataset method performing a baseline correction using the `Baseline` class.
-abc : NDDataset method performing an automatic baseline correction.
+baseline : NDDataset method computing a baseline using the `Baseline` class.
+basc : NDDataset method making a baseline correction using the `Baseline` class.
 asls : NDDataset method performing an Asymmetric Least Squares Smoothing baseline.
     correction.
 snip : NDDataset method performing a Simple Non-Iterative Peak (SNIP) detection
@@ -62,8 +62,8 @@ _docstring.get_sections(
     sections=["See Also"],
 )
 _docstring.delete_params("Baseline.see_also", "Baseline")
+_docstring.delete_params("Baseline.see_also", "baseline")
 _docstring.delete_params("Baseline.see_also", "basc")
-_docstring.delete_params("Baseline.see_also", "abc")
 _docstring.delete_params("Baseline.see_also", "asls")
 _docstring.delete_params("Baseline.see_also", "snip")
 _docstring.delete_params("Baseline.see_also", "autosub")
@@ -101,8 +101,6 @@ class Baseline(AnalysisConfigurable):
     In both approaches, various models can be used to estimate the
     baseline.
 
-    - ``'abc'`` : A linear baseline is automatically subtracted using the feature limit
-      for reference.
     - ``'detrend'`` : remove trends from data. Depending on the ``order`` parameter,
       the detrend can be constant (mean removal), linear (order=1), quadratic (order=2)
       or `cubic`(order=3).
@@ -111,7 +109,12 @@ class Baseline(AnalysisConfigurable):
     - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
       (:cite:`ryan:1988`\ ).
     - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
-      the polynomial is defined by the ``order`` parameter. The baseline is then obtained by evaluating the polynomial at each feature defined in predefined `ranges`\ .
+      the polynomial is defined by the ``order`` parameter. The baseline is then
+      obtained by evaluating the polynomial at each feature defined in predefined
+      `ranges`\ .
+
+    By default, `ranges` is set to the feature limits (i.e. `ranges=features[0], features[-1]`)
+    `model='polynomial'` and `order=1`.
 
     # TODO: complete this description
 
@@ -146,23 +149,18 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True)
 
     model = tr.CaselessStrEnum(
-        ["polynomial", "pchip", "abc", "detrend", "asls", "snip"],
-        default_value="pchip",
+        ["polynomial", "detrend", "asls", "snip"],
+        default_value="polynomial",
         help="""The model used to determine the baseline.
 
-The following model requires that the `ranges` parameter is provided
-(see `ranges` parameter for more details):
-
-* 'polynomial': the baseline is determined by a nth-degree polynomial interpolation.
-  It uses the `order` parameter to determine the degree of the polynomial.
-
-The others models do not require the `ranges` parameter to be provided:
-
-* 'detrend': the baseline is determined by a constant, linear or polynomial
-  trend removal. The order of the trend is determined by the `order` parameter.
+* 'polynomial': the baseline correction is determined by a nth-degree polynomial
+  fitted on the data belonging to the selected `ranges`. The `order` parameter
+  to determine the degree of the polynomial.
+* 'detrend': removes a constant, linear or polynomial trend to the data. The order of
+  the trend is determined by the `order` parameter.
 * 'asls': the baseline is determined by an asymmetric least square algorithm.
 * 'snip': the baseline is determined by a simple non-iterative peak detection
-  algorithm (for th).
+  algorithm.
 """,
     ).tag(config=True)
 
@@ -181,8 +179,8 @@ The others models do not require the `ranges` parameter to be provided:
         ),
         default_value=1,
         help="""Polynom order to use for polynomial/pchip interpolation or detrend.
-* If an integer id provided, it is the order of the polynom to fit, "
-* If a string if provided among  constant', 'linear', 'quadratic' and 'cubic',
+* If an integer is provided, it is the order of the polynom to fit, "
+* If a string if provided among  'constant', 'linear', 'quadratic' and 'cubic',
   it is equivalent to order O (constant) to 3 (cubic).
 * If a string equal to `pchip` is provided, the polynomial interpolation is replaced
   by a piecewise cubic hermite interpolation (see `scipy.interpolate.PchipInterpolator`\ """,
@@ -339,7 +337,9 @@ baseline/trends for different segments of the data.
             # nothing to do
             return
 
-        if self.model not in ["polynomial", "abc"]:
+        if self.model not in [
+            "polynomial",
+        ]:
             # such as detrend, or asls we work on the full data so range is the
             # full feature range.
             self._X_ranges = X.copy()
@@ -358,11 +358,7 @@ baseline/trends for different segments of the data.
             lastcoord = X.coordset[X.dims[-1]]  # we have to take into account the
             # possibility of transposed data, so we can't use directly X.x
             x = lastcoord.data
-            if self.model != "abc":
-                ranges += [[x[0], x[2]], [x[-3], x[-1]]]
-            else:
-                r = (x[-1] - x[-1]) * 0.05
-                ranges += [[x[0], x[0] + r], [x[-1] - r, x[-1]]]
+            ranges += [[x[0], x[2]], [x[-3], x[-1]]]
 
         if self.breakpoints:
             # we should also include breakpoints in the ranges
@@ -396,7 +392,7 @@ baseline/trends for different segments of the data.
 
     def _fit(self, xbase, ybase, Xpart):
         # core _fit method:
-        # calculate the baseline according to the current approch and model
+        # calculate the baseline according to the current approach and model
 
         # get the last coordinate of the dataset
         lastcoord = Xpart.coordset[Xpart.dims[-1]]
@@ -440,9 +436,9 @@ baseline/trends for different segments of the data.
                 Y = Vt[0:M]
 
         # -----------------------------------------
-        # Polynomial interpolation, detrend or abc
+        # Polynomial interpolation, detrend
         # -----------------------------------------
-        if self.model in ["polynomial", "detrend", "abc"] and self.order != "pchip":
+        if self.model in ["polynomial", "detrend"] and self.order != "pchip":
             # polynomial interpolation or detrend process
             # using parameter `order` and predetermined ranges
             polycoef = np.polynomial.polynomial.polyfit(
@@ -768,11 +764,12 @@ baseline/trends for different segments of the data.
 
 
 @_docstring.dedent
-def basc(dataset, *ranges, **kwargs):
+def baseline(dataset, *ranges, **kwargs):
     r"""
-    Compute a baseline correction using the Baseline class processor.
+    Compute a baseline using the Baseline class processor.
 
-    See `Baseline` for detailled information on the parameters.
+    If no ranges is provided, the features limits are used.
+    See `Baseline` for detailed information on the parameters.
 
     Parameters
     ----------
@@ -781,17 +778,17 @@ def basc(dataset, *ranges, **kwargs):
     *ranges : a variable number of pair-tuples
         The regions taken into account for the manual baseline correction.
     **kwargs
-        Optional keyword parameters (see `Baseline` Parameters for a detailled
+        Optional keyword parameters (see `Baseline` Parameters for a detailed
         information).
 
     Returns
     -------
     `NDDataset`
-        The baseline corrected dataset
+        The computed baseline
 
     See Also
     --------
-    %(Baseline.see_also.no_basc)s
+    %(Baseline.see_also.no_baseline)s
 
     Notes
     -----
@@ -800,12 +797,56 @@ def basc(dataset, *ranges, **kwargs):
     """
 
     blc = Baseline()
-    if ranges:
+
+    if ranges is not None:
         blc.ranges = ranges
+
     for key in kwargs:
         setattr(blc, key, kwargs[key])
+
+    if blc.ranges == [] and blc.order != 1:
+        raise ValueError(
+            f"As no ranges was provided, baseline() uses the features limit "
+            f"with order=1, but you provided order={blc.order}"
+        )
+
     blc.fit(dataset)
-    return blc.transform()
+    return blc.baseline
+
+
+@_docstring.dedent
+def basc(dataset, *ranges, **kwargs):
+    r"""
+    Compute a baseline using the Baseline class processor.
+
+    If no ranges is provided, the features limits are used.
+    See `Baseline` for detailed information on the parameters.
+
+    Parameters
+    ----------
+    dataset : a `NDDataset` instance
+        The dataset where to correcty the baseline.
+    *ranges : a variable number of pair-tuples
+        The regions taken into account for the manual baseline correction.
+    **kwargs
+        Optional keyword parameters (see `Baseline` Parameters for a detailed
+        information).
+
+    Returns
+    -------
+    `NDDataset`
+        The computed baseline
+
+    See Also
+    --------
+    %(Baseline.see_also.no_baseline_correct)s
+
+    Notes
+    -----
+    For more flexibility and functionality, it is advised to use the Baseline class
+    processor instead.
+    """
+    return dataset - baseline(dataset, *ranges, **kwargs)
 
 
 @_docstring.dedent
@@ -941,41 +982,6 @@ def snip(dataset, snip_width=50):
     blc = Baseline()
     blc.model = "snip"
     blc.snip_width = snip_width
-    blc.fit(dataset)
-
-    return blc.transform()
-
-
-@_docstring.dedent
-def abc(dataset, model="linear", breakpoints=[]):
-    """
-    Automatic baseline correction.
-
-    Parameters
-    ----------
-    dataset : `NDDataset`
-        The input data.
-    model : `str`, optional, default: 'linear'
-        The baseline correction model to use. Available models are:
-
-        * ``'linear'``: linear baseline correction using the limits of the dataset.
-
-    See Also
-    --------
-    %(Baseline.see_also.no_abc)s
-
-    # TODO add other methods
-    """
-
-    blc = Baseline()
-    blc.model = "abc"
-    blc.breakpoints = breakpoints
-    if model == "linear":
-        blc.ranges = []
-        blc.include_limits = True
-        blc.order = 1
-    else:
-        raise ValueError(f"Unknown model {model}")
     blc.fit(dataset)
 
     return blc.transform()

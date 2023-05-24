@@ -28,14 +28,21 @@
 # %% [markdown]
 # # Baseline corrections
 #
-# This tutorial shows how to make baseline corrections with **SpectroChemPy** using the `Baseline`class processor or equivalent API or dataset methods.
+# This tutorial shows how to make baseline corrections with **SpectroChemPy** using the
+# `Baseline`class processor - which allows performing all the implemented correction
+# operations with a maximum of flexibility and settings - or using equivalent
+# SpectroChemPy API or NDDataset methods which allow performing specific corrections
+# operations in slightly more straightforward way.
 #
+#
+# | API method | NDDataset method | Shord destcription
+# |---|---|
+# |`scp.basc(D, <options>)` | `D.basc(<options)` | general baseline correction |
+# |`scp.detrend(D, <options>)` | `D.detrend(<options>)` | remove constant, linear or polynomial trend |
+# | `scp.nips(A, <options>)` | scp.nips(A, <options>)` |
 # As prerequisite,
 # the user is expected to have read the [Import](../importexport/import.ipynb)
 # and [Import IR](../importexport/importIR.ipynb) tutorials.
-
-# %% [markdown]
-# Spectrochempy offers two approaches to perform baseline corrections. The first one is to use methods of the NDDataset object directly or via the SpectroChemPy API. The second one is the use of a Baseline object which allows to perform all the correction operations with a maximum of flexibility and settings.
 
 # %% [markdown]
 # ## Baseline correction using NDDataset or API methods
@@ -49,7 +56,8 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# As an example, we can use a dataset consisting of 80 samples of corn measured on a NIR spectrometers. This dataset (and others) can be loaded from http://www.eigenvector.com.
+# As an example, we can use a dataset consisting of 80 samples of corn measured on a NIR
+# spectrometer. This dataset (and others) can be loaded from http://www.eigenvector.com.
 
 # %%
 A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")[4]
@@ -75,7 +83,8 @@ _ = A.plot()
 # %% [markdown]
 # ### Detrending
 #
-# It is quite clear that this spectrum series has an increasing trend with both a vertical shift and a drift.
+# It is quite clear that this spectrum series has an increasing trend with both a
+# vertical shift and a drift.
 #
 # The `detrend` method can help to remove such trends.
 
@@ -117,7 +126,7 @@ _ = A3.plot()
 # For example, let's try on a single spectrum for clarity:
 
 # %%
-# without bp
+# without breakpoint
 R = A[0]
 R1 = R.detrend()
 
