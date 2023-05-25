@@ -47,7 +47,7 @@ See Also
 Baseline : Manual baseline correction.
 baseline : NDDataset method computing a baseline using the `Baseline` class.
 basc : NDDataset method making a baseline correction using the `Baseline` class.
-asls : NDDataset method performing an Asymmetric Least Squares Smoothing baseline.
+asls : NDDataset method performing an Asymmetric Least Squares Smoothing baseline
     correction.
 snip : NDDataset method performing a Simple Non-Iterative Peak (SNIP) detection
     algorithm.
@@ -82,7 +82,7 @@ class Baseline(AnalysisConfigurable):
     Baseline Correction processor.
 
     The baseline correction can be applied to 1D datasets consisting in a single row
-    with :term:`n_features` or to a 2D dataset with shape (:term:`n_observation`,
+    with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`\ ,
     :term:`n_features`\ ).
 
     When dealing with 2D datasets, the baseline correction can be applied either sequentially (default) or using a multivariate approach (parameter
@@ -94,7 +94,7 @@ class Baseline(AnalysisConfigurable):
     - The ``'multivariate'`` approach can only be applied to 2D datasets (at least 3
       observations).
       The 2D dataset is first dimensionally reduced into several principal
-      components using a conventional Singular Value Decomposition :term:`SVD` or a non-negative matrix factorization (`NMF`).
+      components using a conventional Singular Value Decomposition :term:`SVD` or a non-negative matrix factorization (`NMF`\ ).
       Each component is then fitted before an inverse transform performed to recover
       the baseline correction.
 
@@ -113,10 +113,8 @@ class Baseline(AnalysisConfigurable):
       obtained by evaluating the polynomial at each feature defined in predefined
       `ranges`\ .
 
-    By default, `ranges` is set to the feature limits (i.e. `ranges=features[0], features[-1]`)
-    `model='polynomial'` and `order=1`.
-
-    # TODO: complete this description
+    By default, `ranges` is set to the feature limits (i.e. `ranges=[features[0], features[-1]]`)
+    `model='polynomial'` and `order=1`\ .
 
     Parameters
     ----------
@@ -607,7 +605,7 @@ baseline/trends for different segments of the data.
         # sort and remove duplicates
         bplist = sorted(list(set(bplist)))
 
-        # # loop on breakpoints pairs
+        # loop on breakpoints pairs
         baseline = np.zeros_like(self._X.data)
         istart = lastcoord.loc2index(bplist[0])
         ixstart = Xx.loc2index(bplist[0])
@@ -982,6 +980,40 @@ def snip(dataset, snip_width=50):
     blc = Baseline()
     blc.model = "snip"
     blc.snip_width = snip_width
+    blc.fit(dataset)
+
+    return blc.transform()
+
+
+@_docstring.dedent
+def abc(dataset, model="linear", breakpoints=[]):
+    """
+    Automatic baseline correction.
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The input data.
+    model : `str`\ , optional, default: 'linear'
+        The baseline correction model to use. Available models are:
+
+        * ``'linear'``\ : linear baseline correction using the limits of the dataset.
+
+    See Also
+    --------
+    %(Baseline.see_also.no_abc)s
+    """
+    # TODO add other methods
+
+    blc = Baseline()
+    blc.model = "abc"
+    blc.breakpoints = breakpoints
+    if model == "linear":
+        blc.ranges = []
+        blc.include_limits = True
+        blc.order = 1
+    else:
+        raise ValueError(f"Unknown model {model}")
     blc.fit(dataset)
 
     return blc.transform()
