@@ -625,6 +625,9 @@ baseline/trends for different segments of the data.
             baseline = baseline[..., ::-1]
             self._X.sort(inplace=True, descend=True)
 
+        if self.model == "asls":  # restore the mask
+            self._X._mask = self.Xmasked.mask
+
         self._outfit = (baseline, bplist)  # store the result
 
         # if the process was successful, _fitted is set to True so that other method
@@ -748,7 +751,7 @@ baseline/trends for different segments of the data.
         )
         ax = (bas - X.min()).plot(clear=False, cmap=None, color=colRes)
         ax.autoscale(enable=True, axis="y")
-        ax.set_title(f"{self.name} plot of merit")
+        ax.set_title(f"{self.name} plot")
         ax.yaxis.set_visible(False)
         return ax
 
@@ -795,18 +798,21 @@ def baseline(dataset, *ranges, **kwargs):
     """
 
     blc = Baseline()
-
-    if ranges is not None:
-        blc.ranges = ranges
-
+    # by default, model is 'polynomial' and order is 1.
+    # kwargs can overwrite these default values
     for key in kwargs:
         setattr(blc, key, kwargs[key])
 
-    if blc.ranges == [] and blc.order != 1:
-        raise ValueError(
-            f"As no ranges was provided, baseline() uses the features limit "
-            f"with order=1, but you provided order={blc.order}"
-        )
+    # if model is 'polynomial' and no ranges is provided, we use the features limits
+    # and order='linear'
+    if blc.model == "polynomial":
+        if not ranges and blc.order != 1:
+            warning_(
+                f"As no ranges was provided, baseline() uses the features limit "
+                f"with order='linear'. Provided order={blc.order} is ignored"
+            )
+            blc.order = "linear"
+        blc.ranges = ranges
 
     blc.fit(dataset)
     return blc.baseline
@@ -946,6 +952,7 @@ def asls(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     """
     blc = Baseline()
     blc.model = "asls"
+    blc.mu = mu
     blc.asymmetry = asymmetry
     blc.tol = tol
     blc.max_iter = max_iter
@@ -980,40 +987,6 @@ def snip(dataset, snip_width=50):
     blc = Baseline()
     blc.model = "snip"
     blc.snip_width = snip_width
-    blc.fit(dataset)
-
-    return blc.transform()
-
-
-@_docstring.dedent
-def abc(dataset, model="linear", breakpoints=[]):
-    """
-    Automatic baseline correction.
-
-    Parameters
-    ----------
-    dataset : `NDDataset`
-        The input data.
-    model : `str`\ , optional, default: 'linear'
-        The baseline correction model to use. Available models are:
-
-        * ``'linear'``\ : linear baseline correction using the limits of the dataset.
-
-    See Also
-    --------
-    %(Baseline.see_also.no_abc)s
-    """
-    # TODO add other methods
-
-    blc = Baseline()
-    blc.model = "abc"
-    blc.breakpoints = breakpoints
-    if model == "linear":
-        blc.ranges = []
-        blc.include_limits = True
-        blc.order = 1
-    else:
-        raise ValueError(f"Unknown model {model}")
     blc.fit(dataset)
 
     return blc.transform()

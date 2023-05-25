@@ -10,16 +10,10 @@ import os
 import pytest
 
 import spectrochempy as scp
-from spectrochempy import NDDataset
 from spectrochempy.analysis.preprocessing.baseline import Baseline
 from spectrochempy.core.units import ur
-
-# noinspection PyUnresolvedReferences
 from spectrochempy.utils.plots import show
-from spectrochempy.utils.testing import (
-    assert_dataset_almost_equal,
-    assert_dataset_equal,
-)
+from spectrochempy.utils.testing import assert_dataset_equal
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -180,6 +174,27 @@ def test_baseline_sequential_asls(IR_dataset_2D):
 
     # it works but not very well adapted to a situation where the regularization
     # parameter mu and may be asymmetry should be adapted to each spectra.
+
+
+def test_preprocessing_nddtaset_methods(IR_dataset_2D):
+
+    ndp = IR_dataset_2D[::5]
+    ndp[:, 1290.0:890.0] = scp.MASKED
+
+    # baseline
+    baseline = ndp.baseline()
+    assert baseline.shape == ndp.shape
+    baseline = ndp.baseline(model="asls", mu=10**8, asymmetry=0.002)
+    assert baseline.shape == ndp.shape
+
+    # asls
+    ndpcor = scp.asls(ndp, mu=10**8, asymmetry=0.002)
+    assert_dataset_equal(ndpcor, ndp - baseline)
+
+    # snip
+    ndpcor = scp.snip(ndp, snip_width=150)
+    baseline = ndp.baseline(model="snip", snip_width=150)
+    assert_dataset_equal(ndpcor, ndp - baseline)
 
 
 @pytest.mark.skip()
