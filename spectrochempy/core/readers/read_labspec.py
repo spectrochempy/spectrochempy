@@ -135,6 +135,7 @@ def _read_txt(*args, **kwargs):
     dataset.title = "Counts"
     dataset.units = None
     dataset.name = filename.stem
+    dataset.filename = filename
     dataset.meta = meta
 
     # date_acq is Acquisition date at start (first moment of acquisition)

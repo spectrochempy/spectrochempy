@@ -65,7 +65,10 @@ class NDIO(HasTraits):
         Current filename for this dataset.
         """
         if self._filename:
-            return self._filename.stem + self.suffix
+            try:
+                self._filename.relative_to(self.preferences.datadir)
+            except ValueError:
+                return self._filename
         else:
             return None
 

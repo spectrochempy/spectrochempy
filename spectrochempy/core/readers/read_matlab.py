@@ -105,6 +105,7 @@ def _read_mat(*args, **kwargs):
             # this is an array of numbers
             dataset.data = data
             dataset.name = name
+            dataset.filename = filename
             dataset.history = "Imported from .mat file"
             # TODO: reshape from fortran/Matlab order to C opder
             # for 3D or higher datasets ?
