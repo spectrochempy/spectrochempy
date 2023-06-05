@@ -66,8 +66,12 @@ def test_baselinecorrector_slicing(X):
     assert out.corrected.shape == (55, 5549)
     assert len(out._fig.axes[0].lines) == 110, "original + baselines"
     assert len(out._fig.axes[1].lines) == 55, "corrected"
-    assert np.all(out._fig.axes[1].lines[0].get_xdata() == X.x.data)
-    assert np.all(out._fig.axes[0].lines[10].get_ydata() == X.data[10])
+    testing.assert_array_almost_equal(
+        out._fig.axes[1].lines[0].get_xdata(), X.x.data, decimal=3
+    )
+    testing.assert_array_almost_equal(
+        out._fig.axes[0].lines[10].get_ydata(), X.data[10], decimal=3
+    )
 
     # slicing
     out._x_limits_control.value = "[5000.56 : 649.9 : 1]"

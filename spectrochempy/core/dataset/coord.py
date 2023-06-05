@@ -237,7 +237,7 @@ class Coord(NDMath, NDArray):
         data = super().data
         # now eventually round the data to the number of significant digits
         # for displaying (internally _data as its full precision)
-        if data is not None and self._rounding:
+        if data is not None and len(data) > 0 and self._rounding:
             maxval = np.max(np.abs(data))
             rounding = 3
             nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding

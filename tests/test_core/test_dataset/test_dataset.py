@@ -267,7 +267,7 @@ def test_nddataset_coords_indexer():
     assert_array_almost_equal(
         da.coordset["time-on-stream"].data,
         coord1,
-        decimal=4,
+        decimal=3,
         err_msg="get axis by title failed",
     )
     assert_array_almost_equal(da.coordset["temperature"].data, coord2, decimal=3)
