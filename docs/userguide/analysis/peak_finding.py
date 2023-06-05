@@ -79,7 +79,7 @@ _ = reg.plot()
 
 # %% [markdown]
 # ## Find maxima by manual inspection of the plot
-# %% Once a given maximum has been approximately located manually with the mouse, it is
+# Once a given maximum has been approximately located manually with the mouse, it is
 # possible to obtain [markdown]
 # For instance, after zooming on the highest peak of the last spectrum,
 # one finds that it is located at ~ 2115.5 cm$^{-1}$. The exact x-coordinate value can
@@ -114,8 +114,6 @@ _ = ax.annotate(
 
 # %% [markdown]
 # ## Find maxima with an automated method: `find_peaks()`
-
-# %% [markdown]
 # Exploring the spectra manually is useful, but cannot be made systematically in large
 # datasets with many - possibly
 # shifting peaks. The maxima of a given spectrum can be found automatically by the
@@ -220,8 +218,6 @@ _ = evol.plot(ls=":")
 
 # %% [markdown]
 # ###  Options of `find_peaks()` <a id='options'></a>
-
-# %% [markdown]
 # The default behaviour of find_peaks() will return *all* the detected maxima.
 # The user can choose various options to
 # select among these peaks:
@@ -266,19 +262,26 @@ _ = evol.plot(ls=":")
 
 # %%
 s = reg[-1].squeeze()
+
+# %% [markdown]
 # we use squeeze it because one of the dimensions for this dataset of shape (1, N)
 # is useless
 
-# %%
+# %% [markdown]
 # default settings
+
+# %%
 peaks, properties = s.find_peaks()
 ax = s.plot_pen(color="black")
 peaks.plot_scatter(
     ax=ax, label="default", marker="v", ms=4, color="black", clear=False, data_only=True
 )
 
+# %% [markdown]
 # find peaks heights than 0.05  (NB: the spectra are shifted for the display.
 # Refer to the 1st spectrum for true heights)
+
+# %%
 peaks, properties = s.find_peaks(height=0.05)
 color = "blue"
 label = "0.05<height"
@@ -288,7 +291,10 @@ offset = 0.05
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
+# %% [markdown]
 # find peaks heights between 0.05 and 0.2 (the highest peak won't be detected)
+
+# %%
 peaks, properties = s.find_peaks(height=(0.05, 0.2))
 color = "green"
 label = "0.05<height<0.2"
@@ -298,7 +304,10 @@ offset = 0.1
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
+# %% [markdown]
 # find peaks with prominence >= 0.05 (only the two most prominent peaks are detected)
+
+# %%
 peaks, properties = s.find_peaks(prominence=0.05)
 color = "purple"
 label = "prominence=0.05"
@@ -308,8 +317,11 @@ offset = 0.15
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
+# %% [markdown]
 # find peaks with distance >= 10 (only the highest of the two maxima at ~ 2075 is
 # detected)
+
+# %%
 peaks, properties = s.find_peaks(distance=10)
 color = "red"
 label = "distance>10"
@@ -319,7 +331,10 @@ offset = 0.20
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
+# %% [markdown]
 # find peaks with width >= 10 (none of the two maxima at ~ 2075 is detected)
+
+# %%
 peaks, properties = s.find_peaks(width=10)
 color = "grey"
 label = "width>10"
@@ -363,7 +378,8 @@ _ = ax.legend()
 peaks, properties = s.find_peaks(height=(0.15, 0.22), prominence=0)
 properties
 
-# %% The actual prominence of the peak is this 0.0689, a value significantly lower
+# %% [markdown]
+# The actual prominence of the peak is this 0.0689, a value significantly lower
 # that is peak height ( [markdown]
 # The peak prominence is 0.0689, a much lower value than the height (0.1995), as
 # could be expected by the illustration
@@ -387,12 +403,16 @@ properties
 # %%
 ax = s.plot_pen()
 
+# %% [markdown]
 # plots the  maximum
+
+# %%
 _ = peaks.plot_scatter(
     ax=ax, marker="v", mfc="green", mec="green", data_only=True, clear=False
 )
 
 wl, wr = properties["left_bases"][0], properties["right_bases"][0]
+
 # wavenumbers of of left and right bases
 for w in (wl, wr):
     ax.axvline(w, linestyle="--")  # add vertical line at the bases
@@ -401,7 +421,8 @@ for w in (wl, wr):
 
 ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
 
-# %% It leads to base marks at their expected locations. We can further check that the
+# %% [markdown]
+# It leads to base marks at their expected locations. We can further check that the
 # prominence of the [markdown]
 # We can check that the correct value of the peak prominence is obtained by the
 # difference between its height
@@ -411,7 +432,8 @@ ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base
 prominence = peaks[0].values - s[wr].values
 print(f"calc. prominence = {prominence:0.4fK}")
 
-# %% Finally, we illustrate how the use of the `wlen` parameter - which limits the
+# %% [markdown]
+# Finally, we illustrate how the use of the `wlen` parameter - which limits the
 # search of the "base [markdown]
 # Finally, the figure below shows how the prominence can be affected by `wlen` , the
 # size of the window used to determine the peaks' bases.
@@ -435,7 +457,8 @@ print(f"prominence with reduced window: {properties['prominences'][0]:0.4fK}")
 # %% [markdown]
 # #### Width
 
-# %% The peak widths, as returned by `find_peaks()` can be *very approximate* and for
+# %% [markdown]
+# The peak widths, as returned by `find_peaks()` can be *very approximate* and for
 # precise assessment, [markdown]
 # The find_peaks() method also returns the peak widths. As we will see below, the
 # method is **very approximate** and
@@ -465,12 +488,14 @@ print(f"prominence with reduced window: {properties['prominences'][0]:0.4fK}")
 peaks, properties = s.find_peaks(height=0.2, width=0)
 properties
 
-# %% The code below shows how these heights and widths can be extracted from the
+# %% [markdown]
+# The code below shows how these heights and widths can be extracted from the
 # dictionary and plotted [markdown]
 # The code below shows how these data can be extracted and then plotted:
 
 # %%
 # extraction of data (for better readability of the code below)
+
 height = properties["peak_heights"][0]
 width_height = properties["width_heights"][0]
 wl = properties["left_ips"][0]
@@ -485,7 +510,8 @@ _ = ax.axhline(width_height, linestyle="--", color="red")
 _ = ax.axvline(wl, linestyle="--", color="green")
 _ = ax.axvline(wr, linestyle="--", color="green")
 
-# %% As stressed above, we see here that the peak width is very approximate and probably
+# %% [markdown]
+# As stressed above, we see here that the peak width is very approximate and probably
 # exaggerated in [markdown]
 # It is obvious here that the peak width is overestimated in the present case due to the
 # presence of the second peak on
@@ -507,16 +533,19 @@ s = reg[-1]  # define a single-row NDDataset
 s.preferences.method_1D = "pen"
 
 # peak selection parameters; should be set to return a single peak
+
 height = 0.08  # minimal height or min and max heights)
 prominence = 0.0  # minimal prominence or min and max prominences
 width = 0.0  # minimal width or min and max widths
 threshold = None  # minimal threshold or min and max threshold)
 
 # prominence and width parameter
+
 wlen = None  # the length of the window used to compute the prominence
 rel_height = 0.47  # the fraction of the prominence used to compute the width
 
 # code: find peaks, plot and print properties -------------------
+
 peaks, properties = s.find_peaks(
     height=height,
     prominence=prominence,
@@ -548,3 +577,4 @@ for i in range(len(peaks)):
 
 # %% [markdown]
 # -- this is the end of this tutorial --
+
