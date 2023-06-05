@@ -88,7 +88,7 @@ def test_issue_668():
 
     s = scp.read("irdata/CO@Mo_Al2O3.SPG")[-1, 2300.0:1900.0]
 
-    print(s[:, [0, 1, 2, 7, 15]].x.data)
+    # print(s[:, [0, 1, 2, 7, 15]].x.data)
     # # wrongly returns [    2300     2296     2293     2289     2285]
     # print(s[:, [0, 1, 5, 10,
     #             15]].x.data)
@@ -96,6 +96,5 @@ def test_issue_668():
     # print(s.x[[0, 1, 2, 7,
     #            15]].data)
     # # returns the expected values of the first line above[    2300     2299     2298     2293     2285]
-    #
 
     assert np.all(s[:, [0, 1, 2, 7, 15]].x.data == s.x[[0, 1, 2, 7, 15]].data)
