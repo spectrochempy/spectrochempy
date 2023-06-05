@@ -839,7 +839,10 @@ class Coord(NDMath, NDArray):
         if not makeitlinear and is_iterable(spacing):
             # may be the variation in % are small enough (0.1%)
             variation = (
-                (np.max(spacing) - np.min(spacing)) * 100.0 / np.max(spacing) / 2.0
+                (np.max(spacing) - np.min(spacing))
+                * 100.0
+                / np.abs(np.max(spacing))
+                / 2.0
             )
             if variation <= self._linearize_below:
                 makeitlinear = True

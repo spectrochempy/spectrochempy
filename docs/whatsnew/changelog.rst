@@ -27,6 +27,8 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* issue #664: wrongly defined xaxis for opus file.
+* issue #668: fix bug with fancy indexing of datasets.
 
 .. section
 
