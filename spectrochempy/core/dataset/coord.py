@@ -234,7 +234,15 @@ class Coord(NDMath, NDArray):
         significant digits, the data are thus linearized
         and the `linear` attribute is set to True.
         """
-        return super().data
+        data = super().data
+        # now eventually round the data to the number of significant digits
+        # for displaying (internally _data as its full precision)
+        if data is not None and self._rounding:
+            maxval = np.max(np.abs(data))
+            rounding = 3
+            nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
+            data = np.around(data, max(nd, rounding))
+        return data
 
     @data.setter
     def data(self, data):
@@ -253,17 +261,8 @@ class Coord(NDMath, NDArray):
             # First try to linearize the data if it is not a datetime
             self._linear = False
             self.linearize(self._sigdigits)
-            # if self._linear:
-            #    return
-
-            # now eventually round the data to the number of significant digits
-            # if self._data.size < 1:  # pragma: no cover
-            #     nd = self.sigdigits + 1
-            if self._rounding:
-                maxval = np.max(np.abs(self._data))
-                rounding = 2
-                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
-                self._data = np.around(self._data, max(nd, rounding))
+            if self._linear:
+                return
 
     @property
     def default(self):

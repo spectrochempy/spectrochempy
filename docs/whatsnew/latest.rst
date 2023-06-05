@@ -10,4 +10,6 @@ Bug fixes
 ~~~~~~~~~
 
 * issue #664: wrongly defined xaxis for opus file.
-* issue #668: fix bug with fancy indexing of datasets.
+* issue #668: fix bug with fancy indexing of datasets (fix also #663).
+  Both issues were related to the linearization of the coordinates,
+  which was not done correctly in some cases. This is now fixed.
