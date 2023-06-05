@@ -234,7 +234,15 @@ class Coord(NDMath, NDArray):
         significant digits, the data are thus linearized
         and the `linear` attribute is set to True.
         """
-        return super().data
+        data = super().data
+        # now eventually round the data to the number of significant digits
+        # for displaying (internally _data as its full precision)
+        if data is not None and len(data) > 0 and self._rounding:
+            maxval = np.max(np.abs(data))
+            rounding = 3
+            nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
+            data = np.around(data, max(nd, rounding))
+        return data
 
     @data.setter
     def data(self, data):
@@ -255,16 +263,6 @@ class Coord(NDMath, NDArray):
             self.linearize(self._sigdigits)
             if self._linear:
                 return
-
-            # well, the data cannot be linearized with the given significant digits,
-            # now eventually round the data to the number of significant digits
-            # if self._data.size < 1:  # pragma: no cover
-            #     nd = self.sigdigits + 1
-            if self._rounding:
-                maxval = np.max(np.abs(self._data))
-                rounding = 2
-                nd = get_n_decimals(maxval, self.sigdigits) if maxval > 0 else rounding
-                self._data = np.around(self._data, max(nd, rounding))
 
     @property
     def default(self):
@@ -845,7 +843,10 @@ class Coord(NDMath, NDArray):
         if not makeitlinear and is_iterable(spacing):
             # may be the variation in % are small enough (0.1%)
             variation = (
-                (np.max(spacing) - np.min(spacing)) * 100.0 / np.max(spacing) / 2.0
+                (np.max(spacing) - np.min(spacing))
+                * 100.0
+                / np.abs(np.max(spacing))
+                / 2.0
             )
             if variation <= self._linearize_below:
                 makeitlinear = True

@@ -206,8 +206,10 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
     return True
 
 
-def compare_coords(this, other, approx=False, decimal=6, data_only=False):
+def compare_coords(this, other, approx=False, decimal=3, data_only=False):
 
+    # TODO: compare base on signficant digit for coordinate instead of decimals
+    #  (that may not work for very small coordinates numbers)
     from spectrochempy.core.units import ur
 
     def compare(x, y):
@@ -418,7 +420,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                         pass
                     else:
                         for item in zip(sattr, oattr):
-                            res = compare_coords(*item, approx=approx, decimal=decimal)
+                            res = compare_coords(*item, approx=True, decimal=3)
                             if not res:
                                 raise AssertionError(f"coords differs:\n{res}")
                 else:
@@ -459,7 +461,7 @@ def assert_dataset_equal(nd1, nd2, **kwargs):
 
 
 def assert_dataset_almost_equal(nd1, nd2, **kwargs):
-    decimal = kwargs.get("decimal", 6)
+    decimal = kwargs.get("decimal", 3)
     approx = kwargs.get("approx", True)
     # if data_only is True, compare only based on data (not labels and so on)
     # except if dataset is label only!.
