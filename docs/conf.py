@@ -333,7 +333,6 @@ sphinx_gallery_conf = {
     "reference_url": {
         "spectrochempy": None,
     },
-    # path where to save gallery generated examples=======
     "abort_on_example_error": False,
     "expected_failing_examples": [],
     "download_all_examples": False,
