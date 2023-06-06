@@ -145,7 +145,7 @@ def json_serialiser(byte_obj, encoding=None):
                 "__class__": "NUMPY_ARRAY",
             }
 
-    elif isinstance(byte_obj, pathlib.PosixPath):
+    elif isinstance(byte_obj, (pathlib.PosixPath, pathlib.WindowsPath)):
         return {"str": str(byte_obj), "__class__": "PATH"}
 
     elif isinstance(byte_obj, Unit):
