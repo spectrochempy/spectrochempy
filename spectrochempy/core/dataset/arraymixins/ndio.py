@@ -66,7 +66,7 @@ class NDIO(HasTraits):
         """
         if self._filename:
             try:
-                self._filename.relative_to(self.preferences.datadir)
+                return self._filename.relative_to(self.preferences.datadir)
             except ValueError:
                 return self._filename
         else:
