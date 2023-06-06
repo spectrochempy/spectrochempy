@@ -577,4 +577,3 @@ for i in range(len(peaks)):
 
 # %% [markdown]
 # -- this is the end of this tutorial --
-

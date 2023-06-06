@@ -46,7 +46,6 @@ source = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(source, "docs", "sphinxext"))
 
 extensions = [
-    "nbsphinx",
     "sphinx_copybutton",
     "sphinx.ext.mathjax",
     "sphinx.ext.autodoc",
@@ -62,6 +61,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
     "sphinxcontrib.bibtex",
+    "nbsphinx",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -99,9 +99,6 @@ exclude_patterns = [
     "_templates",
     "_static",
     "**.ipynb_checkpoints",
-    "gallery/auto_examples/*.md5",
-    "gallery/auto_examples/*.py",
-    # "gallery/auto_examples/*.ipynb",
     "~temp",
 ]
 
@@ -336,13 +333,13 @@ sphinx_gallery_conf = {
     "reference_url": {
         "spectrochempy": None,
     },
-    # path where to save gallery generated examples=======
     "abort_on_example_error": False,
     "expected_failing_examples": [],
     "download_all_examples": False,
+    "pypandoc": True,
 }
 suppress_warnings = [
-    "sphinx_gallery",
+    # "sphinx_gallery",
 ]
 
 # nbsphinx ---------------------------------------------------------------------
@@ -552,6 +549,6 @@ def setup(app):
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
     # # Ignore .ipynb files
-    app.registry.source_suffix.pop(".ipynb", None)
-    app.registry.source_suffix.pop(".py", None)
-    app.registry.source_suffix.pop(".py.md5", None)
+    # app.registry.source_suffix.pop(".ipynb", None)
+    # app.registry.source_suffix.pop(".py", None)
+    # app.registry.source_suffix.pop(".py.md5", None)
