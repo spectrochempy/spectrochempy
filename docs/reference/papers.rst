@@ -18,8 +18,15 @@ Papers citing `SpectroChemPy`
 - Observation of surface species in plasma-catalytic dry reforming of methane in a novel atmospheric pressure dielectric barrier discharge in situ IR cell,
   :cite:t:`vanturnhout:2022`\ , `DOI: 10.1039/D2CY00311B <https://dx.doi.org/10.1039/D2CY00311B>`__\ .
 
+- Développement d’outils de traitement de données de spectroscopie massives dans le contexte de la dépollution automobile,
+  :cite:t:`helie:2022`\ , `HAL: tel-04077817 <https://theses.hal.science/tel-04077817>`__\ .
+
 2023
 ====
 
 - Understanding the patterns that neural networks learn from chemical spectra,
-  :cite:t:`rieger:2023`\ , `DOI: 10.26434/chemrxiv-2023-8pfk5 <https://dx.doi.org/10.26434/chemrxiv-2023-8pfk5>`__\ ,
+  :cite:t:`rieger:2023`\ , `DOI: 10.26434/chemrxiv-2023-8pfk5 <https://dx.doi.org/10.26434/chemrxiv-2023-8pfk5>`__\ .
+
+- FTIR dataset from the article "Resistance to
+  Degradation of Silk Fibroin Hydrogels Exposed to Neuroinflammatory Environments",
+  :cite:t:`yonesi:2023`\ , `DOI: 10.5281/zenodo.7921117 <https://doi.org/10.5281/zenodo.7921117>`__\ .
