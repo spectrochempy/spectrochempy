@@ -1,25 +1,22 @@
 # -*- coding: utf-8 -*-
-# %%
 # ======================================================================================
 # Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+"""
+    NDDataset baseline correction
+    ==============================
+
+    In this example, we perform a baseline correction of a 2D NDDataset
+    interactively, using the ``multivariate`` method and a ``pchip``\ /``polynomial`` interpolation.
+
+    For comparison we also use the `asls`and `snip` models.
+    """
 
 # %%
-"""
-NDDataset baseline correction
-==============================
-
-In this example, we perform a baseline correction of a 2D NDDataset
-interactively, using the ``multivariate`` method and a ``pchip``\ /``polynomial`` interpolation.
-
-For comparison we also use the `asls`and `snip` models.
-"""
-
-# %%
-# As usual we start by importing the useful library, and at least  the
+# As usual we start by importing the useful library, and at least the
 # spectrochempy library.
 
 import spectrochempy as scp
