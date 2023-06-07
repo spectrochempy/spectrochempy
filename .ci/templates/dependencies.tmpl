@@ -8,8 +8,8 @@ requirements[_dev][_test].text, environment[_dev][_test].yml and .conda/meta.yam
 be created or updated accordingly
 #}
     # specific dependencies
-    - quadprog
     - brukeropusreader
+    - quadprog
     - quaternion
 {% if CANTERA -%}
     - cantera
@@ -25,7 +25,7 @@ be created or updated accordingly
     - numba
     - numpy
     - numpydoc>=1.2
-    - pint
+    - pint>=0.20
     - pytz
     - requests
     - scipy
@@ -41,12 +41,18 @@ be created or updated accordingly
     - git
 
     # Jupyter lab
-    - jupyterlab
-    - nodejs
     - ipywidgets=8.0.4
-    - widgetsnbextension=4.0.5
-    - jupyterlab_widgets=3.0.5
     - ipympl
+    - jupyterlab
+    - jupyterlab_widgets=3.0.5
+    - jupyter_server=1.23.6
+    - nodejs
+    - widgetsnbextension=4.0.5
+
+    # voila
+    - voila
+    - voila-material
+
 {%- if TEST %}
 
     # TEST dependencies
@@ -66,23 +72,24 @@ be created or updated accordingly
     # ----------------
     # From here, the dependencies are essentially for development.
     # They should not be necessary for the user of  spectrochempy.
-    - scikit-image
+    - anaconda-client
     - black
-    - pre-commit
-    - mamba
-    - jupytext
-    - sphinx=5.3
-    - sphinx_rtd_theme=1.2
-    - autodocsumm
-    - sphinx-gallery
-    - nbsphinx
-    - jupyter_sphinx
-    - json5
-    - sphinx-copybutton
-    - sphinxcontrib-bibtex
-    - pandoc=2.19
     - conda-build
     - conda-verify
-    - anaconda-client
+    - isort
+    - json5
+    - jupytext
+    - jupyter_sphinx
+    - mamba
+    - nbconvert=7.4.0
+    - nbsphinx
     - numpydoc>=1.2
+    - pandoc=2.19
+    - pre-commit
+    - scikit-image
+    - sphinx=5.3
+    - sphinx-copybutton
+    - sphinx-gallery=0.13
+    - sphinx_rtd_theme=1.2
+    - sphinxcontrib-bibtex
 {%- endif %}
