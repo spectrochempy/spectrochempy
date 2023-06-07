@@ -527,7 +527,6 @@ def test_simple_arithmetic_on_full_dataset():
 
 
 def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
-
     # CREATION _LIKE METHODS
     # ----------------------
     # from a list
@@ -1008,23 +1007,6 @@ def test_coord_add_units_with_different_scale():
     assert x.data[1] == 101.0
     d1 += d2
     assert d1.data[1] == 1.01
-    d2 += d1
-    assert d2.data[1] == 102.0
-
-
-def test_linearcoord_add_units_with_different_scale():
-    d1 = Coord.arange(3.0, units="m")
-    d2 = Coord.arange(3.0, units="cm")
-
-    x = d1 + 1.0 * ur.cm
-    assert np.around(x.data[1], 2) == 1.01
-
-    x = d1 + d2
-    assert np.around(x.data[1], 2) == 1.01
-    x = d2 + d1
-    assert np.around(x.data[1], 2) == 101.0
-    d1 += d2
-    assert np.around(d1.data[1], 2) == 1.01
     d2 += d1
     assert d2.data[1] == 102.0
 
