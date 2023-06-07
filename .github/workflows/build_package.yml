@@ -88,12 +88,13 @@ jobs:
           fetch-depth: 0
 
       - name: Install Conda environment with Micromamba
-        uses: mamba-org/provision-with-micromamba@main
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment_dev.yml
           environment-name: scpy
-          extra-specs: |
+          create-args: >-
             python=3.9
+          cache-environment: true
 
       - name: Install spectrochempy
         run: |
