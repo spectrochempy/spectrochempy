@@ -473,6 +473,7 @@ def _read_spc(*args, **kwargs):
     # Create NDDataset Object for the series
     dataset = NDDataset(np.expand_dims(floatY, axis=0))
     dataset.name = str(filename)
+    dataset.filename = filename
     dataset.units = y_unit
     dataset.title = y_title
     dataset.origin = "thermo galactic"

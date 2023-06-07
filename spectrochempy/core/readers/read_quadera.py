@@ -141,6 +141,7 @@ def _read_asc(*args, **kwargs):
 
     dataset = NDDataset(ioncurrent)
     dataset.name = filename.stem
+    dataset.filename = filename
     dataset.title = "ion current"
     dataset.units = "amp"
 

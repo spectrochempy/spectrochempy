@@ -258,11 +258,11 @@ class Importer(HasTraits):
 
         # several datasets returned (only if several files have been passed) and the `merge` keyword argument is False
         merged = kwargs.get("merge", False)
-        shapes = {nd.shape if hasattr(nd, "shape") else None for nd in datasets}
+        shapes = list({nd.shape if hasattr(nd, "shape") else None for nd in datasets})
         if len(shapes) == 1 and None not in shapes:
             # homogeneous set of files
-            dim0 = shapes.pop()[0]
-            if dim0 == 1:
+            # we can merge them if they are 1D spectra
+            if len(shapes[0]) == 1 or shapes[0][0] == 1:
                 merged = kwargs.get("merge", True)  # priority to the keyword setting
         else:
             # not homogeneous

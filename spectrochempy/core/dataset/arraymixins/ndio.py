@@ -14,7 +14,6 @@ __all__ = ["load"]
 import io
 import json
 import pathlib
-from warnings import warn
 
 import numpy as np
 from numpy.lib.npyio import zipfile_factory
@@ -27,6 +26,9 @@ from spectrochempy.utils.file import check_filename_to_save, pathclean
 from spectrochempy.utils.jsonutils import json_serialiser
 from spectrochempy.utils.misc import TYPE_BOOL
 from spectrochempy.utils.zip import ScpFile
+
+# from warnings import warn
+
 
 SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 
@@ -65,7 +67,10 @@ class NDIO(HasTraits):
         Current filename for this dataset.
         """
         if self._filename:
-            return self._filename.stem + self.suffix
+            try:
+                return self._filename.relative_to(self.preferences.datadir)
+            except ValueError:
+                return self._filename
         else:
             return None
 
@@ -439,10 +444,10 @@ class NDIO(HasTraits):
         import zipfile
 
         # prepare the json data
-        try:
-            js = self.dumps(encoding="base64")
-        except Exception as e:
-            warn(str(e))
+        # try:
+        js = self.dumps(encoding="base64")
+        # except Exception as e:
+        #     warn(str(e))
 
         # write in a temp file
         _, tmpfile = tempfile.mkstemp(suffix="-spectrochempy")

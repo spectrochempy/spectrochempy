@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 
 try:
-    # work only if spectrochempy is installed
+    # Work only if spectrochempy is installed
     import spectrochempy
 except ModuleNotFoundError:  # pragma: no cover
     raise ModuleNotFoundError(

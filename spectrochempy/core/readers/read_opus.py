@@ -190,6 +190,7 @@ def _read_opus(*args, **kwargs):
 
     # Set name, origin, description and history
     dataset.name = filename.name
+    dataset.filename = filename
     dataset.origin = "opus"
     dataset.description = "Dataset from opus files. \n"
     dataset.history = str(datetime.now(timezone.utc)) + ": import from opus files \n"

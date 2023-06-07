@@ -277,6 +277,8 @@ def _read_jdx(*args, **kwargs):
 
     dataset.data = data
     dataset.name = jdx_title
+    dataset.filename = filename
+
     if yunits[0].strip() == "ABSORBANCE":
         dataset.units = "absorbance"
         dataset.title = "absorbance"
