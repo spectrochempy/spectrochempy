@@ -94,6 +94,7 @@ jobs:
           environment-name: scpy
           create-args: >-
             python=3.9
+          cache-environment: true
 
       - name: Install spectrochempy
         run: |

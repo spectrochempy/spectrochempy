@@ -41,8 +41,6 @@ def load_iris():
     from sklearn.datasets import load_iris as sklearn_iris
 
     data = sklearn_iris()
-    if data is None:
-        raise OSError("Failed in reading the `IRIS` dataset from sklearn!")
 
     coordx = Coord(
         labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
@@ -58,7 +56,6 @@ def load_iris():
         name="`IRIS` Dataset",
         units="cm",
     )
-    info_(str(new))
 
     new.history = "Loaded from scikit-learn datasets"
 
