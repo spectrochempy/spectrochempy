@@ -8,13 +8,11 @@
 In this module, methods are provided to download external datasets
 from public database.
 """
-__all__ = ["download_iris", "download_nist_ir"]
+__all__ = ["load_iris", "download_nist_ir"]
 __dataset_methods__ = __all__
 
-from io import StringIO
 from pathlib import Path
 
-import numpy as np
 import requests
 
 from spectrochempy.core import error_, info_
@@ -22,16 +20,14 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.read_jcamp import read_jcamp
 from spectrochempy.utils.misc import is_iterable
-from spectrochempy.utils.optional import import_optional_dependency
 
 
-def download_iris():
+def load_iris():
     """
     Upload the classical "iris" dataset.
 
-    The "IRIS" dataset is a classical example for machine learning.It is downloaded from
-    the
-    [UCI distant repository](https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data)
+    The "IRIS" dataset is a classical example for machine learning.
+    It is read from the `scikit-learn` package.
 
     Returns
     -------
@@ -42,82 +38,31 @@ def download_iris():
     --------
     read : Read data from experimental data.
     """
-    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
+    from sklearn.datasets import load_iris as sklearn_iris
 
-    try:
-        connection = True
-        info_("Downloading the `IRIS` dataset from the UCI repository")
-        response = requests.get(url, stream=True, timeout=10)
-        if response.status_code != 200:
-            error_(OSError, "Cannot download from the UCI repository. Try Scikit-Learn")
-            connection = False
-    except OSError:
-        error_(OSError, "Cannot connect to the UCI repository. Try Scikit-Learn")
-        connection = False
+    data = sklearn_iris()
+    if data is None:
+        raise OSError("Failed in reading the `IRIS` dataset from sklearn!")
 
-    if connection:  # Download data
-        txtdata = ""
-        for rd in response.iter_content():
-            txtdata += rd.decode("utf8")
+    coordx = Coord(
+        labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
+        title="features",
+    )
+    labels = [data.target_names[i] for i in data.target]
+    coordy = Coord(labels=labels, title="samples")
 
-        fil = StringIO(txtdata)
-        try:
-            data = np.loadtxt(fil, delimiter=",", usecols=range(4))
-            fil.seek(0)
-            labels = np.loadtxt(fil, delimiter=",", usecols=(4,), dtype="|S")
-            labels = list((lab.decode("utf8") for lab in labels))
-        except Exception:
-            raise OSError("can't read JCAMP file")
+    new = NDDataset(
+        data.data,
+        coordset=[coordy, coordx],
+        title="size",
+        name="`IRIS` Dataset",
+        units="cm",
+    )
+    info_(str(new))
 
-        coordx = Coord(
-            labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
-            title="features",
-        )
-        coordy = Coord(labels=labels, title="samples")
+    new.history = "Loaded from scikit-learn datasets"
 
-        new = NDDataset(
-            data,
-            coordset=[coordy, coordx],
-            title="size",
-            name="`IRIS` Dataset",
-            units="cm",
-        )
-
-        new.history = "Loaded from UC Irvine machine learning repository"
-
-        return new
-
-    else:
-        # Cannot download - use the scikit-learn dataset (if scikit-learn is installed)
-
-        sklearn = import_optional_dependency("sklearn", errors="ignore")
-        if sklearn is None:
-            raise OSError("Failed in uploading the `IRIS` dataset!")
-        else:
-            from sklearn import datasets
-
-        data = datasets.load_iris()
-        if data is None:
-            raise OSError("Failed in reading the `IRIS` dataset from sklearn!")
-
-        coordx = Coord(
-            labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
-            title="features",
-        )
-        labels = [data.target_names[i] for i in data.target]
-        coordy = Coord(labels=labels, title="samples")
-
-        new = NDDataset(
-            data.data,
-            coordset=[coordy, coordx],
-            title="size",
-            name="`IRIS` Dataset",
-            units="cm",
-        )
-
-        new.history = "Loaded from scikit-learn datasets"
-
-        return new
+    return new
 
 
 def download_nist_ir(CAS, index="all"):
