@@ -97,6 +97,8 @@ def download_iris():
             from sklearn import datasets
 
         data = datasets.load_iris()
+        if data is None:
+            raise OSError("Failed in reading the `IRIS` dataset from sklearn!")
 
         coordx = Coord(
             labels=["sepal_length", "sepal width", "petal_length", "petal_width"],
