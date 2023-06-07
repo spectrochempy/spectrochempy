@@ -21,8 +21,8 @@ channels:
 
 dependencies:
     # specific dependencies
-    - quadprog
     - brukeropusreader
+    - quadprog
     - quaternion
 
     # dependencies for the core package
@@ -36,7 +36,7 @@ dependencies:
     - numba
     - numpy
     - numpydoc>=1.2
-    - pint
+    - pint>=0.20
     - pytz
     - requests
     - scipy
@@ -46,15 +46,21 @@ dependencies:
     - xlrd
     - pyyaml
 
+
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
 
     # Jupyter lab
-    - jupyterlab
-    - nodejs
     - ipywidgets=8.0.4
-    - widgetsnbextension=4.0.5
-    - jupyterlab_widgets=3.0.5
     - ipympl
+    - jupyterlab
+    - jupyterlab_widgets=3.0.5
+    - jupyter_server=1.23.6
+    - nodejs
+    - widgetsnbextension=4.0.5
+
+    # voila
+    - voila
+    - voila-material

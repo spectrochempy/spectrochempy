@@ -7,8 +7,8 @@
 # See in `environment.yml` for more information.
 #
 # ======================================================================================
-quadprog
 brukeropusreader
+quadprog
 numpy-quaternion
 cffconvert
 colorama
@@ -20,7 +20,7 @@ matplotlib
 numba
 numpy
 numpydoc>=1.2
-pint
+pint>=0.20
 pytz
 requests
 scipy
@@ -32,9 +32,12 @@ pyyaml
 setuptools
 setuptools_scm
 gitpython
-jupyterlab
-nodejs
 ipywidgets==8.0.4
-widgetsnbextension==4.0.5
-jupyterlab_widgets==3.0.5
 ipympl
+jupyterlab
+jupyterlab_widgets==3.0.5
+jupyter_server==1.23.6
+nodejs
+widgetsnbextension==4.0.5
+voila
+voila-material
