@@ -461,7 +461,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     # ----------------------------------------------------------------------------------
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.debug_("*" * 40)
+
         self.initialize()
 
     # ----------------------------------------------------------------------------------
@@ -606,7 +606,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         argv :  List, [optional].
             List of configuration parameters.
         """
-
         # parse the argv
         # --------------------------------------------------------------------
         # if we are running this under ipython and jupyter notebooks
@@ -771,7 +770,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
                 args[1] if args and len(args) > 1 else kwargs.get("message", None)
             )
         else:
-            raise KeyError("wrong argiments have been passed to error_")
+            raise KeyError("wrong arguments have been passed to error_")
         self._catch_exceptions(etype, emessage, None)
 
     def warning_(self, msg, *args, **kwargs):
