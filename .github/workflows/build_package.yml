@@ -91,7 +91,7 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment_dev.yml
-          environment-name: scpy
+          environment-name: scpy_build
           create-args: >-
             python=3.9
           cache-environment: true
