@@ -54,8 +54,7 @@ curve2.plot(color="b", clear=False)
 new2.plot(dcolor="b", clear=False, label=" em = 30 HZ, shifted = ")
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script with python
 
-# %%
 # scp.show()

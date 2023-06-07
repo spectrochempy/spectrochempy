@@ -45,8 +45,7 @@ B = scp.read_labspec(ramandir / "subdir")
 _ = B.plot()
 
 # %%
-# This ends the example ! The following line can be uncommented if no plot shows when running
-# the .py script
+# This ends the example ! The following line can be uncommented if no plot shows when
+# running the .py script with python
 
-# %%
 # scp.show()

@@ -13,6 +13,7 @@ from traitlets.config import Config
 from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
+from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.objects import Adict
 
 
@@ -69,6 +70,8 @@ class MetaConfigurable(Configurable):
             defaults.update(config)
         return defaults
 
+    @_docstring.get_docstring(base="MetaConfigurable.parameters_doc")
+    @_docstring.dedent
     def parameters(self, default=False):
         """
         Current or default configuration values.

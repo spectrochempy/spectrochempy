@@ -13,7 +13,6 @@ import functools
 def _units_agnostic_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
-
         # On which axis do we want to shift (get axis from arguments)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
