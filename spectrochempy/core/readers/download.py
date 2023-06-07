@@ -46,7 +46,11 @@ def download_iris():
 
     try:
         connection = True
+        info_("Downloading the `IRIS` dataset from the UCI repository")
         response = requests.get(url, stream=True, timeout=10)
+        if response.status_code != 200:
+            error_(OSError, "Cannot download from the UCI repository. Try Scikit-Learn")
+            connection = False
     except OSError:
         error_(OSError, "Cannot connect to the UCI repository. Try Scikit-Learn")
         connection = False
