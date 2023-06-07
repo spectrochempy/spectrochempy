@@ -27,6 +27,10 @@ class requests_response:
     def iter_content(self):
         return (rd.encode("utf-8") for rd in self.resp)
 
+    @property
+    def status_code(self):
+        return 200
+
 
 class sklearn_data:
 
