@@ -35,7 +35,7 @@ def test_ndio_generic(NMR_dataset_1D):
     # save with the default name (equivalent to save_as in this case)
     # as this file (IR_1D.scp)  doesn't yet exist a confirmation dialog is opened
     f = nmr.save()
-    assert nmr.filename == f.name
+    assert nmr.filename.name == f.name
     assert nmr.directory == nmrdatadir
 
     # load back this  file : the full path f is given so no dialog is opened
@@ -44,12 +44,12 @@ def test_ndio_generic(NMR_dataset_1D):
 
     # as it has been already saved, we should not get dialogs
     f = nd.save()
-    assert nd.filename == "NMR_1D.scp"
+    assert nd.filename.name == "NMR_1D.scp"
     # return
 
     # now it opens a dialog and the name can be changed
     f1 = nmr.save_as()
-    assert nmr.filename == f1.name
+    assert nmr.filename.name == f1.name
 
     # remove these files
     f.unlink()
@@ -58,8 +58,8 @@ def test_ndio_generic(NMR_dataset_1D):
     # save in a specified directory
     nmr.save_as(irdatadir / "essai")  # save essai.scp
     assert nmr.directory == irdatadir
-    assert nmr.filename == "essai.scp"
-    (irdatadir / nmr.filename).unlink()
+    assert nmr.filename.name == "essai.scp"
+    (irdatadir / nmr.filename.name).unlink()
 
     # save in the current directory
     f = nmr.save_as(cwd / "essai")

@@ -75,15 +75,15 @@ class _CoordRange(tr.HasTraits):
 
 
 def trim_ranges(*ranges, reversed=False):
-    """
-    Set of ordered, non intersecting intervals.
+    r"""
+    Set of ordered, non-intersecting intervals.
 
     An ordered set of ranges is constructed from the inputs and returned.
     *e.g.,* [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
 
     Parameters
     -----------
-    \*ranges :  iterable
+    *ranges :  iterable
         An interval or a set of intervals.
         set of  intervals. If none is given, the range will be a set of an empty
         interval [[]]. The interval

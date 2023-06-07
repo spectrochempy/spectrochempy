@@ -93,11 +93,12 @@ def largest_power_of_2(value):
     """
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
+    #
+    #
+    # def make_func_from(func, first=None):
+    # """
 
-#
-#
-# def make_func_from(func, first=None):
-#     """
+
 #     Create a new func with its arguments from another func and a new signature.
 #     """
 #     code_obj = func.__code__

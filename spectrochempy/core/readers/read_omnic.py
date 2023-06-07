@@ -686,7 +686,7 @@ def _read_spa(*args, **kwargs):
 
     dataset.set_coordset(y=_y, x=_x)
     dataset.name = spa_name  # to be consistent with omnic behaviour
-    dataset.filename = str(filename)
+    dataset.filename = filename
 
     # Set origin, description, history, date
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
@@ -840,6 +840,7 @@ def _read_srs(*args, **kwargs):
     dataset.units = info["units"]
     dataset.title = info["title"]
     dataset.origin = "omnic"
+    dataset.filename = filename
 
     # now add coordinates
     _x = Coord.linspace(
