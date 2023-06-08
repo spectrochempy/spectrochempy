@@ -50,6 +50,7 @@ pyfakefs
 pep8-naming
 xarray
 black
+boa
 isort
 json5
 jupytext
