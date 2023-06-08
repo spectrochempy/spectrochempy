@@ -18,14 +18,9 @@ dataset (Ronald A. Fisher.
 import spectrochempy as scp
 
 # %%
-# Upload a dataset form a distant server
-try:
-    dataset = scp.download_iris()
-except (IOError, OSError):
-    print("Could not load The `IRIS` dataset. Finishing here.")
-    import sys
+# load a dataset from scikit-learn
+dataset = scp.load_iris()
 
-    sys.exit(0)
 # %%
 # Create a PCA object
 # Here, the number of components  wich is used by the model is automatically determined
