@@ -81,6 +81,7 @@ dependencies:
     # They should not be necessary for the user of  spectrochempy.
     - anaconda-client
     - black
+    - boa
     - conda-build
     - conda-verify
     - isort
