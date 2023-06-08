@@ -193,6 +193,7 @@ Import a NDataset from external source
     read_topspin
     read_zip
     read_carroucell
+    load_iris
     download_nist_ir
 
 Export a NDDataset
