@@ -112,9 +112,9 @@ jobs:
         run: |
           bash .ci/set_env_var.sh
 
-      - name: Build package
+      - name: Build package using mamabuild
         run: |
-          conda-build .conda --output-folder out
+          conda mambabuild .conda --output-folder out
 
       - name: Publish package for release
         if: (github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy')
