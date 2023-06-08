@@ -92,6 +92,7 @@ jobs:
         with:
           environment-file: environment_dev.yml
           environment-name: scpy_build
+          condarc-file: .ci/condarc.yml
           create-args: >-
             python=3.10
           cache-environment: true
