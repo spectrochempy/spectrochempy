@@ -594,5 +594,5 @@ dac
 daq = da.set_quaternion()  # equivalently one can use the set_hypercomplex method
 daq
 
-# %% pycharm={"name": "#%%\n"}
+# %%
 daq.dtype

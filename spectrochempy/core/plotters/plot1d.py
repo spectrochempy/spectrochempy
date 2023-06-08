@@ -142,25 +142,37 @@ def plot_bar(dataset, **kwargs):
     """
 
 
-def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
+def plot_multiple(datasets, method="scatter", pen=True, labels=None,
+                  marker='AUTO', color='AUTO', ls='AUTO', lw=1, **kwargs):
     """
     Plot a series of 1D datasets as a scatter plot with optional lines between markers.
 
     Parameters
     ----------
-    datasets : a list of ndatasets
-    method : str among [scatter, pen]
+    datasets : `list` of 1D `NDDataset`
+        NDdatasets to plot.
+    method : `str` among [scatter, pen]
+        Method to use for plotting.
     pen : bool, optional, default: True
         If method is scatter, this flag tells to draw also the lines
         between the marks.
-    labels : a list of str, optional
-        Labels used for the legend.
+    labels : a `list` of `str`, optional
+        Labels used for the legend. The length of the list must be equal to the number
+        of datasets to plot.
+    marker : `str`, list` os `str` or `AUTO`, optional, default: 'AUTO'
+        Marker type for scatter plot. If marker is not provided then the scatter type
+        of plot is chosen automatically.
+    color : `str`, list` os `str` or `AUTO`, optional, default: 'AUTO'
+        Color of the lines. If color is not provided then the color of the lines is
+        chosen automatically.
+    ls: `str`, `list` os `str` or `AUTO`, optional, default: 'AUTO'
+        Line style definition. If ls is not provided then the line style is chosen
+        automatically.
+    lw: `float`, `list`of  `floats`, optional, default: 1.0
+        Line width. If lw is not provided then the line width is chosen automatically.
+
     **kwargs
         Other parameters that will be passed to the plot1D function.
-
-    Other Parameters
-    ----------------
-    {0}
 
     See Also
     --------
@@ -174,11 +186,12 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
         # we need a sequence. Else it is a single plot.
         return datasets.plot(**kwargs)
 
-    if not is_sequence(labels) or len(labels) != len(datasets):
-        # we need a sequence of labels of same length as datasets
-        raise ValueError(
-            "the list of labels must be of same length " "as the datasets list"
-        )
+    def _valid(x, desc):
+        if is_sequence(x) and len(x) != len(datasets):
+            raise ValueError(
+                f"list of {desc} must be of same length as the datasets list"
+            )
+    _valid(labels, "labels")
 
     for dataset in datasets:
         if dataset._squeeze_ndim > 1:
@@ -204,14 +217,20 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
     )  # remove 'legend' from kwargs before calling plot
     # else it will generate a conflict
 
+    _valid(marker, "marker")
+    _valid(color, "color")
+    _valid(ls, "ls")
+    _valid(lw, "lw")
+
     for s in datasets:  # , colors, markers):
 
         ax = s.plot(
             method=method,
             pen=pen,
-            marker="AUTO",
-            color="AUTO",
-            ls="AUTO",
+            marker=marker,
+            color=color,
+            ls=ls,
+            lw=lw,
             clear=clear,
             **kwargs
         )
@@ -226,7 +245,6 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None, **kwargs):
             shadow=True,
             loc=legend,
             frameon=True,
-            facecolor="lightyellow",
         )
 
     # now we can output the final figure

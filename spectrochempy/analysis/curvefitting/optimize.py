@@ -15,7 +15,7 @@ import scipy.optimize
 import traitlets as tr
 from IPython import display
 
-from spectrochempy.analysis._baseclass._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis.curvefitting import _models as models_
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.application import info_, warning_

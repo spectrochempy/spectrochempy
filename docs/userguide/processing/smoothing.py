@@ -9,7 +9,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.14.5
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -23,45 +23,32 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.8
+#     version: 3.10.10
 # ---
-# %% [markdown]
-# # Smoothing
-#
-# In this tutorial, we show how to smooth spectra along one dimension (another tutorial will be devoted to 2-D
-# smoothing)
-# and gives information on the algorithms used in Spectrochempy.
-#
-# We first import spectrochempy, the other libraries used in this tutorial, and a sample dataset (
-# nh4y-activation.spg) from which we extract a noisy part:
 
-# %%
-import numpy as np
+# %% [markdown]
+# # Filtering and Smoothing
+#
+# In this tutorial, we show how to filter/smooth spectra
+# and we gives information on the algorithms used in Spectrochempy.
+#
+# We first import spectrochempy, the other libraries used in this tutorial, and a sample raman dataset:
 
 # %%
 import spectrochempy as scp
 
 # %%
-X = scp.read_omnic("irdata//nh4y-activation.spg")  # import spectra
-X = X[
-    0:5, 3600.0:2800.0
-]  # select a noisy part (the first 5 spectra in the 3700-2800 cm-1 range)
+# import spectra
+X = scp.read("ramandata/SMC1-Initial_RT.txt")
 
-# %%
-prefs = X.preferences
-prefs.figure.figsize = (7, 3)
+# plot it
+_ = X.plot()
 
-ax = X.plot()  # plot
-
-# %% Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ( [markdown]
-# In this tutorial we will apply smoothing of the
-# spectra along the wavelength dimension. These methods are based on window functions, which prototype is the *moving
-# average*.
-
-# %% Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ( [markdown]
+# %% [markdown]
 # ## The `smooth()` method
 
-# %% Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension ( [markdown]
+# %% [markdown]
+# Two methods implemented in spectrochempy can be used to smooth spectra along either one dimension (
 # The `smooth()` method is adapted from the ["Smoothing of a 1D signal" code](
 # https://scipy-cookbook.readthedocs.io/items/SignalSmooth.html) of the [Scipy cookbook](
 # https://scipy-cookbook.readthedocs.io/). It is a (weighted)-moving average method and consist in the convolution of
@@ -76,7 +63,23 @@ ax = X.plot()  # plot
 # When passed as is, i.e. `X.smooth()` , the method uses a moving average of 5 points:
 
 # %%
-ax = X.smooth().plot()
+Xsm = X.smooth()
+
+# %% [markdown]
+# Note that it is also possible to use the API function `scp.smooth(X)` instead of the dataset method `X.smooth()`. The result
+# is the same.
+
+# %% [markdown]
+# Now we plot the original and smoothed spectra on the same figure, and select a small region to better evaluate
+# the quality of the smoothing.
+
+# %%
+
+ax = X.plot(color="b", label="original")
+ax = Xsm.plot(
+    clear=False, color="r", ls="-", label="smoothed ma(5)"
+)  # moving average 5 point
+_ = ax.legend(loc="best", fontsize=10)
 
 # %% [markdown]
 # ### Window length
@@ -86,29 +89,29 @@ ax = X.smooth().plot()
 
 # %% [markdown]
 # Loop over window lengths.
-# `i` index will run from 0 to 6.
+# `i` index will run from 0 to 6. Difference between original and smothed spectra are also displayed, and the standard deviation beteen both spectra is indicated in the legend.
 
 # %%
-lspectra = [
-    X[0],
-]
-llabels = [
-    "Initial",
-]
-for i, length in enumerate([5, 11, 27, 51, 101, 201, 501]):
-    s = X[0].smooth(window_length=length)  # smooth
-    s += 0.1 * (
-        1 + i
-    )  # shift the absorbance by +0.1 a.u. with respect to previous iteration
-    lspectra.append(s)
-    llabels.append(f"length: {length}")
 
-ax = scp.plot_multiple(
-    figsize=(7, 6), method="pen", datasets=lspectra, labels=llabels, legend="upper left"
-)
+for i, length in enumerate([3, 5, 11]):
+    Xsm = X.smooth(window_length=length)  # smooth
 
-# %% The above spectra clearly show that as that the width of the window increases, the peaks belonging to [markdown]
-# The spectrum is flattened out and distorted. When determining the optimum window length, one should thus consider
+    ax = X.plot(color="b", label="original", figsize=(8, 4))
+    ax = Xsm.plot(clear=False, ls="-", lw=2, label=f"smoothed ma({length})")
+    diff = X - Xsm
+    s = round(diff.std(dim="x").values, 2)
+    ax = (diff + 1000.0).plot(clear=False, ls="-", lw=1, label=f"diff ($\sigma$={s})")
+
+    _ = ax.legend(loc="best", fontsize=10)
+
+    # for clarity with zoom on a restricted region
+    _ = ax.set_xlim(60, 350)
+    _ = ax.set_ylim(500, 3500)
+
+
+# %%
+# The above spectra clearly show that as that the width of the window increases, the peaks belonging to [markdown]
+# For large value of the window length, the spectrum is flattened out and distorted. When determining the optimum window length, one should thus consider
 # the balance between noise removal and signal integrity: the larger the window length, the stronger the smoothing,
 # but also the greater the chance to distort the spectrum.
 #
@@ -123,22 +126,20 @@ ax = scp.plot_multiple(
 # The code below compares the effect of the type of window:
 
 # %%
-wspectra = [
-    X[0],
-]
-wlabels = [
-    "Initial",
-]
 for i, window in enumerate(["flat", "bartlett", "hanning", "hamming", "blackman"]):
-    s = X[0].smooth(window_length=27, window=window) + 0.1 * (1 + i)  # smooth and shift
-    wspectra.append(s)
-    wlabels.append(f"window: {window}")
+    Xsm = X.smooth(window_length=7, window=window)
 
-ax = scp.plot_multiple(
-    figsize=(7, 4), method="pen", datasets=wspectra, labels=wlabels, legend="upper left"
-)
+    ax = X.plot(color="b", label="original", figsize=(8, 4))
+    ax = Xsm.plot(clear=False, ls="-", lw=2, label=f"{window} window")
+    diff = X - Xsm
+    s = round(diff.std(dim="x").values, 2)
+    ax = (diff + 1000.0).plot(clear=False, ls="-", lw=1, label=f"diff ($\sigma$={s})")
+    _ = ax.legend(loc="upper left", fontsize=10)
+    _ = ax.set_xlim(60, 250)
+    _ = ax.set_ylim(500, 3500)
 
-# %% Close examination of the spectra shows that the flat window leads to the stronger smoothing. This is [markdown]
+# %%
+# Close examination of the spectra shows that the flat window leads to the stronger smoothing. This is [markdown]
 # because the other window functions (also known as *apodization functions*) are used as weighting functions for the
 # N+1 points, with the largest weight on the central point and smaller weights for external points.
 #
@@ -147,6 +148,8 @@ ax = scp.plot_multiple(
 # code below displays the corresponding normalized functions for 27 points:
 
 # %%
+import numpy as np
+
 functions = []
 labels = []
 for i, f in enumerate([np.bartlett, np.hanning, np.hamming, np.blackman]):
@@ -158,44 +161,31 @@ for i, f in enumerate([np.bartlett, np.hanning, np.hamming, np.blackman]):
     labels.append(f"function: {f.__name__}")
 
 ax = scp.plot_multiple(
-    figsize=(7, 4), method="pen", datasets=functions, labels=labels, legend="upper left"
+    figsize=(7, 5),
+    ylim=(0, 0.1),
+    method="pen",
+    datasets=functions,
+    labels=labels,
+    ls="-",
+    lw=2,
 )
+_ = ax.legend(labels, loc="upper left", fontsize=10)
 
-# %% As shown above, the "bartlett" function is equivalent to a triangular apodization, while other [markdown]
-# functions (`hanning` , `hamming` , `blackman` ) are bell-shaped. More information on window functions can be found [
+# %%  [markdown]
+# As shown above, the "bartlett" function is equivalent to a triangular apodization,
+# while other
+# functions (`hanning` , `hamming` , `blackman` ) are bell-shaped. More information on
+# window functions can be found [
 # here](https://en.wikipedia.org/wiki/Window_function).
-#
-# Overall, the impact of the window function on the final spectrum is moderate, as can be shown by comparing the
-# differences (noisy spectrum *minus* smoothed spectra and the standard deviation along dimension x:
-
-# %%
-diffs = []
-stds = []
-labels = wlabels[1:]
-for s in wspectra[1:]:
-    s = s - X[0]
-    diffs.append(s)
-    stds.append(s.std(dim="x").values.m)
-ax = scp.plot_multiple(
-    figsize=(7, 4), method="pen", datasets=diffs, labels=labels, legend="upper left"
-)
-ax.set_ylim(0, 0.8)
 
 # %% [markdown]
-# and the standard deviations (the largest the value, the stronger the smoothing):
-
-# %%
-for ll, s in zip(labels, stds):
-    print(f"{ll[7:]:10s}: {s:.4f}")
-
-# %% [markdown]
-# ## Savitzky-Golay algorithm:`savgol_filter()`
+# ## Savitzky-Golay algorithm:`sgs()`
 #
 # The second algorithm implemented in spectrochempy is the Savitzky-Golay filter which uses a polynomial
 # interpolation in the moving window. A demonstrative illustration of the method can be found on the [Savitzky-Golay
 # filter](https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter) entry of Wikipedia.
 #
-# The function implemented in spectrochempy is a wrapper of the [savgol_filert() method](
+# The function implemented in spectrochempy is a wrapper of the [savgol_filter() method](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html) from the [scipy.signal](
 # https://docs.scipy.org/doc/scipy/reference/signal.html) module to which we refer the interested reader. It not only
 # used to smooth spectra but also to compute their successive derivatives. The latter are treated in [the
@@ -212,7 +202,11 @@ for ll, s in zip(labels, stds):
 # polynomial order (see Exercises below)
 
 # %%
-_ = X.savgol_filter(window_length=5, polyorder=0).plot()
+_ = X.savgol_filter(window_length=5, polyorder=0, mode="mirror").plot()
+
+# %% [markdown]
+# ## Whittaker-eilers algorithm : `whittaker_smooth`
+#
 
 # %% [markdown]
 # <div class='alert alert-info'>

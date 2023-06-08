@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 from brukeropusreader.opus_parser import parse_data, parse_meta
 
-from spectrochempy.core import debug_
+from spectrochempy.application import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.utils.docstrings import _docstring

@@ -11,7 +11,7 @@ from copy import copy
 import numpy as np
 import pytest
 
-from spectrochempy.core import debug_
+from spectrochempy.application import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.testing import (

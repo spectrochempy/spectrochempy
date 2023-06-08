@@ -68,15 +68,12 @@ warnings.filterwarnings(action="ignore", category=FutureWarning)
 
 from spectrochempy import api
 from spectrochempy.api import *
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.nddataset import NDDataset
 
 __all__ = api.__all__
 
-
 def __getattr__(name):
     # NDDataset method accessible from the API
+    from spectrochempy.core.dataset.nddataset import NDDataset
     if hasattr(NDDataset, name):
         return getattr(NDDataset, name)
     raise AttributeError

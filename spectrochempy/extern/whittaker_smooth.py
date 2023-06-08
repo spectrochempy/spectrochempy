@@ -9,13 +9,16 @@ based on the work by Eilers [1].
 coded by M. H. V. Werts (CNRS, France)
 tested on Anaconda 64-bit (Python 3.6.4, numpy 1.14.0, scipy 1.0.0)
 
-Read the license text at the end of this file before using this software.
-
 Warm thanks go to Simon Bordeyne who pioneered a first (non-sparse) version
 of the smoother in Python.
-"""
-# downloaded from
+
+# This code was downloaded from
 # https://github.com/mhvwerts/whittaker-eilers-smoother/blob/master/whittaker_smooth.py
+# See Licence in the LICENCES folder of the repository
+# (LICENCES/WHITTAKER_SMOOTH_LICENCE.rst)
+# and has been slightly modified.
+
+"""
 
 import numpy as np
 import scipy.sparse as sparse
@@ -31,7 +34,7 @@ def speyediff(N, d, format="csc"):
     Final matrix (N-d) x N
     """
 
-    assert not (d < 0), "d must be non negative"
+    # assert not (d < 0), "d must be non negative"  (this will be checked elsewhere)
     shape = (N - d, N)
     diagonals = np.zeros(2 * d + 1)
     diagonals[d] = 1.0
@@ -77,36 +80,3 @@ def whittaker_smooth(y, lmbd, d=2):
     coefmat = E + lmbd * D.conj().T.dot(D)
     z = splu(coefmat).solve(y)
     return z
-
-
-# Copyright M. H. V. Werts, 2017
-#
-# martinus point werts à ens-rennes point fr
-#
-# This software is a computer program whose purpose is to smooth noisy data.
-#
-# This software is governed by the CeCILL-B license under French law and
-# abiding by the rules of distribution of free software.  You can  use,
-# modify and/ or redistribute the software under the terms of the CeCILL-B
-# license as circulated by CEA, CNRS and INRIA at the following URL
-# "http://www.cecill.info".
-#
-# As a counterpart to the access to the source code and  rights to copy,
-# modify and redistribute granted by the license, users are provided only
-# with a limited warranty  and the software's author,  the holder of the
-# economic rights,  and the successive licensors  have only  limited
-# liability.
-#
-# In this respect, the user's attention is drawn to the risks associated
-# with loading,  using,  modifying and/or developing or reproducing the
-# software by the user in light of its specific status of free software,
-# that may mean  that it is complicated to manipulate,  and  that  also
-# therefore means  that it is reserved for developers  and  experienced
-# professionals having in-depth computer knowledge. Users are therefore
-# encouraged to load and test the software's suitability as regards their
-# requirements in conditions enabling the security of their systems and/or
-# data to be ensured and,  more generally, to use and operate it in the
-# same conditions as regards security.
-#
-# The fact that you are presently reading this means that you have had
-# knowledge of the CeCILL-B license and that you accept its terms.

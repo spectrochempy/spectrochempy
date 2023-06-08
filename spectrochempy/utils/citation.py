@@ -46,7 +46,7 @@ class Zenodo:
         """
         Update the version string metadata
         """
-        from spectrochempy.core import version as scpversion
+        from spectrochempy.application import version as scpversion
 
         if version is None:
             version = scpversion
@@ -138,7 +138,7 @@ class Citation:
         """
         Update the version metadata.
         """
-        from spectrochempy.core import version as scpversion
+        from spectrochempy.application import version as scpversion
 
         if version is None:
             version = scpversion

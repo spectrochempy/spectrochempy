@@ -10,11 +10,11 @@ from functools import partial
 from IPython.display import display
 from ipywidgets import Layout, widgets
 
-from spectrochempy.analysis.baseline.baseline import Baseline
-from spectrochempy.core import info_, warning_
+from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
-from spectrochempy.core.processors.concatenate import concatenate
+from spectrochempy.analysis.baseline.baseline import Baseline
+from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
 from spectrochempy.utils.plots import show
 
