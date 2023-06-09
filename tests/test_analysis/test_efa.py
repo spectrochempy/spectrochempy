@@ -25,7 +25,7 @@ from spectrochempy.utils.plots import show
 )
 def test_EFA_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.efa"
+    module = "spectrochempy.analysis.decomposition.efa"
     chd.check_docstrings(
         module,
         obj=scp.EFA,

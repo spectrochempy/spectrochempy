@@ -14,7 +14,7 @@ import pytest
 from numpy.testing import assert_allclose
 
 import spectrochempy as scp
-from spectrochempy.analysis.svd import SVD
+from spectrochempy.analysis.decomposition.svd import SVD
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
 
@@ -27,7 +27,7 @@ from spectrochempy.utils.constants import MASKED
 )
 def test_SVD_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.svd"
+    module = "spectrochempy.analysis.decomposition.svd"
     chd.check_docstrings(
         module,
         obj=scp.SVD,

@@ -158,7 +158,7 @@ def json_serialiser(byte_obj, encoding=None):
             "__class__": "QUANTITY",
         }
 
-    elif isinstance(byte_obj, (np.complex128, np.complex64, np.complex)):
+    elif isinstance(byte_obj, (np.complex128, np.complex64, complex)):
         if encoding is None:
             return {
                 "tolist": json_serialiser(

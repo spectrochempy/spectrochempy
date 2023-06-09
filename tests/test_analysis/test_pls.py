@@ -18,7 +18,7 @@ from numpy.testing import assert_almost_equal
 from sklearn.cross_decomposition import PLSRegression as sklPLSRegression
 
 import spectrochempy as scp
-from spectrochempy.analysis.pls import PLSRegression
+from spectrochempy.analysis.crossdecomposition.pls import PLSRegression
 from spectrochempy.core.readers.importer import read
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
@@ -33,7 +33,7 @@ from spectrochempy.utils.testing import assert_dataset_equal
 )
 def test_PLS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.pls"
+    module = "spectrochempy.analysis.crossdecomposition.pls"
     chd.check_docstrings(
         module,
         obj=scp.PLSRegression,

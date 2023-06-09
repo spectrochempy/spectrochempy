@@ -8,6 +8,7 @@
 import copy
 import functools
 import inspect
+from functools import partial, update_wrapper
 from inspect import Parameter, Signature, signature
 from textwrap import indent
 from typing import Type, TypeVar
@@ -283,3 +284,194 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
         cls.config.__doc__ = "`traitlets.config.Config` object."
         cls.parent.__doc__ = None
     return cls
+
+
+# ======================================================================================
+# A decorator to transform np.ndarray output from models to NDDataset
+# according to the X (default) and/or Y input
+# ======================================================================================
+class _set_output(object):
+    def __init__(
+        self,
+        method,
+        *args,
+        meta_from="_X",  # the attribute or tuple of attributes from which meta data are taken
+        units="keep",
+        title="keep",
+        typex=None,
+        typey=None,
+        typesingle=None,
+    ):
+        self.method = method
+        update_wrapper(self, method)
+        self.meta_from = meta_from
+        self.units = units
+        self.title = title
+        self.typex = typex
+        self.typey = typey
+        self.typesingle = typesingle
+
+    @preserve_signature
+    def __get__(self, obj, objtype):
+        """Support instance methods."""
+        newfunc = partial(self.__call__, obj)
+        update_wrapper(newfunc, self.method)
+        return newfunc
+
+    def __call__(self, obj, *args, **kwargs):
+        from spectrochempy.core.dataset.coord import Coord
+        from spectrochempy.core.dataset.nddataset import NDDataset
+
+        # HACK to be able to used deprecated alias of the method, without error
+        # because if not this modification obj appears two times
+        if args and type(args[0]) == type(obj):
+            args = args[1:]
+
+        # get the method output - one or two arrays depending on the method and *args
+        output = self.method(obj, *args, **kwargs)
+
+        # restore eventually masked rows and columns
+        axis = "both"
+        if self.typex is not None and self.typex != "features":
+            axis = 0
+        elif self.typey is not None:
+            axis = 1
+
+        # if a single array was returned...
+        if not isinstance(output, tuple):
+            # ... make a tuple of 1 array:
+            data_tuple = (output,)
+            # ... and a tuple of 1 from_meta element:
+            if not isinstance(self.meta_from, tuple):
+                meta_from_tuple = (self.meta_from,)
+            else:
+                # ensure that the first one
+                meta_from_tuple = (self.meta_from[0],)
+        else:
+            data_tuple = output
+            meta_from_tuple = self.meta_from
+
+        out = []
+        for data, meta_from in zip(data_tuple, meta_from_tuple):
+            X_transf = NDDataset(data)
+
+            # Now set the NDDataset attributes from the original X
+
+            # determine the input X dataset
+            X = getattr(obj, meta_from)
+
+            if self.units is not None:
+                if self.units == "keep":
+                    X_transf.units = X.units
+                else:
+                    X_transf.units = self.units
+            X_transf.name = f"{X.name}_{obj.name}.{self.method.__name__}"
+            X_transf.history = f"Created using method {obj.name}.{self.method.__name__}"
+            if self.title is not None:
+                if self.title == "keep":
+                    X_transf.title = X.title
+                else:
+                    X_transf.title = self.title
+            # make coordset
+            M, N = X.shape
+            if X_transf.shape == X.shape and self.typex is None and self.typey is None:
+                X_transf.set_coordset(y=X.coord(0), x=X.coord(1))
+            else:
+                if self.typey == "components":
+                    X_transf.set_coordset(
+                        y=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[0])],
+                            title="components",
+                        ),
+                        x=X.coord(-1).copy() if X.coord(-1) is not None else None,
+                    )
+                if self.typex == "components":
+                    X_transf.set_coordset(
+                        y=X.coord(0).copy() if X.coord(0) is not None else None,
+                        # cannot use X.y in case of transposed X
+                        x=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                    )
+                if self.typex == "features":
+                    X_transf.set_coordset(
+                        y=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                        x=X.coord(1).copy() if X.coord(1) is not None else None,
+                    )
+                if self.typey == "features":
+                    X_transf.set_coordset(
+                        y=X.coord(1).copy() if X.coord(1) is not None else None,
+                        x=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                    )
+                if self.typesingle == "components":
+                    # occurs when the data are 1D such as ev_ratio...
+                    X_transf.set_coordset(
+                        x=Coord(
+                            None,
+                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                    )
+                if self.typesingle == "targets":
+                    # occurs when the data are 1D such as PLSRegression intercept...
+                    if X.coordset[0].labels is not None:
+                        labels = X.coordset[0].labels
+                    else:
+                        labels = ["#%d" % (i + 1) for i in range(X.shape[-1])]
+                    X_transf.set_coordset(
+                        x=Coord(
+                            None,
+                            labels=labels,
+                            title="targets",
+                        ),
+                    )
+
+            # eventually restore masks
+            X_transf = obj._restore_masked_data(X_transf, axis=axis)
+            out.append(X_transf.squeeze())
+
+        if len(out) == 1:
+            return out[0]
+        else:
+            return tuple(out)
+
+
+def _wrap_ndarray_output_to_nddataset(
+    method=None,
+    meta_from="_X",
+    units="keep",
+    title="keep",
+    typex=None,
+    typey=None,
+    typesingle=None,
+):
+    # wrap _set_output to allow for deferred calling
+    if method:
+        # case of the decorator without argument
+        out = _set_output(method)
+    else:
+        # and with argument
+        def wrapper(method):
+            return _set_output(
+                method,
+                meta_from=meta_from,
+                units=units,
+                title=title,
+                typex=typex,
+                typey=typey,
+                typesingle=typesingle,
+            )
+
+        out = wrapper
+    return out

@@ -11,7 +11,7 @@ import os
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.analysis.simplisma import SIMPLISMA
+from spectrochempy.analysis.decomposition.simplisma import SIMPLISMA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.plots import show
@@ -25,7 +25,7 @@ from spectrochempy.utils.plots import show
 )
 def test_SIMPLISMA_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.simplisma"
+    module = "spectrochempy.analysis.decomposition.simplisma"
     chd.check_docstrings(
         module,
         obj=scp.SIMPLISMA,
