@@ -4,6 +4,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+__all__ = ["Optimize"]
+__configurables__ = __all__
 
 import re
 import sys
@@ -14,8 +16,8 @@ import traitlets as tr
 from IPython import display
 
 from spectrochempy.analysis._baseclass._analysisbase import DecompositionAnalysis
-from spectrochempy.analysis.optimize import _models as models_
-from spectrochempy.analysis.optimize._parameters import FitParameters
+from spectrochempy.analysis.curvefitting import _models as models_
+from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.application import info_, warning_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
