@@ -4,10 +4,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Package to perform fitting of 1D or n-D spectral data.
-"""
-from spectrochempy.analysis.optimize.optimize import Optimize
+from spectrochempy.utils.packages import generate_api
 
-__all__ = ["Optimize"]
-__configurables__ = __all__
+# in analysis package some classes are configurbles: list them!
+__all__, __configurables__ = generate_api(__file__, configurables=True)
+pass

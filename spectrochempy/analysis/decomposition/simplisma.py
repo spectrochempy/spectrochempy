@@ -16,7 +16,7 @@ from warnings import warn
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._base import DecompositionAnalysis
+from spectrochempy.analysis._baseclass._analysisbase import DecompositionAnalysis
 from spectrochempy.core import info_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits

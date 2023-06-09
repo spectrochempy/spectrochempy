@@ -7,6 +7,7 @@
 """
 SpectroChemPy specific exceptions
 """
+import inspect
 from contextlib import contextmanager
 
 import pint
@@ -60,6 +61,58 @@ class SpectroChemPyError(Exception):
         super().__init__(message)
 
 
+# ======================================================================================
+# Exceptions for configurable models
+# ======================================================================================
+class NotYetAppliedError(SpectroChemPyError):
+    """
+    Exception raised when a model has not yet been applied to a dataset,
+    but one use one of its method.
+
+    Parameters
+    ----------
+    attr : method, optional
+        The method from which the error was issued. In general, it is determined
+        automatically.
+    """
+
+    def __init__(self, attr=None, message=None):
+        if message is not None:
+            super().__init__(message)
+            return
+        frame = inspect.currentframe().f_back
+        caller = frame.f_code.co_name if attr is None else attr
+        model = frame.f_locals["self"].name
+        message = (
+            f"To use `{caller}` ,  the method `apply` of model `{model}`"
+            f" should be executed first"
+        )
+        super().__init__(message)
+
+
+class NotFittedError(NotYetAppliedError):
+    """
+    Exception raised when an analysis estimator is not fitted
+    but one use one of its method.
+
+    Parameters
+    ----------
+    attr : method, optional
+        The method from which the error was issued. In general, it is determined
+        automatically.
+    """
+
+    def __init__(self, attr=None, message=None):
+        frame = inspect.currentframe().f_back
+        caller = frame.f_code.co_name if attr is None else attr
+        model = frame.f_locals["self"].name
+        message = (
+            f"To use `{caller}` ,  the method `fit` of model `{model}`"
+            f" should be executed first"
+        )
+        super().__init__(message=message)
+
+
 class CastingError(SpectroChemPyError):
     """
     Exception raised when an array cannot be cast to the required data type
@@ -84,13 +137,6 @@ class ShapeError(SpectroChemPyError):
     def __init__(self, shape, message):
         message = f" Assigned value has shape {shape} but {message}"
         super().__init__(message)
-
-
-# Analysis method errors
-class NotFittedError(SpectroChemPyError):
-    """
-    Exception raised when an analysis estimtor is not fitted before use.
-    """
 
 
 class MissingDataError(SpectroChemPyError):

@@ -11,13 +11,14 @@ import pathlib
 import numpy as np
 import pytest
 
-try:
-    # Work only if spectrochempy is installed
-    import spectrochempy
-except ModuleNotFoundError:  # pragma: no cover
-    raise ModuleNotFoundError(
-        "You must install spectrochempy and its dependencies before executing tests!"
-    )
+import spectrochempy
+
+# try:
+# Work only if spectrochempy is installed
+# except ModuleNotFoundError:  # pragma: no cover
+#     raise ModuleNotFoundError(
+#         "You must install spectrochempy and its dependencies before executing tests!"
+#     )
 
 
 # ----------------------------

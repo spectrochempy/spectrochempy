@@ -9,7 +9,7 @@ Implementation of least squares Linear Regression.
 """
 import traitlets as tr
 
-from spectrochempy.analysis._base import LinearRegressionAnalysis
+from spectrochempy.analysis._baseclass._analysisbase import LinearRegressionAnalysis
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 

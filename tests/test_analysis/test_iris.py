@@ -22,7 +22,7 @@ from spectrochempy.utils import docstrings as chd
 )
 def test_IRIS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.iris"
+    module = "spectrochempy.analysis.decomposition.iris"
     chd.check_docstrings(
         module,
         obj=scp.IRIS,

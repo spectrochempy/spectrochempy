@@ -11,8 +11,8 @@ from pathlib import Path
 
 import traitlets as tr
 
-from spectrochempy.application.metaconfigurable import MetaConfigurable
 from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
 
 # ======================================================================================

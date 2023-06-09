@@ -13,17 +13,15 @@ Tests for the PCA module
 import os
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.analysis._base import NotFittedError
-from spectrochempy.analysis.pca import PCA
+from spectrochempy.analysis._baseclass._analysisbase import NotFittedError
+from spectrochempy.analysis.decomposition.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings as chd
-from spectrochempy.utils import exceptions, testing
+from spectrochempy.utils import testing
 from spectrochempy.utils.constants import MASKED
-from spectrochempy.utils.plots import show
 
 
 # test docstring
@@ -34,7 +32,7 @@ from spectrochempy.utils.plots import show
 )
 def test_PCA_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.pca"
+    module = "spectrochempy.analysis.decomposition.pca"
     chd.check_docstrings(
         module,
         obj=scp.PCA,

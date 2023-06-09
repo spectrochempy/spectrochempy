@@ -13,7 +13,7 @@ from numpy.testing import assert_almost_equal
 from sklearn.decomposition import FastICA as skl_ICA
 
 import spectrochempy as scp
-from spectrochempy.analysis.fast_ica import FastICA as scp_ICA
+from spectrochempy.analysis.decomposition.fast_ica import FastICA as scp_ICA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
@@ -29,7 +29,7 @@ from spectrochempy.utils.testing import assert_dataset_equal
 )
 def test_FastICA_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.fast_ica"
+    module = "spectrochempy.analysis.decomposition.fast_ica"
     chd.check_docstrings(
         module,
         obj=scp.FastICA,
