@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.analysis.optimize._models import asymmetricvoigtmodel
+from spectrochempy.analysis.curvefitting._models import asymmetricvoigtmodel
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
