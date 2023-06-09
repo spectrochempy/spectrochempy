@@ -13,13 +13,12 @@ import pytest
 import traitlets as tr
 
 import spectrochempy as scp
-from spectrochempy.analysis.mcrals import MCRALS
+from spectrochempy.analysis.decomposition.mcrals import MCRALS
 from spectrochempy.core import set_loglevel
 from spectrochempy.core.dataset.arraymixins.npy import dot
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils import testing
-from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.plots import show
 
 
@@ -31,7 +30,7 @@ from spectrochempy.utils.plots import show
 )
 def test_MCRALS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.mcrals"
+    module = "spectrochempy.analysis.decomposition.mcrals"
     chd.check_docstrings(
         module,
         obj=scp.MCRALS,

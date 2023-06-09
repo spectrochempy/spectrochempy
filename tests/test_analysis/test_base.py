@@ -13,7 +13,7 @@ import pytest
 import traitlets as tr
 
 import spectrochempy as scp
-from spectrochempy.analysis._base import (
+from spectrochempy.analysis._baseclass._analysisbase import (
     AnalysisConfigurable,
     DecompositionAnalysis,
     LinearRegressionAnalysis,
@@ -30,12 +30,12 @@ from spectrochempy.utils import docstrings as chd
 )
 def test_base_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis._base"
+    module = "spectrochempy.analysis._baseclass._analysisbase"
 
     # analyse AnalysisConfigurable
     chd.check_docstrings(
         module,
-        obj=scp.analysis._base.AnalysisConfigurable,
+        obj=scp.analysis._baseclass._analysisbase.AnalysisConfigurable,
         # exclude some errors - remove whatever you want to check
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
@@ -43,20 +43,20 @@ def test_base_docstrings():
     # analyse DecompositionAnalysis
     chd.check_docstrings(
         module,
-        obj=scp.analysis._base.DecompositionAnalysis,
+        obj=scp.analysis._baseclass._analysisbase.DecompositionAnalysis,
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
 
     # analyse LinearRegressionAnalysis
     chd.check_docstrings(
         module,
-        obj=scp.analysis._base.LinearRegressionAnalysis,
+        obj=scp.analysis._baseclass._analysisbase.LinearRegressionAnalysis,
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
     # analyse CrossDecompositionAnalysis
     chd.check_docstrings(
         module,
-        obj=scp.analysis._base.CrossDecompositionAnalysis,
+        obj=scp.analysis._baseclass._analysisbase.CrossDecompositionAnalysis,
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
 

@@ -17,7 +17,7 @@ from numpy.testing import assert_almost_equal
 from sklearn.decomposition import NMF as skl_NMF
 
 import spectrochempy as scp
-from spectrochempy.analysis.nmf import NMF
+from spectrochempy.analysis.decomposition.nmf import NMF
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
@@ -33,7 +33,7 @@ from spectrochempy.utils.testing import assert_dataset_equal
 )
 def test_NMF_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.nmf"
+    module = "spectrochempy.analysis.decomposition.nmf"
     chd.check_docstrings(
         module,
         obj=scp.NMF,

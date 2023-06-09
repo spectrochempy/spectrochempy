@@ -13,7 +13,7 @@ import scipy.optimize
 import traitlets as tr
 from IPython import display
 
-from spectrochempy.analysis._base import DecompositionAnalysis
+from spectrochempy.analysis._baseclass._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis.optimize import _models as models_
 from spectrochempy.analysis.optimize._parameters import FitParameters
 from spectrochempy.application import info_, warning_

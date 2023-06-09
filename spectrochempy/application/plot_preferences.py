@@ -23,7 +23,7 @@ from traitlets import (
     observe,
 )
 
-from spectrochempy.application.metaconfigurable import MetaConfigurable
+from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
 # from spectrochempy.core import warning_
 

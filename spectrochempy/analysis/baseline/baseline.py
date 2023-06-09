@@ -15,17 +15,18 @@ import traitlets as tr
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
-from spectrochempy.analysis._base import (
-    AnalysisConfigurable,
-    NotFittedError,
-    _wrap_ndarray_output_to_nddataset,
-)
-from spectrochempy.analysis.preprocessing.utils import lls, lls_inv
+from spectrochempy.analysis._baseclass._analysisbase import AnalysisConfigurable
+from spectrochempy.analysis.baseline.utils import lls, lls_inv
 from spectrochempy.application import info_, warning_
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.utils.coordrange import trim_ranges
-from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
+from spectrochempy.utils.decorators import (
+    _wrap_ndarray_output_to_nddataset,
+    deprecated,
+    signature_has_configurable_traits,
+)
 from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.plots import NBlue, NGreen, NRed
 from spectrochempy.utils.traits import NDDatasetType
@@ -40,6 +41,8 @@ __all__ = [
     "lls",
     "lls_inv",
 ]
+__configurables__ = ["Baseline"]
+__dataset_methods__ = ["baseline", "basc", "detrend", "asls", "snip"]
 
 _common_see_also = """
 See Also

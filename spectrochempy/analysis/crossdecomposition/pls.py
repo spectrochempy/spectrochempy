@@ -11,7 +11,7 @@ Implementation of Partial Least Square regression (using scikit-learn library)
 import traitlets as tr
 from sklearn import cross_decomposition
 
-from spectrochempy.analysis._base import (
+from spectrochempy.analysis._baseclass._analysisbase import (
     CrossDecompositionAnalysis,
     _wrap_ndarray_output_to_nddataset,
 )

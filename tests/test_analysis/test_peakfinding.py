@@ -22,7 +22,7 @@ from spectrochempy.utils import docstrings as chd
 )
 def test_findpeaks_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis.peakfinding"
+    module = "spectrochempy.analysis.peakfinding.peakfinding"
     chd.check_docstrings(
         module,
         obj=scp.find_peaks,

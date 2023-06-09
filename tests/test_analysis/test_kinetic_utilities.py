@@ -11,7 +11,7 @@ import pytest
 from spectrochempy import show
 
 # import spectrochempy
-from spectrochempy.analysis import kinetic_utilities as cu
+from spectrochempy.analysis.kinetics import kineticutilities as cu
 
 
 @pytest.mark.skipif(

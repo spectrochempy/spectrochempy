@@ -26,7 +26,7 @@ import scipy
 import traitlets as tr
 from sklearn import decomposition
 
-from spectrochempy.analysis._base import (
+from spectrochempy.analysis._baseclass._analysisbase import (
     DecompositionAnalysis,
     NotFittedError,
     _wrap_ndarray_output_to_nddataset,

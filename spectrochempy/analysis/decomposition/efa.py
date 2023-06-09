@@ -10,12 +10,13 @@ This module implement the EFA (Evolving Factor Analysis) class.
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._base import (
-    DecompositionAnalysis,
-    _wrap_ndarray_output_to_nddataset,
-)
+from spectrochempy.analysis._baseclass._analysisbase import DecompositionAnalysis
 from spectrochempy.core import info_
-from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
+from spectrochempy.utils.decorators import (
+    _wrap_ndarray_output_to_nddataset,
+    deprecated,
+    signature_has_configurable_traits,
+)
 from spectrochempy.utils.docstrings import _docstring
 
 __all__ = ["EFA"]

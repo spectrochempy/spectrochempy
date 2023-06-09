@@ -4,6 +4,16 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# -*- coding: utf-8 -*-
+# ======================================================================================
+# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
+"""
+This module implements the base class for all configurables.
+"""
+
 from pathlib import Path
 
 import numpy as np
@@ -60,7 +70,8 @@ class MetaConfigurable(Configurable):
         return d
 
     def trait_defaults(self, *names, **metadata):
-        # override traitlets trait default to take into accound changes in the config file
+        # override traitlets trait default to take into accound changes in the config
+        # file
         defaults = super().trait_defaults(*names, **metadata)
         # modify with the loaded external config
         if not names:  # full dictionary
@@ -128,7 +139,8 @@ class MetaConfigurable(Configurable):
             # (avoid recursive functions, though!)
             # for this we use the dill library
             # (see
-            # https://medium.com/@greyboi/serialising-all-the-functions-in-python-cd880a63b591)
+            # https://medium.com/@greyboi/
+            # serialising-all-the-functions-in-python-cd880a63b591)
             if callable(value):
                 import dill
 
@@ -142,8 +154,8 @@ class MetaConfigurable(Configurable):
             elif isinstance(value, (type(cycler), Path)):
                 value = str(value)
             if isinstance(value, np.ndarray):
-                # we need to transform it to a list of elements, bUT with python built-in
-                # types, which is not the case e.g., for int64
+                # we need to transform it to a list of elements, bUT with python
+                # built-in types, which is not the case e.g., for int64
                 value = value.tolist()
 
             self.cfg.update(
