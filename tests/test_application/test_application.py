@@ -10,6 +10,7 @@ import logging
 import spectrochempy as scp
 from spectrochempy.application import app
 
+
 def test_version():
     # test version
     assert len(scp.version.split(".")) >= 3

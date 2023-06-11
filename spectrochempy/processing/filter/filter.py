@@ -9,13 +9,22 @@ import scipy.signal
 import traitlets as tr
 
 import spectrochempy.utils.traits as mtr
-from spectrochempy.application import error_
 from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
-from spectrochempy.utils.decorators import signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
 
-__dataset_methods__ = ["savgol_filter", "sgs", "smooth", "whittaker"]
+__dataset_methods__ = [
+    "savgol_filter",
+    "savgol",
+    "smooth",
+    "whittaker",
+    "avg",
+    "han",
+    "hamming",
+    "bartlett",
+    "blackman",
+]
 __configurables__ = ["Filter"]
 __all__ = __dataset_methods__ + __configurables__
 
@@ -23,10 +32,11 @@ _common_see_also = """
 See Also
 --------
 Filter : Define and apply filters/smoothers using various algorithms.
-sgs : Savitzky-Golay filter.
-savgol_filter : Alias of `sgs`
+smooth : Function to smooth data using various window filters.
+savgol : Savitzky-Golay filter.
+savgol_filter : Alias of `savgol`
 whittaker : Whittaker-Eilers filter.
-smooth : Smooth the data using a moving average procedure.
+avg : Smooth the data using a moving average procedure.
 han : Han window filter.
 hamming : Hamming window filter.
 bartlett : Bartlett window filter.
@@ -38,7 +48,7 @@ _docstring.get_sections(
     sections=["See Also"],
 )
 _docstring.delete_params("Filter.see_also", "Filter")
-_docstring.delete_params("Filter.see_also", "sgs")
+_docstring.delete_params("Filter.see_also", "savgol")
 _docstring.delete_params("Filter.see_also", "savgol_filter")
 _docstring.delete_params("Filter.see_also", "whittaker")
 _docstring.delete_params("Filter.see_also", "smooth")
@@ -69,7 +79,7 @@ class Filter(ProcessingConfigurable):
 
     - Moving average (`avg`)
     - Convolution filters (`han`, `hamming`, `bartlett`, `blackman`)
-    - Savitzky-Golay filter (`sgs`)
+    - Savitzky-Golay filter (`savgol`)
     - Whittaker-Eilers filter (`whittaker`)
 
     Parameters
@@ -88,12 +98,12 @@ class Filter(ProcessingConfigurable):
             "hamming",
             "bartlett",
             "blackman",
-            "sgs",
+            "savgol",
             "whittaker",
         ],
-        default_value="sgs",
+        default_value="savgol",
         help="The filter method to be applied. By default, "
-        "the Savitzky-Golay (sgs) filter is applied.",
+        "the Savitzky-Golay (savgol) filter is applied.",
     ).tag(config=True)
 
     size = mtr.PositiveOddInteger(
@@ -104,7 +114,7 @@ class Filter(ProcessingConfigurable):
     order = tr.Integer(
         default_value=2,
         help="The order of the polynomial used to fit the data"
-        "in the case of the Savitzky-Golay (sgs) filter. "
+        "in the case of the Savitzky-Golay (savgol) filter. "
         "`order` must be less than size.\n"
         "In the case of the Whittaker-Eilers filter, order is the "
         "difference order of the penalized least squares.",
@@ -113,7 +123,7 @@ class Filter(ProcessingConfigurable):
     deriv = tr.Integer(
         default_value=0,
         help="The order of the derivative to compute in the case of "
-        "the Savitzky-Golay (sgs) filter. This must be a "
+        "the Savitzky-Golay (savgol) filter. This must be a "
         "non-negative integer. The default is 0, which means to "
         "filter the data without differentiating.",
     ).tag(config=True, min=0)
@@ -189,13 +199,13 @@ and ‘nearest’.
         # Convolution filters
         # -------------------
         elif self.method in ["han", "hamming", "bartlett", "blackman"]:
-            win = scipy.signal.get_window(self.method, self.size)
+            win = scipy.signal.get_window(self.method, self.size, fftbins=False)
             win = win / np.sum(win)
             data = scipy.ndimage.convolve1d(X, win, **kwargs)
 
         # Savitzky-Golay filter
         # ---------------------
-        elif self.method == "sgs":
+        elif self.method == "savgol":
             kwargs = dict(
                 axis=self._dim,
                 deriv=self.deriv,
@@ -217,6 +227,14 @@ and ‘nearest’.
         return data
 
 
+# TODO history
+#     new.history = (
+#         f"savgol_filter applied (window_length={window_length}, "
+#         f"polyorder={polyorder}, deriv={deriv}, delta={delta}, mode={mode}, "
+#         f"cval={cval}"
+#     )
+
+
 # ======================================================================================
 # API / NDDataset functions
 # ======================================================================================
@@ -233,65 +251,231 @@ def smooth(dataset, size=5, window="avg", **kwargs):
     """
     Smooth the data using a window with requested size.
 
-    This method is based on the convolution of a scaled window with the signal.
-    The signal is prepared by introducing reflected copies of the signal
-    (with the window size) in both ends so that transient parts are minimized in the
-    beginning and end part of the output data.
+    This method is based on the convolution of a scaled kernel window with the signal.
 
     Parameters
     ----------
     %(dataset)s
     %(Filter.parameters.size)s
     window : `str`, optional, default:'flat'
-        The type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
-        flat window will produce a moving average smoothing.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+        The type of window from 'flat' or 'avg', 'han' or 'hanning', 'hamming',
+        'bartlett', 'blackman'.
+        `avg` window will produce a moving average smoothing.
+    %(kwargs)s
 
     Returns
     -------
-    NDDataset
+    `NDDataset`
         Smoothed data.
 
     Other Parameters
     ----------------
     %(dim)s
+    %(Filter.parameters.mode)s
+    %(Filter.parameters.cval)s
 
     See Also
     --------
-    %(Filter.see_also.no_smooth)s                                                                                                                                     : Wittaker smoother.
+    %(Filter.see_also.no_smooth)s
     """
-    return Filter(size=size, method=window, **kwargs).apply(dataset)
+    if window in ["flat", "avg", "han", "hanning", "hamming", "bartlett", "blackman"]:
+        if window == "flat":
+            window = "avg"
+        if window == "hanning":
+            window = "han"
+
+        if kwargs.get("window_length", None) is not None:
+            deprecated("window_length", replace="size", removed="0.8")
+            size = kwargs.pop("window_length")
+
+        return Filter(method=window, size=size, **kwargs).transform(dataset)
+    else:
+        raise ValueError(
+            f"Window type '{window}' is not supported. "
+            f"Supported types are 'flat' or 'avg', 'han' or 'hanning', 'hamming', "
+            f"'bartlett', 'blackman'."
+        )
 
 
-# --------------------------------------------------------------------------------------
-def sgs(dataset, **kwargs):
+@_docstring.dedent
+def avg(dataset, size=5, **kwargs):
     """
-    Savitzky-Golay filter.
-
-    Wrapper of scpy.signal.savgol(). If dataset has dimension greater than 1,
-    dim determines the axis along which the filter is applied.
+    Moving average smoothing.
 
     Parameters
     ----------
-    dataset : `NDDataset`
-        The dataset to be filtered.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    %(dataset)s
+    %(Filter.parameters.size)s
+    %(kwargs)s
 
     Returns
     -------
-    NDDataset
-        The filtered data with same shape as x. data units are removed when deriv > 1.
+    `NDDataset`
+        Smoothed data.
 
     Other Parameters
     ----------------
-    dim : str or int, optional, default='x'
-        Specify on which dimension to apply this method. If `dim` is specified as an
-        integer it is equivalent to the usual `axis` numpy parameter.
-    inplace : bool, optional, default=False
-        True if we make the transform inplace.  If False, the function return a new
-        object.
+    %(Filter.parameters.dim)s
+    %(Filter.parameters.mode)s
+    %(Filter.parameters.cval)s
+
+    See Also
+    --------
+    %(Filter.see_also.no_avg)s
+    """
+    return Filter(method="avg", size=size, **kwargs).transform(dataset)
+
+
+@_docstring.dedent
+def han(dataset, size=5, **kwargs):
+    """
+    Hanning window smoothing.
+
+    Parameters
+    ----------
+    %(dataset)s
+    %(Filter.parameters.size)s
+    %(kwargs)s
+
+    Returns
+    -------
+    `NDDataset`
+        Smoothed data.
+
+    Other Parameters
+    ----------------
+    %(Filter.parameters.dim)s
+    %(Filter.parameters.mode)s
+    %(Filter.parameters.cval)s
+
+    See Also
+    --------
+    %(Filter.see_also.no_han)s
+    """
+    return Filter(method="han", size=size, **kwargs).transform(dataset)
+
+
+@_docstring.dedent
+def hamming(dataset, size=5, **kwargs):
+    """
+    Hamming window smoothing.
+
+    Parameters
+    ----------
+    %(dataset)s
+    %(Filter.parameters.size)s
+    %(kwargs)s
+
+    Returns
+    -------
+    `NDDataset`
+        Smoothed data.
+
+    Other Parameters
+    ----------------
+    %(Filter.parameters.dim)s
+    %(Filter.parameters.mode)s
+    %(Filter.parameters.cval)s
+
+    See Also
+    --------
+    %(Filter.see_also.no_hamming)s
+    """
+    return Filter(method="hamming", size=size, **kwargs).transform(dataset)
+
+
+@_docstring.dedent
+def bartlett(dataset, size=5, **kwargs):
+    """
+    Bartlett window smoothing.
+
+    Parameters
+    ----------
+    %(dataset)s
+    %(Filter.parameters.size)s
+    %(kwargs)s
+
+    Returns
+    -------
+    `NDDataset`
+        Smoothed data.
+
+    Other Parameters
+    ----------------
+    %(Filter.parameters.dim)s
+    %(Filter.parameters.mode)s
+    %(Filter.parameters.cval)s
+
+    See Also
+    --------
+    %(Filter.see_also.no_bartlett)s
+    """
+    return Filter(method="bartlett", size=size, **kwargs).transform(dataset)
+
+
+@_docstring.dedent
+def blackman(dataset, size=5, **kwargs):
+    """
+    Blackman window smoothing.
+
+    Parameters
+    ----------
+    %(dataset)s
+    %(Filter.parameters.size)s
+    %(kwargs)s
+
+    Returns
+    -------
+    `NDDataset`
+        Smoothed data.
+
+    Other Parameters
+    ----------------
+    %(Filter.parameters.dim)s
+    %(Filter.parameters.mode)s
+    %(Filter.parameters.cval)s
+
+    See Also
+    --------
+    %(Filter.see_also.no_bartlett)s
+    """
+    return Filter(method="blackman", size=size, **kwargs).transform(dataset)
+
+
+# --------------------------------------------------------------------------------------
+@_docstring.dedent
+def savgol(dataset, size=5, order=2, **kwargs):
+    """
+    Savitzky-Golay filter.
+
+    Wrapper of scpy.signal.savgol(). See the documentation of this function for more
+    details.
+
+    Parameters
+    ----------
+    %(dataset)s
+    %(Filter.parameters.size)s
+    order : `int`, optional, default=2
+        The order of the polynomial used to fit the data. `order` must be less
+        than size.
+    %(kwargs)s
+
+    Returns
+    -------
+    `NDDataset`
+        Smoothed data.
+
+    Other Parameters
+    ----------------
+    %(dim)s
+    %(Filter.parameters.deriv)s
+    %(Filter.parameters.delta)s
+    %(Filter.parameters.mode)s
+    %(Filter.parameters.cval)s
+
+    See Also
+    --------
+    %(Filter.see_also.no_savgol)s
 
     Notes
     -----
@@ -304,55 +488,29 @@ def sgs(dataset, **kwargs):
     whittaker_smooth : Whittaker smoother.
 
     """
+    if kwargs.get("window_length", None) is not None:
+        deprecated("window_length", replace="size", removed="0.8")
+        size = kwargs.pop("window_length")
 
-    new = dataset.copy() if not kwargs.pop("inplace", False) else dataset
+    if kwargs.get("polyorder", None) is not None:
+        deprecated("polyorder", replace="order", removed="0.8")
+        order = kwargs.pop("polyorder")
 
-    is_ndarray = False
-    axis = kwargs.pop("dim", kwargs.pop("axis", -1))
-    if hasattr(new, "get_axis"):
-        axis, dim = new.get_axis(axis, negative_axis=True)
-        data = new.data
-    else:
-        is_ndarray = True
-        data = new
-
-    data = scipy.signal.savgol_filter(
-        data, window_length, polyorder, deriv, delta, axis, mode, cval
-    )
-
-    if not is_ndarray:
-        if deriv != 0 and dataset.coord(dim).reversed:
-            data = data * (-1) ** deriv
-        new.data = data
-    else:
-        new = data
-
-    if not is_ndarray:
-        new.history = (
-            f"savgol_filter applied (window_length={window_length}, "
-            f"polyorder={polyorder}, deriv={deriv}, delta={delta}, mode={mode}, "
-            f"cval={cval}"
-        )
-    return new
+    return Filter(method="savgol", size=size, order=order, **kwargs).transform(dataset)
 
 
 def savgol_filter(*args, **kwargs):
     """
     Savitzky-Golay filter.
 
-    Alias of `sgs`.
-
-    See Also
-    --------
-    sgs : Savitzky-Golay filter.
-    whittaker : Whittaker-Eilers filter.
-    smooth : Smooth the data using a window with requested size.
+    Alias of `savgol`.
     """
     # for backward compatibility TODO: should we deprecate this?
-    return sgs(*args, **kwargs)
+    return savgol(*args, **kwargs)
 
 
-def whittaker(dataset, lamb=0.2, d=2, **kwargs):
+@_docstring.dedent
+def whittaker(dataset, lambd=1.0, order=2, **kwargs):
     """
     Smooth the data using the Whittaker smoothing algorithm.
 
@@ -363,68 +521,25 @@ def whittaker(dataset, lamb=0.2, d=2, **kwargs):
 
     Parameters
     ----------
-    dataset : `NDDataset` or a ndarray-like object
-        Input object.
-    lamb : `float`, optional, default=0.2
-        Regularization parameter for the smoothing algorithm (roughness penalty)
-        The larger `lamb`\ , the smoother the data.
+    %(dataset)s
+    %(Filter.parameters.lambd)s
     order : `int`, optional, default=2
-        Order of the smoothing.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+        The difference order of the penalized least squares.
+    %(kwargs)s
 
     Returns
     -------
-    NDdataset
+    `NDdataset`
         Smoothed data.
 
     Other Parameters
     ----------------
-    dim : str or int, optional, default='x'.
-        Specify on which dimension to apply this method. If `dim` is specified as an
-        integer it is equivalent to the usual `axis` numpy parameter.
-    inplace : bool, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new
-        object
+    %(dim)s
 
     See Also
     --------
-    savgol_filter : Apply a Savitzky-Golay filter.
-    smooth : Smooth the data using a window with requested size.
+    %(Filter.see_also.no_whittaker)s
     """
-    if not kwargs.pop("inplace", False):
-        # default
-        new = dataset.copy()
-    else:
-        new = dataset
-
-    is_ndarray = False
-    axis = kwargs.pop("dim", kwargs.pop("axis", -1))
-    if hasattr(new, "get_axis"):
-        axis, dim = new.get_axis(axis, negative_axis=True)
-    else:
-        is_ndarray = True
-
-    swapped = False
-    if axis != -1:
-        new.swapdims(axis, -1, inplace=True)  # must be done in  place
-        swapped = True
-
-    data = new.data
-    for i in range(data.shape[0]):
-        y = data[i]
-        data[i] = ws(y, lamb, d)
-
-    if not is_ndarray:
-        new.data = data
-        new.history = (
-            f"smoothing using Whittaker algorithm with lambda={lamb} and d={d}"
-        )
-
-        # restore original data order if it was swapped
-        if swapped:
-            new.swapdims(axis, -1, inplace=True)  # must be done inplace
-    else:
-        new = data
-
-    return new
+    return Filter(method="whittaker", lambd=lambd, order=order, **kwargs).transform(
+        dataset
+    )

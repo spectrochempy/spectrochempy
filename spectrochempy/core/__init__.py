@@ -102,8 +102,8 @@ with timeit("constants"):
         NOMASK,
         EPSILON,
         INPLACE,
-    ) # noqa: E402
-    from spectrochempy.utils.print_versions import show_versions # noqa: E402
+    )  # noqa: E402
+    from spectrochempy.utils.print_versions import show_versions  # noqa: E402
 
     __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
 
@@ -203,4 +203,5 @@ with timeit("processing"):
 # -------------
 with timeit("start app"):
     from spectrochempy.application import app
+
     _started = app.start()

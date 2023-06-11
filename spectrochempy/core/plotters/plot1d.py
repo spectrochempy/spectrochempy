@@ -142,8 +142,17 @@ def plot_bar(dataset, **kwargs):
     """
 
 
-def plot_multiple(datasets, method="scatter", pen=True, labels=None,
-                  marker='AUTO', color='AUTO', ls='AUTO', lw=1, **kwargs):
+def plot_multiple(
+    datasets,
+    method="scatter",
+    pen=True,
+    labels=None,
+    marker="AUTO",
+    color="AUTO",
+    ls="AUTO",
+    lw=1,
+    **kwargs,
+):
     """
     Plot a series of 1D datasets as a scatter plot with optional lines between markers.
 
@@ -191,6 +200,7 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None,
             raise ValueError(
                 f"list of {desc} must be of same length as the datasets list"
             )
+
     _valid(labels, "labels")
 
     for dataset in datasets:
@@ -232,7 +242,7 @@ def plot_multiple(datasets, method="scatter", pen=True, labels=None,
             ls=ls,
             lw=lw,
             clear=clear,
-            **kwargs
+            **kwargs,
         )
         clear = False  # clear=False is necessary for the next plot to say
         # that we will plot on the same figure

@@ -7,7 +7,6 @@
 """
 This module implements the base abstract classes to define estimators such as PCA, ...
 """
-import numpy as np
 import traitlets as tr
 
 from spectrochempy.application import app
