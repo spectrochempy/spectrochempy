@@ -8,6 +8,7 @@
 import logging
 
 import spectrochempy as scp
+from spectrochempy.application import app
 
 
 def test_version():
@@ -25,7 +26,7 @@ def test_log():
 
     assert scp.get_loglevel() == logging.WARNING
     # error and warning should be written in the handler[1]
-    log_out = scp.app.log.handlers[1].stream.getvalue().rstrip()
+    log_out = app.log.handlers[1].stream.getvalue().rstrip()
     assert "ERROR | SpectroChemPyError: an error!" in log_out
     # assert "WARNING | (UserWarning) a warning!" in log_out   # for some
     # reason the WARNING is in the file when executed as a single test but in the suite of test

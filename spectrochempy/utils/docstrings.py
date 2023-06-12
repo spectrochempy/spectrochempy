@@ -51,11 +51,23 @@ ERROR_MSGS = {
 
 
 _common_doc = """
+out : `object`
+    Input object or a newly allocated object, depending on the `inplace` flag.
+new : `object`
+    Newly allocated object.
 copy : `bool`, optional, default: `True`
     Perform a copy of the passed object.
 inplace : `bool`, optional, default: `False`
     By default, the method returns a newly allocated object.
     If `inplace` is set to `True`, the input object is returned.
+dataset : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+    Input data, where :term:`n_observations` is the number of observations
+    and :term:`n_features` is the number of features.
+dim : `int` or `str`, optional, default: -1,
+    Dimension along which the method is applied.
+    By default, the method is applied to the last dimension.
+    If `dim` is specified as an integer it is equivalent to the usual `axis` numpy
+    parameter.
 **kwargs : keyword parameters, optional
     See Other Parameters.
 """
@@ -76,14 +88,6 @@ class DocstringProcessor(docrep.DocstringProcessor):
             for k, v in (re.split(r"\s?:\s?", p, maxsplit=1) for p in plist)
         }
         self.params.update(params)
-        self.params.update(
-            {
-                "out": "`object`\n"
-                "    Input object or a newly allocated object\n"
-                "    depending on the `inplace` flag.",
-                "new": "`object`\n" "    Newly allocated object.",
-            }
-        )
 
     def dedent(self, s, stacklevel=3):
         s_ = s

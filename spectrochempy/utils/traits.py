@@ -98,3 +98,39 @@ class CoordType(SpectroChemPyType):
             kwargs["klass"] = Coord
         super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
         self.metadata.update({"dtype": dtype})
+
+
+class PositiveInteger(tr.Integer):
+    """
+    A trait for positive integer values.
+    """
+
+    info_text = "a positive integer"
+    default_value = 0
+
+    def validate(self, obj, value):
+        if value is None and not self.allow_none:
+            self.error(obj, value)
+        if value is None or value is tr.Undefined:
+            return super().validate(obj, value)
+        if value < 0:
+            self.error(obj, value)
+        return super().validate(obj, value)
+
+
+class PositiveOddInteger(tr.Integer):
+    """
+    A trait for positive odd integer values.
+    """
+
+    info_text = "a positive odd integer"
+    default_value = 1
+
+    def validate(self, obj, value):
+        if value is None and not self.allow_none:
+            self.error(obj, value)
+        if value is None or value is tr.Undefined:
+            return super().validate(obj, value)
+        if value < 0 or value % 2 == 0:
+            self.error(obj, value)
+        return super().validate(obj, value)

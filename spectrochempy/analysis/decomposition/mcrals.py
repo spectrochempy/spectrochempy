@@ -26,12 +26,12 @@ import scipy
 import traitlets as tr
 from sklearn import decomposition
 
-from spectrochempy.analysis._baseclass._analysisbase import (
+from spectrochempy.analysis._base._analysisbase import (
     DecompositionAnalysis,
     NotFittedError,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.core import info_
+from spectrochempy.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring

@@ -99,7 +99,7 @@ from spectrochempy import ur
 # Additional metadata can also be added to the instances of this class
 # through the `meta` properties.
 
-# %% [markdown] tags=[]
+# %% [markdown]
 # ## 1D-Dataset (unidimensional dataset)
 
 # %% [markdown]

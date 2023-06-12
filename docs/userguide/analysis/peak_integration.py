@@ -83,8 +83,8 @@ Xcorr.plot()
 # NDDataset.
 
 # %%
-inttrapz = Xcorr.trapz(dim="x")
-intsimps = Xcorr.simps(dim="x")
+inttrapz = Xcorr.trapezoid(dim="x")
+intsimps = Xcorr.simpson(dim="x")
 
 # %% [markdown]
 # As you can see both method give almost the same results in this case

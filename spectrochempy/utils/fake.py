@@ -60,7 +60,7 @@ def generate_fake():
     # define properties of the spectra and concentration profiles
     # ----------------------------------------------------------------------------------
     from spectrochempy.analysis.curvefitting import _models
-    from spectrochempy.core.dataset.arraymixins.npy import dot
+    from spectrochempy.processing.transformation.npy import dot
 
     # data for four peaks (one very broad)
     POS = (6000.0, 4000.0, 2000.0, 2500.0)

@@ -17,7 +17,7 @@ from traitlets import (
     validate,
 )
 
-from spectrochempy.core import error_
+from spectrochempy.application import error_
 from spectrochempy.core.project.abstractproject import AbstractProject
 
 __all__ = ["Script", "run_script", "run_all_scripts"]

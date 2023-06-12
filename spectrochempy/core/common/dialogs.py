@@ -10,7 +10,8 @@ This module implement File I/O Dialogs
 
 from os import environ
 
-from spectrochempy.core import error_, preferences
+from spectrochempy.application import error_
+from spectrochempy.core import preferences
 from spectrochempy.utils.optional import import_optional_dependency
 
 __all__ = ["open_dialog", "save_dialog"]

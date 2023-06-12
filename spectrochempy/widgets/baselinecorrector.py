@@ -10,12 +10,12 @@ from functools import partial
 from IPython.display import display
 from ipywidgets import Layout, widgets
 
-from spectrochempy.core import info_, warning_
+from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
-from spectrochempy.core.processors.baseline import BaselineCorrection
-from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.core.readers.importer import read
+from spectrochempy.processing.baseline.baseline import BaselineCorrection
+from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.utils.plots import show
 
 __all__ = ["BaselineCorrector"]
@@ -32,8 +32,9 @@ class BaselineCorrector:
 
     Parameters
     ----------
-    X : `NDDataset`\, default: None
-        The NDDataset to process. If None, an upload button can be used to load data.
+    X : `NDDataset`\ , default: `None`
+        The `NDDataset` to process. If `None`, an upload button can be used to load
+        data.
     initial_ranges : list, optional, default: None
         The initial regions where to compute the baseline. If not given, 5% on each
         side of the spectra will be taken as a starting range's list.

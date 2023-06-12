@@ -23,7 +23,7 @@ from warnings import catch_warnings
 import numpy as np
 from quaternion import as_float_array
 
-from spectrochempy.core import error_, warning_
+from spectrochempy.application import error_, warning_
 from spectrochempy.core.units import DimensionalityError, Quantity, ur
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
