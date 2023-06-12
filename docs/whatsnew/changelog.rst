@@ -20,6 +20,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* Two new baseline algorithms have been added: `asls` and `snip`. See :ref:`Baseline` for details.
 
 .. section
 
@@ -34,6 +35,12 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+* `BaselineCorrection` class has been renamed into
+  `Baseline`, and there are changes in the way it
+  is now used. It allows to perform baseline correction
+  on a dataset with multiple algorithms. See :ref:`baseline` for details.
+
+* `abc` (and its alias `ab`) method has been removed in favor of `basc`.
 
 .. section
 

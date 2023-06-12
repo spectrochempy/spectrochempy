@@ -763,7 +763,7 @@ baseline/trends for different segments of the data.
 # API / NDDataset functions
 # ======================================================================================
 # Instead of using directly the Baseline class, we provide here some functions
-# which are eventually more user friendly and which can be used directly on NDDataset or
+# which are eventually more user-friendly and which can be used directly on NDDataset or
 # called from the API.
 
 
@@ -824,7 +824,7 @@ def baseline(dataset, *ranges, **kwargs):
 @_docstring.dedent
 def basc(dataset, *ranges, **kwargs):
     r"""
-    Compute a baseline using the Baseline class processor.
+    Compute a baseline corrected dataset using the Baseline class processor.
 
     If no ranges is provided, the features limits are used.
     See `Baseline` for detailed information on the parameters.
@@ -832,7 +832,7 @@ def basc(dataset, *ranges, **kwargs):
     Parameters
     ----------
     dataset : a `NDDataset` instance
-        The dataset where to correcty the baseline.
+        The dataset where to correct the baseline.
     *ranges : a variable number of pair-tuples
         The regions taken into account for the manual baseline correction.
     **kwargs
@@ -842,7 +842,7 @@ def basc(dataset, *ranges, **kwargs):
     Returns
     -------
     `NDDataset`
-        The computed baseline
+        The computed baseline corrected dataset
 
     See Also
     --------
