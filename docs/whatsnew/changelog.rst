@@ -30,6 +30,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* #687 fixed.
 
 .. section
 
@@ -49,3 +50,5 @@ Breaking changes
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+* `parameters` method of Analysis configurables is now deprecated in favor of `params`.

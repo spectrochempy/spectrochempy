@@ -13,6 +13,11 @@ New features
   plot style of the different spectra. See :ref:`plot_multiple` for details.
 * Two new baseline algorithms have been added: `asls` and `snip`. See :ref:`Baseline` for details.
 
+Bug fixes
+~~~~~~~~~
+
+* #687 fixed.
+
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
@@ -22,3 +27,8 @@ Breaking changes
   on a dataset with multiple algorithms. See :ref:`baseline` for details.
 
 * `abc` (and its alias `ab`) method has been removed in favor of `basc`.
+
+Deprecations
+~~~~~~~~~~~~
+
+* `parameters` method of Analysis configurables is now deprecated in favor of `params`.
