@@ -1,0 +1,10 @@
+spectrochempy
+- application (main application with logs and preferences)
+- core (definition of NDDataset, and basic functionality: plotting, reading, math... )
+- analysis (divided into subfolders containing scripts for different types of NDDataset analysis, e.g. decomposition, integration, peak search, etc.)
+- processing (divided into sub-folders containing scripts for NDDataset processing, e.g. baseline, filtering, etc.)
+- utils (everything that can be shared between scripts)
+- ipython (definition of magic commands for ipython)
+- extern (external libraries included in SpectroChemPy to avoid imports)
+- examples (examples of scripts)
+- widgets (widgets for the graphical user interface - to be developed in the future)
