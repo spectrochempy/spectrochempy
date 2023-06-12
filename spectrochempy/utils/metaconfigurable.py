@@ -82,7 +82,6 @@ class MetaConfigurable(Configurable):
         return defaults
 
     @_docstring.get_docstring(base="MetaConfigurable.parameters_doc")
-    @_docstring.dedent
     def params(self, default=False):
         """
         Current or default configuration values.
