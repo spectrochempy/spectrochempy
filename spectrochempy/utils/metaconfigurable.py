@@ -83,7 +83,7 @@ class MetaConfigurable(Configurable):
 
     @_docstring.get_docstring(base="MetaConfigurable.parameters_doc")
     @_docstring.dedent
-    def parameters(self, default=False):
+    def params(self, default=False):
         """
         Current or default configuration values.
 
@@ -132,7 +132,6 @@ class MetaConfigurable(Configurable):
             return
 
         if change.name in self.trait_names(config=True):
-
             value = change.new
 
             # Serialization of callable functions

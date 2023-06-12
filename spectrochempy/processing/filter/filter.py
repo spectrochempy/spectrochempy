@@ -129,14 +129,14 @@ class Filter(ProcessingConfigurable):
         help="""
 The type of extension to use for the padded signal to which the filter is applied.
 
-* When mode is ‘constant’, the padding value is given by `cval`.\n
+* When mode is ‘constant’, the padding value is given by `cval`.
 * When the ‘interp’ mode is selected (the default), no extension is used.
   Instead, a polynomial of degree `order` is fit to the last `size` values
   of the edges, and this polynomial is used to evaluate the last window_length // 2
-  output values. \n
-* When mode is ‘nearest’, the last size values are repeated. \n
+  output values.
+* When mode is ‘nearest’, the last size values are repeated.
 * When mode is ‘mirror’, the padding is created by reflecting the signal about the end
-  of the signal. \n"
+  of the signal.
 * When mode is ‘wrap’, the signal is wrapped around on itself to create the padding.
 
 See `scipy.signal.savgol_filter` for more details on ‘mirror’, ‘constant’, ‘wrap’,
