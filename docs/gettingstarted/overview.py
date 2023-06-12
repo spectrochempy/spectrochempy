@@ -111,7 +111,7 @@ _ = smoothed.plot(colormap="magma")
 # %% [markdown]
 # #### Baseline correction
 
-# %% tags=[]
+# %%
 region = ds[:, 4000.0:2000.0]
 smoothed = region.smooth(window_length=51, window="hanning")
 blc = scp.BaselineCorrection(smoothed)

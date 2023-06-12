@@ -64,7 +64,7 @@ class SpectroChemPyError(Exception):
 # ======================================================================================
 # Exceptions for configurable models
 # ======================================================================================
-class NotYetAppliedError(SpectroChemPyError):
+class NotTransformedError(SpectroChemPyError):
     """
     Exception raised when a model has not yet been applied to a dataset,
     but one use one of its method.
@@ -90,7 +90,7 @@ class NotYetAppliedError(SpectroChemPyError):
         super().__init__(message)
 
 
-class NotFittedError(NotYetAppliedError):
+class NotFittedError(NotTransformedError):
     """
     Exception raised when an analysis estimator is not fitted
     but one use one of its method.

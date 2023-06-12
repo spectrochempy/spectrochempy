@@ -18,11 +18,11 @@ import traitlets as tr
 from matplotlib import pyplot as plt
 from scipy import optimize
 
-from spectrochempy.analysis._baseclass._analysisbase import (
+from spectrochempy.analysis._base._analysisbase import (
     DecompositionAnalysis,
     NotFittedError,
 )
-from spectrochempy.core import info_, warning_
+from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset

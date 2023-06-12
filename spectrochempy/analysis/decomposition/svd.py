@@ -10,7 +10,7 @@ This module implements the Singular Value Decomposition (SVD) class.
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._baseclass._analysisbase import (
+from spectrochempy.analysis._base._analysisbase import (
     DecompositionAnalysis,
     _wrap_ndarray_output_to_nddataset,
 )

@@ -15,36 +15,12 @@ isort:skip_file
 
 __all__ = []  # modified below
 
-from os import environ
-import sys
-
-from time import perf_counter
-
-
-class timeit:
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __enter__(self):
-        self.time = perf_counter()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.time = perf_counter() - self.time
-        self.readout = f"Elapsed Time for {self.msg}: {self.time:.6f} seconds\n"
-        if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
-            print(self.readout)
-
+from spectrochempy.utils.timeutils import timeit
 
 # ======================================================================================
 # loading module libraries
 # here we also construct the __all__ list automatically
 # ======================================================================================
-
-with timeit("app"):
-    from spectrochempy.application import app  # noqa: E402
-
-    __all__ += ["app"]
 
 with timeit("application"):
     from spectrochempy.application import (
@@ -73,8 +49,6 @@ with timeit("application"):
         config_manager,
         reset_preferences,
     )  # noqa: E402
-
-    # datadir = app.datadir
 
     def set_loglevel(level=WARNING):
         if isinstance(level, str):
@@ -117,6 +91,35 @@ with timeit("application"):
         "long_description",
     ]
 
+
+# constants
+# ---------
+with timeit("constants"):
+
+    from spectrochempy.utils.plots import show
+    from spectrochempy.utils.constants import (
+        MASKED,
+        NOMASK,
+        EPSILON,
+        INPLACE,
+    )  # noqa: E402
+    from spectrochempy.utils.print_versions import show_versions  # noqa: E402
+
+    __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
+
+# units
+# -----
+with timeit("units"):
+    from spectrochempy.core.units import *  # noqa: E402,F403,F401
+
+    __all__ += [
+        "Unit",
+        "Quantity",
+        "ur",
+        "set_nmr_context",
+        "DimensionalityError",
+    ]
+
 # dataset
 # -------
 with timeit("dataset"):
@@ -130,14 +133,6 @@ with timeit("dataset"):
 with timeit("plotter"):
     from spectrochempy.core.plotters import api  # noqa: E402
     from spectrochempy.core.plotters.api import *  # noqa: E402,F403,F401
-
-    __all__ += api.__all__
-
-# processors
-# ----------
-with timeit("processor"):
-    from spectrochempy.core.processors import api  # noqa: E402
-    from spectrochempy.core.processors.api import *  # noqa: E402,F403,F401
 
     __all__ += api.__all__
 
@@ -188,34 +183,17 @@ with timeit("analysis"):
 
     __all__ += api.__all__
 
-with timeit("constants"):
+# processing
+# ----------
+with timeit("processing"):
+    from spectrochempy.processing import api  # noqa: E402
+    from spectrochempy.processing.api import *  # noqa: E402,F403,F401
 
-    # constants
-    # ---------
-    from spectrochempy.utils.plots import show
-    from spectrochempy.utils.constants import (
-        MASKED,
-        NOMASK,
-        EPSILON,
-        INPLACE,
-    )
-    from spectrochempy.utils.print_versions import show_versions
-
-    __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
-
-# units
-# -----
-with timeit("units"):
-    from spectrochempy.core.units import *  # noqa: E402,F403,F401
-
-    __all__ += [
-        "Unit",
-        "Quantity",
-        "ur",
-        "set_nmr_context",
-        "DimensionalityError",
-    ]
+    __all__ += api.__all__
 
 # START THE app
+# -------------
 with timeit("start app"):
+    from spectrochempy.application import app
+
     _started = app.start()

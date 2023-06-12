@@ -19,7 +19,7 @@ import requests
 import yaml
 from traitlets import Dict, HasTraits, List, Type, Unicode
 
-from spectrochempy.core import info_, warning_
+from spectrochempy.application import info_, warning_
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 from spectrochempy.utils.file import (

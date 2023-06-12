@@ -18,7 +18,7 @@ import numpy as np
 import pytz  # TODO: for py>=3.9, we could use builtin zoneinfo library instead of pyt
 import traitlets as tr
 
-from spectrochempy.core import error_, warning_
+from spectrochempy.application import error_, warning_
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
@@ -201,7 +201,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # reference data (for GUI)
     # _referencedata = Array(Float(), allow_none=True)
 
-    # region ranges
+    # ranges
     # _ranges = Instance(Meta)
 
     # history
@@ -1544,7 +1544,7 @@ for funcname in api_funcs:
     __all__.append(funcname)
 
 # import also npy functions  # TODO: this will be changed with __array_functions__
-from spectrochempy.core.dataset.arraymixins.npy import dot
+from spectrochempy.processing.transformation.npy import dot
 
 NDDataset.dot = dot
 

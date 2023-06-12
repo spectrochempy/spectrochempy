@@ -20,7 +20,8 @@ from matplotlib.colors import to_rgba
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from traitlets import Dict, HasTraits, Instance, TraitError, Union, default
 
-from spectrochempy.core import error_, plot_preferences, preferences
+from spectrochempy.application import error_, plot_preferences
+from spectrochempy.core import preferences
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.plotters.plot1d import plot_1D
 from spectrochempy.core.plotters.plot2d import plot_2D
