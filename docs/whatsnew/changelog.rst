@@ -20,6 +20,8 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* `plot_multiple` method now accept keyword arguments to change the default
+  plot style of the different spectra. See :ref:`plot_multiple` for details.
 * Two new baseline algorithms have been added: `asls` and `snip`. See :ref:`Baseline` for details.
 
 .. section

@@ -16,7 +16,7 @@ import numpy as np
 import traitlets as tr
 from sklearn import linear_model
 
-from spectrochempy.core import app
+from spectrochempy.application import app
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
@@ -758,7 +758,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         -------
         x_score, y_score: `NDDataset` or tuple of `NDDataset`
             Datasets with shape (:term:`n_observations`\ , :term:`n_components`\ ).
-
         """
         if not self._fitted:
             raise NotFittedError()

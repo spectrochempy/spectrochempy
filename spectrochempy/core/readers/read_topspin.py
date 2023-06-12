@@ -16,7 +16,7 @@ import re
 import numpy as np
 from quaternion import as_quat_array
 
-from spectrochempy.core import debug_
+from spectrochempy.application import debug_
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method

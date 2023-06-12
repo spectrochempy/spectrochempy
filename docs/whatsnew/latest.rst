@@ -9,6 +9,8 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
+* `plot_multiple` method now accept keyword arguments to change the default
+  plot style of the different spectra. See :ref:`plot_multiple` for details.
 * Two new baseline algorithms have been added: `asls` and `snip`. See :ref:`Baseline` for details.
 
 Breaking changes

@@ -22,7 +22,7 @@ import traitlets as tr
 from scipy.integrate import solve_ivp
 from scipy.optimize import differential_evolution, least_squares, minimize
 
-from spectrochempy.core import error_
+from spectrochempy.application import error_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
@@ -616,7 +616,7 @@ class ActionMassKinetics(tr.HasTraits):
             # t2 = time.time()
 
         # uncomment for debugging (warning: debug_() multiply the exec time by 4...)
-        # from from spectrochempy.core import debug_
+        # from from spectrochempy.application import debug_
         # debug_(bunch.message)
         # t4 = time.time()
 

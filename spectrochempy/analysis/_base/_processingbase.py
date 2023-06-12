@@ -7,13 +7,13 @@
 """
 This module implements the base abstract classes to define estimators such as PCA, ...
 """
-import numpy as np
 import traitlets as tr
 
-from spectrochempy.core import app
+from spectrochempy.application import app
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
+from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.docstrings import _docstring
-from spectrochempy.utils.exceptions import NotYetAppliedError
+from spectrochempy.utils.exceptions import NotTransformedError
 
 
 # ======================================================================================
@@ -23,6 +23,9 @@ class ProcessingConfigurable(BaseConfigurable):
     __doc__ = _docstring.dedent(
         r"""
     Abstract class to write processing models.
+
+    Unlike the `AnalysisConfigurable` class,
+    this class has no fit methods but a only a transform method.
 
     Processing model class must subclass this to get a minimal structure
 
@@ -38,8 +41,9 @@ class ProcessingConfigurable(BaseConfigurable):
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
-    _applied = tr.Bool(False, help="False if the model was not yet applied")
-    _out = tr.Any(help="the output of the _apply method")
+    _transformed = tr.Bool(False, help="False if the model was not yet applied")
+    _reversed = tr.Bool(default_value=False, help="Whether the last axis is reversed")
+    _dim = tr.Integer(default_value=-1, help="axis along which to apply ")
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
@@ -55,12 +59,15 @@ class ProcessingConfigurable(BaseConfigurable):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def __call__(self, *args, **kwargs):
+        return self.transform(*args, **kwargs)
+
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
     # ----------------------------------------------------------------------------------
     @tr.default("_X")
     def _X_default(self):
-        raise NotYetAppliedError
+        raise NotTransformedError
 
     @property
     def _X_is_missing(self):
@@ -68,64 +75,77 @@ class ProcessingConfigurable(BaseConfigurable):
         try:
             if self._X is None:
                 return True
-        except NotYetAppliedError:
+        except NotTransformedError:
             return True
         return False
+
+    @tr.observe("_X", "_dim")
+    def _X_or_dim_changed(self, change):
+
+        X = None
+        if change.name == "_X":
+            X = change.new
+        elif change.name == "_dim":
+            X = self._X
+            dim = change.new
+            # make dim an integer
+            self._dim, _ = X.get_axis(dim, negative_axis=True)
+
+        # is a reversed x axis (if x exists)
+        if X.coordset is not None:
+            self._reversed = X.coord(self._dim).reversed
 
     # ----------------------------------------------------------------------------------
     # Private methods that should be, most of the time, overloaded in subclass
     # ----------------------------------------------------------------------------------
-    def _apply(self, X):  # pragma: no cover
+    def _transform(self, X):  # pragma: no cover
         #  Intended to be replaced in the subclasses by user defined function
         #  (with the same name)
-        raise NotImplementedError("fit method has not yet been implemented")
+        raise NotImplementedError("_transform method has not yet been implemented")
 
     # ----------------------------------------------------------------------------------
     # Public methods and property
     # ----------------------------------------------------------------------------------
-    def apply(self, X):
+    @_wrap_ndarray_output_to_nddataset
+    @_docstring.dedent
+    def transform(self, dataset, dim=-1):
         r"""
-        Apply the model with ``X`` as input dataset.
+        Transform the input dataset X using the current model.
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
-            Training data.
+        %(dataset)s
+        %(dim)s
 
         Returns
         -------
-        self
-            The instance itself.
+        `NDDataset`
+            The transformed dataset.
         """
-        self._applied = False  # reinit this flag
+        self._transformed = False  # reinit this flag
 
         # fire the X validation and preprocessing.
         # X is expected to be a NDDataset or list of NDDataset.
-        self._X = X
+        self._X = dataset
+        self._dim = dim
 
         # _X_preprocessed has been computed when X was set.
         # At this stage they should be simple ndarrays
         newX = self._X_preprocessed
 
-        # Call to the actual _apply method (overloaded in the subclass)
-        # warning : _apply must take ndarray arguments not NDDataset arguments.
-        # when method must return NDDataset from the calculated data,
-        # we use the decorator _wrap_ndarray_output_to_nddataset.
-        self._out = self._apply(newX)
+        # Call to the actual _transform method (overloaded in the subclass)
+        Xt = self._transform(newX)
 
-        # if the process was successful, _applied is set to True so that other method
-        # which needs apply will be possibly used.
-        self._applied = True
-        return self
+        # if the process was successful, _transformed is set to True so that other
+        # methods which need to be applied will be possibly used.
+        self._transformed = True
+        return Xt
 
-    # we do not use this method as a decorator as in this case signature of subclasses
     _docstring.get_sections(
-        _docstring.dedent(apply.__doc__),
-        base="processing_apply",
+        _docstring.dedent(transform.__doc__),
+        base="processing_transform",
         sections=["Parameters", "Returns"],
     )
-    # extract useful individual parameters doc
-    _docstring.keep_params("processing_apply.parameters", "X")
 
     @property
     def log(self):
@@ -135,21 +155,3 @@ class ProcessingConfigurable(BaseConfigurable):
         # A string handler (#1) is defined for the Spectrochempy logger,
         # thus we will return it's content
         return app.log.handlers[1].stream.getvalue().rstrip()
-
-    @property
-    def X(self):
-        """
-        Return the X input dataset (eventually modified by the model).
-        """
-        if self._X_is_missing:
-            raise NotYetAppliedError
-        # We use X property only to show this information to the end user. Internally
-        # we use _X attribute to refer to the input data
-        X = self._X.copy()
-        if np.any(self._X_mask):
-            # restore masked row and column if necessary
-            X = self._restore_masked_data(X, axis="both")
-        if self._is_dataset or self._output_type == "NDDataset":
-            return X
-        else:
-            return np.asarray(X)

@@ -15,7 +15,7 @@ from pathlib import Path
 
 import requests
 
-from spectrochempy.core import error_, info_
+from spectrochempy.application import error_, info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.read_jcamp import read_jcamp

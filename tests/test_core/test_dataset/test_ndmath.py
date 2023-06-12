@@ -16,7 +16,7 @@ from pint.errors import DimensionalityError
 from quaternion import quaternion
 
 import spectrochempy as scp
-from spectrochempy.core import error_, info_
+from spectrochempy.application import error_, info_
 from spectrochempy.core.dataset.arraymixins.ndmath import (
     _binary_ufuncs,
     _comp_ufuncs,

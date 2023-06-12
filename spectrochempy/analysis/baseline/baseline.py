@@ -15,8 +15,8 @@ import traitlets as tr
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
-from spectrochempy.analysis._baseclass._analysisbase import AnalysisConfigurable
-from spectrochempy.analysis.baseline.utils import lls, lls_inv
+from spectrochempy.analysis._base._analysisbase import AnalysisConfigurable
+from spectrochempy.analysis.baseline.baselineutils import lls, lls_inv
 from spectrochempy.application import info_, warning_
 from spectrochempy.core.processors.concatenate import concatenate
 from spectrochempy.utils.coordrange import trim_ranges
@@ -78,7 +78,8 @@ _docstring.delete_params("Baseline.see_also", "detrend")
 # ======================================================================================
 @signature_has_configurable_traits
 # Note: with this decorator
-# Configurable traits are added to the signature as keywords if they are not yet present.
+# Configurable traits are added to the signature as keywords
+# if they are not yet present.
 class Baseline(AnalysisConfigurable):
     __doc__ = _docstring.dedent(
         """
@@ -88,7 +89,8 @@ class Baseline(AnalysisConfigurable):
     with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`\ ,
     :term:`n_features`\ ).
 
-    When dealing with 2D datasets, the baseline correction can be applied either sequentially (default) or using a multivariate approach (parameter
+    When dealing with 2D datasets, the baseline correction can be applied either
+    sequentially (default) or using a multivariate approach (parameter
     `multivariate`set to `True).
 
     - The ``'sequential'`` approach which can be used for both 1D and 2D datasets
@@ -97,7 +99,8 @@ class Baseline(AnalysisConfigurable):
     - The ``'multivariate'`` approach can only be applied to 2D datasets (at least 3
       observations).
       The 2D dataset is first dimensionally reduced into several principal
-      components using a conventional Singular Value Decomposition :term:`SVD` or a non-negative matrix factorization (`NMF`\ ).
+      components using a conventional Singular Value Decomposition :term:`SVD` or a
+      non-negative matrix factorization (`NMF`\ ).
       Each component is then fitted before an inverse transform performed to recover
       the baseline correction.
 
@@ -116,7 +119,8 @@ class Baseline(AnalysisConfigurable):
       obtained by evaluating the polynomial at each feature defined in predefined
       `ranges`\ .
 
-    By default, `ranges` is set to the feature limits (i.e. `ranges=[features[0], features[-1]]`)
+    By default, `ranges` is set to the feature limits (i.e. `ranges=[features[0],
+    features[-1]]`)
     `model='polynomial'` and `order=1`\ .
 
     Parameters
@@ -184,7 +188,8 @@ class Baseline(AnalysisConfigurable):
 * If a string if provided among  'constant', 'linear', 'quadratic' and 'cubic',
   it is equivalent to order O (constant) to 3 (cubic).
 * If a string equal to `pchip` is provided, the polynomial interpolation is replaced
-  by a piecewise cubic hermite interpolation (see `scipy.interpolate.PchipInterpolator`\ """,
+  by a piecewise cubic hermite interpolation
+  (see `scipy.interpolate.PchipInterpolator`\ """,
     ).tag(config=True, min=1)
 
     mu = tr.Float(
@@ -195,9 +200,10 @@ class Baseline(AnalysisConfigurable):
 
     asymmetry = tr.Float(
         default_value=0.05,
-        help="The asymmetry parameter for the AsLS method. It is typically between 0.001 "
+        help="The asymmetry parameter for the AsLS method. "
+        "It is typically between 0.001 "
         "and 0.1. 0.001 gives almost the same fit as the unconstrained least squares",
-    ).tag(config=True)
+    ).tag(config=True, min=0.001)
 
     snip_width = tr.Integer(
         help="The width of the window used to determine the baseline using the SNIP "
@@ -209,10 +215,10 @@ class Baseline(AnalysisConfigurable):
         help="The tolerance parameter for the AsLS method. Smaller values make the "
         "fitting better but potentially increases the number of iterations and the "
         "running time. Values should be in the range (0, 1).",
-    ).tag(config=True)
+    ).tag(config=True, min=0, max=1)
 
     max_iter = tr.Integer(50, help="Maximum number of :term:`AsLS` iteration.").tag(
-        config=True
+        config=True, min=1
     )
     n_components = tr.Integer(
         default_value=5,

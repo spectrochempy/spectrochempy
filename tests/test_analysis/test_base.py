@@ -13,7 +13,7 @@ import pytest
 import traitlets as tr
 
 import spectrochempy as scp
-from spectrochempy.analysis._baseclass._analysisbase import (
+from spectrochempy.analysis._base._analysisbase import (
     AnalysisConfigurable,
     DecompositionAnalysis,
     LinearRegressionAnalysis,
@@ -30,12 +30,12 @@ from spectrochempy.utils import docstrings as chd
 )
 def test_base_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
-    module = "spectrochempy.analysis._baseclass._analysisbase"
+    module = "spectrochempy.analysis._base._analysisbase"
 
     # analyse AnalysisConfigurable
     chd.check_docstrings(
         module,
-        obj=scp.analysis._baseclass._analysisbase.AnalysisConfigurable,
+        obj=scp.analysis._base._analysisbase.AnalysisConfigurable,
         # exclude some errors - remove whatever you want to check
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
@@ -43,20 +43,20 @@ def test_base_docstrings():
     # analyse DecompositionAnalysis
     chd.check_docstrings(
         module,
-        obj=scp.analysis._baseclass._analysisbase.DecompositionAnalysis,
+        obj=scp.analysis._base._analysisbase.DecompositionAnalysis,
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
 
     # analyse LinearRegressionAnalysis
     chd.check_docstrings(
         module,
-        obj=scp.analysis._baseclass._analysisbase.LinearRegressionAnalysis,
+        obj=scp.analysis._base._analysisbase.LinearRegressionAnalysis,
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
     # analyse CrossDecompositionAnalysis
     chd.check_docstrings(
         module,
-        obj=scp.analysis._baseclass._analysisbase.CrossDecompositionAnalysis,
+        obj=scp.analysis._base._analysisbase.CrossDecompositionAnalysis,
         exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
     )
 
@@ -87,7 +87,7 @@ def test_analysisconfigurable():
 
     # set conf. at init
     foo.reset()  # needed to delete json (in case it was already created)
-    cd = scp.app.config_dir
+    cd = scp.application.app.config_dir
     assert not (cd / "Foo.json").exists()
     foo = Foo(a=1)
     assert foo.a == 1

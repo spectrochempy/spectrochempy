@@ -16,7 +16,7 @@ __dataset_methods__ = __all__
 
 import numpy as np
 
-from spectrochempy.core.processors.utils import _units_agnostic_method
+from spectrochempy.utils.decorators import _units_agnostic_method
 
 pi = np.pi
 

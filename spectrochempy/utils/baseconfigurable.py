@@ -26,7 +26,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import MASKED, NOMASK
 from spectrochempy.utils.docstrings import _docstring
-from spectrochempy.utils.exceptions import NotYetAppliedError
+from spectrochempy.utils.exceptions import NotTransformedError
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -93,7 +93,8 @@ class BaseConfigurable(MetaConfigurable):
         """ """
         # An empty __doc__ is placed here, else Configurable.__doc__
         # will appear when there is no __init___.doc in subclass
-        from spectrochempy.core import app, set_loglevel
+        from spectrochempy.application import app
+        from spectrochempy.core import set_loglevel
 
         # Reset default configuration if not warm_start
         reset = not self._warm_start
@@ -284,7 +285,7 @@ class BaseConfigurable(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     @tr.default("_X")
     def _X_default(self):
-        raise NotYetAppliedError
+        raise NotTransformedError
 
     @tr.validate("_X")
     def _X_validate(self, proposal):
@@ -318,7 +319,7 @@ class BaseConfigurable(MetaConfigurable):
         try:
             if self._X is None:
                 return True
-        except NotYetAppliedError:
+        except NotTransformedError:
             return True
         return False
 
@@ -346,7 +347,7 @@ class BaseConfigurable(MetaConfigurable):
         """
         # A string handler (#1) is defined for the Spectrochempy logger,
         # thus we will return it's content
-        from spectrochempy.core import app
+        from spectrochempy.application import app
 
         return app.log.handlers[1].stream.getvalue().rstrip()
 

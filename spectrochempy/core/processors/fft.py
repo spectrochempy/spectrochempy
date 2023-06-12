@@ -14,11 +14,11 @@ import numpy as np
 from quaternion import as_float_array
 from scipy.signal import hilbert
 
-from spectrochempy.core import error_
+from spectrochempy.application import error_
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.processors.utils import _units_agnostic_method
 from spectrochempy.core.processors.zero_filling import zf_size
 from spectrochempy.core.units import ur
+from spectrochempy.utils.decorators import _units_agnostic_method
 from spectrochempy.utils.misc import (
     as_quaternion,
     get_component,

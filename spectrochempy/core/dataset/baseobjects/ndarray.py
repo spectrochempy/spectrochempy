@@ -32,7 +32,7 @@ from traitlets import (
     validate,
 )
 
-from spectrochempy.core import error_, info_
+from spectrochempy.application import error_, info_
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.units import (
     DimensionalityError,

@@ -16,7 +16,7 @@ def lls(data):
 
     Compress the dynamic range of data by applying the log-log-square transform.
     It is used in the context of the baseline correction but can be used
-    in other contexts, such as denoising fro instances.
+    in other contexts, such as de-noising for instances.
 
     Parameters
     ----------

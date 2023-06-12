@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.analysis._baseclass._analysisbase import NotFittedError
+from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis.decomposition.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings as chd

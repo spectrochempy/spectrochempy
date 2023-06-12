@@ -16,7 +16,7 @@ import functools
 
 import numpy as np
 
-from spectrochempy.core import error_
+from spectrochempy.application import error_
 from spectrochempy.core.units import Quantity, ur
 
 pi = np.pi

@@ -18,7 +18,7 @@ __dataset_methods__ = __all__
 
 # from ...utils import NOMASK, MASKED, UnitsCompatibilityError
 # from spectrochempy.extern.orderedset import OrderedSet
-# from spectrochempy.core import warning_, error_
+# from spectrochempy.application import warning_, error_
 
 
 def interpolate(dataset, axis=0, size=None):

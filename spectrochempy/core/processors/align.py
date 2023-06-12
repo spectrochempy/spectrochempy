@@ -14,7 +14,7 @@ __dataset_methods__ = __all__
 # import scipy.interpolate
 import numpy as np
 
-from spectrochempy.core import error_, warning_
+from spectrochempy.application import error_, warning_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.misc import get_n_decimals

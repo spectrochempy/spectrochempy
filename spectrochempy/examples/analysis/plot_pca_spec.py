@@ -82,7 +82,8 @@ _ = pca.loadings.plot(legend=True)
 scores = pca.transform()
 _ = pca.scoreplot(scores, 1, 2)
 
-# %% labeling scoreplot with spectra labels
+# %%
+# Labeling scoreplot with spectra labels
 # Our dataset has already two columns of labels for the spectra but there are little
 # too long for display on plots.
 scores.y.labels
