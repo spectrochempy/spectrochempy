@@ -81,7 +81,6 @@ class MetaConfigurable(Configurable):
             defaults.update(config)
         return defaults
 
-    @_docstring.get_docstring(base="MetaConfigurable.parameters_doc")
     def params(self, default=False):
         """
         Current or default configuration values.
@@ -103,6 +102,8 @@ class MetaConfigurable(Configurable):
         else:
             d.update(self.trait_defaults(config=True))
         return d
+
+    _docstring.get_docstring(params.__doc__, base="MetaConfigurable.parameters_doc")
 
     def reset(self):
         """

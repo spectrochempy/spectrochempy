@@ -1991,7 +1991,6 @@ class NDArray(HasTraits):
         if title:
             self._title = title
 
-    @_docstring.get_docstring(base="to")
     def to(self, other, inplace=False, force=False):
         """
         Return the object with data rescaled to different units.
@@ -2166,6 +2165,8 @@ class NDArray(HasTraits):
 
         else:
             return new
+
+    _docstring.get_docstring(to.__doc__, base="to")
 
     def to_base_units(self, inplace=False):
         """
