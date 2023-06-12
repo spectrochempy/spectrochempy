@@ -48,9 +48,6 @@ _docstring.delete_params("Filter.see_also", "smooth")
 # Filter class processor
 # ======================================================================================
 @signature_has_configurable_traits
-# Note: with this decorator
-# Configurable traits are added to the signature as keywords
-# if they are not yet present.
 class Filter(ProcessingConfigurable):
     __doc__ = _docstring.dedent(
         """
@@ -213,6 +210,17 @@ and ‘nearest’.
         return data
 
 
+_docstring.keep_params("Filter.parameters", "log_level")
+_docstring.keep_params("Filter.parameters", "method")
+_docstring.keep_params("Filter.parameters", "size")
+_docstring.keep_params("Filter.parameters", "order")
+_docstring.keep_params("Filter.parameters", "deriv")
+_docstring.keep_params("Filter.parameters", "lambd")
+_docstring.keep_params("Filter.parameters", "delta")
+_docstring.keep_params("Filter.parameters", "mode")
+_docstring.keep_params("Filter.parameters", "cval")
+
+
 # TODO history
 #     new.history = (
 #         f"savgol_filter applied (window_length={window_length}, "
@@ -229,7 +237,6 @@ and ‘nearest’.
 # called from the API.
 
 # --------------------------------------------------------------------------------------
-_docstring.keep_params("Filter.parameters", "size")
 
 
 @_docstring.dedent
@@ -259,6 +266,7 @@ def smooth(dataset, size=5, window="avg", **kwargs):
     %(dim)s
     %(Filter.parameters.mode)s
     %(Filter.parameters.cval)s
+    %(Filter.parameters.log_level)s
 
     See Also
     --------
@@ -287,49 +295,45 @@ def smooth(dataset, size=5, window="avg", **kwargs):
 @_docstring.dedent
 def savgol(dataset, size=5, order=2, **kwargs):
     """
-        Savitzky-Golay filter.
+    Savitzky-Golay filter.
 
-        Wrapper of scpy.signal.savgol(). See the documentation of this function for more
-        details.
+    Wrapper of scpy.signal.savgol(). See the documentation of this function for more
+    details.
 
-        Parameters
-        ----------
-        %(dataset)s
-        %(Filter.parameters.size)s
-        order : `int`, optional, default=2
-            The order of the polynomial used to fit the data. `order` must be less
-            than size.
-        %(kwargs)s
+    Parameters
+    ----------
+    %(dataset)s
+    %(Filter.parameters.size)s
+    order : `int`, optional, default=2
+        The order of the polynomial used to fit the data. `order` must be less
+        than size.
+    %(kwargs)s
 
-        Returns
-        -------
-        `NDDataset`
-            Smoothed data.
+    Returns
+    -------
+    `NDDataset`
+        Smoothed data.
 
-        Other Parameters
-        ----------------
-        %(dim)s
-        %(Filter.parameters.deriv)s
-        %(Filter.parameters.delta)s
-        %(Filter.parameters.mode)s
-        %(Filter.parameters.cval)s
+    Other Parameters
+    ----------------
+    %(dim)s
+    %(Filter.parameters.deriv)s
+    %(Filter.parameters.delta)s
+    %(Filter.parameters.mode)s
+    %(Filter.parameters.cval)s
+    %(Filter.parameters.log_level)s
 
-        See Also
-        --------
-        %(Filter.see_also.no_savgol)s
+    See Also
+    --------
+    %(Filter.see_also.no_savgol)s
 
-        Notes
-        -----
-        Even spacing of the axis coordinates is NOT checked. Be aware that Savitzky-Golay
-        algorithm is based on indexes, not on coordinates.
-
-    <<<<<<< HEAD
-        See Also
-        ---------
-        smooth : Smooth the data using a window with requested size.
-        whittaker_smooth : Whittaker smoother.
-
+    Notes
+    -----
+    Even spacing of the axis coordinates is NOT checked.
+    Be aware that Savitzky-Golay algorithm is based on indexes, not on coordinates.
     """
+    # TODO : check if coordinates are evenly spaced
+
     if kwargs.get("window_length", None) is not None:
         deprecated("window_length", replace="size", removed="0.8")
         size = kwargs.pop("window_length")
@@ -366,7 +370,7 @@ def whittaker(dataset, lambd=1.0, order=2, **kwargs):
     %(dataset)s
     %(Filter.parameters.lambd)s
     order : `int`, optional, default=2
-        The difference order of the penalized least squares.
+        The difference order of the penalized least-squares.
     %(kwargs)s
 
     Returns
@@ -377,6 +381,7 @@ def whittaker(dataset, lambd=1.0, order=2, **kwargs):
     Other Parameters
     ----------------
     %(dim)s
+    %(Filter.parameters.log_level)s
 
     See Also
     --------
