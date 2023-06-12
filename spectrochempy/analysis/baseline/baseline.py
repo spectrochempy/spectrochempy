@@ -671,7 +671,7 @@ baseline/trends for different segments of the data.
         """
         %(MetaConfigurable.parameters_doc)s
         """
-        d = super().parameters(default)
+        d = super().params(default)
         if not default:
             d.ranges = self._ranges
         return d

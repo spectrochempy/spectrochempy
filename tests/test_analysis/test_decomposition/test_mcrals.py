@@ -153,13 +153,13 @@ def test_MCRALS(model, data):
     assert mcr.transform(D) == mcr.C
 
     # test current parameters
-    params = mcr.parameters()
+    params = mcr.params()
     assert len(params) == 31
     assert np.all(params.closureTarget == [1] * 10)
     assert params.tol == 30.0
 
     # test display of default
-    params = mcr.parameters(default=True)
+    params = mcr.param(default=True)
     assert params.tol == 0.1
 
     # full process

@@ -119,7 +119,7 @@ class MetaConfigurable(Configurable):
             f.unlink(missing_ok=True)
 
         # then set the default parameters
-        for k, v in self.parameters(default=True).items():
+        for k, v in self.params(default=True).items():
             if getattr(self, k) != v:
                 setattr(self, k, v)
 
