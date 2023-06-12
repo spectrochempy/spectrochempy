@@ -159,7 +159,7 @@ def test_MCRALS(model, data):
     assert params.tol == 30.0
 
     # test display of default
-    params = mcr.param(default=True)
+    params = mcr.params(default=True)
     assert params.tol == 0.1
 
     # full process
