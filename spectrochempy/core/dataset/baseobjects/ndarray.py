@@ -1204,7 +1204,6 @@ class NDArray(HasTraits):
 
     @property
     @_docstring.get_docstring(base="data")
-    @_docstring.dedent
     def data(self):
         """
         Data array (`~numpy.ndarray`).
@@ -1977,7 +1976,7 @@ class NDArray(HasTraits):
     @property
     def title(self):
         """
-        An user friendly title (str).
+        An user-friendly title (str).
 
         When the title is provided, it can be used for labeling the object,
         e.g., axe title in a matplotlib plot.
@@ -1992,8 +1991,6 @@ class NDArray(HasTraits):
         if title:
             self._title = title
 
-    @_docstring.get_docstring(base="to")
-    @_docstring.dedent
     def to(self, other, inplace=False, force=False):
         """
         Return the object with data rescaled to different units.
@@ -2168,6 +2165,8 @@ class NDArray(HasTraits):
 
         else:
             return new
+
+    _docstring.get_docstring(to.__doc__, base="to")
 
     def to_base_units(self, inplace=False):
         """

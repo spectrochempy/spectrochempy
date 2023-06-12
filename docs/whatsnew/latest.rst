@@ -11,3 +11,13 @@ New features
 
 * `plot_multiple` method now accept keyword arguments to change the default
   plot style of the different spectra. See :ref:`plot_multiple` for details.
+
+Bug fixes
+~~~~~~~~~
+
+* #687 fixed.
+
+Deprecations
+~~~~~~~~~~~~
+
+* `parameters` method of Analysis configurables is now deprecated in favor of `params`.

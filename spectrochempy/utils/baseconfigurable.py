@@ -108,7 +108,7 @@ class BaseConfigurable(MetaConfigurable):
         # Initial configuration
         # ---------------------
         # Reset all config parameters to default, if not warm_start
-        defaults = self.parameters(default=True)
+        defaults = self.params(default=True)
         configkw = {} if self._warm_start else defaults
 
         # Eventually take parameters from kwargs
@@ -350,19 +350,3 @@ class BaseConfigurable(MetaConfigurable):
         from spectrochempy.application import app
 
         return app.log.handlers[1].stream.getvalue().rstrip()
-
-    @property
-    def X(self):
-        """
-        Return the X input dataset (eventually modified by the model).
-        """
-        # We use X property only to show this information to the end user. Internally
-        # we use _X attribute to refer to the input data
-        X = self._X.copy()
-        if np.any(self._X_mask):
-            # restore masked row and column if necessary
-            X = self._restore_masked_data(X, axis="both")
-        if self._is_dataset or self._output_type == "NDDataset":
-            return X
-        else:
-            return np.asarray(X)

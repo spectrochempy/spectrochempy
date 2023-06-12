@@ -95,7 +95,6 @@ with timeit("application"):
 # constants
 # ---------
 with timeit("constants"):
-
     from spectrochempy.utils.plots import show
     from spectrochempy.utils.constants import (
         MASKED,

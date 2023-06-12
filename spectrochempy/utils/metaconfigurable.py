@@ -23,6 +23,7 @@ from traitlets.config import Config
 from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.objects import Adict
 
@@ -81,9 +82,7 @@ class MetaConfigurable(Configurable):
             defaults.update(config)
         return defaults
 
-    @_docstring.get_docstring(base="MetaConfigurable.parameters_doc")
-    @_docstring.dedent
-    def parameters(self, default=False):
+    def params(self, default=False):
         """
         Current or default configuration values.
 
@@ -105,6 +104,15 @@ class MetaConfigurable(Configurable):
             d.update(self.trait_defaults(config=True))
         return d
 
+    _docstring.get_docstring(params.__doc__, base="MetaConfigurable.parameters_doc")
+
+    @deprecated(replace="params", removed="0.7.1")
+    def parameters(self, default=False):
+        """
+        Alias for `params` method.
+        """
+        return self.params(default=default)
+
     def reset(self):
         """
         Reset configuration parameters to their default values
@@ -119,7 +127,7 @@ class MetaConfigurable(Configurable):
             f.unlink(missing_ok=True)
 
         # then set the default parameters
-        for k, v in self.parameters(default=True).items():
+        for k, v in self.params(default=True).items():
             if getattr(self, k) != v:
                 setattr(self, k, v)
 
@@ -132,7 +140,6 @@ class MetaConfigurable(Configurable):
             return
 
         if change.name in self.trait_names(config=True):
-
             value = change.new
 
             # Serialization of callable functions

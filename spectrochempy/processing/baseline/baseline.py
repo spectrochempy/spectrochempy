@@ -7,9 +7,9 @@
 """
 This module implements the `BaselineCorrection` class for baseline corrections.
 """
-__all__ = ["BaselineCorrection", "ab", "abc", "dc", "basc"]
+__all__ = ["BaselineCorrection", "ab", "abc", "basc"]
 
-__dataset_methods__ = ["ab", "abc", "dc", "basc"]
+__dataset_methods__ = ["ab", "abc", "basc"]
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,10 +21,7 @@ from spectrochempy.core import debug_, warning_
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.processing.filter.smooth import smooth
 from spectrochempy.utils.coordrange import trim_ranges
-from spectrochempy.utils.decorators import (
-    _units_agnostic_method,
-    signature_has_configurable_traits,
-)
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -78,7 +75,6 @@ class BaselineCorrection(HasTraits):
     sps = List()
 
     def __init__(self, dataset, **kwargs):
-
         super().__init__(**kwargs)
 
         self.dataset = dataset
@@ -116,7 +112,6 @@ class BaselineCorrection(HasTraits):
             self.ranges.append(item)
 
     def _setup(self, **kwargs):
-
         self.method = kwargs.get("method", self.method)
         self.interpolation = kwargs.get("interpolation", self.interpolation)
         if self.interpolation == "polynomial":
@@ -127,7 +122,6 @@ class BaselineCorrection(HasTraits):
         self.figsize = kwargs.get("figsize", self.figsize)
 
     def __call__(self, *ranges, **kwargs):
-
         return self.compute(*ranges, **kwargs)
 
     def compute(self, *ranges, **kwargs):
@@ -215,7 +209,6 @@ class BaselineCorrection(HasTraits):
         xbase = sbase.coordset(dim)
 
         if self.method == "sequential":
-
             if self.interpolation == "polynomial":
                 # # bad fit when NaN values => are replaced by 0      # NO reason we have Nan -> suppressed
                 # if np.any(np.isnan(sbase)):
@@ -234,7 +227,6 @@ class BaselineCorrection(HasTraits):
                     baseline[i] = interp(x)
 
         elif self.method == "multivariate":
-
             # SVD of Sbase
             U, s, Vt = np.linalg.svd(sbase.data, full_matrices=False, compute_uv=True)
 
@@ -364,7 +356,6 @@ class BaselineCorrection(HasTraits):
         self.show_regions(ax1)
 
         def show_basecor(ax2):
-
             corrected = self.compute(*ranges, **kwargs)
 
             ax2.clear()
@@ -591,36 +582,6 @@ def ab(dataset, dim=-1, **kwargs):
     Alias of `abc` .
     """
     return abs(dataset, dim, **kwargs)
-
-
-@_units_agnostic_method
-def dc(dataset, **kwargs):
-    """
-    Time domain baseline correction.
-
-    Parameters
-    ----------
-    dataset : nddataset
-        The time domain daatset to be corrected.
-    kwargs : dict, optional
-        Additional parameters.
-
-    Returns
-    -------
-    dc
-        DC corrected array.
-
-    Other Parameters
-    ----------------
-    len : float, optional
-        Proportion in percent of the data at the end of the dataset to take into account. By default, 25%.
-    """
-
-    len = int(kwargs.pop("len", 0.25) * dataset.shape[-1])
-    dc = np.mean(np.atleast_2d(dataset)[..., -len:])
-    dataset -= dc
-
-    return dataset
 
 
 # ======================================================================================

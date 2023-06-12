@@ -350,7 +350,7 @@ Clipping and rounding
 
 
 Algebra
-========
+=======
 
 .. autosummary::
     :nosignatures:
@@ -435,7 +435,7 @@ Units manipulation
     set_nmr_context
 
 
-mathematical operations
+Mathematical operations
 =======================
 
 .. autosummary::
@@ -444,6 +444,7 @@ mathematical operations
 
     mc
     ps
+
 
 Statistical operations
 =======================
@@ -473,7 +474,6 @@ Baseline correction
     abc
     basc
     detrend
-    dc
 
 
 Fourier transform
@@ -489,29 +489,6 @@ Fourier transform
     fsh
     fsh2
 
-Zero-filling
-============
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    zf
-    zf_auto
-    zf_double
-    zf_size
-
-Rolling
-=======
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    cs
-    ls
-    roll
-    rs
 
 Phasing
 =======
@@ -524,15 +501,52 @@ Phasing
     pk_exp
 
 
-Smoothing, apodization
-=======================
+Time-domain processing
+======================
+
+Offset correction
+-----------------
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    savgol_filter
-    smooth
+    dc
+
+
+Zero-filling
+------------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    zf
+    zf_auto
+    zf_double
+    zf_size
+
+
+Rolling
+-------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    cs
+    ls
+    roll
+    rs
+
+
+Apodization
+-----------
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
     bartlett
     blackmanharris
     hamming
@@ -545,6 +559,17 @@ Smoothing, apodization
     sine
     qsin
     sinm
+
+
+Smoothing, filtering
+====================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    savgol_filter
+    smooth
 
 
 Alignment, interpolation
