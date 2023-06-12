@@ -11,13 +11,7 @@ __dataset_methods__ = __all__
 import numpy as np
 import scipy.signal
 
-from spectrochempy.core import error_
-
-# Todo:
-# find_peaks_cwt(vector, widths[, wavelet, ...]) Attempt to find the peaks in a 1-D array.
-# argrelmin(data[, axis, order, mode]) 	Calculate the relative minima of data.
-# argrelmax(data[, axis, order, mode]) 	Calculate the relative maxima of data.
-# argrelextrema(data, comparator[, axis, ...]) 	Calculate the relative extrema of data.
+from spectrochempy.application import error_
 
 
 def savgol_filter(

@@ -11,8 +11,8 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.processors.concatenate import concatenate, stack
 from spectrochempy.core.units import ur
+from spectrochempy.processing.transformation.concatenate import concatenate, stack
 from spectrochempy.utils.exceptions import (
     DimensionsCompatibilityError,
     UnitsCompatibilityError,

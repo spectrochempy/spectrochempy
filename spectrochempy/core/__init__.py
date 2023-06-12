@@ -136,14 +136,6 @@ with timeit("plotter"):
 
     __all__ += api.__all__
 
-# processors
-# ----------
-with timeit("processor"):
-    from spectrochempy.core.processors import api  # noqa: E402
-    from spectrochempy.core.processors.api import *  # noqa: E402,F403,F401
-
-    __all__ += api.__all__
-
 # readers
 # -------
 with timeit("readers"):
@@ -188,6 +180,14 @@ with timeit("widgets"):
 with timeit("analysis"):
     from spectrochempy.analysis import api  # noqa: E402
     from spectrochempy.analysis.api import *  # noqa: E402,F403,F401
+
+    __all__ += api.__all__
+
+# processing
+# ----------
+with timeit("processing"):
+    from spectrochempy.processing import api  # noqa: E402
+    from spectrochempy.processing.api import *  # noqa: E402,F403,F401
 
     __all__ += api.__all__
 

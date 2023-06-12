@@ -382,9 +382,7 @@ Sums, integal, difference
 
     sum
     cumsum
-    trapz
     trapezoid
-    simps
     simpson
 
 

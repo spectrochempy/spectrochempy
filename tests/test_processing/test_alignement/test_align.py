@@ -9,7 +9,7 @@
 """ Tests for the interpolate module
 
 """
-from spectrochempy.core.processors.align import align
+from spectrochempy.processing.alignement.align import align
 
 # align
 # -------

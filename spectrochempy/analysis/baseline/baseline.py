@@ -18,7 +18,7 @@ from scipy.sparse.linalg import spsolve
 from spectrochempy.analysis._base._analysisbase import AnalysisConfigurable
 from spectrochempy.analysis.baseline.baselineutils import lls, lls_inv
 from spectrochempy.application import info_, warning_
-from spectrochempy.core.processors.concatenate import concatenate
+from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import (
     _wrap_ndarray_output_to_nddataset,
