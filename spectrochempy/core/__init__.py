@@ -95,7 +95,6 @@ with timeit("application"):
 # constants
 # ---------
 with timeit("constants"):
-
     from spectrochempy.utils.plots import show
     from spectrochempy.utils.constants import (
         MASKED,
@@ -133,14 +132,6 @@ with timeit("dataset"):
 with timeit("plotter"):
     from spectrochempy.core.plotters import api  # noqa: E402
     from spectrochempy.core.plotters.api import *  # noqa: E402,F403,F401
-
-    __all__ += api.__all__
-
-# processors
-# ----------
-with timeit("processor"):
-    from spectrochempy.processing import api  # noqa: E402
-    from spectrochempy.processing.api import *  # noqa: E402,F403,F401
 
     __all__ += api.__all__
 

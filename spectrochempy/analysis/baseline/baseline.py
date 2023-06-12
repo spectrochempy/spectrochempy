@@ -830,7 +830,7 @@ def baseline(dataset, *ranges, **kwargs):
 @_docstring.dedent
 def basc(dataset, *ranges, **kwargs):
     r"""
-    Compute a baseline using the Baseline class processor.
+    Compute a baseline corrected dataset using the Baseline class processor.
 
     If no ranges is provided, the features limits are used.
     See `Baseline` for detailed information on the parameters.
@@ -848,7 +848,7 @@ def basc(dataset, *ranges, **kwargs):
     Returns
     -------
     `NDDataset`
-        The computed baseline
+        The computed baseline corrected dataset
 
     See Also
     --------

@@ -19,11 +19,6 @@ __dataset_methods__ = [
     "savgol",
     "smooth",
     "whittaker",
-    "avg",
-    "han",
-    "hamming",
-    "bartlett",
-    "blackman",
 ]
 __configurables__ = ["Filter"]
 __all__ = __dataset_methods__ + __configurables__
@@ -36,11 +31,6 @@ smooth : Function to smooth data using various window filters.
 savgol : Savitzky-Golay filter.
 savgol_filter : Alias of `savgol`
 whittaker : Whittaker-Eilers filter.
-avg : Smooth the data using a moving average procedure.
-han : Han window filter.
-hamming : Hamming window filter.
-bartlett : Bartlett window filter.
-blackman : Blackman window filter.
 """
 _docstring.get_sections(
     _docstring.dedent(_common_see_also),
@@ -52,10 +42,6 @@ _docstring.delete_params("Filter.see_also", "savgol")
 _docstring.delete_params("Filter.see_also", "savgol_filter")
 _docstring.delete_params("Filter.see_also", "whittaker")
 _docstring.delete_params("Filter.see_also", "smooth")
-_docstring.delete_params("Filter.see_also", "hanning")
-_docstring.delete_params("Filter.see_also", "hamming")
-_docstring.delete_params("Filter.see_also", "bartlett")
-_docstring.delete_params("Filter.see_also", "blackman")
 
 
 # ======================================================================================
@@ -297,195 +283,51 @@ def smooth(dataset, size=5, window="avg", **kwargs):
         )
 
 
-@_docstring.dedent
-def avg(dataset, size=5, **kwargs):
-    """
-    Moving average smoothing.
-
-    Parameters
-    ----------
-    %(dataset)s
-    %(Filter.parameters.size)s
-    %(kwargs)s
-
-    Returns
-    -------
-    `NDDataset`
-        Smoothed data.
-
-    Other Parameters
-    ----------------
-    %(Filter.parameters.dim)s
-    %(Filter.parameters.mode)s
-    %(Filter.parameters.cval)s
-
-    See Also
-    --------
-    %(Filter.see_also.no_avg)s
-    """
-    return Filter(method="avg", size=size, **kwargs).transform(dataset)
-
-
-@_docstring.dedent
-def han(dataset, size=5, **kwargs):
-    """
-    Hanning window smoothing.
-
-    Parameters
-    ----------
-    %(dataset)s
-    %(Filter.parameters.size)s
-    %(kwargs)s
-
-    Returns
-    -------
-    `NDDataset`
-        Smoothed data.
-
-    Other Parameters
-    ----------------
-    %(Filter.parameters.dim)s
-    %(Filter.parameters.mode)s
-    %(Filter.parameters.cval)s
-
-    See Also
-    --------
-    %(Filter.see_also.no_han)s
-    """
-    return Filter(method="han", size=size, **kwargs).transform(dataset)
-
-
-@_docstring.dedent
-def hamming(dataset, size=5, **kwargs):
-    """
-    Hamming window smoothing.
-
-    Parameters
-    ----------
-    %(dataset)s
-    %(Filter.parameters.size)s
-    %(kwargs)s
-
-    Returns
-    -------
-    `NDDataset`
-        Smoothed data.
-
-    Other Parameters
-    ----------------
-    %(Filter.parameters.dim)s
-    %(Filter.parameters.mode)s
-    %(Filter.parameters.cval)s
-
-    See Also
-    --------
-    %(Filter.see_also.no_hamming)s
-    """
-    return Filter(method="hamming", size=size, **kwargs).transform(dataset)
-
-
-@_docstring.dedent
-def bartlett(dataset, size=5, **kwargs):
-    """
-    Bartlett window smoothing.
-
-    Parameters
-    ----------
-    %(dataset)s
-    %(Filter.parameters.size)s
-    %(kwargs)s
-
-    Returns
-    -------
-    `NDDataset`
-        Smoothed data.
-
-    Other Parameters
-    ----------------
-    %(Filter.parameters.dim)s
-    %(Filter.parameters.mode)s
-    %(Filter.parameters.cval)s
-
-    See Also
-    --------
-    %(Filter.see_also.no_bartlett)s
-    """
-    return Filter(method="bartlett", size=size, **kwargs).transform(dataset)
-
-
-@_docstring.dedent
-def blackman(dataset, size=5, **kwargs):
-    """
-    Blackman window smoothing.
-
-    Parameters
-    ----------
-    %(dataset)s
-    %(Filter.parameters.size)s
-    %(kwargs)s
-
-    Returns
-    -------
-    `NDDataset`
-        Smoothed data.
-
-    Other Parameters
-    ----------------
-    %(Filter.parameters.dim)s
-    %(Filter.parameters.mode)s
-    %(Filter.parameters.cval)s
-
-    See Also
-    --------
-    %(Filter.see_also.no_bartlett)s
-    """
-    return Filter(method="blackman", size=size, **kwargs).transform(dataset)
-
-
 # --------------------------------------------------------------------------------------
 @_docstring.dedent
 def savgol(dataset, size=5, order=2, **kwargs):
     """
-    Savitzky-Golay filter.
+        Savitzky-Golay filter.
 
-    Wrapper of scpy.signal.savgol(). See the documentation of this function for more
-    details.
+        Wrapper of scpy.signal.savgol(). See the documentation of this function for more
+        details.
 
-    Parameters
-    ----------
-    %(dataset)s
-    %(Filter.parameters.size)s
-    order : `int`, optional, default=2
-        The order of the polynomial used to fit the data. `order` must be less
-        than size.
-    %(kwargs)s
+        Parameters
+        ----------
+        %(dataset)s
+        %(Filter.parameters.size)s
+        order : `int`, optional, default=2
+            The order of the polynomial used to fit the data. `order` must be less
+            than size.
+        %(kwargs)s
 
-    Returns
-    -------
-    `NDDataset`
-        Smoothed data.
+        Returns
+        -------
+        `NDDataset`
+            Smoothed data.
 
-    Other Parameters
-    ----------------
-    %(dim)s
-    %(Filter.parameters.deriv)s
-    %(Filter.parameters.delta)s
-    %(Filter.parameters.mode)s
-    %(Filter.parameters.cval)s
+        Other Parameters
+        ----------------
+        %(dim)s
+        %(Filter.parameters.deriv)s
+        %(Filter.parameters.delta)s
+        %(Filter.parameters.mode)s
+        %(Filter.parameters.cval)s
 
-    See Also
-    --------
-    %(Filter.see_also.no_savgol)s
+        See Also
+        --------
+        %(Filter.see_also.no_savgol)s
 
-    Notes
-    -----
-    Even spacing of the axis coordinates is NOT checked. Be aware that Savitzky-Golay
-    algorithm is based on indexes, not on coordinates.
+        Notes
+        -----
+        Even spacing of the axis coordinates is NOT checked. Be aware that Savitzky-Golay
+        algorithm is based on indexes, not on coordinates.
 
-    See Also
-    ---------
-    smooth : Smooth the data using a window with requested size.
-    whittaker_smooth : Whittaker smoother.
+    <<<<<<< HEAD
+        See Also
+        ---------
+        smooth : Smooth the data using a window with requested size.
+        whittaker_smooth : Whittaker smoother.
 
     """
     if kwargs.get("window_length", None) is not None:

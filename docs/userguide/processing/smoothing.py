@@ -307,7 +307,6 @@ functions = []
 labels = []
 size = 27
 for i, method in enumerate(["bartlett", "han", "hamming", "blackman"]):
-
     data = scipy.signal.get_window(method, size, fftbins=False)
     data = data / np.sum(data)
 
@@ -335,35 +334,15 @@ _ = ax.legend(labels, loc="upper left", fontsize=10)
 # here](https://en.wikipedia.org/wiki/Window_function).
 
 # %% [markdown]
-# The window functions available with the smooth method can also be accessed directly
-# either as API or NDDataset method.
-# *e.g.*
-
-# %%
-Xa = scp.avg(Xn, size=5)
-
-# %%
-Xb = scp.han(Xn, size=5)
-
-# %%
-Xc = scp.hamming(Xn, size=5)
-
-# %%
-Xd = scp.bartlett(Xn, size=5)
-
-# %%
-Xe = scp.blackman(Xn, size=5)
-
-# %% [markdown]
 # ### Savitzky-Golay filter:`savgol`
-# Similarly, the Savitsky-Golay filter is also implemented.
+# Similarly, the Savitsky-Golay filter is also implemented as an API/NDDataset method:
 
 # %%
 Xsg = scp.savgol(Xn, size=5, order=2, mode="mirror")
 
 # %% [markdown]
 # ### Whittaker-eilers filter : `whittaker`
-# Finally, we can also use the `wittaker` filter directly. e.g
+# Finally, we can also use the `wittaker` filter directly. *e.g*.:
 
 # %%
 Xw = scp.whittaker(Xn, lambd=10)

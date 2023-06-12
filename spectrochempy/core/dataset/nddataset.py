@@ -201,7 +201,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # reference data (for GUI)
     # _referencedata = Array(Float(), allow_none=True)
 
-    # region ranges
+    # ranges
     # _ranges = Instance(Meta)
 
     # history

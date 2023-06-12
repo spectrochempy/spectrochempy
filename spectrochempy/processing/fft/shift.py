@@ -212,7 +212,7 @@ def fsh(dataset, pts, **kwargs):
     --------
     ls, rs, cs, roll, fsh2
     """
-    from spectrochempy.processing.fft import _fft, _ifft
+    from spectrochempy.processing.fft.fft import _fft, _ifft
 
     s = float(dataset.shape[-1])
 
@@ -257,7 +257,7 @@ def fsh2(dataset, pts, **kwargs):
     ls, rs, cs, roll, fsh2
     """
 
-    from spectrochempy.processing.fft import _fft_positive, _ifft_positive
+    from spectrochempy.processing.fft.fft import _fft_positive, _ifft_positive
 
     s = float(dataset.shape[-1])
 

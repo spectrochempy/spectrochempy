@@ -4,8 +4,17 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-from spectrochempy.utils.packages import generate_api
+# flake8: noqa
 
-# in analysis package some classes are configurbles: list them!
-__all__, __configurables__ = generate_api(__file__, configurables=True)
-pass
+""" Tests for the interpolate module
+
+"""
+import pytest
+
+# align
+# -------
+
+
+@pytest.mark.skip
+def test_interpolate(ds1, ds2):
+    pass
