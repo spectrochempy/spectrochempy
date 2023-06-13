@@ -667,11 +667,11 @@ baseline/trends for different segments of the data.
         return self.transform()
 
     @_docstring.dedent
-    def parameters(self, default=False):
+    def params(self, default=False):
         """
         %(MetaConfigurable.parameters_doc)s
         """
-        d = super().parameters(default)
+        d = super().params(default)
         if not default:
             d.ranges = self._ranges
         return d
