@@ -25,9 +25,10 @@ Breaking changes
   `Baseline`, and there are changes in the way it
   is now used. It allows to perform baseline correction
   on a dataset with multiple algorithms. See :ref:`baseline` for details.
-* `abc` (and its alias `ab`) method has been removed in favor of `basc`.
 
 Deprecations
 ~~~~~~~~~~~~
 
 * `parameters` method of Analysis configurables is now deprecated in favor of `params`.
+* The BaselineCorrection processor has been deprecated in favor of Baseline.
+* `abc` (and its alias `ab`) method has been deprecated in favor of `basc`.

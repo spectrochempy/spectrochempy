@@ -18,7 +18,7 @@ from spectrochempy.utils.testing import assert_dataset_equal
 path = os.path.dirname(os.path.abspath(__file__))
 
 
-def test_preprocessing_baseline(IR_dataset_2D):
+def test_baseline(IR_dataset_2D):
     # define a 1D test dataset (1 spectrum)
     dataset = IR_dataset_2D[10].squeeze()
     # minimal process
