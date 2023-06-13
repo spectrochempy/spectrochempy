@@ -263,7 +263,7 @@ class BaselineCorrector:
                 self._fig = axes["axe11"].figure
 
                 ylim = axes["axe11"].get_ylim()
-                self.blc.baseline.plot(ax=axes["axe11"], clear=False, cmap="copper")
+                self.blc.baseline.plot(ax=axes["axe11"], cmap="copper")
                 axes["axe11"].set_ylim(ylim)
 
                 show()

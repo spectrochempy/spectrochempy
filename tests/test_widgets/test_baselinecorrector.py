@@ -12,6 +12,7 @@ import spectrochempy
 import spectrochempy as scp
 from spectrochempy.core.common import dialogs
 from spectrochempy.utils import testing
+from spectrochempy.utils.exceptions import NotFittedError
 
 DATADIR = scp.preferences.datadir
 SPG_FILE = DATADIR / "irdata/nh4y-activation.spg"
@@ -39,7 +40,9 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
         return UNREADABLE
 
     out = scp.BaselineCorrector()
-    assert out.corrected.is_empty
+
+    with pytest.raises(NotFittedError):
+        out.corrected
     # save
     # write without parameters and dialog cancel
     monkeypatch.setenv(
