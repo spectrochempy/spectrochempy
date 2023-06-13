@@ -176,7 +176,7 @@ def test_baseline_sequential_asls(IR_dataset_2D):
     # parameter mu and may be asymmetry should be adapted to each spectra.
 
 
-def test_preprocessing_nddtaset_methods(IR_dataset_2D):
+def test_preprocessing_nddataset_methods(IR_dataset_2D):
 
     ndp = IR_dataset_2D[::5]
     ndp[:, 1290.0:890.0] = scp.MASKED
@@ -197,25 +197,13 @@ def test_preprocessing_nddtaset_methods(IR_dataset_2D):
     assert_dataset_equal(ndpcor, ndp - baseline)
 
 
-@pytest.mark.skip()
-def test_ab_nmr(NMR_dataset_1D):
-    dataset = NMR_dataset_1D.copy()
-    dataset /= dataset.real.data.max()  # nromalize
+def test_baseline_polynomial(IR_dataset_2D):
+    X = IR_dataset_2D[::5]
 
-    dataset.em(10.0 * ur.Hz, inplace=True)
-    dataset = dataset.fft(tdeff=8192, size=2**15)
-    dataset = dataset[150.0:-150.0] + 1.0
+    blc = scp.Baseline()
+    blc.model = "polynomial"
+    blc.order = 2
+    blc.ranges = [[4000.0, 4001.0], [2000.0, 2001.0]]
+    blc.fit(X)
 
-    dataset.plot()
-
-    transf = dataset.copy()
-    transfab = transf.ab(window=0.25)
-    transfab.plot(clear=False, color="r")
-
-    transf = dataset.copy()
-    base = transf.ab(mode="poly", dryrun=True)
-    transfab = transf - base
-    transfab.plot(xlim=(150, -150), clear=False, color="b")
-    base.plot(xlim=(150, -150), ylim=[-2, 10], clear=False, color="y")
-
-    show()
+    blc.plot()

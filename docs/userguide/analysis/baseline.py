@@ -526,6 +526,8 @@ basc.show_regions(axs["axe21"])
 # e.g. `([5900.0, 5400.0], 2000.0, [1550.0, 1555.0],)` .
 
 # %%
+import spectrochempy as scp
+
 X = scp.read_omnic("irdata/nh4y-activation.spg")
 out = scp.BaselineCorrector(X)
 

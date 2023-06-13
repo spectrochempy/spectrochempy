@@ -158,9 +158,9 @@ class Baseline(AnalysisConfigurable):
         default_value="polynomial",
         help="""The model used to determine the baseline.
 
-* 'polynomial': the baseline correction is determined by a nth-degree polynomial
-  fitted on the data belonging to the selected `ranges`. The `order` parameter
-  to determine the degree of the polynomial.
+* 'polynomial': the baseline correction is determined by a nth-degree polynomial fitted
+  on the data belonging to the selected `ranges`. The `order` parameter to determine the
+  degree of the polynomial.
 * 'detrend': removes a constant, linear or polynomial trend to the data. The order of
   the trend is determined by the `order` parameter.
 * 'asls': the baseline is determined by an asymmetric least square algorithm.
@@ -328,7 +328,7 @@ baseline/trends for different segments of the data.
                 item = [item, item]
             ranges[i] = item
 
-        # clean the result (reorder and suppress overlap)
+        # clean the result (reorder and suppress overlaps)
         return trim_ranges(*ranges)
 
     @tr.observe("_X", "ranges", "include_limits", "model", "multivariate")
@@ -684,6 +684,8 @@ baseline/trends for different segments of the data.
         Eventually the features limits are included and the list returned is trimmed,
         cleaned and ordered.
         """
+        # if not self._fitted:
+        #    raise NotFittedError
         return self._ranges
 
     def show_regions(self, ax):

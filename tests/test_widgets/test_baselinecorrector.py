@@ -188,7 +188,7 @@ def test_baselinecorrector_not_a_NDDataset(X):
 
 
 def test_baselinecorrector_parameters(X):
-    _X = X[0:10, 0:100]
+    _X = X[0:10, :]  # 0:100]
     out = scp.BaselineCorrector(_X)
     # sequential
     assert out._method_selector in out._method_control.children
@@ -202,7 +202,7 @@ def test_baselinecorrector_parameters(X):
     out._interpolation_selector.value = "polynomial"
     out._process_clicked()
 
-    assert out.corrected.shape == (10, 100)
+    assert out.corrected.shape == (10, 5549)
     assert len(out._fig.axes[0].lines) == 20, "original + baselines"
     assert len(out._fig.axes[1].lines) == 10, "corrected"
     testing.assert_array_almost_equal(
