@@ -10,12 +10,10 @@ import os
 import pytest
 
 import spectrochempy as scp
-
 from spectrochempy.analysis.baseline.baseline import Baseline
 from spectrochempy.core.units import ur
 from spectrochempy.utils.plots import show
 from spectrochempy.utils.testing import assert_dataset_equal
-
 
 path = os.path.dirname(os.path.abspath(__file__))
 
