@@ -57,7 +57,6 @@ requirements:
     - xlrd
     - pyyaml
 
-
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm

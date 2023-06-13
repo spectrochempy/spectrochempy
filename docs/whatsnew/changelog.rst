@@ -49,7 +49,6 @@ Breaking changes
   `Baseline`, and there are changes in the way it
   is now used. It allows to perform baseline correction
   on a dataset with multiple algorithms. See :ref:`baseline` for details.
-
 * `abc` (and its alias `ab`) method has been removed in favor of `basc`.
 
 .. section
