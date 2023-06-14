@@ -15,7 +15,6 @@ from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.readers.importer import read
-from spectrochempy.utils.plots import show
 
 __all__ = ["BaselineCorrector"]
 
@@ -266,7 +265,6 @@ class BaselineCorrector:
                 self.blc.baseline.plot(ax=axes["axe11"], cmap="copper")
                 axes["axe11"].set_ylim(ylim)
 
-                show()
             self._done = True
 
     @property
