@@ -11,20 +11,17 @@ New features
 
 * `plot_multiple` method now accept keyword arguments to change the default
   plot style of the different spectra. See :ref:`plot_multiple` for details.
-* Two new baseline algorithms have been added: `asls` and `snip`. See :ref:`Baseline` for details.
+* `BaselineCorrection` class has been renamed into
+  `Baseline`, and there are changes in the way it
+  is now used. It allows to perform baseline correction
+  on a dataset with multiple algorithms. See :ref:`baseline` for details. BaselineCorrection is still valid but deprecated.
+* Three new baseline algorithms have been added to the new Baseline processor:
+  `rubberband`, `asls` and `snip`. See :ref:`Baseline` for details.
 
 Bug fixes
 ~~~~~~~~~
 
-* #687 fixed.
-
-Breaking changes
-~~~~~~~~~~~~~~~~
-
-* `BaselineCorrection` class has been renamed into
-  `Baseline`, and there are changes in the way it
-  is now used. It allows to perform baseline correction
-  on a dataset with multiple algorithms. See :ref:`baseline` for details.
+* Docs problems fixed (#687).
 
 Deprecations
 ~~~~~~~~~~~~
