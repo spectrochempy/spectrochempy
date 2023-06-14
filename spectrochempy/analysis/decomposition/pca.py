@@ -280,6 +280,8 @@ for reproducible results across multiple function calls.""",
         # we need to  set self._pca.components_ to a compatible size but without
         # destroying the full matrix:
         store_components_ = self._pca.components_
+        if X_transform.ndim == 1:
+            X_transform = X_transform.reshape(-1, 1)
         self._pca.components_ = self._pca.components_[: X_transform.shape[1]]
         X = self._pca.inverse_transform(X_transform)
         # restore
