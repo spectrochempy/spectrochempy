@@ -184,11 +184,11 @@ def test_preprocessing_nddataset_methods(IR_dataset_2D):
     # baseline
     baseline = ndp.baseline()
     assert baseline.shape == ndp.shape
-    baseline = ndp.baseline(model="asls", mu=10**8, asymmetry=0.002)
+    baseline = ndp.baseline(model="asls", lamb=10**8, asymmetry=0.002)
     assert baseline.shape == ndp.shape
 
     # asls
-    ndpcor = scp.asls(ndp, mu=10**8, asymmetry=0.002)
+    ndpcor = scp.asls(ndp, lamb=10**8, asymmetry=0.002)
     assert_dataset_equal(ndpcor, ndp - baseline)
 
     # snip
