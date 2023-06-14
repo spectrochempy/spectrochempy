@@ -114,17 +114,17 @@ _ = smoothed.plot(colormap="magma")
 # %%
 region = ds[:, 4000.0:2000.0]
 smoothed = region.smooth(window_length=51, window="hanning")
-blc = scp.BaselineCorrection(smoothed)
-basc = blc.compute(
-    [2000.0, 2300.0],
-    [3800.0, 3900.0],
-    method="multivariate",
-    interpolation="pchip",
-    npc=5,
-)
+blc = scp.Baseline()
+blc.ranges = [[2000.0, 2300.0], [3800.0, 3900.0]]
+blc.multivariate = True
+blc.model = "polynomial"
+blc.order = "pchip"
+blc.n_components = 5
 
-# %% tags=[]
-_ = basc.plot()
+_ = blc.fit(smoothed)
+
+# %%
+_ = blc.corrected.plot()
 
 # %% [markdown]
 # ### Analysis

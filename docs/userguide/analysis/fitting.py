@@ -236,7 +236,7 @@ ndOH.plot()
 # automatic baseline correction)
 
 # %%
-ndOHcorr = scp.abc(ndOH)
+ndOHcorr = scp.basc(ndOH)
 ndOHcorr.plot()
 
 # %% [markdown]

@@ -81,7 +81,6 @@ class ProcessingConfigurable(BaseConfigurable):
 
     @tr.observe("_X", "_dim")
     def _X_or_dim_changed(self, change):
-
         X = None
         if change.name == "_X":
             X = change.new

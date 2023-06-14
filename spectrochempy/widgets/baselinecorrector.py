@@ -10,13 +10,11 @@ from functools import partial
 from IPython.display import display
 from ipywidgets import Layout, widgets
 
+from spectrochempy.analysis.baseline.baseline import Baseline
 from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.readers.importer import read
-from spectrochempy.processing.baseline.baseline import BaselineCorrection
-from spectrochempy.processing.transformation.concatenate import concatenate
-from spectrochempy.utils.plots import show
 
 __all__ = ["BaselineCorrector"]
 
@@ -93,6 +91,8 @@ class BaselineCorrector:
         if not isinstance(X, (NDDataset, type(None))):
             raise ValueError("X must be None or a valid NDDataset")
 
+        self.blc = Baseline()
+
         self._X = X
         self._fig = None
         self._initial_ranges = initial_ranges
@@ -107,9 +107,11 @@ class BaselineCorrector:
         self._save_button.on_click(self._save_clicked)
 
         # Parameters widgets
-        self._npc_slider = widgets.IntSlider(description="N pc", value=1, min=1, max=5)
+        self._npc_slider = widgets.IntSlider(
+            description="N components", value=1, min=1, max=5
+        )
         self._order_slider = widgets.IntSlider(
-            description="Order", layout=Layout(width="350px"), value=1, min=1, max=6
+            description="Order", layout=Layout(width="350px"), value=1, min=1, max=10
         )
 
         self._method_selector = widgets.Dropdown(
@@ -145,8 +147,6 @@ class BaselineCorrector:
 
         # init attributes
         self.original = NDDataset()
-        self.corrected = NDDataset()
-        self.baseline = NDDataset()
 
         # events
         for control in [
@@ -229,24 +229,25 @@ class BaselineCorrector:
                 ranges = _round_ranges(new_ranges)
                 self._ranges_control.value = _ranges_to_str(ranges)
 
-            blc = BaselineCorrection(self.original)
-            self.corrected = blc.compute(
-                *ranges,
-                interpolation=self._interpolation_selector.value,
-                order=self._order_slider.value,
-                method=self._method_selector.value,
-                npc=self._npc_slider.value,
+            self.blc.ranges = list(ranges)
+            self.blc.model = "polynomial"
+            interpolation = self._interpolation_selector.value
+            self.blc.order = (
+                self._order_slider.value if interpolation == "polynomial" else "pchip"
             )
-            self.baseline = self.original - self.corrected
+            self.blc.multivariate = self._method_selector.value == "multivariate"
+            self.blc.n_components = self._npc_slider.value
+
+            self.blc.fit(self.original)
 
             self._output.clear_output(True)
             with self._output:
                 axes = multiplot(
                     [
-                        concatenate(self.original, self.baseline, dims="y"),
-                        self.corrected,
+                        self.original,
+                        self.blc.corrected,
                     ],
-                    labels=["Original", "Corrected"],
+                    labels=["Original", "Baseline corrected"],
                     sharex=True,
                     nrow=2,
                     ncol=1,
@@ -257,10 +258,22 @@ class BaselineCorrector:
                     mpl_event=False,
                 )
                 axes["axe11"].get_xaxis().set_visible(False)
-                blc.show_regions(axes["axe21"])
-                self._fig = axes["axe21"].figure
-                show()
+                self.blc.show_regions(axes["axe11"])
+                self._fig = axes["axe11"].figure
+
+                ylim = axes["axe11"].get_ylim()
+                self.blc.baseline.plot(ax=axes["axe11"], cmap="copper")
+                axes["axe11"].set_ylim(ylim)
+
             self._done = True
+
+    @property
+    def corrected(self):
+        return self.blc.corrected
+
+    @property
+    def baseline(self):
+        return self.blc.baseline
 
     def _load_clicked(self, b=None):
         # read data and reset defaults
@@ -309,8 +322,8 @@ class BaselineCorrector:
         self._process_button.disabled = True
 
     def _save_clicked(self, b=None):
-        if self.corrected is not None:
-            return self.corrected.write()
+        if self.blc.corrected is not None:
+            return self.blc.corrected.write()
 
 
 # Utility functions

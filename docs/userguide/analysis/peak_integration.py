@@ -68,14 +68,18 @@ X.plot()
 # Now we can perform some baseline correction
 
 # %%
-blc = scp.BaselineCorrection(X)
-regions = (
+blc = scp.Baseline()
+blc.ranges = (
     [1740.0, 1800.0],
     [1550.0, 1570.0],
     [1250.0, 1300.0],
 )  # define 3 regions where we want the baseline to reach zero.
-Xcorr = blc.compute(*regions)  # compute the corrected NDDataset
+blc.model = "polynomial"
+blc.order = 3
 
+blc.fit(X)  # fit the baseline
+
+Xcorr = blc.corrected  # get the corrected dataset
 Xcorr.plot()
 
 # %% [markdown]

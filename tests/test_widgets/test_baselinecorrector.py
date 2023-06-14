@@ -12,6 +12,7 @@ import spectrochempy
 import spectrochempy as scp
 from spectrochempy.core.common import dialogs
 from spectrochempy.utils import testing
+from spectrochempy.utils.exceptions import NotFittedError
 
 DATADIR = scp.preferences.datadir
 SPG_FILE = DATADIR / "irdata/nh4y-activation.spg"
@@ -39,7 +40,9 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
         return UNREADABLE
 
     out = scp.BaselineCorrector()
-    assert out.corrected.is_empty
+
+    with pytest.raises(NotFittedError):
+        out.corrected
     # save
     # write without parameters and dialog cancel
     monkeypatch.setenv(
@@ -188,7 +191,7 @@ def test_baselinecorrector_not_a_NDDataset(X):
 
 
 def test_baselinecorrector_parameters(X):
-    _X = X[0:10, 0:100]
+    _X = X[0:10, :]  # 0:100]
     out = scp.BaselineCorrector(_X)
     # sequential
     assert out._method_selector in out._method_control.children
@@ -202,7 +205,7 @@ def test_baselinecorrector_parameters(X):
     out._interpolation_selector.value = "polynomial"
     out._process_clicked()
 
-    assert out.corrected.shape == (10, 100)
+    assert out.corrected.shape == (10, 5549)
     assert len(out._fig.axes[0].lines) == 20, "original + baselines"
     assert len(out._fig.axes[1].lines) == 10, "corrected"
     testing.assert_array_almost_equal(

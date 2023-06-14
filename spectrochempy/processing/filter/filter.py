@@ -4,11 +4,14 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-__all__ = ["savgol_filter", "detrend"]
+__all__ = ["savgol_filter", "smooth"]
 
 __dataset_methods__ = __all__
 
+import numpy as np
 import scipy.signal
+
+from spectrochempy.application import error_
 
 
 def savgol_filter(
@@ -152,54 +155,51 @@ def savgol_filter(
     return new
 
 
-def detrend(dataset, type="linear", bp=0, **kwargs):
+def smooth(dataset, window_length=5, window="flat", **kwargs):
     """
-    Remove linear trend along dim from dataset.
+    Smooth the data using a window with requested size.
 
-    Wrapper of scpy.signal.detrend().
+    This method is based on the convolution of a scaled window with the signal.
+    The signal is prepared by introducing reflected copies of the signal (with the window size) in both ends so that
+    transient parts are minimized in the beginning and end part of the output data.
 
     Parameters
     ----------
-    dataset :  `NDDataset`
-        The input data.
-    type : str among ['linear', 'constant'}, optional, default='linear'
-        The type of detrending. If `type == 'linear'` (default),
-        the result of a linear least-squares fit to `data` is subtracted from `data` .
-        If `type == 'constant'` , only the mean of `data` is subtracted.
-    bp : array_like of ints, optional
-        A sequence of break points. If given, an individual linear fit is
-        performed for each part of `data` between two break points.
-        Break points are specified as indices into `data` .
+    dataset :  `NDDataset` or a ndarray-like object
+        Input object.
+    window_length :  int, optional, default=5
+        The dimension of the smoothing window; must be an odd integer.
+    window : str, optional, default='flat'
+        The type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'.
+        flat window will produce a moving average smoothing.
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
     Returns
     -------
-    detrended
-        The detrended `NDDataset` .
+    smoothed
+        Same type as input dataset.
 
     Other Parameters
     ----------------
     dim : str or int, optional, default='x'.
-        Specify on which dimension to apply this method. If `dim` is specified as an
-        integer it is equivalent to the usual `axis` numpy parameter.
+        Specify on which dimension to apply this method. If `dim` is specified as an integer it is equivalent
+        to the usual `axis` numpy parameter.
     inplace : bool, optional, default=False.
-        True if we make the transform inplace.  If False, the function return a new
-        object
+        True if we make the transform inplace.  If False, the function return a new object
 
     See Also
     --------
-    BaselineCorrection : Manual baseline correction.
-    abs : Automatic baseline correction.
-    autosub : Subtraction of reference.
+    savgol_filter : Apply a Savitzky-Golay filter.
 
     Examples
     --------
 
-    >>> dataset = scp.read("irdata/nh4y-activation.spg")
-    >>> dataset.detrend(type='constant')
+    >>> ds = scp.read("irdata/nh4y-activation.spg")
+    >>> ds.smooth(window_length=11)
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
     """
+
     if not kwargs.pop("inplace", False):
         # default
         new = dataset.copy()
@@ -210,16 +210,62 @@ def detrend(dataset, type="linear", bp=0, **kwargs):
     axis = kwargs.pop("dim", kwargs.pop("axis", -1))
     if hasattr(new, "get_axis"):
         axis, dim = new.get_axis(axis, negative_axis=True)
-        data = new.data
     else:
         is_ndarray = True
-        data = new
 
-    data = scipy.signal.detrend(data, axis=axis, type=type, bp=bp)
+    swapped = False
+    if axis != -1:
+        new.swapdims(axis, -1, inplace=True)  # must be done in  place
+        swapped = True
 
-    if is_ndarray:
-        return data
+    if (window_length % 2) != 1:
+        error_("Window length must be an odd integer.")
 
-    new.data = data
+    if new.shape[-1] < window_length:
+        error_("Input vector needs to be bigger than window size.")
+        return new
+
+    if window_length < 3:
+        return new
+
+    wind = {
+        "flat": np.ones,
+        "hanning": np.hanning,
+        "hamming": np.hamming,
+        "bartlett": np.bartlett,
+        "blackman": np.blackman,
+    }
+
+    if not callable(window):
+        if window not in wind.keys():
+            error_(
+                "Window must be a callable or a string among 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+            )
+            return new
+        window = wind[window]
+
+    # extend on both side to limit side effects
+    dat = np.r_[
+        "-1",
+        new.data[..., window_length - 1 : 0 : -1],
+        new.data,
+        new.data[..., -1:-window_length:-1],
+    ]
+
+    w = window(window_length)
+    data = np.apply_along_axis(np.convolve, -1, dat, w / w.sum(), mode="valid")
+    data = data[..., int(window_length / 2) : -int(window_length / 2)]
+
+    if not is_ndarray:
+        new.data = data
+        new.history = (
+            f"smoothing with a window:{window.__name__} of length {window_length}"
+        )
+
+        # restore original data order if it was swapped
+        if swapped:
+            new.swapdims(axis, -1, inplace=True)  # must be done inplace
+    else:
+        new = data
 
     return new

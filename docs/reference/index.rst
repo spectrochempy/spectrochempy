@@ -467,13 +467,14 @@ Baseline correction
     :nosignatures:
     :toctree: generated/
 
-    BaselineCorrection
+    Baseline
     BaselineCorrector
     autosub
-    ab
-    abc
+    baseline
     basc
     detrend
+    asls
+    snip
 
 
 Fourier transform
