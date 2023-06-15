@@ -81,6 +81,7 @@ class Filter(ProcessingConfigurable):
             "hamming",
             "bartlett",
             "blackman",
+            "median",
             "savgol",
             "whittaker",
         ],
@@ -111,9 +112,9 @@ class Filter(ProcessingConfigurable):
         "filter the data without differentiating.",
     ).tag(config=True, min=0)
 
-    lambd = tr.Float(
+    lamb = tr.Float(
         default_value=1.0,
-        help="Smoothing/Regularization parameter. The larger `lambd`\ , the smoother "
+        help="Smoothing/Regularization parameter. The larger `lamb`\ , the smoother "
         "the data.",
     ).tag(config=True)
 
@@ -186,6 +187,17 @@ and ‘nearest’.
             win = win / np.sum(win)
             data = scipy.ndimage.convolve1d(X, win, **kwargs)
 
+        # Median filter
+        # -------------
+        elif self.method == "median":
+            if "axis" in kwargs:
+                axis = kwargs.pop("axis")
+            if axis in (-2, 0):
+                size = (self.size, 1)
+            elif axis in (-1, 1):
+                size = (1, self.size)
+            data = scipy.ndimage.median_filter(X, size=size, **kwargs)
+
         # Savitzky-Golay filter
         # ---------------------
         elif self.method == "savgol":
@@ -205,7 +217,7 @@ and ‘nearest’.
         # Whittaker-Eilers filter
         # -----------------------
         elif self.method == "whittaker":
-            data = np.apply_along_axis(ws, -1, X, self.lambd, self.order)
+            data = np.apply_along_axis(ws, -1, X, self.lamb, self.order)
 
         return data
 
@@ -215,7 +227,7 @@ _docstring.keep_params("Filter.parameters", "method")
 _docstring.keep_params("Filter.parameters", "size")
 _docstring.keep_params("Filter.parameters", "order")
 _docstring.keep_params("Filter.parameters", "deriv")
-_docstring.keep_params("Filter.parameters", "lambd")
+_docstring.keep_params("Filter.parameters", "lamb")
 _docstring.keep_params("Filter.parameters", "delta")
 _docstring.keep_params("Filter.parameters", "mode")
 _docstring.keep_params("Filter.parameters", "cval")
@@ -356,7 +368,7 @@ def savgol_filter(*args, **kwargs):
 
 
 @_docstring.dedent
-def whittaker(dataset, lambd=1.0, order=2, **kwargs):
+def whittaker(dataset, lamb=1.0, order=2, **kwargs):
     """
     Smooth the data using the Whittaker smoothing algorithm.
 
@@ -368,7 +380,7 @@ def whittaker(dataset, lambd=1.0, order=2, **kwargs):
     Parameters
     ----------
     %(dataset)s
-    %(Filter.parameters.lambd)s
+    %(Filter.parameters.lamb)s
     order : `int`, optional, default=2
         The difference order of the penalized least-squares.
     %(kwargs)s
@@ -387,6 +399,6 @@ def whittaker(dataset, lambd=1.0, order=2, **kwargs):
     --------
     %(Filter.see_also.no_whittaker)s
     """
-    return Filter(method="whittaker", lambd=lambd, order=order, **kwargs).transform(
+    return Filter(method="whittaker", lamb=lamb, order=order, **kwargs).transform(
         dataset
     )

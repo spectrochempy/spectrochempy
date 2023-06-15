@@ -1,3 +1,5 @@
+import numpy as np
+
 from spectrochempy.application import error_, info_, warning_
 from spectrochempy.core import get_loglevel
 
@@ -77,16 +79,86 @@ def denoise(dataset, ratio=99.8, **kwargs):
     return data
 
 
-def despike(dataset, **kwargs):
+def despike(dataset, size=9, delta=2):
     """
-    Despike the data using various algorithm.
+    Remove convex spike from the data using the katsumoto-ozaki procedure.
+
+    The method can be used to remove cosmic ray peaks from a spectrum.
+
+    The present implementation is based on the method is described
+    in :cite:t:`Katsumoto2003`:
+
+    * In the first step, the moving-average method is employed to detect the spike
+      noise. The moving-average window should contain several data points along the
+      abscissa that are larger than those of the spikes in the spectrum.
+      If a window contains a spike, the value on the ordinate for the spike will show
+      an anomalous deviation from the average for this window.
+    * In the second step, each data point value identified as noise is replaced by the
+      moving-averaged value.
+    * In the third step, the moving-average process is applied to the new data set made
+      by the second step.
+    * In the fourth step, the spikes are identified by comparing the differences between
+      the original spectra and the moving-averaged spectra calculated in the third step.
+
+    As a result, the proposed method realizes the reduction of convex spikes.
+
 
     Parameters
     ----------
-    dataset
-    kwargs
+    dataset : `NDDataset` or a ndarray-like object
+        Input object.
+    size : int, optional, default: 9
+        Size of the moving average window.
+    delta : float, optional, default: 2
+        Set the threshold for the detection of spikes. A spike is detected if its value
+        is greater than `delta` times the standard deviation of the difference between
+        the original and the smoothed data.
 
     Returns
     -------
-
+    `NDdataset`
+        The despike dataset
     """
+    new = dataset.copy()
+    s = int((size - 1) / 2)
+
+    for k, X in enumerate(new):
+        X = X.squeeze()
+
+        # 1) first step : savgol filter
+        A = X.savgol(size=size)
+
+        # 2 and 3) second and third step : detect spike and replace spkike by the moving
+        # average and the new data are smoothed again
+        diff = X - A
+        std = delta * diff.std()
+
+        # spike should have a large variation with respect to the std of the difference
+        select = np.array(abs(diff) >= std, dtype=bool)
+        select = np.logical_or(select, np.roll(select, 1))
+        select = np.logical_or(select, np.roll(select, -1))
+
+        # compute weights
+        w = np.ones_like(X)
+        w[select] = 0
+
+        # now we must calculate the weighted average, but for efficiency we will compute it
+        # only around where spike peaks are, the other part should be unchanged.
+
+        res = np.zeros_like(X)
+        W = np.zeros_like(X)
+        r = range(-s, s + 1)
+        for j in r:
+            vj = np.roll(X, j)
+            wj = np.roll(w, j)
+            res += vj * wj
+            W += wj
+        if 0 in W:
+            error_("May be size or delta is two low")
+        A = res / W
+
+        # 4) compare with original to remove spike peaks
+        X.data[select] -= (X - A).data[select]
+        new[k] = X
+
+    return new

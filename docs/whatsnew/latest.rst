@@ -22,6 +22,9 @@ New features
   for details. Note: Backward compatibility is ensured with the previous `smooth` and `savgol_filter` methods.
 * A `whittaker` filter has been added to the `Filter` processor class. See `Filtering and Smoothing`
   tutorials and `Filter` for details.
+* A `denoise` method based on PCA analysis has been added which allows to apply a denoising filter to a 2D dataset.
+* A `despike` method has been added to the `Filter` processor class.
+  It allows to remove spikes from a 1D or 2D dataset. This close issues #688.
 
 Bug fixes
 ~~~~~~~~~

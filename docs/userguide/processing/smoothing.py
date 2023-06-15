@@ -27,7 +27,7 @@
 # ---
 
 # %% [markdown]
-# # Filtering and Smoothing
+# # Filtering, Smoothing and Denoising
 #
 # In this tutorial, we show how to filter/smooth 1D and 2D spectra and gives information
 # on the algorithms used in Spectrochempy.
@@ -74,7 +74,7 @@ Xn = Xs + noise
 _ = Xn.plot()
 
 # %% [markdown]
-# ## 1) The `Filter` processor
+# ## The `Filter` processor
 #
 # The `Filter` processor is a generic processor which can be used to filter 1D and 2D
 # spectra.
@@ -205,18 +205,18 @@ plot(Xn, Xsm2, label="Savitzky-Golay (7 points, order=2)")
 # P. H. C. Eilers, "A perfect smoother", Anal. Chem. 2003, 75, 3631-3636.
 # The implementation in SpectroChemPy is based on the work by H. V. Werts
 # (https://github.com/mhvwerts/whittaker-eilers-smoother). The main parameter to be
-# changed is the `lambd` ('λ' in the Eilers paper), which determines the strength
+# changed is the `lamb` ('λ' in the Eilers paper), which determines the strength
 # of the smoothing. Note that it may needs tuning over several orders of
 # magnitude (1, 10, 100, 1000, ...).
 
 # %%
-filter = scp.Filter(method="whittaker", order=2, lambd=1.5)
+filter = scp.Filter(method="whittaker", order=2, lamb=1.5)
 Xwhit = filter(Xn)
-plot(Xn, Xwhit, label="Whittaker-Eilers (order=2, lambd=1.5)")
+plot(Xn, Xwhit, label="Whittaker-Eilers (order=2, lamb=1.5)")
 
 
 # %% [markdown]
-# ## 3) API or NDDataset methods.
+# ## Filtering using API or NDDataset methods.
 #
 # In addition to the `Filter` processor which provide an uniform interface to the
 # various filter methods provided by
@@ -241,11 +241,6 @@ Xsm = Xn.smooth()  # NDDataset method
 
 # %%
 Xsm = scp.smooth(Xn)  # SpectroChemPy API function
-
-# %% [markdown]
-# Now we plot the original and smoothed spectra on the same figure, and select a small
-# region to better evaluate
-# the quality of the smoothing.
 
 # %% [markdown]
 # #### Window size influence
@@ -342,7 +337,7 @@ Xsg = scp.savgol(Xn, size=5, order=2, mode="mirror")
 
 # %% [markdown]
 # ### Whittaker-eilers filter : `whittaker`
-# Finally, we can also use the `wittaker` filter directly. *e.g*.:
+# Finally, we can also use the `whittaker` filter directly. *e.g*.:
 
 # %%
-Xw = scp.whittaker(Xn, lambd=10)
+Xw = scp.whittaker(Xn, lamb=10)
