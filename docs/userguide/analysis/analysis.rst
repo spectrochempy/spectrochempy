@@ -15,6 +15,7 @@ in the gallery (:ref:`examples-index`\).
    :glob:
    :maxdepth: 2
 
+   baseline
    peak_finding
    peak_integration
    fitting
