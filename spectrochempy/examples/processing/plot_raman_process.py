@@ -112,7 +112,7 @@ blc.model = "asls"
 # The smoothness parameter is a positive number that controls the smoothness of the baseline.
 # The larger this number is, the smoother the resulting baseline.
 # The asymmetry parameter controls the asymmetry for the AsLS resolution.
-blc.mu = 10**7  # smoothness
+blc.lamb = 10**8  # smoothness
 blc.asymmetry = 0.01
 
 # %%
@@ -174,10 +174,7 @@ _ = corr[::10].plot()
 # Denoising
 # ---------
 D = corr.copy()
-estimator = scp.PCA(n_components=4)  # , max_iter=10000)
-offset = D.min()
-estimator.fit(D)
-G = estimator.inverse_transform()
+G = scp.denoise(D, ratio=98)
 
 _ = G[::10].plot()
 
