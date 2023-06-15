@@ -151,6 +151,7 @@ def plot_multiple(
     color="AUTO",
     ls="AUTO",
     lw=1,
+    shift=0,
     **kwargs,
 ):
     """
@@ -179,7 +180,8 @@ def plot_multiple(
         automatically.
     lw: `float`, `list`of  `floats`, optional, default: 1.0
         Line width. If lw is not provided then the line width is chosen automatically.
-
+    shift: `float`, `list`of  `floats`, optional, default: 0.0
+        Vertical shift of the lines.
     **kwargs
         Other parameters that will be passed to the plot1D function.
 
@@ -200,8 +202,13 @@ def plot_multiple(
             raise ValueError(
                 f"list of {desc} must be of same length as the datasets list"
             )
+        if not is_sequence(x) and x != "AUTO":
+            x = [x] * len(datasets)
+            return x
 
-    _valid(labels, "labels")
+        return x
+
+    labels = _valid(labels, "labels")
 
     for dataset in datasets:
         if dataset._squeeze_ndim > 1:
@@ -227,23 +234,26 @@ def plot_multiple(
     )  # remove 'legend' from kwargs before calling plot
     # else it will generate a conflict
 
-    _valid(marker, "marker")
-    _valid(color, "color")
-    _valid(ls, "ls")
-    _valid(lw, "lw")
+    marker = _valid(marker, "marker")
+    color = _valid(color, "color")
+    ls = _valid(ls, "ls")
+    lw = _valid(lw, "lw")
+    shift = _valid(shift, "shift")
 
-    for s in datasets:  # , colors, markers):
-
-        ax = s.plot(
+    # now we can plot
+    sh = 0
+    for i, s in enumerate(datasets):  # , colors, markers):
+        ax = (s + shift[i] + sh).plot(
             method=method,
             pen=pen,
-            marker=marker,
-            color=color,
-            ls=ls,
-            lw=lw,
+            marker=(marker[i] if marker != "AUTO" else marker),
+            color=color[i] if color != "AUTO" else color,
+            ls=ls[i] if ls != "AUTO" else ls,
+            lw=lw[i] if lw != "AUTO" else lw,
             clear=clear,
             **kwargs,
         )
+        sh += shift[i]
         clear = False  # clear=False is necessary for the next plot to say
         # that we will plot on the same figure
 
@@ -255,6 +265,7 @@ def plot_multiple(
             shadow=True,
             loc=legend,
             frameon=True,
+            fontsize="small",
         )
 
     # now we can output the final figure
@@ -581,7 +592,6 @@ def plot_1D(dataset, method=None, **kwargs):
 
     uselabel = kwargs.get("uselabel", False)
     if x and x.is_labeled and (uselabel or not np.any(x.data)):
-
         if x.data is not None:
             xt = ax.get_xticks()
             ticklabels = x.labels[x._loc2index(xt), 0]
@@ -622,7 +632,6 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # masks
     if kwargs.get("show_mask", False):
-
         ax.fill_between(
             xdata,
             zdata.min() - 1.0,

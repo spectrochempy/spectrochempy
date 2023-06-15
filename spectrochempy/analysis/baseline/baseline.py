@@ -14,6 +14,7 @@ import scipy.signal
 import traitlets as tr
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
+from scipy.spatial import ConvexHull
 
 from spectrochempy.analysis._base._analysisbase import AnalysisConfigurable
 from spectrochempy.analysis.baseline.baselineutils import lls, lls_inv
@@ -38,25 +39,24 @@ __all__ = [
     "detrend",
     "asls",
     "snip",
+    "rubberband",
     "lls",
     "lls_inv",
 ]
 __configurables__ = ["Baseline"]
-__dataset_methods__ = ["baseline", "basc", "detrend", "asls", "snip"]
+__dataset_methods__ = ["baseline", "basc", "detrend", "asls", "snip", "rubberband"]
 
 _common_see_also = """
 See Also
 --------
-Baseline : Manual baseline correction.
-baseline : NDDataset method computing a baseline using the `Baseline` class.
-basc : NDDataset method making a baseline correction using the `Baseline` class.
-asls : NDDataset method performing an Asymmetric Least Squares Smoothing baseline
-    correction.
-snip : NDDataset method performing a Simple Non-Iterative Peak (SNIP) detection
-    algorithm.
-autosub: NDDataset method performing a subtraction of reference.
-detrend : NDDataset method performing a remove polynomial trend along a dimension
-    from dataset.
+Baseline : Manual baseline correction processor.
+baseline : Compuute a baseline using the `Baseline` class.
+basc : Make a baseline correction using the `Baseline` class.
+asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
+snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
+rubberband : Perform a Rubberband baseline correction.
+autosub: Perform an automatic subtraction of reference.
+detrend : Remove polynomial trend along a dimension from dataset.
 """
 
 _docstring.get_sections(
@@ -71,6 +71,7 @@ _docstring.delete_params("Baseline.see_also", "asls")
 _docstring.delete_params("Baseline.see_also", "snip")
 _docstring.delete_params("Baseline.see_also", "autosub")
 _docstring.delete_params("Baseline.see_also", "detrend")
+_docstring.delete_params("Baseline.see_also", "rubberband")
 
 
 # ======================================================================================
@@ -114,6 +115,7 @@ class Baseline(AnalysisConfigurable):
       is based on the work of Eilers and Boelens (:cite:`eilers:2005`\ ).
     - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
       (:cite:`ryan:1988`\ ).
+    - ``'rubberband'`` : Rubberband baseline correction.
     - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
       the polynomial is defined by the ``order`` parameter. The baseline is then
       obtained by evaluating the polynomial at each feature defined in predefined
@@ -154,18 +156,19 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True)
 
     model = tr.CaselessStrEnum(
-        ["polynomial", "detrend", "asls", "snip"],
+        ["polynomial", "detrend", "asls", "snip", "rubberband"],
         default_value="polynomial",
         help="""The model used to determine the baseline.
 
-* 'polynomial': the baseline correction is determined by a nth-degree polynomial
-  fitted on the data belonging to the selected `ranges`. The `order` parameter
-  to determine the degree of the polynomial.
+* 'polynomial': the baseline correction is determined by a nth-degree polynomial fitted
+  on the data belonging to the selected `ranges`. The `order` parameter to determine the
+  degree of the polynomial.
 * 'detrend': removes a constant, linear or polynomial trend to the data. The order of
   the trend is determined by the `order` parameter.
 * 'asls': the baseline is determined by an asymmetric least square algorithm.
 * 'snip': the baseline is determined by a simple non-iterative peak detection
   algorithm.
+* 'rubberband': the baseline is determined by a rubberband algorithm.
 """,
     ).tag(config=True)
 
@@ -192,7 +195,7 @@ class Baseline(AnalysisConfigurable):
   (see `scipy.interpolate.PchipInterpolator`\ """,
     ).tag(config=True, min=1)
 
-    mu = tr.Float(
+    lamb = tr.Float(
         default_value=1e5,
         help="The smoothness parameter for the AsLS method. Larger values make the "
         "baseline stiffer. Values should be in the range (0, 1e9).",
@@ -328,7 +331,7 @@ baseline/trends for different segments of the data.
                 item = [item, item]
             ranges[i] = item
 
-        # clean the result (reorder and suppress overlap)
+        # clean the result (reorder and suppress overlaps)
         return trim_ranges(*ranges)
 
     @tr.observe("_X", "ranges", "include_limits", "model", "multivariate")
@@ -502,7 +505,7 @@ baseline/trends for different segments of the data.
         elif self.model == "asls":
             # AsLS fitted baseline
             # For now, this doesn't work with masked data
-            mu = self.mu
+            lamb = self.lamb
             p = self.asymmetry
             D = sparse.diags([1, -2, 1], [0, -1, -2], shape=(N, N - 2))
 
@@ -516,7 +519,7 @@ baseline/trends for different segments of the data.
                 iter = 0
                 while True:
                     W = sparse.spdiags(w, 0, N, N)
-                    C = W + mu * D.dot(D.transpose())
+                    C = W + lamb * D.dot(D.transpose())
                     z = spsolve(C, w * y)
                     w = p * (y > z) + (1 - p) * (y < z)
                     change = np.sum(np.abs(w_old - w)) / N
@@ -532,6 +535,27 @@ baseline/trends for different segments of the data.
                 # do not forget to add to mi to get the original data back
                 z += mi
                 _store[i] = z[::-1] if self._X.x.is_descendant else z
+
+        elif self.model == "rubberband":
+            # Rubberband baseline correction
+            # (do not work with multivariate approach)
+            # based on a solution found here:
+            # https://dsp.stackexchange.com/questions/2725/how-to-perform-a-rubberband-correction-on-spectroscopic-data
+            x = np.arange(N)
+            for i in range(M):
+                y = Y[i].squeeze()
+                # Find the convex hull
+                v = ConvexHull(np.array(np.column_stack((x, y)))).vertices
+                # Array v contains indices of the vertex points,
+                # arranged in the counterclockwise direction,
+                # e.g. [892, 125, 93, 0, 4, 89, 701, 1023].
+                # We have to extract part where v is ascending, e.g. 0–1023.
+                # Rotate convex hull vertices until they start from the lowest one
+                v = np.roll(v, -v.argmin())
+                # Leave only the ascending part
+                v = v[: v.argmax() + 1]
+                # Create baseline using linear interpolation between vertices
+                _store[i] = np.interp(x, x[v], y[v])
 
         # inverse transform to get the baseline in the original data space
         # this depends on the approach used (multivariate or not)
@@ -576,7 +600,9 @@ baseline/trends for different segments of the data.
         # Set X
         # -----
         X = X.copy()
-        if self.model == "asls":  # AsLS doesn't work with masked data (see _fit)
+        if (
+            self.model == "asls"
+        ):  # AsLS doesn't work for now with masked data (see _fit)
             # so we will remove the mask and restore it after the fit
             self.Xmasked = X.copy()
             X.remove_masks()
@@ -684,6 +710,8 @@ baseline/trends for different segments of the data.
         Eventually the features limits are included and the list returned is trimmed,
         cleaned and ordered.
         """
+        # if not self._fitted:
+        #    raise NotFittedError
         return self._ranges
 
     def show_regions(self, ax):
@@ -929,7 +957,7 @@ def detrend(dataset, order="linear", breakpoints=[], **kwargs):
 
 
 @_docstring.dedent
-def asls(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
+def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     """
     Asymmetric Least Squares Smoothing baseline correction.
 
@@ -939,7 +967,7 @@ def asls(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     ----------
     dataset : `NDDataset`
         The input data.
-    mu : `float`, optional, default:1e5
+    lamb : `float`, optional, default:1e5
         The smoothness parameter for the AsLS method. Larger values make the
         baseline stiffer. Values should be in the range (0, 1e9)
     asymmetry : `float`, optional, default:0.05,
@@ -961,7 +989,7 @@ def asls(dataset, mu=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     """
     blc = Baseline()
     blc.model = "asls"
-    blc.mu = mu
+    blc.lamb = lamb
     blc.asymmetry = asymmetry
     blc.tol = tol
     blc.max_iter = max_iter
@@ -996,6 +1024,35 @@ def snip(dataset, snip_width=50):
     blc = Baseline()
     blc.model = "snip"
     blc.snip_width = snip_width
+    blc.fit(dataset)
+
+    return blc.transform()
+
+
+@_docstring.dedent
+def rubberband(dataset):
+    """
+    Rubberband baseline correction.
+
+    The algorithm is faster than the AsLS method, but it is less controllable as there
+    is no parameter to tune.
+
+    Parameters
+    ----------
+    dataset : `NDDataset`
+        The input data.
+
+    Returns
+    -------
+    `NDDataset`
+        The baseline corrected dataset.
+
+    See Also
+    --------
+    %(Baseline.see_also.no_rubberband)s
+    """
+    blc = Baseline()
+    blc.model = "rubberband"
     blc.fit(dataset)
 
     return blc.transform()
