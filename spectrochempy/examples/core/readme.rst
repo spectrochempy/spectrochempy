@@ -1,7 +1,7 @@
-.. _examples-processing-index:
+.. _examples-core-index:
 
 ####################
-Processing NDDataset
+Core functionalities
 ####################
 
 .. contents:: Table of Contents

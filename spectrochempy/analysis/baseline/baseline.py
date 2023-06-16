@@ -34,7 +34,7 @@ from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = [
     "Baseline",
-    "baseline",
+    "get_baseline",
     "basc",
     "detrend",
     "asls",
@@ -44,13 +44,13 @@ __all__ = [
     "lls_inv",
 ]
 __configurables__ = ["Baseline"]
-__dataset_methods__ = ["baseline", "basc", "detrend", "asls", "snip", "rubberband"]
+__dataset_methods__ = ["get_baseline", "basc", "detrend", "asls", "snip", "rubberband"]
 
 _common_see_also = """
 See Also
 --------
 Baseline : Manual baseline correction processor.
-baseline : Compuute a baseline using the `Baseline` class.
+get_baseline : Compuute a baseline using the `Baseline` class.
 basc : Make a baseline correction using the `Baseline` class.
 asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
 snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
@@ -65,7 +65,7 @@ _docstring.get_sections(
     sections=["See Also"],
 )
 _docstring.delete_params("Baseline.see_also", "Baseline")
-_docstring.delete_params("Baseline.see_also", "baseline")
+_docstring.delete_params("Baseline.see_also", "get_baseline")
 _docstring.delete_params("Baseline.see_also", "basc")
 _docstring.delete_params("Baseline.see_also", "asls")
 _docstring.delete_params("Baseline.see_also", "snip")
@@ -83,7 +83,7 @@ _docstring.delete_params("Baseline.see_also", "rubberband")
 # if they are not yet present.
 class Baseline(AnalysisConfigurable):
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Baseline Correction processor.
 
     The baseline correction can be applied to 1D datasets consisting in a single row
@@ -122,8 +122,7 @@ class Baseline(AnalysisConfigurable):
       `ranges`\ .
 
     By default, `ranges` is set to the feature limits (i.e. `ranges=[features[0],
-    features[-1]]`)
-    `model='polynomial'` and `order=1`\ .
+    features[-1]]`\ )
 
     Parameters
     ----------
@@ -148,10 +147,10 @@ class Baseline(AnalysisConfigurable):
         help="For 2D datasets, if `True` or if multivariate='svd' or 'nmf' , a "
         "multivariate method is used to fit a "
         "baseline on the principal components determined using a SVD decomposition "
-        " if `multivariate='svd'`\ /`True` or a NMF factorization if "
+        " if `multivariate='svd'`\ or `True`, or a NMF factorization if "
         "`multivariate='nmf'`\ ,"
         "followed by an inverse-transform to retrieve the baseline corrected "
-        "dataset. If `False`, a sequential method is used which consists in fitting a "
+        "dataset. If `False` , a sequential method is used which consists in fitting a "
         "baseline on each row (observations) of the dataset.",
     ).tag(config=True)
 
@@ -187,7 +186,8 @@ class Baseline(AnalysisConfigurable):
         ),
         default_value=1,
         help="""Polynom order to use for polynomial/pchip interpolation or detrend.
-* If an integer is provided, it is the order of the polynom to fit, "
+
+* If an integer is provided, it is the order of the polynom to fit, i.e. 1 for linear,
 * If a string if provided among  'constant', 'linear', 'quadratic' and 'cubic',
   it is equivalent to order O (constant) to 3 (cubic).
 * If a string equal to `pchip` is provided, the polynomial interpolation is replaced
@@ -226,7 +226,7 @@ class Baseline(AnalysisConfigurable):
     n_components = tr.Integer(
         default_value=5,
         help="Number of components to use for the multivariate method "
-        "(:term:`n_observation` >= `n_components`).",
+        "(:term:`n_observations` >= `n_components`).",
     ).tag(config=True, min=1)
 
     ranges = tr.List(
@@ -555,7 +555,6 @@ baseline/trends for different segments of the data.
                 # Leave only the ascending part
                 v = v[: v.argmax() + 1]
                 # Create baseline using linear interpolation between vertices
-                # Create baseline using linear interpolation between vertices
                 _store[i] = np.interp(x, x[v], y[v])
 
         # inverse transform to get the baseline in the original data space
@@ -803,7 +802,7 @@ baseline/trends for different segments of the data.
 
 
 @_docstring.dedent
-def baseline(dataset, *ranges, **kwargs):
+def get_baseline(dataset, *ranges, **kwargs):
     r"""
     Compute a baseline using the Baseline class processor.
 
@@ -827,7 +826,7 @@ def baseline(dataset, *ranges, **kwargs):
 
     See Also
     --------
-    %(Baseline.see_also.no_baseline)s
+    %(Baseline.see_also.no_get_baseline)s
 
     Notes
     -----
@@ -888,12 +887,12 @@ def basc(dataset, *ranges, **kwargs):
     For more flexibility and functionality, it is advised to use the Baseline class
     processor instead.
     """
-    return dataset - baseline(dataset, *ranges, **kwargs)
+    return dataset - get_baseline(dataset, *ranges, **kwargs)
 
 
 @_docstring.dedent
 def detrend(dataset, order="linear", breakpoints=[], **kwargs):
-    """
+    r"""
     Remove polynomial trend along a dimension from dataset.
 
     Depending on the ``order``parameter, `detrend` removes the best-fit polynomial line
@@ -903,14 +902,14 @@ def detrend(dataset, order="linear", breakpoints=[], **kwargs):
     ----------
     dataset : `NDDataset`
         The input data.
-    order : non-negative `int` or a `str` among ['constant', 'linear', 'quadratic', 'cubic'], optional, default='linear'
+    order : non-negative `int` or a `str` among ['constant', 'linear', 'quadratic', 'cubic'], optional, default:'linear'
         The order of the polynomial trend.
 
-        * If ``order=0`` or ``'constant'``\ , the mean of data is subtracted to remove
+        * If ``order=0`` or ``'constant'`` , the mean of data is subtracted to remove
           a shift trend.
-        * If ``order=1`` or ``'linear'`` (default), the best straith-fit line is
+        * If ``order=1`` or ``'linear'`` (default), the best straight-fit line is
           subtracted from data to remove a linear trend (drift).
-        * If order=2 or ``order=quadratic``\ ,  the best fitted nth-degree polynomial
+        * If order=2 or ``order=quadratic`` ,  the best fitted nth-degree polynomial
           line is subtracted from data to remove a quadratic polynomial trend.
         * ``order=n`` can also be used to remove any nth-degree polynomial trend.
 

@@ -68,7 +68,7 @@ __pycache__/
 docs/reference/generated
 docs/reference/api.rst
 build/
-docs/gallery/
+gallery/
 docs/savefig/
 dist/
 build/

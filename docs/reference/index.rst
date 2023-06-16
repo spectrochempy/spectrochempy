@@ -470,7 +470,7 @@ Baseline correction
     Baseline
     BaselineCorrector
     autosub
-    baseline
+    get_baseline
     basc
     detrend
     asls

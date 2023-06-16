@@ -1,4 +1,9 @@
-.. _analysis_examples-index:
+.. _examples-core-index:
 
-Analysing datasets
-------------------
+##################
+Analysis NDDataset
+##################
+
+.. contents:: Table of Contents
+   :local:
+   :depth: 3

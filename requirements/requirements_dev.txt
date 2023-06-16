@@ -60,6 +60,7 @@ nbconvert==7.4.0
 nbsphinx
 numpydoc>=1.2
 pandoc==2.19
+pypandoc
 pre-commit
 scikit-image
 sphinx==5.3
