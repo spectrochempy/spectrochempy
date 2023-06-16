@@ -25,10 +25,10 @@ Among its major features:
     smoothing, apodization...
 #.  Manipulate single or multiple datasets: concatenation, splitting, alignment
     along given dimensions, ...
-#.  Explore data with exploratory analyses methods such as `SVD`\ ,
-    `PCA`\ , `EFA` and visualization capabilities ...
-#.  Modeling single or multiple datasets with curve fitting (`Optimize`\ )/ curve modeling
-    (`MCR-ALS`\ ) methods...
+#.  Explore data with exploratory analyses methods such as `~spectrochempy.SVD`\ ,
+    `~spectrochempy.PCA`\ , `~spectrochempy.EFA` and visualization capabilities ...
+#.  Modeling single or multiple datasets with curve fitting (`~spectrochempy.Optimize`\ )/ curve modeling
+    (`~spectrochempy.MCR-ALS`\ ) methods...
 #.  Export data and analyses to various formats: ``csv`` , ``xls`` , ``JCAMP-DX`` ,  ...
 #.  Embed the complete workflow from raw data import to final analyses in a project manager
 
@@ -65,7 +65,7 @@ Getting Started
 
 * :doc:`gettingstarted/whyscpy`
 * :doc:`gettingstarted/overview`
-* :doc:`gallery/auto_examples/index`
+* :doc:`gettingstarted/examples/index`
 * :doc:`gettingstarted/install/index`
 
 .. toctree::
@@ -75,7 +75,7 @@ Getting Started
 
     gettingstarted/whyscpy
     gettingstarted/overview
-    Examples <gallery/auto_examples/index>
+    Examples <gettingstarted/examples/index>
     Installation <gettingstarted/install/index>
 
 .. _userguide:
@@ -84,14 +84,17 @@ Getting Started
 User's Guide & Tutorials
 ************************
 
+The user guide is designed to give you a quick overview of the main features of SpectroChemPy. It does not cover all
+features, but should help you to get started quickly, and to find your way around.
+For more details on the various features, check out the :ref:`api_reference` section which gives a more detailed
+description of the API. You can also refer to the :ref:`examples-index` for more examples using SpectroChemPy.
+
 * :doc:`userguide/introduction/introduction`
-* :doc:`userguide/objects`
+* :doc:`userguide/objects/index`
 * :doc:`userguide/importexport/importexport`
-* :doc:`userguide/plotting/plotting`
 * :doc:`userguide/processing/processing`
 * :doc:`userguide/analysis/analysis`
-* :doc:`userguide/units/units`
-* :doc:`userguide/api/api`
+* :doc:`userguide/plotting/plotting`
 
 .. toctree::
     :maxdepth: 3
@@ -99,13 +102,11 @@ User's Guide & Tutorials
     :caption: User's Guide & Tutorials
 
     userguide/introduction/introduction
-    userguide/objects
+    userguide/objects/index
     userguide/importexport/importexport
-    userguide/plotting/plotting
     userguide/processing/processing
     userguide/analysis/analysis
-    userguide/units/units
-    userguide/api/api
+    userguide/plotting/plotting
 
 .. _reference:
 

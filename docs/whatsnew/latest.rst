@@ -16,7 +16,7 @@ New features
   is now used. It allows to perform baseline correction
   on a dataset with multiple algorithms. See :ref:`baseline` for details. BaselineCorrection is still valid but deprecated.
 * Three new baseline algorithms have been added to the new Baseline processor:
-  `rubberband`, `asls` and `snip`. See :ref:`Baseline` for details.
+  `~spectrochempy.rubberband`, `~spectrochempy.asls` and `~spectrochempy.snip` .
 * Filters has been refactored. A new `Filter` processor class allows to define various
   filters and apply them to a dataset. See `Filtering and Smoothing` tutorials and `Filter`
   for details. Note: Backward compatibility is ensured with the previous `smooth` and `savgol_filter` methods.

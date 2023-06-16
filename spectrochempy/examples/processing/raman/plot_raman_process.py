@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-# %%
 # ======================================================================================
 # Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
-# %%
 """
 Processing RAMAN spectra
 ========================
@@ -39,7 +37,7 @@ _ = B.plot()
 # %%
 # Baseline correction
 # -------------------
-# Let's try to remove the baseline using differents methods
+# Let's try to remove the baseline using different methods
 # For this we use the `Baseline` processor
 #
 # First, we define the baseline processor
@@ -58,8 +56,8 @@ blc.model = "detrend"
 
 # %%
 # Now we need to define the order of the detrending either as an integer giving the
-# degree of the polynomial trend or a string among {`constant`\ , `linear`\ ,
-# `quadratic`\ ,`cubic`\ }
+# degree of the polynomial trend or a string among { `constant` , `linear` ,
+# `quadratic` , `cubic` }
 blc.order = "linear"
 
 # %%
@@ -99,7 +97,8 @@ plot_result(B, corr, baseline)
 # %%
 # Ok this is a good start.
 # But we can do better with more specific baseline correction methods.
-# Let's try the asymmetric least squares smoothing model ( `asls` ), on this detrended spectrum:
+# Let's try the asymmetric least squares smoothing model ( `asls` ), on this detrended
+# spectrum:
 Bd = blc.corrected
 
 # %%
@@ -108,10 +107,10 @@ Bd = blc.corrected
 blc.model = "asls"
 
 # %%
-# We need to define the smoothness and asymmetry parameters
-# The smoothness parameter is a positive number that controls the smoothness of the baseline.
-# The larger this number is, the smoother the resulting baseline.
-# The asymmetry parameter controls the asymmetry for the AsLS resolution.
+# We need to define the smoothness and asymmetry parameters. The smoothness parameter is
+# a positive number that controls the smoothness of the baseline. The larger this number
+# is, the smoother the resulting baseline. The asymmetry parameter controls the
+# asymmetry for the AsLS resolution.
 blc.lamb = 10**8  # smoothness
 blc.asymmetry = 0.01
 
@@ -124,7 +123,7 @@ plot_result(Bd, corr, baseline)
 
 # %%
 # The correction appears to be good, but let's see if we can do better by using the
-# `snip` method. This method requires to adjust the with of a window (usually set to
+# `snip` method. This method requires to adjust the width of a window (usually set to
 # the FWHM of the characteristic peaks).
 blc.model = "snip"
 blc.snip_width = 55  # estimated FWHM of the peaks (expressed in point. TODO: alternatively use true coordinates)
@@ -134,7 +133,6 @@ corr = blc.transform()
 baseline = blc.baseline
 plot_result(Bs, corr, baseline)
 
-
 # %%
 # Baseline correction 2D spectra (series of spectra)
 # --------------------------------------------------
@@ -143,7 +141,6 @@ plot_result(Bs, corr, baseline)
 C = scp.read_labspec("Activation.txt", directory=ramandir)
 # C = C[20:]  # discard the first 20 spectra
 _ = C.plot()
-
 
 # %%
 # Now we apply the AsLS method on the series of spectra

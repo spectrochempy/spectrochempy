@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.16
+#     version: 3.10.11
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -33,11 +33,11 @@
 # %% [markdown]
 # # Introduction
 #
-# The `SpectroChemPy` project was developed to provide advanced tools for processing and
+# The **SpectroChemPy** project was developed to provide advanced tools for processing and
 # analyzing spectroscopic data, initially for internal purposes within the
-# [LCS (https://www.lcs.ensicaen.fr)] (https://www.lcs.ensicaen.fr).
+# [LCS (https://www.lcs.ensicaen.fr)](https://www.lcs.ensicaen.fr).
 #
-# The `SpectroChemPy` project is essentially a library written in
+# The **SpectroChemPy** project is essentially a library written in
 # [python](https://www.python.org) language and provides objects,
 # [NDDataset](../../reference/generated/spectrochempy.NDDataset.rst)
 # and [Project](../../reference/generated/spectrochempy.Project.rst),
@@ -47,6 +47,18 @@
 # The processed data are mainly spectroscopic data from techniques such as IR, Raman or
 # NMR, but they are not limited to this type of application, as any type of data can be
 # used.
+
+# %% [markdown]
+# ## About this user's guide
+#
+# The ``User's guide and tutorials`` section is designed to give you a quick overview of the main features of **SpectroChemPy**. It does not cover all
+# features, but should help you to get started quickly, and to find your way around.
+# For more details on the various features, check out the [Public API reference](../../reference/index.rst) section which gives
+# a more detailed description of the API. You can also refer to the [Gallery of example](../../gallery/auto_examples/index.html)
+#
+# ## What to do if questions arise
+#
+# If, despite this documentation, which we're constantly trying to improve, you still have unresolved questions, don't hesitate to post your question on the [discussion forum](https://github.com/spectrochempy/spectrochempy/discussions). You can also post on [StackOverflow](https://stackoverflow.com), if you prefer, but don't forget to put "Spectrochempy" in the title (as there are no tags yet to enable us to find new questions easily.
 
 # %% [markdown]
 # ## How to get started
@@ -61,10 +73,7 @@
 # If you are already an experienced `python` user, you can certainly use your favorite
 # IDE to run your scripts, debug them and display the results. But if you want an easier
 # way, especially if you are a beginner, we recommend you to use `Jupyter Lab` to do it.
-# To get started, you can follow links below:
-
-# %% [markdown]
-# [Jupyter Lab interface](interface.ipynb).
+# To get started, you can follow this link : [Jupyter Lab interface](interface.ipynb).
 
 # %% [markdown]
 # ### Loading the API
@@ -110,112 +119,22 @@ from spectrochempy import NDDataset
 nd = NDDataset()
 
 
-# %% [markdown]
-# ## NDDataset, the main object
-#
-# NDDataset is a python object, actually a container, which can represent most of your
-# multidimensional spectroscopic data.
-# For instance, in the following we read data from a series of FTIR experiments,
-# provided  by the OMNIC software
-
-# %%
-nd = NDDataset.read_omnic("irdata/nh4y-activation.spg")
-
-# %% [markdown]
-# Note that for this example, we use data stored in a `test` directory. For your own
-# usage, you probably have to give the full pathname.
-
-# %% [markdown]
-# ### Display dataset information
-
-# %% [markdown]
-# Several ways are available to display the data we have just read and that are now
-# stored in the dataset
-#
-# * **Printing** them, using the print function of python to get a short text version
-# of the dataset information.
-
-# %%
-print(nd)
-
-# %% [markdown]
-# * **Displaying html**, inside a jupyter notebook, by just typing the name of the
-# dataset (must be the last
-# instruction of a cell, however!)
-
 # %%
 nd
 
 # %% [markdown]
-# ### Plotting a dataset
+# ## Where to go next?
+
+# %% [markdown]
+# The ``User's guide & tutorial`` section is divided into several sections describing the main features of spectrochempy.
 #
-# First, we can set some general plotting preferences for this dataset
-
-# %%
-prefs = nd.preferences
-prefs.reset()
-prefs.figure.figsize = (6, 3)
-
-# %% [markdown]
-# Let's plot first a 1D spectrum (for instance one row of nd)
-
-# %%
-row = nd[-1]
-_ = row.plot()
-
-# %% [markdown]
-# or a column ...
-
-# %%
-col = nd[:, 3500.0]  # note the indexing using wavenumber!
-_ = col.plot_scatter()
-
-# %% [markdown]
-# 2D plots can be also generated as stacked plot
-
-# %%
-_ = nd.plot(method="stack")  # or nd.plot_stack()
-
-# %% [markdown]
-# or as an image plot:
-
-# %%
-prefs.colormap = "magma"
-_ = nd.plot(method="image")  # or nd.plot_image()
-
-# %% [markdown]
-# Note that as we plot wavenumbers as abscissa, by convention the coordinates' direction
-# is reversed.
+# * [Core objects](../objects/index.rst) : This is really the starting point for understanding how SpectroChemPy works. In fact, virtually all the functions offered by the API use one of these objects: `NDDataset` (the most important!) , `Project` or `Script`.
 #
-# This can be changed by using the keyword argument `reversed = False` .
-
-# %% [markdown]
-# ### Processing a dataset
-
-# %% [markdown]
-# Some arithmetic can be performed on such dataset. Here is an example where we subtract
-# one reference spectrum to
-# the whole nddataset that we have read above (`nd` ).
-
-# %% [markdown]
-# Let's take, e.g., the last row as reference
-
-# %%
-ref = nd[0]
-_ = ref.plot()
-
-# %% [markdown]
-# Now suppress this ref spectrum to all other spectra of the whole dataset (additionally
-# we mask the region of
-# saturation
-
-# %%
-prefs.colormap = "jet"
-prefs.colorbar = True
-nds = nd - ref
-nds[:, 1290.0:890.0] = scp.MASKED
-_ = nds.plot_stack()
-
-# %% [markdown]
-# More details on available processing and analysis functions will be given later in
-# this user guide.
+# * [Import & export](../importexport.importexport.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
+#
+# * [Processing](../processing/processing.rst) : This section explains how to prepare datasets for future analysis. By processing, we mean methods which generally return the same dataset transformed by mathematical operations (for example, this may be a `sqrt` or `log` operation, or a `fft` operation or many others), or part of a dataset transformed by a slicing or concatenation operation.
+#
+# * [Analysis](../analysis/analysis.rst) : This section presents the analysis methods implemented in SpectroChemPy. Generally speaking, analysis methods are any methods used to extract properties or characteristics from one or more NDDatasets. Analysis methods include statistical methods (mean, standard deviation, etc.), peaks, integration, etc.
+# But perhaps the most important is the implementation of various chemometrics methods (PCA, PLS-R, EFA, MCR-ALS, ...), data fit methods, and baseline extraction.
+#
+# * [Plotting](../plotting/plotting.py) : Finally, this section attempts to give the basics for using the plot methods included in SpectroChemPy.  These methods do not claim to cover all needs, and so it may be worthwhile for the user to learn how to use packages such as matplotlib, on which the methods described in this section are based.

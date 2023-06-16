@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.10
+#     version: 3.10.11
 # ---
 
 # %% [markdown]
@@ -526,5 +526,3 @@ out.original, out.corrected, out.baseline
 # - simulate noisy spectra with baseline drifts and compare the performances of
 # `multivariate` vs `sequential` methods
 # </div>
-
-# %%
