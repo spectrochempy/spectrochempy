@@ -555,7 +555,6 @@ baseline/trends for different segments of the data.
                 # Leave only the ascending part
                 v = v[: v.argmax() + 1]
                 # Create baseline using linear interpolation between vertices
-                # Create baseline using linear interpolation between vertices
                 _store[i] = np.interp(x, x[v], y[v])
 
         # inverse transform to get the baseline in the original data space
