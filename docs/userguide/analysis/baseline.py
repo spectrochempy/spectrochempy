@@ -526,5 +526,3 @@ out.original, out.corrected, out.baseline
 # - simulate noisy spectra with baseline drifts and compare the performances of
 # `multivariate` vs `sequential` methods
 # </div>
-
-# %%

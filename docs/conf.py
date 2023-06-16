@@ -326,8 +326,16 @@ pdf_language = "en_EN"
 
 sphinx_gallery_conf = {
     "plot_gallery": "True",
-    "examples_dirs": "../spectrochempy/examples",
-    "gallery_dirs": "gallery/auto_examples",
+    "examples_dirs": [
+        "../spectrochempy/examples/core",
+        "../spectrochempy/examples/processing",
+        "../spectrochempy/examples/analysis",
+    ],
+    "gallery_dirs": [
+        "gettingstarted/examples/gallery/auto_examples_core",
+        "gettingstarted/examples/gallery/auto_examples_processing",
+        "gettingstarted/examples/gallery/auto_examples_analysis",
+    ],
     "backreferences_dir": "gallery/backreferences",
     "doc_module": "spectrochempy",
     "reference_url": {
