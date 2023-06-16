@@ -1,13 +1,13 @@
 .. _userguide.analysis:
 
 Analysis
-**********
+********
 
 Here you'll find some tutorials on the analysis methods provided by SpectroChemPy.
 
 The `analysis` category includes all methods and classes designed to extract properties and features from one or more NDDatasets.
 The information given on these tutorial pages can be effectively supplemented by a review of the examples
-in the gallery (:ref:`examples-index`\ ).
+in the gallery (`examples-index`\ ).
 
 .. note::
 
