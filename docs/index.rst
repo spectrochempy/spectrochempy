@@ -87,11 +87,9 @@ User's Guide & Tutorials
 * :doc:`userguide/introduction/introduction`
 * :doc:`userguide/objects`
 * :doc:`userguide/importexport/importexport`
-* :doc:`userguide/plotting/plotting`
 * :doc:`userguide/processing/processing`
 * :doc:`userguide/analysis/analysis`
-* :doc:`userguide/units/units`
-* :doc:`userguide/api/api`
+* :doc:`userguide/plotting/plotting`
 
 .. toctree::
     :maxdepth: 3
@@ -99,13 +97,11 @@ User's Guide & Tutorials
     :caption: User's Guide & Tutorials
 
     userguide/introduction/introduction
-    userguide/objects
+    userguide/objects/index
     userguide/importexport/importexport
-    userguide/plotting/plotting
     userguide/processing/processing
     userguide/analysis/analysis
-    userguide/units/units
-    userguide/api/api
+    userguide/plotting/plotting
 
 .. _reference:
 

@@ -1,7 +1,7 @@
 .. _userguide.objects:
 
-Data structures
-###############
+Data objects
+############
 
 
 The NDDataset is the main object used by `SpectroChemPy` .
