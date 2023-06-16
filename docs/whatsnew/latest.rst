@@ -1,24 +1,13 @@
-
 :orphan:
 
-What's new in revision {{ revision }}
+What's new in revision 0.6.6.dev
 ---------------------------------------------------------------------------------------
 
-These are the changes in SpectroChemPy-{{ revision }}.
+These are the changes in SpectroChemPy-0.6.6.dev.
 See :ref:`release` for a full changelog including other versions of SpectroChemPy.
-
-..
-   Do not remove the ``revision`` marker. It will be replaced during doc building.
-   Also do not delete the section titles.
-   Add your list of changes between (Add here) and (section) comments
-   keeping a blank line before and after this list.
-
-
-.. section
 
 New features
 ~~~~~~~~~~~~
-.. Add here new public features (do not delete this comment)
 
 * `~spectrochempy.plot_multiple` method now accept keyword arguments to change the default
   plot style of the different spectra.
@@ -29,26 +18,13 @@ New features
 * Three new baseline algorithms have been added to the new Baseline processor:
   `~spectrochempy.rubberband`, `~spectrochempy.asls` and `~spectrochempy.snip` .
 
-.. section
-
 Bug fixes
 ~~~~~~~~~
-.. Add here new bug fixes (do not delete this comment)
 
 * Docs problems fixed (#687).
 
-.. section
-
-Breaking changes
-~~~~~~~~~~~~~~~~
-.. Add here new breaking changes (do not delete this comment)
-
-
-.. section
-
 Deprecations
 ~~~~~~~~~~~~
-.. Add here new deprecations (do not delete this comment)
 
 * `parameters` method of Analysis configurables is now deprecated in favor of `params`.
 * The `BaselineCorrection` processor has been deprecated in favor of `~spectrochempy.Baseline` .

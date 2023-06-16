@@ -84,8 +84,13 @@ Getting Started
 User's Guide & Tutorials
 ************************
 
+The user guide is designed to give you a quick overview of the main features of SpectroChemPy. It does not cover all
+features, but should help you to get started quickly, and to find your way around.
+For more details on the various features, check out the :ref:`api_reference` section which gives a more detailed
+description of the API. You can also refer to the :ref:`examples-index` for more examples using SpectroChemPy.
+
 * :doc:`userguide/introduction/introduction`
-* :doc:`userguide/objects`
+* :doc:`userguide/objects/index`
 * :doc:`userguide/importexport/importexport`
 * :doc:`userguide/processing/processing`
 * :doc:`userguide/analysis/analysis`

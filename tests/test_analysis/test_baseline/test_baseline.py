@@ -177,14 +177,13 @@ def test_baseline_sequential_asls(IR_dataset_2D):
 
 
 def test_preprocessing_nddataset_methods(IR_dataset_2D):
-
     ndp = IR_dataset_2D[::5]
     ndp[:, 1290.0:890.0] = scp.MASKED
 
     # baseline
-    baseline = ndp.baseline()
+    baseline = ndp.get_baseline()
     assert baseline.shape == ndp.shape
-    baseline = ndp.baseline(model="asls", lamb=10**8, asymmetry=0.002)
+    baseline = ndp.get_baseline(model="asls", lamb=10**8, asymmetry=0.002)
     assert baseline.shape == ndp.shape
 
     # asls
@@ -193,7 +192,7 @@ def test_preprocessing_nddataset_methods(IR_dataset_2D):
 
     # snip
     ndpcor = scp.snip(ndp, snip_width=150)
-    baseline = ndp.baseline(model="snip", snip_width=150)
+    baseline = ndp.get_baseline(model="snip", snip_width=150)
     assert_dataset_equal(ndpcor, ndp - baseline)
 
 
