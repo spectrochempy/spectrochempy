@@ -31,11 +31,12 @@ New features
 * Filters has been refactored. A new `Filter` processor class allows to define various
   filters and apply them to a dataset. See `Filtering and Smoothing` tutorials and `Filter`
   for details. Note: Backward compatibility is ensured with the previous `smooth` and `savgol_filter` methods.
-* A `whittaker` filter has been added to the `Filter` processor class. See `Filtering and Smoothing`
-  tutorials and `Filter` for details.
-* A `denoise` method based on PCA analysis has been added which allows to apply a denoising filter to a 2D dataset.
-* A `despike` method has been added to the `Filter` processor class.
+* A `whittaker` filter has been added to the `~spectrochempy.Filter` processor class. See `Filtering and Smoothing`
+  tutorials and `~spectrochempy.Filter` for details. A method is also available: `~spectrochempy.whittaker`.
+* A `~spectrochempy.denoise` method based on PCA analysis has been added which allows to apply a denoising filter to a 2D dataset.
+* A `~spectrochempy.despike` method has been added to the `~spectrochempy.Filter` processor class.
   It allows to remove spikes from a 1D or 2D dataset. This close issues #688.
+* New examples has been added to the gallery
 
 .. section
 
@@ -61,3 +62,4 @@ Deprecations
 * `parameters` method of Analysis configurables is now deprecated in favor of `params`.
 * The `BaselineCorrection` processor has been deprecated in favor of `~spectrochempy.Baseline` .
 * `abc` (and its alias `ab`) method has been deprecated in favor of `~spectrochempy.basc`.
+* `savgol_filter` method has been deprecated in favor of `~spectrochempy.Filter` processor class or the `~spectrochempy.savgol` method.
