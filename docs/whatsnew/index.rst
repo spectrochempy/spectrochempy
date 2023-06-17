@@ -19,6 +19,7 @@ Version 0.6
     :maxdepth: 2
 
     latest
+    v0.6.6
     v0.6.5
     v0.6.4
     v0.6.3
