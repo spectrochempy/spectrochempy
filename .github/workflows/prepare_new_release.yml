@@ -44,7 +44,7 @@ jobs:
         id: make-commit
         run: |
           git add -A
-          git commit --message "Prepare release ${{ github.event.inputs.versionString }}"
+          git commit --no-verify --message "Prepare release ${{ github.event.inputs.versionString }}"
           echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Push new branch
