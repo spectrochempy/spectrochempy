@@ -12,7 +12,7 @@ import pytest
 
 import spectrochempy as scp
 
-RAMANDIR = scp.preferences.datadir / "ramandata"
+RAMANDIR = scp.preferences.datadir / "ramandata/labspec"
 
 
 # @pytest.mark.skipif(

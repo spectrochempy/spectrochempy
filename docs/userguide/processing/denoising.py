@@ -42,7 +42,7 @@ import spectrochempy as scp
 
 # %%
 # Load the data  ( )
-dataset = scp.read("ramandata/serie190214-1.txt")
+dataset = scp.read("ramandata/labspec/serie190214-1.txt")
 # select the useful region (in particular spectra are 0 after 6500 s)
 nd = dataset[0.0:6500.0, 70.0:]
 # baseline correction the data (for a easier comparison)

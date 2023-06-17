@@ -8,6 +8,7 @@
 #
 # ======================================================================================
 brukeropusreader
+renishawWiRE
 quadprog
 numpy-quaternion
 cffconvert

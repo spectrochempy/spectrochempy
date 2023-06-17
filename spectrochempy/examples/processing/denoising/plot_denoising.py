@@ -24,7 +24,7 @@ scp.set_loglevel("INFO")  # to see information
 # %%
 # Load the data (should be a 2D spectrum or a list of datasets that can be merged):
 
-dataset = scp.read("ramandata/serie190214-1.txt")
+dataset = scp.read("ramandata/labspec/serie190214-1.txt")
 
 # %%
 # select the useful region

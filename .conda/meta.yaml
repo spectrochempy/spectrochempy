@@ -33,6 +33,7 @@ requirements:
 
     # specific dependencies
     - brukeropusreader
+    - renishaw_wire
     - quadprog
     - quaternion
 

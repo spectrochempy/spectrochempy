@@ -19,7 +19,7 @@ import spectrochempy as scp
 # ----------------------
 # Define the folder where are the spectra
 datadir = scp.preferences.datadir
-ramandir = datadir / "ramandata"
+ramandir = datadir / "ramandata/labspec"
 
 # %%
 # Read a single spectrum
