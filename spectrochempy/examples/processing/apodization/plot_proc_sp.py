@@ -95,3 +95,5 @@ new5.plot(
 # running the .py script with python
 
 # scp.show()
+
+# sphinx_gallery_thumbnail_number = -1

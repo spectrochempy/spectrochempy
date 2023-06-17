@@ -12,7 +12,13 @@ import spectrochempy as scp
 def test_download_nist():
     CAS = "7732-18-5"  # WATER
 
-    ds = scp.download_nist_ir(CAS)
+    try:
+        ds = scp.download_nist_ir(CAS)
+    except OSError:
+        # no internet connection or server down
+        # (should not fail test)
+        return
+
     assert len(ds) == 2
 
     ds = scp.download_nist_ir(CAS, index=0)

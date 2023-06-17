@@ -562,15 +562,19 @@ Apodization
     sinm
 
 
-Smoothing, filtering
-====================
+Smoothing, filtering, denoising
+===============================
 
 .. autosummary::
     :nosignatures:
     :toctree: generated/
 
-    savgol_filter
+    Filter
+    savgol
     smooth
+    whittaker
+    denoise
+    despike
 
 
 Alignment, interpolation

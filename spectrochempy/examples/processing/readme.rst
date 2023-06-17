@@ -3,7 +3,3 @@
 ####################
 Processing NDDataset
 ####################
-
-.. contents:: Table of Contents
-   :local:
-   :depth: 3

@@ -104,8 +104,7 @@ def download_nist_ir(CAS, index="all"):
                     index.append(i)
                     i += 1
             except OSError:
-                error_("OSError: could not connect to NIST")
-                return None
+                raise OSError("Cannot connect to the NIST server... ")
 
         if len(index) == 0:
             error_(IOError, "NIST IR: no spectrum found")
