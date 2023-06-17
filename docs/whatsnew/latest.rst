@@ -9,12 +9,12 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* `plot_multiple` method now accept keyword arguments to change the default
-  plot style of the different spectra. See :ref:`plot_multiple` for details.
+* `~spectrochempy.plot_multiple` method now accept keyword arguments to change the default
+  plot style of the different spectra.
 * `BaselineCorrection` class has been renamed into
-  `Baseline`, and there are changes in the way it
+  `~spectrochempy.Baseline`, and there are changes in the way it
   is now used. It allows to perform baseline correction
-  on a dataset with multiple algorithms. See :ref:`baseline` for details. BaselineCorrection is still valid but deprecated.
+  on a dataset with multiple algorithms. `BaselineCorrection` is still valid but deprecated.
 * Three new baseline algorithms have been added to the new Baseline processor:
   `~spectrochempy.rubberband`, `~spectrochempy.asls` and `~spectrochempy.snip` .
 * Filters has been refactored. A new `Filter` processor class allows to define various
@@ -35,5 +35,5 @@ Deprecations
 ~~~~~~~~~~~~
 
 * `parameters` method of Analysis configurables is now deprecated in favor of `params`.
-* The BaselineCorrection processor has been deprecated in favor of Baseline.
-* `abc` (and its alias `ab`) method has been deprecated in favor of `basc`.
+* The `BaselineCorrection` processor has been deprecated in favor of `~spectrochempy.Baseline` .
+* `abc` (and its alias `ab`) method has been deprecated in favor of `~spectrochempy.basc`.

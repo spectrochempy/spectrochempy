@@ -86,7 +86,7 @@ def despike(dataset, size=9, delta=2):
     The method can be used to remove cosmic ray peaks from a spectrum.
 
     The present implementation is based on the method is described
-    in :cite:t:`Katsumoto:2003`:
+    in :cite:t:`katsumoto:2003`:
 
     * In the first step, the moving-average method is employed to detect the spike
       noise. The moving-average window should contain several data points along the
