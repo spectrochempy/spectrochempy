@@ -6,4 +6,4 @@ Analysis NDDataset
 
 .. contents:: Table of Contents
    :local:
-   :depth: 3
+   :depth: 1

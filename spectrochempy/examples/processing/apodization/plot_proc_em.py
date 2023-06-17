@@ -45,16 +45,18 @@ new2, curve2 = dataset1D.copy().em(
 # %%
 # Plotting
 
-p = dataset1D.plot(zlim=(-2, 2), color="k")
+_ = dataset1D.plot(zlim=(-2, 2), color="k")
 
-curve1.plot(color="r")
-new1.plot(color="r", clear=False, label=" em = 20 hz")
+_ = curve1.plot(color="r")
+_ = new1.plot(color="r", clear=False, label=" em = 20 hz")
 
-curve2.plot(color="b", clear=False)
-new2.plot(dcolor="b", clear=False, label=" em = 30 HZ, shifted = ")
+_ = curve2.plot(color="b", clear=False)
+_ = new2.plot(dcolor="b", clear=False, label=" em = 30 HZ, shifted = ")
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
 # running the .py script with python
 
 # scp.show()
+
+# sphinx_gallery_thumbnail_number = -1

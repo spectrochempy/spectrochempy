@@ -3,7 +3,3 @@
 ####################
 Core functionalities
 ####################
-
-.. contents:: Table of Contents
-   :local:
-   :depth: 3

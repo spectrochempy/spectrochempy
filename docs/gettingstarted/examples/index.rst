@@ -13,7 +13,7 @@ If you have examples to suggest from your own use of spectrochempy, don't hesita
 in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>`__ or by creating a pull-request.
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 4
 
     gallery/auto_examples_core/index
     gallery/auto_examples_processing/index

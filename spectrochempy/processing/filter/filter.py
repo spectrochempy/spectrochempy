@@ -372,7 +372,7 @@ def whittaker(dataset, lamb=1.0, order=2, **kwargs):
     """
     Smooth the data using the Whittaker smoothing algorithm.
 
-    This implementation based on the work by :cite:t:`eilers2003` uses sparse matrices
+    This implementation based on the work by :cite:t:`eilers:2003` uses sparse matrices
     enabling high-speed processing of large input vectors.
 
     Copyright M. H. V. Werts, 2017 (see LICENSES/WITTAKER_SMOOTH_LICENSE.rst)

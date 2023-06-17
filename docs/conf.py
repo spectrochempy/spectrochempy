@@ -323,6 +323,7 @@ pdf_language = "en_EN"
 
 # Sphinx-gallery ---------------------------------------------------------------
 # Generate the plots for the gallery
+from sphinx_gallery.sorting import FileNameSortKey
 
 sphinx_gallery_conf = {
     "plot_gallery": "True",
@@ -345,6 +346,8 @@ sphinx_gallery_conf = {
     "expected_failing_examples": [],
     "download_all_examples": False,
     "pypandoc": True,
+    "remove_config_comments": True,
+    "within_subsection_order": FileNameSortKey,
 }
 suppress_warnings = [
     # "sphinx_gallery",

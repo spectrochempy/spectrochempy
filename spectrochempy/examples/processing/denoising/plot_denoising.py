@@ -8,7 +8,7 @@
 # flake8: noqa
 """
 Denoising a 2D Raman spectrum
-============================
+=============================
 
 In this example, we use the `denoise` method to remove the noise from a 2D Raman
 spectrum.
@@ -33,6 +33,7 @@ nd = dataset[:, 60.0:]
 
 # %%
 # Basic plot
+
 _ = nd.plot(title="original data")
 
 # %%
@@ -52,7 +53,8 @@ _ = nd2.plot(title="denoised data")
 nd3 = nd1.denoise(ratio=95)
 _ = nd3.plot(title="denoised data")
 
-# %%
+# sphinx_gallery_thumbnail_number = 5
+
 nd4 = nd1.denoise(ratio=90)
 _ = nd4.plot(title="denoised data")
 
@@ -65,3 +67,5 @@ _ = nd4.plot(title="denoised data")
 # This ends the basic example of denoising a 2D Raman spectrum.
 
 # scp.show()  # uncomment to show plot if running from a script
+
+# sphinx_gallery_thumbnail_number = -1
