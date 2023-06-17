@@ -15,7 +15,7 @@ spectrum.
 import spectrochempy as scp
 
 # %%
-# Load the data  ( )
+# Load the data
 
 dataset = scp.read("ramandata/serie190214-1.txt")
 
@@ -39,24 +39,22 @@ _ = X1.plot()
 
 # %%
 # Now let's use the `~spectrochempy.despike` method.
-# Only two parameters needs to be tuned: the `size`of the filter
-# (actually a savitsky-golay filter of order 2), and `delta`, the threshold for the
+# Only two parameters needs to be tuned: the `size` of the filter
+# (actually a Savitsky-Golay filter of order 2), and `delta`, the threshold for the
 # detection of spikes (outliers).
 # A spike is detected if its value is greater than `delta` times the standard deviation
 # of the difference between the original and the smoothed data.
-
-# sphinx_gallery_thumbnail_number = 2
 
 X2 = scp.despike(X1, size=11, delta=5)
 _ = X1.plot()
 _ = X2.plot(clear=False, ls="-", c="r")
 
-# %% [markdown]
+# %%
 # Getting the desired results require the tuning of size and delta parameters.
 # And sometimes may need to repeat the procedure on a previously filtered spectra.
 #
 # For example, if size or delta are badly chosen, valid peaks could be removed.
-# So carefull inspection of the results is crucial.
+# So careful inspection of the results is crucial.
 
 X3 = scp.despike(X1, size=21, delta=2)
 _ = X1.plot()
