@@ -13,7 +13,6 @@ __dataset_methods__ = __all__
 
 import io
 import re
-import struct
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
@@ -24,6 +23,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.file import fromfile
 
 # ======================================================================================
 # Public functions
@@ -336,14 +336,14 @@ def _read_spg(*args, **kwargs):
 
     # read total number of lines
     fid.seek(294)
-    nlines = _fromfile(fid, "uint16", count=1)
+    nlines = fromfile(fid, "uint16", count=1)
 
     # read "key values"
     pos = 304
     keys = np.zeros(nlines)
     for i in range(nlines):
         fid.seek(pos)
-        keys[i] = _fromfile(fid, dtype="uint8", count=1)
+        keys[i] = fromfile(fid, dtype="uint8", count=1)
         pos += 16
 
     # the number of occurrences of the key '02' is number of spectra
@@ -375,7 +375,7 @@ def _read_spg(*args, **kwargs):
     for i in range(nspec):
         # read the position of the header
         fid.seek(position02[i] + 2)
-        pos_header = _fromfile(fid, dtype="uint32", count=1)
+        pos_header = fromfile(fid, dtype="uint32", count=1)
         # get infos
         info = _read_header(fid, pos_header)
         nx[i] = info["nx"]
@@ -435,7 +435,7 @@ def _read_spg(*args, **kwargs):
     for i in range(nspec):
         # determines the position of informatioon
         fid.seek(position6B[i] + 2)  # go to line and skip 2 bytes
-        spa_title_pos = _fromfile(fid, "uint32", 1)
+        spa_title_pos = fromfile(fid, "uint32", 1)
 
         # read omnic filename
         spa_title = _readbtext(fid, spa_title_pos, 256)
@@ -443,7 +443,7 @@ def _read_spg(*args, **kwargs):
 
         # and the acquisition date
         fid.seek(spa_title_pos + 256)
-        timestamp = _fromfile(fid, dtype="uint32", count=1)
+        timestamp = fromfile(fid, dtype="uint32", count=1)
         # since 31/12/1899, 00:00
         acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
             seconds=int(timestamp)
@@ -466,7 +466,7 @@ def _read_spg(*args, **kwargs):
         #  if len(position1B) != 0:  # read history texts
         #     for j in range(nspec):  determine the position of information
         #        f.seek(position1B[j] + 2)  #
-        #        history_pos = _fromfile(f,  'uint32', 1)
+        #        history_pos = fromfile(f,  'uint32', 1)
         #        history =  _readbtext(f, history_pos[0])
         #        allhistories.append(history)
 
@@ -534,7 +534,7 @@ def _read_spa(*args, **kwargs):
     # The acquisition date (GMT) is at hex 128 = decimal 296.
     # Second since 31/12/1899, 00:00
     fid.seek(296)
-    timestamp = _fromfile(fid, dtype="uint32", count=1)
+    timestamp = fromfile(fid, dtype="uint32", count=1)
     acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
         seconds=int(timestamp)
     )
@@ -579,14 +579,14 @@ def _read_spa(*args, **kwargs):
     spa_comments = []  # several custom comments can be present
     while "continue":
         fid.seek(pos)
-        key = _fromfile(fid, dtype="uint8", count=1)
+        key = fromfile(fid, dtype="uint8", count=1)
 
         # print(key, end=' ; ')
 
         if key == 2:
             # read the position of the header
             fid.seek(pos + 2)
-            pos_header = _fromfile(fid, dtype="uint32", count=1)
+            pos_header = fromfile(fid, dtype="uint32", count=1)
             info = _read_header(fid, pos_header)
 
         elif key == 3 and return_ifg is None:
@@ -594,17 +594,17 @@ def _read_spa(*args, **kwargs):
 
         elif key == 4:
             fid.seek(pos + 2)
-            comments_pos = _fromfile(fid, "uint32", 1)
+            comments_pos = fromfile(fid, "uint32", 1)
             fid.seek(pos + 6)
-            comments_len = _fromfile(fid, "uint32", 1)
+            comments_len = fromfile(fid, "uint32", 1)
             fid.seek(comments_pos)
             spa_comments.append(fid.read(comments_len).decode("latin-1", "replace"))
 
         elif key == 27:
             fid.seek(pos + 2)
-            history_pos = _fromfile(fid, "uint32", 1)
+            history_pos = fromfile(fid, "uint32", 1)
             fid.seek(pos + 6)
-            history_len = _fromfile(fid, "uint32", 1)
+            history_len = fromfile(fid, "uint32", 1)
             spa_history = _readbtext(fid, history_pos, history_len)
 
         elif key == 102 and return_ifg == "sample":
@@ -741,7 +741,7 @@ def _read_srs(*args, **kwargs):
     # determine whether the srs is reprocessed. At pos=292 (hex:124) appears a difference between
     # and reprocessed series
     fid.seek(292)
-    key = _fromfile(fid, dtype="uint8", count=16)[0]
+    key = fromfile(fid, dtype="uint8", count=16)[0]
     if key == 39:  # (hex: 27)
         is_reprocessed = False
     elif key == 15:  # (hex = 0F)
@@ -792,7 +792,7 @@ def _read_srs(*args, **kwargs):
         names.append(_readbtext(fid, pos, 256))
         pos += 84
         fid.seek(pos)
-        data[0, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
+        data[0, :] = fromfile(fid, dtype="float32", count=info["nx"])[:]
         pos += info["nx"] * 4
         # ... and the remaining ones:
         for i in np.arange(info["ny"])[1:]:
@@ -800,7 +800,7 @@ def _read_srs(*args, **kwargs):
             names.append(_readbtext(fid, pos, 256))
             pos += 84
             fid.seek(pos)
-            data[i, :] = _fromfile(fid, dtype="float32", count=info["nx"])[:]
+            data[i, :] = fromfile(fid, dtype="float32", count=info["nx"])[:]
             pos += info["nx"] * 4
 
         # now get series history
@@ -822,7 +822,7 @@ def _read_srs(*args, **kwargs):
         if "background_name" not in info.keys():
             # it is a short header
             fid.seek(index[1] + 208)
-            data = _fromfile(fid, dtype="float32", count=info["nx"])
+            data = fromfile(fid, dtype="float32", count=info["nx"])
         else:
             # longer header, in such case the header indicates a spectrum
             # but the data are those of an ifg... For now need more examples
@@ -900,11 +900,11 @@ def _read_srs(*args, **kwargs):
         # while not found:
         #     pos += 16
         #     f.seek(pos)
-        #     key = _fromfile(f, dtype='uint8', count=1)
+        #     key = fromfile(f, dtype='uint8', count=1)
         #     if key == 1:
         #         pos += 4
         #         f.seek(pos)
-        #         X = _fromfile(f, dtype='float32', count=info['ny'])
+        #         X = fromfile(f, dtype='float32', count=info['ny'])
         #         found = True
         #
         # X = NDDataset(X)
@@ -920,31 +920,6 @@ def _read_srs(*args, **kwargs):
     fid.close()
 
     return dataset
-
-
-def _fromfile(fid, dtype, count):
-    # to replace np.fromfile in case of io.BytesIO object instead of byte
-    # object
-    t = {
-        "uint8": "B",
-        "int8": "b",
-        "uint16": "H",
-        "int16": "h",
-        "uint32": "I",
-        "int32": "i",
-        "float32": "f",
-        "char8": "c",
-    }
-    typ = t[dtype] * count
-    if dtype.endswith("16"):
-        count *= 2
-    elif dtype.endswith("32"):
-        count *= 4
-
-    out = struct.unpack(typ, fid.read(count))
-    if len(out) == 1:
-        return out[0]
-    return np.array(out)
 
 
 def _readbtext(fid, pos, size):
@@ -1064,11 +1039,11 @@ def _read_header(fid, pos):
 
     # nx
     fid.seek(pos + 4)
-    out["nx"] = _fromfile(fid, "uint32", count=1)
+    out["nx"] = fromfile(fid, "uint32", count=1)
 
     # xunits
     fid.seek(pos + 8)
-    key = _fromfile(fid, dtype="uint8", count=1)
+    key = fromfile(fid, dtype="uint8", count=1)
     if key == 1:
         out["xunits"] = "cm^-1"
         out["xtitle"] = "wavenumbers"
@@ -1091,7 +1066,7 @@ def _read_header(fid, pos):
 
     # data units
     fid.seek(pos + 12)
-    key = _fromfile(fid, dtype="uint8", count=1)
+    key = fromfile(fid, dtype="uint8", count=1)
     if key == 17:
         out["units"] = "absorbance"
         out["title"] = "absorbance"
@@ -1126,24 +1101,24 @@ def _read_header(fid, pos):
 
     # firstx, lastx
     fid.seek(pos + 16)
-    out["firstx"] = _fromfile(fid, "float32", 1)
+    out["firstx"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 20)
-    out["lastx"] = _fromfile(fid, "float32", 1)
+    out["lastx"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 28)
 
-    out["scan_pts"] = _fromfile(fid, "uint32", 1)
+    out["scan_pts"] = fromfile(fid, "uint32", 1)
     fid.seek(pos + 32)
-    out["zpd"] = _fromfile(fid, "uint32", 1)
+    out["zpd"] = fromfile(fid, "uint32", 1)
     fid.seek(pos + 36)
-    out["nscan"] = _fromfile(fid, "uint32", 1)
+    out["nscan"] = fromfile(fid, "uint32", 1)
     fid.seek(pos + 52)
-    out["nbkgscan"] = _fromfile(fid, "uint32", 1)
+    out["nbkgscan"] = fromfile(fid, "uint32", 1)
     fid.seek(pos + 68)
-    out["collection_length"] = _fromfile(fid, "uint32", 1)
+    out["collection_length"] = fromfile(fid, "uint32", 1)
     fid.seek(pos + 80)
-    out["reference_frequency"] = _fromfile(fid, "float32", 1)
+    out["reference_frequency"] = fromfile(fid, "float32", 1)
     fid.seek(pos + 188)
-    out["optical_velocity"] = _fromfile(fid, "float32", 1)
+    out["optical_velocity"] = fromfile(fid, "float32", 1)
 
     if filetype == "spa, spg":
         out["history"] = _readbtext(fid, pos + 208, None)
@@ -1156,13 +1131,13 @@ def _read_header(fid, pos):
 
         out["name"] = _readbtext(fid, pos + 938, 256)
         fid.seek(pos + 1002)
-        out["collection_length"] = _fromfile(fid, "float32", 1) * 60
+        out["collection_length"] = fromfile(fid, "float32", 1) * 60
         fid.seek(pos + 1006)
-        out["lasty"] = _fromfile(fid, "float32", 1)
+        out["lasty"] = fromfile(fid, "float32", 1)
         fid.seek(pos + 1010)
-        out["firsty"] = _fromfile(fid, "float32", 1)
+        out["firsty"] = fromfile(fid, "float32", 1)
         fid.seek(pos + 1026)
-        out["ny"] = _fromfile(fid, "uint32", 1)
+        out["ny"] = fromfile(fid, "uint32", 1)
         #  y unit could be at pos+1030 with 01 = minutes ?
         out["history"] = _readbtext(fid, pos + 1200, None)
 
@@ -1179,11 +1154,11 @@ def _getintensities(fid, pos):
     # returns a ndarray
 
     fid.seek(pos + 2)  # skip 2 bytes
-    intensity_pos = _fromfile(fid, "uint32", 1)
+    intensity_pos = fromfile(fid, "uint32", 1)
     fid.seek(pos + 6)
-    intensity_size = _fromfile(fid, "uint32", 1)
+    intensity_size = fromfile(fid, "uint32", 1)
     nintensities = int(intensity_size / 4)
 
     # Read and return spectral intensities
     fid.seek(intensity_pos)
-    return _fromfile(fid, "float32", int(nintensities))
+    return fromfile(fid, "float32", int(nintensities))

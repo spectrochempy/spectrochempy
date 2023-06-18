@@ -8,9 +8,12 @@
 File utilities.
 """
 import re
+import struct
 import warnings
 from os import environ
 from pathlib import Path, PosixPath, WindowsPath
+
+import numpy as np
 
 
 # ======================================================================================
@@ -27,6 +30,31 @@ def download_testdata():
     if not downloaded.exists():
         read(datadir, download_only=True)
         downloaded.touch(exist_ok=True)
+
+
+def fromfile(fid, dtype, count):
+    # to replace np.fromfile in case of io.BytesIO object instead of byte
+    # object
+    t = {
+        "uint8": "B",
+        "int8": "b",
+        "uint16": "H",
+        "int16": "h",
+        "uint32": "I",
+        "int32": "i",
+        "float32": "f",
+        "char8": "c",
+    }
+    typ = t[dtype] * count
+    if dtype.endswith("16"):
+        count *= 2
+    elif dtype.endswith("32"):
+        count *= 4
+
+    out = struct.unpack(typ, fid.read(count))
+    if len(out) == 1:
+        return out[0]
+    return np.array(out)
 
 
 def _insensitive_case_glob(pattern):
