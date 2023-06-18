@@ -13,7 +13,7 @@ This example shows how to read a Renishaw WiRE files (*.wdf format).
 
 The spectral data used has been downloaded from
 https://github.com/alchem0x2A/py-wdf-reader (MIT License) and stored in the
-local directory ``ramandata/renishaw``.
+local directory ``ramandata/wire``.
 
 The examples given here is a modified version of the original examples:
 See https://github.com/alchem0x2A/py-wdf-reader/blob/master/examples
@@ -33,14 +33,14 @@ import spectrochempy as scp
 # %%
 # First read a single spectrum (measurement type : single)
 
-dataset = scp.read_wire("ramandata/renishaw/sp.wdf")
+dataset = scp.read_wire("ramandata/wire/sp.wdf")
 _ = dataset.plot()
 
 
 # %%
 # Now read a series of spectra (measurement type : series) from a Z-depth scan.
 
-dataset = scp.read_wire("ramandata/renishaw/depth.wdf")
+dataset = scp.read_wire("ramandata/wire/depth.wdf")
 _ = dataset.plot_image()
 
 
@@ -53,14 +53,14 @@ _ = dataset.plot_image()
 
 # %%
 # extract a line scan data from a StreamLine HR measurement
-dataset = scp.read_wire("ramandata/renishaw/line.wdf")
+dataset = scp.read_wire("ramandata/wire/line.wdf")
 dataset.y -= dataset.y[0]
 _ = dataset.plot_image()
 
 
 # %%
 # finally extract grid scan data from a StreamLine HR measurement
-dataset = scp.read_wire("ramandata/renishaw/mapping.wdf")
+dataset = scp.read_wire("ramandata/wire/mapping.wdf")
 dataset.z -= dataset.z[0]  # this is a xpos
 dataset.y -= dataset.y[0]  # this is a ypos
 # plot the image summming on a frequency
