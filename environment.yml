@@ -22,7 +22,6 @@ channels:
 dependencies:
     # specific dependencies
     - brukeropusreader
-    - renishaw_wire
     - quadprog
     - quaternion
 
