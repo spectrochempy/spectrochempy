@@ -30,6 +30,9 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* Fix a bug when slicing dataset with an array or list of index: Multi-coordinates
+  were not correctly handled.
+
 
 .. section
 
