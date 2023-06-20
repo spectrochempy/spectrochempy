@@ -343,7 +343,6 @@ class _wdfReader(object):
                 )
                 # set the acquisition time from the first time stamp
                 self._meta.acquisition_time = data[0]
-                print(data[0])
                 data = data - data[0]
             else:
                 data = np.array([self._read_type("double") for i in range(count)])

@@ -347,7 +347,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 idx = names.index(name)
                 if self._coordset[idx].is_empty:
                     new_coords[idx] = Coord(None, name=name)
-                elif isinstance(item, slice):
+                else:  # if isinstance(item, slice):
                     # add the slice on the corresponding coordinates on the dim to the
                     # new list of coordinates
                     if not isinstance(self._coordset[idx], CoordSet):
@@ -365,8 +365,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                         ]._default  # set the same default coord
                         new_coords[idx]._is_same_dim = self._coordset[idx]._is_same_dim
 
-                elif isinstance(item, (np.ndarray, list)):
-                    new_coords[idx] = self._coordset[idx][item]
+                # elif isinstance(item, (np.ndarray, list)):
+                #    new_coords[idx] = self._coordset[idx][item]
 
             new.set_coordset(*new_coords, keepnames=True)
 
