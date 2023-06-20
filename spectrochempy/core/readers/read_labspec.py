@@ -52,7 +52,7 @@ def read_labspec(*paths, **kwargs):
 
     Examples
     --------
-    >>> A = scp.read_labspec('ramandata/Activation.txt')
+    >>> A = scp.read_labspec('ramandata/labspec/Activation.txt')
     """
 
     kwargs["filetypes"] = ["LABSPEC exported files (*.txt)"]

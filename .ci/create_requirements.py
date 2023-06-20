@@ -36,6 +36,7 @@ RENAME = {
     "quaternion": "numpy-quaternion",
     "matplotlib-base": "matplotlib",
     "nmrglue": "git+https://github.com/jjhelmus/nmrglue.git",
+    "renishaw_wire": "renishawWiRE",
 }
 
 

@@ -18,7 +18,7 @@ import spectrochempy as scp
 # %%
 # define the folder where are the spectra
 datadir = scp.preferences.datadir
-ramandir = datadir / "ramandata"
+ramandir = datadir / "ramandata/labspec"
 
 # %%
 

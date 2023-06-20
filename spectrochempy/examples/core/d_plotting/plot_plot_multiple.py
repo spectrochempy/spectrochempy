@@ -18,7 +18,7 @@ import spectrochempy as scp
 
 # %%
 # Load the data (here 2D spectrum made from a list of 1D spectra):
-B1 = scp.read("ramandata/serie190214-1.txt")
+B1 = scp.read("ramandata/labspec/serie190214-1.txt")
 
 # %%
 # First we show the basic plot (note here the use of the `cmap=None` option to

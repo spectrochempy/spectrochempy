@@ -43,7 +43,7 @@ import spectrochempy as scp
 
 # %%
 # use the generic read function. Note that read_labspec would be equivalent for this file format.
-X = scp.read("ramandata/SMC1-Initial_RT.txt")
+X = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
 
 # %% [markdown]
 # and plot it:

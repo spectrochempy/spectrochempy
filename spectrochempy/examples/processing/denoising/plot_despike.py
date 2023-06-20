@@ -17,7 +17,7 @@ import spectrochempy as scp
 # %%
 # Load the data
 
-dataset = scp.read("ramandata/serie190214-1.txt")
+dataset = scp.read("ramandata/labspec/serie190214-1.txt")
 
 # %%
 # Keep only one spectrum in this series

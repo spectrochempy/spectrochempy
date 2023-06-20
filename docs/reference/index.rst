@@ -179,6 +179,8 @@ Import a NDataset from external source
     read_hdr
     read_jcamp
     read_labspec
+    read_wire
+    read_wdf
     read_mat
     read_matlab
     read_omnic

@@ -48,7 +48,8 @@ FILETYPES = [
     ("zip", "Compressed folder of data files (*.zip)"),
     ("quadera", "Quadera ascii files (*.asc)"),
     ("carroucell", "Carroucell files (*spa)"),
-    ("galactic", "GRAMS/Thermo Galactic files (*.spc)")
+    ("galactic", "GRAMS/Thermo Galactic files (*.spc)"),
+    ("wire", "Renishaw WiRE files (*.wdf)"),
     #  ('all', 'All files (*.*)')
 ]
 ALIAS = [
@@ -65,6 +66,7 @@ ALIAS = [
     ("dx", "jcamp"),
     ("xls", "excel"),
     ("asc", "quadera"),
+    ("wdf", "wire"),
 ]
 
 
@@ -311,6 +313,7 @@ read_csv : Read CSV files (:file:`.csv`\ ).
 read_jcamp : Read Infrared JCAMP-DX files (:file:`.jdx`\ , :file:`.dx`\ ).
 read_matlab : Read Matlab files (:file:`.mat`\ , :file:`.dso`\ ).
 read_carroucell : Read files in a directory after a carroucell experiment.
+read_wire : Read REnishaw Wire files (:file:`.wdf`\ ).
 """,
     sections=["See Also"],
     base="Importer",
@@ -686,7 +689,7 @@ def _openfid(filename, mode="rb", **kwargs):
     encoding = "utf-8"
 
     if _is_url(filename):
-        # by default we set the read_only flag to True when reading remote url
+        # by default, we set the read_only flag to True when reading remote url
         kwargs["read_only"] = kwargs.get("read_only", True)
 
         # use request to read the remote content
