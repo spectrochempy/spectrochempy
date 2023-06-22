@@ -129,9 +129,9 @@ def test_compare_project(simple_project):
 
 def test_compare_units():
 
-    testing.assert_equal_units(ur.km, ur.m)
+    testing.assert_units_equal(ur.km, ur.m)
     with pytest.raises(AssertionError):
-        testing.assert_equal_units(ur.km, ur.m, strict=True)
+        testing.assert_units_equal(ur.km, ur.m, strict=True)
 
     with pytest.raises(AssertionError):
-        testing.assert_equal_units(ur.absorbance, ur.transmittance)
+        testing.assert_units_equal(ur.absorbance, ur.transmittance)

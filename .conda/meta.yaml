@@ -25,7 +25,7 @@ build:
 requirements:
   host:
     - pip
-    - python >=3.8
+    - python >=3.9
     - setuptools
     - setuptools_scm
   run:
@@ -48,11 +48,11 @@ requirements:
     - numpy
     - numpydoc>=1.2
     - pint>=0.20
-    - pytz
     - requests
     - scipy
     - tqdm
     - traitlets
+    - tzlocal
     - scikit-learn
     - xlrd
     - pyyaml

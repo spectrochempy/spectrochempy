@@ -32,7 +32,7 @@ from spectrochempy.utils.testing import (
     RandomSeedContext,
     assert_array_equal,
     assert_dataset_equal,
-    assert_equal_units,
+    assert_units_equal,
 )
 
 typequaternion = np.dtype(np.quaternion)
@@ -489,7 +489,7 @@ def test_ndmath_unit_conversion_operators(operation, result_units):
     in_m = NDDataset(in_km.data * 1000, units=ur.m)
     operator_km = in_km.__getattribute__(operation)
     combined = operator_km(in_m)
-    assert_equal_units(combined.units, result_units)
+    assert_units_equal(combined.units, result_units)
 
 
 @pytest.mark.parametrize(
@@ -513,7 +513,7 @@ def test_arithmetic_unit_calculation(unit1, unit2, op, result_units):
     try:
         assert result.units == result_units
     except AssertionError:
-        assert_equal_units(ndd1_method(ndd2).units, result_units)
+        assert_units_equal(ndd1_method(ndd2).units, result_units)
 
 
 def test_simple_arithmetic_on_full_dataset():
@@ -1064,7 +1064,7 @@ def test_issue417():
 
     assert_array_equal(X.data, X_r.data)
     assert_dataset_equal(X, X_r)
-    assert_equal_units(X.units, X_r.units)
+    assert_units_equal(X.units, X_r.units)
     assert_dataset_equal(X[-1], X_r[-1])
 
     x_r = X_r - X_r[-1]

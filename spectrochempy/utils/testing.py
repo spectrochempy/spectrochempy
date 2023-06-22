@@ -573,7 +573,7 @@ class RandomSeedContext(object):
 # ======================================================================================
 # raises and assertions (mostly copied from astropy)
 # ======================================================================================
-def assert_equal_units(unit1, unit2, strict=False):
+def assert_units_equal(unit1, unit2, strict=False):
     """
     Compare units.
 

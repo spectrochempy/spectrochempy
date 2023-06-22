@@ -17,7 +17,7 @@ from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.testing import (
     assert_approx_equal,
     assert_array_equal,
-    assert_equal_units,
+    assert_units_equal,
 )
 from spectrochempy.utils.warnings import assert_produces_warning
 
@@ -439,7 +439,7 @@ def test_coord_unit_conversion_operators_a(operation, result_units):
 
     combined = operator_km(scalar_in_m)
 
-    assert_equal_units(combined.units, result_units)
+    assert_units_equal(combined.units, result_units)
 
 
 UNARY_MATH = [
@@ -480,7 +480,7 @@ def test_coord_unit_conversion_operators(operation, result_units):
 
     combined = operator_km(scalar)
     debug_(f"{operation}, {combined}")
-    assert_equal_units(combined.units, result_units)
+    assert_units_equal(combined.units, result_units)
 
 
 NOTIMPL = [
