@@ -140,9 +140,8 @@ setup_args = dict(
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development :: Libraries",
         "Intended Audience :: Science/Research",
-        "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
+        "License :: CeCILL-B Free Software License Agreement (CeCILL-B)",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
@@ -151,7 +150,7 @@ setup_args = dict(
     zip_safe=False,
     packages=find_packages() + packages,
     include_package_data=True,  # requirements
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     setup_requires=["setuptools_scm>=6.3.2", "matplotlib>=3.5.1"],
     install_requires=read_requirements(),
     # post-commands

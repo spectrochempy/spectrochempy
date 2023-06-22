@@ -42,12 +42,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        pythonVersion: ["3.8", "3.10"]
+        pythonVersion: ["3.9", "3.10"]
         exclude:
           - os: macos-latest
-            pythonVersion: 3.8
+            pythonVersion: 3.9
           - os: windows-latest
-            pythonVersion: 3.8
+            pythonVersion: 3.9
     steps:
       - name: Checkout spectrochempy repository
         uses: actions/checkout@v3
