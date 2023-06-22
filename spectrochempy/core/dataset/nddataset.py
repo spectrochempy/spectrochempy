@@ -13,10 +13,11 @@ __all__ = ["NDDataset"]
 import sys
 import textwrap
 from datetime import datetime, tzinfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import numpy as np
-import pytz  # TODO: for py>=3.9, we could use builtin zoneinfo library instead of pyt
 import traitlets as tr
+from tzlocal import get_localzone
 
 from spectrochempy.application import error_, warning_
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
@@ -28,12 +29,11 @@ from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
+from spectrochempy.utils.datetimeutils import utcnow
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
-
-#       but we need compatibility with 3.7 (Colab).
 
 
 # ======================================================================================
@@ -226,7 +226,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     ):
         super().__init__(data, **kwargs)
 
-        self._created = datetime.utcnow()
+        self._created = utcnow()
         self.description = kwargs.pop("description", "")
         self.author = kwargs.pop("author", get_user_and_node())
 
@@ -541,16 +541,16 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     @tr.default("_timezone")
     def _timezone_default(self):
-        # Return the default timezone (UTC)
-        return datetime.utcnow().astimezone().tzinfo
+        # Return the default timezone (local timezone)
+        return get_localzone()
 
-    @tr.validate("_created")
-    def _created_validate(self, proposal):
-        date = proposal["value"]
-        if date.tzinfo is not None:
-            # make the date utc naive
-            date = date.replace(tzinfo=None)
-        return date
+    # @tr.validate("_created")
+    # def _created_validate(self, proposal):
+    #     date = proposal["value"]
+    #     if date.tzinfo is not None:
+    #         # make the date utc naive
+    #         date = date.replace(tzinfo=None)
+    #     return date
 
     @tr.validate("_history")
     def _history_validate(self, proposal):
@@ -560,13 +560,13 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             self._history = None
         return history
 
-    @tr.validate("_modified")
-    def _modified_validate(self, proposal):
-        date = proposal["value"]
-        if date.tzinfo is not None:
-            # make the date utc naive
-            date = date.replace(tzinfo=None)
-        return date
+    # @tr.validate("_modified")
+    # def _modified_validate(self, proposal):
+    #     date = proposal["value"]
+    #     if date.tzinfo is not None:
+    #         # make the date utc naive
+    #         date = date.replace(tzinfo=None)
+    #     return date
 
     @tr.observe(tr.All)
     def _anytrait_changed(self, change):
@@ -582,7 +582,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             return
 
         # all the time -> update modified date
-        self._modified = datetime.utcnow()
+        self._modified = utcnow()
         return
 
     def _cstr(self):
@@ -820,8 +820,9 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         history = []
         for date, value in self._history:
-            date = pytz.utc.localize(date)
-            date = date.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+            date = date.astimezone(self._timezone).isoformat(
+                sep=" ", timespec="seconds"
+            )
             value = value[0].capitalize() + value[1:]
             history.append(f"{date}> {value}")
         return history
@@ -927,8 +928,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
         Creation date object (Datetime).
         """
-        created = pytz.utc.localize(self._created)
-        return created.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+        created = self._created.astimezone(self._timezone)
+        return created.isoformat(sep=" ", timespec="seconds")
 
     @property
     def data(self):
@@ -972,7 +973,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
         Return the local timezone.
         """
-        return str(datetime.utcnow().astimezone().tzinfo)
+        return str(get_localzone())
 
     @property
     def modeldata(self):
@@ -992,8 +993,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
         Date of modification (readonly property).
         """
-        modified = pytz.utc.localize(self._modified)
-        return modified.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+        modified = self._modified.astimezone(self._timezone)
+        return modified.isoformat(sep=" ", timespec="seconds")
 
     @property
     def origin(self):
@@ -1279,27 +1280,20 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         A timezone's offset refers to how many hours the timezone
         is from Coordinated Universal Time (UTC).
 
-        A `naive` datetime object contains no timezone information. The
-        easiest way to tell if a datetime object is naive is by checking
-        tzinfo.  will be set to None of the object is naive.
-
-        A naive datetime object is limited in that it cannot locate itself
-        in relation to offset-aware datetime objects.
-
         In spectrochempy, all datetimes are stored in UTC, so that conversion
         must be done during the display of these datetimes using tzinfo.
         """
-        return self._timezone
+        return str(self._timezone)
 
     @timezone.setter
     def timezone(self, val):
         try:
-            self._timezone = pytz.timezone(val)
-        except pytz.UnknownTimeZoneError:
-            raise UnknownTimeZoneError(
+            self._timezone = ZoneInfo(val)
+        except ZoneInfoNotFoundError as e:
+            raise ZoneInfoNotFoundError(
                 "You can get a list of valid timezones in "
                 "https://en.wikipedia.org/wiki/tr.List_of_tz_database_time_zones ",
-            )
+            ) from e
 
     def to_array(self):
         """

@@ -455,7 +455,7 @@ class PlotPreferences(MetaConfigurable):
     # DATE
     #
     timezone = Unicode(
-        "UTC", help=r"""a pytz timezone string, e.g., US/Central or Europe/Paris"""
+        "UTC", help=r"""a IANA timezone string, e.g., US/Central or Europe/Paris"""
     ).tag(config=True, kind="")
     date_autoformatter_year = Unicode("%Y").tag(config=True, kind="")
     date_autoformatter_month = Unicode("%b %Y").tag(config=True, kind="")

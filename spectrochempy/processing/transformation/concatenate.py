@@ -8,7 +8,6 @@ __all__ = ["concatenate", "stack"]
 
 __dataset_methods__ = __all__
 
-import datetime as datetime
 from warnings import warn
 
 import numpy as np
@@ -16,6 +15,7 @@ import numpy as np
 from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils import exceptions
+from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.orderedset import OrderedSet
 
@@ -182,7 +182,7 @@ def concatenate(*datasets, **kwargs):
         out.description += ", {}".format(dataset.name)
 
     out.description += " )"
-    out._date = out._modified = datetime.datetime.now(datetime.timezone.utc)
+    out._date = out._modified = utcnow()
     out.history = ["Created by concatenate"]
 
     return out
