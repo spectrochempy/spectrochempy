@@ -78,11 +78,6 @@ jobs:
           python -m pip install --no-deps .
           python -m pip list
 
-      - name: Setup timezone
-        uses: zcong1993/setup-timezone@master
-        with:
-          timezone: Central European Time
-
       - name: Test with coverage
         run: |
           coverage run -m pytest tests --durations=10

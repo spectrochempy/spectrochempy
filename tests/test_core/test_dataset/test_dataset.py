@@ -1124,7 +1124,7 @@ def test_nddataset_timezone():
     nd = scp.NDDataset(np.ones((1, 3, 1, 2)), name="value")
     assert nd.timezone is not None
     assert nd.timezone == nd.local_timezone
-    nd.timezone = "UTC"
+    nd.timezone = "Pacific/Honolulu"
     assert nd.timezone != nd.local_timezone
     with pytest.raises(ZoneInfoNotFoundError):
         nd.timezone = "XXX"
