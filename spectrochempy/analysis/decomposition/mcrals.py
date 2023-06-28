@@ -959,13 +959,18 @@ and `St`.
             # ------------------------------------------
             C_constrained = C.copy()
 
-            # Compute St taking into account non-negativity
-            # --------------------------------------------
+            # Compute St
+            # -----------
             St = self._solve_St(C)
 
             # stores St in St_unconstrained
             # ------------------------------------------
             St_unconstrained = St.copy()
+
+            # Force non-negative spectra
+            # ------------------------------------------
+            if np.any(self.nonnegSpec):
+                St[self.nonnegSpec, :] = St[self.nonnegSpec, :].clip(min=0)
 
             # Force unimodal spectra
             # ------------------------------------------
