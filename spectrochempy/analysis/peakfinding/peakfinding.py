@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 import numpy as np
 import scipy
 
+from spectrochempy.application import warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import Quantity
 
@@ -219,12 +220,16 @@ def find_peaks(
     use_coord = use_coord and X.coordset is not None
 
     # units
-    xunits = X.x.units if use_coord else 1
-    dunits = X.units if use_coord else 1
+    xunits = X.x.units if use_coord and X.x.units is not None else 1
+    dunits = X.units if use_coord and X.units is not None else 1
 
     # assume linear x coordinates when use_coord is True!
     # TODO: what if the coordinates are not linear?
-    spacing = X.x.spacing
+    if not X.x.linear:
+        warning_("The x coordinates are not linear. The peak finding might be wrong.")
+        spacing = np.mean(X.x.spacing)
+    else:
+        spacing = X.x.spacing
     if isinstance(spacing, Quantity):
         spacing = spacing.magnitude
     step = np.abs(spacing) if use_coord else 1
@@ -258,7 +263,6 @@ def find_peaks(
         # quadratic interpolation to find the maximum
         x_pos = []
         for i, peak in enumerate(peaks):
-
             start = peak - window_length // 2
             end = peak + window_length // 2 + 1
             sle = slice(start, end)
@@ -281,7 +285,6 @@ def find_peaks(
 
     # transform back index to coord
     if use_coord:
-
         for key in ["peak_heights", "width_heights", "prominences"]:
             if key in properties:
                 properties[key] = [height * dunits for height in properties[key]]
@@ -292,7 +295,6 @@ def find_peaks(
             "left_edges",
             "right_edges",
         ):  # values are initially of int type
-
             if key in properties:
                 properties[key] = [
                     X.x.values[int(index)]
