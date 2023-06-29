@@ -74,7 +74,7 @@ _ = s4.plot(clear=False, color="green", ls="-", lw="2")
 # %%
 # Peak picking
 # ------------
-peaks, _ = s2.real.find_peaks()
+peaks, _ = s2.find_peaks()
 
 
 # %%
@@ -84,22 +84,22 @@ peaks, _ = s2.real.find_peaks()
 
 def plot_with_pp(s, peaks):
     ax = s.plot()  # output the spectrum on ax. ax will receive next plot too
-    pks = peaks + 0.01  # add a small offset on the y position of the markers
+    pks = peaks + 0.2  # add a small offset on the y position of the markers
     _ = pks.plot_scatter(
         ax=ax,
         marker="v",
         color="black",
         clear=False,  # we need to keep the previous output on ax
         data_only=True,  # we don't need to redraw all things like labels, etc...
-        ylim=(-0.01, 6),
+        ylim=(-0.1, 7),
     )
 
     for p in pks:
-        x, y = p.x.values, p.values + 0.02
+        x, y = p.coord(-1).values, p.values + 0.2
         _ = ax.annotate(
-            f"{x.m:0.0f}",
+            f"{x.m:0.1f}",
             xy=(x, y),
-            xytext=(-5, 10),
+            xytext=(-5, 5),
             rotation=90,
             textcoords="offset points",
         )
@@ -109,7 +109,12 @@ _ = plot_with_pp(s2, peaks)
 
 # %%
 # Set some parameters to get less but significant peaks
-peaks, _ = s2.real.find_peaks(height=1.0, distance=1.0)
+peaks, _ = s2.find_peaks(height=1.0, distance=1.0)
 _ = plot_with_pp(s2, peaks)
+
+# %%
+# Now look in the other dimension using slice s4
+peaks, _ = s4.find_peaks(height=1.0, distance=1.0)
+_ = plot_with_pp(s4, peaks)
 
 # %%
