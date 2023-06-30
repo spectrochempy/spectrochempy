@@ -296,6 +296,10 @@ class BaseConfigurable(MetaConfigurable):
         # So let's generate the un-squeezed X
         X = self._make_unsqueezed_dataset(X)
 
+        # if X is complex or quaternion, we will work on the real part only
+        if X.is_complex or X.is_quaternion:
+            X = X.real
+
         # as in fit methods we often use np.linalg library, we cannot handle directly
         # masked data (so we remove them here and they will be restored at the end of
         # the process during transform or inverse transform methods
