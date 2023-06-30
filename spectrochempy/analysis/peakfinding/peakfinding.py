@@ -267,10 +267,11 @@ def find_peaks(
     out = X[peaks]
 
     if not use_coord:
-        out.coordset = None
+        out.coordset = None  # remove the coordinates
 
     # quadratic interpolation to find the maximum
     window_length = window_length if window_length % 2 == 0 else window_length - 1
+    x_pos = []
     if window_length > 1:
         for i, peak in enumerate(peaks):
             start = peak - window_length // 2
@@ -286,8 +287,14 @@ def find_peaks(
             y_at_max = np.poly1d(coef)(x_at_max)
 
             out[i] = y_at_max
-            # x_pos.append(x_at_max)
-            out.coordset(out.dims[-1])[i] = x_at_max
+            if not use_coord:
+                x_pos.append(x_at_max)
+            else:
+                out.coordset(out.dims[-1])[i] = x_at_max
+    if x_pos and not use_coord:
+        from spectrochempy.core.dataset.coord import Coord
+
+        out.coordset = Coord(x_pos)
 
     # transform back index to coord
     if use_coord:
