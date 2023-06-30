@@ -142,6 +142,8 @@ class AnalysisConfigurable(BaseConfigurable):
 
         # fire the X and eventually Y validation and preprocessing.
         # X and Y are expected to be resp. NDDataset and NDDataset or list of NDDataset.
+        if X.is_complex or X.is_quaternion:
+            X = X.real
         self._X = X
         if Y is not None:
             self._Y = Y

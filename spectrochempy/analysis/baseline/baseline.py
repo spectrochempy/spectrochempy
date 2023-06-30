@@ -600,6 +600,8 @@ baseline/trends for different segments of the data.
         # Set X
         # -----
         X = X.copy()
+        if X.is_complex or X.is_quaternion:
+            X = X.real
         if (
             self.model == "asls"
         ):  # AsLS doesn't work for now with masked data (see _fit)
