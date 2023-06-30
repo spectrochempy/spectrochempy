@@ -140,7 +140,7 @@ setup_args = dict(
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development :: Libraries",
         "Intended Audience :: Science/Research",
-        "License :: CeCILL-B Free Software License Agreement (CeCILL-B)",
+        "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
