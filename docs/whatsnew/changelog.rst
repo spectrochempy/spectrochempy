@@ -25,6 +25,7 @@ New features
   This reader is based on the `py_wdf_reader <https://github.com/alchem0x2A/py-wdf-reader>`_ package.
 * Added an example for NMR processing.
 * Peak finding now handles dimensions other than x (important when data are transposed, or when working on a slice in dimension other than x)
+* Analysis methods now accept complex input data, but work only on the real part of the data.
 
 .. section
 
