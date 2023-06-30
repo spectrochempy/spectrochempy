@@ -56,18 +56,18 @@ _ = sb.plot_map()
 
 # %%
 # Select a region of interest
-nd = sb[
+sc = sb[
     -40.0:-15.0, 55.0:20.0
-]  # note the use of float to delect using coordinates (not poitn indexes)
-_ = nd.plot_map()
+]  # note the use of float to make selection using coordinates (not point indexes)
+_ = sc.plot_map()
 
 # %%
 # Extract slices along x
-s1 = nd[-27.6, :]
+s1 = sc[-27.6, :]
 _ = s1.plot()
 
 # %%
-s2 = nd[-25.7, :]
+s2 = sc[-25.7, :]
 _ = s2.plot()
 
 # %%
@@ -81,8 +81,8 @@ _ = s2.plot(
 
 # %%
 # Now slice along y
-s3 = nd[:, 40.0]
-s4 = nd[:, 36.0]
+s3 = sc[:, 40.0]
+s4 = sc[:, 36.0]
 _ = s3.plot(color="violet", ls="-", lw="2")
 _ = s4.plot(clear=False, color="green", ls="-", lw="2")
 
@@ -133,5 +133,91 @@ peaks, _ = s4.find_peaks(height=1.0, distance=1.0)
 _ = plot_with_pp(s4, peaks)
 
 # %%
+# Peak fitting
+# ------------
+#
+# Fit parameters are defined in a script (a single text as below)
+script = """
+#-----------------------------------------------------------
+# syntax for parameters definition:
+# name: value, low_bound,  high_bound
+# available prefix:
+#  # for comments
+#  * for fixed parameters
+#  $ for variable parameters
+#  > for reference to a parameter in the COMMON block
+#    (> is forbidden in the COMMON block)
+# common block parameters should not have a _ in their names
+#-----------------------------------------------------------
+#
+
+COMMON:
+$ commonwidth: 1, 0, 5
+$ commonratio: .5, 0, 1
+
+MODEL: LINE_1
+shape: voigtmodel
+    $ ampl:  1, 0.0, none
+    $ pos:   -21.7, -22., -20
+    > ratio: commonratio
+    > width: commonwidth
+
+MODEL: LINE_2
+shape: voigtmodel
+    $ ampl:  4, 0.0, none
+    $ pos:   -24, -24.5, -23.5
+    > ratio: commonratio
+    > width: commonwidth
+
+MODEL: LINE_3
+shape: voigtmodel
+    $ ampl:  4, 0.0, none
+    $ pos:   -25.4, -25.8, -25
+    > ratio: commonratio
+    > width: commonwidth
+
+MODEL: LINE_4
+shape: voigtmodel
+    $ ampl:  4, 0.0, none
+    $ pos:   -27.8, -28.5, -27
+    > ratio: commonratio
+    > width: commonwidth
+
+MODEL: LINE_5
+shape: voigtmodel
+    $ ampl:  4, 0.0, none
+    $ pos:   -31.5, -32, -31
+    > ratio: commonratio
+    > width: commonwidth
+
+"""
+
+# %%
+# We will work here on the slice s4 (taken in the y dimension).
+s4p = s4.snip()  # Baseline correction
+
+# %%
+# create an Optimize object
+f1 = scp.Optimize(log_level="INFO")
+
+# %%
+# Show plot and the starting model using the dry parameters (of course it is advisable
+# to be as close as possible of a good expectation
+f1.script = script
+f1.max_iter = 50000
+
+
+# %%
+_ = f1.fit(s4p)
+
+# %%
+# Show the result
+s4p.plot()
+ax = (f1.components[:]).plot(clear=False)
+ax.autoscale(enable=True, axis="y")
+
+# plotmerit
+som = f1.inverse_transform()
+_ = f1.plotmerit(offset=2)
 
 # %%
