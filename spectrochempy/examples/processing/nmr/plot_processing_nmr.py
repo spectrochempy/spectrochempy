@@ -39,15 +39,30 @@ dataset
 _ = dataset.plot_map()
 
 # %%
+# Extract slices along x
+s = dataset[-27.6, :]
+_ = s.plot()
+
+# %%
+# Baseline correction of this slice
+# Note that only the real part is corrected
+sa = s.snip(snip_width=100)
+_ = sa.plot()
+
+# %%
+# apply this correction to the whole dataset
+sb = dataset.snip(snip_width=100)
+_ = sb.plot_map()
+
+# %%
 # Select a region of interest
-nd = dataset[
-    -39.0:-10.0, 50.0:25.0
+nd = sb[
+    -40.0:-15.0, 55.0:20.0
 ]  # note the use of float to delect using coordinates (not poitn indexes)
 _ = nd.plot_map()
 
 # %%
 # Extract slices along x
-
 s1 = nd[-27.6, :]
 _ = s1.plot()
 
@@ -116,5 +131,7 @@ _ = plot_with_pp(s2, peaks)
 # Now look in the other dimension using slice s4
 peaks, _ = s4.find_peaks(height=1.0, distance=1.0)
 _ = plot_with_pp(s4, peaks)
+
+# %%
 
 # %%

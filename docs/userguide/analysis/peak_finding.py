@@ -131,16 +131,13 @@ _ = ax.annotate(
 # ###  Default behaviour
 
 # %% [markdown]
-# Applying this method on the last spectrum without any option will yield 7 peaks :
+# Applying this method on the last spectrum without any option will yield 7 peaks. But
+# some peaks are very close so we use the option `distance` to avoid this.
 
 # %%
 last = reg[-1]
-(
-    peaks,
-    _,
-) = (
-    last.find_peaks()
-)  # we do not catch the second output (properties) as it is void in this case
+peaks, _ = last.find_peaks(distance=5.0)
+# we do not catch the second output (properties) as it is void in this case
 
 # %% [markdown]
 # `peaks` is a NDDataset. Its `x` attribute gives the peak position
@@ -153,7 +150,7 @@ peaks.x.values
 
 # %%
 ax = last.plot_pen()  # output the spectrum on ax. ax will receive next plot too
-pks = peaks + 0.01  # add a small offset on the y position of the markers
+pks = peaks + 0.02  # add a small offset on the y position of the markers
 _ = pks.plot_scatter(
     ax=ax,
     marker="v",
@@ -177,7 +174,7 @@ for p in pks:
 # Now we will do a peak-finding for the whole dataset:
 
 # %%
-peakslist = [s.find_peaks()[0] for s in reg]
+peakslist = [s.find_peaks(distance=5)[0] for s in reg]
 
 # %%
 ax = reg.plot()
@@ -204,7 +201,7 @@ for peaks in peakslist:
 
 # %%
 # Find peak's position
-positions = [s.find_peaks()[0].x.values for s in reg[:, 2220.0:2180.0]]
+positions = [s.find_peaks(distance=5)[0].x.values for s in reg[:, 2220.0:2180.0]]
 
 # Make a NDDataset
 evol = scp.NDDataset(positions, title="wavenumber at the maximum")
@@ -267,21 +264,25 @@ s = reg[-1].squeeze()
 # we use squeeze it because one of the dimensions for this dataset of shape (1, N)
 # is useless
 
-# %% [markdown]
+# %%
 # default settings
 
-# %%
 peaks, properties = s.find_peaks()
 ax = s.plot_pen(color="black")
 peaks.plot_scatter(
-    ax=ax, label="default", marker="v", ms=4, color="black", clear=False, data_only=True
+    ax=ax,
+    label="default",
+    marker="v",
+    ms=4,
+    color="black",
+    clear=False,
+    data_only=True,
+    ylim=(-0.01, 0.35),
 )
 
-# %% [markdown]
-# find peaks heights than 0.05  (NB: the spectra are shifted for the display.
+# find peaks higher than 0.05  (NB: the spectra are shifted for the display.
 # Refer to the 1st spectrum for true heights)
 
-# %%
 peaks, properties = s.find_peaks(height=0.05)
 color = "blue"
 label = "0.05<height"
@@ -291,10 +292,8 @@ offset = 0.05
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
-# %% [markdown]
 # find peaks heights between 0.05 and 0.2 (the highest peak won't be detected)
 
-# %%
 peaks, properties = s.find_peaks(height=(0.05, 0.2))
 color = "green"
 label = "0.05<height<0.2"
@@ -304,10 +303,8 @@ offset = 0.1
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
-# %% [markdown]
 # find peaks with prominence >= 0.05 (only the two most prominent peaks are detected)
 
-# %%
 peaks, properties = s.find_peaks(prominence=0.05)
 color = "purple"
 label = "prominence=0.05"
@@ -317,11 +314,9 @@ offset = 0.15
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
-# %% [markdown]
 # find peaks with distance >= 10 (only the highest of the two maxima at ~ 2075 is
 # detected)
 
-# %%
 peaks, properties = s.find_peaks(distance=10)
 color = "red"
 label = "distance>10"
@@ -331,10 +326,8 @@ offset = 0.20
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
-# %% [markdown]
 # find peaks with width >= 10 (none of the two maxima at ~ 2075 is detected)
 
-# %%
 peaks, properties = s.find_peaks(width=10)
 color = "grey"
 label = "width>10"
@@ -344,7 +337,7 @@ offset = 0.25
     ax=ax, label=label, m="v", mfc=color, mec=color, ms=5, clear=False, data_only=True
 )
 
-_ = ax.legend()
+_ = ax.legend(fontsize=6)
 
 # %% [markdown]
 # ### More on peak properties
@@ -413,7 +406,7 @@ _ = peaks.plot_scatter(
 
 wl, wr = properties["left_bases"][0], properties["right_bases"][0]
 
-# wavenumbers of of left and right bases
+# wavenumbers of left and right bases
 for w in (wl, wr):
     ax.axvline(w, linestyle="--")  # add vertical line at the bases
     ax.plot(w, s[w].data, "v", color="red")
@@ -459,7 +452,7 @@ print(f"prominence with reduced window: {properties['prominences'][0]:0.4fK}")
 
 # %% [markdown]
 # The peak widths, as returned by `find_peaks()` can be *very approximate* and for
-# precise assessment, [markdown]
+# precise assessment,
 # The find_peaks() method also returns the peak widths. As we will see below, the
 # method is **very approximate** and
 # more advanced methods (such as peak fitting), also implemented in spectrochempy
@@ -512,7 +505,7 @@ _ = ax.axvline(wr, linestyle="--", color="green")
 
 # %% [markdown]
 # As stressed above, we see here that the peak width is very approximate and probably
-# exaggerated in [markdown]
+# exaggerated in
 # It is obvious here that the peak width is overestimated in the present case due to the
 # presence of the second peak on
 # the left. Here a better estimate would be obtained by considering the right
@@ -547,6 +540,7 @@ rel_height = 0.47  # the fraction of the prominence used to compute the width
 # code: find peaks, plot and print properties -------------------
 
 peaks, properties = s.find_peaks(
+    distance=10,
     height=height,
     prominence=prominence,
     wlen=wlen,
