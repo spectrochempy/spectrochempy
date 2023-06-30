@@ -396,10 +396,7 @@ properties
 # %%
 ax = s.plot_pen()
 
-# %% [markdown]
 # plots the  maximum
-
-# %%
 _ = peaks.plot_scatter(
     ax=ax, marker="v", mfc="green", mec="green", data_only=True, clear=False
 )
