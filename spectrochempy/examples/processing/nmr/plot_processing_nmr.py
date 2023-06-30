@@ -201,13 +201,13 @@ s4p = s4.snip()  # Baseline correction
 f1 = scp.Optimize(log_level="INFO")
 
 # %%
-# Show plot and the starting model using the dry parameters (of course it is advisable
-# to be as close as possible of a good expectation
+# Set parameters
 f1.script = script
 f1.max_iter = 50000
 
 
 # %%
+# Fit the slice s4p
 _ = f1.fit(s4p)
 
 # %%
