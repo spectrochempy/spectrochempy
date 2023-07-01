@@ -7,8 +7,8 @@
 # ======================================================================================
 # flake8: noqa
 """
-Processing NMR spectra
-========================
+Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)
+================================================================================
 Various examples of processing NMR spectra
 """
 # %%
@@ -85,12 +85,12 @@ s3 = sc[:, 40.0]
 s4 = sc[:, 36.0]
 
 # %%
-# IMPORTANT: note tha the slice when the slice is along y, which give a column vector of
-# shape (308, 1). When applying a NDDataset method to this slice, such as for instance
-# a baseline correction, it will be applied by default to the last dimension [rows]
-# (here the dimebsion of size 1, which is not what is expected in general). To avoid
-# this, we can use the squeeze method to remove this dimension or transpose the slice
-# to get a row vector of shape (1, 308).
+# IMPORTANT: note that when the slice is along y, this results in a column vector of
+# shape (308, 1). When an NDDataset method is applied to this slice, such as a baseline
+# correction, it will be applied by default to the last dimension [rows] (in this case
+# the dimension of size 1, which is not what is generally expected). To avoid this,
+# we can use the squeeze method to remove this dimension or transpose the slice to
+# obtain a vector of rows of shape (1, 308)
 s3 = s3.squeeze()
 s4 = s4.squeeze()
 
