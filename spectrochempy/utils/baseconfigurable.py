@@ -149,7 +149,6 @@ class BaseConfigurable(MetaConfigurable):
 
     def _make_unsqueezed_dataset(self, d):
         # add a dimension to 1D Dataset
-        d = d.squeeze()
         if d.ndim == 1:
             coordset = d.coordset
             d._data = d._data[np.newaxis]
