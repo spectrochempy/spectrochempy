@@ -128,7 +128,6 @@ class CoordSet(HasTraits):
     # initialization
     # ----------------------------------------------------------------------------------
     def __init__(self, *coords, **kwargs):
-
         self._copy = kwargs.pop("copy", True)
         self._sorted = kwargs.pop("sorted", True)
 
@@ -145,7 +144,6 @@ class CoordSet(HasTraits):
         # --------------------------
         # some cleaning
         if coords:
-
             if all(
                 [
                     (
@@ -774,7 +772,7 @@ class CoordSet(HasTraits):
 
     def __getattr__(self, item):
         # when the attribute was not found
-        if "_validate" in item or "_changed" in item:
+        if "_validate" in item or "_changed" in item or item in ["strip", "__iter__"]:
             raise AttributeError
 
         try:
@@ -783,9 +781,7 @@ class CoordSet(HasTraits):
             raise AttributeError
 
     def __getitem__(self, index):
-
         if isinstance(index, str):
-
             # find by name
             if index in self.names:
                 idx = self.names.index(index)
@@ -962,9 +958,7 @@ class CoordSet(HasTraits):
         self._coords[index] = coord
 
     def __delitem__(self, index):
-
         if isinstance(index, str):
-
             # find by name
             if index in self.names:
                 idx = self.names.index(index)
@@ -1013,13 +1007,11 @@ class CoordSet(HasTraits):
         return repr(self)
 
     def _cstr(self, header="  coordinates: ... \n", print_size=True):
-
         txt = ""
         for idx, dim in enumerate(self.names):
             coord = getattr(self, dim)
 
             if coord:
-
                 dimension = f"     DIMENSION `{dim}`"
                 for k, v in self.references.items():
                     if dim == v:

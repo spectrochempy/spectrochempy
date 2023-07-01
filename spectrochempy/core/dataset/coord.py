@@ -165,7 +165,6 @@ class Coord(NDMath, NDArray):
     # initialization
     # ----------------------------------------------------------------------------------
     def __init__(self, data=None, **kwargs):
-
         # check if data is iterable
         if data is not None and not is_iterable(data):
             raise ValueError("Data for coordinates must be an iterable or None")
@@ -182,7 +181,7 @@ class Coord(NDMath, NDArray):
         # specific case of NMR (initialize unit context NMR)
         larmor = kwargs.pop("larmor", None)
 
-        self._linearize_below = kwargs.pop("linearize_below", 0.1)
+        self._linearize_below = kwargs.pop("linearize_below", 1.0)
 
         # extract parameters for linearization and data rounding
         self._sigdigits = kwargs.pop("sigdigits", 4)
@@ -257,7 +256,6 @@ class Coord(NDMath, NDArray):
         # to the number of significant digits
 
         if self.has_data and self.dtype.kind not in "M":
-
             # First try to linearize the data if it is not a datetime
             self._linear = False
             self.linearize(self._sigdigits)
@@ -653,7 +651,6 @@ class Coord(NDMath, NDArray):
     #     return False
 
     def _cstr(self, header="  coordinates: ... \n", print_size=True, **kwargs):
-
         indent = kwargs.get("indent", 0)
 
         out = ""
@@ -769,7 +766,6 @@ class Coord(NDMath, NDArray):
 
     @_use_time_axis.setter
     def _use_time_axis(self, val):
-
         self._use_time = val
         if "laser_frequency" in self.meta:
             self.set_laser_frequency(self.meta.laser_frequency)
@@ -789,7 +785,6 @@ class Coord(NDMath, NDArray):
 
     @show_datapoints.setter
     def show_datapoints(self, val):
-
         self._show_datapoints = val
 
     @property

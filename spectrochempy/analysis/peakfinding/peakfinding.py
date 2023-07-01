@@ -14,12 +14,10 @@ __all__ = ["find_peaks"]
 
 __dataset_methods__ = ["find_peaks"]
 
-from datetime import datetime, timezone
-
 import numpy as np
 import scipy
 
-from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.application import warning_
 from spectrochempy.core.units import Quantity
 
 # Todo:
@@ -204,30 +202,47 @@ def find_peaks(
     <Quantity(38.729003, 'centimeter^-1')>
     """
 
+    # get the dataset
     X = dataset.squeeze()
-
     if X.ndim > 1:
         raise ValueError(
             "Works only for 1D NDDataset or a 2D NDdataset with `len(X.y) <= 1`"
         )
+    # TODO: implement for 2D datasets (would be useful e.g., for NMR)
+    # be sure that data are real (NMR case for instance)
+    if X.is_complex or X.is_quaternion:
+        X = X.real
 
-    window_length = window_length if window_length % 2 == 0 else window_length - 1
-
-    # if the following parameters are entered as floats, the coordinates are used.
-    # Else, they will be treated as indices as in scipy.signal.find_peak()
-
+    # Check if we can work with the coordinates
     use_coord = use_coord and X.coordset is not None
 
-    # units
-    xunits = X.x.units if use_coord else 1
-    dunits = X.units if use_coord else 1
+    # init variable in case we do not use coordinates
+    lastcoord = None
+    xunits = 1
+    dunits = 1
+    step = 1
 
-    # assume linear x coordinates when use_coord is True!
-    # TODO: what if the coordinates are not linear?
-    spacing = X.x.spacing
-    if isinstance(spacing, Quantity):
-        spacing = spacing.magnitude
-    step = np.abs(spacing) if use_coord else 1
+    if use_coord:
+        # We will use the last coordinates (but if the data were transposed or sliced,
+        # the name can be something else than 'x')
+        lastcoord = X.coordset[X.dims[-1]]
+
+        # units
+        xunits = lastcoord.units if lastcoord.units is not None else 1
+        dunits = X.units if X.units is not None else 1
+
+        # assume linear x coordinates
+        # TODO: what if the coordinates are not linear?
+        if not lastcoord.linear:
+            warning_(
+                "The x coordinates are not linear. " "The peak finding might be wrong."
+            )
+            spacing = np.mean(lastcoord.spacing)
+        else:
+            spacing = lastcoord.spacing
+        if isinstance(spacing, Quantity):
+            spacing = spacing.magnitude
+        step = np.abs(spacing)
 
     # transform coord (if exists) to index
     # TODO: allow units for distance, width, wlen, plateau_size
@@ -252,21 +267,19 @@ def find_peaks(
     out = X[peaks]
 
     if not use_coord:
-        out.coordset = None
+        out.coordset = None  # remove the coordinates
 
+    # quadratic interpolation to find the maximum
+    window_length = window_length if window_length % 2 == 0 else window_length - 1
+    x_pos = []
     if window_length > 1:
-        # quadratic interpolation to find the maximum
-        x_pos = []
         for i, peak in enumerate(peaks):
-
             start = peak - window_length // 2
             end = peak + window_length // 2 + 1
             sle = slice(start, end)
 
-            Xp = X[sle]
-
-            y = Xp.data
-            x = Xp.x.data if use_coord else range(start, end)
+            y = X.data[sle]
+            x = lastcoord.data[sle] if use_coord else range(start, end)
 
             coef = np.polyfit(x, y, 2)
 
@@ -274,14 +287,17 @@ def find_peaks(
             y_at_max = np.poly1d(coef)(x_at_max)
 
             out[i] = y_at_max
-            x_pos.append(x_at_max)
+            if not use_coord:
+                x_pos.append(x_at_max)
+            else:
+                out.coordset(out.dims[-1])[i] = x_at_max
+    if x_pos and not use_coord:
+        from spectrochempy.core.dataset.coord import Coord
 
-        out.x = Coord(x_pos)
-        out.x.units = X.x.units if use_coord else None
+        out.coordset = Coord(x_pos)
 
     # transform back index to coord
     if use_coord:
-
         for key in ["peak_heights", "width_heights", "prominences"]:
             if key in properties:
                 properties[key] = [height * dunits for height in properties[key]]
@@ -292,18 +308,17 @@ def find_peaks(
             "left_edges",
             "right_edges",
         ):  # values are initially of int type
-
             if key in properties:
                 properties[key] = [
-                    X.x.values[int(index)]
+                    lastcoord.values[int(index)]
                     for index in properties[key].astype("float64")
                 ]
 
         def _prop(ips):
             # interpolate coord
             floor = int(np.floor(ips))
-            return X.x.values[floor] + (ips - floor) * (
-                X.x.values[floor + 1] - X.x.values[floor]
+            return lastcoord.values[floor] + (ips - floor) * (
+                lastcoord.values[floor + 1] - lastcoord.values[floor]
             )
 
         for key in ("left_ips", "right_ips"):  # values are float type
@@ -321,8 +336,6 @@ def find_peaks(
             ]
 
     out.name = "peaks of " + X.name
-    out.history = (
-        f"{str(datetime.now(timezone.utc))}: find_peaks(): {len(peaks)} peak(s) found"
-    )
+    out.history = f"find_peaks(): {len(peaks)} peak(s) found"
 
     return out, properties

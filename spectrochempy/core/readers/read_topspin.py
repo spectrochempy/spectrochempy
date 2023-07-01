@@ -848,7 +848,7 @@ def _read_topspin(*args, **kwargs):
         else:
             data = datalist
 
-    # we now make some rearrangement of the dic to have something more user friendly
+    # we now make some rearrangement of the dic to have something more user-friendly
     # we assume that all experiments have similar (important) parameters so that the experiments are compatibles
 
     meta = Meta()  # This is the parameter dictionary

@@ -23,6 +23,9 @@ New features
 * A new reader has been added: `read_wire` (alias `read_wdf``) to read data from
   the .wdf format (WDF) files produced by the ReniShaw WiRe software.
   This reader is based on the `py_wdf_reader <https://github.com/alchem0x2A/py-wdf-reader>`_ package.
+* Added an example for NMR processing.
+* Peak finding now handles dimensions other than x (important when data are transposed, or when working on a slice in dimension other than x)
+* Analysis methods now accept complex input data, but work only on the real part of the data.
 
 .. section
 
@@ -32,7 +35,9 @@ Bug fixes
 
 * Fix a bug when slicing dataset with an array or list of index: Multi-coordinates
   were not correctly handled.
-
+* Increase the value of the coordinate linearization condition from 0.1% to 1% spacing variation.
+  (linearization was sometimes lost when slicing)
+* Fix a missing correction for non-negative spectra in MCR-ALS.
 
 .. section
 

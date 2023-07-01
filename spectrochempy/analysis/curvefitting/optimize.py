@@ -122,10 +122,13 @@ class Optimize(DecompositionAnalysis):
     # Private methods ( overriding abstract methods)
     # ----------------------------------------------------------------------------------
     def _fit(self, X, Y=None):
-
         # NMR
         # sequence = kargs.get('sequence', 'ideal_pulse')
         # self.sequence = PulseSequence(type=sequence)
+
+        # for now, we only work with 1D data
+        if X.ndim > 1 and all(np.array(X.shape) > 1):
+            raise NotImplementedError("Only 1D data are supported for now")
 
         # create model data
         modeldata, modelnames, model_A, model_a, model_b = self._get_modeldata(X)
@@ -579,7 +582,6 @@ class Optimize(DecompositionAnalysis):
         new_param = param.copy()
 
         for key in param:
-
             if param.reference[key]:
                 new_param.reference[key] = False
                 # important to put it here

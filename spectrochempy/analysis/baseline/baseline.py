@@ -600,6 +600,7 @@ baseline/trends for different segments of the data.
         # Set X
         # -----
         X = X.copy()
+
         if (
             self.model == "asls"
         ):  # AsLS doesn't work for now with masked data (see _fit)
