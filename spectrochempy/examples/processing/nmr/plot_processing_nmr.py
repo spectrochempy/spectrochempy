@@ -24,7 +24,7 @@ datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata"
 
 dataset = scp.read_topspin(
-    nmrdir / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "pdata" / "1" / "ser"
+    nmrdir / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "pdata" / "1" / "2rr"
 )
 
 
@@ -216,7 +216,7 @@ f1 = scp.Optimize(log_level="INFO")
 # %%
 # Set parameters
 f1.script = script
-f1.max_iter = 50000
+f1.max_iter = 5000
 
 
 # %%
@@ -229,6 +229,12 @@ s4p.plot()
 ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
-# plotmerit
+# Plotmerit
 som = f1.inverse_transform()
 _ = f1.plotmerit(offset=2)
+
+# %%
+# This ends the example ! The following line can be removed or commented
+# when the example is run as a notebook (*.ipynb).
+
+# scp.show()

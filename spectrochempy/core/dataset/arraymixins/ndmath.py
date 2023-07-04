@@ -1214,7 +1214,7 @@ class NDMath(object):
         coord = {}
         for i, item in enumerate(cmax[::-1]):
             _dim = dims[-(i + 1)]
-            coord[_dim] = coordset[_dim][item].values
+            coord[_dim] = coordset[_dim][item].default.values
 
         if cls._squeeze_ndim == 1:
             dim = dims[-1]
@@ -1248,7 +1248,7 @@ class NDMath(object):
         coord = {}
         for i, item in enumerate(cmax[::-1]):
             _dim = dims[-(i + 1)]
-            coord[_dim] = coordset[_dim][item].values
+            coord[_dim] = coordset[_dim][item].default.values
 
         if cls._squeeze_ndim == 1:
             dim = dims[-1]

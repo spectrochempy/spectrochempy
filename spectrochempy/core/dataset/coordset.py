@@ -456,7 +456,7 @@ class CoordSet(HasTraits):
         """
         Default coordinates (Coord).
         """
-        return self[self._default]
+        return self._coords[self._default]
 
     @property
     def data(self):
@@ -781,6 +781,8 @@ class CoordSet(HasTraits):
             raise AttributeError
 
     def __getitem__(self, index):
+        # String index
+        # ------------
         if isinstance(index, str):
             # find by name
             if index in self.names:
@@ -830,29 +832,33 @@ class CoordSet(HasTraits):
 
             raise KeyError(f"Could not find `{index}` in coordinates names or titles")
 
-        try:
-            multi = False
-            self._coords.__getitem__(index)
-        except TypeError:
-            # It can be that we are dealing with slicing of multicoordinates
-            if self.is_same_dim:
-                multi = True
-            else:
-                raise
+        # numerical index
+        # ---------------
+
+        # It can be that we are dealing with slicing of multicoordinates
+        multi = True if self.is_same_dim else False
 
         if not multi:
-            res = self._coords.__getitem__(index)
+            return self._coords.__getitem__(index)  # It's the index of one of the
+            # coordinate in the coordset. return it.
         else:
-            res = []
+            res = []  # Slice of a multicoordinate
             for c in self._coords:
                 res.append(c.__getitem__(index))
+            coords = self.__class__(*res, keepnames=True)
+            # name must be changed
+            coords.name = self.name
+            # and is_same_dim and default for coordset
+            coords._is_same_dim = self._is_same_dim
+            coords._default = self._default
+            return coords
 
-        if isinstance(index, slice):
-            if isinstance(res, CoordSet):
-                res = (res,)
-            return CoordSet(*res, keepnames=True)
-        else:
-            return res
+        # if isinstance(index, slice):
+        #     if isinstance(res, CoordSet):
+        #         res = (res,)
+        #     return CoordSet(*res, keepnames=True)
+        # else:
+        #     return res
 
     def __setattr__(self, key, value):
         keyb = key[1:] if key.startswith("_") else key
@@ -1023,7 +1029,7 @@ class CoordSet(HasTraits):
                     # txt += '        index: {}\n'.format(idx)
                     if not coord.is_empty:
                         if print_size:
-                            txt += f"{coord[0]._str_shape().rstrip()}\n"
+                            txt += f"{coord._coords[0]._str_shape().rstrip()}\n"
 
                         coord._html_output = self._html_output
                         for idx_s, dim_s in enumerate(coord.names):
@@ -1055,7 +1061,7 @@ class CoordSet(HasTraits):
 
     def __deepcopy__(self, memo):
         coords = self.__class__(
-            tuple(cpy.deepcopy(ax, memo=memo) for ax in self), keepnames=True
+            tuple(cpy.deepcopy(ax, memo=memo) for ax in self._coords), keepnames=True
         )
         coords.name = self.name
         coords._is_same_dim = self._is_same_dim
@@ -1063,7 +1069,9 @@ class CoordSet(HasTraits):
         return coords
 
     def __copy__(self):
-        coords = self.__class__(tuple(cpy.copy(ax) for ax in self), keepnames=True)
+        coords = self.__class__(
+            tuple(cpy.copy(ax) for ax in self._coords), keepnames=True
+        )
         # name must be changed
         coords.name = self.name
         # and is_same_dim and default for coordset

@@ -1038,7 +1038,6 @@ def read_fid(
 
         # Look two directory levels lower.
         elif os.path.isdir(os.path.dirname(os.path.dirname(dir))):
-
             # ! change the dir
             dir = os.path.dirname(os.path.dirname(dir))
 
@@ -1163,7 +1162,6 @@ def read_procs_file(dir=".", procs_files=None):
     """
 
     if procs_files is None:
-
         # Reading standard procs files
         procs_files = []
 
@@ -1254,20 +1252,22 @@ def guess_shape(dic):
     except KeyError:
         td0 = 1024  # default value
 
-    try:
-        td2 = int(dic["acqu2s"]["TD"])
-    except KeyError:
-        td2 = 0  # default value
+    td3 = td2 = td1 = 0
+    if dic["acqus"]["PARMODE"] > 0:
+        try:
+            td2 = int(dic["acqu2s"]["TD"])
+        except KeyError:
+            td2 = 0  # default value
 
-    try:
-        td1 = float(dic["acqu3s"]["TD"])
-    except KeyError:
-        td1 = int(td2)  # default value
+        try:
+            td1 = float(dic["acqu3s"]["TD"])
+        except KeyError:
+            td1 = int(td2)  # default value
 
-    try:
-        td3 = int(dic["acqu4s"]["TD"])
-    except KeyError:
-        td3 = int(td1)  # default value
+        try:
+            td3 = int(dic["acqu4s"]["TD"])
+        except KeyError:
+            td3 = int(td1)  # default value
 
     # From the acquisition reference manual (section on parameter NBL):
     #     ---
@@ -1936,7 +1936,6 @@ def read_jcamp(filename, encoding=locale.getpreferredencoding()):
 
     with io.open(filename, "r", encoding=encoding) as f:
         while True:  # loop until end of file is found
-
             line = f.readline().rstrip()  # read a line
             if line == "":  # end of file found
                 break
@@ -2076,7 +2075,6 @@ def read_pprog(filename):
     # loop over lines in pulseprogram looking for loops, increment,
     # assignments and phase commands
     for line in f:
-
         # split line into comment and text and strip leading/trailing spaces
         if ";" in line:
             text = line[: line.index(";")].strip()

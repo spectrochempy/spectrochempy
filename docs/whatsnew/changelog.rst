@@ -20,6 +20,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* Fancy indexing using location now supported.
 
 .. section
 
@@ -27,6 +28,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* Sorting coordinates now work with multi-coordinates axis.
 
 .. section
 

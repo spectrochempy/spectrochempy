@@ -294,7 +294,7 @@ class BaseConfigurable(MetaConfigurable):
 
         # for the following we need X with two dimensions
         # So let's generate the un-squeezed X
-        X = self._make_unsqueezed_dataset(X)
+        X = X.atleast_2d()  # self._make_unsqueezed_dataset(X)
 
         # if X is complex or quaternion, we will work on the real part only
         if X.is_complex or X.is_quaternion:

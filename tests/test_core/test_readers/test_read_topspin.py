@@ -24,7 +24,6 @@ NMRDATA = DATADIR / "nmrdata"
 #     reason="Experimental data not available for testing",
 # )
 def test_readtopspin():
-
     # A.plot()
     nd = scp.read_topspin(nmrdir / "exam2d_HC/3/pdata/1/2rr")
     assert str(nd) == "NDDataset: [quaternion] unitless (shape: (y:1024, x:1024))"
@@ -53,7 +52,7 @@ def test_readtopspin():
 
     nd = scp.read_topspin(nmrdir, glob="topspin*/*/pdata/*/*")
     assert isinstance(nd, list)
-    assert str(nd[0]) == "NDDataset: [complex128] unitless (size: 16384)"
+    assert str(nd[0]) == "NDDataset: [complex128] unitless (size: 12411)"
     assert str(nd[1]) == "NDDataset: [quaternion] unitless (shape: (y:1024, x:2048))"
 
 

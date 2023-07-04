@@ -66,6 +66,9 @@ warnings.filterwarnings(action="ignore", module="pykwalify")  # , category=UserW
 warnings.filterwarnings(action="ignore", module="matplotlib")
 warnings.filterwarnings(action="ignore", category=FutureWarning)
 
+from pint import UnitStrippedWarning
+
+warnings.filterwarnings(action="ignore", category=UnitStrippedWarning)
 from spectrochempy import api
 from spectrochempy.api import *
 

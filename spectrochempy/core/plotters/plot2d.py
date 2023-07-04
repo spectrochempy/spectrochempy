@@ -184,6 +184,8 @@ def plot_2D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     lw = kwargs.get("linewidth", kwargs.get("lw", prefs.lines_linewidth))
     ls = kwargs.get("linestyle", kwargs.get("ls", prefs.lines_linestyle))
+    marker = kwargs.get("marker", kwargs.get("m", None))
+    markersize = kwargs.get("markersize", kwargs.get("ms", prefs.lines_markersize))
 
     alpha = kwargs.get("calpha", prefs.contour_alpha)
 
@@ -475,7 +477,15 @@ def plot_2D(dataset, method=None, **kwargs):
         if not clear and not transposed:
             lines.extend(ax.lines)  # keep the old lines
 
-        line0 = mpl.lines.Line2D(xdata, zdata[0], lw=lw, ls=ls, picker=True)
+        line0 = mpl.lines.Line2D(
+            xdata,
+            zdata[0],
+            lw=lw,
+            ls=ls,
+            marker=marker,
+            markersize=markersize,
+            picker=True,
+        )
 
         for i in range(zdata.shape[0]):
             li = cpy(line0)
