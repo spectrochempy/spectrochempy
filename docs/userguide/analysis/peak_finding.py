@@ -45,8 +45,8 @@ import spectrochempy as scp
 # ## Loading an experimental dataset
 
 # %% [markdown]
-# A typical IR dataset (CO adsorption on supported CoMo catalyst in the 2300-1900 cm-1
-# region) will be used throughout.
+# A typical IR dataset (CO adsorption on supported CoMo catalyst
+# in the 2300-1900 cm-1 region) will be used throughout.
 
 # %% [markdown]
 # We load the data using the generic API method  `read` (the type of data is inferred

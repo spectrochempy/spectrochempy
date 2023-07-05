@@ -23,14 +23,7 @@ import spectrochempy as scp
 datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
-dataset = scp.read_topspin(nmrdir / "relax" / "100" / "ser")
-
-# Change the y coordinate using the vdlist
-with open(nmrdir / "relax" / "100" / "vdlist", mode="r") as f:
-    vd = [float(val) for val in f.readlines()]
-
-dataset.y = scp.Coord(vd, title="time", units="s")
-
+dataset = scp.read_topspin(nmrdir / "relax" / "100" / "ser", use_vdlist=True)
 
 # %%
 # Analysing the data
