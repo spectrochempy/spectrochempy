@@ -125,7 +125,6 @@ def pathclean(paths):
         return win
 
     def _clean(path):
-
         if isinstance(path, (Path, PosixPath, WindowsPath)):
             path = path.name
         if is_windows():
@@ -289,8 +288,8 @@ def check_filenames(*args, **kwargs):
             if fexist:
                 filename = fexist
 
-            # Particular case for topspin where filename can be provided as a directory only
-            # use of expno and procno
+            # Particular case for topspin where filename can be provided
+            # as a directory only
             if filename.is_dir() and "topspin" in kwargs.get("protocol", []):
                 filename = _topspin_check_filename(filename, **kwargs)
 
@@ -457,7 +456,6 @@ def get_filenames(*filenames, **kwargs):
 
     # now proceed with the filenames
     if filenames:
-
         # look if all the filename exists either in the specified directory,
         # else in the current directory, and finally in the default preference data directory
         temp = []
@@ -487,7 +485,6 @@ def get_filenames(*filenames, **kwargs):
         if not getdir:
             # we open a dialogue to select one or several files manually
             if not NODIAL:
-
                 from spectrochempy.core.common.dialogs import open_dialog
 
                 filenames = open_dialog(
@@ -502,7 +499,6 @@ def get_filenames(*filenames, **kwargs):
                 filenames = [pathclean(environ.get("TEST_FILE"))]
 
         else:
-
             if not NODIAL:
                 from spectrochempy.core.common.dialogs import open_dialog
 
@@ -621,7 +617,6 @@ def get_directory_name(directory, **kwargs):
     directory = pathclean(directory)
 
     if directory:
-
         # Search locally
         if directory.is_dir():
             # nothing else to do
@@ -655,7 +650,6 @@ def get_directory_name(directory, **kwargs):
 def check_filename_to_save(
     dataset, filename=None, save_as=False, confirm=True, **kwargs
 ):
-
     from spectrochempy import NO_DIALOG
     from spectrochempy.application import info_
 
@@ -665,7 +659,6 @@ def check_filename_to_save(
         filename = Path.cwd() / filename
 
     if not filename or save_as or filename.exists():
-
         from spectrochempy.core.common.dialogs import save_dialog
 
         # no filename provided
@@ -684,7 +677,6 @@ def check_filename_to_save(
                 open_diag = False
 
         if not NODIAL and open_diag:
-
             filename = save_dialog(
                 caption=kwargs.pop("caption", caption),
                 filename=filename,
@@ -708,7 +700,6 @@ def check_filename_to_open(*args, **kwargs):
         return
 
     if not isinstance(filenames, dict):
-
         if len(filenames) == 1 and filenames[0] is None:
             raise (FileNotFoundError)
 

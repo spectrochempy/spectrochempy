@@ -12,11 +12,11 @@ __all__ = ["read_topspin"]
 __dataset_methods__ = __all__
 
 import re
+from datetime import datetime
 
 import numpy as np
 from quaternion import as_quat_array
 
-from spectrochempy.application import debug_
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
@@ -59,7 +59,8 @@ nmr_valid_meta = [
     # ('cpdprgb', ''),
     # ('cpdprgt', ''),
     ("d", "s"),
-    ("date", ""),  # ('dbl', ''),
+    ("date", ""),
+    # ('dbl', ''),
     # ('dbp', ''),
     # ('dbp07', ''),
     # ('dbpnam0', ''),
@@ -625,8 +626,8 @@ def _remove_digital_filter(dic, data):
         if dspfvs >= 14:  # DSPFVS greater than 14 give no phase correction.
             phase = 0.0
         else:
-            if dspfvs < 11:
-                dspfvs = 11  # default for DQD  # loop up the phase in the table
+            if dspfvs < 10:
+                dspfvs = 10  # default for DQD  # loop up the phase in the table
             if dspfvs not in bruker_dsp_table:
                 raise KeyError("dspfvs not in lookup table")
             if decim not in bruker_dsp_table[dspfvs]:
@@ -636,7 +637,7 @@ def _remove_digital_filter(dic, data):
     si = data.shape[-1]
     pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(si / 2)
     pdata = (pdata.T - pdata.T[0]).T  # TODO: this allow generally to
-    # TODO: remove Bruker smiles, not so sure actually
+    #   remove Bruker smiles, not so sure actually
 
     # Phasing
     si = float(pdata.shape[-1])
@@ -732,6 +733,7 @@ def read_topspin(*paths, **kwargs):
     kwargs["filetypes"] = [
         "Bruker TOPSPIN fid's or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
         "Compressed TOPSPIN data directories (*.zip)",
+        "Bruker TOPSPIN directories",
     ]
     kwargs["protocol"] = ["topspin"]
     importer = Importer()
@@ -752,11 +754,10 @@ def _get_files(path, typ="acqu"):
 
 @_importer_method
 def _read_topspin(*args, **kwargs):
-    debug_("Bruker TOPSPIN file reading")
     dataset, path = args
     #    content = kwargs.get('content', None)
 
-    # is-it a processed dataset (1r, 2rr ....
+    # is-it a processed dataset file (1r, 2rr ....) ?
     processed = True if path.match("pdata/*/*") else False
 
     # ----------------------------------------------------------------------------------
@@ -792,7 +793,7 @@ def _read_topspin(*args, **kwargs):
         data = data * np.exp(-1j * np.pi / 2.0)
 
         # Look the case when the reshaping was not correct
-        # for example, this happen when the number
+        # for example, this happens when the number
         # of accumulated row was incomplete
         if path.name in ["ser"] and data.ndim == 1:
             # we must reshape using the acqu parameters
@@ -1034,6 +1035,8 @@ def _read_topspin(*args, **kwargs):
     dataset.origin = "topspin"
     dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
     dataset.filename = f_name
+    if dataset.meta.date is not None:
+        dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])
 
     return dataset
 

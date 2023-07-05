@@ -84,7 +84,6 @@ class Importer(HasTraits):
     filetypes = Dict()
 
     def __init__(self):
-
         super().__init__()
 
         self.filetypes = dict(FILETYPES)
@@ -97,7 +96,6 @@ class Importer(HasTraits):
         self.alias = dict(ALIAS)
 
     def __call__(self, *args, **kwargs):
-
         self.datasets = []
         self.default_key = kwargs.pop("default_key", ".scp")
 
@@ -120,10 +118,15 @@ class Importer(HasTraits):
             return None
 
         for key in self.files.keys():
-
+            # particular case of carroucell files
             if key == "" and kwargs.get("protocol") == ["carroucell"]:
                 key = ".carroucell"
                 self.files = {".carroucell": self.files[""]}
+
+            # particular case of topspin files
+            elif key == "" and kwargs.get("protocol") == ["topspin"]:
+                key = ".topspin"
+                self.files = {".topspin": self.files[""]}
 
             if key == "frombytes":
                 # here we need to read contents
@@ -143,7 +146,6 @@ class Importer(HasTraits):
 
         # now we will reset preference for this newly loaded datasets
         if len(self.datasets) > 0:
-
             if all(self.datasets) is None:
                 return None
 
@@ -198,7 +200,6 @@ class Importer(HasTraits):
         return args, kwargs
 
     def _switch_protocol(self, key, files, **kwargs):
-
         protocol = kwargs.get("protocol", None)
         if protocol is not None and protocol != "ALL":
             if not isinstance(protocol, list):
@@ -207,8 +208,8 @@ class Importer(HasTraits):
                 return
 
         datasets = []
+        files[key] = sorted(files[key])  # sort the files according their names
         for filename in files[key]:
-
             read_ = getattr(self, f"_read_{key[1:]}")
 
             dataset = None
@@ -233,7 +234,7 @@ class Importer(HasTraits):
                     )
                     dataset = _read_remote(self.objtype(), filename, **kwargs)
 
-                except (FileNotFoundError) as exc:
+                except FileNotFoundError as exc:
                     raise (FileNotFoundError) from exc
 
                 except Exception as e:
@@ -257,7 +258,6 @@ class Importer(HasTraits):
         self.datasets.extend(datasets)
 
     def _do_merge(self, datasets, **kwargs):
-
         # several datasets returned (only if several files have been passed) and the `merge` keyword argument is False
         merged = kwargs.get("merge", False)
         shapes = list({nd.shape if hasattr(nd, "shape") else None for nd in datasets})
@@ -273,10 +273,17 @@ class Importer(HasTraits):
         if merged:
             # Try to stack the dataset into a single one
             try:
-                dataset = self.objtype.concatenate(datasets, axis=0)
+                if datasets[0].ndim == 1:
+                    dataset = self.objtype.stack(datasets)
+                    dataset.history = "Stacked from several files"
+                else:
+                    dataset = self.objtype.concatenate(datasets, axis=0)
+                    dataset.history = "Merged from several files"
+
                 if dataset.coordset is not None and kwargs.pop("sortbydate", True):
-                    dataset.sort(dim="y", inplace=True)
-                    dataset.history = "Sorted by date"
+                    dataset.sort(dim=0, inplace=True)
+                    #  dataset.history = "Sorted"  (this not always by date:
+                    #  actually for now it is by value which can be a date or not)
                 datasets = [dataset]
 
             except DimensionsCompatibilityError as e:
@@ -608,6 +615,7 @@ def read_dir(directory=None, **kwargs):
 #     return importer(file_or_dir, **kwargs)
 #
 
+
 # ======================================================================================
 # Private read functions
 # ======================================================================================
@@ -725,7 +733,6 @@ def _write_downloaded_file(content, dst):
 
 
 def _get_url_content_and_save(url, dst, replace, read_only=False):
-
     if not replace and dst.exists():
         return
 

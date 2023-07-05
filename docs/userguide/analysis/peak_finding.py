@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.10
+#     version: 3.10.11
 # ---
 
 # %% [markdown]
@@ -220,10 +220,10 @@ _ = evol.plot(ls=":")
 # select among these peaks:
 #
 # **Parameters relative to "peak intensity":**
-# - `height`\ : minimal required height of the peaks (single number) or minimal
+# - `height` : minimal required height of the peaks (single number) or minimal
 # and maximal heights
 # (sequence of two numbers)
-# - `prominence`\ : minimal prominence of the peak to be detected
+# - `prominence` : minimal prominence of the peak to be detected
 # (single number) or minimal and maximal prominence (sequence of 2 numbers). In brief
 # the "prominence" of a peak
 # measures how much a peak stands out from its surrounding and is the vertical distance
@@ -234,15 +234,15 @@ _ = evol.plot(ls=":")
 #     - in addition to the prominence, the user can define `wlen` , the width (in points)
 #     of the window used to look
 #     at neighboring minima, the peak maximum being is at the center of the window.
-# - `threshold`\ : a single number (the minimal required threshold) or a sequence of two
+# - `threshold` : a single number (the minimal required threshold) or a sequence of two
 # numbers (minimal and maximal).
 # The thresholds are the difference of height of the
 # maximum with its two neighboring points (useful to detect spikes for instance)
 #
 # **Parameters relative to "peak spacing":**
-# - `distance`\ : the required minimal horizontal distance between neighbouring peaks.
+# - `distance` : the required minimal horizontal distance between neighbouring peaks.
 # Smaller peaks are removed first.
-# - `width`\ : Required minimal width of peaks in samples (single number) or minimal and
+# - `width` : Required minimal width of peaks in samples (single number) or minimal and
 # maximal width. The width is
 # assessed from the peak height,
 # prominence and neighboring signal. - In addition the user can define `rel_height`

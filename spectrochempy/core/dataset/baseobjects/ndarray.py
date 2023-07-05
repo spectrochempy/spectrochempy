@@ -289,7 +289,7 @@ class NDArray(HasTraits):
         if attrs is None:
             attrs = self.__dir__()
 
-        for attr in ["name", "linear"]:
+        for attr in ["name", "linear", "roi"]:
             if attr in attrs:
                 attrs.remove(attr)
 
@@ -835,9 +835,24 @@ class NDArray(HasTraits):
             if is_sequence(key) and not isinstance(key, Quantity):
                 # fancy indexing
                 # all items of the sequence must be integer index
+                if np.any(list(isinstance(k, TYPE_FLOAT) for k in key)):
+                    key = [self._loc2index(k, dim) for k in key]
                 keys[axis] = key
             else:
                 keys[axis] = self._get_slice(key, dim)
+
+        # when the array is one-dimensional (squeeze_ndim=1 and shape[0]==1)
+        # then we can consider that slicing is to be performed on the significant
+        # axis (axis=-1)
+        if (
+            self._squeeze_ndim == 1
+            and self.ndim == 2
+            and self.shape[0] == 1
+            and keys[0] != slice(None)
+            and keys[0] != slice(0, 1, 1)
+            and keys[1] == slice(None)
+        ):
+            keys.reverse()  # WARNING; assume 2D
         return tuple(keys)
 
     @default("_mask")

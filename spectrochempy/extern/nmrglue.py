@@ -1038,7 +1038,6 @@ def read_fid(
 
         # Look two directory levels lower.
         elif os.path.isdir(os.path.dirname(os.path.dirname(dir))):
-
             # ! change the dir
             dir = os.path.dirname(os.path.dirname(dir))
 
@@ -1070,6 +1069,13 @@ def read_fid(
 
     # determine file size and add to the dictionary
     dic["FILE_SIZE"] = os.stat(os.path.join(dir, bin_file)).st_size
+
+    # Parmode may be missing
+    if "PARMODE" not in dic["acqus"]:
+        if "fid" in bin_file:
+            dic["acqus"]["PARMODE"] = 0
+        elif "ser" in bin_file:
+            dic["acqus"]["PARMODE"] = 1
 
     # determine shape and complexity for direct dim if needed
     if shape is None or cplex is None:
@@ -1103,7 +1109,7 @@ def read_fid(
 
     # read the binary file
     f = os.path.join(dir, bin_file)
-    null, data = read_binary(f, shape=shape, cplex=cplex, big=big, isfloat=isfloat)
+    _, data = read_binary(f, shape=shape, cplex=cplex, big=big, isfloat=isfloat)
     return dic, data
 
 
@@ -1163,7 +1169,6 @@ def read_procs_file(dir=".", procs_files=None):
     """
 
     if procs_files is None:
-
         # Reading standard procs files
         procs_files = []
 
@@ -1254,20 +1259,22 @@ def guess_shape(dic):
     except KeyError:
         td0 = 1024  # default value
 
-    try:
-        td2 = int(dic["acqu2s"]["TD"])
-    except KeyError:
-        td2 = 0  # default value
+    td3 = td2 = td1 = 0
+    if dic["acqus"]["PARMODE"] > 0:
+        try:
+            td2 = int(dic["acqu2s"]["TD"])
+        except KeyError:
+            td2 = 0  # default value
 
-    try:
-        td1 = float(dic["acqu3s"]["TD"])
-    except KeyError:
-        td1 = int(td2)  # default value
+        try:
+            td1 = float(dic["acqu3s"]["TD"])
+        except KeyError:
+            td1 = int(td2)  # default value
 
-    try:
-        td3 = int(dic["acqu4s"]["TD"])
-    except KeyError:
-        td3 = int(td1)  # default value
+        try:
+            td3 = int(dic["acqu4s"]["TD"])
+        except KeyError:
+            td3 = int(td1)  # default value
 
     # From the acquisition reference manual (section on parameter NBL):
     #     ---
@@ -1936,7 +1943,6 @@ def read_jcamp(filename, encoding=locale.getpreferredencoding()):
 
     with io.open(filename, "r", encoding=encoding) as f:
         while True:  # loop until end of file is found
-
             line = f.readline().rstrip()  # read a line
             if line == "":  # end of file found
                 break
@@ -2076,7 +2082,6 @@ def read_pprog(filename):
     # loop over lines in pulseprogram looking for loops, increment,
     # assignments and phase commands
     for line in f:
-
         # split line into comment and text and strip leading/trailing spaces
         if ";" in line:
             text = line[: line.index(";")].strip()

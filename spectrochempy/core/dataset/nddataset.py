@@ -208,7 +208,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     _history = tr.List(tr.Tuple(), allow_none=True)
 
     # Dates
-    # _acquisition_date = Instance(datetime, allow_none=True)
+    _acquisition_date = tr.Instance(datetime, allow_none=True)
     _created = tr.Instance(datetime)
     _modified = tr.Instance(datetime)
     _timezone = tr.Instance(tzinfo, allow_none=True)
@@ -355,7 +355,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                     else:
                         # we must slice all internal coordinates
                         newc = []
-                        for c in self._coordset[idx]:
+                        for c in self._coordset[idx]._coords:
                             newc.append(c[item])
                         new_coords[idx] = CoordSet(*newc[::-1], name=name)
                         # we reverse to be sure
@@ -737,38 +737,19 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # ----------------------------------------------------------------------------------
     # Public methods and property
     # ----------------------------------------------------------------------------------
-    # @property
-    # def acquisition_date(self):
-    #     """
-    #     Acquisition date (Datetime).
-    #
-    #     The acquisition date can be assigned by the user. In this case this date
-    #     is returned.
-    #     But if it is not the case, and if there is one datetime axis in the dataset
-    #     coordinate, this method return the first datetime, which is then considered
-    #     as the acquisition date. This assume that there is only one datetime axis in
-    #     the dataset coordinates. If there is more than one, the first found in the
-    #     coordset is used.
-    #     """
-    #
-    #     def get_acq(cs):
-    #         for c in cs:
-    #             if isinstance(c, Coord) and is_datetime64(c):
-    #                 return c._acquisition_date
-    #             if isinstance(c, CoordSet):
-    #                 return get_acq(c)
-    #
-    #     if self._acquisition_date is not None:
-    #         # take the one which has been previously set for this dataset
-    #         acq = self._acquisition_date
-    #     else:
-    #         # try to get one datetime axis to determine it
-    #         acq = get_acq(self.coordset)
-    #     if acq is not None:
-    #         if is_datetime64(acq):
-    #             acq = datetime.fromisoformat(str(acq).split(".")[0])
-    #         acq = pytz.utc.localize(acq)
-    #         return acq.astimezone(self.timezone).isoformat(sep=" ", timespec="seconds")
+    @property
+    def acquisition_date(self):
+        """
+        Acquisition date.
+        """
+        if self._acquisition_date is not None:
+            # take the one which has been previously set for this dataset
+            acq = self._acquisition_date.astimezone(self._timezone)
+            return acq.isoformat(sep=" ", timespec="seconds")
+
+    @acquisition_date.setter
+    def acquisition_date(self, value):
+        self._acquisition_date = value
 
     def add_coordset(self, *coords, dims=None, **kwargs):
         """
@@ -1105,13 +1086,16 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         if axis is None:
             axis, dim = self.get_axis(axis=0)
 
-        # get the corresponding coordinates (remember the their order can be different form the order
-        # of dimension  in dims. S we cannot just take the coord from the indice.
-        coord = getattr(self, dim)  # get the coordinate using the syntax such as self.x
+        # get the corresponding coordinates (remember their order can be different
+        # from the order of dimension in dims. So we cannot just take the coord from
+        # the indice.
+        multi = getattr(self, dim)  # get the coordinate using the syntax such as self.x
+        coord = multi.default
+        # sort on the default coordinate (in case we have multicoordinates)
 
         descend = kwargs.pop("descend", None)
         if descend is None:
-            # when non specified, default is False (except for reversed coordinates
+            # when non specified, default is False (except for reversed coordinates)
             descend = coord.reversed
 
         # import warnings
@@ -1127,11 +1111,13 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                         by = "label"
                     else:
                         # nothing to do for sorting
-                        # return self itself
-                        return self
+                        # return inchanged dataset
+                        return new
 
                 args = coord._argsort(by=by, pos=pos, descend=descend)
-                setattr(new, dim, coord[args])
+                setattr(new, dim, multi[args])
+                #  sort all coordinate in case of multicoordinates
+
                 indexes.append(args)
             else:
                 indexes.append(slice(None))
@@ -1184,27 +1170,45 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         return new
 
-    def expand_dims(self, dim=None):
+    def atleast_2d(self, inplace=False):
         """
-        Expand the shape of an array.
-
-        Insert a new axis that will appear at the `axis` position in the expanded array shape.
+        Expand the shape of an array to make it at least 2D.
 
         Parameters
         ----------
-        dim : int or str
-            Position in the expanded axes where the new axis (or axes) is placed.
+        inplace : bool, optional, default=`False`
+            Flag to say that the method return a new object (default)
+            or not (inplace=True).
 
         Returns
         -------
         `NDDataset`
-            View of `a` with the number of dimensions increased.
+            The input array, but with dimensions increased.
 
         See Also
         --------
         squeeze : The inverse operation, removing singleton dimensions.
         """
-        # TODO
+        if not inplace:
+            new = self.copy()
+        else:
+            new = self
+
+        coordset = self.coordset
+        # mask = self.mask
+
+        if self.ndim == 0:
+            new._data = self._data[np.newaxis, np.newaxis]
+            new._mask = self._mask[np.newaxis, np.newaxis]
+            new.dims = ["y", "x"]
+            new.set_coordset(x=None, y=None)
+        elif self.ndim == 1:
+            new._data = self._data[np.newaxis]
+            new._mask = self._mask[np.newaxis]
+            new.dims = ["y", "x"]
+            new.set_coordset(x=coordset[0] if coordset is not None else None, y=None)
+
+        return new
 
     def swapdims(self, dim1, dim2, inplace=False):
         """

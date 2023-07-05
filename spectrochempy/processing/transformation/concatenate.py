@@ -14,6 +14,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.decorators import deprecated
@@ -117,6 +118,39 @@ def concatenate(*datasets, **kwargs):
     # concatenate or stack the data array + mask
     # --------------------------------------------
     sss = []
+
+    if datasets[0].origin == "topspin":
+        # we can use metadata to create new coordinates
+        metacoords = {}
+        meta0 = datasets[0].meta
+        for i, dataset in enumerate(datasets):
+            if i == 0:
+                continue
+            meta = dataset.meta
+            for item in meta0:
+                if item in ["file_size", "pprog", "phc0", "phc1", "nsold"]:
+                    continue
+                keepitem = item if item != "date" else "timestamp"
+                if np.any(meta0[item][-1] != meta[item][-1]):
+                    if hasattr(meta0[item][-1], "size") and meta0[item][-1].size > 1:
+                        # case of pulse length or delays for instance
+                        for i in range(meta0[item][-1].size):
+                            if np.any(meta0[item][-1][i] == meta[item][-1][i]):
+                                continue
+                            itemi = f"{item}{i}"
+                            if itemi not in metacoords:
+                                metacoords[itemi] = [
+                                    meta0[item][-1][i],
+                                    meta[item][-1][i],
+                                ]
+                            else:
+                                metacoords[itemi].append(meta[item][-1][i])
+                        continue
+                    if keepitem not in metacoords:
+                        metacoords[keepitem] = [meta0[item][-1], meta[item][-1]]
+                    else:
+                        metacoords[keepitem].append(meta[item][-1])
+
     for i, dataset in enumerate(datasets):
         d = dataset.masked_data
         sss.append(d)
@@ -130,9 +164,7 @@ def concatenate(*datasets, **kwargs):
     coords = datasets[0].coordset
 
     if coords is not None:
-
         if not coords[dim].is_empty:
-
             labels = []
             if coords[dim].is_labeled:
                 for ds in datasets:
@@ -145,8 +177,8 @@ def concatenate(*datasets, **kwargs):
             elif coords[dim]._implements("CoordSet"):
                 if labels != []:
                     labels = np.array(labels, dtype=object)
-                    for i, coord in enumerate(coords[dim]):
-                        if labels[:i].size != 0:
+                    for i, coord in enumerate(coords[dim]._coords):
+                        if np.all(labels[:, i] != [None] * len(labels[:, i])):
                             coord._labels = np.concatenate(
                                 [label for label in labels[:, i]]
                             )
@@ -161,6 +193,14 @@ def concatenate(*datasets, **kwargs):
     out._data = data
     if coords is not None:
         out._coordset[dim] = coords[dim]
+
+    # for topspin data, we can create new coordinates from metadata
+    if datasets[0].origin == "topspin" and metacoords != {}:
+        c = []
+        for item in metacoords:
+            c.append(Coord(metacoords[item], title=item))
+        out.y = CoordSet(c)
+
     out._mask = mask
     out._units = units
 
@@ -170,7 +210,6 @@ def concatenate(*datasets, **kwargs):
     authortuple = (datasets[0].author,)
 
     for dataset in datasets[1:]:
-
         if out.title != dataset.title:
             warn("Different data title => the title is that of the 1st dataset")
 
