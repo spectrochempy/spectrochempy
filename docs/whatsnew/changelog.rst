@@ -22,6 +22,7 @@ New features
 
 * Fancy indexing using location now supported.
 * Add an example for NMR processing of a series of CP-MAS spectra.
+* Add an example for processing NMR relaxation data
 * Add an option to `read_topspin` to create ``y`` coordinates from a ``vdlist`` file.
 * Add option to plot to add markers on curves
 
