@@ -77,8 +77,8 @@ _ = ax.set_ylim(-1, 10)
 # %%
 # Peak peaking
 # we use the max of each spectra for this pp
-peaks, _ = nd4.max(dim=0).find_peaks(height=2.0, distance=10.0)
-peaks.x.data
+peaks, properties = nd4.max(dim=0).find_peaks(height=2.0, distance=10.0)
+peaks.x.data, properties
 
 # %%
 # plot with peak markers
@@ -114,6 +114,48 @@ sections = sections.T
 
 # now plot it
 _ = sections.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
+
+# %%
+# Fitting a model to these data
+# Fitting of arbitrary model is not yet implemented in SpectroChemPy, but we can use scipy for that purpose
+
+import numpy as np
+from scipy.optimize import curve_fit
+
+# see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
+
+
+def cp_model(t, I_0, T_IS, T1_Irho, T1_Srho):
+    I = (
+        I_0
+        * (np.exp(-t / T1_Irho) - np.exp(-t * (1 / T_IS + 1 / T1_Srho)))
+        / (1 + T_IS / T1_Srho - T_IS / T1_Irho)
+    )
+    return I
+
+
+# %%
+for section in sections:
+    xdata = (
+        section.y.data
+    )  # Note we use axis `y` which correcponds to the contact times (data have been transposed!)
+    ydata = section.data.squeeze()  # data to fit
+
+    # initial parameters
+    I_0 = np.max(ydata)
+    T_IS = 10
+    T1_Irho = 100
+    T1_Srho = 10000
+    p0 = [I_0, T_IS, T1_Irho, T1_Srho]
+    popt, pcov = curve_fit(cp_model, xdata, ydata, p0, bounds=(0, 20000))
+
+    I_0, T_IS, T1_Irho, T1_Srho = popt
+    print(popt)
+    ymodel = cp_model(xdata, I_0, T_IS, T1_Irho, T1_Srho)
+
+    ax = section.plot(marker="o", ls="")
+    ax.plot(xdata, ymodel)
+
 
 # %%
 # This ends the example ! The following line can be removed or commented
