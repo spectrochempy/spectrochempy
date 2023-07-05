@@ -461,7 +461,7 @@ class CoordSet(HasTraits):
     @property
     def data(self):
         # in case data is called on a coordset for dimension with multiple coordinates
-        # return the first coordinates
+        # return the default coordinates data
         return self.default.data
 
     @property
@@ -483,11 +483,11 @@ class CoordSet(HasTraits):
         """
         _titles = []
         for item in self._coords:
-            if isinstance(item, NDArray):
+            if isinstance(item, Coord):
                 _titles.append(item.title if item.title else item.name)  # TODO:name
             elif isinstance(item, CoordSet):
                 _titles.append(
-                    [el.title if el.title else el.name for el in item]
+                    [el.title if el.title else el.name for el in item._coords]
                 )  # TODO:name
             else:
                 raise ValueError("Something wrong with the titles!")
@@ -498,21 +498,21 @@ class CoordSet(HasTraits):
         """
         Labels of the coordinates in the current coordset (list).
         """
-        return [item.labels for item in self]
+        return [item.labels for item in self._coords]
 
     @property
     def is_labeled(self):
         """
         returns True if one of the coords is labeled.
         """
-        return any([item.is_labeled for item in self])
+        return any([item.is_labeled for item in self._coords])
 
     @property
     def units(self):
         """
         Units of the coords in the current coords (list).
         """
-        return [item.units for item in self]
+        return [item.units for item in self._coords]
 
     # ----------------------------------------------------------------------------------
     # Public methods
@@ -611,11 +611,11 @@ class CoordSet(HasTraits):
             args = args[0]
 
         for i, item in enumerate(args):
-            if not isinstance(self[i], CoordSet):
-                self[i].title = item
+            if not isinstance(self._coords[i], CoordSet):
+                self._coords[i].title = item
             else:
                 if is_sequence(item):
-                    for j, v in enumerate(self[i]):
+                    for j, v in enumerate(self._coords[i]._coords):
                         v.title = item[j]
 
         for k, item in kwargs.items():
@@ -651,11 +651,11 @@ class CoordSet(HasTraits):
             args = args[0]
 
         for i, item in enumerate(args):
-            if not isinstance(self[i], CoordSet):
-                self[i].to(item, force=force, inplace=True)
+            if not isinstance(self._coords[i], CoordSet):
+                self._coords[i].to(item, force=force, inplace=True)
             else:
                 if is_sequence(item):
-                    for j, v in enumerate(self[i]):
+                    for j, v in enumerate(self._coords[i]._coords):
                         v.to(item[j], force=force, inplace=True)
 
         for k, item in kwargs.items():
@@ -809,12 +809,12 @@ class CoordSet(HasTraits):
             for item in self._coords:
                 if isinstance(item, CoordSet) and index in item.titles:
                     # selection by subcoord title
-                    return item.__getitem__(item.titles.index(index))
+                    return item._coords.__getitem__(item.titles.index(index))
 
             for item in self._coords:
                 if isinstance(item, CoordSet) and index in item.names:
                     # selection by subcoord name
-                    return item.__getitem__(item.names.index(index))
+                    return item._coords.__getitem__(item.names.index(index))
 
             try:
                 # let try with the canonical dimension names

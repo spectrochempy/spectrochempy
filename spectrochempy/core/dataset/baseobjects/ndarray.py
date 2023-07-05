@@ -289,7 +289,7 @@ class NDArray(HasTraits):
         if attrs is None:
             attrs = self.__dir__()
 
-        for attr in ["name", "linear"]:
+        for attr in ["name", "linear", "roi"]:
             if attr in attrs:
                 attrs.remove(attr)
 
@@ -835,7 +835,7 @@ class NDArray(HasTraits):
             if is_sequence(key) and not isinstance(key, Quantity):
                 # fancy indexing
                 # all items of the sequence must be integer index
-                if not all(isinstance(k, (int, np.int64)) for k in key):
+                if np.any(list(isinstance(k, TYPE_FLOAT) for k in key)):
                     key = [self._loc2index(k, dim) for k in key]
                 keys[axis] = key
             else:

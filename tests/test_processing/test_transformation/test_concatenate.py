@@ -70,7 +70,7 @@ def test_concatenate(IR_dataset_2D):
     assert s.y.size == (s1.y.size + s2.y.size)
 
     # coordset
-    coord_2 = Coord(np.log(s.y.data), title="log_time")
+    coord_2 = Coord(np.cos(s.y.data), title="cos_time")
     s.set_coordset(y=[s.y, coord_2], x=s.x)
     s1 = s[:2]
     s2 = s[-5:]

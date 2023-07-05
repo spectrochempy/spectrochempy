@@ -52,7 +52,7 @@ def test_readtopspin():
 
     nd = scp.read_topspin(nmrdir, glob="topspin*/*/pdata/*/*")
     assert isinstance(nd, list)
-    assert str(nd[0]) == "NDDataset: [complex128] unitless (size: 12411)"
+    assert str(nd[0]) == "NDDataset: [complex128] unitless (size: 16384)"
     assert str(nd[1]) == "NDDataset: [quaternion] unitless (shape: (y:1024, x:2048))"
 
 

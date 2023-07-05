@@ -177,10 +177,10 @@ def test_coordset_multicoord_for_a_single_dim():
     assert co.names == ["_1", "_2"]
     assert co._1 == coord0
 
-    co = coordse[-1:]
+    co = coordse[-1]
     assert isinstance(co, CoordSet)
-    assert co[0].name == "y"  # should keep the original name (solved)
-    assert co[0]["_1"] == coord0
+    assert co.name == "y"  # should keep the original name (solved)
+    assert co["_1"] == coord0
 
 
 def test_coordset_call(coord0, coord1):
@@ -414,7 +414,6 @@ def test_coordset_set(coord0, coord1, coord2):
 
 
 def test_issue_310():
-
     import numpy as np
 
     import spectrochempy as scp

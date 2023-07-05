@@ -10,8 +10,11 @@ New features
 ~~~~~~~~~~~~
 
 * Fancy indexing using location now supported.
+* Add an example for NMR processing of a series of CP-MAS spectra.
+* Add option to plot to add markers on curves
 
 Bug fixes
 ~~~~~~~~~
 
 * Sorting coordinates now work with multi-coordinates axis.
+* Fix a bug when concatenating datasets with multi-coordinates axis.

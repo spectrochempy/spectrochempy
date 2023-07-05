@@ -21,6 +21,8 @@ New features
 .. Add here new public features (do not delete this comment)
 
 * Fancy indexing using location now supported.
+* Add an example for NMR processing of a series of CP-MAS spectra.
+* Add option to plot to add markers on curves
 
 .. section
 
@@ -29,6 +31,7 @@ Bug fixes
 .. Add here new bug fixes (do not delete this comment)
 
 * Sorting coordinates now work with multi-coordinates axis.
+* Fix a bug when concatenating datasets with multi-coordinates axis.
 
 .. section
 

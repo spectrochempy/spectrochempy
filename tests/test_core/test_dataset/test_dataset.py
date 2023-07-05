@@ -826,7 +826,8 @@ def test_nddataset_multiple_axis(
     # by an index or a label
     assert da.coordset["x_1"] == coord2b
     assert da.coordset["x_2"] == coord2
-    assert da.coordset["x"][1] == coord2
+    assert da.coordset["x"].coords[1] == coord2  # if we want to get it by
+    # numerical index use coords attribute
     assert da.coordset["x"]._1 == coord2b
     assert da.x["_1"] == coord2b
     assert da["x_1"] == coord2b
@@ -1257,7 +1258,6 @@ def test_take(dsm):
 
 
 def test_nddataset_bug_462():
-
     A = scp.random((10, 100))
     A.x = scp.Coord(np.arange(0.0, 100.0, 1), title="coord1")
     af = A.write("A.scp", confirm=False)

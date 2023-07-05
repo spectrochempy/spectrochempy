@@ -1070,6 +1070,13 @@ def read_fid(
     # determine file size and add to the dictionary
     dic["FILE_SIZE"] = os.stat(os.path.join(dir, bin_file)).st_size
 
+    # Parmode may be missing
+    if "PARMODE" not in dic["acqus"]:
+        if "fid" in bin_file:
+            dic["acqus"]["PARMODE"] = 0
+        elif "ser" in bin_file:
+            dic["acqus"]["PARMODE"] = 1
+
     # determine shape and complexity for direct dim if needed
     if shape is None or cplex is None:
         gshape, gcplex = guess_shape(dic)
@@ -1102,7 +1109,7 @@ def read_fid(
 
     # read the binary file
     f = os.path.join(dir, bin_file)
-    null, data = read_binary(f, shape=shape, cplex=cplex, big=big, isfloat=isfloat)
+    _, data = read_binary(f, shape=shape, cplex=cplex, big=big, isfloat=isfloat)
     return dic, data
 
 

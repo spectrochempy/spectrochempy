@@ -17,7 +17,6 @@ from datetime import datetime
 import numpy as np
 from quaternion import as_quat_array
 
-from spectrochempy.application import debug_
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
@@ -755,7 +754,6 @@ def _get_files(path, typ="acqu"):
 
 @_importer_method
 def _read_topspin(*args, **kwargs):
-    debug_("Bruker TOPSPIN file reading")
     dataset, path = args
     #    content = kwargs.get('content', None)
 
@@ -1037,7 +1035,8 @@ def _read_topspin(*args, **kwargs):
     dataset.origin = "topspin"
     dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
     dataset.filename = f_name
-    dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])
+    if dataset.meta.date is not None:
+        dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])
 
     return dataset
 
