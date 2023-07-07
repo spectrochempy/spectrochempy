@@ -275,7 +275,6 @@ def __format__(self, spec):
 setattr(Unit, "__format__", __format__)
 
 if globals().get("U_", None) is None:
-
     # filename = resource_filename(PKG, 'spectrochempy.txt')
     U_ = UnitRegistry(on_redefinition="ignore")  # filename)
 
@@ -287,7 +286,6 @@ if globals().get("U_", None) is None:
     U_.define("absolute_transmittance = 1.")
     U_.define("absorbance = 1. = a.u.")
     U_.define("Kubelka_Munk = 1. = K.M.")
-
     U_.define("ppm = 1. = ppm")
 
     if pint_version < 20:
@@ -393,7 +391,6 @@ def set_nmr_context(larmor):
         U_.add_context(c)
 
     else:
-
         c = U_._contexts["nmr"]
         c.defaults["larmor"] = larmor
 
@@ -413,7 +410,6 @@ def remove_args_units(func):
     """
 
     def _remove_units(val):
-
         if isinstance(val, Quantity):
             val = val.m
         elif isinstance(val, (list, tuple)):
@@ -422,7 +418,6 @@ def remove_args_units(func):
 
     @wraps(func)
     def new_func(*args, **kwargs):
-
         args = tuple([_remove_units(arg) for arg in args])
         kwargs = {key: _remove_units(val) for key, val in kwargs.items()}
         return func(*args, **kwargs)

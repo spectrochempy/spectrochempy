@@ -34,6 +34,7 @@ Bug fixes
 
 * Sorting coordinates now work with multi-coordinates axis.
 * Fix a bug when concatenating datasets with multi-coordinates axis.
+* Fix a bug in coordset definition for integration methods.
 
 .. section
 
