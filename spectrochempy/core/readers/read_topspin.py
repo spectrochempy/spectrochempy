@@ -1039,6 +1039,7 @@ def _read_topspin(*args, **kwargs):
     dataset.meta.readonly = True
     dataset.set_coordset(*tuple(coords))
 
+    dataset.units = "count"
     dataset.title = "intensity"
     dataset.origin = "topspin"
     dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
