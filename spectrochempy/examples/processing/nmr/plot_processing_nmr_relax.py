@@ -7,14 +7,17 @@
 # ======================================================================================
 # flake8: noqa
 """
-Processing NMR spectra (Relaxation measurement)
-================================================
+Processing Relaxation measurement
+=================================
 Processing NMR spectra taken for relaxation measurements
 """
 # %%
 # Import API
 # ----------
 import spectrochempy as scp
+
+# short version of the unit registry
+U = scp.ur
 
 # %%
 # Importing a pseudo 2D NMR spectra
@@ -33,51 +36,61 @@ dataset
 
 # %%
 # Plot the dataset
-ds = dataset.em(lb=15)
+ds = dataset.em(lb=15 * U.Hz)
 ds = ds.fft()
-ds = ds.pk(phc0=-10)
+ds = ds.pk(phc0=-10 * U.deg, phc1=0 * U.deg)
 _ = ds.plot(xlim=(-60, -140))
 
 
 # %%
 # Integrate a region
 dsint = ds[:, -90.0:-115.0].simpson()
-_ = dsint.plot(marker="^")
-dsint
+_ = dsint.plot(marker="^", ls=":")
+dsint.real
 
 # %%
 # Fit a model
-# (option not yet included to SpectroChemPy)
-
-import numpy as np
-from scipy.optimize import curve_fit
-
-# see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
+# -----------
+# %%
+# create an Optimize object using a simple leastsq method
+fitter = scp.Optimize(log_level="INFO", method="leastsq")
 
 
-def T1_model(t, I_0, T1):
-    I = I_0 * (1 - np.exp(-t / T1))
+# %%
+# Define the model to fit
+def T1_model(t, I0, T1):  # no underscore in parameters names.
+    # T1 relaxation model
+    import numpy as np
+
+    I = I0 * (1 - np.exp(-t / T1))
     return I
 
 
 # %%
-xdata = np.append(
-    0, dsint.y.data.squeeze()
-)  # we add a zero at the begining to complete the series of values
-ydata = np.append(0, dsint.real.data)  # data to fit
+# Add the model to the fitter usermodels as it it not a built-in model
+fitter.usermodels = {"T1_model": T1_model}
 
-# initial parameters
-I_0 = np.max(ydata)
-T1 = 10
-p0 = [I_0, T1]
-popt, pcov = curve_fit(T1_model, xdata, ydata, p0, bounds=(0, 20000))
-I_0, T1 = popt
-ymodel = T1_model(xdata, I_0, T1)
-ax = dsint.plot(marker="o", ls="")
-_ = ax.plot(xdata, ymodel)
-_ = ax.set_xlim(0, 50)
-_ = ax.set_ylim(0, 5000)
-_ = ax.set_title(f"I$_0$: {I_0}  T$_1$: {T1}s", fontsize=9)
+# %%
+# Define the parameter variables using a script
+# (parameter: value, low_bound,  high_bound)
+# no underscore in parameters names.
+fitter.script = """
+MODEL: T1
+shape: T1_model
+  $ I0:  1000.0, 1, none
+  $ T1:  2.0,    0.1, none
+"""
+
+# %%
+# Fit the model
+_ = fitter.fit(dsint)
+
+# %%
+som = fitter.predict()
+som
+
+# %%
+_ = fitter.plotmerit(dsint, som, method="scatter", title="T1 relaxation fitting")
 
 # %%
 # This ends the example ! The following line can be removed or commented

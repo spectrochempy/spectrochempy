@@ -375,49 +375,72 @@ class _set_output(object):
             # make coordset
             M, N = X.shape
             if X_transf.shape == X.shape and self.typex is None and self.typey is None:
-                X_transf.set_coordset(y=X.coord(0), x=X.coord(1))
+                X_transf.dims = [X.coord(0).name, X.coord(1).name]
+                X_transf.set_coordset(
+                    {X.coord(0).name: X.coord(0), X.coord(1).name: X.coord(1)}
+                )
             else:
                 if self.typey == "components":
                     X_transf.set_coordset(
-                        y=Coord(
-                            None,
-                            labels=["#%d" % (i) for i in range(X_transf.shape[0])],
-                            title="components",
-                        ),
-                        x=X.coord(-1).copy() if X.coord(-1) is not None else None,
+                        {
+                            "k": Coord(
+                                None,
+                                labels=["#%d" % (i) for i in range(X_transf.shape[0])],
+                                title="components",
+                            ),
+                            X.coord(-1).name: X.coord(-1).copy()
+                            if X.coord(-1) is not None
+                            else None,
+                        }
                     )
                 if self.typex == "components":
+                    X_transf.dims = [X.coord(0).name, "k"]
                     X_transf.set_coordset(
-                        y=X.coord(0).copy() if X.coord(0) is not None else None,
-                        # cannot use X.y in case of transposed X
-                        x=Coord(
-                            None,
-                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                            title="components",
-                        ),
+                        {
+                            X.coord(0).name: X.coord(0).copy()
+                            if X.coord(0) is not None
+                            else None,
+                            # cannot use X.y in case of transposed X
+                            "k": Coord(
+                                None,
+                                labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                                title="components",
+                            ),
+                        }
                     )
                 if self.typex == "features":
+                    X_transf.dims = ["k", X.coord(1).name]
                     X_transf.set_coordset(
-                        y=Coord(
-                            None,
-                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                            title="components",
-                        ),
-                        x=X.coord(1).copy() if X.coord(1) is not None else None,
+                        {
+                            "k": Coord(
+                                None,
+                                labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                                title="components",
+                            ),
+                            X.coord(1).name: X.coord(1).copy()
+                            if X.coord(1) is not None
+                            else None,
+                        }
                     )
                 if self.typey == "features":
+                    X_transf.dims = [X.coord(1).name, "k"]
                     X_transf.set_coordset(
-                        y=X.coord(1).copy() if X.coord(1) is not None else None,
-                        x=Coord(
-                            None,
-                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
-                            title="components",
-                        ),
+                        {
+                            X.coord(1).name: X.coord(1).copy()
+                            if X.coord(1) is not None
+                            else None,
+                            "k": Coord(
+                                None,
+                                labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                                title="components",
+                            ),
+                        }
                     )
                 if self.typesingle == "components":
                     # occurs when the data are 1D such as ev_ratio...
+                    X_transf.dims = ["k"]
                     X_transf.set_coordset(
-                        x=Coord(
+                        k=Coord(
                             None,
                             labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
                             title="components",
@@ -429,8 +452,9 @@ class _set_output(object):
                         labels = X.coordset[0].labels
                     else:
                         labels = ["#%d" % (i + 1) for i in range(X.shape[-1])]
+                    X_transf.dims = ["j"]
                     X_transf.set_coordset(
-                        x=Coord(
+                        j=Coord(
                             None,
                             labels=labels,
                             title="targets",

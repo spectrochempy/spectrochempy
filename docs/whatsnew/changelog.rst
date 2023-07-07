@@ -25,6 +25,8 @@ New features
 * Add an example for processing NMR relaxation data
 * Add an option to `read_topspin` to create ``y`` coordinates from a ``vdlist`` file.
 * Add option to plot to add markers on curves
+* Add a new method to the `Optimize` class to perform a least-square fitting.
+* Add the possibility to define user-defined functions in the `Optimize` class.
 
 .. section
 
@@ -35,6 +37,7 @@ Bug fixes
 * Sorting coordinates now work with multi-coordinates axis.
 * Fix a bug when concatenating datasets with multi-coordinates axis.
 * Fix a bug in coordset definition for integration methods.
+* Fix coordinates definitions in Analysis methods.
 
 .. section
 

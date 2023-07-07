@@ -335,7 +335,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             raise NotFittedError()
 
         # Fire the validation and preprocessing
-        self._X = X if X is not None else self.X
+        self._X = X if X is not None else self.X.copy()
 
         # Get the processed ndarray data
         newX = self._X_preprocessed

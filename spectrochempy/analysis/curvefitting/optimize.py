@@ -7,6 +7,7 @@
 __all__ = ["Optimize"]
 __configurables__ = __all__
 
+import inspect
 import re
 import sys
 
@@ -60,7 +61,9 @@ class Optimize(DecompositionAnalysis):
     ).tag(config=True)
 
     method = tr.CaselessStrEnum(
-        ["SIMPLEX", "HOPPING"], default_value="SIMPLEX", help="Optimization method."
+        ["least_squares", "leastsq", "simplex", "basinhopping"],
+        default_value="least_squares",
+        help="Optimization method (see scipy.optimize docs for details).",
     ).tag(config=True)
 
     script = tr.Unicode(help="Script defining models and parameters for fitting.").tag(
@@ -94,6 +97,7 @@ class Optimize(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Runtime Parameters (in addition to those of AnalysisConfigurable)
     # ----------------------------------------------------------------------------------
+    usermodels = tr.Dict(default_value={}, help="User defined models.")
     fp = tr.Instance(FitParameters, allow_none=True)
     modeldata = tr.List(Array())
 
@@ -133,11 +137,7 @@ class Optimize(DecompositionAnalysis):
         # create model data
         modeldata, modelnames, model_A, model_a, model_b = self._get_modeldata(X)
 
-        info_("*" * 50)
-        info_("  Entering fitting procedure")
-        info_("*" * 50)
-
-        global niter, chi2, everyiter, ncalls
+        global niter, everyiter, ncalls, chi2
         ncalls = 0
         everyiter = self.callback_every
         niter = 0
@@ -197,19 +197,16 @@ class Optimize(DecompositionAnalysis):
         #     chi2 = np.sqrt(chi2 / som)
         #     # reset log_level
         #     return chi2
-        # internally defined function chi2
-        def funchi2(params, X, *constraints):
-            """
-            Return sum((y - x)**2)
-            """
-            global chi2, ncalls
-            # model spectrum
 
-            chi2 = 0
+        # Residuals and chi2 functions -----------------------------------------------
+
+        def fun_residuals(params, X):
+            global ncalls
             ncalls += 1
 
             # model
             modeldata = self._get_modeldata(X)[0]
+
             # baseline is already summed with modeldata[-1]
             mdata = modeldata[-1]  # modelsum
 
@@ -217,11 +214,20 @@ class Optimize(DecompositionAnalysis):
             # not the complex number
             data = X.real.squeeze()
 
-            diff = data - mdata
-            chi2 += np.sum(diff**2)  # * merror
-            return chi2
+            residuals = data - mdata
 
-        # end chi2 function ---------------------------------------------------
+            return residuals
+
+        def fun_chi2(params, X):  # , *constraints):
+            """
+            Return sum((y - x)**2)
+            """
+            global chi2
+
+            # model
+            res = fun_residuals(params, X)
+            chi2 = np.sum(res**2)  # * merror
+            return chi2
 
         # callback function--------------------------------------------------------
         def callback(*args, **kwargs):
@@ -238,13 +244,19 @@ class Optimize(DecompositionAnalysis):
             info_(f"Iterations: {niter}, Calls: {ncalls} (chi2: {chi2:.5f})")
             sys.stdout.flush()
 
-        # end callback function ---------------------------------------------------
+        # ------------------------------------------------------------------------------
 
         fp = self.fp  # starting parameters
 
+        func = (
+            fun_chi2
+            if self.method not in ["leastsq", "least_squares"]
+            else fun_residuals
+        )
+
         if not self.dry:
             fp, fopt = _optimize(
-                funchi2,
+                func,
                 fp,
                 args=(X,),
                 maxfun=self.max_fun_calls,
@@ -258,13 +270,13 @@ class Optimize(DecompositionAnalysis):
         self.script = str(fp)
 
         # log.info the results
-        info_("\n")
+        display.clear_output(wait=True)
         info_("*" * 50)
         if not self.dry:
-            info_("  Result:")
+            info_("Result:")
         else:
-            info_("  Starting parameters:")
-        info_("*" * 50)
+            info_("Starting parameters:")
+        info_("*" * 50 + "\n")
         info_(self.script)
 
         # reset dry and continue to show starting model
@@ -289,6 +301,28 @@ class Optimize(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Private methods for validation
     # ----------------------------------------------------------------------------------
+    @tr.validate("method")
+    def _method_validate(self, proposal):
+        method = proposal.value
+
+        return method.lower()
+
+    @tr.validate("usermodels")
+    def _usermodels_validate(self, proposal):
+        usermodels = proposal.value
+        if usermodels is None:
+            usermodels = {}
+        newdict = {}
+        for key, value in usermodels.items():
+            # the keys must be with lower case
+            # and the values must be a models_.usermodel instance
+            if not isinstance(value, models_.usermodel):
+                usermodel = models_.usermodel
+                usermodel.f = staticmethod(value)
+                usermodel.args = inspect.getfullargspec(value).args[1:]
+            newdict[key.lower()] = usermodel
+        return newdict
+
     @tr.validate("script")
     def _script_validate(self, proposal):
         script = proposal.value
@@ -445,7 +479,7 @@ class Optimize(DecompositionAnalysis):
         Return a default script.
         """
         return """
-        # -----------------------------------------------------------
+        # -----------------------------------------------------------------------
         # syntax for parameters definition:
         # name: value, low_bound,  high_bound
         # prefix:
@@ -454,12 +488,11 @@ class Optimize(DecompositionAnalysis):
         #  $ for variable parameters
         #  > for reference to a parameter in the COMMON block
         #    (> is forbidden in the COMMON block)
-        # common block parameters should not have a _ in their names
-        # -----------------------------------------------------------
-        #
+        # common block parameters should not have a _ (underscore) in their names
+        # -----------------------------------------------------------------------
 
         COMMON:
-        # common parameters
+        # common parameters block
         # $ gwidth: 1.0, 0.0, none
           $ gratio: 0.5, 0.0, 1.0
 
@@ -522,7 +555,11 @@ class Optimize(DecompositionAnalysis):
 
         for model in models:
             calc = getmodel(
-                x, modelname=model, par=parameters, amplitude_mode=self.amplitude_mode
+                x,
+                modelname=model,
+                par=parameters,
+                amplitude_mode=self.amplitude_mode,
+                usermodels=self.usermodels,
             )
             if not model.startswith("baseline"):
                 row += 1
@@ -877,16 +914,28 @@ class Optimize(DecompositionAnalysis):
     def _transform(self, X=None):
         # X is ignored for Optimize
         # this method is present for coherence with other decomposition methods
-        return self._outfit[0]
+        return self._outfit[0].copy()
 
     def _inverse_transform(self, X_transform=None):
         # X_transform is ignored for Optimize
         # this method is present for coherence with other decomposition methods
-        X_transform = self._outfit[2]
+        X_transform = self._outfit[2].copy()
         if X_transform.ndim == 1:
             # we need a seconddimension of size 1 for the restoration of masks
             X_transform = X_transform[np.newaxis]
         return X_transform
+
+    def predict(self):
+        """
+        Return the fitted model.
+
+        Returns
+        -------
+        `NDDataset`
+            The fitted model.
+        """
+
+        return self.inverse_transform()
 
     def _get_components(self):
         return self._outfit[1]  # the first is the baseline, the last is the sum
@@ -920,7 +969,7 @@ def _optimize(
     fp0,
     args=(),
     constraints={},
-    method="SIMPLEX",
+    method="least_squares",
     maxfun=None,
     maxiter=1000,
     ftol=1e-8,
@@ -1008,7 +1057,20 @@ def _optimize(
 
     if not maxfun:
         maxfun = 4 * maxiter
-    if method.upper() == "SIMPLEX":
+
+    if method in ["leastsq", "least_squares"]:
+        method = "lm" if len(fp0) < 10 else "trf"
+
+    if method.lower() in ["lm", "trf"]:
+        result = scipy.optimize.least_squares(
+            internal_func,
+            par,
+            args=tuple(args),
+            method=method.lower(),
+        )
+        res, fopt, warnmess = result.x, result.cost, result.message
+
+    elif method.lower() == "simplex":
         result = scipy.optimize.fmin(
             internal_func,
             par,
@@ -1023,7 +1085,7 @@ def _optimize(
         )
         res, fopt, iterations, funcalls, warnmess = result
 
-    elif method.upper() == "HOPPING":
+    elif method.upper() == "basinhopping":
         result = scipy.optimize.basinhopping(
             internal_func,
             par,
@@ -1063,7 +1125,15 @@ def _optimize(
 
 
 # ======================================================================================
-def getmodel(x, y=None, modelname=None, par=None, **kwargs):
+def getmodel(
+    x,
+    y=None,
+    modelname=None,
+    par=None,
+    usermodels=None,
+    amplitude_mode="height",
+    **kwargs,
+):
     """
     Get the model for a given x vector.
 
@@ -1078,7 +1148,12 @@ def getmodel(x, y=None, modelname=None, par=None, **kwargs):
         Name of the model class to use.
     par : :class:`Parameters` instance
         Parameter to pass to the f function.
-    kargs : any
+    usermodels: dict, optional, default is None
+        Dictionary of user defined models used to extend the models available
+        in spectrochempy.
+    amplitude_mode : str, optional, default is 'height'
+        Select the amplitude mode calculation. Can be 'height' or 'area'.
+    kwargs : any
         Keywords arguments to pass to the f function.
 
     Returns
@@ -1087,7 +1162,18 @@ def getmodel(x, y=None, modelname=None, par=None, **kwargs):
         Array containing the calculated model.
     """
     model = par.model[modelname]
-    modelcls = getattr(models_, model)
+    try:
+        modelcls = getattr(models_, model)
+    except AttributeError:
+        if usermodels is not None:
+            try:
+                modelcls = usermodels[model]
+            except KeyError:
+                raise ValueError(
+                    f"Model {model} not found in spectrochempy nor in usermodels."
+                )
+        else:
+            raise ValueError(f"Model {model} not found in spectrochempy.")
 
     # take an instance of the model
     a = modelcls()
@@ -1096,7 +1182,7 @@ def getmodel(x, y=None, modelname=None, par=None, **kwargs):
     args = []
     for p in a.args:
         try:
-            args.append(par[f"{p}_{modelname}"])
+            args.append(par[f"{p.lower()}_{modelname}"])
         except KeyError as e:
             if p.startswith("c_"):
                 # probably the end of the list
@@ -1115,7 +1201,6 @@ def getmodel(x, y=None, modelname=None, par=None, **kwargs):
         val = a.f(x, y, *args, **kwargs)
 
     # Return amplitude or area ? return calc is scaled by area by default
-    amplitude_mode = kwargs.pop("amplitude_mode")
     if amplitude_mode.lower() == "height":
         # in this case ampl parameter is the height, so we need to rescale
         # calc
