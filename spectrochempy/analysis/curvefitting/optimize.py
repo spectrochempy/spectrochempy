@@ -287,14 +287,14 @@ class Optimize(DecompositionAnalysis):
         if X.squeeze().ndim == 1:
             # C in this case is just the A for all species
             # (not very useful here but it will be necessary for 2D
+            C = np.ones((1, self._n_components)) * A  # TODO: check this
             # we eventually add baseline to the components
             start = 0 if self.autobase else 1
-            C = np.ones((start, self._n_components)) * A
             components = modeldata[start:-1]
             total = modeldata[-1]
         else:
             # todo
-            pass
+            raise NotImplementedError("Fit not implemented for nD data yet!")
         _outfit = C, components, total, A, a, b
         return _outfit
 

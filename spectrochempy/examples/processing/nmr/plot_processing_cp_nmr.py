@@ -95,7 +95,7 @@ _ = pks.plot_scatter(
 )
 
 for p in pks:
-    x, y = p.coord(-1).values, p.values + 0.5
+    x, y = p.coord(-1).values, (p + 0.5).values
     _ = ax.annotate(
         f"{x.m:0.1f}",
         xy=(x, y),
