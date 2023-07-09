@@ -23,6 +23,7 @@ from traitlets.config import Config
 from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
+from spectrochempy.core.units import Quantity
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.objects import Adict
@@ -160,10 +161,17 @@ class MetaConfigurable(Configurable):
             # replace other serializable value by an equivalent
             elif isinstance(value, (type(cycler), Path)):
                 value = str(value)
-            if isinstance(value, np.ndarray):
+            elif isinstance(value, Quantity):
+                value = str(value)
+            elif isinstance(value, np.ndarray):
                 # we need to transform it to a list of elements, bUT with python
                 # built-in types, which is not the case e.g., for int64
                 value = value.tolist()
+
+            if isinstance(value, (list, tuple)):
+                # replace other serializable value by an equivalent
+                value = [str(v) if isinstance(v, Path) else v for v in value]
+                value = [str(v) if isinstance(v, Quantity) else v for v in value]
 
             self.cfg.update(
                 self.name,

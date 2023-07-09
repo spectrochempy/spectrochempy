@@ -525,7 +525,7 @@ class SIMPLISMA(DecompositionAnalysis):
         """
         C = self.transform()
         C.name = "Relative Concentrations"
-        C.x.title = "# pure compound"
+        C.coord(-1).title = "# pure compound"
         C.description = "Concentration/contribution matrix from SIMPLISMA:"  # + logs
         return C
 
@@ -547,7 +547,7 @@ class SIMPLISMA(DecompositionAnalysis):
         Pt = self.St.copy()  # get a container
         Pt.data = self._outfit[2]
         Pt.name = "Purity spectra"
-        Pt.y.title = "# pure compound"
+        Pt.coord(-2).title = "# pure compound"
         Pt.description = "Purity spectra from SIMPLISMA:"  # + logs
         return Pt
 

@@ -52,7 +52,6 @@ def test_example():
 
 
 def test_EFA(IR_dataset_2D):
-
     ####################################################################################
     # Generate a test dataset
     # ----------------------------------------------------------------------------------
@@ -109,9 +108,9 @@ def test_EFA(IR_dataset_2D):
     # Plots of the log(EV) for the forward and backward analysis
     #
 
-    efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.x.labels)
+    efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.k.labels)
 
-    efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.x.labels)
+    efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.k.labels)
 
     ####################################################################################
     # Looking at these EFA curves, it is quite obvious that only two components

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# %%
 # ======================================================================================
 # Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -64,14 +65,14 @@ St = model.components
 # %%
 # Plot results
 # ------------
-_ = C.T.plot(title="Concentration", colormap=None, legend=C.x.labels)
+_ = C.T.plot(title="Concentration", colormap=None, legend=C.k.labels)
 
 # %%
 #
 m = St.ptp()
 for i in range(St.shape[0]):
     St.data[i] -= i * m / 2
-ax = St.plot(title="Components", colormap=None, legend=St.y.labels)
+ax = St.plot(title="Components", colormap=None, legend=St.k.labels)
 ax.set_yticks([])
 
 # %%

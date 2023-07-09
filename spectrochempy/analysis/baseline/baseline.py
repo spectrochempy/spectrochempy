@@ -495,7 +495,7 @@ baseline/trends for different segments of the data.
 
             # Last phase: do an inverse transform Y = LLS^-1(G) + offset
             # will be done later
-            _store = Y[:, ::-1] if self._X.x.is_descendant else Y
+            _store = Y[:, ::-1] if self._X.coord(1).is_descendant else Y
 
         # ------------------------
         # AsLS baseline correction

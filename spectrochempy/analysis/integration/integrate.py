@@ -22,17 +22,12 @@ from spectrochempy.utils.decorators import deprecated
 def _integrate_method(method):
     @functools.wraps(method)
     def wrapper(dataset, *args, **kwargs):
-
         # handle the various syntax to pass the axis
         if args:
             kwargs["dim"] = args[0]
             args = []
 
-        dim = dataset._get_dims_from_args(*args, **kwargs)
-        if dim is None:
-            dim = -1
-        axis = dataset._get_dims_index(dim)
-        axis = axis[0] if axis and not dataset.is_1d else None
+        axis, dim = dataset.get_axis(**kwargs)
 
         if kwargs.get("dim"):
             kwargs.pop("dim")

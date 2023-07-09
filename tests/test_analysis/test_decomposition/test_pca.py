@@ -44,7 +44,6 @@ def test_PCA_docstrings():
 # test pca
 # ---------
 def test_pca():
-
     dataset = NDDataset.read("irdata/nh4y-activation.spg")
 
     pca = PCA()
@@ -84,7 +83,6 @@ def test_pca():
 
     # try a wrong number of n_components  <= min(n_observations, n_features)
     try:
-
         pca = PCA(n_components=56)
         pca.fit(dataset)
     except ValueError:
@@ -176,4 +174,4 @@ def test_pca():
     ev = pca.explained_variance
     assert isinstance(ev, NDDataset)
     assert ev.shape == (pca.n_components,)
-    assert ev.x.title == "components"
+    assert ev.k.title == "components"

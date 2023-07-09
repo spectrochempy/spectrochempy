@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# %%
 # ======================================================================================
 # Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -30,7 +31,7 @@ nd = scp.NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 ndOH = nd[54, 3800.0:3300.0]
 # masking
 ndOH[:, 3505.0:3500.0] = scp.MASKED
-ndOH.plot()
+_ = ndOH.plot()
 
 # %%
 # Perform a Fit
@@ -96,7 +97,7 @@ ax.autoscale(enable=True, axis="y")
 # %%
 # Now perform a fit with maximum 1000 iterations
 f1.max_iter = 1000
-f1.fit(ndOH)
+_ = f1.fit(ndOH)
 
 # %%
 # Show the result
@@ -104,9 +105,10 @@ ndOH.plot()
 ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
+# %%
 # plotmerit
 som = f1.inverse_transform()
-f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2)
+_ = f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2, lw=2)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

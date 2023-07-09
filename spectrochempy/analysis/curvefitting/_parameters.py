@@ -92,7 +92,6 @@ class FitParameters(UserDict):
     # ----------------------------------------------------------------------------------
     def __str__(self):
         def makestr(key):
-
             keystring = key.split("_")[0]
             if self.reference[key]:
                 return f"\t> {keystring}:{self.data[key]}\n"
@@ -111,27 +110,31 @@ class FitParameters(UserDict):
 
                 return f"{keystring}: {float(val):10.4f}, {lob}, {upb}\n"
 
-        message = "#PARAMETER SCRIPT\n\nCOMMON:\n"
-
+        mess = ""
         var = ""
         for item in self.expvars:
             var += f" {item}"
 
         if var:
-            message += f"\texperiment_number: {self.expnumber}\n"
-            message += f"\texperiment_variables: {var}\n"
+            mess += f"\texperiment_number: {self.expnumber}\n"
+            mess += f"\texperiment_variables: {var}\n"
 
         # look for common parameters
         for key in list(self.keys()):
             keysp = key.split("_")[0]
             if self.common[keysp]:
-                message += makestr(key)
+                mess += makestr(key)
+
+        message = ""
+        if mess:
+            message += "COMMON:\n"
+            message += mess
 
         # model parameters
         models = self.models
         for model in models:
-            message += f"\nMODEL: {model}\n"
-            message += f"shape: {self.model[model]}\n"
+            message += f"\n MODEL: {model}\n"
+            message += f" shape: {self.model[model]}\n"
             for key in sorted(self.keys()):
                 keyspl = key.split("_")
                 if model not in "_".join(keyspl[1:]):
@@ -220,7 +223,6 @@ class FitParameters(UserDict):
 
     # ----------------------------------------------------------------------------------
     def to_external(self, key, pi):
-
         key = str(key)
         if key not in self.data:
             raise KeyError(f"parameter `{key}` is not found")
@@ -263,7 +265,6 @@ class FitParameters(UserDict):
         return pe
 
     def copy(self):
-
         import copy as cpy
 
         data = cpy.copy(self.data)

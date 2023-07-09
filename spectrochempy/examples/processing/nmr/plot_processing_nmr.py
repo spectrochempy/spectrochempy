@@ -123,7 +123,7 @@ def plot_with_pp(s, peaks):
     )
 
     for p in pks:
-        x, y = p.coord(-1).values, p.values + 0.2
+        x, y = p.coord(-1).values, (p + 0.2).values
         _ = ax.annotate(
             f"{x.m:0.1f}",
             xy=(x, y),

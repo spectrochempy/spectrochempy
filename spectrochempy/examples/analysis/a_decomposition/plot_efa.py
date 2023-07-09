@@ -47,11 +47,17 @@ _ = efa1.fit(dataset)
 # %%
 # Forward evolution of the 5 first components
 f = efa1.f_ev[:, :5]
-f.T.plot(yscale="log", legend=f.x.labels)
+f.T.plot(yscale="log", legend=f.k.labels)
+
+# %%
+# Note the use of coordinate 'k' (component axis) in the expression above.
+# Remember taht to find the actul names of the coordinates, the `dims`
+# attribute can be used as in the following:
+f.dims
 
 # Backward evolution
 b = efa1.b_ev[:, :5]
-b.T[:5].plot(yscale="log", legend=b.x.labels)
+b.T[:5].plot(yscale="log", legend=b.k.labels)
 
 # %%
 # Show results with 3 components (which seems to already explain a large part of the dataset)
@@ -62,7 +68,7 @@ efa1.cutoff = efa1.f_ev[:, 3].max()
 
 # get concentration
 C1 = efa1.transform()
-C1.T.plot(title="EFA determined concentrations", legend=C1.x.labels)
+C1.T.plot(title="EFA determined concentrations", legend=C1.k.labels)
 
 # %%
 # Fit transform : Get the concentration in too commands
@@ -77,7 +83,7 @@ assert C1 == C2
 # Get components
 #
 St = efa2.get_components()
-St.plot(title="components", legend=St.y.labels)
+St.plot(title="components", legend=St.k.labels)
 
 # %%
 # Compare with PCA
@@ -89,7 +95,7 @@ C3.T.plot(title="PCA scores")
 
 # %%
 LT = pca.loadings
-LT.plot(title="PCA components", legend=LT.y.labels)
+LT.plot(title="PCA components", legend=LT.k.labels)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -31,7 +31,6 @@ def make_units_compatibility(func):
     """
 
     def _convert_to_units(arg, x_units):
-
         if isinstance(arg, Quantity):
             arg.ito(x_units)  # eventually convert units and rescale
         # set units to those of x
@@ -45,7 +44,6 @@ def make_units_compatibility(func):
 
     @wraps(func)
     def wrapper(cls, xinput, *args, **kwargs):
-
         returntype = "ndarray"
         x = xinput.copy()
 
@@ -99,6 +97,7 @@ def make_units_compatibility(func):
 #          #
 ############
 
+
 # ======================================================================================
 # PolynomialBaseline
 # ======================================================================================
@@ -130,7 +129,7 @@ class polynomialbaseline(object):
     """
 
     @make_units_compatibility
-    def f(self, x, ampl, *c_, **kargs):
+    def f(self, x, ampl, *c_, **kwargs):
         c = [0.0, 0.0]
         c.extend(c_)
         return ampl * np.polyval(np.array(tuple(c))[::-1], x - x[int(x.size / 2)])
@@ -182,7 +181,7 @@ class gaussianmodel(object):
     """
 
     @make_units_compatibility
-    def f(self, x, ampl, pos, width, **kargs):
+    def f(self, x, ampl, pos, width, **kwargs):
         gb = width / 2.3548
         tsq = (x - pos) * 2**-0.5 / gb
         w = np.exp(-tsq * tsq) * (2 * np.pi) ** -0.5 / gb
@@ -259,7 +258,6 @@ class voigtmodel(object):
 
     @staticmethod
     def f(x, ampl, pos, width, ratio, **kargs):
-
         return asymmetricvoigtmodel().f(x, ampl, pos, width, ratio, asym=0.0)
 
 
@@ -304,6 +302,11 @@ class asymmetricvoigtmodel(object):
             return ampl * w
 
 
+# ======================================================================================
+# Sigmoid Model
+# ======================================================================================
+
+
 class sigmoidmodel(object):
     """
     A Sigmoid function.
@@ -327,3 +330,19 @@ class sigmoidmodel(object):
     def f(self, x, ampl, pos, asym, **kargs):
         w = 1.0 / (1.0 + np.exp(asym * (x - pos) / ampl))
         return ampl * w
+
+
+# ======================================================================================
+# User defined model
+# ======================================================================================
+class usermodel(object):
+    """
+    Base class for user defined models
+    """
+
+    type = "1D"
+    args = []
+
+    @staticmethod
+    def f():
+        raise NotImplementedError("This is a base class for user defined models")

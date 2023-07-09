@@ -1038,12 +1038,12 @@ def test_nddataset_max_min_with_1D(NMR_dataset_1D):
     nd1 = NMR_dataset_1D
     nd1[4] = scp.MASKED
     assert nd1.is_masked
-    mx = nd1.max()
+    mx = nd1.max().m
     assert (mx.real, mx.imag) == pytest.approx((2283.5096153847107, -2200.383064516033))
     # check if it works for real
-    mx1 = nd1.real.max()
+    mx1 = nd1.real.max().m
     assert mx1 == pytest.approx(2283.5096153847107)
-    mi = nd1.min()
+    mi = nd1.min().m
     assert (mi.real, mi.imag) == pytest.approx((-408.29714640199626, 261.1864143920416))
 
 

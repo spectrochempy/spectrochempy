@@ -1200,14 +1200,16 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         if self.ndim == 0:
             new._data = self._data[np.newaxis, np.newaxis]
             new._mask = self._mask[np.newaxis, np.newaxis]
-            new.dims = ["y", "x"]
-            new.set_coordset(x=None, y=None)
+            new.dims = ["v", "u"]
+            new.set_coordset(u=None, v=None)
         elif self.ndim == 1:
+            xdim = new.dims[0]
+            xcoord = coordset[0] if coordset is not None else None
             new._data = self._data[np.newaxis]
             new._mask = self._mask[np.newaxis]
-            new.dims = ["y", "x"]
-            new.set_coordset(x=coordset[0] if coordset is not None else None, y=None)
-
+            new.dims = ["u", xdim]
+            # new.set_coordset(x=coordset[0] if coordset is not None else None, u=None)
+            new.set_coordset({xdim: xcoord, "u": None})
         return new
 
     def swapdims(self, dim1, dim2, inplace=False):

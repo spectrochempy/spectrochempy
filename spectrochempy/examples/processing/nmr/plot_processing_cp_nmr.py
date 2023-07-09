@@ -67,7 +67,8 @@ nd3 = scp.pk(nd2, phc0=-118)
 _ = nd3.plot()
 
 # %%
-# snip baseline correction
+# ## Baseline correction
+# Here we use the snip algorithm
 nd4 = scp.snip(nd3, snip_width=200)
 
 ax = nd4.plot()
@@ -75,13 +76,24 @@ _ = ax.set_xlim(225, 25)
 _ = ax.set_ylim(-1, 10)
 
 # %%
-# Peak peaking
-# we use the max of each spectra for this pp
-peaks, properties = nd4.max(dim=0).find_peaks(height=2.0, distance=10.0)
-peaks.x.data, properties
+# ## Peak peaking
+# we will use here the max of each spectra
+peaks, properties = nd4.max(dim=0).find_peaks(height=2.0, width=0.5, wlen=33.0)
+print(f"position of the peaks : {peaks.x.data}")
 
 # %%
-# plot with peak markers
+# properties of the peaks
+table_pos = "  ".join([f"{peaks[i].x.value.m:>10.3f}" for i in range(len(peaks))])
+print(f'{"peak_position (cm⁻¹)":>26}: {table_pos}')
+for key in properties:
+    table_property = "  ".join(
+        [f"{properties[key][i].m:>10.3f}" for i in range(len(peaks))]
+    )
+    title = f"{key:>.16} ({properties[key][0].u:~P})"
+    print(f"{title:>26}: {table_property}")
+
+# %%
+# plot with peak markers and the left/right-bases indicators
 ax = nd4.plot()  # output the spectrum on ax. ax will receive next plot too
 pks = peaks + 0.5  # add a small offset on the y position of the markers
 _ = pks.plot_scatter(
@@ -94,8 +106,8 @@ _ = pks.plot_scatter(
     xlim=(225, 25),
 )
 
-for p in pks:
-    x, y = p.coord(-1).values, p.values + 0.5
+for i, p in enumerate(pks):
+    x, y = p.x.values, (p + 0.5).values
     _ = ax.annotate(
         f"{x.m:0.1f}",
         xy=(x, y),
@@ -103,6 +115,10 @@ for p in pks:
         rotation=90,
         textcoords="offset points",
     )
+    for w in (properties["left_bases"][i], properties["right_bases"][i]):
+        ax.axvline(w, linestyle="--", color="green")
+    for w in (properties["left_ips"][i], properties["right_ips"][i]):
+        ax.axvline(w, linestyle=":", color="red")
 
 # %%
 # Get the section at once using fancy indexing
@@ -113,49 +129,130 @@ sections = nd4[:, peaks.x.data]
 sections = sections.T
 
 # now plot it
-_ = sections.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
+ax = sections.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
+_ = ax.set_xlim(0, 16000)
+
+# %%
+# The sections we have taken here represent the maximum heigths of the peaks.
+# However it could may be interesting to have the area of the peak instead.
+# Let's use the left and right bases to perform the integration of the peaks.
+area = []
+for i in range(len(peaks)):
+    lb, ub = properties["left_bases"][i].m, properties["right_bases"][i].m
+    a = nd4[:, lb:ub].simpson()
+    area.append(a)
+
+area = scp.NDDataset(
+    area,
+    dims=["y", "x"],
+    coordset=scp.CoordSet({"y": peaks.x.copy(), "x": nd4.y.default.copy()}),
+    units=a.units,
+    title="area",
+)
+area.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
+area
 
 # %%
 # Fitting a model to these data
-# Fitting of arbitrary model is not yet implemented in SpectroChemPy, but we can use scipy for that purpose
-
 import numpy as np
-from scipy.optimize import curve_fit
 
-# see https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
+# create an Optimize object using a simple leastsq method
+fitter = scp.Optimize(log_level="INFO", method="leastsq")
 
 
-def cp_model(t, I_0, T_IS, T1_Irho, T1_Srho):
-    I = (
-        I_0
-        * (np.exp(-t / T1_Irho) - np.exp(-t * (1 / T_IS + 1 / T1_Srho)))
-        / (1 + T_IS / T1_Srho - T_IS / T1_Irho)
-    )
+# define a model
+# Note: This is only for sake of demonstration,
+# as the model is probably not sufficient to fit the data correctly.
+def cp_model(t, i0, tis, t1irho):  # warning: no underscore in variable names
+    I = i0 * (np.exp(-t / t1irho) - np.exp(-t * (1 / tis))) / (1 - tis / t1irho)
     return I
 
 
+# Add the model to the fitter usermodels as it it not a built-in model
+fitter.usermodels = {"CP_model": cp_model}
+
 # %%
-for section in sections:
-    xdata = (
-        section.y.data
-    )  # Note we use axis `y` which correcponds to the contact times (data have been transposed!)
-    ydata = section.data.squeeze()  # data to fit
+index = 0
+s = area[index]
 
-    # initial parameters
-    I_0 = np.max(ydata)
-    T_IS = 10
-    T1_Irho = 100
-    T1_Srho = 10000
-    p0 = [I_0, T_IS, T1_Irho, T1_Srho]
-    popt, pcov = curve_fit(cp_model, xdata, ydata, p0, bounds=(0, 20000))
+# Define the parameter variables using a script
+# (parameter: value, low_bound,  high_bound)
+# - no underscore in parameters names.
+# - times are in the units of the data time coordinates (here `s`)
+# - initially we assume relaxation (T1rho) time constant vey large
+fitter.script = """
+ MODEL: cp
+ shape: cp_model
+	$ i0:     25, 0.1, none
+	$ t1irho: 1e4, 1, none
+	$ tis:  800, 1, 10000
+"""
 
-    I_0, T_IS, T1_Irho, T1_Srho = popt
-    print(popt)
-    ymodel = cp_model(xdata, I_0, T_IS, T1_Irho, T1_Srho)
+_ = fitter.fit(s)
 
-    ax = section.plot(marker="o", ls="")
-    ax.plot(xdata, ymodel)
+spred = fitter.predict()
 
+ax = fitter.plotmerit(
+    s,
+    spred,
+    method="scatter",
+    show_yaxis=True,
+    title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",
+)
+_ = ax.set_xlim(0, 16000)
+
+# %%
+index = 1
+s = area[index]
+fitter.script = """
+ MODEL: cp
+ shape: cp_model
+	$ i0:     35, 0.1, none
+	$ t1irho: 1e4, 1, none
+	$ tis:  800, 1, 10000
+"""
+
+_ = fitter.fit(s)
+
+spred = fitter.predict()
+
+ax = fitter.plotmerit(
+    s,
+    spred,
+    method="scatter",
+    show_yaxis=True,
+    title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",
+)
+_ = ax.set_xlim(0, 16000)
+
+# %%
+index = 2
+s = area[index]
+fitter.script = """
+ MODEL: cp
+ shape: cp_model
+	$ i0:     125, 0.1, none
+	$ t1irho: 1e4, 1, none
+	$ tis:  800, 1, 10000
+"""
+
+_ = fitter.fit(s)
+
+spred = fitter.predict()
+
+ax = fitter.plotmerit(
+    s,
+    spred,
+    method="scatter",
+    show_yaxis=True,
+    title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",
+)
+_ = ax.set_xlim(0, 16000)
+
+# %%
+# The model looks good for the peak at 174 ppm. This peak appears to be composed of a single species,
+# which is not the case for the other peaks at 99 and 70 ppm.
+# Deconvolution of these two peaks is therefore probably necessary for a better analysis.
 
 # %%
 # This ends the example ! The following line can be removed or commented

@@ -989,7 +989,15 @@ def _read_topspin(*args, **kwargs):
     axe_range = list(range(parmode + 1))
 
     for axis in axe_range:
-        if not meta.isfreq[axis]:
+        if parmode > 0 and kwargs.pop("use_vdlist", False) and axis == 0:
+            # we use the vdlist to make the axis
+            # this is useful for pseudo 2D data such as relaxation, etc...
+            with open(f_expno / "vdlist", mode="r") as f:
+                vd = [float(val) for val in f.readlines()]
+            coord = Coord(vd, title="time", units="s")
+            coords.append(coord)
+
+        elif not meta.isfreq[axis]:
             # the axis is in time units
             dw = (1.0 / meta.sw_h[axis]).to("us")
             coordpoints = np.arange(meta.td[axis])
@@ -1031,6 +1039,7 @@ def _read_topspin(*args, **kwargs):
     dataset.meta.readonly = True
     dataset.set_coordset(*tuple(coords))
 
+    dataset.units = "count"
     dataset.title = "intensity"
     dataset.origin = "topspin"
     dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"

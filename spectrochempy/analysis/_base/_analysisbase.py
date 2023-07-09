@@ -335,7 +335,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             raise NotFittedError()
 
         # Fire the validation and preprocessing
-        self._X = X if X is not None else self.X
+        self._X = X if X is not None else self.X.copy()
 
         # Get the processed ndarray data
         newX = self._X_preprocessed
@@ -599,14 +599,15 @@ class DecompositionAnalysis(AnalysisConfigurable):
         ma = max(X.max(), X_hat.max())
         mao = ma * offset / 100
         mad = ma * offset / 100 + ma / 10
-        _ = (X - X.min()).plot(color=colX, **kwargs)
-        _ = (X_hat - X_hat.min() - mao).plot(
+        _ = X.plot(color=colX, **kwargs)  # - X.min()
+        _ = (X_hat - mao).plot(  # - X_hat.min()
             clear=False, ls="dashed", cmap=None, color=colXhat
         )
-        ax = (res - res.min() - mad).plot(clear=False, cmap=None, color=colRes)
+        ax = (res - mad).plot(clear=False, cmap=None, color=colRes)  # -res.min()
         ax.autoscale(enable=True, axis="y")
-        ax.set_title(f"{self.name} plot of merit")
-        ax.yaxis.set_visible(False)
+        title = kwargs.get("title", f"{self.name} plot of merit")
+        ax.set_title(title)
+        ax.yaxis.set_visible(kwargs.get("show_yaxis", False))
         return ax
 
     _docstring.get_sections(_docstring.dedent(plotmerit.__doc__), base="plotmerit")
