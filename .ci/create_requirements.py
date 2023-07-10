@@ -198,7 +198,7 @@ if __name__ == "__main__":
         DEV=False,
         DASH=args.dash,
         CANTERA=args.cantera,
-        QUADPROG=args.osqp,
+        OSQP=args.osqp,
         COMMENT=comment,
     )
     out_test_dependencies = template_dependencies.render(

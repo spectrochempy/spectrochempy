@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        pythonVersion: ["3.9", "3.10"]
+        pythonVersion: ["3.9", "3.11"]
         exclude:
           - os: macos-latest
             pythonVersion: 3.9
@@ -83,12 +83,12 @@ jobs:
           coverage run -m pytest tests --durations=10
 
       - name: Coverage report to xml
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.11' && matrix.os == 'ubuntu-latest' }}
         run: |
           coverage xml
 
       - name: Code Climate reporting
-        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.10' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.11' && matrix.os == 'ubuntu-latest' }}
         uses: paambaati/codeclimate-action@v3.2.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
