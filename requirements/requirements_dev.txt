@@ -8,7 +8,6 @@
 #
 # ======================================================================================
 brukeropusreader
-quadprog
 numpy-quaternion
 cffconvert
 colorama

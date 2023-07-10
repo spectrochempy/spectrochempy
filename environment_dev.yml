@@ -22,8 +22,8 @@ channels:
 dependencies:
     # specific dependencies
     - brukeropusreader
-    - quadprog
     - quaternion
+
 
     # dependencies for the core package
     - cffconvert

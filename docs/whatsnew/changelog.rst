@@ -47,6 +47,8 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+* Changed the QP solver (quadprog -> osqp): The new solver is compatible with
+  python 3.11. Fastness and robusteness are improved.
 
 .. section
 

@@ -26,3 +26,9 @@ Bug fixes
 * Fix a bug when concatenating datasets with multi-coordinates axis.
 * Fix a bug in coordset definition for integration methods.
 * Fix coordinates definitions in Analysis methods.
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* Changed the QP solver (quadprog -> osqp): The new solver is compatible with
+  python 3.11. Fastness and robusteness are improved.

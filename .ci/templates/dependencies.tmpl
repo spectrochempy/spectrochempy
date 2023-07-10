@@ -9,10 +9,12 @@ be created or updated accordingly
 #}
     # specific dependencies
     - brukeropusreader
-    - quadprog
     - quaternion
 {% if CANTERA -%}
     - cantera
+{%- endif %}
+{% if OSQP -%}
+    - osqp
 {%- endif %}
     # dependencies for the core package
     - cffconvert
