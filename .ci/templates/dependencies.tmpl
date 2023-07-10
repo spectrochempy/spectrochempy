@@ -13,9 +13,6 @@ be created or updated accordingly
 {% if CANTERA -%}
     - cantera
 {%- endif %}
-{% if OSQP -%}
-    - osqp
-{%- endif %}
     # dependencies for the core package
     - cffconvert
     - colorama
@@ -27,6 +24,7 @@ be created or updated accordingly
     - numba
     - numpy
     - numpydoc>=1.2
+    - osqp
     - pint>=0.20
     - requests
     - scipy

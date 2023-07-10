@@ -135,7 +135,6 @@ if __name__ == "__main__":
 
     parser.add_argument("--dash", help="use dash", action="store_true")
     parser.add_argument("--cantera", help="use cantera", action="store_true")
-    parser.add_argument("--osqp", help="use osqp", action="store_true")
     args = parser.parse_args()
 
     repo_path = Path(__file__).parent.parent
@@ -176,7 +175,6 @@ if __name__ == "__main__":
         DEV=False,
         DASH=args.dash,
         CANTERA=args.cantera,
-        OSQP=args.osqp,
         COMMENT=comment,
     )
     out_dependencies = template_dependencies.render(
@@ -184,7 +182,6 @@ if __name__ == "__main__":
         DEV=False,
         DASH=args.dash,
         CANTERA=args.cantera,
-        OSQP=args.osqp,
         COMMENT=comment,
     )
     filename = repo_path / "environment.yml"
@@ -198,7 +195,6 @@ if __name__ == "__main__":
         DEV=False,
         DASH=args.dash,
         CANTERA=args.cantera,
-        OSQP=args.osqp,
         COMMENT=comment,
     )
     out_test_dependencies = template_dependencies.render(
@@ -206,7 +202,6 @@ if __name__ == "__main__":
         DEV=False,
         DASH=args.dash,
         CANTERA=args.cantera,
-        OSQP=args.osqp,
         COMMENT=comment,
     )
     filename = repo_path / "environment_test.yml"
@@ -222,7 +217,6 @@ if __name__ == "__main__":
         DEV=True,
         DASH=args.dash,
         CANTERA=args.cantera,
-        OSQP=args.osqp,
         COMMENT=comment,
     )
     out_dev_dependencies = template_dependencies.render(
@@ -230,7 +224,6 @@ if __name__ == "__main__":
         DEV=True,
         DASH=args.dash,
         CANTERA=args.cantera,
-        OSQP=args.osqp,
         COMMENT=comment,
     )
     filename = repo_path / "environment_dev.yml"

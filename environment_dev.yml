@@ -24,7 +24,6 @@ dependencies:
     - brukeropusreader
     - quaternion
 
-
     # dependencies for the core package
     - cffconvert
     - colorama
@@ -36,6 +35,7 @@ dependencies:
     - numba
     - numpy
     - numpydoc>=1.2
+    - osqp
     - pint>=0.20
     - requests
     - scipy
