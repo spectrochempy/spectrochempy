@@ -21,7 +21,7 @@ from spectrochempy.analysis._base._analysisbase import (
     DecompositionAnalysis,
     NotFittedError,
 )
-from spectrochempy.application import error_, info_, warning_
+from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -33,15 +33,6 @@ from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
 osqp = import_optional_dependency("osqp", errors="ignore")
-
-
-def _osqp_is_not_available():
-    if osqp is None:
-        error_(
-            ImportError,
-            "Missing optional dependency 'osqp'.  " "Use conda or pip to install osqp.",
-        )
-    return osqp is None
 
 
 @tr.signature_has_traits
@@ -396,8 +387,6 @@ class IRIS(DecompositionAnalysis):
         warm_start=False,
         **kwargs,
     ):
-        if _osqp_is_not_available():
-            return
 
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
