@@ -25,7 +25,6 @@ EXCLUDE = {
     "pip",
     "spectrochempy_data",
     "cantera",
-    "osqp",
     "conda-build",
     "conda-verify",
     "anaconda-client",

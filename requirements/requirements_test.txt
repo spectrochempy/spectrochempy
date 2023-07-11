@@ -19,6 +19,7 @@ matplotlib
 numba
 numpy
 numpydoc>=1.2
+osqp
 pint>=0.20
 requests
 scipy
