@@ -32,3 +32,12 @@ def test_write_csv(IR_dataset_2D):
     ds = IR_dataset_2D
     with pytest.raises(NotImplementedError):
         f = ds.write_csv("myfile.csv", confirm=False)
+
+
+def test_issue_706(IR_dataset_2D):
+    ds = IR_dataset_2D[0]
+    ds.write_csv("myfile.csv", confirm=False)
+    f = ds.write_csv("../myfile.csv")
+    assert f.name == "myfile.csv"
+    assert scp.pathclean("../myfile.csv").exists()
+    f.unlink()

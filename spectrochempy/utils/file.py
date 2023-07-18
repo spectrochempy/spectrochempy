@@ -655,6 +655,8 @@ def check_filename_to_save(
 
     NODIAL = (NO_DIALOG or "DOC_BUILDING" in environ) and "KEEP_DIALOGS" not in environ
 
+    filename = pathclean(filename)
+
     if filename and pathclean(filename).parent.resolve() == Path.cwd():
         filename = Path.cwd() / filename
 
