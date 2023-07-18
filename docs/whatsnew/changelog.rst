@@ -40,6 +40,7 @@ Bug fixes
 * Fix a bug when concatenating datasets with multi-coordinates axis.
 * Fix a bug in coordset definition for integration methods.
 * Fix coordinates definitions in Analysis methods.
+* Fix a bug in `write_csv` when the filename was provided as a string (issue #706)
 
 .. section
 
