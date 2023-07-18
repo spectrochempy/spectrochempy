@@ -12,7 +12,8 @@ New features
 * Fancy indexing using location now supported.
 * Add an example for NMR processing of a series of CP-MAS spectra.
 * Add an example for processing NMR relaxation data
-* Add an option to `read_topspin` to create ``y`` coordinates from a ``vdlist`` file.
+* Add an option to `read_topspin` to create ``y`` coordinates
+  of pseudo-2D NMR spectra from a file (e.g. ``vdlist`` ).
 * Add option to plot to add markers on curves
 * Add a new method to the `Optimize` class to perform a least-square fitting. It is
   based on the `scipy.optimize.least_squares` function, allowing much faster operation
