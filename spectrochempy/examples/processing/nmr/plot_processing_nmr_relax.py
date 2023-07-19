@@ -26,7 +26,7 @@ U = scp.ur
 datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
-dataset = scp.read_topspin(nmrdir / "relax" / "100" / "ser", use_vdlist=True)
+dataset = scp.read_topspin(nmrdir / "relax" / "100" / "ser", use_list="vdlist")
 
 # %%
 # Analysing the data
@@ -51,7 +51,6 @@ dsint.real
 # %%
 # Fit a model
 # -----------
-# %%
 # create an Optimize object using a simple leastsq method
 fitter = scp.Optimize(log_level="INFO", method="leastsq")
 
@@ -82,7 +81,7 @@ shape: T1_model
 """
 
 # %%
-# Fit the model
+# Performs the fit
 _ = fitter.fit(dsint)
 
 # %%

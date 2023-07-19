@@ -723,6 +723,8 @@ def read_topspin(*paths, **kwargs):
         Experiment number.
     procno : `int`\ , optional
         Processing number.
+    use_list : `bool` or `str`\ , optional, default: `False`
+        Whether to use a list to make indirect coordinates for pseudo-2D spectra (e.g., for relaxation experiments). If `True` the list `vdlist` is used. If a string, the list with the given name is used.
     %(Importer.other_parameters)s
 
     See Also
@@ -988,11 +990,16 @@ def _read_topspin(*args, **kwargs):
     coords = []
     axe_range = list(range(parmode + 1))
 
+    use_list = kwargs.pop("use_list", False)
+
     for axis in axe_range:
-        if parmode > 0 and kwargs.pop("use_vdlist", False) and axis == 0:
-            # we use the vdlist to make the axis
+        if parmode > 0 and use_list and axis == 0:
+            # we use the vd or other list to make the axis
             # this is useful for pseudo 2D data such as relaxation, etc...
-            with open(f_expno / "vdlist", mode="r") as f:
+            if not isinstance(use_list, str):
+                use_list = "vdlist"
+            use_list = f_expno / use_list
+            with open(use_list, mode="r") as f:
                 vd = [float(val) for val in f.readlines()]
             coord = Coord(vd, title="time", units="s")
             coords.append(coord)

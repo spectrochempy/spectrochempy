@@ -66,3 +66,13 @@ def test_readdir_for_nmr():
     nd1 = [item.name for item in nd]
     assert "topspin_2d expno:1 procno:1 (SER)" in nd1
     assert "topspin_1d expno:1 procno:1 (FID)" in nd1
+
+
+def test_use_list():
+    # Importing a pseudo 2D NMR spectra
+    # ---------------------------------
+    # Define the folder where are the spectra
+    datadir = scp.preferences.datadir
+    nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
+
+    dataset = scp.read_topspin(nmrdir / "relax" / "100" / "ser", use_list=True)
