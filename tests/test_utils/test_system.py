@@ -37,6 +37,13 @@ def test_is_kernel():
     assert not res
 
 
+import sys
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="does not run well on windows (seems to be linked to some commit message)",
+)
 def test_sh():
     res = sh.git("show", "HEAD")
     assert res is not None
