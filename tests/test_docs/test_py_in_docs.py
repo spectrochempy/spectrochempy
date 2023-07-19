@@ -53,7 +53,10 @@ def nbsphinx_script_run(path):
     return pipe.returncode, so, serr
 
 
-# @pytest.mark.skipif(sys.platform.startswith("win"), reason="do not work on windows")
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="does not run well on windows - to be investigated",
+)
 @pytest.mark.parametrize("script", sorted(scripts, key=lambda script: script.stem))
 def test_nbsphinx_script_(script):
     # some test will failed due to the magic commands or for other known reasons
@@ -83,7 +86,7 @@ import spectrochempy as scp  # to avoid imporing it in example test (already imp
 
 @pytest.mark.skipif(
     sys.platform == "win32",
-    reason="does not run well on windows",
+    reason="does not run well on windows - to be investigated",
 )
 @pytest.mark.parametrize("example", sorted(examples, key=lambda example: example.stem))
 def test_examples(example):
