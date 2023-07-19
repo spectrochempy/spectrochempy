@@ -6,6 +6,8 @@
 # ======================================================================================
 # flake8: noqa
 
+import sys
+
 import pytest
 
 from spectrochempy.utils.system import (
@@ -35,9 +37,6 @@ def test_get_user_and_node():
 def test_is_kernel():
     res = is_kernel()
     assert not res
-
-
-import sys
 
 
 @pytest.mark.skipif(

@@ -81,6 +81,10 @@ import matplotlib as mpl
 import spectrochempy as scp  # to avoid imporing it in example test (already impported)
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="does not run well on windows",
+)
 @pytest.mark.parametrize("example", sorted(examples, key=lambda example: example.stem))
 def test_examples(example):
 
