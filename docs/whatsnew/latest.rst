@@ -32,5 +32,6 @@ Bug fixes
 Breaking changes
 ~~~~~~~~~~~~~~~~
 
-* Changed the QP solver (quadprog -> osqp): The new solver is compatible with
-  python 3.11. Fastness and robusteness are improved.
+* Changed the default QP solver (quadprog -> osqp): The new solver is compatible with
+  python 3.11. Fastness and robusteness are improved. The quadprog solver can still be
+  used if available

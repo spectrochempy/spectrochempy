@@ -517,26 +517,26 @@ class IRIS(DecompositionAnalysis):
         else:  # regularization
             # some matrices used for QP optimization do not depend on lambdaR
             # and are computed here.
-            # The standard form used by quadprog() was
-            # minimize (1/2) xT G x - aT x ; subject to: C.T x >= b
-            # The first part of the G matrix is independent of lambda:
-            #     G = G0 + 2 * lambdaR S
 
-            # G0 = 2 * np.dot(K.T, K)
-            # a = 2 * np.dot(X.T, K)
-            # C = np.eye(M)
-            # b = np.zeros(M)
+            if self.qpsolver == "osqp":
+                # The standard form used by osqp() is
+                # minimize (1/2) xT P x + qT x ; subject to: lo <= A x <= u
+                # The first part of the P matrix is independent of lambda:
+                #     P = P0 + 2 * lambdaR S
+                P0 = 2 * np.dot(K.T, K)
+                q = -2 * np.dot(X.T, K)
+                A = sparse.csc_matrix(np.eye(M))
+                lo = np.zeros(M)
+            else:
+                # The standard form used by quadprog() was
+                # minimize (1/2) xT P x - qT x ; subject to: A.T x >= b
+                # The first part of the G matrix is independent of lambda:
+                #     P = P0 + 2 * lambdaR S
 
-            # The standard form used by osqp() is
-            # minimize (1/2) xT P x + qT x ; subject to: lo <= A x <= u
-
-            # The first part of the P matrix is independent of lambda:
-            #     P = P0 + 2 * lambdaR S
-
-            P0 = 2 * np.dot(K.T, K)
-            q = -2 * np.dot(X.T, K)
-            A = sparse.csc_matrix(np.eye(M))
-            lo = np.zeros(M)
+                P0 = 2 * np.dot(K.T, K)
+                q = 2 * np.dot(X.T, K)
+                A = np.eye(M)
+                b = np.zeros(M)
 
             # --------------------------------------------------------------------------
             def solve_for_lambda(X, K, P0, lamda, S):
@@ -560,32 +560,37 @@ class IRIS(DecompositionAnalysis):
                 fi = np.zeros((M, N))
                 channels = self._channels
 
-                for j, channel in enumerate(channels.data):
-                    # try:
-                    P = sparse.csc_matrix(P0 + 2 * lamda * S)
-                    qprob = osqp.OSQP()
-                    qprob.setup(P, q[j].squeeze(), A, lo, alpha=1.0, verbose=False)
-                    fi[:, j] = qprob.solve().x
-                    # except ValueError:  # pragma: no cover
-                    #     msg = (
-                    #         f"Warning:P is not positive definite for log10(lambda)="
-                    #         f"{np.log10(lamda):.2f} at {channel:.2f} "
-                    #         f"{channels.units}, find nearest PD matrix"
-                    #     )
-                    #     warning_(msg)
-                    #     try:
-                    #         P = _nearestPD(P0 + 2 * lamda * S, 0)
-                    #         qprob.setup(P, q[j].squeeze(), A, l, u, alpha=1.0)
-                    #         fi[:, j] = qprob.solve()[0]
-                    #     except ValueError:
-                    #         msg = (
-                    #             "... P matrix is still ill-conditioned, "
-                    #             "try with a small shift of diagonal elements..."
-                    #         )
-                    #         warning_(msg)
-                    #         P = _nearestPD(P0 + 2 * lamda * S, 1e-3)
-                    #         qprob.setup(P, q[j].squeeze(), A, l, u, alpha=1.0)
-                    #         fi[:, j] = qprob.solve()[0]
+                if self.qpsolver == "osqp":
+                    for j, channel in enumerate(channels.data):
+                        P = sparse.csc_matrix(P0 + 2 * lamda * S)
+                        qprob = osqp.OSQP()
+                        qprob.setup(P, q[j].squeeze(), A, lo, alpha=1.0, verbose=False)
+                        fi[:, j] = qprob.solve().x
+                else:
+                    for j, channel in enumerate(channels.data):
+                        try:
+                            P = P0 + 2 * lamda * S
+                            fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
+
+                        except ValueError:  # pragma: no cover
+                            msg = (
+                                f"Warning:P is not positive definite for log10(lambda)="
+                                f"{np.log10(lamda):.2f} at {channel:.2f} "
+                                f"{channels.units}, find nearest PD matrix"
+                            )
+                            warning_(msg)
+                            try:
+                                P = _nearestPD(P0 + 2 * lamda * S, 0)
+                                fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
+
+                            except ValueError:
+                                msg = (
+                                    "... P matrix is still ill-conditioned, "
+                                    "try with a small shift of diagonal elements..."
+                                )
+                                warning_(msg)
+                                P = _nearestPD(P0 + 2 * lamda * S, 1e-3)
+                                fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
 
                 resi = X.data - np.dot(K.data, fi)
                 RSSi = np.sum(resi**2)
