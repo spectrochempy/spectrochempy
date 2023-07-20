@@ -11,6 +11,7 @@ It also defines
 the default application preferences and IPython magic functions.
 """
 
+import importlib
 import io
 import json
 import logging
@@ -32,7 +33,6 @@ from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.display import clear_output, publish_display_data
 from jinja2 import Template
-from pkg_resources import DistributionNotFound, get_distribution
 from setuptools_scm import get_version
 from traitlets.config.application import Application
 from traitlets.config.configurable import Config
@@ -128,9 +128,9 @@ def _display_info_string(**kwargs):  # pragma: no cover
 # Version
 # --------------------------------------------------------------------------------------
 try:
-    release = get_distribution("spectrochempy").version.split("+")[0]
+    release = importlib.metadata.version("spectrochempy").split("+")[0]
     "Release version string of this package"
-except DistributionNotFound:  # pragma: no cover
+except Exception:  # pragma: no cover
     # package is not installed
     release = "--not set--"
 

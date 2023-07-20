@@ -15,7 +15,8 @@ from pathlib import Path
 from warnings import warn
 
 import requests
-from pkg_resources import parse_version
+from packaging.version import Version
+from packaging.version import parse as parse_version
 
 
 # --------------------------------------------------------------------------------------
@@ -34,8 +35,6 @@ def _get_pypi_version():
     """
     Get the last released pypi version
     """
-    from spectrochempy.utils.version import Version
-
     url = "https://pypi.python.org/pypi/spectrochempy/json"
 
     connection_timeout = 30  # secondss
@@ -96,8 +95,6 @@ def _display_needs_update_message():
 # Update checking
 # ======================================================================================
 def check_update(version):
-    from spectrochempy.utils.version import Version
-
     old = Version(version)
     res = _get_pypi_version()
     if res is not None:
