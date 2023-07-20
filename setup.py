@@ -144,6 +144,7 @@ setup_args = dict(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
     ],
     platforms=["Windows", "Mac OS X", "Linux"],
     # packages discovery

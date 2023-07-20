@@ -28,3 +28,10 @@ Bug fixes
 * Fix a bug in coordset definition for integration methods.
 * Fix coordinates definitions in Analysis methods.
 * Fix a bug in `write_csv` when the filename was provided as a string (issue #706)
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* Changed the default QP solver (quadprog -> osqp): The new solver is compatible with
+  python 3.11. Fastness and robusteness are improved. The quadprog solver can still be
+  used if available

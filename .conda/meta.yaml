@@ -33,7 +33,6 @@ requirements:
 
     # specific dependencies
     - brukeropusreader
-    - quadprog
     - quaternion
 
     # dependencies for the core package
@@ -47,6 +46,7 @@ requirements:
     - numba
     - numpy
     - numpydoc>=1.2
+    - osqp
     - packaging
     - pint>=0.20
     - requests
@@ -54,7 +54,7 @@ requirements:
     - tqdm
     - traitlets
     - tzlocal
-    - scikit-learn
+    - scikit-learn=1.2
     - xlrd
     - pyyaml
 

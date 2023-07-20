@@ -13,10 +13,12 @@ __configurables__ = ["IRIS"]
 # from collections.abc import Iterable
 
 import numpy as np
-import quadprog
+
+# QP solvers import
+import osqp
 import traitlets as tr
 from matplotlib import pyplot as plt
-from scipy import optimize
+from scipy import optimize, sparse
 
 from spectrochempy.analysis._base._analysisbase import (
     DecompositionAnalysis,
@@ -30,7 +32,10 @@ from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType, NDDatasetType
+
+quadprog = import_optional_dependency("quadpog", errors="ignore")
 
 
 @tr.signature_has_traits
@@ -363,6 +368,15 @@ class IRIS(DecompositionAnalysis):
     _regularization = tr.Bool(False)
     _search_reg = tr.Bool(False)
 
+    qpsolver = tr.Enum(
+        [
+            "osqp",
+            "quadprog",
+        ],
+        default_value="osqp",
+        allow_none=True,
+    )
+
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------
@@ -385,6 +399,7 @@ class IRIS(DecompositionAnalysis):
         warm_start=False,
         **kwargs,
     ):
+
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
@@ -400,6 +415,15 @@ class IRIS(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
     # ----------------------------------------------------------------------------------
+    @tr.validate("qpsolver")
+    def _qpsolver_validate(self, proposal):
+        qpsolver = proposal.value
+        if qpsolver == "quadprog" and quadprog is False:
+            raise ValueError(
+                "quadprog module is not installed. Please install it or run IRIS Solver "
+                "with qpsolver='osqp'"
+            )
+
     @tr.validate("reg_par")
     def _reg_par_validate(self, proposal):
         reg_par = proposal.value
@@ -492,18 +516,30 @@ class IRIS(DecompositionAnalysis):
 
         else:  # regularization
             # some matrices used for QP optimization do not depend on lambdaR
-            # and are computed here. The standard form used by quadprog() is
-            # minimize (1/2) xT G x - aT x ; subject to: C.T x >= b
+            # and are computed here.
 
-            # The first part of the G matrix is independent of lambda:
-            #     G = G0 + 2 * lambdaR S
-            G0 = 2 * np.dot(K.T, K)
-            a = 2 * np.dot(X.T, K)
-            C = np.eye(M)
-            b = np.zeros(M)
+            if self.qpsolver == "osqp":
+                # The standard form used by osqp() is
+                # minimize (1/2) xT P x + qT x ; subject to: lo <= A x <= u
+                # The first part of the P matrix is independent of lambda:
+                #     P = P0 + 2 * lambdaR S
+                P0 = 2 * np.dot(K.T, K)
+                q = -2 * np.dot(X.T, K)
+                A = sparse.csc_matrix(np.eye(M))
+                lo = np.zeros(M)
+            else:
+                # The standard form used by quadprog() was
+                # minimize (1/2) xT P x - qT x ; subject to: A.T x >= b
+                # The first part of the G matrix is independent of lambda:
+                #     P = P0 + 2 * lambdaR S
+
+                P0 = 2 * np.dot(K.T, K)
+                q = 2 * np.dot(X.T, K)
+                A = np.eye(M)
+                b = np.zeros(M)
 
             # --------------------------------------------------------------------------
-            def solve_for_lambda(X, K, G0, lamda, S):
+            def solve_for_lambda(X, K, P0, lamda, S):
                 """
                 QP optimization
 
@@ -511,9 +547,9 @@ class IRIS(DecompositionAnalysis):
                 -----------
                 X: NDDataset of experimental spectra
                 K: NDDataset, kernel datase
-                G0: the lambda independent part of G
+                P0: the lambda independent part of P
                 lamda: regularization parameter
-                S: penalty function (shaprness)
+                S: penalty function (sharpness)
                 verbose: print info
 
                 returns:
@@ -523,28 +559,38 @@ class IRIS(DecompositionAnalysis):
                 M, N, _ = K.shape[-1], X.shape[-1], X.shape[0]
                 fi = np.zeros((M, N))
                 channels = self._channels
-                for j, channel in enumerate(channels.data):
-                    try:
-                        G = G0 + 2 * lamda * S
-                        fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
-                    except ValueError:  # pragma: no cover
-                        msg = (
-                            f"Warning:G is not positive definite for log10(lambda)="
-                            f"{np.log10(lamda):.2f} at {channel:.2f} "
-                            f"{channels.units}, find nearest PD matrix"
-                        )
-                        warning_(msg)
+
+                if self.qpsolver == "osqp":
+                    for j, channel in enumerate(channels.data):
+                        P = sparse.csc_matrix(P0 + 2 * lamda * S)
+                        qprob = osqp.OSQP()
+                        qprob.setup(P, q[j].squeeze(), A, lo, alpha=1.0, verbose=False)
+                        fi[:, j] = qprob.solve().x
+                else:
+                    for j, channel in enumerate(channels.data):
                         try:
-                            G = _nearestPD(G0 + 2 * lamda * S, 0)
-                            fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
-                        except ValueError:
+                            P = P0 + 2 * lamda * S
+                            fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
+
+                        except ValueError:  # pragma: no cover
                             msg = (
-                                "... G matrix is still ill-conditioned, "
-                                "try with a small shift of diagonal elements..."
+                                f"Warning:P is not positive definite for log10(lambda)="
+                                f"{np.log10(lamda):.2f} at {channel:.2f} "
+                                f"{channels.units}, find nearest PD matrix"
                             )
                             warning_(msg)
-                            G = _nearestPD(G0 + 2 * lamda * S, 1e-3)
-                            fi[:, j] = quadprog.solve_qp(G, a[j].squeeze(), C, b)[0]
+                            try:
+                                P = _nearestPD(P0 + 2 * lamda * S, 0)
+                                fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
+
+                            except ValueError:
+                                msg = (
+                                    "... P matrix is still ill-conditioned, "
+                                    "try with a small shift of diagonal elements..."
+                                )
+                                warning_(msg)
+                                P = _nearestPD(P0 + 2 * lamda * S, 1e-3)
+                                fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
 
                 resi = X.data - np.dot(K.data, fi)
                 RSSi = np.sum(resi**2)
@@ -569,7 +615,7 @@ class IRIS(DecompositionAnalysis):
                 info_(msg)
 
                 for i, lamda_ in enumerate(lambdas):
-                    f[i], RSS[i], SM[i] = solve_for_lambda(X, K, G0, lamda_, S)
+                    f[i], RSS[i], SM[i] = solve_for_lambda(X, K, P0, lamda_, S)
 
             else:
                 msg = (
@@ -592,7 +638,7 @@ class IRIS(DecompositionAnalysis):
                 info_(msg)
 
                 for i, xi in enumerate(x):
-                    f[i], RSS[i], SM[i] = solve_for_lambda(X, K, G0, 10**xi, S)
+                    f[i], RSS[i], SM[i] = solve_for_lambda(X, K, P0, 10**xi, S)
 
                 Rx = np.copy(RSS)
                 Sy = np.copy(SM)
@@ -616,7 +662,7 @@ class IRIS(DecompositionAnalysis):
                         msg = "New range of Log(lambda) values: " + str(x)
                         info_(msg)
 
-                        f_, Rx[1], Sy[1] = solve_for_lambda(X, K, G0, 10 ** x[1], S)
+                        f_, Rx[1], Sy[1] = solve_for_lambda(X, K, P0, 10 ** x[1], S)
                         lambdas = np.append(lambdas, np.array(10 ** x[1]))
                         f = np.concatenate((f, np.atleast_3d(f_.T).T))
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
@@ -640,7 +686,7 @@ class IRIS(DecompositionAnalysis):
                         x[1] = (x[3] + phi * x[0]) / (1 + phi)
                         msg = "New range (Log lambda): " + str(x)
                         info_(msg)
-                        f_, Rx[1], Sy[1] = solve_for_lambda(X, K, G0, 10 ** x[1], S)
+                        f_, Rx[1], Sy[1] = solve_for_lambda(X, K, P0, 10 ** x[1], S)
                         f = np.concatenate((f, np.atleast_3d(f_.T).T))
                         lambdas = np.append(lambdas, np.array(10 ** x[1]))
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
@@ -657,7 +703,7 @@ class IRIS(DecompositionAnalysis):
                         x[2] = x[0] - (x[1] - x[3])
                         msg = "New range (Log lambda):" + str(x)
                         info_(msg)
-                        f_, Rx[2], Sy[2] = solve_for_lambda(X, K, G0, 10 ** x[2], S)
+                        f_, Rx[2], Sy[2] = solve_for_lambda(X, K, P0, 10 ** x[2], S)
                         f = np.concatenate((f, np.atleast_3d(f_.T).T))
                         lambdas = np.append(lambdas, np.array(10 ** x[2]))
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))

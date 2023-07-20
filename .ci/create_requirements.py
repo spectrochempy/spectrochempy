@@ -170,10 +170,18 @@ if __name__ == "__main__":
 
     # Generate environment.yml and requirements.txt files ..............................
     out_header = template_header.render(
-        TEST=False, DEV=False, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
+        TEST=False,
+        DEV=False,
+        DASH=args.dash,
+        CANTERA=args.cantera,
+        COMMENT=comment,
     )
     out_dependencies = template_dependencies.render(
-        TEST=False, DEV=False, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
+        TEST=False,
+        DEV=False,
+        DASH=args.dash,
+        CANTERA=args.cantera,
+        COMMENT=comment,
     )
     filename = repo_path / "environment.yml"
     filename.write_text(out_header + out_dependencies.rstrip() + "\n")
@@ -182,10 +190,18 @@ if __name__ == "__main__":
 
     # Generate requirements_test.txt files .............................................
     out_test_header = template_header.render(
-        TEST=True, DEV=False, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
+        TEST=True,
+        DEV=False,
+        DASH=args.dash,
+        CANTERA=args.cantera,
+        COMMENT=comment,
     )
     out_test_dependencies = template_dependencies.render(
-        TEST=True, DEV=False, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
+        TEST=True,
+        DEV=False,
+        DASH=args.dash,
+        CANTERA=args.cantera,
+        COMMENT=comment,
     )
     filename = repo_path / "environment_test.yml"
     filename.write_text(out_test_header + out_test_dependencies.rstrip() + "\n")
@@ -196,10 +212,18 @@ if __name__ == "__main__":
 
     # Generate environment_dev.yml and requirements_dev.txt files ......................
     out_dev_header = template_header.render(
-        TEST=True, DEV=True, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
+        TEST=True,
+        DEV=True,
+        DASH=args.dash,
+        CANTERA=args.cantera,
+        COMMENT=comment,
     )
     out_dev_dependencies = template_dependencies.render(
-        TEST=True, DEV=True, DASH=args.dash, CANTERA=args.cantera, COMMENT=comment
+        TEST=True,
+        DEV=True,
+        DASH=args.dash,
+        CANTERA=args.cantera,
+        COMMENT=comment,
     )
     filename = repo_path / "environment_dev.yml"
     filename.write_text(out_dev_header + out_dev_dependencies.rstrip() + "\n")

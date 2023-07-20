@@ -13,6 +13,7 @@ ARG PY_VERSION=3.9
 ARG DEV=''
 ARG DASH=''
 ARG CANTERA=''
+ARG OSQP=''
 ARG BRANCH=''
 
 # ENV CONDA_ENV scpy$PY_VERSION
@@ -25,7 +26,7 @@ COPY --chown=${NB_UID}:${NB_GID} .ci/scripts/env* /home/$NB_USER/tmp/
 RUN cd /home/$NB_USER/tmp/ && \
     conda update conda && \
     conda install -c conda-forge mamba jinja2 && \
-    python env_create.py -v $PY_VERSION $DEV $DASH $CANTERA scpy$PY_VERSION.yml && \
+    python env_create.py -v $PY_VERSION $DEV $DASH $CANTERA $OSQP scpy$PY_VERSION.yml && \
     # mamba env create -p $CONDA_DIR/envs/$CONDA_ENV -f scpy$PY_VERSION.yml && \
     mamba env update --name base -f scpy$PY_VERSION.yml && \
     conda clean --all -f -y && \

@@ -22,7 +22,6 @@ channels:
 dependencies:
     # specific dependencies
     - brukeropusreader
-    - quadprog
     - quaternion
 
     # dependencies for the core package
@@ -36,6 +35,7 @@ dependencies:
     - numba
     - numpy
     - numpydoc>=1.2
+    - osqp
     - packaging
     - pint>=0.20
     - requests
@@ -43,7 +43,7 @@ dependencies:
     - tqdm
     - traitlets
     - tzlocal
-    - scikit-learn
+    - scikit-learn=1.2
     - xlrd
     - pyyaml
 
