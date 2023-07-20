@@ -36,6 +36,7 @@ dependencies:
     - numpy
     - numpydoc>=1.2
     - osqp
+    - packaging
     - pint>=0.20
     - requests
     - scipy
