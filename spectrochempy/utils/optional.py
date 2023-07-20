@@ -9,7 +9,7 @@ import sys
 import types
 import warnings
 
-from pkg_resources import DistributionNotFound, get_distribution
+from packaging.version import Version
 
 VERSIONS = {
     "xarray": "*",
@@ -31,8 +31,8 @@ def get_module_version(module: types.ModuleType) -> str:
         version = getattr(module, "__VERSION__", None)
     if version is None:
         try:
-            version = get_distribution(module.__name__).version.split("+")[0]
-        except DistributionNotFound:
+            version = importlib.metadata.version(module.__name__).split("+")[0]
+        except Exception:
             pass
     if version is None:
         raise ImportError(f"Can't determine version for {module.__name__}")
@@ -81,8 +81,6 @@ def import_optional_dependency(
         is False, or when the package's version is too old and `errors`
         is ``'warn'``\ .
     """
-    from spectrochempy.utils.version import Version
-
     assert errors in {"warn", "raise", "ignore"}
 
     package_name = INSTALL_MAPPING.get(name)

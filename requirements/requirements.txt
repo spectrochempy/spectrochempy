@@ -20,6 +20,7 @@ matplotlib
 numba
 numpy
 numpydoc>=1.2
+packaging
 pint>=0.20
 requests
 scipy
