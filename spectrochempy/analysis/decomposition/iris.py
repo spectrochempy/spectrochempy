@@ -368,13 +368,11 @@ class IRIS(DecompositionAnalysis):
     _regularization = tr.Bool(False)
     _search_reg = tr.Bool(False)
 
-    qpsolver = tr.Union(
-        tr.Enum(
-            [
-                "osqp",
-                "quadprog",
-            ]
-        ),
+    qpsolver = tr.Enum(
+        [
+            "osqp",
+            "quadprog",
+        ],
         default_value="osqp",
         allow_none=True,
     )
