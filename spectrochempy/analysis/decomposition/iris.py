@@ -13,6 +13,9 @@ __configurables__ = ["IRIS"]
 # from collections.abc import Iterable
 
 import numpy as np
+
+# QP solvers import
+import osqp
 import traitlets as tr
 from matplotlib import pyplot as plt
 from scipy import optimize, sparse
@@ -32,7 +35,7 @@ from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
-osqp = import_optional_dependency("osqp", errors="ignore")
+quadprog = import_optional_dependency("quadpog", errors="ignore")
 
 
 @tr.signature_has_traits
@@ -365,6 +368,17 @@ class IRIS(DecompositionAnalysis):
     _regularization = tr.Bool(False)
     _search_reg = tr.Bool(False)
 
+    qpsolver = tr.Union(
+        tr.Enum(
+            [
+                "osqp",
+                "quadprog",
+            ]
+        ),
+        default_value="osqp",
+        allow_none=True,
+    )
+
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------
@@ -403,6 +417,15 @@ class IRIS(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Private validation and default getter methods
     # ----------------------------------------------------------------------------------
+    @tr.validate("qpsolver")
+    def _qpsolver_validate(self, proposal):
+        qpsolver = proposal.value
+        if qpsolver == "quadprog" and quadprog is False:
+            raise ValueError(
+                "quadprog module is not installed. Please install it or run IRIS Solver "
+                "with qpsolver='osqp'"
+            )
+
     @tr.validate("reg_par")
     def _reg_par_validate(self, proposal):
         reg_par = proposal.value
