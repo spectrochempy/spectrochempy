@@ -135,7 +135,7 @@ except Exception:  # pragma: no cover
     release = "--not set--"
 
 try:
-    version = get_version(root="..", relative_to=__file__)
+    version = get_version(root="../..", relative_to=__file__)
     "Version string of this package"
 except LookupError:  # pragma: no cover
     version = release

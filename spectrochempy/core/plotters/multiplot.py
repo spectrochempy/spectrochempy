@@ -118,7 +118,7 @@ def multiplot(
     suptitle=None,
     suptitle_color="k",
     mpl_event=True,
-    **kwargs
+    **kwargs,
 ):
     """
     Generate a figure with multiple axes arranged in array (n rows, n columns).
@@ -291,7 +291,6 @@ def multiplot(
 
     for irow in range(nrow):
         for icol in range(ncol):
-
             idx = irow * ncol + icol
             dataset = datasets[idx]
             try:
@@ -365,7 +364,7 @@ def multiplot(
                 autolayout=False,
                 colorbar=colorbar,
                 data_transposed=transposed,
-                **kwargs
+                **kwargs,
             )
 
             ax.set_title(label, fontsize=8)
@@ -397,7 +396,6 @@ def multiplot(
             ax.set_xlim(xlim)
 
     def do_tight_layout(fig, axes, suptitle, **kwargs):
-
         # tight_layout
         renderer = fig.canvas.get_renderer()
         axeslist = list(axes.values())

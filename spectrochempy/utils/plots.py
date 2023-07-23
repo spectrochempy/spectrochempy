@@ -290,11 +290,9 @@ def plot_method(type, doc):
     """
 
     def decorator_plot_method(func):
-
         method = func.__name__.split("plot_")[-1]
 
         def wrapper(dataset, *args, **kwargs):
-
             if dataset.ndim < 2:
                 from spectrochempy.core.plotters.plot1d import plot_1D
 
@@ -459,7 +457,7 @@ def get_figure(**kwargs):
             return None
 
         figsize = kwargs.get("figsize", prefs.figure_figsize)
-        dpi = kwargs.get("dpi", prefs.figure_dpi)
+        dpi = int(kwargs.get("dpi", prefs.figure_dpi))
         facecolor = kwargs.get("facecolor", prefs.figure_facecolor)
         edgecolor = kwargs.get("edgecolor", prefs.figure_edgecolor)
         frameon = kwargs.get("frameon", prefs.figure_frameon)
