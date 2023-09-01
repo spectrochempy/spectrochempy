@@ -57,7 +57,7 @@ dependencies:
     - ipympl
     - jupyterlab
     - jupyterlab_widgets=3.0.5
-    - jupyter_server=1.23.6
+    - jupyter_server=2.7.2
     - nodejs
     - widgetsnbextension=4.0.5
 
