@@ -211,7 +211,7 @@ class IrisKernel(tr.HasTraits):
 
         if isinstance(K, str):
 
-            if K.lower() not in _adsorption + _kinetics + _diffusion:
+            if K.lower() not in _adsorption + _kinetics + _diffusion + _stejskal_tanner:
                 raise NotImplementedError(
                     f"Kernel type `{K.lower()}` is not implemented"
                 )
