@@ -78,6 +78,7 @@ class IrisKernel(tr.HasTraits):
                         "reactant-first-order",
                         "product-first-order",
                         "diffusion",
+                        "stejskal-tanner",
                     ]
                 ),
                 tr.Callable(),
@@ -199,6 +200,7 @@ class IrisKernel(tr.HasTraits):
         _adsorption = ["langmuir", "ca"]
         _kinetics = ["reactant-first-order", "product-first-order"]
         _diffusion = ["diffusion"]
+        _stejskal_tanner = ["stejskal-tanner"]
 
         K = self._K
         p = self._p.copy()
@@ -275,6 +277,21 @@ class IrisKernel(tr.HasTraits):
                         -(1 / 9) * n**2 * np.pi**2 * q.data * p.data[:, None]
                     )
                 kernel = 1 - (6 / np.pi**2) * kernel
+
+            elif K.lower() in _stejskal_tanner:
+                title = "signal strength"
+
+                # change default metadata
+                if qdefault:
+                    q.name = "Diffusion coefficient"
+                    q.title = "$D$"
+                    p.to("m^2/s ", force=True)
+                if pdefault:
+                    p.name = "b-value"
+                    p.title = "$b$"
+                    p.to("s/m^2", force=True)
+
+                kernel = np.exp(-q.data * p.data[:, None])
 
         elif callable(K):
             kernel = K(p.data, q.data)
