@@ -285,11 +285,11 @@ class IrisKernel(tr.HasTraits):
                 if qdefault:
                     q.name = "Diffusion coefficient"
                     q.title = "$D$"
-                    p.to("m^2/s ", force=True)
+                    p.to("cm^2/s ", force=True)
                 if pdefault:
                     p.name = "b-value"
                     p.title = "$b$"
-                    p.to("s/m^2", force=True)
+                    p.to("s/cm^2", force=True)
 
                 kernel = np.exp(-q.data * p.data[:, None])
 
