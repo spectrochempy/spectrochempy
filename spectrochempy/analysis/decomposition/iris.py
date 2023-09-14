@@ -397,6 +397,8 @@ class IRIS(DecompositionAnalysis):
         ],
         default_value="osqp",
         allow_none=True,
+        help="Quatratic programming solver (`osqp` (default) or `quadprog`). "
+        "Note that quadprog is not installed with spectrochempy.",
     ).tag(config=True)
 
     reg_par = tr.List(
