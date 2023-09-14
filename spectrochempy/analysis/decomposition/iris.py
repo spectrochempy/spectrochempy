@@ -32,10 +32,15 @@ from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
-from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
-quadprog = import_optional_dependency("quadpog", errors="ignore")
+# note: import_optional_dependency does not work with quadprog
+# from spectrochempy.utils.optional import import_optional_dependency
+
+try:
+    import quadprog
+except ImportError:
+    pass
 
 
 @tr.signature_has_traits
@@ -265,7 +270,6 @@ class IrisKernel(tr.HasTraits):
                 if qdefault:
                     q.name = "Diffusion rate constant"
                     q.title = "$\\tau^{-1}$"
-                    # q.to('1/s', force=True)
                 if pdefault:
                     p.name = "time"
                     p.title = "$t$"
@@ -283,15 +287,13 @@ class IrisKernel(tr.HasTraits):
 
                 # change default metadata
                 if qdefault:
-                    q.name = "Diffusion coefficient"
-                    q.title = "$D$"
-                    p.to("cm^2/s ", force=True)
+                    q.name = "Log of diffusivity"
+                    q.title = "$Log D$"
                 if pdefault:
                     p.name = "b-value"
                     p.title = "$b$"
-                    p.to("s/cm^2", force=True)
 
-                kernel = np.exp(-q.data * p.data[:, None])
+                kernel = np.exp(-np.exp(q.data) * p.data[:, None])
 
         elif callable(K):
             kernel = K(p.data, q.data)
@@ -385,6 +387,9 @@ class IRIS(DecompositionAnalysis):
     _regularization = tr.Bool(False)
     _search_reg = tr.Bool(False)
 
+    # ----------------------------------------------------------------------------------
+    # Configuration parameters
+    # ----------------------------------------------------------------------------------
     qpsolver = tr.Enum(
         [
             "osqp",
@@ -392,11 +397,8 @@ class IRIS(DecompositionAnalysis):
         ],
         default_value="osqp",
         allow_none=True,
-    )
+    ).tag(config=True)
 
-    # ----------------------------------------------------------------------------------
-    # Configuration parameters
-    # ----------------------------------------------------------------------------------
     reg_par = tr.List(
         minlen=2,
         maxlen=3,
@@ -563,7 +565,7 @@ class IRIS(DecompositionAnalysis):
                 parameters:
                 -----------
                 X: NDDataset of experimental spectra
-                K: NDDataset, kernel datase
+                K: NDDataset, kernel dataset
                 P0: the lambda independent part of P
                 lamda: regularization parameter
                 S: penalty function (sharpness)
