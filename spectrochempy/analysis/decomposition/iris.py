@@ -928,7 +928,11 @@ class IRIS(DecompositionAnalysis):
         if type(index) is int:
             index = [index]
         for i in index:
-            axeslist.append(self.f[i].plot(method="map", **kwargs))
+            ax = self.f[i].plot(method="map", **kwargs)
+            ax.set_title(
+                f"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]:.2e}"
+            )
+            axeslist.append(ax)
         return axeslist
 
 
