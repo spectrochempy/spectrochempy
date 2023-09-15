@@ -293,7 +293,7 @@ class IrisKernel(tr.HasTraits):
                     p.name = "b-value"
                     p.title = "$b$"
 
-                kernel = np.exp(-np.exp(q.data) * p.data[:, None])
+                kernel = np.exp(-np.power(10, q.data) * p.data[:, None])
 
         elif callable(K):
             kernel = K(p.data, q.data)
@@ -896,9 +896,7 @@ class IRIS(DecompositionAnalysis):
 
             ax = super().plotmerit(X, X_hat_, **kwargs)
 
-            ax.set_title(
-                f"2D IRIS merit plot, $\lambda$ = {self._lambdas[i].value:.2e}"
-            )
+            ax.set_title(f"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]:.2e}")
             axeslist.append(ax)
 
         return axeslist
