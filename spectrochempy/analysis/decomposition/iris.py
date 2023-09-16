@@ -385,8 +385,8 @@ class IRIS(DecompositionAnalysis):
         maxlen=3,
         default_value=None,
         allow_none=True,
-        help="Regularization parameter (two values [ ``min`` , ``max`` ] "
-        "or three values [ ``start`` , ``stop`` , ``num`` ]. "
+        help="Regularization parameter (two values [ ``min``\ , ``max``\ ] "
+        "or three values [ ``start``\ , ``stop``\ , ``num``\ ]. "
         "If `reg_par` is None, no :term:`regularization` is applied.",
     ).tag(config=True)
 
