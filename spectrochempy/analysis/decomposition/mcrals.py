@@ -193,8 +193,8 @@ Correction is applied only if: ``C[i,j] > C[i-1,j] * unimodTol`` .""",
 
 - ``[]``\ : no constraint is applied.
 - `list` of indexes: the corresponding profiles are considered to increase
-  monotonically, not the others. For instance ``[0, 2]`` indicates that profile
-  ``#0`` and ``#2`` are increasing while profile ``#1`` *can* decrease."""
+  monotonically, not the others. For instance ``[0, 2]`` indicates that profile ``#0``
+  and ``#2`` are increasing while profile ``#1`` *can* decrease."""
         ),
     ).tag(config=True)
 
@@ -876,7 +876,6 @@ and `St`.
         Xpca = pca.inverse_transform(Xtransf)
 
         while change >= self.tol and niter < self.max_iter and ndiv < self.maxdiv:
-
             niter += 1
 
             # Compute C
@@ -1225,6 +1224,7 @@ and `St`.
 # --------------------------------------------------------------------------------------
 # Utilities
 # --------------------------------------------------------------------------------------
+
 
 # LS solvers for W in the linear matrix equation X @ W = Y
 def _lstsq(X, Y, rcond=None):
