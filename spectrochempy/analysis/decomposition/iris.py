@@ -109,7 +109,6 @@ class IrisKernel(tr.HasTraits):
     # Initialization
     # ----------------------------------------------------------------------------------
     def __init__(self, X, K, p=None, q=None, **kwargs):
-
         info_("Creating Kernel...")
 
         self._X = X
@@ -201,7 +200,6 @@ class IrisKernel(tr.HasTraits):
     # ----------------------------------------------------------------------------------
     @property
     def kernel(self):
-
         _adsorption = ["langmuir", "ca"]
         _kinetics = ["reactant-first-order", "product-first-order"]
         _diffusion = ["diffusion"]
@@ -217,6 +215,7 @@ class IrisKernel(tr.HasTraits):
         if isinstance(K, str):
 
             if K.lower() not in _adsorption + _kinetics + _diffusion + _stejskal_tanner:
+
                 raise NotImplementedError(
                     f"Kernel type `{K.lower()}` is not implemented"
                 )
@@ -323,7 +322,6 @@ class IrisKernel(tr.HasTraits):
 
 @signature_has_configurable_traits
 class IRIS(DecompositionAnalysis):
-
     _docstring.delete_params("DecompositionAnalysis.see_also", "IRIS")
 
     __doc__ = _docstring.dedent(
@@ -406,8 +404,8 @@ class IRIS(DecompositionAnalysis):
         maxlen=3,
         default_value=None,
         allow_none=True,
-        help="Regularization parameter (two values [ ``min`` , ``max`` ] "
-        "or three values [ ``start`` , ``stop`` , ``num`` ]. "
+        help="Regularization parameter (two values [ ``min``\ , ``max``\ ] "
+        "or three values [ ``start``\ , ``stop``\ , ``num``\ ]. "
         "If `reg_par` is None, no :term:`regularization` is applied.",
     ).tag(config=True)
 
@@ -420,7 +418,6 @@ class IRIS(DecompositionAnalysis):
         warm_start=False,
         **kwargs,
     ):
-
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
