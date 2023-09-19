@@ -9,6 +9,7 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
+* Add Stejskal-Tanner kernel for 2D IRIS
 * Fancy indexing using location now supported.
 * Add an example for NMR processing of a series of CP-MAS spectra.
 * Add an example for processing NMR relaxation data

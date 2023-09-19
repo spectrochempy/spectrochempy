@@ -35,7 +35,7 @@ from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
-quadprog = import_optional_dependency("quadpog", errors="ignore")
+quadprog = import_optional_dependency("quadprog", errors="ignore")
 
 
 @tr.signature_has_traits
@@ -78,6 +78,7 @@ class IrisKernel(tr.HasTraits):
                         "reactant-first-order",
                         "product-first-order",
                         "diffusion",
+                        "stejskal-tanner",
                     ]
                 ),
                 tr.Callable(),
@@ -197,6 +198,7 @@ class IrisKernel(tr.HasTraits):
         _adsorption = ["langmuir", "ca"]
         _kinetics = ["reactant-first-order", "product-first-order"]
         _diffusion = ["diffusion"]
+        _stejskal_tanner = ["stejskal-tanner"]
 
         K = self._K
         p = self._p.copy()
@@ -206,7 +208,9 @@ class IrisKernel(tr.HasTraits):
         pdefault = p.name == "external variable" and p.title == "$p$"
 
         if isinstance(K, str):
-            if K.lower() not in _adsorption + _kinetics + _diffusion:
+
+            if K.lower() not in _adsorption + _kinetics + _diffusion + _stejskal_tanner:
+
                 raise NotImplementedError(
                     f"Kernel type `{K.lower()}` is not implemented"
                 )
@@ -260,7 +264,6 @@ class IrisKernel(tr.HasTraits):
                 if qdefault:
                     q.name = "Diffusion rate constant"
                     q.title = "$\\tau^{-1}$"
-                    # q.to('1/s', force=True)
                 if pdefault:
                     p.name = "time"
                     p.title = "$t$"
@@ -272,6 +275,19 @@ class IrisKernel(tr.HasTraits):
                         -(1 / 9) * n**2 * np.pi**2 * q.data * p.data[:, None]
                     )
                 kernel = 1 - (6 / np.pi**2) * kernel
+
+            elif K.lower() in _stejskal_tanner:
+                title = "signal strength"
+
+                # change default metadata
+                if qdefault:
+                    q.name = "Log of diffusivity"
+                    q.title = "$Log D$"
+                if pdefault:
+                    p.name = "b-value"
+                    p.title = "$b$"
+
+                kernel = np.exp(-np.power(10, q.data) * p.data[:, None])
 
         elif callable(K):
             kernel = K(p.data, q.data)
@@ -364,6 +380,9 @@ class IRIS(DecompositionAnalysis):
     _regularization = tr.Bool(False)
     _search_reg = tr.Bool(False)
 
+    # ----------------------------------------------------------------------------------
+    # Configuration parameters
+    # ----------------------------------------------------------------------------------
     qpsolver = tr.Enum(
         [
             "osqp",
@@ -371,11 +390,10 @@ class IRIS(DecompositionAnalysis):
         ],
         default_value="osqp",
         allow_none=True,
-    )
+        help="Quatratic programming solver (`osqp` (default) or `quadprog`). "
+        "Note that quadprog is not installed with spectrochempy.",
+    ).tag(config=True)
 
-    # ----------------------------------------------------------------------------------
-    # Configuration parameters
-    # ----------------------------------------------------------------------------------
     reg_par = tr.List(
         minlen=2,
         maxlen=3,
@@ -541,7 +559,7 @@ class IRIS(DecompositionAnalysis):
                 parameters:
                 -----------
                 X: NDDataset of experimental spectra
-                K: NDDataset, kernel datase
+                K: NDDataset, kernel dataset
                 P0: the lambda independent part of P
                 lamda: regularization parameter
                 S: penalty function (sharpness)
@@ -870,9 +888,7 @@ class IRIS(DecompositionAnalysis):
 
             ax = super().plotmerit(X, X_hat_, **kwargs)
 
-            ax.set_title(
-                f"2D IRIS merit plot, $\lambda$ = {self._lambdas[i].value:.2e}"
-            )
+            ax.set_title(f"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]:.2e}")
             axeslist.append(ax)
 
         return axeslist
@@ -904,7 +920,11 @@ class IRIS(DecompositionAnalysis):
         if type(index) is int:
             index = [index]
         for i in index:
-            axeslist.append(self.f[i].plot(method="map", **kwargs))
+            ax = self.f[i].plot(method="map", **kwargs)
+            ax.set_title(
+                f"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]:.2e}"
+            )
+            axeslist.append(ax)
         return axeslist
 
 
