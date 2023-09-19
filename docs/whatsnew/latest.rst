@@ -20,6 +20,7 @@ New features
   based on the `scipy.optimize.least_squares` function, allowing much faster operation
   for simple curve fitting
 * Add the possibility to define user-defined functions in the `Optimize` class.
+* Traceback are now fully displayed when an error occurs in a script.
 
 Bug fixes
 ~~~~~~~~~
@@ -29,6 +30,7 @@ Bug fixes
 * Fix a bug in coordset definition for integration methods.
 * Fix coordinates definitions in Analysis methods.
 * Fix a bug in `write_csv` when the filename was provided as a string (issue #706)
+* Fix issue #716
 
 Breaking changes
 ~~~~~~~~~~~~~~~~

@@ -469,29 +469,30 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     # ----------------------------------------------------------------------------------
     def _ipython_catch_exceptions(self, shell, etype, evalue, tb, tb_offset=None):
         # output the full traceback only in DEBUG mode or when under pytest
-        if self.log_level == logging.DEBUG:
-            shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
-        else:
-            self.log.error(f"{etype.__name__}: {evalue}")
+        # if self.log_level == logging.DEBUG:
+        shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
+
+    # else:
+    #    self.log.error(f"{etype.__name__}: {evalue}")
 
     def _catch_exceptions(self, etype, evalue, tb=None):
         # output the full traceback only in DEBUG mode
         with self._fmtcontext():
-            if self.log_level == logging.DEBUG:
-                # print(etype, type(etype))
-                if isinstance(etype, str):
-                    # probably the type was not provided!
-                    evalue = etype
-                    etype = Exception
-                self.log.error(f"{etype.__name__}: {evalue}")
-                if tb:
-                    format_exception = traceback.format_tb(tb)
-                    for line in format_exception:
-                        parts = line.splitlines()
-                        for p in parts:
-                            self.log.error(p)
-            else:
-                self.log.error(f"{etype.__name__}: {evalue}")
+            # if self.log_level == logging.DEBUG:
+            # print(etype, type(etype))
+            if isinstance(etype, str):
+                # probably the type was not provided!
+                evalue = etype
+                etype = Exception
+            self.log.error(f"{etype.__name__}: {evalue}")
+            if tb:
+                format_exception = traceback.format_tb(tb)
+                for line in format_exception:
+                    parts = line.splitlines()
+                    for p in parts:
+                        self.log.error(p)
+        # else:
+        #    self.log.error(f"{etype.__name__}: {evalue}")
 
     def _custom_warning(
         self, message, category, filename, lineno, file=None, line=None
@@ -663,9 +664,9 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         if ipy is not None:  # pragma: no cover
             ipy.set_custom_exc((Exception,), self._ipython_catch_exceptions)
         else:
-            if environ.get("SCPY_TESTING", 0) == 0 and "pytest" not in sys.argv[0]:
-                # catch exception only when pytest is not running
-                sys.excepthook = self._catch_exceptions
+            # if environ.get("SCPY_TESTING", 0) == 0 and "pytest" not in sys.argv[0]:
+            #    # catch exception only when pytest is not running
+            sys.excepthook = self._catch_exceptions
 
     def reset_preferences(self):
         """
