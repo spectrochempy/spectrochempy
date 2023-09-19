@@ -190,3 +190,9 @@ def test_IRIS():
     iris4.fit(X, K6)
     f6 = iris4.f
     assert f6.shape == (1, q[2], X.shape[1])
+
+    q = [5, 1, 10]
+    K7 = scp.IrisKernel(X[::-1], "stejskal-tanner", q=q)
+    iris4.fit(X, K7)
+    f7 = iris4.f
+    assert f7.shape == (1, q[2], X.shape[1])

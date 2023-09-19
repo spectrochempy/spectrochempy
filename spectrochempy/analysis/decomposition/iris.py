@@ -32,15 +32,10 @@ from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
-# note: import_optional_dependency does not work with quadprog
-# from spectrochempy.utils.optional import import_optional_dependency
-
-try:
-    import quadprog
-except ImportError:
-    pass
+quadprog = import_optional_dependency("quadprog", errors="ignore")
 
 
 @tr.signature_has_traits
