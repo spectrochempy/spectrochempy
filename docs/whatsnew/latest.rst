@@ -31,6 +31,7 @@ Bug fixes
 * Fix coordinates definitions in Analysis methods.
 * Fix a bug in `write_csv` when the filename was provided as a string (issue #706)
 * Fix issue #716
+* Fix issue #714 : show versions of dependencies now working
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
