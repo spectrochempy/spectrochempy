@@ -30,3 +30,11 @@ Papers citing `SpectroChemPy`
 - FTIR dataset from the article "Resistance to
   Degradation of Silk Fibroin Hydrogels Exposed to Neuroinflammatory Environments",
   :cite:t:`yonesi:2023`\ , `DOI: 10.5281/zenodo.7921117 <https://doi.org/10.5281/zenodo.7921117>`__\ .
+
+- Cyclohexane Oxidative Dehydrogenation on Graphene-Oxide-Supported Cobalt Ferrite
+  Nanohybrids: Effect of Dynamic Nature of Active Sites on Reaction Selectivity,
+  :cite:t:`kadam:2023`\ , `DOI: 10.1021/acscatal.3c02592 <https://doi.org/10.1021/acscatal.3c02592>`__\ .
+
+- Study of the diffusion properties of zeolite mixtures by combined gravimetric
+  analysis, IR spectroscopy and inversion methods (IRIS),
+  :cite:t:`ait-blal:2023`\ , `DOI: 10.1039/D3CP01585H <http://dx.doi.org/10.1039/D3CP01585H>`__\ .
