@@ -129,7 +129,9 @@ class MetaConfigurable(Configurable):
 
         # then set the default parameters
         for k, v in self.params(default=True).items():
-            if getattr(self, k) != v:
+            if type(getattr(self, k)) != type(v):
+                setattr(self, k, v)
+            elif getattr(self, k) != v:
                 setattr(self, k, v)
 
     @tr.observe(tr.All)
