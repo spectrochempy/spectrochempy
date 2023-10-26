@@ -129,9 +129,10 @@ class MetaConfigurable(Configurable):
 
         # then set the default parameters
         for k, v in self.params(default=True).items():
-            if type(getattr(self, k)) != type(v):
-                setattr(self, k, v)
-            elif getattr(self, k) != v:
+            is_not_default = getattr(self, k) != v
+            if isinstance(is_not_default, np.ndarray):  # if bool array
+                is_not_default = is_not_default.any()
+            if is_not_default:
                 setattr(self, k, v)
 
     @tr.observe(tr.All)
