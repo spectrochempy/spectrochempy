@@ -27,6 +27,10 @@ from spectrochempy.utils.testing import assert_dataset_equal
     os.environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
     reason="debug mode cause error when checking docstrings",
 )
+@pytest.mark.skipif(
+    os.name == "nt",
+    reason="UnicodeDecodeError on github action with windows, but not locally",
+)
 def test_FastICA_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
     module = "spectrochempy.analysis.decomposition.fast_ica"

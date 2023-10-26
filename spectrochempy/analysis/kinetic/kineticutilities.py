@@ -163,9 +163,14 @@ class ActionMassKinetics(tr.HasTraits):
         if isinstance(reactions, (list, tuple)):
             self._reactions = reactions
             self._reactions_names = [f"equation {i}" for i in range(len(reactions))]
-        if isinstance(reactions, dict):
+        elif isinstance(reactions, dict):
             self._reactions = list(reactions.values())
             self._reactions_names = list(reactions.keys())
+        else:
+            raise TypeError(
+                f"reactions should contain be a dict, a list or a tuple of strings, "
+                f"not a {type(reactions).__name__}."
+            )
 
         self._arrhenius = arrhenius
         self._T = T
@@ -177,6 +182,7 @@ class ActionMassKinetics(tr.HasTraits):
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
+
     @tr.validate("_arrhenius")
     def _arrhenius_validate(self, proposal):
         # arrhenius can be an iterable of:

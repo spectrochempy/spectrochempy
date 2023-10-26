@@ -178,7 +178,13 @@ def concatenate(*datasets, **kwargs):
                 if labels != []:
                     labels = np.array(labels, dtype=object)
                     for i, coord in enumerate(coords[dim]._coords):
-                        if np.all(labels[:, i] != [None] * len(labels[:, i])):
+                        try:
+                            labels_not_none = np.all(
+                                labels[:, i] != [None] * len(labels[:, i])
+                            )
+                        except ValueError:
+                            labels_not_none = True
+                        if labels_not_none:
                             coord._labels = np.concatenate(
                                 [label for label in labels[:, i]]
                             )
