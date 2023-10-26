@@ -703,8 +703,9 @@ and `St`.
             return proposal.value
         closureTarget = proposal.value
         ny = self.X.shape[0]
-        if closureTarget == "default":
-            closureTarget = np.ones(ny)
+        if isinstance(closureTarget, str):
+            if closureTarget == "default":
+                closureTarget = np.ones(ny)
         elif len(closureTarget) != ny:
             raise ValueError(
                 f"The data contain only {ny} observations, please check "
