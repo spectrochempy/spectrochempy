@@ -87,3 +87,11 @@ def test_read_omnic():
     # non-rapid scan series
     a = scp.read_srs("irdata/omnic_series/GC_Demo.srs")
     assert a is None  # not rapid scan mode
+
+    # high speed series
+    a = scp.read_srs("irdata/omnic_series/high_speed.srs")
+    assert str(a) == "NDDataset: [float64] a.u. (shape: (y:897, x:13898))"
+
+    # high speed series, import bg
+    a = scp.read_srs("irdata/omnic_series/high_speed.srs", return_bg=True)
+    assert str(a) == "NDDataset: [float64] unitless (shape: (y:1, x:13898))"
