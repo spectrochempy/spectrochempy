@@ -11,24 +11,24 @@ import pytest
 from spectrochempy import show
 
 # import spectrochempy
-from spectrochempy.analysis.kinetic import kineticutilities as cu
+from spectrochempy.analysis.kinetic import kineticutilities as ku
 
 
 @pytest.mark.skipif(
-    cu._cantera_is_not_available(), reason="Cantera must be installed first"
+    ku._cantera_is_not_available(), reason="Cantera must be installed first"
 )
 def test_cu(monkeypatch):
 
     # availability of cantera (# should be installed if the test wa not skipped)
-    assert not cu._cantera_is_not_available()
+    assert not ku._cantera_is_not_available()
 
     # simulate abscense of cantera
     with monkeypatch.context() as m:
-        m.setattr(cu, "ct", None)
-        assert cu._cantera_is_not_available()
+        m.setattr(ku, "ct", None)
+        assert ku._cantera_is_not_available()
 
     # context restored with ct = cantera
-    assert not cu._cantera_is_not_available()
+    assert not ku._cantera_is_not_available()
 
 
 @pytest.mark.parametrize(
@@ -47,7 +47,7 @@ def test_cu(monkeypatch):
 )
 def test_equations_regex(test_str, left_expected, right_expected):
     species = list(left_expected.keys()) + list(right_expected.keys())
-    left, right = cu._interpret_equation(test_str, species)
+    left, right = ku._interpret_equation(test_str, species)
 
     assert left_expected == left
     assert right_expected == right
@@ -56,29 +56,71 @@ def test_equations_regex(test_str, left_expected, right_expected):
 def test_ABC():
     reactions = ("A -> B", "B -> C")
     species_concentrations = {"A": 1.0, "B": 0.0, "C": 0.0}
-    time = np.arange(10)
-    k_exp = np.array(((1.0, 50.0), (1.0, 50.0)))
-    kin_exp = cu.ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
-    C_exp = kin_exp.integrate(time)
+    time = np.arange(0, 10)
+    k_exp = np.array(((1.0e8, 52.0e3), (1.0e8, 50.0e3)))
 
-    k_guess = np.array(((1.5, 50.0), (1.0, 55.0)))
-    kin_guess = cu.ActionMassKinetics(reactions, species_concentrations, k_guess)
+    # isothermal
+    kin_exp = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
+    C_exp = kin_exp.integrate(time)
+    k_guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
+    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess)
     res = kin_guess.fit_to_concentrations(
         C_exp,
         iexp=[0, 1, 2],
         i2iexp=[0, 1, 2],
         dict_param_to_optimize={
-            "k[0].A": 1.1,
-            "k[1].Ea": 49.0,
+            "k[0].A": 1.1e8,
+            "k[1].Ea": 49.0e3,
         },
         optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
     )
     C_opt = kin_guess.integrate(time)
 
     print(res[2]["x"])
-    assert max(res[2]["x"] - [1.0, 50.0]) < 1e-3
+    assert max(res[2]["x"] - [1.0e8, 50.0e3]) < 1e-3
 
     _ = C_exp.T.plot(markers="o")
     _ = C_opt.T.plot(clear=False)
 
+    # non-isothermal
+
+    # tepmerature profile
+    def T(t):
+        T = np.zeros_like(t)
+        for i, ti in enumerate(t):
+            if ti < 2.5:  # plateau
+                T[i] = 298.0
+            elif ti < 7.5:  # ramp
+                T[i] = 298.0 + (308.0 - 298.0) * ti
+            else:  # plateau
+                T[i] = 308.0
+        return T
+
+    # Compute concentration profile
+    kin = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
+    C_exp = kin.integrate(
+        time, k_dt=0.01
+    )  # k_dt is a time step for the apporximation the rate constants vs time
+
+    _guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
+    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess, T=T)
+    res = kin_guess.fit_to_concentrations(
+        C_exp,
+        iexp=[0, 1, 2],
+        i2iexp=[0, 1, 2],
+        dict_param_to_optimize={
+            "k[0].A": 1.1e8,
+            "k[1].Ea": 49.0e3,
+        },
+        optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
+        ivp_solver_kwargs={"k_dt": 0.1},
+    )
+
+    print(res[2]["x"])
+    assert max((res[2]["x"] - [1.0e8, 50.0e3]) / [1.0e8, 50.0e3]) < 0.02
+
+    C_opt = kin_guess.integrate(time, k_dt=0.1)
+
+    _ = C_exp.T.plot(marker="o", linewidth=0.0, clear=True)
+    _ = C_opt.T.plot(clear=False)
     show()
