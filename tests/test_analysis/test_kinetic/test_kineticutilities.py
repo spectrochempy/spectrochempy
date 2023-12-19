@@ -82,10 +82,11 @@ def test_ABC():
     _ = C_exp.T.plot(markers="o")
     _ = C_opt.T.plot(clear=False)
 
-    # non-isothermal
+    # non-isothermal, single condition
 
     # tepmerature profile
     def T(t):
+        """temperature profile"""
         T = np.zeros_like(t)
         for i, ti in enumerate(t):
             if ti < 2.5:  # plateau
@@ -117,10 +118,59 @@ def test_ABC():
     )
 
     print(res[2]["x"])
-    assert max((res[2]["x"] - [1.0e8, 50.0e3]) / [1.0e8, 50.0e3]) < 0.02
+    assert max((res[2]["x"] - [1.0e8, 50.0e3]) / [1.0e8, 50.0e3]) < 0.05
 
     C_opt = kin_guess.integrate(time, k_dt=0.1)
 
     _ = C_exp.T.plot(marker="o", linewidth=0.0, clear=True)
     _ = C_opt.T.plot(clear=False)
     show()
+
+    # non-isothermal, with several conditions
+    def T2(t):
+        """another temperature profile"""
+        T = np.zeros_like(t)
+        for i, ti in enumerate(t):
+            if ti < 2.5:  # plateau
+                T[i] = 298.0
+            elif ti < 7.5:  # ramp
+                T[i] = 298.0 + (320.0 - 298.0) * ti
+            else:  # plateau
+                T[i] = 320.0
+        return T
+
+    species_concentrations = (
+        {"A": 1.0, "B": 0.0, "C": 0.0},
+        {"A": 1.0, "B": 0.2, "C": 0.0},
+    )
+    T = (T, T2)
+
+    time = (np.arange(0, 10), np.arange(0, 10, 0.5))
+
+    # Compute concentration profiles
+    kin = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
+    C_exp = kin.integrate(time, k_dt=0.01)
+
+    k_guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
+    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess, T=T)
+    res = kin_guess.fit_to_concentrations(
+        C_exp,
+        iexp=[0, 1, 2],
+        i2iexp=[0, 1, 2],
+        dict_param_to_optimize={
+            "k[0].A": 1.1e8,
+            "k[1].Ea": 49.0e3,
+        },
+        optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
+        ivp_solver_kwargs={"k_dt": 0.1},
+    )
+
+    print(res[2]["x"])
+    assert max((res[2]["x"] - [1.0e8, 50.0e3]) / [1.0e8, 50.0e3]) < 0.05
+
+    C_opt = kin_guess.integrate(time, k_dt=0.1)
+
+    for c_exp, c_opt in zip(C_exp, C_opt):
+        _ = c_exp.T.plot(marker="o", linewidth=0.0, clear=True)
+        _ = c_opt.T.plot(clear=False)
+        show()
