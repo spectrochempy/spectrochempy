@@ -108,9 +108,9 @@ class ActionMassKinetics(tr.HasTraits):
     """
     An object which stores a reaction network of elementary reactions.
 
-    It stores its rate parameterization, initial concentrations, temperature profile,
-    with methods for evaluating production rates and concentration profiles assuming
-    action mass kinetic and closed reactor.
+    It stores its rate parameterization, set(s) of initial concentrations,
+    temperature profile(s), with methods for evaluating production rates and
+    concentration profiles assuming action mass kinetic and closed reactor.
 
     Parameters
     ----------
@@ -118,9 +118,10 @@ class ActionMassKinetics(tr.HasTraits):
         Strings giving the ``n_reactions`` chemical equation of the network.
         Reactants and products must be separated by a ``"->"`` or "→" symbol,
         The name of each species should match a key of the `species` dictionary.
-        Examples: ``"A + B -> C"`` or ``"2A -> D"``\
-    species : `dict`, optional
-        Dictionary of initial concentrations for the `n_species` species.
+        Examples: ``"A + B -> C"`` or ``"2A → D"``\
+    species : `dict` or `list` or `tuple` of `dict`
+        Dictionary or list of dictionaries giving  the initial concentrations for the
+        `n_species` species.
     arrhenius : :term:`array-like`
         Iterable of shape `n_reactions` x 1, `n_reactions` x 2  or `n_reactions` x 3
         with either the isothermal rate constants (:math:`k_1`\ , ..., :math:`k_n`\ ) or
@@ -128,11 +129,35 @@ class ActionMassKinetics(tr.HasTraits):
         ... (:math:`A_n`\ , :math:`b_n`\ , :math:`Ea_n`\ )) or  ((:math:`A_1`\ ,
         :math:`Ea_1`\ ), ...)).  If a 2-column iterable is provided the temperature
         exponents are set to 0.
-    T : `float`\ , `Quantity`\ , `callable` or None, optional, default: None
-        Temperature. If None, the system is considered isothermal and T = 298.0
+    T : `float`\ , `Quantity`\ , `callable` or `list` or `tuple` of , or None, optional default: None
+        Temperature. If None, or not given, the system is considered isothermal and T = 298.0
         If it is not a temperature quantity, the unit is assumed to be
         in Kelvin. A function can also be provided which output a temperature `T` in K
         vs. time `t`\ .
+
+    Examples:
+    ---------
+    # A simple A → B → C:
+    >>> reactions = ("A -> B", "B -> C")
+    >>> species_concentrations = {"A": 1.0, "B": 0.0, "C": 0.0}
+    >>> time = np.arange(0, 10)
+    >>> k_exp = np.array(((1.0e8, 52.0e3), (1.0e8, 50.0e3)))
+    >>> kin_exp = scp.ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
+    >>> C_exp = kin_exp.integrate(time)
+    >>> print(f"Concentrations at t = 4 : {C_exp[4.].data}")
+    Concentrations at t = 4 : [[  0.7355   0.1879  0.07666]]
+
+    # Several sets of experimental conditions can be used. In this case, `species`, `T`
+    # are set using lists or tuples of the same length, even if only one is changed:
+    >>> species_concentrations = ({"A": 1.0, "B": 0.0, "C": 0.0}, {"A": 1.0, "B": 0.0, "C": 0.0})
+    >>> T = (298.0, 308.0)
+    >>> time = (np.arange(0, 10), np.arange(0, 5))
+    >>> kin_exp = scp.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
+    >>> C_exp = kin_exp.integrate(time)
+    >>> print(f"Concentrations at {T[0]}K, t = 4 : {C_exp[0][4.].data}")
+    >>> print(f"Concentrations at {T[1]}K, t = 4 : {C_exp[1][4.].data}")
+    Concentrations at 298.0K, t = 4 : [[  0.7355   0.1879  0.07666]]
+    Concentrations at 308.0K, t = 4 : [[  0.5448    0.236   0.2192]]
     """
 
     # internal parameters
@@ -140,15 +165,21 @@ class ActionMassKinetics(tr.HasTraits):
         (tr.List(tr.Unicode()), tr.Dict()), help="List or dict of model reactions"
     )
     _reactions_names = tr.List(tr.Unicode(), help="List of model reactions names")
-    _init_concentrations = tr.Dict(
-        help="A dictionary of model's species: initial " "concentrations"
+    _init_concentrations = tr.Union(
+        (tr.Dict(), tr.List(tr.Dict()), tr.Tuple(tr.Dict())),
+        help="A dictionary or list/tuple of dictionaries of model's species initial concentrations",
     )
     _species = tr.List(help="a list of species in this model")
     _A = Array(help="Stoichiometric matrix A (reactants)")
     _B = Array(help="Stoichiometric matrix B (products)")
     _arrhenius = Array(help="Arrhenius-like rate constant parameters")
     _T = tr.Union(
-        (tr.Float(), tr.Callable()),
+        (
+            tr.Float(),
+            tr.Callable(),
+            tr.List(),
+            tr.Tuple(),
+        ),
         allow_none=False,
         default_value=298.0,
         help="Temperature",
@@ -158,7 +189,21 @@ class ActionMassKinetics(tr.HasTraits):
 
         # initialise concentrations, species, reactions, arrhenius, T
         self._init_concentrations = species_concentrations
-        self._species = list(self._init_concentrations.keys())
+        if isinstance(self._init_concentrations, (list, tuple)):
+            # we have two sets (or more) of experimental data.
+            self._nset = len(self._init_concentrations)
+            self._species = list(self._init_concentrations[0].keys())
+            # check that all keys are the same:
+            for i, conc in enumerate(self._init_concentrations[1:]):
+                if set(conc.keys()) != set(self._species):
+                    raise ValueError(
+                        f"species names in species_concentrations[{i}] do not match "
+                        f"species names in species_concentrations[0]"
+                    )
+
+        else:
+            self._species = list(self._init_concentrations.keys())
+            self._nset = 1
 
         if isinstance(reactions, (list, tuple)):
             self._reactions = reactions
@@ -173,6 +218,7 @@ class ActionMassKinetics(tr.HasTraits):
             )
 
         self._arrhenius = arrhenius
+
         self._T = T
 
         self._reaction_rates = self._write_reaction_rates()
@@ -289,12 +335,15 @@ class ActionMassKinetics(tr.HasTraits):
     @property
     def species(self):
         """Components names."""
-        return list(self._init_concentrations.keys())
+        return self._species
 
     @property
     def init_concentrations(self):
         """Concentrations."""
-        return list(self._init_concentrations.values())
+        if isinstance(self._init_concentrations, (list, tuple)):
+            return [list(init_conc.values()) for init_conc in self._init_concentrations]
+        else:
+            return list(self._init_concentrations.values())
 
     def _write_reaction_rates(self):
         """Return the expressions of production rates as a string"""
@@ -409,8 +458,10 @@ class ActionMassKinetics(tr.HasTraits):
 
         Parameters
         ----------
-        t : :term:`array-like` of shape (``t_points``\ ,)
-            Iterable with time values at which the concentrations are computed.
+        t : :term:`array-like` of shape (``t_points``\ ,) or list or tuple of
+        `arrays-like`.
+            Iterable with time values or sets of timle values at which the
+            concentrations are computed.
 
         k_dt : `float` or `None'
             Resolution of the time grid used to compute `k(T(t))`\ . Used only for non
@@ -521,148 +572,164 @@ class ActionMassKinetics(tr.HasTraits):
         global_env = {}
         locals_env = {}
 
-        if callable(self._T):
-            # non-isothermal: a grid of k_i values spaced by k_dt time intervals
-            # is computed
-            t_grid = np.arange(0, t[-1] + k_dt, k_dt)
-            T_grid = np.expand_dims(self._T(t_grid), axis=1)
-            k_grid = (
-                self._arrhenius[:, 0]
-                * np.power(T_grid, self._arrhenius[:, 1])
-                * np.exp(-self._arrhenius[:, 2] / 8.314 / T_grid)
-            )
-
-            # uncomment for debugging and optimization
-            # t1 = time.time()
-
-            exec(
-                f"def f_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return self._BmAt @ {self._reaction_rates}",
-                global_env,
-                locals_env,
-            )
-
-            if use_jac:
-                # define jac_ = d[dC/dt]/dCi
-                exec(
-                    f"def jac_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return{self._jacobian}",
-                    global_env,
-                    locals_env,
-                )
-                jac = partial(locals_env["jac_"], self, k_grid, k_dt)
-            else:
-                jac = None
-
-            # uncomment for debugging and optimization
-            # t2 = time.time()
-
-            bunch = solve_ivp(
-                partial(locals_env["f_"], self, k_grid, k_dt),
-                (t[0], t[-1]),
-                self.init_concentrations,
-                t_eval=t,
-                method=method,
-                atol=atol,
-                rtol=rtol,
-                jac=jac,
-            )
-
-            # uncomment for debugging and optimization
-            # t3 = time.time()
-
+        if self._nset == 1:
+            conditions = zip([self._T], [self._init_concentrations], [t])
         else:
-            if len(self._arrhenius.shape) == 1:
-                # _arrhenius is 1D array of rate constants
-                k = self._arrhenius
+            conditions = zip(self._T, self._init_concentrations, t)
+
+        C = []
+        for i, (T, C0, t) in enumerate(conditions):
+            if callable(T):
+                # non-isothermal: a grid of k_i values spaced by k_dt time intervals
+                # is computed
+                t_grid = np.arange(0, t[-1] + k_dt, k_dt)
+                T_grid = np.expand_dims(T(t_grid), axis=1)
+                k_grid = (
+                    self._arrhenius[:, 0]
+                    * np.power(T_grid, self._arrhenius[:, 1])
+                    * np.exp(-self._arrhenius[:, 2] / 8.314 / T_grid)
+                )
 
                 # uncomment for debugging and optimization
                 # t1 = time.time()
 
-            else:
-                # isothermal, the k_i are computed once
-                k = (
-                    self._arrhenius[:, 0]
-                    * self._T ** self._arrhenius[:, 1]
-                    * np.exp(-self._arrhenius[:, 2] / R / self._T)
-                )
-
-            # uncomment for debugging and optimization
-            # t1 = time.time()
-
-            exec(
-                f"def f_(self, k, t, C): return{self._production_rates}",
-                global_env,
-                locals_env,
-            )
-            if use_jac:
-                # define jac_ = d[dC/dt]/dCi
                 exec(
-                    f"def jac_(self, k, t, C): return{self._jacobian}",
+                    f"def f_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return self._BmAt @ {self._reaction_rates}",
                     global_env,
                     locals_env,
                 )
-                jac = partial(locals_env["jac_"], self, k)
-            else:
-                jac = None
 
-            # uncomment for debugging and optimization
-            # t2 = time.time()
+                if use_jac:
+                    # define jac_ = d[dC/dt]/dCi
+                    exec(
+                        f"def jac_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return{self._jacobian}",
+                        global_env,
+                        locals_env,
+                    )
+                    jac = partial(locals_env["jac_"], self, k_grid, k_dt)
+                else:
+                    jac = None
 
-            bunch = solve_ivp(
-                partial(locals_env["f_"], self, k),
-                (t[0], t[-1]),
-                self.init_concentrations,
-                t_eval=t,
-                method=method,
-                atol=atol,
-                rtol=rtol,
-                jac=jac,
-            )
+                # uncomment for debugging and optimization
+                # t2 = time.time()
 
-            # uncomment for debugging and optimization
-            # t2 = time.time()
-
-        # uncomment for debugging (warning: debug_() multiply the exec time by 4...)
-        # from from spectrochempy.application import debug_
-        # debug_(bunch.message)
-        # t4 = time.time()
-
-        if bunch.status != 0:
-            raise SolverError(bunch.message)
-
-        C = (left_op @ bunch.y).T if left_op is not None else bunch.y.T
-        t = bunch.t
-
-        # uncomment for debugging and optimization
-        # t5 = time.time()
-
-        return_dataset = kwargs.get("return_NDDataset", True)
-        if return_dataset:
-            C = NDDataset(C, name="Concentrations")
-            C.y = Coord(t, title="time")
-            if left_op is None:
-                C.x = Coord(range(self.n_species), labels=self.species, title="species")
-            elif c_names is not None:
-                C.x = Coord(range(left_op.shape[0]), labels=c_names, title="species")
-            else:
-                C.x = Coord(
-                    range(left_op.shape[0]),
-                    labels=[f"species #{i}" for i in range(left_op.shape[0])],
-                    title="species",
+                bunch = solve_ivp(
+                    partial(locals_env["f_"], self, k_grid, k_dt),
+                    (t[0], t[-1]),
+                    list(C0.values()),
+                    t_eval=t,
+                    method=method,
+                    atol=atol,
+                    rtol=rtol,
+                    jac=jac,
                 )
-            C.history = "Created using ActionMassKinetics.integrate"
-            C.meta.update(bunch)
 
-        # uncomment for debugging and optimization
-        # t6 = time.time()
-        # print(f"time compute k       : {t1 - t0:f}, {100*(t1 - t0)/(t6-t0):f}%")
-        # print(f"time load f (and jac): {t2 - t1:f}, {100*(t2 - t1)/(t6-t0):f}%")
-        # print(f"time integration     : {t3 - t2:f}, {100*(t3 - t2)/(t6-t0):f}%")
-        # print(f"time debug           : {t4 - t3:f}, {100*(t4 - t3)/(t6-t0):f}%")
-        # print(f"time C,t             : {t5 - t4:f}, {100*(t5 - t4)/(t6-t0):f}%")
-        # print(f"time to NDDataset    : {t6 - t5:f}, {100*(t6 - t5)/(t6-t0):f}%")
+                # uncomment for debugging and optimization
+                # t3 = time.time()
 
-        if kwargs.get("return_meta", False) and not return_dataset:
-            return (C, bunch)
+            else:
+                if len(self._arrhenius.shape) == 1:
+                    # _arrhenius is 1D array of rate constants
+                    k = self._arrhenius
+
+                    # uncomment for debugging and optimization
+                    # t1 = time.time()
+
+                else:
+                    # isothermal, the k_i are computed once
+                    k = (
+                        self._arrhenius[:, 0]
+                        * T ** self._arrhenius[:, 1]
+                        * np.exp(-self._arrhenius[:, 2] / R / T)
+                    )
+
+                # uncomment for debugging and optimization
+                # t1 = time.time()
+
+                exec(
+                    f"def f_(self, k, t, C): return{self._production_rates}",
+                    global_env,
+                    locals_env,
+                )
+                if use_jac:
+                    # define jac_ = d[dC/dt]/dCi
+                    exec(
+                        f"def jac_(self, k, t, C): return{self._jacobian}",
+                        global_env,
+                        locals_env,
+                    )
+                    jac = partial(locals_env["jac_"], self, k)
+                else:
+                    jac = None
+
+                # uncomment for debugging and optimization
+                # t2 = time.time()
+
+                bunch = solve_ivp(
+                    partial(locals_env["f_"], self, k),
+                    (t[0], t[-1]),
+                    list(C0.values()),
+                    t_eval=t,
+                    method=method,
+                    atol=atol,
+                    rtol=rtol,
+                    jac=jac,
+                )
+
+                # uncomment for debugging and optimization
+                # t2 = time.time()
+
+            # uncomment for debugging (warning: debug_() multiply the exec time by 4...)
+            # from from spectrochempy.application import debug_
+            # debug_(bunch.message)
+            # t4 = time.time()
+
+            if bunch.status != 0:
+                raise SolverError(bunch.message)
+
+            C_ = (left_op @ bunch.y).T if left_op is not None else bunch.y.T
+            t = bunch.t
+
+            # uncomment for debugging and optimization
+            # t5 = time.time()
+
+            return_dataset = kwargs.get("return_NDDataset", True)
+            if return_dataset:
+                C.append(NDDataset(C_, name="Concentrations"))
+                C[i].y = Coord(t, title="time")
+                if left_op is None:
+                    C[i].x = Coord(
+                        range(self.n_species), labels=self.species, title="species"
+                    )
+                elif c_names is not None:
+                    C[i].x = Coord(
+                        range(left_op.shape[0]), labels=c_names, title="species"
+                    )
+                else:
+                    C[i].x = Coord(
+                        range(left_op.shape[0]),
+                        labels=[f"species #{i}" for i in range(left_op.shape[0])],
+                        title="species",
+                    )
+                C[i].history = "Created using ActionMassKinetics.integrate"
+                C[i].meta.update(bunch)
+
+                # uncomment for debugging and optimization
+                # t6 = time.time()
+                # print(f"time compute k       : {t1 - t0:f}, {100*(t1 - t0)/(t6-t0):f}%")
+                # print(f"time load f (and jac): {t2 - t1:f}, {100*(t2 - t1)/(t6-t0):f}%")
+                # print(f"time integration     : {t3 - t2:f}, {100*(t3 - t2)/(t6-t0):f}%")
+                # print(f"time debug           : {t4 - t3:f}, {100*(t4 - t3)/(t6-t0):f}%")
+                # print(f"time C,t             : {t5 - t4:f}, {100*(t5 - t4)/(t6-t0):f}%")
+                # print(f"time to NDDataset    : {t6 - t5:f}, {100*(t6 - t5)/(t6-t0):f}%")
+
+            elif kwargs.get("return_meta", False) and not return_dataset:
+                C.append((C_, bunch))
+            else:
+                C.append(C_)
+
+        if len(C) == 1:
+            return C[0]
         else:
             return C
 
@@ -703,9 +770,9 @@ class ActionMassKinetics(tr.HasTraits):
 
         Parameters
         ------------
-        Cexp : `NDDataset`
+        Cexp : `NDDataset` or `list` ot `tuple` of NDDatasets
             Experimental concentration profiles on which to fit the model.
-            `Cexp` can contain more concentration profiles than those to fit.
+            each set of concentrations can contain more concentration profiles than those to fit.
         iexp : `int`
             Indexes of experimental concentration profiles on which the model will be
             fitted.
@@ -738,21 +805,32 @@ class ActionMassKinetics(tr.HasTraits):
             k_dt,
             C_op,
         ):
-            """returns the SSE on concentrationb profiles"""
+            """returns the SSE on concentrations profiles"""
 
             for param, item in zip(params, dict_param_to_optimize):
                 dict_param_to_optimize[item] = param
 
             self._modify_kinetics(dict_param_to_optimize, optimizer_left_op)
 
+            if self._nset == 1:
+                t = Cexp.y.data
+                Carray = Cexp.data
+            else:
+                t = [C.y.data for C in Cexp]
+                Carray = np.concatenate([C.data for C in Cexp])
+
             Chat = self.integrate(
-                Cexp.y.data,
+                t,
                 return_NDDataset=False,
                 method=ivp_solver_method,
                 k_dt=k_dt,
                 left_op=C_op,
             )
-            return np.sum(np.square(Cexp.data[:, iexp] - Chat[:, i2iexp]))
+
+            if self._nset > 1:
+                Chat = np.concatenate([C for C in Chat])
+
+            return np.sum(np.square(Carray[:, iexp] - Chat[:, i2iexp]))
 
         # optimizer (kw)arguments:
         # ... parameters for scipy.minimize
@@ -817,8 +895,14 @@ class ActionMassKinetics(tr.HasTraits):
             print(f"         Optimization time: {toc - tic}")
             print(f"         Final parameters: {optim_res['x']}")
 
+        # compute the final concentration profiles
+        if self._nset == 1:
+            t = Cexp.y.data
+        else:
+            t = [C.y.data for C in Cexp]
+
         Ckin = self.integrate(
-            Cexp.y.data,
+            t,
             return_NDDataset=False,
             method=ivp_solver_method,
             k_dt=ivp_solver_k_dt,
