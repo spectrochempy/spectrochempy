@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        pythonVersion: ["3.9", "3.11"]
+        pythonVersion: ["3.9", "3.12"]
         exclude:
           - os: macos-latest
             pythonVersion: 3.9
@@ -65,12 +65,12 @@ jobs:
         id: cache-virtualenv
         uses: syphar/restore-virtualenv@v1
 
-      # - name: Install dependencies for testing
-      #   # Run only if dependencies have changed
-      #   if: steps.cache-virtualenv.outputs.cache-hit != 'true'
-      #   run: |
-      #     python --version
-      #     python -m pip install -r requirements/requirements_test.txt
+      - name: Install dependencies for testing
+        # Run only if dependencies have changed
+        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+        run: |
+          python --version
+          python -m pip install -r requirements/requirements_test.txt
 
       - name: Install spectrochempy
         run: |
