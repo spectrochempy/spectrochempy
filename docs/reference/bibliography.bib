@@ -393,3 +393,22 @@ publisher  ="The Royal Society of Chemistry",
 doi  ="10.1039/D3CP01585H",
 url  ="http://dx.doi.org/10.1039/D3CP01585H",
 abstract  ="We report the development of a new method of investigation of the mass transport properties of acidic zeolite-based materials aiming to overcome the limitations of classical approaches. It consists in hyphenating gravimetric analysis and infrared spectroscopy. The former allows assessing the diffusion from the gas phase to all the porosity{,} while IR allows for selective assessment of diffusion to the zeolite active sites located in the micropores. Furthermore{,} the data are processed by an original methodology allowing the recovery of the distribution of diffusion domains by inversion of the integral equations describing the uptake curves or the evolution of the infrared spectra. The combination of gravimetric analysis and IR spectroscopy makes it possible to monitor and distinguish diffusion within the various components of the material. The methodology has been applied to the isooctane uptake in the mechanical mixture of FAU and MFI zeolites. Analysis of both gravimetric uptake curves and evolving infrared spectra allows distinguishing and assigning diffusion domains to the H-FAU and H-MFI components of the mixture{,} with high and low effective diffusion rate constants{,} respectively. The advantages and limits of the methodology are discussed."}
+
+@article{coca-lopez:2024,
+title = {An intuitive approach for spike removal in Raman spectra based on peaks’ prominence and width},
+journal = {Analytica Chimica Acta},
+volume = {1295},
+pages = {342312},
+year = {2024},
+issn = {0003-2670},
+doi = {https://doi.org/10.1016/j.aca.2024.342312},
+url = {https://www.sciencedirect.com/science/article/pii/S0003267024001132},
+author = {Nicolas Coca-Lopez},
+keywords = {Cosmic ray noise, Spike removal, Raman spectroscopy, Spectral processing, Chemometrics, Graphene},
+abstract = {Background
+Raman spectroscopists are familiar with the challenge of dealing with spikes caused by cosmic rays. These artifacts may lead to errors in subsequent data processing steps, such as for example calibration, normalization or spectral search. Spike removal is therefore a fundamental step in Raman spectral data pre-treatment, but access to publicly accessible code for spike removal tools is limited, and their performance for spectra correction often unknown. Therefore, there is a need for development and testing open-source and easy-to-implement algorithms that improve the Raman data processing workflow.
+Results
+In this work, we present and validate two approaches for spike detection and correction in Raman spectral data from graphene: i) An algorithm based on the peaks' widths and prominences and ii) an algorithm based on the ratio of these two peak features. The first algorithm provides an efficient and reliable approach for spike detection in real and synthetic Raman spectra by imposing thresholds on the peaks’ width and prominence. The second approach leverages the prominence/width ratio for outlier detection. It relies on the calculation of a limit of detection based on either one or several spectra, enabling the automatic identification of cosmic ray and low-intensity noise-originated spikes alike. Both algorithms detect low-intensity spikes down to at least ≈10% of the highest Raman peak of spectra with different noise levels. To address their limitations and prove their versatility, the algorithms were further tested in Raman spectra from calcite and polystyrene.
+Significance
+Our intuitive, open-source algorithms have been validated and allow automatic correction for a given set of samples. They do not require any pre-processing steps such as calibration or baseline subtraction, and their implementation with Python libraries is computationally efficient, allowing for immediate utilization within existing open-source packages for Raman spectra processing.}
+}
