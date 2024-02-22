@@ -9,7 +9,8 @@ on:
 
 jobs:
   pre-commit:
-    if: ${{ !startsWith(github.head_ref, 'release/') }}
+    # if not released and not a cron job on a fork
+    if: ${{ !startsWith(github.head_ref, 'release/') }} && !(github.event_name == 'schedule' && github.repository != 'spectrochempy/spectrochempy')
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.ref }}-pre-commit
