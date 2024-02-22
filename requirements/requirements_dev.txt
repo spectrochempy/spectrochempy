@@ -30,7 +30,7 @@ tzlocal
 scikit-learn==1.2
 xlrd
 pyyaml
-setuptools
+setuptools>=69.0.0
 setuptools_scm
 gitpython
 ipywidgets==8.0.4
