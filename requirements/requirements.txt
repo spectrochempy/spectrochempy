@@ -27,7 +27,7 @@ scipy
 tqdm
 traitlets==5.9.0
 tzlocal
-scikit-learn==1.2
+scikit-learn
 xlrd
 pyyaml
 setuptools
