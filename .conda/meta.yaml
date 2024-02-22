@@ -52,25 +52,25 @@ requirements:
     - requests
     - scipy
     - tqdm
-    - traitlets=5.9.0
+    - traitlets
     - tzlocal
-    - scikit-learn=1.2
+    - scikit-learn
     - xlrd
     - pyyaml
 
     # dependencies needed mainly for install and a bit more ...
-    - setuptools>=69.0.0
+    - setuptools
     - setuptools_scm
     - git
 
     # Jupyter lab
-    - ipywidgets=8.0.4
+    - ipywidgets
     - ipympl
     - jupyterlab
-    - jupyterlab_widgets=3.0.5
-    - jupyter_server=2.7.3
+    - jupyterlab_widgets
+    - jupyter_server
     - nodejs
-    - widgetsnbextension=4.0.5
+    - widgetsnbextension
 
     # voila
     - voila
