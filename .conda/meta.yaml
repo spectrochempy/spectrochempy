@@ -42,7 +42,7 @@ requirements:
     - docrep
     - ipython
     - jinja2
-    - matplotlib
+    - matplotlib>=3.8
     - numba
     - numpy
     - numpydoc>=1.2
