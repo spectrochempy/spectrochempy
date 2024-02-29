@@ -7,6 +7,9 @@ Papers citing `SpectroChemPy`
 2024
 ====
 
+- Deriving kinetic insights from mechanochemically synthesized compounds using multivariate analysis (MCR-ALS) of powder X-ray diffraction data,
+  :cite:t:`Macchietti:2024`\ , `DOI: 10.1039/D3MR00013C <http://dx.doi.org/10.1039/D3MR00013C>`__\ .
+
 - An intuitive approach for spike removal in Raman spectra based on peaks’ prominence and width,
   :cite:t:`coca-lopez:2024`\ , `DOI: 10.1016/j.aca.2024.342312 <https://doi.org/10.1016/j.aca.2024.342312>`__\ .
 
