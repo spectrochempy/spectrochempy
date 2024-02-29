@@ -64,7 +64,7 @@ pandoc==2.19
 pypandoc
 pre-commit
 scikit-image
-sphinx==7.2.6
+sphinx==5.3
 sphinx-copybutton
 sphinx-gallery==0.13
 sphinx_rtd_theme==1.2
