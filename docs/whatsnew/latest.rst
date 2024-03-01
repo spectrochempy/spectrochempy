@@ -22,8 +22,8 @@ New features
 * Add the possibility to define user-defined functions in the `Optimize` class.
 * Traceback are now fully displayed when an error occurs in a script.
 * Add the possibility to read Thermo high speed series files
-* Add the possibility to use several sets of experimental conditions in
- `ActionMassKinetics` class.
+* Add the possibility to use several sets of experimental conditions
+  in `ActionMassKinetics` class.
 
 Bug fixes
 ~~~~~~~~~
