@@ -53,7 +53,7 @@ jobs:
           environment-name: scpy_docs
           condarc-file: .ci/condarc.yml
           create-args: >-
-            python=3.9
+            python=3.10
           cache-environment: true
 
       - name: Install spectrochempy
