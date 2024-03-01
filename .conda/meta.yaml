@@ -68,8 +68,8 @@ requirements:
     - ipympl
     - jupyterlab
     - jupyterlab_widgets
-    - jupyter_server=2.7.3
     - jupyter-events=0.6.3
+    - jupyter_server
     - nodejs
     - widgetsnbextension=4.0.5
 
