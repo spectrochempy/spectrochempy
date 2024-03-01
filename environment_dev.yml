@@ -31,7 +31,7 @@ dependencies:
     - docrep
     - ipython
     - jinja2
-    - matplotlib>=3.8
+    - matplotlib
     - numba
     - numpy
     - numpydoc>=1.2
@@ -43,7 +43,7 @@ dependencies:
     - tqdm
     - traitlets=5.14.1
     - tzlocal
-    - scikit-learn>=1.4
+    - scikit-learn
     - xlrd
     - pyyaml
 
