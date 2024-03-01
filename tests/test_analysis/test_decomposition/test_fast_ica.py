@@ -58,10 +58,12 @@ def test_fastICA():
 
     ds_ = ds.data.copy()
 
-    ica = scp_ICA(n_components=4, random_state=123, log_level="INFO")
+    ica = scp_ICA(
+        n_components=4, random_state=123, whiten="unit-variance", log_level="INFO"
+    )
     ica.fit(ds)
 
-    ica_ = skl_ICA(n_components=4, random_state=123)
+    ica_ = skl_ICA(n_components=4, random_state=123, whiten="unit-variance")
     ica_.fit(ds_)
 
     # compare scpy and sklearn FastICA attributes

@@ -39,7 +39,7 @@ class FastICA(DecompositionAnalysis):
 
     :term:`ICA` (Independent Component Analysis) extracts the underlying sources of
     the variability of a set of spectra :math:`X` into the spectral profiles :math:`S^t`
-    of the underelying sources and a mixing matrix :math:`A`\ .
+    of the underlying sources and a mixing matrix :math:`A`\ .
 
     In terms of matrix equation:
 
@@ -86,7 +86,7 @@ class FastICA(DecompositionAnalysis):
 
     whiten = tr.Union(
         (tr.Enum(["arbitrary-variance", "unit-variance"]), tr.Bool(False)),
-        default_value="arbitrary-variance",
+        default_value="unit-variance",
         allow_none=True,
         help=(
             """Specify the whitening strategy to use.
