@@ -40,5 +40,8 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 
 * Changed the default QP solver (quadprog -> osqp): The new solver is compatible with
-  python 3.11. Fastness and robusteness are improved. The quadprog solver can still be
+  python 3.11 and later. Fastness and robustness are improved. The quadprog solver can still be
   used if available
+* Change the default value of the `whiten` parameter in the `FastICA` class to
+  `unit-variance` instead of `arbitrary-variance` for compatibility with ScikitLearn
+  1.3 and later

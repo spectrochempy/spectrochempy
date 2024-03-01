@@ -9,13 +9,13 @@
 # ======================================================================================
 brukeropusreader
 numpy-quaternion
-cffconvert
+cffconvert>=2.0.0
 colorama
 dill
 docrep
 ipython
 jinja2
-matplotlib
+matplotlib>=3.8
 numba
 numpy
 numpydoc>=1.2
@@ -25,9 +25,9 @@ pint>=0.20
 requests
 scipy
 tqdm
-traitlets==5.9.0
+traitlets==5.14.1
 tzlocal
-scikit-learn==1.2
+scikit-learn
 xlrd
 pyyaml
 setuptools
@@ -36,8 +36,9 @@ gitpython
 ipywidgets==8.0.4
 ipympl
 jupyterlab
-jupyterlab_widgets==3.0.5
-jupyter_server==2.7.3
+jupyterlab_widgets
+jupyter_events==0.6.3
+jupyter_server
 nodejs
 widgetsnbextension==4.0.5
 voila
