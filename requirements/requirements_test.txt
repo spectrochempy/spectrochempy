@@ -9,7 +9,7 @@
 # ======================================================================================
 brukeropusreader
 numpy-quaternion
-cffconvert
+cffconvert>=2.0.0
 colorama
 dill
 docrep
