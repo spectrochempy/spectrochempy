@@ -10,7 +10,7 @@ Datetime utilities
 
 import re
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -42,7 +42,7 @@ def utcnow():
     if sys.version_info[1] < 12:
         return datetime.utcnow().replace(microsecond=0, tzinfo=ZoneInfo("UTC"))
     else:
-        return datetime.now(datetime.UTC).replace(microsecond=0)
+        return datetime.now(UTC).replace(microsecond=0)
 
 
 def from_dt64_units(units):
