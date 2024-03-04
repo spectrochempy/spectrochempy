@@ -10,8 +10,12 @@ Datetime utilities
 
 import re
 import sys
-from datetime import UTC, datetime
 from zoneinfo import ZoneInfo
+
+if sys.version_info[1] < 12:
+    from datetime import datetime
+else:
+    from datetime import datetime, UTC
 
 import numpy as np
 
