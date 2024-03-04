@@ -9,6 +9,7 @@ Datetime utilities
 """
 
 import re
+import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -38,7 +39,10 @@ DT64_TO_SCP_UNITS = {
 
 def utcnow():
     """Return the current time in UTC with a timezone."""
-    return datetime.utcnow().replace(microsecond=0, tzinfo=ZoneInfo("UTC"))
+    if sys.version_info[1] < 12:
+        return datetime.utcnow().replace(microsecond=0, tzinfo=ZoneInfo("UTC"))
+    else:
+        return datetime.now(datetime.UTC).replace(microsecond=0)
 
 
 def from_dt64_units(units):
