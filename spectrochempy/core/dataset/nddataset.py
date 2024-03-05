@@ -818,7 +818,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             if len(value) == 0:
                 return
             value = value[0]
-        date = datetime.utcnow()
+        date = utcnow()
         self._history.append((date, value))
 
     def coord(self, dim="x"):

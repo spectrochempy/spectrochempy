@@ -22,6 +22,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import ur
+from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.docstrings import _docstring
 from spectrochempy.utils.file import fromfile
 
@@ -505,7 +506,7 @@ def _read_spg(*args, **kwargs):
         "description", f"Omnic title: {spg_title}\nOmnic " f"filename: {filename}"
     )
 
-    dataset._date = datetime.now(timezone.utc)
+    dataset._date = utcnow()
 
     dataset.history = f"Imported from spg file {filename}."
 
@@ -708,7 +709,7 @@ def _read_spa(*args, **kwargs):
                 + spa_history
             )
 
-    dataset._date = datetime.now(timezone.utc)
+    dataset._date = utcnow()
 
     dataset.meta.collection_length = info["collection_length"] / 100 * ur("s")
     dataset.meta.optical_velocity = info["optical_velocity"]
@@ -1006,9 +1007,7 @@ def _read_srs(*args, **kwargs):
             "Omnic 'DATA PROCESSING HISTORY' :\n"
             "--------------------------------\n" + history
         )
-    dataset.history.append(
-        str(datetime.now(timezone.utc)) + ": imported from srs file " + str(filename)
-    )
+    dataset.history.append(str(utcnow()) + ": imported from srs file " + str(filename))
 
     dataset.meta.laser_frequency = info["reference_frequency"] * ur("cm^-1")
     dataset.meta.collection_length = info["collection_length"] * ur("s")
