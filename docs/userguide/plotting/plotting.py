@@ -398,7 +398,7 @@ _ = dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
 # %%
 # And finally an example of a surface plot:
 prefs.reset()
-_ = dataset.plot_surface(linewidth=0.00, antialiased=True, y_reverse=True)
+_ = dataset.plot_surface(linewidth=0, y_reverse=True, autolayout=False)
 # %% [markdown]
 # ## Plotting 1D datasets
 

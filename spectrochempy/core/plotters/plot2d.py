@@ -56,7 +56,7 @@ use_plotly : bool, optional
 data_only : `bool` [optional, default=`False`]
     Only the plot is done. No addition of axes or label specifications
     (current if any or automatic settings are kept.
-method : str [optional among `map` , `stack` , `image` or `3D`]
+method : str [optional among `map` , `stack` , `image`, `surface` or `3D`]
     The type of plot,
 projections : `bool` [optional, default=False]
 style : str, optional, default='notebook'

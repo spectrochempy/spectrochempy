@@ -107,7 +107,7 @@ X
 # (PCA, EFA, MCR-ALs, ...). For instance to plot X as a surface:
 
 # %%
-surf = X.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5))
+surf = X.plot_surface(linewidth=0.0, figsize=(10, 5), autolayout=False)
 
 # %% [markdown]
 # ## Initial guess and MCR ALS optimization
@@ -389,14 +389,14 @@ _ = mcr4.St.plot()
 A[1]
 
 # %% [markdown]
-# Let's plot it as a map, and as a surface:
+# Let's plot it as a surface and as a map:
 
 # %%
 X2 = A[1]
 X2.title = "absorbance"
 X2.set_coordset(None, None)
 X2.set_coordtitles(y="elution time", x="wavelength")
-surf = X2.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5))
+surf = X2.plot_surface(linewidth=0.0, ccount=100, figsize=(8, 4), autolayout=False)
 _ = X2.plot(method="map")
 
 # %%
