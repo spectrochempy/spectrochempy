@@ -60,7 +60,7 @@ copy : `bool`, optional, default: `True`
 inplace : `bool`, optional, default: `False`
     By default, the method returns a newly allocated object.
     If `inplace` is set to `True`, the input object is returned.
-dataset : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+dataset : `NDDataset` or :term:`array-like` of shape (`n_observations` , `n_features`)
     Input data, where :term:`n_observations` is the number of observations
     and :term:`n_features` is the number of features.
 dim : `int` or `str`, optional, default: -1,

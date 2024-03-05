@@ -93,7 +93,7 @@ X.x = scp.Coord.arange(96, title="wavelength")
 # From now on, these names will be taken into account by Scpy in the plots as well as
 # in the analysis treatments (PCA, EFA, MCR-ALS ...). For instance to plot X as a surface:
 # %%
-surf = X.plot_surface(colorbar=True, linewidth=0.2, ccount=100, figsize=(10, 5))
+surf = X.plot_surface(linewidth=0.0, ccount=100, figsize=(10, 5), autolayout=False)
 
 # %% [markdown]
 # ## Running a PCA

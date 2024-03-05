@@ -56,7 +56,7 @@ use_plotly : bool, optional
 data_only : `bool` [optional, default=`False`]
     Only the plot is done. No addition of axes or label specifications
     (current if any or automatic settings are kept.
-method : str [optional among `map` , `stack` , `image` or `3D`]
+method : str [optional among `map` , `stack` , `image`, `surface` or `3D`]
     The type of plot,
 projections : `bool` [optional, default=False]
 style : str, optional, default='notebook'
@@ -370,16 +370,17 @@ def plot_2D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     ax.grid(prefs.axes_grid)
 
-    normalize = kwargs.get("normalize", None)
+    # matplotlib.colors.Normalize object
+    norm = kwargs.get("norm", None)
+
     cmap = kwargs.get("colormap", "Undefined")
     if cmap == "Undefined":
         cmap = kwargs.get("cmap", prefs.colormap)
 
     if method in ["map", "image", "surface"]:
-        zmin, zmax = zlim
-        zmin = min(zmin, -zmax)
-        zmax = max(-zmin, zmax)
-        norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
+        if norm is None:
+            zmin, zmax = zlim
+            norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
 
     if method in ["surface"]:
         X, Y = np.meshgrid(xdata, ydata)
@@ -452,12 +453,10 @@ def plot_2D(dataset, method=None, **kwargs):
         # ----------
         # now plot the collection of lines
         # map colors
-        vmin, vmax = ylim
-        norm = mpl.colors.Normalize(
-            vmin=vmin, vmax=vmax
-        )  # we normalize to the max time
-        if normalize is not None:
-            norm.vmax = normalize
+        if norm is None:
+            vmin, vmax = ylim
+            # we normalize to the max time
+            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
 
         if cmap is None:
             color = kwargs.get("color")

@@ -35,6 +35,7 @@ New features
 * Add the possibility to read Thermo high speed series files
 * Add the possibility to use several sets of experimental conditions
   in `ActionMassKinetics` class.
+* Add the possibility to pass a colormap normalization to the `plot` method.
 
 .. section
 
@@ -62,6 +63,9 @@ Breaking changes
 * Change the default value of the `whiten` parameter in the `FastICA` class to
   `unit-variance` instead of `arbitrary-variance` for compatibility with ScikitLearn
   1.3 and later
+* Colormap normalization for `surface`, `image` and `map` plot methods has been
+  changed for consistency with matplotlib default. The former behaviour can be obtained
+  by passing a `norm` parameter to the `plot` method (see userguide/plotting).
 
 .. section
 

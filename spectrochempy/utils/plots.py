@@ -432,7 +432,7 @@ def get_figure(**kwargs):
         If False, suppress drawing the figure background patch.
     tight_layout : bool or dict, default: preferences.figure.autolayout
         If False use subplotpars. If True adjust subplot parameters using tight_layout
-        with default padding.nWhen providing a dict containing the keys pad, w_pad,
+        with default padding. When providing a dict containing the keys pad, w_pad,
         h_pad, and rect, the default tight_layout paddings will be overridden.
     constrained_layout : bool, default: preferences.figure_constrained_layout
         If True use constrained layout to adjust positioning of plot elements.
