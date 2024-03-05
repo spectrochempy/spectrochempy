@@ -446,20 +446,4 @@ print(f"Max absolute difference in wavenumber: {max_error:.3g}")
 print(f"Max relative difference in wavenumber: {max_rel_error:.3g}")
 
 # %% [markdown]
-# This is much beyond the experimental accuracy but can lead to undesirable effects.
-#
-# For instance:
-
-# %%
-try:
-    S0 - newS0
-except Exception as e:
-    scp.error_(Exception, e)
-
-# %% [markdown]
-# returns an error because of the small shift of coordinates. We will see in another
-# tutorial how to re-align datasets
-# and deal with these small problems. It is worth noticing that similar distortions
-# arise in commercial software,...
-# except that the user is not notified.
-#
+# But this is much beyond the experimental accuracy of the data and has

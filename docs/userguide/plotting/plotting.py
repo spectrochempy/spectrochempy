@@ -373,11 +373,11 @@ _ = dataset.plot()
 prefs.axes_facecolor = "white"
 _ = dataset.plot_image(colorbar=True)  # will use image_cmap preference!
 
-# %%
+# %% [markdown]
 # Here we use the generic `plot()` with the `method' argument and we change the image_cmap:
 _ = dataset.plot(method="image", image_cmap="jet", colorbar=True)
 
-# %%
+# %% [markdown]
 # The colormap normalization can be changed using the `norm` parameter, as illustrated below,
 # for a centered colomap:
 import matplotlib as mpl
@@ -385,20 +385,21 @@ import matplotlib as mpl
 norm = mpl.colors.CenteredNorm()
 _ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
 
-# %%
+# %% [markdown]
 # or below for a log scale (more information about colormap normalization can be found
 # [here](https://matplotlib.org/stable/users/explain/colors/colormapnorms.html)).
+
 norm = mpl.colors.LogNorm(vmin=0.1, vmax=4.0)
 _ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
-# %%
+# %% [markdown]
 # Below an example of a waterfall plot:
 prefs.reset()
 _ = dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
 
-# %%
+# %% [markdown]
 # And finally an example of a surface plot:
 prefs.reset()
-_ = dataset.plot_surface(linewidth=0, y_reverse=True, autolayout=False)
+_ = dataset.plot_surface(figsize=(7, 7), linewidth=0, y_reverse=True, autolayout=False)
 # %% [markdown]
 # ## Plotting 1D datasets
 
