@@ -4,7 +4,6 @@
 SpectroChemPy
 </h1>
 
-![Python](https://img.shields.io/pypi/pyversions)
 [![Tests Actions Status](https://github.com/spectrochempy/spectrochempy/actions/workflows/test_package.yml/badge.svg)](https://github.com/spectrochempy/spectrochempy/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/78681bc1aabbb8ca915f/maintainability)](https://codeclimate.com/github/spectrochempy/spectrochempy/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/78681bc1aabbb8ca915f/test_coverage)](https://codeclimate.com/github/spectrochempy/spectrochempy/test_coverage)
