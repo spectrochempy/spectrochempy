@@ -20,6 +20,11 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* Compatibility with Python 3.12
+* Add the possibility to pass a colormap normalization to the `plot` method.
+* Add the possibility to use several sets of experimental conditions
+  in `ActionMassKinetics` class.
+* Add the possibility to read Thermo high speed series files
 * Add Stejskal-Tanner kernel for 2D IRIS
 * Fancy indexing using location now supported.
 * Add an example for NMR processing of a series of CP-MAS spectra.
@@ -32,10 +37,6 @@ New features
   for simple curve fitting
 * Add the possibility to define user-defined functions in the `Optimize` class.
 * Traceback are now fully displayed when an error occurs in a script.
-* Add the possibility to read Thermo high speed series files
-* Add the possibility to use several sets of experimental conditions
-  in `ActionMassKinetics` class.
-* Add the possibility to pass a colormap normalization to the `plot` method.
 
 .. section
 

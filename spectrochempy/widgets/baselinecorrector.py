@@ -30,7 +30,7 @@ class BaselineCorrector:
 
     Parameters
     ----------
-    X : `NDDataset`\ , default: `None`
+    X : `NDDataset`, default: `None`
         The `NDDataset` to process. If `None`, an upload button can be used to load
         data.
     initial_ranges : list, optional, default: None
