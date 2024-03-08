@@ -59,11 +59,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonVersion }}
+          cache: 'pip'
 
-      - name: cache virtualenv
-        # Cache virtual environment to avoid installing dependencies at each runs
-        id: cache-virtualenv
-        uses: syphar/restore-virtualenv@v1
+#      - name: cache virtualenv
+#        # Cache virtual environment to avoid installing dependencies at each runs
+#        id: cache-virtualenv
+#        uses: syphar/restore-virtualenv@v1
 
       - name: Install dependencies for testing
         # Run only if dependencies have changed
