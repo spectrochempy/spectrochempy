@@ -69,9 +69,11 @@ jobs:
       #    python .ci/update_version_and_release_notes.py ${{ env.VERSIONSTRING }}
 
       - name: Setup timezone
-        uses: zcong1993/setup-timezone@master
+        uses: MathRobin/timezone-action@v1.1
         with:
-          timezone: Central European Time
+          timezoneLinux: 'Europe/Paris'
+          timezoneMacos: 'Europe/Paris'
+          timezoneWindows: 'Europe/Paris'
 
       - name: Build docs
         run: |

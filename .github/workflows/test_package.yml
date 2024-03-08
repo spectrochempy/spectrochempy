@@ -56,7 +56,7 @@ jobs:
 
       - name: Set up Python ${{ matrix.pythonVersion }}
         id: setup_python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonVersion }}
 
@@ -89,6 +89,6 @@ jobs:
 
       - name: Code Climate reporting
         if: ${{ github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
