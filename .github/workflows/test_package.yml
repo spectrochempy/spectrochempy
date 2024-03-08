@@ -59,19 +59,20 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonVersion }}
-          cache: 'pip'
 
-#      - name: cache virtualenv
-#        # Cache virtual environment to avoid installing dependencies at each runs
-#        id: cache-virtualenv
-#        uses: syphar/restore-virtualenv@v1
-
+      - name: cache virtualenv
+        uses: actions/cache@v4
+        with:
+          key: venv-${{runner.os}}-${{steps.setup_python.outputs.python-version}}-{{ hashFiles('requirements/requirements_test.txt') }}
+          path: .venv
+          
       - name: Install dependencies for testing
-        # Run only if dependencies have changed
-        if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
-          python --version
+          python --
+          python -m venv .venv
           python -m pip install -r requirements/requirements_test.txt
+          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
+          echo  "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
 
       - name: Install spectrochempy
         run: |
