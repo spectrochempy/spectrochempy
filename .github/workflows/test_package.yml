@@ -68,8 +68,8 @@ jobs:
           
       - name: Install dependencies for testing
         run: |
-          python --
           python -m venv .venv
+          source .venv/bin/activate
           python -m pip install -r requirements/requirements_test.txt
           echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
           echo  "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
