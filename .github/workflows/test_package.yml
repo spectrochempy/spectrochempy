@@ -59,20 +59,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonVersion }}
-
-      - name: cache virtualenv
-        uses: actions/cache@v4
-        with:
-          key: venv-${{runner.os}}-${{steps.setup_python.outputs.python-version}}-${{ hashFiles('requirements/requirements_test.txt') }}
-          path: .venv
+          cache: 'pip'
           
       - name: Install dependencies for testing
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          python -m pip install -r requirements/requirements_test.txt
-          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
-          echo  "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+        run: python -m pip install -r requirements/requirements_test.txt
 
       - name: Install spectrochempy
         run: |
