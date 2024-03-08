@@ -63,7 +63,7 @@ jobs:
       - name: cache virtualenv
         uses: actions/cache@v4
         with:
-          key: venv-${{runner.os}}-${{steps.setup_python.outputs.python-version}}-{{ hashFiles('requirements/requirements_test.txt') }}
+          key: venv-${{runner.os}}-${{steps.setup_python.outputs.python-version}}-${{ hashFiles('requirements/requirements_test.txt') }}
           path: .venv
           
       - name: Install dependencies for testing
