@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.Quantity &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.to" href="spectrochempy.to.html" />
+    <link rel="prev" title="spectrochempy.Unit" href="spectrochempy.Unit.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Public API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates-related objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#processing">Processing</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#transpose-like-oprations">Transpose-like oprations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#changing-number-of-dimensions">Changing number of dimensions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#changing-type">Changing type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#joining-or-splitting-datasets">Joining or splitting datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#indexing">Indexing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#sorting">Sorting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#minimum-and-maximum">Minimum and maximum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#clipping-and-rounding">Clipping and rounding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#algebra">Algebra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#logic-functions">Logic functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#sums-integal-difference">Sums, integal, difference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#complex">Complex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#masks">Masks</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#units-manipulation">Units manipulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#mathematical-operations">mathematical operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#statistical-operations">Statistical operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#baseline-correction">Baseline correction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#fourier-transform">Fourier transform</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#zero-filling">Zero-filling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#rolling">Rolling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#phasing">Phasing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#smoothing-apodization">Smoothing, apodization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#alignment-interpolation">Alignment, interpolation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#miscellaneous">Miscellaneous</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Public API reference</a></li>
+      <li class="breadcrumb-item active">spectrochempy.Quantity</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.Quantity.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-quantity">
+<h1>spectrochempy.Quantity<a class="headerlink" href="#spectrochempy-quantity" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spectrochempy.Quantity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Quantity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.check.html#spectrochempy.Quantity.check" title="spectrochempy.Quantity.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.check</span></code></a>(dimension)</p></td>
+<td><p>Return true if the quantity's dimension matches passed dimension.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.compute.html#spectrochempy.Quantity.compute" title="spectrochempy.Quantity.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.compute</span></code></a>(**kwargs)</p></td>
+<td><p>Compute the Dask array wrapped by pint.PlainQuantity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.dot.html#spectrochempy.Quantity.dot" title="spectrochempy.Quantity.dot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.dot</span></code></a>(b)</p></td>
+<td><p>Dot product of two arrays.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.from_list</span></code>(quant_list[, units])</p></td>
+<td><p>Transforms a list of Quantities into an numpy.array quantity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.from_sequence</span></code>(cls, seq[, units])</p></td>
+<td><p>Transforms a sequence of Quantities into an numpy.array quantity.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.is_compatible_with.html#spectrochempy.Quantity.is_compatible_with" title="spectrochempy.Quantity.is_compatible_with"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.is_compatible_with</span></code></a>(self, other, ...)</p></td>
+<td><p>check if the other object is compatible</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.ito.html#spectrochempy.Quantity.ito" title="spectrochempy.Quantity.ito"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.ito</span></code></a>([other])</p></td>
+<td><p>Inplace rescale to different units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.ito_base_units.html#spectrochempy.Quantity.ito_base_units" title="spectrochempy.Quantity.ito_base_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.ito_base_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity rescaled to plain units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.ito_reduced_units.html#spectrochempy.Quantity.ito_reduced_units" title="spectrochempy.Quantity.ito_reduced_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.ito_reduced_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity scaled in place to reduced units, i.e. one unit per dimension.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.ito_root_units.html#spectrochempy.Quantity.ito_root_units" title="spectrochempy.Quantity.ito_root_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.ito_root_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity rescaled to root units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.m_as.html#spectrochempy.Quantity.m_as" title="spectrochempy.Quantity.m_as"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.m_as</span></code></a>(units)</p></td>
+<td><p>PlainQuantity's magnitude expressed in particular units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.persist.html#spectrochempy.Quantity.persist" title="spectrochempy.Quantity.persist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.persist</span></code></a>(**kwargs)</p></td>
+<td><p>Persist the Dask Array wrapped by pint.PlainQuantity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.prod.html#spectrochempy.Quantity.prod" title="spectrochempy.Quantity.prod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.prod</span></code></a>(_prod_dispatcher)def prod(a[, ...])</p></td>
+<td><p>Return the product of quantity elements over a given axis</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.to.html#spectrochempy.Quantity.to" title="spectrochempy.Quantity.to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.to</span></code></a>([other])</p></td>
+<td><p>Return PlainQuantity rescaled to different units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.to_base_units.html#spectrochempy.Quantity.to_base_units" title="spectrochempy.Quantity.to_base_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.to_base_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity rescaled to plain units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.to_compact.html#spectrochempy.Quantity.to_compact" title="spectrochempy.Quantity.to_compact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.to_compact</span></code></a>([unit])</p></td>
+<td><p>&quot;Return PlainQuantity rescaled to compact, human-readable units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.to_reduced_units.html#spectrochempy.Quantity.to_reduced_units" title="spectrochempy.Quantity.to_reduced_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.to_reduced_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity scaled in place to reduced units, i.e. one unit per dimension.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.to_root_units.html#spectrochempy.Quantity.to_root_units" title="spectrochempy.Quantity.to_root_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.to_root_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity rescaled to root units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.visualize.html#spectrochempy.Quantity.visualize" title="spectrochempy.Quantity.visualize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.visualize</span></code></a>(**kwargs)</p></td>
+<td><p>Produce a visual representation of the Dask graph.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.default_format" title="spectrochempy.Quantity.default_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.default_format</span></code></a></p></td>
+<td><p>Default formatting string.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.dimensionality.html#spectrochempy.Quantity.dimensionality" title="spectrochempy.Quantity.dimensionality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.dimensionality</span></code></a></p></td>
+<td><p>returns: <em>dict</em> -- Dimensionality of the PlainQuantity, e.g.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.dimensionless.html#spectrochempy.Quantity.dimensionless" title="spectrochempy.Quantity.dimensionless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.dimensionless</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.m.html#spectrochempy.Quantity.m" title="spectrochempy.Quantity.m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.m</span></code></a></p></td>
+<td><p>PlainQuantity's magnitude.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.magnitude.html#spectrochempy.Quantity.magnitude" title="spectrochempy.Quantity.magnitude"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.magnitude</span></code></a></p></td>
+<td><p>PlainQuantity's magnitude.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.u.html#spectrochempy.Quantity.u" title="spectrochempy.Quantity.u"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.u</span></code></a></p></td>
+<td><p>PlainQuantity's units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.Quantity.unitless.html#spectrochempy.Quantity.unitless" title="spectrochempy.Quantity.unitless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.unitless</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.Quantity.units.html#spectrochempy.Quantity.units" title="spectrochempy.Quantity.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity.units</span></code></a></p></td>
+<td><p>PlainQuantity's units.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.default_format">
+<span class="sig-name descname"><span class="pre">default_format</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'~P'</span></em><a class="headerlink" href="#spectrochempy.Quantity.default_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default formatting string.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.dimensionality">
+<span class="sig-name descname"><span class="pre">dimensionality</span></span><a class="headerlink" href="#spectrochempy.Quantity.dimensionality" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns: <em>dict</em> – Dimensionality of the PlainQuantity, e.g. <code class="docutils literal notranslate"><span class="pre">{length:</span> <span class="pre">1,</span> <span class="pre">time:</span> <span class="pre">-1}</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.dimensionless">
+<span class="sig-name descname"><span class="pre">dimensionless</span></span><a class="headerlink" href="#spectrochempy.Quantity.dimensionless" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.m">
+<span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#spectrochempy.Quantity.m" title="Permalink to this definition">¶</a></dt>
+<dd><p>PlainQuantity’s magnitude. Short form for <a class="reference internal" href="spectrochempy.Quantity.magnitude.html#spectrochempy.Quantity.magnitude" title="spectrochempy.Quantity.magnitude"><code class="xref py py-obj docutils literal notranslate"><span class="pre">magnitude</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.magnitude">
+<span class="sig-name descname"><span class="pre">magnitude</span></span><a class="headerlink" href="#spectrochempy.Quantity.magnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>PlainQuantity’s magnitude. Long form for <a class="reference internal" href="spectrochempy.Quantity.m.html#spectrochempy.Quantity.m" title="spectrochempy.Quantity.m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">m</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.u">
+<span class="sig-name descname"><span class="pre">u</span></span><a class="headerlink" href="#spectrochempy.Quantity.u" title="Permalink to this definition">¶</a></dt>
+<dd><p>PlainQuantity’s units. Short form for <a class="reference internal" href="spectrochempy.Quantity.units.html#spectrochempy.Quantity.units" title="spectrochempy.Quantity.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">units</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.unitless">
+<span class="sig-name descname"><span class="pre">unitless</span></span><a class="headerlink" href="#spectrochempy.Quantity.unitless" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#spectrochempy.Quantity.units" title="Permalink to this definition">¶</a></dt>
+<dd><p>PlainQuantity’s units. Long form for <a class="reference internal" href="spectrochempy.Quantity.u.html#spectrochempy.Quantity.u" title="spectrochempy.Quantity.u"><code class="xref py py-obj docutils literal notranslate"><span class="pre">u</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="examples-using-spectrochempy-quantity">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">spectrochempy.Quantity</span></code><a class="headerlink" href="#examples-using-spectrochempy-quantity" title="Permalink to this heading">¶</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example, we show how units can be used in SpectroChemPy"><img alt="" src="../../../_images/sphx_glr_plot_units_thumb.png" />
+<p><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/nddataset/plot_units.html#sphx-glr-gettingstarted-gallery-auto-examples-nddataset-plot-units-py"><span class="std std-ref">Units manipulation examples</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Units manipulation examples</div>
+</div></div><div style='clear:both'></div></section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrochempy.Unit.html" class="btn btn-neutral float-left" title="spectrochempy.Unit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.to.html" class="btn btn-neutral float-right" title="spectrochempy.to" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
