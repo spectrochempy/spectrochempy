@@ -660,7 +660,7 @@ and `St`.
             # due to a deprecation warning from traitlets.
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `nonnegConc` configuration (value:{nonnegConc})"
+                f"the `nonnegConc` configuration (value: {nonnegConc})"
             )
         return nonnegConc
 
@@ -679,7 +679,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check the "
-                f"`unimodConc` configuration (value:{unimodConc})"
+                f"`unimodConc` configuration (value: {unimodConc})"
             )
         return unimodConc
 
@@ -693,7 +693,7 @@ and `St`.
         elif len(closureConc) > self._n_components:
             raise ValueError(
                 f"The model contains only {self._n_components} components, please check "
-                f"the 'closureConc' configuration (value:{closureConc})"
+                f"the 'closureConc' configuration (value: {closureConc})"
             )
         return closureConc
 
@@ -709,7 +709,7 @@ and `St`.
         elif len(closureTarget) != ny:
             raise ValueError(
                 f"The data contain only {ny} observations, please check "
-                f"the 'closureTarget' configuration (value:{closureTarget})"
+                f"the 'closureTarget' configuration (value: {closureTarget})"
             )
         return closureTarget
 
@@ -729,7 +729,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `getC_to_C_idx`  configuration (value:{getC_to_C_idx})"
+                f"the `getC_to_C_idx`  configuration (value: {getC_to_C_idx})"
             )
         return getC_to_C_idx
 
@@ -748,7 +748,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `nonnegSpec`configuration (value:{nonnegSpec})"
+                f"the `nonnegSpec`configuration (value: {nonnegSpec})"
             )
         return nonnegSpec
 
@@ -786,7 +786,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `getSt_to_St_idx`  configuration (value:{getSt_to_St_idx})"
+                f"the `getSt_to_St_idx`  configuration (value: {getSt_to_St_idx})"
             )
         return getSt_to_St_idx
 
@@ -948,8 +948,6 @@ and `St`.
                     self.argsGetConc = output[1]
                     if len(output) == 3:
                         extraOutputGetConc.append(output[2])
-                    else:
-                        fixedC = output
                 else:
                     fixedC = output
 
@@ -1033,8 +1031,8 @@ and `St`.
 
             stdev_PCA = np.std(Xhat - Xpca)
             info_(
-                f"{niter:3d}{' '*6}{stdev_PCA:10f}{' '*6}"
-                f"{stdev2:10f}{' '*6}{change:10f}"
+                f"{niter: 3d}{' ' * 6}{stdev_PCA: 10f}{' ' * 6}"
+                f"{stdev2: 10f}{' ' * 6}{change: 10f}"
             )
 
             # check convergence
@@ -1059,7 +1057,7 @@ and `St`.
             if niter == self.max_iter:
                 info_(
                     f"Convergence criterion ('tol') not reached after "
-                    f"{ self.max_iter:d} iterations."
+                    f"{self.max_iter: d} iterations."
                 )
                 info_("Stop ALS optimization.")
 
