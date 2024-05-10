@@ -27,6 +27,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* Fix issue #758 : serialization error for tuple containing a ndarray
 
 .. section
 

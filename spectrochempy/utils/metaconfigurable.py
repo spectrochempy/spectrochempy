@@ -175,6 +175,7 @@ class MetaConfigurable(Configurable):
                 # replace other serializable value by an equivalent
                 value = [str(v) if isinstance(v, Path) else v for v in value]
                 value = [str(v) if isinstance(v, Quantity) else v for v in value]
+                value = [v.tolist() if isinstance(v, np.ndarray) else v for v in value]
 
             self.cfg.update(
                 self.name,
