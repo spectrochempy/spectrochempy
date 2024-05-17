@@ -6,6 +6,7 @@
 # ======================================================================================
 # flake8: noqa
 
+
 from spectrochempy.core import INPLACE, preferences
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
@@ -16,6 +17,8 @@ prefs = preferences
 
 # Basic
 # --------------------------------------------------------------------------------------
+
+
 def test_project(ds1, ds2, dsm):
     myp = Project(name="AGIR processing", method="stack")
 
