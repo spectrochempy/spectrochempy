@@ -44,7 +44,7 @@ requirements:
     - jinja2
     - matplotlib>=3.8
     - numba
-    - numpy<=2.0.0
+    - numpy<2.0
     - numpydoc>=1.2
     - osqp
     - packaging
