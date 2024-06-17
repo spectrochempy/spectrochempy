@@ -57,9 +57,16 @@ warnings.filterwarnings(
     action="once", module="spectrochempy", category=DeprecationWarning
 )
 
-warnings.filterwarnings(
-    action="error", module="spectrochempy", category=np.VisibleDeprecationWarning
-)
+if np.version.version[0] == "1":
+    warnings.filterwarnings(
+        action="error", module="spectrochempy", category=np.VisibleDeprecationWarning
+    )
+else:
+    warnings.filterwarnings(
+        action="error",
+        module="spectrochempy",
+        category=np.exceptions.VisibleDeprecationWarning,
+    )
 
 warnings.filterwarnings(action="ignore", module="jupyter")  # , category=UserWarning)
 warnings.filterwarnings(action="ignore", module="pykwalify")  # , category=UserWarning)
