@@ -33,7 +33,7 @@ dependencies:
     - jinja2
     - matplotlib>=3.8
     - numba
-    - numpy
+    - numpy<2.0
     - numpydoc>=1.2
     - osqp
     - packaging
