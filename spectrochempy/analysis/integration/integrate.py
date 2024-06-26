@@ -109,7 +109,7 @@ def trapezoid(dataset, **kwargs):
     NDDataset: [float64] a.u..cm^-1 (size: 55)
     """
 
-    return scipy.integrate.trapz(dataset, **kwargs)
+    return scipy.integrate.trapezoid(dataset, **kwargs)
 
 
 @deprecated(replace="Trapezoid")
@@ -175,7 +175,7 @@ def simpson(dataset, *args, **kwargs):
     >>> dataset[:,1250.:1800.].simps()
     NDDataset: [float64] a.u..cm^-1 (size: 55)
     """
-    return scipy.integrate.simps(dataset.data, **kwargs)
+    return scipy.integrate.simpson(dataset.data, **kwargs)
 
 
 @deprecated(replace="simpson")
