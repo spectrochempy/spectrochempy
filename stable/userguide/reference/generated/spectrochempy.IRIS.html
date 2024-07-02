@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.IRIS &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.kern" href="spectrochempy.kern.html" />
+    <link rel="prev" title="spectrochempy.MCRALS" href="spectrochempy.MCRALS.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Public API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates-related objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#analysis">Analysis</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.find_peaks.html">spectrochempy.find_peaks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.EFA.html">spectrochempy.EFA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.PCA.html">spectrochempy.PCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.NNMF.html">spectrochempy.NNMF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.SIMPLISMA.html">spectrochempy.SIMPLISMA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.MCRALS.html">spectrochempy.MCRALS</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">spectrochempy.IRIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.kern.html">spectrochempy.kern</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Public API reference</a></li>
+      <li class="breadcrumb-item active">spectrochempy.IRIS</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.IRIS.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-iris">
+<h1>spectrochempy.IRIS<a class="headerlink" href="#spectrochempy-iris" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spectrochempy.IRIS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IRIS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg_par</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/analysis/iris.py#L178-L695"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.IRIS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integral inversion solver for spectroscopic data.</p>
+<p>Solves integral equations of the first kind of 1 or 2 dimensions, i.e. returns a
+distribution f of contributions to 1D ou 2D datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>NDDataset</em>) – The 1D or 2D dataset on which to perform the IRIS analysis.</p></li>
+<li><p><strong>K</strong> (<em>str or callable or NDDataset</em>) – Kernel of the integral equation. Pre-defined kernels can be chosen among
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">[&quot;langmuir&quot;,</span> <span class="pre">&quot;ca&quot;,</span> <span class="pre">&quot;reactant-first-order&quot;,</span> <span class="pre">&quot;product-first-order&quot;,</span> <span class="pre">&quot;diffusion&quot;]</span></code>.</p></li>
+<li><p><strong>p</strong> (<em>Coord or Iterable</em>) – External variable. Must be provided if the kernel is passed as a str or callable.</p></li>
+<li><p><strong>q</strong> (<em>Coord or Iterable of 3 values</em>) – Internal variable. Must be provided if the kernel is passed as a str or callable.</p></li>
+<li><p><strong>reg_par</strong> (None or array_like of two values <code class="xref py py-obj docutils literal notranslate"><span class="pre">[min,</span> <span class="pre">max]</span></code> or three values <code class="xref py py-obj docutils literal notranslate"><span class="pre">[start,</span> <span class="pre">stop,</span> <span class="pre">num]</span></code>) – Regularization parameter.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.IRIS.f">
+<span class="sig-name descname"><span class="pre">f</span></span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.IRIS.f" title="Permalink to this definition">¶</a></dt>
+<dd><p>A 3D/2D dataset containing the solutions (one per regularization parameter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset">NDDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.IRIS.RSS">
+<span class="sig-name descname"><span class="pre">RSS</span></span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.IRIS.RSS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Residual sums of squares (one per regularization parameter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>array of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.IRIS.SM">
+<span class="sig-name descname"><span class="pre">SM</span></span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.IRIS.SM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Values of the regularization constraint (one per regularization parameter).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>array of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.IRIS.reg_par">
+<span class="sig-name descname"><span class="pre">reg_par</span></span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.IRIS.reg_par" title="Permalink to this definition">¶</a></dt>
+<dd><p>Values of the regularization parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>None or array of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.IRIS.log">
+<span class="sig-name descname"><span class="pre">log</span></span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.IRIS.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log of the optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.IRIS.K">
+<span class="sig-name descname"><span class="pre">K</span></span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.IRIS.K" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kernel matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset">NDDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.IRIS.X">
+<span class="sig-name descname"><span class="pre">X</span></span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.IRIS.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>The original dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset">NDDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">ker</span></code></dt><dd><p>Compute kernel of Fredholm equation of the 1st kind.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>IRIS solves integral equation of the first kind of 1 or 2 dimensions, i.e. finds a distribution
+function <span class="math notranslate nohighlight">\(f(p)\)</span> or <span class="math notranslate nohighlight">\(f(c,p)\)</span> of contributions to univariate data <span class="math notranslate nohighlight">\(a(p)\)</span> or multivariate
+<span class="math notranslate nohighlight">\(a(c, p)\)</span> data evolving with an external experimental variable <span class="math notranslate nohighlight">\(p\)</span> (time, pressure,
+temperature, concentration, …) according to the integral transform:</p>
+<div class="math notranslate nohighlight">
+\[a(c, p) = \int_{min}^{max} k(q, p) f(c, q) dq\]</div>
+<div class="math notranslate nohighlight">
+\[a(p) = \int_{min}^{max} k(q, p) f(q) dq\]</div>
+<p>where the kernel <span class="math notranslate nohighlight">\(k(q, p)\)</span> expresses the functional dependence of a single contribution
+with respect to the experimental variable <span class="math notranslate nohighlight">\(p\)</span> and and ‘internal’ physico-chemical variable <span class="math notranslate nohighlight">\(q\)</span>
+Regularization is triggered when ‘reg_param’ is set to an array of two or three values.
+If ‘reg_param’ has two values [min, max], the optimum regularization parameter is searched between
+<span class="math notranslate nohighlight">\(10^{min}\)</span> and <span class="math notranslate nohighlight">\(10^{max}\)</span>. Automatic search of the regularization is made using the
+Cultrera_Callegaro algorithm (arXiv:1608.04571v2) which involves the Menger curvature of a circumcircle
+and the golden section search method.
+If three values are given (<code class="xref py py-obj docutils literal notranslate"><span class="pre">[min,</span> <span class="pre">max,</span> <span class="pre">num]</span></code>), then the inversion will be made for num values
+evenly spaced on a log scale between <span class="math notranslate nohighlight">\(10^{min}\)</span> and <span class="math notranslate nohighlight">\(10^{max}\)</span></p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">X</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;irdata/CO@Mo_Al2O3.SPG&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.004</span><span class="p">,</span> <span class="mf">0.009</span><span class="p">,</span> <span class="mf">0.014</span><span class="p">,</span> <span class="mf">0.021</span><span class="p">,</span> <span class="mf">0.026</span><span class="p">,</span> <span class="mf">0.036</span><span class="p">,</span> <span class="mf">0.051</span><span class="p">,</span> <span class="mf">0.093</span><span class="p">,</span> <span class="mf">0.150</span><span class="p">,</span>
+<span class="gp">... </span>     <span class="mf">0.203</span><span class="p">,</span> <span class="mf">0.300</span><span class="p">,</span> <span class="mf">0.404</span><span class="p">,</span> <span class="mf">0.503</span><span class="p">,</span> <span class="mf">0.602</span><span class="p">,</span> <span class="mf">0.702</span><span class="p">,</span> <span class="mf">0.801</span><span class="p">,</span> <span class="mf">0.905</span><span class="p">,</span> <span class="mf">1.004</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">iris</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">IRIS</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mf">2250.0</span><span class="p">:</span><span class="mf">1960.0</span><span class="p">],</span> <span class="s2">&quot;langmuir&quot;</span><span class="p">,</span> <span class="n">q</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">iris</span><span class="o">.</span><span class="n">f</span>
+<span class="go">NDDataset: [float64] unitless (shape: (z:1, y:10, x:301))</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.IRIS.plotdistribution.html#spectrochempy.IRIS.plotdistribution" title="spectrochempy.IRIS.plotdistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IRIS.plotdistribution</span></code></a>([index])</p></td>
+<td><p>Plot the distribution function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.IRIS.plotlcurve.html#spectrochempy.IRIS.plotlcurve" title="spectrochempy.IRIS.plotlcurve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IRIS.plotlcurve</span></code></a>([scale, title])</p></td>
+<td><p>Plot the L Curve.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.IRIS.plotmerit.html#spectrochempy.IRIS.plotmerit" title="spectrochempy.IRIS.plotmerit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IRIS.plotmerit</span></code></a>([index])</p></td>
+<td><p>Plot the input dataset, reconstructed dataset and residuals.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.IRIS.reconstruct.html#spectrochempy.IRIS.reconstruct" title="spectrochempy.IRIS.reconstruct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IRIS.reconstruct</span></code></a>()</p></td>
+<td><p>Transform data back to the original space.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<section id="examples-using-spectrochempy-iris">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">spectrochempy.IRIS</span></code><a class="headerlink" href="#examples-using-spectrochempy-iris" title="Permalink to this heading">¶</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide catalyst."><img alt="" src="../../../_images/sphx_glr_plot_2D_iris_thumb.png" />
+<p><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/analysis/plot_2D_iris.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-2d-iris-py"><span class="std std-ref">2D-IRIS analysis example</span></a></p>
+  <div class="sphx-glr-thumbnail-title">2D-IRIS analysis example</div>
+</div></div><div style='clear:both'></div></section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrochempy.MCRALS.html" class="btn btn-neutral float-left" title="spectrochempy.MCRALS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.kern.html" class="btn btn-neutral float-right" title="spectrochempy.kern" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

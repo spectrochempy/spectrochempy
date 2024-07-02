@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2D-IRIS analysis example &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Example of the fitting package usage" href="../fitting/index.html" />
+    <link rel="prev" title="EFA analysis (Keller and Massart original example)" href="plot_efa_keller_massart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#example-of-the-analysis-package-usage">Example of the analysis package usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#example-of-the-fitting-package-usage">Example of the fitting package usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#how-to-use-nddataset">How to use NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-dataset-examples">Plotting dataset examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing-dataset-examples">Processing dataset examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project Management</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#read-write">Read / Write</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Example of the analysis package usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fitting/index.html">Example of the fitting package usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nddataset/index.html">How to use NDDataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/index.html">Plotting dataset examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../processing/index.html">Processing dataset examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/index.html">Project Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../read/index.html">Read / Write</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/reference/index.html">Public API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example’s gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Example of the analysis package usage</a></li>
+      <li class="breadcrumb-item active">2D-IRIS analysis example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/gettingstarted/gallery/auto_examples/analysis/plot_2D_iris.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gettingstarted-gallery-auto-examples-analysis-plot-2d-iris-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="d-iris-analysis-example">
+<span id="sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-2d-iris-py"></span><h1>2D-IRIS analysis example<a class="headerlink" href="#d-iris-analysis-example" title="Permalink to this heading">¶</a></h1>
+<p>In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide catalyst.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">spectrochempy</span> <span class="k">as</span> <span class="nn">scp</span>
+</pre></div>
+</div>
+<section id="uploading-dataset">
+<h2>Uploading dataset<a class="headerlink" href="#uploading-dataset" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.read.html#spectrochempy.read" title="spectrochempy.read" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-function"><span class="n">scp</span><span class="o">.</span><span class="n">read</span></a><span class="p">(</span><span class="s2">&quot;irdata/CO@Mo_Al2O3.SPG&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">X</span></code> has two coordinates:
+* <code class="xref py py-obj docutils literal notranslate"><span class="pre">wavenumbers</span></code> named “x”
+* and <code class="xref py py-obj docutils literal notranslate"><span class="pre">timestamps</span></code> (<em>i.e.,</em> the time of recording) named “y”.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.coordset.html#spectrochempy.NDDataset.coordset" title="spectrochempy.NDDataset.coordset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X</span><span class="o">.</span><span class="n">coordset</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>CoordSet: [x:wavenumbers, y:acquisition timestamp (GMT)]
+</pre></div>
+</div>
+</section>
+<section id="setting-new-coordinates">
+<h2>Setting new coordinates<a class="headerlink" href="#setting-new-coordinates" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">y</span></code> coordinates of the dataset is the acquisition timestamp.
+However, each spectrum has been recorded with a given pressure of CO
+in the infrared cell.</p>
+<p>Hence, it would be interesting to add pressure coordinates to the <code class="docutils literal notranslate"><span class="pre">y</span></code> dimension:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pressures</span></a> <span class="o">=</span> <span class="p">[</span>
+    <span class="mf">0.003</span><span class="p">,</span>
+    <span class="mf">0.004</span><span class="p">,</span>
+    <span class="mf">0.009</span><span class="p">,</span>
+    <span class="mf">0.014</span><span class="p">,</span>
+    <span class="mf">0.021</span><span class="p">,</span>
+    <span class="mf">0.026</span><span class="p">,</span>
+    <span class="mf">0.036</span><span class="p">,</span>
+    <span class="mf">0.051</span><span class="p">,</span>
+    <span class="mf">0.093</span><span class="p">,</span>
+    <span class="mf">0.150</span><span class="p">,</span>
+    <span class="mf">0.203</span><span class="p">,</span>
+    <span class="mf">0.300</span><span class="p">,</span>
+    <span class="mf">0.404</span><span class="p">,</span>
+    <span class="mf">0.503</span><span class="p">,</span>
+    <span class="mf">0.602</span><span class="p">,</span>
+    <span class="mf">0.702</span><span class="p">,</span>
+    <span class="mf">0.801</span><span class="p">,</span>
+    <span class="mf">0.905</span><span class="p">,</span>
+    <span class="mf">1.004</span><span class="p">,</span>
+<span class="p">]</span>
+
+<a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_pressures</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">Coord</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pressures</span></a><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;pressure&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;torr&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we can set multiple coordinates:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_times</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.copy.html#spectrochempy.CoordSet.copy" title="spectrochempy.CoordSet.copy" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">copy</span></a><span class="p">()</span>  <span class="c1"># the original coordinate</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span><span class="o">.</span><span class="n">y</span></a> <span class="o">=</span> <span class="p">[</span><a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_times</span></a><span class="p">,</span> <a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_pressures</span></a><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span><span class="o">.</span><span class="n">y</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>CoordSet: [_1:acquisition timestamp (GMT), _2:pressure]
+</pre></div>
+</div>
+<p>To get a detailed
+a rich display of these coordinates. In a jupyter notebook, just type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.coordset.html#spectrochempy.NDDataset.coordset" title="spectrochempy.NDDataset.coordset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X</span><span class="o">.</span><span class="n">coordset</span></a>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `x`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 3112</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> wavenumbers</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[    4000     3999 ...     1001    999.9] cm⁻¹</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>     DIMENSION `y`</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 19</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          (_1)</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> acquisition timestamp (GMT)</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[1.477e+09 1.477e+09 ... 1.477e+09 1.477e+09] s</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       labels</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='darkcyan'>         [[  2016-10-18 13:49:35+00:00   2016-10-18 13:54:06+00:00 ...   2016-10-18 16:01:33+00:00   2016-10-18 16:06:37+00:00]<br/>          [  *Résultat de Soustraction:04_Mo_Al2O3_calc_0.003torr_LT_after sulf_Oct 18 15:46:42 2016 (GMT+02:00)<br/>             *Résultat de Soustraction:04_Mo_Al2O3_calc_0.004torr_LT_after sulf_Oct 18 15:51:12 2016 (GMT+02:00) ...<br/>             *Résultat de Soustraction:04_Mo_Al2O3_calc_0.905torr_LT_after sulf_Oct 18 17:58:42 2016 (GMT+02:00)<br/>             *Résultat de Soustraction:04_Mo_Al2O3_calc_1.004torr_LT_after sulf_Oct 18 18:03:41 2016 (GMT+02:00)]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          (_2)</strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> pressure</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[   0.003    0.004 ...    0.905    1.004] torr</font></div></td><tr>
+</table>
+</div>
+<br />
+<br /><p>By default, the current coordinate is the first one (here <code class="xref py py-obj docutils literal notranslate"><span class="pre">c_times</span></code>).
+For example, it will be used by default for
+plotting:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prefs</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.preferences.html#spectrochempy.NDDataset.preferences" title="spectrochempy.NDDataset.preferences" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X</span><span class="o">.</span><span class="n">preferences</span></a>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prefs</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">figsize</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot_map.html#spectrochempy.NDDataset.plot_map" title="spectrochempy.NDDataset.plot_map" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X</span><span class="o">.</span><span class="n">plot_map</span></a><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_001.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_001.png" alt="plot 2D iris" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_002.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_002.png" alt="plot 2D iris" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p>To seamlessly work with the second coordinates (pressures), we can change the default
+coordinate:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.select.html#spectrochempy.CoordSet.select" title="spectrochempy.CoordSet.select" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">select</span></a><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># to select coordinate ``_2``</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.default.html#spectrochempy.CoordSet.default" title="spectrochempy.CoordSet.default" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">default</span></a>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 19</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> pressure</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[   0.003    0.004 ...    0.905    1.004] torr</font></div></td><tr>
+</table>
+</div>
+<br />
+<br /><p>Let’s now plot the spectral range of interest. The default coordinate is now used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span></a><span class="p">[:,</span> <span class="mf">2250.0</span><span class="p">:</span><span class="mf">1950.0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.default.html#spectrochempy.CoordSet.default" title="spectrochempy.CoordSet.default" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X_</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">default</span></a><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X_</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot_map.html#spectrochempy.NDDataset.plot_map" title="spectrochempy.NDDataset.plot_map" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X_</span><span class="o">.</span><span class="n">plot_map</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_003.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_003.png" alt="plot 2D iris" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_004.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_004.png" alt="plot 2D iris" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Coord: [float64] torr (size: 19)
+</pre></div>
+</div>
+</section>
+<section id="iris-analysis-without-regularization">
+<h2>IRIS analysis without regularization<a class="headerlink" href="#iris-analysis-without-regularization" title="Permalink to this heading">¶</a></h2>
+<p>%%
+Perform IRIS without regularization (the loglevel can be set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">INFO</span></code> to have
+information on the running process)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.set_loglevel.html#spectrochempy.set_loglevel" title="spectrochempy.set_loglevel" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-function"><span class="n">scp</span><span class="o">.</span><span class="n">set_loglevel</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">scp</span><span class="o">.</span><span class="n">INFO</span></a><span class="p">)</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.IRIS.html#spectrochempy.IRIS" title="spectrochempy.IRIS" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">iris</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.IRIS.html#spectrochempy.IRIS" title="spectrochempy.IRIS" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">IRIS</span></a><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X_</span></a><span class="p">,</span> <span class="s2">&quot;langmuir&quot;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Build kernel matrix with: langmuir
+
+Build S matrix (sharpness)
+
+... done
+
+Solving for 312 channels and 19 observations, no regularization
+
+--&gt;  residuals = 1.09e-01    curvature = 9.15e+04
+
+Done.
+</pre></div>
+</div>
+<p>Plots the results</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.IRIS.plotdistribution.html#spectrochempy.IRIS.plotdistribution" title="spectrochempy.IRIS.plotdistribution" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">iris</span><span class="o">.</span><span class="n">plotdistribution</span></a><span class="p">()</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.IRIS.plotmerit.html#spectrochempy.IRIS.plotmerit" title="spectrochempy.IRIS.plotmerit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">iris</span><span class="o">.</span><span class="n">plotmerit</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_005.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_005.png" alt="plot 2D iris" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_006.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_006.png" alt="2D IRIS merit plot, $\lambda$ = 0.00e+00" class = "sphx-glr-multi-img"/></li>
+</ul>
+</section>
+<section id="with-regularization-and-a-manual-search">
+<h2>With regularization and a manual search<a class="headerlink" href="#with-regularization-and-a-manual-search" title="Permalink to this heading">¶</a></h2>
+<p>%%
+Perform  IRIS with regularization, manual search</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.IRIS.html#spectrochempy.IRIS" title="spectrochempy.IRIS" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">iris</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.IRIS.html#spectrochempy.IRIS" title="spectrochempy.IRIS" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">IRIS</span></a><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X_</span></a><span class="p">,</span> <span class="s2">&quot;langmuir&quot;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="n">reg_par</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">])</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.IRIS.plotlcurve.html#spectrochempy.IRIS.plotlcurve" title="spectrochempy.IRIS.plotlcurve" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">iris</span><span class="o">.</span><span class="n">plotlcurve</span></a><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;L curve, manual search&quot;</span><span class="p">)</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.IRIS.plotdistribution.html#spectrochempy.IRIS.plotdistribution" title="spectrochempy.IRIS.plotdistribution" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">iris</span><span class="o">.</span><span class="n">plotdistribution</span></a><span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.IRIS.plotmerit.html#spectrochempy.IRIS.plotmerit" title="spectrochempy.IRIS.plotmerit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">iris</span><span class="o">.</span><span class="n">plotmerit</span></a><span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_007.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_007.png" alt="L curve" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_008.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_008.png" alt="plot 2D iris" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_009.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_009.png" alt="2D IRIS merit plot, $\lambda$ = 1.00e-05" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Build kernel matrix with: langmuir
+
+Build S matrix (sharpness)
+
+... done
+
+Solving for 312 channels, 19 observations and 12 regularization parameters
+
+log10(lambda)=-10.000 --&gt;  residuals = 1.088e-01    regularization constraint  = 9.085e+04
+
+log10(lambda)=-9.000 --&gt;  residuals = 1.088e-01    regularization constraint  = 8.266e+04
+
+log10(lambda)=-8.000 --&gt;  residuals = 1.093e-01    regularization constraint  = 2.244e+04
+
+log10(lambda)=-7.000 --&gt;  residuals = 1.104e-01    regularization constraint  = 3.301e+03
+
+log10(lambda)=-6.000 --&gt;  residuals = 1.121e-01    regularization constraint  = 6.108e+02
+
+log10(lambda)=-5.000 --&gt;  residuals = 1.153e-01    regularization constraint  = 1.148e+02
+
+log10(lambda)=-4.000 --&gt;  residuals = 1.210e-01    regularization constraint  = 2.192e+01
+
+log10(lambda)=-3.000 --&gt;  residuals = 1.309e-01    regularization constraint  = 4.383e+00
+
+log10(lambda)=-2.000 --&gt;  residuals = 1.474e-01    regularization constraint  = 9.509e-01
+
+log10(lambda)=-1.000 --&gt;  residuals = 1.778e-01    regularization constraint  = 3.208e-01
+
+log10(lambda)=0.000 --&gt;  residuals = 2.639e-01    regularization constraint  = 1.399e-01
+
+log10(lambda)=1.000 --&gt;  residuals = 5.505e-01    regularization constraint  = 9.736e-02
+
+
+Done.
+</pre></div>
+</div>
+</section>
+<section id="automatic-search">
+<h2>Automatic search<a class="headerlink" href="#automatic-search" title="Permalink to this heading">¶</a></h2>
+<p>%%
+Now try an automatic search of the regularization parameter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.IRIS.html#spectrochempy.IRIS" title="spectrochempy.IRIS" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">iris</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.IRIS.html#spectrochempy.IRIS" title="spectrochempy.IRIS" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">IRIS</span></a><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X_</span></a><span class="p">,</span> <span class="s2">&quot;langmuir&quot;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="n">reg_par</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.IRIS.plotlcurve.html#spectrochempy.IRIS.plotlcurve" title="spectrochempy.IRIS.plotlcurve" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">iris</span><span class="o">.</span><span class="n">plotlcurve</span></a><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;L curve, automated search&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../_images/sphx_glr_plot_2D_iris_010.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_010.png" alt="L curve" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span> Build kernel matrix with: langmuir
+
+ Build S matrix (sharpness)
+
+ ... done
+
+ Solving for 312 channel(s) and 19 observations, search optimum regularization parameter in the range: [10**-10, 10**1]
+
+ Initial Log(lambda) values = [     -10   -5.798   -3.202        1]
+ log10(lambda)=-10.000 --&gt;  residuals = 1.088e-01    regularization constraint  = 9.085e+04
+
+ log10(lambda)=-5.798 --&gt;  residuals = 1.126e-01    regularization constraint  = 4.325e+02
+
+ log10(lambda)=-3.202 --&gt;  residuals = 1.284e-01    regularization constraint  = 6.047e+00
+
+ log10(lambda)=1.000 --&gt;  residuals = 5.505e-01    regularization constraint  = 9.736e-02
+
+ Curvatures of the inner points: C1 = 0.012 ; C2 = 0.163
+
+ New range of Log(lambda) values: [     -10   -7.403   -5.798   -3.202]
+ log10(lambda)=-7.403 --&gt;  residuals = 1.099e-01    regularization constraint  = 7.236e+03
+
+ new curvature: C2 = 0.014
+ New range (Log lambda):[  -7.403   -5.798   -4.807   -3.202]
+ log10(lambda)=-4.807 --&gt;  residuals = 1.162e-01    regularization constraint  = 8.329e+01
+
+ Curvatures of the inner points: C1 = 0.010 ; C2 = 0.021
+
+ New range of Log(lambda) values: [  -7.403   -6.411   -5.798   -4.807]
+ log10(lambda)=-6.411 --&gt;  residuals = 1.113e-01    regularization constraint  = 1.223e+03
+
+ new curvature: C2 = 0.012
+ New range (Log lambda):[  -6.411   -5.798    -5.42   -4.807]
+ log10(lambda)=-5.420 --&gt;  residuals = 1.138e-01    regularization constraint  = 2.293e+02
+
+ Curvatures of the inner points: C1 = 0.011 ; C2 = 0.014
+
+ New range of Log(lambda) values: [  -6.411   -6.033   -5.798    -5.42]
+ log10(lambda)=-6.033 --&gt;  residuals = 1.121e-01    regularization constraint  = 6.458e+02
+
+ new curvature: C2 = 0.012
+ New range (Log lambda):[  -6.033   -5.798   -5.654    -5.42]
+ log10(lambda)=-5.654 --&gt;  residuals = 1.130e-01    regularization constraint  = 3.413e+02
+
+ Curvatures of the inner points: C1 = 0.011 ; C2 = 0.013
+
+ New range of Log(lambda) values: [  -6.033   -5.888   -5.798   -5.654]
+ log10(lambda)=-5.888 --&gt;  residuals = 1.124e-01    regularization constraint  = 5.035e+02
+
+ new curvature: C2 = 0.013
+ New range (Log lambda):[  -5.888   -5.798   -5.743   -5.654]
+ log10(lambda)=-5.743 --&gt;  residuals = 1.128e-01    regularization constraint  = 3.950e+02
+
+ Curvatures of the inner points: C1 = 0.013 ; C2 = 0.015
+
+ New range of Log(lambda) values: [  -5.888   -5.833   -5.798   -5.743]
+ log10(lambda)=-5.833 --&gt;  residuals = 1.126e-01    regularization constraint  = 4.582e+02
+
+ new curvature: C2 = 0.013
+ New range (Log lambda):[  -5.833   -5.798   -5.777   -5.743]
+ log10(lambda)=-5.777 --&gt;  residuals = 1.127e-01    regularization constraint  = 4.176e+02
+
+ Curvatures of the inner points: C1 = 0.012 ; C2 = 0.015
+
+ New range of Log(lambda) values: [  -5.833   -5.811   -5.798   -5.777]
+ log10(lambda)=-5.811 --&gt;  residuals = 1.126e-01    regularization constraint  = 4.421e+02
+
+ new curvature: C2 = 0.011
+ New range (Log lambda): [  -5.833   -5.819   -5.811   -5.798]
+ log10(lambda)=-5.819 --&gt;  residuals = 1.126e-01    regularization constraint  = 4.482e+02
+
+
+ optimum found: index = 7 ; Log(lambda) = -5.811 ; lambda = 1.54375e-06 ; curvature = 0.012
+
+ Done.
+
+&lt;Axes: title={&#39;center&#39;: &#39;L curve&#39;}, xlabel=&#39;Residuals&#39;, ylabel=&#39;Curvature&#39;&gt;
+</pre></div>
+</div>
+<p>The data corresponding to the largest curvature of the L-curve
+are at the second last position of output data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.IRIS.plotdistribution.html#spectrochempy.IRIS.plotdistribution" title="spectrochempy.IRIS.plotdistribution" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">iris</span><span class="o">.</span><span class="n">plotdistribution</span></a><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.IRIS.plotmerit.html#spectrochempy.IRIS.plotmerit" title="spectrochempy.IRIS.plotmerit" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">iris</span><span class="o">.</span><span class="n">plotmerit</span></a><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_011.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_011.png" alt="plot 2D iris" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../../_images/sphx_glr_plot_2D_iris_012.png" srcset="../../../../_images/sphx_glr_plot_2D_iris_012.png" alt="2D IRIS merit plot, $\lambda$ = 6.29e-04" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  24.730 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gettingstarted-gallery-auto-examples-analysis-plot-2d-iris-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../../_downloads/3b5140c01fa07a59960dd5991f50a711/plot_2D_iris.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_2D_iris.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../../_downloads/69fa5a64f81670c083e5d62824253256/plot_2D_iris.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_2D_iris.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_efa_keller_massart.html" class="btn btn-neutral float-left" title="EFA analysis (Keller and Massart original example)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../fitting/index.html" class="btn btn-neutral float-right" title="Example of the fitting package usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

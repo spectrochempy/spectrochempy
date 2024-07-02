@@ -1,0 +1,10 @@
+What's new in revision 0.4.7 [2022-05-16]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.7. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+Bug fixes
+~~~~~~~~~
+
+-  Show_versions utility now work with user installation only.

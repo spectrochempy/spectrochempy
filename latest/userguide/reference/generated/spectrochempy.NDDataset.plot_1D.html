@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.NDDataset.plot_1D &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Public API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">spectrochempy.NDDataset.plot_1D</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.NDDataset.plot_1D.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-nddataset-plot-1d">
+<h1>spectrochempy.NDDataset.plot_1D<a class="headerlink" href="#spectrochempy-nddataset-plot-1d" title="Permalink to this heading">¶</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.NDDataset.plot_1D">
+<span class="sig-prename descclassname"><span class="pre">NDDataset.</span></span><span class="sig-name descname"><span class="pre">plot_1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_PLOT1D_DOC)def</span> <span class="pre">plot_1D(dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/plotters/plot1d.py#L242-L607"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.NDDataset.plot_1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot of one-dimensional data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">NDDataset</span></code>) – Source of data to plot.</p></li>
+<li><p><strong>method</strong> (<em>str, optional, default: dataset.preference.method_1D</em>) – The method can be one among <code class="docutils literal notranslate"><span class="pre">pen</span></code>, <code class="docutils literal notranslate"><span class="pre">bar</span></code>, <code class="docutils literal notranslate"><span class="pre">scatter</span></code> or <code class="docutils literal notranslate"><span class="pre">scatter+pen</span></code>.
+Default values is <code class="docutils literal notranslate"><span class="pre">pen</span></code>, i.e., solid lines are drawn. This default can be changed
+using <code class="docutils literal notranslate"><span class="pre">dataset.preference.method_1D</span></code>.
+To draw a Bar graph, use method <code class="docutils literal notranslate"><span class="pre">bar</span></code>.
+For a Scatter plot, use method <code class="docutils literal notranslate"><span class="pre">scatter</span></code>.
+For pen and scatter simultaneously, use method <code class="docutils literal notranslate"><span class="pre">scatter+pen</span></code>.</p></li>
+<li><p><strong>**kwargs</strong> – Optional keyword parameters (see Other Parameters).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ax</strong> (<em>Axe, optional</em>) – Axe where to plot. If not specified, create a new one.</p></li>
+<li><p><strong>style</strong> (str, optional, default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">dataset.preferences.style</span></code> (scpy)) – Matplotlib stylesheet (use <code class="xref py py-obj docutils literal notranslate"><span class="pre">available_style</span></code> to get a list of available
+styles for plotting.</p></li>
+<li><p><strong>use_plotly</strong> (bool, optional, default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">preferences.use_plotly</span></code> (False)) – Should we use plotly instead of matplotlib for plotting.</p></li>
+<li><p><strong>twinx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Axes</span></code> instance, optional, default: None) – If this is not None, then a twin axes will be created with a
+common x dimension.</p></li>
+<li><p><strong>clear</strong> (<em>bool, optional, default: True</em>) – If false, hold the current figure and ax until a new plot is performed.</p></li>
+<li><p><strong>reverse</strong> (<em>bool or None [optional, default=None/False</em>) – In principle, coordinates run from left to right,
+except for wavenumbers
+(<em>e.g.</em>, FTIR spectra) or ppm (<em>e.g.</em>, NMR), that spectrochempy
+will try to guess. But if reverse is set, then this is the
+setting which will be taken into account.</p></li>
+<li><p><strong>data_only</strong> (<em>bool, optional, default: False</em>) – Only the plot is done. No addition of axes or label specifications.</p></li>
+<li><p><strong>imag</strong> (<em>bool, optional, default: False</em>) – Show imaginary component for complex data. By default the real component is
+displayed.</p></li>
+<li><p><strong>show_complex</strong> (<em>bool, optional, default: False</em>) – Show both real and imaginary component for complex data.
+By default only the real component is displayed.</p></li>
+<li><p><strong>figsize</strong> (<em>tuple, optional, default is (3.4, 1.7)</em>) – figure size.</p></li>
+<li><p><strong>dpi</strong> (<em>int, optional</em>) – the number of pixel per inches.</p></li>
+<li><p><strong>xlim</strong> (<em>tuple, optional</em>) – limit on the horizontal axis.</p></li>
+<li><p><strong>zlim or ylim</strong> (<em>tuple, optional</em>) – limit on the vertical axis.</p></li>
+<li><p><strong>color or c</strong> (<em>color, optional, default: auto</em>) – color of the line.</p></li>
+<li><p><strong>linewidth or lw</strong> (<em>float, optional, default: auto</em>) – line width.</p></li>
+<li><p><strong>linestyle or ls</strong> (<em>str, optional, default: auto</em>) – line style definition.</p></li>
+<li><p><strong>marker, m</strong> (<em>str, optional, default: auto</em>) – marker type for scatter plot. If marker != “” then the scatter type of plot is chosen automatically.</p></li>
+<li><p><strong>markeredgecolor or mec</strong> (<em>color, optional</em>)</p></li>
+<li><p><strong>markeredgewidth or mew</strong> (<em>float, optional</em>)</p></li>
+<li><p><strong>markerfacecolor or mfc</strong> (<em>color, optional</em>)</p></li>
+<li><p><strong>markersize or ms</strong> (<em>float, optional</em>)</p></li>
+<li><p><strong>markevery</strong> (<em>None or int</em>)</p></li>
+<li><p><strong>title</strong> (<em>str</em>) – Title of the plot (or subplot) axe.</p></li>
+<li><p><strong>plottitle</strong> (<em>bool, optional, default: False</em>) – Use the name of the dataset as title. Works only if title is not defined</p></li>
+<li><p><strong>xlabel</strong> (<em>str, optional</em>) – label on the horizontal axis.</p></li>
+<li><p><strong>zlabel or ylabel</strong> (<em>str, optional</em>) – label on the vertical axis.</p></li>
+<li><p><strong>uselabel_x</strong> (<em>bool, optional</em>) – use x coordinate label as x tick labels</p></li>
+<li><p><strong>show_z</strong> (<em>bool, optional, default: True</em>) – should we show the vertical axis.</p></li>
+<li><p><strong>show_zero</strong> (<em>bool, optional</em>) – show the zero basis.</p></li>
+<li><p><strong>show_mask</strong> (<em>bool, optional</em>) – Should we display the mask using colored area.</p></li>
+<li><p><strong>plot_model</strong> (<em>Bool,</em>) – plot model data if available.</p></li>
+<li><p><strong>modellinestyle or modls</strong> (<em>str</em>) – line style of the model.</p></li>
+<li><p><strong>offset</strong> (<em>float</em>) – offset of the model individual lines.</p></li>
+<li><p><strong>commands</strong> (<em>str,</em>) – matplotlib commands to be executed.</p></li>
+<li><p><strong>output</strong> (<em>str,</em>) – name of the file to save the figure.</p></li>
+<li><p><strong>vshift</strong> (<em>float, optional</em>) – vertically shift the line from its baseline.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="spectrochempy.plot_pen.html#spectrochempy.plot_pen" title="spectrochempy.plot_pen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_pen</span></code></a>, <a class="reference internal" href="spectrochempy.plot_scatter.html#spectrochempy.plot_scatter" title="spectrochempy.plot_scatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_scatter</span></code></a>, <a class="reference internal" href="spectrochempy.plot_bar.html#spectrochempy.plot_bar" title="spectrochempy.plot_bar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_bar</span></code></a>, <a class="reference internal" href="spectrochempy.plot_scatter_pen.html#spectrochempy.plot_scatter_pen" title="spectrochempy.plot_scatter_pen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_scatter_pen</span></code></a>, <a class="reference internal" href="spectrochempy.plot_multiple.html#spectrochempy.plot_multiple" title="spectrochempy.plot_multiple"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code></a></p>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div></section>
+
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
