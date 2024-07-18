@@ -815,8 +815,8 @@ def _read_srs(*args, **kwargs):
 
             else:
                 raise NotImplementedError(
-                    "The reader is only implemented for Rapid Scan "
-                    "and High Speed Real Time srs files. If you think "
+                    "The reader is only implemented for Rapid Scan, "
+                    "High Speed Real Time, GC or TGA srs files. If you think "
                     "your file belongs to one of these types, or if "
                     "you'd like an update of the reader to read your "
                     "file type, please report the issue on "
