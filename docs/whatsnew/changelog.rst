@@ -20,6 +20,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* read_srs now accepts TGA and GC filetypes (issue
 
 .. section
 

@@ -253,9 +253,7 @@ def read_spa(*paths, **kwargs):
 @_docstring.dedent
 def read_srs(*paths, **kwargs):
     """
-    Open a Thermo Nicolet file or a list of files with extension ``.srs`` .
-
-    Currently, only the rapid scan and high speed real time series are supported.
+    Open a Thermo Nicolet file or a list of files with extension ``.srs``
 
     Parameters
     ----------
