@@ -740,7 +740,7 @@ def _read_srs(*args, **kwargs):
         fid = open(filename, "rb")
 
     # read the file and determine whether it is a rapidscan or a high speed real time
-    is_rapidscan, is_highspeed = False, False
+    is_rapidscan, is_highspeed, is_tg = False, False, False
 
     """ At pos=304 (hex:130) is the position of the '02' key for series. Here we don't use it.
     Instead, we use one of the following sequence :
