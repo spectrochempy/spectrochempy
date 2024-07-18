@@ -960,7 +960,7 @@ def _read_srs(*args, **kwargs):
 
             # Get series history. on the sample file, the history seems overwritten by
             # some post-processing, so info["history"] returns a corrupted string.
-            # The "DATA PROCESSING HISTORY" (as inidcated by omnic) is located right
+            # The "DATA PROCESSING HISTORY" (as indicated by omnic) is located right
             # after the following 16 byte sequence:
             sub = b"\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\xFF\xFF"
             pos = bytestring.find(sub) + 16
@@ -1008,7 +1008,9 @@ def _read_srs(*args, **kwargs):
         if not return_bg:
             info = _read_header(fid, pos_info_data)
             names, data = _read_srs_spectra(fid, pos_data, info["ny"], info["nx"])
-            history = info["history"]
+            # Note: info["history"] is empty in TG IR or GC series
+            # the position of the history is indiated at pos 856 or 878 depending on the
+            # file.
 
         # read the background if the user asked for it.
         if return_bg:

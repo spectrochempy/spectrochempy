@@ -16,7 +16,6 @@ from spectrochempy.utils.exceptions import NotFittedError
 
 DATADIR = scp.preferences.datadir
 SPG_FILE = DATADIR / "irdata/nh4y-activation.spg"
-UNREADABLE = DATADIR / "irdata/omnic_series/GC_Demo.srs"
 
 
 @pytest.fixture(scope="module")
@@ -35,10 +34,6 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
         # mock dialog canceled
         return None
 
-    def open_wrong(*args, **kwargs):
-        # mock opening a dialog
-        return UNREADABLE
-
     out = scp.BaselineCorrector()
 
     with pytest.raises(NotFittedError):
@@ -55,11 +50,6 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
     monkeypatch.setattr(spectrochempy.core.common.dialogs, "open_dialog", open_ok)
     out._load_clicked()
     assert out.original.name == "nh4y-activation"
-
-    out = scp.BaselineCorrector()
-    monkeypatch.setattr(spectrochempy.core.common.dialogs, "open_dialog", open_wrong)
-    out._load_clicked()
-    assert out.original.is_empty
 
 
 def test_baselinecorrector_slicing(X):
