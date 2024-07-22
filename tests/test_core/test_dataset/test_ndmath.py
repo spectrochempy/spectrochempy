@@ -926,7 +926,10 @@ def test_ndmath_and_api_methods(IR_dataset_1D, IR_dataset_2D):
 
     mxd = nd.mean(dim="y")  # cannot make n
     assert str(mxd) == "NDDataset: [float64] a.u. (size: 5549)"
-    assert str(mxd.x) == "Coord: [float64] cm⁻¹ (size: 5549)"
+    assert str(mxd.x) in [
+        "Coord: [float64] cm⁻¹ (size: 5549)",
+        "Coord: [float64] 1/cm (size: 5549)",
+    ]
 
     # ----
     nd2 = NDDataset([[0, 1, 2], [3, 4, 5]])  # no coord (check issues

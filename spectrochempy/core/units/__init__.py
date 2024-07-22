@@ -218,7 +218,10 @@ setattr(
 def __format__(self, spec):
     # modify Pint unit __format__
 
-    spec = formatting.extract_custom_flags(spec or self.default_format)
+    if pint_version < 24:
+        spec = formatting.extract_custom_flags(spec or self.default_format)
+    else:
+        spec = formatting.extract_custom_flags(spec or self._REGISTRY.default_format)
     if "~" in spec:
         if not self._units:
             return ""

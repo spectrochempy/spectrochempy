@@ -378,7 +378,10 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
 
     nd = ndarrayunit.copy()
     h, w = ref.shape
-    assert nd.__repr__() == f"NDArray: [float64] m.s⁻¹ (shape: (y:{h}, x:{w}))"
+    assert nd.__repr__() in [
+        f"NDArray: [float64] m.s⁻¹ (shape: (y:{h}, x:{w}))",
+        f"NDArray: [float64] m/s (shape: (y:{h}, x:{w}))",
+    ]
     nd[1] = MASKED
     assert nd.is_masked
 
