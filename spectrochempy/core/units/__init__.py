@@ -113,11 +113,11 @@ if pint_version < 24:
     del formatting._FORMATTERS["C"]
 
 else:
-    del formatting._REGISTERED_FORMATTERS["P"]
-    del formatting._REGISTERED_FORMATTERS["L"]
-    del formatting._REGISTERED_FORMATTERS["H"]
-    del formatting._REGISTERED_FORMATTERS["D"]
-    del formatting._REGISTERED_FORMATTERS["C"]
+    del formatting.REGISTERED_FORMATTERS["P"]
+    del formatting.REGISTERED_FORMATTERS["L"]
+    del formatting.REGISTERED_FORMATTERS["H"]
+    del formatting.REGISTERED_FORMATTERS["D"]
+    del formatting.REGISTERED_FORMATTERS["C"]
 
 
 @formatting.register_unit_format("P")
