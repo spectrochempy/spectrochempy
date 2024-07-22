@@ -29,16 +29,9 @@ install SpectroChemPy in Colab.
 
 .. sourcecode:: ipython3
 
-    ! pip install spectrochempy &>> output.log
-    exit()
+    ! pip install -q spectrochempy &>> output.log
 
-.. note::
-
-  The whole process takes 1-2 minutes. The `exit()` instruction allows restarting
-  runtime automatically: do not pay
-  attention to the popup messages about session crash/restart. You can safely close them.
-
-Then as usual in Jupyter Notebook you can start using SpectroChemPy by inserting
+The whole process takes 1-2 minutes. Then as usual in Jupyter Notebook you can start using SpectroChemPy by inserting
 adding new code cells:
 
 .. image:: images/colab_1.png
