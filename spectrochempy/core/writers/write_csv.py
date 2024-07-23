@@ -84,7 +84,7 @@ def _write_csv(*args, **kwargs):
                 col_coord = True
                 title_1 = dataset.coordset[-1].title
                 if dataset.coordset[-1].units is not None:
-                    title_1 += f" / {dataset.coordset[-1].units: C}"
+                    title_1 += f" / {dataset.coordset[-1].units: K}"
             else:
                 col_coord = False
 

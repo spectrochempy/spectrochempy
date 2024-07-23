@@ -6,6 +6,9 @@
 # ======================================================================================
 """
 The core interface to the Pint library.
+
+
+ - % sign (used e.g. for absorbance) leads to an error when plotting with pint 0.24
 """
 
 __all__ = [
@@ -19,7 +22,6 @@ __all__ = [
 from functools import wraps
 from warnings import warn
 
-import pint
 from pint import (
     Context,
     DimensionalityError,
@@ -181,17 +183,23 @@ if pint_version < 24:
             **options,
         )
 
-else:
+else:  # pint > 0.24
+    # temoporary fix for pint >= 0.24
+    # the following should be changed as it fails in giving
+    # negative powers, e.g. as_ratio=False should yield "10 s.km⁻¹" while
+    # "10 s/km" is obtained...
+    # also the "K" format does not seem to be taken into account....
+
     del formatting.REGISTERED_FORMATTERS["P"]
     del formatting.REGISTERED_FORMATTERS["L"]
     del formatting.REGISTERED_FORMATTERS["H"]
     del formatting.REGISTERED_FORMATTERS["D"]
     del formatting.REGISTERED_FORMATTERS["C"]
 
-    @pint.register_unit_format("P")
+    @formatting.register_unit_format("P")
     def format_pretty(unit, registry, **options):
         return formatting.formatter(
-            unit.items(),
+            items=unit.items(),
             as_ratio=False,
             single_denominator=False,
             product_fmt=".",
@@ -202,7 +210,7 @@ else:
             **options,
         )
 
-    @pint.register_unit_format("K")
+    @formatting.register_unit_format("K")
     def format_spectrochempy_compact(unit, registry, **options):
         return formatting.formatter(
             unit.items(),
@@ -215,7 +223,7 @@ else:
             **options,
         )
 
-    @pint.register_unit_format("L")
+    @formatting.register_unit_format("L")
     def format_latex(unit, registry, **options):
         preprocessed = {
             r"\mathrm{{{}}}".format(u.replace("_", r"\_")): p for u, p in unit.items()
@@ -232,7 +240,7 @@ else:
         )
         return formatted.replace("[", "{").replace("]", "}")
 
-    @pint.register_unit_format("H")
+    @formatting.register_unit_format("H")
     def format_html(unit, registry, **options):
         return formatting.formatter(
             unit.items(),
@@ -245,7 +253,7 @@ else:
             **options,
         )
 
-    @pint.register_unit_format("D")
+    @formatting.register_unit_format("D")
     def format_default(unit, registry, **options):
         return formatting.formatter(
             unit.items(),
@@ -258,7 +266,7 @@ else:
             **options,
         )
 
-    @pint.register_unit_format("C")
+    @formatting.register_unit_format("C")
     def format_compact(unit, registry, **options):
         return formatting.formatter(
             unit.items(),
@@ -306,9 +314,17 @@ def __format__(self, spec):
             if self._units == "ppm":
                 units = UnitsContainer({"ppm": 1})
             elif self._units in ["percent", "transmittance"]:
-                units = UnitsContainer({"pct": 1})
+                if pint_version >= 24:
+                    # to avoid an error when plotting with % sign and pint 0.24
+                    units = UnitsContainer({"pct": 1})
+                else:
+                    units = UnitsContainer({"%": 1})
             elif self._units == "weight_percent":
-                units = UnitsContainer({"wt.pct": 1})
+                if pint_version >= 24:
+                    # to avoid an error when plotting with % sign and pint 0.24
+                    units = UnitsContainer({"wt.pct": 1})
+                else:
+                    units = UnitsContainer({"wt.%": 1})
             elif self._units == "radian":
                 units = UnitsContainer({"rad": 1})
             elif self._units == "degree":
@@ -369,7 +385,7 @@ if globals().get("U_", None) is None:
     if pint_version < 24:
         U_.default_format = "~P"
     else:
-        U_.fromatter.default_format = "~P"
+        U_.formatter.default_format = "~P"
     Q_ = U_.Quantity
     Q_.default_format = "~P"
 

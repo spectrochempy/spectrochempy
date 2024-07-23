@@ -41,6 +41,7 @@ def test_repr_html():
     assert a._repr_html_() in ["10 s.km<sup>-1</sup>", "10 s/km"]
 
 
+# does not work with pint >= 0.24
 # def test_unit_dimensionality():
 #     a = Quantity(1.0, "cm")
 #     b = a / Quantity(1.0, "km")
