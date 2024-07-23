@@ -19,21 +19,22 @@ __all__ = [
 from functools import wraps
 from warnings import warn
 
+import pint
 from pint import (
     Context,
     DimensionalityError,
+    Quantity,
+    Unit,
     UnitRegistry,
     __version__,
     formatting,
     set_application_registry,
 )
+from pint.facets.plain import ScaleConverter, UnitDefinition
+from pint.util import UnitsContainer
 
 # check pint version
 pint_version = int(__version__.split(".")[1])
-
-from pint import Quantity, Unit
-from pint.facets.plain import ScaleConverter, UnitDefinition
-from pint.util import UnitsContainer
 
 # ======================================================================================
 # Modify the pint behaviour
@@ -97,6 +98,89 @@ if pint_version < 24:
     del formatting._FORMATTERS["D"]
     del formatting._FORMATTERS["C"]
 
+    @formatting.register_unit_format("P")
+    def format_pretty(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=False,
+            product_fmt=".",
+            division_fmt="/",
+            power_fmt="{}{}",
+            parentheses_fmt="({})",
+            exp_call=formatting._pretty_fmt_exponent,
+            **options,
+        )
+
+    @formatting.register_unit_format("K")
+    def format_spectrochempy_compact(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=False,
+            product_fmt=".",
+            division_fmt="/",
+            power_fmt="{}^{}",
+            parentheses_fmt=r"({})",
+            **options,
+        )
+
+    @formatting.register_unit_format("L")
+    def format_latex(unit, registry, **options):
+        preprocessed = {
+            r"\mathrm{{{}}}".format(u.replace("_", r"\_")): p for u, p in unit.items()
+        }
+        formatted = formatting.formatter(
+            preprocessed.items(),
+            as_ratio=False,
+            single_denominator=True,
+            product_fmt=r" \cdot ",
+            division_fmt=r"\frac[{}][{}]",
+            power_fmt="{}^[{}]",
+            parentheses_fmt=r"\left({}\right)",
+            **options,
+        )
+        return formatted.replace("[", "{").replace("]", "}")
+
+    @formatting.register_unit_format("H")
+    def format_html(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=True,
+            product_fmt=r".",
+            division_fmt=r"{}/{}",
+            power_fmt=r"{}<sup>{}</sup>",
+            parentheses_fmt=r"({})",
+            **options,
+        )
+
+    @formatting.register_unit_format("D")
+    def format_default(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=False,
+            product_fmt="*",
+            division_fmt="/",
+            power_fmt="{}^{}",
+            parentheses_fmt=r"({})",
+            **options,
+        )
+
+    @formatting.register_unit_format("C")
+    def format_compact(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=False,
+            product_fmt="*",
+            division_fmt="/",
+            power_fmt="{}**{}",
+            parentheses_fmt=r"({})",
+            **options,
+        )
+
 else:
     del formatting.REGISTERED_FORMATTERS["P"]
     del formatting.REGISTERED_FORMATTERS["L"]
@@ -104,94 +188,88 @@ else:
     del formatting.REGISTERED_FORMATTERS["D"]
     del formatting.REGISTERED_FORMATTERS["C"]
 
+    @pint.register_unit_format("P")
+    def format_pretty(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=False,
+            product_fmt=".",
+            division_fmt="/",
+            power_fmt="{}{}",
+            parentheses_fmt="({})",
+            exp_call=formatting._pretty_fmt_exponent,
+            **options,
+        )
 
-@formatting.register_unit_format("P")
-def format_pretty(unit, registry, **options):
-    return formatting.formatter(
-        unit.items(),
-        as_ratio=False,
-        single_denominator=False,
-        product_fmt=".",
-        division_fmt="/",
-        power_fmt="{}{}",
-        parentheses_fmt="({})",
-        exp_call=formatting._pretty_fmt_exponent,
-        **options,
-    )
+    @pint.register_unit_format("K")
+    def format_spectrochempy_compact(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=False,
+            product_fmt=".",
+            division_fmt="/",
+            power_fmt="{}^{}",
+            parentheses_fmt=r"({})",
+            **options,
+        )
 
+    @pint.register_unit_format("L")
+    def format_latex(unit, registry, **options):
+        preprocessed = {
+            r"\mathrm{{{}}}".format(u.replace("_", r"\_")): p for u, p in unit.items()
+        }
+        formatted = formatting.formatter(
+            preprocessed.items(),
+            as_ratio=False,
+            single_denominator=True,
+            product_fmt=r" \cdot ",
+            division_fmt=r"\frac[{}][{}]",
+            power_fmt="{}^[{}]",
+            parentheses_fmt=r"\left({}\right)",
+            **options,
+        )
+        return formatted.replace("[", "{").replace("]", "}")
 
-@formatting.register_unit_format("K")
-def format_spectrochempy_compact(unit, registry, **options):
-    return formatting.formatter(
-        unit.items(),
-        as_ratio=False,
-        single_denominator=False,
-        product_fmt=".",
-        division_fmt="/",
-        power_fmt="{}^{}",
-        parentheses_fmt=r"({})",
-        **options,
-    )
+    @pint.register_unit_format("H")
+    def format_html(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=True,
+            product_fmt=r".",
+            division_fmt=r"{}/{}",
+            power_fmt=r"{}<sup>{}</sup>",
+            parentheses_fmt=r"({})",
+            **options,
+        )
 
+    @pint.register_unit_format("D")
+    def format_default(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=False,
+            product_fmt="*",
+            division_fmt="/",
+            power_fmt="{}^{}",
+            parentheses_fmt=r"({})",
+            **options,
+        )
 
-@formatting.register_unit_format("L")
-def format_latex(unit, registry, **options):
-    preprocessed = {
-        r"\mathrm{{{}}}".format(u.replace("_", r"\_")): p for u, p in unit.items()
-    }
-    formatted = formatting.formatter(
-        preprocessed.items(),
-        as_ratio=False,
-        single_denominator=True,
-        product_fmt=r" \cdot ",
-        division_fmt=r"\frac[{}][{}]",
-        power_fmt="{}^[{}]",
-        parentheses_fmt=r"\left({}\right)",
-        **options,
-    )
-    return formatted.replace("[", "{").replace("]", "}")
-
-
-@formatting.register_unit_format("H")
-def format_html(unit, registry, **options):
-    return formatting.formatter(
-        unit.items(),
-        as_ratio=False,
-        single_denominator=True,
-        product_fmt=r".",
-        division_fmt=r"{}/{}",
-        power_fmt=r"{}<sup>{}</sup>",
-        parentheses_fmt=r"({})",
-        **options,
-    )
-
-
-@formatting.register_unit_format("D")
-def format_default(unit, registry, **options):
-    return formatting.formatter(
-        unit.items(),
-        as_ratio=False,
-        single_denominator=False,
-        product_fmt="*",
-        division_fmt="/",
-        power_fmt="{}^{}",
-        parentheses_fmt=r"({})",
-        **options,
-    )
-
-
-@formatting.register_unit_format("C")
-def format_compact(unit, registry, **options):
-    return formatting.formatter(
-        unit.items(),
-        as_ratio=False,
-        single_denominator=False,
-        product_fmt="*",
-        division_fmt="/",
-        power_fmt="{}**{}",
-        parentheses_fmt=r"({})",
-        **options,
-    )
+    @pint.register_unit_format("C")
+    def format_compact(unit, registry, **options):
+        return formatting.formatter(
+            unit.items(),
+            as_ratio=False,
+            single_denominator=False,
+            product_fmt="*",
+            division_fmt="/",
+            power_fmt="{}**{}",
+            parentheses_fmt=r"({})",
+            **options,
+        )
 
 
 def _repr_html_(cls):
@@ -218,10 +296,7 @@ setattr(
 def __format__(self, spec):
     # modify Pint unit __format__
 
-    if pint_version < 24:
-        spec = formatting.extract_custom_flags(spec or self.default_format)
-    else:
-        spec = formatting.extract_custom_flags(spec or self._REGISTRY.default_format)
+    spec = formatting.extract_custom_flags(spec or self.default_format)
     if "~" in spec:
         if not self._units:
             return ""
@@ -231,9 +306,9 @@ def __format__(self, spec):
             if self._units == "ppm":
                 units = UnitsContainer({"ppm": 1})
             elif self._units in ["percent", "transmittance"]:
-                units = UnitsContainer({"%": 1})
+                units = UnitsContainer({"pct": 1})
             elif self._units == "weight_percent":
-                units = UnitsContainer({"wt.%": 1})
+                units = UnitsContainer({"wt.pct": 1})
             elif self._units == "radian":
                 units = UnitsContainer({"rad": 1})
             elif self._units == "degree":
@@ -276,28 +351,25 @@ if globals().get("U_", None) is None:
     U_.define("Kubelka_Munk = 1. = K.M.")
     U_.define("ppm = 1. = ppm")
 
-    if pint_version < 20:
-        U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
-        U_.define(
-            UnitDefinition("weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0))
+    U_.define(
+        UnitDefinition(
+            "percent", "pct", (), ScaleConverter(1 / 100.0), UnitsContainer()
         )
-    else:
-        U_.define(
-            UnitDefinition(
-                "percent", "pct", (), ScaleConverter(1 / 100.0), UnitsContainer()
-            )
+    )
+    U_.define(
+        UnitDefinition(
+            "weight_percent",
+            "wt_pct",
+            (),
+            ScaleConverter(1 / 100.0),
+            UnitsContainer(),
         )
-        U_.define(
-            UnitDefinition(
-                "weight_percent",
-                "wt_pct",
-                (),
-                ScaleConverter(1 / 100.0),
-                UnitsContainer(),
-            )
-        )
+    )
 
-    U_.default_format = "~P"
+    if pint_version < 24:
+        U_.default_format = "~P"
+    else:
+        U_.fromatter.default_format = "~P"
     Q_ = U_.Quantity
     Q_.default_format = "~P"
 
