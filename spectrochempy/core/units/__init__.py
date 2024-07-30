@@ -562,7 +562,7 @@ else:  # pint version >= 24
 
         default_format: str = "~P"
 
-        def __init__(self, registry: UnitRegistry | None = None):
+        def __init__(self, registry):
             super().__init__(registry)
 
             self._formatters = {}
