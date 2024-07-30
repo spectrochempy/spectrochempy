@@ -71,7 +71,7 @@ lstsq.fit(time, distance)
 v = lstsq.coef
 d0 = lstsq.intercept
 rsquare = lstsq.score()
-print(f"speed : {v:.2fK},  d0 : {d0:.2fK},  r^2={rsquare:.3f}")
+print(f"speed : {v: .2f},  d0 : {d0: .2f},  r^2={rsquare: .3f}")
 
 # %%
 # Predict return a NDDataset since the inputs were NDDatasets
@@ -102,7 +102,7 @@ lstsq.fit(distance)
 v = lstsq.coef
 d0 = lstsq.intercept
 rsquare = lstsq.score()
-print(f"speed : {v:.2fK},  d0 : {d0:.2fK},  r^2={rsquare:.3f}")
+print(f"speed : {v:.2f~C},  d0 : {d0:.2f~C},  r^2={rsquare:.3f}")
 
 # %%
 # Final plot

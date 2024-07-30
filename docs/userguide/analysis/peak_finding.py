@@ -104,7 +104,7 @@ x = pos.max()
 y = maximas.max()
 ax.set_ylim(-0.01, 0.3)
 _ = ax.annotate(
-    f"{x:~0.2fP} {y:~.3fP}",
+    f"{x: ~0.2fP} {y: ~.3fP}",
     xy=(2115.5, maximas.max()),
     xytext=(30, -20),
     textcoords="offset points",
@@ -163,7 +163,7 @@ _ = pks.plot_scatter(
 for p in pks:
     x, y = p.x.values, p.values + 0.02
     _ = ax.annotate(
-        f"{x.m:0.0f}",
+        f"{x.m: 0.0f}",
         xy=(x, y),
         xytext=(-5, 0),
         rotation=90,
@@ -420,7 +420,7 @@ ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base
 
 # %%
 prominence = peaks[0].values - s[wr].values
-print(f"calc. prominence = {prominence:0.4fK}")
+print(f"calc. prominence = {prominence: 0.4f}")
 
 # %% [markdown]
 # Finally, we illustrate how the use of the `wlen` parameter - which limits the
@@ -437,12 +437,12 @@ print(f"calc. prominence = {prominence:0.4fK}")
 
 # %%
 peak, properties = s.find_peaks(height=0.2, prominence=0)
-print(f"prominence with full spectrum: {properties['prominences'][0]:0.4fK}")
+print(f"prominence with full spectrum: {properties['prominences'][0]: 0.4f}")
 
 peak, properties = s.find_peaks(
     height=0.2, prominence=0, wlen=50.0
 )  # a float should be explicitly passed, else will be considered as points
-print(f"prominence with reduced window: {properties['prominences'][0]:0.4fK}")
+print(f"prominence with reduced window: {properties['prominences'][0]: 0.4f}")
 
 # %% [markdown]
 # #### Width
@@ -546,14 +546,14 @@ peaks, properties = s.find_peaks(
     rel_height=rel_height,
 )
 
-table_pos = "  ".join([f"{peaks[i].x.value.m:>10.3f}" for i in range(len(peaks))])
-print(f'{"peak_position (cm⁻¹)":>26}: {table_pos}')
+table_pos = "  ".join([f"{peaks[i].x.value.m: >10.3f}" for i in range(len(peaks))])
+print(f'{"peak_position (cm⁻¹)": >26}: {table_pos}')
 for key in properties:
     table_property = "  ".join(
-        [f"{properties[key][i].m:>10.3f}" for i in range(len(peaks))]
+        [f"{properties[key][i].m: >10.3f}" for i in range(len(peaks))]
     )
-    title = f"{key:>.16} ({properties[key][0].u:~P})"
-    print(f"{title:>26}: {table_property}")
+    title = f"{key: >.16} ({properties[key][0].u: ~P})"
+    print(f"{title: >26}: {table_property}")
 
 ax = s.plot()
 peaks.plot_scatter(
