@@ -589,7 +589,7 @@ else:  # pint version >= 24
             "__wrapped__ = 1"
         )  # <- hack to avoid an error with pytest (doctest activated)
         ur.define("@alias point = count")
-        ur.define("transmittance = 1. / 100. = %")
+        ur.define("transmittance = 1. / 100. = pct")
         ur.define("absolute_transmittance = 1.")
         ur.define("absorbance = 1. = a.u.")
         ur.define("Kubelka_Munk = 1. = K.M.")
@@ -597,13 +597,13 @@ else:  # pint version >= 24
 
         ur.define(
             UnitDefinition(
-                "percent", "%", (), ScaleConverter(1 / 100.0), UnitsContainer()
+                "percent", "pct", (), ScaleConverter(1 / 100.0), UnitsContainer()
             )
         )
         ur.define(
             UnitDefinition(
                 "weight_percent",
-                "wt.%",
+                "wt.%" "pct",
                 (),
                 ScaleConverter(1 / 100.0),
                 UnitsContainer(),
