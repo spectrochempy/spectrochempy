@@ -9,4 +9,9 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* read_srs now accepts TGA and GC filetypes (issue
+* read_srs now accepts TGA and GC filetypes (issue #769)
+
+Bug fixes
+~~~~~~~~~
+
+* compatibility with pint>0.24 (issue #765)

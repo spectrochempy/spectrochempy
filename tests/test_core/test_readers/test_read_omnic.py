@@ -86,10 +86,7 @@ def test_read_omnic():
 
     # GC Demo
     a = scp.read_srs("irdata/omnic_series/GC_Demo.srs")
-    assert str(a) in [
-        "NDDataset: [float64] % (shape: (y:788, x:1738))",
-        "NDDataset: [float64] pct (shape: (y:788, x:1738))",
-    ]
+    assert str(a) == "NDDataset: [float64] % (shape: (y:788, x:1738))"
 
     # high speed series
     a = scp.read_srs("irdata/omnic_series/high_speed.srs")

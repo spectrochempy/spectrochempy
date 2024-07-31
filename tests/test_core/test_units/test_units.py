@@ -37,8 +37,8 @@ def test_units():
 
 def test_repr_html():
     a = Quantity(10, "s/km")
-    assert "{}".format(a) == "10 s.km⁻¹"
-    assert a._repr_html_() == "10 s.km<sup>-1</sup>"
+    assert "{}".format(a) == "10 s⋅km⁻¹"
+    assert a._repr_html_() == "10 s⋅km<sup>-1</sup>"
 
 
 def test_unit_dimensionality():

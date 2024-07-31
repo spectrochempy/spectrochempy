@@ -97,7 +97,7 @@ if pint_version < 24:
         "K": {  # spectrochempy Compact format.
             "as_ratio": False,
             "single_denominator": False,
-            "product_fmt": ".",
+            "product_fmt": " ",
             "division_fmt": "/",
             "power_fmt": "{}^{}",
             "parentheses_fmt": r"({})",
@@ -112,7 +112,7 @@ if pint_version < 24:
             unit.items(),
             as_ratio=False,
             single_denominator=False,
-            product_fmt=".",
+            product_fmt="⋅",
             division_fmt="/",
             power_fmt="{}{}",
             parentheses_fmt="({})",
@@ -126,7 +126,7 @@ if pint_version < 24:
             unit.items(),
             as_ratio=False,
             single_denominator=False,
-            product_fmt=".",
+            product_fmt=" ",
             division_fmt="/",
             power_fmt="{}^{}",
             parentheses_fmt=r"({})",
@@ -160,7 +160,7 @@ if pint_version < 24:
             unit.items(),
             as_ratio=False,
             single_denominator=True,
-            product_fmt=r".",
+            product_fmt=r"⋅",
             division_fmt=r"{}/{}",
             power_fmt=r"{}<sup>{}</sup>",
             parentheses_fmt=r"({})",
@@ -399,19 +399,20 @@ else:  # pint version >= 24
         DimensionalityError,
         Unit,
         UnitRegistry,
-        formatting,
         set_application_registry,
     )
+
+    # utilities
     from pint.delegates.formatter._compound_unit_helpers import (
         localize_per,
         prepare_compount_unit,
     )
     from pint.delegates.formatter._format_helpers import formatter, pretty_fmt_exponent
+
+    # formatters to be  subclassed
     from pint.delegates.formatter.full import FullFormatter
     from pint.delegates.formatter.html import HTMLFormatter
     from pint.delegates.formatter.latex import LatexFormatter, latex_escape
-
-    # formatters to be  subclassed
     from pint.delegates.formatter.plain import (
         CompactFormatter,
         DefaultFormatter,
@@ -420,6 +421,9 @@ else:  # pint version >= 24
     from pint.facets.plain import ScaleConverter, UnitDefinition
     from pint.util import UnitsContainer
 
+    ####################################################################################
+    # SpectroChemPy specific formatters
+    # ##################################################################################
     class ScpDefaultFormatter(DefaultFormatter):
         """subclasses the DefaultFormatter to provide a specific formatting for
         SpectroChemPy"""
@@ -486,7 +490,7 @@ else:  # pint version >= 24
                 denominator,
                 as_ratio=False,
                 single_denominator=False,
-                product_fmt=".",
+                product_fmt="⋅",
                 division_fmt="/",
                 power_fmt="{}{}",
                 parentheses_fmt=r"({})",
@@ -519,7 +523,7 @@ else:  # pint version >= 24
                 denominator,
                 as_ratio=False,
                 single_denominator=True,
-                product_fmt=r".",
+                product_fmt=r"⋅",
                 division_fmt=division_fmt,
                 power_fmt=r"{}<sup>{}</sup>",
                 parentheses_fmt=r"({})",
@@ -573,7 +577,8 @@ else:  # pint version >= 24
             self._formatters["L"] = ScpLatexFormatter(registry)
 
     ####################################################################################
-    # Define the pint-spectrochempy UnitRegistry
+    # Spectrochempy UnitRegistry
+    ####################################################################################
 
     if globals().get("ur", None) is None:
 
@@ -603,10 +608,9 @@ else:  # pint version >= 24
 
     ur.enable_contexts("spectroscopy", "boltzmann", "chemistry")
 
-    # utilities
-
+    ###################################################################################
     # Context for NMR
-    # --------------------------------------------------------------------------------------
+    ###################################################################################
     def set_nmr_context(larmor):
         """
         Set a NMR context relative to the given Larmor frequency.
@@ -676,6 +680,11 @@ else:  # pint version >= 24
         else:
             c = ur._contexts["nmr"]
             c.defaults["larmor"] = larmor
+
+
+########################################################################################
+# utilities
+########################################################################################
 
 
 def remove_args_units(func):
