@@ -1,3 +1,5 @@
+# flake8: noqa
+
 import json
 import re
 import sys
@@ -237,6 +239,13 @@ New features
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+
+
+.. section
+
+Dependency updates
+~~~~~~~~~~~~~~~~~~
+.. Add here new dependency updates (do not delete this comment)
 
 
 .. section

@@ -20,7 +20,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-* read_srs now accepts TGA and GC filetypes (issue
+* read_srs now accepts TGA and GC filetypes (issue #769)
 
 .. section
 
@@ -28,6 +28,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* compatibility with pint>0.24 (issue #765)
 
 .. section
 

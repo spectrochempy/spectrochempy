@@ -88,7 +88,7 @@ lst = scp.LSTSQ()
 lst.fit(time, d)
 
 v, d0 = lst.coef, lst.intercept
-print("speed : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
+print("speed : {:.3f},  distance at time 0 : {:.3f}".format(v, d0))
 
 dfit = lst.predict()
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
@@ -117,7 +117,7 @@ d.plot_scatter(
     mfc="red",
     mec="black",
     label="Original data",
-    title=f"Linear regression, $r^2={lst.score():.3f} ",
+    title=f"Linear regression, $r^2={lst.score(): .3f} ",
 )
 dfit = lst.predict()
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
@@ -158,7 +158,7 @@ lst = scp.LSTSQ()
 lst.fit(X, d2)
 
 v, d0 = lst.coef, lst.intercept
-print("acceleration : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
+print("acceleration : {:.3f},  distance at time 0 : {:.3f}".format(v, d0))
 
 # %%
 d2.plot_scatter(
@@ -188,7 +188,7 @@ nls = scp.NNLS()
 nls.fit(X, d2)
 
 v, d0 = lst.coef, lst.intercept
-print("acceleration : {:.3fK},  distance at time 0 : {:.3fK}".format(v, d0))
+print("acceleration : {: .3f},  distance at time 0 : {: .3f}".format(v, d0))
 
 # %%
 d2.plot_scatter(

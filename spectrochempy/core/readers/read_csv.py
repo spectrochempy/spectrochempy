@@ -240,7 +240,7 @@ def _add_tga_info(dataset, **kwargs):
     # for TGA, some information are needed.
     # we add them here
     dataset.x.units = "hour"
-    dataset.units = "weight_percent"
+    dataset.units = "percent"
     dataset.x.title = "time-on-stream"
     dataset.title = "mass change"
     dataset.origin = "tga"

@@ -11,6 +11,9 @@ import matplotlib.axes as maxes
 import mpl_toolkits.mplot3d.axes3d as maxes3D
 import numpy as np
 from matplotlib import pyplot as plt
+from pint import __version__
+
+pint_version = int(__version__.split(".")[1])
 
 
 @maxes.subplot_class_factory
@@ -565,7 +568,8 @@ def make_label(ss, lab="<no_axe_label>", use_mpl=True):
             "absolute_transmittance",
         ]:
             units = r"/\ {:~L}".format(ss.units)
-            units = units.replace("%", r"\%")
+            if pint_version < 24:
+                units = units.replace("%", r"\%")
         else:
             units = ""
         label = r"%s $\mathrm{%s}$" % (label, units)

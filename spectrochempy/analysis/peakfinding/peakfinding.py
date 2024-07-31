@@ -195,11 +195,11 @@ def find_peaks(
     >>> len(peaks.x)
     2
     >>> peaks.x.values
-    <Quantity([    1644     1455], 'centimeter^-1')>
+    <Quantity([    1644     1455], '1 / centimeter')>
     >>> properties["peak_heights"][0]
     <Quantity(2.26663446, 'absorbance')>
     >>> properties["widths"][0]
-    <Quantity(38.729003, 'centimeter^-1')>
+    <Quantity(38.729003, '1 / centimeter')>
     """
 
     # get the dataset
