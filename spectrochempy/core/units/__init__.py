@@ -546,7 +546,7 @@ else:  # pint version >= 24
             formatted = formatter(
                 numerator,
                 denominator,
-                as_ratio=True,
+                as_ratio=False,
                 single_denominator=True,
                 product_fmt=r" \cdot ",
                 division_fmt=r"\frac[{}][{}]",
@@ -589,26 +589,11 @@ else:  # pint version >= 24
             "__wrapped__ = 1"
         )  # <- hack to avoid an error with pytest (doctest activated)
         ur.define("@alias point = count")
-        ur.define("transmittance = 1. / 100. = pct")
+        ur.define("transmittance = 1. / 100. = %")
         ur.define("absolute_transmittance = 1.")
         ur.define("absorbance = 1. = a.u.")
         ur.define("Kubelka_Munk = 1. = K.M.")
         ur.define("ppm = 1. = ppm")
-
-        ur.define(
-            UnitDefinition(
-                "percent", "pct", (), ScaleConverter(1 / 100.0), UnitsContainer()
-            )
-        )
-        ur.define(
-            UnitDefinition(
-                "weight_percent",
-                "wt.%" "pct",
-                (),
-                ScaleConverter(1 / 100.0),
-                UnitsContainer(),
-            )
-        )
 
         set_application_registry(ur)
         del UnitRegistry  # to avoid importing it
