@@ -21,7 +21,7 @@ numpy<2.0
 numpydoc>=1.2
 osqp
 packaging
-pint>=0.20
+pint>=0.24
 requests
 scipy
 tqdm

@@ -7,6 +7,9 @@ Papers citing `SpectroChemPy`
 2024
 ====
 
+- External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
+  :cite:t:`Rejman:2024`\ , `DOI: 10.26434/chemrxiv-2024-4fq4v <https://doi.org/10.26434/chemrxiv-2024-4fq4v>`__\ .
+
 - Deriving kinetic insights from mechanochemically synthesized compounds using multivariate analysis (MCR-ALS) of powder X-ray diffraction data,
   :cite:t:`Macchietti:2024`\ , `DOI: 10.1039/D3MR00013C <http://dx.doi.org/10.1039/D3MR00013C>`__\ .
 
