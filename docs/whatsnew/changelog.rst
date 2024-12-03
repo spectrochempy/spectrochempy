@@ -29,6 +29,7 @@ Bug fixes
 .. Add here new bug fixes (do not delete this comment)
 
 * compatibility with pint>0.24 (issue #765)
+* loading of dataset for MCR-ALS with kinetic constraints.
 
 .. section
 
