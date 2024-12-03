@@ -16,7 +16,8 @@ in :cite:t:`bijlsma:2001` .
 The data can be downloded from the author website `Biosystems Data Analysis group
 University of Amsterdam
 <http://www.bdagroup.nl/content/Downloads/datasets/datasets.php>`__
-(Copyright 2005 Biosystems Data Analysis Group ; Universiteit van Amsterdam )
+(Copyright 2005 Biosystems Data Analysis Group ; Universiteit van Amsterdam ). For the user convenience,
+# this dataset is present in the 'datadir' of spectrochempy in 'matlabdata/METING9.MAT'.
 """
 
 import numpy as np
@@ -26,10 +27,8 @@ import spectrochempy as scp
 # %%
 # Loading a NDDataset
 # -------------------
-# DownLoad the data at
-# (`Kinetic data set (UV-VIS) <http://www.bdagroup.nl/content/Downloads/datasets/18_sb_uv_vis.zip>`__ )
-# using the `read` function.
-data = scp.read("http://www.bdagroup.nl/content/Downloads/datasets/18_sb_uv_vis.zip")
+# Load the data with the `read` function.
+data = scp.read("matlabdata/METING9.MAT")
 
 # %%
 # For sake of demonstration, we will focus on a single run.
