@@ -105,11 +105,11 @@ def trapezoid(dataset, **kwargs):
     Example
     -------
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
-    >>> dataset[:,1250.:1800.].trapz()
+    >>> dataset[:,1250.:1800.].trapezoid()
     NDDataset: [float64] a.u..cm^-1 (size: 55)
     """
 
-    return scipy.integrate.trapezoid(dataset, **kwargs)
+    return scipy.integrate.trapezoid(dataset.data, **kwargs)
 
 
 @deprecated(replace="Trapezoid")
@@ -172,7 +172,7 @@ def simpson(dataset, *args, **kwargs):
     --------
 
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
-    >>> dataset[:,1250.:1800.].simps()
+    >>> dataset[:,1250.:1800.].simpson()
     NDDataset: [float64] a.u..cm^-1 (size: 55)
     """
     return scipy.integrate.simpson(dataset.data, **kwargs)

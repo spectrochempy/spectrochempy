@@ -98,6 +98,13 @@ def dot(a, b, strict=True, out=None):
     new._mask = mask
     new.set_coordset(y=coordy, x=coordx)
     new.history = history
+
+    if a.title == "<untitled>":
+        new.title = b.title
+    elif b.title == "<untitled>":
+        new.title = a.title
+    else:
+        new.title = a.title + "." + b.title
     if a.unitless:
         new.units = b.units
     elif b.unitless:
