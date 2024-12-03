@@ -28,23 +28,11 @@ import spectrochempy as scp
 # Loading a NDDataset
 # -------------------
 # Load the data with the `read` function.
-data = scp.read("matlabdata/METING9.MAT")
+ds = scp.read("matlabdata/METING9.MAT")
 
 # %%
-# For sake of demonstration, we will focus on a single run.
-# For example, we extract only the data for the run ``#9`` (dataset name: ``'x9b'`` ).
-#
-# Let's search it. Data is a list of pairs of NDDataset, a pair of each run.
-# The name we are looking for is the name of the second dataset in a apir.
-for pair in data:
-    if pair[1].name == "x9b":
-        ds = pair
-        break
-
-# %%
-# now we have the required pair of dataset.
-#
-# The first dataset incontains the time in seconds since the start of the reaction (t=0).
+# This file contains a pair of datasets. The first dataset contains the time in seconds since the start of the reaction
+# (t=0). The second dataset contains the UV-VIS spectra of the reaction mixture, recorded at different time points.
 # The first column of the matrix contains the wavelength axis and the remaining columns
 # are the measured UV-VIS spectra (wavelengths x timepoints)
 print("\n NDDataset names: " + str([d.name for d in ds]))
