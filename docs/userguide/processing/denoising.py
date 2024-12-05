@@ -35,7 +35,7 @@ import spectrochempy as scp
 
 # %% [markdown]
 # ## Denoising 2D spectra
-# Denoising 2D spectra can be done using the above filtering techniques which can be applies sequentially
+# Denoising 2D spectra can be done using the above filtering techniques which can be applied sequentially
 # to each rows of a 2D dataset.
 #
 # e.g., let's take a series of Raman spectra for demonstration: These spectra present both a significant noise and cosmic rays spikes.
@@ -95,14 +95,10 @@ _ = nd4.plot()
 # %% [markdown]
 # ### `despike` method
 #
-# To obtain better results, one can use the despike method (base on the paper from
-# Katsumoto and Ozaki,
-# Practical Algorithm for Reducing Convex Spike Noises on a Spectrum.
-# Applied Spectroscopy. 2003;57(3):317-322.
-#
-# Only two parameters needs to be tuned: the `size`of the savgol filter, and delta, the threshold for the detection of spikes.
-# A spike is detected if its value is greater than `delta` times the standard deviation of the difference between
-# the original and the smoothed data.
+# To obtain better results, one can use the despike methods. The default method ('katsumo') is based on
+# :cite:t:`katsumoto:2003`. The second one ('whitaker') is based on :cite:t:`Whitaker:2018`
+# For both methods, only two parameters needs to be tuned: `delta`, a threshold for the detection of spikes, and
+# `size` the size of the window to consider around the spike to estimate the original intensity.
 
 # %%
 X = nd1[0]
@@ -113,7 +109,7 @@ _ = nd5.plot(clear=False, ls="-", c="r")
 # %% [markdown]
 # Getting the desired results require the tuning of size and delta parameters. And sometimes may need to repeat the procedure on a previously filtered spectra.
 #
-# For example, it size or delta are badly chosen, valid peaks could be removed. So carefull inspection of the results is crucial.
+# For example, it size or delta are badly chosen, valid peaks could be removed. So careful inspection of the results is crucial.
 
 # %%
 nd5b = scp.despike(X, size=21, delta=2)
@@ -135,3 +131,8 @@ _ = nd6.plot()
 # %%
 nd7 = nd6.denoise(ratio=92)
 _ = nd7.plot()
+
+# %% [markdown]
+# The 'whitaker' method is also available:
+nd8 = scp.despike(nd1, size=11, delta=5, method="whitaker")
+_ = nd8.plot()

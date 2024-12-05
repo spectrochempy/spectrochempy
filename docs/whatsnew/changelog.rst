@@ -20,6 +20,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* add a despike method ('whitaker') and improves rate of execution of 'katsumoto' method
 * read_srs now accepts TGA and GC filetypes (issue #769)
 
 .. section

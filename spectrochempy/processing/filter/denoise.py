@@ -1,12 +1,10 @@
 import numpy as np
+from scipy.signal import savgol_filter
 
 from spectrochempy.application import error_, info_, warning_
 from spectrochempy.core import get_loglevel
 
-__dataset_methods__ = [
-    "denoise",
-    "despike",
-]
+__dataset_methods__ = ["denoise", "despike"]
 __all__ = __dataset_methods__
 
 
@@ -64,7 +62,7 @@ def denoise(dataset, ratio=99.8, **kwargs):
     pca.fit(dataset)
     info_(
         f"Number of components selected for reconstruction: {pca.n_components} "
-        f"[n_observations={dataset.shape[0]}, ratio={ratio*100:.2f}%]"
+        f"[n_observations={dataset.shape[0]}, ratio={ratio * 10: .2f}%]"
     )
     if pca.n_components < 3:
         warning_(
@@ -79,13 +77,13 @@ def denoise(dataset, ratio=99.8, **kwargs):
     return data
 
 
-def despike(dataset, size=9, delta=2):
+def despike(dataset, size=9, delta=2, method="katsumoto"):
     """
-    Remove convex spike from the data using the katsumoto-ozaki procedure.
+    Remove spikes from the data.
 
-    The method can be used to remove cosmic ray peaks from a spectrum.
+    The `despike` methods can be used to remove cosmic ray peaks from a spectrum.
 
-    The present implementation is based on the method is described
+    The 'katsumoto' implementation (default) is based on the method is described
     in :cite:t:`katsumoto:2003`:
 
     * In the first step, the moving-average method is employed to detect the spike
@@ -102,63 +100,106 @@ def despike(dataset, size=9, delta=2):
 
     As a result, the proposed method realizes the reduction of convex spikes.
 
+    The 'whitaker' implementation is based on the method is described
+    in :cite:t:`whitaker:2018`:
+
+    * The spikes are detected when the zscore of the difference between consecutive intensities is larger than
+    the delta parameter.
+    * The spike intensities are replaced by the average of the intensities in a window around the spike, excluding the
+    points that are spikes.
+
 
     Parameters
     ----------
     dataset : `NDDataset` or a ndarray-like object
         Input object.
     size : int, optional, default: 9
-        Size of the moving average window.
+        Size of the moving average window ('katsumoto' method) or the size of the window to consider around the spike
+        ('whitaker' method).
     delta : float, optional, default: 2
-        Set the threshold for the detection of spikes. A spike is detected if its value
-        is greater than `delta` times the standard deviation of the difference between
-        the original and the smoothed data.
+        Set the threshold for the detection of spikes.
+    method : str, optional, default: 'katsumoto'
+        The method to use. Can be 'katsumoto' or 'whitaker'
 
     Returns
     -------
     `NDdataset`
         The despike dataset
     """
+
     new = dataset.copy()
+
+    # machine epsilon
+    eps = np.finfo(float).eps
+
     s = int((size - 1) / 2)
 
-    for k, X in enumerate(new):
+    for k, X in enumerate(new.data):
         X = X.squeeze()
 
-        # 1) first step : savgol filter
-        A = X.savgol(size=size)
+        if method == "katsumoto":
+            # 1) first step : savgol filter
+            A = savgol_filter(X, window_length=size, polyorder=2)
 
-        # 2 and 3) second and third step : detect spike and replace spkike by the moving
-        # average and the new data are smoothed again
-        diff = X - A
-        std = delta * diff.std()
+            # 2 and 3) second and third step : detect spike and replace spkike by the moving
+            # average and the new data are smoothed again
+            diff = X - A
+            std = delta * np.std(diff)
 
-        # spike should have a large variation with respect to the std of the difference
-        select = np.array(abs(diff) >= std, dtype=bool)
-        select = np.logical_or(select, np.roll(select, 1))
-        select = np.logical_or(select, np.roll(select, -1))
+            # spike should have a large variation with respect to the std of the difference
+            select = abs(diff) >= std
+            select = np.logical_or(select, np.roll(select, 1))
+            select = np.logical_or(select, np.roll(select, -1))
 
-        # compute weights
-        w = np.ones_like(X)
-        w[select] = 0
+            # compute weights
+            w = np.ones_like(X)
+            w[select] = 0
 
-        # now we must calculate the weighted average, but for efficiency we will compute it
-        # only around where spike peaks are, the other part should be unchanged.
+            # now we must calculate the weighted average, but for efficiency we will compute it
+            # only around where spike peaks are, the other part should be unchanged.
 
-        res = np.zeros_like(X)
-        W = np.zeros_like(X)
-        r = range(-s, s + 1)
-        for j in r:
-            vj = np.roll(X, j)
-            wj = np.roll(w, j)
-            res += vj * wj
-            W += wj
-        if 0 in W:
-            error_("May be size or delta is two low")
-        A = res / W
+            res = np.zeros_like(X)
+            W = np.zeros_like(X) + eps  # to avoid division by zero
+            r = range(-s, s + 1)
+            for j in r:
+                vj = np.roll(X, j)
+                wj = np.roll(w, j)
+                res += vj * wj
+                W += wj
 
-        # 4) compare with original to remove spike peaks
-        X.data[select] -= (X - A).data[select]
-        new[k] = X
+            A = res / W
+
+            # 4) compare with original to remove spike peaks
+            X[select] -= (X - A)[select]
+
+        elif method == "whitaker":
+            # 1) detrended difference series
+            DX = np.zeros_like(X)
+            DX[1:] = X[1:] - X[:-1]
+
+            # zscore
+            m = np.median(DX)
+            M = np.median(np.abs(DX - m))
+            Z = (DX - m) / M
+            Z[0] = Z[-1] = delta + 1
+
+            # select spikes
+            select = abs(Z) >= delta
+
+            # replace spikes by average
+            A = np.zeros_like(X)
+            for i in [j for j, x in enumerate(select) if x]:
+                indexes = np.arange(max(0, i - s), min(len(X), i + s))
+                indexes = [index for index in indexes if not select[index]]
+                if indexes != []:
+                    A[i] = np.mean(X[indexes])
+                else:
+                    A[i] = X[i]
+
+            # makes change in X
+            X[select] -= (X - A)[select]
+
+        new.data[k] = X
+    new.history = f"despiked with method={method}, size={size}, delta={delta}"
 
     return new
