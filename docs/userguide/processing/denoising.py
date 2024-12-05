@@ -134,5 +134,6 @@ _ = nd7.plot()
 
 # %% [markdown]
 # The 'whitaker' method is also available:
+# %%
 nd8 = scp.despike(nd1, size=11, delta=5, method="whitaker")
 _ = nd8.plot()

@@ -50,15 +50,24 @@ _ = X1.plot()
 _ = X2.plot(clear=False, ls="-", c="r")
 
 # %%
+# Another method, 'whitaker', is also available (see the documentation for details):
+# %%
+X3 = scp.despike(X1, size=11, delta=5, method="whitaker")
+_ = X1.plot()
+_ = X3.plot(clear=False, ls="-", c="r")
+
+
+# %%
 # Getting the desired results require the tuning of size and delta parameters.
 # And sometimes may need to repeat the procedure on a previously filtered spectra.
 #
 # For example, if size or delta are badly chosen, valid peaks could be removed.
 # So careful inspection of the results is crucial.
 
-X3 = scp.despike(X1, size=21, delta=2)
+X4 = scp.despike(X1, size=21, delta=2)
 _ = X1.plot()
-_ = X3.plot(clear=False, ls="-", c="r")
+_ = X4.plot(clear=False, ls="-", c="r")
+
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

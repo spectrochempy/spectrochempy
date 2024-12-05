@@ -114,8 +114,8 @@ def despike(dataset, size=9, delta=2, method="katsumoto"):
     dataset : `NDDataset` or a ndarray-like object
         Input object.
     size : int, optional, default: 9
-        Size of the moving average window ('katsumoto' method) or the size of the window to consider around the spike
-        ('whitaker' method).
+        Size of the moving average window ('katsumoto' method) or the size of the window around the spike to estimate
+        the intensities ('whitaker' method).
     delta : float, optional, default: 2
         Set the threshold for the detection of spikes.
     method : str, optional, default: 'katsumoto'

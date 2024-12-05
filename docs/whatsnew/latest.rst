@@ -9,7 +9,7 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
-* add a despike method ('whitaker') and improves rate of execution of 'katsumoto' method
+* add a despike method ('whitaker') and improves speed of execution of the default ('katsumoto') method
 * read_srs now accepts TGA and GC filetypes (issue #769)
 
 Bug fixes
