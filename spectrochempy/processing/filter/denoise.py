@@ -100,13 +100,12 @@ def despike(dataset, size=9, delta=2, method="katsumoto"):
 
     As a result, the proposed method realizes the reduction of convex spikes.
 
-    The 'whitaker' implementation is based on the method is described
-    in :cite:t:`whitaker:2018`:
+    The 'whitaker' implementation is based on the method is described in :cite:t:`whitaker:2018`:
 
-    * The spikes are detected when the zscore of the difference between consecutive intensities is larger than
-    the delta parameter.
+    * The spikes are detected when the zscore of the difference between consecutive intensities is larger than the delta
+      parameter.
     * The spike intensities are replaced by the average of the intensities in a window around the spike, excluding the
-    points that are spikes.
+      points that are spikes.
 
 
     Parameters
