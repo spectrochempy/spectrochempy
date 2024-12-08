@@ -1,0 +1,13 @@
+What's new in revision 0.4.4 [2022-03-22]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.4.4. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Increase compatibility with Google Colaboratory (COLAB).
+-  Enable custom widget in COLAB in order to make its configuration
+   easier.
+-  Check update regularly and notify only every 3 days.
