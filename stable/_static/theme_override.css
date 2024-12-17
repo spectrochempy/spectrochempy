@@ -1,0 +1,92 @@
+.wy-nav-top {
+    background-color: #628DB6 !important;
+    /* same as for the redmine site */
+}
+
+.wy-side-nav-search {
+    background-color: #628DB6 !important;
+}
+
+
+div[class^="highlight"] a {
+    background-color: #E6E6E6;
+}
+
+div[class^="highlight"] a:hover {
+    background-color: #ABECFC;
+}
+
+.rst-versions {
+    position: relative;
+}
+
+.rst-versions.shift-up {
+    overflow-y: visible;
+}
+
+a[class^="sphx-glr-backref-module-"] {
+    text-decoration: none;
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+
+a.sphx-glr-backref-module-sphinx_gallery {
+    text-decoration: underline;
+    background-color: #E6E6E6;
+}
+
+table.colwidths-given {
+    table-layout: fixed;
+    width: 100%;
+}
+
+table.docutils td {
+    white-space: unset;
+    word-wrap: break-word;
+}
+
+
+/*div.output {*/
+/*    font-size: 10px;*/
+/*    line-height: 1.4;*/
+/*}*/
+
+/*!**/
+/*Nb Sphinx and sphinx gallery*/
+/**!*/
+
+/*div[class^="highlight-default"] pre, div[class^="highlight-ipython3"] pre , div[class^="highlight-python"] pre {*/
+/*    border: 1px #ccc solid;*/
+/*    background-color: #f7f7f7;*/
+/*    border-left-color: green;*/
+/*    border-left-width: medium;*/
+/*}*/
+
+
+div.output, div.output_area, div.output_subarea {
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.nbinput .prompt,
+.nboutput .prompt {
+    display: none;
+}
+
+/*div.input_area {*/
+/*    border: 1px #ccc solid;*/
+/*    padding: 5px;*/
+/*    background-color: #f7f7f7;*/
+/*    border-left-color: green;*/
+/*    border-left-width: medium;*/
+/*}*/
+
+/*div[class^="highlight-bash"] pre {*/
+/*    border: 1px #ccc solid;*/
+/*    background-color: #f7f7f7;*/
+/*    border-left-color: blue;*/
+/*    border-left-width: medium;*/
+/*}*/
+
+div.highlight, .highlight-default, .highlight-ipython3, .highlight-python, div.input-area{
+    background: #f5f5f5;
+}
