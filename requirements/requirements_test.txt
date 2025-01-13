@@ -19,7 +19,6 @@ matplotlib>=3.8
 numba
 numpy<2.0
 numpydoc>=1.2
-osqp
 packaging
 pint>=0.24
 requests
@@ -45,6 +44,7 @@ widgetsnbextension==4.0.5
 voila
 voila-material
 coverage
+osqp
 pytest
 pytest-doctestplus
 pytest-flake8

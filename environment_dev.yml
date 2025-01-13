@@ -35,7 +35,6 @@ dependencies:
     - numba
     - numpy<2.0
     - numpydoc>=1.2
-    - osqp
     - packaging
     - pint>=0.24
     - requests
@@ -70,6 +69,7 @@ dependencies:
     # TEST dependencies
     # ----------------
     - coverage
+    - osqp
     - pytest
     - pytest-doctestplus
     - pytest-flake8

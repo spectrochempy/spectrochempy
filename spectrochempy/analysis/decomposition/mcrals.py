@@ -290,7 +290,7 @@ It should be using one of the following syntax:
 - ``getConc(Ccurr, *argsGetConc, **kwargsGetConc) -> hardC, newArgsGetConc,
   extraOutputGetConc``
 
-with:
+where:
 
 - ``Ccurr`` is the current `C` dataset,
 - ``argsGetConc`` are the parameters needed to completely specify the function.
@@ -482,6 +482,11 @@ and `St`.
         ),
     ).tag(config=True)
 
+    storeIterations = tr.Bool(
+        default_value=False,
+        help=(r"""Whether to store the C and St generated at each iteration"""),
+    ).tag(config=True)
+
     # ----------------------------------------------------------------------------------
     # Initialization
     # ----------------------------------------------------------------------------------
@@ -592,6 +597,7 @@ and `St`.
         if profile.shape[0] == self._X_shape[0]:
             # this should be a concentration profile.
             C = profile.copy()
+            self._C0 = C
             self._n_components = C.shape[1]
             info_(
                 f"Concentration profile initialized with {self._n_components} components"
@@ -599,6 +605,7 @@ and `St`.
 
             # compute initial spectra (using X eventually masked)
             St = self._solve_St(C)
+            self._St0 = St
             info_("Initial spectra profile computed")
             # if everything went well here, C and St are set, we return
             # after having removed the eventual C mask!
@@ -608,18 +615,19 @@ and `St`.
 
         else:  # necessarily: profile.shape[1] == profile.shape[0]
             St = profile.copy()
+            self._St0 = St
             self._n_components = St.shape[0]
             info_(f"Spectra profile initialized with {self._n_components} components")
 
             # compute initial spectra
             C = self._solve_C(St)
+            self._C0 = C
             info_("Initial concentration profile computed")
             # if everything went well here, C and St are set, we return
             # after having removed the eventual St mask!
             if np.any(self._X_mask):
                 St = St[:, ~masked_columns]
             # update the number of components
-
             return C, St
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
@@ -812,7 +820,7 @@ and `St`.
     @tr.default("_components")
     def _components_default(self):
         if self._fitted:
-            # note: _outfit = (C, St, C_constrained, St_unconstrained, extraOutputGetConc, extraOutputGetSpec)
+            # note: _outfit = (C, St, C_constrained, St_ls, extraOutputGetConc, extraOutputGetSpec, ...)
             return self._outfit[1]
         else:
             raise NotFittedError("The model was not yet fitted. Execute `fit` first!")
@@ -867,6 +875,11 @@ and `St`.
         niter = 0
         ndiv = 0
 
+        C_constrained_list = []
+        C_ls_list = []
+        St_constrained_list = []
+        St_ls_list = []
+
         info_("***           ALS optimisation log            ***")
         info_("#iter     RSE / PCA        RSE / Exp      %change")
         info_("-------------------------------------------------")
@@ -878,10 +891,6 @@ and `St`.
 
         while change >= self.tol and niter < self.max_iter and ndiv < self.maxdiv:
             niter += 1
-
-            # Compute C
-            # ------------------------------------------
-            C = self._solve_C(St)
 
             # Force non-negative concentration
             # ------------------------------------------
@@ -953,17 +962,21 @@ and `St`.
 
                 C[:, self.hardConc] = fixedC[:, self.getC_to_C_idx]
 
-            # stores C in C_constrained
-            # ------------------------------------------
+            # stores C
+            # ---------------------------
             C_constrained = C.copy()
+            if self.storeIterations:
+                C_constrained_list.append(C_constrained)
 
             # Compute St
             # -----------
             St = self._solve_St(C)
+            St_ls = St.copy()
 
-            # stores St in St_unconstrained
-            # ------------------------------------------
-            St_unconstrained = St.copy()
+            # stores St in St_ls_list
+            # -----------------------------
+            if self.storeIterations:
+                St_ls_list.append(St.copy())
 
             # Force non-negative spectra
             # ------------------------------------------
@@ -1007,8 +1020,8 @@ and `St`.
 
                 St[self.hardSpec, :] = fixedSt[self.getSt_to_St_idx, :]
 
-            # recompute C for consistency
-            # ------------------------------------------
+            # recompute C
+            # -----------
             C = self._solve_C(St)
 
             # rescale spectra and concentrations
@@ -1021,6 +1034,13 @@ and `St`.
                 alpha = np.linalg.norm(St, axis=1).reshape(self._n_components, 1)
                 St = St / alpha
                 C = C * alpha.T
+
+            # store profiles
+            # --------------
+
+            if self.storeIterations:
+                C_ls_list.append(C)
+                St_constrained_list.append(St)
 
             # compute residuals
             # ------------------------------------------
@@ -1036,7 +1056,7 @@ and `St`.
             )
 
             # check convergence
-            # ------------------------------------------
+            # -----------------
 
             if change > 0:
                 ndiv += 1
@@ -1067,9 +1087,13 @@ and `St`.
             C,
             St,
             C_constrained,
-            St_unconstrained,
+            St_ls,
             extraOutputGetConc,
             extraOutputGetSpec,
+            C_constrained_list,
+            C_ls_list,
+            St_constrained_list,
+            St_ls_list,
         )
         return _outfit
 
@@ -1174,23 +1198,15 @@ and `St`.
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def C_constrained(self):
         """
-        The constrained concentration profiles, i.e. after applying the hard and soft constraints.
+        The last constrained concentration profiles, i.e. after applying the hard and soft constraints
         """
         return self._outfit[2]
 
     @property
-    @deprecated(replace="C_constrained")
-    def C_hard(self):
-        """
-        Deprecated. Equivalent to `C_constrained`.
-        """
-        return self.C_constrained
-
-    @property
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
-    def St_unconstrained(self):
+    def St_ls(self):
         r"""
-        The soft spectra profiles.
+        The last spectral profiles obtained by least-square optimization, before constraints.
 
         Spectra obtained after solving :math:`C_{\textrm{constrained}} \cdot St = X`
         for :math:`St`\ .
@@ -1198,12 +1214,20 @@ and `St`.
         return self._outfit[3]
 
     @property
-    @deprecated(replace="St_unconstrained")
+    @deprecated(replace="St_ls")
+    def St_unconstrained(self):
+        """
+        Deprecated. Equivalent to `St_ls`.
+        """
+        return self.St_ls
+
+    @property
+    @deprecated(replace="St_ls")
     def S_soft(self):
         """
-        Deprecated. Equivalent to `C_constrained`.
+        Deprecated. Equivalent to `St_ls`.
         """
-        return self.St_unconstrained
+        return self.St_ls
 
     @property
     def extraOutputGetConc(self):
@@ -1218,6 +1242,38 @@ and `St`.
         The extra outputs of the external function used to get spectra.
         """
         return self._outfit[5]
+
+    @property
+    def C_constrained_list(self):
+        """
+        The list of constrained concentration profiles at each ALS iteration.
+        Requires `MCRALS.storeIterations` set to True
+        """
+        return self._outfit[6]
+
+    @property
+    def C_ls_list(self):
+        """
+        The list of concentration profiles obtained by least square optimization and scaling at each ALS iteration.
+        Requires `MCRALS.storeIterations` set to True
+        """
+        return self._outfit[7]
+
+    @property
+    def St_constrained_list(self):
+        """
+        The list of constrained spectral profiles at each ALS iteration.
+        Requires `MCRALS.storeIterations` set to True
+        """
+        return self._outfit[9]
+
+    @property
+    def St_ls_list(self):
+        """
+        The list of optimized spectral profiles at each ALS iteration.
+        Requires `MCRALS.storeIterations` set to True
+        """
+        return self._outfit[10]
 
 
 # --------------------------------------------------------------------------------------

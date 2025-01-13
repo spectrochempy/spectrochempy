@@ -13,9 +13,6 @@ __configurables__ = ["IRIS"]
 # from collections.abc import Iterable
 
 import numpy as np
-
-# QP solvers import
-import osqp
 import traitlets as tr
 from matplotlib import pyplot as plt
 from scipy import optimize, sparse
@@ -36,6 +33,7 @@ from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
 quadprog = import_optional_dependency("quadprog", errors="ignore")
+osqp = import_optional_dependency("osqp", errors="ignore")
 
 
 @tr.signature_has_traits
@@ -391,7 +389,7 @@ class IRIS(DecompositionAnalysis):
         default_value="osqp",
         allow_none=True,
         help="Quatratic programming solver (`osqp` (default) or `quadprog`). "
-        "Note that quadprog is not installed with spectrochempy.",
+        "Note that these solvers are not installed with spectrochempy.",
     ).tag(config=True)
 
     reg_par = tr.List(
@@ -431,10 +429,19 @@ class IRIS(DecompositionAnalysis):
     @tr.validate("qpsolver")
     def _qpsolver_validate(self, proposal):
         qpsolver = proposal.value
-        if qpsolver == "quadprog" and quadprog is False:
-            raise ValueError(
+        if not quadprog and not osqp:
+            raise ImportError(
+                "IRIS needs at least one qp solver installed among quadpro and osqp"
+            )
+        elif qpsolver == "quadprog" and quadprog is False:
+            raise ImportError(
                 "quadprog module is not installed. Please install it or run IRIS Solver "
                 "with qpsolver='osqp'"
+            )
+        if qpsolver == "osqp" and osqp is False:
+            raise ImportError(
+                "quadprog module is not installed. Please install it or run IRIS Solver "
+                "with qpsolver='quadprog'"
             )
 
     @tr.validate("reg_par")
@@ -524,7 +531,7 @@ class IRIS(DecompositionAnalysis):
             RSS[0] = np.sum(res**2)
             SM[0] = np.linalg.norm(np.dot(np.dot(np.transpose(f[0]), S), f[0]))
 
-            msg = f"-->  residuals = {RSS[0]:.2e}    curvature = {SM[0]:.2e}"
+            msg = f"--> residuals = {RSS[0]: .2e}    curvature = {SM[0]: .2e}"
             info_(msg)
 
         else:  # regularization
@@ -587,8 +594,8 @@ class IRIS(DecompositionAnalysis):
 
                         except ValueError:  # pragma: no cover
                             msg = (
-                                f"Warning:P is not positive definite for log10(lambda)="
-                                f"{np.log10(lamda):.2f} at {channel:.2f} "
+                                f"Warning: P is not positive definite for log10(lambda)="
+                                f"{np.log10(lamda): .2f} at {channel: .2f} "
                                 f"{channels.units}, find nearest PD matrix"
                             )
                             warning_(msg)
@@ -610,9 +617,9 @@ class IRIS(DecompositionAnalysis):
                 SMi = np.linalg.norm(np.dot(np.dot(np.transpose(fi), S), fi))
 
                 msg = (
-                    f"log10(lambda)={np.log10(lamda):.3f} -->  "
-                    f"residuals = {RSSi:.3e}    "
-                    f"regularization constraint  = {SMi:.3e}"
+                    f"log10(lambda)={np.log10(lamda): .3f} --> "
+                    f"residuals = {RSSi: .3e}    "
+                    f"regularization constraint = {SMi: .3e}"
                 )
                 info_(msg)
 
@@ -658,10 +665,7 @@ class IRIS(DecompositionAnalysis):
                 while "convergence not reached":
                     C1 = _menger(np.log10(Rx[0:3]), np.log10(Sy[0:3]))
                     C2 = _menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
-                    msg = (
-                        f"Curvatures of the inner points: C1 = {C1:.3f} ;"
-                        f" C2 = {C2:.3f}"
-                    )
+                    msg = f"Curvatures of the inner points: C1 = {C1: .3f} and C2 = {C2: .3f}"
                     info_(msg)
 
                     while "convergence not reached":
@@ -681,7 +685,7 @@ class IRIS(DecompositionAnalysis):
                         RSS = np.concatenate((RSS, np.array(Rx[1:2])))
                         SM = np.concatenate((SM, np.array(Sy[1:2])))
                         C2 = _menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
-                        msg = f"new curvature: C2 = {C2:.3f}"
+                        msg = f"new curvature: C2 = {C2: .3f}"
                         info_(msg)
 
                         if C2 > 0:
@@ -726,9 +730,9 @@ class IRIS(DecompositionAnalysis):
                 id_opt = np.argmin(np.abs(lambdas - np.power(10, x_)))
                 id_opt_ranked = np.argmin(np.abs(np.argsort(lambdas) - id_opt))
                 msg = (
-                    f" optimum found: index = {id_opt_ranked} ; "
-                    f"Log(lambda) = {x_:.3f} ; "
-                    f"lambda = {np.power(10, x_):.5e} ; curvature = {C_:.3f}"
+                    f" optimum found: index = {id_opt_ranked} - "
+                    f"Log(lambda) = {x_: .3f} - "
+                    f"lambda = {np.power(10, x_): .5e} - curvature = {C_: .3f}"
                 )
                 info_(msg)
 
@@ -888,7 +892,9 @@ class IRIS(DecompositionAnalysis):
 
             ax = super().plotmerit(X, X_hat_, **kwargs)
 
-            ax.set_title(f"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]:.2e}")
+            ax.set_title(
+                f"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]: .2e}"
+            )
             axeslist.append(ax)
 
         return axeslist
@@ -922,7 +928,7 @@ class IRIS(DecompositionAnalysis):
         for i in index:
             ax = self.f[i].plot(method="map", **kwargs)
             ax.set_title(
-                f"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]:.2e}"
+                f"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]: .2e}"
             )
             axeslist.append(ax)
         return axeslist
