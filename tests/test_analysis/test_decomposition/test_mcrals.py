@@ -154,7 +154,7 @@ def test_MCRALS(model, data):
 
     # test current parameters
     params = mcr.params()
-    assert len(params) == 31
+    assert len(params) == 32
     assert np.all(params.closureTarget == [1] * 10)
     assert params.tol == 30.0
 
