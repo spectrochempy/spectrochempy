@@ -34,6 +34,8 @@ jobs:
 
     name: Build and publish documentation
     runs-on: ubuntu-latest
+    env:
+      TZ: "Etc/UTC"
 
     defaults:
       run:
@@ -68,12 +70,12 @@ jobs:
       #  run: |
       #    python .ci/update_version_and_release_notes.py ${{ env.VERSIONSTRING }}
 
-      - name: Setup timezone
-        uses: MathRobin/timezone-action@v1.1
-        with:
-          timezoneLinux: 'Europe/Paris'
-          timezoneMacos: 'Europe/Paris'
-          timezoneWindows: 'Europe/Paris'
+      # - name: Setup timezone
+      #  uses: MathRobin/timezone-action@v1.1
+      #  with:
+      #    timezoneLinux: 'Europe/Paris'
+      #    timezoneMacos: 'Europe/Paris'
+      #    timezoneWindows: 'Europe/Paris'
 
       - name: Build docs
         run: |

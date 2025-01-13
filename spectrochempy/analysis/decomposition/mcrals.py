@@ -484,7 +484,7 @@ and `St`.
 
     storeIterations = tr.Bool(
         default_value=False,
-        help=(r"""Whether to store the C and St generated at each iteration"""),
+        help=(r"""Whether to store the C and St generated at each iteration."""),
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
