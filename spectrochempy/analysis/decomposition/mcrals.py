@@ -1198,7 +1198,7 @@ and `St`.
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def C_constrained(self):
         """
-        The last constrained concentration profiles, i.e. after applying the hard and soft constraints
+        The last constrained concentration profiles, i.e. after applying the hard and soft constraints.
         """
         return self._outfit[2]
 
@@ -1247,7 +1247,8 @@ and `St`.
     def C_constrained_list(self):
         """
         The list of constrained concentration profiles at each ALS iteration.
-        Requires `MCRALS.storeIterations` set to True
+
+        Requires `MCRALS.storeIterations` set to True.
         """
         return self._outfit[6]
 
@@ -1255,7 +1256,8 @@ and `St`.
     def C_ls_list(self):
         """
         The list of concentration profiles obtained by least square optimization and scaling at each ALS iteration.
-        Requires `MCRALS.storeIterations` set to True
+
+        Requires `MCRALS.storeIterations` set to True.
         """
         return self._outfit[7]
 
@@ -1263,7 +1265,8 @@ and `St`.
     def St_constrained_list(self):
         """
         The list of constrained spectral profiles at each ALS iteration.
-        Requires `MCRALS.storeIterations` set to True
+
+        Requires `MCRALS.storeIterations` set to True.
         """
         return self._outfit[9]
 
@@ -1271,7 +1274,8 @@ and `St`.
     def St_ls_list(self):
         """
         The list of optimized spectral profiles at each ALS iteration.
-        Requires `MCRALS.storeIterations` set to True
+
+        Requires `MCRALS.storeIterations` set to True.
         """
         return self._outfit[10]
 
