@@ -39,6 +39,7 @@ pytest-mock
 pyfakefs
 pep8-naming
 xarray
+ipywidgets
 black
 boa
 isort

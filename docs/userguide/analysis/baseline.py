@@ -475,7 +475,7 @@ basc.show_regions(axs["axe21"])
 
 # %% [markdown]
 # The `BaselineCorrector` widget can be used in either Jupyter notebook or Jupyter
-# lab.
+# lab. It requires the `ipywidgets` package to be installed (which is absent by default).
 #
 # The buttons are the following:
 # * `upload`: allows to upload new data.

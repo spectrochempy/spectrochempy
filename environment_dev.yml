@@ -63,6 +63,16 @@ dependencies:
     - pep8-naming
     - xarray
 
+    - ipywidgets
+    # - ipympl
+    # - jupyterlab
+    # - jupyterlab_widgets
+    # - jupyter_events=0.6.3
+    # - jupyter_server
+    # - pyzmq=25.1.2
+    # - nodejs
+    # - widgetsnbextension=4.0.5
+
     # DEV dependencies
     # ----------------
     # From here, the dependencies are essentially for development.
