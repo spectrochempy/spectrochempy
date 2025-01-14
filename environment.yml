@@ -35,7 +35,7 @@ dependencies:
     - jinja2
     - matplotlib>=3.8
     - numpy<2.0
-    - numpydoc>=1.2
+    # - numpydoc>=1.2
     - osqp
     - packaging
     - pint>=0.24

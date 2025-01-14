@@ -35,7 +35,7 @@ dependencies:
     - jinja2
     - matplotlib>=3.8
     - numpy<2.0
-    - numpydoc>=1.2
+    # - numpydoc>=1.2
     - osqp
     - packaging
     - pint>=0.24
@@ -64,18 +64,10 @@ dependencies:
     - xarray
 
     - ipywidgets
-    # - ipympl
-    # - jupyterlab
-    # - jupyterlab_widgets
-    # - jupyter_events=0.6.3
-    # - jupyter_server
-    # - pyzmq=25.1.2
-    # - nodejs
-    # - widgetsnbextension=4.0.5
 
     # DEV dependencies
     # ----------------
-    # From here, the dependencies are essentially for development.
+    # From here, the dependencies are essentially for development and documentation.
     # They should not be necessary for the user of  spectrochempy.
     - anaconda-client
     - black

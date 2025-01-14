@@ -36,6 +36,7 @@ import IPython
 from IPython.core.interactiveshell import InteractiveShell
 
 from spectrochempy.application import error_
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.optional import import_optional_dependency
 
@@ -121,6 +122,7 @@ class FileSelector(Base):
         alias for [''], passes all files.
     """
 
+    @deprecated(name="FileSelector", kind="class", replace="", removed="0.7")
     def __init__(self, done_callback=None, path=None, filters=None):
 
         if _ipywidgets_is_not_available():

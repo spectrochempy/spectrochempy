@@ -14,6 +14,7 @@ from spectrochempy.application import error_, info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.readers.importer import read
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.optional import import_optional_dependency
 
 ipywidgets = import_optional_dependency("ipywidgets", errors="ignore")
@@ -102,6 +103,7 @@ class BaselineCorrector:
            out = scp.BaselineCorrector(X)
     """
 
+    @deprecated(name="BaselineCorrector", kind="class", replace="", removed="0.7")
     def __init__(self, X=None, initial_ranges=None):
 
         if _ipywidgets_is_not_available():
