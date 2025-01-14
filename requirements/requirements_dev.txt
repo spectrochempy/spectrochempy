@@ -61,10 +61,7 @@ sphinx_rtd_theme==1.2
 sphinxcontrib-bibtex
 ipywidgets
 ipympl
-jupyterlab
-jupyterlab_widgets
 jupyter_events==0.6.3
 jupyter_server
 pyzmq==25.1.2
-nodejs
 widgetsnbextension==4.0.5
