@@ -99,3 +99,4 @@ dependencies:
     - sphinx-gallery=0.13
     - sphinx_rtd_theme=1.2
     - sphinxcontrib-bibtex
+    - ipywidgets
