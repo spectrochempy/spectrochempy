@@ -5,6 +5,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+import pytest
+
 import spectrochempy as scp
 from spectrochempy.widgets.fileselector import _ipywidgets_is_not_available
 
