@@ -35,7 +35,7 @@ from contextlib import contextmanager
 import IPython
 from IPython.core.interactiveshell import InteractiveShell
 
-from spectrochempy.application import error_, warning_
+from spectrochempy.application import warning_
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.optional import import_optional_dependency
 
@@ -43,12 +43,6 @@ ipywidgets = import_optional_dependency("ipywidgets", errors="ignore")
 
 
 def _ipywidgets_is_not_available():
-    if ipywidgets is None:
-        error_(
-            ImportError,
-            "Missing optional dependency 'ipywidgets'.  "
-            "Use conda or pip to install ipywidgets.",
-        )
     return ipywidgets is None
 
 
@@ -128,7 +122,7 @@ class FileSelector(Base):
         )
 
         if _ipywidgets_is_not_available():
-            raise ImportError
+            raise ImportError('This widget requires "ipywidgets" to be installed.')
 
         path = pathclean(path)
         self.startpath = path
