@@ -497,7 +497,7 @@ basc.show_regions(axs["axe21"])
 import spectrochempy as scp
 
 X = scp.read_omnic("irdata/nh4y-activation.spg")
-out = scp.BaselineCorrector(X)
+# out = scp.BaselineCorrector(X)
 
 # %% [markdown]
 # After processing, one can get the original (sliced) dataset, corrected dataset
@@ -505,7 +505,7 @@ out = scp.BaselineCorrector(X)
 # through the following attributes:
 
 # %%
-out.original, out.corrected, out.baseline
+# out.original, out.corrected, out.baseline
 
 # %% [markdown]
 # <div class='alert alert-info'>
