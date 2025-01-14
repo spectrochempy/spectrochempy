@@ -6,8 +6,12 @@
 # ======================================================================================
 # flake8: noqa
 import spectrochempy as scp
+from spectrochempy.widgets.fileselector import _ipywidgets_is_not_available
 
 
+@pytest.mark.skipif(
+    _ipywidgets_is_not_available(), reason="ipywidgets must be installed first"
+)
 def test_fileselector():
 
     datadir = scp.preferences.datadir

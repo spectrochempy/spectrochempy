@@ -134,6 +134,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--dash", help="use dash", action="store_true")
     parser.add_argument("--cantera", help="use cantera", action="store_true")
+    parser.add_argument("--widgets", help="use widgets", action="store_true")
     args = parser.parse_args()
 
     repo_path = Path(__file__).parent.parent
@@ -172,6 +173,7 @@ if __name__ == "__main__":
     out_header = template_header.render(
         TEST=False,
         DEV=False,
+        WIDGETS=args.widgets,
         DASH=args.dash,
         CANTERA=args.cantera,
         COMMENT=comment,
@@ -179,6 +181,7 @@ if __name__ == "__main__":
     out_dependencies = template_dependencies.render(
         TEST=False,
         DEV=False,
+        WIDGETS=args.widgets,
         DASH=args.dash,
         CANTERA=args.cantera,
         COMMENT=comment,
@@ -192,6 +195,7 @@ if __name__ == "__main__":
     out_test_header = template_header.render(
         TEST=True,
         DEV=False,
+        WIDGETS=args.widgets,
         DASH=args.dash,
         CANTERA=args.cantera,
         COMMENT=comment,
@@ -199,6 +203,7 @@ if __name__ == "__main__":
     out_test_dependencies = template_dependencies.render(
         TEST=True,
         DEV=False,
+        WIDGETS=args.widgets,
         DASH=args.dash,
         CANTERA=args.cantera,
         COMMENT=comment,

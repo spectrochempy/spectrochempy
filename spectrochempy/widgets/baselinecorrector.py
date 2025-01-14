@@ -8,13 +8,29 @@ import re
 from functools import partial
 
 from IPython.display import display
-from ipywidgets import Layout, widgets
 
 from spectrochempy.analysis.baseline.baseline import Baseline
-from spectrochempy.application import info_, warning_
+from spectrochempy.application import error_, info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.readers.importer import read
+from spectrochempy.utils.optional import import_optional_dependency
+
+ipywidgets = import_optional_dependency("ipywidgets", errors="ignore")
+
+
+def _ipywidgets_is_not_available():
+    if ipywidgets is None:
+        error_(
+            ImportError,
+            "Missing optional dependency 'ipywidgets'.  "
+            "Use conda or pip to install ipywidgets.",
+        )
+    return ipywidgets is None
+
+
+if not _ipywidgets_is_not_available():
+    from ipywidgets import Layout, widgets
 
 __all__ = ["BaselineCorrector"]
 
@@ -87,6 +103,9 @@ class BaselineCorrector:
     """
 
     def __init__(self, X=None, initial_ranges=None):
+
+        if _ipywidgets_is_not_available():
+            raise ImportError
 
         if not isinstance(X, (NDDataset, type(None))):
             raise ValueError("X must be None or a valid NDDataset")

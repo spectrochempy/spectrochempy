@@ -13,6 +13,7 @@ import spectrochempy as scp
 from spectrochempy.core.common import dialogs
 from spectrochempy.utils import testing
 from spectrochempy.utils.exceptions import NotFittedError
+from spectrochempy.widgets.baselinecorrector import _ipywidgets_is_not_available
 
 DATADIR = scp.preferences.datadir
 SPG_FILE = DATADIR / "irdata/nh4y-activation.spg"
@@ -25,6 +26,9 @@ def X():
     return X
 
 
+@pytest.mark.skipif(
+    _ipywidgets_is_not_available(), reason="ipywidgets must be installed first"
+)
 def test_baselinecorrector_load_clicked(X, monkeypatch):
     def open_ok(*args, **kwargs):
         # mock opening a dialog
@@ -52,6 +56,9 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
     assert out.original.name == "nh4y-activation"
 
 
+@pytest.mark.skipif(
+    _ipywidgets_is_not_available(), reason="ipywidgets must be installed first"
+)
 def test_baselinecorrector_slicing(X):
 
     out = scp.BaselineCorrector(X)
@@ -175,11 +182,17 @@ def test_baselinecorrector_slicing(X):
         out._process_clicked()
 
 
+@pytest.mark.skipif(
+    _ipywidgets_is_not_available(), reason="ipywidgets must be installed first"
+)
 def test_baselinecorrector_not_a_NDDataset(X):
     with pytest.raises(ValueError):
         scp.BaselineCorrector(X.x)
 
 
+@pytest.mark.skipif(
+    _ipywidgets_is_not_available(), reason="ipywidgets must be installed first"
+)
 def test_baselinecorrector_parameters(X):
     _X = X[0:10, :]  # 0:100]
     out = scp.BaselineCorrector(_X)
@@ -216,6 +229,9 @@ def test_baselinecorrector_parameters(X):
     assert out._npc_slider not in out._method_control.children
 
 
+@pytest.mark.skipif(
+    _ipywidgets_is_not_available(), reason="ipywidgets must be installed first"
+)
 def test_baselinecorrector_save_clicked(X, monkeypatch):
     def dialog_cancel(*args, **kwargs):
         # mock a dialog cancel action
