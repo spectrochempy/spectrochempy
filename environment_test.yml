@@ -34,7 +34,7 @@ dependencies:
     - ipython
     - jinja2
     - matplotlib>=3.8
-    - numpy<2.0
+    - numpy
     - numpydoc>=1.2
     - osqp
     - packaging
