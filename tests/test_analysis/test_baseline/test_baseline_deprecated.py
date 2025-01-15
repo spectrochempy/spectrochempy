@@ -500,41 +500,6 @@ def test_userguide_example():
     blc.show_regions(axes["axe21"])
 
     # %% [markdown]
-    # ### Widget for "advanced" baseline corrections
-
-    # %% [markdown]
-    # The `BaselineCorrector` widget can be used in either Jupyter notebook or Jupyter
-    # lab.
-    #
-    # The buttons are the following:
-    # * `upload`: allows to upload new data.
-    # * `process` : baseline correct and plot original dataset + baseline and corrected
-    # datasets
-    # * `save as`: save the baseline corrected dataset.
-    #
-    # The `x slice` and `y slice` text boxes can be used to slice the original dataset
-    # with the usual `[start:stop:step]` format. In both dimensions, coordinates or indexes
-    # can be used (for example, [3000.0::2] or [:100:5] are valid entries).
-    #
-    # The `Method` and `Interpolation` dropdown fields are self-explanatory,
-    # see above for details.
-    #
-    # `Ranges` must be entered as a tuple of digits or wave numbers,
-    # e.g. `([5900.0, 5400.0], 2000.0, [1550.0, 1555.0],)` .
-
-    # %%
-    X = scp.read_omnic("irdata/nh4y-activation.spg")
-    out = scp.BaselineCorrector(X)
-
-    # %% [markdown]
-    # After processing, one can get the original (sliced) dataset, corrected dataset
-    # and baselines
-    # through the following attributes:
-
-    # %%
-    out.original, out.corrected, out.baseline
-
-    # %% [markdown]
     # <div class='alert alert-info'>
     #     <b>Exercises</b>
     #
