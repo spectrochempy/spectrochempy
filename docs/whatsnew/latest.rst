@@ -16,6 +16,17 @@ New features
 Bug fixes
 ~~~~~~~~~
 
+* google colab compatibility (issue #784)
 * compatibility with pint>0.24 (issue #765)
 * loading of dataset for MCR-ALS with kinetic constraints.
 * update title in cdot
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* jupyter lab and widget related dependencies are not installed by default anymore
+
+Deprecations
+~~~~~~~~~~~~
+
+* FileSelector and BaseFileSelector are deprecated

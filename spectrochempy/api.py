@@ -107,13 +107,9 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
         ):
             # We are running from NBSphinx - the plot must be inline to show up.
             IP.run_line_magic("matplotlib", "inline")
-        else:
-            if RUNNING_IN_COLAB:  # pragma: no cover
-                # allow using matplotlib widget
-                from google.colab import output
-
-                output.enable_custom_widget_manager()
-            IP.run_line_magic("matplotlib", "widget")
+        elif RUNNING_IN_COLAB:  # pragma: no cover
+            # does not support interactive plots either
+            IP.run_line_magic("matplotlib", "inline")
     except Exception:
         IP.run_line_magic("matplotlib", "qt")
 

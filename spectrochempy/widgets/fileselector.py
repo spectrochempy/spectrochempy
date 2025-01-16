@@ -35,11 +35,22 @@ from contextlib import contextmanager
 import IPython
 from IPython.core.interactiveshell import InteractiveShell
 
+from spectrochempy.application import warning_
 from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.optional import import_optional_dependency
+
+ipywidgets = import_optional_dependency("ipywidgets", errors="ignore")
+
+
+def _ipywidgets_is_not_available():
+    return ipywidgets is None
+
+
+if not _ipywidgets_is_not_available():
+    from ipywidgets import widgets
+
 
 __all__ = ["FileSelector"]
-
-import ipywidgets as widgets
 
 
 @contextmanager
@@ -105,6 +116,13 @@ class FileSelector(Base):
     """
 
     def __init__(self, done_callback=None, path=None, filters=None):
+
+        warning_(
+            "This widget is not supported anymore and will be removed in a future version."
+        )
+
+        if _ipywidgets_is_not_available():
+            raise ImportError('This widget requires "ipywidgets" to be installed.')
 
         path = pathclean(path)
         self.startpath = path

@@ -25,7 +25,7 @@ pint>=0.24
 requests
 scipy
 tqdm
-traitlets==5.14.1
+traitlets
 tzlocal
 scikit-learn
 xlrd
@@ -33,6 +33,14 @@ pyyaml
 setuptools
 setuptools_scm
 gitpython
+coverage
+pytest
+pytest-doctestplus
+pytest-flake8
+pytest-mock
+pyfakefs
+pep8-naming
+xarray
 ipywidgets==8.0.4
 ipympl
 jupyterlab
@@ -42,13 +50,3 @@ jupyter_server
 pyzmq==25.1.2
 nodejs
 widgetsnbextension==4.0.5
-voila
-voila-material
-coverage
-pytest
-pytest-doctestplus
-pytest-flake8
-pytest-mock
-pyfakefs
-pep8-naming
-xarray

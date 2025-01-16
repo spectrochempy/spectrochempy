@@ -30,7 +30,7 @@ be created or updated accordingly
     - requests
     - scipy
     - tqdm
-    - traitlets=5.14.1
+    - traitlets
     - tzlocal
     - scikit-learn
     - xlrd
@@ -40,21 +40,6 @@ be created or updated accordingly
     - setuptools
     - setuptools_scm
     - git
-
-    # Jupyter lab
-    - ipywidgets=8.0.4
-    - ipympl
-    - jupyterlab
-    - jupyterlab_widgets
-    - jupyter_events=0.6.3
-    - jupyter_server
-    - pyzmq=25.1.2
-    - nodejs
-    - widgetsnbextension=4.0.5
-
-    # voila
-    - voila
-    - voila-material
 
 {%- if TEST %}
 
@@ -68,6 +53,16 @@ be created or updated accordingly
     - pyfakefs
     - pep8-naming
     - xarray
+    # Jupyter lab
+    - ipywidgets=8.0.4
+    - ipympl
+    - jupyterlab
+    - jupyterlab_widgets
+    - jupyter_events=0.6.3
+    - jupyter_server
+    - pyzmq=25.1.2
+    - nodejs
+    - widgetsnbextension=4.0.5
 {%- endif %}
 {%- if DEV %}
 
@@ -97,4 +92,14 @@ be created or updated accordingly
     - sphinx-gallery=0.13
     - sphinx_rtd_theme=1.2
     - sphinxcontrib-bibtex
+    # Jupyter lab
+    - ipywidgets=8.0.4
+    - ipympl
+    - jupyterlab
+    - jupyterlab_widgets
+    - jupyter_events=0.6.3
+    - jupyter_server
+    - pyzmq=25.1.2
+    - nodejs
+    - widgetsnbextension=4.0.5
 {%- endif %}
