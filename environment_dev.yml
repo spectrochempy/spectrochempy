@@ -100,12 +100,12 @@ dependencies:
     - sphinx_rtd_theme=1.2
     - sphinxcontrib-bibtex
     # Jupyter lab
-    - ipywidgets
+    - ipywidgets=8.0.4
     - ipympl
     - jupyterlab
     - jupyterlab_widgets
-    - jupyter_events
+    - jupyter_events=0.6.3
     - jupyter_server
-    - pyzmq
+    - pyzmq=25.1.2
     - nodejs
-    - widgetsnbextension
+    - widgetsnbextension=4.0.5
