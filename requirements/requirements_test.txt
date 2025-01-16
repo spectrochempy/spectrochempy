@@ -33,7 +33,6 @@ pyyaml
 setuptools
 setuptools_scm
 gitpython
-jupyterlab
 coverage
 pytest
 pytest-doctestplus

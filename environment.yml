@@ -51,6 +51,3 @@ dependencies:
     - setuptools
     - setuptools_scm
     - git
-
-    # jupyterlab
-    - jupyterlab

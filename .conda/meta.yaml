@@ -63,9 +63,6 @@ requirements:
     - setuptools_scm
     - git
 
-    # jupyterlab
-    - jupyterlab
-
 
   test:
     - python  {{ python }}
