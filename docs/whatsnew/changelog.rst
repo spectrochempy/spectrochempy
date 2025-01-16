@@ -19,12 +19,13 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
-
+- Improvement of the installation process using pip.
+  One can now install the package using command like `pip install spectrochempy[dev]`.
 
 .. section
 
 Bug fixes
-~~~~~~~~~
+~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
 
