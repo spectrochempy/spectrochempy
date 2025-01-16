@@ -1,4 +1,21 @@
-# flake8: noqa
+"""
+Version and Release Notes Management Script.
+
+This script manages project versioning and documentation by:
+1. Updating version information in various project files
+2. Managing citation information
+3. Generating and updating release notes
+4. Maintaining changelog documentation
+
+The script handles these files:
+- CITATION.cff: Citation information
+- .zenodo.json: Zenodo metadata
+- docs/whatsnew/: Release notes and changelog
+
+Usage:
+    python update_version_and_release_notes.py [version]
+    If version is not provided, uses 'unreleased'
+"""
 
 import json
 import re
@@ -10,6 +27,7 @@ import yaml
 from cffconvert.cli.create_citation import create_citation
 from setuptools_scm import get_version
 
+# Path configurations
 CI = Path(__file__).parent
 PROJECT = CI.parent
 CITATION = PROJECT / "CITATION.cff"
@@ -21,6 +39,13 @@ gitversion = get_version(root="..", relative_to=__file__)
 
 
 class Zenodo:
+    """
+    Handles Zenodo metadata file operations.
+
+    This class manages the .zenodo.json file which contains metadata for Zenodo
+    repositories including version information and publication dates.
+    """
+
     def __init__(self, infile=ZENODO):
         self._infile = infile
         self._js = None
@@ -59,6 +84,13 @@ class Zenodo:
 
 
 class Citation:
+    """
+    Manages citation information for the project.
+
+    This class handles the CITATION.cff file, providing multiple citation formats
+    and maintaining version/date information.
+    """
+
     def __init__(self, infile=CITATION):
         self._infile = infile
         self._citation = None
@@ -146,7 +178,14 @@ class Citation:
 
 
 def make_citation(version):
-    """"""
+    """
+    Create or update the CITATION.cff file.
+
+    Parameters
+    ----------
+    version : str
+        Version string to use in citation
+    """
     citation = Citation()
     citation.load()
     citation.update_version(version)
@@ -156,7 +195,14 @@ def make_citation(version):
 
 
 def make_zenodo(version):
-    """"""
+    """
+    Create or update the .zenodo.json file.
+
+    Parameters
+    ----------
+    version : str
+        Version string to use in Zenodo metadata
+    """
     zenodo = Zenodo()
     zenodo.load()
     zenodo.update_version(version)
@@ -166,29 +212,43 @@ def make_zenodo(version):
 
 
 def make_release_note_index(revision):
+    """
+    Generate and update release notes documentation.
 
-    # remove old last revision files
+    Parameters
+    ----------
+    revision : str
+        Version string ('unreleased' or specific version)
+
+    Notes
+    -----
+    This function:
+    1. Cleans up old development version files
+    2. Updates the changelog
+    3. Creates version-specific release notes
+    4. Generates an index of all release notes
+    """
+    # Clean up old dev files
     files = WN.glob("v*.dev*.rst")
     for file in files:
         file.unlink()
     if (WN / "latest.rst").exists():
         (WN / "latest.rst").unlink()
 
-    # Create or update file with the current version number
+    # Handle version string
     if revision == "unreleased":
         revision = gitversion.split(".dev")[0]
         revision = revision + ".dev"
 
+    # Process changelog content
     content = (WN / "changelog.rst").read_text()
-
     sections = re.split(r"^\.\. section$", content, flags=re.M)
 
-    # remove void sections and clean other sections
+    # Clean and organize sections
     header = re.sub(r"(\.\.\n(.*\n)*)", "", sections[0], 0)
     header = header.strip() + "\n"
-    cleaned_sections = [
-        header,
-    ]
+    cleaned_sections = [header]
+
     for section in sections[1:]:
         if section.strip().endswith("(do not delete this comment)"):
             continue
@@ -198,20 +258,27 @@ def make_release_note_index(revision):
         content = content.strip() + "\n"
         cleaned_sections.append(content)
 
+    # Generate final changelog
     changelog_content = "\n".join(cleaned_sections)
-    # changelog_content = changelog_content.strip() + "\n"  # end of file
     changelog_content = changelog_content.replace("{{ revision }}", revision)
 
+    # Write appropriate files based on version type
     if ".dev" in revision:
         (WN / "latest.rst").write_text(changelog_content)
     else:
-        # in principle this happens for release, create the related rst file
+        # Handle release version
         (WN / f"v{revision}.rst").write_text(changelog_content)
-        # copy it to latest for display in menu
         (WN / "latest.rst").write_text(changelog_content)
-        # void changelog (keep only section titles)
-        (WN / "changelog.rst").write_text(
-            """
+        # Reset changelog template
+        (WN / "changelog.rst").write_text(_get_changelog_template())
+
+    # Generate index file
+    _generate_release_index(revision)
+
+
+def _get_changelog_template():
+    """Return the template for a new changelog file."""
+    return """
 :orphan:
 
 What's new in revision {{ revision }}
@@ -261,15 +328,22 @@ Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
 """
-        )
-    # Create the new index.rst file
+
+
+def _generate_release_index(revision):
+    """
+    Generate the release notes index file.
+
+    Parameters
+    ----------
+    revision : str
+        Current version being processed
+    """
+    # Collect and sort version files
     files = WN.glob("v*.rst")
-    names = []
-    for file in files:
-        name = file.name
-        names.append(name)
-    names.sort()
-    names.reverse()
+    names = sorted([f.name for f in files], reverse=True)
+
+    # Organize versions
     dicvers = {}
     for name in names:
         arr = name.split(".")
@@ -280,23 +354,10 @@ Deprecations
         else:
             dicvers[v] = [base]
 
+    # Generate index content
     with open(WN / "index.rst", "w") as f:
-        f.write(
-            """.. _release:
+        f.write(_get_index_header())
 
-*************
-Release notes
-*************
-
-..
-   Do not modify this file as it is automatically generated.
-   See '.ci/update_version_and_release_notes.py' if you need to change the output.
-
-This is the list of changes to `SpectroChemPy` between each release. For full details,
-see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_ .
-For install and upgrade instructions, see :ref:`installation`\ .
-"""
-        )
         for i, vers in enumerate(dicvers):
             latest = "\n    latest" if i == 0 and ".dev" in revision else ""
             f.write(
@@ -309,21 +370,39 @@ Version {vers}
 {latest}
 """
             )
+            # Sort and write version entries
             li = sorted(dicvers[vers], key=lambda x: int(str.split(x, ".")[2]))
             li.reverse()
             for rev in li:
                 f.write(f"    {rev}\n")
 
 
+def _get_index_header():
+    """Return the standard header for the release notes index."""
+    return """.. _release:
+
+*************
+Release notes
+*************
+
+..
+   Do not modify this file as it is automatically generated.
+   See '.ci/update_version_and_release_notes.py' if you need to change the output.
+
+This is the list of changes to `SpectroChemPy` between each release. For full details,
+see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_ .
+For install and upgrade instructions, see :ref:`installation`.
+"""
+
+
 if __name__ == "__main__":
+    # Get version from command line or use 'unreleased'
+    new_revision = sys.argv[1] if len(sys.argv) > 1 else "unreleased"
 
-    if len(sys.argv) > 1:
-        new_revision = sys.argv[1]
-    else:
-        new_revision = "unreleased"
-
+    # Update citation and Zenodo info for actual releases
     if new_revision != "unreleased":
         make_citation(new_revision)
         make_zenodo(new_revision)
 
+    # Always update release notes
     make_release_note_index(new_revision)
