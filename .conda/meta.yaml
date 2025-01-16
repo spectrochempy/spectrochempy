@@ -64,15 +64,15 @@ requirements:
     - git
 
     # Jupyter lab
-    - ipywidgets=8.0.4
+    - ipywidgets
     - ipympl
     - jupyterlab
     - jupyterlab_widgets
-    - jupyter_events=0.6.3
+    - jupyter_events
     - jupyter_server
-    - pyzmq=25.1.2
+    - pyzmq
     - nodejs
-    - widgetsnbextension=4.0.5
+    - widgetsnbextension
 
     # voila
     - voila
