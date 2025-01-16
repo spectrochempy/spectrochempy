@@ -41,7 +41,7 @@ dependencies:
     - requests
     - scipy
     - tqdm
-    - traitlets=5.14.1
+    - traitlets
     - tzlocal
     - scikit-learn
     - xlrd
@@ -51,6 +51,9 @@ dependencies:
     - setuptools
     - setuptools_scm
     - git
+
+    # jupyterlab
+    - jupyterlab
 
     # TEST dependencies
     # ----------------
