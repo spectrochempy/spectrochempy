@@ -20,9 +20,6 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
-* MCRALS now allows storing the C and St generated at each iteration (storeIteration parameter)
-* add a despike method ('whitaker') and improves speed of execution of the default ('katsumoto') method
-* read_srs now accepts TGA and GC filetypes (issue #769)
 
 .. section
 
@@ -30,10 +27,13 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-* google colab compatibility (issue #784)
-* compatibility with pint>0.24 (issue #765)
-* loading of dataset for MCR-ALS with kinetic constraints.
-* update title in cdot
+
+.. section
+
+Dependency updates
+~~~~~~~~~~~~~~~~~~
+.. Add here new dependency updates (do not delete this comment)
+
 
 .. section
 
@@ -41,12 +41,9 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
-* jupyter lab and widget related dependencies are not installed by default anymore
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
-
-* FileSelector and BaseFileSelector are deprecated
