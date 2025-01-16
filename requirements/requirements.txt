@@ -33,14 +33,3 @@ pyyaml
 setuptools
 setuptools_scm
 gitpython
-ipywidgets
-ipympl
-jupyterlab
-jupyterlab_widgets
-jupyter_events
-jupyter_server
-pyzmq
-nodejs
-widgetsnbextension
-voila
-voila-material

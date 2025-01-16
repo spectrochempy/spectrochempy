@@ -52,21 +52,6 @@ dependencies:
     - setuptools_scm
     - git
 
-    # Jupyter lab
-    - ipywidgets
-    - ipympl
-    - jupyterlab
-    - jupyterlab_widgets
-    - jupyter_events
-    - jupyter_server
-    - pyzmq
-    - nodejs
-    - widgetsnbextension
-
-    # voila
-    - voila
-    - voila-material
-
     # TEST dependencies
     # ----------------
     - coverage
@@ -77,6 +62,16 @@ dependencies:
     - pyfakefs
     - pep8-naming
     - xarray
+    # Jupyter lab
+    - ipywidgets
+    - ipympl
+    - jupyterlab
+    - jupyterlab_widgets
+    - jupyter_events
+    - jupyter_server
+    - pyzmq
+    - nodejs
+    - widgetsnbextension
 
     # DEV dependencies
     # ----------------
@@ -104,3 +99,13 @@ dependencies:
     - sphinx-gallery=0.13
     - sphinx_rtd_theme=1.2
     - sphinxcontrib-bibtex
+    # Jupyter lab
+    - ipywidgets
+    - ipympl
+    - jupyterlab
+    - jupyterlab_widgets
+    - jupyter_events
+    - jupyter_server
+    - pyzmq
+    - nodejs
+    - widgetsnbextension

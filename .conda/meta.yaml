@@ -63,21 +63,6 @@ requirements:
     - setuptools_scm
     - git
 
-    # Jupyter lab
-    - ipywidgets
-    - ipympl
-    - jupyterlab
-    - jupyterlab_widgets
-    - jupyter_events
-    - jupyter_server
-    - pyzmq
-    - nodejs
-    - widgetsnbextension
-
-    # voila
-    - voila
-    - voila-material
-
 
   test:
     - python  {{ python }}
