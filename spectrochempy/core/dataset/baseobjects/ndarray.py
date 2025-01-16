@@ -971,12 +971,18 @@ class NDArray(HasTraits):
                     pass
 
         elif isinstance(data, Quantity):
-            self._data = np.asarray(data.magnitude, copy=self._copy)
+            if self._copy:
+                self._data = np.asarray(data.magnitude, subok=True, copy=True)
+            else:
+                self._data = np.asarray(data.magnitude)
             self._units = data.units
 
         elif hasattr(data, "mask"):
             # an object with data and mask attributes
-            self._data = np.array(data.data, subok=True, copy=self._copy)
+            if self.copy:
+                self._data = np.array(data.data, subok=True, copy=self._copy)
+            else:
+                self._data = np.asarray(data.data)
             if isinstance(data.mask, np.ndarray) and data.mask.shape == data.data.shape:
                 self.mask = np.asarray(data.mask, dtype=np.bool_)
 

@@ -63,7 +63,7 @@ def set_env(**environ):
 # ======================================================================================
 def gisinf(x):
     # copied from numpy.testing._private.utils
-    from numpy.core import errstate, isinf
+    from numpy._core import errstate, isinf
 
     with errstate(invalid="ignore"):
         st = isinf(x)
@@ -74,9 +74,9 @@ def gisinf(x):
 
 def _compare(x, y, decimal):
     # copied from numpy.testing._private.utils
-    from numpy.core import array, float_, number, result_type
-    from numpy.core.fromnumeric import any as npany
-    from numpy.core.numerictypes import issubdtype
+    from numpy._core import asarray, float64, number, result_type
+    from numpy._core.fromnumeric import any as npany
+    from numpy._core.numerictypes import issubdtype
 
     try:
         if npany(gisinf(x)) or npany(gisinf(y)):
@@ -95,11 +95,11 @@ def _compare(x, y, decimal):
     # make sure y is an inexact type to avoid abs(MIN_INT); will cause
     # casting of x later.
     dtype = result_type(y, 1.0)
-    y = array(y, dtype=dtype, copy=False, subok=True)
+    y = asarray(y, dtype=dtype)
     z = abs(x - y)
 
     if not issubdtype(z.dtype, number):
-        z = z.astype(float_)  # handle object arrays
+        z = z.astype(float64)  # handle object arrays
 
     return z < 1.5 * 10.0 ** (-decimal)
 
@@ -420,7 +420,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                         for item in zip(sattr, oattr):
                             res = compare_coords(*item, approx=True, decimal=3)
                             if not res:
-                                raise AssertionError(f"coords differs:\n{res}")
+                                raise AssertionError(f"coords differs: \n{res}")
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
@@ -601,8 +601,8 @@ def assert_units_equal(unit1, unit2, strict=False):
 def _check_absorbance_related_units(unit1, unit2):
     # particular case of absorbance, transmittance and absolute_transmitttance units
     lunit = ["absorbance", "transmittance", "absolute_transmittance"]
-    if f"{unit1:P}" in lunit and f"{unit2:P}" in lunit:
-        if f"{unit1:P}" != f"{unit2:P}":
+    if f"{unit1: P}" in lunit and f"{unit2: P}" in lunit:
+        if f"{unit1: P}" != f"{unit2: P}":
             raise AssertionError
     return True
 
