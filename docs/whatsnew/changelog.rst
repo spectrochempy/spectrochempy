@@ -27,6 +27,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* numpy>2.0 compatibility
 
 .. section
 
