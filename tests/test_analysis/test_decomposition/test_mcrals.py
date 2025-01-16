@@ -154,7 +154,7 @@ def test_MCRALS(model, data):
 
     # test current parameters
     params = mcr.params()
-    assert len(params) == 31
+    assert len(params) == 32
     assert np.all(params.closureTarget == [1] * 10)
     assert params.tol == 30.0
 
@@ -165,6 +165,9 @@ def test_MCRALS(model, data):
     # full process
     mcr.fit(D, C0)
     X_hat = mcr.inverse_transform()
+
+    # assert iterations not stored (default)
+    assert mcr.C_ls_list == []
 
     # test plot
     mcr.C.T.plot(title="Concentration")
@@ -178,10 +181,12 @@ def test_MCRALS(model, data):
 
     # test chaining fit runs
     mcr = MCRALS()
-    mcr.tol == 0.1
     mcr.fit(D, C0)
-    mcr.tol == 0.01
+    mcr.storeIterations = True
     mcr.fit(D, (mcr.C, mcr.St))
+
+    # assert iterations are stored
+    assert mcr.C_ls_list != []
 
     mcr1 = MCRALS()
     mcr1.tol == 0.01
