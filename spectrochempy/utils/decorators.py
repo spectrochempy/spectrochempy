@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -388,18 +388,18 @@ class _set_output(object):
                                 labels=["#%d" % (i) for i in range(X_transf.shape[0])],
                                 title="components",
                             ),
-                            X.dims[1]: X.coord(1).copy()
-                            if X.coord(-1) is not None
-                            else None,
+                            X.dims[1]: (
+                                X.coord(1).copy() if X.coord(-1) is not None else None
+                            ),
                         }
                     )
                 if self.typex == "components":
                     X_transf.dims = [X.dims[0], "k"]
                     X_transf.set_coordset(
                         {
-                            X.dims[0]: X.coord(0).copy()
-                            if X.coord(0) is not None
-                            else None,
+                            X.dims[0]: (
+                                X.coord(0).copy() if X.coord(0) is not None else None
+                            ),
                             # cannot use X.y in case of transposed X
                             "k": Coord(
                                 None,
@@ -417,18 +417,18 @@ class _set_output(object):
                                 labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
                                 title="components",
                             ),
-                            X.dims[1]: X.coord(1).copy()
-                            if X.coord(1) is not None
-                            else None,
+                            X.dims[1]: (
+                                X.coord(1).copy() if X.coord(1) is not None else None
+                            ),
                         }
                     )
                 if self.typey == "features":
                     X_transf.dims = [X.dims[1], "k"]
                     X_transf.set_coordset(
                         {
-                            X.dims[1]: X.coord(1).copy()
-                            if X.coord(1) is not None
-                            else None,
+                            X.dims[1]: (
+                                X.coord(1).copy() if X.coord(1) is not None else None
+                            ),
                             "k": Coord(
                                 None,
                                 labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
