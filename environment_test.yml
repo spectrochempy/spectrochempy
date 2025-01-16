@@ -62,7 +62,6 @@ dependencies:
     - pyfakefs
     - pep8-naming
     - xarray
-    # Jupyter lab
     - ipywidgets=8.0.4
     - ipympl
     - jupyterlab
