@@ -9,6 +9,7 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 
+* MCRALS now allows storing the C and St generated at each iteration (storeIteration parameter)
 * add a despike method ('whitaker') and improves speed of execution of the default ('katsumoto') method
 * read_srs now accepts TGA and GC filetypes (issue #769)
 
