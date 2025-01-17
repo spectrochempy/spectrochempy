@@ -25,7 +25,7 @@ dependencies:
     - quaternion
 
     # dependencies for the core package
-    - cffconvert>=2.0.0
+    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
     - colorama
     - dill
     - docrep
@@ -89,13 +89,13 @@ dependencies:
     - nbconvert=7.16.1
     - nbsphinx
     - numpydoc>=1.2
-    - pandoc=2.19
+    # - pandoc=2.19
     - pypandoc
     - pre-commit
     - scikit-image
     - sphinx=5.3
     - sphinx-copybutton
-    - sphinx-gallery=0.13
+    - sphinx-gallery<=0.7.0
     - sphinx_rtd_theme=1.2
     - sphinxcontrib-bibtex
     - ipywidgets=8.0.4

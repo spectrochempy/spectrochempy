@@ -25,7 +25,7 @@ dependencies:
     - quaternion
 
     # dependencies for the core package
-    - cffconvert>=2.0.0
+    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
     - colorama
     - dill
     - docrep

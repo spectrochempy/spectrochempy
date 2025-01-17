@@ -11,7 +11,8 @@ import inspect
 from contextlib import contextmanager
 
 import pint
-import pytz
+
+# import pytz
 
 
 # ======================================================================================
@@ -184,10 +185,10 @@ class NotHyperComplexArrayError(SpectroChemPyError):
     array"""
 
 
-class UnknownTimeZoneError(pytz.UnknownTimeZoneError):
-    """
-    Exception raised when Timezone code is not recognized.
-    """
+# class UnknownTimeZoneError(pytz.UnknownTimeZoneError):
+#    """
+#    Exception raised when Timezone code is not recognized.
+#    """
 
 
 class UnitsCompatibilityError(SpectroChemPyError):
