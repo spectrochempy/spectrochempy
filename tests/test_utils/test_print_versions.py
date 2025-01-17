@@ -19,4 +19,4 @@ def test_show_versions() -> None:
     assert "- python" in f.getvalue()
     assert "- numpy" in f.getvalue()
     assert "- pint" in f.getvalue()
-    assert "spectrochempy version" in f.getvalue()
+    assert "SPECTROCHEMPY" in f.getvalue()
