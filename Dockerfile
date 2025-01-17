@@ -8,8 +8,8 @@ RUN sudo apt-get update -y && \
 
 USER $NB_UID
 
-# Choose python 3.9 version
-ARG PY_VERSION=3.9
+# Choose python 3.10 version
+ARG PY_VERSION=3.10
 ARG DEV=''
 ARG DASH=''
 ARG CANTERA=''

@@ -210,7 +210,7 @@ REDUCE_KEEPUNITS_METHODS = [
     "sum",
     "mean",
     "std",
-    "ptp",
+    # "ptp",
 ]
 
 REDUCE_METHODS = [
