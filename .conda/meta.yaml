@@ -56,6 +56,7 @@ requirements:
     - scikit-learn
     - xlrd
     - pyyaml
+    - cffconvert
 
     # dependencies needed mainly for install and a bit more ...
     - setuptools
@@ -64,8 +65,8 @@ requirements:
 
     # PIP dependencies
     # ----------------
-    - pip
-        - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
+    #- pip
+    #    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
 
 
   test:

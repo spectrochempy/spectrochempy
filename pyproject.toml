@@ -50,10 +50,10 @@ dependencies = [
 	 "scikit-learn",
 	 "xlrd",
 	 "pyyaml",
+	 "cffconvert",
 	 "setuptools",
 	 "setuptools_scm",
-	 "gitpython",
-	 "cffconvert@git+https://github.com/citation-file-format/cffconvert@main"
+	 "gitpython"
 ]
 [project.optional-dependencies]
 dev = [
