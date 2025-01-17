@@ -15,6 +15,8 @@ In this example, we show how units can be used in SpectroChemPy
 
 # %%
 
+import pint
+
 import spectrochempy as scp
 
 # %%
@@ -75,9 +77,8 @@ x
 
 try:
     x.to("hour")
-except scp.DimensionalityError as e:
-    # scp.error_(scp.DimensionalityError, e)
-    print(e)
+except pint.DimensionalityError as e:
+    scp.error_(pint.DimensionalityError, e)
 
 # %%
 # This, of course, also applies to NDDataset.
@@ -97,8 +98,7 @@ _ = ds.plot()
 try:
     ds.x.ito("nanometer")
 except Exception as e:
-    # scp.error_(Exception, e)
-    print(e)
+    scp.error_(Exception, e)
 
 ""
 ds.x = ds.x.to("nanometer")
