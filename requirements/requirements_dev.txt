@@ -16,7 +16,6 @@ docrep
 ipython
 jinja2
 matplotlib>=3.8
-numba
 numpy
 numpydoc>=1.2
 osqp
@@ -24,7 +23,6 @@ packaging
 pint>=0.24
 requests
 scipy
-tqdm
 traitlets
 tzlocal
 scikit-learn
