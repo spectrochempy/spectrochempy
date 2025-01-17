@@ -19,21 +19,31 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
-
+* Improvement of the installation process using pip.
+  One can now install the package using command
+  like `pip install spectrochempy[cantera]` to install the package with the cantera
+  the `cantera` dependencies,
+  or `pip install -e ".[dev]"` to install the package with the
+  development dependencies and in editable mode.
+* MCRALS now allows storing the C and St generated at each iteration (storeIteration parameter)
+* add a despike method ('whitaker') and improves speed of execution of the default ('katsumoto') method
+* read_srs now accepts TGA and GC filetypes (issue #769)
 
 .. section
 
 Bug fixes
-~~~~~~~~~
+~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-
-
+* bug #777. Now `scp.show_version()`` works as expected.
+* google colab compatibility (issue #784)
+* compatibility with pint>0.24 (issue #765)
+* loading of dataset for MCR-ALS with kinetic constraints.
+* update title in cdot
 .. section
 
 Dependency updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
-
 * now compatible with numpy>2.0
 
 .. section
@@ -41,11 +51,13 @@ Dependency updates
 Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
-
 * minimum python version set to 3.10
+* jupyter lab and widget related dependencies are not installed by default anymore
+
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+* FileSelector and BaseFileSelector are deprecated

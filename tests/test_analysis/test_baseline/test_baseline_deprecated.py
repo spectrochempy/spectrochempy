@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -142,7 +142,7 @@ def test_notebook_basecor_bug(IR_dataset_2D):
 def test_old_plot_baseline_correction():
     # -*- coding: utf-8 -*-
     # ======================================================================================
-    # Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+    # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
     # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
     # See full LICENSE agreement in the root directory.
     # ======================================================================================

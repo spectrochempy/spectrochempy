@@ -36,7 +36,6 @@ requirements:
     - quaternion
 
     # dependencies for the core package
-    - cffconvert>=2.0.0
     - colorama
     - dill
     - docrep
@@ -55,6 +54,7 @@ requirements:
     - scikit-learn
     - xlrd
     - pyyaml
+    - cffconvert
 
     # dependencies needed mainly for install and a bit more ...
     - setuptools

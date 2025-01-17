@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# import atexit
 import shutil
 import warnings
 from pathlib import Path
@@ -22,7 +21,6 @@ def version():
 def _install_mpl():
     """
     Install matplotlib styles and fonts
-
     """
     try:
         import matplotlib as mpl
@@ -62,8 +60,6 @@ def _install_mpl():
     # https://stackoverflow.com/a/47743010
 
     # Copy files over
-    # _dir_data = Path(matplotlib_fname()).parent
-    # _dir_data = Path(mpl.rcParams['datapath'])
     _dir_data = Path(mpl.get_data_path())
 
     dir_source = Path("scp_data") / "fonts"
@@ -120,48 +116,19 @@ class PostDevelopCommand(_develop):
 # Data for setuptools
 packages = []
 setup_args = dict(
-    # packages information
     name="spectrochempy",
-    # use_scm_version=True,
     version=version(),
-    license="CECILL-B",
-    author="Arnaud Travert & Christian Fernandez",
-    author_email="contact@spectrochempy.fr",
-    maintainer="C. Fernandez",
-    maintainer_email="christian.fernandez@ensicaen.fr",
-    url="https://www.spectrochempy.fr",
-    description="Processing, analysis and modelling Spectroscopic data for "
-    "Chemistry with Python",
-    long_description=Path("README.md").read_text(),
-    long_description_content_type="text/markdown",
-    classifiers=[
-        "Development Status :: 3 - Alpha",
-        "Topic :: Utilities",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Software Development :: Libraries",
-        "Intended Audience :: Science/Research",
-        "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-    ],
-    platforms=["Windows", "Mac OS X", "Linux"],
-    # packages discovery
     zip_safe=False,
     packages=find_packages() + packages,
     include_package_data=True,  # requirements
     python_requires=">=3.10",
     setup_requires=["setuptools_scm>=6.3.2", "matplotlib>=3.5.1"],
     install_requires=read_requirements(),
-    # post-commands
     cmdclass={
         "develop": PostDevelopCommand,
         "install": PostInstallCommand,
     },
 )
 
-# ======================================================================================
 if __name__ == "__main__":
-    # execute setup
     setup(**setup_args)

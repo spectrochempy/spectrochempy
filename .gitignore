@@ -128,3 +128,4 @@ coverage.json
 scp_data/stylesheets/mydefault.mplstyle
 _ressources
 _tools
+.venv

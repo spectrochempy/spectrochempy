@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -343,6 +343,8 @@ sphinx_gallery_conf = {
         "spectrochempy": None,
     },
     "abort_on_example_error": False,
+    "only_warn_on_example_error": True,
+    "capture_repr": ("_repr_html_", "__repr__"),
     "expected_failing_examples": [],
     "download_all_examples": False,
     "pypandoc": True,

@@ -1,7 +1,108 @@
 [build-system]
 requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
+build-backend = "setuptools.build_meta"
 
-#[tool.setuptools_scm]
+[project]
+name = "spectrochempy"
+description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
+readme = "README.md"
+dynamic = ["version"]
+requires-python = ">=3.9"
+license = { text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT" }
+authors = [
+    { name = "Arnaud Travert", email = "contact@spectrochempy.fr" },
+    { name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr" }
+]
+keywords = ["spectroscopy", "chemistry", "data analysis"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Topic :: Utilities",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries",
+    "Intended Audience :: Science/Research",
+    "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+	"brukeropusreader",
+	 "numpy-quaternion",
+	 "colorama",
+	 "dill",
+	 "docrep",
+	 "ipython",
+	 "jinja2",
+	 "matplotlib>=3.8",
+	 "numpy",
+	 "numpydoc>=1.2",
+	 "osqp",
+	 "packaging",
+	 "pint>=0.24",
+	 "requests",
+	 "scipy",
+	 "traitlets",
+	 "tzlocal",
+	 "scikit-learn",
+	 "xlrd",
+	 "pyyaml",
+	 "cffconvert",
+	 "setuptools",
+	 "setuptools_scm",
+	 "gitpython"
+]
+[project.optional-dependencies]
+dev = [
+	"coverage",
+	 "pytest",
+	 "pytest-doctestplus",
+	 "pytest-flake8",
+	 "pytest-mock",
+	 "pyfakefs",
+	 "pep8-naming",
+	 "xarray",
+	 "black",
+	 "boa",
+	 "isort",
+	 "json5",
+	 "jupytext",
+	 "jupyter_sphinx",
+	 "mamba",
+	 "nbconvert==7.16.1",
+	 "nbsphinx",
+	 "pandoc==2.19",
+	 "pypandoc",
+	 "pre-commit",
+	 "scikit-image",
+	 "sphinx==5.3",
+	 "sphinx-copybutton",
+	 "sphinx-gallery==0.13",
+	 "sphinx_rtd_theme==1.2",
+	 "sphinxcontrib-bibtex"
+]
+test = [
+	"coverage",
+	 "pytest",
+	 "pytest-doctestplus",
+	 "pytest-flake8",
+	 "pytest-mock",
+	 "pyfakefs",
+	 "pep8-naming",
+	 "xarray"
+]
+cantera = [
+    "cantera"
+]
+
+[project.urls]
+homepage = "https://www.spectrochempy.fr"
+repository = "https://github.com/spectrochempy/spectrochempy"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "dirty-tag"
 
 [tool.autoflake]
 check = true
@@ -11,4 +112,4 @@ exclude = ["docs/*", "tests/*", "docs/whatsnew/latest.rst", "docs/whatsnew/index
 
 [tool.isort]
 profile = "black"
-skip_glob = ["docs/*" ]
+skip_glob = ["docs/*"]

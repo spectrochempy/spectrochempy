@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -16,7 +16,7 @@ from quaternion import quaternion
 import spectrochempy as scp
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.units import ur
-from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.testing import (
     RandomSeedContext,

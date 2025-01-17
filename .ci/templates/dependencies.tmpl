@@ -10,11 +10,8 @@ be created or updated accordingly
     # specific dependencies
     - brukeropusreader
     - quaternion
-{% if CANTERA -%}
-    - cantera
-{%- endif %}
+
     # dependencies for the core package
-    - cffconvert>=2.0.0
     - colorama
     - dill
     - docrep
@@ -33,6 +30,7 @@ be created or updated accordingly
     - scikit-learn
     - xlrd
     - pyyaml
+    - cffconvert
 
     # dependencies needed mainly for install and a bit more ...
     - setuptools
@@ -80,4 +78,10 @@ be created or updated accordingly
     - sphinx-gallery=0.13
     - sphinx_rtd_theme=1.2
     - sphinxcontrib-bibtex
+{%- endif %}
+{%- if CANTERA %}
+
+    # CANTERA dependencies
+    # --------------------
+    - cantera
 {%- endif %}
