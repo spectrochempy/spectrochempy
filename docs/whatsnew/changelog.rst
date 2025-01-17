@@ -27,7 +27,6 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-* numpy>2.0 compatibility
 
 .. section
 
@@ -35,6 +34,7 @@ Dependency updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+* now compatible with numpy>2.0
 
 .. section
 
@@ -42,6 +42,7 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+* minimum python version set to 3.10
 
 .. section
 
