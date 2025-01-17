@@ -343,6 +343,8 @@ sphinx_gallery_conf = {
         "spectrochempy": None,
     },
     "abort_on_example_error": False,
+    "only_warn_on_example_error": True,
+    "capture_repr": ("_repr_html_", "__repr__"),
     "expected_failing_examples": [],
     "download_all_examples": False,
     "pypandoc": True,
