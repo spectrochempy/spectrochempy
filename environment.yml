@@ -25,7 +25,6 @@ dependencies:
     - quaternion
 
     # dependencies for the core package
-    - cffconvert>=2.0.0
     - colorama
     - dill
     - docrep
@@ -46,8 +45,14 @@ dependencies:
     - scikit-learn
     - xlrd
     - pyyaml
+    - cffconvert
 
     # dependencies needed mainly for install and a bit more ...
     - setuptools
     - setuptools_scm
     - git
+
+    # PIP dependencies
+    # ----------------
+    #- pip
+    #    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main

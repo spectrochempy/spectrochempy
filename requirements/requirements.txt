@@ -9,7 +9,6 @@
 # ======================================================================================
 brukeropusreader
 numpy-quaternion
-cffconvert>=2.0.0
 colorama
 dill
 docrep
@@ -30,6 +29,7 @@ tzlocal
 scikit-learn
 xlrd
 pyyaml
+cffconvert
 setuptools
 setuptools_scm
 gitpython

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -14,6 +14,8 @@ In this example, we show how units can be used in SpectroChemPy
 """
 
 # %%
+
+import pint
 
 import spectrochempy as scp
 
@@ -75,8 +77,8 @@ x
 
 try:
     x.to("hour")
-except scp.DimensionalityError as e:
-    scp.error_(scp.DimensionalityError, e)
+except pint.DimensionalityError as e:
+    scp.error_(pint.DimensionalityError, e)
 
 # %%
 # This, of course, also applies to NDDataset.

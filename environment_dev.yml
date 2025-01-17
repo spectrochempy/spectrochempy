@@ -25,7 +25,6 @@ dependencies:
     - quaternion
 
     # dependencies for the core package
-    - cffconvert>=2.0.0
     - colorama
     - dill
     - docrep
@@ -46,6 +45,7 @@ dependencies:
     - scikit-learn
     - xlrd
     - pyyaml
+    - cffconvert
 
     # dependencies needed mainly for install and a bit more ...
     - setuptools
@@ -62,7 +62,6 @@ dependencies:
     - pyfakefs
     - pep8-naming
     - xarray
-    # Jupyter lab
     - ipywidgets=8.0.4
     - ipympl
     - jupyterlab
@@ -99,7 +98,6 @@ dependencies:
     - sphinx-gallery=0.13
     - sphinx_rtd_theme=1.2
     - sphinxcontrib-bibtex
-    # Jupyter lab
     - ipywidgets=8.0.4
     - ipympl
     - jupyterlab
@@ -109,3 +107,8 @@ dependencies:
     - pyzmq=25.1.2
     - nodejs
     - widgetsnbextension=4.0.5
+
+    # PIP dependencies
+    # ----------------
+    #- pip
+    #    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main

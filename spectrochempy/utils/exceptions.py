@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # ======================================================================================
-# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -11,7 +11,8 @@ import inspect
 from contextlib import contextmanager
 
 import pint
-import pytz
+
+# import pytz
 
 
 # ======================================================================================
@@ -184,10 +185,10 @@ class NotHyperComplexArrayError(SpectroChemPyError):
     array"""
 
 
-class UnknownTimeZoneError(pytz.UnknownTimeZoneError):
-    """
-    Exception raised when Timezone code is not recognized.
-    """
+# class UnknownTimeZoneError(pytz.UnknownTimeZoneError):
+#    """
+#    Exception raised when Timezone code is not recognized.
+#    """
 
 
 class UnitsCompatibilityError(SpectroChemPyError):

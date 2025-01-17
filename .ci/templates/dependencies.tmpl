@@ -10,11 +10,8 @@ be created or updated accordingly
     # specific dependencies
     - brukeropusreader
     - quaternion
-{% if CANTERA -%}
-    - cantera
-{%- endif %}
+
     # dependencies for the core package
-    - cffconvert>=2.0.0
     - colorama
     - dill
     - docrep
@@ -35,6 +32,7 @@ be created or updated accordingly
     - scikit-learn
     - xlrd
     - pyyaml
+    - cffconvert
 
     # dependencies needed mainly for install and a bit more ...
     - setuptools
@@ -53,7 +51,6 @@ be created or updated accordingly
     - pyfakefs
     - pep8-naming
     - xarray
-    # Jupyter lab
     - ipywidgets=8.0.4
     - ipympl
     - jupyterlab
@@ -92,7 +89,6 @@ be created or updated accordingly
     - sphinx-gallery=0.13
     - sphinx_rtd_theme=1.2
     - sphinxcontrib-bibtex
-    # Jupyter lab
     - ipywidgets=8.0.4
     - ipympl
     - jupyterlab
@@ -103,3 +99,14 @@ be created or updated accordingly
     - nodejs
     - widgetsnbextension=4.0.5
 {%- endif %}
+{%- if CANTERA %}
+
+    # CANTERA dependencies
+    # --------------------
+    - cantera
+{%- endif %}
+
+    # PIP dependencies
+    # ----------------
+    #- pip
+    #    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
