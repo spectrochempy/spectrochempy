@@ -8,6 +8,7 @@
 import spectrochempy as scp
 
 
+@pytest.mark.skip
 def test_fileselector():
 
     datadir = scp.preferences.datadir

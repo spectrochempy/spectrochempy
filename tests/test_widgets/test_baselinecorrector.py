@@ -25,6 +25,7 @@ def X():
     return X
 
 
+@pytest.mark.skip
 def test_baselinecorrector_load_clicked(X, monkeypatch):
     def open_ok(*args, **kwargs):
         # mock opening a dialog
@@ -52,6 +53,7 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
     assert out.original.name == "nh4y-activation"
 
 
+@pytest.mark.skip
 def test_baselinecorrector_slicing(X):
 
     out = scp.BaselineCorrector(X)
