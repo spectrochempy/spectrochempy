@@ -15,6 +15,7 @@ import sys
 from importlib.metadata import metadata
 from os import environ
 
+from spectrochempy.application import version as scpversion
 from spectrochempy.utils import optional
 from spectrochempy.utils.file import pathclean
 
@@ -31,11 +32,15 @@ def show_versions(file=sys.stdout):
     """
 
     print("\nSYSTEM INFO", file=file)
-    print("-------------", file=file)
+    print("-----------", file=file)
 
     for key, val in _get_sys_info():
         print(f"- {key:25s} {val}", file=file)
-    print(file=file)
+
+    print("\nSPECTROCHEMPY", file=file)
+    print("-------------", file=file)
+    ss = "version"
+    print(f"{ss:28s} {scpversion.strip()}", file=file)
 
     # dependencies
     deps, deps_dev, deps_test = get_package_requirements()
@@ -50,8 +55,9 @@ def show_versions(file=sys.stdout):
             "pyyaml": "yaml",
             "gitpython": "git",
             "ipython": "IPython",
-            "pep8_naming": "pep8ext_naming",
+            "pep8-naming": "pep8ext_naming",
             "pyzmq": "zmq",
+            "scikit-image": "skimage",
         }
     )
 
@@ -162,16 +168,11 @@ def _find_versions(deps, RENAME):
             dep = dep.split("<")[0]
             dep = dep.split("=")[0]
             dep = RENAME.get(dep, dep)
-            try:
-                module = optional.import_optional_dependency(dep)
-            except Exception:
-                print(f"Could not import {dep}")
-                continue
+            module = optional.import_optional_dependency(dep)
             version = optional.get_module_version(module)
             versions[dep_] = version
-        except ImportError:
-
-            versions[dep_] = "not found"
+        except Exception:
+            versions[dep_] = "not found or not import"
 
     return versions
 

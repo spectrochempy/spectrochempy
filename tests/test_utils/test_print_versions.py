@@ -13,5 +13,10 @@ import spectrochempy as scp
 def test_show_versions() -> None:
     f = io.StringIO()
     scp.show_versions(file=f)
-    assert "INSTALLED VERSIONS" in f.getvalue()
-    assert "python:" in f.getvalue()
+    assert "INSTALLED PACKAGES" in f.getvalue()
+    assert "DEV PACKAGES" in f.getvalue()
+    assert "- pytest" in f.getvalue()
+    assert "- python" in f.getvalue()
+    assert "- numpy" in f.getvalue()
+    assert "- pint" in f.getvalue()
+    assert "spectrochempy version" in f.getvalue()

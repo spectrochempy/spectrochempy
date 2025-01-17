@@ -16,7 +16,7 @@ from quaternion import quaternion
 import spectrochempy as scp
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.units import ur
-from spectrochempy.utils.exceptions import SpectroChemPyError, UnknownTimeZoneError
+from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.system import get_user_and_node
 from spectrochempy.utils.testing import (
     RandomSeedContext,
