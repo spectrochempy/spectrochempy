@@ -137,7 +137,7 @@ We'll now install `SpectroChemPy` in development mode following 2 steps:
       conda install mamba jinja2
 
    Here we will create un environment using python in its version 3.12
-   but it is up to you to install any version from 3.10 to 3.13.
+   but it is up to you to install any version from 3.10 to 3.12.
    Just change the relevant information in the code below (the first line uses a
    script to create the necessary yaml
    file containing all information about the packages to install):
