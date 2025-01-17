@@ -15,7 +15,7 @@ docrep
 ipython
 jinja2
 matplotlib>=3.8
-numpy
+numpy>=2.0
 numpydoc>=1.2
 osqp
 packaging
@@ -49,7 +49,6 @@ mamba
 nbconvert==7.16.1
 nbsphinx
 numpydoc>=1.2
-pandoc==2.19
 pypandoc
 pre-commit
 scikit-image
