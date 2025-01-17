@@ -20,14 +20,18 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 - Improvement of the installation process using pip.
-  One can now install the package using command like `pip install spectrochempy[dev]`.
+  One can now install the package using command
+  like `pip install spectrochempy[cantera]` to install the package with the cantera
+  the `cantera` dependencies,
+  or `pip install -e ".[dev]"` to install the package with the
+  development dependencies and in editable mode.
 
 .. section
 
 Bug fixes
 ~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-
+- Fix bug #777. Now `scp.show_version()`` works as expected.
 
 .. section
 
