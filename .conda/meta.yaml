@@ -36,7 +36,6 @@ requirements:
     - quaternion
 
     # dependencies for the core package
-    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
     - colorama
     - dill
     - docrep
@@ -62,6 +61,11 @@ requirements:
     - setuptools
     - setuptools_scm
     - git
+
+    # PIP dependencies
+    # ----------------
+    - pip
+        - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
 
 
   test:

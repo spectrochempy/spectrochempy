@@ -30,7 +30,6 @@ classifiers = [
 dependencies = [
 	"brukeropusreader",
 	 "numpy-quaternion",
-	 "cffconvert@git+https://github.com/citation-file-format/cffconvert@main",
 	 "colorama",
 	 "dill",
 	 "docrep",
@@ -53,7 +52,8 @@ dependencies = [
 	 "pyyaml",
 	 "setuptools",
 	 "setuptools_scm",
-	 "gitpython"
+	 "gitpython",
+	 "cffconvert@git+https://github.com/citation-file-format/cffconvert@main"
 ]
 [project.optional-dependencies]
 dev = [

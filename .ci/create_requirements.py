@@ -97,6 +97,10 @@ def conda_package_to_pip(package):
 
         break
 
+    # handle direct URL
+    if "@git+" in package and package.startswith("pip"):
+        return package.split("pip")[1].strip()[2:]
+
     # Handle package exclusions and renames
     if package in EXCLUDE:
         return

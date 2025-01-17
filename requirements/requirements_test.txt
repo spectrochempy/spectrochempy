@@ -9,7 +9,6 @@
 # ======================================================================================
 brukeropusreader
 numpy-quaternion
-cffconvert@git+https://github.com/citation-file-format/cffconvert@main
 colorama
 dill
 docrep
@@ -50,3 +49,4 @@ jupyter_server
 pyzmq==25.1.2
 nodejs
 widgetsnbextension==4.0.5
+cffconvert@git+https://github.com/citation-file-format/cffconvert@main

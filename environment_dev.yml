@@ -25,7 +25,6 @@ dependencies:
     - quaternion
 
     # dependencies for the core package
-    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
     - colorama
     - dill
     - docrep
@@ -107,3 +106,8 @@ dependencies:
     - pyzmq=25.1.2
     - nodejs
     - widgetsnbextension=4.0.5
+
+    # PIP dependencies
+    # ----------------
+    - pip
+        - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
