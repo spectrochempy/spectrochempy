@@ -125,8 +125,7 @@ def _assert_caught_expected_warning(
 
     if not saw_warning:
         raise AssertionError(
-            f"Did not see expected warning of class "
-            f"{repr(expected_warning.__name__)}"
+            f"Did not see expected warning of class {repr(expected_warning.__name__)}"
         )
 
     if match and not matched_message:
@@ -148,7 +147,7 @@ def _assert_caught_no_extra_warnings(
     for actual_warning in caught_warnings:
         if _is_unexpected_warning(actual_warning, expected_warning):
             unclosed = "unclosed transport <asyncio.sslproto._SSLProtocolTransport"
-            if actual_warning.category == ResourceWarning and unclosed in str(
+            if actual_warning.category is ResourceWarning and unclosed in str(
                 actual_warning.message
             ):
                 # FIXME: kludge because pytest.filterwarnings does not

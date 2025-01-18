@@ -38,6 +38,7 @@ from traitlets.config.application import Application
 from traitlets.config.configurable import Config
 from traitlets.config.manager import BaseJSONConfigManager
 
+from spectrochempy.application._check_update import check_update
 from spectrochempy.application.datadir import DataDir
 from spectrochempy.application.general_preferences import GeneralPreferences
 from spectrochempy.utils.file import find_or_create_spectrochempy_dir, pathclean
@@ -841,7 +842,6 @@ reset_preferences = app.reset_preferences
 # --------------------------------------------------------------------------------------
 # Check for new release in a separate thread
 # --------------------------------------------------------------------------------------
-from spectrochempy.application._check_update import check_update
 
 DISPLAY_UPDATE = threading.Thread(target=check_update, args=(version,))
 DISPLAY_UPDATE.start()

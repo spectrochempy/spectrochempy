@@ -359,7 +359,7 @@ class _wdfReader(object):
 
     def _parse_dimension(self, dim):
         """Get information from XLST or YLST blocks"""
-        if not dim.upper() in ["X", "Y"]:
+        if dim.upper() not in ["X", "Y"]:
             raise ValueError("Direction argument `dir` must be X or Y!")
 
         block_name = dim.upper() + "LST"

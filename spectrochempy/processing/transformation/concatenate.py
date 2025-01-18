@@ -219,7 +219,7 @@ def concatenate(*datasets, **kwargs):
         if out.title != dataset.title:
             warn("Different data title => the title is that of the 1st dataset")
 
-        if not (dataset.author in authortuple):
+        if dataset.author not in authortuple:
             authortuple = authortuple + (dataset.author,)
 
         out.author = " & ".join([str(author) for author in authortuple])

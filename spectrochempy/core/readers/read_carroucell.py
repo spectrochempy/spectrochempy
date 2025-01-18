@@ -7,6 +7,7 @@
 """
 This module provides methods for reading data in a directory after a carroucell experiment.
 """
+
 __all__ = ["read_carroucell"]
 __dataset_methods__ = __all__
 
@@ -91,7 +92,6 @@ def read_carroucell(directory=None, **kwargs):
 # --------------------------------------------------------------------------------------
 @_importer_method
 def _read_carroucell(*args, **kwargs):
-
     _, directory = args
     directory = get_directory_name(directory)
 
@@ -112,8 +112,12 @@ def _read_carroucell(*args, **kwargs):
     spafileback = [f for f in spafiles if "BCKG" in f.stem]
 
     # select files
-    prefix = lambda f: f.stem.split("_")[0]
-    number = lambda f: int(f.stem.split("_")[1])
+    def prefix(f):
+        return f.stem.split("_")[0]
+
+    def number(f):
+        return int(f.stem.split("_")[1])
+
     if spectra is not None:
         [min, max] = spectra
         spafilespec = [f for f in spafilespec if min <= number(f) <= max]

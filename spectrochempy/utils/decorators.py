@@ -324,7 +324,7 @@ class _set_output(object):
 
         # HACK to be able to used deprecated alias of the method, without error
         # because if not this modification obj appears two times
-        if args and type(args[0]) == type(obj):
+        if args and type(args[0]) is type(obj):
             args = args[1:]
 
         # get the method output - one or two arrays depending on the method and *args

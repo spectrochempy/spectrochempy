@@ -29,6 +29,7 @@ from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.processing.transformation.npy import dot
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
@@ -1544,8 +1545,6 @@ for funcname in api_funcs:
     __all__.append(funcname)
 
 # import also npy functions  # TODO: this will be changed with __array_functions__
-from spectrochempy.processing.transformation.npy import dot
-
 NDDataset.dot = dot
 
 # ======================================================================================
