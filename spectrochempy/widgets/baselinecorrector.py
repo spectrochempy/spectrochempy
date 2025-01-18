@@ -377,7 +377,13 @@ def _str_to_slice(strg, dataset, dim):
 
 
 def _ranges_to_str(ranges):
-    return str(ranges).replace("(", "").replace("], ", "],\n").replace(")", "")
+    return (
+        str(ranges)
+        .replace("(", "")
+        .replace("], ", "],\n")
+        .replace(")", "")
+        .replace("np.float64", "")
+    )
 
 
 def _str_to_ranges(strg):
