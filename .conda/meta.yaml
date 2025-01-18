@@ -55,6 +55,7 @@ requirements:
     - xlrd
     - pyyaml
     - cffconvert
+    - ipywidgets
 
     # dependencies needed mainly for install and a bit more ...
     - setuptools

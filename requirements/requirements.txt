@@ -28,6 +28,7 @@ scikit-learn
 xlrd
 pyyaml
 cffconvert
+ipywidgets
 setuptools
 setuptools_scm
 gitpython
