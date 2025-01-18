@@ -6,6 +6,20 @@
 # ======================================================================================
 """
 Bruker file (single dimension FID or multidimensional SER) importers.
+
+This module provides functionality to read Bruker NMR data files.
+
+Classes
+-------
+- TopspinImporter : Main class for importing Bruker Topspin data
+
+Functions
+---------
+- read_topspin : Main entry point for reading Bruker files
+
+Notes
+-----
+Supports both FID and processed data (1D and nD)
 """
 
 __all__ = ["read_topspin"]
@@ -27,6 +41,9 @@ from spectrochempy.utils.docstrings import _docstring
 # ======================================================================================
 # Constants
 # ======================================================================================
+FREQ_UNIT = ur.megahertz  # Define frequency unit
+TIME_UNIT = ur.microsecond  # Define time unit
+
 FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
@@ -488,6 +505,175 @@ nmr_valid_meta = [
     # ('xdim', ''),
     # ('ymax_p', ''),
     # ('ymin_p', ''),
+    # ('zgoptns', ''),
+    # ('zl1', ''),
+    # ('zl2', ''),
+    # ('zl3', ''),
+    # ('zl4', ''),
+    # PROCS
+    # ('absf1', ''),
+    # ('absf2', ''),
+    # ('absg', ''),
+    # ('absl', ''),
+    # ('acqt0', ''),
+    # ('alpha', ''),
+    # ('ampcoil', ''),
+    # ('anavpt', ''),
+    ("aqorder", ""),  # ('assfac', ''),
+    # ('assfaci', ''),
+    # ('assfacx', ''),
+    # ('asswid', ''),
+    # ('aunmp', ''),
+    # ('axleft', ''),
+    # ('axname', ''),
+    # ('axnuc', ''),
+    # ('axright', ''),
+    # ('axtype', ''),
+    # ('axunit', ''),
+    # ('azfe', ''),
+    # ('azfw', ''),
+    # ('bc_mod', ''),
+    # ('bcfw', ''),
+    # ('bytordp', ''),
+    # ('cagpars', ''),
+    # ('coroffs', ''),
+    # ('cy', ''),
+    # ('datmod', ''),
+    # ('dc', ''),
+    # ('dfilt', ''),
+    # ('dtypp', ''),
+    # ('eretic', ''),
+    # ('f1p', ''),
+    # ('f2p', ''),
+    # ('fcor', ''),
+    # ('fntype', ''),
+    # ('frqlo3', ''),
+    # ('frqlo3n', ''),
+    # ('ft_mod', ''),
+    # ('ftsize', ''),
+    # ('gamma', ''),
+    # ('gb', 'Hz' ),
+    # ('gpnam', ''),
+    # ('grpdly', ''),
+    ("inf", "us"),  # ('intbc', ''),
+    # ('intscl', ''),
+    # ('isen', ''),
+    # ('lb', 'Hz' ),
+    # ('lev0', ''),
+    # ('linpstp', ''),
+    # ('locsw', ''),
+    # ('lpbin', ''),
+    # ('maxi', ''),
+    ("mc2", ""),  # ('mdd_csalg', ''),
+    # ('mdd_cslambda', ''),
+    # ('mdd_csniter', ''),
+    # ('mdd_csnorm', ''),
+    # ('mdd_cszf', ''),
+    # ('mdd_mod', ''),
+    # ('mddcexp', ''),
+    # ('mddct_sp', ''),
+    # ('mddf180', ''),
+    # ('mddlambda', ''),
+    # ('mddmemory', ''),
+    # ('mddmerge', ''),
+    # ('mddncomp', ''),
+    # ('mddniter', ''),
+    # ('mddnoise', ''),
+    # ('mddphase', ''),
+    # ('mddseed', ''),
+    # ('mddsrsize', ''),
+    # ('me_mod', ''),
+    # ('mean', ''),
+    # ('mi', ''),
+    # ('mulexpno', ''),
+    # ('nc_proc', ''),
+    # ('ncoef', ''),
+    # ('nlev', ''),
+    # ('nlogch', ''),
+    # ('noisf1', ''),
+    # ('noisf2', ''),
+    # ('novflw', ''),
+    # ('nsp', ''),
+    # ('nth_pi', ''),
+    # ('nusamount', ''),
+    # ('nusfpnz', ''),
+    # ('nusjsp', ''),
+    # ('nuslist', ''),
+    # ('nusseed', ''),
+    # ('nust2', ''),
+    # ('nustd', ''),
+    # ('nzp', ''),
+    # ('offset', ''),
+    # ('pacoil', ''),
+    # ('pc', ''),
+    # ('pexsel', ''),
+    # ('ph_mod', ''),
+    ("phc0", "deg"),
+    ("phc1", "deg"),  # ('phlist', ''),
+    # ('pknl', ''),
+    # ('plstep', ''),
+    # ('plstrt', ''),
+    # ('plw', ''),
+    # ('plwmax', ''),
+    # ('pparmod', ''),
+    # ('ppdiag', ''),
+    # ('ppiptyp', ''),
+    # ('ppmpnum', ''),
+    # ('ppresol', ''),
+    # ('pqphase', ''),
+    # ('pqscale', ''),
+    # ('pscal', ''),
+    # ('psign', ''),
+    # ('pynm', ''),
+    # ('pynmp', ''),
+    # ('recpre', ''),
+    # ('recprfx', ''),
+    # ('recsel', ''),
+    ("reverse", ""),  # ('s_dev', ''),
+    # ('selrec', ''),
+    ("sf", "MHz"),  # ('si', ''),
+    # ('sigf1', ''),
+    # ('sigf2', ''),
+    # ('sino', ''),
+    # ('siold', ''),
+    # ('solvold', ''),
+    # ('spectyp', ''),
+    # ('spincnt', ''),
+    # ('spnam', ''),
+    # ('sppex', ''),
+    # ('spw', ''),
+    # ('sreglst', ''),
+    # ('ssb', ''),
+    # ('stsi', ''),
+    # ('stsr', ''),
+    # ('subnam', ''),
+    ("sw_p", ""),  # ('swfinal', ''),
+    # ('symm', ''),
+    # ('tdeff', ''),
+    # ('tdoff', ''),
+    # ('te1', ''),
+    # ('te4', ''),
+    # ('te_pidx', ''),
+    # ('te_stab', ''),
+    # ('ti', ''),
+    # ('tilt', ''),
+    # ('tm1', ''),
+    # ('tm2', ''),
+    # ('toplev', ''),
+    # ('userp1', ''),
+    # ('userp2', ''),
+    # ('userp3', ''),
+    # ('userp4', ''),
+    # ('userp5', ''),
+    # ('wdw', ''),
+    # ('xdim', ''),
+    # ('ymax_p', ''),
+    # ('ymin_p', ''),
+    # ('zgoptns', ''),
+    # ('zl1', ''),
+    # ('zl2', ''),
+    # ('zl3', ''),
+    # ('zl4', ''),
 ]
 
 # ======================================================================================
@@ -645,7 +831,7 @@ def _remove_digital_filter(dic, data):
     pdata = pdata * np.exp(ph)
 
     # ifft
-    data = np.fft.ifft(np.fft.ifftshift(pdata, -1), si, axis=-1) * float(si / 2)
+    data = np.fft.ifft(np.fft.ifftshift(pdata, -1), n=int(si), axis=-1) * float(si / 2)
 
     # remove last points * 2
     rp = 2 * (phase // 2)
@@ -1049,7 +1235,9 @@ def _read_topspin(*args, **kwargs):
     dataset.units = "count"
     dataset.title = "intensity"
     dataset.origin = "topspin"
-    dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
+    dataset.name = (
+        f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"  # noqa: E231
+    )
     dataset.filename = f_name
     if dataset.meta.date is not None:
         dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])
