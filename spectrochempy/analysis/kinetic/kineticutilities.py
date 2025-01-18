@@ -187,7 +187,6 @@ class ActionMassKinetics(tr.HasTraits):
     )
 
     def __init__(self, reactions, species_concentrations, arrhenius, T=298.0, **kwargs):
-
         # initialise concentrations, species, reactions, arrhenius, T
         self._init_concentrations = species_concentrations
         if isinstance(self._init_concentrations, (list, tuple)):
@@ -247,7 +246,7 @@ class ActionMassKinetics(tr.HasTraits):
                 )
             if any(arrhenius < 0):
                 warnings.warn(
-                    "at least a rate constant is negative... are you sure of " "that ?!"
+                    "at least a rate constant is negative... are you sure of that ?!"
                 )
         elif arrhenius.shape[-1] == 2:
             # this is a 2D array with lines == [A, Ea]
@@ -426,7 +425,7 @@ class ActionMassKinetics(tr.HasTraits):
                                 jac += (
                                     f" * C[{jj}]**{nu}"
                                     if jj != j
-                                    else f" * {nu} * C[{jj}]**{nu-1}"
+                                    else f" * {nu} * C[{jj}]**{nu - 1}"
                                 )
                 if is_null:
                     jac += "0,"
@@ -735,7 +734,6 @@ class ActionMassKinetics(tr.HasTraits):
             return C
 
     def _modify_kinetics(self, dict_param, left_op=None):
-
         if len(self._arrhenius.shape) == 2:
             for item in dict_param:
                 i_r, p = item.split("[")[-1].split("].")
@@ -1041,7 +1039,6 @@ class PFR:
         K=1e-5,
         kin_param_to_set=None,
     ):
-
         if _cantera_is_not_available():
             raise ImportError
 
@@ -1304,7 +1301,6 @@ class PFR:
             optimizer,
             **kwargs,
         ):
-
             global it, trials, tic, pop_sse, prev_min_sse
             it = it + 1
             trials.append(guess)
@@ -1351,7 +1347,7 @@ class PFR:
                 ).flatten()
                 sse = np.sum(se)
             else:
-                sse = np.Inf
+                sse = np.inf
 
             if logfile:
                 if popsize:
