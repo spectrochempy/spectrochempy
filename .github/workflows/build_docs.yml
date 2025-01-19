@@ -16,16 +16,14 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: '00 0 * * *'
+    - cron: "00 0 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-
   build_and_publish_documentation:
-
     # prevent cron jobs from running on forks
     if: |
       (github.event_name == 'schedule'
@@ -33,7 +31,7 @@ jobs:
        github.event_name != 'schedule')
 
     name: Build and publish documentation
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     env:
       TZ: "Etc/UTC"
 
@@ -42,7 +40,6 @@ jobs:
         shell: bash -l {0}
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
