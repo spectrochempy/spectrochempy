@@ -17,7 +17,7 @@ from scipy.sparse.linalg import spsolve
 from scipy.spatial import ConvexHull
 
 from spectrochempy.analysis._base._analysisbase import AnalysisConfigurable
-from spectrochempy.analysis.baseline.baselineutils import lls, lls_inv
+from spectrochempy.analysis.baselineprocessing.baselineutils import lls, lls_inv
 from spectrochempy.application import info_, warning_
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.utils.coordrange import trim_ranges

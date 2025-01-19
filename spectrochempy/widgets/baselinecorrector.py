@@ -9,7 +9,7 @@ from functools import partial
 
 from IPython.display import display
 
-from spectrochempy.analysis.baseline.baseline import Baseline
+from spectrochempy.analysis.baselineprocessing.baseline import Baseline
 from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
@@ -97,7 +97,6 @@ class BaselineCorrector:
     """
 
     def __init__(self, X=None, initial_ranges=None):
-
         warning_(
             "This widget is not supported anymore and will be removed in a future version."
         )
@@ -210,7 +209,6 @@ class BaselineCorrector:
                 )
 
     def _update(self, *args, **kwargs):
-
         control = kwargs.get("control")
         if control == "method_selector":
             self._method_control.children = (self._method_selector,)
@@ -237,7 +235,6 @@ class BaselineCorrector:
         ranges = _str_to_ranges(self._ranges_control.value)
 
         if self.original is not None:  # slicing was OK
-
             # check that no range is outside coordinates
             new_ranges, changed = _update_ranges(
                 _str_to_ranges(self._ranges_control.value), self.original.x.data
