@@ -32,7 +32,7 @@ New features
 .. section
 
 Bug fixes
-~~~~~~~~
+~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 * bug #777. Now `scp.show_version()`` works as expected.
 * google colab compatibility (issue #784)

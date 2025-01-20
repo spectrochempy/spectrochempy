@@ -19,7 +19,7 @@ New features
 * read_srs now accepts TGA and GC filetypes (issue #769)
 
 Bug fixes
-~~~~~~~~
+~~~~~~~~~
 * bug #777. Now `scp.show_version()`` works as expected.
 * google colab compatibility (issue #784)
 * compatibility with pint>0.24 (issue #765)
