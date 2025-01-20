@@ -185,8 +185,6 @@ _ = ndp[-1].plot(clear=False, color="green", ls="--")
 
 _ = corrected.plot()
 
-scp.show()
-
 # %%
 # Finally, we will use the snip model
 
