@@ -110,8 +110,15 @@ class BuildDocumentation(object):
         self.warningiserror = warningiserror
         self.verbosity = verbosity
 
+        # Determine number of jobs
         if jobs == "auto":
             jobs = mp.cpu_count()
+        else:
+            try:
+                jobs = int(jobs)
+            except ValueError:
+                print("Error: --jobs argument must be an integer or 'auto'")
+                return 1
         self.jobs = jobs
 
         self.whatsnew = whatsnew
