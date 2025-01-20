@@ -6,9 +6,10 @@ on:
       - master
       - develop
       - feature/*
+      - fix/*
 
   schedule:
-    - cron: '00 0 * * *'
+    - cron: "00 0 * * *"
 
   pull_request:
 
@@ -20,7 +21,6 @@ concurrency:
 
 jobs:
   test-package:
-
     # prevent cron jobs from running on forks or release
     if: |
       (github.event_name == 'schedule'
@@ -59,7 +59,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonVersion }}
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install dependencies for testing
         run: |
