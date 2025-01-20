@@ -183,7 +183,7 @@ class BuildDocumentation(object):
         # Use  jupytext to sync py and ipynb files in userguide
 
         pyfiles = set()
-        print(f'\n{"-" * 80}\nSync *.py and *.ipynb using jupytex\n{"-" * 80}')
+        print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytex\n{'-' * 80}")
 
         py = list(SRC.glob("**/*.py"))
         py.extend(list(SRC.glob("**/*.ipynb")))
@@ -257,7 +257,7 @@ class BuildDocumentation(object):
 
     @staticmethod
     def _apigen():
-        print(f'\n{"-" * 80}\nRegenerate the reference API list\n{"-" * 80}')
+        print(f"\n{'-' * 80}\nRegenerate the reference API list\n{'-' * 80}")
 
         Apigen()
 
@@ -274,11 +274,11 @@ class BuildDocumentation(object):
         BUILDDIR = DOCREPO / builder
 
         print(
-            f'{"#" * 80}\n'
+            f"{'#' * 80}\n"
             f"Building {builder.upper()} documentation ({doc_version.capitalize()} "
             f"version : {version})"
             f"\n in {BUILDDIR}"
-            f'\n{"#" * 80}'
+            f"\n{'#' * 80}"
         )
 
         # self._make_dirs()
@@ -290,9 +290,9 @@ class BuildDocumentation(object):
         self._sync_notebooks()
 
         # run sphinx
-        print(f'{"-" * 80}\n')
+        print(f"{'-' * 80}\n")
         print(f"\n{builder.upper()} BUILDING")
-        print(f'{"-" * 80}\n')
+        print(f"{'-' * 80}\n")
         srcdir = confdir = DOCS
         outdir = f"{BUILDDIR}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"
@@ -337,7 +337,7 @@ class BuildDocumentation(object):
     def clean(self):
         # Clean/remove the built documentation.
 
-        print(f'\n{"-" * 80}\nCleaning\n{"-" * 80}')
+        print(f"\n{'-' * 80}\nCleaning\n{'-' * 80}")
 
         doc_version = self._doc_version
 
@@ -401,7 +401,7 @@ class BuildDocumentation(object):
 
     def tutorials(self):
         # make tutorials.zip
-        print(f'\n{"-" * 80}\nMake tutorials.zip\n{"-" * 80}')
+        print(f"\n{'-' * 80}\nMake tutorials.zip\n{'-' * 80}")
 
         # clean notebooks output
         for nb in DOCS.rglob("**/*.ipynb"):
@@ -493,8 +493,7 @@ def main():
         dest="verbosity",
         default=0,
         help=(
-            "increase verbosity (can be repeated), "
-            "passed to the sphinx build command"
+            "increase verbosity (can be repeated), passed to the sphinx build command"
         ),
     )
 
