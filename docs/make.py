@@ -525,7 +525,7 @@ def main():
     )
 
     parser.add_argument(
-        "--jobs", default="auto", help="number of jobs used by sphinx-build"
+        "--jobs", "-j", default="auto", help="number of jobs used by sphinx-build"
     )
 
     args = parser.parse_args()
