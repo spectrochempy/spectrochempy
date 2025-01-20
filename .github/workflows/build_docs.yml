@@ -60,6 +60,11 @@ jobs:
         run: |
           python3 -m pip install --no-deps .
 
+      - name: Setup Jupyter kernel
+        run: |
+          python3 -m pip install ipykernel
+          python3 -m ipykernel install --user --name python3 --display-name "Python 3"
+
       - name: Set up version environment variable
         run: |
           bash .ci/set_env_var.sh
@@ -78,6 +83,9 @@ jobs:
       - name: Build docs
         run: |
           mkdir -p build
+
+          # List available kernels for debugging
+          jupyter kernelspec list
 
           echo "cloning gh-pages repository"
           git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/html
