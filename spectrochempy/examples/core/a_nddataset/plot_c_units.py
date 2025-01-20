@@ -78,7 +78,8 @@ x
 try:
     x.to("hour")
 except pint.DimensionalityError as e:
-    scp.error_(pint.DimensionalityError, e)
+    print(e)
+    # scp.error_(pint.DimensionalityError, e)
 
 # %%
 # This, of course, also applies to NDDataset.
