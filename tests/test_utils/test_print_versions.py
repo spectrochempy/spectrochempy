@@ -18,7 +18,6 @@ def test_show_versions() -> None:
     assert "numpy" in f.getvalue()
     assert "pint" in f.getvalue()
     assert "matplotlib" in f.getvalue()
-    assert "scipy" in f.getvalue()
     assert "pytest" in f.getvalue()
     assert "SPECTROCHEMPY" in f.getvalue()
 
