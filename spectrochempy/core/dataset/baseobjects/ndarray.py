@@ -471,7 +471,7 @@ class NDArray(HasTraits):
         elif isinstance(value, Quantity):
             # first convert value to the current units
             value.ito(self.units)
-            value = np.asarray(value.magnitude, copy=self.copy)
+            value = np.asarray(value.magnitude)  # , copy=self.copy)
 
         if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
             # sometimes do not work directly : here is a work around
@@ -2156,9 +2156,8 @@ class NDArray(HasTraits):
                         elif (
                             oldunits.dimensionality
                             in ["1/[time]", "1/[length]", "[length]"]
-                            and new._units.dimensionality == "[length] ** 2 * "
-                            "[mass] / [time] "
-                            "** 2"
+                            and new._units.dimensionality
+                            == "[length] ** 2 * [mass] / [time] ** 2"
                         ):
                             new._title = "energy"
 

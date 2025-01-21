@@ -63,7 +63,13 @@ def set_env(**environ):
 # ======================================================================================
 def gisinf(x):
     # copied from numpy.testing._private.utils
-    from numpy._core import errstate, isinf
+    try:
+        # Modern numpy way
+        from numpy import errstate, isinf
+    except ImportError:
+        # Fallback for numpy 2.0
+        errstate = np.errstate
+        isinf = np.isinf
 
     with errstate(invalid="ignore"):
         st = isinf(x)
@@ -74,9 +80,19 @@ def gisinf(x):
 
 def _compare(x, y, decimal):
     # copied from numpy.testing._private.utils
-    from numpy._core import asarray, float64, number, result_type
-    from numpy._core.fromnumeric import any as npany
-    from numpy._core.numerictypes import issubdtype
+    # Fix numpy import
+    try:
+        # Modern numpy way
+        from numpy import any as npany
+        from numpy import asarray, float64, issubdtype, number, result_type
+    except ImportError:
+        # Fallback for numpy 2.0
+        asarray = np.asarray
+        float64 = np.float64
+        number = np.number
+        result_type = np.result_type
+        npany = np.any
+        issubdtype = np.issubdtype
 
     try:
         if npany(gisinf(x)) or npany(gisinf(y)):
@@ -170,16 +186,13 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
                             operator.__eq__,
                             sattr,
                             oattr,
-                            header=f"{thistype}.{attr} "
-                            f"attributes are not "
-                            f"equal",
+                            header=f"{thistype}.{attr} attributes are not equal",
                         )
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are "
-                        f"different."
+                        f"The {attr} attributes of {this} and {other} are different."
                     )
             else:
                 return False
@@ -259,9 +272,7 @@ def compare_coords(this, other, approx=False, decimal=3, data_only=False):
                             operator.__eq__,
                             sattr,
                             oattr,
-                            header=f"{thistype}.{attr} "
-                            f"attributes are not "
-                            f"equal",
+                            header=f"{thistype}.{attr} attributes are not equal",
                         )
 
                 else:
@@ -269,8 +280,7 @@ def compare_coords(this, other, approx=False, decimal=3, data_only=False):
 
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are "
-                        f"different."
+                        f"The {attr} attributes of {this} and {other} are different."
                     )
             else:
                 return False
@@ -404,9 +414,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                             operator.__eq__,
                             sattr,
                             oattr,
-                            header=f"{thistype}.{attr} "
-                            f"attributes are not "
-                            f"equal",
+                            header=f"{thistype}.{attr} attributes are not equal",
                         )
 
                 elif attr in ["coordset"]:
@@ -425,8 +433,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                     eq &= np.all(sattr == oattr)
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are "
-                        f"different."
+                        f"The {attr} attributes of {this} and {other} are different."
                     )
             else:
                 return False
