@@ -6,11 +6,21 @@ on:
       - master
       - develop
       - feature/*
+    paths-ignore:
+      - "docs/**"
+      - "**/*.rst"
+      - "**/*.md"
+      - "**/*.ipynb"
 
   schedule:
     - cron: "00 0 * * *"
 
   pull_request:
+    paths-ignore:
+      - "docs/**"
+      - "**/*.rst"
+      - "**/*.md"
+      - "**/*.ipynb"
 
   workflow_dispatch:
 
