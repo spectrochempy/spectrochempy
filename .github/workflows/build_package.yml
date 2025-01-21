@@ -92,14 +92,6 @@ jobs:
             python=3.10
           cache-environment: true
 
-      #      - name: Install Conda environment with Micromamba
-      #        uses: mamba-org/provision-with-micromamba@main
-      #        with:
-      #          environment-file: environment_dev.yml
-      #          environment-name: scpy
-      #          extra-specs: |
-      #            python=3.9
-
       - name: Install spectrochempy
         run: |
           python3 -m pip install --no-deps .

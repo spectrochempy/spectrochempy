@@ -7,25 +7,25 @@ Change SpectroChemPy project dependencies here only.
 requirements[_dev][_test].text, environment[_dev][_test].yml and .conda/meta.yaml will
 be created or updated accordingly
 #}
-    # specific dependencies
-    - brukeropusreader
-    - quaternion
 
     # dependencies for the core package
+    - brukeropusreader
     - colorama
     - dill
     - docrep
     - ipython
     - jinja2
-    - matplotlib
     - numpy
     - numpydoc
+    - matplotlib
     - osqp
     - pint
-    - scikit-learn
-    - xlrd
     - pyyaml
+    - quaternion
+    - scikit-learn
     - setuptools_scm
+    - tzlocal
+    - xlrd
 
 {%- if TEST %}
 

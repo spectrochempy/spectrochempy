@@ -21,25 +21,25 @@ channels:
     - defaults
 
 dependencies:
-    # specific dependencies
-    - brukeropusreader
-    - quaternion
 
     # dependencies for the core package
+    - brukeropusreader
     - colorama
     - dill
     - docrep
     - ipython
     - jinja2
-    - matplotlib
     - numpy
     - numpydoc
+    - matplotlib
     - osqp
     - pint
-    - scikit-learn
-    - xlrd
     - pyyaml
+    - quaternion
+    - scikit-learn
     - setuptools_scm
+    - tzlocal
+    - xlrd
 
     # TEST dependencies
     # ----------------

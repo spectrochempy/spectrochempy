@@ -28,21 +28,22 @@ classifiers = [
 ]
 dependencies = [
 	"brukeropusreader",
-	 "numpy-quaternion",
 	 "colorama",
 	 "dill",
 	 "docrep",
 	 "ipython",
 	 "jinja2",
-	 "matplotlib",
 	 "numpy",
 	 "numpydoc",
+	 "matplotlib",
 	 "osqp",
 	 "pint",
-	 "scikit-learn",
-	 "xlrd",
 	 "pyyaml",
-	 "setuptools_scm"
+	 "numpy-quaternion",
+	 "scikit-learn",
+	 "setuptools_scm",
+	 "tzlocal",
+	 "xlrd"
 ]
 [project.optional-dependencies]
 dev = [

@@ -8,7 +8,7 @@ on:
       - feature/*
 
   schedule:
-    - cron: '00 0 * * *'
+    - cron: "00 0 * * *"
 
   pull_request:
 
@@ -20,7 +20,6 @@ concurrency:
 
 jobs:
   test-package:
-
     # prevent cron jobs from running on forks or release
     if: |
       (github.event_name == 'schedule'
@@ -48,6 +47,8 @@ jobs:
             pythonVersion: 3.10
           - os: windows-latest
             pythonVersion: 3.10
+        # when adding a new python version, do not forget to update the matrix in the codeclimate step.max-parallel
+        # also go to github settings to modify the required actions to succeed for PR (branches/protectionrules: edit "master")
     steps:
       - name: Checkout spectrochempy repository
         uses: actions/checkout@v4
@@ -59,7 +60,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonVersion }}
-          cache: 'pip'
+          cache: "pip"
 
       - name: Install dependencies for testing
         run: |
