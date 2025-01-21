@@ -54,13 +54,19 @@ def show_versions(file=sys.stdout):
     installed = get_installed_versions()
     underlined_title("Dependencies", file=file)
     underlined_title(
-        f"{'Package': <20} {'Required': <15} {'Installed': <15}", ".", ret=False
+        f"{'Package': <20} {'Required': <15} {'Installed': <15}",
+        ".",
+        ret=False,
+        file=file,
     )
     base, req = check_dependencies("", installed, env)
     print(base, file=file)
     underlined_title("Optional developpement dependencies", file=file)
     underlined_title(
-        f"{'Package': <20} {'Required': <15} {'Installed': <15}", ".", ret=False
+        f"{'Package': <20} {'Required': <15} {'Installed': <15}",
+        ".",
+        ret=False,
+        file=file,
     )
     dev, _ = check_dependencies("dev", installed, exclude=req, env=env)
     print(dev, file=file)
