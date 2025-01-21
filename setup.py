@@ -114,6 +114,11 @@ setup_args = dict(
         "develop": PostDevelopCommand,
         "install": PostInstallCommand,
     },
+    entry_points={
+        "console_scripts": [
+            "show-versions=spectrochempy.scripts.show_versions:main",
+        ],
+    },
 )
 
 if __name__ == "__main__":

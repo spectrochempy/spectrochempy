@@ -16,6 +16,7 @@ Usage::
 Copied and modified from https://github.com/pandas-dev/pandas/scripts/validate_docstrings.py (BSD 3-Clause License)
 
 """
+
 from __future__ import annotations
 
 import argparse
@@ -366,8 +367,8 @@ def print_validate_all_results(
             if errors and err_code not in errors:
                 continue
             sys.stdout.write(
-                f'{prefix}{res["file"]}:{res["file_line"]}:'
-                f"{err_code}:{name}:{err_desc}\n"
+                f"{prefix}{res['file']}: {res['file_line']}: "
+                f"{err_code}: {name}: {err_desc}\n"
             )
             exit_status += 1
 
@@ -390,14 +391,14 @@ def print_validate_one_results(func_name: str):
 
     sys.stderr.write(header("Validation"))
     if result["errors"]:
-        sys.stderr.write(f'{len(result["errors"])} Errors found:\n')
+        sys.stderr.write(f"{len(result['errors'])} Errors found: \n")
         for err_code, err_desc in result["errors"]:
             if err_code == "EX02":  # Failing examples are printed at the end
                 sys.stderr.write("\tExamples do not pass tests\n")
                 continue
             sys.stderr.write(f"\t{err_desc}\n")
     else:
-        sys.stderr.write(f'Docstring for "{func_name}" correct. :)\n')
+        sys.stderr.write(f'Docstring for "{func_name}" correct. : )\n')  # noqa: E202
 
     if result["examples_errs"]:
         sys.stderr.write(header("Doctests"))

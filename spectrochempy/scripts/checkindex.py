@@ -39,4 +39,4 @@ for item in apicontent:
     if item not in idxcontent:
         if "." in item and not item.startswith("NDDataset"):
             continue
-        print(f"    {item} : missing definition of  in index.rst")
+        print(f"{item} : missing definition of in index.rst")
