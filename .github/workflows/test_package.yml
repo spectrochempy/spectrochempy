@@ -11,6 +11,8 @@ on:
       - "**/*.rst"
       - "**/*.md"
       - "**/*.ipynb"
+      - "**/*.yml"
+      - "**/*.toml"
 
   schedule:
     - cron: "00 0 * * *"
@@ -21,6 +23,8 @@ on:
       - "**/*.rst"
       - "**/*.md"
       - "**/*.ipynb"
+      - "**/*.yml"
+      - "**/*.toml"
 
   workflow_dispatch:
 
