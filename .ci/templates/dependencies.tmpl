@@ -17,26 +17,15 @@ be created or updated accordingly
     - docrep
     - ipython
     - jinja2
-    - matplotlib>=3.8
-    - numpy>=2.0
-    - numpydoc>=1.2
+    - matplotlib
+    - numpy
+    - numpydoc
     - osqp
-    - packaging
-    - pint>=0.24
-    - requests
-    - scipy
-    - traitlets
-    - tzlocal
+    - pint
     - scikit-learn
     - xlrd
     - pyyaml
-    - cffconvert
-    - ipywidgets
-
-    # dependencies needed mainly for install and a bit more ...
-    - setuptools
     - setuptools_scm
-    - git
 
 {%- if TEST %}
 
@@ -50,6 +39,9 @@ be created or updated accordingly
     - pyfakefs
     - pep8-naming
     - xarray
+    - ipywidgets
+    - cffconvert
+
 {%- endif %}
 {%- if DEV %}
 
@@ -58,6 +50,7 @@ be created or updated accordingly
     # From here, the dependencies are essentially for development.
     # They should not be necessary for the user of  spectrochempy.
     - anaconda-client
+    - flake8
     - black
     - boa
     - conda-build

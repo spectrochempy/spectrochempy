@@ -34,24 +34,15 @@ dependencies = [
 	 "docrep",
 	 "ipython",
 	 "jinja2",
-	 "matplotlib>=3.8",
-	 "numpy>=2.0",
-	 "numpydoc>=1.2",
+	 "matplotlib",
+	 "numpy",
+	 "numpydoc",
 	 "osqp",
-	 "packaging",
-	 "pint>=0.24",
-	 "requests",
-	 "scipy",
-	 "traitlets",
-	 "tzlocal",
+	 "pint",
 	 "scikit-learn",
 	 "xlrd",
 	 "pyyaml",
-	 "cffconvert",
-	 "ipywidgets",
-	 "setuptools",
-	 "setuptools_scm",
-	 "gitpython"
+	 "setuptools_scm"
 ]
 [project.optional-dependencies]
 dev = [
@@ -63,6 +54,9 @@ dev = [
 	 "pyfakefs",
 	 "pep8-naming",
 	 "xarray",
+	 "ipywidgets",
+	 "cffconvert",
+	 "flake8",
 	 "black",
 	 "boa",
 	 "isort",
@@ -72,6 +66,7 @@ dev = [
 	 "mamba",
 	 "nbconvert==7.16.1",
 	 "nbsphinx",
+	 "numpydoc>=1.2",
 	 "pypandoc",
 	 "pre-commit",
 	 "scikit-image",
@@ -89,7 +84,9 @@ test = [
 	 "pytest-mock",
 	 "pyfakefs",
 	 "pep8-naming",
-	 "xarray"
+	 "xarray",
+	 "ipywidgets",
+	 "cffconvert"
 ]
 cantera = [
     "cantera"
