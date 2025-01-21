@@ -5,6 +5,13 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+import pytest
+
+pytestmark = pytest.mark.skipif(
+    pytest.importorskip("ipywidgets", reason="ipywidgets not installed") is None,
+    reason="ipywidgets not installed",
+)
+
 import numpy as np
 import pytest
 
@@ -53,7 +60,6 @@ def test_baselinecorrector_load_clicked(X, monkeypatch):
 
 
 def test_baselinecorrector_slicing(X):
-
     out = scp.BaselineCorrector(X)
 
     assert out.corrected.shape == (55, 5549)

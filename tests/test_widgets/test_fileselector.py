@@ -5,11 +5,17 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+import pytest
+
 import spectrochempy as scp
+
+pytest.mark.skipif(
+    pytest.importorskip("ipywidgets", reason="ipywidgets not installed") is None,
+    reason="ipywidgets not installed",
+)
 
 
 def test_fileselector():
-
     datadir = scp.preferences.datadir
     fs = scp.FileSelector(path=datadir, filters=["spg", "spa"])
     # no selection possible if we are not in a notebook
