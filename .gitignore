@@ -129,3 +129,4 @@ scp_data/stylesheets/mydefault.mplstyle
 _ressources
 _tools
 .venv
+sg_execution_times.rst
