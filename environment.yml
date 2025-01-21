@@ -35,6 +35,7 @@ dependencies:
     - pint
     - pyyaml
     - quaternion
+    - requests
     - scikit-learn
     - setuptools_scm
     - tzlocal
