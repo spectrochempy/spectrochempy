@@ -30,7 +30,6 @@ dependencies:
     - ipython
     - jinja2
     - numpy
-    - numpydoc
     - matplotlib
     - osqp
     - pint
@@ -53,6 +52,7 @@ dependencies:
     - xarray
     - ipywidgets
     - cffconvert
+    - numpydoc
 
     # DEV dependencies
     # ----------------

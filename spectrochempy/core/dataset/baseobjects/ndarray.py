@@ -43,7 +43,7 @@ from spectrochempy.core.units import (
 )
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import INPLACE, MASKED, NOMASK, MaskedConstant
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.misc import (
     TYPE_FLOAT,

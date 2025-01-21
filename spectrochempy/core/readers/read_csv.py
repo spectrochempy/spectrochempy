@@ -21,7 +21,7 @@ import numpy as np
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 try:
     locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format

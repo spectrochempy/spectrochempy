@@ -16,7 +16,6 @@ be created or updated accordingly
     - ipython
     - jinja2
     - numpy
-    - numpydoc
     - matplotlib
     - osqp
     - pint
@@ -26,6 +25,9 @@ be created or updated accordingly
     - setuptools_scm
     - tzlocal
     - xlrd
+
+{%-if INTERACTIVE %}
+{%- endif %}
 
 {%- if TEST %}
 
@@ -41,6 +43,7 @@ be created or updated accordingly
     - xarray
     - ipywidgets
     - cffconvert
+    - numpydoc
 
 {%- endif %}
 {%- if DEV %}

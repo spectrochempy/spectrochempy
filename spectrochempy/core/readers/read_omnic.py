@@ -8,6 +8,7 @@
 This module extend NDDataset with the import method for OMNIC generated data
 files.
 """
+
 __all__ = ["read_omnic", "read_spg", "read_spa", "read_srs"]
 __dataset_methods__ = __all__
 
@@ -23,7 +24,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import utcnow
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.file import fromfile
 
 # ======================================================================================
@@ -352,7 +353,7 @@ def _read_spg(*args, **kwargs):
 
     if nspec == 0:  # pragma: no cover
         raise IOError(
-            "Error : File format not recognized" " - information markers not found"
+            "Error : File format not recognized - information markers not found"
         )
 
     # container to hold values
@@ -396,19 +397,19 @@ def _read_spg(*args, **kwargs):
         )
     elif np.ptp(firstx) != 0:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - " "the x axis should start at same value"
+            "Error : Inconsistent data set - the x axis should start at same value"
         )
     elif np.ptp(lastx) != 0:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set -" " the x axis should end at same value"
+            "Error : Inconsistent data set - the x axis should end at same value"
         )
     elif len(set(xunits)) != 1:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - " "data units should be identical"
+            "Error : Inconsistent data set - data units should be identical"
         )
     elif len(set(units)) != 1:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - " "x axis units should be identical"
+            "Error : Inconsistent data set - x axis units should be identical"
         )
     data = np.ndarray((nspec, nx[0]), dtype="float32")
 
@@ -501,7 +502,7 @@ def _read_spg(*args, **kwargs):
     # Set description, date and history
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
     dataset.description = kwargs.get(
-        "description", f"Omnic title: {spg_title}\nOmnic " f"filename: {filename}"
+        "description", f"Omnic title: {spg_title}\nOmnic filename: {filename}"
     )
 
     dataset._date = utcnow()
@@ -878,14 +879,13 @@ def _read_srs(*args, **kwargs):
                 # In reprocessed series the updated "DATA PROCESSING HISTORY" is located right after
                 # the following 16 byte sequence:
                 sub = (
-                    b"\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+                    b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
                 )
                 pos = bytestring.find(sub) + 16
                 history = _readbtext(fid, pos, None)
 
         # read the background if the user asked for it.
         if return_bg:
-
             # First get background info
             info = _read_header(fid, pos_info_bg)
 
@@ -924,7 +924,6 @@ def _read_srs(*args, **kwargs):
             # X.history = str(datetime.now(timezone.utc)) + ':imported from srs
 
     if is_highspeed:
-
         # find the 3 following starting indexes of sub.
         # 1st -> series info),
         # 2nd -> background ?
@@ -962,7 +961,7 @@ def _read_srs(*args, **kwargs):
             # some post-processing, so info["history"] returns a corrupted string.
             # The "DATA PROCESSING HISTORY" (as indicated by omnic) is located right
             # after the following 16 byte sequence:
-            sub = b"\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\xFF\xFF"
+            sub = b"\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff"
             pos = bytestring.find(sub) + 16
             history = _readbtext(fid, pos, None)
 
@@ -982,7 +981,6 @@ def _read_srs(*args, **kwargs):
                 return None
 
     if is_tg:
-
         fid.seek(0)
         bytestring = fid.read()
         index = [pos]
@@ -1014,7 +1012,6 @@ def _read_srs(*args, **kwargs):
 
         # read the background if the user asked for it.
         if return_bg:
-
             # First get background info
             info = _read_header(fid, pos_info_bg)
 
@@ -1197,7 +1194,7 @@ def _read_header(fid, pos):
         - ... y unit could be at pos+1030 with 01 = minutes ?
         - history (text), 1200 bytes behind (only initial history.
            When reprocessed, updated history is at the end of the file after the
-           b`\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF` sequence
+           b`\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff` sequence
     """
 
     out = {}

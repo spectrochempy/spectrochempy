@@ -7,6 +7,7 @@
 """
 This module implement the EFA (Evolving Factor Analysis) class.
 """
+
 import numpy as np
 import traitlets as tr
 
@@ -17,7 +18,7 @@ from spectrochempy.utils.decorators import (
     deprecated,
     signature_has_configurable_traits,
 )
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 __all__ = ["EFA"]
 __configurables__ = ["EFA"]
@@ -25,7 +26,6 @@ __configurables__ = ["EFA"]
 
 @signature_has_configurable_traits
 class EFA(DecompositionAnalysis):
-
     _docstring.delete_params("DecompositionAnalysis.see_also", "EFA")
 
     __doc__ = _docstring.dedent(
@@ -91,7 +91,6 @@ class EFA(DecompositionAnalysis):
         warm_start=False,
         **kwargs,
     ):
-
         # Call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
@@ -119,7 +118,6 @@ class EFA(DecompositionAnalysis):
         # ------------------------------------------------------------------------------
         f = np.zeros((M, K))
         for i in range(M):
-
             s = np.linalg.svd(X[: i + 1], compute_uv=False)
             k = s.size
             f[i, :k] = s**2

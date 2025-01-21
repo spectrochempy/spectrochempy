@@ -9,11 +9,11 @@ from functools import partial
 
 from IPython.display import display
 
-from spectrochempy.analysis.baselineprocessing.baseline import Baseline
 from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.readers.importer import read
+from spectrochempy.processing.baselineprocessing.baseline import Baseline
 from spectrochempy.utils.optional import import_optional_dependency
 
 ipywidgets = import_optional_dependency("ipywidgets", errors="ignore")

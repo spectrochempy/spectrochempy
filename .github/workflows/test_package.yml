@@ -6,25 +6,25 @@ on:
       - master
       - develop
       - feature/*
-    paths-ignore:
-      - "docs/**"
-      - "**/*.rst"
-      - "**/*.md"
-      - "**/*.ipynb"
-      - "**/*.yml"
-      - "**/*.toml"
+    # paths-ignore:
+    #   - "docs/**"
+    #   - "**/*.rst"
+    #   - "**/*.md"
+    #   - "**/*.ipynb"
+    #   - "**/*.yml"
+    #   - "**/*.toml"
 
   schedule:
     - cron: "00 0 * * *"
 
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "**/*.rst"
-      - "**/*.md"
-      - "**/*.ipynb"
-      - "**/*.yml"
-      - "**/*.toml"
+    # paths-ignore:
+    #   - "docs/**"
+    #   - "**/*.rst"
+    #   - "**/*.md"
+    #   - "**/*.ipynb"
+    #   - "**/*.yml"
+    #   - "**/*.toml"
 
   workflow_dispatch:
 

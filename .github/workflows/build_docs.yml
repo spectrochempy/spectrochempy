@@ -32,7 +32,7 @@ jobs:
        github.event_name != 'schedule')
 
     name: Build and publish documentation
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       TZ: "Etc/UTC"
 

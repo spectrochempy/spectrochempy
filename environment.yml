@@ -30,7 +30,6 @@ dependencies:
     - ipython
     - jinja2
     - numpy
-    - numpydoc
     - matplotlib
     - osqp
     - pint

@@ -14,7 +14,6 @@ docrep
 ipython
 jinja2
 numpy
-numpydoc
 matplotlib
 osqp
 pint
@@ -34,3 +33,4 @@ pep8-naming
 xarray
 ipywidgets
 cffconvert
+numpydoc

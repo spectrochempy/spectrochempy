@@ -12,7 +12,7 @@ import spectrochempy.utils.traits as mtr
 from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 __dataset_methods__ = [
     "savgol_filter",
@@ -92,7 +92,7 @@ class Filter(ProcessingConfigurable):
 
     size = mtr.PositiveOddInteger(
         default_value=5,
-        help="The size of the filter window." "size must be a positive odd integer.",
+        help="The size of the filter window.size must be a positive odd integer.",
     ).tag(config=True)
 
     order = tr.Integer(

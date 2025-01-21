@@ -7,12 +7,13 @@
 """
 This module implements the base abstract classes to define estimators such as PCA, ...
 """
+
 import traitlets as tr
 
 from spectrochempy.application import app
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.exceptions import NotTransformedError
 
 

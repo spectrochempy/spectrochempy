@@ -40,7 +40,6 @@ requirements:
     - ipython
     - jinja2
     - numpy
-    - numpydoc
     - matplotlib
     - osqp
     - pint
@@ -80,3 +79,30 @@ about:
 extra:
   recipe-maintainers:
     - fernandezc
+
+
+# a way to get different conda packages
+# outputs:
+#   - name: spectrochempy
+#     run_constrained:
+#       - spectrochempy-base
+#       - spectrochempy-dev
+#       - spectrochempy-docs
+
+#   - name: spectrochempy-base
+#     requirements:
+
+#   - name: spectrochempy-dev
+#     requirements:
+#       run:
+#         - {{ pin_subpackage('spectrochempy-base', exact=True) }}
+#         - pytest
+#         - pytest-cov
+#         - black
+
+#   - name: spectrochempy-docs
+#     requirements:
+#       run:
+#         - {{ pin_subpackage('spectrochempy-base', exact=True) }}
+#         - sphinx
+#         - sphinx-rtd-theme

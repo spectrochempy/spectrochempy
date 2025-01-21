@@ -15,7 +15,7 @@ from spectrochempy.core.readers.importer import (
     _openfid,
     read,
 )
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 # ======================================================================================
 # Public functions
@@ -72,7 +72,6 @@ def _read_zip(*args, **kwargs):
     fid, kwargs = _openfid(filename, **kwargs)
 
     with zipfile.ZipFile(fid) as zf:
-
         filelist = zf.filelist
         only = kwargs.pop("only", len(filelist))
 

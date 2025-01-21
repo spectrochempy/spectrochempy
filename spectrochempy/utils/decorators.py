@@ -16,7 +16,7 @@ from warnings import warn
 
 import traitlets as tr
 
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 
 def preserve_signature(f):

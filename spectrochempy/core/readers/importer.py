@@ -7,6 +7,7 @@
 """
 This module define a generic class to import directories, files and contents.
 """
+
 __all__ = ["read", "read_dir"]  # , "read_remote"]
 __dataset_methods__ = __all__
 
@@ -20,7 +21,7 @@ import yaml
 from traitlets import Dict, HasTraits, List, Type, Unicode
 
 from spectrochempy.application import info_, warning_
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 from spectrochempy.utils.file import (
     check_filename_to_open,

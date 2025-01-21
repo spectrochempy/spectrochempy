@@ -182,10 +182,10 @@ class BuildDocumentation(object):
 
         for filename in folder.rglob("**/*.png"):
             image = imread(filename)
-            h, l, c = image.shape
+            _, width, _ = image.shape
             ratio = 1.0
-            if l > size:
-                ratio = size / l
+            if width > size:
+                ratio = size / width
             if ratio < 1:
                 # reduce size
                 image_resized = resize(

@@ -1544,7 +1544,7 @@ for funcname in api_funcs:
     __all__.append(funcname)
 
 # import also npy functions  # TODO: this will be changed with __array_functions__
-from spectrochempy.processing.transformation.npy import dot  # nqo: E402
+from spectrochempy.processing.transformation.npy import dot  # noqa: E402
 
 NDDataset.dot = dot
 

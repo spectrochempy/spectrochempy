@@ -7,6 +7,7 @@
 """
 This module implements the Singular Value Decomposition (SVD) class.
 """
+
 import numpy as np
 import traitlets as tr
 
@@ -14,7 +15,7 @@ from spectrochempy.analysis._base._analysisbase import (
     DecompositionAnalysis,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 __all__ = ["SVD"]
 __configurables__ = ["SVD"]
@@ -60,7 +61,6 @@ def _svd_flip(U, VT, u_based_decision=True):
 # class PCA
 # ======================================================================================
 class SVD(DecompositionAnalysis):
-
     _docstring.delete_params("DecompositionAnalysis.see_also", "SVD")
 
     __doc__ = _docstring.dedent(
@@ -120,7 +120,6 @@ class SVD(DecompositionAnalysis):
         warm_start=False,
         **kwargs,
     ):
-
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(

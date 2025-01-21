@@ -17,7 +17,7 @@ from spectrochempy.analysis._base._analysisbase import (
 )
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 __all__ = ["PLSRegression"]
 __configurables__ = ["PLSRegression"]
@@ -92,7 +92,6 @@ class PLSRegression(CrossDecompositionAnalysis):
         warm_start=False,
         **kwargs,
     ):
-
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(
