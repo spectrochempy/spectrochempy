@@ -31,8 +31,14 @@ from sphinx.application import Sphinx
 
 try:
     from sphinx.deprecation import RemovedInSphinx70Warning
+
+    warnings.filterwarnings(action="ignore", category=RemovedInSphinx70Warning)
+
 except ImportError:
     from sphinx.deprecation import RemovedInSphinx10Warning
+
+    warnings.filterwarnings(action="ignore", category=RemovedInSphinx10Warning)
+
 
 from spectrochempy.api import preferences as prefs
 from spectrochempy.api import version
@@ -41,7 +47,7 @@ from spectrochempy.utils.system import sh
 from apigen import Apigen
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
-warnings.filterwarnings(action="ignore", category=RemovedInSphinx70Warning)
+
 warnings.filterwarnings(action="ignore", module="debugpy")
 warnings.filterwarnings(action="ignore", category=FutureWarning)
 
