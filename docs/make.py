@@ -28,7 +28,11 @@ import numpy as np
 from skimage.io import imread, imsave
 from skimage.transform import resize
 from sphinx.application import Sphinx
-from sphinx.deprecation import RemovedInSphinx70Warning
+
+try:
+    from sphinx.deprecation import RemovedInSphinx70Warning
+except ImportError:
+    from sphinx.deprecation import RemovedInSphinx10Warning
 
 from spectrochempy.api import preferences as prefs
 from spectrochempy.api import version

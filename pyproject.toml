@@ -65,16 +65,15 @@ dev = [
 	 "jupytext",
 	 "jupyter_sphinx",
 	 "mamba",
-	 "nbconvert==7.16.1",
+	 "nbconvert",
 	 "nbsphinx",
-	 "numpydoc>=1.2",
 	 "pypandoc",
 	 "pre-commit",
 	 "scikit-image",
-	 "sphinx==5.3",
+	 "sphinx",
 	 "sphinx-copybutton",
-	 "sphinx-gallery==0.13",
-	 "sphinx_rtd_theme==1.2",
+	 "sphinx-gallery",
+	 "sphinx_rtd_theme",
 	 "sphinxcontrib-bibtex"
 ]
 test = [
