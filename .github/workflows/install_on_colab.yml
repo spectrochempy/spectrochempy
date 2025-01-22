@@ -33,14 +33,12 @@ jobs:
            remove-android: 'true'
            remove-haskell: 'true'
            remove-codeql: 'true'
-         
      - name: Install Colab Docker image
        run: |
          echo "Installing Colab Docker image..."
          docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
          echo "Colab Docker image installed."
          echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
-        
      - uses: actions/checkout@v4
      - name: Install scp dependencies
        run: |
