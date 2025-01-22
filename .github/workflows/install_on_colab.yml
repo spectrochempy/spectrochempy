@@ -25,7 +25,6 @@ jobs:
          remove-android: 'true'
          remove-haskell: 'true'
          remove-codeql: 'true'
-         verbose: 'true'
          
      - name: Install Colab Docker image
        run: |
@@ -38,7 +37,6 @@ jobs:
      - uses: actions/checkout@v4
      - name: Install scp dependencies
        run: |
-         echo "Installing spectrochempy dependencies ..."
-         python -m pip install -r https://raw.githubusercontent.com/${{github.repository}}/requirements/requirements.txt 
-         git clone --depth=1 https://github.com/${{github.repository}}/spectrochempy.git
-         python -m pip install ./spectrochempy
+        echo "Installing spectrochempy dependencies ..."
+        python -m pip install -r ./requirements/requirements.txt 
+        python -m pip install .
