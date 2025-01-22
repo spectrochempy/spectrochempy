@@ -18,10 +18,14 @@ jobs:
     
      - name: Maximize disc space
        uses: AdityaGarg8/remove-unwanted-software@v4.1
+       with:
+           remove-dotnet: 'true'
+           remove-android: 'true'
+           remove-haskell: 'true'
+           remove-codeql: 'true'
          
      - name: Install Colab Docker image
        run: |
-         echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
          echo "Installing Colab Docker image..."
          docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
          echo "Colab Docker image installed."
@@ -33,7 +37,7 @@ jobs:
         echo "Installing spectrochempy dependencies ..."
         python -m pip install -r ./requirements/requirements.txt 
         python -m pip install .
-                python -c "
+        python -c "
         import spectrochempy as scp
         a = scp.random((10,10))
         assert a.shape == (10, 10)
