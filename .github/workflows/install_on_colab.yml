@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     name: Test run on latest colab image
-    runs-on: ubuntu-latest-4core
+    runs-on: ubuntu-latest
 
     container:
       image: europe-docker.pkg.dev/colab-images/public/runtime:latest
