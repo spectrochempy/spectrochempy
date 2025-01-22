@@ -45,7 +45,7 @@ jobs:
      - name: Install scp dependencies
        run: |
         echo "Installing spectrochempy dependencies ..."
-        python -m pip install -r ./requirements/requirements.txt 
+        python -m pip install -r ./requirements/requirements.txt
         python -m pip install .
         python -c "
         import spectrochempy as scp
