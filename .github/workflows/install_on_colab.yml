@@ -15,22 +15,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+     - name: Init space
+       run: |
+         echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
+       
      - name: Maximize build space
        uses: AdityaGarg8/remove-unwanted-software@v4.1
        with:
          remove-android: 'true'
+         remove-haskell: 'true'
+         remove-codeql: 'true'
+         verbose: 'true'
          
-    - name: Install Colab Docker image
-      run: |
-        echo "Installing Colab Docker image..."
-        docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
-        echo "Colab Docker image installed."
-        echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
+     - name: Install Colab Docker image
+       run: |
+         echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
+         echo "Installing Colab Docker image..."
+         docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
+         echo "Colab Docker image installed."
+         echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
         
-    - uses: actions/checkout@v4
-    - name: Install scp dependencies
-      run: |
-        echo "Installing spectrochempy dependencies ..."
-        python -m pip install -r https://raw.githubusercontent.com/${{github.repository}}/requirements/requirements.txt 
-        git clone --depth=1 https://github.com/${{github.repository}}/spectrochempy.git
-        python -m pip install ./spectrochempy
+     - uses: actions/checkout@v4
+     - name: Install scp dependencies
+       run: |
+         echo "Installing spectrochempy dependencies ..."
+         python -m pip install -r https://raw.githubusercontent.com/${{github.repository}}/requirements/requirements.txt 
+         git clone --depth=1 https://github.com/${{github.repository}}/spectrochempy.git
+         python -m pip install ./spectrochempy
