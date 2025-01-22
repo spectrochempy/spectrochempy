@@ -14,14 +14,30 @@ jobs:
     name: Test run on latest colab image
     runs-on: ubuntu-latest
 
-    container:
-      image: europe-docker.pkg.dev/colab-images/public/runtime:latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Install dependencies
+    - name: Free up disk space
       run: |
-        # Install any necessary Python packages here
+        echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
+        echo "Freeing up disk space..."
+        sudo apt-get clean
+        sudo rm -rf /var/lib/apt/lists/*
+        sudo apt-get autoremove -y
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+        echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
+
+    - name: Install Colab Docker image
+      run: |
+        echo "Installing Colab Docker image..."
+        docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
+        echo "Colab Docker image installed."
+        echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
+        
+    - uses: actions/checkout@v4
+    - name: Install scp dependencies
+      run: |
+        echo "Installing spectrochempy dependencies ..."
         python -m pip install -r https://raw.githubusercontent.com/${{github.repository}}/requirements/requirements.txt 
         git clone --depth=1 https://github.com/${{github.repository}}/spectrochempy.git
         python -m pip install ./spectrochempy
