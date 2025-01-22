@@ -7,6 +7,7 @@
 """
 Implementation of Principal Component Analysis (using scikit-learn library)
 """
+
 import matplotlib.pyplot as plt
 import numpy as np
 import traitlets as tr
@@ -20,7 +21,7 @@ from spectrochempy.analysis._base._analysisbase import (
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.plots import NBlue, NRed
 
 __all__ = ["PCA"]
@@ -202,7 +203,6 @@ for reproducible results across multiple function calls.""",
     # ----------------------------------------------------------------------------------
     @tr.observe("_X")
     def _preprocess_as_X_changed(self, change):
-
         X = change.new
 
         # Standardization
@@ -361,7 +361,6 @@ for reproducible results across multiple function calls.""",
     # Reporting specific to PCA
     # ----------------------------------------------------------------------------------
     def __str__(self, n_components=5):
-
         if not self._fitted:
             raise NotFittedError(
                 f"The fit method must be used prior using the {self.name} model"
@@ -396,9 +395,7 @@ for reproducible results across multiple function calls.""",
             The number of components to print.
         """
         if not self._fitted:
-            raise NotFittedError(
-                "The fit method must be used " "before using this method"
-            )
+            raise NotFittedError("The fit method must be used before using this method")
 
         if n_components is None or n_components > self.n_components:
             n_components = self.n_components

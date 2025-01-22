@@ -43,7 +43,7 @@ from spectrochempy.core.units import (
 )
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import INPLACE, MASKED, NOMASK, MaskedConstant
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.misc import (
     TYPE_FLOAT,
@@ -471,8 +471,7 @@ class NDArray(HasTraits):
         elif isinstance(value, Quantity):
             # first convert value to the current units
             value.ito(self.units)
-            # self._data[keys] = np.array(value.magnitude, subok=True, copy=self._copy)
-            value = np.array(value.magnitude, subok=True, copy=self._copy)
+            value = np.asarray(value.magnitude)  # , copy=self.copy)
 
         if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
             # sometimes do not work directly : here is a work around
@@ -622,7 +621,7 @@ class NDArray(HasTraits):
                 raise TypeError(
                     f"Dimensions must be specified as string or integer index, but a "
                     f"value of type "
-                    f"{type(dim)} has been passed (value:{dim})!"
+                    f"{type(dim)} has been passed (value: {dim})!"
                 )
 
         for i, item in enumerate(axis):
@@ -722,7 +721,7 @@ class NDArray(HasTraits):
             raise NotImplementedError(
                 f"not implemented for {type(self).__name__} objects which are "
                 f"not 1-dimensional "
-                f"(current ndim:{self.ndim})"
+                f"(current ndim: {self.ndim})"
             )
 
         # check units compatibility
@@ -732,9 +731,9 @@ class NDArray(HasTraits):
             and units != self.units
         ):
             raise ValueError(
-                f"Units of the location {loc} {units} are not compatible with those of"
-                f" this array:"
-                f" {self.units}"
+                f"Units of the location {loc} {units} are not compatible with those of "
+                f"this array: "
+                f"{self.units}"
             )
 
         if self.is_empty and not self.is_labeled:
@@ -911,7 +910,7 @@ class NDArray(HasTraits):
     def _repr_units(self):
         if self.has_units:
             # if not self.units.dimensionless or self.units.scaling != 1:
-            strunits = f"{self.units:~P}"
+            strunits = f"{self.units: ~P}"
             if strunits == "":
                 strunits = "dimensionless"
         else:
@@ -972,14 +971,20 @@ class NDArray(HasTraits):
                     pass
 
         elif isinstance(data, Quantity):
-            self._data = np.array(data.magnitude, subok=True, copy=self._copy)
+            if self._copy:
+                self._data = np.asarray(data.magnitude, subok=True, copy=True)
+            else:
+                self._data = np.asarray(data.magnitude)
             self._units = data.units
 
         elif hasattr(data, "mask"):
             # an object with data and mask attributes
-            self._data = np.array(data.data, subok=True, copy=self._copy)
+            if self.copy:
+                self._data = np.array(data.data, subok=True, copy=self._copy)
+            else:
+                self._data = np.asarray(data.data)
             if isinstance(data.mask, np.ndarray) and data.mask.shape == data.data.shape:
-                self.mask = np.array(data.mask, dtype=np.bool_, copy=False)
+                self.mask = np.asarray(data.mask, dtype=np.bool_)
 
         elif (
             not hasattr(data, "shape")
@@ -989,11 +994,11 @@ class NDArray(HasTraits):
             # Data doesn't look like a numpy array, try converting it to
             # one.
             try:
-                self._data = np.array(data, subok=True, copy=False)
+                self._data = np.asarray(data)
             except ValueError:
                 # happens if data is a list of quantities
                 if isinstance(data[0], Quantity):
-                    self._data = np.array([d.m for d in data], subok=True, copy=False)
+                    self._data = np.asarray([d.m for d in data])
                 self._units = data[0].units
 
         else:
@@ -2098,14 +2103,14 @@ class NDArray(HasTraits):
 
                 # particular case of dimensionless units: absorbance and transmittance
                 else:
-                    if f"{oldunits:P}" in ["transmittance", "absolute_transmittance"]:
-                        if f"{units:P}" == "absorbance":
+                    if f"{oldunits: P}" in ["transmittance", "absolute_transmittance"]:
+                        if f"{units: P}" == "absorbance":
                             udata = (new.data * new.units).to(units)
                             new._data = -np.log10(udata.m)
                             new._units = units
                             new._title = "absorbance"
 
-                        elif f"{units:P}" in [
+                        elif f"{units: P}" in [
                             "transmittance",
                             "absolute_transmittance",
                         ]:
@@ -2113,8 +2118,8 @@ class NDArray(HasTraits):
                             new._units = units
                             new._title = "transmittance"
 
-                    elif f"{oldunits:P}" == "absorbance":
-                        if f"{units:P}" in ["transmittance", "absolute_transmittance"]:
+                    elif f"{oldunits: P}" == "absorbance":
+                        if f"{units: P}" in ["transmittance", "absolute_transmittance"]:
                             scale = Quantity(1.0, self._units).to(units).magnitude
                             new._data = 10.0**-new.data * scale
                             new._units = units
@@ -2151,9 +2156,8 @@ class NDArray(HasTraits):
                         elif (
                             oldunits.dimensionality
                             in ["1/[time]", "1/[length]", "[length]"]
-                            and new._units.dimensionality == "[length] ** 2 * "
-                            "[mass] / [time] "
-                            "** 2"
+                            and new._units.dimensionality
+                            == "[length] ** 2 * [mass] / [time] ** 2"
                         ):
                             new._title = "energy"
 
@@ -2330,8 +2334,8 @@ class NDArray(HasTraits):
                 self.to(units)
             except Exception:
                 raise TypeError(
-                    f"Provided units {units} does not match data units: {self._units}.\nTo force a change,"
-                    f" use the to() method, with force flag set to True"
+                    f"Provided units {units} does not match data units: {self._units}.\nTo force a change, "
+                    f"use the to() method, with force flag set to True"
                 )
         self._units = units
 

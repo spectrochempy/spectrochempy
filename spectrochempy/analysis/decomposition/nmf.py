@@ -7,6 +7,7 @@
 """
 Implementation of NMF model (using scikit-learn library)
 """
+
 import logging
 
 import traitlets as tr
@@ -15,7 +16,7 @@ from sklearn import decomposition
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 __all__ = ["NMF"]
 __configurables__ = ["NMF"]

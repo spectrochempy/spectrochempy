@@ -25,7 +25,7 @@ from traitlets.config.loader import LazyConfigValue
 
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.objects import Adict
 
 

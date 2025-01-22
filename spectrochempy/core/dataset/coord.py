@@ -22,7 +22,7 @@ from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.compare import is_iterable, is_number
 from spectrochempy.utils.constants import INPLACE, NOMASK
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.numutils import get_n_decimals, spacings
 from spectrochempy.utils.print import colored_output
 

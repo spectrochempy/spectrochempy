@@ -22,7 +22,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset, deprecated
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.plots import NBlue, NGreen, NRed
 from spectrochempy.utils.traits import NDDatasetType
@@ -1259,7 +1259,10 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         if self._linear_regression.coef_.size == 1:
             # this is the result of the single equation, so only one value
             # should be returned
-            A = float(self._linear_regression.coef_)
+            if self._linear_regression.coef_.ndim == 0:
+                A = float(self._linear_regression.coef_)
+            else:
+                A = float(self._linear_regression.coef_[0])
             if self._is_dataset and self._Y.has_units and self._X.has_units:
                 A = A * self._Y.units / self._X.units
         elif self._is_dataset:

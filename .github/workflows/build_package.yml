@@ -6,7 +6,7 @@ on:
       - master
 
   schedule:
-    - cron: '00 0 * * *'
+    - cron: "00 0 * * *"
 
   pull_request:
 
@@ -20,7 +20,6 @@ concurrency:
 jobs:
   # Job 1
   build-and-publish_pypi:
-
     # prevent cron jobs from running on forks
     if: |
       (github.event_name == 'schedule' && github.repository == 'spectrochempy/spectrochempy') || (github.event_name != 'schedule')
@@ -33,7 +32,6 @@ jobs:
         shell: bash -l {0}
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -42,7 +40,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.11"
 
       - name: Install pypa/build
         run: |
@@ -67,7 +65,6 @@ jobs:
 
   # Job 2
   build_and_publish_conda_package:
-
     name: Build and publish Conda package to Anaconda
     runs-on: ubuntu-latest
 
@@ -80,7 +77,6 @@ jobs:
         shell: bash -l {0}
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -95,14 +91,6 @@ jobs:
           create-args: >-
             python=3.10
           cache-environment: true
-
-      #      - name: Install Conda environment with Micromamba
-      #        uses: mamba-org/provision-with-micromamba@main
-      #        with:
-      #          environment-file: environment_dev.yml
-      #          environment-name: scpy
-      #          extra-specs: |
-      #            python=3.9
 
       - name: Install spectrochempy
         run: |

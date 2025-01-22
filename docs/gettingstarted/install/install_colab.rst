@@ -31,7 +31,7 @@ install SpectroChemPy in Colab.
 
     ! pip install -q spectrochempy &>> output.log
 
-The whole process takes 1-2 minutes. Then as usual in Jupyter Notebook you can start using SpectroChemPy by inserting
+The whole process takes less than 1 minute. Then as usual in Jupyter Notebook you can start using SpectroChemPy by inserting
 adding new code cells:
 
 .. image:: images/colab_1.png

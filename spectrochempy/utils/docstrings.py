@@ -9,6 +9,7 @@ Analyze docstrings to detect errors.
 
 Adapted from Pandas (see License in the root directory)
 """
+
 import doctest
 import functools
 import inspect
@@ -22,7 +23,6 @@ import textwrap
 import traceback
 
 # import matplotlib
-import docrep
 import matplotlib.pyplot as plt
 import numpy
 from numpydoc.docscrape import get_doc_object
@@ -48,70 +48,6 @@ ERROR_MSGS = {
     "EX04": "Do not import {imported_library}, as it is imported "
     "automatically for the examples (numpy as np, spectrochempy as scp)",
 }
-
-
-_common_doc = """
-out : `object`
-    Input object or a newly allocated object, depending on the `inplace` flag.
-new : `object`
-    Newly allocated object.
-copy : `bool`, optional, default: `True`
-    Perform a copy of the passed object.
-inplace : `bool`, optional, default: `False`
-    By default, the method returns a newly allocated object.
-    If `inplace` is set to `True`, the input object is returned.
-dataset : `NDDataset` or :term:`array-like` of shape (`n_observations` , `n_features`)
-    Input data, where :term:`n_observations` is the number of observations
-    and :term:`n_features` is the number of features.
-dim : `int` or `str`, optional, default: -1,
-    Dimension along which the method is applied.
-    By default, the method is applied to the last dimension.
-    If `dim` is specified as an integer it is equivalent to the usual `axis` numpy
-    parameter.
-**kwargs : keyword parameters, optional
-    See Other Parameters.
-"""
-
-
-class DocstringProcessor(docrep.DocstringProcessor):
-
-    param_like_sections = ["See Also"] + docrep.DocstringProcessor.param_like_sections
-
-    def __init__(self, **kwargs):
-
-        super().__init__(**kwargs)
-
-        regex = re.compile(r"(?=^[*]{0,2}\b\w+\b\s?:?\s?)", re.MULTILINE | re.DOTALL)
-        plist = regex.split(_common_doc.strip())[1:]
-        params = {
-            k.strip("*"): f"{k.strip()} : {v.strip()}"
-            for k, v in (re.split(r"\s?:\s?", p, maxsplit=1) for p in plist)
-        }
-        self.params.update(params)
-
-    def dedent(self, s, stacklevel=3):
-        s_ = s
-        start = ""
-        end = ""
-        string = True
-        if not isinstance(s, str) and hasattr(s, "__doc__"):
-            string = False
-            s_ = s.__doc__
-        if s_.startswith("\n"):  # restore the first blank line
-            start = "\n"
-        if s_.strip(" ").endswith("\n"):  # restore the last return before quote
-            end = "\n"
-        s_mod = super().dedent(s, stacklevel=stacklevel)
-        if string:
-            s_mod = f"{start}{s_mod}{end}"
-        else:
-            s_mod.__doc__ = f"{start}{s_mod.__doc__}{end}"
-        return s_mod
-
-
-# Docstring substitution (docrep)
-# --------------------------------------------------------------------------------------
-_docstring = DocstringProcessor()
 
 
 def check_docstrings(module, obj, exclude=[]):
@@ -343,15 +279,14 @@ def spectrochempy_validate(func_name, exclude=[]):
 
 class DocstringError(Exception):
     def __init__(self, result):
-
         message = ""
         message += f"{len(result['errors'])} DocstringError(s) found:\n"
-        message += f"{' '*10}{'-'*26}\n"
+        message += f"{' ' * 10}{'-' * 26}\n"
         for err_code, err_desc in result["errors"]:
             if err_code == "EX02":  # Failing examples are printed at the end
-                message += f"{' '*2}Examples do not pass tests\n"
+                message += f"{' ' * 2}Examples do not pass tests\n"
                 continue
-            message += f"{' '*10}* {err_code}: {err_desc}\n"
+            message += f"{' ' * 10}* {err_code}: {err_desc}\n"
         if result["examples_errs"]:
             message += "\n\nDoctests:\n---------\n"
             message += result["examples_errs"]
@@ -382,7 +317,6 @@ def add_docstring(*args):
     """
 
     def new_doc(func):
-
         for item in args:
             item.strip()
 

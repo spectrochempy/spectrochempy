@@ -44,6 +44,7 @@ The original code was inspired by Henderson, Alex DOI:10.5281/zenodo.495477
 See also gwyddion for the DATA types
 https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/modules/file/renishaw.c
 """
+
 __all__ = ["read_wdf", "read_wire"]
 __dataset_methods__ = __all__
 
@@ -60,7 +61,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import windows_time_to_dt64
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.file import fromfile
 from spectrochempy.utils.objects import Adict
 
@@ -359,7 +360,7 @@ class _wdfReader(object):
 
     def _parse_dimension(self, dim):
         """Get information from XLST or YLST blocks"""
-        if not dim.upper() in ["X", "Y"]:
+        if dim.upper() not in ["X", "Y"]:
             raise ValueError("Direction argument `dir` must be X or Y!")
 
         block_name = dim.upper() + "LST"

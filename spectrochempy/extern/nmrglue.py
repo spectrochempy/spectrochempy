@@ -44,6 +44,7 @@ files.
 
 Copied and adapted from NMRGLUE (See NMRGLUE_LICENCES in root folder LICENSES)
 """
+
 import io
 import locale
 
@@ -1766,7 +1767,7 @@ def reorder_submatrix(data, shape, submatrix_shape, reverse=False):
         return data
 
     sub_per_dim = [int(i / j) for i, j in zip(shape, submatrix_shape)]
-    nsubs = np.product(sub_per_dim)
+    nsubs = np.prod(sub_per_dim)
 
     if reverse:
         rdata = np.empty([nsubs] + list(submatrix_shape))

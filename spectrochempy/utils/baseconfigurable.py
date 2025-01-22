@@ -25,7 +25,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import MASKED, NOMASK
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.exceptions import NotTransformedError
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 from spectrochempy.utils.traits import NDDatasetType
@@ -62,7 +62,7 @@ class BaseConfigurable(MetaConfigurable):
     _X_mask = Array(allow_none=True, help="Mask information of the input X data")
     _X_preprocessed = Array(help="Preprocessed inital input X data")
     _X_shape = tr.Tuple(
-        help="Original shape of the input X data, " "before any transformation"
+        help="Original shape of the input X data, before any transformation"
     )
     _X_coordset = tr.Instance(CoordSet, allow_none=True)
     _is_dataset = tr.Bool(help="True if the input X data is a NDDataset")

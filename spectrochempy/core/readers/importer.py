@@ -7,6 +7,7 @@
 """
 This module define a generic class to import directories, files and contents.
 """
+
 __all__ = ["read", "read_dir"]  # , "read_remote"]
 __dataset_methods__ = __all__
 
@@ -20,7 +21,7 @@ import yaml
 from traitlets import Dict, HasTraits, List, Type, Unicode
 
 from spectrochempy.application import info_, warning_
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 from spectrochempy.utils.file import (
     check_filename_to_open,
@@ -749,7 +750,7 @@ def _get_url_content_and_save(url, dst, replace, read_only=False):
         return r.content
 
     except OSError:
-        raise FileNotFoundError(f"Not found locally or at url:{url}")
+        raise FileNotFoundError(f"Not found locally or at url: {url}")
 
 
 def _download_full_testdata_directory():
@@ -777,7 +778,7 @@ def _download_from_github(path, dst, replace=False):
     # download on github (always save the downloaded files)
     relative_path = str(pathclean(path).as_posix())
     path = (
-        f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
+        f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"  # noqa
         f"testdata/{relative_path}"
     )
 
@@ -801,7 +802,7 @@ def _download_from_github(path, dst, replace=False):
 def _is_relative_to(path, base):
     # try to emulate the pathlib is_relative_to method which does not work on python
     # 3.7 (needed for Colab!)
-    # TODO: replace as Colab is updated to 3.9
+    # TODO: check as Colab is updated to 3.10
     pparts = path.parts
     bparts = base.parts
     if bparts[-1] in pparts:

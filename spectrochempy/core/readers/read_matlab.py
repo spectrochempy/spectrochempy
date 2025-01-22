@@ -19,7 +19,7 @@ import scipy.io as sio
 from spectrochempy.application import info_, warning_
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 # ======================================================================================
 # Public functions
@@ -81,7 +81,6 @@ def _read_mat(*args, **kwargs):
 
     datasets = []
     for name, data in dic.items():
-
         dataset = NDDataset()
         if name == "__header__":
             dataset.description = str(data, "utf-8", "ignore")
@@ -101,7 +100,6 @@ def _read_mat(*args, **kwargs):
             np.dtype("uint32"),
             np.dtype("uint64"),
         ]:
-
             # this is an array of numbers
             dataset.data = data
             dataset.name = name

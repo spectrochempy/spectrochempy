@@ -25,48 +25,31 @@ build:
 requirements:
   host:
     - pip
-    - python >=3.9
+    - python >=3.10
     - setuptools
     - setuptools_scm
   run:
     - python
 
-    # specific dependencies
-    - brukeropusreader
-    - quaternion
 
     # dependencies for the core package
+    - brukeropusreader
     - colorama
     - dill
     - docrep
     - ipython
     - jinja2
-    - matplotlib>=3.8
-    - numba
-    - numpy<2.0
-    - numpydoc>=1.2
+    - numpy
+    - matplotlib
     - osqp
-    - packaging
-    - pint>=0.24
-    - requests
-    - scipy
-    - tqdm
-    - traitlets
-    - tzlocal
-    - scikit-learn
-    - xlrd
+    - pint
     - pyyaml
-    - cffconvert
-
-    # dependencies needed mainly for install and a bit more ...
-    - setuptools
+    - quaternion
+    - requests
+    - scikit-learn
     - setuptools_scm
-    - git
-
-    # PIP dependencies
-    # ----------------
-    #- pip
-    #    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
+    - tzlocal
+    - xlrd
 
 
   test:
@@ -97,3 +80,30 @@ about:
 extra:
   recipe-maintainers:
     - fernandezc
+
+
+# a way to get different conda packages
+# outputs:
+#   - name: spectrochempy
+#     run_constrained:
+#       - spectrochempy-base
+#       - spectrochempy-dev
+#       - spectrochempy-docs
+
+#   - name: spectrochempy-base
+#     requirements:
+
+#   - name: spectrochempy-dev
+#     requirements:
+#       run:
+#         - {{ pin_subpackage('spectrochempy-base', exact=True) }}
+#         - pytest
+#         - pytest-cov
+#         - black
+
+#   - name: spectrochempy-docs
+#     requirements:
+#       run:
+#         - {{ pin_subpackage('spectrochempy-base', exact=True) }}
+#         - sphinx
+#         - sphinx-rtd-theme

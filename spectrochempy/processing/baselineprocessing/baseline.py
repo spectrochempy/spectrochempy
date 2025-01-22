@@ -17,8 +17,8 @@ from scipy.sparse.linalg import spsolve
 from scipy.spatial import ConvexHull
 
 from spectrochempy.analysis._base._analysisbase import AnalysisConfigurable
-from spectrochempy.analysis.baseline.baselineutils import lls, lls_inv
 from spectrochempy.application import info_, warning_
+from spectrochempy.processing.baselineprocessing.baselineutils import lls, lls_inv
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import (
@@ -26,7 +26,7 @@ from spectrochempy.utils.decorators import (
     deprecated,
     signature_has_configurable_traits,
 )
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
 from spectrochempy.utils.plots import NBlue, NGreen, NRed

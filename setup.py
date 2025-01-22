@@ -85,18 +85,6 @@ def _install_mpl():
             print(f"Deleted font cache {file}.")
 
 
-def read_requirements():
-    path = Path("requirements/requirements.txt")
-    req = path.read_text().strip()
-    req = req.split("\n")
-    req = list(map(str.strip, req))
-    try:
-        req.remove("")
-    except Exception:
-        pass
-    return [r for r in req if not r.startswith("#")]
-
-
 class PostInstallCommand(_install):
     """Post-installation for installation mode."""
 
@@ -121,12 +109,15 @@ setup_args = dict(
     zip_safe=False,
     packages=find_packages() + packages,
     include_package_data=True,
-    python_requires=">=3.9",
-    setup_requires=["setuptools_scm>=6.3.2", "matplotlib>=3.5.1"],
-    install_requires=read_requirements(),
+    python_requires=">=3.10",
     cmdclass={
         "develop": PostDevelopCommand,
         "install": PostInstallCommand,
+    },
+    entry_points={
+        "console_scripts": [
+            "show-versions=spectrochempy.scripts.show_versions:main",
+        ],
     },
 )
 

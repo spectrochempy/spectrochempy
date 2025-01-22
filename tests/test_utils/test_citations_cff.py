@@ -5,6 +5,13 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # flake8: noqa
+import pytest
+
+pytestmark = pytest.mark.skipif(
+    pytest.importorskip("cffconvert", reason="cffconvert not installed") is None,
+    reason="cffconvert not installed",
+)
+
 
 from spectrochempy.utils.citation import Citation, Zenodo
 

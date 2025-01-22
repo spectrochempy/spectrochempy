@@ -22,7 +22,6 @@ from spectrochempy.utils.misc import largest_power_of_2
 def _zf_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
-
         # On which axis do we want to shift (get axis from arguments)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
@@ -59,7 +58,7 @@ def _zf_method(method):
             # we need to increase the x coordinates array to match the new data size
             offset = x.data[0]
             size = x.size
-            inc = x._data.ptp() / (size - 1)
+            inc = np.ptp(x._data) / (size - 1)
             x._data = np.arange(offset, offset + new._data.shape[-1] * inc, inc)
             # update with the new td
             new.meta.td[-1] = x.size

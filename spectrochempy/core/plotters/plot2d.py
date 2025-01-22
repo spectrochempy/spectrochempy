@@ -7,6 +7,7 @@
 """
 Plotters.
 """
+
 __all__ = [
     "plot_2D",
     "plot_map",
@@ -24,7 +25,7 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils.docstrings import add_docstring
+from spectrochempy.utils.docrep import add_docstring
 from spectrochempy.utils.plots import make_label, plot_method
 
 _PLOT2D_DOC = """

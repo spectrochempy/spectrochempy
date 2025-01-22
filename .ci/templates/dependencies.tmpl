@@ -7,37 +7,28 @@ Change SpectroChemPy project dependencies here only.
 requirements[_dev][_test].text, environment[_dev][_test].yml and .conda/meta.yaml will
 be created or updated accordingly
 #}
-    # specific dependencies
-    - brukeropusreader
-    - quaternion
 
     # dependencies for the core package
+    - brukeropusreader
     - colorama
     - dill
     - docrep
     - ipython
     - jinja2
-    - matplotlib>=3.8
-    - numba
-    - numpy<2.0
-    - numpydoc>=1.2
+    - numpy
+    - matplotlib
     - osqp
-    - packaging
-    - pint>=0.24
-    - requests
-    - scipy
-    - tqdm
-    - traitlets
-    - tzlocal
-    - scikit-learn
-    - xlrd
+    - pint
     - pyyaml
-    - cffconvert
-
-    # dependencies needed mainly for install and a bit more ...
-    - setuptools
+    - quaternion
+    - requests
+    - scikit-learn
     - setuptools_scm
-    - git
+    - tzlocal
+    - xlrd
+
+{%-if INTERACTIVE %}
+{%- endif %}
 
 {%- if TEST %}
 
@@ -51,15 +42,10 @@ be created or updated accordingly
     - pyfakefs
     - pep8-naming
     - xarray
-    - ipywidgets=8.0.4
-    - ipympl
-    - jupyterlab
-    - jupyterlab_widgets
-    - jupyter_events=0.6.3
-    - jupyter_server
-    - pyzmq=25.1.2
-    - nodejs
-    - widgetsnbextension=4.0.5
+    - ipywidgets
+    - cffconvert
+    - numpydoc
+
 {%- endif %}
 {%- if DEV %}
 
@@ -68,6 +54,7 @@ be created or updated accordingly
     # From here, the dependencies are essentially for development.
     # They should not be necessary for the user of  spectrochempy.
     - anaconda-client
+    - flake8
     - black
     - boa
     - conda-build
@@ -77,27 +64,17 @@ be created or updated accordingly
     - jupytext
     - jupyter_sphinx
     - mamba
-    - nbconvert=7.16.1
+    - nbconvert
     - nbsphinx
-    - numpydoc>=1.2
-    - pandoc=2.19
+    # - pandoc # cannot be installed with pip
     - pypandoc
     - pre-commit
     - scikit-image
-    - sphinx=5.3
+    - sphinx
     - sphinx-copybutton
-    - sphinx-gallery=0.13
-    - sphinx_rtd_theme=1.2
+    - sphinx-gallery
+    - sphinx_rtd_theme
     - sphinxcontrib-bibtex
-    - ipywidgets=8.0.4
-    - ipympl
-    - jupyterlab
-    - jupyterlab_widgets
-    - jupyter_events=0.6.3
-    - jupyter_server
-    - pyzmq=25.1.2
-    - nodejs
-    - widgetsnbextension=4.0.5
 {%- endif %}
 {%- if CANTERA %}
 
@@ -105,8 +82,3 @@ be created or updated accordingly
     # --------------------
     - cantera
 {%- endif %}
-
-    # PIP dependencies
-    # ----------------
-    #- pip
-    #    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main

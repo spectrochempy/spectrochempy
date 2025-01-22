@@ -13,10 +13,10 @@ __all__ = ["load"]
 
 import io
 import json
+import os
 import pathlib
 
 import numpy as np
-from numpy.lib.npyio import zipfile_factory
 from traitlets import HasTraits, Instance, Unicode, Union
 
 from spectrochempy.core.dataset.coord import Coord
@@ -36,6 +36,22 @@ SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 # --------------------------------------------------------------------------------------
 # Utilities
 # --------------------------------------------------------------------------------------
+def zipfile_factory(file, *args, **kwargs):
+    """
+    Create a ZipFile.
+
+    Allows for Zip64, and the `file` argument can accept file, str, or
+    pathlib.Path objects. `args` and `kwargs` are passed to the zipfile.ZipFile
+    constructor.
+    """
+    if not hasattr(file, "read"):
+        file = os.fspath(file)
+    import zipfile
+
+    kwargs["allowZip64"] = True
+    return zipfile.ZipFile(file, *args, **kwargs)
+
+
 # ======================================================================================
 # Class NDIO to handle I/O of datasets
 # ======================================================================================

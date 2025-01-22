@@ -7,6 +7,7 @@
 """
 This module implements the IRIS class.
 """
+
 __all__ = ["IrisKernel", "IRIS"]
 __configurables__ = ["IRIS"]
 
@@ -31,7 +32,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType, NDDatasetType
 
@@ -208,9 +209,7 @@ class IrisKernel(tr.HasTraits):
         pdefault = p.name == "external variable" and p.title == "$p$"
 
         if isinstance(K, str):
-
             if K.lower() not in _adsorption + _kinetics + _diffusion + _stejskal_tanner:
-
                 raise NotImplementedError(
                     f"Kernel type `{K.lower()}` is not implemented"
                 )
@@ -659,8 +658,7 @@ class IRIS(DecompositionAnalysis):
                     C1 = _menger(np.log10(Rx[0:3]), np.log10(Sy[0:3]))
                     C2 = _menger(np.log10(Rx[1:4]), np.log10(Sy[1:4]))
                     msg = (
-                        f"Curvatures of the inner points: C1 = {C1:.3f} ;"
-                        f" C2 = {C2:.3f}"
+                        f"Curvatures of the inner points: C1 = {C1:.3f} ; C2 = {C2:.3f}"
                     )
                     info_(msg)
 

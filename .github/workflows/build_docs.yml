@@ -6,6 +6,7 @@ on:
       - master
       - develop
       - feature/*
+      - fix/*
       - docs/*
 
   pull_request:
@@ -16,16 +17,14 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: '00 0 * * *'
+    - cron: "00 0 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-
   build_and_publish_documentation:
-
     # prevent cron jobs from running on forks
     if: |
       (github.event_name == 'schedule'
@@ -42,7 +41,6 @@ jobs:
         shell: bash -l {0}
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -55,12 +53,17 @@ jobs:
           environment-name: scpy_docs
           condarc-file: .ci/condarc.yml
           create-args: >-
-            python=3.10
+            python=3.11
           cache-environment: true
 
       - name: Install spectrochempy
         run: |
           python3 -m pip install --no-deps .
+
+      - name: Setup Jupyter kernel
+        run: |
+          python3 -m pip install ipykernel
+          python3 -m ipykernel install --user --name python3 --display-name "Python 3"
 
       - name: Set up version environment variable
         run: |
@@ -81,11 +84,14 @@ jobs:
         run: |
           mkdir -p build
 
+          # List available kernels for debugging
+          jupyter kernelspec list
+
           echo "cloning gh-pages repository"
           git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/html
 
           echo "Recreating docs"
-          python docs/make.py html
+          python docs/make.py -v -j1 html
 
       - name: Deployment
         if: (github.event_name != 'pull_request')

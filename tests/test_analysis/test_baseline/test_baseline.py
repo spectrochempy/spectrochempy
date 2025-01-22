@@ -10,8 +10,8 @@ import os
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.analysis.baseline.baseline import Baseline
 from spectrochempy.core.units import ur
+from spectrochempy.processing.baselineprocessing.baseline import Baseline
 from spectrochempy.utils.plots import show
 from spectrochempy.utils.testing import assert_dataset_equal
 

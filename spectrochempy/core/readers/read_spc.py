@@ -7,6 +7,7 @@
 """
 This module extend NDDataset with the import method for Thermo galactic (spc) data files.
 """
+
 __all__ = ["read_spc"]
 __dataset_methods__ = __all__
 
@@ -20,7 +21,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import Quantity
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 # ======================================================================================
 # Public functions

@@ -20,7 +20,7 @@ import numpy as np
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 # ======================================================================================
 # Public functions
@@ -72,7 +72,6 @@ def read_dx(*args, **kwargs):  # pragma: no cover
 # ======================================================================================
 @_importer_method
 def _read_jdx(*args, **kwargs):
-
     # read jdx file
     dataset, filename = args
     content = kwargs.get("content", None)
@@ -131,7 +130,6 @@ def _read_jdx(*args, **kwargs):
     # Read the spectra
 
     for i in range(nspec):
-
         # Reset variables
         keyword = ""
 

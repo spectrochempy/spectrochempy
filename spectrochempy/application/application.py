@@ -841,7 +841,7 @@ reset_preferences = app.reset_preferences
 # --------------------------------------------------------------------------------------
 # Check for new release in a separate thread
 # --------------------------------------------------------------------------------------
-from spectrochempy.application._check_update import check_update
+from spectrochempy.application._check_update import check_update  # noqa: E402
 
 DISPLAY_UPDATE = threading.Thread(target=check_update, args=(version,))
 DISPLAY_UPDATE.start()

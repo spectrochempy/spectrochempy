@@ -14,45 +14,29 @@
 #          *  pre-commit run --all-files
 #
 # ======================================================================================
+channel_priority: strict
 channels:
     - conda-forge
     - spectrocat
     - defaults
 
 dependencies:
-    # specific dependencies
-    - brukeropusreader
-    - quaternion
 
     # dependencies for the core package
+    - brukeropusreader
     - colorama
     - dill
     - docrep
     - ipython
     - jinja2
-    - matplotlib>=3.8
-    - numba
-    - numpy<2.0
-    - numpydoc>=1.2
+    - numpy
+    - matplotlib
     - osqp
-    - packaging
-    - pint>=0.24
-    - requests
-    - scipy
-    - tqdm
-    - traitlets
-    - tzlocal
-    - scikit-learn
-    - xlrd
+    - pint
     - pyyaml
-    - cffconvert
-
-    # dependencies needed mainly for install and a bit more ...
-    - setuptools
+    - quaternion
+    - requests
+    - scikit-learn
     - setuptools_scm
-    - git
-
-    # PIP dependencies
-    # ----------------
-    #- pip
-    #    - cffconvert@git+https://github.com/citation-file-format/cffconvert@main
+    - tzlocal
+    - xlrd

@@ -136,17 +136,17 @@ We'll now install `SpectroChemPy` in development mode following 2 steps:
       conda config --set channel_priority flexible
       conda install mamba jinja2
 
-   Here we will create un environment using python in its version 3.9
-   but it is up to you to install any version from 3.6.9 to 3.9.
+   Here we will create un environment using python in its version 3.12
+   but it is up to you to install any version from 3.10 to 3.12.
    Just change the relevant information in the code below (the first line uses a
    script to create the necessary yaml
    file containing all information about the packages to install):
 
    .. sourcecode:: bash
 
-      python .ci/env_create.py -v 3.9 --dev scpy3.9.yml
-      mamba env create -f .ci/scpy3.9.yml
-      conda activate scpy3.9
+      python .ci/env_create.py -v 3.12 --dev scpy3.12.yml
+      mamba env create -f .ci/scpy3.12.yml
+      conda activate scpy3.12
 
 2. Install `SpectroChemPy`
 
@@ -155,15 +155,15 @@ We'll now install `SpectroChemPy` in development mode following 2 steps:
 
    .. sourcecode:: bash
 
-      (scpy3.9) $ cd <spectrochempy folder>
-      (scpy3.9) $ python -m pip install -e .
+      (scpy3.12) $ cd <spectrochempy folder>
+      (scpy3.12) $ python -m pip install -e .
 
    At this point you should be able to import spectrochempy from your local
    development version:
 
    .. sourcecode:: bash
 
-      (scpy3.9) $ python
+      (scpy3.12) $ python
 
    This start an interpreter in which you can check your installation.
 

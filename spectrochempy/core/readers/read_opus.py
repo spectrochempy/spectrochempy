@@ -7,6 +7,7 @@
 """
 This module extend NDDataset with the import method for OPUS generated data files.
 """
+
 __all__ = ["read_opus"]
 __dataset_methods__ = __all__
 
@@ -18,7 +19,7 @@ from brukeropusreader.opus_parser import parse_data, parse_meta
 from spectrochempy.application import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
-from spectrochempy.utils.docstrings import _docstring
+from spectrochempy.utils.docrep import _docstring
 
 # ======================================================================================
 # Public functions

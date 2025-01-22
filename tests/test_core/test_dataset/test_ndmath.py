@@ -10,6 +10,7 @@
 Tests for the ndmath module
 
 """
+
 import numpy as np
 import pytest
 from pint.errors import DimensionalityError
@@ -210,7 +211,7 @@ REDUCE_KEEPUNITS_METHODS = [
     "sum",
     "mean",
     "std",
-    "ptp",
+    # "ptp",  # removed in numpy 2.0
 ]
 
 REDUCE_METHODS = [

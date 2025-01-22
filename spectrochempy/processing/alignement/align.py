@@ -270,7 +270,7 @@ def align(dataset, *others, **kwargs):
             # change the data shape
             new_obj_shape = list(obj.shape)
             new_obj_shape[dim_index] = len(new_coord)
-            new_obj_data = np.full(new_obj_shape, np.NaN)
+            new_obj_data = np.full(new_obj_shape, np.nan)
 
             # create new dataset for obj and ref_objects
             if copy:

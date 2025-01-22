@@ -63,7 +63,13 @@ def set_env(**environ):
 # ======================================================================================
 def gisinf(x):
     # copied from numpy.testing._private.utils
-    from numpy.core import errstate, isinf
+    try:
+        # Modern numpy way
+        from numpy import errstate, isinf
+    except ImportError:
+        # Fallback for numpy 2.0
+        errstate = np.errstate
+        isinf = np.isinf
 
     with errstate(invalid="ignore"):
         st = isinf(x)
@@ -74,9 +80,19 @@ def gisinf(x):
 
 def _compare(x, y, decimal):
     # copied from numpy.testing._private.utils
-    from numpy.core import array, float_, number, result_type
-    from numpy.core.fromnumeric import any as npany
-    from numpy.core.numerictypes import issubdtype
+    # Fix numpy import
+    try:
+        # Modern numpy way
+        from numpy import any as npany
+        from numpy import asarray, float64, issubdtype, number, result_type
+    except ImportError:
+        # Fallback for numpy 2.0
+        asarray = np.asarray
+        float64 = np.float64
+        number = np.number
+        result_type = np.result_type
+        npany = np.any
+        issubdtype = np.issubdtype
 
     try:
         if npany(gisinf(x)) or npany(gisinf(y)):
@@ -95,11 +111,11 @@ def _compare(x, y, decimal):
     # make sure y is an inexact type to avoid abs(MIN_INT); will cause
     # casting of x later.
     dtype = result_type(y, 1.0)
-    y = array(y, dtype=dtype, copy=False, subok=True)
+    y = asarray(y, dtype=dtype)
     z = abs(x - y)
 
     if not issubdtype(z.dtype, number):
-        z = z.astype(float_)  # handle object arrays
+        z = z.astype(float64)  # handle object arrays
 
     return z < 1.5 * 10.0 ** (-decimal)
 
@@ -170,16 +186,13 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
                             operator.__eq__,
                             sattr,
                             oattr,
-                            header=f"{thistype}.{attr} "
-                            f"attributes are not "
-                            f"equal",
+                            header=f"{thistype}.{attr} attributes are not equal",
                         )
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are "
-                        f"different."
+                        f"The {attr} attributes of {this} and {other} are different."
                     )
             else:
                 return False
@@ -259,9 +272,7 @@ def compare_coords(this, other, approx=False, decimal=3, data_only=False):
                             operator.__eq__,
                             sattr,
                             oattr,
-                            header=f"{thistype}.{attr} "
-                            f"attributes are not "
-                            f"equal",
+                            header=f"{thistype}.{attr} attributes are not equal",
                         )
 
                 else:
@@ -269,8 +280,7 @@ def compare_coords(this, other, approx=False, decimal=3, data_only=False):
 
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are "
-                        f"different."
+                        f"The {attr} attributes of {this} and {other} are different."
                     )
             else:
                 return False
@@ -404,9 +414,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                             operator.__eq__,
                             sattr,
                             oattr,
-                            header=f"{thistype}.{attr} "
-                            f"attributes are not "
-                            f"equal",
+                            header=f"{thistype}.{attr} attributes are not equal",
                         )
 
                 elif attr in ["coordset"]:
@@ -420,13 +428,12 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                         for item in zip(sattr, oattr):
                             res = compare_coords(*item, approx=True, decimal=3)
                             if not res:
-                                raise AssertionError(f"coords differs:\n{res}")
+                                raise AssertionError(f"coords differs: \n{res}")
                 else:
                     eq &= np.all(sattr == oattr)
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are "
-                        f"different."
+                        f"The {attr} attributes of {this} and {other} are different."
                     )
             else:
                 return False
@@ -601,8 +608,8 @@ def assert_units_equal(unit1, unit2, strict=False):
 def _check_absorbance_related_units(unit1, unit2):
     # particular case of absorbance, transmittance and absolute_transmitttance units
     lunit = ["absorbance", "transmittance", "absolute_transmittance"]
-    if f"{unit1:P}" in lunit and f"{unit2:P}" in lunit:
-        if f"{unit1:P}" != f"{unit2:P}":
+    if f"{unit1: P}" in lunit and f"{unit2: P}" in lunit:
+        if f"{unit1: P}" != f"{unit2: P}":
             raise AssertionError
     return True
 

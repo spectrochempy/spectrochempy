@@ -305,24 +305,3 @@ X = scp.read_omnic(DATADIR / "wodger.spg")
 #    3. try in `datadir`
 #    4. if none of these works: generate an OSError (file or directory not found)
 #
-
-# %% [markdown]
-# ## File selector widget
-
-# %% [markdown]
-# A widget is provided to help with the selection of file names or directory.
-#
-
-# %%
-datadir = scp.preferences.datadir
-fs = scp.FileSelector(path=datadir, filters=["spg", "spa"])
-fs
-
-# %% [markdown]
-# After validation of the selection, one can read the path and name of the selected
-# files.
-
-# %%
-fs.value, fs.path, fs.fullpath
-
-# %%
