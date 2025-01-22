@@ -15,18 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Free up disk space
-      run: |
-        echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
-        echo "Freeing up disk space..."
-        sudo apt-get clean
-        sudo rm -rf /var/lib/apt/lists/*
-        sudo apt-get autoremove -y
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-        echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
-
+     - name: Maximize build space
+       uses: AdityaGarg8/remove-unwanted-software@v4.1
+       with:
+         remove-android: 'true'
+         
     - name: Install Colab Docker image
       run: |
         echo "Installing Colab Docker image..."
