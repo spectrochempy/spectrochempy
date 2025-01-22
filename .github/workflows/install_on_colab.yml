@@ -9,8 +9,18 @@ on:
       - fix/*
       - docs/*
 
+  schedule:
+    - cron: "00 0 * * *"
+
 jobs:
   test:
+    # prevent cron jobs from running on forks or release
+    if: |
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy'
+       && !startsWith(github.ref, 'refs/release/')) || (
+       github.event_name != 'schedule'
+       && !startsWith(github.ref, 'refs/release/'))
     name: Test install on latest colab image
     runs-on: ubuntu-latest
 
