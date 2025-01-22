@@ -11,20 +11,13 @@ on:
 
 jobs:
   test:
-    name: Test run on latest colab image
+    name: Test install on latest colab image
     runs-on: ubuntu-latest
 
     steps:
-     - name: Init space
-       run: |
-         echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
-       
-     - name: Maximize build space
+    
+     - name: Maximize disc space
        uses: AdityaGarg8/remove-unwanted-software@v4.1
-       with:
-         remove-android: 'true'
-         remove-haskell: 'true'
-         remove-codeql: 'true'
          
      - name: Install Colab Docker image
        run: |
@@ -40,3 +33,8 @@ jobs:
         echo "Installing spectrochempy dependencies ..."
         python -m pip install -r ./requirements/requirements.txt 
         python -m pip install .
+                python -c "
+        import spectrochempy as scp
+        a = scp.random((10,10))
+        assert a.shape == (10, 10)
+                "
