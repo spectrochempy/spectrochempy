@@ -25,6 +25,7 @@ cffconvert
 ipywidgets
 jupytext
 nbsphinx
+numpydoc
 sphinx
 sphinx-copybutton
 sphinx-gallery
