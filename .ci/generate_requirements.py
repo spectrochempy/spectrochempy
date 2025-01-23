@@ -162,7 +162,7 @@ def generate_pip_requirements(deps, opt_deps):
 
     # OPTIONAL dependencies
     deps_string = underline("CORE dependencies")
-    deps_string += "-r requirements/requirements.txt\n"
+    deps_string += "-r requirements.txt\n"
 
     for opt in opt_deps:
         opt_deps_string = underline(f"{opt.upper()} dependencies")
