@@ -49,7 +49,7 @@ jobs:
       - name: Install Conda environment with Micromamba
         uses: mamba-org/setup-micromamba@v1
         with:
-          environment-file: environment_dev.yml
+          environment-file: environments/environment_docs.yml
           environment-name: scpy_docs
           condarc-file: .ci/condarc.yml
           create-args: >-

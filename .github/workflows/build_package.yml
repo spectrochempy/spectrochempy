@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+      - develop
+      - feature/*
 
   schedule:
     - cron: "00 0 * * *"
@@ -64,6 +66,32 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
   # Job 2
+  # Try to use rattler-buil instead of mambabuild
+
+  build_using_rattler_build:
+    name: Build package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure conda channels
+        run: |
+          cp .ci/condarc.yml $HOME/.condarc
+
+      - name: Set up version environment variable
+        run: |
+          bash .ci/set_env_var.sh
+
+      - name: Build conda package
+        uses: prefix-dev/rattler-build-action@v0.2.29
+        with:
+          recipe-path: recipes/meta.yaml
+          build-args: -c spectrocat
+
+  # Job 2bis
   build_and_publish_conda_package:
     name: Build and publish Conda package to Anaconda
     runs-on: ubuntu-latest
@@ -82,31 +110,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Conda environment with Micromamba
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          environment-file: environment_dev.yml
-          environment-name: scpy_build
-          condarc-file: .ci/condarc.yml
-          create-args: >-
-            python=3.10
-          cache-environment: true
-
-      - name: Install spectrochempy
-        run: |
-          python3 -m pip install --no-deps .
-
       - name: Set up version environment variable
         run: |
           bash .ci/set_env_var.sh
 
-      - name: Build package using mamabuild
+      - name: Build package using mambabuild
         run: |
-          conda mambabuild .conda --output-folder out
-
-      #- name: Build package using conda build
-      #  run: |
-      #    conda build .conda --output-folder out
+          conda config --set channel_priority strict
+          conda config --add channels conda-forge
+          conda config --add channels defaults
+          conda mambabuild recipes --output-folder out
 
       - name: Publish package for release
         if: (github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy')
