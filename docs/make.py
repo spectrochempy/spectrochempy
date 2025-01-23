@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Clean, build, and release the HTML and PDF documentation for SpectroChemPy.
+Clean, build, and release the HTML documentation for SpectroChemPy.
 
 .. code-block:: bash
 
@@ -24,9 +24,6 @@ from os import environ
 from pathlib import Path
 import multiprocessing as mp
 
-import numpy as np
-from skimage.io import imread, imsave
-from skimage.transform import resize
 from sphinx.application import Sphinx
 
 try:
@@ -65,7 +62,6 @@ PROJECT = DOCS.parent
 DOCREPO = PROJECT / "build"
 DOCTREES = DOCREPO / "~doctrees"
 HTML = DOCREPO / "html"
-LATEX = DOCREPO / "latex"
 DOWNLOADS = HTML / "downloads"
 SOURCES = PROJECT / PROJECTNAME
 
@@ -177,25 +173,6 @@ class BuildDocumentation(object):
         return answer[:1] == "y"
 
     @staticmethod
-    def _resize_img(folder, size):
-        # image resizing mainly for pdf doc
-
-        for filename in folder.rglob("**/*.png"):
-            image = imread(filename)
-            _, width, _ = image.shape
-            ratio = 1.0
-            if width > size:
-                ratio = size / width
-            if ratio < 1:
-                # reduce size
-                image_resized = resize(
-                    image,
-                    (int(image.shape[0] * ratio), int(image.shape[1] * ratio)),
-                    anti_aliasing=True,
-                )
-                imsave(filename, (image_resized * 255.0).astype(np.uint8))
-
-    @staticmethod
     def _sync_notebooks():
         # Use  jupytext to sync py and ipynb files in userguide
 
@@ -263,10 +240,8 @@ class BuildDocumentation(object):
             DOCREPO,
             DOCTREES,
             HTML,
-            LATEX,
             DOCTREES / doc_version,
             HTML / doc_version,
-            LATEX / doc_version,
             DOWNLOADS,
         ]
         for d in build_dirs:
@@ -281,12 +256,14 @@ class BuildDocumentation(object):
     # COMMANDS
     # ----------------------------------------------------------------------------------
     def _make_docs(self, builder="html"):
-        # Make the html or latex/pdf documentation
+        # Make the html documentation
 
         doc_version = self._doc_version
 
-        if builder not in ["html", "latex"]:
-            raise ValueError('Not a supported builder: Must be "html" or "latex"')
+        if builder not in [
+            "html",
+        ]:
+            raise ValueError('Not a supported builder: Must be "html"')
 
         BUILDDIR = DOCREPO / builder
 
@@ -344,11 +321,6 @@ class BuildDocumentation(object):
         if builder == "html":
             self._make_redirection_page()
 
-        # a workaround to reduce the size of the image in the pdf document
-        # TODO:probably better solution exists?
-        if builder == "latex":
-            self.resize_img(GALLERY, size=580.0)
-
         return res
 
     def clean(self):
@@ -368,53 +340,12 @@ class BuildDocumentation(object):
         print(f"removed {DEV_API}")
         shutil.rmtree(GALLERY, ignore_errors=True)
         print(f"removed {GALLERY}")
-        shutil.rmtree(LATEX / doc_version, ignore_errors=True)
-        print(f"remove {LATEX / doc_version}")
 
         self._delnb()
 
     def html(self):
         """Generate HTML documentation."""
         return self._make_docs("html")
-
-    def latex(self):
-        """Generate Latex documentation."""
-        # (WARNING NOT TESTED SINCE A LONG TIME!)
-        return self._make_docs("latex")
-
-    def pdf(self):
-        """Generate the PDF documentation."""
-        res = self._make_docs("latex")
-        if res != 0:
-            return res
-
-        doc_version = self._doc_version
-        LATEXDIR = LATEX / doc_version
-        print(
-            "Started to build pdf from latex using make.... "
-            "Wait until a new message appear (it is a long! compilation) "
-        )
-
-        print("FIRST COMPILATION:")
-        sh(
-            f"cd {LATEXDIR}; "
-            f"lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex"
-        )
-
-        print("MAKEINDEX:")
-        sh(f"cd {LATEXDIR}; makeindex spectrochempy.idx")
-
-        print("SECOND COMPILATION:")
-        sh(
-            f"cd {LATEXDIR}; "
-            f"lualatex -synctex=1 -interaction=nonstopmode spectrochempy.tex"
-        )
-
-        print("move pdf file in the download dir")
-        sh(
-            f"cp "
-            f"{LATEXDIR / PROJECTNAME}.pdf {DOWNLOADS}/{doc_version}-{PROJECTNAME}.pdf"
-        )
 
     def tutorials(self):
         # make tutorials.zip
