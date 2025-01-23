@@ -11,6 +11,7 @@ latest = pvs.split("+")[0]
 version_parts = latest.split(".")
 version = f"{version_parts[0]}.{version_parts[1]}.{version_parts[2]}"
 
+# Determine if the version is a development version or stable
 devstring = version_parts[3] if len(version_parts) > 3 else "stable"
 
 print(latest)
@@ -18,12 +19,13 @@ print(version)
 print(devstring)
 
 try:
-    # Export variable in the GitHub environment
+    # Export variables in the GitHub environment
     with open(os.getenv("GITHUB_ENV"), "a") as env_file:
         env_file.write(f"VERSIONSTRING={latest}\n")
         env_file.write(f"VERSION={version}\n")
         env_file.write(f"DEVSTRING={devstring}\n")
 except TypeError as e:
+    # Handle error if the script is not run in a GitHub Actions workflow
     print(f"Error: {e}")
     print("This script must be run in a GitHub Actions workflow.")
     exit(1)

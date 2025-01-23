@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=3.4"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,21 +10,21 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 license = { text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT" }
 authors = [
-    { name = "Arnaud Travert", email = "contact@spectrochempy.fr" },
-    { name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr" }
+  { name = "Arnaud Travert", email = "contact@spectrochempy.fr" },
+  { name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr" },
 ]
 keywords = ["spectroscopy", "chemistry", "data analysis"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Topic :: Utilities",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Software Development :: Libraries",
-    "Intended Audience :: Science/Research",
-    "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+  "Development Status :: 3 - Alpha",
+  "Topic :: Utilities",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Libraries",
+  "Intended Audience :: Science/Research",
+  "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
   "brukeropusreader",
@@ -42,20 +42,21 @@ dependencies = [
   "requests",
   "scikit-learn",
   "setuptools_scm",
+  "toml",
   "tzlocal",
-  "xlrd"
+  "xlrd",
 ]
 
 [project.optional-dependencies]
-interactive= [
+interactive = [
   "jupyterlab",
   "ipykernel",
   "ipyparallel",
   "jupyterlab",
   "nodejs",
-  "jupyter_server"
+  "jupyter_server",
 ]
-test= [
+test = [
   "cffconvert",
   "coverage",
   "ipywidgets",
@@ -64,9 +65,9 @@ test= [
   "pytest-doctestplus",
   "pytest-flake8",
   "pytest-mock",
-  "numpydoc"
+  "numpydoc",
 ]
-docs= [
+docs = [
   "cffconvert",
   "ipywidgets",
   "jupytext",
@@ -76,11 +77,9 @@ docs= [
   "sphinx-gallery",
   "sphinx_rtd_theme",
   "sphinxcontrib-bibtex",
-  "json5"
+  "json5",
 ]
-cantera= [
-  "cantera"
-]
+cantera = ["cantera"]
 dev = [
   # interactive
   "jupyterlab",
@@ -98,23 +97,23 @@ dev = [
   "pytest-doctestplus",
   "pytest-flake8",
   "pytest-mock",
-  "numpydoc",
   # docs
-  "cffconvert",
   "ipywidgets",
   "jupytext",
   "nbsphinx",
+  "numpydoc",
   "sphinx",
   "sphinx-copybutton",
   "sphinx-gallery",
   "sphinx_rtd_theme",
   "sphinxcontrib-bibtex",
-  "json5"
+  "json5",
 ]
 
 [project.urls]
 homepage = "https://www.spectrochempy.fr"
 repository = "https://github.com/spectrochempy/spectrochempy"
+documentation = "https://www.spectrochempy.fr/latest"
 issues = "https://github.com/spectrochempy/spectrochempy/issues"
 
 [project.scripts]
@@ -128,7 +127,12 @@ local_scheme = "dirty-tag"
 check = true
 ignore-init-module-imports = true
 in-place = true
-exclude = ["docs/*", "tests/*", "docs/whatsnew/latest.rst", "docs/whatsnew/index.rst"]
+exclude = [
+  "docs/*",
+  "tests/*",
+  "docs/whatsnew/latest.rst",
+  "docs/whatsnew/index.rst",
+]
 
 [tool.isort]
 profile = "black"
