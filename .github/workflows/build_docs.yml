@@ -67,7 +67,7 @@ jobs:
 
       - name: Set up version environment variable
         run: |
-          python3 .github/workflows/set_env_var.py
+          python3 .ci/set_env_var.py
 
       # - name: Update version in release notes
       #  run: |

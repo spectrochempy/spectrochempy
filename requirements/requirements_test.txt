@@ -17,7 +17,7 @@
 
 # CORE dependencies
 # -----------------
--r requirements/requirements.txt
+-r requirements.txt
 
 # TEST dependencies
 # -----------------
