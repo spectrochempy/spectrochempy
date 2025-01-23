@@ -1,0 +1,54 @@
+name: Build and publish conda packages 📦
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - feature/*
+
+  schedule:
+    - cron: "00 0 * * *"
+
+  pull_request:
+
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Try to use rattler-buil instead of mambabuild
+
+  build_using_rattler_build:
+    name: Build package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        id: setup_python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.10
+          cache: "pip"
+
+      - name: Configure conda channels
+        run: |
+          cp .ci/condarc.yml $HOME/.condarc
+
+      - name: Set up version environment variable
+        run: |
+          pip install setuptools_scm
+          python3 .github/workflows/set_env_var.py
+
+      - name: Build conda package
+        uses: prefix-dev/rattler-build-action@v0.2.29
+        with:
+          recipe-path: recipe/meta.yaml
+          build-args: "-c spectrocat"

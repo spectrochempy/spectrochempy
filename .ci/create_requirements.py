@@ -364,7 +364,7 @@ def main():
     generate_pyproject_toml(pyproject_filename, pyproject_file_template, pip_deps)
 
     # Generate meta.yaml
-    meta_filename = repo_path / "recipes" / "meta.yaml"
+    meta_filename = repo_path / "recipe" / "meta.yaml"
     generate_meta_yml(meta_filename, meta_template_file, conda_deps)
 
     # Print summary

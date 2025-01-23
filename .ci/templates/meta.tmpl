@@ -1,11 +1,11 @@
 context:
   name: spectrochempy
-  version: VERSION
-  devstring: DEVSTRING
+  version: ${{ env.VERSION }}
+  devstring: ${{ env.DEVSTRING }}
 
 package:
   name: ${{ name }}
-  version: ${{ version}}
+  version: ${{ env.VERSION }}
 
 source:
   path: ..
