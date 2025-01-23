@@ -83,12 +83,12 @@ jobs:
 
       - name: Set up version environment variable
         run: |
-          bash .ci/set_env_var.sh
+          python3 .github/workflows/set_env_var.py
 
       - name: Build conda package
         uses: prefix-dev/rattler-build-action@v0.2.29
         with:
-          recipe-path: recipes/meta.yaml
+          recipe-path: recipe/meta.yaml
           build-args: -c spectrocat
 
   # Job 2bis
