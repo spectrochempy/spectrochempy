@@ -16,9 +16,13 @@
 # ======================================================================================
 
 
-# Development dependencies (include all)
+# CORE dependencies
 -r requirements.txt
--r requirements_core.txt
--r requirements_interactive.txt
--r requirements_test.txt
--r requirements_docs.txt
+
+# INTERACTIVE dependencies
+jupyterlab
+ipykernel
+ipyparallel
+jupyterlab
+nodejs
+jupyter_server

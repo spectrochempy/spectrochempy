@@ -7,7 +7,7 @@ name = "spectrochempy"
 description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
 readme = "README.md"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT" }
 authors = [
     { name = "Arnaud Travert", email = "contact@spectrochempy.fr" },
@@ -27,12 +27,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = DEPENDENCIES
+
 [project.optional-dependencies]
-dev = DEV_DEPENDENCIES
-test = TEST_DEPENDENCIES
-cantera = [
-    "cantera"
-]
+OPTIONAL
 
 [project.urls]
 homepage = "https://www.spectrochempy.fr"

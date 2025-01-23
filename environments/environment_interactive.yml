@@ -21,8 +21,8 @@ channels:
     - defaults
 
 dependencies:
-
-    # dependencies for the core package
+    # CORE dependencies
+    # -----------------
     - brukeropusreader
     - colorama
     - dill
@@ -40,3 +40,12 @@ dependencies:
     - setuptools_scm
     - tzlocal
     - xlrd
+
+    # INTERACTIVE dependencies
+    # ------------------------
+    - jupyterlab
+    - ipykernel
+    - ipyparallel
+    - jupyterlab
+    - nodejs
+    - jupyter_server

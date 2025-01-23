@@ -4,11 +4,11 @@ DEPENDENCIES template
 ---------------------------------------------------------------------------------------
 Change SpectroChemPy project dependencies here only.
 
-requirements[_dev][_test].text, environment[_dev][_test].yml and .conda/meta.yaml will
+requirements[_dev][_test].text, environment[_dev][_test].yml and recipes/meta.yaml will
 be created or updated accordingly
 #}
-
-    # dependencies for the core package
+    # CORE dependencies
+    # -----------------
     - brukeropusreader
     - colorama
     - dill
@@ -26,55 +26,57 @@ be created or updated accordingly
     - setuptools_scm
     - tzlocal
     - xlrd
+{%- if INTERACTIVE %}
 
-{%-if INTERACTIVE %}
+    # INTERACTIVE dependencies
+    # ------------------------
+    - jupyterlab
+    - ipykernel
+    - ipyparallel
+    - jupyterlab
+    - nodejs
+    - jupyter_server
 {%- endif %}
-
 {%- if TEST %}
 
     # TEST dependencies
     # ----------------
+    - cffconvert
     - coverage
+    - ipywidgets
+    - pyfakefs
     - pytest
     - pytest-doctestplus
     - pytest-flake8
     - pytest-mock
-    - pyfakefs
-    - pep8-naming
-    - xarray
-    - ipywidgets
-    - cffconvert
     - numpydoc
-
 {%- endif %}
-{%- if DEV %}
+{%- if DOCS %}
 
-    # DEV dependencies
-    # ----------------
-    # From here, the dependencies are essentially for development.
-    # They should not be necessary for the user of  spectrochempy.
-    - anaconda-client
-    - flake8
-    - black
-    - boa
-    - conda-build
-    - conda-verify
-    - isort
-    - json5
+    # DOCS dependencies
+    # -----------------
+    - cffconvert
+    - ipywidgets
     - jupytext
-    - jupyter_sphinx
-    - mamba
-    - nbconvert
     - nbsphinx
-    # - pandoc # cannot be installed with pip
-    - pypandoc
-    - pre-commit
-    - scikit-image
     - sphinx
     - sphinx-copybutton
     - sphinx-gallery
     - sphinx_rtd_theme
     - sphinxcontrib-bibtex
+    - json5
+{%- endif %}
+{%- if STYLING %}
+
+    # STYLING dependencies
+    # -------------------
+    # From here, the dependencies are essentially for development.
+    # They should not be necessary for the user of spectrochempy.
+    - flake8
+    - pep8-naming
+    - black
+    - isort
+    - pre-commit
 {%- endif %}
 {%- if CANTERA %}
 

@@ -61,14 +61,14 @@ def show_versions(file=sys.stdout):
     )
     base, req = check_dependencies("", installed, env)
     print(base, file=file)
-    underlined_title("Optional developpement dependencies", file=file)
+    underlined_title("Optional dependencies", file=file)
     underlined_title(
         f"{'Package': <20} {'Required': <15} {'Installed': <15}",
         ".",
         ret=False,
         file=file,
     )
-    dev, _ = check_dependencies("dev", installed, exclude=req, env=env)
+    dev, _ = check_dependencies("docs", installed, exclude=req, env=env)
     print(dev, file=file)
 
     return
@@ -139,7 +139,7 @@ def check_dependencies(run, installed, env, exclude=None):
         req_file = f"requirements/requirements{'_' if run else ''}{run}.txt"
         requirements = parse_requirements(req_file)
     else:
-        req_file = f"environment{'_' if run else ''}{run}.yml"
+        req_file = f"environments/environment{'_' if run else ''}{run}.yml"
         requirements = parse_environment_yml(req_file)
 
     str = ""
