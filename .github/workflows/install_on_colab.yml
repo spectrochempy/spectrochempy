@@ -25,27 +25,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-     - name: Maximize disc space
-       uses: AdityaGarg8/remove-unwanted-software@v4.1
-       with:
-           remove-dotnet: 'true'
-           remove-android: 'true'
-           remove-haskell: 'true'
-           remove-codeql: 'true'
-     - name: Install Colab Docker image
-       run: |
-         echo "Installing Colab Docker image..."
-         docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
-         echo "Colab Docker image installed."
-         echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
-     - uses: actions/checkout@v4
-     - name: Install scp dependencies
-       run: |
-        echo "Installing spectrochempy..."
-        python -m pip install .
-        python -c "
-        import spectrochempy as scp
-        a = scp.random((10,10))
-        assert a.shape == (10, 10)
-                "
+      - name: Maximize disc space
+        uses: AdityaGarg8/remove-unwanted-software@v4.1
+        with:
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+      - name: Install Colab Docker image
+        run: |
+          echo "Installing Colab Docker image..."
+          docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
+          echo "Colab Docker image installed."
+          echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
+      - uses: actions/checkout@v4
+      - name: Install scp dependencies
+        run: |
+          echo "Installing spectrochempy..."
+          python -m pip install .
+          python -c "
+          import spectrochempy as scp
+          a = scp.random((10,10))
+          assert a.shape == (10, 10)
+                  "
