@@ -7,7 +7,6 @@ on:
       - develop
       - feature/*
       - fix/*
-      - docs/*
 
   schedule:
     - cron: "00 0 * * *"

@@ -23,7 +23,7 @@ source:
   path: ..
 
 build:
-  string: dev10
+  string: dev11
   noarch: python
   script:
     - export SETUPTOOLS_SCM_PRETEND_VERSION=0.6.11
