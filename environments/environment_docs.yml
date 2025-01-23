@@ -21,8 +21,8 @@ channels:
     - defaults
 
 dependencies:
-
-    # dependencies for the core package
+    # CORE dependencies
+    # -----------------
     - brukeropusreader
     - colorama
     - dill
@@ -41,43 +41,15 @@ dependencies:
     - tzlocal
     - xlrd
 
-    # TEST dependencies
-    # ----------------
-    - coverage
-    - pytest
-    - pytest-doctestplus
-    - pytest-flake8
-    - pytest-mock
-    - pyfakefs
-    - pep8-naming
-    - xarray
-    - ipywidgets
+    # DOCS dependencies
+    # -----------------
     - cffconvert
-    - numpydoc
-
-    # DEV dependencies
-    # ----------------
-    # From here, the dependencies are essentially for development.
-    # They should not be necessary for the user of  spectrochempy.
-    - anaconda-client
-    - flake8
-    - black
-    - boa
-    - conda-build
-    - conda-verify
-    - isort
-    - json5
+    - ipywidgets
     - jupytext
-    - jupyter_sphinx
-    - mamba
-    - nbconvert
     - nbsphinx
-    # - pandoc # cannot be installed with pip
-    - pypandoc
-    - pre-commit
-    - scikit-image
     - sphinx
     - sphinx-copybutton
     - sphinx-gallery
     - sphinx_rtd_theme
     - sphinxcontrib-bibtex
+    - json5

@@ -25,7 +25,23 @@ requirements:
     - setuptools_scm
   run:
     - python >=3.10
-DEPENDENCIES
+    - brukeropusreader
+    - colorama
+    - dill
+    - docrep
+    - ipython
+    - jinja2
+    - numpy
+    - matplotlib
+    - osqp
+    - pint
+    - pyyaml
+    - quaternion
+    - requests
+    - scikit-learn
+    - setuptools_scm
+    - tzlocal
+    - xlrd
 
 tests:
   - script:

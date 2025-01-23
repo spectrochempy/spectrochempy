@@ -8,14 +8,6 @@ This script automates the creation and maintenance of various configuration file
 3. Conda build recipe (meta.yaml)
 4. Python package configuration (pyproject.toml)
 
-Usage:
-    $ python create_requirements.py [--dev] [--cantera] [--dash]
-
-Arguments:
-    --dev     : Include development dependencies
-    --cantera : Include Cantera-specific dependencies
-    --dash    : Include Dash-specific dependencies
-
 The script uses template files from the .ci/templates directory to generate the output files.
 Dependencies are managed in a centralized way through these templates, ensuring consistency
 across different package management systems (conda, pip) and development environments.
@@ -29,7 +21,6 @@ Adapted from: https://github.com/pandas-dev/pandas/scripts/generate_pip_deps_fro
 License: BSD 3-Clause
 """
 
-import argparse
 import re
 from pathlib import Path
 
@@ -41,22 +32,21 @@ EXCLUDE = {
     "python",  # Handled by requires-python in pyproject.toml
     "pip",  # Package manager itself
     "spectrochempy_data",  # Internal package
-    "cantera",  # Optional dependency
-    "conda-build",  # Build-time only
-    "conda-verify",  # Build-time only
-    "anaconda-client",  # Build-time only
+    # "cantera",  # Optional dependency
+    # "conda-build",  # Build-time only
+    # "conda-verify",  # Build-time only
+    # "anaconda-client",  # Build-time only
 }
 
 # Mapping between conda and pip package names
 RENAME = {
-    "pyqt": "pyqt5",  # Different naming convention
-    "dask-core": "dask",  # Simplified pip name
     "git": "gitpython",  # Full package name
     "quaternion": "numpy-quaternion",  # Full package name
     "matplotlib-base": "matplotlib",  # Base package name
-    "nmrglue": "git+https://github.com/jjhelmus/nmrglue.git",  # Direct from source
-    "renishaw_wire": "renishawWiRE",  # Case difference
 }
+
+# Dependency configuration
+DEPENDENCYCATEGORIES = ["core", "interactive", "test", "docs", "cantera", "dev"]
 
 
 def conda_package_to_pip(package):
@@ -111,21 +101,31 @@ def conda_package_to_pip(package):
     return package
 
 
-def generate_pip_requirements(conda_fname, pip_fnames):
+def generate_pip_requirements(
+    case, conda_fname, pip_fnames, conda_deps, pip_deps, **kwargs
+):
     """
     Generate pip requirements file(s) from conda environment file.
 
     Parameters
     ----------
+    case : str
+        The case for which to generate the requirements (e.g., "core", "test").
     conda_fname : Path
         Path to conda environment file (e.g., environment.yml)
     pip_fnames : Path or list of Path
         Path(s) to output pip requirements file(s)
+    conda_deps : dict
+        Dictionary to store conda dependencies
+    pip_deps : dict
+        Dictionary to store pip dependencies
+    **kwargs : dict
+        Additional keyword arguments
 
     Returns
     -------
-    list
-        List of pip dependencies
+    tuple
+        Updated conda_deps and pip_deps dictionaries
 
     Notes
     -----
@@ -139,33 +139,48 @@ def generate_pip_requirements(conda_fname, pip_fnames):
         deps = yaml.safe_load(conda_fd)["dependencies"]
 
     # Convert dependencies to pip format
-    pip_deps = []
+    case_dep = pip_deps.get(case, [])
+    if case != "core":
+        deps = conda_deps[case] = [dep for dep in deps if dep not in conda_deps["core"]]
+    else:
+        conda_deps[case] = deps
+
     for dep in deps:
         if isinstance(dep, str):
-            conda_dep = conda_package_to_pip(dep)
-            if conda_dep:
-                pip_deps.append(conda_dep)
+            pip_dep = conda_package_to_pip(dep)
+            if pip_dep:
+                case_dep.append(pip_dep)
         elif isinstance(dep, dict) and len(dep) == 1 and "pip" in dep:
-            pip_deps += dep["pip"]
+            case_dep += dep["pip"]
         else:
             raise ValueError(f"Unexpected dependency {dep}")
+    pip_deps[case] = case_dep
 
     # Generate header
-    fname = conda_fname.name
-    header = f"""
-# ======================================================================================
-#
-# This file is auto-generated from {fname} file.
-#
-# !!! DO NOT MODIFY !!!
-#
-# See in `{fname}` for more information.
-#
-# ======================================================================================
-""".lstrip()
+    header = kwargs["COMMENT"]
 
     # Create output content
-    pip_content = header + "\n".join(pip_deps) + "\n"
+    pip_content = header + "\n"
+    pip_content += (
+        "\n# CORE dependencies\n"
+        if case != "dev"
+        else "\n# Development dependencies (include all)\n"
+    )
+
+    if case == "core":
+        pip_content += "\n".join(pip_deps["core"]) + "\n"
+    else:
+        pip_content += "-r requirements.txt\n"
+        for cas in DEPENDENCYCATEGORIES:
+            if cas == "dev" and case == "dev":
+                # include all other requirements (except cantera which is very specific and can be installed separately)
+                for cas_ in DEPENDENCYCATEGORIES:
+                    if cas_ not in ["dev", "cantera"]:
+                        pip_content += f"-r requirements_{cas_}.txt\n"
+            elif case == cas and cas != "dev":
+                # write only the block for case
+                pip_content += f"\n# {cas.upper()} dependencies\n"
+                pip_content += "\n".join(pip_deps[cas]) + "\n"
 
     # Write to file(s)
     if not isinstance(pip_fnames, list):
@@ -174,35 +189,124 @@ def generate_pip_requirements(conda_fname, pip_fnames):
     for fname in pip_fnames:
         fname.write_text(pip_content)
 
-    return pip_deps
+    return conda_deps, pip_deps
 
 
-if __name__ == "__main__":
-    # Initialize argument parser
-    parser = argparse.ArgumentParser(
-        description="Generate package configuration files from templates",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+def generate_pyproject_toml(filename, template_file, pip_deps):
+    """
+    Generate pyproject.toml file from template and dependencies.
+
+    Parameters
+    ----------
+    filename : Path
+        Path to output pyproject.toml file
+    template_file : Path
+        Path to template file for pyproject.toml
+    pip_deps : dict
+        Dictionary of pip dependencies
+
+    Notes
+    -----
+    Generates pyproject.toml file with:
+    1. Auto-generated header
+    2. Dependencies for different sections (dev, test, core)
+    """
+    # Load template
+    template = template_file.read_text("utf-8")
+
+    def make_dep_string(case, no_brackets=False):
+        strg = '[\n  "' if not no_brackets else '\n  "'
+        strg += '",\n  "'.join(pip_deps.get(case, []))
+        strg += '"\n]' if not no_brackets else '",\n'
+        return strg
+
+    # Define core dependencies
+    core_deps = make_dep_string("core")
+
+    # Define optional dependencies
+    opt_deps = ""
+    dev_deps = ""
+    for case in DEPENDENCYCATEGORIES:
+        if case not in ["core", "dev"]:
+            opt_deps += f"{case}= {make_dep_string(case)}\n"
+
+    # Add dev dependencies that include all others except cantera
+    dev_deps = "dev = [\n"
+    for case in DEPENDENCYCATEGORIES:
+        if case not in ["core", "dev", "cantera"]:
+            dev_deps += f"  # {case}{make_dep_string(case, no_brackets=True)}"
+    dev_deps = dev_deps.rstrip(",\n") + "\n]"
+    opt_deps += dev_deps
+
+    # Replace placeholders in template
+    pyproject_content = template.replace("DEPENDENCIES", core_deps).replace(
+        "OPTIONAL", opt_deps
     )
-    parser.add_argument("--dash", help="Include Dash dependencies", action="store_true")
-    parser.add_argument(
-        "--cantera", help="Include Cantera dependencies", action="store_true"
-    )
-    args = parser.parse_args()
 
-    # Define paths
+    # Write pyproject.toml
+    filename.write_text(pyproject_content)
+
+    return
+
+
+def generate_meta_yml(filename, template_file, conda_deps):
+    """
+    Generate meta.yaml file from template and dependencies.
+
+    Parameters
+    ----------
+    filename : Path
+        Path to output meta.yaml file
+    template_file : Path
+        Path to template file for meta.yaml
+    conda_deps : dict
+        Dictionary of conda dependencies
+
+    Notes
+    -----
+    Generates meta.yaml file with:
+    1. Auto-generated header
+    2. Dependencies for different sections (core)
+    """
+    # Load template
+    template = template_file.read_text("utf-8")
+
+    def make_dep_string(case):
+        strg = "    - "
+        strg += "\n    - ".join(conda_deps.get(case, []))
+        return strg
+
+    # Define core dependencies
+    core_deps = make_dep_string("core")
+
+    # Replace placeholders in template
+    meta_content = template.replace("DEPENDENCIES", core_deps)
+
+    # Write meta.yaml
+    filename.write_text(meta_content)
+
+    return
+
+
+def main():
+    """
+    Main function to generate package configuration files.
+    """
+
+    # Define template paths
     repo_path = Path(__file__).parent.parent
     template_dir = repo_path / ".ci" / "templates"
-    file_header = template_dir / "environment.tmpl"
-    file_dependencies = template_dir / "dependencies.tmpl"
-    file_meta = template_dir / "meta.tmpl"
-    file_pyproject = template_dir / "pyproject.tmpl"
+    header_template_file = template_dir / "environment.tmpl"
+    dependencies_template_file = template_dir / "dependencies.tmpl"
+    meta_template_file = template_dir / "meta.tmpl"
+    pyproject_file_template = template_dir / "pyproject.tmpl"
 
     # Load template files
     template_header = Template(
-        file_header.read_text("utf-8"), keep_trailing_newline=True
+        header_template_file.read_text("utf-8"), keep_trailing_newline=True
     )
     template_dependencies = Template(
-        file_dependencies.read_text("utf-8"), keep_trailing_newline=True
+        dependencies_template_file.read_text("utf-8"), keep_trailing_newline=True
     )
 
     # Define standard warning header for generated files
@@ -225,103 +329,58 @@ if __name__ == "__main__":
 # ======================================================================================
 """.lstrip()
 
-    # Generate standard environment files
-    out_header = template_header.render(
-        TEST=False,
-        DEV=False,
-        DASH=args.dash,
-        CANTERA=args.cantera,
-        COMMENT=comment,
-    )
-    out_dependencies = template_dependencies.render(
-        TEST=False,
-        DEV=False,
-        DASH=args.dash,
-        CANTERA=args.cantera,
-        COMMENT=comment,
-    )
-    filename = repo_path / "environment.yml"
-    filename.write_text(out_header + out_dependencies.rstrip() + "\n")
+    # Generate files for different cases
+    pip_deps = {"core": []}  # initialise
+    conda_deps = {"core": []}  # initialise
 
-    deps = generate_pip_requirements(
-        filename, repo_path / "requirements" / "requirements.txt"
-    )
+    for case in DEPENDENCYCATEGORIES:
+        kwargs = {"COMMENT": comment}
+        kwargs.update(
+            {
+                cat.upper(): False
+                for cat in DEPENDENCYCATEGORIES
+                if cat not in ["core", case]
+            }
+        )
+        kwargs[case.upper()] = True
+        kwargs["CORE"] = True
 
-    # Generate test environment files
-    out_test_header = template_header.render(
-        TEST=True,
-        DEV=False,
-        DASH=args.dash,
-        CANTERA=args.cantera,
-        COMMENT=comment,
-    )
-    out_test_dependencies = template_dependencies.render(
-        TEST=True,
-        DEV=False,
-        DASH=args.dash,
-        CANTERA=args.cantera,
-        COMMENT=comment,
-    )
-    filename = repo_path / "environment_test.yml"
-    filename.write_text(out_test_header + out_test_dependencies.rstrip() + "\n")
+        out_header = template_header.render(**kwargs)
+        out_dependencies = template_dependencies.render(**kwargs)
 
-    test_deps = generate_pip_requirements(
-        filename, repo_path / "requirements" / "requirements_test.txt"
-    )
+        # Generate environment file
+        case_suffix = "" if case == "core" else f"_{case}"
+        filename = repo_path / "environments" / f"environment{case_suffix}.yml"
+        filename.write_text(out_header + out_dependencies.rstrip() + "\n")
 
-    # Generate development environment files
-    out_dev_header = template_header.render(
-        TEST=True,
-        DEV=True,
-        DASH=args.dash,
-        CANTERA=args.cantera,
-        COMMENT=comment,
-    )
-    out_dev_dependencies = template_dependencies.render(
-        TEST=True,
-        DEV=True,
-        DASH=args.dash,
-        CANTERA=args.cantera,
-        COMMENT=comment,
-    )
-    filename = repo_path / "environment_dev.yml"
-    filename.write_text(out_dev_header + out_dev_dependencies.rstrip() + "\n")
-
-    dev_deps = generate_pip_requirements(
-        filename, repo_path / "requirements" / "requirements_dev.txt"
-    )
-
-    # Generate conda recipe meta.yaml
-    out_meta = file_meta.read_text("utf-8")
-    out_meta = out_meta.replace("DEPENDENCIES", out_dependencies.rstrip() + "\n")
-    filename = repo_path / ".conda" / "meta.yaml"
-    filename.write_text(out_meta)
-
-    # Load templates
-    template_pyproject = file_pyproject.read_text("utf-8")
-
-    # Helper function to format dependency lists for TOML
-    def format_deps(deps):
-        """Format dependency list for TOML output with proper indentation."""
-        return (
-            str(deps)
-            .replace("'", '"')
-            .replace(",", ",\n\t")
-            .replace("[", "[\n\t")
-            .replace("]", "\n]")
+        # Generate pip requirements file et set dict of dependencies
+        req_filename = repo_path / "requirements" / f"requirements{case_suffix}.txt"
+        conda_deps, pip_deps = generate_pip_requirements(
+            case, filename, req_filename, conda_deps, pip_deps, **kwargs
         )
 
-    # Process dependencies for different sections
-    dev_deps = [dep for dep in dev_deps if dep not in deps]
-    test_deps = [dep for dep in test_deps if dep not in deps]
+    # Generate pyproject.toml
+    pyproject_filename = repo_path / "pyproject.toml"
+    generate_pyproject_toml(pyproject_filename, pyproject_file_template, pip_deps)
 
-    # Replace placeholders in template
-    pyproject_content = (
-        template_pyproject.replace("DEV_DEPENDENCIES", format_deps(dev_deps))
-        .replace("TEST_DEPENDENCIES", format_deps(test_deps))
-        .replace("DEPENDENCIES", format_deps(deps))
-    )
+    # Generate meta.yaml
+    meta_filename = repo_path / "recipes" / "meta.yaml"
+    generate_meta_yml(meta_filename, meta_template_file, conda_deps)
 
-    # Write pyproject.toml
-    filename = repo_path / "pyproject.toml"
-    filename.write_text(pyproject_content)
+    # Print summary
+    print("Generated files:")
+    print(f"  - {pyproject_filename}")
+    print(f"  - {meta_filename}")
+    for case in DEPENDENCYCATEGORIES:
+        case_suffix = "" if case == "core" else f"_{case}"
+        print(f"  - {repo_path / 'requirements' / f'requirements{case_suffix}.txt'}")
+        print(f"  - {repo_path / 'environments' / f'environment{case_suffix}.yml'}")
+
+    # Return success
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

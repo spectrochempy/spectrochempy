@@ -16,9 +16,17 @@
 # ======================================================================================
 
 
-# Development dependencies (include all)
+# CORE dependencies
 -r requirements.txt
--r requirements_core.txt
--r requirements_interactive.txt
--r requirements_test.txt
--r requirements_docs.txt
+
+# DOCS dependencies
+cffconvert
+ipywidgets
+jupytext
+nbsphinx
+sphinx
+sphinx-copybutton
+sphinx-gallery
+sphinx_rtd_theme
+sphinxcontrib-bibtex
+json5

@@ -19,10 +19,11 @@ channels:
     - conda-forge
     - spectrocat
     - defaults
+    - cantera
 
 dependencies:
-
-    # dependencies for the core package
+    # CORE dependencies
+    # -----------------
     - brukeropusreader
     - colorama
     - dill
@@ -41,16 +42,6 @@ dependencies:
     - tzlocal
     - xlrd
 
-    # TEST dependencies
-    # ----------------
-    - coverage
-    - pytest
-    - pytest-doctestplus
-    - pytest-flake8
-    - pytest-mock
-    - pyfakefs
-    - pep8-naming
-    - xarray
-    - ipywidgets
-    - cffconvert
-    - numpydoc
+    # CANTERA dependencies
+    # --------------------
+    - cantera

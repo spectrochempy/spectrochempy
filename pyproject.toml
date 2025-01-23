@@ -7,7 +7,7 @@ name = "spectrochempy"
 description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
 readme = "README.md"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT" }
 authors = [
     { name = "Arnaud Travert", email = "contact@spectrochempy.fr" },
@@ -27,71 +27,89 @@ classifiers = [
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
-	"brukeropusreader",
-	 "colorama",
-	 "dill",
-	 "docrep",
-	 "ipython",
-	 "jinja2",
-	 "numpy",
-	 "matplotlib",
-	 "osqp",
-	 "pint",
-	 "pyyaml",
-	 "numpy-quaternion",
-	 "requests",
-	 "scikit-learn",
-	 "setuptools_scm",
-	 "tzlocal",
-	 "xlrd"
+  "brukeropusreader",
+  "colorama",
+  "dill",
+  "docrep",
+  "ipython",
+  "jinja2",
+  "numpy",
+  "matplotlib",
+  "osqp",
+  "pint",
+  "pyyaml",
+  "numpy-quaternion",
+  "requests",
+  "scikit-learn",
+  "setuptools_scm",
+  "tzlocal",
+  "xlrd"
 ]
+
 [project.optional-dependencies]
+interactive= [
+  "jupyterlab",
+  "ipykernel",
+  "ipyparallel",
+  "jupyterlab",
+  "nodejs",
+  "jupyter_server"
+]
+test= [
+  "cffconvert",
+  "coverage",
+  "ipywidgets",
+  "pyfakefs",
+  "pytest",
+  "pytest-doctestplus",
+  "pytest-flake8",
+  "pytest-mock",
+  "numpydoc"
+]
+docs= [
+  "cffconvert",
+  "ipywidgets",
+  "jupytext",
+  "nbsphinx",
+  "sphinx",
+  "sphinx-copybutton",
+  "sphinx-gallery",
+  "sphinx_rtd_theme",
+  "sphinxcontrib-bibtex",
+  "json5"
+]
+cantera= [
+  "cantera"
+]
 dev = [
-	"coverage",
-	 "pytest",
-	 "pytest-doctestplus",
-	 "pytest-flake8",
-	 "pytest-mock",
-	 "pyfakefs",
-	 "pep8-naming",
-	 "xarray",
-	 "ipywidgets",
-	 "cffconvert",
-	 "numpydoc",
-	 "flake8",
-	 "black",
-	 "boa",
-	 "isort",
-	 "json5",
-	 "jupytext",
-	 "jupyter_sphinx",
-	 "mamba",
-	 "nbconvert",
-	 "nbsphinx",
-	 "pypandoc",
-	 "pre-commit",
-	 "scikit-image",
-	 "sphinx",
-	 "sphinx-copybutton",
-	 "sphinx-gallery",
-	 "sphinx_rtd_theme",
-	 "sphinxcontrib-bibtex"
-]
-test = [
-	"coverage",
-	 "pytest",
-	 "pytest-doctestplus",
-	 "pytest-flake8",
-	 "pytest-mock",
-	 "pyfakefs",
-	 "pep8-naming",
-	 "xarray",
-	 "ipywidgets",
-	 "cffconvert",
-	 "numpydoc"
-]
-cantera = [
-    "cantera"
+  # interactive
+  "jupyterlab",
+  "ipykernel",
+  "ipyparallel",
+  "jupyterlab",
+  "nodejs",
+  "jupyter_server",
+  # test
+  "cffconvert",
+  "coverage",
+  "ipywidgets",
+  "pyfakefs",
+  "pytest",
+  "pytest-doctestplus",
+  "pytest-flake8",
+  "pytest-mock",
+  "numpydoc",
+  # docs
+  "cffconvert",
+  "ipywidgets",
+  "jupytext",
+  "nbsphinx",
+  "sphinx",
+  "sphinx-copybutton",
+  "sphinx-gallery",
+  "sphinx_rtd_theme",
+  "sphinxcontrib-bibtex",
+  "json5"
 ]
 
 [project.urls]

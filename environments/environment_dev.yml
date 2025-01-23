@@ -14,11 +14,29 @@
 #          *  pre-commit run --all-files
 #
 # ======================================================================================
+channel_priority: strict
+channels:
+    - conda-forge
+    - spectrocat
+    - defaults
 
-
-# Development dependencies (include all)
--r requirements.txt
--r requirements_core.txt
--r requirements_interactive.txt
--r requirements_test.txt
--r requirements_docs.txt
+dependencies:
+    # CORE dependencies
+    # -----------------
+    - brukeropusreader
+    - colorama
+    - dill
+    - docrep
+    - ipython
+    - jinja2
+    - numpy
+    - matplotlib
+    - osqp
+    - pint
+    - pyyaml
+    - quaternion
+    - requests
+    - scikit-learn
+    - setuptools_scm
+    - tzlocal
+    - xlrd

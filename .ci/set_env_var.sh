@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+## Install setuptools_scm
+pip install setuptools_scm
+
 ## get version string from setuptools_scm
-PVS="$(python setup.py --version)"
+PVS=$(python -c "from setuptools_scm import get_version; print(get_version())")
 echo "Current version string = $PVS"
 
 ## Extract components
