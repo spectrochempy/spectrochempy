@@ -83,7 +83,7 @@ jobs:
           python -m pip install ".[test]"
           python -m pip list
           # check if the scp_data package is present
-          python -c "import scp_data"
+          python -c 'src = Path("scp_data") / "stylesheets"; print(list(src.iterdir()))'
 
       - name: Test with coverage
         if: ${{ !(github.event.act == 'act' && matrix.pythonVersion == '3.12') }}
