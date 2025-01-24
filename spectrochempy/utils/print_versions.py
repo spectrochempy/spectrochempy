@@ -73,9 +73,9 @@ def show_versions(file=sys.stdout):
     strg = check_dependencies(deps, opt_deps, installed)
     print(strg, file=file)
 
-    import json
+    # import json
 
-    print(json.dumps(dict(sorted(installed.items())), indent=4))
+    # print(json.dumps(dict(sorted(installed.items())), indent=4))
 
     return
 

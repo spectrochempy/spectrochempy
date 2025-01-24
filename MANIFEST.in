@@ -1,6 +1,8 @@
 prune docs
 prune tests
-prune .ci
-prune .github
+prune recipe
+prune requirements
+prune environments
+prune .*
 recursive-include scp_data *
 include README.md

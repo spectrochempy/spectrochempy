@@ -51,4 +51,4 @@ dependencies:
     - ipyparallel
     - jupyterlab
     - nodejs
-    - jupyter_server
+    - jupyter-server

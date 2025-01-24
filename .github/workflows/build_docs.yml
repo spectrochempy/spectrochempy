@@ -91,8 +91,17 @@ jobs:
           git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/html
 
           echo "Recreating docs"
-          python docs/make.py -v -j1 html
+          python docs/make.py -j1 html
 
+      # Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: |
+            build/html/
+
+          retention-days: 5
       - name: Deployment
         if: (github.event_name != 'pull_request' && !github.event.act)
         uses: JamesIves/github-pages-deploy-action@v4
