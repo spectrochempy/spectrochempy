@@ -17,6 +17,7 @@ def _install_mpl():
     """
     Install matplotlib styles and fonts
     """
+    print("Installing MatPlotLib styles and fonts...")
     try:
         import matplotlib as mpl
         from matplotlib import get_cachedir
