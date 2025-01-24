@@ -101,8 +101,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Step 2: Set up version environment variable
-      - name: Set up version environment variable
+      # Step 2: Generate conda recipe (with the correct information on version, etc...)
+      - name: Generate conda recipe
         run: |
           pip install --upgrade setuptools>=61.0.0
           pip install setuptools_scm toml jinja2
