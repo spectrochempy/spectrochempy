@@ -56,7 +56,17 @@ jobs:
         run: |
           python -m build --sdist --wheel --outdir dist/ .
 
-      # Step 5: Publish package to Test PyPI
+      # Step 5: Upload PyPI build artifacts
+      - name: Upload PyPI build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pypi-package
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          retention-days: 5
+
+      # Step 6: Publish package to Test PyPI
       - name: Publish package to Test PyPI
         if: (github.event_name == 'push' && github.repository == 'spectrochempy/spectrochempy')
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -64,7 +74,7 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
 
-      # Step 6: Publish package to PyPI
+      # Step 7: Publish package to PyPI
       - name: Publish package to PyPI
         if: (github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy')
         uses: pypa/gh-action-pypi-publish@release/v1
