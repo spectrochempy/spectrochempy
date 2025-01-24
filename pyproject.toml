@@ -120,6 +120,11 @@ issues = "https://github.com/spectrochempy/spectrochempy/issues"
 [project.scripts]
 show-versions = "spectrochempy.scripts.show_versions:main"
 
+[tool.setuptools]
+packages = ["find:"]
+zip-safe = false
+include-package-data = true
+
 [tool.setuptools_scm]
 version_scheme = "post-release"
 local_scheme = "dirty-tag"
