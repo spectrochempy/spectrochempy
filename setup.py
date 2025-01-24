@@ -8,7 +8,7 @@ import shutil
 import warnings
 from pathlib import Path
 
-from setuptools import find_packages, setup
+from setuptools import setup
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 from setuptools_scm import get_version
@@ -101,23 +101,12 @@ class PostDevelopCommand(_develop):
         _develop.run(self)
 
 
-# Data for setuptools
-packages = []
+# Data for personnalized installation
 setup_args = dict(
-    name="spectrochempy",
     version=version(),
-    zip_safe=False,
-    packages=find_packages() + packages,
-    include_package_data=True,
-    python_requires=">=3.10",
     cmdclass={
         "develop": PostDevelopCommand,
         "install": PostInstallCommand,
-    },
-    entry_points={
-        "console_scripts": [
-            "show-versions=spectrochempy.scripts.show_versions:main",
-        ],
     },
 )
 
