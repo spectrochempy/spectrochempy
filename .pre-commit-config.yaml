@@ -13,13 +13,15 @@ repos:
         language: python
         additional_dependencies: [toml, jinja2]
         pass_filenames: false
-      - id: generate_conda_recipe
-        name: generate_conda_recipe
-        description: Create or update recipe/meta.yaml according to a template
-        entry: python .ci/generate_conda_recipe.py
-        language: python
-        additional_dependencies: [toml, jinja2, setuptools_scm]
-        pass_filenames: false
+      # The following causes problems with the pre-commit action
+      # we will create the yaml file only in the action to build the package
+      # - id: generate_conda_recipe
+      #   name: generate_conda_recipe
+      #   description: Create or update recipe/meta.yaml according to a template
+      #   entry: python .ci/generate_conda_recipe.py
+      #   language: python
+      #   additional_dependencies: [toml, jinja2, setuptools_scm]
+      #   pass_filenames: false
       - id: update_version_and_release_notes
         name: update_version_and_release_notes
         description: Update version number and udate release notes
