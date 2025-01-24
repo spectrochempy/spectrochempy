@@ -80,8 +80,10 @@ jobs:
       - name: Install spectrochempy
         if: ${{ !(github.event.act && matrix.pythonVersion == '3.12') }}
         run: |
-          python -m pip install "".[test]
+          python -m pip install ".[test]"
           python -m pip list
+          # check if the scp_data package is present
+          python -c "import scp_data"
 
       - name: Test with coverage
         if: ${{ !(github.event.act == 'act' && matrix.pythonVersion == '3.12') }}
