@@ -14,25 +14,24 @@ import re
 import struct
 import subprocess
 import sys
-from importlib.metadata import PackageNotFoundError, distributions, version
+from importlib.metadata import distributions, version
 from os import environ
 from pathlib import Path
 
-import yaml
+import toml
 
 __all__ = ["show_versions"]
 
 
 def show_versions(file=sys.stdout):
-    """print the versions of spectrochempy and its dependencies
+    """
+    Print the versions of spectrochempy and its dependencies.
 
     Parameters
     ----------
     file : file-like, optional
-        print to the given file-like object. Defaults to sys.stdout.
+        Print to the given file-like object. Defaults to sys.stdout.
     """
-    # from spectrochempy.application import version as scpversion
-
     underlined_title("SYSTEM INFO", "=", file=file)
     for key, val in _get_sys_info():
         print(f"- {key: <15} {val}", file=file)
@@ -46,12 +45,24 @@ def show_versions(file=sys.stdout):
     vers = version("spectrochempy")
     print(f"{'- version': <15} {vers}", file=file)
 
-    # deps, deps_dev, deps_test = get_package_requirements()
-
     underlined_title("INSTALLED PACKAGES", "=", file=file)
 
     # dependencies
+
+    # Load pyproject.toml
+    pyproject_file = "pyproject.toml"
+    pyproject = toml.load(pyproject_file)
+
+    # Get dependencies
+    deps = pyproject["project"]["dependencies"]
+
+    # Get optional dependencies
+    opt_deps = pyproject["project"].get("optional-dependencies", {})
+
+    # Get installed packages
     installed = get_installed_versions()
+
+    # display results of comparison with the requirements
     underlined_title("Dependencies", file=file)
     underlined_title(
         f"{'Package': <20} {'Required': <15} {'Installed': <15}",
@@ -59,29 +70,45 @@ def show_versions(file=sys.stdout):
         ret=False,
         file=file,
     )
-    base, req = check_dependencies("", installed, env)
-    print(base, file=file)
-    underlined_title("Optional dependencies", file=file)
-    underlined_title(
-        f"{'Package': <20} {'Required': <15} {'Installed': <15}",
-        ".",
-        ret=False,
-        file=file,
-    )
-    dev, _ = check_dependencies("docs", installed, exclude=req, env=env)
-    print(dev, file=file)
+    strg = check_dependencies(deps, opt_deps, installed)
+    print(strg, file=file)
+
+    import json
+
+    print(json.dumps(dict(sorted(installed.items())), indent=4))
 
     return
 
 
 def underlined_title(s, char="-", file=sys.stdout, ret=True):
+    """
+    Print an underlined title.
+
+    Parameters
+    ----------
+    s : str
+        The title string.
+    char : str, optional
+        The character to use for underlining. Defaults to '-'.
+    file : file-like, optional
+        Print to the given file-like object. Defaults to sys.stdout.
+    ret : bool, optional
+        Whether to add a newline before the title. Defaults to True.
+    """
     n = "\n" if ret else ""
     print(n + s, file=file)
     print(char * len(s), file=file)
 
 
 def _get_sys_info():
-    """Returns system information as a dict"""
+    """
+    Returns system information as a list of tuples.
+
+    Returns
+    -------
+    list of tuples
+        System information.
+    """
     # copied from XArray
 
     REPOS = Path(__file__).parent.parent.parent
@@ -133,36 +160,75 @@ def _get_sys_info():
     return blob
 
 
-def check_dependencies(run, installed, env, exclude=None):
-    """Compare installed versions with requirements."""
-    if env["type"] != "conda":
-        req_file = f"requirements/requirements{'_' if run else ''}{run}.txt"
-        requirements = parse_requirements(req_file)
-    else:
-        req_file = f"environments/environment{'_' if run else ''}{run}.yml"
-        requirements = parse_environment_yml(req_file)
+def check_dependencies(deps, other_deps, installed):
+    """
+    Compare installed versions with requirements.
 
-    str = ""
-    for pkg, req_ver in requirements.items():
-        if exclude and pkg in exclude:
-            continue
-        try:
-            inst_ver = version(pkg)
-        except PackageNotFoundError:
-            inst_ver = "Not installed"
+    Parameters
+    ----------
+    deps : list
+        List of core dependencies.
+    other_deps : dict
+        Dictionary of optional dependencies.
+    installed : dict
+        Dictionary of installed packages and their versions.
 
-        str += f"{pkg: <20} {req_ver or 'Any': <15} {inst_ver: <15}\n"
+    Returns
+    -------
+    str
+        Formatted string of dependency comparison results.
+    """
+    # make a dictionary of package and version requirements
+    requirements = {"core": deps, **other_deps}
+    for key, deps in requirements.items():
+        new_deps = {}
+        for package in deps:
+            # change eventual "==" to "="
+            package = re.sub("==", "=", package).strip()
+            # split version
+            for compare in ("<=", ">=", "="):
+                if compare not in package:
+                    continue
+                pkg, version = package.split(compare)
+                break
+            else:
+                pkg = package
+                version = "Any"
+            new_deps[pkg] = version
+        requirements[key] = new_deps
 
-    return str, requirements
+    # compare with installed packages
+    strg = ""
+    for key, deps in requirements.items():
+        strg += f"\n---- {key} ----\n"
+        for pkg, req_ver in deps.items():
+            inst_ver = installed.get(pkg, "Not installed")
+            strg += f"{pkg: <20} {req_ver: <15} {inst_ver: <15}\n"
+
+    return strg
 
 
 def get_user_directory():
-    """Get user home directory path."""
+    """
+    Get user home directory path.
+
+    Returns
+    -------
+    str
+        User home directory path.
+    """
     return str(Path.home())
 
 
 def get_environment_info():
-    """Detect virtual environment type and return info."""
+    """
+    Detect virtual environment type and return info.
+
+    Returns
+    -------
+    dict
+        Dictionary of environment information.
+    """
     env_info = {}
     user_dir = get_user_directory()
 
@@ -188,41 +254,15 @@ def get_environment_info():
     return env_info
 
 
-def parse_requirements(filename):
-    """Parse requirements file and return dict of package names and version specs."""
-    requirements = {}
-    with open(filename) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#"):
-                # Split package name and version spec
-                parts = re.split(r"(>=|<=|==|<|>|~=)", line)
-                if len(parts) > 1:
-                    pkg = parts[0].strip()
-                    ver_spec = "".join(parts[1:]).strip()
-                    requirements[pkg] = ver_spec
-                else:
-                    requirements[line] = None
-    return requirements
-
-
-def parse_environment_yml(filename):
-    """Parse environment.yml and return dict of package versions."""
-    with open(filename) as f:
-        env_dict = yaml.safe_load(f)
-
-    requirements = {}
-    for dep in env_dict.get("dependencies", []):
-        if isinstance(dep, str) and not dep.startswith("pip:"):
-            parts = re.split(r"(>=|<=|==|<|>|~=)", dep)
-            pkg = parts[0].strip()
-            ver_spec = "".join(parts[1:]).strip() if len(parts) > 1 else None
-            requirements[pkg] = ver_spec
-    return requirements
-
-
 def get_installed_versions():
-    """Get installed packages and their versions using importlib.metadata."""
+    """
+    Get installed packages and their versions using importlib.metadata.
+
+    Returns
+    -------
+    dict
+        Dictionary of installed packages and their versions.
+    """
     installed = {}
     for dist in distributions():
         try:

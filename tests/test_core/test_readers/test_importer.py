@@ -14,7 +14,6 @@ import pytest
 import spectrochempy.utils.exceptions
 from spectrochempy import NDDataset  # , preferences as prefs
 from spectrochempy.core import preferences as prefs
-from spectrochempy.core.common import dialogs
 from spectrochempy.core.readers.importer import (
     ALIAS,
     FILETYPES,
@@ -24,6 +23,11 @@ from spectrochempy.core.readers.importer import (
     read_dir,
 )
 from spectrochempy.utils.file import pathclean
+
+try:
+    from spectrochempy.core import dialogs
+except ImportError:
+    pytest.skip("dialogs not available with act", allow_module_level=True)
 
 DATADIR = prefs.datadir
 
@@ -99,11 +103,11 @@ def dialog_open(*args, **kwargs):
     if not args and not kwargs.get("single"):
         return [DATADIR / "fakedir" / f"fake{i + 1}.fk" for i in range(2)]
 
-    return [DATADIR / "fakedir" / f"fake{i+1}.fk" for i in range(4)]
+    return [DATADIR / "fakedir" / f"fake{i + 1}.fk" for i in range(4)]
 
 
 def directory_glob(*args, **kwargs):
-    res = [DATADIR / f"fakedir/fake{i+1}.fk" for i in range(4)]
+    res = [DATADIR / f"fakedir/fake{i + 1}.fk" for i in range(4)]
     res.append(DATADIR / "fakedir/emptyfake.fk")
     if len(args) > 1 and args[1].startswith("**/"):
         # recursive
@@ -113,7 +117,6 @@ def directory_glob(*args, **kwargs):
 
 @pytest.mark.skip
 def test_importer(monkeypatch, fs):
-
     fs.create_file("/var/data/xx1.txt")
     assert os.path.exists("/var/data/xx1.txt")
 
@@ -140,7 +143,7 @@ def test_importer(monkeypatch, fs):
     assert nd == fake_dataset(f)
 
     # Generic read without parameters and dialog cancel
-    monkeypatch.setattr(spectrochempy.core.common.dialogs, "open_dialog", dialog_cancel)
+    monkeypatch.setattr(dialogs, "open_dialog", dialog_cancel)
     monkeypatch.setenv(
         "KEEP_DIALOGS", "True"
     )  # we ask to display dialogs as we will mock them.

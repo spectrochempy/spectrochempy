@@ -23,7 +23,7 @@ source:
   path: ..
 
 build:
-  string: dev12
+  string: dev13
   noarch: python
   script:
     - export SETUPTOOLS_SCM_PRETEND_VERSION=0.6.11
@@ -51,7 +51,7 @@ requirements:
     - quaternion
     - requests
     - scikit-learn
-    - setuptools_scm
+    - setuptools-scm>=8
     - toml
     - tzlocal
     - xlrd

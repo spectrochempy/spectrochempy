@@ -11,11 +11,6 @@ from pathlib import Path
 from setuptools import setup
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
-from setuptools_scm import get_version
-
-
-def version():
-    return get_version(root=".", relative_to=__file__).split("+")[0]
 
 
 def _install_mpl():
@@ -103,7 +98,6 @@ class PostDevelopCommand(_develop):
 
 # Data for personnalized installation
 setup_args = dict(
-    version=version(),
     cmdclass={
         "develop": PostDevelopCommand,
         "install": PostInstallCommand,

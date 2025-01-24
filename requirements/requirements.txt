@@ -31,7 +31,7 @@ pyyaml
 numpy-quaternion
 requests
 scikit-learn
-setuptools_scm
+setuptools-scm>=8
 toml
 tzlocal
 xlrd
