@@ -8,7 +8,7 @@ import shutil
 import warnings
 from pathlib import Path
 
-from setuptools import setup
+from setuptools import find_packages, setup
 from setuptools.command.develop import develop as _develop
 from setuptools.command.install import install as _install
 
@@ -98,6 +98,9 @@ class PostDevelopCommand(_develop):
 
 # Data for personnalized installation
 setup_args = dict(
+    zip_safe=False,
+    packages=find_packages(),
+    include_package_data=True,
     cmdclass={
         "develop": PostDevelopCommand,
         "install": PostInstallCommand,
