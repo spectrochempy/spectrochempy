@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61", "wheel", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=64", "setuptools-scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -41,7 +41,7 @@ dependencies = [
   "numpy-quaternion",
   "requests",
   "scikit-learn",
-  "setuptools_scm",
+  "setuptools-scm>=8",
   "toml",
   "tzlocal",
   "xlrd",
@@ -76,13 +76,14 @@ docs = [
   "sphinx",
   "sphinx-copybutton",
   "sphinx-gallery",
-  "sphinx_rtd_theme",
+  "sphinx-rtd-theme",
   "sphinxcontrib-bibtex",
   "json5",
 ]
 cantera = ["cantera"]
 dev = [
   # interactive
+  "jupyter",
   "jupyterlab",
   "ipykernel",
   "ipyparallel",
@@ -106,7 +107,7 @@ dev = [
   "sphinx",
   "sphinx-copybutton",
   "sphinx-gallery",
-  "sphinx_rtd_theme",
+  "sphinx-rtd-theme",
   "sphinxcontrib-bibtex",
   "json5",
 ]
@@ -121,7 +122,7 @@ issues = "https://github.com/spectrochempy/spectrochempy/issues"
 show-versions = "spectrochempy.scripts.show_versions:main"
 
 [tool.setuptools]
-packages = ["find:"]
+packages = { find = {} }
 zip-safe = false
 include-package-data = true
 

@@ -39,13 +39,14 @@ dependencies:
     - quaternion
     - requests
     - scikit-learn
-    - setuptools_scm
+    - setuptools-scm>=8
     - toml
     - tzlocal
     - xlrd
 
     # DEV dependencies
     # ----------------
+    - jupyter
     - jupyterlab
     - ipykernel
     - ipyparallel
@@ -67,6 +68,6 @@ dependencies:
     - sphinx
     - sphinx-copybutton
     - sphinx-gallery
-    - sphinx_rtd_theme
+    - sphinx-rtd-theme
     - sphinxcontrib-bibtex
     - json5

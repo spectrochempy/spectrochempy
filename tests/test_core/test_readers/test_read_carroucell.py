@@ -13,7 +13,11 @@ import pytest
 import spectrochempy as scp
 from spectrochempy import NDDataset, info_
 from spectrochempy import preferences as prefs
-from spectrochempy.core.common import dialogs
+
+try:
+    from spectrochempy.core import dialogs
+except ImportError:
+    pytest.skip("dialogs not available with act", allow_module_level=True)
 
 DATADIR = prefs.datadir
 CARROUCELL_FOLDER = DATADIR / "irdata/carroucell_samp"
@@ -28,7 +32,6 @@ def dialog_carroucell(*args, **kwargs):
 #         not CARROUCELL_FOLDER.exists(), reason="Experimental data not available for testing"
 #         )
 def test_read_carroucell(monkeypatch):
-
     # # Before testing we need to download the data locally if not yet done:
     # # because read carrousel is not designed to download itself.
     # # Use the read for that:

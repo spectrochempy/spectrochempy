@@ -21,6 +21,7 @@
 
 # DEV dependencies
 # ----------------
+jupyter
 jupyterlab
 ipykernel
 ipyparallel
@@ -42,6 +43,6 @@ numpydoc
 sphinx
 sphinx-copybutton
 sphinx-gallery
-sphinx_rtd_theme
+sphinx-rtd-theme
 sphinxcontrib-bibtex
 json5
