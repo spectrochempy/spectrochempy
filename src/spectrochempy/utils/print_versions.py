@@ -50,7 +50,8 @@ def show_versions(file=sys.stdout):
     # dependencies
 
     # Load pyproject.toml
-    pyproject_file = "pyproject.toml"
+    repo_path = Path(__file__).parent.parent.parent.parent
+    pyproject_file = repo_path / "pyproject.toml"
     pyproject = toml.load(pyproject_file)
 
     # Get dependencies
