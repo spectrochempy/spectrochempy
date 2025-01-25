@@ -14,11 +14,11 @@ from cffconvert.cli.create_citation import create_citation
 
 sys.tracebacklimit = 2
 
-HOME = pathlib.Path(__file__).parent.parent.parent
+repo_path = pathlib.Path(__file__).parent.parent.parent.parent
 
 
 class Zenodo:
-    def __init__(self, infile=HOME / ".zenodo.json"):
+    def __init__(self, infile=repo_path / ".zenodo.json"):
         self._infile = infile
         self._js = None
 
@@ -57,7 +57,7 @@ class Zenodo:
 
 
 class Citation:
-    def __init__(self, infile=HOME / "CITATION.cff"):
+    def __init__(self, infile=repo_path / "CITATION.cff"):
         self._infile = infile
         self._citation = None
 
