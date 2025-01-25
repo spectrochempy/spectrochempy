@@ -192,6 +192,7 @@ def check_dependencies(deps, other_deps, installed):
                 if compare not in package:
                     continue
                 pkg, version = package.split(compare)
+                version = compare + version
                 break
             else:
                 pkg = package
