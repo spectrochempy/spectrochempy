@@ -31,17 +31,5 @@ checks:
     config:
       threshold: 20
 
-exclude_patterns:
-  - ".ci/"
-  - ".git/"
-  - ".eggs/"
-  - ".github/"
-  - ".conda/"
-  - "docker/"
-  - "docs/"
-  - "env"
-  - "scp_data"
-  - "*.egg-info/"
-  - "tests/"
-  - "build/"
-  - "scripts/"
+include_patterns:
+  - "src/"
