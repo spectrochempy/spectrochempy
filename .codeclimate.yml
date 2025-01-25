@@ -33,3 +33,6 @@ checks:
 
 include_patterns:
   - "src/"
+
+exclude_patterns:
+  - src/spectrochempy/extern/
