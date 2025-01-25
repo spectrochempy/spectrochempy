@@ -14,8 +14,6 @@ import sys
 import warnings
 from datetime import datetime
 
-import sphinx_rtd_theme  # Theme for the website
-
 import spectrochempy as scp  # isort:skip
 
 # set a filename and default folder by default for notebook which have file dialogs
@@ -150,7 +148,6 @@ html_theme_options = {
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -328,9 +325,9 @@ from sphinx_gallery.sorting import FileNameSortKey
 sphinx_gallery_conf = {
     "plot_gallery": "True",
     "examples_dirs": [
-        "../spectrochempy/examples/core",
-        "../spectrochempy/examples/processing",
-        "../spectrochempy/examples/analysis",
+        "../src/spectrochempy/examples/core",
+        "../src/spectrochempy/examples/processing",
+        "../src/spectrochempy/examples/analysis",
     ],
     "gallery_dirs": [
         "gettingstarted/examples/gallery/auto_examples_core",

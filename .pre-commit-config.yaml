@@ -60,7 +60,10 @@ repos:
     hooks:
       - id: black
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
-    hooks:
-        - id: flake8
+  # remove this as ti seems to work incorrectly,
+  # e.g. analysing strings as if it was code.
+  # TODO: To be insvestigated! or probably replaced with ruff
+  # - repo: https://github.com/PyCQA/flake8
+  #   rev: 6.0.0
+  #   hooks:
+  #       - id: flake8
