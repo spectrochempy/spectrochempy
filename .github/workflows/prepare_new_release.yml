@@ -34,7 +34,7 @@ jobs:
           git config user.email "github-actions@users.noreply.github.com"
           git config user.name "GitHub Actions"
 
-      - name: Update version in release notes, .zenodo.json and CITATION.cff
+      - name: Update version in release notes, zenodo.json and CITATION.cff
         run: |
           python .ci/update_version_and_release_notes.py ${{ github.event.inputs.versionString }}
 
@@ -64,7 +64,7 @@ jobs:
             here:
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.
 
-            I've updated the CHANGELOG.md, CITATION.cff, .zenodo.json plus eventual
+            I've updated the CHANGELOG.md, CITATION.cff, zenodo.json plus eventual
             changes on the requirements/environment files:
             ${{ steps.make-commit.outputs.commit }}.
             Merging this PR should be followed by the creation of the corresponding

@@ -31,8 +31,8 @@ dependencies:
     - docrep
     - ipython
     - jinja2
-    - numpy
-    - matplotlib-base
+    - numpy>=1.6.0
+    - matplotlib-base>=3.5.0
     - osqp
     - pint
     - pyyaml
@@ -40,6 +40,5 @@ dependencies:
     - requests
     - scikit-learn
     - setuptools-scm>=8
-    - toml
     - tzlocal
     - xlrd

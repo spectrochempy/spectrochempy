@@ -23,8 +23,8 @@ dill
 docrep
 ipython
 jinja2
-numpy
-matplotlib
+numpy>=1.6.0
+matplotlib>=3.5.0
 osqp
 pint
 pyyaml
@@ -32,6 +32,5 @@ numpy-quaternion
 requests
 scikit-learn
 setuptools-scm>=8
-toml
 tzlocal
 xlrd

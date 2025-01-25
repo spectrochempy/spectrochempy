@@ -23,7 +23,7 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils.docrep import add_docstring  # , deprecated
+from spectrochempy.utils.docreps import add_docstring  # , deprecated
 from spectrochempy.utils.misc import is_sequence
 from spectrochempy.utils.plots import make_label, plot_method
 

@@ -18,7 +18,7 @@ from spectrochempy.utils.decorators import (
     deprecated,
     signature_has_configurable_traits,
 )
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 __all__ = ["EFA"]
 __configurables__ = ["EFA"]

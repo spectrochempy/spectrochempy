@@ -15,7 +15,7 @@ from spectrochempy.core.readers.importer import (
     _openfid,
     read,
 )
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
 # Public functions

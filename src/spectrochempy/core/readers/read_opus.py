@@ -19,7 +19,7 @@ from brukeropusreader.opus_parser import parse_data, parse_meta
 from spectrochempy.application import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
 # Public functions

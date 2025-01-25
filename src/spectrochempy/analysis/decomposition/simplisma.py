@@ -20,7 +20,7 @@ from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.application import info_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 
 # ======================================================================================

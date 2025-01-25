@@ -24,7 +24,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import utcnow
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.file import fromfile
 
 # ======================================================================================

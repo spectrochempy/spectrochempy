@@ -24,7 +24,7 @@ from spectrochempy.application import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.readers.read_omnic import read_omnic
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.file import get_directory_name, get_filenames
 
 _docstring.delete_params("Importer.see_also", "read_carroucell")

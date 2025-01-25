@@ -14,7 +14,7 @@ __dataset_methods__ = __all__
 
 from spectrochempy.core.readers.importer import Importer, _importer_method
 from spectrochempy.core.readers.read_omnic import _read_spa
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
 # Public functions

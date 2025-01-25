@@ -21,7 +21,7 @@ import yaml
 from traitlets import Dict, HasTraits, List, Type, Unicode
 
 from spectrochempy.application import info_, warning_
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
 from spectrochempy.utils.file import (
     check_filename_to_open,

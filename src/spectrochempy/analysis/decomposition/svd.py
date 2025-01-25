@@ -15,7 +15,7 @@ from spectrochempy.analysis._base._analysisbase import (
     DecompositionAnalysis,
     _wrap_ndarray_output_to_nddataset,
 )
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 __all__ = ["SVD"]
 __configurables__ = ["SVD"]

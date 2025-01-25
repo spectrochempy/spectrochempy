@@ -33,8 +33,8 @@ dependencies = [
   "docrep",
   "ipython",
   "jinja2",
-  "numpy",
-  "matplotlib",
+  "numpy>=1.6.0",
+  "matplotlib>=3.5.0",
   "osqp",
   "pint",
   "pyyaml",
@@ -42,7 +42,6 @@ dependencies = [
   "requests",
   "scikit-learn",
   "setuptools-scm>=8",
-  "toml",
   "tzlocal",
   "xlrd",
 ]
@@ -129,7 +128,13 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-"spectrochempy.data" = ["fonts/*", "stylesheets/*", "databases/*"]
+"spectrochempy.data" = [
+  "fonts/*",
+  "stylesheets/*",
+  "databases/*",
+  "*.json",
+  "*.cff",
+]
 
 [tool.setuptools_scm]
 local_scheme = "dirty-tag"

@@ -9,7 +9,7 @@ This script manages project versioning and documentation by:
 
 The script handles these files:
 - CITATION.cff: Citation information
-- .zenodo.json: Zenodo metadata
+- zenodo.json: Zenodo metadata
 - docs/whatsnew/: Release notes and changelog
 
 Usage:
@@ -30,8 +30,8 @@ from setuptools_scm import get_version
 # Path configurations
 CI = Path(__file__).parent
 PROJECT = CI.parent
-CITATION = PROJECT / "CITATION.cff"
-ZENODO = PROJECT / ".zenodo.json"
+CITATION = PROJECT / "src/spectrochempy/data/CITATION.cff"
+ZENODO = PROJECT / "src/spectrochempy/data/zenodo.json"
 DOCS = PROJECT / "docs"
 WN = DOCS / "whatsnew"
 
@@ -42,7 +42,7 @@ class Zenodo:
     """
     Handles Zenodo metadata file operations.
 
-    This class manages the .zenodo.json file which contains metadata for Zenodo
+    This class manages the zenodo.json file which contains metadata for Zenodo
     repositories including version information and publication dates.
     """
 
@@ -52,14 +52,14 @@ class Zenodo:
 
     def load(self):
         """
-        Load the .zenodo.json file
+        Load the zenodo.json file
         """
         with self._infile.open("r") as fid:
             self._js = json.load(fid)
 
     def save(self):
         """
-        Write the .zenodo.json file
+        Write the zenodo.json file
         """
         with self._infile.open("w") as fid:
             json.dump(self._js, fid, indent=2)
@@ -196,7 +196,7 @@ def make_citation(version):
 
 def make_zenodo(version):
     """
-    Create or update the .zenodo.json file.
+    Create or update the zenodo.json file.
 
     Parameters
     ----------

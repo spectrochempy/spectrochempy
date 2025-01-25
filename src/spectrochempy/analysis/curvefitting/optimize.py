@@ -22,7 +22,7 @@ from spectrochempy.analysis.curvefitting._parameters import FitParameters
 from spectrochempy.application import info_, warning_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 
 # ======================================================================================

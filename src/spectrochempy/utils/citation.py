@@ -12,26 +12,28 @@ from datetime import date
 import yaml
 from cffconvert.cli.create_citation import create_citation
 
+from spectrochempy.utils.file import get_repo_path
+
 sys.tracebacklimit = 2
 
-repo_path = pathlib.Path(__file__).parent.parent.parent.parent
+repo_path = get_repo_path()
 
 
 class Zenodo:
-    def __init__(self, infile=repo_path / ".zenodo.json"):
+    def __init__(self, infile=repo_path / "data" / "zenodo.json"):
         self._infile = infile
         self._js = None
 
     def load(self):
         """
-        Load the .zenodo.json file
+        Load the zenodo.json file
         """
         with self._infile.open("r") as fid:
             self._js = json.load(fid)
 
     def save(self):
         """
-        Write the .zenodo.json file
+        Write the zenodo.json file
         """
         with self._infile.open("w") as fid:
             json.dump(self._js, fid, indent=2)
@@ -57,7 +59,7 @@ class Zenodo:
 
 
 class Citation:
-    def __init__(self, infile=repo_path / "CITATION.cff"):
+    def __init__(self, infile=repo_path / "data" / "CITATION.cff"):
         self._infile = infile
         self._citation = None
 
@@ -143,3 +145,24 @@ class Citation:
         if version is None:
             version = scpversion
         self._citation.cffobj["version"] = ".".join(version.split(".")[:3])
+
+
+if __name__ == "__main__":
+    zenodo = Zenodo()
+    zenodo.load()
+    zenodo.update_version()
+    zenodo.update_date()
+    print(zenodo)
+
+    citation = Citation()
+    citation.load()
+    citation.update_version()
+    citation.update_date()
+    print(citation)
+    print(citation.apa)
+    print(citation.bibtex)
+    print(citation.cff)
+    print(citation.endnote)
+    print(citation.ris)
+    citation.save()
+    zenodo.save()

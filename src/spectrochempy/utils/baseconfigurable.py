@@ -25,7 +25,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import MASKED, NOMASK
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.exceptions import NotTransformedError
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 from spectrochempy.utils.traits import NDDatasetType

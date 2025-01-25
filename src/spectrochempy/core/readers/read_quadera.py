@@ -19,7 +19,7 @@ import numpy as np
 
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
 # Public functions
