@@ -18,7 +18,6 @@ from spectrochempy.analysis.kinetic import kineticutilities as ku
     ku._cantera_is_not_available(), reason="Cantera must be installed first"
 )
 def test_cu(monkeypatch):
-
     # availability of cantera (# should be installed if the test wa not skipped)
     assert not ku._cantera_is_not_available()
 
@@ -84,7 +83,7 @@ def test_ABC():
 
     # non-isothermal, single condition
 
-    # tepmerature profile
+    # temperature profile
     def T(t):
         """temperature profile"""
         T = np.zeros_like(t)

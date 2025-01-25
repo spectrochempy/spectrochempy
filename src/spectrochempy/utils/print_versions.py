@@ -14,11 +14,13 @@ import re
 import struct
 import subprocess
 import sys
-from importlib.metadata import distributions, version
+from importlib.metadata import distributions, requires, version
 from os import environ
 from pathlib import Path
 
 import toml
+
+from spectrochempy.utils.file import get_repo_path
 
 __all__ = ["show_versions"]
 
@@ -49,16 +51,19 @@ def show_versions(file=sys.stdout):
 
     # dependencies
 
-    # Load pyproject.toml
-    repo_path = Path(__file__).parent.parent.parent.parent
-    pyproject_file = repo_path / "pyproject.toml"
-    pyproject = toml.load(pyproject_file)
-
-    # Get dependencies
-    deps = pyproject["project"]["dependencies"]
-
-    # Get optional dependencies
-    opt_deps = pyproject["project"].get("optional-dependencies", {})
+    # Load project metadata
+    req = requires("spectrochempy")
+    req = [r.split("; extra == ") for r in req]
+    deps = [r[0] for r in req if len(r) == 1]
+    opt_deps = {}
+    for r in req:
+        if len(r) == 1:
+            continue
+        if len(r) == 2:
+            r[1] = r[1].strip('"')
+            opt = opt_deps.get(r[1], [])
+            opt.append(r[0])
+            opt_deps[r[1]] = opt
 
     # Get installed packages
     installed = get_installed_versions()

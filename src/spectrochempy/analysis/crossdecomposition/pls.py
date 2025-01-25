@@ -17,7 +17,7 @@ from spectrochempy.analysis._base._analysisbase import (
 )
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 __all__ = ["PLSRegression"]
 __configurables__ = ["PLSRegression"]

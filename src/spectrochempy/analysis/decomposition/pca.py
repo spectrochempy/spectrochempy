@@ -21,7 +21,7 @@ from spectrochempy.analysis._base._analysisbase import (
     _wrap_ndarray_output_to_nddataset,
 )
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.plots import NBlue, NRed
 
 __all__ = ["PCA"]

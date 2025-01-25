@@ -7,6 +7,8 @@
 """
 File utilities.
 """
+
+import importlib.util
 import re
 import struct
 import warnings
@@ -30,6 +32,43 @@ def download_testdata():
     if not downloaded.exists():
         read(datadir, download_only=True)
         downloaded.touch(exist_ok=True)
+
+
+def is_editable_install(package_name):
+    """
+    Check if a package is installed in editable mode.
+
+    Parameters
+    ----------
+    package_name : str
+        The name of the package to check.
+
+    Returns
+    -------
+    bool
+        True if the package is installed in editable mode, False otherwise.
+    """
+    spec = importlib.util.find_spec(package_name)
+    if spec is None:
+        return False
+    print("origin", spec.origin)
+    return f"{package_name}/src" in spec.origin
+
+
+def get_repo_path():
+    """
+    Get the repository path based on the installation mode.
+
+    Returns
+    -------
+    Path
+        The path to the repository.
+    """
+    if is_editable_install("spectrochempy"):
+        return Path(__file__).parent.parent.parent.parent
+    else:
+        return Path(__file__).parent.parent
+    pass
 
 
 def fromfile(fid, dtype, count):

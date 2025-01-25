@@ -16,7 +16,7 @@ from sklearn import decomposition
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
-from spectrochempy.utils.docrep import _docstring
+from spectrochempy.utils.docreps import _docstring
 
 __all__ = ["NMF"]
 __configurables__ = ["NMF"]
