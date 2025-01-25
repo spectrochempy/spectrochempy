@@ -26,6 +26,7 @@ ipywidgets
 jupytext
 nbsphinx
 numpydoc
+pypandoc
 sphinx
 sphinx-copybutton
 sphinx-gallery

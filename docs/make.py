@@ -50,7 +50,7 @@ warnings.filterwarnings(action="ignore", category=FutureWarning)
 
 # CONSTANT
 PROJECTNAME = "spectrochempy"
-REPO_URI = f"spectrochempy/{PROJECTNAME}"
+REPO_URI = f"spectrochempy/src/{PROJECTNAME}"
 API_GITHUB_URL = "https://api.github.com"
 URL_SCPY = "www.spectrochempy.fr"
 
