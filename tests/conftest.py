@@ -22,28 +22,6 @@ import spectrochempy
 #     )
 
 
-def is_editable_install(package_name):
-    """
-    Check if a package is installed in editable mode.
-
-    Parameters
-    ----------
-    package_name : str
-        The name of the package to check.
-
-    Returns
-    -------
-    bool
-        True if the package is installed in editable mode, False otherwise.
-    """
-    for dist in pkg_resources.working_set:
-        if dist.project_name.lower() == package_name.lower():
-            for path_item in dist._provider.egg_info.splitlines():
-                if path_item.endswith(".egg-link"):
-                    return True
-    return False
-
-
 # ----------------------------
 # Cleaning when exiting pytest
 # ----------------------------

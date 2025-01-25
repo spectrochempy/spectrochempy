@@ -18,10 +18,6 @@ from importlib.metadata import distributions, requires, version
 from os import environ
 from pathlib import Path
 
-import toml
-
-from spectrochempy.utils.file import get_repo_path
-
 __all__ = ["show_versions"]
 
 
