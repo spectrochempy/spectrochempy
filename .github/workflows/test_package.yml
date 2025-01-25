@@ -83,7 +83,7 @@ jobs:
           python -m pip list
 
       - name: Test with coverage
-        if: ${{ !(github.event.act == 'act' && matrix.pythonVersion == '3.12') }}
+        if: ${{ !(github.event.act && matrix.pythonVersion == '3.12') }}
         run: |
           coverage run -m pytest tests --durations=10
 
