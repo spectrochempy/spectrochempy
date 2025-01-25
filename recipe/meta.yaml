@@ -61,9 +61,6 @@ tests:
       imports:
         - spectrochempy
       pip_check: true
-  - package_contents:
-      site_packages:
-        - scp_data
 
 about:
   homepage: https://www.spectrochempy.fr

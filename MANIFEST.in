@@ -1,8 +1,0 @@
-prune docs
-prune tests
-prune recipe
-prune requirements
-prune environments
-prune .*
-recursive-include scp_data *
-include README.md

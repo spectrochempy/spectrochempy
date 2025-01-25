@@ -975,7 +975,7 @@ class PlotPreferences(MetaConfigurable):
         # the spectra path in package data
         from spectrochempy.utils.packages import get_pkg_path
 
-        return get_pkg_path("stylesheets", "scp_data")
+        return get_pkg_path("data/stylesheets", "spectrochempy")
 
     @observe("style")
     def _style_changed(self, change):

@@ -117,7 +117,7 @@ class GeneralPreferences(MetaConfigurable):
     # @tr.default("databases_directory")
     # def _get_databases_directory_default(self):
     #     # the spectra path in package data
-    #     return pathclean(get_pkg_path("databases", "scp_data"))
+    #     return pathclean(get_pkg_path("databases", "spectrochempy.data"))
 
     @tr.default("datadir")
     def _get_default_datadir(self):

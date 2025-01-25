@@ -121,6 +121,15 @@ issues = "https://github.com/spectrochempy/spectrochempy/issues"
 [project.scripts]
 show-versions = "spectrochempy.scripts.show_versions:main"
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"spectrochempy.data" = ["fonts/*", "stylesheets/*", "databases/*"]
+
 [tool.setuptools_scm]
 local_scheme = "dirty-tag"
 
