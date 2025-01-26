@@ -25,9 +25,6 @@ New features
   the `cantera` dependencies,
   or `pip install -e ".[dev]"` to install the package with the
   development dependencies and in editable mode.
-* MCRALS now allows storing the C and St generated at each iteration (storeIteration parameter).
-* Add a despike method ('whitaker') and improves speed of execution of the default ('katsumoto') method.
-* read_srs now accepts TGA and GC filetypes (issue #769).
 * Add a `show-version` script executable from a terminal.
 
 .. section
@@ -35,11 +32,8 @@ New features
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-* bug #777. Now `scp.show_version()`` works as expected.
-* google colab compatibility (issue #784).
-* compatibility with pint>0.24 (issue #765).
-* loading of dataset for MCR-ALS with kinetic constraints.
-* update title in cdot.
+* Bug #777. Now `scp.show_version()`` works as expected
+
 .. section
 
 Dependency updates
@@ -54,13 +48,9 @@ Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 * minimum python version set to 3.10.
-* jupyter lab and widget related dependencies are not installed by default anymore.
-  They must be installed separately.
-
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
-* FileSelector and BaseFileSelector are deprecated
