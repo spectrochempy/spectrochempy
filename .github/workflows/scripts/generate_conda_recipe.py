@@ -6,7 +6,7 @@ from jinja2 import Template
 from setuptools_scm import get_version
 
 # Define paths
-repo_path = Path(__file__).parent.parent
+repo_path = Path(__file__).parent.parent.parent.parent
 template_dir = repo_path / ".ci" / "templates"
 
 # Load template
