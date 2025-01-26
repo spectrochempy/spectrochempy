@@ -4,43 +4,48 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
-# --------------------------------------------------------------------------------------
-# Testing examples and notebooks (Py version) in docs
-# --------------------------------------------------------------------------------------
+"""
+Testing examples and notebooks (Py version) in docs.
+This test is skipped by default as it's too slow and redundant with docs building process.
+To run it explicitly, use: pytest tests/test_docs/test_py_in_docs.py --override-skip
+"""
+
 import subprocess
 import sys
 from os import environ
 from pathlib import Path
 
+import matplotlib as mpl
 import pytest
 from traitlets import import_item
 
-pytestmark = pytest.mark.slow
+import spectrochempy as scp
 
-try:
-    from spectrochempy.core import dialogs
-except ImportError:
-    pytest.skip(
-        "dialogs not available with act - better to skip this test locally",
-        allow_module_level=True,
-    )
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.skip(reason="Too slow and redundant with docs building process"),
+]
 
 repo = Path(__file__).parent.parent.parent
 
-# get nbsphinx scripts located mainly in the userguide
-scripts = list((repo / "docs").glob("**/*.py"))
+# Get example files list at module level
+example_files = list((repo / "src" / "spectrochempy" / "examples").glob("**/*.py"))
+example_files = [
+    example
+    for example in example_files
+    if example.stem != "__init__" and "checkpoint" not in str(example)
+]
 
-# remove some scripts
-for item in scripts[:]:
-    if (
-        "checkpoint" in str(item)
-        or "make.py" in str(item)
-        or "conf.py" in str(item)
-        or "apigen.py" in str(item)
-        or "gallery" in str(item)
-    ):
-        scripts.remove(item)
+# Get nbsphinx scripts
+scripts = list((repo / "docs").glob("**/*.py"))
+scripts = [
+    script
+    for script in scripts
+    if not any(
+        x in str(script)
+        for x in ["checkpoint", "make.py", "conf.py", "apigen.py", "gallery"]
+    )
+]
 
 
 def nbsphinx_script_run(path):
@@ -82,29 +87,20 @@ def test_nbsphinx_script_(script):
     assert not e, message
 
 
-examples = list((repo / "spectrochempy" / "examples").glob("**/*.py"))
-for example in examples[:]:
-    if example.stem == "__init__" or "checkpoint" in str(example):
-        examples.remove(example)
-
-import matplotlib as mpl
-
-import spectrochempy as scp  # to avoid imporing it in example test (already impported)
-
-
 @pytest.mark.skipif(
     sys.platform == "win32",
     reason="does not run well on windows - to be investigated",
 )
-@pytest.mark.parametrize("example", sorted(examples, key=lambda example: example.stem))
+@pytest.mark.parametrize(
+    "example", sorted(example_files, key=lambda x: x.stem), ids=lambda x: x.stem
+)
 def test_examples(example):
+    """Test example files."""
     scp.NO_DISPLAY = True
     scp.NO_DIALOG = True
     mpl.use("agg", force=True)
-    from os import environ
 
     # set test file and folder in environment
-    # set a test file in environment
     DATADIR = scp.pathclean(scp.preferences.datadir)
     environ["TEST_FILE"] = str(DATADIR / "irdata" / "nh4y-activation.spg")
     environ["TEST_FOLDER"] = str(DATADIR / "irdata" / "subdir")
