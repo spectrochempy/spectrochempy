@@ -148,7 +148,7 @@ class BuildDocumentation(object):
     def _make_redirection_page():
         # create an index page at the site root to redirect to the latest version.
 
-        html = f"""
+        html = """
         <html>
         <head>
         <title>Processing, analyzing and modeling spectroscopic data</title>
