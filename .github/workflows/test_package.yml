@@ -71,7 +71,6 @@ jobs:
           echo "Ref: ${{ github.ref }}"
           echo "Repository: ${{ github.repository }}"
           echo "Workflow: ${{ github.workflow }}"
-          echo "Event: ${{ toJSON(github.event) }}"
           echo "pythonVersion: ${{ matrix.pythonVersion }}"
           echo "os: ${{ matrix.os }}"
 
