@@ -151,15 +151,15 @@ class BuildDocumentation(object):
         html = f"""
         <html>
         <head>
-        <title>Redirect to the dev version of the documentation</title>
+        <title>Processing, analyzing and modeling spectroscopic data</title>
         <meta http-equiv="refresh" content="0; URL=latest">
         </head>
         <body>
-        <p>
-        We have moved away from the <strong>spectrochempy.github.io</strong> domain.
-        If you're not automatically redirected, please visit us at
-        <a href="https://{URL_SCPY}">https://{URL_SCPY}</a>.
-        </p>
+            <h1>Processing, analyzing and modeling spectroscopic data</H1>
+            <p>
+                SpectroChemPy is a framework for processing, analyzing and modeling <strong>Spectro</strong>scopic
+                data for <strong>Chem</strong>istry with <strong>Py</strong>thon. It is a cross-platform software, running on Linux, Windows or OS X.
+            </p>
         </body>
         </html>
         """
