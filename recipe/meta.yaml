@@ -23,7 +23,7 @@ source:
   path: ..
 
 build:
-  string: dev16
+  string: dev30
   noarch: python
   script:
     - export SETUPTOOLS_SCM_PRETEND_VERSION=0.6.11
@@ -43,8 +43,8 @@ requirements:
     - docrep
     - ipython
     - jinja2
-    - numpy
-    - matplotlib-base
+    - numpy>=1.6.0
+    - matplotlib>=3.5.0
     - osqp
     - pint
     - pyyaml
@@ -52,7 +52,6 @@ requirements:
     - requests
     - scikit-learn
     - setuptools-scm>=8
-    - toml
     - tzlocal
     - xlrd
 

@@ -54,46 +54,60 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         pythonVersion: ["3.10", "3.12"]
+        # when adding a new python version, do not forget to update the matrix in the codeclimate step.max-parallel
+        # also go to github settings to modify the required actions to succeed for PR (branches/protectionrules: edit "master")
         exclude:
           - os: macos-latest
             pythonVersion: 3.10
           - os: windows-latest
             pythonVersion: 3.10
-
-        # when adding a new python version, do not forget to update the matrix in the codeclimate step.max-parallel
-        # also go to github settings to modify the required actions to succeed for PR (branches/protectionrules: edit "master")
     steps:
+      - name: info
+        run: |
+          echo "Environment Act: ${{ env.ACT }}"
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Event: ${{ toJSON(github.event) }}"
+          echo "pythonVersion: ${{ matrix.pythonVersion }}"
+          echo "os: ${{ matrix.os }}"
+
       - name: Checkout spectrochempy repository
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Python ${{ matrix.pythonVersion }}
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
         id: setup_python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonVersion }}
-          # cache: "pip"
+          cache: "pip"
 
       - name: Install spectrochempy
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
         run: |
           python -m pip install ".[test]"
-          python -m pip list
+          # check the MPL setup
+          python src/spectrochempy/data/setup.py
 
       - name: Test with coverage
-        if: ${{ !(github.event.act && matrix.pythonVersion == '3.12') }}
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
         run: |
-          coverage run -m pytest tests --durations=10
+          coverage run -m pytest tests -s --durations=10
 
       - name: Coverage report to xml
-        if: ${{ !github.event.act &&  github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
         run: |
           coverage xml
 
       - name: Code Climate reporting
-        if: ${{ !github.event.act &&  github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
         uses: paambaati/codeclimate-action@v5.0.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}

@@ -18,6 +18,14 @@ from traitlets import import_item
 
 pytestmark = pytest.mark.slow
 
+try:
+    from spectrochempy.core import dialogs
+except ImportError:
+    pytest.skip(
+        "dialogs not available with act - better to skip this test locally",
+        allow_module_level=True,
+    )
+
 repo = Path(__file__).parent.parent.parent
 
 # get nbsphinx scripts located mainly in the userguide
@@ -90,7 +98,6 @@ import spectrochempy as scp  # to avoid imporing it in example test (already imp
 )
 @pytest.mark.parametrize("example", sorted(examples, key=lambda example: example.stem))
 def test_examples(example):
-
     scp.NO_DISPLAY = True
     scp.NO_DIALOG = True
     mpl.use("agg", force=True)

@@ -12,6 +12,11 @@ pytestmark = pytest.mark.skipif(
     reason="ipywidgets not installed",
 )
 
+pytestmark = pytest.mark.skipif(
+    pytest.importorskip("tkinter", reason="tkinter not installed") is None,
+    reason="tkinter not installed  - happens with act testing",
+)
+
 import numpy as np
 import pytest
 

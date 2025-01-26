@@ -8,6 +8,7 @@
 In this module, methods are provided to download external datasets
 from public database.
 """
+
 __all__ = ["load_iris", "download_nist_ir"]
 __dataset_methods__ = __all__
 
@@ -84,7 +85,7 @@ def download_nist_ir(CAS, index="all"):
     --------
     read : Read data from experimental data.
     """
-
+    print("download_nist_ir")
     if isinstance(CAS, str) and "-" in CAS:
         CAS = CAS.replace("-", "")
 
