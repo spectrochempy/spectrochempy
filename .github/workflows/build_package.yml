@@ -84,7 +84,7 @@ jobs:
 
   # Job 2: Build and publish conda package
   build_and_publish_conda_package:
-    name: Build package
+    name: Build and publish conda package
     runs-on: ubuntu-latest
 
     # Prevent cron jobs from running on forks
