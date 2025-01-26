@@ -19,16 +19,16 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
-* improvement of the installation process using pip.
+* Improvement of the installation process using pip.
   One can now install the package using command
   like `pip install spectrochempy[cantera]` to install the package with the cantera
   the `cantera` dependencies,
   or `pip install -e ".[dev]"` to install the package with the
   development dependencies and in editable mode.
 * MCRALS now allows storing the C and St generated at each iteration (storeIteration parameter).
-* add a despike method ('whitaker') and improves speed of execution of the default ('katsumoto') method.
+* Add a despike method ('whitaker') and improves speed of execution of the default ('katsumoto') method.
 * read_srs now accepts TGA and GC filetypes (issue #769).
-* add a `show_version` script executable from a terminal.
+* Add a `show-version` script executable from a terminal.
 
 .. section
 
@@ -45,7 +45,8 @@ Bug fixes
 Dependency updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
-* now compatible with numpy>2.0.
+* now compatible with numpy>=2.0 and numpy>=1.6 as well.
+* now compatible with python 3.13
 
 .. section
 
