@@ -45,7 +45,6 @@ dependencies:
 
     # DOCS dependencies
     # -----------------
-    - cffconvert
     - ipywidgets
     - jupytext
     - nbsphinx

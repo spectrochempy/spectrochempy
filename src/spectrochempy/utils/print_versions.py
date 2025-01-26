@@ -67,7 +67,7 @@ def show_versions(file=sys.stdout):
     # display results of comparison with the requirements
     underlined_title("Dependencies", file=file)
     underlined_title(
-        f"{'Package': <20} {'Required': <15} {'Installed': <15}",
+        f"{'Package': <20} {'Required': <25} {'Installed': <15}",
         ".",
         ret=False,
         file=file,
@@ -188,10 +188,13 @@ def check_dependencies(deps, other_deps, installed):
             # change eventual "==" to "="
             package = re.sub("==", "=", package).strip()
             # split version
-            for compare in ("<=", ">=", "="):
+            for compare in ("<=", ">=", "=", "@"):
                 if compare not in package:
                     continue
-                pkg, version = package.split(compare)
+                pkg, version = package.split(compare, maxsplit=1)
+                if compare == "@":
+                    version = version.strip()
+                    version = version[0:4] + "..." + version[-17:]
                 version = compare + version
                 break
             else:
@@ -206,7 +209,7 @@ def check_dependencies(deps, other_deps, installed):
         strg += f"\n---- {key} ----\n"
         for pkg, req_ver in deps.items():
             inst_ver = installed.get(pkg, "Not installed")
-            strg += f"{pkg: <20} {req_ver: <15} {inst_ver: <15}\n"
+            strg += f"{pkg: <20} {req_ver: <25} {inst_ver: <15}\n"
 
     return strg
 

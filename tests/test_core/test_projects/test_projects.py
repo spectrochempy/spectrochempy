@@ -14,6 +14,12 @@ from spectrochempy.core.script import Script, run_script
 
 prefs = preferences
 
+try:
+    from spectrochempy.core import dialogs
+except ImportError:
+    import pytest
+
+    pytest.skip("dialogs not available with act", allow_module_level=True)
 
 # Basic
 # --------------------------------------------------------------------------------------

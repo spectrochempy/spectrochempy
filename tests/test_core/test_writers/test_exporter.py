@@ -19,6 +19,11 @@ from spectrochempy.utils.file import pathclean
 irdatadir = pathclean(prefs.datadir) / "irdata"
 cwd = Path.cwd()
 
+try:
+    from spectrochempy.core import dialogs
+except ImportError:
+    pytest.skip("dialogs not available with act", allow_module_level=True)
+
 
 def test_write():
     nd = scp.read_omnic("irdata/nh4y-activation.spg")

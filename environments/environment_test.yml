@@ -45,7 +45,6 @@ dependencies:
 
     # TEST dependencies
     # -----------------
-    - cffconvert
     - coverage
     - ipywidgets
     - pyfakefs

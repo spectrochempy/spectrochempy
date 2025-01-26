@@ -58,6 +58,7 @@ jobs:
 
       # Step 5: Upload PyPI build artifacts
       - name: Upload PyPI build artifacts
+        if: ${{ !env.ACT }}
         uses: actions/upload-artifact@v4
         with:
           name: pypi-package
@@ -106,7 +107,7 @@ jobs:
         run: |
           pip install --upgrade setuptools>=61.0.0
           pip install setuptools_scm toml jinja2
-          python3 .ci/generate_conda_recipe.py
+          python3 .github/workflows/scripts/generate_conda_recipe.py
 
       # Step 3: Build conda package
       - name: Build conda package
@@ -121,6 +122,7 @@ jobs:
 
       # Step 4: Upload build artifacts
       - name: Upload build artifacts
+        if: ${{ !env.ACT }}
         uses: actions/upload-artifact@v4
         with:
           name: conda-package

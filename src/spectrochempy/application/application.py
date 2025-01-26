@@ -824,7 +824,6 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 # Start instance of Spectrochempy and expose public members in all
 # ======================================================================================
 app = SpectroChemPy()
-preferences = app.preferences
 error_ = app.error_
 warning_ = app.warning_
 info_ = app.info_

@@ -56,7 +56,6 @@ interactive = [
   "jupyter-server",
 ]
 test = [
-  "cffconvert",
   "coverage",
   "ipywidgets",
   "pyfakefs",
@@ -67,7 +66,7 @@ test = [
   "numpydoc",
 ]
 docs = [
-  "cffconvert",
+  #"cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
   "ipywidgets",
   "jupytext",
   "nbsphinx",
@@ -91,7 +90,6 @@ dev = [
   "nodejs",
   "jupyter_server",
   # test
-  "cffconvert",
   "coverage",
   "ipywidgets",
   "pyfakefs",
@@ -99,17 +97,6 @@ dev = [
   "pytest-doctestplus",
   "pytest-flake8",
   "pytest-mock",
-  # docs
-  "ipywidgets",
-  "jupytext",
-  "nbsphinx",
-  "numpydoc",
-  "sphinx",
-  "sphinx-copybutton",
-  "sphinx-gallery",
-  "sphinx-rtd-theme",
-  "sphinxcontrib-bibtex",
-  "json5",
 ]
 
 [project.urls]

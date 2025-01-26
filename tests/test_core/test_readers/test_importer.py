@@ -115,7 +115,6 @@ def directory_glob(*args, **kwargs):
     return res
 
 
-@pytest.mark.skip
 def test_importer(monkeypatch, fs):
     fs.create_file("/var/data/xx1.txt")
     assert os.path.exists("/var/data/xx1.txt")

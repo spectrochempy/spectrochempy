@@ -4,21 +4,58 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+"""
+Setup script for matplotlib custom styles and fonts.
+
+This module provides functionality to install custom matplotlib styles and fonts
+"""
+
 import shutil
 import warnings
+from os import environ
 from pathlib import Path
+
+
+def is_on_github_actions():
+    """
+    Check if the code is running on GitHub Actions.
+
+    Returns
+    -------
+    bool
+        True if running on GitHub Actions, False otherwise.
+    """
+    required_vars = ["CI", "GITHUB_RUN_ID", "GITHUB_REPOSITORY"]
+    return all(var in environ and environ.get(var) for var in required_vars)
 
 
 def setup_mpl():
     """
-    Install matplotlib styles and fonts.
+    Install matplotlib styles and fonts for SpectroChemPy.
 
-    This function installs custom matplotlib styles and fonts for SpectroChemPy.
-    It copies the stylesheets and fonts from the 'src/spectrochempy/data' directory to the appropriate
-    matplotlib configuration directories.
+    This function:
+    1. Checks the execution environment (local or GitHub Actions)
+    2. Verifies matplotlib installation
+    3. Installs custom stylesheets if not already present
+    4. Installs custom fonts if not already present
+    5. Cleans up font cache after installation
+
+    Raises
+    ------
+    ImportError
+        If matplotlib is not installed
+    IOError
+        If source directories for styles or fonts are not found
     """
+    # Check execution environment
+    GITHUB = is_on_github_actions()
+    if GITHUB:
+        print("Running on GitHub Actions")
+
+    # Verify matplotlib installation
     try:
         import matplotlib as mpl
+        import matplotlib.pyplot as plt
         from matplotlib import get_cachedir
     except ImportError:
         warnings.warn(
@@ -32,7 +69,7 @@ def setup_mpl():
         )
         return
 
-    # Install all plotting styles in the matplotlib stylelib library
+    # Setup paths for stylesheets
     stylesheets = Path(__file__).parent / "stylesheets"
     if not stylesheets.exists():
         raise IOError(
@@ -40,48 +77,59 @@ def setup_mpl():
             f"Installation incomplete!"
         )
 
+    # Ensure stylelib directory exists
     cfgdir = Path(mpl.get_configdir())
     stylelib = cfgdir / "stylelib"
     if not stylelib.exists():
         stylelib.mkdir()
 
-    styles = stylesheets.glob("*.mplstyle")
-    # check if our custom stylesheet are already installed and it not the case, install them
+    if GITHUB:
+        print(f"MPL Configuration directory: {cfgdir}")
+        print(f"Stylelib directory: {stylelib}")
+
+    # Install stylesheets if needed
+    styles = list(stylesheets.glob("*.mplstyle"))
     if not all((stylelib / src.name).exists() for src in styles):
         print("Installing custom stylesheets...")
         for src in styles:
             dest = stylelib / src.name
             shutil.copy(src, dest)
-            # print(f"Stylesheet {src} installed in {dest}")
-        print("Custom stylesheets installed.")
+            if dest.exists():
+                print(f"Stylesheet {src.name} installed successfully")
+            else:
+                print(f"Failed to install stylesheet {src.name}")
 
-    # Install fonts in mpl-data
-    # see https://stackoverflow.com/a/47743010 discussion
-    _dir_data = Path(mpl.get_data_path())
+        # Reload matplotlib style library
+        plt.style.reload_library()
 
+        if GITHUB:
+            print("\nAvailable stylesheets:")
+            print("\n".join(f"- {style}" for style in plt.style.available))
+
+    # Setup paths for fonts
     dir_source = Path(__file__).parent / "fonts"
     if not dir_source.exists():
-        raise IOError(f"directory {dir_source} not found!")
+        raise IOError(f"Fonts directory not found: {dir_source}")
 
-    dir_dest = _dir_data / "fonts" / "ttf"
+    dir_dest = Path(mpl.get_data_path()) / "fonts" / "ttf"
     if not dir_dest.exists():
         dir_dest.mkdir(parents=True, exist_ok=True)
 
-    # check if our custom fonts are already installed and it not the case, install them
-    if not all((dir_dest / src.name).exists() for src in dir_source.glob("*.[ot]tf")):
-        print("Installing custom fonts...")
-        for src in dir_source.glob("*.[ot]tf"):
+    # Install fonts if needed
+    fonts = list(dir_source.glob("*.[ot]tf"))
+    if not all((dir_dest / src.name).exists() for src in fonts):
+        print("\nInstalling custom fonts...")
+        for src in fonts:
             dest = dir_dest / src.name
             shutil.copy(src, dest)
-            # print(f"Font {src} installed in {dest}")
-        print("Custom fonts installed.")
+            print(f"Font {src.name} installed successfully")
 
-        # Delete font cache
+        # Clear font cache
         dir_cache = Path(get_cachedir())
-        for file in list(dir_cache.glob("*.cache")) + list(dir_cache.glob("font*")):
-            if not file.is_dir():
-                file.unlink()
-                # print(f"Deleted font cache {file}.")
+        for cache_file in dir_cache.glob("*.cache"):
+            if not cache_file.is_dir():
+                cache_file.unlink()
+                print(f"Cleared font cache: {cache_file.name}")
 
 
 if __name__ == "__main__":
