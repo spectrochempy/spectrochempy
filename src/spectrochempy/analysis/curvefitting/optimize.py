@@ -11,9 +11,9 @@ import re
 import sys
 
 import numpy as np
-import scipy.optimize
 import traitlets as tr
 from IPython import display
+from scipy import optimize
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis.curvefitting import _models as models_
@@ -214,9 +214,7 @@ class Optimize(DecompositionAnalysis):
             # not the complex number
             data = X.real.squeeze()
 
-            residuals = data - mdata
-
-            return residuals
+            return data - mdata
 
         def fun_chi2(params, X):  # , *constraints):
             """
@@ -295,8 +293,7 @@ class Optimize(DecompositionAnalysis):
         else:
             # todo
             raise NotImplementedError("Fit not implemented for nD data yet!")
-        _outfit = C, components, total, A, a, b
-        return _outfit
+        return C, components, total, A, a, b
 
     # ----------------------------------------------------------------------------------
     # Private methods for validation
@@ -416,7 +413,7 @@ class Optimize(DecompositionAnalysis):
             s = values.split(",")
             s = [ss.strip() for ss in s]
             if len(s) > 1 and ("[" in s[0]) and ("]" in s[1]):  # list
-                s[0] = "%s, %s" % (s[0], s[1])
+                s[0] = f"{s[0]}, {s[1]}"
                 if len(s) > 2:
                     s[1:] = s[2:]
             if len(s) > 3:
@@ -442,23 +439,7 @@ class Optimize(DecompositionAnalysis):
             fp.reference[ks] = reference
             if not reference:
                 val = value.strip()
-                val = eval(val)
-                # if isinstance(val, list):
-                #     # if the parameter is already a list, that's ok if the number
-                #     # of parameters is ok
-                #     if len(val) != fp.expnumber:
-                #         raise ValueError(
-                #             f"the number of parameters {len(val)} is not the number "
-                #             f"of experiments."
-                #         )
-                #     if key not in fp.expvars:
-                #         raise ValueError(
-                #             f"parameter {key} is not declared as variable"
-                #         )
-                # else:
-                #     if key in fp.expvars:
-                #         # we create a list of parameters corresponding
-                #         val = [val] * fp.expnumber
+                val = eval(str(val))  # noqa: S307
                 fp[ks] = val, mini.strip(), maxi.strip(), fixed
             else:
                 fp[ks] = value.strip()
@@ -607,7 +588,7 @@ class Optimize(DecompositionAnalysis):
             if kw in param:
                 expr = expr.replace(kw, str(param[kw]))
             elif kw in np.__dict__:  # check if it is a recognized math function
-                expr = expr.replace(kw, "np.%s" % kw)
+                expr = expr.replace(kw, f"np.{kw}")
         return expr
 
     def _prepare(self, param, exp_idx=1):
@@ -630,11 +611,11 @@ class Optimize(DecompositionAnalysis):
                         break
                     refpar = par
                 try:
-                    new_param[key] = eval(str(refpar))
-                except Exception:
+                    new_param[key] = eval(str(refpar))  # noqa: S307
+                except Exception as err:
                     raise ValueError(
-                        "Cannot evaluate the expression %s: %s" % (key, param[refpar])
-                    )
+                        f"Cannot evaluate the expression {key}: {param[refpar]}"
+                    ) from err
 
                 new_param.fixed[key] = True
                 new_param.reference[key] = True  # restore it for the next call
@@ -961,7 +942,7 @@ def _optimize(
     func,
     fp0,
     args=(),
-    constraints={},
+    constraints=None,
     method="least_squares",
     maxfun=None,
     maxiter=1000,
@@ -969,27 +950,8 @@ def _optimize(
     xtol=1e-8,
     callback=None,
 ):
-    # """
-    # Parameters
-    # ----------
-    # func
-    # fp0
-    # args
-    # constraints
-    # method
-    # maxfun
-    # maxiter
-    # ftol
-    # xtol
-    # callback
-    #
-    #
-    # #  Internal/external transformation
-    # #  These transformations are used in the MINUIT package,
-    # #  and described in detail
-    # #  in the section 1.3.1 of the MINUIT User's Guide.
-    # """
-
+    if constraints is None:
+        constraints = {}
     global keys
 
     def restore_external(fp, p, keys):
@@ -999,12 +961,12 @@ def _optimize(
             if keysp[0] in fp.expvars:
                 ps = []
                 for i in range(fp.expnumber):
-                    ks = "%s_exp%d" % (key, i)
+                    ks = f"{key}_exp{i}"
                     if ks not in keys:
                         break
                     k = keys.index(ks)
                     ps.append(p[k])
-                if len(ps) > 0:
+                if ps:
                     fp.to_external(key, ps)
             else:
                 if key not in keys:
@@ -1037,7 +999,7 @@ def _optimize(
             if keysp in fp0.expvars:
                 for i in range(fp0.expnumber):
                     par.append(fp0.to_internal(key, i))
-                    keys.append("%s_exp%d" % (key, i))
+                    keys.append(f"{key}_exp{i}")
             else:
                 par.append(fp0.to_internal(key))
                 keys.append(key)
@@ -1055,7 +1017,7 @@ def _optimize(
         method = "lm" if len(fp0) < 10 else "trf"
 
     if method.lower() in ["lm", "trf"]:
-        result = scipy.optimize.least_squares(
+        result = optimize.least_squares(
             internal_func,
             par,
             args=tuple(args),
@@ -1064,7 +1026,7 @@ def _optimize(
         res, fopt, warnmess = result.x, result.cost, result.message
 
     elif method.lower() == "simplex":
-        result = scipy.optimize.fmin(
+        result = optimize.fmin(
             internal_func,
             par,
             args=tuple(args),
@@ -1076,10 +1038,10 @@ def _optimize(
             disp=False,
             callback=internal_callback,
         )
-        res, fopt, iterations, funcalls, warnmess = result
+        res, fopt, _, _, warnmess = result
 
     elif method.upper() == "basinhopping":
-        result = scipy.optimize.basinhopping(
+        result = optimize.basinhopping(
             internal_func,
             par,
             niter=100,
@@ -1099,10 +1061,10 @@ def _optimize(
         res, fopt, warnmess = result.x, result.fun, result.message
 
     elif method == "XXXX":
-        raise NotImplementedError("method: %s" % method)
+        raise NotImplementedError(f"method: {method}")
         # TODO: implement other algorithms
     else:
-        raise NotImplementedError("method: %s" % method)
+        raise NotImplementedError(f"method: {method}")
 
     # restore the external parameter
     fpe = restore_external(fp0, res, keys)
@@ -1161,12 +1123,12 @@ def getmodel(
         if usermodels is not None:
             try:
                 modelcls = usermodels[model]
-            except KeyError:
+            except KeyError as e:
                 raise ValueError(
                     f"Model {model} not found in spectrochempy nor in usermodels."
-                )
+                ) from e
         else:
-            raise ValueError(f"Model {model} not found in spectrochempy.")
+            raise ValueError(f"Model {model} not found in spectrochempy.") from None
 
     # take an instance of the model
     a = modelcls()
@@ -1182,16 +1144,13 @@ def getmodel(
                 # due to a limited polynomial degree
                 pass
             else:
-                raise ValueError(e)
+                raise ValueError(e) from e
 
     x = np.array(x, dtype=np.float64)
     if y is not None:
         y = np.array(y, dtype=np.float64)
 
-    if y is None:
-        val = a.f(x, *args, **kwargs)
-    else:
-        val = a.f(x, y, *args, **kwargs)
+    val = a.f(x, *args, **kwargs) if y is None else a.f(x, y, *args, **kwargs)
 
     # Return amplitude or area ? return calc is scaled by area by default
     if amplitude_mode.lower() == "height":

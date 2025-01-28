@@ -24,6 +24,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.read_omnic import read_omnic
+from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
@@ -150,7 +151,9 @@ def _read_carroucell(*args, **kwargs):
     if len(Tfile) == 0:
         info_("no temperature file")
     elif len(Tfile) > 1:
-        warnings.warn("several .xls/.csv files. The temperature will not be read")
+        warnings.warn(
+            "several .xls/.csv files. The temperature will not be read", stacklevel=2
+        )
     else:
         Tfile = Tfile[0]
         if Tfile[-4:].lower() == ".xls":
@@ -168,7 +171,7 @@ def _read_carroucell(*args, **kwargs):
                 try:
                     time = datetime.datetime.strptime(
                         sheet.cell(i, 0).value, "%d/%m/%y %H:%M:%S"
-                    ).replace(tzinfo=datetime.UTC)
+                    ).replace(tzinfo=UTC)
                     if ti <= time <= tf:
                         t.append(time)
                         T.append(sheet.cell(i, 4).value)

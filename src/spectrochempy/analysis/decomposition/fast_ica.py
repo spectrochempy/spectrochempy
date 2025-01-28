@@ -345,3 +345,4 @@ array of values drawn from a normal distribution is used."""
         """
         if self.whiten:
             return self._fast_ica.whitening_
+        return None

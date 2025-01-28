@@ -6,17 +6,19 @@
 """
 Various methods and classes used in other part of the program.
 """
+
 import functools
 import re
 import types
 import uuid
 import warnings
-from datetime import UTC
 from datetime import datetime
 
 import numpy as np
 from quaternion import as_float_array
 from quaternion import as_quat_array
+
+from spectrochempy.utils.datetimeutils import UTC
 
 #
 # constants

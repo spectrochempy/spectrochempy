@@ -10,7 +10,6 @@ This module extend NDDataset with the import method for OPUS generated data file
 __all__ = ["read_opus"]
 __dataset_methods__ = __all__
 
-from datetime import UTC
 from datetime import datetime
 from datetime import timedelta
 
@@ -23,6 +22,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
+from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================

@@ -133,13 +133,13 @@ class NMF(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    alpha_W = tr.Float(
+    alpha_W = tr.Float(  # noqa: N815
         default_value=0.0,
         help="Constant that multiplies the regularization terms of `W` . Set it to zero"
         "(default) to have no regularization on `W` .",
     ).tag(config=True)
 
-    alpha_H = tr.Union(
+    alpha_H = tr.Union(  # noqa: N815
         (tr.Float(), tr.Enum(["same"])),
         default_value="same",
         help=(

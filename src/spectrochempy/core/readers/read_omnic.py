@@ -13,7 +13,6 @@ __dataset_methods__ = __all__
 
 import io
 import re
-from datetime import UTC
 from datetime import datetime
 from datetime import timedelta
 
@@ -26,6 +25,7 @@ from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import ur
+from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.file import fromfile

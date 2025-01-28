@@ -302,16 +302,11 @@ class IrisKernel(tr.HasTraits):
         w[-1] = w[0]
 
         kernel = kernel * w
-        if isinstance(K, str):
-            name = K + " kernel matrix"
-        else:
-            name = "kernel matrix"
+        name = K + " kernel matrix" if isinstance(K, str) else "kernel matrix"
         dims = ["y", "x"]
-        out = NDDataset(
+        return NDDataset(
             kernel, dims=dims, coordset=CoordSet(y=p, x=q), title=title, name=name
         )
-
-        return out
 
 
 @signature_has_configurable_traits
@@ -573,7 +568,7 @@ class IRIS(DecompositionAnalysis):
                 channels = self._channels
 
                 if self.qpsolver == "osqp":
-                    for j, channel in enumerate(channels.data):
+                    for j in range(len(channels.data)):
                         P = sparse.csc_matrix(P0 + 2 * lamda * S)
                         qprob = osqp.OSQP()
                         qprob.setup(P, q[j].squeeze(), A, lo, alpha=1.0, verbose=False)
@@ -740,8 +735,7 @@ class IRIS(DecompositionAnalysis):
         info_("Done.")
 
         self._lambdas.data = lambdas
-        _outfit = f, RSS, SM
-        return _outfit
+        return f, RSS, SM
 
     # ----------------------------------------------------------------------------------
     # Public methods and property
@@ -879,10 +873,9 @@ class IRIS(DecompositionAnalysis):
             index = [index]
 
         for i in index:
-            if X_hat.ndim == 3:  # if several lambda
-                X_hat_ = X_hat[i].squeeze()
-            else:
-                X_hat_ = X_hat  # if single lambda or no regularization
+            X_hat_ = (
+                X_hat[i].squeeze() if X_hat.ndim == 3 else X_hat
+            )  # if several lambda or single lambda/no regularization
 
             ax = super().plotmerit(X, X_hat_, **kwargs)
 
@@ -977,8 +970,7 @@ def _Smat(q):
     S[m - 1, m - 2] = -4
     S[m - 1, m - 1] = 6
 
-    S = ((q[m - 1] - q[0]) / (m - 1)) ** (-3) * S
-    return S
+    return ((q[m - 1] - q[0]) / (m - 1)) ** (-3) * S
 
 
 def _nearestPD(A, shift):  # pragma: no cover
@@ -1025,7 +1017,7 @@ def _nearestPD(A, shift):  # pragma: no cover
         mineig = np.min(np.real(np.linalg.eigvals(A3)))
         A3 += Ie * (-mineig * k**2 + spacing)
         k += 1
-        print("makes PD matrix")
+        info_("makes PD matrix")
     return A3
 
 

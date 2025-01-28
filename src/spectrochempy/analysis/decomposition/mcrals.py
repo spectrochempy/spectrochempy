@@ -6,6 +6,7 @@
 """
 This module implements the MCRALS class.
 """
+# ruff: noqa: N815
 
 # DEVNOTE:
 # API methods accessible as  scp.method or scp.class must be defined in __all__
@@ -96,7 +97,7 @@ class MCRALS(DecompositionAnalysis):
         5, help="Maximum number of successive non-converging iterations."
     ).tag(config=True)
 
-    solverConc = tr.Enum(
+    solverConc = tr.Enum(  # noqa: N815
         ["lstsq", "nnls", "pnnls"],
         default_value="lstsq",
         help=(
@@ -111,7 +112,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    nonnegConc = tr.Union(
+    nonnegConc = tr.Union(  # noqa: N815
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
         help=(
@@ -126,7 +127,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    unimodConc = tr.Union(
+    unimodConc = tr.Union(  # noqa: N815
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
         help=(
@@ -140,7 +141,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    unimodConcMod = tr.Enum(
+    unimodConcMod = tr.Enum(  # noqa: N815
         ["strict", "smooth"],
         default_value="strict",
         help=(
@@ -153,7 +154,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    unimodConcTol = tr.Float(
+    unimodConcTol = tr.Float(  # noqa: N815
         default_value=1.1,
         help=(
             r"""Tolerance parameter for :term:`unimodality`.
@@ -165,7 +166,7 @@ Correction is applied only if:
         ),
     ).tag(config=True)
 
-    monoDecConc = tr.List(
+    monoDecConc = tr.List(  # noqa: N815
         default_value=[],
         help=(
             r"""Monotonic decrease constraint on concentrations.
@@ -177,7 +178,7 @@ Correction is applied only if:
         ),
     ).tag(config=True)
 
-    monoDecTol = tr.Float(
+    monoDecTol = tr.Float(  # noqa: N815
         default_value=1.1,
         help=r"""Tolerance parameter for monotonic decrease.
 
@@ -544,9 +545,9 @@ and `St`.
 
         # deal with the callable that may have been serialized
         if self.getConc is not None and isinstance(self.getConc, str):
-            self.getConc = dill.loads(base64.b64decode(self.getConc))
+            self.getConc = dill.loads(base64.b64decode(self.getConc))  # noqa: S301
         if self.getSpec is not None and isinstance(self.getSpec, str):
-            self.getSpec = dill.loads(base64.b64decode(self.getSpec))
+            self.getSpec = dill.loads(base64.b64decode(self.getSpec))  # noqa: S301
 
     # ----------------------------------------------------------------------------------
     # Private methods
@@ -559,6 +560,7 @@ and `St`.
             return _nnls(St.T, self._X.data.T).T
         if self.solverConc == "pnnls":
             return _pnnls(St.T, self._X.data.T, nonneg=self.nonnegConc).T
+        return None
 
     def _solve_St(self, C):
         if self.solverSpec == "lstsq":
@@ -567,6 +569,7 @@ and `St`.
             return _nnls(C, self._X.data)
         if self.solverSpec == "pnnls":
             return _pnnls(C, self._X.data, nonneg=self.nonnegSpec)
+        return None
 
     def _guess_profile(self, profile):
         # Set or guess an initial profile.
@@ -830,7 +833,7 @@ and `St`.
     def _preprocess_as_Y_changed(self, change):
         # should be a tuple of profiles or only concentrations/spectra profiles
         profiles = change.new
-        if isinstance(profiles, (list, tuple)):
+        if isinstance(profiles, list | tuple):
             # we assume that the starting C and St are already computed
             # (for ex. from a previous run of fit)
             C, St = (item.data for item in profiles)
@@ -1079,7 +1082,7 @@ and `St`.
 
         # return _fit results
         self._components = St
-        _outfit = (
+        return (
             C,
             St,
             C_constrained,
@@ -1091,7 +1094,6 @@ and `St`.
             St_constrained_list,
             St_ls_list,
         )
-        return _outfit
 
     def _transform(self, X=None):
         # X is ignored for MCRALS
@@ -1285,8 +1287,7 @@ and `St`.
 def _lstsq(X, Y, rcond=None):
     # Least-squares solution to a linear matrix equation X @ W = Y
     # Return W
-    W = np.linalg.lstsq(X, Y, rcond)[0]
-    return W
+    return np.linalg.lstsq(X, Y, rcond)[0]
 
 
 def _nnls(X, Y, withres=False):
@@ -1304,10 +1305,12 @@ def _nnls(X, Y, withres=False):
     return (W, np.sqrt(residuals)) if withres else W
 
 
-def _pnnls(X, Y, nonneg=[], withres=False):
+def _pnnls(X, Y, nonneg=None, withres=False):
     # Least-squares  solution to a linear matrix equation X @ W = Y
     # with partial nonnegativity (indicated by the nonneg list of targets)
     # Return W with eventually some column non negative.
+    if nonneg is None:
+        nonneg = []
     nsamp, nfeat = X.shape
     nsamp, ntarg = Y.shape
     W = np.empty((nfeat, ntarg))
