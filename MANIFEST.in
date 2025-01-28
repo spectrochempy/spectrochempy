@@ -1,6 +1,0 @@
-prune docs
-prune tests
-prune .ci
-prune .github
-recursive-include scp_data *
-include README.md

@@ -9,6 +9,7 @@
 import pathlib
 
 import numpy as np
+import pkg_resources
 import pytest
 
 import spectrochempy
@@ -35,7 +36,7 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
     for f in list(cwd.glob("**/*.jdx")):
         f.unlink()
     for f in list(cwd.glob("**/*.json")):
-        if f.name != ".zenodo.json":
+        if f.name != "zenodo.json":
             f.unlink()
     for f in list(cwd.glob("**/*.log")):
         f.unlink()
@@ -324,7 +325,6 @@ def NMR_dataset_2D():
 
 @pytest.fixture(scope="function")
 def JDX_2D():
-
     jdx = """##TITLE=IR_2D
     ##JCAMP-DX=5.01
     ##DATA TYPE=LINK
@@ -418,7 +418,6 @@ def JDX_2D():
 # --------------------------------------------------------------------------------------
 @pytest.fixture(scope="function")
 def simple_project():
-
     proj = Project(
         # subprojects
         Project(name="P350", label=r"$\mathrm{M_P}\,(623\,K)$"),

@@ -42,5 +42,5 @@ Deprecations
 ~~~~~~~~~~~~
 
 * Analysis object methods such as  `reconstruct` and `reduce` are now deprecated.
-  Use `inverse_transform` and `transform`\ ,instead, in line with
-  the method naming in `sklearn`\ .
+  Use `inverse_transform` and `transform`,instead, in line with
+  the method naming in `sklearn`.

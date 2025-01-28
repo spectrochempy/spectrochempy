@@ -11,6 +11,7 @@ import spectrochempy as scp
 
 
 def test_show_versions() -> None:
+    print(scp.show_versions)
     f = io.StringIO()
     scp.show_versions(file=f)
     assert "INSTALLED PACKAGES" in f.getvalue()

@@ -51,7 +51,7 @@ The `NDDataset` is the main object use by `SpectroChemPy` .
 Like `numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and subject to mathematical operations.
 
 But, in addition, `NDDataset` may have units, can be masked and each dimension can also have coordinated with units.
-This make `NDDataset` aware of unit compatibility, *e.g.,*\ , for binary operation such as additions or subtraction or
+This make `NDDataset` aware of unit compatibility, *e.g.,*, for binary operation such as additions or subtraction or
 during the application of mathematical operations. In addition or in replacement of numerical data for coordinates,
 NDDataset can also have labeled coordinates where labels can be different kinds of objects (strings, datetime, numpy
 nd.ndarray or other NDDatasets, etc...).
@@ -70,8 +70,8 @@ Coordinates-related objects
 ===========================
 
 `NDDataset` in `SpectroChemPy` in contrast to numpy nd-arrays can have coordinates for each dimension.
-The individual coordinates are represented by a specific object: `Coord`\ .
-All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`\ .
+The individual coordinates are represented by a specific object: `Coord`.
+All coordinates of a `NDDataset` are grouped in a particular object: `CoordSet`.
 
 .. autosummary::
     :nosignatures:

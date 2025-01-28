@@ -49,9 +49,9 @@ jobs:
       - name: Install Conda environment with Micromamba
         uses: mamba-org/setup-micromamba@v1
         with:
-          environment-file: environment_dev.yml
+          environment-file: environments/environment_docs.yml
           environment-name: scpy_docs
-          condarc-file: .ci/condarc.yml
+          condarc-file: .github/workflows/data/condarc.yml
           create-args: >-
             python=3.11
           cache-environment: true
@@ -67,11 +67,11 @@ jobs:
 
       - name: Set up version environment variable
         run: |
-          bash .ci/set_env_var.sh
+          python3 .github/workflows/scripts/set_env_var.py
 
       # - name: Update version in release notes
       #  run: |
-      #    python .ci/update_version_and_release_notes.py ${{ env.VERSIONSTRING }}
+      #    python .github/workflows/scripts/update_version_and_release_notes.py ${{ env.VERSIONSTRING }}
 
       # - name: Setup timezone
       #  uses: MathRobin/timezone-action@v1.1
@@ -91,10 +91,19 @@ jobs:
           git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/html
 
           echo "Recreating docs"
-          python docs/make.py -v -j1 html
+          python docs/make.py -j1 html
 
+      # Upload build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: |
+            build/html/
+
+          retention-days: 5
       - name: Deployment
-        if: (github.event_name != 'pull_request')
+        if: (github.event_name != 'pull_request' && !github.event.act)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages

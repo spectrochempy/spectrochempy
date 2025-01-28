@@ -6,9 +6,7 @@
 # ======================================================================================
 # flake8: noqa
 
-""" Tests for the ndplugin module
-
-"""
+"""Tests for the ndplugin module"""
 
 import pathlib
 
@@ -23,9 +21,16 @@ irdatadir = pathclean(prefs.datadir) / "irdata"
 nmrdatadir = pathclean(prefs.datadir) / "nmrdata" / "bruker" / "tests" / "nmr"
 cwd = pathlib.Path.cwd()
 
+try:
+    from spectrochempy.core import dialogs
+except ImportError:
+    pytest.skip("dialogs not available with act", allow_module_level=True)
+
 
 # Basic
 # --------------------------------------------------------------------------------------
+
+
 def test_ndio_generic(NMR_dataset_1D):
     nmr = NMR_dataset_1D
     assert nmr.directory == nmrdatadir

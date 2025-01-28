@@ -24,7 +24,7 @@ Breaking changes
 * The behavior of Coord has been slightly modified. During initialisation
   of a Coord object, a try is given to convert the `data` to a linear array, with
   values evenly spaced. If this is not possible, the data are kept as they are but rounded
-  to a number of significant digits (given by the parameter `sigdigits`\ ).
+  to a number of significant digits (given by the parameter `sigdigits`).
   If the data are linear already, nothing is modified.
 * The rounding of the data is now done in the `~spectrochempy.Coord` class automatically to at least
   2 decimals everytime the `data` are modified and during Coord initialisation,

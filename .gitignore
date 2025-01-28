@@ -57,7 +57,8 @@ thumb.png
 *.pct.md
 
 # VS
-.vscode
+!.vscode/
+!.vscode/settings.json
 
 # caches
 __pycache__/
@@ -125,7 +126,7 @@ essai.py
 *dev*.rst
 coverage.json
 
-scp_data/stylesheets/mydefault.mplstyle
+data/stylesheets/mydefault.mplstyle
 _ressources
 _tools
 .venv

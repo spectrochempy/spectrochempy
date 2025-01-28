@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=64", "setuptools-scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,111 +7,170 @@ name = "spectrochempy"
 description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
 readme = "README.md"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT" }
 authors = [
-    { name = "Arnaud Travert", email = "contact@spectrochempy.fr" },
-    { name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr" }
+  { name = "Arnaud Travert", email = "contact@spectrochempy.fr" },
+  { name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr" },
 ]
 keywords = ["spectroscopy", "chemistry", "data analysis"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Topic :: Utilities",
-    "Topic :: Scientific/Engineering",
-    "Topic :: Software Development :: Libraries",
-    "Intended Audience :: Science/Research",
-    "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+  "Development Status :: 3 - Alpha",
+  "Topic :: Utilities",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Libraries",
+  "Intended Audience :: Science/Research",
+  "License :: CeCILL-B Free Software License Agreement (CECILL-B)",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-	"brukeropusreader",
-	 "colorama",
-	 "dill",
-	 "docrep",
-	 "ipython",
-	 "jinja2",
-	 "numpy",
-	 "matplotlib",
-	 "osqp",
-	 "pint",
-	 "pyyaml",
-	 "numpy-quaternion",
-	 "requests",
-	 "scikit-learn",
-	 "setuptools_scm",
-	 "tzlocal",
-	 "xlrd"
+  "brukeropusreader",
+  "colorama",
+  "dill",
+  "docrep",
+  "ipython",
+  "jinja2",
+  "numpy>=1.6.0",
+  "matplotlib>=3.5.0",
+  "osqp",
+  "pint",
+  "pyyaml",
+  "numpy-quaternion",
+  "requests",
+  "scikit-learn",
+  "setuptools-scm>=8",
+  "tzlocal",
+  "xlrd",
 ]
+
 [project.optional-dependencies]
 dev = [
-	"coverage",
-	 "pytest",
-	 "pytest-doctestplus",
-	 "pytest-flake8",
-	 "pytest-mock",
-	 "pyfakefs",
-	 "pep8-naming",
-	 "xarray",
-	 "ipywidgets",
-	 "cffconvert",
-	 "numpydoc",
-	 "flake8",
-	 "black",
-	 "boa",
-	 "isort",
-	 "json5",
-	 "jupytext",
-	 "jupyter_sphinx",
-	 "mamba",
-	 "nbconvert",
-	 "nbsphinx",
-	 "pypandoc",
-	 "pre-commit",
-	 "scikit-image",
-	 "sphinx",
-	 "sphinx-copybutton",
-	 "sphinx-gallery",
-	 "sphinx_rtd_theme",
-	 "sphinxcontrib-bibtex"
+  # various
+  "toml",
+  "ruff>=0.2.0",
+  "pre-commit",
+  # interactive
+  "jupyter",
+  "jupyterlab",
+  "ipykernel",
+  "ipyparallel",
+  "jupyterlab",
+  "nodejs",
+  "jupyter_server",
+  # test
+  "coverage",
+  "ipywidgets",
+  "pyfakefs",
+  "pytest",
+  "pytest-cov",
+  "pytest-doctestplus",
+  "pytest-ruff",
+  "pytest-mock",
+]
+interactive = [
+  "jupyterlab",
+  "ipykernel",
+  "ipyparallel",
+  "jupyterlab",
+  "nodejs",
+  "jupyter-server",
 ]
 test = [
-	"coverage",
-	 "pytest",
-	 "pytest-doctestplus",
-	 "pytest-flake8",
-	 "pytest-mock",
-	 "pyfakefs",
-	 "pep8-naming",
-	 "xarray",
-	 "ipywidgets",
-	 "cffconvert",
-	 "numpydoc"
+  "coverage",
+  "ipywidgets",
+  "pyfakefs",
+  "pytest",
+  "pytest-doctestplus",
+  "pytest-mock",
+  "numpydoc",
 ]
-cantera = [
-    "cantera"
+docs = [
+  #"cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
+  "ipywidgets",
+  "jupytext",
+  "nbsphinx",
+  "numpydoc",
+  "pypandoc",
+  "sphinx",
+  "sphinx-copybutton",
+  "sphinx-gallery",
+  "sphinx-rtd-theme",
+  "sphinxcontrib-bibtex",
+  "json5",
 ]
+cantera = ["cantera"]
 
 [project.urls]
 homepage = "https://www.spectrochempy.fr"
 repository = "https://github.com/spectrochempy/spectrochempy"
+documentation = "https://www.spectrochempy.fr/latest"
 issues = "https://github.com/spectrochempy/spectrochempy/issues"
 
 [project.scripts]
 show-versions = "spectrochempy.scripts.show_versions:main"
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"spectrochempy.data" = [
+  "fonts/*",
+  "stylesheets/*",
+  "databases/*",
+  "*.json",
+  "*.cff",
+]
+
 [tool.setuptools_scm]
-version_scheme = "post-release"
 local_scheme = "dirty-tag"
 
-[tool.autoflake]
-check = true
-ignore-init-module-imports = true
-in-place = true
-exclude = ["docs/*", "tests/*", "docs/whatsnew/latest.rst", "docs/whatsnew/index.rst"]
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = "py312"
 
-[tool.isort]
-profile = "black"
-skip_glob = ["docs/*"]
+[tool.ruff.lint]
+# Enable Pyflakes, pycodestyle, isort
+select = ["E", "F", "I", "N", "UP", "S", "B", "C4", "T20", "RET", "SIM", "W"]
+ignore = [
+  "E402", # Module level import not at top of file
+  "E501", # Line too long
+  "E731", # Do not assign a lambda expression
+  "N801", # Class name should use CapWords convention
+  "N802", # Function name should be lowercase
+  "N803", # Argument name should be lowercase
+  "N805", # First argument of a method should be named 'self'
+  "N806", # Variable in function should be lowercase
+]
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+  ".eggs",
+  ".git",
+  ".ruff_cache",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "build",
+  "dist",
+  "docs/sphinxext",
+  "~*",
+  "tests",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["spectrochempy"]
+force-single-line = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

@@ -31,17 +31,8 @@ checks:
     config:
       threshold: 20
 
+include_patterns:
+  - "src/"
+
 exclude_patterns:
-  - ".ci/"
-  - ".git/"
-  - ".eggs/"
-  - ".github/"
-  - ".conda/"
-  - "docker/"
-  - "docs/"
-  - "env"
-  - "scp_data"
-  - "*.egg-info/"
-  - "tests/"
-  - "build/"
-  - "scripts/"
+  - src/spectrochempy/extern/
