@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -20,12 +19,14 @@ __all__ = [
 __dataset_methods__ = __all__
 
 import numpy as np
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
+from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.docreps import add_docstring  # , deprecated
 from spectrochempy.utils.misc import is_sequence
-from spectrochempy.utils.plots import make_label, plot_method
+from spectrochempy.utils.plots import make_label
+from spectrochempy.utils.plots import plot_method
 
 _PLOT1D_DOC = """\
 ax : Axe, optional
@@ -224,7 +225,7 @@ def plot_multiple(
     # do not save during this plots, nor apply any commands
     # we will make this when all plots will be done
 
-    output = kwargs.get("output", None)
+    output = kwargs.get("output")
     kwargs["output"] = None
     commands = kwargs.get("commands", [])
     kwargs["commands"] = []
@@ -344,7 +345,7 @@ def plot_1D(dataset, method=None, **kwargs):
         new = new.squeeze()
 
     # is that a plot with twin axis
-    is_twinx = kwargs.get("twinx", None) is not None
+    is_twinx = kwargs.get("twinx") is not None
 
     # if dataset is complex it is possible to overlap
     # with the imaginary component
@@ -439,7 +440,7 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # plot_lines
     # ------------------------------------------------------------------------
-    label = kwargs.get("label", None)
+    label = kwargs.get("label")
     if scatter and pen:
         (line,) = ax.plot(
             xdata,
@@ -581,7 +582,7 @@ def plot_1D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     # x label
 
-    xlabel = kwargs.get("xlabel", None)
+    xlabel = kwargs.get("xlabel")
     if show_x_points:
         xlabel = "data points"
     if not xlabel:
@@ -602,7 +603,7 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # z label
 
-    zlabel = kwargs.get("zlabel", kwargs.get("ylabel", None))
+    zlabel = kwargs.get("zlabel", kwargs.get("ylabel"))
     if not zlabel:
         zlabel = make_label(new, "z")
 
@@ -622,7 +623,7 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # display a title
     # ------------------------------------------------------------------------
-    title = kwargs.get("title", None)
+    title = kwargs.get("title")
     if title:
         ax.set_title(title)
     elif kwargs.get("plottitle", False):

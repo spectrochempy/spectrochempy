@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 import os
 
@@ -18,7 +17,6 @@ from spectrochempy.utils.plots import show
 
 # @pytest.mark.skip
 def test_plot_1D():
-
     dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
     # get first 1D spectrum
@@ -43,7 +41,6 @@ def test_plot_1D():
 
 
 def test_issue_375():
-
     # minimal example
     n_pc = 3
 

@@ -1,25 +1,25 @@
-# -*- coding: utf-8 -*-
 # %%
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 """
 MCR-ALS example (adapted from Jaumot et al. 2005)
 =================================================
 
 In this example, we perform the MCR ALS optimization of a dataset
-corresponding to a HPLC-DAD run, from :cite:t:`jaumot:2005` and :cite:t:`jaumot:2015`\ .
+corresponding to a HPLC-DAD run, from :cite:t:`jaumot:2005` and :cite:t:`jaumot:2015`.
 
 This dataset (and others) can be downloaded from the
 `Multivariate Curve Resolution Homepage
-<https://mcrals.wordpress.com/download/example-data-sets>`_\ .
+<https://mcrals.wordpress.com/download/example-data-sets>`_.
 
 For the user convenience, this dataset is present in the test data directory
-`scp.preferences.datadir` of SpectroChemPy as ``als2004dataset.MAT``\ .
+`scp.preferences.datadir` of SpectroChemPy as ``als2004dataset.MAT``.
 """
+
 # %%
 # Import the spectrochempy API package
 import spectrochempy as scp
@@ -28,8 +28,8 @@ import spectrochempy as scp
 # Loading the example dataset
 # ---------------------------
 #
-# The file type (matlab) is inferred from the extension ``.mat``\ , so we
-# can use the generic API function `read`\ .  Alternatively, one can be more
+# The file type (matlab) is inferred from the extension ``.mat``, so we
+# can use the generic API function `read`.  Alternatively, one can be more
 # specific by using the `read_matlab` function. Both have exactly the same behavior.
 datasets = scp.read("matlabdata/als2004dataset.MAT")
 
@@ -40,7 +40,7 @@ for ds in datasets:
     print(f"{ds.name} : {ds.shape}")
 
 # %%
-# We are interested in the last dataset (``"m1"``\ ) that contains a single HPLS-DAD run
+# We are interested in the last dataset (``"m1"``) that contains a single HPLS-DAD run
 # ``(51x96)``  dataset.
 #
 # As usual, the 51 rows correspond to the ``time axis`` of the HPLC run, and the 96
@@ -65,7 +65,7 @@ _ = guess.plot()
 # Create a MCR-ALS object
 # -----------------------
 #
-# We first create a MCR-ALS object named here ``mcr``\ .
+# We first create a MCR-ALS object named here ``mcr``.
 #
 # The `log_level` option can be set to ``"INFO"`` to get verbose ouput of
 # the MCR-ALS optimization steps.
@@ -90,9 +90,9 @@ _ = mcr.C.T.plot()
 _ = mcr.St.plot()
 
 # %%
-# Finally, plots the reconstructed dataset (:math:`\hat{X} = C.S^T`\ )
+# Finally, plots the reconstructed dataset (:math:`\hat{X} = C.S^T`)
 # *vs.* original dataset
-# (:math:`X`\ ) as well as the residuals (:math:`E`\ ) for few spectra.
+# (:math:`X`) as well as the residuals (:math:`E`) for few spectra.
 #
 # The fit is good and comparable to the original paper (:cite:t:`jaumot:2005`).
 _ = mcr.plotmerit(nb_traces=5)

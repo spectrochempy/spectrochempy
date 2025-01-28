@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -17,8 +16,11 @@ from warnings import warn
 
 import numpy as np
 
-from spectrochempy.core.dataset.nddataset import Coord, NDDataset
-from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
+from spectrochempy.core.dataset.nddataset import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
@@ -29,8 +31,8 @@ _docstring.delete_params("Importer.see_also", "read_quadera")
 
 @_docstring.dedent
 def read_quadera(*paths, **kwargs):
-    """
-    Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file with extension :file:`.asc`\ .
+    r"""
+    Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file with extension :file:`.asc`.
 
     Parameters
     ----------
@@ -42,9 +44,9 @@ def read_quadera(*paths, **kwargs):
 
     Other Parameters
     ----------------
-    timestamp: `bool`\ , optional, default: `True`
+    timestamp: `bool`, optional, default: `True`
         Returns the acquisition timestamp as `Coord`.
-        If set to `False`\ , returns the time relative to the acquisition time of the
+        If set to `False`, returns the time relative to the acquisition time of the
         data
     %(Importer.other_parameters)s
 

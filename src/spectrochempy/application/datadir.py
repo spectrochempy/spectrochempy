@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -12,7 +11,8 @@ from pathlib import Path
 
 import traitlets as tr
 
-from spectrochempy.utils.file import find_or_create_spectrochempy_dir, pathclean
+from spectrochempy.utils.file import find_or_create_spectrochempy_dir
+from spectrochempy.utils.file import pathclean
 
 
 # ======================================================================================

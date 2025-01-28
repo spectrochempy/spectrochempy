@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -32,21 +31,19 @@ if pint_version < 24:
     )
 
 if pint_version < 24:
-
     from functools import wraps
     from warnings import warn
 
-    from pint import (
-        Context,
-        DimensionalityError,
-        Quantity,
-        Unit,
-        UnitRegistry,
-        __version__,
-        formatting,
-        set_application_registry,
-    )
-    from pint.facets.plain import ScaleConverter, UnitDefinition
+    from pint import Context
+    from pint import DimensionalityError
+    from pint import Quantity
+    from pint import Unit
+    from pint import UnitRegistry
+    from pint import __version__
+    from pint import formatting
+    from pint import set_application_registry
+    from pint.facets.plain import ScaleConverter
+    from pint.facets.plain import UnitDefinition
     from pint.util import UnitsContainer
 
     # ======================================================================================
@@ -204,17 +201,13 @@ if pint_version < 24:
         p = p.replace(r"\[", "").replace(r"\]", "").replace(r"\ ", " ")
         return p
 
-    setattr(Quantity, "_repr_html_", _repr_html_)
-    setattr(Quantity, "_repr_latex_", lambda cls: "$" + cls.__format__("~L") + "$")
+    Quantity._repr_html_ = _repr_html_
+    Quantity._repr_latex_ = lambda cls: "$" + cls.__format__("~L") + "$"
 
     # TODO: work on this latex format
 
-    setattr(
-        Unit,
-        "scaling",
-        property(
-            lambda u: u._REGISTRY.Quantity(1.0, u._units).to_base_units().magnitude
-        ),
+    Unit.scaling = property(
+        lambda u: u._REGISTRY.Quantity(1.0, u._units).to_base_units().magnitude
     )
 
     # --------------------------------------------------------------------------------------
@@ -259,7 +252,7 @@ if pint_version < 24:
 
         return formatting.format_unit(units, spec, registry=self._REGISTRY)
 
-    setattr(Unit, "__format__", __format__)
+    Unit.__format__ = __format__
 
     if globals().get("U_", None) is None:
         # filename = resource_filename(PKG, 'spectrochempy.txt')
@@ -390,35 +383,31 @@ if pint_version < 24:
             c.defaults["larmor"] = larmor
 
 else:  # pint version >= 24
-
     from functools import wraps
     from warnings import warn
 
-    from pint import (
-        Context,
-        DimensionalityError,
-        Unit,
-        UnitRegistry,
-        set_application_registry,
-    )
+    from pint import Context
+    from pint import DimensionalityError
+    from pint import Unit
+    from pint import UnitRegistry
+    from pint import set_application_registry
 
     # utilities
-    from pint.delegates.formatter._compound_unit_helpers import (
-        localize_per,
-        prepare_compount_unit,
-    )
-    from pint.delegates.formatter._format_helpers import formatter, pretty_fmt_exponent
+    from pint.delegates.formatter._compound_unit_helpers import localize_per
+    from pint.delegates.formatter._compound_unit_helpers import prepare_compount_unit
+    from pint.delegates.formatter._format_helpers import formatter
+    from pint.delegates.formatter._format_helpers import pretty_fmt_exponent
 
     # formatters to be  subclassed
     from pint.delegates.formatter.full import FullFormatter
     from pint.delegates.formatter.html import HTMLFormatter
-    from pint.delegates.formatter.latex import LatexFormatter, latex_escape
-    from pint.delegates.formatter.plain import (
-        CompactFormatter,
-        DefaultFormatter,
-        PrettyFormatter,
-    )
-    from pint.facets.plain import ScaleConverter, UnitDefinition
+    from pint.delegates.formatter.latex import LatexFormatter
+    from pint.delegates.formatter.latex import latex_escape
+    from pint.delegates.formatter.plain import CompactFormatter
+    from pint.delegates.formatter.plain import DefaultFormatter
+    from pint.delegates.formatter.plain import PrettyFormatter
+    from pint.facets.plain import ScaleConverter
+    from pint.facets.plain import UnitDefinition
     from pint.util import UnitsContainer
 
     ####################################################################################
@@ -510,7 +499,7 @@ else:  # pint version >= 24
                 registry=self._registry,
             )
 
-            if babel_kwds.get("locale", None):
+            if babel_kwds.get("locale"):
                 length = babel_kwds.get("length") or (
                     "short" if "~" in uspec else "long"
                 )
@@ -581,7 +570,6 @@ else:  # pint version >= 24
     ####################################################################################
 
     if globals().get("ur", None) is None:
-
         ur = UnitRegistry(on_redefinition="ignore")
 
         ur = UnitRegistry()

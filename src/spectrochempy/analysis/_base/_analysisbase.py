@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -21,10 +20,13 @@ from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
-from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset, deprecated
+from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.exceptions import NotFittedError
-from spectrochempy.utils.plots import NBlue, NGreen, NRed
+from spectrochempy.utils.plots import NBlue
+from spectrochempy.utils.plots import NGreen
+from spectrochempy.utils.plots import NRed
 from spectrochempy.utils.traits import NDDatasetType
 
 
@@ -41,14 +43,14 @@ class AnalysisConfigurable(BaseConfigurable):
     Parameters
     ----------
     %(BaseConfigurable.parameters.log_level)s
-    warm_start : `bool`\ , optional, default: `False`
+    warm_start : `bool`, optional, default: `False`
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
         it may be possible to reuse previous model learned from the previous parameter
         value, saving time.
 
-        When `warm_start` is `True`\ , the existing fitted model attributes is used to
-        initialize the new model in a subsequent call to `fit`\ .
+        When `warm_start` is `True`, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to `fit`.
     """
     )
 
@@ -123,7 +125,7 @@ class AnalysisConfigurable(BaseConfigurable):
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
             Training data.
         Y : any
             Depends on the model.
@@ -135,7 +137,7 @@ class AnalysisConfigurable(BaseConfigurable):
 
         See Also
         --------
-        fit_transform :  Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``\ .
+        fit_transform :  Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``.
         fit_reduce : Alias of `fit_transform` (Deprecated).
         """
         self._fitted = False  # reinit this flag
@@ -200,8 +202,7 @@ class AnalysisConfigurable(BaseConfigurable):
             X = self._restore_masked_data(X, axis="both")
         if self._is_dataset or self._output_type == "NDDataset":
             return X
-        else:
-            return np.asarray(X)
+        return np.asarray(X)
 
 
 # ======================================================================================
@@ -309,11 +310,11 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def transform(self, X=None, **kwargs):
         r"""
-        Apply dimensionality reduction to `X`\ .
+        Apply dimensionality reduction to `X`.
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`), optional
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
@@ -322,7 +323,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         Returns
         -------
         `NDDataset`
-            Dataset with shape (:term:`n_observations`\ , :term:`n_components`\ ).
+            Dataset with shape (:term:`n_observations`, :term:`n_components`).
 
         Other Parameters
         ----------------
@@ -376,7 +377,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X_transform : array-like of shape (:term:`n_observations`\ , :term:`n_components`\ ), optional
+        X_transform : array-like of shape (:term:`n_observations`, :term:`n_components`), optional
             Reduced `X` data, where `n_observations` is the number of observations
             and `n_components` is the number of components. If `X_transform` is not
             provided, a transform of `X` provided in `fit` is performed first.
@@ -385,7 +386,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         Returns
         -------
         `NDDataset`
-            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
+            Dataset with shape (:term:`n_observations`, :term:`n_features`).
 
         Other Parameters
         ----------------
@@ -434,7 +435,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def fit_transform(self, X, Y=None, **kwargs):
         r"""
-        Fit the model with `X` and apply the dimensionality reduction on `X`\ .
+        Fit the model with `X` and apply the dimensionality reduction on `X`.
 
         Parameters
         ----------
@@ -478,7 +479,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typey="components")
     def get_components(self, n_components=None):
         r"""
-        Return the component's dataset: (selected :term:`n_components`\ , :term:`n_features`\ ).
+        Return the component's dataset: (selected :term:`n_components`, :term:`n_features`).
 
         Parameters
         ----------
@@ -489,7 +490,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         Returns
         -------
         `~spectrochempy.core.dataset.nddataset.NDDataset`
-            Dataset with shape (:term:`n_components`\ , :term:`n_features`\ )
+            Dataset with shape (:term:`n_components`, :term:`n_features`)
         """
         if n_components is None or n_components > self._n_components:
             n_components = self._n_components
@@ -503,7 +504,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
     def components(self):
         r"""
-        `NDDataset` with components in feature space (:term:`n_components`\ , :term:`n_features`\ ).
+        `NDDataset` with components in feature space (:term:`n_components`, :term:`n_features`).
 
         See Also
         --------
@@ -518,8 +519,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         """
         if self._fitted:
             return self._n_components
-        else:
-            raise NotFittedError("n_components")
+        raise NotFittedError("n_components")
 
     # ----------------------------------------------------------------------------------
     # Plot methods
@@ -527,7 +527,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     @_docstring.dedent
     def plotmerit(self, X=None, X_hat=None, **kwargs):
         r"""
-        Plot the input (`X`\ ), reconstructed (`X_hat`\ ) and residuals.
+        Plot the input (`X`), reconstructed (`X_hat`) and residuals.
 
         :math:`X` and :math:`\hat{X}` can be passed as arguments. If not,
         the `X` attribute is used for :math:`X`\ and :math:`\hat{X}`\ is computed by
@@ -535,10 +535,10 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : `NDDataset`\ , optional
+        X : `NDDataset`, optional
             Original dataset. If is not provided (default), the `X`
-            attribute is used and X_hat is computed using `inverse_transform`\ .
-        X_hat : `NDDataset`\ , optional
+            attribute is used and X_hat is computed using `inverse_transform`.
+        X_hat : `NDDataset`, optional
             Inverse transformed dataset. if `X` is provided, `X_hat`
             must also be provided as compuyed externally.
         %(kwargs)s
@@ -557,9 +557,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
             and :const:`NRed`  (which are colorblind friendly).
         offset : `float`, optional, default: `None`
             Specify the separation (in percent) between the
-            :math:`X` , :math:`X_hat` and :math:`E`\ .
-        nb_traces : `int` or ``'all'``\ , optional
-            Number of lines to display. Default is ``'all'``\ .
+            :math:`X` , :math:`X_hat` and :math:`E`.
+        nb_traces : `int` or ``'all'``, optional
+            Number of lines to display. Default is ``'all'``.
         **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the `X` dataset.
         """
@@ -663,12 +663,12 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None)
     @_docstring.dedent
     def predict(self, X=None):
-        """
+        r"""
         Predict targets of given observations.
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`), optional
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
@@ -676,7 +676,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Returns
         -------
         `NDDataset`
-            Datasets with shape (:term:`n_observations`\ ,) or ( :term:`n_observations`\ , :term:`n_targets`\ ).
+            Datasets with shape (:term:`n_observations`,) or ( :term:`n_observations`, :term:`n_targets`).
         """
         if not self._fitted:
             raise NotFittedError()
@@ -696,25 +696,25 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         The coefficient of determination :math:`R^2` is defined as
         :math:`(1 - \frac{u}{v})` , where :math:`u` is the residual
         sum of squares ``((y_true - y_pred)** 2).sum()`` and :math:`v`
-        is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()``\ .
+        is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()``.
         The best possible score is ``1.0`` and it can be negative (because the
         model can be arbitrarily worse). A constant model that always predicts
-        the expected value of `Y`\ , disregarding the input features, would get
+        the expected value of `Y`, disregarding the input features, would get
         a :math:`R^2` score of 0.0.
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`), optional
             Test samples. If not given, the X attribute is used.
-        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_targets`\ ), optional
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_targets`), optional
             True values for `X`.
-        sample_weight : `NDDataset` or :term:`array-like` of shape (:term:`n_samples`\ ,), default: `None`
+        sample_weight : `NDDataset` or :term:`array-like` of shape (:term:`n_samples`,), default: `None`
             Sample weights.
 
         Returns
         -------
         `float`
-            :math:`R^2` of `predict`\ (X) w.r.t `Y`\ .
+            :math:`R^2` of `predict`\ (X) w.r.t `Y`.
         """
         if not self._fitted:
             raise NotFittedError()
@@ -740,15 +740,15 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     @_docstring.dedent
     def transform(self, X=None, Y=None, both=False, **kwargs):
         r"""
-        Apply dimensionality reduction to `X`\ and `Y`\ .
+        Apply dimensionality reduction to `X`\ and `Y`.
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ ), optional
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`), optional
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
-        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_targets`\ ), optional
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_targets`), optional
             New data, where :term:`n_targets` is the number of variables to predict.
             if not provided, the input dataset of the `fit` method will be used.
         both : `bool`, default: `False`
@@ -758,7 +758,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Returns
         -------
         x_score, y_score: `NDDataset` or tuple of `NDDataset`
-            Datasets with shape (:term:`n_observations`\ , :term:`n_components`\ ).
+            Datasets with shape (:term:`n_observations`, :term:`n_components`).
         """
         if not self._fitted:
             raise NotFittedError()
@@ -773,8 +773,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         if both or (Y is not None):
             return self._transform(newX, newY)
-        else:
-            return self._transform(newX, None)
+        return self._transform(newX, None)
 
     # Get doc sections for reuse in subclass
     _docstring.get_sections(
@@ -789,7 +788,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     def inverse_transform(
         self, X_transform=None, Y_transform=None, both=False, **kwargs
     ):
-        """
+        r"""
         Transform data back to its original space.
 
         In other words, return reconstructed `X` and `Y` whose reduce/transform would
@@ -797,11 +796,11 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         Parameters
         ----------
-        X_transform : array-like of shape (:term:`n_observations`\ , :term:`n_components`\ ), optional
+        X_transform : array-like of shape (:term:`n_observations`, :term:`n_components`), optional
             Reduced `X` data, where `n_observations` is the number of observations
             and `n_components` is the number of components. If `X_transform` is not
             provided, a transform of `X` provided in `fit` is performed first.
-        Y_transform : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , `n_components`\ ), optional
+        Y_transform : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, `n_components`), optional
             New data, where :term:`n_targets` is the number of variables to predict. If `Y_transform` is not
             provided, a transform of `Y` provided in `fit` is performed first.
         %(kwargs)s
@@ -809,7 +808,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Returns
         -------
         `NDDataset`
-            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
+            Dataset with shape (:term:`n_observations`, :term:`n_features`).
 
         Other Parameters
         ----------------
@@ -837,9 +836,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         if Y_transform is None:
             X = self._inverse_transform(X_transform)
             return X
-        else:
-            X, Y = self._inverse_transform(X_transform, X_transform)
-            return X, Y
+        X, Y = self._inverse_transform(X_transform, X_transform)
+        return X, Y
 
     _docstring.get_sections(
         _docstring.dedent(inverse_transform.__doc__),
@@ -850,15 +848,15 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
     @_docstring.dedent
     def fit_transform(self, X, Y, both=False):
-        """
-        Fit the model with `X` and `Y` and apply the dimensionality reduction on `X` and optionally on `Y`\ .
+        r"""
+        Fit the model with `X` and `Y` and apply the dimensionality reduction on `X` and optionally on `Y`.
 
         Parameters
         ----------
         %(analysis_fit.parameters.X)s
-        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
             Training data.
-        both : `bool`\ , optional
+        both : `bool`, optional
             Whether to apply the dimensionality reduction on `X` and `Y` .
 
         Returns
@@ -869,8 +867,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         self.fit(X, Y)
         if both:
             return self.transform(X, Y)
-        else:
-            return self.transform(X)
+        return self.transform(X)
 
     # ----------------------------------------------------------------------------------
     # Plot methods
@@ -884,7 +881,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         **kwargs,
     ):
         r"""
-        Plot the predicted (:math:`\hat{Y}`\ ) vs measured (:math:`Y`\ ) values.
+        Plot the predicted (:math:`\hat{Y}`) vs measured (:math:`Y`) values.
 
         :math:`Y` and :math:`\hat{Y}` can be passed as arguments. If not,
         the `Y` attribute is used for :math:`Y`\ and :math:`\hat{Y}`\ is computed by
@@ -892,13 +889,13 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         Parameters
         ----------
-        Y : `NDDataset`\ , optional
+        Y : `NDDataset`, optional
             Measured values. If is not provided (default), the `Y`
-            attribute is used and Y_hat is computed using `inverse_transform`\ .
-        Y_hat : `NDDataset`\ , optional
+            attribute is used and Y_hat is computed using `inverse_transform`.
+        Y_hat : `NDDataset`, optional
             Predicted values. if `Y` is provided, `Y_hat` must also be provided as
             computed externally.
-        clear : `bool`\ , optional
+        clear : `bool`, optional
             Whether to plot on a new axes. Default is True.
         %(kwargs)s
 
@@ -947,7 +944,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
               and instantiated.
               This parameter is ignored if c is RGB(A).
 
-        vmin, vmax : `float`\ , optional
+        vmin, vmax : `float`, optional
             When using scalar data and no explicit norm, vmin and vmax define the data
             range that the colormap covers.
             By default, the colormap covers the complete value range of the supplied
@@ -955,7 +952,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             vmin/vmax when a norm instance is given (but using a str norm name together
             with vmin/vmax is acceptable).
             This parameter is ignored if c is RGB(A).
-        alpha : `float`\ , default: 0.5
+        alpha : `float`, default: 0.5
             The alpha blending value, between 0 (transparent) and 1 (opaque).
         linewidths : `float` or array-like, default: rcParams["lines.linewidth"] (default: 1.5)
             The linewidth of the marker edges. Note: The default edgecolors is 'face'.
@@ -968,7 +965,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             For non-filled markers, edgecolors is ignored. Instead, the color is
             determined like with 'face',
             i.e. from c, colors, or facecolors.
-        plotnonfinite : `bool`\ , default: False
+        plotnonfinite : `bool`, default: False
             Whether to plot points with nonfinite c (i.e. inf, -inf or nan).
             If True the points are drawn with the bad
             colormap color (see Colormap.set_bad).
@@ -1082,7 +1079,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     positive = tr.Bool(
         default_value=False,
-        help=r"When set to `True` , forces the coefficients (\ `coef`\ ) "
+        help=r"When set to `True` , forces the coefficients (\ `coef`) "
         r"to be positive.",
     ).tag(config=True)
 
@@ -1168,12 +1165,12 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ ,:term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`,:term:`n_features`)
             Training data, where `n_observations` is the number of observations
             and `n_features` is the number of features.
-        Y : :term:`array-like` of shape (:term:`n_observations`\ ,) or (:term:`n_observations`\ ,:term:`n_targets`\ )
+        Y : :term:`array-like` of shape (:term:`n_observations`,) or (:term:`n_observations`,:term:`n_targets`)
             Target values. Will be cast to `X`\ 's dtype if necessary.
-        sample_weight : :term:`array-like` of shape (:term:`n_observations`\ ,), default: `None`
+        sample_weight : :term:`array-like` of shape (:term:`n_observations`,), default: `None`
             Individual weights for each observation.
 
         Returns
@@ -1244,8 +1241,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         Y = self._Y
         if self._is_dataset or self._output_type == "NDDataset":
             return Y
-        else:
-            return np.asarray(Y)
+        return np.asarray(Y)
 
     @property
     def coef(self):
@@ -1253,8 +1249,8 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         Estimated coefficients for the linear regression problem.
 
         If multiple targets are passed during the fit (Y 2D), this is a 2D array of
-        shape (:term:`n_targets`\ , :term:`n_features`\ ), while if only one target
-        is passed, this is a 1D array of length :term:`n_features`\ .
+        shape (:term:`n_targets`, :term:`n_features`), while if only one target
+        is passed, this is a 1D array of length :term:`n_features`.
         """
         if self._linear_regression.coef_.size == 1:
             # this is the result of the single equation, so only one value
@@ -1286,7 +1282,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
     @property
     def intercept(self):
         r"""
-        Return a float or an array of shape (:term:`n_targets`\ ,).
+        Return a float or an array of shape (:term:`n_targets`,).
 
         Independent term in the linear model. Set to ``0.0`` if `fit_intercept` is `False`.
         If `Y` has units, then `intercept` has the same units.
@@ -1314,13 +1310,13 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` matrix, shape (:term:`n_observations`\ ,:term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` matrix, shape (:term:`n_observations`,:term:`n_features`)
             Observations. If `X` is not set, the input `X` for `fit` is used.
 
         Returns
         -------
         `~spectrochempy.core.dataset.nddataset.NDDataset`
-            Predicted values (object of type of the input) using a ahape (:term:`n_observations`\ ,).
+            Predicted values (object of type of the input) using a ahape (:term:`n_observations`,).
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1357,18 +1353,18 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         is the total sum of squares ``((y_true - y_true.mean()) ** 2).sum()`` .
         The best possible score is ``1.0`` and it can be negative (because the
         model can be arbitrarily worse). A constant model that always predicts
-        the expected value of `Y`\ , disregarding the input features, would get
+        the expected value of `Y`, disregarding the input features, would get
         a :math:`R^2` score of 0.0.
 
         Parameters
         ----------
-        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ , :term:`n_features`\ )
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
             Test samples.
 
-        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`\ ,)
-            True values for `X`\ .
+        Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`,)
+            True values for `X`.
 
-        sample_weight : :term:`array-like` of shape (:term:`n_observations`\ ,), default: `None`
+        sample_weight : :term:`array-like` of shape (:term:`n_observations`,), default: `None`
             Sample weights.
 
         Returns

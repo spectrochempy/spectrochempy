@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,11 +6,13 @@
 """
 Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
-from datetime import datetime, timezone
+from datetime import UTC
+from datetime import datetime
 
 import numpy as np
 
-from spectrochempy.core.writers.exporter import Exporter, exportermethod
+from spectrochempy.core.writers.exporter import Exporter
+from spectrochempy.core.writers.exporter import exportermethod
 
 __all__ = ["write_jcamp"]
 __dataset_methods__ = __all__
@@ -61,7 +62,6 @@ def _write_jcamp(*args, **kwargs):
 
     # Make JCAMP_DX file
     with filename.open("w") as fid:
-
         # Writes first lines
         fid.write(f"##TITLE={dataset.name}\n")
         fid.write("##JCAMP-DX=5.01\n")
@@ -88,10 +88,9 @@ def _write_jcamp(*args, **kwargs):
                     timestamp_index = i
 
         if timestamp_index is None:
-            timestamp = datetime.now(timezone.utc)
+            timestamp = datetime.now(UTC)
 
         for i in range(dataset.shape[0]):
-
             if dataset.shape[0] > 1:
                 title = (
                     dataset.y.labels[i][title_index]

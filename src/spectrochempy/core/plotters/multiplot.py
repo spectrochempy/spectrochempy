@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -26,10 +25,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # TODO: tight_layout module is deprecated
-from matplotlib._tight_layout import (  # get_renderer,
-    get_subplotspec_list,
-    get_tight_layout_figure,
-)
+from matplotlib._tight_layout import get_subplotspec_list  # get_renderer,
+from matplotlib._tight_layout import get_tight_layout_figure  # get_renderer,
 
 from spectrochempy.utils.misc import is_sequence
 from spectrochempy.utils.plots import _Axes
@@ -211,7 +208,7 @@ def multiplot(
     if nrow == ncol and nrow == 1 and not show_transposed and single:
         # obviously a single plot, return it
         return datasets[0].plot(**kwargs)
-    elif nrow * ncol < len(datasets):
+    if nrow * ncol < len(datasets):
         nrow = ncol = len(datasets) // 2
         if nrow * ncol < len(datasets):
             ncol += 1
@@ -273,15 +270,15 @@ def multiplot(
 
     if sharey not in [None, False, True, "all", "col"]:
         raise ValueError(
-            "invalid option for {}. Should be"
-            " among (None, False, True, 'all' or 'row')".format(textsharey)
+            f"invalid option for {textsharey}. Should be"
+            " among (None, False, True, 'all' or 'row')"
         )
 
     if sharez not in [None, False, True, "all", "col", "row"]:
         raise ValueError(
-            "invalid option for {}. Should be"
+            f"invalid option for {textsharez}. Should be"
             " among (None, False, True, "
-            "'all', 'row' or 'col')".format(textsharez)
+            "'all', 'row' or 'col')"
         )
 
     if sharey:
@@ -314,20 +311,20 @@ def multiplot(
                 if sharex == "all":
                     _sharex = axes["axe11"]
                 elif sharex == "col":
-                    _sharex = axes["axe1{}".format(icol + 1)]
+                    _sharex = axes[f"axe1{icol + 1}"]
 
                 if sharey == "all":
                     _sharey = axes["axe11"]
                 elif sharey == "row":
-                    _sharey = axes["axe{}1".format(irow + 1)]
+                    _sharey = axes[f"axe{irow + 1}1"]
 
                 # in the last dimension
                 if sharez == "all":
                     _sharez = axes["axe11"]
                 elif sharez == "row":
-                    _sharez = axes["axe{}1".format(irow + 1)]
+                    _sharez = axes[f"axe{irow + 1}1"]
                 elif sharez == "col":
-                    _sharez = axes["axe1{}".format(icol + 1)]
+                    _sharez = axes[f"axe1{icol + 1}"]
 
                 ax = _Axes(fig, nrow, ncol, idx + 1, sharex=_sharex, sharey=_sharey)
                 ax = fig.add_subplot(ax)
@@ -335,7 +332,7 @@ def multiplot(
             ax._sharez = _sharez  # we add a new share info to the ax.
             # which will be useful for the interactive masks
 
-            ax.name = "axe{}{}".format(irow + 1, icol + 1)
+            ax.name = f"axe{irow + 1}{icol + 1}"
             axes[ax.name] = ax
             if icol > 0 and sharey:
                 # hide the redondant ticklabels on left side of interior figures

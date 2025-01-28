@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -16,7 +15,8 @@ from pathlib import Path
 
 import requests
 
-from spectrochempy.application import error_, info_
+from spectrochempy.application import error_
+from spectrochempy.application import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.read_jcamp import read_jcamp
@@ -101,16 +101,15 @@ def download_nist_ir(CAS, index="all"):
                 response = requests.get(url, timeout=10)
                 if b"Spectrum not found" in response.content[:30]:
                     break
-                else:
-                    index.append(i)
-                    i += 1
+                index.append(i)
+                i += 1
             except OSError:
                 raise OSError("Cannot connect to the NIST server... ")
 
         if len(index) == 0:
             error_(IOError, "NIST IR: no spectrum found")
-            return
-        elif len(index) == 1:
+            return None
+        if len(index) == 1:
             info_("NIST IR: 1 spectrum found")
         else:
             info_("NISTR IR: {len(index)} spectra found")
@@ -133,8 +132,7 @@ def download_nist_ir(CAS, index="all"):
                 )
                 if i == index[-1] and out == []:
                     return None
-                else:
-                    break
+                break
 
         except OSError:
             error_("OSError: Cannot connect... ")
@@ -156,11 +154,10 @@ def download_nist_ir(CAS, index="all"):
             (Path(".") / "temp.jdx").unlink()
 
         except Exception:
-            raise IOError(
+            raise OSError(
                 "Can't read this JCAMP file: please report the issue to Spectrochempy developpers"
             )
 
     if len(out) == 1:
         return out[0]
-    else:
-        return out
+    return out

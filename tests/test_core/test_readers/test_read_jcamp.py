@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 def test_read_jcamp(JDX_2D):
-
     # read
     Y = NDDataset.read_jcamp({"some2Dspectra.jdx": JDX_2D.encode("utf8")})
     assert str(Y.coordset) == "CoordSet: [x:wavenumbers, y:acquisition timestamp (GMT)]"

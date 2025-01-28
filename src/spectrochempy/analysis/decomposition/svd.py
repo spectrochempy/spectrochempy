@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -11,10 +10,8 @@ This module implements the Singular Value Decomposition (SVD) class.
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.analysis._base._analysisbase import (
-    DecompositionAnalysis,
-    _wrap_ndarray_output_to_nddataset,
-)
+from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.docreps import _docstring
 
 __all__ = ["SVD"]
@@ -67,9 +64,9 @@ class SVD(DecompositionAnalysis):
         r"""
     Singular Value Decomposition (SVD).
 
-    The SVD is commonly written as :math:`X = U \Sigma V^{T}`\ .
+    The SVD is commonly written as :math:`X = U \Sigma V^{T}`.
 
-    This class has the attributes : U, s = diag(S) and VT=V :math:`^T`\ .
+    This class has the attributes : U, s = diag(S) and VT=V :math:`^T`.
 
     If the dataset contains masked values, the corresponding ranges are
     ignored in the calculation.

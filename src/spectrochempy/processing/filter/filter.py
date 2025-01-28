@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -11,7 +10,8 @@ import traitlets as tr
 import spectrochempy.utils.traits as mtr
 from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
-from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 
 __dataset_methods__ = [
@@ -50,12 +50,12 @@ _docstring.delete_params("Filter.see_also", "smooth")
 @signature_has_configurable_traits
 class Filter(ProcessingConfigurable):
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Filters/smoothers processor.
 
     The filters can be applied to 1D datasets consisting in a single row
-    with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`\ ,
-    :term:`n_features`\ ).
+    with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`,
+    :term:`n_features`).
 
     Various filters/smoothers can be applied to the data. The currently available
     filters are:
@@ -114,7 +114,7 @@ class Filter(ProcessingConfigurable):
 
     lamb = tr.Float(
         default_value=1.0,
-        help="Smoothing/Regularization parameter. The larger `lamb`\ , the smoother "
+        help=r"Smoothing/Regularization parameter. The larger `lamb`, the smoother "
         "the data.",
     ).tag(config=True)
 
@@ -290,17 +290,16 @@ def smooth(dataset, size=5, window="avg", **kwargs):
         if window == "hanning":
             window = "han"
 
-        if kwargs.get("window_length", None) is not None:
+        if kwargs.get("window_length") is not None:
             deprecated("window_length", replace="size", removed="0.8")
             size = kwargs.pop("window_length")
 
         return Filter(method=window, size=size, **kwargs).transform(dataset)
-    else:
-        raise ValueError(
-            f"Window type '{window}' is not supported. "
-            f"Supported types are 'flat' or 'avg', 'han' or 'hanning', 'hamming', "
-            f"'bartlett', 'blackman'."
-        )
+    raise ValueError(
+        f"Window type '{window}' is not supported. "
+        f"Supported types are 'flat' or 'avg', 'han' or 'hanning', 'hamming', "
+        f"'bartlett', 'blackman'."
+    )
 
 
 # --------------------------------------------------------------------------------------
@@ -346,11 +345,11 @@ def savgol(dataset, size=5, order=2, **kwargs):
     """
     # TODO : check if coordinates are evenly spaced
 
-    if kwargs.get("window_length", None) is not None:
+    if kwargs.get("window_length") is not None:
         deprecated("window_length", replace="size", removed="0.8")
         size = kwargs.pop("window_length")
 
-    if kwargs.get("polyorder", None) is not None:
+    if kwargs.get("polyorder") is not None:
         deprecated("polyorder", replace="order", removed="0.8")
         order = kwargs.pop("polyorder")
 

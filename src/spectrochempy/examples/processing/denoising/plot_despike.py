@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 """
 Removing cosmic ray spikes from a Raman spectrum
 =================================================
@@ -12,6 +11,7 @@ Removing cosmic ray spikes from a Raman spectrum
 In this example, we use the `despike` method to remove the noise from a Raman
 spectrum.
 """
+
 import spectrochempy as scp
 
 # %%

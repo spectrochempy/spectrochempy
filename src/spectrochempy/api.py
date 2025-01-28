@@ -1,31 +1,35 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# ruff: noqa: I001
 """
-Application Programming Interface.
+SpectroChemPy Application Programming Interface.
 
-isort:skip_file
+This module initializes the SpectroChemPy environment and exposes the public API.
+It handles:
+1. Environment detection (IPython, PyCharm, Jupyter, etc.)
+2. Display settings configuration
+3. Matplotlib backend and style setup
+4. Core API exposure
+
+The module adapts its behavior based on the execution context:
+- Interactive vs non-interactive environment
+- Test environment
+- Documentation building
+- Display availability
 """
-
-# During the initialization of this package, a `matplotlib` backend is set
-# and some `IPython` configurations are made.
 
 import sys
-
-import matplotlib as mpl
-
-from IPython.core.interactiveshell import InteractiveShell
-from IPython import get_ipython
-
 from pathlib import Path
 
-# --------------------------------------------------------------------------------------
-# Check the environment for plotting
-# --------------------------------------------------------------------------------------
-# Do we run in IPython ?
+import matplotlib as mpl
+from IPython import get_ipython
+from IPython.core.interactiveshell import InteractiveShell
+
+# Environment detection
+# --------------------
 IN_IPYTHON = False
 KERNEL = None
 IP = None
@@ -34,76 +38,70 @@ if InteractiveShell.initialized():  # pragma: no cover
     IP = get_ipython()
     KERNEL = getattr(IP, "kernel", None)
 
+# Display configuration
+# -------------------
 NO_DISPLAY = False
 NO_DIALOG = False
 
-# Are we buildings the docs ?
+# Check execution context
 if Path(sys.argv[0]).name in ["make.py", "validate_docstrings.py"]:  # pragma: no cover
-    # if we are building the documentation, in principle it should be done
-    # using the make.py located at the root of the spectrochempy package.
+    # Documentation building mode
     NO_DISPLAY = True
     NO_DIALOG = True
     mpl.use("agg", force=True)
 
-# is there a --nodisplay flag
+# Check command line flags
 if "--nodisplay" in sys.argv:  # pragma: no cover
     NO_DISPLAY = True
     NO_DIALOG = True
 
-# Are we running pytest?
-
+# Test environment detection
 if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
-    # if we are testing we also like a silent work with no figure popup!
     NO_DISPLAY = True
     NO_DIALOG = True
 
-    # OK, but if we are doing individual function testing in PyCharm
-    # it is interesting to see the plots and the file dialogs,
-    # except if we set explicitly --nodisplay argument!
-    # if len(sys.argv) > 1 and not any([arg.endswith(".py") for arg in
-    # sys.argv[1:]]) and '--nodisplay' not in sys.argv:
+    # Enable display for individual PyCharm test runs
     if (
         len(sys.argv) > 1
-        and any((arg.split("::")[0].endswith(".py") for arg in sys.argv[1:]))
+        and any(arg.split("::")[0].endswith(".py") for arg in sys.argv[1:])
         and "--nodisplay" not in sys.argv
     ):  # pragma: no cover
-        # individual module testing
         NO_DISPLAY = False
         NO_DIALOG = False
 
-# Are we running in PyCharm scientific mode?
+# PyCharm scientific mode detection
 IN_PYCHARM_SCIMODE = mpl.get_backend() == "module://backend_interagg"
 
+# Configure matplotlib backend
 if (
     not (IN_IPYTHON and KERNEL) and not IN_PYCHARM_SCIMODE and not NO_DISPLAY
 ):  # pragma: no cover
-    backend = mpl.rcParams["backend"]  # 'Qt5Agg'
+    backend = mpl.rcParams["backend"]
     mpl.use(backend, force=True)
 
 ALL = ["NO_DISPLAY", "NO_DIALOG"]
 
-# --------------------------------------------------------------------------------------
-# Configure matplotlib styles and fonts
-# --------------------------------------------------------------------------------------
+# Initialize matplotlib styles and fonts
+# -----------------------------------
 from spectrochempy.data.setup import setup_mpl  # noqa: E402
 
 setup_mpl()
 
-# --------------------------------------------------------------------------------------
-# Now we can start loading the API
-# --------------------------------------------------------------------------------------
-# import the core api
+# Load core API
+# ------------
 from spectrochempy import core  # noqa: E402
 from spectrochempy.core import *  # noqa: F403, F401, E402
 
 ALL += core.__all__
 
+# Terminal color support
 if not IN_IPYTHON:
-    # needed in terminal - but must not in Jupyter notebook
     from colorama import init as initcolor
 
     initcolor()
 
+# Jupyter environment configuration
+# -------------------------------
 RUNNING_IN_COLAB = "google.colab" in str(get_ipython())
 
 if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
@@ -112,29 +110,29 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
             "ipykernel_launcher" in sys.argv[0]
             and "--InlineBackend.rc={'figure.dpi': 96}" in sys.argv
         ):
-            # We are running from NBSphinx - the plot must be inline to show up.
+            # Jupyter environment
             IP.run_line_magic("matplotlib", "inline")
         elif RUNNING_IN_COLAB:  # pragma: no cover
-            # does not support interactive plots either
+            # Google Colab environment
             IP.run_line_magic("matplotlib", "inline")
     except Exception:
         IP.run_line_magic("matplotlib", "qt")
 
-# a useful utilities for dealing with path
+# Path utilities and data directory setup
+# ------------------------------------
 from spectrochempy.utils.file import pathclean  # noqa: E402
 
 DATADIR = pathclean(preferences.datadir)  # noqa: F405
 
 __all__ = ["pathclean", "DATADIR"] + ALL
 
+# Test environment setup
 if NO_DISPLAY:
     mpl.use("agg", force=True)
 
     from os import environ
 
-    # set test file and folder in environment
-    # set a test file in environment
-
+    # Set test files and folders
     environ["TEST_FILE"] = str(DATADIR / "irdata" / "nh4y-activation.spg")
     environ["TEST_FOLDER"] = str(DATADIR / "irdata" / "subdir")
     environ["TEST_NMR_FOLDER"] = str(

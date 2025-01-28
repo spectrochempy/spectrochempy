@@ -29,4 +29,4 @@ Breaking changes
 Deprecations
 ~~~~~~~~~~~~
 
-* FileSelector and BaseFileSelector are deprecated
+* FileSelector and BaseFileSelector are deprecated. They will be removed in version 0.8.

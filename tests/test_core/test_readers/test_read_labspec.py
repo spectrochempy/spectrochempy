@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 from pathlib import Path
 
@@ -20,7 +19,6 @@ RAMANDIR = scp.preferences.datadir / "ramandata/labspec"
 #     reason="Experimental data not available for testing",
 # )
 def test_read_labspec():
-
     # single file
     nd = scp.read_labspec("Activation.txt", directory=RAMANDIR)
     assert nd.shape == (532, 1024)

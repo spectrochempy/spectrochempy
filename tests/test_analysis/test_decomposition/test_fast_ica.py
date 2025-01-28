@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 import os
 
@@ -101,9 +100,10 @@ def test_fastICA():
     #
     assert ica2._X.shape == (51, 86), "missing row or col should be removed"
     assert ica2.X.shape == (51, 96), "missing row or col restored"
-    assert_dataset_equal(
-        ica2.X, ds, data_only=True
-    ), "input dataset should be reflected in the internal variable X (where mask is restored)"
+    (
+        assert_dataset_equal(ica2.X, ds, data_only=True),
+        "input dataset should be reflected in the internal variable X (where mask is restored)",
+    )
 
     ica2.plotmerit()
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -13,7 +12,9 @@ import re
 import struct
 import warnings
 from os import environ
-from pathlib import Path, PosixPath, WindowsPath
+from pathlib import Path
+from pathlib import PosixPath
+from pathlib import WindowsPath
 
 import numpy as np
 
@@ -66,9 +67,7 @@ def get_repo_path():
     """
     if is_editable_install("spectrochempy"):
         return Path(__file__).parent.parent.parent.parent
-    else:
-        return Path(__file__).parent.parent
-    pass
+    return Path(__file__).parent.parent
 
 
 def fromfile(fid, dtype, count):
@@ -113,8 +112,7 @@ def patterns(filetypes, allcase=True):
         patterns.extend([match.group(0) for match in m])
     if not allcase:
         return patterns
-    else:
-        return [_insensitive_case_glob(p) for p in patterns]
+    return [_insensitive_case_glob(p) for p in patterns]
 
 
 def pathclean(paths):
@@ -182,14 +180,14 @@ def pathclean(paths):
         if isinstance(paths, (str, Path, PosixPath, WindowsPath)):
             path = str(paths)
             return _clean(path).expanduser()
-        elif isinstance(paths, (list, tuple)):
+        if isinstance(paths, (list, tuple)):
             return [_clean(p).expanduser() if isinstance(p, str) else p for p in paths]
 
     return paths
 
 
 def _get_file_for_protocol(f, **kwargs):
-    protocol = kwargs.get("protocol", None)
+    protocol = kwargs.get("protocol")
     if protocol is not None:
         if isinstance(protocol, str):
             if protocol in ["ALL"]:
@@ -203,8 +201,7 @@ def _get_file_for_protocol(f, **kwargs):
             lst.extend(list(f.parent.glob(f"{f.stem}.{p}")))
         if not lst:
             return None
-        else:
-            return f.parent / lst[0]
+        return f.parent / lst[0]
 
 
 def check_filenames(*args, **kwargs):
@@ -253,7 +250,7 @@ def check_filenames(*args, **kwargs):
         ):
             # return url
             return args
-        elif isinstance(args[0], (str, Path, PosixPath, WindowsPath)):
+        if isinstance(args[0], (str, Path, PosixPath, WindowsPath)):
             # one or several filenames are passed - make Path objects
             filenames = pathclean(args)
         elif isinstance(args[0], bytes):
@@ -299,7 +296,7 @@ def check_filenames(*args, **kwargs):
 
             if directory.resolve() == Path.cwd() or directory == Path("."):
                 directory = ""
-            kw_directory = pathclean(kwargs.get("directory", None))
+            kw_directory = pathclean(kwargs.get("directory"))
             if directory and kw_directory and directory != kw_directory:
                 # conflict we do not take into account the kw.
                 warnings.warn(
@@ -343,10 +340,10 @@ def check_filenames(*args, **kwargs):
 
 
 def _topspin_check_filename(filename, **kwargs):
-    if kwargs.get("iterdir", False) or kwargs.get("glob", None) is not None:
+    if kwargs.get("iterdir", False) or kwargs.get("glob") is not None:
         # when we list topspin dataset we have to read directories, not directly files
         # we can retrieve them using glob patterns
-        glob = kwargs.get("glob", None)
+        glob = kwargs.get("glob")
         if glob:
             files_ = list(filename.glob(glob))
         elif not kwargs.get("processed", False):
@@ -432,8 +429,8 @@ def get_filenames(*filenames, **kwargs):
     from spectrochempy.core import preferences as prefs
 
     NODIAL = (
-        NO_DIALOG or "DOC_BUILDING" in environ
-    ) and "KEEP_DIALOGS" not in environ  # flag to suppress dialog when doc is built or during full testing
+        (NO_DIALOG or "DOC_BUILDING" in environ) and "KEEP_DIALOGS" not in environ
+    )  # flag to suppress dialog when doc is built or during full testing
 
     # allowed filetypes
     # -----------------
@@ -504,7 +501,7 @@ def get_filenames(*filenames, **kwargs):
                 # try in the data directory
                 directory = pathclean(prefs.datadir)
                 if not (pathclean(directory / filename)).exists():
-                    raise IOError(f"Can't find  this filename {filename}")
+                    raise OSError(f"Can't find  this filename {filename}")
             temp.append(directory / filename)
 
         # now we have checked all the filename with their correct location
@@ -517,7 +514,7 @@ def get_filenames(*filenames, **kwargs):
 
         getdir = kwargs.get(
             "iterdir",
-            directory is not None or kwargs.get("protocol", None) == ["topspin"],
+            directory is not None or kwargs.get("protocol") == ["topspin"],
             # or kwargs.get("protocol", None) == ["carroucell"],
         )
 
@@ -551,7 +548,7 @@ def get_filenames(*filenames, **kwargs):
             elif NODIAL and not directory:
                 directory = get_directory_name(environ.get("TEST_FOLDER"))
 
-            elif NODIAL and kwargs.get("protocol", None) == ["topspin"]:
+            elif NODIAL and kwargs.get("protocol") == ["topspin"]:
                 directory = get_directory_name(environ.get("TEST_NMR_FOLDER"))
 
             if directory is None:
@@ -559,7 +556,7 @@ def get_filenames(*filenames, **kwargs):
 
             filenames = []
 
-            if kwargs.get("protocol", None) != ["topspin"]:
+            if kwargs.get("protocol") != ["topspin"]:
                 # automatic reading of the whole directory
                 for pat in patterns(filetypes):
                     if kwargs.get("recursive", False):
@@ -584,7 +581,7 @@ def get_filenames(*filenames, **kwargs):
         if not all(
             isinstance(elem, (Path, PosixPath, WindowsPath)) for elem in filenames
         ):
-            raise IOError("one of the list elements is not a filename!")
+            raise OSError("one of the list elements is not a filename!")
 
     # or a single filename
     if isinstance(filenames, (str, Path, PosixPath, WindowsPath)):
@@ -597,12 +594,12 @@ def get_filenames(*filenames, **kwargs):
             filenames.remove(filename)
 
     dictionary = kwargs.get("dictionary", True)
-    protocol = kwargs.get("protocol", None)
+    protocol = kwargs.get("protocol")
     if dictionary and protocol != ["topspin"]:
         # make and return a dictionary
         filenames_dict = {}
         for filename in filenames:
-            if filename.is_dir() and not protocol == ["carroucell"]:
+            if filename.is_dir() and protocol != ["carroucell"]:
                 continue
             extension = filename.suffix.lower()
             if not extension:
@@ -611,13 +608,12 @@ def get_filenames(*filenames, **kwargs):
             elif extension[1:].isdigit():
                 # probably an opus file
                 extension = ".opus"
-            if extension in filenames_dict.keys():
+            if extension in filenames_dict:
                 filenames_dict[extension].append(filename)
             else:
                 filenames_dict[extension] = [filename]
         return filenames_dict
-    else:
-        return filenames
+    return filenames
 
 
 def find_or_create_spectrochempy_dir():
@@ -627,7 +623,7 @@ def find_or_create_spectrochempy_dir():
 
     if directory.is_file():  # pragma: no cover
         msg = "Intended SpectroChemPy directory `{0}` is actually a file."
-        raise IOError(msg.format(directory))
+        raise OSError(msg.format(directory))
 
     return directory
 
@@ -661,29 +657,27 @@ def get_directory_name(directory, **kwargs):
             # nothing else to do
             return directory
 
-        elif (working_dir / directory).is_dir():
+        if (working_dir / directory).is_dir():
             # if no parent directory: look at current working dir
             return working_dir / directory
 
-        elif (data_dir / directory).is_dir():
+        if (data_dir / directory).is_dir():
             return data_dir / directory
 
-        else:
-            raise OSError(f'"{str(directory)}" is not a valid directory')
-            # warnings.warn(f'"{directory}" is not a valid directory')
-            # return None
+        raise OSError(f'"{str(directory)}" is not a valid directory')
+        # warnings.warn(f'"{directory}" is not a valid directory')
+        # return None
 
-    else:
-        # open a file dialog
-        directory = data_dir
-        if not NO_DIALOG:  # this is for allowing test to continue in the background
-            from spectrochempy.core.common.dialogs import open_dialog
+    # open a file dialog
+    directory = data_dir
+    if not NO_DIALOG:  # this is for allowing test to continue in the background
+        from spectrochempy.core.common.dialogs import open_dialog
 
-            directory = open_dialog(
-                single=False, directory=working_dir, filters="directory", **kwargs
-            )
+        directory = open_dialog(
+            single=False, directory=working_dir, filters="directory", **kwargs
+        )
 
-        return pathclean(directory)
+    return pathclean(directory)
 
 
 def check_filename_to_save(
@@ -726,7 +720,7 @@ def check_filename_to_save(
             )
             if filename is None:
                 # this is probably due to a cancel action for an open dialog.
-                return
+                return None
 
     return pathclean(filename)
 
@@ -738,7 +732,7 @@ def check_filename_to_open(*args, **kwargs):
 
     if filenames is None:  # not args and
         # this is probably due to a cancel action for an open dialog.
-        return
+        return None
 
     if not isinstance(filenames, dict):
         if len(filenames) == 1 and filenames[0] is None:
@@ -759,11 +753,10 @@ def check_filename_to_open(*args, **kwargs):
             key = ".opus"
         return {key: filenames}
 
-    elif len(args) > 0 and args[0] is not None:
+    if len(args) > 0 and args[0] is not None:
         # args where passed so in this case we have directly byte contents instead of filenames only
         contents = filenames
         return {"frombytes": contents}
 
-    else:
-        # probably no args (which means that we are coming from a dialog or from a full list of a directory
-        return filenames
+    # probably no args (which means that we are coming from a dialog or from a full list of a directory
+    return filenames

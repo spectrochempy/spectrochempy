@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -11,7 +10,8 @@ Plugin module to extend NDDataset with a JCAMP-DX export method.
 import csv
 
 from spectrochempy.core import preferences as prefs
-from spectrochempy.core.writers.exporter import Exporter, exportermethod
+from spectrochempy.core.writers.exporter import Exporter
+from spectrochempy.core.writers.exporter import exportermethod
 
 __all__ = ["write_csv"]
 __dataset_methods__ = __all__
@@ -61,7 +61,6 @@ def write_csv(*args, **kwargs):
 
 @exportermethod
 def _write_csv(*args, **kwargs):
-
     dataset, filename = args
     dataset.filename = filename
 

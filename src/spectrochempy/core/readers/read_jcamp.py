@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -13,12 +12,14 @@ __dataset_methods__ = __all__
 
 import io
 import re
-from datetime import datetime, timezone
+from datetime import UTC
+from datetime import datetime
 
 import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docreps import _docstring
 
@@ -30,10 +31,10 @@ _docstring.delete_params("Importer.see_also", "read_jcamp")
 
 @_docstring.dedent
 def read_jcamp(*paths, **kwargs):
-    """
-    Open Infrared ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`\ .
+    r"""
+    Open Infrared ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.
 
-    Limited to AFFN encoding (see :cite:t:`mcdonald:1988`\ )
+    Limited to AFFN encoding (see :cite:t:`mcdonald:1988`)
 
     Parameters
     ----------
@@ -74,13 +75,13 @@ def read_dx(*args, **kwargs):  # pragma: no cover
 def _read_jdx(*args, **kwargs):
     # read jdx file
     dataset, filename = args
-    content = kwargs.get("content", None)
+    content = kwargs.get("content")
     sortbydate = kwargs.pop("sortbydate", True)
 
     if content is not None:
         fid = io.StringIO(content.decode("utf-8"))
     else:
-        fid = open(filename, "r")
+        fid = open(filename)
 
     # Read header of outer Block
 
@@ -142,7 +143,7 @@ def _read_jdx(*args, **kwargs):
             keyword, text = _readl(fid)
             if keyword in ["##OWNER", "##JCAMP-DX"]:
                 continue
-            elif keyword == "##ORIGIN":
+            if keyword == "##ORIGIN":
                 allorigins.append(text)
             elif keyword == "##TITLE":
                 # Add the title of the spectrum in the list alltitles
@@ -200,11 +201,11 @@ def _read_jdx(*args, **kwargs):
                     raise ValueError(
                         "Inconsistent data set: number of wavenumber per spectrum should be identical"
                     )
-                elif firstx[i] - firstx[i - 1] != 0:
+                if firstx[i] - firstx[i - 1] != 0:
                     raise ValueError(
                         "Inconsistent data set: the x axis should start at same value"
                     )
-                elif lastx[i] - lastx[i - 1] != 0:
+                if lastx[i] - lastx[i - 1] != 0:
                     raise ValueError(
                         "Inconsistent data set: the x axis should end at same value"
                     )
@@ -229,7 +230,7 @@ def _read_jdx(*args, **kwargs):
                 int(hour),
                 int(minute),
                 int(second),
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             )
             timestamp = date.timestamp()
             # Transform back to timestamp for storage in the Coord object
@@ -247,7 +248,7 @@ def _read_jdx(*args, **kwargs):
                 raise ValueError(
                     f"##YUNITS should be the same for all spectra (check spectrum n°{i + 1}"
                 )
-            elif xunits[i] != xunits[i - 1]:
+            if xunits[i] != xunits[i - 1]:
                 raise ValueError(
                     f"##XUNITS should be the same for all spectra (check spectrum n°{i + 1}"
                 )
@@ -308,7 +309,7 @@ def _read_jdx(*args, **kwargs):
         else:
             dataset.origin = [(origin + "; ") for origin in set(allorigins)][0][:-2]
 
-    dataset.description = "Dataset from jdx file: '{0}'".format(jdx_title)
+    dataset.description = f"Dataset from jdx file: '{jdx_title}'"
 
     dataset.history = "Imported from jdx file"
 

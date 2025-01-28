@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -255,7 +254,7 @@ def dict_compare(d1, d2, check_equal_only=True):
                 modified.add(o)
             else:
                 # in principe we vae here two list of same length
-                for i1, i2 in zip(d1[o], d2[o]):
+                for i1, i2 in zip(d1[o], d2[o], strict=False):
                     if np.any(i1 != i2):
                         modified.add(o)
         else:
@@ -266,7 +265,6 @@ def dict_compare(d1, d2, check_equal_only=True):
 
     if not check_equal_only:
         return added, removed, modified, same
-    else:
-        if modified or removed or added:
-            return False
-        return True
+    if modified or removed or added:
+        return False
+    return True

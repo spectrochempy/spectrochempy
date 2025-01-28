@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -51,14 +50,19 @@ __dataset_methods__ = __all__
 import datetime
 import io
 import struct
-from enum import Enum, IntEnum
+from enum import Enum
+from enum import IntEnum
 
 import numpy as np
 
-from spectrochempy.application import debug_, error_, warning_
+from spectrochempy.application import debug_
+from spectrochempy.application import error_
+from spectrochempy.application import warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import windows_time_to_dt64
 from spectrochempy.utils.docreps import _docstring
@@ -73,7 +77,7 @@ except ImportError:
     PIL = None
 
 
-class _wdfReader(object):
+class _wdfReader:
     """
     Reader for Renishaw(TM) WiRE Raman spectroscopy files (.wdf format)
 
@@ -308,7 +312,7 @@ class _wdfReader(object):
             _, pos, _ = self._block_info["ORGN"]
         except KeyError:
             debug_("Current measurement does not contain dimension information!")
-            return
+            return None
 
         count = self._meta.count
         capacity = self._meta.capacity
@@ -369,11 +373,9 @@ class _wdfReader(object):
         self._fid.seek(pos + offset)
         dimtype = DataType(self._read_type("int32"))
         units = str(UnitType(self._read_type("int32")))
-        size = getattr(self, "_{0}_size".format(dim.lower()))
+        size = getattr(self, f"_{dim.lower()}_size")
         if size == 0:  # Possibly not started
-            raise ValueError(
-                "{0} array possibly not yet initialized!".format(dim.upper())
-            )
+            raise ValueError(f"{dim.upper()} array possibly not yet initialized!")
 
         data = fromfile(self._fid, dtype="float32", count=size)
         data = np.array(data, dtype=float, ndmin=1)
@@ -391,7 +393,7 @@ class _wdfReader(object):
             _, pos, _ = self._block_info["WMAP"]
         except KeyError:
             debug_("Current measurement does not contain mapping information!")
-            return
+            return None
 
         self._fid.seek(pos + Offsets.wmap_origin)
         self._meta.map_area_type = MapAreaType(self._read_type("int32"))
@@ -520,7 +522,7 @@ class _wdfReader(object):
 
             return struct.unpack(fmt_out, self._fid.read(fmt_in * size))[0]
 
-        elif type == "utf8":
+        if type == "utf8":
             # Read utf8 string with determined size block
             return self._fid.read(size).decode("utf8").replace("\x00", "")
 
@@ -569,7 +571,7 @@ class _wdfReader(object):
                 data = np.reshape(data, (count, points))
             except ValueError:
                 error_("Reshaping spectra array failed..")
-                return
+                return None
 
         elif map_shape is not None:
             # Is a mapping
@@ -580,25 +582,24 @@ class _wdfReader(object):
                     " corresponding to ORGN block! "
                 )
                 error_("Can't reshape the spectra with the given mapping information.")
-                return
+                return None
 
-            elif w * h * points != data.size:
+            if w * h * points != data.size:
                 debug_(
                     "Mapping information from WMAP"
                     " not corresponding to DATA! "
                     "Will not reshape the spectra"
                 )
                 error_("Reshaping spectra array failed.")
-                return
+                return None
 
+            # Should be h rows * w columns. np.ndarray is row first
+            # Reshape to 3D matrix when doing 2D mapping
+            if (h > 1) and (w > 1):
+                data = np.reshape(data, (h, w, points))
+            # otherwise it is a line scan
             else:
-                # Should be h rows * w columns. np.ndarray is row first
-                # Reshape to 3D matrix when doing 2D mapping
-                if (h > 1) and (w > 1):
-                    data = np.reshape(data, (h, w, points))
-                # otherwise it is a line scan
-                else:
-                    data = np.reshape(data, (count, points))
+                data = np.reshape(data, (count, points))
 
         # For any other type of measurement, reshape into (counts, point_per_spectrum)
         # example: series scan
@@ -842,7 +843,7 @@ def _read_wdf(*args, **kwargs):
     dataset = reader.dataset
     if dataset is None:
         error_(f"The {filename.stem} file is not readable!")
-        return
+        return None
     dataset.name = filename.stem
     dataset.filename = filename
     dataset.history = f"Imported from {filename} on {datetime.datetime.now()}"

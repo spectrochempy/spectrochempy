@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -12,10 +11,8 @@ import traitlets as tr
 from numpy.random import RandomState
 from sklearn import decomposition
 
-from spectrochempy.analysis._base._analysisbase import (
-    DecompositionAnalysis,
-    _wrap_ndarray_output_to_nddataset,
-)
+from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.traits import NDDatasetType
@@ -35,11 +32,11 @@ class FastICA(DecompositionAnalysis):
         r"""
     Fast algorithm for Independent Component Analysis (FastICA).
 
-    A wrapper of `sklearn.decomposition.FastICA`\ .
+    A wrapper of `sklearn.decomposition.FastICA`.
 
     :term:`ICA` (Independent Component Analysis) extracts the underlying sources of
     the variability of a set of spectra :math:`X` into the spectral profiles :math:`S^t`
-    of the underlying sources and a mixing matrix :math:`A`\ .
+    of the underlying sources and a mixing matrix :math:`A`.
 
     In terms of matrix equation:
 
@@ -89,7 +86,7 @@ class FastICA(DecompositionAnalysis):
         default_value="unit-variance",
         allow_none=True,
         help=(
-            """Specify the whitening strategy to use.
+            r"""Specify the whitening strategy to use.
 
 - ``"arbitrary-variance"``\ : a whitening with variance arbitrary is used.
 - "unit-variance" : the whitening matrix is rescaled to ensure that each recovered
@@ -106,7 +103,7 @@ class FastICA(DecompositionAnalysis):
         help=(
             r"""The functional form of the function used in the approximation to neg-entropy.
 
-- ``string``\ : could be either ``"logcosh"``\ , ``"exp"``\ , or ``"cube"``\ .
+- ``string``\ : could be either ``"logcosh"``, ``"exp"``, or ``"cube"``.
 - ``callable``\ : You can provide your own function. It should return a tuple containing
   the value of the function, and of its derivative, in the point. The derivative should
   be averaged along its last dimension.
@@ -159,13 +156,13 @@ array of values drawn from a normal distribution is used."""
         ["svd", "eigh"],
         default_value="svd",
         help=(
-            """The solver to use for whitening.
+            r"""The solver to use for whitening.
 
 - ``"svd"``\ : is more stable numerically if the problem is degenerate, and often faster
-  when :term:`n_observations` <= :term:`n_features`\ .
+  when :term:`n_observations` <= :term:`n_features`.
 - ``"eigh"``\ : is generally more memory efficient when
-  :term:`n_observations` >= :term:`n_features`\ , and can be faster when
-  :term:`n_observations` >= 50 * :term:`n_features`\ . """
+  :term:`n_observations` >= :term:`n_features`, and can be faster when
+  :term:`n_observations` >= 50 * :term:`n_features`. """
         ),
     ).tag(config=True)
 
@@ -273,11 +270,11 @@ array of values drawn from a normal distribution is used."""
         units=None, title=None, typey="features", typex="components"
     )
     def mixing(self):
-        """
+        r"""
         The pseudo inverse of components.
 
-        NDDataset of size (`n_features`\ , `n_components`\ ). It is the linear operator
-        that maps independent sources to the data, and the transpose of `St`\ .
+        NDDataset of size (`n_features`, `n_components`). It is the linear operator
+        that maps independent sources to the data, and the transpose of `St`.
         """
         return self._fast_ica.mixing_
 
@@ -288,10 +285,10 @@ array of values drawn from a normal distribution is used."""
         typey="components",
     )
     def St(self):
-        """
+        r"""
         The spectral profiles of the independant sources.
 
-        NDDataset of size (`n_components`\ , `n_features`\ ). It is the transpose of the
+        NDDataset of size (`n_components`, `n_features`). It is the transpose of the
         ``mixing_`` matrix returned by Scikit-Learn.
         """
         return self._fast_ica.mixing_.T
@@ -303,10 +300,10 @@ array of values drawn from a normal distribution is used."""
         typex="components",
     )
     def A(self):
-        """
+        r"""
         The mixing system A.
 
-        NDDataset of size (`n_observations`\ , `n_components`\ ). It is the matrix
+        NDDataset of size (`n_observations`, `n_components`). It is the matrix
         returned by the `transform()` method.
         """
         return self._fast_ica.transform(self.X.data)
@@ -314,11 +311,11 @@ array of values drawn from a normal distribution is used."""
     @property
     @_wrap_ndarray_output_to_nddataset()
     def mean(self):
-        """
+        r"""
         The mean of X over features.
 
         Only set if `whiten` is True, it is needed (and used) to reconstruct a dataset
-        by ``inverse_transform(A)``\ .
+        by ``inverse_transform(A)``.
         """
         return self._fast_ica.mean_
 

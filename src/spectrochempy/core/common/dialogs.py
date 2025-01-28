@@ -1,17 +1,32 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implement File I/O Dialogs
+File I/O Dialog Module
+=====================
+
+This module implements file dialog functionality for SpectroChemPy, supporting both
+Qt and Tkinter backends. It provides:
+
+- Open file dialogs (single and multiple file selection)
+- Save file dialogs
+- Directory selection dialogs
+
+The implementation automatically selects between Qt and Tkinter based on:
+- User preferences (preferences.use_qt)
+- Environment variable SCPY_GUI
+- Availability of PyQt5
 """
 
+import re
 from os import environ
+from pathlib import Path
 
 from spectrochempy.application import error_
 from spectrochempy.core import preferences
+from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.optional import import_optional_dependency
 
 __all__ = ["open_dialog", "save_dialog"]
@@ -20,7 +35,6 @@ __all__ = ["open_dialog", "save_dialog"]
 USE_QT = preferences.use_qt or environ.get("SCPY_GUI", None) == "RUNNING"
 
 if USE_QT:  # pragma: no cover
-
     try:
         pyqt = import_optional_dependency("PyQt5.QtWidgets")
         FileDialog = pyqt.QFileDialog
@@ -31,7 +45,6 @@ if USE_QT:  # pragma: no cover
         from tkinter import filedialog
 
 else:
-
     from tkinter import filedialog
 
 
@@ -39,10 +52,31 @@ else:
 # Private functions
 # --------------------------------------------------------------------------------------
 class _QTFileDialogs:  # pragma: no cover
+    """Qt-based file dialog implementations."""
+
     @classmethod
     def _open_existing_directory(
-        cls, parent=None, caption="Select a folder", directory=None
-    ):
+        cls,
+        parent: object | None = None,
+        caption: str = "Select a folder",
+        directory: str | None = None,
+    ) -> str | None:
+        """Open dialog for selecting an existing directory.
+
+        Parameters
+        ----------
+        parent : Optional[object]
+            Parent widget
+        caption : str
+            Dialog window title
+        directory : Optional[str]
+            Initial directory to show
+
+        Returns
+        -------
+        Optional[str]
+            Selected directory path or None if cancelled
+        """
 
         if directory is None:
             directory = str(preferences.datadir)
@@ -57,11 +91,32 @@ class _QTFileDialogs:  # pragma: no cover
 
         return None
 
-    # noinspection PyRedundantParentheses
     @classmethod
     def _open_filename(
-        cls, parent=None, directory=None, caption="Select file", filters=None
-    ):
+        cls,
+        parent: object | None = None,
+        directory: str | None = None,
+        caption: str = "Select file",
+        filters: list[str] | None = None,
+    ) -> str | None:
+        """Open dialog for selecting a file.
+
+        Parameters
+        ----------
+        parent : Optional[object]
+            Parent widget
+        directory : Optional[str]
+            Initial directory to show
+        caption : str
+            Dialog window title
+        filters : Optional[List[str]]
+            List of file type filters
+
+        Returns
+        -------
+        Optional[str]
+            Selected file path or None if cancelled
+        """
 
         if directory is None:
             directory = str(preferences.datadir)
@@ -77,13 +132,32 @@ class _QTFileDialogs:  # pragma: no cover
 
         return None
 
-    # noinspection PyRedundantParentheses
     @classmethod
     def _open_multiple_filenames(
-        cls, parent=None, directory=None, caption="Select file(s)", filters=None
-    ):
+        cls,
+        parent: object | None = None,
+        directory: str | None = None,
+        caption: str = "Select file(s)",
+        filters: list[str] | None = None,
+    ) -> list[str] | None:
         """
-        Return one or several files to open
+        Return one or several files to open.
+
+        Parameters
+        ----------
+        parent : Optional[object]
+            Parent widget
+        directory : Optional[str]
+            Initial directory to show
+        caption : str
+            Dialog window title
+        filters : Optional[List[str]]
+            List of file type filters
+
+        Returns
+        -------
+        Optional[List[str]]
+            List of selected file paths or None if cancelled
         """
 
         if directory is None:
@@ -103,11 +177,29 @@ class _QTFileDialogs:  # pragma: no cover
     @classmethod
     def _save_filename(
         cls,
-        parent=None,
-        filename=None,
-        caption="Save as...",
-        filters=None,
-    ):
+        parent: object | None = None,
+        filename: str | None = None,
+        caption: str = "Save as...",
+        filters: list[str] | None = None,
+    ) -> str | None:
+        """Open dialog for saving a file.
+
+        Parameters
+        ----------
+        parent : Optional[object]
+            Parent widget
+        filename : Optional[str]
+            Default filename to suggest
+        caption : str
+            Dialog window title
+        filters : Optional[List[str]]
+            List of file type filters
+
+        Returns
+        -------
+        Optional[str]
+            Selected save file path or None if cancelled
+        """
 
         directory = str(filename)
 
@@ -131,7 +223,10 @@ class _QTFileDialogs:  # pragma: no cover
 
 
 class _TKFileDialogs:  # pragma: no cover
+    """Tkinter-based file dialog implementations."""
+
     def __init__(self):
+        """Initialize Tkinter root window."""
         import tkinter as tk
 
         root = tk.Tk()
@@ -144,7 +239,27 @@ class _TKFileDialogs:  # pragma: no cover
         self.root = root
 
     @staticmethod
-    def _open_existing_directory(parent=None, caption="Select a folder", directory=""):
+    def _open_existing_directory(
+        parent: object | None = None,
+        caption: str = "Select a folder",
+        directory: str = "",
+    ) -> str | None:
+        """Open dialog for selecting an existing directory.
+
+        Parameters
+        ----------
+        parent : Optional[object]
+            Parent widget
+        caption : str
+            Dialog window title
+        directory : str
+            Initial directory to show
+
+        Returns
+        -------
+        Optional[str]
+            Selected directory path or None if cancelled
+        """
 
         directory = filedialog.askdirectory(
             # parent=parent,
@@ -158,9 +273,19 @@ class _TKFileDialogs:  # pragma: no cover
         return None
 
     @staticmethod
-    def filetypes(filters):
-        # convert QT filters to TK
-        import re
+    def filetypes(filters: list[str]) -> list[tuple[str, tuple[str, ...]]]:
+        """Convert Qt filter patterns to Tkinter format.
+
+        Parameters
+        ----------
+        filters : List[str]
+            List of Qt-style filter patterns
+
+        Returns
+        -------
+        List[Tuple[str, Tuple[str, ...]]]
+            Tkinter-compatible file type specifications
+        """
 
         regex = r"(.*)\((.*)\)"
         filetypes = []
@@ -177,12 +302,23 @@ class _TKFileDialogs:  # pragma: no cover
             filetypes.append((g[0], (g[1])))
         return filetypes
 
-    # noinspection PyRedundantParentheses
     def _open_filename(
-        self,
-        parent=None,
-        filters=None,
-    ):
+        self, parent: object | None = None, filters: list[str] | None = None
+    ) -> str | None:
+        """Open dialog for selecting a file.
+
+        Parameters
+        ----------
+        parent : Optional[object]
+            Parent widget
+        filters : Optional[List[str]]
+            List of file type filters
+
+        Returns
+        -------
+        Optional[str]
+            Selected file path or None if cancelled
+        """
 
         filename = filedialog.askopenfilename(
             # parent=parent,
@@ -198,10 +334,23 @@ class _TKFileDialogs:  # pragma: no cover
 
         return None
 
-    # noinspection PyRedundantParentheses
-    def _open_multiple_filenames(self, parent=None, filters=None):
+    def _open_multiple_filenames(
+        self, parent: object | None = None, filters: list[str] | None = None
+    ) -> list[str] | None:
         """
-        Return one or several files to open
+        Return one or several files to open.
+
+        Parameters
+        ----------
+        parent : Optional[object]
+            Parent widget
+        filters : Optional[List[str]]
+            List of file type filters
+
+        Returns
+        -------
+        Optional[List[str]]
+            List of selected file paths or None if cancelled
         """
         filename = filedialog.askopenfilenames(
             # parent=parent,
@@ -220,13 +369,28 @@ class _TKFileDialogs:  # pragma: no cover
     def _save_filename(
         self,
         # parent=None,
-        filename="",
-        caption="Save as...",
-        filters=None,
-    ):
+        filename: str = "",
+        caption: str = "Save as...",
+        filters: list[str] | None = None,
+    ) -> Path | None:
+        """Open dialog for saving a file.
 
-        from spectrochempy.utils.file import pathclean
+        Parameters
+        ----------
+        parent : Optional[object]
+            Parent widget
+        filename : str
+            Default filename to suggest
+        caption : str
+            Dialog window title
+        filters : Optional[List[str]]
+            List of file type filters
 
+        Returns
+        -------
+        Optional[Path]
+            Selected save file path or None if cancelled
+        """
         dftext = ""
         directory = "."
         if filename:
@@ -260,12 +424,31 @@ class _TKFileDialogs:  # pragma: no cover
 # --------------------------------------------------------------------------------------
 # Public functions
 # --------------------------------------------------------------------------------------
-# noinspection PyRedundantParentheses
+
+
 def save_dialog(
-    filename=None, caption="Save as...", filters=("All Files (*)"), **kwargs
-):  # pragma: no cover
-    """
-    Return a file where to save.
+    filename: str | Path | None = None,
+    caption: str = "Save as...",
+    filters: tuple[str, ...] = ("All Files (*)",),
+    **kwargs,
+) -> Path | None:  # pragma: no cover
+    """Display a save file dialog.
+
+    Parameters
+    ----------
+    filename : Optional[Union[str, Path]]
+        Default filename to suggest
+    caption : str
+        Dialog window title
+    filters : Tuple[str, ...]
+        File type filters in Qt format
+    **kwargs
+        Additional arguments passed to dialog implementation
+
+    Returns
+    -------
+    Optional[Path]
+        Selected save file path or None if cancelled
     """
     if USE_QT:
         parent = kwargs.pop(
@@ -284,17 +467,32 @@ def save_dialog(
             filename=filename, caption=caption, filters=filters
         )
 
-    from spectrochempy.utils.file import pathclean
-
     return pathclean(f)
 
 
-# noinspection PyRedundantParentheses
 def open_dialog(
-    single=True, directory=None, filters=("All Files (*)"), **kwargs
-):  # pragma: no cover
-    """
-    Return one or several files to open.
+    single: bool = True,
+    directory: str | Path | None = None,
+    filters: str | tuple[str, ...] = ("All Files (*)",),
+    **kwargs,
+) -> Path | list[Path] | None:  # pragma: no cover
+    """Display an open file/directory dialog.
+
+    Parameters
+    ----------
+    single : bool
+        If True, allow selecting only one file
+    directory : Optional[Union[str, Path]]
+        Initial directory to show
+    filters : Union[str, Tuple[str, ...]]
+        File type filters in Qt format, or "directory" for directory selection
+    **kwargs
+        Additional arguments passed to dialog implementation
+
+    Returns
+    -------
+    Optional[Union[Path, List[Path]]]
+        Selected path(s) or None if cancelled
     """
     if USE_QT:
         parent = kwargs.pop(
@@ -318,7 +516,5 @@ def open_dialog(
         f = klass._open_filename(parent=parent, filters=filters)
     else:
         f = klass._open_multiple_filenames(parent=parent, filters=filters)
-
-    from spectrochempy.utils.file import pathclean
 
     return pathclean(f)

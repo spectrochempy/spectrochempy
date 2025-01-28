@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -41,7 +40,6 @@ def _apodize_method(**units):
     def decorator_apodize_method(method):
         @functools.wraps(method)
         def wrapper(dataset, **kwargs):
-
             # what to return
             retapod = kwargs.pop("retapod", False)
             dryrun = kwargs.pop("dryrun", False)
@@ -72,12 +70,10 @@ def _apodize_method(**units):
 
             # check if the dimensionality is compatible with this kind of functions
             if x.unitless or x.dimensionless or x.units.dimensionality == "[time]":
-
                 # Set correct units for parameters
                 dunits = dataset.coordset[dim].units
                 apod = {}
                 for key, default_units in units.items():
-
                     if key not in kwargs or default_units is None:
                         continue
 
@@ -143,8 +139,7 @@ def _apodize_method(**units):
             if retapod:
                 apodcurve = type(new)(apod_arr, coordset=[x])
                 return new, apodcurve
-            else:
-                return new
+            return new
 
         return wrapper
 

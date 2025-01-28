@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 r"""
-This module extend NDDataset with the import method for Labspec \*.txt generated data files.
+This module extend NDDataset with the import method for Labspec *.txt generated data files.
 """
 
 __all__ = ["read_labspec"]
@@ -17,7 +16,8 @@ import numpy as np
 
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
@@ -77,16 +77,16 @@ def _read_txt(*args, **kwargs):
     if content:
         lines = content.decode("utf-8").splitlines()
     else:
-        fid = open(filename, "r", encoding="utf-8")
+        fid = open(filename, encoding="utf-8")
         try:
             lines = fid.readlines()
         except UnicodeDecodeError:
-            fid = open(filename, "r", encoding="latin-1")
+            fid = open(filename, encoding="latin-1")
             lines = fid.readlines()
             fid.close()
 
     if len(lines) == 0:
-        return
+        return None
 
     # Metadata
     meta = Meta()
@@ -105,13 +105,13 @@ def _read_txt(*args, **kwargs):
     labspec_keys_1D = ["Acq. time (s)", "Dark correction"]
     labspec_keys_2D = ["Exposition", "Grating"]
 
-    if all(keywd in meta.keys() for keywd in labspec_keys_1D):
-        pass
-    elif all(keywd in meta.keys() for keywd in labspec_keys_2D):
+    if all(keywd in meta.keys() for keywd in labspec_keys_1D) or all(
+        keywd in meta.keys() for keywd in labspec_keys_2D
+    ):
         pass
     else:
         # this is not a labspec txt file"
-        return
+        return None
 
     # read spec
     rawdata = np.genfromtxt(lines[i:], delimiter="\t")

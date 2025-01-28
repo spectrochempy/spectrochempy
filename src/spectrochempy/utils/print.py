@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,7 +6,8 @@
 import re
 
 import numpy as np
-from colorama import Fore, Style
+from colorama import Fore
+from colorama import Style
 
 
 def pstr(object, **kwargs):
@@ -19,8 +19,7 @@ def pstr(object, **kwargs):
         "CoordSet",
     ]:
         return object._cstr(**kwargs).strip()
-    else:
-        return str(object).strip()
+    return str(object).strip()
 
 
 # ======================================================================================
@@ -181,8 +180,7 @@ def convert_to_html(obj):
 #  the non-public interface of numpy.ma
 #  see the header of numpy.ma.core.py for the license
 # ======================================================================================
-class _MaskedPrintOption(object):
-
+class _MaskedPrintOption:
     # """
     # Handle the string used to represent missing data in a masked array.
     # copied from numpy.ma.core
@@ -349,7 +347,7 @@ def numpyprintoptions(
     formatter=None,
     spc=4,
     linewidth=150,
-    **kargs
+    **kargs,
 ):
     """
     Method to control array printing.
@@ -367,7 +365,9 @@ def numpyprintoptions(
     """
 
     def _format_object(x):
-        from spectrochempy.utils.misc import TYPE_COMPLEX, TYPE_FLOAT, TYPE_INTEGER
+        from spectrochempy.utils.misc import TYPE_COMPLEX
+        from spectrochempy.utils.misc import TYPE_FLOAT
+        from spectrochempy.utils.misc import TYPE_INTEGER
 
         if isinstance(x, _MaskedPrintOption):
             # a workaround to format masked values
@@ -386,7 +386,9 @@ def numpyprintoptions(
 
         elif isinstance(x, TYPE_FLOAT):
             fmt = "{:{lspace}.0{prec}g}".format(
-                x, prec=precision, lspace=precision + spc  # - 1,
+                x,
+                prec=precision,
+                lspace=precision + spc,  # - 1,
             )
 
         elif isinstance(x, TYPE_COMPLEX):
@@ -398,7 +400,7 @@ def numpyprintoptions(
             fmt = "{:>{lspace}d}".format(x, lspace=precision + spc)
 
         else:
-            fmt = "  {}".format(x)
+            fmt = f"  {x}"
 
         return fmt
 
@@ -415,5 +417,5 @@ def numpyprintoptions(
         suppress=suppress,
         formatter=formatter,
         linewidth=linewidth,
-        **kargs
+        **kargs,
     )

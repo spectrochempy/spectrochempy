@@ -1,70 +1,71 @@
-# -*- coding: utf-8 -*-
-# ======================================================================================
-# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory.
-# ======================================================================================
 """
-This module implements the NDMath class.
+NDMath class - Mathematical operations for N-dimensional arrays.
 """
-# TODO: test binary ufunc and put them in docs
 
-__all__ = []
-__dataset_methods__ = []
-
+# Standard library imports
 import copy as cpy
 import functools
 import inspect
 import operator
 import re
 import sys
+from collections.abc import Callable
+from collections.abc import Sequence
+from typing import Any
+from typing import TypeVar
 from warnings import catch_warnings
 
+# Third-party imports
 import numpy as np
 from quaternion import as_float_array
 
-from spectrochempy.application import error_, warning_
-from spectrochempy.core.units import DimensionalityError, Quantity, ur
+# Local imports
+from spectrochempy.application import error_
+from spectrochempy.application import warning_
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.units import DimensionalityError
+from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import ur
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
-from spectrochempy.utils.misc import TYPE_COMPLEX, as_quaternion, quat_as_complex_array
+from spectrochempy.utils.misc import TYPE_COMPLEX
+from spectrochempy.utils.misc import as_quaternion
+from spectrochempy.utils.misc import quat_as_complex_array
 from spectrochempy.utils.orderedset import OrderedSet
 from spectrochempy.utils.testing import assert_coord_almost_equal
 
+__all__ = []
+__dataset_methods__ = []
 
-# ======================================================================================
-# utilities
-# ======================================================================================
-def _reduce_method(method):
-    # Decorator
-    # ---------
-    # set the flag reduce to true for the _from numpy decorator. Must be placed above
-    # this decorator.
-    # e.g.,
+# Type variables
+ArrayLike = np.ndarray | NDArray
+DType = TypeVar("DType", bound=np.dtype[Any])
+
+
+def _reduce_method(method: Callable) -> Callable:
+    # Decorator that sets the reduce flag to true for _from_numpy decorator.
+    # Must be placed above this decorator.
+    # Example:
     #    @_reduce_method
     #    @_from_numpy_method
-    #    def somefunction(....):
-    #
+    #    def somefunction(...):
     method.reduce = True
     return method
 
 
 class _from_numpy_method:
-    # Decorator
-    # ---------
-    # This decorator assumes that the signature starts always by : (cls, ...)
-    # the second positional only argument can be `dataset` - in this case this mean that
-    # the function apply on a
-    # dataset
+    # Decorator that wraps numpy methods for NDArray classes.
+    # Assumes signature starts with (cls, ...).
+    # Second positional arg can be 'dataset' to indicate method applies to dataset.
 
     reduce = False
 
-    def __init__(self, method):
+    def __init__(self, method: Callable):
         self.method = method
 
-    def __get__(self, instance, cls):
+    def __get__(self, instance: Any, cls: type) -> Callable:
         @functools.wraps(self.method)
-        def func(*args, **kwargs):
+        def func(*args: Any, **kwargs: Any) -> Any:
             # Delayed import to avoid circular reference
             from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
             from spectrochempy.core.dataset.coord import Coord
@@ -80,7 +81,7 @@ class _from_numpy_method:
             if "dataset" not in pars:
                 if instance is not None:
                     klass = type(instance)
-                elif issubclass(cls, (NDDataset, Coord)):
+                elif issubclass(cls, NDDataset | Coord):
                     klass = cls
                 else:
                     # Probably a call from the API !
@@ -123,7 +124,7 @@ class _from_numpy_method:
                 )
 
             # in principle args should be void at this point
-            assert not args
+            assert not args  # noqa: S101
 
             # -----------------------------
             # Creation from scratch methods
@@ -158,7 +159,7 @@ class _from_numpy_method:
 
             # Be sure that the dataset passed to the numpy function are a numpy
             # (masked) array
-            if isinstance(argpos[0], (NDDataset, Coord)):
+            if isinstance(argpos[0], NDDataset | Coord):
                 # argpos[0] = argpos[0].real.masked_data
                 argpos[0] = argpos[0].masked_data
 
@@ -178,7 +179,7 @@ class _from_numpy_method:
             # apply the numpy operator on the masked data
             new = self.method(new, *argpos)
 
-            if not isinstance(new, (NDDataset, Coord)):
+            if not isinstance(new, NDDataset | Coord):
                 # if a numpy array or a scalar is returned after reduction
                 return new
 
@@ -352,7 +353,7 @@ def _logical_binary_ufuncs():
     return _extract_ufuncs(LOGICAL_BINARY_STR)
 
 
-class NDMath(object):
+class NDMath:
     """
     This class provides the math and some other array manipulation functionalities to  `NDArray` or  `Coord` .
 
@@ -732,8 +733,7 @@ class NDMath(object):
         evaluate to `True` because these are not equal to zero.
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
-        data = np.all(dataset, axis, keepdims=keepdims)
-        return data
+        return np.all(dataset, axis, keepdims=keepdims)
 
     @_reduce_method
     @_from_numpy_method
@@ -976,8 +976,7 @@ class NDMath(object):
         """
 
         axis, dim = cls.get_axis(dim, allows_none=True)
-        data = np.any(dataset, axis, keepdims=keepdims)
-        return data
+        return np.any(dataset, axis, keepdims=keepdims)
 
     @_from_numpy_method
     def arange(cls, start=0, stop=None, step=None, dtype=None, **kwargs):
@@ -2220,30 +2219,30 @@ class NDMath(object):
 
     def pipe(self, func, *args, **kwargs):
         """
-        Apply func(self, \*args, \*\*kwargs).
+        Apply func(self, *args, **kwargs).
 
         Parameters
         ----------
         func : function
-            Function to apply to the `NDDataset` .
-            \*args` , and `\*\*kwargs` are passed into `func` .
+            Function to apply to the `NDDataset`.
+            *args, and **kwargs are passed into `func`.
             Alternatively a `(callable, data_keyword)` tuple where
             `data_keyword` is a string indicating the keyword of
             `callable` that expects the array object.
         *args
-            Positional arguments passed into `func` .
+            Positional arguments passed into `func`.
         **kwargs
-            Keyword arguments passed into `func` .
+            Keyword arguments passed into `func`.
 
         Returns
         -------
         pipe
-           The return type of `func` .
+           The return type of `func`.
 
         Notes
         -----
         Use `pipe` when chaining together functions that expect
-        a `NDDataset` .
+        a `NDDataset`.
         """
         if isinstance(func, tuple):
             func, target = func
@@ -2306,7 +2305,7 @@ class NDMath(object):
         .. note::
             To sample :math:`\\mathrm{Uniform}[a, b)` with :math:`b > a`, multiply the
             output of random by (b-a) and
-            add a, i.e.: :math:`(b - a) * \\mathrm{random}() + a`\ .
+            add a, i.e.: :math:`(b - a) * \\mathrm{random}() + a`.
 
         Parameters
         ----------
@@ -2730,7 +2729,7 @@ class NDMath(object):
         is_quaternion = False
         compatible_units = fname in self.__compatible_units
 
-        for i, obj in enumerate(inputs):
+        for _i, obj in enumerate(inputs):
             # type
             objtype = type(obj).__name__
             objtypes.append(objtype)
@@ -2784,7 +2783,9 @@ class NDMath(object):
 
         return fname, inputs, objtypes, returntype, is_masked, is_quaternion
 
-    def _op(self, f, inputs, isufunc=False):
+    def _op(
+        self, f: Callable, inputs: Sequence[ArrayLike], isufunc: bool = False
+    ) -> tuple[np.ndarray, str | None, np.ndarray, str | None]:
         # Achieve an operation f on the objs
 
         fname = f.__name__
@@ -2818,10 +2819,7 @@ class NDMath(object):
 
         # Get the underlying data: If one of the input is masked, we will work with
         # masked array
-        if is_masked and is_dataset:
-            d = obj._umasked(obj.data, obj.mask)
-        else:
-            d = obj.data
+        d = obj._umasked(obj.data, obj.mask) if is_masked and is_dataset else obj.data
 
         # Do we have units?
         # We create a quantity q that will be used for unit calculations (without
@@ -2850,14 +2848,14 @@ class NDMath(object):
         if other is not None:
             # First the units may require to be compatible, and if thet are sometimes
             # they may need to be rescales
-            if othertype in ["NDDataset", "Coord", "Quantity"]:
-                # rescale according to units
-                if not other.unitless:
-                    if hasattr(obj, "units"):
-                        # obj is a Quantity
-                        if compatible_units:
-                            # adapt the other units to that of object
-                            other.ito(obj.units)
+            if (
+                othertype in ["NDDataset", "Coord", "Quantity"]
+                and not other.unitless
+                and hasattr(obj, "units")
+                and compatible_units
+            ):
+                # adapt the other units to that of object
+                other.ito(obj.units)
 
             # If all inputs are datasets BUT coordset mismatch.
             if (
@@ -2887,7 +2885,7 @@ class NDMath(object):
                             decimal=3,
                             data_only=True,
                         )  # we compare only data for this operation
-                    except TypeError:
+                    except TypeError as err:
                         # This happen when coord are None or empty
                         xobc = (
                             None
@@ -2903,12 +2901,12 @@ class NDMath(object):
                             pass
                         else:
                             raise CoordinatesMismatchError(
-                                obc[obj.dims[-1]].data, otc[obj.dims[-1]].data
-                            )
-                    except AssertionError:
+                                obc[obj.dims[-1]].data, otc[other.dims[-1]].data
+                            ) from err
+                    except AssertionError as err:
                         raise CoordinatesMismatchError(
-                            obc[obj.dims[-1]].data, otc[obj.dims[-1]].data
-                        )
+                            obc[obj.dims[-1]].data, otc[other.dims[-1]].data
+                        ) from err
 
                 # if other is multidimensional and as we are talking about element wise
                 # operation, we assume
@@ -2922,10 +2920,10 @@ class NDMath(object):
                                 decimal=3,
                                 data_only=True,
                             )  # we compare only data for this operation
-                        except AssertionError:
+                        except AssertionError as err:
                             raise CoordinatesMismatchError(
                                 obc[obj.dims[idx]].data, otc[other.dims[idx]].data
-                            )
+                            ) from err
 
             if othertype in ["NDDataset", "Coord"]:
                 # mask?
@@ -2938,11 +2936,7 @@ class NDMath(object):
                 # Not a NDArray.
 
                 # if it is a quantity than separate units and magnitude
-                if isinstance(other, Quantity):
-                    arg = other.m
-                else:
-                    # no units
-                    arg = other
+                arg = other.m if isinstance(other, Quantity) else other
 
             args.append(arg)
 
@@ -2990,10 +2984,7 @@ class NDMath(object):
 
             for i, otherq in enumerate(otherqs[:]):
                 if hasattr(otherq, "units"):
-                    if np.ma.isMaskedArray(otherq):
-                        otherqm = otherq.m.data
-                    else:
-                        otherqm = otherq.m
+                    otherqm = otherq.m.data if np.ma.isMaskedArray(otherq) else otherq.m
                     otherqs[i] = otherqm * check_require_units(fname, otherq.units)
                 else:
                     # here we want to change the behavior a pint regarding the addition
@@ -3044,9 +3035,8 @@ class NDMath(object):
                 if fname in ["arccos", "arcsin", "arctanh"]:
                     if np.any(np.abs(d) > 1):
                         d = d.astype(np.complex128)
-                elif fname in ["sqrt"]:
-                    if np.any(d < 0):
-                        d = d.astype(np.complex128)
+                elif fname in ["sqrt"] and np.any(d < 0):
+                    d = d.astype(np.complex128)
 
                 if fname == "sqrt":  # do not work with masked array
                     data = d ** (1.0 / 2.0)
@@ -3077,10 +3067,10 @@ class NDMath(object):
         else:
             # make a simple operation
             try:
-                if not is_quaternion:
-                    data = f(d, *args)
-                elif quaternion_aware and all(
-                    (arg.dtype not in TYPE_COMPLEX for arg in args)
+                if (
+                    not is_quaternion
+                    or quaternion_aware
+                    and all(arg.dtype not in TYPE_COMPLEX for arg in args)
                 ):
                     data = f(d, *args)
                 else:
@@ -3091,7 +3081,7 @@ class NDMath(object):
                     data = as_quaternion(datar, datai)
 
             except Exception as e:
-                raise ArithmeticError(e.args[0])
+                raise ArithmeticError(e.args[0]) from e
 
         # get possible mask
         if isinstance(data, np.ma.MaskedArray):
@@ -3122,7 +3112,7 @@ class NDMath(object):
     def _check_order(fname, inputs):
         objtypes = []
         returntype = None
-        for i, obj in enumerate(inputs):
+        for _i, obj in enumerate(inputs):
             # type
             objtype = type(obj).__name__
             objtypes.append(objtype)
@@ -3154,10 +3144,7 @@ class NDMath(object):
             else:
                 raise NotImplementedError()
 
-        if fname in ["exp"]:
-            f = getattr(np, fname)
-        else:
-            f = getattr(operator, fname)
+        f = getattr(np, fname) if fname in ["exp"] else getattr(operator, fname)
         return f, inputs
 
     @staticmethod
@@ -3165,10 +3152,7 @@ class NDMath(object):
         @functools.wraps(f)
         def func(self, other):
             fname = f.__name__
-            if not reflexive:
-                objs = [self, other]
-            else:
-                objs = [other, self]
+            objs = [self, other] if not reflexive else [other, self]
             fm, objs = self._check_order(fname, objs)
 
             if hasattr(self, "history"):
@@ -3180,8 +3164,7 @@ class NDMath(object):
                 history = None
 
             data, units, mask, returntype = self._op(fm, objs)
-            new = self._op_result(data, units, mask, history, returntype)
-            return new
+            return self._op_result(data, units, mask, history, returntype)
 
         return func
 
@@ -3260,10 +3243,10 @@ class _ufunc:
 
     @property
     def __doc__(self):
-        doc = f"""
-            {_unary_ufuncs()[self.name].split('->')[-1].strip()}
+        return f"""
+            {_unary_ufuncs()[self.name].split("->")[-1].strip()}
 
-            Wrapper of the numpy.ufunc function `np.{self.name}(dataset)` .
+            Wrapper of the numpy.ufunc function `np.{self.name}(dataset)`.
 
             Parameters
             ----------
@@ -3282,8 +3265,7 @@ class _ufunc:
             Notes
             -----
             Numpy Ufuncs referenced in our documentation can be directly applied to
-            `NDDataset` or  `Coord` type
-            of SpectrochemPy objects.
+            `NDDataset` or `Coord` type of SpectroChemPy objects.
             Most of these Ufuncs, however, instead of returning a numpy array, will
             return the same type of object.
 
@@ -3298,7 +3280,6 @@ class _ufunc:
 
             >>> ds_transformed = np.{self.name}(ds)
             """
-        return doc
 
 
 thismodule = sys.modules[__name__]

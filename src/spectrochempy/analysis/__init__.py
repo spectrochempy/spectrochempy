@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -6,5 +5,5 @@
 # ======================================================================================
 """
 Package with modules related to the analysis of `NDDataset`\'s or
-`Project`\ 's.
+`Project`\\ 's.
 """

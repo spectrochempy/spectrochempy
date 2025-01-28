@@ -45,7 +45,6 @@ files.
 Copied and adapted from NMRGLUE (See NMRGLUE_LICENCES in root folder LICENSES)
 """
 
-import io
 import locale
 
 __developer_info__ = """
@@ -248,10 +247,9 @@ class unit_conversion:
         """
         if isinstance(val, str):
             return self.__str2pnt(val)
-        else:
-            if unit is None:
-                raise ValueError("invalid unit type")
-            return self.__unit2pnt(val, unit)
+        if unit is None:
+            raise ValueError("invalid unit type")
+        return self.__unit2pnt(val, unit)
 
     # User functions
     def f(self, val, unit=None):
@@ -463,7 +461,7 @@ def uc_from_freqscale(scale, obs, unit="ppm"):
             car = (min - dx / 2.0 + (max - min) / 2.0) / 1.0e3
 
     else:
-        mesg = "{} is not a supported unit.".format(unit)
+        mesg = f"{unit} is not a supported unit."
         raise ValueError(mesg)
 
     return unit_conversion(size, complex, sw, obs, car)
@@ -478,7 +476,7 @@ def open_towrite(filename, overwrite=False, mode="wb"):
     """
     # check if file exists and overwrite if False
     if os.path.exists(filename) and (overwrite is False):
-        raise IOError("File exists, recall with overwrite=True")
+        raise OSError("File exists, recall with overwrite=True")
 
     p, fn = os.path.split(filename)  # split into filename and path
     # create directories if needed
@@ -496,26 +494,26 @@ def open_towrite(filename, overwrite=False, mode="wb"):
 
 
 def ndfrom_iter(shape, slices):
-    ch = [range(lenx)[sX] for lenx, sX in zip(shape, slices)]
+    ch = [range(lenx)[sX] for lenx, sX in zip(shape, slices, strict=False)]
     return itertools.product(*ch)
 
 
 def ndto_iter(shape, slices):
-    ich = [range(len(range(lenx)[sX])) for lenx, sX in zip(shape, slices)]
+    ich = [range(len(range(lenx)[sX])) for lenx, sX in zip(shape, slices, strict=False)]
     return itertools.product(*ich)
 
 
 def ndtofrom_iter(shape, slices):
-    ch = [range(lenx)[sX] for lenx, sX in zip(shape, slices)]
+    ch = [range(lenx)[sX] for lenx, sX in zip(shape, slices, strict=False)]
     ich = [range(len(i)) for i in ch]
-    return zip(itertools.product(*ich), itertools.product(*ch))
+    return zip(itertools.product(*ich), itertools.product(*ch), strict=False)
 
 
 def size_and_ndtofrom_iter(shape, slices):
-    ch = [range(lenx)[sX] for lenx, sX in zip(shape, slices)]
+    ch = [range(lenx)[sX] for lenx, sX in zip(shape, slices, strict=False)]
     s = [len(i) for i in ch]
     ich = [range(i) for i in s]
-    return s, zip(itertools.product(*ich), itertools.product(*ch))
+    return s, zip(itertools.product(*ich), itertools.product(*ch), strict=False)
 
 
 # index2trace and trace2index functions
@@ -578,7 +576,7 @@ def trace2index_opp(shape, ntrace):
     to_add = list(trace2index_flat([2] * n, r))[::-1]
     pshape = [i // 2 for i in shape]
     base = list(trace2index_flat(pshape, q))
-    total = [b * 2 + a for b, a in zip(base, to_add)]
+    total = [b * 2 + a for b, a in zip(base, to_add, strict=False)]
     return tuple(total)
 
 
@@ -608,7 +606,7 @@ def trace2index_reg(shape, ntrace):
     to_add = list(trace2index_flat([2] * n, r))
     pshape = [i // 2 for i in shape]
     base = list(trace2index_flat(pshape, q))
-    total = [b * 2 + a for b, a in zip(base, to_add)]
+    total = [b * 2 + a for b, a in zip(base, to_add, strict=False)]
     return tuple(total)
 
 
@@ -708,8 +706,7 @@ def create_data(data):
     """
     if np.iscomplexobj(data):
         return np.array(data, dtype="complex128")
-    else:
-        return np.array(data, dtype="int32")
+    return np.array(data, dtype="int32")
 
 
 # universal dictionary functions
@@ -1021,7 +1018,7 @@ def read_fid(
 
     """
     if os.path.isdir(dir) is not True:
-        raise IOError("directory %s does not exist" % (dir))
+        raise OSError("directory %s does not exist" % (dir))
 
     # Take a shot at reading the procs file
     if read_procs:
@@ -1048,10 +1045,10 @@ def read_fid(
                 bin_file = "ser"
             else:
                 mesg = "No Bruker binary file could be found in %s"
-                raise IOError(mesg % (dir))
+                raise OSError(mesg % (dir))
         else:
             mesg = "No Bruker binary file could be found in %s"
-            raise IOError(mesg % (dir))
+            raise OSError(mesg % (dir))
 
     if read_acqus:
         # read the acqus_files and add to the dictionary
@@ -1329,7 +1326,7 @@ def guess_shape(dic):
     # replace td0,td1,td2,td3 in loop list
     rep = {"td0": td0, "td1": td1, "td2": td2, "td3": td3}
     for i, v in enumerate(loop):
-        if v in rep.keys():
+        if v in rep:
             loop[i] = rep[v]
 
     # if the loop variables contains strings, return current shape
@@ -1475,7 +1472,7 @@ def read_pdata(
     # TODO read_pdata_lowmem, write_pdata
 
     if os.path.isdir(dir) is not True:
-        raise IOError("directory %s does not exist" % (dir))
+        raise OSError("directory %s does not exist" % (dir))
 
     # find binary files
     if bin_files is None:
@@ -1504,7 +1501,7 @@ def read_pdata(
             else:
                 bin_files = ["3rrr"]
         else:
-            raise IOError("No Bruker binary file could be found in %s" % (dir))
+            raise OSError("No Bruker binary file could be found in %s" % (dir))
 
     for f in bin_files.copy():
         if not os.path.isfile(os.path.join(dir, f)):
@@ -1574,8 +1571,7 @@ def read_pdata(
 
     if len(data) == 1:
         return dic, data[0]
-    else:
-        return dic, data
+    return dic, data
 
 
 def scale_pdata(dic, data, reverse=False):
@@ -1605,8 +1601,7 @@ def scale_pdata(dic, data, reverse=False):
 
     if reverse:
         return data * scale
-    else:
-        return data / scale
+    return data / scale
 
 
 def array_to_int(data):
@@ -1727,13 +1722,12 @@ def read_pdata_binary(
     # submatrix reordering
     if submatrix_shape is None or shape is None:
         return dic, data
-    else:
-        try:
-            data = reorder_submatrix(data, shape, submatrix_shape)
-            return dic, data
-        except Exception:
-            warn("unable to reorder data")
-            return dic, data
+    try:
+        data = reorder_submatrix(data, shape, submatrix_shape)
+        return dic, data
+    except Exception:
+        warn("unable to reorder data")
+        return dic, data
 
 
 def reorder_submatrix(data, shape, submatrix_shape, reverse=False):
@@ -1766,7 +1760,7 @@ def reorder_submatrix(data, shape, submatrix_shape, reverse=False):
     if len(submatrix_shape) == 1 or len(shape) == 1:
         return data
 
-    sub_per_dim = [int(i / j) for i, j in zip(shape, submatrix_shape)]
+    sub_per_dim = [int(i / j) for i, j in zip(shape, submatrix_shape, strict=False)]
     nsubs = np.prod(sub_per_dim)
 
     if reverse:
@@ -1777,7 +1771,8 @@ def reorder_submatrix(data, shape, submatrix_shape, reverse=False):
 
     for sub_num, sub_idx in enumerate(np.ndindex(tuple(sub_per_dim))):
         sub_slices = [
-            slice(i * j, (i + 1) * j) for i, j in zip(sub_idx, submatrix_shape)
+            slice(i * j, (i + 1) * j)
+            for i, j in zip(sub_idx, submatrix_shape, strict=False)
         ]
         if reverse:
             rdata[sub_num] = data[tuple(sub_slices)]
@@ -1852,13 +1847,10 @@ def get_data(f, big, isfloat):
     if isfloat:
         if big:
             return np.frombuffer(f.read(), dtype=">f8")
-        else:
-            return np.frombuffer(f.read(), dtype="<f8")
-    else:
-        if big:
-            return np.frombuffer(f.read(), dtype=">i4")
-        else:
-            return np.frombuffer(f.read(), dtype="<i4")
+        return np.frombuffer(f.read(), dtype="<f8")
+    if big:
+        return np.frombuffer(f.read(), dtype=">i4")
+    return np.frombuffer(f.read(), dtype="<i4")
 
 
 def get_trace(f, num_points, big, isfloat):
@@ -1869,16 +1861,13 @@ def get_trace(f, num_points, big, isfloat):
         if big:
             bsize = num_points * np.dtype(">f8").itemsize
             return np.frombuffer(f.read(bsize), dtype=">f8")
-        else:
-            bsize = num_points * np.dtype("<f8").itemsize
-            return np.frombuffer(f.read(bsize), dtype="<f8")
-    else:
-        if big:
-            bsize = num_points * np.dtype(">i4").itemsize
-            return np.frombuffer(f.read(bsize), dtype=">i4")
-        else:
-            bsize = num_points * np.dtype("<i4").itemsize
-            return np.frombuffer(f.read(bsize), dtype="<i4")
+        bsize = num_points * np.dtype("<f8").itemsize
+        return np.frombuffer(f.read(bsize), dtype="<f8")
+    if big:
+        bsize = num_points * np.dtype(">i4").itemsize
+        return np.frombuffer(f.read(bsize), dtype=">i4")
+    bsize = num_points * np.dtype("<i4").itemsize
+    return np.frombuffer(f.read(bsize), dtype="<i4")
 
 
 # data manipulation functions
@@ -1942,7 +1931,7 @@ def read_jcamp(filename, encoding=locale.getpreferredencoding()):
     """
     dic = {"_coreheader": [], "_comments": []}  # create empty dictionary
 
-    with io.open(filename, "r", encoding=encoding) as f:
+    with open(filename, encoding=encoding) as f:
         while True:  # loop until end of file is found
             line = f.readline().rstrip()  # read a line
             if line == "":  # end of file found
@@ -1951,7 +1940,7 @@ def read_jcamp(filename, encoding=locale.getpreferredencoding()):
             if line[:6] == "##END=":
                 # print("End of file")
                 break
-            elif line[:2] == "$$":
+            if line[:2] == "$$":
                 dic["_comments"].append(line)
             elif line[:2] == "##" and line[2] != "$":
                 dic["_coreheader"].append(line)
@@ -2019,19 +2008,18 @@ def parse_jcamp_value(text):
     """
     if text == "":
         return None
-    elif text.startswith("<") and text.endswith(">"):
+    if text.startswith("<") and text.endswith(">"):
         return text[1:-1]  # remove < and >
+    if "." in text or "e" in text or "inf" in text:
+        try:
+            return float(text)
+        except ValueError:
+            return text
     else:
-        if "." in text or "e" in text or "inf" in text:
-            try:
-                return float(text)
-            except ValueError:
-                return text
-        else:
-            try:
-                return int(text)
-            except ValueError:
-                return text
+        try:
+            return int(text)
+        except ValueError:
+            return text
 
 
 def read_pprog(filename):
@@ -2071,7 +2059,7 @@ def read_pprog(filename):
     """
 
     # open the file
-    f = open(filename, "r")
+    f = open(filename)
 
     # initialize lists and dictionaries
     var = dict()
@@ -2117,9 +2105,8 @@ def read_pprog(filename):
                     pass
                     # print(line,"--Statement")
                 continue
-            else:
-                # print(line,"--Statement")
-                continue
+            # print(line,"--Statement")
+            continue
 
         # loops begin with lo
         # syntax is: lo to N time M

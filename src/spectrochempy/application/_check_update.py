@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -9,7 +8,8 @@ Check SpectroChemPy updates
 """
 import json
 import time
-from datetime import date, timedelta
+from datetime import date
+from datetime import timedelta
 from os import environ
 from pathlib import Path
 from warnings import warn
@@ -43,7 +43,7 @@ def _get_pypi_version():
         try:
             response = requests.get(url)
             if response.status_code != 200:  # pragma: no cover
-                return
+                return None
             break  # exit the while loop in case of success
 
         except (
@@ -52,9 +52,8 @@ def _get_pypi_version():
         ):  # pragma: no cover
             if time.time() > start_time + connection_timeout:
                 # 'Unable to get updates after {} seconds of ConnectionErrors'
-                return
-            else:
-                time.sleep(1)  # attempting once every second
+                return None
+            time.sleep(1)  # attempting once every second
 
     releases = json.loads(response.text)["releases"]
     versions = sorted(releases, key=parse_version)

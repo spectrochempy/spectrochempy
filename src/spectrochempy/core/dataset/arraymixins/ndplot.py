@@ -1,26 +1,53 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module defines the `NDPlot` class in which generic `NDDataset` plot methods are defined.
+NDPlot Module
+============
+
+This module defines plotting functionality for NDDataset objects. Provides:
+
+- 1D, 2D and 3D plotting capabilities
+- Plot preferences management
+- Figure and axes management
+- Interactive plotting tools
+
+Classes
+-------
+NDPlot
+    Base class providing plotting methods for NDDataset objects
+PreferencesSet
+    Settings manager for plot preferences
+
+Notes
+-----
+- Supports both Matplotlib and TODO: Plotly backends
+- Handles unit-aware plotting
+- Manages plot style preferences
 """
 
 __all__ = ["plot"]
 
 import re
 import textwrap
+from typing import Any
 
 import matplotlib as mpl
 from cycler import cycler
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_rgba
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from traitlets import Dict, HasTraits, Instance, TraitError, Union, default
+from traitlets import Dict
+from traitlets import HasTraits
+from traitlets import Instance
+from traitlets import TraitError
+from traitlets import Union
+from traitlets import default
 
-from spectrochempy.application import error_, plot_preferences
+from spectrochempy.application import error_
+from spectrochempy.application import plot_preferences
 from spectrochempy.core import preferences
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.plotters.plot1d import plot_1D
@@ -28,24 +55,20 @@ from spectrochempy.core.plotters.plot2d import plot_2D
 from spectrochempy.core.plotters.plot3d import plot_3D
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.optional import import_optional_dependency
-from spectrochempy.utils.plots import _Axes, _Axes3D, get_figure
+from spectrochempy.utils.plots import _Axes
+from spectrochempy.utils.plots import _Axes3D
+from spectrochempy.utils.plots import get_figure
+from spectrochempy.utils.print import TBold
+from spectrochempy.utils.print import colored
 
 go = import_optional_dependency("plotly.graph_objects", errors="ignore")
 HAS_PLOTLY = go is not None
 
-# from spectrochempy.utils.decorators import deprecated
 
-
-# ======================================================================================
-# Management of the preferences for datasets
-# ======================================================================================
 class PreferencesSet(Meta):
-    """
-    Preferences setting.
-    """
+    """Settings manager for plot preferences."""
 
     def __getitem__(self, key):
-
         # search on the preferences
         if self.parent is not None:
             res = getattr(self.parent, f"{self.name}_{key}")
@@ -60,7 +83,7 @@ class PreferencesSet(Meta):
                     res = PreferencesSet(
                         parent=self,
                         name=key,
-                        **dict([(n, getattr(self, f"{key}_{n}")) for n in alias]),
+                        **{n: getattr(self, f"{key}_{n}") for n in alias},
                     )
                 else:
                     res = getattr(self, alias)
@@ -75,7 +98,6 @@ class PreferencesSet(Meta):
         return res
 
     def __setitem__(self, key, value):
-
         # also change the corresponding preferences
         if hasattr(plot_preferences, key):
             try:
@@ -106,8 +128,12 @@ class PreferencesSet(Meta):
     # ----------------------------------------------------------------------------------
     # Private methods
     # ----------------------------------------------------------------------------------
-    def _get_alias(self, key):
-
+    def _get_alias(self, key: str) -> list[str]:
+        # Find alias matches for matplotlib parameter names
+        # Args:
+        #    key: Parameter name to find aliases for
+        # Returns:
+        #    List of matched parameter names
         alias = []
         lkeyp = len(key) + 1
 
@@ -118,8 +144,7 @@ class PreferencesSet(Meta):
                 alias.append(item)
 
         if alias:
-
-            starts = any([par.startswith(key) for par in alias])
+            starts = any(par.startswith(key) for par in alias)
             # ends = any([par.endswith(key) for par in alias])
 
             if len(alias) > 1:
@@ -128,14 +153,13 @@ class PreferencesSet(Meta):
                     raise KeyError(
                         f"Found several keys for {key}: {alias}, so it is ambiguous. Please choose on one of them"
                     )
-                else:
-                    if any([par.startswith(key) for par in alias]):
-                        # we return the group of parameters
-                        pars = []
-                        for par in alias:
-                            if par.startswith(key):
-                                pars.append(par[lkeyp:])
-                        return pars
+                if any(par.startswith(key) for par in alias):
+                    # we return the group of parameters
+                    pars = []
+                    for par in alias:
+                        if par.startswith(key):
+                            pars.append(par[lkeyp:])
+                    return pars
             else:
                 return alias[0][:-lkeyp]
 
@@ -144,10 +168,8 @@ class PreferencesSet(Meta):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    def reset(self):
-        """
-        Remove the matplotlib_user json file to reset to defaults.
-        """
+    def reset(self) -> None:
+        """Reset plot preferences to defaults."""
         config_dir = pathclean(preferences.cfg.config_dir)
         f = config_dir / "PlotPreferences.json"
         if f.exists():
@@ -183,24 +205,19 @@ class PreferencesSet(Meta):
 
         self._data = {}
 
-    def all(self):
-        """
-        List all parameters with their current and default value.
-        """
+    def all(self) -> None:
+        """List all preferences with current and default values."""
         for key in plot_preferences.trait_names(config=True):
             self.help(key)
 
-    def help(self, key):
-        """
-        Display information on a given parameter.
+    def help(self, key: str) -> None:
+        """Display help for a preference parameter.
 
         Parameters
         ----------
         key : str
-            Name of the parameter for which we want information.
+            Parameter name to show help for
         """
-        from spectrochempy.utils.print import TBold, colored
-
         value = self[key]
         trait = plot_preferences.traits()[key]
         default = trait.default_value
@@ -218,35 +235,37 @@ class PreferencesSet(Meta):
         value = colored(value, "GREEN")
         default = colored(default, "BLUE")
 
-        print(TBold(f"{key} = {value} \t[default: {default}]"))
-        print(f"{help}\n")
+        print(TBold(f"{key} = {value} \t[default: {default}]"))  # noqa: T201
+        print(f"{help}\n")  # noqa: T201
 
-    def makestyle(self, stylename="mydefault", to_mpl=False):
-        """
-        Create Matplotlib Style files.
+    def makestyle(
+        self, stylename: str = "mydefault", to_mpl: bool = False
+    ) -> str | None:
+        """Create a matplotlib style file.
 
         Parameters
         ----------
-        stylename :
-        to_mpl :
+        stylename : str
+            Name for the style file
+        to_mpl : bool
+            Whether to also save to matplotlib's style directory
 
         Returns
-        --------
-        stylename
-            Name of the style
-
+        -------
+        str
+            Name of created style file if successful
         """
         if stylename.startswith("scpy"):
             error_(
                 NameError,
                 "Style name starting with `scpy` are READ-ONLY. Please use an another style name.",
             )
-            return
+            return None
 
         txt = ""
         sline = ""
 
-        for key in mpl.rcParams.keys():
+        for key in mpl.rcParams:
             if key in [
                 "animation.avconv_args",
                 "animation.avconv_path",
@@ -337,92 +356,40 @@ class PreferencesSet(Meta):
         return stylename
 
 
-# ======================================================================================
-# Class NDPlot to handle plotting of datasets
-# ======================================================================================
 class NDPlot(HasTraits):
-    """
-    Plotting interface for `NDDataset` .
+    """Plotting interface for NDDataset objects.
 
-    This class is used as basic plotting interface of the `NDDataset` .
+    Provides methods for:
+    - 1D, 2D and 3D plotting
+    - Plot customization
+    - Figure and axes management
+    - Plot style control
     """
 
-    # Instance of the current matplotlib axis defined for a NDArray object.
-    # The _Axes class subclass matplotlib axes in order to allow methods with
-    # Quantities as arguments
     _ax = Instance(_Axes, allow_none=True)
-
-    # The figure on which this NDArray can be plotted
-    if HAS_PLOTLY:
-        _fig = Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
-    else:
-        _fig = Instance(plt.Figure, allow_none=True)
-
-    # A list of axes on which this dataset and other elements such as projections
-    # and colorbar can be plotted
+    _fig = (
+        Union((Instance(plt.Figure), Instance(go.Figure)), allow_none=True)
+        if HAS_PLOTLY
+        else Instance(plt.Figure, allow_none=True)
+    )
     _ndaxes = Dict(Instance(_Axes))
-
-    # Metadata to store plot parameters
     _preferences = Instance(PreferencesSet, allow_none=True)
 
-    # ----------------------------------------------------------------------------------
-    # Generic plotter and plot related methods or properties
-    # ----------------------------------------------------------------------------------
-    def plot(self, method=None, **kwargs):
-        """
-        Generic plot function.
-
-        This apply to a `NDDataset` but actually delegate the work to a plotter defined
-        by the keyword parameter `method` .
+    def plot(self, method: str | None = None, **kwargs: Any) -> _Axes | None:
+        """Plot the dataset using the specified method.
 
         Parameters
         ----------
-        method : str, optional, default: "generic"
-            Specify with plot method to use.
+        method : str, optional
+            Plot method to use. If None, chooses based on dataset dimensionality
         **kwargs
-            Any optional parameters to pass to the plot method.
-            See plot_1D, plot_2D and plot_3D for a list of possible arguments.
+            Additional plot options passed to the specific plot method
 
         Returns
         -------
-        axe
-            The axe instance on which the plot has bee performed.
-
-        See Also
-        --------
-        plot_1D
-        plot_pen
-        plot_bar
-        plot_scatter_pen
-        plot_multiple
-        plot_2D
-        plot_stack
-        plot_map
-        plot_image
-        plot_1D
-        plot_surface
-        plot_waterfall
-        multiplot
-
-        Examples
-        --------
-
-        For 1D data, the default plot is done with method scatter
-
-        >>> nd = scp.NDDataset([1, 2, 3])
-        >>> _ = nd.plot()  # default to method="scatter"
-
-        or
-        >>> _ = nd.plot(method="scatter")
-
-        Equivalently, one can also specify the method to use as follow:
-        >>> _ = nd.plot_scatter()
-        >>> _ = nd.plot_1D()
-
-        For
-
+        _Axes
+            Matplotlib axes containing the plot
         """
-
         # --------------------------------------------------------------------
         # select plotter depending on the dimension of the data
         # --------------------------------------------------------------------
@@ -432,10 +399,9 @@ class NDPlot(HasTraits):
                 # no plotter found
                 error_(
                     NameError,
-                    "The specified plotter for method "
-                    "`{}` was not found!".format(method),
+                    f"The specified plotter for method `{method}` was not found!",
                 )
-                raise IOError
+                raise OSError
         else:
             _plotter = self._plot_generic
 
@@ -443,21 +409,19 @@ class NDPlot(HasTraits):
         # --------------------
         return _plotter(**kwargs)
 
-    # ----------------------------------------------------------------------------------
-    # plotter: plot_generic
-    # ----------------------------------------------------------------------------------
-    def _plot_generic(self, **kwargs):
-
+    def _plot_generic(self, **kwargs: Any) -> _Axes | None:
+        # Choose plotting method based on dataset dimensionality
+        # Args:
+        #    **kwargs: Plot options
+        # Returns:
+        #    Matplotlib axes if successful
         if self._squeeze_ndim == 1:
-
             ax = plot_1D(self, **kwargs)
 
         elif self._squeeze_ndim == 2:
-
             ax = plot_2D(self, **kwargs)
 
         elif self._squeeze_ndim == 3:
-
             ax = plot_3D(self, **kwargs)
 
         else:
@@ -473,11 +437,16 @@ class NDPlot(HasTraits):
         if self._fig is not None:
             plt.close(self._fig)
 
-    # ----------------------------------------------------------------------------------
-    # setup figure properties
-    # ----------------------------------------------------------------------------------
-    def _figure_setup(self, ndim=1, method=None, **kwargs):
-
+    def _figure_setup(
+        self, ndim: int = 1, method: str | None = None, **kwargs: Any
+    ) -> str:
+        # Set up figure and axes for plotting
+        # Args:
+        #    ndim: Number of dimensions to plot
+        #    method: Plot method to use
+        #    **kwargs: Additional options
+        # Returns:
+        #    Method name to use for plotting
         prefs = self.preferences
 
         if not method:
@@ -495,7 +464,7 @@ class NDPlot(HasTraits):
 
         # is it a twin figure? In such case if ax and hold are also provided,
         # they will be ignored
-        tax = kwargs.get("twinx", None)
+        tax = kwargs.get("twinx")
         if tax is not None:
             if issubclass(type(tax), mpl.axes.Axes):
                 clear = False
@@ -522,7 +491,7 @@ class NDPlot(HasTraits):
                 ax.name = "main"
                 self.ndaxes["main"] = ax
             else:
-                raise ValueError("{} is not recognized as a valid Axe".format(ax))
+                raise ValueError(f"{ax} is not recognized as a valid Axe")
 
         elif self._fig.get_axes():
             # no ax parameters in keywords, so we need to get those existing
@@ -543,10 +512,10 @@ class NDPlot(HasTraits):
             self.ndaxes["main"] = ax
 
         # set the prop_cycle according to preference
-        prop_cycle = eval(prefs.axes.prop_cycle)
+        prop_cycle = eval(prefs.axes.prop_cycle)  # noqa: S307
         if isinstance(prop_cycle, str):
             # not yet evaluated
-            prop_cycle = eval(prop_cycle)
+            prop_cycle = eval(prop_cycle)  # noqa: S307
 
         colors = prop_cycle.by_key()["color"]
         for i, c in enumerate(colors):
@@ -644,10 +613,11 @@ class NDPlot(HasTraits):
 
         return method
 
-    # ----------------------------------------------------------------------------------
-    # resume a figure plot
-    # ----------------------------------------------------------------------------------
-    def _plot_resume(self, origin, **kwargs):
+    def _plot_resume(self, origin: Any, **kwargs: Any) -> None:
+        # Clean up after plotting and handle plot output
+        # Args:
+        #    origin: Original dataset
+        #    **kwargs: Plot options
         # put back the axes in the original dataset
         # (we have worked on a copy in plot)
         if not kwargs.get("data_transposed", False):
@@ -669,7 +639,7 @@ class NDPlot(HasTraits):
 
         origin._fig = self._fig
 
-        loc = kwargs.get("legend", None)
+        loc = kwargs.get("legend")
         if isinstance(loc, str) or (
             isinstance(loc, tuple) and len(loc) == 2 and isinstance(loc[0], float)
         ):
@@ -689,14 +659,14 @@ class NDPlot(HasTraits):
                 for item in val:
                     if "=" in item:
                         k, v = item.split("=")
-                        kws[k.strip()] = eval(v)
+                        kws[k.strip()] = eval(v)  # noqa: S307
                     else:
-                        ags.append(eval(item))
+                        ags.append(eval(item))  # noqa: S307
                 getattr(self.ndaxes["main"], com)(*ags, **kws)  # TODO: improve this
 
         # output command should be after all plot commands
 
-        savename = kwargs.get("output", None)
+        savename = kwargs.get("output")
         if savename is not None:
             # we save the figure with options found in kwargs
             # starting with `save`
@@ -719,8 +689,7 @@ class NDPlot(HasTraits):
     @default("_preferences")
     def _preferences_default(self):
         # Reset all preferences
-        prefs = PreferencesSet()
-        return prefs
+        return PreferencesSet()
 
     @property
     def preferences(self):

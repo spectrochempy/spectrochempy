@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -22,17 +21,19 @@ import xlrd
 
 from spectrochempy.application import info_
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.read_omnic import read_omnic
 from spectrochempy.utils.docreps import _docstring
-from spectrochempy.utils.file import get_directory_name, get_filenames
+from spectrochempy.utils.file import get_directory_name
+from spectrochempy.utils.file import get_filenames
 
 _docstring.delete_params("Importer.see_also", "read_carroucell")
 
 
 @_docstring.dedent
 def read_carroucell(directory=None, **kwargs):
-    """
+    r"""
     Open :file:`.spa` files in a directory after a :term:`carroucell` experiment.
 
     The files for a given sample are grouped in `NDDataset`\ s (sorted by
@@ -98,9 +99,9 @@ def _read_carroucell(*args, **kwargs):
     if not directory:  # pragma: no cover
         # probably cancel has been chosen in the open dialog
         info_("No directory was selected.")
-        return
+        return None
 
-    spectra = kwargs.get("spectra", None)
+    spectra = kwargs.get("spectra")
     discardbg = kwargs.get("discardbg", True)
     delta_clocks = datetime.timedelta(seconds=kwargs.get("delta_clocks", 0))
 
@@ -167,7 +168,7 @@ def _read_carroucell(*args, **kwargs):
                 try:
                     time = datetime.datetime.strptime(
                         sheet.cell(i, 0).value, "%d/%m/%y %H:%M:%S"
-                    ).replace(tzinfo=datetime.timezone.utc)
+                    ).replace(tzinfo=datetime.UTC)
                     if ti <= time <= tf:
                         t.append(time)
                         T.append(sheet.cell(i, 4).value)

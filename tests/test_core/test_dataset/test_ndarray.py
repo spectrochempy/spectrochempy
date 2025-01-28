@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 from copy import copy, deepcopy
 
@@ -441,7 +440,6 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
 
 
 def test_ndarray_slicing(refarray, ndarray):
-
     ref = refarray
     nd = ndarray.copy()
     assert not nd.is_masked

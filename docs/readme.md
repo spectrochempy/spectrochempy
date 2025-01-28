@@ -1,3 +1,5 @@
+# DOCUMENTATION Readme
+
 This directory contains the sources ans tools necessary to build the spectrochempy
 documentation using Sphinx.
 

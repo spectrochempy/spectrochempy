@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -16,14 +15,19 @@ import numpy as np
 import traitlets as tr
 
 from spectrochempy.application import error_
-from spectrochempy.core.dataset.arraymixins.ndmath import NDMath, _set_operators
+from spectrochempy.core.dataset.arraymixins.ndmath import NDMath
+from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
-from spectrochempy.core.units import Quantity, ur
-from spectrochempy.utils.compare import is_iterable, is_number
-from spectrochempy.utils.constants import INPLACE, NOMASK
+from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import ur
+from spectrochempy.utils.compare import is_iterable
+from spectrochempy.utils.compare import is_number
+from spectrochempy.utils.constants import INPLACE
+from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docreps import _docstring
-from spectrochempy.utils.numutils import get_n_decimals, spacings
+from spectrochempy.utils.numutils import get_n_decimals
+from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import colored_output
 
 
@@ -32,7 +36,7 @@ from spectrochempy.utils.print import colored_output
 # ======================================================================================
 @tr.signature_has_traits
 class Coord(NDMath, NDArray):
-    """
+    r"""
     Explicit coordinates for a dataset along a given axis.
 
     The coordinates of a `NDDataset` can be created using the  `Coord`
@@ -95,7 +99,7 @@ class Coord(NDMath, NDArray):
         variation of spacing in % below which the coordinate is linearized. Set it to
     rounding : bool, optional, default=True
         If True, the data will be rounded to the number of significant
-        digits given by `sigdigits`\ .
+        digits given by `sigdigits`.
     sigdigits : int, optional, default=4
         Number of significant digits to be used for rounding and linearizing
         the data.
@@ -104,13 +108,13 @@ class Coord(NDMath, NDArray):
         data.
     offset : `float` instance, optional
         The offset of the axis. This is used to generate an evenly values spaced axis
-        together with `ìncrement` and `size`\ .
+        together with `ìncrement` and `size`.
     increment : `float` instance, optional
         The increment between two consecutive values of the axis. This is used to
-        generate an evenly values spaced axis together with `offset` and `size`\ .
+        generate an evenly values spaced axis together with `offset` and `size`.
     size : `int` instance, optional
         The size of the axis. This is used to generate an evenly values spaced axis
-        together with `offset` and `increment`\ .
+        together with `offset` and `increment`.
 
     See Also
     --------
@@ -212,9 +216,11 @@ class Coord(NDMath, NDArray):
     @property
     def reversed(self):
         """Whether the axis is reversed."""
-        if self.units == "ppm":
-            return True
-        elif self.units == "1 / centimeter" and "raman" not in self.title.lower():
+        if (
+            self.units == "ppm"
+            or self.units == "1 / centimeter"
+            and "raman" not in self.title.lower()
+        ):
             return True
         return False
 
@@ -519,8 +525,7 @@ class Coord(NDMath, NDArray):
         if isinstance(res, tuple):
             if return_error:
                 return res
-            else:
-                return res[0]
+            return res[0]
         return res
 
     # TODO: new method to replace the old loc2index
@@ -658,7 +663,7 @@ class Coord(NDMath, NDArray):
             out += f"{self._str_shape().rstrip()}\n"
         out += f"        title: {self.title}\n" if self.title else ""
         if self.has_data:
-            out += "{}\n".format(self._str_value(header=header))
+            out += f"{self._str_value(header=header)}\n"
         elif self.is_empty and not self.is_labeled:
             out += header.replace("...", "\0Undefined\0")
 
@@ -666,7 +671,7 @@ class Coord(NDMath, NDArray):
             header = "       labels: ... \n"
             text = str(self.labels.T).strip()
             if "\n" not in text:  # single line!
-                out += header.replace("...", "\0\0{}\0\0".format(text))
+                out += header.replace("...", f"\0\0{text}\0\0")
             else:
                 out += header
                 out += "\0\0{}\0\0".format(textwrap.indent(text.strip(), " " * 9))
@@ -683,8 +688,7 @@ class Coord(NDMath, NDArray):
 
         if not self._html_output:
             return colored_output(out)
-        else:
-            return out
+        return out
 
     def __repr__(self):
         out = self._repr_value().rstrip()
@@ -721,7 +725,7 @@ class Coord(NDMath, NDArray):
     # ----------------------------------------------------------------------------------
 
     def set_laser_frequency(self, frequency=15798.26 * ur("cm^-1")):
-        """
+        r"""
         Set the laser frequency.
 
         This method is used to set the laser frequency of the dataset.
@@ -731,7 +735,7 @@ class Coord(NDMath, NDArray):
 
         Parameters
         ----------
-        frequency : `float` or `Quantity`\ , optional, default=15798.26 * ur("cm^-1")
+        frequency : `float` or `Quantity`, optional, default=15798.26 * ur("cm^-1")
             The laser frequency in cm^-1 or Hz. If the value is in cm^-1, the
             frequency is converted to Hz using the current speed of light value.
         """

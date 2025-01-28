@@ -34,7 +34,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy
 from numpydoc.docscrape import get_doc_object
-from numpydoc.validate import Validator, validate
+from numpydoc.validate import Validator
+from numpydoc.validate import validate
 
 import spectrochempy
 
@@ -413,9 +414,8 @@ def main(func_name, prefix, errors, output_format, ignore_deprecated):
         return print_validate_all_results(
             prefix, errors, output_format, ignore_deprecated
         )
-    else:
-        print_validate_one_results(func_name)
-        return 0
+    print_validate_one_results(func_name)
+    return 0
 
 
 if __name__ == "__main__":

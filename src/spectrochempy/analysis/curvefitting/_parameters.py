@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -84,7 +83,7 @@ class FitParameters(UserDict):
         key = str(key)
         if self.lob[key] is None and self.upb[key] is None:
             return False
-        elif (self.lob[key] is not None and self.data[key] < self.lob[key]) or (
+        if (self.lob[key] is not None and self.data[key] < self.lob[key]) or (
             self.upb[key] is not None and self.data[key] > self.upb[key]
         ):
             raise ValueError(f"`{key}` value ({self.data[key]}) is out of bounds")
@@ -95,20 +94,19 @@ class FitParameters(UserDict):
             keystring = key.split("_")[0]
             if self.reference[key]:
                 return f"\t> {keystring}:{self.data[key]}\n"
+            if self.fixed[key]:
+                keystring = f"\t* {keystring}"
             else:
-                if self.fixed[key]:
-                    keystring = f"\t* {keystring}"
-                else:
-                    keystring = f"\t$ {keystring}"
-                lob = self.lob[key]
-                upb = self.upb[key]
-                if lob <= -0.1 / sys.float_info.epsilon:
-                    lob = "none"
-                if upb >= +0.1 / sys.float_info.epsilon:
-                    upb = "none"
-                val = str(self.data[key])
+                keystring = f"\t$ {keystring}"
+            lob = self.lob[key]
+            upb = self.upb[key]
+            if lob <= -0.1 / sys.float_info.epsilon:
+                lob = "none"
+            if upb >= +0.1 / sys.float_info.epsilon:
+                upb = "none"
+            val = str(self.data[key])
 
-                return f"{keystring}: {float(val):10.4f}, {lob}, {upb}\n"
+            return f"{keystring}: {float(val):10.4f}, {lob}, {upb}\n"
 
         mess = ""
         var = ""

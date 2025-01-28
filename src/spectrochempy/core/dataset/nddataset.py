@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -12,19 +11,23 @@ __all__ = ["NDDataset"]
 # import signal
 import sys
 import textwrap
-from datetime import datetime, tzinfo
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from datetime import datetime
+from datetime import tzinfo
+from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfoNotFoundError
 
 import numpy as np
 import traitlets as tr
 from tzlocal import get_localzone
 
-from spectrochempy.application import error_, warning_
+from spectrochempy.application import error_
+from spectrochempy.application import warning_
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
-from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME, NDArray
+from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
@@ -42,7 +45,7 @@ from spectrochempy.utils.system import get_user_and_node
 @tr.signature_has_traits
 class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     r"""
-    The main N-dimensional dataset class used by  `SpectroChemPy`\ .
+    The main N-dimensional dataset class used by  `SpectroChemPy`.
 
     The `NDDataset` is the main object use by SpectroChemPy. Like numpy
     `~numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and
@@ -53,7 +56,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     application of mathematical operations.
     In addition or in replacement of numerical data for coordinates,
     `NDDataset` can also have labeled coordinates where labels can be different kind of
-    objects (`str`\ , `datetime`\ , `~numpy.ndarray` or other `NDDataset`\ 's, etc...).
+    objects (`str`, `datetime`, `~numpy.ndarray` or other `NDDataset`\ 's, etc...).
 
     Parameters
     ----------
@@ -64,22 +67,22 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         Any size or shape of data is accepted. If not given, an empty
         `NDDataset` will be inited.
         At the initialisation the provided data will be eventually cast to
-        a `~numpy.ndarray`\ .
+        a `~numpy.ndarray`.
         If the provided objects is passed which already contains some
         mask, or units, these elements will be used if possible to accordingly set
         those of the created object. If possible, the provided data will not be copied
         for `data` input, but will be passed by reference, so you should
         make a copy of the `data` before passing them if that's the desired behavior
-        or set the `copy` argument to `True`\ .
+        or set the `copy` argument to `True`.
     coordset : `CoordSet` instance, optional
-        It contains the coordinates for the different dimensions of the `data`\ .
+        It contains the coordinates for the different dimensions of the `data`.
         if `CoordSet` is provided, it must specify the `coord` and `labels` for all
-        dimensions of the `data`\ . Multiple `coord`\ 's can be specified in a
+        dimensions of the `data`. Multiple `coord`\ 's can be specified in a
         `CoordSet` instance for each dimension.
-    coordunits : `list`\ , optional, default: `None`
+    coordunits : `list`, optional, default: `None`
         A list of units corresponding to the dimensions in the order of the
         coordset.
-    coordtitles : `list`\ , optional, default: `None`
+    coordtitles : `list`, optional, default: `None`
         A list of titles corresponding of the dimensions in the order of the
         coordset.
     **kwargs
@@ -87,19 +90,19 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     Other Parameters
     ----------------
-    dtype : `str` or `~numpy.dtype`\ , optional, default: `np.float64`
+    dtype : `str` or `~numpy.dtype`, optional, default: `np.float64`
         If specified, the data will be cast to this dtype, else the data
         will be cast to float64 or complex128.
-    dims : `list` of `str`\ , optional
+    dims : `list` of `str`, optional
         If specified the list must have a length equal to the number od data
         dimensions (`ndim`) and the elements must be
-        taken among ``x,y,z,u,v,w or t``\ . If not specified, the dimension
+        taken among ``x,y,z,u,v,w or t``. If not specified, the dimension
         names are automatically attributed in this order.
-    name : `str`\ , optional
+    name : `str`, optional
         A user-friendly name for this object. If not given, the automatic
         `id` given at the object creation will be used as a name.
     labels : :term:`array-like` of objects, optional
-        Labels for the `data`\ . labels can be used only for 1D-datasets.
+        Labels for the `data`. labels can be used only for 1D-datasets.
         The labels array may have an additional dimension, meaning several
         series of labels for the same data.
         The given array can be a list, a tuple, a `~numpy.ndarray` , a ndarray-like,
@@ -120,33 +123,33 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         explicitly provided an error is raised. Handling of units use the
         `pint <https://pint.readthedocs.org/>`__
         package.
-    timezone : `datetime.tzinfo`\ , optional
+    timezone : `datetime.tzinfo`, optional
         The timezone where the data were created. If not specified, the local timezone
         is assumed.
-    title : `str`\ , optional
+    title : `str`, optional
         The title of the data dimension. The `title` attribute should not be confused
         with the `name` .
         The `title` attribute is used for instance for labelling plots of the data.
         It is optional but recommended to give a title to each ndarray data.
-    dlabel :  `str`\ , optional
+    dlabel :  `str`, optional
         Alias of `title` .
     meta : `dict`\ -like object, optional
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
-    author : `str`\ , optional
+    author : `str`, optional
         Name(s) of the author(s) of this dataset. By default, name of the
         computer note where this dataset is
         created.
-    description : `str`\ , optional
+    description : `str`, optional
         An optional description of the nd-dataset. A shorter alias is `desc` .
-    origin : `str`\ , optional
+    origin : `str`, optional
         Origin of the data: Name of organization, address, telephone number,
         name of individual contributor, etc., as appropriate.
     roi : `list`
         Region of interest (ROI) limits.
-    history : `str`\ , optional
+    history : `str`, optional
         A string to add to the object history.
-    copy : `bool`\ , optional
+    copy : `bool`, optional
         Perform a copy of the passed object. Default is False.
 
     See Also
@@ -157,7 +160,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     Notes
     -----
     The underlying array in a `NDDataset` object can be accessed through the
-    `data` attribute, which will return a conventional `~numpy.ndarray`\ .
+    `data` attribute, which will return a conventional `~numpy.ndarray`.
     """
 
     # Examples
@@ -252,7 +255,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 coordtitles = [None] * self.ndim
 
             _coordset = []
-            for c, u, t in zip(coordset, coordunits, coordtitles):
+            for c, u, t in zip(coordset, coordunits, coordtitles, strict=False):
                 if not isinstance(c, CoordSet):
                     coord = Coord(c)
                     if u is not None:
@@ -413,24 +416,20 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                         if attribute is not None:
                             # get the attribute
                             return getattr(c, attribute)
-                        else:
-                            return c
-                    else:
-                        raise AttributeError
+                        return c
+                    raise AttributeError
 
                 except Exception as err:
                     if item in self.dims:
                         return None
-                    else:
-                        raise err
+                    raise err
             elif attribute is not None:
                 if attribute == "size":
                     # we want the size but there is no coords, get it from the data shape
                     return self.shape[index]
-                else:
-                    raise AttributeError(
-                        f"Can not find `{attribute}` when no coordinate is defined"
-                    )
+                raise AttributeError(
+                    f"Can not find `{attribute}` when no coordinate is defined"
+                )
 
             return None
 
@@ -588,11 +587,11 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     def _cstr(self):
         # Display the metadata of the object and partially the data
         out = ""
-        out += "         name: {}\n".format(self.name)
-        out += "       author: {}\n".format(self.author)
-        out += "      created: {}\n".format(self.created)
+        out += f"         name: {self.name}\n"
+        out += f"       author: {self.author}\n"
+        out += f"      created: {self.created}\n"
         out += (
-            "     modified: {}\n".format(self.modified)
+            f"     modified: {self.modified}\n"
             if (self._modified - self._created).seconds > 30
             else ""
         )
@@ -609,12 +608,12 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             out += "  description: "
             desc = ""
             if pars:
-                desc += "{}\n".format(wrapper1.fill(pars[0]))
+                desc += f"{wrapper1.fill(pars[0])}\n"
             for par in pars[1:]:
                 desc += "{}\n".format(textwrap.indent(par, " " * 15))
             # the three escaped null characters are here to facilitate
             # the generation of html outputs
-            desc = "\0\0\0{}\0\0\0\n".format(desc.rstrip())
+            desc = f"\0\0\0{desc.rstrip()}\0\0\0\n"
             out += desc
 
         if self._history:
@@ -622,17 +621,17 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             out += "      history: "
             hist = ""
             if pars:
-                hist += "{}\n".format(wrapper1.fill(pars[0]))
+                hist += f"{wrapper1.fill(pars[0])}\n"
             for par in pars[1:]:
                 hist += "{}\n".format(textwrap.indent(par, " " * 15))
             # the three escaped null characters are here to facilitate
             # the generation of html outputs
-            hist = "\0\0\0{}\0\0\0\n".format(hist.rstrip())
+            hist = f"\0\0\0{hist.rstrip()}\0\0\0\n"
             out += hist
 
-        out += "{}\n".format(self._str_value().rstrip())
-        out += "{}\n".format(self._str_shape().rstrip()) if self._str_shape() else ""
-        out += "{}\n".format(self._str_dims().rstrip())
+        out += f"{self._str_value().rstrip()}\n"
+        out += f"{self._str_shape().rstrip()}\n" if self._str_shape() else ""
+        out += f"{self._str_dims().rstrip()}\n"
 
         if not out.endswith("\n"):
             out += "\n"
@@ -640,8 +639,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         if not self._html_output:
             return colored_output(out.rstrip())
-        else:
-            return out.rstrip()
+        return out.rstrip()
 
     def _loc2index(self, loc, dim=-1, *, units=None):
         # Return the index of a location (label or coordinates) along the dim
@@ -650,7 +648,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         if self._coordset is None:
             raise SpectroChemPyError(
                 "No coords have been defined. Slicing or selection"
-                " by location ({}) needs coords definition.".format(loc)
+                f" by location ({loc}) needs coords definition."
             )
 
         coord = self.coord(dim)
@@ -687,7 +685,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     def _valid_coordset(self, coords):
         # uses in coords_validate and setattr
         if coords is None:
-            return
+            return None
 
         for k, coord in enumerate(coords):
             if (
@@ -850,9 +848,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         if name in self._coordset.names:
             idx = self._coordset.names.index(name)
             return self._coordset[idx]
-        else:
-            error_(f"could not find this dimenson name: `{name}`")
-            return None
+        error_(f"could not find this dimenson name: `{name}`")
+        return None
 
     @property
     def coordset(self):
@@ -1386,7 +1383,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         xr = import_optional_dependency("xarray")
         if xr is None:
-            return
+            return None
 
         x, y = self.x, self.y
         tx = x.title

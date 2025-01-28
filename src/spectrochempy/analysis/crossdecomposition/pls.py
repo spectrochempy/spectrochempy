@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -11,10 +10,8 @@ Implementation of Partial Least Square regression (using scikit-learn library)
 import traitlets as tr
 from sklearn import cross_decomposition
 
-from spectrochempy.analysis._base._analysisbase import (
-    CrossDecompositionAnalysis,
-    _wrap_ndarray_output_to_nddataset,
-)
+from spectrochempy.analysis._base._analysisbase import CrossDecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring

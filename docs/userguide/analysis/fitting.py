@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -88,7 +87,7 @@ lst = scp.LSTSQ()
 lst.fit(time, d)
 
 v, d0 = lst.coef, lst.intercept
-print("speed : {:.3f},  distance at time 0 : {:.3f}".format(v, d0))
+print(f"speed : {v:.3f},  distance at time 0 : {d0:.3f}")
 
 dfit = lst.predict()
 dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
@@ -126,6 +125,7 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 # %% [markdown]
 # Let's try now with a quadratic increase of the speed:
 
+
 # %%
 def func(t, a, var):
     d = a * (t / 3.0) ** 2 + (np.random.rand(len(t)) - 0.8) * var
@@ -158,7 +158,7 @@ lst = scp.LSTSQ()
 lst.fit(X, d2)
 
 v, d0 = lst.coef, lst.intercept
-print("acceleration : {:.3f},  distance at time 0 : {:.3f}".format(v, d0))
+print(f"acceleration : {v:.3f},  distance at time 0 : {d0:.3f}")
 
 # %%
 d2.plot_scatter(
@@ -166,7 +166,7 @@ d2.plot_scatter(
     mfc="red",
     mec="black",
     label="Original data",
-    title="Least-square fitting " "example on quadratic data",
+    title="Least-square fitting example on quadratic data",
 )
 dfit = lst.predict()
 
@@ -188,7 +188,7 @@ nls = scp.NNLS()
 nls.fit(X, d2)
 
 v, d0 = lst.coef, lst.intercept
-print("acceleration : {: .3f},  distance at time 0 : {: .3f}".format(v, d0))
+print(f"acceleration : {v: .3f},  distance at time 0 : {d0: .3f}")
 
 # %%
 d2.plot_scatter(
@@ -321,11 +321,11 @@ shape: asymmetricvoigtmodel
 #
 # Come after the definition of the model parameters depending on the shape, e.g., for
 # a `gaussianmodel` we have three
-# parameters: `amplitude` (`ampl`\ ), `width` and `position` (`pos`\ ) of the line.
+# parameters: `amplitude` (`ampl`), `width` and `position` (`pos`) of the line.
 #
 # To define a given parameter, we have to write its `name` and a set of 3 values:
 # the expected `value` and 2 limits
-# for the allowed variations : `low_bound`\ ,  `high_bound`\ :
+# for the allowed variations : `low_bound`,  `high_bound`\ :
 #
 # ```
 # name : value, low_bound,  high_bound

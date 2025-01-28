@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -11,18 +10,19 @@ Implementation of Principal Component Analysis (using scikit-learn library)
 import matplotlib.pyplot as plt
 import numpy as np
 import traitlets as tr
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
+from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import ScalarFormatter
 from numpy.random import RandomState
 from sklearn import decomposition
 
-from spectrochempy.analysis._base._analysisbase import (
-    DecompositionAnalysis,
-    NotFittedError,
-    _wrap_ndarray_output_to_nddataset,
-)
-from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
+from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
+from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
-from spectrochempy.utils.plots import NBlue, NRed
+from spectrochempy.utils.plots import NBlue
+from spectrochempy.utils.plots import NRed
 
 __all__ = ["PCA"]
 __configurables__ = ["PCA"]
@@ -69,13 +69,13 @@ class PCA(DecompositionAnalysis):
     standardized = tr.Bool(
         default_value=False,
         help=r"If True the data are scaled to unit standard deviation: "
-        ":math:`X' = X / \sigma`\ .",
+        r":math:`X' = X / \sigma`.",
     ).tag(config=True)
 
     scaled = tr.Bool(
         default_value=False,
-        help="If True the data are scaled in the interval ``[0-1]``\ : "
-        ":math:`X' = (X - min(X)) / (max(X)-min(X))`\ .",
+        help=r"If True the data are scaled in the interval ``[0-1]``\ : "
+        r":math:`X' = (X - min(X)) / (max(X)-min(X))`.",
     ).tag(config=True)
 
     n_components = tr.Union(
@@ -399,13 +399,13 @@ for reproducible results across multiple function calls.""",
 
         if n_components is None or n_components > self.n_components:
             n_components = self.n_components
-        print((self.__str__(n_components)))
+        print(self.__str__(n_components))
 
     # ----------------------------------------------------------------------------------
     # Plot methods specific to PCA
     # ----------------------------------------------------------------------------------
     def screeplot(self, n_components=None, **kwargs):
-        """
+        r"""
         Scree plot of explained variance + cumulative variance by PCA.
 
         Explained variance by each PC is plot as a bar graph (left y axis)
@@ -418,7 +418,7 @@ for reproducible results across multiple function calls.""",
             Number of components to plot.
         **kwargs
             Extra arguments: `colors` (default: ``[NBlue, NRed]`` ) to set the colors
-            of the bar plot and scatter plot; ``ylims`` (default ``[(0, 100), "auto"]``\ ).
+            of the bar plot and scatter plot; ``ylims`` (default ``[(0, 100), "auto"]``).
 
         Returns
         -------
@@ -532,7 +532,7 @@ for reproducible results across multiple function calls.""",
         if show_labels:
             if scores.y.labels is None:
                 raise ValueError("You set show_label to true but score.y has no label")
-            elif scores.y.labels.ndim == 1:
+            if scores.y.labels.ndim == 1:
                 scatterlabels = scores.y.labels
             else:
                 scatterlabels = scores.y.labels[:, labels_column]
@@ -544,12 +544,8 @@ for reproducible results across multiple function calls.""",
             ax = fig.add_subplot(111)
             ax.set_title("Score plot")
 
-            ax.set_xlabel(
-                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
-            )
-            ax.set_ylabel(
-                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
-            )
+            ax.set_xlabel(f"PC# {pcs[0] + 1} ({self.ev_ratio.data[pcs[0]]:.3f}%)")
+            ax.set_ylabel(f"PC# {pcs[1] + 1} ({self.ev_ratio.data[pcs[1]]:.3f}%)")
             x = scores.masked_data[:, pcs[0]]
             y = scores.masked_data[:, pcs[1]]
             axsc = ax.scatter(x, y, s=30, c=colors, cmap=colormap)
@@ -581,15 +577,9 @@ for reproducible results across multiple function calls.""",
             plt.figure(**kwargs)
             ax = plt.axes(projection="3d")
             ax.set_title("Score plot")
-            ax.set_xlabel(
-                "PC# {} ({:.3f}%)".format(pcs[0] + 1, self.ev_ratio.data[pcs[0]])
-            )
-            ax.set_ylabel(
-                "PC# {} ({:.3f}%)".format(pcs[1] + 1, self.ev_ratio.data[pcs[1]])
-            )
-            ax.set_zlabel(
-                "PC# {} ({:.3f}%)".format(pcs[2] + 1, self.ev_ratio.data[pcs[2]])
-            )
+            ax.set_xlabel(f"PC# {pcs[0] + 1} ({self.ev_ratio.data[pcs[0]]:.3f}%)")
+            ax.set_ylabel(f"PC# {pcs[1] + 1} ({self.ev_ratio.data[pcs[1]]:.3f}%)")
+            ax.set_zlabel(f"PC# {pcs[2] + 1} ({self.ev_ratio.data[pcs[2]]:.3f}%)")
             axsc = ax.scatter(
                 scores.masked_data[:, pcs[0]],
                 scores.masked_data[:, pcs[1]],

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -15,24 +14,24 @@ import uuid
 import warnings
 
 import numpy as np
-from traitlets import (
-    All,
-    Bool,
-    Dict,
-    HasTraits,
-    Int,
-    List,
-    Unicode,
-    default,
-    observe,
-    signature_has_traits,
-    validate,
-)
+from traitlets import All
+from traitlets import Bool
+from traitlets import Dict
+from traitlets import HasTraits
+from traitlets import Int
+from traitlets import List
+from traitlets import Unicode
+from traitlets import default
+from traitlets import observe
+from traitlets import signature_has_traits
+from traitlets import validate
 
-from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME, NDArray
+from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.misc import is_sequence
-from spectrochempy.utils.print import colored_output, convert_to_html
+from spectrochempy.utils.print import colored_output
+from spectrochempy.utils.print import convert_to_html
 
 
 # ======================================================================================
@@ -40,14 +39,14 @@ from spectrochempy.utils.print import colored_output, convert_to_html
 # ======================================================================================
 @signature_has_traits
 class CoordSet(HasTraits):
-    """
+    r"""
     A collection of Coord objects for a NDArray object with validation.
 
     This object is an iterable containing a collection of Coord objects.
 
     Parameters
     ----------
-    \*coords : `NDArray` ,  `NDArray` subclass or `CoordSet` sequence of objects.
+    *coords : `NDArray` ,  `NDArray` subclass or `CoordSet` sequence of objects.
         If an instance of CoordSet is found, instead of an array, this means
         that all coordinates in this coords describe the same axis.
         It is assumed that the coordinates are passed in the order of the
@@ -277,8 +276,7 @@ class CoordSet(HasTraits):
         """
         if name is None:
             return "CoordSet"
-        else:
-            return name == "CoordSet"
+        return name == "CoordSet"
 
     # ----------------------------------------------------------------------------------
     # Validation methods
@@ -335,10 +333,9 @@ class CoordSet(HasTraits):
                 _sortedtuples = sorted(
                     (coord.name, coord) for coord in coords
                 )  # Final sort
-                coords = list(zip(*_sortedtuples))[1]
+                coords = list(zip(*_sortedtuples, strict=False))[1]
             return list(coords)  # be sure its a list not a tuple
-        else:
-            return None
+        return None
 
     @default("_id")
     def _id_default(self):
@@ -373,7 +370,7 @@ class CoordSet(HasTraits):
         """
         True if the name has been defined (bool).
         """
-        return not (self.name == self.id)
+        return self.name != self.id
 
     @property
     def id(self):
@@ -389,8 +386,7 @@ class CoordSet(HasTraits):
         """
         if self._coords:
             return len(self._coords) == 0
-        else:
-            return False
+        return False
 
     @property
     def is_same_dim(self):
@@ -468,8 +464,7 @@ class CoordSet(HasTraits):
     def name(self):
         if self._name:
             return self._name
-        else:
-            return self._id
+        return self._id
 
     @name.setter
     def name(self, value):
@@ -671,7 +666,7 @@ class CoordSet(HasTraits):
             A dictionary where keys are the names of the coordinates, and the values
             the coordinates themselves.
         """
-        return dict(zip(self.names, self._coords))
+        return dict(zip(self.names, self._coords, strict=False))
 
     def update(self, **kwargs):
         """
@@ -719,7 +714,7 @@ class CoordSet(HasTraits):
     def _set_names(self, names):
         # utility function to change names of coordinates (in batch)
         # useful when a coordinate is a CoordSet itself
-        for coord, name in zip(self._coords, names):
+        for coord, name in zip(self._coords, names, strict=False):
             coord.name = name
 
     def _set_parent_dim(self, name):
@@ -737,7 +732,7 @@ class CoordSet(HasTraits):
     def __call__(self, *args, **kwargs):
         # allow the following syntax: coords(), coords(0,2) or
         coords = []
-        axis = kwargs.get("axis", None)
+        axis = kwargs.get("axis")
         if args:
             for idx in args:
                 coords.append(self[idx])
@@ -750,8 +745,7 @@ class CoordSet(HasTraits):
             coords = self._coords
         if len(coords) == 1:
             return coords[0]
-        else:
-            return CoordSet(*coords)
+        return CoordSet(*coords)
 
     def __hash__(self):
         # all instance of this class has same hash, so they can be compared
@@ -841,17 +835,16 @@ class CoordSet(HasTraits):
         if not multi:
             return self._coords.__getitem__(index)  # It's the index of one of the
             # coordinate in the coordset. return it.
-        else:
-            res = []  # Slice of a multicoordinate
-            for c in self._coords:
-                res.append(c.__getitem__(index))
-            coords = self.__class__(*res, keepnames=True)
-            # name must be changed
-            coords.name = self.name
-            # and is_same_dim and default for coordset
-            coords._is_same_dim = self._is_same_dim
-            coords._default = self._default
-            return coords
+        res = []  # Slice of a multicoordinate
+        for c in self._coords:
+            res.append(c.__getitem__(index))
+        coords = self.__class__(*res, keepnames=True)
+        # name must be changed
+        coords.name = self.name
+        # and is_same_dim and default for coordset
+        coords._is_same_dim = self._is_same_dim
+        coords._default = self._default
+        return coords
 
         # if isinstance(index, slice):
         #     if isinstance(res, CoordSet):
@@ -956,10 +949,7 @@ class CoordSet(HasTraits):
                 self._coords.append(coord)
                 return
 
-            else:
-                raise KeyError(
-                    f"Could not find `{index}` in coordinates names or titles"
-                )
+            raise KeyError(f"Could not find `{index}` in coordinates names or titles")
 
         self._coords[index] = coord
 
@@ -969,14 +959,14 @@ class CoordSet(HasTraits):
             if index in self.names:
                 idx = self.names.index(index)
                 del self._coords[idx]
-                return
+                return None
 
             # let's try in the title
             if index in self.titles:
                 # selection by coord titles
                 index = self.titles.index(index)
                 self._coords.__delitem__(index)
-                return
+                return None
 
             # may be it is a title in a sub-coords
             for item in self._coords:
@@ -1045,16 +1035,13 @@ class CoordSet(HasTraits):
                     # coordinates if available
                     # txt += '        index: {}\n'.format(idx)
                     coord._html_output = self._html_output
-                    txt += "{}\n".format(
-                        coord._cstr(header=header, print_size=print_size)
-                    )
+                    txt += f"{coord._cstr(header=header, print_size=print_size)}\n"
 
         txt = txt.rstrip()  # remove the trailing '\n'
 
         if not self._html_output:
             return colored_output(txt.rstrip())
-        else:
-            return txt.rstrip()
+        return txt.rstrip()
 
     def _repr_html_(self):
         return convert_to_html(self)

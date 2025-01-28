@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 """
 PCA analysis example
 --------------------
@@ -12,6 +11,7 @@ In this example, we perform the PCA dimensionality reduction of a spectra
 dataset
 
 """
+
 # %%
 # Import the spectrochempy API package
 import spectrochempy as scp

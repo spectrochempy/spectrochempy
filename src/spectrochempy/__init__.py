@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
@@ -39,20 +37,30 @@
 # The fact that you are presently reading this means that you have had
 # knowledge of the CeCILL-B license and that you accept its terms.
 # ======================================================================================
-# flake8: noqa
+
 """
-SpectroChemPy API.
+SpectroChemPy API Module
+========================
 
 SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data
-for Chemistry with Python.
-It is a cross-platform software, running on Linux, Windows or OS X.
+for Chemistry with Python. It is a cross-platform software, running on Linux, Windows or OS X.
+
+This module serves as the main entry point for the SpectroChemPy package, providing:
+- Configuration of warning filters
+- Import of the public API
+- Dynamic attribute access to NDDataset methods
 """
 
 import warnings
+from typing import Any
 
 import numpy as np
 
-# warnings.filterwarnings(action="error", category=DeprecationWarning)
+# ------------------------------------------------------------------------------
+# Warning configurations
+# ------------------------------------------------------------------------------
+
+# Configure warnings for spectrochempy
 warnings.filterwarnings(
     action="once", module="spectrochempy", category=DeprecationWarning
 )
@@ -68,24 +76,51 @@ else:
         category=np.exceptions.VisibleDeprecationWarning,
     )
 
-warnings.filterwarnings(action="ignore", module="jupyter")  # , category=UserWarning)
-warnings.filterwarnings(action="ignore", module="pykwalify")  # , category=UserWarning)
+# Ignore warnings from third-party packages
+warnings.filterwarnings(action="ignore", module="jupyter")
+warnings.filterwarnings(action="ignore", module="pykwalify")
 warnings.filterwarnings(action="ignore", module="matplotlib")
 warnings.filterwarnings(action="ignore", category=FutureWarning)
 
 from pint import UnitStrippedWarning
 
 warnings.filterwarnings(action="ignore", category=UnitStrippedWarning)
+
+# ------------------------------------------------------------------------------
+# API imports
+# ------------------------------------------------------------------------------
+
 from spectrochempy import api
-from spectrochempy.api import *
+from spectrochempy.api import *  # noqa: E402, F403
 
 __all__ = api.__all__
 
 
-def __getattr__(name):
-    # NDDataset method accessible from the API
+def __getattr__(name: str) -> Any:
+    """
+    Dynamic attribute lookup for NDDataset methods.
+
+    This function allows direct access to NDDataset methods from the top-level package.
+    For example, `spectrochempy.method_name` will return the corresponding method
+    from NDDataset if it exists.
+
+    Parameters
+    ----------
+    name : str
+        Name of the attribute to look up
+
+    Returns
+    -------
+    Any
+        The requested NDDataset method
+
+    Raises
+    ------
+    AttributeError
+        If the requested attribute doesn't exist in NDDataset
+    """
     from spectrochempy.core.dataset.nddataset import NDDataset
 
     if hasattr(NDDataset, name):
         return getattr(NDDataset, name)
-    raise AttributeError
+    raise AttributeError(f"module 'spectrochempy' has no attribute '{name}'")

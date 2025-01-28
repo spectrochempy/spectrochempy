@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -69,7 +68,6 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
     """
 
     def __init__(self, fid):
-
         _zip = make_zipfile(fid)
 
         self.files = _zip.namelist()
@@ -126,22 +124,21 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
             f = self.zip.open(key)
             return read_array(f, allow_pickle=True)
 
-        elif member and ext in [".scp"]:
+        if member and ext in [".scp"]:
             from spectrochempy.core.dataset.nddataset import NDDataset
 
             # f = io.BytesIO(self.zip.read(key))
             content = self.zip.read(key)
             return NDDataset.load(key, content=content)
 
-        elif member and ext in [".json"]:
+        if member and ext in [".json"]:
             content = self.zip.read(key)
             return json.loads(content, object_hook=json_decoder)
 
-        elif member:
+        if member:
             return self.zip.read(key)
 
-        else:
-            raise KeyError("%s is not a file in the archive or is not " "allowed" % key)
+        raise KeyError("%s is not a file in the archive or is not " "allowed" % key)
 
     def __contains__(self, key):
         return self.files.__contains__(key)

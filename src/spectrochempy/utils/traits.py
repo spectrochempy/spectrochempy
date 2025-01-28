@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -8,7 +7,8 @@ import inspect
 
 import traitlets as tr
 
-from spectrochempy.extern.traittypes import Empty, SciType
+from spectrochempy.extern.traittypes import Empty
+from spectrochempy.extern.traittypes import SciType
 
 
 class SpectroChemPyType(SciType):
@@ -38,7 +38,7 @@ class SpectroChemPyType(SciType):
         if (
             (old_value is None and new_value is not None)
             or (old_value is tr.Undefined and new_value is not tr.Undefined)
-            or not (old_value == new_value)
+            or old_value != new_value
         ):
             obj._notify_trait(self.name, old_value, new_value)
 
@@ -60,8 +60,7 @@ class SpectroChemPyType(SciType):
     def make_dynamic_default(self):
         if self.default_value is None or self.default_value is tr.Undefined:
             return self.default_value
-        else:
-            return self.default_value.copy()
+        return self.default_value.copy()
 
 
 class NDDatasetType(SpectroChemPyType):

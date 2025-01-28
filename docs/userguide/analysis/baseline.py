@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -408,9 +407,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 
 # %%
 Aa = A.basc()
-_ = (
-    Aa.plot()
-)  # range are automatically set to the start and end of the spectra, model='polynomial', order='linear'
+_ = Aa.plot()  # range are automatically set to the start and end of the spectra, model='polynomial', order='linear'
 
 # %% [markdown]
 # All parameters of `Baseline` can be used in basc. It is thus probably quite conveninent if one wants to write shorter code.

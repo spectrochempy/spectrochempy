@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -425,9 +424,11 @@ print(newS0)
 # It is important to note here that the conversion to JCAMP-DX changes the last digits
 # of absorbance and wavenumbers:
 
+
 # %%
 def difference(x, y):
-    from numpy import abs, max
+    from numpy import abs
+    from numpy import max
 
     nonzero = y.data != 0
     error = abs(x.data - y.data)

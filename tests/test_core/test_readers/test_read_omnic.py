@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 import pytest
 
@@ -22,7 +21,6 @@ IRDATA = DATADIR / "irdata"
 #     reason="Experimental data not available for testing",
 # )
 def test_read_omnic():
-
     # Class method opening a dialog (but for test it is preset)
     nd1 = NDDataset.read_omnic(IRDATA / "nh4y-activation.spg")
     assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"

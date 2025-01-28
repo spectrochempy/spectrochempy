@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -16,13 +15,13 @@ where optional parameters indicates which job(s) is(are) to perform.
 """
 
 import argparse
+import multiprocessing as mp
 import shutil
 import sys
 import warnings
 import zipfile
 from os import environ
 from pathlib import Path
-import multiprocessing as mp
 
 from sphinx.application import Sphinx
 
@@ -37,11 +36,12 @@ except ImportError:
     warnings.filterwarnings(action="ignore", category=RemovedInSphinx10Warning)
 
 
+from apigen import Apigen
+
 from spectrochempy.api import preferences as prefs
 from spectrochempy.api import version
 from spectrochempy.utils.file import download_testdata
 from spectrochempy.utils.system import sh
-from apigen import Apigen
 
 warnings.filterwarnings(action="ignore", module="matplotlib", category=UserWarning)
 
@@ -87,7 +87,7 @@ download_testdata()  # (download done using mamba install spectrochempy_data)
 # ======================================================================================
 # Class BuildDocumentation
 # ======================================================================================
-class BuildDocumentation(object):
+class BuildDocumentation:
     def __init__(
         self,
         delnb=False,

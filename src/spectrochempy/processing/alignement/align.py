@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -14,7 +13,8 @@ __dataset_methods__ = __all__
 # import scipy.interpolate
 import numpy as np
 
-from spectrochempy.application import error_, warning_
+from spectrochempy.application import error_
+from spectrochempy.application import warning_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.misc import get_n_decimals
@@ -58,14 +58,14 @@ def can_merge_or_align(coord1, coord2):
 
 
 def align(dataset, *others, **kwargs):
-    """
+    r"""
     Align individual `NDDataset` along given dimensions using various methods.
 
     Parameters
     -----------
     dataset : `NDDataset`
         Dataset on which we want to align other objects.
-    \*others : `NDDataset`
+    *others : `NDDataset`
         Objects to align.
     dim : str. Optional, default='x'
         Along which axis to perform the alignment.
@@ -148,14 +148,12 @@ def align(dataset, *others, **kwargs):
     axis, dims = dataset.get_axis(only_first=False, **kwargs)
 
     # check compatibility of the dims and prepare the dimension for alignment
-    for axis, dim in zip(axis, dims):
-
+    for axis, dim in zip(axis, dims, strict=False):
         # get all objects to align
         _objects = {}
         _nobj = 0
 
         for idx, object in enumerate(objects):
-
             if not object._implements("NDDataset"):
                 error_(
                     f"Bad object(s) found: {object}. Note that only NDDataset "
@@ -205,7 +203,6 @@ def align(dataset, *others, **kwargs):
 
         # loop on all object
         for index, object in _objects.items():
-
             obj = object["obj"]
 
             if obj is ref_obj:
@@ -255,7 +252,6 @@ def align(dataset, *others, **kwargs):
 
         # Now perform alignment of all objects on the new coordinates
         for index, object in _objects.items():
-
             obj = object["obj"]
 
             # get the dim index for the given object
@@ -324,8 +320,7 @@ def align(dataset, *others, **kwargs):
 
             if method == "interpolate":
                 warning_(
-                    "Interpolation not yet implemented - for now equivalent "
-                    "to `outer`"
+                    "Interpolation not yet implemented - for now equivalent to `outer`"
                 )
 
         # the new transformed object must be in the same order as the passed

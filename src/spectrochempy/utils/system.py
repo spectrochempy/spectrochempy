@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,7 +6,9 @@
 import getpass
 import platform
 import sys
-from subprocess import PIPE, STDOUT, run
+from subprocess import PIPE
+from subprocess import STDOUT
+from subprocess import run
 
 
 def get_user():
@@ -46,11 +47,9 @@ class _ExecCommand:
     # """
 
     def __init__(self, command):
-
         self.commands = [command]
 
     def __call__(self, *args, **kwargs):
-
         self.commands.extend(args)
 
         silent = kwargs.pop("silent", False)
@@ -65,13 +64,12 @@ class _ExecCommand:
 
 
 # noinspection PyPep8Naming
-class sh(object):
+class sh:
     """
     Utility to run subprocess run command as if they were functions.
     """
 
     def __getattr__(self, command):
-
         return _ExecCommand(command)
 
     def __call__(self, script, silent=False):

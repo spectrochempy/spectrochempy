@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -10,9 +9,12 @@ This module define a generic class to import files and contents.
 __all__ = ["write"]
 __dataset_methods__ = __all__
 
-from traitlets import Any, HasTraits
+from traitlets import Any
+from traitlets import HasTraits
 
-from spectrochempy.utils.file import check_filename_to_save, pathclean, patterns
+from spectrochempy.utils.file import check_filename_to_save
+from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.file import patterns
 
 
 # --------------------------------------------------------------------------------------
@@ -22,7 +24,6 @@ class Exporter(HasTraits):
     object = Any()
 
     def __init__(self):
-
         FILETYPES = [
             ("scp", "SpectroChemPy files (*.scp)"),
             ("labspec", "LABSPEC exported files (*.txt)"),
@@ -40,7 +41,6 @@ class Exporter(HasTraits):
                 self.protocols[s[1:]] = protocol
 
     def __call__(self, *args, **kwargs):
-
         args = self._setup_object(*args)
 
         try:
@@ -51,7 +51,7 @@ class Exporter(HasTraits):
                     kwargs["filetypes"] = [self.filetypes[protocol]]
             filename = check_filename_to_save(self.object, *args, **kwargs)
             if filename is None:
-                return
+                return None
             if kwargs.get("suffix", ""):
                 filename = filename.with_suffix(kwargs.get("suffix", ""))
             protocol = self.protocols[filename.suffix]
@@ -63,7 +63,6 @@ class Exporter(HasTraits):
             raise e
 
     def _setup_object(self, *args):
-
         # check if the first argument is an instance of NDDataset or Project
         args = list(args)
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -16,9 +15,13 @@ from datetime import datetime
 import numpy as np
 import scipy.io as sio
 
-from spectrochempy.application import info_, warning_
-from spectrochempy.core.dataset.nddataset import Coord, NDDataset
-from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
+from spectrochempy.application import info_
+from spectrochempy.application import warning_
+from spectrochempy.core.dataset.nddataset import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
@@ -148,92 +151,91 @@ def _read_dso(dataset, name, data):
     if typedata != "data":
         return (name, data)
 
+    author_mat = data["author"][0][0]
+    if len(author_mat) == 0:
+        author = "*unknown*"
     else:
-        author_mat = data["author"][0][0]
-        if len(author_mat) == 0:
-            author = "*unknown*"
-        else:
-            author = author_mat[0]
+        author = author_mat[0]
 
-        date_mat = data["date"][0][0]
-        if len(date_mat) == 0:
-            date = datetime(1, 1, 1, 0, 0)
-        else:
-            date = datetime(
-                int(date_mat[0][0]),
-                int(date_mat[0][1]),
-                int(date_mat[0][2]),
-                int(date_mat[0][3]),
-                int(date_mat[0][4]),
-                int(date_mat[0][5]),
-            )
+    date_mat = data["date"][0][0]
+    if len(date_mat) == 0:
+        date = datetime(1, 1, 1, 0, 0)
+    else:
+        date = datetime(
+            int(date_mat[0][0]),
+            int(date_mat[0][1]),
+            int(date_mat[0][2]),
+            int(date_mat[0][3]),
+            int(date_mat[0][4]),
+            int(date_mat[0][5]),
+        )
 
-        dat = data["data"][0][0]
+    dat = data["data"][0][0]
 
-        # look at coords and labels
-        # only the first label and axisscale are taken into account
-        # the axisscale title is used as the coordinate title
+    # look at coords and labels
+    # only the first label and axisscale are taken into account
+    # the axisscale title is used as the coordinate title
 
-        coords = []
-        for i in range(len(dat.shape)):
-            coord = datac = None  # labels = title = None
-            labelsarray = data["label"][0][0][i][0]
-            if len(labelsarray):  # some labels might be present
-                if isinstance(labelsarray[0], np.ndarray):
-                    labels = data["label"][0][0][i][0][0]
+    coords = []
+    for i in range(len(dat.shape)):
+        coord = datac = None  # labels = title = None
+        labelsarray = data["label"][0][0][i][0]
+        if len(labelsarray):  # some labels might be present
+            if isinstance(labelsarray[0], np.ndarray):
+                labels = data["label"][0][0][i][0][0]
+            else:
+                labels = data["label"][0][0][i][0]
+            if len(labels):
+                coord = Coord(labels=[str(label) for label in labels])
+            if len(data["label"][0][0][i][1]):
+                if isinstance(data["label"][0][0][i][1][0], np.ndarray):
+                    if len(data["label"][0][0][i][1][0]):
+                        coord.name = data["label"][0][0][i][1][0][0]
+                elif isinstance(data["label"][0][0][i][1][0], str):
+                    coord.name = data["label"][0][0][i][1][0]
+
+        axisdataarray = data["axisscale"][0][0][i][0]
+        if len(axisdataarray):  # some axiscale might be present
+            if isinstance(axisdataarray[0], np.ndarray):
+                if len(axisdataarray[0]) == dat.shape[i]:
+                    datac = axisdataarray[0]  # take the first axiscale data
+                elif axisdataarray[0].size == dat.shape[i]:
+                    datac = axisdataarray[0][0]
+
+            if datac is not None:
+                if isinstance(coord, Coord):
+                    coord.data = datac
                 else:
-                    labels = data["label"][0][0][i][0]
-                if len(labels):
-                    coord = Coord(labels=[str(label) for label in labels])
-                if len(data["label"][0][0][i][1]):
-                    if isinstance(data["label"][0][0][i][1][0], np.ndarray):
-                        if len(data["label"][0][0][i][1][0]):
-                            coord.name = data["label"][0][0][i][1][0][0]
-                    elif isinstance(data["label"][0][0][i][1][0], str):
-                        coord.name = data["label"][0][0][i][1][0]
+                    coord = Coord(data=datac)
 
-            axisdataarray = data["axisscale"][0][0][i][0]
-            if len(axisdataarray):  # some axiscale might be present
-                if isinstance(axisdataarray[0], np.ndarray):
-                    if len(axisdataarray[0]) == dat.shape[i]:
-                        datac = axisdataarray[0]  # take the first axiscale data
-                    elif axisdataarray[0].size == dat.shape[i]:
-                        datac = axisdataarray[0][0]
-
-                if datac is not None:
-                    if isinstance(coord, Coord):
-                        coord.data = datac
-                    else:
-                        coord = Coord(data=datac)
-
-                if len(data["axisscale"][0][0][i][1]):  # some titles might be present
+            if len(data["axisscale"][0][0][i][1]):  # some titles might be present
+                try:
+                    coord.title = data["axisscale"][0][0][i][1][0]
+                except Exception:
                     try:
-                        coord.title = data["axisscale"][0][0][i][1][0]
+                        coord.title = data["axisscale"][0][0][i][1][0][0]
                     except Exception:
-                        try:
-                            coord.title = data["axisscale"][0][0][i][1][0][0]
-                        except Exception:
-                            pass
+                        pass
 
-            if not isinstance(coord, Coord):
-                coord = Coord(data=[j for j in range(dat.shape[i])], title="index")
+        if not isinstance(coord, Coord):
+            coord = Coord(data=[j for j in range(dat.shape[i])], title="index")
 
-            coords.append(coord)
+        coords.append(coord)
 
-        dataset.data = dat
-        dataset.set_coordset(*[coord for coord in coords])
-        dataset.author = author
-        dataset.name = name
-        dataset.date = date
+    dataset.data = dat
+    dataset.set_coordset(*[coord for coord in coords])
+    dataset.author = author
+    dataset.name = name
+    dataset.date = date
 
-        # TODO: reshape from fortran/Matlab order to C order
-        #  for 3D or higher datasets ?
+    # TODO: reshape from fortran/Matlab order to C order
+    #  for 3D or higher datasets ?
 
-        for i in data["description"][0][0]:
-            dataset.description += i
+    for i in data["description"][0][0]:
+        dataset.description += i
 
-        for i in data["history"][0][0][0][0]:
-            dataset.history = i
+    for i in data["history"][0][0][0][0]:
+        dataset.history = i
 
-        dataset.history = "Imported by spectrochempy."
+    dataset.history = "Imported by spectrochempy."
     return dataset

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -304,8 +303,7 @@ def plot_method(type, doc):
 
             if kwargs.get("use_plotly", False):
                 return dataset.plotly(method=method, **kwargs)
-            else:
-                return getattr(dataset, f"plot_{type}")(*args, method=method, **kwargs)
+            return getattr(dataset, f"plot_{type}")(*args, method=method, **kwargs)
 
         wrapper.__doc__ = f"""
 {textwrap.dedent(func.__doc__).strip()}
@@ -337,9 +335,7 @@ plot_3D
 plot_surface
 plot_waterfall
 multiplot
-""".replace(
-            f"\nplot_{method}", ""
-        )
+""".replace(f"\nplot_{method}", "")
 
         return wrapper
 
@@ -567,7 +563,7 @@ def make_label(ss, lab="<no_axe_label>", use_mpl=True):
             "dimensionless",
             "absolute_transmittance",
         ]:
-            units = r"/\ {:~L}".format(ss.units)
+            units = rf"/\ {ss.units:~L}"
             if pint_version < 24:
                 units = units.replace("%", r"\%")
         else:
@@ -575,7 +571,7 @@ def make_label(ss, lab="<no_axe_label>", use_mpl=True):
         label = r"%s $\mathrm{%s}$" % (label, units)
     else:
         if ss.units is not None and str(ss.units) != "dimensionless":
-            units = r"{:~H}".format(ss.units)
+            units = rf"{ss.units:~H}"
         else:
             units = ""
         label = r"%s / %s" % (label, units)

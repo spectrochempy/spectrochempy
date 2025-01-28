@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 from os import environ
 from zoneinfo import ZoneInfoNotFoundError
 
@@ -208,8 +207,9 @@ def test_nddataset_coordset():
     assert daa.coordset.titles == coordtitles[::-1]
     assert daa.dims == ["z", "y", "x"]
     # with a CoordSet
-    c0, c1 = scp.Coord(labels=["d%d" % i for i in range(6)]), scp.Coord(
-        data=[1, 2, 3, 4, 5, 6]
+    c0, c1 = (
+        scp.Coord(labels=["d%d" % i for i in range(6)]),
+        scp.Coord(data=[1, 2, 3, 4, 5, 6]),
     )
     cc = scp.CoordSet(c0, c1)
     cd = scp.CoordSet(x=cc, y=c1)

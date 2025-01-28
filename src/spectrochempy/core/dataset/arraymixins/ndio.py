@@ -1,48 +1,80 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+
 """
-This module define the class  `NDIO` in which input/output standard
-methods for a `NDDataset` are defined.
+NDDataset Input/Output Module
+============================
+
+This module implements input/output functionality for NDDataset objects. It provides:
+
+- Save/load operations in native .scp format
+- JSON serialization/deserialization
+- Directory and file path management
+- File type handling
+
+Classes
+-------
+NDIO
+    Base class providing I/O operations for NDDataset objects
+
+Functions
+---------
+load(filename, **kwargs)
+    Load a dataset from a .scp file
+zipfile_factory(file, *args, **kwargs)
+    Create a ZipFile with proper configuration
 """
 
 __all__ = ["load"]
-
 import io
 import json
 import os
 import pathlib
+import zipfile
+from typing import Any
+from typing import BinaryIO
 
 import numpy as np
-from traitlets import HasTraits, Instance, Unicode, Union
+from traitlets import HasTraits
+from traitlets import Instance
+from traitlets import Unicode
+from traitlets import Union
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions
-from spectrochempy.utils.file import check_filename_to_save, pathclean
+from spectrochempy.utils.file import check_filename_to_save
+from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.jsonutils import json_serialiser
 from spectrochempy.utils.misc import TYPE_BOOL
 from spectrochempy.utils.zip import ScpFile
 
 # from warnings import warn
 
+SCPY_SUFFIX: dict[str, str] = {"NDDataset": ".scp", "Project": ".pscp"}
 
-SCPY_SUFFIX = {"NDDataset": ".scp", "Project": ".pscp"}
 
+def zipfile_factory(
+    file: str | pathlib.Path | BinaryIO, *args: Any, **kwargs: Any
+) -> "zipfile.ZipFile":
+    """Create a ZipFile with Zip64 support.
 
-# --------------------------------------------------------------------------------------
-# Utilities
-# --------------------------------------------------------------------------------------
-def zipfile_factory(file, *args, **kwargs):
-    """
-    Create a ZipFile.
+    Parameters
+    ----------
+    file : Union[str, pathlib.Path, BinaryIO]
+        File path or file-like object
+    *args : Any
+        Additional arguments passed to ZipFile constructor
+    **kwargs : Any
+        Additional keyword arguments passed to ZipFile constructor
 
-    Allows for Zip64, and the `file` argument can accept file, str, or
-    pathlib.Path objects. `args` and `kwargs` are passed to the zipfile.ZipFile
-    constructor.
+    Returns
+    -------
+    zipfile.ZipFile
+        Configured zip file object
     """
     if not hasattr(file, "read"):
         file = os.fspath(file)
@@ -52,14 +84,24 @@ def zipfile_factory(file, *args, **kwargs):
     return zipfile.ZipFile(file, *args, **kwargs)
 
 
-# ======================================================================================
-# Class NDIO to handle I/O of datasets
-# ======================================================================================
 class NDIO(HasTraits):
-    """
-    Import/export interface from `NDDataset` .
+    """Input/Output interface for NDDataset objects.
 
-    This class is used as basic import/export interface of the `NDDataset` .
+    This class provides methods for:
+    - Saving/loading datasets in native format
+    - Managing file paths and types
+    - JSON serialization
+
+    Properties
+    ----------
+    filename : pathlib.Path
+        Current filename for this dataset
+    directory : pathlib.Path
+        Current directory for this dataset
+    filetype : List[str]
+        Supported file types
+    suffix : str
+        File extension
     """
 
     _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
@@ -74,8 +116,7 @@ class NDIO(HasTraits):
         """
         if self._filename:
             return pathclean(self._filename).parent
-        else:
-            return None
+        return None
 
     @property
     def filename(self):
@@ -113,9 +154,8 @@ class NDIO(HasTraits):
         """
         if self._filename and self._filename.suffix:
             return self._filename.suffix
-        else:
-            klass = self._implements()
-            return SCPY_SUFFIX[klass]
+        klass = self._implements()
+        return SCPY_SUFFIX[klass]
 
     # ----------------------------------------------------------------------------------
     # Special methods
@@ -128,50 +168,24 @@ class NDIO(HasTraits):
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    def save(self, **kwargs):
-        """
-        Save the current object in SpectroChemPy format.
-
-        Default extension is .scp for `NDDataset`\'s and .pscp for
-         `Project`'s.
+    def save(self, **kwargs: Any) -> pathlib.Path | None:
+        """Save dataset in native .scp format.
 
         Parameters
         ----------
-        **kwargs
-            Optional keyword parameters (see Other Parameters).
+        **kwargs : Any
+            Optional arguments passed to save_as()
 
-        Other Parameters
-        ----------------
-        confirm : bool
+        Returns
+        -------
+        Optional[pathlib.Path]
+            Path to saved file if successful
 
         See Also
-        ---------
-        save_as : Save current object with a different name and/or directory.
-        write : Export current object to different format.
-
-        Examples
-        ---------
-
-        Read some data from an OMNIC file
-
-        >>> nd = scp.read_omnic('wodger.spg')
-        >>> assert nd.name == 'wodger'
-
-        Write it in SpectroChemPy format (.scp)
-        (return a `pathlib` object)
-
-        >>> filename = nd.save()
-
-        Check the existence of the scp fie
-
-        >>> assert filename.is_file()
-        >>> assert filename.name == 'wodger.scp'
-
-        Remove this file
-
-        >>> filename.unlink()
+        --------
+        save_as : Save with new filename
+        write : Export to different format
         """
-
         # By default we save the file in the self.directory and with the
         # name + suffix depending
         # on the current object type
@@ -196,7 +210,7 @@ class NDIO(HasTraits):
 
     def save_as(self, filename="", **kwargs):
         """
-        Save the current `NDDataset` in SpectroChemPy format (\*.scp).
+        Save the current NDDataset in SpectroChemPy format (*.scp).
 
         Parameters
         ----------
@@ -265,11 +279,12 @@ class NDIO(HasTraits):
         if filename:
             self.filename = filename
             return self.dump(filename, **kwargs)
+        return None
 
     @classmethod
     def load(cls, filename, **kwargs):
         """
-        Open data from a '\*.scp' (NDDataset) or '\*.pscp' (Project) file.
+        Open data from a '*.scp' (NDDataset) or '*.pscp' (Project) file.
 
         Parameters
         ----------
@@ -306,7 +321,7 @@ class NDIO(HasTraits):
         >>> from spectrochempy import *
         >>> nd2 = NDDataset.load(f)
         """
-        content = kwargs.get("content", None)
+        content = kwargs.get("content")
 
         if content:
             fid = io.BytesIO(content)
@@ -316,24 +331,26 @@ class NDIO(HasTraits):
             filename = pathclean(filename)
             suffix = cls().suffix
             filename = filename.with_suffix(suffix)
-            if kwargs.get("directory", None) is not None:
+            if kwargs.get("directory") is not None:
                 filename = pathclean(kwargs.get("directory")) / filename
             if not filename.exists():
                 raise FileNotFoundError(f"No file with name {filename} could be found.")
                 # filename = check_filenames(filename, **kwargs)[0]
-            fid = open(filename, "rb")
+            fid = open(filename, "rb")  # noqa: SIM115
 
         # get zip file
         try:
             obj = ScpFile(fid)
-        except FileNotFoundError:
-            raise exceptions.SpectroChemPyError(f"File {filename} doesn't exist!")
+        except FileNotFoundError as e:
+            raise exceptions.SpectroChemPyError(
+                f"File {filename} doesn't exist!"
+            ) from e
         except Exception as e:
             if str(e) == "File is not a zip file":
                 raise exceptions.SpectroChemPyError(
                     "File not in 'scp' or 'pscp' format!"
-                )
-            raise exceptions.SpectroChemPyError("Undefined error!")
+                ) from e
+            raise exceptions.SpectroChemPyError("Undefined error!") from e
 
         js = obj[obj.files[0]]
         if kwargs.get("json", False):
@@ -351,24 +368,37 @@ class NDIO(HasTraits):
         return new
 
     def dumps(self, encoding=None):
-
         js = json_serialiser(self, encoding=encoding)
         return json.dumps(js, indent=2)
 
     @classmethod
-    def loads(cls, js):
+    def loads(cls, js: dict[str, Any]) -> Any:
+        """Deserialize dataset from JSON.
 
+        Parameters
+        ----------
+        js : Dict[str, Any]
+            JSON object to deserialize
+
+        Returns
+        -------
+        Any
+            Deserialized dataset object
+
+        Raises
+        ------
+        TypeError
+            If JSON cannot be deserialized
+        """
         from spectrochempy.core.dataset.nddataset import NDDataset
         from spectrochempy.core.project.project import Project
         from spectrochempy.core.script import Script
 
         # .........................
         def item_to_attr(obj, dic):
-
             for key, val in dic.items():
-
                 try:
-                    if "readonly" in dic.keys() and key in ["readonly", "name"]:
+                    if "readonly" in dic and key in ["readonly", "name"]:
                         # case of the meta and preferences
                         pass
 
@@ -400,7 +430,7 @@ class NDIO(HasTraits):
                                 else:
                                     raise ValueError("Invalid : not a multicoordinate")
 
-                        coords = dict((c.name, c) for c in _coords)
+                        coords = {c.name: c for c in _coords}
                         obj.set_coordset(coords)
                         obj._name = val["name"]
                         obj._references = val["references"]
@@ -436,14 +466,12 @@ class NDIO(HasTraits):
                             setattr(obj, key, val)
 
                 except Exception as e:
-                    raise TypeError(f"for {key} {e}")
+                    raise TypeError(f"for {key} {e}") from e
 
             return obj
 
         # Create the class object and load it with the JSON content
-        new = item_to_attr(cls(), js)
-
-        return new
+        return item_to_attr(cls(), js)
 
     def dump(self, filename, **kwargs):
         """

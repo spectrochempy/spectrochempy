@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -514,7 +513,7 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
         what = "function"
 
     if what not in ("function", "method", "data") or signature is None:
-        return  # removed"class",
+        return None  # removed"class",
 
     import re
 

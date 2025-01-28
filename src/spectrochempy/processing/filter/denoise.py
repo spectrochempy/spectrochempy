@@ -1,7 +1,9 @@
 import numpy as np
 from scipy.signal import savgol_filter
 
-from spectrochempy.application import error_, info_, warning_
+from spectrochempy.application import error_
+from spectrochempy.application import info_
+from spectrochempy.application import warning_
 from spectrochempy.core import get_loglevel
 
 __dataset_methods__ = ["denoise", "despike"]

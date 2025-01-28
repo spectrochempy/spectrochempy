@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 # DEPRECATED TEST
 # This test for the deprecated baseline correction
@@ -140,13 +139,12 @@ def test_notebook_basecor_bug(IR_dataset_2D):
 
 # old plot_baseline_correction.py
 def test_old_plot_baseline_correction():
-    # -*- coding: utf-8 -*-
     # ======================================================================================
     # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
     # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
     # See full LICENSE agreement in the root directory.
     # ======================================================================================
-    # flake8: noqa
+    # ruff: noqa
     """
     NDDataset baseline correction
     ==============================
@@ -211,7 +209,6 @@ def test_old_plot_baseline_correction():
 
 
 def test_userguide_example():
-
     # %% [markdown]
     # # Baseline corrections
     #

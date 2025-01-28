@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -13,11 +12,9 @@ import traitlets as tr
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.application import info_
-from spectrochempy.utils.decorators import (
-    _wrap_ndarray_output_to_nddataset,
-    deprecated,
-    signature_has_configurable_traits,
-)
+from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
+from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 
 __all__ = ["EFA"]
@@ -32,11 +29,11 @@ class EFA(DecompositionAnalysis):
         r"""
     Evolving Factor Analysis (EFA).
 
-    Evolving factor analysis (`EFA`\ ) is a method that allows model-free resolution of
+    Evolving factor analysis (`EFA`) is a method that allows model-free resolution of
     overlapping peaks into concentration profiles and normalized spectra of components.
 
     Originally developed for GC and GC-MS experiments (See *e.g.,*
-    :cite:t:`maeder:1986` , :cite:t:`roach:1992`\ ), it is also suitable for
+    :cite:t:`maeder:1986` , :cite:t:`roach:1992`), it is also suitable for
     analysis spectra such as those obtained by Operando FTIR for example.
 
     The model used in this class allow to perform a forward and reverse analysis of the

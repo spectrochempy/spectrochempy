@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -26,14 +25,13 @@ import scipy
 import traitlets as tr
 from sklearn import decomposition
 
-from spectrochempy.analysis._base._analysisbase import (
-    DecompositionAnalysis,
-    NotFittedError,
-    _wrap_ndarray_output_to_nddataset,
-)
+from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.application import info_
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 
 
@@ -45,13 +43,13 @@ class MCRALS(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "MCRALS")
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Multivariate Curve Resolution Alternating Least Squares (MCRALS).
 
     :term:`MCR-ALS` ( ``Multivariate Curve Resolution Alternating Least Squares`` )
     resolve's a set (or several sets) of spectra :math:`X` of an evolving mixture
     (or a set of mixtures) into the spectra :math:`S^t` of "pure" species and their
-    concentration profiles :math:`C`\ .
+    concentration profiles :math:`C`.
 
     In terms of matrix equation:
 
@@ -102,12 +100,12 @@ class MCRALS(DecompositionAnalysis):
         ["lstsq", "nnls", "pnnls"],
         default_value="lstsq",
         help=(
-            r"""Solver used to get `C` from `X` and `St`\ .
+            r"""Solver used to get `C` from `X` and `St`.
 
 - ``'lstsq'``\ : uses ordinary least squares with `~numpy.linalg.lstsq`
-- ``'nnls'``\ : non-negative least squares (`~scipy.optimize.nnls`\ ) are applied
+- ``'nnls'``\ : non-negative least squares (`~scipy.optimize.nnls`) are applied
   sequentially on all profiles
-- ``'pnnls'``\ : non-negative least squares (`~scipy.optimize.nnls`\ ) are applied on
+- ``'pnnls'``\ : non-negative least squares (`~scipy.optimize.nnls`) are applied on
   profiles indicated in `nonnegConc` and ordinary least squares on other profiles.
 """
         ),
@@ -158,12 +156,12 @@ class MCRALS(DecompositionAnalysis):
     unimodConcTol = tr.Float(
         default_value=1.1,
         help=(
-            r"""Tolerance parameter for :term:`unimodality`\ .
+            r"""Tolerance parameter for :term:`unimodality`.
 
 Correction is applied only if:
 
-- ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile ``#j``\ ,
-- ``C[i,j] < C[i-1,j] * unimodTol`` on the increasing branch of profile ``#j``\ ."""
+- ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile ``#j``,
+- ``C[i,j] < C[i-1,j] * unimodTol`` on the increasing branch of profile ``#j``."""
         ),
     ).tag(config=True)
 
@@ -200,9 +198,9 @@ Correction is applied only if: ``C[i,j] > C[i-1,j] * unimodTol`` .""",
 
     monoIncTol = tr.Float(
         default_value=1.1,
-        help="""Tolerance parameter for monotonic decrease.
+        help=r"""Tolerance parameter for monotonic decrease.
 
-Correction is applied only if ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``\ .""",
+Correction is applied only if ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``.""",
     ).tag(config=True)
 
     unimodConc = tr.Union(
@@ -229,7 +227,7 @@ Correction is applied only if ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``
 - ``'all'``\ : all profile are constrained so that their weighted sum equals the
   `closureTarget`
 - `list` of indexes: the corresponding profiles are constrained so that their weighted sum
-  equals `closureTarget`\ ."""
+  equals `closureTarget`."""
         ),
     ).tag(config=True)
 
@@ -242,7 +240,7 @@ Correction is applied only if ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``
 - ``'default'``\ : the total concentration is set to ``1.0`` for all observations.
 - :term:`array-like` of size :term:`n_observations`: the values of concentration for
   each observation. Hence, ``np.ones(X.shape[0])`` would be equivalent to
-  ``'default'``\ ."""
+  ``'default'``."""
         ),
     ).tag(config=True)
 
@@ -259,8 +257,8 @@ Correction is applied only if ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``
      C \leftarrow C \cdot \textrm{diag} \left( C_L^{-1} c_t \right)
 
   where :math:`c_t` is the vector given by `closureTarget` and :math:`C_L^{-1}`
-  is the left inverse of :math:`C`\ .
-- ``'constantSum'`` normalize the sum of concentration profiles to `closureTarget`\ .
+  is the left inverse of :math:`C`.
+- ``'constantSum'`` normalize the sum of concentration profiles to `closureTarget`.
 """
         ),
     ).tag(config=True)
@@ -271,7 +269,7 @@ Correction is applied only if ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``
             r"""Defines hard constraints on the concentration profiles.
 
 - ``[]``\ : no constraint is applied.
-- `list` of indexes: the corresponding profiles will set by `getConc`\ ."""
+- `list` of indexes: the corresponding profiles will set by `getConc`."""
         ),
     ).tag(config=True)
 
@@ -295,7 +293,7 @@ where:
 - ``Ccurr`` is the current `C` dataset,
 - ``argsGetConc`` are the parameters needed to completely specify the function.
 - ``hardC`` is a `~numpy.ndarray` or `NDDataset` of shape
-  (:term:`n_observations` , len(``hardConc``\ ),
+  (:term:`n_observations` , len(``hardConc``),
 - ``newArgsGetConc`` are the updated parameters for the next iteration (can be `None`),
 - ``extraOutputGetConc`` can be any other relevant output to be kept in
   ``extraOutputGetConc`` attribute, a list of ``extraOutputGetConc`` at each MCR ALS
@@ -323,13 +321,13 @@ where:
         default_value="default",
         help=(
             r"""Correspondence of the profiles returned by `getConc`
-and `C[:,hardConc]`\ .
+and `C[:,hardConc]`.
 
 - ``'default'``: the profiles correspond to those of `C[:,hardConc]`. This is equivalent
   to ``range(len(hardConc))``
 - `list` of indexes or of `None`. For instance ``[2, 1, 0]`` indicates that the
-  third profile returned by `getC` (index ``2``\ ) corresponds to the 1st profile of
-  `C[:, hardConc]`\ , the 2nd returned profile (index ``1``\ ) corresponds to
+  third profile returned by `getC` (index ``2``) corresponds to the 1st profile of
+  `C[:, hardConc]`, the 2nd returned profile (index ``1``) corresponds to
   second profile of `C[:, hardConc]`, etc..."""
         ),
     ).tag(config=True)
@@ -338,12 +336,12 @@ and `C[:,hardConc]`\ .
         ["lstsq", "nnls", "pnnls"],
         default_value="lstsq",
         help=(
-            r"""Solver used to get `St` from `X` and `C`\ .
+            r"""Solver used to get `St` from `X` and `C`.
 
 - ``'lstsq'``\ : uses ordinary least squares with `~numpy.linalg.lstsq`
-- ``'nnls'``\ : non-negative least squares (`~scipy.optimize.nnls`\ ) are applied
+- ``'nnls'``\ : non-negative least squares (`~scipy.optimize.nnls`) are applied
   sequentially on all profiles
-- ``'pnnls'``\ : non-negative least squares (`~scipy.optimize.nnls`\ ) are applied on
+- ``'pnnls'``\ : non-negative least squares (`~scipy.optimize.nnls`) are applied on
   profiles indicated in `nonnegConc` and ordinary least squares on other profiles."""
         ),
     ).tag(config=True)
@@ -381,7 +379,7 @@ and `C[:,hardConc]`\ .
             r"""Unimodality constraint on Spectra.
 
 - ``[]``\ : all profiles can be multimodal.
-- ``'all'``\ : all profiles are unimodal (equivalent to ``range(n_components)``\ ).
+- ``'all'``\ : all profiles are unimodal (equivalent to ``range(n_components)``).
 - array of indexes : the corresponding profiles are considered unimodal, not the others.
   For instance ``[0, 2]`` indicates that profile ``#0`` and ``#2`` are unimodal while
   profile ``#1`` *can* be multimodal."""
@@ -408,8 +406,8 @@ and `C[:,hardConc]`\ .
 
 Correction is applied only if the deviating point ``St[j, i]`` is larger than
 ``St[j, i-1] * unimodSpecTol`` on the decreasing branch of profile
-``#j``\ , or lower than ``St[j, i-1] * unimodTol`` on the increasing branch of
-profile  ``#j``\ ."""
+``#j``, or lower than ``St[j, i-1] * unimodTol`` on the increasing branch of
+profile  ``#j``."""
         ),
     ).tag(config=True)
 
@@ -419,7 +417,7 @@ profile  ``#j``\ ."""
             r"""Defines hard constraints on the spectral profiles.
 
 - ``[]``\ : no constraint is applied.
-- `list` of indexes : the corresponding profiles will set by `getSpec`\ ."""
+- `list` of indexes : the corresponding profiles will set by `getSpec`."""
         ),
     ).tag(config=True)
 
@@ -444,7 +442,7 @@ with:
 - ``*argsGetSpec`` and ``**kwargsGetSpec``\ : the parameters needed to completely
   specify the function.
 - ``hardSt``\ : `~numpy.ndarray` or `NDDataset` of shape
-  ``(n_observations, len(hardSpec)``\ ,
+  ``(n_observations, len(hardSpec)``,
 - ``newArgsGetSpec``\ : updated parameters for the next ALS iteration (can be None),
 - ``extraOutputGetSpec``\ : any other relevant output to be kept in
   `extraOutputGetSpec` attribute, a list of ``extraOutputGetSpec`` at each iterations.
@@ -474,9 +472,9 @@ with:
 and `St`.
 
 - ``'default'``\ : the indexes correspond to those of `St`. This is equivalent
-  to ``range(len(hardSpec))``\ .
+  to ``range(len(hardSpec))``.
 - `list` of indexes : corresponding indexes in `St`, i.e. ``[2, None, 0]`` indicates that the
-  first returned profile corresponds to the third `St` profile (index ``2``\ ), the 2nd
+  first returned profile corresponds to the third `St` profile (index ``2``), the 2nd
   returned profile does not correspond to any profile in `St`, the 3rd returned profile
   corresponds to the first `St` profile (index ``0`` )."""
         ),
@@ -557,24 +555,24 @@ and `St`.
     def _solve_C(self, St):
         if self.solverConc == "lstsq":
             return _lstsq(St.T, self._X.data.T).T
-        elif self.solverConc == "nnls":
+        if self.solverConc == "nnls":
             return _nnls(St.T, self._X.data.T).T
-        elif self.solverConc == "pnnls":
+        if self.solverConc == "pnnls":
             return _pnnls(St.T, self._X.data.T, nonneg=self.nonnegConc).T
 
     def _solve_St(self, C):
         if self.solverSpec == "lstsq":
             return _lstsq(C, self._X.data)
-        elif self.solverSpec == "nnls":
+        if self.solverSpec == "nnls":
             return _nnls(C, self._X.data)
-        elif self.solverSpec == "pnnls":
+        if self.solverSpec == "pnnls":
             return _pnnls(C, self._X.data, nonneg=self.nonnegSpec)
 
     def _guess_profile(self, profile):
         # Set or guess an initial profile.
 
         if self._X_is_missing:
-            return
+            return None
 
         # check the dimensions compatibility
         # As the dimension of profile should match the initial shape
@@ -613,22 +611,22 @@ and `St`.
                 C = C[~masked_rows]
             return C, St
 
-        else:  # necessarily: profile.shape[1] == profile.shape[0]
-            St = profile.copy()
-            self._St0 = St
-            self._n_components = St.shape[0]
-            info_(f"Spectra profile initialized with {self._n_components} components")
+        # necessarily: profile.shape[1] == profile.shape[0]
+        St = profile.copy()
+        self._St0 = St
+        self._n_components = St.shape[0]
+        info_(f"Spectra profile initialized with {self._n_components} components")
 
-            # compute initial spectra
-            C = self._solve_C(St)
-            self._C0 = C
-            info_("Initial concentration profile computed")
-            # if everything went well here, C and St are set, we return
-            # after having removed the eventual St mask!
-            if np.any(self._X_mask):
-                St = St[:, ~masked_columns]
-            # update the number of components
-            return C, St
+        # compute initial spectra
+        C = self._solve_C(St)
+        self._C0 = C
+        info_("Initial concentration profile computed")
+        # if everything went well here, C and St are set, we return
+        # after having removed the eventual St mask!
+        if np.any(self._X_mask):
+            St = St[:, ~masked_columns]
+        # update the number of components
+        return C, St
 
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def _C_2_NDDataset(self, C):
@@ -731,8 +729,7 @@ and `St`.
         if getC_to_C_idx == "default":
             getC_to_C_idx = np.arange(self._n_components).tolist()
         elif (
-            len(getC_to_C_idx)
-            > self._n_components
+            len(getC_to_C_idx) > self._n_components
             #   or max(getC_to_C_idx) + 1 > self._n_components
         ):
             raise ValueError(
@@ -822,8 +819,7 @@ and `St`.
         if self._fitted:
             # note: _outfit = (C, St, C_constrained, St_ls, extraOutputGetConc, extraOutputGetSpec, ...)
             return self._outfit[1]
-        else:
-            raise NotFittedError("The model was not yet fitted. Execute `fit` first!")
+        raise NotFittedError("The model was not yet fitted. Execute `fit` first!")
 
     # ----------------------------------------------------------------------------------
     # Private methods (overloading abstract classes)
@@ -837,7 +833,7 @@ and `St`.
         if isinstance(profiles, (list, tuple)):
             # we assume that the starting C and St are already computed
             # (for ex. from a previous run of fit)
-            C, St = [item.data for item in profiles]
+            C, St = (item.data for item in profiles)
             self._n_components = C.shape[1]
             # eventually remove mask
             if np.any(self._X_mask):
@@ -1156,7 +1152,7 @@ and `St`.
 
     @_docstring.dedent
     def inverse_transform(self, X_transform=None, **kwargs):
-        """
+        r"""
         Transform data back to its original space.
 
         In other words, return an input `X_original` whose reduce/transform would be X.
@@ -1168,7 +1164,7 @@ and `St`.
         Returns
         -------
         `NDDataset`
-            Dataset with shape (:term:`n_observations`\ , :term:`n_features`\ ).
+            Dataset with shape (:term:`n_observations`, :term:`n_features`).
 
         Other Parameters
         ----------------
@@ -1209,7 +1205,7 @@ and `St`.
         The last spectral profiles obtained by least-square optimization, before constraints.
 
         Spectra obtained after solving :math:`C_{\textrm{constrained}} \cdot St = X`
-        for :math:`St`\ .
+        for :math:`St`.
         """
         return self._outfit[3]
 
@@ -1338,8 +1334,8 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
     #     indexes at which the correction is applied
     #
     # mod : str
-    #     When set to `"strict"`\ , values deviating from unimodality are reset to the
-    #     value of the previous point. When set to `"smooth"`\ , both values (deviating
+    #     When set to `"strict"`, values deviating from unimodality are reset to the
+    #     value of the previous point. When set to `"smooth"`, both values (deviating
     #     point and previous point) are modified to avoid "steps" in the profile.
     #
     # tol: float
@@ -1352,7 +1348,7 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
     elif axis == 1:
         a_ = a.T
 
-    for col, idx in zip(a_[:, idxes].T, idxes):
+    for col, idx in zip(a_[:, idxes].T, idxes, strict=False):
         a_[:, idx] = _unimodal_1D(col, tol, mod)
 
     return a
@@ -1368,8 +1364,8 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
     # a : 1D ndarray
     #
     # mod : str
-    #     When set to `"strict"`\ , values deviating from unimodality are reset to the value
-    #     of the previous point. When set to `"smooth"`\ , both values (deviating point and
+    #     When set to `"strict"`, values deviating from unimodality are reset to the value
+    #     of the previous point. When set to `"smooth"`, both values (deviating point and
     #     previous point) are modified to avoid "steps"
     #     in the profile.
     #

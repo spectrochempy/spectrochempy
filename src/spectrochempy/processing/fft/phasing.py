@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -17,7 +16,8 @@ import functools
 import numpy as np
 
 from spectrochempy.application import error_
-from spectrochempy.core.units import Quantity, ur
+from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import ur
 
 pi = np.pi
 
@@ -28,7 +28,6 @@ pi = np.pi
 def _phase_method(method):
     @functools.wraps(method)
     def wrapper(dataset, **kwargs):
-
         # On which axis do we want to phase (get axis from arguments)
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
@@ -48,7 +47,6 @@ def _phase_method(method):
 
         # check if the dimensionality is compatible with this kind of functions
         if x.unitless or x.dimensionless or x.units.dimensionality != "[time]":
-
             # extract initial phase from metadata
             def _check_units(par, default_units, inv=False):
                 if not isinstance(par, Quantity):

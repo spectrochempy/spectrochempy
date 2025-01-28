@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -50,7 +49,7 @@ def setup_mpl():
     # Check execution environment
     GITHUB = is_on_github_actions()
     if GITHUB:
-        print("Running on GitHub Actions")
+        print("Running on GitHub Actions")  # noqa: T201
 
     # Verify matplotlib installation
     try:
@@ -65,14 +64,15 @@ def setup_mpl():
             "  pip install matplotlib\n"
             "or\n"
             "  conda install matplotlib\n"
-            "and then install again."
+            "and then install again.",
+            stacklevel=2,
         )
         return
 
     # Setup paths for stylesheets
     stylesheets = Path(__file__).parent / "stylesheets"
     if not stylesheets.exists():
-        raise IOError(
+        raise OSError(
             f"Can't find the stylesheets from SpectroChemPy {str(stylesheets)}.\n"
             f"Installation incomplete!"
         )
@@ -84,32 +84,32 @@ def setup_mpl():
         stylelib.mkdir()
 
     if GITHUB:
-        print(f"MPL Configuration directory: {cfgdir}")
-        print(f"Stylelib directory: {stylelib}")
+        print(f"MPL Configuration directory: {cfgdir}")  # noqa: T201
+        print(f"Stylelib directory: {stylelib}")  # noqa: T201
 
     # Install stylesheets if needed
     styles = list(stylesheets.glob("*.mplstyle"))
     if not all((stylelib / src.name).exists() for src in styles):
-        print("Installing custom stylesheets...")
+        print("Installing custom stylesheets...")  # noqa: T201
         for src in styles:
             dest = stylelib / src.name
             shutil.copy(src, dest)
             if dest.exists():
-                print(f"Stylesheet {src.name} installed successfully")
+                print(f"Stylesheet {src.name} installed successfully")  # noqa: T201
             else:
-                print(f"Failed to install stylesheet {src.name}")
+                print(f"Failed to install stylesheet {src.name}")  # noqa: T201
 
         # Reload matplotlib style library
         plt.style.reload_library()
 
         if GITHUB:
-            print("\nAvailable stylesheets:")
-            print("\n".join(f"- {style}" for style in plt.style.available))
+            print("\nAvailable stylesheets:")  # noqa: T201
+            print("\n".join(f"- {style}" for style in plt.style.available))  # noqa: T201
 
     # Setup paths for fonts
     dir_source = Path(__file__).parent / "fonts"
     if not dir_source.exists():
-        raise IOError(f"Fonts directory not found: {dir_source}")
+        raise OSError(f"Fonts directory not found: {dir_source}")
 
     dir_dest = Path(mpl.get_data_path()) / "fonts" / "ttf"
     if not dir_dest.exists():
@@ -118,18 +118,18 @@ def setup_mpl():
     # Install fonts if needed
     fonts = list(dir_source.glob("*.[ot]tf"))
     if not all((dir_dest / src.name).exists() for src in fonts):
-        print("\nInstalling custom fonts...")
+        print("\nInstalling custom fonts...")  # noqa: T201
         for src in fonts:
             dest = dir_dest / src.name
             shutil.copy(src, dest)
-            print(f"Font {src.name} installed successfully")
+            print(f"Font {src.name} installed successfully")  # noqa: T201
 
         # Clear font cache
         dir_cache = Path(get_cachedir())
         for cache_file in dir_cache.glob("*.cache"):
             if not cache_file.is_dir():
                 cache_file.unlink()
-                print(f"Cleared font cache: {cache_file.name}")
+                print(f"Cleared font cache: {cache_file.name}")  # noqa: T201
 
 
 if __name__ == "__main__":

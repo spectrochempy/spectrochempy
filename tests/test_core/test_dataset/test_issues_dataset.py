@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 import os
 
 import numpy as np
@@ -64,7 +63,6 @@ def test_fix_issue_58():
 
 
 def test_fix_issue_186():
-
     import spectrochempy as scp
 
     da = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))

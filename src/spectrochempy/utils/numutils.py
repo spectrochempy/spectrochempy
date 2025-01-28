@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -55,8 +54,7 @@ def spacings(arr, sd=4):
     if len(spacings) == 1:
         # uniform spacing
         return spacings[0]
-    else:
-        return spacings
+    return spacings
 
 
 def gt_eps(arr):

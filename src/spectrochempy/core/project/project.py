@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -120,8 +119,8 @@ class Project(AbstractProject, NDIO):
 
         else:
             raise ValueError(
-                "objects of type {} has no name and so "
-                "cannot be appended to the project ".format(type(obj).__name__)
+                f"objects of type {type(obj).__name__} has no name and so "
+                "cannot be appended to the project "
             )
 
     def _get_from_type(self, name):
@@ -142,7 +141,7 @@ class Project(AbstractProject, NDIO):
             raise KeyError("The key must be a string.")
 
         if key == "No project":
-            return
+            return None
 
         if "/" in key:
             # Case of composed name (we assume not more than one level subproject
@@ -150,16 +149,15 @@ class Project(AbstractProject, NDIO):
             if parent in self.projects_names:
                 if key in self._projects[parent].datasets_names:
                     return self._projects[parent]._datasets[key]
-                elif key in self._projects[parent].scripts_names:
+                if key in self._projects[parent].scripts_names:
                     return self._projects[parent]._scripts[key]
         if key in self.datasets_names:
             return self._datasets[key]
-        elif key in self.projects_names:
+        if key in self.projects_names:
             return self._projects[key]
-        elif key in self.scripts_names:
+        if key in self.scripts_names:
             return self._scripts[key]
-        else:
-            raise KeyError(f"{key}: This object name does not exist in this project.")
+        raise KeyError(f"{key}: This object name does not exist in this project.")
 
     def __setitem__(self, key, value):
         if not isinstance(key, str):
@@ -168,7 +166,7 @@ class Project(AbstractProject, NDIO):
         if key in self.allnames and not isinstance(value, type(self[key])):
             raise ValueError(
                 "the key exists but for a different type "
-                "of object: {}".format(type(self[key]).__name__)
+                f"of object: {type(self[key]).__name__}"
             )
 
         if key in self.datasets_names:
@@ -189,23 +187,22 @@ class Project(AbstractProject, NDIO):
             # this avoids infinite recursion due to the traits management
             return super().__getattribute__(item)
 
-        elif item in self.allnames:
+        if item in self.allnames:
             # allows to access project, dataset or script by attribute
             return self[item]
 
-        elif item in self.meta.keys():
+        if item in self.meta.keys():
             # return the attribute
             return self.meta[item]
 
-        else:
-            raise AttributeError
+        raise AttributeError
 
     def __iter__(self):
         for items in self.allitems:
             yield items
 
     def __str__(self):
-        s = "Project {}:\n".format(self.name)
+        s = f"Project {self.name}:\n"
 
         lens = len(s)
 
@@ -214,18 +211,18 @@ class Project(AbstractProject, NDIO):
             sep = "   " * ns
 
             for k, v in project._projects.items():
-                s += "{} ⤷ {} (sub-project)\n".format(sep, k)
+                s += f"{sep} ⤷ {k} (sub-project)\n"
                 s = _listproj(s, v, ns)  # recursive call
 
             for k, v in project._datasets.items():
-                s += "{} ⤷ {} (dataset)\n".format(sep, k)
+                s += f"{sep} ⤷ {k} (dataset)\n"
 
             for k, v in project._scripts.items():
-                s += "{} ⤷ {} (script)\n".format(sep, k)
+                s += f"{sep} ⤷ {k} (script)\n"
 
             if len(s) == lens:
                 # nothing has been found in the project
-                s += "{} (empty project)\n".format(sep)
+                s += f"{sep} (empty project)\n"
 
             return s.strip("\n")
 
@@ -420,8 +417,7 @@ class Project(AbstractProject, NDIO):
         """
         if name is None:
             return "Project"
-        else:
-            return name == "Project"
+        return name == "Project"
 
     def copy(self):
         """

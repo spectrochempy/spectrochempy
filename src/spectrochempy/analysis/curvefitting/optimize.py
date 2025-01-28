@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -19,7 +18,8 @@ from IPython import display
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis.curvefitting import _models as models_
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
-from spectrochempy.application import info_, warning_
+from spectrochempy.application import info_
+from spectrochempy.application import warning_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
@@ -361,11 +361,11 @@ class Optimize(DecompositionAnalysis):
                     fp.models.append(modlabel)
                 common = False
                 continue
-            elif key.startswith("common") or key.startswith("vars"):
+            if key.startswith("common") or key.startswith("vars"):
                 common = True
                 modlabel = "common"
                 continue
-            elif key.startswith("shape"):
+            if key.startswith("shape"):
                 shape = values.lower().strip()
                 if shape is None:  # or (shape not in self._list_of_models and shape not
                     # in self._list_of_baselines):
@@ -388,81 +388,80 @@ class Optimize(DecompositionAnalysis):
             #         expvars = expvars.split()
             #         fp.expvars.extend(expvars)
             #     continue
+            if modlabel is None and not common:
+                raise ValueError(
+                    "The first definition should be a label for a model or a block "
+                    "of variables or constants."
+                )
+            # get the parameters
+            if key.startswith("*"):
+                fixed = True
+                reference = False
+                key = key[1:].strip()
+            elif key.startswith("$"):
+                fixed = False
+                reference = False
+                key = key[1:].strip()
+            elif key.startswith(">"):
+                fixed = True
+                reference = True
+                key = key[1:].strip()
             else:
-                if modlabel is None and not common:
-                    raise ValueError(
-                        "The first definition should be a label for a model or a block "
-                        "of variables or constants."
-                    )
-                # get the parameters
-                if key.startswith("*"):
-                    fixed = True
-                    reference = False
-                    key = key[1:].strip()
-                elif key.startswith("$"):
-                    fixed = False
-                    reference = False
-                    key = key[1:].strip()
-                elif key.startswith(">"):
-                    fixed = True
-                    reference = True
-                    key = key[1:].strip()
-                else:
-                    raise ValueError(
-                        f"Cannot interpret line {lc}: A parameter definition must start"
-                        f" with *,$ or >"
-                    )
+                raise ValueError(
+                    f"Cannot interpret line {lc}: A parameter definition must start"
+                    f" with *,$ or >"
+                )
 
-                # store this parameter
-                s = values.split(",")
-                s = [ss.strip() for ss in s]
-                if len(s) > 1 and ("[" in s[0]) and ("]" in s[1]):  # list
-                    s[0] = "%s, %s" % (s[0], s[1])
-                    if len(s) > 2:
-                        s[1:] = s[2:]
-                if len(s) > 3:
-                    raise ValueError(
-                        f"line {lc}: value, min, max should be defined in this order"
-                    )
-                elif len(s) == 2:
-                    raise ValueError(f"only two items in line {lc}")
-                    # s.append('none')
-                elif len(s) == 1:
-                    s.extend(["none", "none"])
-                value, mini, maxi = s
-                if mini.strip().lower() in ["none", ""]:
-                    mini = str(-1.0 / sys.float_info.epsilon)
-                if maxi.strip().lower() in ["none", ""]:
-                    maxi = str(+1.0 / sys.float_info.epsilon)
-                if modlabel != "common":
-                    ks = f"{key}_{modlabel}"
-                    fp.common[key] = False
-                else:
-                    ks = f"{key}"
-                    fp.common[key] = True
-                fp.reference[ks] = reference
-                if not reference:
-                    val = value.strip()
-                    val = eval(val)
-                    # if isinstance(val, list):
-                    #     # if the parameter is already a list, that's ok if the number
-                    #     # of parameters is ok
-                    #     if len(val) != fp.expnumber:
-                    #         raise ValueError(
-                    #             f"the number of parameters {len(val)} is not the number "
-                    #             f"of experiments."
-                    #         )
-                    #     if key not in fp.expvars:
-                    #         raise ValueError(
-                    #             f"parameter {key} is not declared as variable"
-                    #         )
-                    # else:
-                    #     if key in fp.expvars:
-                    #         # we create a list of parameters corresponding
-                    #         val = [val] * fp.expnumber
-                    fp[ks] = val, mini.strip(), maxi.strip(), fixed
-                else:
-                    fp[ks] = value.strip()
+            # store this parameter
+            s = values.split(",")
+            s = [ss.strip() for ss in s]
+            if len(s) > 1 and ("[" in s[0]) and ("]" in s[1]):  # list
+                s[0] = "%s, %s" % (s[0], s[1])
+                if len(s) > 2:
+                    s[1:] = s[2:]
+            if len(s) > 3:
+                raise ValueError(
+                    f"line {lc}: value, min, max should be defined in this order"
+                )
+            if len(s) == 2:
+                raise ValueError(f"only two items in line {lc}")
+                # s.append('none')
+            if len(s) == 1:
+                s.extend(["none", "none"])
+            value, mini, maxi = s
+            if mini.strip().lower() in ["none", ""]:
+                mini = str(-1.0 / sys.float_info.epsilon)
+            if maxi.strip().lower() in ["none", ""]:
+                maxi = str(+1.0 / sys.float_info.epsilon)
+            if modlabel != "common":
+                ks = f"{key}_{modlabel}"
+                fp.common[key] = False
+            else:
+                ks = f"{key}"
+                fp.common[key] = True
+            fp.reference[ks] = reference
+            if not reference:
+                val = value.strip()
+                val = eval(val)
+                # if isinstance(val, list):
+                #     # if the parameter is already a list, that's ok if the number
+                #     # of parameters is ok
+                #     if len(val) != fp.expnumber:
+                #         raise ValueError(
+                #             f"the number of parameters {len(val)} is not the number "
+                #             f"of experiments."
+                #         )
+                #     if key not in fp.expvars:
+                #         raise ValueError(
+                #             f"parameter {key} is not declared as variable"
+                #         )
+                # else:
+                #     if key in fp.expvars:
+                #         # we create a list of parameters corresponding
+                #         val = [val] * fp.expnumber
+                fp[ks] = val, mini.strip(), maxi.strip(), fixed
+            else:
+                fp[ks] = value.strip()
 
         # update global fp
         self.fp = fp
@@ -664,13 +663,7 @@ class Optimize(DecompositionAnalysis):
         sEI = sum(xi * expe)
         sId = sum(xi**2)
 
-        den = (
-            n * sFI**2
-            - n * sFd * sId
-            + sF**2 * sId
-            - 2 * sF * sFI * sI
-            + sFd * sI**2
-        )
+        den = n * sFI**2 - n * sFd * sId + sF**2 * sId - 2 * sF * sFI * sI + sFd * sI**2
 
         a = (
             -sE * (sF * sFI - sFd * sI)
@@ -1026,7 +1019,7 @@ def _optimize(
 
     def internal_callback(*args):
         if callback is None:
-            return
+            return None
         return callback(*args)
 
     if not isinstance(fp0, FitParameters):

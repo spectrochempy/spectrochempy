@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -17,19 +16,22 @@ from scipy.sparse.linalg import spsolve
 from scipy.spatial import ConvexHull
 
 from spectrochempy.analysis._base._analysisbase import AnalysisConfigurable
-from spectrochempy.application import info_, warning_
-from spectrochempy.processing.baselineprocessing.baselineutils import lls, lls_inv
+from spectrochempy.application import info_
+from spectrochempy.application import warning_
+from spectrochempy.processing.baselineprocessing.baselineutils import lls
+from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.utils.coordrange import trim_ranges
-from spectrochempy.utils.decorators import (
-    _wrap_ndarray_output_to_nddataset,
-    deprecated,
-    signature_has_configurable_traits,
-)
+from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
+from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.exceptions import NotFittedError
-from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
-from spectrochempy.utils.plots import NBlue, NGreen, NRed
+from spectrochempy.utils.misc import TYPE_FLOAT
+from spectrochempy.utils.misc import TYPE_INTEGER
+from spectrochempy.utils.plots import NBlue
+from spectrochempy.utils.plots import NGreen
+from spectrochempy.utils.plots import NRed
 from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = [
@@ -87,8 +89,8 @@ class Baseline(AnalysisConfigurable):
     Baseline Correction processor.
 
     The baseline correction can be applied to 1D datasets consisting in a single row
-    with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`\ ,
-    :term:`n_features`\ ).
+    with :term:`n_features` or to a 2D dataset with shape (:term:`n_observations`,
+    :term:`n_features`).
 
     When dealing with 2D datasets, the baseline correction can be applied either
     sequentially (default) or using a multivariate approach (parameter
@@ -101,7 +103,7 @@ class Baseline(AnalysisConfigurable):
       observations).
       The 2D dataset is first dimensionally reduced into several principal
       components using a conventional Singular Value Decomposition :term:`SVD` or a
-      non-negative matrix factorization (`NMF`\ ).
+      non-negative matrix factorization (`NMF`).
       Each component is then fitted before an inverse transform performed to recover
       the baseline correction.
 
@@ -112,17 +114,17 @@ class Baseline(AnalysisConfigurable):
       the detrend can be constant (mean removal), linear (order=1), quadratic (order=2)
       or `cubic`(order=3).
     - ``'asls'`` : Asymmetric Least Squares Smoothing baseline correction. This method
-      is based on the work of Eilers and Boelens (:cite:`eilers:2005`\ ).
+      is based on the work of Eilers and Boelens (:cite:`eilers:2005`).
     - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
-      (:cite:`ryan:1988`\ ).
+      (:cite:`ryan:1988`).
     - ``'rubberband'`` : Rubberband baseline correction.
     - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
       the polynomial is defined by the ``order`` parameter. The baseline is then
       obtained by evaluating the polynomial at each feature defined in predefined
-      `ranges`\ .
+      `ranges`.
 
     By default, `ranges` is set to the feature limits (i.e. `ranges=[features[0],
-    features[-1]]`\ )
+    features[-1]]`)
 
     Parameters
     ----------
@@ -147,8 +149,8 @@ class Baseline(AnalysisConfigurable):
         help="For 2D datasets, if `True` or if multivariate='svd' or 'nmf' , a "
         "multivariate method is used to fit a "
         "baseline on the principal components determined using a SVD decomposition "
-        " if `multivariate='svd'`\ or `True`, or a NMF factorization if "
-        "`multivariate='nmf'`\ ,"
+        r" if `multivariate='svd'`\ or `True`, or a NMF factorization if "
+        r"`multivariate='nmf'`,"
         "followed by an inverse-transform to retrieve the baseline corrected "
         "dataset. If `False` , a sequential method is used which consists in fitting a "
         "baseline on each row (observations) of the dataset.",
@@ -185,7 +187,7 @@ class Baseline(AnalysisConfigurable):
             tr.CaselessStrEnum(["constant", "linear", "quadratic", "cubic", "pchip"]),
         ),
         default_value=1,
-        help="""Polynom order to use for polynomial/pchip interpolation or detrend.
+        help=r"""Polynom order to use for polynomial/pchip interpolation or detrend.
 
 * If an integer is provided, it is the order of the polynom to fit, i.e. 1 for linear,
 * If a string if provided among  'constant', 'linear', 'quadratic' and 'cubic',
@@ -237,7 +239,7 @@ class Baseline(AnalysisConfigurable):
         "numerical values (start, end). Single values are internally converted to "
         "a pair (start=value, end=start). The limits of the spectra are "
         "automatically added during the fit process unless the `remove_limit` "
-        "parameter is `True`\ ",
+        r"parameter is `True`\ ",
     ).tag(config=True)
 
     include_limits = tr.Bool(
@@ -286,8 +288,7 @@ baseline/trends for different segments of the data.
     def _validate_breakpoints(self, proposal):
         if proposal.value is None:
             return []
-        else:
-            return sorted(proposal.value)
+        return sorted(proposal.value)
 
     @tr.validate("n_components")
     def _validate_n_components(self, proposal):
@@ -752,8 +753,8 @@ baseline/trends for different segments of the data.
         offset : `float`, optional, default: `None`
             Specify the separation (in percent) between the
             original and corrected data.
-        nb_traces : `int` or ``'all'``\ , optional
-            Number of lines to display. Default is ``'all'``\ .
+        nb_traces : `int` or ``'all'``, optional
+            Number of lines to display. Default is ``'all'``.
         **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the datasets.
         """
@@ -914,7 +915,7 @@ def detrend(dataset, order="linear", breakpoints=[], **kwargs):
           line is subtracted from data to remove a quadratic polynomial trend.
         * ``order=n`` can also be used to remove any nth-degree polynomial trend.
 
-    breakpoints : :term:`array_like`\ , optional
+    breakpoints : :term:`array_like`, optional
         Breakpoints to define piecewise segments of the data, specified as a vector
         containing coordinate values or indices indicating the location of the
         breakpoints. Breakpoints are useful when you want to compute separate trends
@@ -959,10 +960,10 @@ def detrend(dataset, order="linear", breakpoints=[], **kwargs):
 
 @_docstring.dedent
 def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
-    """
+    r"""
     Asymmetric Least Squares Smoothing baseline correction.
 
-    This method is based on the work of Eilers and Boelens (:cite:`eilers:2005`\ ).
+    This method is based on the work of Eilers and Boelens (:cite:`eilers:2005`).
 
     Parameters
     ----------
