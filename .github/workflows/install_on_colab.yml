@@ -1,29 +1,31 @@
-name: Install on Colab
+# This workflow tests if SpectrochemPy can be installed and run in a Google Colab environment
+# It uses Docker to simulate the Colab environment locally on GitHub's servers
 
+name: Test Colab Notebook
+
+# Define when this workflow should run
 on:
   push:
     branches:
-      - master
       - develop
       - feature/*
       - fix/*
+  pull_request:
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
 
-  schedule:
-    - cron: "00 0 * * *"
+# Prevent multiple copies of this workflow from running simultaneously
+# This saves resources and prevents conflicts
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
-    # prevent cron jobs from running on forks or release
-    if: |
-      (github.event_name == 'schedule'
-       && github.repository == 'spectrochempy/spectrochempy'
-       && !startsWith(github.ref, 'refs/release/')) || (
-       github.event_name != 'schedule'
-       && !startsWith(github.ref, 'refs/release/'))
-    name: Test install on latest colab image
-    runs-on: ubuntu-latest
+    name: Test notebook in Colab environment
+    runs-on: ubuntu-latest  # Use Ubuntu as our base system
 
     steps:
+      # Step 1: Free up space on the GitHub runner
       - name: Maximize disc space
         uses: AdityaGarg8/remove-unwanted-software@v4.1
         with:
@@ -31,19 +33,164 @@ jobs:
           remove-android: "true"
           remove-haskell: "true"
           remove-codeql: "true"
-      - name: Install Colab Docker image
+
+      # Step 2: Get our code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 3: Set up Docker build system with caching support
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 4: Cache Docker images to speed up subsequent runs
+      - name: Cache Docker images
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # Step 5: Cache pip packages to speed up installation
+      - name: Cache pip packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Step 6: Download the official Google Colab Docker image
+      # This image contains the same environment as Google Colab
+      - name: Pull Colab image
+        run: docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
+
+      # Step 7: Create a test notebook
+      # This creates a Jupyter notebook file that will:
+      # 1. Install our package and its dependencies
+      # 2. Import and test basic functionality
+      # The notebook format is JSON with specific cells that will be executed
+      - name: Create test notebook
         run: |
-          echo "Installing Colab Docker image..."
-          docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
-          echo "Colab Docker image installed."
-          echo "Free space available: $(df -h / | awk '{print $4}' | tail -n 1)"
-      - uses: actions/checkout@v4
-      - name: Install scp dependencies
+          cat << EOF > test_install.ipynb
+          {
+           "cells": [
+            {
+             "cell_type": "code",
+             "execution_count": null,
+             "metadata": {
+              "tags": ["parameters"]
+             },
+             "source": [
+              "# This cell is for papermill parameters\n",
+              "workspace_dir = '/workspace'"
+             ],
+             "outputs": []
+            },
+            {
+             "cell_type": "code",
+             "execution_count": null,
+             "metadata": {},
+             "source": [
+              "import sys\n",
+              "import subprocess\n",
+              "import importlib\n",
+              "\n",
+              "def install_package(path):\n",
+              "    # Install requirements\n",
+              "    requirements = path + '/requirements/requirements.txt'\n",
+              "    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', '-r', requirements])\n",
+              "    # Install spectrochempy\n",
+              "    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', '--no-deps', path])\n",
+              "    print('Installation completed')\n",
+              "\n",
+              "install_package(workspace_dir)"
+             ],
+             "outputs": []
+            },
+            {
+             "cell_type": "code",
+             "execution_count": null,
+             "metadata": {},
+             "source": [
+              "# Force reload sys.path\n",
+              "import site\n",
+              "import sys\n",
+              "sys.path.insert(0, '')\n",
+              "importlib.reload(site)\n",
+              "\n",
+              "# Now import and test\n",
+              "from zoneinfo import ZoneInfo  # For datetime handling\n",
+              "import spectrochempy as scp\n",
+              "print('Development version:', scp.version)\n",
+              "\n",
+              "# Test basic functionality\n",
+              "ds = scp.NDDataset([1,2,3])\n",
+              "print('Created dataset:', ds)"
+             ],
+             "outputs": []
+            }
+           ],
+           "metadata": {
+            "kernelspec": {
+             "display_name": "Python 3",
+             "language": "python",
+             "name": "python3"
+            }
+           },
+           "nbformat": 4,
+           "nbformat_minor": 4
+          }
+          EOF
+
+      # Step 8: Run the test notebook in the Colab environment
+      # This step:
+      # 1. Creates a directory for pip cache
+      # 2. Starts the Colab container with our code mounted
+      # 3. Installs required tools (papermill)
+      # 4. Runs our test notebook
+      #
+      # Docker run flags explained:
+      # --rm: Remove container when it stops
+      # -d: Run in detached mode (background)
+      # -p 8888:8888: Map container's port 8888 to host
+      # -v: Mount directories (workspace and pip cache)
+      - name: Run notebook in Colab environment
         run: |
-          echo "Installing spectrochempy..."
-          python -m pip install .
-          python -c "
-          import spectrochempy as scp
-          a = scp.random((10,10))
-          assert a.shape == (10, 10)
-                  "
+          # Create pip cache directory
+          mkdir -p ~/.cache/pip
+
+          # Start the Colab container with pip cache mounted
+          docker run --rm -d \
+            -p 8888:8888 \
+            -v ${{ github.workspace }}:/workspace \
+            -v ~/.cache/pip:/root/.cache/pip \
+            --name colab_container \
+            europe-docker.pkg.dev/colab-images/public/runtime:latest
+
+          # Wait for Jupyter to start
+          sleep 10
+
+          # Install papermill and ipykernel in the container
+          docker exec colab_container \
+            pip install -q papermill ipykernel
+
+          # Execute the notebook
+          docker exec colab_container \
+            papermill /workspace/test_install.ipynb /workspace/output.ipynb \
+            -p workspace_dir /workspace \
+            --no-progress-bar
+
+          # Stop container
+          docker stop colab_container
+
+      # Step 9: Save the results
+      # This saves the executed notebook as an artifact
+      # Artifacts can be downloaded from the GitHub Actions interface
+      # This runs even if previous steps fail (if: always)
+      - name: Upload notebook results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: notebook-output
+          path: output.ipynb

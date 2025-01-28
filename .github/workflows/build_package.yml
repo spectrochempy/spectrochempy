@@ -1,14 +1,14 @@
+# This workflow builds and publishes SpectrochemPy packages to:
+# - PyPI (Python Package Index)
+# - Anaconda Cloud
+# It runs after successful completion of the test workflow
+
 name: Build and publish packages 📦
 
 on:
   push:
     branches:
       - master
-      - develop
-      - feature/*
-
-  schedule:
-    - cron: "00 0 * * *"
 
   pull_request:
 
@@ -20,12 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Job 1: Build and publish distribution to PyPI
+  # Job 1: Build and publish to PyPI
   build-and-publish_pypi:
-    # Prevent cron jobs from running on forks
-    if: |
-      (github.event_name == 'schedule' && github.repository == 'spectrochempy/spectrochempy') || (github.event_name != 'schedule')
-
     name: Build and publish distribution to PyPI
     runs-on: ubuntu-latest
 
@@ -82,14 +78,10 @@ jobs:
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
-  # Job 2: Build and publish conda package
+  # Job 2: Build and publish to Anaconda
   build_and_publish_conda_package:
     name: Build and publish conda package to Anaconda.org
     runs-on: ubuntu-latest
-
-    # Prevent cron jobs from running on forks
-    if: |
-      (github.event_name == 'schedule' && github.repository == 'spectrochempy/spectrochempy') || (github.event_name != 'schedule')
 
     defaults:
       run:

@@ -1,12 +1,18 @@
+# This workflow builds and publishes the documentation for SpectrochemPy
+# Documentation is built using Sphinx and published to GitHub Pages
+
 name: Docs 📕
 
+# Trigger on:
+# - Code pushes to main branches
+# - Pull requests
+# - New releases
+# - Manual triggers
+# - Weekly schedule
 on:
   push:
     branches:
       - master
-      - develop
-      - feature/*
-      - fix/*
       - docs/*
 
   pull_request:
@@ -17,7 +23,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: "00 0 * * *"
+    - cron: "0 0 * * 0"  # At 00:00 on Sunday
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,7 +31,7 @@ concurrency:
 
 jobs:
   build_and_publish_documentation:
-    # prevent cron jobs from running on forks
+    # Only run scheduled jobs on main repository
     if: |
       (github.event_name == 'schedule'
        && github.repository == 'spectrochempy/spectrochempy') || (
@@ -41,11 +47,14 @@ jobs:
         shell: bash -l {0}
 
     steps:
+      # Step 1: Get the code
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # Step 2: Setup Python environment using Micromamba
+      # This installs all documentation dependencies
       - name: Install Conda environment with Micromamba
         uses: mamba-org/setup-micromamba@v1
         with:
@@ -69,17 +78,6 @@ jobs:
         run: |
           python3 .github/workflows/scripts/set_env_var.py
 
-      # - name: Update version in release notes
-      #  run: |
-      #    python .github/workflows/scripts/update_version_and_release_notes.py ${{ env.VERSIONSTRING }}
-
-      # - name: Setup timezone
-      #  uses: MathRobin/timezone-action@v1.1
-      #  with:
-      #    timezoneLinux: 'Europe/Paris'
-      #    timezoneMacos: 'Europe/Paris'
-      #    timezoneWindows: 'Europe/Paris'
-
       - name: Build docs
         run: |
           mkdir -p build
@@ -98,10 +96,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: docs
-          path: |
-            build/html/
-
+          path: build/html/
           retention-days: 5
+
+      # Final step: Deploy to GitHub Pages
+      # Only runs on push events (not pull requests)
       - name: Deployment
         if: (github.event_name != 'pull_request' && !github.event.act)
         uses: JamesIves/github-pages-deploy-action@v4
