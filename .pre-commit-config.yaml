@@ -45,25 +45,32 @@ repos:
         name: absolufy-imports
         files: ^spectrochempy/
 
-#  - repo: https://github.com/PyCQA/autoflake
-#    rev: "v2.0.0"
-#    hooks:
-#      - id: autoflake
+  #  - repo: https://github.com/PyCQA/autoflake
+  #    rev: "v2.0.0"
+  #    hooks:
+  #      - id: autoflake
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
+  # - repo: https://github.com/pycqa/isort
+  #   rev: 5.12.0
+  #   hooks:
+  #     - id: isort
 
-  - repo: https://github.com/ambv/black
-    rev: 22.12.0
-    hooks:
-      - id: black
+  # - repo: https://github.com/ambv/black
+  #   rev: 22.12.0
+  #   hooks:
+  #     - id: black
 
-  # remove this as ti seems to work incorrectly,
+  # remove this as it seems to work incorrectly,
   # e.g. analysing strings as if it was code.
   # TODO: To be insvestigated! or probably replaced with ruff
   # - repo: https://github.com/PyCQA/flake8
   #   rev: 6.0.0
   #   hooks:
   #       - id: flake8
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.2.0
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format

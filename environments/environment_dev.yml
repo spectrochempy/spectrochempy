@@ -45,6 +45,9 @@ dependencies:
 
     # DEV dependencies
     # ----------------
+    - toml
+    - ruff>=0.2.0
+    - pre-commit
     - jupyter
     - jupyterlab
     - ipykernel
@@ -56,6 +59,7 @@ dependencies:
     - ipywidgets
     - pyfakefs
     - pytest
+    - pytest-cov
     - pytest-doctestplus
-    - pytest-flake8
+    - pytest-ruff
     - pytest-mock

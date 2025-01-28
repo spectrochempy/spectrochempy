@@ -26,6 +26,5 @@ ipywidgets
 pyfakefs
 pytest
 pytest-doctestplus
-pytest-flake8
 pytest-mock
 numpydoc

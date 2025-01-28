@@ -34,7 +34,7 @@ deps_strg = "    - " + "\n    - ".join(deps)
 
 # Get version string from setuptools_scm
 pvs = get_version()
-print(f"Current version string = {pvs}")
+# print(f"Current version string = {pvs}")
 latest = pvs.split("+")[0]
 version_parts = latest.split(".")
 version = f"{version_parts[0]}.{version_parts[1]}.{version_parts[2]}"
@@ -57,4 +57,4 @@ meta_content = meta_template.render(
 # Write updated meta.yaml to file
 meta_filename = repo_path / "recipe" / "meta.yaml"
 meta_filename.write_text(meta_content)
-print(f"Updated {meta_filename}")
+# print(f"Updated {meta_filename}")

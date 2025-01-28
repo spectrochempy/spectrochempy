@@ -1,3 +1,8 @@
+# This script is used to extract the version string from the setuptools_scm
+# generated version and export it as an environment variable in the GitHub
+# Actions workflow.
+# ruff: noqa: T201
+
 import os
 
 from setuptools_scm import get_version

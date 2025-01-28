@@ -57,7 +57,8 @@ thumb.png
 *.pct.md
 
 # VS
-.vscode
+!.vscode/
+!.vscode/settings.json
 
 # caches
 __pycache__/
