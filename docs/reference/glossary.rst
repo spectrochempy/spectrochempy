@@ -16,10 +16,10 @@ Glossary
         :math:`\hat{X} = C \cdot St` is close to :math:`X` and either stops or goes for a new loop.
 
     API
-        API stands for ``Application Programming Interface``\ , which is a set of methods
+        API stands for ``Application Programming Interface``, which is a set of methods
         and protocols for using the SpectroChemPy (especially
         in `Jupyter Notebooks <https://docs.jupyter.org/en/latest/>`__
-        or `Jupyter Lab <https://docs.jupyter.org/en/latest/>`__\ )
+        or `Jupyter Lab <https://docs.jupyter.org/en/latest/>`__)
         without knowing all the details of the implementation of these methods or protocols.
 
     AsLS
@@ -30,7 +30,7 @@ Glossary
 
     array-like
         An object which can be transformed into a 1D dataset such as a list or tuple of numbers, or a
-        2D or nD dataset such a list of lists or a `~numpy.ndarray`\ .
+        2D or nD dataset such a list of lists or a `~numpy.ndarray`.
 
     Carroucell
         Multisample FTIR cell as described in :cite:t:`zholobenko:2020`.
@@ -40,19 +40,19 @@ Glossary
         Constraint where the sum of concentrations is fixed to a target value.
 
     EFA
-        EFA stands for ``Evolving Factor Analysis``\ .
+        EFA stands for ``Evolving Factor Analysis``.
         EFA examines the evolution of the singular values or :term:`rank` of a dataset :math:`X` by systematically
         carrying out a :term:`PCA` of submatrices of :math:`X`. It is often used to guess predminance regions of
         appearing/disappearing species in an evolving mixture. See :cite:`maeder:1986` for the original case study
         and :cite:`maeder:2009` for more recent references.
 
     ICA
-        ``Independant Component Analysis``\ .
+        ``Independant Component Analysis``.
         ICA is a method for separating a multivariate signal into additive subcomponents.
 
     loading
     loadings
-        In the context of :term:`PCA`\ , loadings are vectors :math:`\mathbf{p}_i` of length :term:`n_features`
+        In the context of :term:`PCA`, loadings are vectors :math:`\mathbf{p}_i` of length :term:`n_features`
         which, associated to the corresponding :term:`score` vectors, are related to the so-called
         i-th principal component describing the variance of a datastet :math:`X`.
 
@@ -60,7 +60,7 @@ Glossary
         MCR-ALS stands for ``Multivariate Curve Resolution by Alternating Least Squares`` .
         MCR-ALS resolve's a set of spectra :math:`X` of an evolving mixture
         into the spectral profiles  :math:`S` of "pure" species and their
-        concentration profiles :math:`C`\ , such as:
+        concentration profiles :math:`C`, such as:
 
         .. math:: X = C \cdot S^T + E
 
@@ -83,7 +83,7 @@ Glossary
         Typically a target is a composition variable such as a concentration.
 
     PCA
-        ``Principal Component Analysis``\ .
+        ``Principal Component Analysis``.
         PCA is directly related to the :term:`SVD`. Its master equation is:
 
         .. math:: \mathbf{X} = \mathbf{T} \mathbf{P}^t + \mathbf{E}
@@ -127,12 +127,12 @@ Glossary
 
     score
     scores
-        In the context of :term:`PCA`\ , scores are vectors :math:`\mathbf{t}_i` of length :term:`n_observations`
+        In the context of :term:`PCA`, scores are vectors :math:`\mathbf{t}_i` of length :term:`n_observations`
         which, associated to the corresponding :term:`loading` vectors, are related to the so-called
 
 
     SVD
-        SVD stands for ``Singular Value Decomposition``\ .
+        SVD stands for ``Singular Value Decomposition``.
         SVD decomposes a matrix :math:`\mathbf{X}(n,m)` (typically of set of :math:`n` spectra) as:
 
         .. math:: \mathbf{X} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^t + \mathbf{E}

@@ -47,8 +47,7 @@ def underline(s, indent=None):
         The underlined string.
     """
     x = "" if indent is None else " " * indent
-    s = f"{x}# {s}\n{x}# {'-' * len(s)}\n"
-    return s
+    return f"{x}# {s}\n{x}# {'-' * len(s)}\n"
 
 
 def pip2conda(package):

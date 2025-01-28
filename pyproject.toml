@@ -47,6 +47,29 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+dev = [
+  # various
+  "toml",
+  "ruff>=0.2.0",
+  "pre-commit",
+  # interactive
+  "jupyter",
+  "jupyterlab",
+  "ipykernel",
+  "ipyparallel",
+  "jupyterlab",
+  "nodejs",
+  "jupyter_server",
+  # test
+  "coverage",
+  "ipywidgets",
+  "pyfakefs",
+  "pytest",
+  "pytest-cov",
+  "pytest-doctestplus",
+  "pytest-ruff",
+  "pytest-mock",
+]
 interactive = [
   "jupyterlab",
   "ipykernel",
@@ -61,7 +84,6 @@ test = [
   "pyfakefs",
   "pytest",
   "pytest-doctestplus",
-  "pytest-flake8",
   "pytest-mock",
   "numpydoc",
 ]
@@ -80,24 +102,6 @@ docs = [
   "json5",
 ]
 cantera = ["cantera"]
-dev = [
-  # interactive
-  "jupyter",
-  "jupyterlab",
-  "ipykernel",
-  "ipyparallel",
-  "jupyterlab",
-  "nodejs",
-  "jupyter_server",
-  # test
-  "coverage",
-  "ipywidgets",
-  "pyfakefs",
-  "pytest",
-  "pytest-doctestplus",
-  "pytest-flake8",
-  "pytest-mock",
-]
 
 [project.urls]
 homepage = "https://www.spectrochempy.fr"
@@ -126,17 +130,47 @@ where = ["src"]
 [tool.setuptools_scm]
 local_scheme = "dirty-tag"
 
-[tool.autoflake]
-check = true
-ignore-init-module-imports = true
-in-place = true
-exclude = [
-  "docs/*",
-  "tests/*",
-  "docs/whatsnew/latest.rst",
-  "docs/whatsnew/index.rst",
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.lint]
+# Enable Pyflakes, pycodestyle, isort
+select = ["E", "F", "I", "N", "UP", "S", "B", "C4", "T20", "RET", "SIM", "W"]
+ignore = [
+  "E402", # Module level import not at top of file
+  "E501", # Line too long
+  "E731", # Do not assign a lambda expression
+  "N801", # Class name should use CapWords convention
+  "N802", # Function name should be lowercase
+  "N803", # Argument name should be lowercase
+  "N805", # First argument of a method should be named 'self'
+  "N806", # Variable in function should be lowercase
 ]
 
-[tool.isort]
-profile = "black"
-skip_glob = ["docs/*"]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+  ".eggs",
+  ".git",
+  ".ruff_cache",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "build",
+  "dist",
+  "docs/sphinxext",
+  "~*",
+  "tests",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["spectrochempy"]
+force-single-line = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
