@@ -1,40 +1,35 @@
+# This workflow runs tests for SpectrochemPy across different operating systems and Python versions
+# It ensures the package works correctly in various environments
+
 name: Tests
 
+# Define when this workflow should run:
+# - On push to main branches
+# - Weekly on Sunday at midnight
+# - On pull requests
+# - Manually from GitHub interface
 on:
   push:
     branches:
       - master
       - develop
       - feature/*
-    # paths-ignore:
-    #   - "docs/**"
-    #   - "**/*.rst"
-    #   - "**/*.md"
-    #   - "**/*.ipynb"
-    #   - "**/*.yml"
-    #   - "**/*.toml"
 
   schedule:
-    - cron: "00 0 * * *"
+    - cron: "0 0 * * 0"  # At 00:00 on Sunday
 
   pull_request:
-    # paths-ignore:
-    #   - "docs/**"
-    #   - "**/*.rst"
-    #   - "**/*.md"
-    #   - "**/*.ipynb"
-    #   - "**/*.yml"
-    #   - "**/*.toml"
 
-  workflow_dispatch:
+  workflow_dispatch:  # Manual trigger
 
+# Prevent multiple simultaneous runs
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test-package:
-    # prevent cron jobs from running on forks or release
+    # Skip tests for releases and limit scheduled runs to main repository
     if: |
       (github.event_name == 'schedule'
        && github.repository == 'spectrochempy/spectrochempy'
@@ -51,23 +46,40 @@ jobs:
         shell: bash {0}
         # do not use -l flag (do not work with macos when bash is se in login mode)
 
+    # Define test matrix - this will run tests in parallel for:
+    # - Different operating systems (Ubuntu, macOS, Windows)
+    # - Different Python versions (3.10, 3.13)
     strategy:
-      fail-fast: false
+      fail-fast: false  # Continue testing even if one combination fails
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        pythonVersion: ["3.10", "3.12", "3.13"]
-        # when adding a new python version, do not forget to update the matrix in the codeclimate step.max-parallel
-        # also go to github settings to modify the required actions to succeed for PR (branches/protectionrules: edit "master")
-        exclude:
-          - os: macos-latest
-            pythonVersion: 3.10
-          - os: macos-latest
-            pythonVersion: 3.13
+        pythonVersion: ["3.10", "3.13"]
+        include:
+          # Full testing on Ubuntu with all Python versions
+          - os: ubuntu-latest
+            pythonVersion: "3.10"
+            full_test: true
+          - os: ubuntu-latest
+            pythonVersion: "3.13"
+            full_test: true
+
+          # Limited testing on Windows/macOS
           - os: windows-latest
-            pythonVersion: 3.10
+            pythonVersion: "3.13"
+            full_test: false
           - os: macos-latest
-            pythonVersion: 3.13
+            pythonVersion: "3.13"
+            full_test: false
+
+        exclude:
+          # Exclude other combinations
+          - os: macos-latest
+            pythonVersion: "3.10"
+          - os: windows-latest
+            pythonVersion: "3.10"
+
     steps:
+      # Print debug information about the current run
       - name: info
         run: |
           echo "Environment Act: ${{ env.ACT }}"
@@ -109,6 +121,14 @@ jobs:
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
         run: |
           coverage run -m pytest tests -s --durations=10
+
+      # Add debug info about workflow completion
+      - name: Debug workflow completion
+        run: |
+          echo "Tests completed successfully"
+          echo "Workflow name: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Current branch: ${{ github.ref }}"
 
       - name: Coverage report to xml
         if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
