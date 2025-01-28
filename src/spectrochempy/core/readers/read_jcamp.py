@@ -12,7 +12,6 @@ __dataset_methods__ = __all__
 
 import io
 import re
-from datetime import UTC
 from datetime import datetime
 
 import numpy as np
@@ -20,6 +19,7 @@ import numpy as np
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docreps import _docstring
 

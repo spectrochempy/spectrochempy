@@ -6,12 +6,14 @@
 """
 Module to perform fitting of 1D or n-D spectral data.
 """
+
 __all__ = []
 
 
 import re
 import sys
 from collections import UserDict
+from contextlib import suppress
 
 import numpy as np
 
@@ -47,17 +49,15 @@ class FitParameters(UserDict):
             # we get a reference to another parameter
             self.data[key] = str(value)
             self.fixed[key] = True
-        elif isinstance(value, tuple) or isinstance(value, list):
+        elif isinstance(value, tuple | list):
             self.data[key] = self._evaluate(value[0])
             self.lob[key] = None
             self.upb[key] = None
-            try:
+            with suppress(Exception):
                 if len(value) > 2:
                     self.lob[key] = self._evaluate(value[1])
                     self.upb[key] = self._evaluate(value[2])
                     self._checkerror(key)
-            except Exception:
-                pass
             self.fixed[key] = False
             if isinstance(value[-1], bool):
                 self.fixed[key] = value[-1]
@@ -87,6 +87,7 @@ class FitParameters(UserDict):
             self.upb[key] is not None and self.data[key] > self.upb[key]
         ):
             raise ValueError(f"`{key}` value ({self.data[key]}) is out of bounds")
+        return None
 
     # ----------------------------------------------------------------------------------
     def __str__(self):
@@ -94,10 +95,7 @@ class FitParameters(UserDict):
             keystring = key.split("_")[0]
             if self.reference[key]:
                 return f"\t> {keystring}:{self.data[key]}\n"
-            if self.fixed[key]:
-                keystring = f"\t* {keystring}"
-            else:
-                keystring = f"\t$ {keystring}"
+            keystring = f"\t* {keystring}" if self.fixed[key] else f"\t$ {keystring}"
             lob = self.lob[key]
             upb = self.upb[key]
             if lob <= -0.1 / sys.float_info.epsilon:
@@ -166,13 +164,13 @@ class FitParameters(UserDict):
 
             for i in range(len(m)):
                 try:
-                    res = eval(m[i])
-                except NameError:
+                    res = eval(m[i])  # noqa: S307
+                except NameError as err:
                     message = f"Cannot evaluate '{strg}' >> {m[i]} is not defined"
-                    raise NameError(message)
-                except SyntaxError:
+                    raise NameError(message) from err
+                except SyntaxError as err:
                     message = f"Syntax error in '{strg}'"
-                    raise SyntaxError(message)
+                    raise SyntaxError(message) from err
         else:
             # not a string (probably a scalar that can be return as it is)
             res = strg
@@ -188,10 +186,7 @@ class FitParameters(UserDict):
         if key not in self.data:
             raise KeyError(f"parameter `{key}` is not found")
 
-        if expi is not None:
-            pe = self.data[key][expi]
-        else:
-            pe = self.data[key]
+        pe = self.data[key][expi] if expi is not None else self.data[key]
         lob = self.lob[key]
         upb = self.upb[key]
 

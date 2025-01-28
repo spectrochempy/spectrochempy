@@ -18,6 +18,7 @@ from sklearn import decomposition
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
+from spectrochempy.application import info_
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
@@ -219,7 +220,7 @@ for reproducible results across multiple function calls.""",
             self._ampl = X.ptp(dim=0)
             X -= self._min
             X /= self._ampl
-            X.name = "scaled %s" % X.name
+            X.name = f"scaled {X.name}"
 
         self._X_preprocessed = X.data
 
@@ -237,9 +238,9 @@ for reproducible results across multiple function calls.""",
                 )
         elif not 0 <= n_components <= min(n_observations, n_features):
             raise ValueError(
-                "n_components=%r must be between 0 and "
-                "min(n_observations, n_features)=%r with "
-                "svd_solver='full'" % (n_components, min(n_observations, n_features))
+                f"n_components={n_components!r} must be between 0 and "
+                f"min(n_observations, n_features)={min(n_observations, n_features)!r} with "
+                "svd_solver='full'"
             )
 
     def _fit(self, X, Y=None):
@@ -399,7 +400,7 @@ for reproducible results across multiple function calls.""",
 
         if n_components is None or n_components > self.n_components:
             n_components = self.n_components
-        print(self.__str__(n_components))
+        info_(self.__str__(n_components))
 
     # ----------------------------------------------------------------------------------
     # Plot methods specific to PCA
@@ -496,10 +497,7 @@ for reproducible results across multiple function calls.""",
         if len(args) > 0:
             scores = args[0]
             if hasattr(scores, "_implements") and scores._implements("NDDataset"):
-                if len(args) > 1:
-                    pcs = args[1:]
-                else:
-                    pcs = 1, 2
+                pcs = args[1:] if len(args) > 1 else (1, 2)
             else:
                 scores = self.scores
                 pcs = args
@@ -507,7 +505,7 @@ for reproducible results across multiple function calls.""",
             scores = self.scores
             pcs = 1, 2
 
-        if isinstance(pcs[0], (list, tuple, set)):
+        if isinstance(pcs[0], list | tuple | set):
             pcs = pcs[0]
 
         # transform to internal index of component's index (1->0 etc...)

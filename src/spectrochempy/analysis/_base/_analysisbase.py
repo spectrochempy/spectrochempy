@@ -261,8 +261,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         Y = proposal.value
 
         # we need a dataset or a list of NDDataset
-        Y = self._make_dataset(Y)
-        return Y
+        return self._make_dataset(Y)
 
     @property
     def _Y_is_missing(self):
@@ -351,7 +350,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
             warnings.warn(
                 "The number of components required for reduction "
                 "cannot be greater than the fitted model components : "
-                f"{self._n_components}. We then use this latter value."
+                f"{self._n_components}. We then use this latter value.",
+                stacklevel=2,
             )
         if n_components < self._n_components:
             X_transform = X_transform[:, :n_components]
@@ -407,7 +407,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
             warnings.warn(
                 "The number of components required for reduction "
                 "cannot be greater than the fitted model components : "
-                f"{self._n_components}. We then use this latter value."
+                f"{self._n_components}. We then use this latter value.",
+                stacklevel=2,
             )
 
         if isinstance(X_transform, NDDataset):
@@ -416,14 +417,13 @@ class DecompositionAnalysis(AnalysisConfigurable):
                 warnings.warn(
                     "The number of components required for reduction "
                     "cannot be greater than the X_transform size : "
-                    f"{X_transform.shape[1]}. We then use this latter value."
+                    f"{X_transform.shape[1]}. We then use this latter value.",
+                    stacklevel=2,
                 )
         elif X_transform is None:
             X_transform = self.transform(**kwargs).data
 
-        X = self._inverse_transform(X_transform)
-
-        return X
+        return self._inverse_transform(X_transform)
 
     _docstring.get_sections(
         _docstring.dedent(inverse_transform.__doc__),
@@ -457,8 +457,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         except TypeError:
             # the current model does not use Y
             self.fit(X)
-        X_transform = self.transform(X, **kwargs)
-        return X_transform
+        return self.transform(X, **kwargs)
 
     def reduce(self, X=None, **kwargs):
         # deprecated decorator do not preserve signature, so
@@ -496,9 +495,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             n_components = self._n_components
 
         # we call the specific _get_components method defined in subclasses
-        components = self._get_components()[:n_components]
-
-        return components
+        return self._get_components()[:n_components]
 
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typey="components")
@@ -621,8 +618,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         # we use _Y attribute to refer to the input data
         if self._Y_is_missing:
             raise NotFittedError
-        Y = self._Y
-        return Y
+        return self._Y
 
 
 # ======================================================================================
@@ -834,8 +830,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Y_transform = self.transform(**kwargs).data
 
         if Y_transform is None:
-            X = self._inverse_transform(X_transform)
-            return X
+            return self._inverse_transform(X_transform)
         X, Y = self._inverse_transform(X_transform, X_transform)
         return X, Y
 
@@ -1127,8 +1122,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         Y = proposal.value
 
         # we need a dataset or a list of NDDataset
-        Y = self._make_dataset(Y)
-        return Y
+        return self._make_dataset(Y)
 
     @property
     def _Y_is_missing(self):
@@ -1153,8 +1147,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     def _fit(self, X, Y=None, sample_weight=None):
         # this method is called by the abstract class fit.
-        _outfit = self._linear_regression.fit(X, Y, sample_weight=sample_weight)
-        return _outfit
+        return self._linear_regression.fit(X, Y, sample_weight=sample_weight)
 
     # ----------------------------------------------------------------------------------
     # Public methods

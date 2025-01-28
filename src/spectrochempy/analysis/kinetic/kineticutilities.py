@@ -24,10 +24,12 @@ from scipy.optimize import least_squares
 from scipy.optimize import minimize
 
 from spectrochempy.application import error_
+from spectrochempy.application import info_
 from spectrochempy.core.dataset.nddataset import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
 
@@ -94,7 +96,7 @@ def _interpret_equation(eq, species):
             raise ValueError(
                 f"Stoichiometric coeffcients must be integers. Could not "
                 f"convert {coef} in int"
-            )
+            ) from None
         if is_reactant:
             left[s] = coef
         else:
@@ -147,7 +149,7 @@ class ActionMassKinetics(tr.HasTraits):
     >>> k_exp = np.array(((1.0e8, 52.0e3), (1.0e8, 50.0e3)))
     >>> kin_exp = scp.ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
     >>> C_exp = kin_exp.integrate(time)
-    >>> print(f"Concentrations at t = 4 : {C_exp[4.].data}")
+    >>> info_(f"Concentrations at t = 4 : {C_exp[4.].data}")
     Concentrations at t = 4 : [[  0.7355   0.1879  0.07666]]
 
     # Several sets of experimental conditions can be used. In this case, `species`, `T`
@@ -157,8 +159,8 @@ class ActionMassKinetics(tr.HasTraits):
     >>> time = (np.arange(0, 10), np.arange(0, 5))
     >>> kin_exp = scp.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
     >>> C_exp = kin_exp.integrate(time)
-    >>> print(f"Concentrations at {T[0]}K, t = 4 : {C_exp[0][4.].data}")
-    >>> print(f"Concentrations at {T[1]}K, t = 4 : {C_exp[1][4.].data}")
+    >>> info_(f"Concentrations at {T[0]}K, t = 4 : {C_exp[0][4.].data}")
+    >>> info_(f"Concentrations at {T[1]}K, t = 4 : {C_exp[1][4.].data}")
     Concentrations at 298.0K, t = 4 : [[  0.7355   0.1879  0.07666]]
     Concentrations at 308.0K, t = 4 : [[  0.5448    0.236   0.2192]]
     """
@@ -191,7 +193,7 @@ class ActionMassKinetics(tr.HasTraits):
     def __init__(self, reactions, species_concentrations, arrhenius, T=298.0, **kwargs):
         # initialise concentrations, species, reactions, arrhenius, T
         self._init_concentrations = species_concentrations
-        if isinstance(self._init_concentrations, (list, tuple)):
+        if isinstance(self._init_concentrations, list | tuple):
             # we have two sets (or more) of experimental data.
             self._nset = len(self._init_concentrations)
             self._species = list(self._init_concentrations[0].keys())
@@ -207,7 +209,7 @@ class ActionMassKinetics(tr.HasTraits):
             self._species = list(self._init_concentrations.keys())
             self._nset = 1
 
-        if isinstance(reactions, (list, tuple)):
+        if isinstance(reactions, list | tuple):
             self._reactions = reactions
             self._reactions_names = [f"equation {i}" for i in range(len(reactions))]
         elif isinstance(reactions, dict):
@@ -248,7 +250,8 @@ class ActionMassKinetics(tr.HasTraits):
                 )
             if any(arrhenius < 0):
                 warnings.warn(
-                    "at least a rate constant is negative... are you sure of that ?!"
+                    "at least a rate constant is negative... are you sure of that ?!",
+                    stacklevel=2,
                 )
         elif arrhenius.shape[-1] == 2:
             # this is a 2D array with lines == [A, Ea]
@@ -260,7 +263,8 @@ class ActionMassKinetics(tr.HasTraits):
             if (arrhenius < 0).any():
                 warnings.warn(
                     "a least a pre-exp factor or activation energy is "
-                    "negative... ae you sure of that ?!"
+                    "negative... ae you sure of that ?!",
+                    stacklevel=2,
                 )
             # now add temperature exponents = 0
             arrhenius = np.array(
@@ -276,18 +280,15 @@ class ActionMassKinetics(tr.HasTraits):
             if (arrhenius[:, [0, 2]] < 0).any():
                 warnings.warn(
                     "a least a pre-exp factor or activation energy is "
-                    "negative... are you sure of that ?!"
+                    "negative... are you sure of that ?!",
+                    stacklevel=2,
                 )
         return arrhenius
 
     @tr.validate("_T")
     def _T_validate(self, proposal):
         Tp = proposal.value
-        if isinstance(Tp, Quantity):
-            T = Tp.to("K").magnitude
-        else:
-            T = Tp
-        return T
+        return Tp.to("K").magnitude if isinstance(Tp, Quantity) else Tp
 
     @tr.observe("_reactions")
     def _stoichio_matrix(self, change):
@@ -297,8 +298,8 @@ class ActionMassKinetics(tr.HasTraits):
         B = np.zeros((self.n_reactions, self.n_species))
         for i, eq in enumerate(reactions):
             left, right = _interpret_equation(eq, self._species)
-            A[i] = [left[k] if k in left else 0 for k in self._species]
-            B[i] = [right[k] if k in right else 0 for k in self._species]
+            A[i] = [left.get(k, 0) for k in self._species]
+            B[i] = [right.get(k, 0) for k in self._species]
         self._A = A
         self._B = B
         self._BmAt = (B - A).T
@@ -342,7 +343,7 @@ class ActionMassKinetics(tr.HasTraits):
     @property
     def init_concentrations(self):
         """Concentrations."""
-        if isinstance(self._init_concentrations, (list, tuple)):
+        if isinstance(self._init_concentrations, list | tuple):
             return [list(init_conc.values()) for init_conc in self._init_concentrations]
         return list(self._init_concentrations.values())
 
@@ -362,7 +363,7 @@ class ActionMassKinetics(tr.HasTraits):
         return block
 
     def _print_reaction_rates(self):
-        print(self._write_reaction_rates().replace(",", ",\n"))
+        info_(self._write_reaction_rates().replace(",", ",\n"))
 
     def _write_production_rates(self):
         """Return the expressions of production rates as a string"""
@@ -395,12 +396,12 @@ class ActionMassKinetics(tr.HasTraits):
         return block
 
     def _print_production_rates(self):
-        print(self._write_production_rates().replace(",", ",\n"))
+        info_(self._write_production_rates().replace(",", ",\n"))
 
     def _write_jacobian(self):
         """Return the expressions of the jacobian of the production rates as a string"""
         block = "["
-        for i, line in enumerate((self._B - self._A).T):
+        for _i, line in enumerate((self._B - self._A).T):
             jac = "["
             for j in range(self.n_species):
                 # compute jac[i,j] = d(dCidt)/dCj
@@ -437,7 +438,7 @@ class ActionMassKinetics(tr.HasTraits):
         return block
 
     def _print_jacobian(self):
-        print(self._write_jacobian().replace(" ],", "],\n"))
+        info_(self._write_jacobian().replace(" ],", "],\n"))
 
     def integrate(
         self,
@@ -717,12 +718,12 @@ class ActionMassKinetics(tr.HasTraits):
 
                 # uncomment for debugging and optimization
                 # t6 = time.time()
-                # print(f"time compute k       : {t1 - t0:f}, {100*(t1 - t0)/(t6-t0):f}%")
-                # print(f"time load f (and jac): {t2 - t1:f}, {100*(t2 - t1)/(t6-t0):f}%")
-                # print(f"time integration     : {t3 - t2:f}, {100*(t3 - t2)/(t6-t0):f}%")
-                # print(f"time debug           : {t4 - t3:f}, {100*(t4 - t3)/(t6-t0):f}%")
-                # print(f"time C,t             : {t5 - t4:f}, {100*(t5 - t4)/(t6-t0):f}%")
-                # print(f"time to NDDataset    : {t6 - t5:f}, {100*(t6 - t5)/(t6-t0):f}%")
+                # info_(f"time compute k       : {t1 - t0:f}, {100*(t1 - t0)/(t6-t0):f}%")
+                # info_(f"time load f (and jac): {t2 - t1:f}, {100*(t2 - t1)/(t6-t0):f}%")
+                # info_(f"time integration     : {t3 - t2:f}, {100*(t3 - t2)/(t6-t0):f}%")
+                # info_(f"time debug           : {t4 - t3:f}, {100*(t4 - t3)/(t6-t0):f}%")
+                # info_(f"time C,t             : {t5 - t4:f}, {100*(t5 - t4)/(t6-t0):f}%")
+                # info_(f"time to NDDataset    : {t6 - t5:f}, {100*(t6 - t5)/(t6-t0):f}%")
 
             elif kwargs.get("return_meta", False) and not return_dataset:
                 C.append((C_, bunch))
@@ -761,8 +762,8 @@ class ActionMassKinetics(tr.HasTraits):
         iexp,
         i2iexp,
         dict_param_to_optimize,
-        ivp_solver_kwargs={},
-        optimizer_kwargs={},
+        ivp_solver_kwargs=None,
+        optimizer_kwargs=None,
     ):
         r"""
         Fit rate parameters and concentrations to a concentration profile.
@@ -792,6 +793,11 @@ class ActionMassKinetics(tr.HasTraits):
         `dict`
             A result dictionary.
         """
+
+        if optimizer_kwargs is None:
+            optimizer_kwargs = {}
+        if ivp_solver_kwargs is None:
+            ivp_solver_kwargs = {}
 
         def objective(
             params,
@@ -827,7 +833,7 @@ class ActionMassKinetics(tr.HasTraits):
             )
 
             if self._nset > 1:
-                Chat = np.concatenate([C for C in Chat])
+                Chat = np.concatenate(list(Chat))
 
             return np.sum(np.square(Carray[:, iexp] - Chat[:, i2iexp]))
 
@@ -865,10 +871,10 @@ class ActionMassKinetics(tr.HasTraits):
                 ivp_solver_k_dt,
                 ivp_solver_left_op,
             )
-            print("Optimization of the parameters.")
-            print(f"         Initial parameters: {x0}")
-            print(f"         Initial function value: {init_val:f}")
-        tic = datetime.datetime.now(datetime.UTC)
+            info_("Optimization of the parameters.")
+            info_(f"         Initial parameters: {x0}")
+            info_(f"         Initial function value: {init_val:f}")
+        tic = datetime.datetime.now(UTC)
 
         optim_res = minimize(
             objective,
@@ -888,17 +894,14 @@ class ActionMassKinetics(tr.HasTraits):
             tol=optimizer_tol,
             options=optimizer_options,
         )
-        toc = datetime.datetime.now(datetime.UTC)
+        toc = datetime.datetime.now(UTC)
 
         if optimizer_options["disp"]:
-            print(f"         Optimization time: {toc - tic}")
-            print(f"         Final parameters: {optim_res['x']}")
+            info_(f"         Optimization time: {toc - tic}")
+            info_(f"         Final parameters: {optim_res['x']}")
 
         # compute the final concentration profiles
-        if self._nset == 1:
-            t = Cexp.y.data
-        else:
-            t = [C.y.data for C in Cexp]
+        t = Cexp.y.data if self._nset == 1 else [C.y.data for C in Cexp]
 
         Ckin = self.integrate(
             t,
@@ -972,7 +975,7 @@ def _ct_modify_surface_kinetics(surface, param_to_set):
         try:
             eval("surface." + param)
         except ValueError:
-            print(f"class {type(surface)} has no '{param}' attribute")
+            info_(f"class {type(surface)} has no '{param}' attribute")
             raise
         # if exists => sets its new value
         # if the attribute is writable:
@@ -1042,10 +1045,7 @@ class PFR:
         if _cantera_is_not_available():
             raise ImportError
 
-        if area is None:
-            add_surface = False
-        else:
-            add_surface = True
+        add_surface = area is not None
 
         # copy inlet parameters (for copy)
         self._cti = cti_file
@@ -1066,10 +1066,10 @@ class PFR:
         self.event = None
         self._pc = []  # pressure controllers
 
-        if isinstance(self._volume, (float, int)):
+        if isinstance(self._volume, float | int):
             self._volume = self._volume * np.ones(n_cstr) / n_cstr
 
-        if add_surface and isinstance(area, (float, int)):
+        if add_surface and isinstance(area, float | int):
             self._area = self._area * np.ones(n_cstr) / n_cstr
         self.n_cstr = len(volume)
 
@@ -1337,6 +1337,7 @@ class PFR:
                         "model could not be integrated with these parameters. "
                         "Objective function set to Inf",
                         UserWarning,
+                        stacklevel=2,
                     )
                 else:
                     raise
@@ -1414,7 +1415,7 @@ class PFR:
                 logging.info(f"{it:6} | {guess_string} | {sse:.3e} ")
 
             if options["disp"]:
-                print(
+                info_(
                     f"         Evaluation # {it} | Current function value: {sse} \r",
                     end="",
                 )
@@ -1426,6 +1427,7 @@ class PFR:
             if optimizer == "least_squares":
                 func_values.append(se)
                 return se
+            return None
 
         method = kwargs.get("method", "Nelder-Mead")
         bounds = kwargs.get("bounds")
@@ -1477,11 +1479,11 @@ class PFR:
             logging.info(" ")
 
         if options["disp"]:
-            print("Optimization of the parameters.")
-            print(f"         Method: {method}")
-            print(f"         Initial parameters: {initial_guess}")
+            info_("Optimization of the parameters.")
+            info_(f"         Method: {method}")
+            info_(f"         Initial parameters: {initial_guess}")
             if optimizer in ["minimize", "least_squares"]:
-                print(f"         Initial function value: {init_function_value}")
+                info_(f"         Initial function value: {init_function_value}")
 
         # tic = datetime.datetime.now()
 
@@ -1507,68 +1509,30 @@ class PFR:
 
         elif optimizer == "differential_evolution":
             # set optional parameters / default set to scipy defaults
-            if "strategy" in options:
-                strategy = options["strategy"]
-            else:
-                strategy = "best1bin"
-            if "maxiter" in options:
-                maxiter = options["maxiter"]
-            else:
-                maxiter = 1000
-            if "popsize" in options:
-                popsize = options["popsize"]
-            else:
-                popsize = 15
-            if "tol" in options:
-                tol = options["tol"]
-            else:
-                tol = 0.01
-            if "mutation" in options:
-                mutation = options["mutation"]
-            else:
-                mutation = 0.5, 1
-            if "recombination" in options:
-                recombination = options["recombination"]
-            else:
-                recombination = 0.7
-            if "seed" in options:
-                seed = options["seed"]
-            else:
-                seed = None
-            if "callback" in options:
-                callback = options["callback"]
-            else:
-                callback = None
-            if "polish" in options:
-                polish = options["polish"]
-            else:
-                polish = True
-            if "init" in options:
-                init = options["init"]
-            else:
-                init = "latinhypercube"
-            if "atol" in options:
-                atol = options["atol"]
-            else:
-                atol = 0
-            if "updating" in options:
-                updating = options["updating"]
-            else:
-                updating = "immediate"
+            strategy = options.get("strategy", "best1bin")
+            maxiter = options.get("maxiter", 1000)
+            popsize = options.get("popsize", 15)
+            tol = options.get("tol", 0.01)
+            mutation = options.get("mutation", (0.5, 1))
+            recombination = options.get("recombination", 0.7)
+            seed = options.get("seed", None)
+            callback = options.get("callback", None)
+            polish = options.get("polish", True)
+            init = options.get("init", "latinhypercube")
+            atol = options.get("atol", 0)
+            updating = options.get("updating", "immediate")
             if "workers" in options:
                 workers = options["workers"]
                 if workers != 1:
                     warnings.warn(
                         "parallelization not implemented yet, workers reset to 1",
                         UserWarning,
+                        stacklevel=2,
                     )
                     workers = 1
             else:
                 workers = 1
-            if "constraints" in options:
-                constraints = options["constraints"]
-            else:
-                constraints = ()
+            constraints = options.get("constraints", ())
 
             pop_sse = []
 
@@ -1616,7 +1580,7 @@ class PFR:
                     "an optimization with the"
                 )
                 logging.info("following array specifying the last population:\n")
-                print(f"it: {it}")
+                info_(f"it: {it}")
                 init_array = "init_pop = np.array([\n"
                 extra_trials = (it + 1) % (popsize * len(param_to_optimize))
                 if not extra_trials:
@@ -1639,8 +1603,8 @@ class PFR:
                 logging.info("Optimization did not end successfully.")
 
         if options["disp"]:
-            print(f"         Optimization time: {(toc - start_time)}")
-            print(f"         Final parameters: {res.x}")
+            info_(f"         Optimization time: {(toc - start_time)}")
+            info_(f"         Final parameters: {res.x}")
 
         if param_to_set is not None:
             all_param = {**param_to_set, **param_to_optimize}

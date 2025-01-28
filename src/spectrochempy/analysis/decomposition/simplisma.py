@@ -169,10 +169,7 @@ class SIMPLISMA(DecompositionAnalysis):
     def _str_iter_summary(j, index, coord, rsquare, stdev_res, diff):
         # return formatted list of figure of merits at a given iteration
 
-        string = (
-            f"{j + 1:4}  {index:5}  {coord:8.1f} {stdev_res:10.4f} {rsquare:10.4f} "
-        )
-        return string
+        return f"{j + 1:4}  {index:5}  {coord:8.1f} {stdev_res:10.4f} {rsquare:10.4f} "
 
     # ----------------------------------------------------------------------------------
     # Private methods (overloading abstract classes)
@@ -186,7 +183,7 @@ class SIMPLISMA(DecompositionAnalysis):
             raise ValueError("For now, SIMPLISMA only handles 2D Datasets")
 
         if np.min(X) < 0:
-            warn("SIMPLISMA does not handle easily negative values.")
+            warn("SIMPLISMA does not handle easily negative values.", stacklevel=2)
             # TODO: check whether negative values should be set to zero or not.
 
         self._X_preprocessed = X.data
@@ -288,7 +285,7 @@ class SIMPLISMA(DecompositionAnalysis):
                 info_(llog)
 
                 if interactive:
-                    print(llog)
+                    info_(llog)
 
                     # should plot purity and stdev, does not work for the moment
                     # TODO: fix the code below
@@ -319,7 +316,7 @@ class SIMPLISMA(DecompositionAnalysis):
                                 maxPIndex[j] = np.argmin(abs(xdata - new))
                                 maxPCoordinate[j] = xdata[maxPIndex[j]]
                             except ValueError:
-                                print(
+                                info_(
                                     "Incorrect answer. Please enter a valid index or value"
                                 )
 
@@ -407,7 +404,7 @@ class SIMPLISMA(DecompositionAnalysis):
                                 maxPIndex[j] = np.argmin(abs(xdata - new))
                                 maxPCoordinate[j] = xdata[maxPIndex[j]]
                             except ValueError:
-                                print(
+                                info_(
                                     "   |--> Incorrect answer. Please enter a valid index or value"
                                 )
 
@@ -466,21 +463,19 @@ class SIMPLISMA(DecompositionAnalysis):
                         C = C[:, 0:j]
                         finished = True
 
-            if j == n_components:
-                if not interactive:
-                    info_(
-                        f"**** Reached maximum number of pure compounds 'n_components' "
-                        f"({n_components})"
-                    )
-                    info_("**** End of SIMPL(I)SMA analysis.")
-                    finished = True
+            if j == n_components and not interactive:
+                info_(
+                    f"**** Reached maximum number of pure compounds 'n_components' "
+                    f"({n_components})"
+                )
+                info_("**** End of SIMPL(I)SMA analysis.")
+                finished = True
 
         # found components
         self._n_components = Pt.shape[0]
 
         # results
-        _outfit = (C, St, Pt, s)
-        return _outfit
+        return (C, St, Pt, s)
 
     def _transform(self, X=None):
         # X is ignored for SIMPLISMA

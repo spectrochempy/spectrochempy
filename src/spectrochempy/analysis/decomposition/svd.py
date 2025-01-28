@@ -185,8 +185,7 @@ class SVD(DecompositionAnalysis):
         """
         Return a NDDataset containing singular values.
         """
-        s = self._outfit[1]
-        return s
+        return self._outfit[1]
 
     sv = singular_values
 
@@ -239,6 +238,7 @@ class SVD(DecompositionAnalysis):
         """
         if self.compute_uv:
             return self._outfit[0]
+        return None
 
     @property
     def VT(self):
@@ -249,6 +249,7 @@ class SVD(DecompositionAnalysis):
         """
         if self.compute_uv:
             return self._outfit[2]
+        return None
 
     @property
     def s(self):

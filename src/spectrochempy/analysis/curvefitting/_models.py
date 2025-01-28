@@ -6,6 +6,7 @@
 """
 This module holds the definitions all the various models.
 """
+
 from functools import wraps
 
 import numpy as np
@@ -113,7 +114,7 @@ class polynomialbaseline:
 
     type = "1D"
     args = ["ampl"]
-    args.extend(["c_%d" % i for i in range(2, 11)])
+    args.extend([f"c_{i}" for i in range(2, 11)])
 
     script = """
     MODEL: baseline%(id)d\nshape: polynomialbaseline

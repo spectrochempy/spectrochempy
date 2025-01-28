@@ -6,13 +6,14 @@
 """
 Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
-from datetime import UTC
+
 from datetime import datetime
 
 import numpy as np
 
 from spectrochempy.core.writers.exporter import Exporter
 from spectrochempy.core.writers.exporter import exportermethod
+from spectrochempy.utils.datetimeutils import UTC
 
 __all__ = ["write_jcamp"]
 __dataset_methods__ = __all__
@@ -106,8 +107,8 @@ def _write_jcamp(*args, **kwargs):
             if timestamp_index is not None:
                 timestamp = dataset.y.labels[i][timestamp_index]
 
-            fid.write(f'##LONGDATE={timestamp.strftime("%Y/%m/%d")}\n')
-            fid.write(f'##TIME={timestamp.strftime("%H:%M:%S")}\n')
+            fid.write(f"##LONGDATE={timestamp.strftime('%Y/%m/%d')}\n")
+            fid.write(f"##TIME={timestamp.strftime('%H:%M:%S')}\n")
 
             fid.write("##XUNITS=1/CM\n")
             fid.write("##YUNITS=ABSORBANCE\n")

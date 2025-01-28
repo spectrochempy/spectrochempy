@@ -140,8 +140,7 @@ class EFA(DecompositionAnalysis):
         self._n_components = K
 
         # return results
-        _outfit = f, b
-        return _outfit
+        return f, b
 
     # ----------------------------------------------------------------------------------
     # Private methods that should be most of the time overloaded in subclass
@@ -164,8 +163,7 @@ class EFA(DecompositionAnalysis):
 
     def _get_components(self):
         # compute the components from the original dataset and the EFA concentrations
-        St = np.dot(self._get_conc().T, self._X_preprocessed)
-        return St
+        return np.dot(self._get_conc().T, self._X_preprocessed)
 
     # ----------------------------------------------------------------------------------
     # Public methods/properties

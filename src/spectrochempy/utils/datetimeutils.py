@@ -9,13 +9,15 @@ Datetime utilities
 
 import re
 import sys
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
-if sys.version_info[1] < 12:
-    from datetime import datetime
-else:
+if sys.version_info >= (3, 11):  # noqa: UP036
     from datetime import UTC
-    from datetime import datetime
+else:
+    from datetime import timezone
+
+    UTC = timezone.utc  # noqa: UP017
 
 import numpy as np
 
@@ -117,7 +119,7 @@ def get_datetime_labels(data, resolution=None, labels=None):
         time_units = resolution
 
     if labels == "cf_format":
-        label = f"{time_units} since {str(acquisition_date).replace('T',' ')}"
+        label = f"{time_units} since {str(acquisition_date).replace('T', ' ')}"
     else:
         units = from_dt64_units(CF_TO_DT64_UNITS[time_units])
         label = f"relative time / {units:~K}"
@@ -186,11 +188,7 @@ def strptime64(val, fmt=None, tz=None):
 
             # MONTH and DAYS
             month = g[2]
-            if reversed:
-                # assume days first
-                days = g[1]
-            else:
-                days = g[3]
+            days = g[1] if reversed else g[3]
 
             if int(month) > 12:
                 # nope days and month are inversed
@@ -203,16 +201,14 @@ def strptime64(val, fmt=None, tz=None):
 
         time = f"T{g[4]}" if g[4] is not None else ""
 
-        val = f"{date}{time}"
-
-        return val
+        return f"{date}{time}"
 
     def _regex_parse(val):
         regex = (
             r"^((\d{2,4})[\/\-\.](\d{2})[\/\-\.](\d{2,4}))?\s?(\d{2}\:\d{2}\:\d{2})?"
         )
 
-        val = re.sub(regex, _mysubst, val, 0)
+        val = re.sub(regex, _mysubst, val, count=0)
         date = _parse(val)
         if np.isnat(date):
             raise ValueError
