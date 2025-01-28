@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.multiplot &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.multiplot_image" href="spectrochempy.multiplot_image.html" />
+    <link rel="prev" title="spectrochempy.plot_multiple" href="spectrochempy.plot_multiple.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Public API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates-related objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot.html">spectrochempy.plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_1D.html">spectrochempy.plot_1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_pen.html">spectrochempy.plot_pen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_scatter.html">spectrochempy.plot_scatter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_scatter_pen.html">spectrochempy.plot_scatter_pen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_with_transposed.html">spectrochempy.plot_with_transposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_bar.html">spectrochempy.plot_bar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_2D.html">spectrochempy.plot_2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_map.html">spectrochempy.plot_map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_stack.html">spectrochempy.plot_stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_image.html">spectrochempy.plot_image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_3D.html">spectrochempy.plot_3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_surface.html">spectrochempy.plot_surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_waterfall.html">spectrochempy.plot_waterfall</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.plot_multiple.html">spectrochempy.plot_multiple</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">spectrochempy.multiplot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.multiplot_image.html">spectrochempy.multiplot_image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.multiplot_lines.html">spectrochempy.multiplot_lines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.multiplot_map.html">spectrochempy.multiplot_map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.multiplot_scatter.html">spectrochempy.multiplot_scatter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.multiplot_stack.html">spectrochempy.multiplot_stack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.multiplot_with_transposed.html">spectrochempy.multiplot_with_transposed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.show.html">spectrochempy.show</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Public API reference</a></li>
+      <li class="breadcrumb-item active">spectrochempy.multiplot</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.multiplot.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-multiplot">
+<h1>spectrochempy.multiplot<a class="headerlink" href="#spectrochempy-multiplot" title="Permalink to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="spectrochempy.multiplot">
+<span class="sig-name descname"><span class="pre">multiplot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nrow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'stack'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharey</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharez</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suptitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suptitle_color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mpl_event</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/plotters/multiplot.py#L108-L444"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.multiplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a figure with multiple axes arranged in array (n rows, n columns).</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul>
+<li><p><strong>datasets</strong> (<em>nddataset or list of nddataset</em>) – Datasets to plot.</p></li>
+<li><p><strong>labels</strong> (<em>list of str</em>) – The labels that will be used as title of each axes.</p></li>
+<li><p><strong>method</strong> (str, default to <a class="reference external" href="https://docs.python.org/3/library/functions.html#map" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">map</span></code></a> for 2D and <code class="xref py py-obj docutils literal notranslate"><span class="pre">lines</span></code> for 1D data) – Type of plot to draw in all axes (<code class="xref py py-obj docutils literal notranslate"><span class="pre">lines</span></code> , <code class="xref py py-obj docutils literal notranslate"><span class="pre">scatter</span></code> , <a class="reference internal" href="spectrochempy.stack.html#spectrochempy.stack" title="spectrochempy.stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack</span></code></a> , <a class="reference external" href="https://docs.python.org/3/library/functions.html#map" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">map</span></code></a>
+,`image` or <code class="xref py py-obj docutils literal notranslate"><span class="pre">with_transposed</span></code>).</p></li>
+<li><p><strong>nrows, ncols</strong> (<em>int, default=1</em>) – Number of rows/cols of the subplot grid. ncol*nrow must be equal
+to the number of datasets to plot.</p></li>
+<li><p><strong>sharex, sharey</strong> (<em>bool or {‘none’, ‘all’, ‘row’, ‘col’}, default=False</em>) – Controls sharing of properties among x (<code class="xref py py-obj docutils literal notranslate"><span class="pre">sharex</span></code>) or y (<code class="xref py py-obj docutils literal notranslate"><span class="pre">sharey</span></code>)
+axes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="kc">True</span> <span class="ow">or</span> <span class="s1">&#39;all&#39;</span> <span class="p">:</span> <span class="n">x</span><span class="o">-</span> <span class="ow">or</span> <span class="n">y</span><span class="o">-</span><span class="n">axis</span> <span class="n">will</span> <span class="n">be</span> <span class="n">shared</span> <span class="n">among</span> <span class="nb">all</span> <span class="n">subplots</span><span class="o">.</span>
+<span class="o">-</span> <span class="kc">False</span> <span class="ow">or</span> <span class="s1">&#39;none&#39;</span> <span class="p">:</span> <span class="n">each</span> <span class="n">subplot</span> <span class="n">x</span><span class="o">-</span> <span class="ow">or</span> <span class="n">y</span><span class="o">-</span><span class="n">axis</span> <span class="n">will</span> <span class="n">be</span> <span class="n">independent</span><span class="o">.</span>
+<span class="o">-</span> <span class="s1">&#39;row&#39;</span> <span class="p">:</span> <span class="n">each</span> <span class="n">subplot</span> <span class="n">row</span> <span class="n">will</span> <span class="n">share</span> <span class="n">an</span> <span class="n">x</span><span class="o">-</span> <span class="ow">or</span> <span class="n">y</span><span class="o">-</span><span class="n">axis</span><span class="o">.</span>
+<span class="o">-</span> <span class="s1">&#39;col&#39;</span> <span class="p">:</span> <span class="n">each</span> <span class="n">subplot</span> <span class="n">column</span> <span class="n">will</span> <span class="n">share</span> <span class="n">an</span> <span class="n">x</span><span class="o">-</span> <span class="ow">or</span> <span class="n">y</span><span class="o">-</span><span class="n">axis</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>When subplots have a shared x-axis along a column, only the x tick
+labels of the bottom subplot are visible.  Similarly, when
+subplots have a shared y-axis along a row, only the y tick labels
+of the first column subplot are visible.</p>
+</li>
+<li><p><strong>sharez</strong> (<em>bool or {‘none’, ‘all’, ‘row’, ‘col’}, default=False</em>) – Equivalent to sharey for 1D plot.
+for 2D plot, z is the intensity axis (i.e., contour levels for maps or
+the vertical axis for stack plot), y is the third axis.</p></li>
+<li><p><strong>figsize</strong> (<em>2-tuple of floats</em>) – <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code> tuple in inches.</p></li>
+<li><p><strong>dpi</strong> (<em>float</em>) – Dots per inch</p></li>
+<li><p><strong>facecolor</strong> (<em>color</em>) – The figure patch facecolor; defaults to rc <code class="docutils literal notranslate"><span class="pre">figure.facecolor</span></code>.</p></li>
+<li><p><strong>edgecolor</strong> (<em>color</em>) – The figure patch edge color; defaults to rc <code class="docutils literal notranslate"><span class="pre">figure.edgecolor</span></code>.</p></li>
+<li><p><strong>linewidth</strong> (<em>float</em>) – The figure patch edge linewidth; the default linewidth of the frame.</p></li>
+<li><p><strong>frameon</strong> (<em>bool</em>) – If <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a> , suppress drawing the figure frame.</p></li>
+<li><p><strong>left</strong> (<em>float in the [0-1] interval</em>) – The left side of the subplots of the figure.</p></li>
+<li><p><strong>right</strong> (<em>float in the [0-1] interval</em>) – The right side of the subplots of the figure.</p></li>
+<li><p><strong>bottom</strong> (<em>float in the [0-1] interval</em>) – The bottom of the subplots of the figure.</p></li>
+<li><p><strong>top</strong> (<em>float in the [0-1] interval</em>) – The top of the subplots of the figure.</p></li>
+<li><p><strong>wspace</strong> (<em>float in the [0-1] interval</em>) – The amount of width reserved for blank space between subplots,
+expressed as a fraction of the average axis width.</p></li>
+<li><p><strong>hspace</strong> (<em>float in the [0-1] interval</em>) – The amount of height reserved for white space between subplots,
+expressed as a fraction of the average axis height.</p></li>
+<li><p><strong>suptitle</strong> (<em>str</em>) – Title of the figure to display on top.</p></li>
+<li><p><strong>suptitle_color</strong> (<em>color</em>) – Color of the subtitles</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrochempy.plot_multiple.html" class="btn btn-neutral float-left" title="spectrochempy.plot_multiple" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.multiplot_image.html" class="btn btn-neutral float-right" title="spectrochempy.multiplot_image" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

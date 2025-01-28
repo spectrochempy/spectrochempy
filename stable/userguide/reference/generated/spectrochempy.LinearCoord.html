@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.LinearCoord &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.CoordSet" href="spectrochempy.CoordSet.html" />
+    <link rel="prev" title="spectrochempy.Coord" href="spectrochempy.Coord.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Public API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset Object</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates-related objects</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.Coord.html">spectrochempy.Coord</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">spectrochempy.LinearCoord</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.CoordSet.html">spectrochempy.CoordSet</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Public API reference</a></li>
+      <li class="breadcrumb-item active">spectrochempy.LinearCoord</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.LinearCoord.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-linearcoord">
+<h1>spectrochempy.LinearCoord<a class="headerlink" href="#spectrochempy-linearcoord" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinearCoord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/dataset/coord.py#L865-L1072"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.LinearCoord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear coordinates.</p>
+<p>Such coordinates correspond to a ascending or descending linear
+sequence of values, fully determined by two parameters, i.e., an offset (off) and an increment (inc) :</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{data} = i*\mathrm{inc} + \mathrm{off}.\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>a 1D array-like object, optional</em>) – WWen provided, the <a class="reference internal" href="spectrochempy.LinearCoord.size.html#spectrochempy.LinearCoord.size" title="spectrochempy.LinearCoord.size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></a> parameters is adjusted to the size of
+the array, and a linearization of the
+array is performed (only if it is possible: regular spacing in
+the 1.e5 relative accuracy).</p></li>
+<li><p><strong>offset</strong> (<em>float, optional</em>) – If omitted a value of 0.0 is taken for the coordinate offset.</p></li>
+<li><p><strong>increment</strong> (<em>float, optional</em>) – If omitted a value of 1.0 is taken for the coordinate increment.</p></li>
+<li><p><strong>**kwargs</strong> – Optional keywords parameters. See other parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>dtype</strong> (<em>str or dtype, optional, default=np.float64</em>) – If specified, the data will be casted to this dtype, else the
+type of the data will be used</p></li>
+<li><p><strong>dims</strong> (<em>list of chars, optional.</em>) – if specified the list must have a length equal to the number od
+data dimensions (ndim) and the chars must be
+taken among x,y,z,u,v,w or t. If not specified,
+the dimension names are automatically attributed in
+this order.</p></li>
+<li><p><strong>name</strong> (<em>str, optional</em>) – A user-friendly name for this object. If not given,
+the automatic <a class="reference internal" href="spectrochempy.LinearCoord.id.html#spectrochempy.LinearCoord.id" title="spectrochempy.LinearCoord.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a> given at the object creation will be
+used as a name.</p></li>
+<li><p><strong>labels</strong> (<em>array of objects, optional</em>) – Labels for the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a>. labels can be used only for 1D-datasets.
+The labels array may have an additional dimension, meaning
+several series of labels for the same data.
+The given array can be a list, a tuple, a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a> ,
+a ndarray-like, a <code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code> or any subclass of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code> .</p></li>
+<li><p><strong>units</strong> (<em>|Unit| instance or str, optional</em>) – Units of the data. If data is a <code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code> then <a class="reference internal" href="spectrochempy.LinearCoord.units.html#spectrochempy.LinearCoord.units" title="spectrochempy.LinearCoord.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">units</span></code></a> is set
+to the unit of the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a>; if a unit is also
+explicitly provided an error is raised. Handling of units use
+the <a class="reference external" href="https://pint.readthedocs.org/">pint</a>
+package.</p></li>
+<li><p><strong>title</strong> (<em>str, optional</em>) – The title of the dimension. It will later be used for instance
+for labelling plots of the data.
+It is optional but recommended to give a title to each ndarray.</p></li>
+<li><p><strong>dlabel</strong> (<em>str, optional.</em>) – Alias of <a class="reference internal" href="spectrochempy.LinearCoord.title.html#spectrochempy.LinearCoord.title" title="spectrochempy.LinearCoord.title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">title</span></code></a>.</p></li>
+<li><p><strong>meta</strong> (<em>dict-like object, optional.</em>) – Additional metadata for this object. Must be dict-like but no
+further restriction is placed on meta.</p></li>
+<li><p><strong>copy</strong> (<em>bool, optional</em>) – Perform a copy of the passed object. Default is False.</p></li>
+<li><p><strong>fill_missing</strong> (<em>bool</em>) – Create a linear coordinate array where missing data are masked.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a></dt><dd><p>Main SpectroChemPy object: an array with masks, units and</p>
+</dd>
+</dl>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">coordinates.</span></code></p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Coord</span></code></a></dt><dd><p>Explicit coordinates.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="n">LinearCoord</span><span class="p">,</span> <span class="n">Coord</span>
+</pre></div>
+</div>
+<p>To create a linear coordinate, we need to specify an offset,
+an increment and
+the size of the data</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c1</span> <span class="o">=</span> <span class="n">LinearCoord</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, linear coordinates can be created using the
+<code class="docutils literal notranslate"><span class="pre">linear</span></code> keyword</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c2</span> <span class="o">=</span> <span class="n">Coord</span><span class="p">(</span><span class="n">linear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">increment</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.amax.html#spectrochempy.LinearCoord.amax" title="spectrochempy.LinearCoord.amax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.amax</span></code></a>(dataset[, dim, keepdims])</p></td>
+<td><p>Return the maximum of the dataset or maxima along given dimensions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.amin.html#spectrochempy.LinearCoord.amin" title="spectrochempy.LinearCoord.amin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.amin</span></code></a>(dataset[, dim, keepdims])</p></td>
+<td><p>Return the maximum of the dataset or maxima along given dimensions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.arange.html#spectrochempy.LinearCoord.arange" title="spectrochempy.LinearCoord.arange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.arange</span></code></a>([start, stop, step, dtype])</p></td>
+<td><p>Return evenly spaced values within a given interval.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.around.html#spectrochempy.LinearCoord.around" title="spectrochempy.LinearCoord.around"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.around</span></code></a>(dataset[, decimals])</p></td>
+<td><p>Evenly round to the given number of decimals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.astype.html#spectrochempy.LinearCoord.astype" title="spectrochempy.LinearCoord.astype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.astype</span></code></a>([dtype])</p></td>
+<td><p>Cast the data to a specified type.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.copy.html#spectrochempy.LinearCoord.copy" title="spectrochempy.LinearCoord.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.copy</span></code></a>([deep, keepname])</p></td>
+<td><p>Make a disconnected copy of the current object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.fromfunction.html#spectrochempy.LinearCoord.fromfunction" title="spectrochempy.LinearCoord.fromfunction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.fromfunction</span></code></a>(cls, function[, ...])</p></td>
+<td><p>Construct a nddataset by executing a function over each coordinate.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.fromiter.html#spectrochempy.LinearCoord.fromiter" title="spectrochempy.LinearCoord.fromiter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.fromiter</span></code></a>(iterable[, dtype, count])</p></td>
+<td><p>Create a new 1-dimensional array from an iterable object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.geomspace.html#spectrochempy.LinearCoord.geomspace" title="spectrochempy.LinearCoord.geomspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.geomspace</span></code></a>(start, stop[, num, ...])</p></td>
+<td><p>Return numbers spaced evenly on a log scale (a geometric progression).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.get_labels.html#spectrochempy.LinearCoord.get_labels" title="spectrochempy.LinearCoord.get_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.get_labels</span></code></a>([level])</p></td>
+<td><p>Get the labels at a given level.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.is_units_compatible.html#spectrochempy.LinearCoord.is_units_compatible" title="spectrochempy.LinearCoord.is_units_compatible"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.is_units_compatible</span></code></a>(other)</p></td>
+<td><p>Check the compatibility of units with another object.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.ito.html#spectrochempy.LinearCoord.ito" title="spectrochempy.LinearCoord.ito"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.ito</span></code></a>(other[, force])</p></td>
+<td><p>Inplace scaling to different units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.ito_base_units.html#spectrochempy.LinearCoord.ito_base_units" title="spectrochempy.LinearCoord.ito_base_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.ito_base_units</span></code></a>()</p></td>
+<td><p>Inplace rescaling to base units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.ito_reduced_units.html#spectrochempy.LinearCoord.ito_reduced_units" title="spectrochempy.LinearCoord.ito_reduced_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.ito_reduced_units</span></code></a>()</p></td>
+<td><p>Quantity scaled in place to reduced units, inplace.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.linspace.html#spectrochempy.LinearCoord.linspace" title="spectrochempy.LinearCoord.linspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.linspace</span></code></a>(cls, start, stop[, ...])</p></td>
+<td><p>Return evenly spaced numbers over a specified interval.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.loc2index.html#spectrochempy.LinearCoord.loc2index" title="spectrochempy.LinearCoord.loc2index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.loc2index</span></code></a>(loc)</p></td>
+<td><p>Return the index corresponding to a given location.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.logspace.html#spectrochempy.LinearCoord.logspace" title="spectrochempy.LinearCoord.logspace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.logspace</span></code></a>(cls, start, stop[, ...])</p></td>
+<td><p>Return numbers spaced evenly on a log scale.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.max.html#spectrochempy.LinearCoord.max" title="spectrochempy.LinearCoord.max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.max</span></code></a>(dataset[, dim, keepdims])</p></td>
+<td><p>Return the maximum of the dataset or maxima along given dimensions.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.min.html#spectrochempy.LinearCoord.min" title="spectrochempy.LinearCoord.min"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.min</span></code></a>(dataset[, dim, keepdims])</p></td>
+<td><p>Return the maximum of the dataset or maxima along given dimensions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.ptp.html#spectrochempy.LinearCoord.ptp" title="spectrochempy.LinearCoord.ptp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.ptp</span></code></a>(dataset[, dim, keepdims])</p></td>
+<td><p>Range of values (maximum - minimum) along a dimension.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.round.html#spectrochempy.LinearCoord.round" title="spectrochempy.LinearCoord.round"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.round</span></code></a>(dataset[, decimals])</p></td>
+<td><p>Evenly round to the given number of decimals.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.round_.html#spectrochempy.LinearCoord.round_" title="spectrochempy.LinearCoord.round_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.round_</span></code></a>(dataset[, decimals])</p></td>
+<td><p>Evenly round to the given number of decimals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.to.html#spectrochempy.LinearCoord.to" title="spectrochempy.LinearCoord.to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.to</span></code></a>(other[, inplace, force])</p></td>
+<td><p>Return the object with data rescaled to different units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.to_base_units.html#spectrochempy.LinearCoord.to_base_units" title="spectrochempy.LinearCoord.to_base_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.to_base_units</span></code></a>([inplace])</p></td>
+<td><p>Return an array rescaled to base units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.to_reduced_units.html#spectrochempy.LinearCoord.to_reduced_units" title="spectrochempy.LinearCoord.to_reduced_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.to_reduced_units</span></code></a>([inplace])</p></td>
+<td><p>Return an array scaled in place to reduced units.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.data</span></code></a></p></td>
+<td><p>The <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.dimensionless.html#spectrochempy.LinearCoord.dimensionless" title="spectrochempy.LinearCoord.dimensionless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.dimensionless</span></code></a></p></td>
+<td><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array is dimensionless - Readonly property (bool).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.dtype.html#spectrochempy.LinearCoord.dtype" title="spectrochempy.LinearCoord.dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.dtype</span></code></a></p></td>
+<td><p>Data type (np.dtype).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.filename.html#spectrochempy.LinearCoord.filename" title="spectrochempy.LinearCoord.filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.filename</span></code></a></p></td>
+<td><p>Current filename for this dataset (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Pathlib</span></code> object).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.has_data.html#spectrochempy.LinearCoord.has_data" title="spectrochempy.LinearCoord.has_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.has_data</span></code></a></p></td>
+<td><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array is not empty and size &gt; 0.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.has_defined_name.html#spectrochempy.LinearCoord.has_defined_name" title="spectrochempy.LinearCoord.has_defined_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.has_defined_name</span></code></a></p></td>
+<td><p>True is the name has been defined (bool).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.has_units.html#spectrochempy.LinearCoord.has_units" title="spectrochempy.LinearCoord.has_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.has_units</span></code></a></p></td>
+<td><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array have units - Readonly property (bool).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.id.html#spectrochempy.LinearCoord.id" title="spectrochempy.LinearCoord.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.id</span></code></a></p></td>
+<td><p>Object identifier - Readonly property (str).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.is_empty.html#spectrochempy.LinearCoord.is_empty" title="spectrochempy.LinearCoord.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.is_empty</span></code></a></p></td>
+<td><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array is empty or size=0, and if no label are present - Readonly property (bool).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.is_float.html#spectrochempy.LinearCoord.is_float" title="spectrochempy.LinearCoord.is_float"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.is_float</span></code></a></p></td>
+<td><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> are real values - Readonly property (bool).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.is_integer.html#spectrochempy.LinearCoord.is_integer" title="spectrochempy.LinearCoord.is_integer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.is_integer</span></code></a></p></td>
+<td><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> are integer values - Readonly property (bool).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.is_labeled.html#spectrochempy.LinearCoord.is_labeled" title="spectrochempy.LinearCoord.is_labeled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.is_labeled</span></code></a></p></td>
+<td><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array have labels - Readonly property (bool).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.labels.html#spectrochempy.LinearCoord.labels" title="spectrochempy.LinearCoord.labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.labels</span></code></a></p></td>
+<td><p>An array of labels for <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a> of str).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.laser_frequency.html#spectrochempy.LinearCoord.laser_frequency" title="spectrochempy.LinearCoord.laser_frequency"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.laser_frequency</span></code></a></p></td>
+<td><p>Laser frequency if needed (Quantity).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.limits.html#spectrochempy.LinearCoord.limits" title="spectrochempy.LinearCoord.limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.limits</span></code></a></p></td>
+<td><p>Range of the data (list).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.m.html#spectrochempy.LinearCoord.m" title="spectrochempy.LinearCoord.m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.m</span></code></a></p></td>
+<td><p>The <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.magnitude.html#spectrochempy.LinearCoord.magnitude" title="spectrochempy.LinearCoord.magnitude"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.magnitude</span></code></a></p></td>
+<td><p>The <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.meta.html#spectrochempy.LinearCoord.meta" title="spectrochempy.LinearCoord.meta"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.meta</span></code></a></p></td>
+<td><p>Additional metadata (<code class="xref py py-class docutils literal notranslate"><span class="pre">Meta</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.name.html#spectrochempy.LinearCoord.name" title="spectrochempy.LinearCoord.name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.name</span></code></a></p></td>
+<td><p>A user-friendly name (str).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.offset.html#spectrochempy.LinearCoord.offset" title="spectrochempy.LinearCoord.offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.offset</span></code></a></p></td>
+<td><p>Starting value for linear array</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.reversed.html#spectrochempy.LinearCoord.reversed" title="spectrochempy.LinearCoord.reversed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.reversed</span></code></a></p></td>
+<td><p>bool - Whether the axis is reversed (readonly property).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.roi.html#spectrochempy.LinearCoord.roi" title="spectrochempy.LinearCoord.roi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.roi</span></code></a></p></td>
+<td><p>Region of interest (ROI) limits (list).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.show_datapoints.html#spectrochempy.LinearCoord.show_datapoints" title="spectrochempy.LinearCoord.show_datapoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.show_datapoints</span></code></a></p></td>
+<td><p>True if axis must discard values and show only datapoints.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.size.html#spectrochempy.LinearCoord.size" title="spectrochempy.LinearCoord.size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.size</span></code></a></p></td>
+<td><p>Size of the underlying <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array - Readonly property (int).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.spacing.html#spectrochempy.LinearCoord.spacing" title="spectrochempy.LinearCoord.spacing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.spacing</span></code></a></p></td>
+<td><p>Return coordinates spacing.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.title.html#spectrochempy.LinearCoord.title" title="spectrochempy.LinearCoord.title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.title</span></code></a></p></td>
+<td><p>An user friendly title (str).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.umasked_data.html#spectrochempy.LinearCoord.umasked_data" title="spectrochempy.LinearCoord.umasked_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.umasked_data</span></code></a></p></td>
+<td><p>The actual array with mask and unit (<code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.unitless.html#spectrochempy.LinearCoord.unitless" title="spectrochempy.LinearCoord.unitless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.unitless</span></code></a></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> - True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> does not have <a class="reference internal" href="spectrochempy.LinearCoord.units.html#spectrochempy.LinearCoord.units" title="spectrochempy.LinearCoord.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">units</span></code></a> (Readonly property).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.units.html#spectrochempy.LinearCoord.units" title="spectrochempy.LinearCoord.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.units</span></code></a></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Unit</span></code> - The units of the data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.value.html#spectrochempy.LinearCoord.value" title="spectrochempy.LinearCoord.value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.value</span></code></a></p></td>
+<td><p>Alias of <a class="reference internal" href="spectrochempy.LinearCoord.values.html#spectrochempy.LinearCoord.values" title="spectrochempy.LinearCoord.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.LinearCoord.values.html#spectrochempy.LinearCoord.values" title="spectrochempy.LinearCoord.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord.values</span></code></a></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code> - The actual values (data, units) contained in this object (Readonly property).</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>).</p>
+<p>If there is no data but labels, then the labels are returned instead of data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.dimensionless">
+<span class="sig-name descname"><span class="pre">dimensionless</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.dimensionless" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array is dimensionless - Readonly property (bool).</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.LinearCoord.unitless.html#spectrochempy.LinearCoord.unitless" title="spectrochempy.LinearCoord.unitless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unitless</span></code></a></dt><dd><p>True if data has no units.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.LinearCoord.has_units.html#spectrochempy.LinearCoord.has_units" title="spectrochempy.LinearCoord.has_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_units</span></code></a></dt><dd><p>True if data has units. Notes</p>
+</dd>
+</dl>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">-----</span></code>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.dtype">
+<span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.dtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data type (np.dtype).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current filename for this dataset (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Pathlib</span></code> object).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.has_data">
+<span class="sig-name descname"><span class="pre">has_data</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.has_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array is not empty and size &gt; 0.</p>
+<p>(Readonly property).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.has_defined_name">
+<span class="sig-name descname"><span class="pre">has_defined_name</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.has_defined_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>True is the name has been defined (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.has_units">
+<span class="sig-name descname"><span class="pre">has_units</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.has_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array have units - Readonly property (bool).</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.LinearCoord.unitless.html#spectrochempy.LinearCoord.unitless" title="spectrochempy.LinearCoord.unitless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unitless</span></code></a></dt><dd><p>True if the data has no unit.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.LinearCoord.dimensionless.html#spectrochempy.LinearCoord.dimensionless" title="spectrochempy.LinearCoord.dimensionless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dimensionless</span></code></a></dt><dd><p>True if the data have dimensionless units.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object identifier - Readonly property (str).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.is_empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array is empty or size=0, and if no label are present
+- Readonly property (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.is_float">
+<span class="sig-name descname"><span class="pre">is_float</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.is_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> are real values - Readonly property (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.is_integer">
+<span class="sig-name descname"><span class="pre">is_integer</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.is_integer" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> are integer values - Readonly property (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.is_labeled">
+<span class="sig-name descname"><span class="pre">is_labeled</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.is_labeled" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array have labels - Readonly property (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>An array of labels for <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a> of str).</p>
+<p>An array of objects of any type (but most generally string), with the last dimension size equal to that of the
+dimension of data. Note that’s labelling is possible only for 1D data. One classical application is
+the labelling of coordinates to display informative strings instead of numerical values.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.laser_frequency">
+<span class="sig-name descname"><span class="pre">laser_frequency</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.laser_frequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Laser frequency if needed (Quantity).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.limits">
+<span class="sig-name descname"><span class="pre">limits</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.limits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Range of the data (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.m">
+<span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.m" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>).</p>
+<p>If there is no data but labels, then the labels are returned instead of data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.magnitude">
+<span class="sig-name descname"><span class="pre">magnitude</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.magnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>).</p>
+<p>If there is no data but labels, then the labels are returned instead of data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.meta">
+<span class="sig-name descname"><span class="pre">meta</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Additional metadata (<code class="xref py py-class docutils literal notranslate"><span class="pre">Meta</span></code>).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>A user-friendly name (str).</p>
+<p>When no name is provided, the <a class="reference internal" href="spectrochempy.LinearCoord.id.html#spectrochempy.LinearCoord.id" title="spectrochempy.LinearCoord.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">id</span></code></a> of the object is returned instead.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starting value for linear array</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.reversed">
+<span class="sig-name descname"><span class="pre">reversed</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.reversed" title="Permalink to this definition">¶</a></dt>
+<dd><p>bool - Whether the axis is reversed (readonly
+property).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.roi">
+<span class="sig-name descname"><span class="pre">roi</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.roi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Region of interest (ROI) limits (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.show_datapoints">
+<span class="sig-name descname"><span class="pre">show_datapoints</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.show_datapoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if axis must discard values and show only datapoints.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.size">
+<span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the underlying <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> array - Readonly property (int).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.spacing">
+<span class="sig-name descname"><span class="pre">spacing</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.spacing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return coordinates spacing.</p>
+<p>It will be a scalar if the coordinates are uniformly spaced,
+else an array of the different spacings</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.title">
+<span class="sig-name descname"><span class="pre">title</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.title" title="Permalink to this definition">¶</a></dt>
+<dd><p>An user friendly title (str).</p>
+<p>When the title is provided, it can be used for labeling the object,
+e.g., axe title in a matplotlib plot.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.umasked_data">
+<span class="sig-name descname"><span class="pre">umasked_data</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.umasked_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>The actual array with mask and unit (<code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code>).</p>
+<p>(Readonly property).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.unitless">
+<span class="sig-name descname"><span class="pre">unitless</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.unitless" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> - True if the <a class="reference internal" href="spectrochempy.LinearCoord.data.html#spectrochempy.LinearCoord.data" title="spectrochempy.LinearCoord.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></a> does not have <a class="reference internal" href="spectrochempy.LinearCoord.units.html#spectrochempy.LinearCoord.units" title="spectrochempy.LinearCoord.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">units</span></code></a> (Readonly property).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.units" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Unit</span></code> - The units of the data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.value">
+<span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias of <a class="reference internal" href="spectrochempy.LinearCoord.values.html#spectrochempy.LinearCoord.values" title="spectrochempy.LinearCoord.values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">values</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.LinearCoord.values">
+<span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#spectrochempy.LinearCoord.values" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code> - The actual values (data, units) contained in this object (Readonly property).</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="examples-using-spectrochempy-linearcoord">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">spectrochempy.LinearCoord</span></code><a class="headerlink" href="#examples-using-spectrochempy-linearcoord" title="Permalink to this heading">¶</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example, we show how units can be used in SpectroChemPy"><img alt="" src="../../../_images/sphx_glr_plot_units_thumb.png" />
+<p><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/nddataset/plot_units.html#sphx-glr-gettingstarted-gallery-auto-examples-nddataset-plot-units-py"><span class="std std-ref">Units manipulation examples</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Units manipulation examples</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In this example, we show how coordinates can be used in SpectroChemPy"><img alt="" src="../../../_images/sphx_glr_plot_coordinates_thumb.png" />
+<p><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/nddataset/plot_coordinates.html#sphx-glr-gettingstarted-gallery-auto-examples-nddataset-plot-coordinates-py"><span class="std std-ref">NDDataset coordinates example</span></a></p>
+  <div class="sphx-glr-thumbnail-title">NDDataset coordinates example</div>
+</div></div><div style='clear:both'></div></section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrochempy.Coord.html" class="btn btn-neutral float-left" title="spectrochempy.Coord" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.CoordSet.html" class="btn btn-neutral float-right" title="spectrochempy.CoordSet" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

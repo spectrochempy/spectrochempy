@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.NDDataset.read_sdr &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Public API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">spectrochempy.NDDataset.read_sdr</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.NDDataset.read_sdr.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-nddataset-read-sdr">
+<h1>spectrochempy.NDDataset.read_sdr<a class="headerlink" href="#spectrochempy-nddataset-read-sdr" title="Permalink to this heading">¶</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.NDDataset.read_sdr">
+<span class="sig-prename descclassname"><span class="pre">NDDataset.</span></span><span class="sig-name descname"><span class="pre">read_sdr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">paths</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/readers/read_soc.py#L269-L348"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.NDDataset.read_sdr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a Surface Optics Corps. file or a list of files with extension <code class="docutils literal notranslate"><span class="pre">.sdr</span></code>.</p>
+<p>Open Surface Optics Corps. file or a list of files with extension <code class="docutils literal notranslate"><span class="pre">.sdr</span></code> and set
+data/metadata in the current dataset.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul>
+<li><p><strong>*paths</strong> (<em>str, pathlib.Path object, list of str, or list of pathlib.Path objects, optional</em>) – The data source(s) can be specified by the name or a list of name
+for the file(s) to be loaded:</p>
+<p><em>e.g.,( file1, file2, …,  **kwargs )</em></p>
+<p>If the list of filenames are enclosed into brackets:</p>
+<p><em>e.g.,</em> ( <strong>[</strong> <em>file1, file2, …</em> <strong>]</strong>, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs <em>)</em></p>
+<p>The returned datasets are merged to form a single dataset,
+except if <code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code> is set to False. If a source is not provided (i.e.
+no <a class="reference internal" href="spectrochempy.NDDataset.filename.html#spectrochempy.NDDataset.filename" title="spectrochempy.NDDataset.filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filename</span></code></a>, nor <code class="xref py py-obj docutils literal notranslate"><span class="pre">content</span></code>),
+a dialog box will be opened to select files.</p>
+</li>
+<li><p><strong>**kwargs</strong> – Optional keyword parameters (see Other Parameters).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>read_ddr</em> – The dataset or a list of dataset corresponding to the (set of)
+file(s).</p>
+</dd>
+<dt class="field-odd">Other Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>return_ifg</strong> (<em>str or None, optional</em>) – Default value is None. When set to ‘sample’ returns the sample interferogram
+of the spa file if present or None if absent. When set to ‘background’ returns
+the backgroung interferogram of the spa file if present or None if absent.</p></li>
+<li><p><strong>directory</strong> (<em>str, optional</em>) – From where to read the specified <a class="reference internal" href="spectrochempy.NDDataset.filename.html#spectrochempy.NDDataset.filename" title="spectrochempy.NDDataset.filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filename</span></code></a>. If not specified,
+read in the default <code class="docutils literal notranslate"><span class="pre">datadir</span></code> specified in
+SpectroChemPy Preferences.</p></li>
+<li><p><strong>merge</strong> (<em>bool, optional</em>) – Default value is False. If True, and several filenames have been
+provided as arguments,
+then a single dataset with merged (stacked along the first
+dimension) is returned (default=False).</p></li>
+<li><p><strong>sortbydate</strong> (<em>bool, optional</em>) – Sort multiple spectra by acquisition date (default=True).</p></li>
+<li><p><strong>description</strong> (<em>str, optional</em>) – A Custom description.</p></li>
+<li><p><strong>content</strong> (<em>bytes object, optional</em>) – Instead of passing a filename for further reading, a bytes content
+can be directly provided as bytes objects.
+The most convenient way is to use a dictionary. This feature is
+particularly useful for a GUI Dash application
+to handle drag and drop of files into a Browser.
+For examples on how to use this feature, one can look in the
+<code class="docutils literal notranslate"><span class="pre">tests/tests_readers</span></code> directory.</p></li>
+<li><p><strong>listdir</strong> (<em>bool, optional</em>) – If True and filename is None, all files present in the provided
+<a class="reference internal" href="spectrochempy.NDDataset.directory.html#spectrochempy.NDDataset.directory" title="spectrochempy.NDDataset.directory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">directory</span></code></a> are returned (and merged if <code class="xref py py-obj docutils literal notranslate"><span class="pre">merge</span></code>
+is True. It is assumed that all the files correspond to current
+reading protocol (default=True).</p></li>
+<li><p><strong>recursive</strong> (<em>bool, optional</em>) – Read also in subfolders. (default=False).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.read.html#spectrochempy.read" title="spectrochempy.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a></dt><dd><p>Generic read method.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+</dd></dl>
+
+<div style='clear:both'></div></section>
+
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

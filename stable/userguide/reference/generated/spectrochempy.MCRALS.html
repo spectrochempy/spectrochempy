@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.MCRALS &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.IRIS" href="spectrochempy.IRIS.html" />
+    <link rel="prev" title="spectrochempy.SIMPLISMA" href="spectrochempy.SIMPLISMA.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Public API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates-related objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#analysis">Analysis</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.find_peaks.html">spectrochempy.find_peaks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.EFA.html">spectrochempy.EFA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.PCA.html">spectrochempy.PCA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.NNMF.html">spectrochempy.NNMF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.SIMPLISMA.html">spectrochempy.SIMPLISMA</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">spectrochempy.MCRALS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.IRIS.html">spectrochempy.IRIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.kern.html">spectrochempy.kern</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Public API reference</a></li>
+      <li class="breadcrumb-item active">spectrochempy.MCRALS</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.MCRALS.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-mcrals">
+<h1>spectrochempy.MCRALS<a class="headerlink" href="#spectrochempy-mcrals" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MCRALS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/analysis/mcrals.py#L26-L689"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.MCRALS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs MCR-ALS of a dataset knowing the initial C or St matrix.</p>
+<p>MCR-ALS (Multivariate Curve Resolution - Alternating Least Squares) resolve”s a set (or several sets) of
+spectra X of an evolving mixture (or a set of mixtures) into the spectra St of ‘pure’ species and their
+concentration profiles C. In terms of matrix equation:
+.. math::<code class="xref py py-obj docutils literal notranslate"><span class="pre">X</span> <span class="pre">=</span> <span class="pre">CS^T</span> <span class="pre">+</span> <span class="pre">E</span></code>
+where <span class="math notranslate nohighlight">\(E\)</span> is the lmatrix of residuals.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>NDDataset</em>) – The dataset on which to perform the MCR-ALS analysis.</p></li>
+<li><p><strong>guess</strong> (<em>NDDataset</em>) – Initial concentration or spectra.</p></li>
+<li><p><strong>**kwargs</strong> – Optional parameters, see Other parameters below.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><ul>
+<li><p><strong>tol</strong> (<em>float, optional, default 0.1</em>) – Convergence criterion on the change of residuals (percent change of standard deviation of residuals).</p></li>
+<li><p><strong>maxit</strong> (<em>int, optional, default=50</em>) – Maximum number of ALS minimizations.</p></li>
+<li><p><strong>maxdiv</strong> (<em>int, optional, default=5</em>) – Maximum number of successive non-converging iterations.</p></li>
+<li><p><strong>nonnegConc</strong> (str or array of indexes or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, default <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>) – Non negativity constraint on concentrations. If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">'all'</span></code> (default) all concentrations profiles are
+considered non-negative. If an array of indexes is passed, the corresponding profiles are considered
+non-negative, not the others. For instance <code class="xref py py-obj docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2]</span></code> indicates that profile #0 and #2 are non-negative while</p>
+<blockquote>
+<div><p>profile #1 <em>can</em> be negative. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">[]</span></code>, all profiles can be negative.</p>
+</div></blockquote>
+</li>
+<li><p><strong>unimodConc</strong> (str or array of indexes, default <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>) – Unimodality constraint on concentrations. If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">'all'</span></code> (default) all concentrations profiles are
+considered unimodal. If an array of indexes is passed, the corresponding profiles are considered
+unimodal, not the others. For instance <code class="xref py py-obj docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2]</span></code> indicates that profile #0 and #2 are unimodal while</p>
+<blockquote>
+<div><p>profile #1 <em>can</em> be multimodal. If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;None&quot;</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">[]</span></code>, all profiles can be multimodal.</p>
+</div></blockquote>
+</li>
+<li><p><strong>unimodConcMod</strong> (<em>str, default “strict”</em>) – When set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;strict&quot;</span></code>, values deviating from unimodality are reset to the value of the previous point.
+When set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;smooth&quot;</span></code>, both values (deviating point and previous point) are modified to avoid =”steps”
+in the concentration profile.</p></li>
+<li><p><strong>unimodTol</strong> (<em>float, default 1.1</em>) – Tolerance parameter for unimodality. Correction is applied only if:
+<code class="docutils literal notranslate"><span class="pre">`C[i,j]</span> <span class="pre">&gt;</span> <span class="pre">C[i-1,j]</span> <span class="pre">*</span> <span class="pre">unimodTol`</span></code>  on the decreasing branch of profile #j,
+<code class="docutils literal notranslate"><span class="pre">`C[i,j]</span> <span class="pre">&lt;</span> <span class="pre">C[i-1,j]</span> <span class="pre">*</span> <span class="pre">unimodTol`</span></code>  on the increasing branch of profile  #j.</p></li>
+<li><p><strong>monoDecConc</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or array of indexes) – Monotonic decrease constraint on concentrations.  If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> (default) or <code class="xref py py-obj docutils literal notranslate"><span class="pre">[]</span></code> no constraint is applied.
+If an array of indexes is passed, the corresponding profiles are considered do decrease monotonically, not</p>
+<blockquote>
+<div><p>the others. For instance <code class="xref py py-obj docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2]</span></code> indicates that profile #0 and #2 are decreasing while profile #1 <em>can</em>
+increase.</p>
+</div></blockquote>
+</li>
+<li><p><strong>monoDecTol</strong> (<em>float, default 1.1</em>) –  Tolerance parameter for monotonic decrease. Correction is applied only if:
+<code class="docutils literal notranslate"><span class="pre">`C[i,j]</span> <span class="pre">&gt;</span> <span class="pre">C[i-1,j]</span> <span class="pre">*</span> <span class="pre">unimodTol`</span></code>  along profile #j.</p></li>
+<li><p><strong>monoIncConc</strong> (<a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or array of indexes) – Monotonic increase constraint on concentrations.  If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> (default) or <code class="xref py py-obj docutils literal notranslate"><span class="pre">[]</span></code> no constraint is applied.
+If an array of indexes is passed, the corresponding profiles are considered to increase monotonically, not</p>
+<blockquote>
+<div><p>the others. For instance <code class="xref py py-obj docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2]</span></code> indicates that profile #0 and #2 are increasing while profile #1 <em>can</em>
+decrease.</p>
+</div></blockquote>
+</li>
+<li><p><strong>monoIncTol</strong> (<em>float, default 1.1</em>) –     Tolerance parameter for monotonic decrease. Correction is applied only if:
+<code class="docutils literal notranslate"><span class="pre">`C[i,j]</span> <span class="pre">&lt;</span> <span class="pre">C[i-1,j]</span> <span class="pre">*</span> <span class="pre">unimodTol`</span></code> along profile  #j.</p></li>
+<li><p><strong>closureConc</strong> (None or array of indexes, default <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – Defines the concentration profiles subjected to closure constraint. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">[]</span></code>, no constraint is
+applied. If an array of indexes is passed, the corresponding profile will be constrained so that their weighted
+sum equals the <code class="xref py py-obj docutils literal notranslate"><span class="pre">closureTarget</span></code>.</p></li>
+<li><p><strong>closureTarget</strong> (str or array of float, default <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;default&quot;</span></code>) – The value of the sum of concentrations profiles subjected to closure.  If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">default</span></code>, the total
+concentration is set to 1.0 for all observations. If an array is passed: the values of concentration for each
+observation. Hence,`np.ones[X.shape[0]` would be equivalent to “default”.</p></li>
+<li><p><strong>closureMethod</strong> (str, <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;scaling&quot;</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;constantSum&quot;</span></code>, default <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;scaling&quot;</span></code>) – The method used to enforce Closure. “scaling” recompute the concentration profiles using linear algebra:
+<a href="#id1"><span class="problematic" id="id2">``</span></a>`
+C.data[:, closureConc] = np.dot(C.data[:, closureConc],</p>
+<blockquote>
+<div><p>np.diag(np.linalg.lstsq(C.data[:, closureConc], closureTarget.T, rcond=None)[0]))</p>
+</div></blockquote>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a>`
+“constantSum”` normalize the sum of concentration profiles to <code class="xref py py-obj docutils literal notranslate"><span class="pre">closureTarget</span></code>.</p>
+</li>
+<li><p><strong>hardConc</strong> (None or or array of indexes, default <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – Defines hard constraints obn the concentration profiles. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">[]</span></code>, no constraint is
+applied. If an array of indexes is passed, the corresponding profiles will set by <code class="xref py py-obj docutils literal notranslate"><span class="pre">getC</span></code> (see below).</p></li>
+<li><p><strong>getC</strong> (<em>Callable</em>) – An external function that will provide <code class="xref py py-obj docutils literal notranslate"><span class="pre">len(hardConc)</span></code> concentration profiles:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">getC(Ccurr,</span> <span class="pre">*argsGetC,</span> <span class="pre">**kwargsGetC)</span> <span class="pre">-&gt;</span> <span class="pre">hardC</span>
+<span class="pre">`</span></code>
+or:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">getC(Ccurr,</span> <span class="pre">*argsGetC,</span> <span class="pre">**kwargsGetC)</span> <span class="pre">-&gt;</span> <span class="pre">hardC,</span> <span class="pre">newArgsGetC</span>
+<span class="pre">`</span></code>
+or:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">getC(Ccurr,</span> <span class="pre">*argsGetCn,</span> <span class="pre">**kargsGetC)</span> <span class="pre">-&gt;</span> <span class="pre">hardC,</span> <span class="pre">newArgsGetC,</span> <span class="pre">extOutput</span>
+<span class="pre">`</span></code>
+where Ccurr  is the current C martrix, <a href="#id5"><span class="problematic" id="id6">*</span></a>argsGetC are the parameters needed to completely specify the function. <code class="xref py py-obj docutils literal notranslate"><span class="pre">hardC</span></code> is a nadarray or NDDataset
+of shape <code class="xref py py-obj docutils literal notranslate"><span class="pre">(C.y,</span> <span class="pre">len(hardConc)</span></code>, newArgsGetC are the updated parameters for the next iteration (can be None), and
+extOutput can be any relevant output to be kept in extOutput attribute (only the last iteration extOutput is
+kept)</p></li>
+<li><p><strong>argsGetConc</strong> (<em>tuple, optional</em>) – supplementary positional arguments passed to the external function.</p></li>
+<li><p><strong>kwargsGetConc</strong> (<em>tuple, optional</em>) – supplementary keyword arguments passed to the external function</p></li>
+<li><p><strong>hardC_to_C_idx</strong> (<em>None or list or tuple, default None</em>) – Indicates the correspondence between the indexes of the columns of hardC and of the C matrix. [1, None, 0]
+indicates that the first profile in hardC (index O) corrsponds to the second profile of C (index 1).</p></li>
+<li><p><strong>nonnegSpec</strong> (str, list or tuple or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>, default <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>) – Indicates non-negative spectral profile. If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">'all'</span></code> (default) all spectral profiles are
+considered non-negative. If an array of indexes is passed, the corresponding profiles are considered
+non-negative, not the others. For instance <code class="xref py py-obj docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2]</span></code> indicates that profile #0 and #2 are non-negative while
+profile #1 <em>can</em> be negative. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">[]</span></code>, all profiles can be negative.</p></li>
+<li><dl>
+<dt><strong>normSpec</strong> (<em>None or str, default None</em>) –    Defines whether the spectral profiles should be normalized. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> no normalization is applied.</dt><dd><p>when set to “euclid”, spectra are normalized with respect to their total area, when set to “max”, spectra are
+normalized with respect to the maximum af their value.</p>
+</dd>
+<dt>unimodSpec<span class="classifier">str or array of indexes, default <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></dt><dd><p>Unimodality constraint on Spectra. If set to <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a> (default) none of spectral profiles is
+considered unimodal. If an array of indexes is passed, the corresponding profiles are considered
+unimodal, not the others. For instance <code class="xref py py-obj docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2]</span></code> indicates that profile #0 and #2 are unimodal while
+profile #1 <em>can</em> be multimodal. If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;None&quot;</span></code> or <code class="xref py py-obj docutils literal notranslate"><span class="pre">[]</span></code>, all profiles can be multimodal.</p>
+</dd>
+</dl>
+</li>
+<li><p><strong>unimodSpecMod</strong> (<em>str, default “strict”</em>) – When set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;strict&quot;</span></code>, values deviating from unimodality are reset to the value of the previous point.
+When set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">&quot;smooth&quot;</span></code>, both values (deviating point and previous point) are modified to avoid =”steps”
+in the concentration profile.</p></li>
+<li><p><strong>unimodSpecTol</strong> (<em>float, default 1.1</em>) – Tolerance parameter for unimodality. Correction is applied only if the deviating point is larger/lower than
+<code class="docutils literal notranslate"><span class="pre">`St[j,i]</span> <span class="pre">&gt;</span> <span class="pre">St[j,</span> <span class="pre">i-1]</span> <span class="pre">*</span> <span class="pre">unimodSpecTol`</span></code>  on the decreasing branch of profile #j,
+<code class="docutils literal notranslate"><span class="pre">`St[j,i]</span> <span class="pre">&lt;</span> <span class="pre">St[j,</span> <span class="pre">i-1]</span> <span class="pre">*</span> <span class="pre">unimodTol`</span></code>  on the increasing branch of profile  #j.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.PCA.html#spectrochempy.PCA" title="spectrochempy.PCA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PCA</span></code></a></dt><dd><p>Performs MCR-ALS of a <a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.core.dataset.nddataset.NDDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDDataset</span></code></a> knowing the initial C or St matrix.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.NNMF.html#spectrochempy.NNMF" title="spectrochempy.NNMF"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NNMF</span></code></a></dt><dd><p>Performs a Non Negative Matrix Factorization of a <a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.core.dataset.nddataset.NDDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDDataset</span></code></a> .</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.EFA.html#spectrochempy.EFA" title="spectrochempy.EFA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EFA</span></code></a></dt><dd><p>Perform an Evolving Factor Analysis (forward and reverse) of the input <a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.core.dataset.nddataset.NDDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">NDDataset</span></code></a> .</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;matlabdata/als2004dataset.MAT&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">X</span><span class="p">,</span> <span class="n">guess</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mcr</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MCRALS</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">guess</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mcr</span><span class="o">.</span><span class="n">St</span><span class="p">,</span> <span class="n">mcr</span><span class="o">.</span><span class="n">St</span>
+<span class="go">(NDDataset: [float64] unitless (shape: (y:4, x:96)), NDDataset: [float64] unitless (shape: (y:4, x:96)))</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.plotmerit.html#spectrochempy.MCRALS.plotmerit" title="spectrochempy.MCRALS.plotmerit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.plotmerit</span></code></a>(**kwargs)</p></td>
+<td><p>Plots the input dataset, reconstructed dataset and residuals.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.reconstruct.html#spectrochempy.MCRALS.reconstruct" title="spectrochempy.MCRALS.reconstruct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.reconstruct</span></code></a>()</p></td>
+<td><p>Transform data back to the original space.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.C.html#spectrochempy.MCRALS.C" title="spectrochempy.MCRALS.C"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.C</span></code></a></p></td>
+<td><p>The final concentration profiles.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.Chard.html#spectrochempy.MCRALS.Chard" title="spectrochempy.MCRALS.Chard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.Chard</span></code></a></p></td>
+<td><p>The hard concentration profiles.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.St.html#spectrochempy.MCRALS.St" title="spectrochempy.MCRALS.St"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.St</span></code></a></p></td>
+<td><p>The final spectra profiles.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.Stsoft.html#spectrochempy.MCRALS.Stsoft" title="spectrochempy.MCRALS.Stsoft"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.Stsoft</span></code></a></p></td>
+<td><p>The soft spectra profiles.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.X.html#spectrochempy.MCRALS.X" title="spectrochempy.MCRALS.X"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.X</span></code></a></p></td>
+<td><p>The original dataset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.extOutput.html#spectrochempy.MCRALS.extOutput" title="spectrochempy.MCRALS.extOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.extOutput</span></code></a></p></td>
+<td><p>The last output of the external function used to get concentrations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.MCRALS.log.html#spectrochempy.MCRALS.log" title="spectrochempy.MCRALS.log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.log</span></code></a></p></td>
+<td><p>Logs output.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.MCRALS.params.html#spectrochempy.MCRALS.params" title="spectrochempy.MCRALS.params"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MCRALS.params</span></code></a></p></td>
+<td><p>The parameters used to perform the MCR als.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS.C">
+<span class="sig-name descname"><span class="pre">C</span></span><a class="headerlink" href="#spectrochempy.MCRALS.C" title="Permalink to this definition">¶</a></dt>
+<dd><p>The final concentration profiles.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS.Chard">
+<span class="sig-name descname"><span class="pre">Chard</span></span><a class="headerlink" href="#spectrochempy.MCRALS.Chard" title="Permalink to this definition">¶</a></dt>
+<dd><p>The hard concentration profiles.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS.St">
+<span class="sig-name descname"><span class="pre">St</span></span><a class="headerlink" href="#spectrochempy.MCRALS.St" title="Permalink to this definition">¶</a></dt>
+<dd><p>The final spectra profiles.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS.Stsoft">
+<span class="sig-name descname"><span class="pre">Stsoft</span></span><a class="headerlink" href="#spectrochempy.MCRALS.Stsoft" title="Permalink to this definition">¶</a></dt>
+<dd><p>The soft spectra profiles.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS.X">
+<span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#spectrochempy.MCRALS.X" title="Permalink to this definition">¶</a></dt>
+<dd><p>The original dataset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS.extOutput">
+<span class="sig-name descname"><span class="pre">extOutput</span></span><a class="headerlink" href="#spectrochempy.MCRALS.extOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>The last output of the external function used to get concentrations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS.log">
+<span class="sig-name descname"><span class="pre">log</span></span><a class="headerlink" href="#spectrochempy.MCRALS.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs output.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.MCRALS.params">
+<span class="sig-name descname"><span class="pre">params</span></span><a class="headerlink" href="#spectrochempy.MCRALS.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>The parameters used to perform the MCR als.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="examples-using-spectrochempy-mcrals">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">spectrochempy.MCRALS</span></code><a class="headerlink" href="#examples-using-spectrochempy-mcrals" title="Permalink to this heading">¶</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform the MCR ALS optimization of a dataset corresponding to a HPLC-DAD r..."><img alt="" src="../../../_images/sphx_glr_plot_mcrals_chrom1_thumb.png" />
+<p><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/analysis/plot_mcrals_chrom1.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-mcrals-chrom1-py"><span class="std std-ref">MCR-ALS optimization example (original example from Jaumot)</span></a></p>
+  <div class="sphx-glr-thumbnail-title">MCR-ALS optimization example (original example from Jaumot)</div>
+</div></div><div style='clear:both'></div></section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrochempy.SIMPLISMA.html" class="btn btn-neutral float-left" title="spectrochempy.SIMPLISMA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.IRIS.html" class="btn btn-neutral float-right" title="spectrochempy.IRIS" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
