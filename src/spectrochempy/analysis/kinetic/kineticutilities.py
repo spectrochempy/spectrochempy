@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -20,10 +19,13 @@ from functools import partial
 import numpy as np
 import traitlets as tr
 from scipy.integrate import solve_ivp
-from scipy.optimize import differential_evolution, least_squares, minimize
+from scipy.optimize import differential_evolution
+from scipy.optimize import least_squares
+from scipy.optimize import minimize
 
 from spectrochempy.application import error_
-from spectrochempy.core.dataset.nddataset import Coord, NDDataset
+from spectrochempy.core.dataset.nddataset import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.exceptions import SpectroChemPyError
@@ -125,16 +127,16 @@ class ActionMassKinetics(tr.HasTraits):
         `n_species` species.
     arrhenius : :term:`array-like`
         Iterable of shape `n_reactions` x 1, `n_reactions` x 2  or `n_reactions` x 3
-        with either the isothermal rate constants (:math:`k_1`\ , ..., :math:`k_n`\ ) or
-        the Arrhenius rate parameters ((:math:`A_1`\ , :math:`b_1`\ , :math:`Ea_1`\ ),
-        ... (:math:`A_n`\ , :math:`b_n`\ , :math:`Ea_n`\ )) or  ((:math:`A_1`\ ,
-        :math:`Ea_1`\ ), ...)).  If a 2-column iterable is provided the temperature
+        with either the isothermal rate constants (:math:`k_1`, ..., :math:`k_n`) or
+        the Arrhenius rate parameters ((:math:`A_1`, :math:`b_1`, :math:`Ea_1`),
+        ... (:math:`A_n`, :math:`b_n`, :math:`Ea_n`)) or  ((:math:`A_1`,
+        :math:`Ea_1`), ...)).  If a 2-column iterable is provided the temperature
         exponents are set to 0.
-    T : `float`\ , `Quantity`\ , `callable` or `list` or `tuple` of , or None, optional default: None
+    T : `float`, `Quantity`, `callable` or `list` or `tuple` of , or None, optional default: None
         Temperature. If None, or not given, the system is considered isothermal and T = 298.0
         If it is not a temperature quantity, the unit is assumed to be
         in Kelvin. A function can also be provided which output a temperature `T` in K
-        vs. time `t`\ .
+        vs. time `t`.
 
     Examples:
     ---------
@@ -306,19 +308,19 @@ class ActionMassKinetics(tr.HasTraits):
     # ----------------------------------------------------------------------------------
     @property
     def A(self):
-        """
+        r"""
         Stoichiometry matrix A
 
-        Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
+        Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`.
         """
         return self._A
 
     @property
     def B(self):
-        """
+        r"""
         Stoichiometry matrix B
 
-        Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`\ .
+        Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`.
         """
         return self._B
 
@@ -342,8 +344,7 @@ class ActionMassKinetics(tr.HasTraits):
         """Concentrations."""
         if isinstance(self._init_concentrations, (list, tuple)):
             return [list(init_conc.values()) for init_conc in self._init_concentrations]
-        else:
-            return list(self._init_concentrations.values())
+        return list(self._init_concentrations.values())
 
     def _write_reaction_rates(self):
         """Return the expressions of production rates as a string"""
@@ -450,7 +451,7 @@ class ActionMassKinetics(tr.HasTraits):
         rtol=1e-3,
         **kwargs,
     ):
-        """
+        r"""
         Integrate the kinetic equations at times `t`.
 
         This function computes and integrates the set of kinetic differential
@@ -458,16 +459,16 @@ class ActionMassKinetics(tr.HasTraits):
 
         Parameters
         ----------
-        t : :term:`array-like` of shape (``t_points``\ ,) or list or tuple of
+        t : :term:`array-like` of shape (``t_points``,) or list or tuple of
         `arrays-like`.
             Iterable with time values or sets of timle values at which the
             concentrations are computed.
 
         k_dt : `float` or `None'
-            Resolution of the time grid used to compute `k(T(t))`\ . Used only for non
+            Resolution of the time grid used to compute `k(T(t))`. Used only for non
             isothermal reaction.
 
-        method : `str` or `~scipy.integrate.OdeSolver`\ , optional, default: ``'LSODA'``
+        method : `str` or `~scipy.integrate.OdeSolver`, optional, default: ``'LSODA'``
             Integration method to use:
 
             * ``'LSODA'`` (default): Adams/BDF method with automatic stiffness detection and
@@ -496,7 +497,7 @@ class ActionMassKinetics(tr.HasTraits):
         left_op : array_like, optional
             A (m x n_species) array to left multiply the (n_species, n_times) array
             obtained after integration:
-            `C.T = left_op @ C.T`\ . Can be used to pool and/or remove some
+            `C.T = left_op @ C.T`. Can be used to pool and/or remove some
             concentration profiles in/from the output matrix of concentrations
 
         c_names : list of str
@@ -518,24 +519,24 @@ class ActionMassKinetics(tr.HasTraits):
             `max(rtol * C) < atol` is always smaller than atol. If components of C have
             different scales, it might be beneficial to set different atol values for
             different components by passing array_like with shape (n_species,) for
-            atol. Default values are `rtol=1e-3` and `atol=1e-6`\ .
+            atol. Default values are `rtol=1e-3` and `atol=1e-6`.
 
         **kwargs
             Additional keyword parameters. See Other Parameters.
 
         Other Parameters
         ----------------
-        return_NDDataset : `bool`\ , optional, default: `True`
+        return_NDDataset : `bool`, optional, default: `True`
             Whether to return a NDDataset
-        return_meta : `bool`\ , optional, default: `False`
+        return_meta : `bool`, optional, default: `False`
             Whether to return a dictionary with the solver results.
             Note that when return_NDDataset is True, meta is always
             included in the meta attribute of the NDDataset.
 
         Returns
         -------
-        C : `~numpy.ndarray` or `NDDataset`, shape ( ``t_points``\ , ``n_species``\ )
-            Values of the solution at times `t`\ .
+        C : `~numpy.ndarray` or `NDDataset`, shape ( ``t_points``, ``n_species``)
+            Values of the solution at times `t`.
         meta : Bunch object with the following fields defined:
 
             * t : ndarray, shape (t_points,)
@@ -573,9 +574,9 @@ class ActionMassKinetics(tr.HasTraits):
         locals_env = {}
 
         if self._nset == 1:
-            conditions = zip([self._T], [self._init_concentrations], [t])
+            conditions = zip([self._T], [self._init_concentrations], [t], strict=False)
         else:
-            conditions = zip(self._T, self._init_concentrations, t)
+            conditions = zip(self._T, self._init_concentrations, t, strict=False)
 
         C = []
         for i, (T, C0, t) in enumerate(conditions):
@@ -730,8 +731,7 @@ class ActionMassKinetics(tr.HasTraits):
 
         if len(C) == 1:
             return C[0]
-        else:
-            return C
+        return C
 
     def _modify_kinetics(self, dict_param, left_op=None):
         if len(self._arrhenius.shape) == 2:
@@ -764,7 +764,7 @@ class ActionMassKinetics(tr.HasTraits):
         ivp_solver_kwargs={},
         optimizer_kwargs={},
     ):
-        """
+        r"""
         Fit rate parameters and concentrations to a concentration profile.
 
         Parameters
@@ -783,9 +783,9 @@ class ActionMassKinetics(tr.HasTraits):
             pre-exponential factor.
         ivp_solver_kwargs : `dict`
             keyword arguments for the ode solver. Defaults are the same as for
-            `~scipy.integrate.solve_ivp`\ , except for `method=LSDOA`
+            `~scipy.integrate.solve_ivp`, except for `method=LSDOA`
         optimizer_kwargs: `dict`
-            keyword arguments the optimization (see `~scipy.optimize.minimize`\ ).
+            keyword arguments the optimization (see `~scipy.optimize.minimize`).
 
         Returns
         --------
@@ -806,7 +806,7 @@ class ActionMassKinetics(tr.HasTraits):
         ):
             """returns the SSE on concentrations profiles"""
 
-            for param, item in zip(params, dict_param_to_optimize):
+            for param, item in zip(params, dict_param_to_optimize, strict=False):
                 dict_param_to_optimize[item] = param
 
             self._modify_kinetics(dict_param_to_optimize, optimizer_left_op)
@@ -868,7 +868,7 @@ class ActionMassKinetics(tr.HasTraits):
             print("Optimization of the parameters.")
             print(f"         Initial parameters: {x0}")
             print(f"         Initial function value: {init_val:f}")
-        tic = datetime.datetime.now(datetime.timezone.utc)
+        tic = datetime.datetime.now(datetime.UTC)
 
         optim_res = minimize(
             objective,
@@ -888,7 +888,7 @@ class ActionMassKinetics(tr.HasTraits):
             tol=optimizer_tol,
             options=optimizer_options,
         )
-        toc = datetime.datetime.now(datetime.timezone.utc)
+        toc = datetime.datetime.now(datetime.UTC)
 
         if optimizer_options["disp"]:
             print(f"         Optimization time: {toc - tic}")
@@ -1013,7 +1013,7 @@ def _ct_modify_surface_kinetics(surface, param_to_set):
 
 
 class PFR:
-    """
+    r"""
     PFR reactor as a CSTR in series.
 
     Parameters
@@ -1021,7 +1021,7 @@ class PFR:
     cti_file : `str`
         The cti file must contain a gas phase named 'gas' and optionally a reactive
         surface named 'surface'.
-    init_X : `dict`\ , :term:`array-like`
+    init_X : `dict`, :term:`array-like`
         Initial composition of the reactors.
     """
 
@@ -1067,10 +1067,10 @@ class PFR:
         self._pc = []  # pressure controllers
 
         if isinstance(self._volume, (float, int)):
-            self._volume = self._volume * np.ones((n_cstr)) / n_cstr
+            self._volume = self._volume * np.ones(n_cstr) / n_cstr
 
         if add_surface and isinstance(area, (float, int)):
-            self._area = self._area * np.ones((n_cstr)) / n_cstr
+            self._area = self._area * np.ones(n_cstr) / n_cstr
         self.n_cstr = len(volume)
 
         # first cstr
@@ -1096,7 +1096,7 @@ class PFR:
 
         self._inlet_F = inlet_F
 
-        for i, (X, F) in enumerate(zip(inlet_X, self._inlet_F)):
+        for i, (X, F) in enumerate(zip(inlet_X, self._inlet_F, strict=False)):
             inlet_gas = ct.Solution(self._cti, "gas")
             inlet_gas.TPX = self.T, self.P, X
             self.inlet.append(ct.Reservoir(contents=inlet_gas, name=f"inlet_{i}"))
@@ -1177,7 +1177,7 @@ class PFR:
         self.X = np.ones((self.n_cstr, self.n_gas_species))
         self.coverages = np.ones((self.n_cstr, self.n_surface_species))
 
-        for i, (r, s) in enumerate(zip(self.cstr, self.surface)):
+        for i, (r, s) in enumerate(zip(self.cstr, self.surface, strict=False)):
             self.X[i, :] = r.thermo.X
             self.coverages[i, :] = s.coverages
 
@@ -1194,7 +1194,7 @@ class PFR:
     def advance(self, time):
         self.net.advance(time)
 
-        for i, (r, s) in enumerate(zip(self.cstr, self.surface)):
+        for i, (r, s) in enumerate(zip(self.cstr, self.surface, strict=False)):
             self.X[i, :] = r.thermo.X
             self.coverages[i, :] = s.coverages
 
@@ -1428,8 +1428,8 @@ class PFR:
                 return se
 
         method = kwargs.get("method", "Nelder-Mead")
-        bounds = kwargs.get("bounds", None)
-        tol = kwargs.get("tol", None)
+        bounds = kwargs.get("bounds")
+        tol = kwargs.get("tol")
         options = kwargs.get("options", {"disp": True})
 
         if method.upper() in SCIPY_MINIMIZE_METHODS:
@@ -1445,7 +1445,7 @@ class PFR:
             # then param_to_optimize are expected to be bounds for each variable
 
         if optimizer in ["minimize", "least_squares"]:
-            initial_guess = np.zeros((len(param_to_optimize)))
+            initial_guess = np.zeros(len(param_to_optimize))
             for i, param in enumerate(param_to_optimize):
                 initial_guess[i] = param_to_optimize[param]
 

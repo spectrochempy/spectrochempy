@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -8,11 +7,14 @@
 Magic ipython Classes
 """
 from IPython.core.error import UsageError
-from IPython.core.magic import Magics, line_cell_magic, magics_class
+from IPython.core.magic import Magics
+from IPython.core.magic import line_cell_magic
+from IPython.core.magic import magics_class
 from IPython.core.magics.code import extract_symbols
 from IPython.utils.text import get_text_list
 
-from spectrochempy import error_, warning_
+from spectrochempy import error_
+from spectrochempy import warning_
 
 __all__ = ["SpectroChemPyMagics"]
 

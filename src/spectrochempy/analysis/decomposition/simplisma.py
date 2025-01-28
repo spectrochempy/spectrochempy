@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -19,7 +18,8 @@ import traitlets as tr
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.application import info_
 from spectrochempy.utils import exceptions
-from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 
 
@@ -31,11 +31,11 @@ class SIMPLISMA(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "SIMPLISMA")
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     SIMPLe to use Interactive Self-modeling Mixture Analysis (SIMPLISMA).
 
     This class performs a SIMPLISMA analysis of a 2D `NDDataset` .
-    The algorithm is adapted from :cite:t:`windig:1997`\ .
+    The algorithm is adapted from :cite:t:`windig:1997`.
 
     Parameters
     ----------
@@ -146,10 +146,9 @@ class SIMPLISMA(DecompositionAnalysis):
     def _components_default(self):
         if self._fitted:
             return self._outfit[1]
-        else:
-            raise exceptions.NotFittedError(
-                "The model was not yet fitted. Execute `fit` first!"
-            )
+        raise exceptions.NotFittedError(
+            "The model was not yet fitted. Execute `fit` first!"
+        )
 
     # ------------------------------------------------------------------------------
     # Utility functions
@@ -170,8 +169,8 @@ class SIMPLISMA(DecompositionAnalysis):
     def _str_iter_summary(j, index, coord, rsquare, stdev_res, diff):
         # return formatted list of figure of merits at a given iteration
 
-        string = "{:4}  {:5}  {:8.1f} {:10.4f} {:10.4f} ".format(
-            j + 1, index, coord, stdev_res, rsquare
+        string = (
+            f"{j + 1:4}  {index:5}  {coord:8.1f} {stdev_res:10.4f} {rsquare:10.4f} "
         )
         return string
 

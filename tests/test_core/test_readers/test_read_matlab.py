@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 import pytest
 
@@ -19,7 +18,6 @@ MATLABDATA = prefs.datadir / "matlabdata"
 #     reason="Experimental data not available for testing",
 # )
 def test_read_matlab():
-
     A = NDDataset.read_matlab(MATLABDATA / "als2004dataset.MAT")
     assert len(A) == 6
     assert A[3].shape == (4, 96)

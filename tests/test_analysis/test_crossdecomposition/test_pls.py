@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 """
 Tests for the PLSRegression module
@@ -45,7 +44,6 @@ def test_PLS_docstrings():
 # test pls
 # ---------
 def test_pls():
-
     datasets = read("http://www.eigenvector.com/data/Corn/corn.mat")
     Xc = datasets[-3][:57]  # corn spectra, calibration
     Xv = datasets[-3][57:]  # corn spectra, validation
@@ -144,11 +142,14 @@ def test_pls():
 
     assert pls2._X.shape == (57, 599), "missing row or col should be removed"
     assert pls2.X.shape == (57, 700), "missing row or col restored"
-    assert_dataset_equal(
-        pls2.X,
-        Xc,
-        data_only=True,
-    ), "input dataset should be reflected in the internal variable X (where mask is restored)"
+    (
+        assert_dataset_equal(
+            pls2.X,
+            Xc,
+            data_only=True,
+        ),
+        "input dataset should be reflected in the internal variable X (where mask is restored)",
+    )
 
     # check plots
     pls1.plotmerit()

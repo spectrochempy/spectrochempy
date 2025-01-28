@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -8,19 +7,20 @@
 Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
 
-from spectrochempy.core.writers.exporter import Exporter, exportermethod
+from spectrochempy.core.writers.exporter import Exporter
+from spectrochempy.core.writers.exporter import exportermethod
 
 __all__ = ["write_matlab", "write_mat"]
 __dataset_methods__ = __all__
 
 
 def write_matlab(*args, **kwargs):
-    """
+    r"""
     Write a dataset in CSV format.
 
     Parameters
     ----------
-    \*args
+    *args
     **kwargs
 
     Returns

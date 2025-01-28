@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -441,7 +440,7 @@ _ = ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4))
 
 # %%
 datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
-labels = ["sample {}".format(label) for label in ["S1", "S10", "S20", "S50", "S53"]]
+labels = [f"sample {label}" for label in ["S1", "S10", "S20", "S50", "S53"]]
 prefs.reset()
 prefs.axes.facecolor = ".99"
 prefs.axes.grid = True

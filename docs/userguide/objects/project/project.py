@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -35,7 +34,9 @@
 # from pathlib import Path
 
 # %%
-from spectrochempy import NDDataset, Project, pathclean
+from spectrochempy import NDDataset
+from spectrochempy import Project
+from spectrochempy import pathclean
 from spectrochempy import preferences as prefs
 
 # %% [markdown]

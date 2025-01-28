@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 from os import environ
 
 import numpy as np
@@ -32,7 +31,6 @@ def test_IRIS_docstrings():
 
 
 def test_analysis_iris_kernel():
-
     X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2105.0:1995.0]
     p = [
         0.00300,
@@ -88,7 +86,6 @@ def test_analysis_iris_kernel():
 
 
 def test_IRIS():
-
     # Define the dataset to fit with the IRIS model
     # we change timestamp coordinates with the corresponding measured pressures.
     X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2105.0:1995.0]

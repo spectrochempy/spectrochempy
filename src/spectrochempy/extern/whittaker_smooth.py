@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 WHITTAKER-EILERS SMOOTHER in Python 3 using numpy and scipy
 

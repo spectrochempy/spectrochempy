@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 # %%
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 """
 Analysis CP NMR spectra
 ========================
 Example with handling of a series of CP NMR spectra.
 """
+
 # %%
 # Import API
 # ----------
@@ -84,7 +84,7 @@ print(f"position of the peaks : {peaks.x.data}")
 # %%
 # properties of the peaks
 table_pos = "  ".join([f"{peaks[i].x.value.m:>10.3f}" for i in range(len(peaks))])
-print(f'{"peak_position (cm⁻¹)":>26}: {table_pos}')
+print(f"{'peak_position (cm⁻¹)':>26}: {table_pos}")
 for key in properties:
     table_property = "  ".join(
         [f"{properties[key][i].m:>10.3f}" for i in range(len(peaks))]

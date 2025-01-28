@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -14,14 +13,18 @@ __dataset_methods__ = __all__
 
 import io
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC
+from datetime import datetime
+from datetime import timedelta
 
 import numpy as np
 
 from spectrochempy.application import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.docreps import _docstring
@@ -38,7 +41,7 @@ def read_omnic(*paths, **kwargs):
     """
     Open a Thermo Nicolet OMNIC file.
 
-    Open Omnic file or a list of :file:`.spg`\ , :file:`.spa` or
+    Open Omnic file or a list of :file:`.spg`, :file:`.spa` or
     :file:`.srs` files and set data/metadata in the current dataset.
 
     The collected metadata are:
@@ -170,8 +173,8 @@ def read_omnic(*paths, **kwargs):
 
 @_docstring.dedent
 def read_spg(*paths, **kwargs):
-    """
-    Open a Thermo Nicolet file or a list of files with extension ``.spg``\ .
+    r"""
+    Open a Thermo Nicolet file or a list of files with extension ``.spg``.
 
     Parameters
     ----------
@@ -194,7 +197,7 @@ def read_spg(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of `read_omnic`\ , except that the type of file
+    This method is an alias of `read_omnic`, except that the type of file
     is constrained to ``.spg``.
 
     Examples
@@ -212,8 +215,8 @@ def read_spg(*paths, **kwargs):
 
 @_docstring.dedent
 def read_spa(*paths, **kwargs):
-    """
-    Open a Thermo Nicolet file or a list of files with extension ``.spa``\ .
+    r"""
+    Open a Thermo Nicolet file or a list of files with extension ``.spa``.
 
     Parameters
     ----------
@@ -233,8 +236,8 @@ def read_spa(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of `read_omnic`\ , except that the type of file
-    is contrain to ``.spa``\ .
+    This method is an alias of `read_omnic`, except that the type of file
+    is contrain to ``.spa``.
 
     Examples
     ---------
@@ -253,7 +256,7 @@ def read_spa(*paths, **kwargs):
 
 @_docstring.dedent
 def read_srs(*paths, **kwargs):
-    """
+    r"""
     Open a Thermo Nicolet file or a list of files with extension ``.srs``
 
     Parameters
@@ -277,8 +280,8 @@ def read_srs(*paths, **kwargs):
 
     Notes
     -----
-    This method is an alias of `read_omnic`\ , except that the type of file
-    is constrained to ``.srs``\ .
+    This method is an alias of `read_omnic`, except that the type of file
+    is constrained to ``.srs``.
 
     Examples
     ---------
@@ -349,10 +352,10 @@ def _read_spg(*args, **kwargs):
         pos += 16
 
     # the number of occurrences of the key '02' is number of spectra
-    nspec = np.count_nonzero((keys == 2))
+    nspec = np.count_nonzero(keys == 2)
 
     if nspec == 0:  # pragma: no cover
-        raise IOError(
+        raise OSError(
             "Error : File format not recognized - information markers not found"
         )
 
@@ -395,19 +398,19 @@ def _read_spg(*args, **kwargs):
             " number of wavenumber per spectrum should be "
             "identical"
         )
-    elif np.ptp(firstx) != 0:  # pragma: no cover
+    if np.ptp(firstx) != 0:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set - the x axis should start at same value"
         )
-    elif np.ptp(lastx) != 0:  # pragma: no cover
+    if np.ptp(lastx) != 0:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set - the x axis should end at same value"
         )
-    elif len(set(xunits)) != 1:  # pragma: no cover
+    if len(set(xunits)) != 1:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set - data units should be identical"
         )
-    elif len(set(units)) != 1:  # pragma: no cover
+    if len(set(units)) != 1:  # pragma: no cover
         raise ValueError(
             "Error : Inconsistent data set - x axis units should be identical"
         )
@@ -447,7 +450,7 @@ def _read_spg(*args, **kwargs):
         fid.seek(spa_title_pos + 256)
         timestamp = fromfile(fid, dtype="uint32", count=1)
         # since 31/12/1899, 00:00
-        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
+        acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
             seconds=int(timestamp)
         )
         acquisitiondates.append(acqdate)
@@ -537,7 +540,7 @@ def _read_spa(*args, **kwargs):
     # Second since 31/12/1899, 00:00
     fid.seek(296)
     timestamp = fromfile(fid, dtype="uint32", count=1)
-    acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=timezone.utc) + timedelta(
+    acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
         seconds=int(timestamp)
     )
     acquisitiondate = acqdate
@@ -627,7 +630,7 @@ def _read_spa(*args, **kwargs):
     ):
         info_("No interferogram found, read_spa returns None")
         return None
-    elif return_ifg == "sample":
+    if return_ifg == "sample":
         intensities = s_ifg_intensities
     elif return_ifg == "background":
         intensities = b_ifg_intensities

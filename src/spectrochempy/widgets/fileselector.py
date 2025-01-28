@@ -30,6 +30,7 @@
 """
 Widgets for the Jupyter notebook and Jupyter lab.
 """
+
 from contextlib import contextmanager
 
 import IPython
@@ -62,7 +63,7 @@ def ignore(ob):
         ob.ignore = False
 
 
-class Base(object):
+class Base:
     done_callback = None
 
     def stop(self, ok=False):
@@ -80,21 +81,19 @@ class Base(object):
         )
 
     def _ipython_display_(self, **kwargs):
-
         # from IPython.Widget._ipython_display_
-        if InteractiveShell.initialized():
-            if self.widget._view_name is not None:
-                plaintext = repr(self)
-                data = {
-                    "text/plain": plaintext,
-                    "application/vnd.jupyter.widget-view+json": {
-                        "version_major": 2,
-                        "version_minor": 0,
-                        "model_id": self.widget._model_id,
-                    },
-                }
-                IPython.display.display(data, raw=True)
-                self.widget._handle_displayed(**kwargs)
+        if InteractiveShell.initialized() and self.widget._view_name is not None:
+            plaintext = repr(self)
+            data = {
+                "text/plain": plaintext,
+                "application/vnd.jupyter.widget-view+json": {
+                    "version_major": 2,
+                    "version_minor": 0,
+                    "model_id": self.widget._model_id,
+                },
+            }
+            IPython.display.display(data, raw=True)
+            self.widget._handle_displayed(**kwargs)
 
 
 class FileSelector(Base):
@@ -116,7 +115,6 @@ class FileSelector(Base):
     """
 
     def __init__(self, done_callback=None, path=None, filters=None):
-
         warning_(
             "This widget is not supported anymore and will be removed in a future version."
         )
@@ -130,7 +128,7 @@ class FileSelector(Base):
 
         self.done_callback = done_callback
         if filters:
-            if not isinstance(filters, (list, tuple)):
+            if not isinstance(filters, list | tuple):
                 filters = [filters]
             self.filters = list(filters)
         else:

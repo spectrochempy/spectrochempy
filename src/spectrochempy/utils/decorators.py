@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -8,10 +7,13 @@
 import copy
 import functools
 import inspect
-from functools import partial, update_wrapper
-from inspect import Parameter, Signature, signature
+from functools import partial
+from functools import update_wrapper
+from inspect import Parameter
+from inspect import Signature
+from inspect import signature
 from textwrap import indent
-from typing import Type, TypeVar
+from typing import TypeVar
 from warnings import warn
 
 import traitlets as tr
@@ -91,7 +93,7 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
     if name is not None:
         kind = "attribute"
         output_warning_message(name, kind, replace, removed, extra_msg)
-        return
+        return None
 
     def deprecation_decorator(func):
         # @preserve_signature
@@ -120,7 +122,7 @@ def _get_default(value):
     return Parameter.empty if value == tr.Undefined else value
 
 
-def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
+def signature_has_configurable_traits(cls: type[T]) -> type[T]:
     """
     Return a decorated class with a constructor signature that contain Trait names as kwargs.
 
@@ -168,8 +170,8 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
     # because it can't accept traits as keyword arguments
     if old_var_keyword_parameter is None:
         raise RuntimeError(
-            "The {} constructor does not take **kwargs, which means that the signature "
-            "can not be expanded with trait names".format(cls)
+            f"The {cls} constructor does not take **kwargs, which means that the signature "
+            "can not be expanded with trait names"
         )
 
     new_parameters = []
@@ -290,7 +292,7 @@ def signature_has_configurable_traits(cls: Type[T]) -> Type[T]:
 # A decorator to transform np.ndarray output from models to NDDataset
 # according to the X (default) and/or Y input
 # ======================================================================================
-class _set_output(object):
+class _set_output:
     def __init__(
         self,
         method,
@@ -352,7 +354,7 @@ class _set_output(object):
             meta_from_tuple = self.meta_from
 
         out = []
-        for data, meta_from in zip(data_tuple, meta_from_tuple):
+        for data, meta_from in zip(data_tuple, meta_from_tuple, strict=False):
             X_transf = NDDataset(data)
 
             # Now set the NDDataset attributes from the original X
@@ -467,8 +469,7 @@ class _set_output(object):
 
         if len(out) == 1:
             return out[0]
-        else:
-            return tuple(out)
+        return tuple(out)
 
 
 def _wrap_ndarray_output_to_nddataset(

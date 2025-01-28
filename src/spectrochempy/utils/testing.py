@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -15,14 +14,12 @@ import numpy as np
 
 # import matplotlib.pyplot as plt
 # from matplotlib.testing.compare import calculate_rms, ImageAssertionError
-from numpy.testing import (  # noqa
-    assert_approx_equal,
-    assert_array_almost_equal,
-    assert_array_compare,
-    assert_array_equal,
-    assert_equal,
-    assert_raises,
-)
+from numpy.testing import assert_approx_equal  # noqa
+from numpy.testing import assert_array_almost_equal  # noqa
+from numpy.testing import assert_array_compare  # noqa
+from numpy.testing import assert_array_equal  # noqa
+from numpy.testing import assert_equal  # noqa
+from numpy.testing import assert_raises  # noqa
 
 
 @contextlib.contextmanager
@@ -65,7 +62,8 @@ def gisinf(x):
     # copied from numpy.testing._private.utils
     try:
         # Modern numpy way
-        from numpy import errstate, isinf
+        from numpy import errstate
+        from numpy import isinf
     except ImportError:
         # Fallback for numpy 2.0
         errstate = np.errstate
@@ -84,7 +82,11 @@ def _compare(x, y, decimal):
     try:
         # Modern numpy way
         from numpy import any as npany
-        from numpy import asarray, float64, issubdtype, number, result_type
+        from numpy import asarray
+        from numpy import float64
+        from numpy import issubdtype
+        from numpy import number
+        from numpy import result_type
     except ImportError:
         # Fallback for numpy 2.0
         asarray = np.asarray
@@ -163,12 +165,11 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
                     # particular case of mask
                     if attr != "mask":
                         raise AssertionError(f"{thistype}.{attr} sizes are different.")
-                    else:
-                        assert_array_equal(
-                            other.mask,
-                            this.mask,
-                            f"{this} and {other} masks are different.",
-                        )
+                    assert_array_equal(
+                        other.mask,
+                        this.mask,
+                        f"{this} and {other} masks are different.",
+                    )
                 if attr in ["data", "mask"]:
                     if approx:
                         assert_array_compare(
@@ -388,12 +389,11 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                     # particular case of mask
                     if attr != "mask":
                         raise AssertionError(f"{thistype}.{attr} sizes are different.")
-                    else:
-                        assert_array_equal(
-                            other.mask,
-                            this.mask,
-                            f"{this} and {other} masks are different.",
-                        )
+                    assert_array_equal(
+                        other.mask,
+                        this.mask,
+                        f"{this} and {other} masks are different.",
+                    )
                 if attr in ["data"]:
                     # we must compare masked array
                     sattr = this.masked_data
@@ -422,10 +422,10 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                         oattr is None and sattr is not None
                     ):
                         raise AssertionError("One of the coordset is None")
-                    elif sattr is None and oattr is None:
+                    if sattr is None and oattr is None:
                         pass
                     else:
-                        for item in zip(sattr, oattr):
+                        for item in zip(sattr, oattr, strict=False):
                             res = compare_coords(*item, approx=True, decimal=3)
                             if not res:
                                 raise AssertionError(f"coords differs: \n{res}")
@@ -514,15 +514,15 @@ def assert_project_equal(proj1, proj2, **kwargs):
 
 def assert_project_almost_equal(proj1, proj2, **kwargs):
     assert len(proj1.datasets) == len(proj2.datasets)
-    for nd1, nd2 in zip(proj1.datasets, proj2.datasets):
+    for nd1, nd2 in zip(proj1.datasets, proj2.datasets, strict=False):
         compare_datasets(nd1, nd2, **kwargs)
 
     assert len(proj1.projects) == len(proj2.projects)
-    for pr1, pr2 in zip(proj1.projects, proj2.projects):
+    for pr1, pr2 in zip(proj1.projects, proj2.projects, strict=False):
         assert_project_almost_equal(pr1, pr2, **kwargs)
 
     assert len(proj1.scripts) == len(proj2.scripts)
-    for sc1, sc2 in zip(proj1.scripts, proj2.scripts):
+    for sc1, sc2 in zip(proj1.scripts, proj2.scripts, strict=False):
         assert_script_equal(sc1, sc2, **kwargs)
 
     return True
@@ -536,7 +536,7 @@ def assert_script_equal(sc1, sc2, **kwargs):
 # ======================================================================================
 # RandomSeedContext
 # ======================================================================================
-class RandomSeedContext(object):
+class RandomSeedContext:
     """
     A context manager (for use with the `with` statement) that will seed the
     numpy random number generator (RNG) to a specific value, and then restore
@@ -614,7 +614,7 @@ def _check_absorbance_related_units(unit1, unit2):
     return True
 
 
-class raises(object):
+class raises:
     """
     A decorator to mark that a test should raise a given exception.
     Use as follows::

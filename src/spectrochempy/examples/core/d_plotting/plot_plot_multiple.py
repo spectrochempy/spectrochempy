@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 """
 Using `plot_multiple` to plot several datasets on the same figure
 =================================================================
@@ -12,6 +11,7 @@ In this example, we will display several Raman datasets on the same figure
 using the `plot_multiple` method. Several options are available to customize
 the display.
 """
+
 # %%
 # Import spectrochempy as usual
 import spectrochempy as scp

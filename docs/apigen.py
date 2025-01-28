@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -18,6 +17,7 @@ import inspect
 import pathlib
 
 from traitlets import import_item
+
 import spectrochempy
 from spectrochempy.utils.packages import list_packages
 
@@ -89,7 +89,6 @@ class Apigen:
                 "utils",
                 "widgets",
             ]:
-
                 continue
 
             module = ".".join(objname.split(".")[1:])
@@ -107,12 +106,10 @@ class Apigen:
         return res
 
     def list_entries(self):
-
         pkgs = self.get_packages()
 
         results = []
         for pkg_name in pkgs:
-
             if pkg_name.startswith("spectrochempy.examples") or pkg_name.startswith(
                 "spectrochempy.extern"
             ):
@@ -120,7 +117,7 @@ class Apigen:
 
             pkg = import_item(pkg_name)
             try:
-                alls = getattr(pkg, "__all__")
+                alls = pkg.__all__
 
             except AttributeError:
                 # warn("This module has no __all__ attribute")

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,15 +6,13 @@
 import ast
 import re
 
-from traitlets import (
-    Float,
-    HasTraits,
-    Instance,
-    TraitError,
-    Unicode,
-    signature_has_traits,
-    validate,
-)
+from traitlets import Float
+from traitlets import HasTraits
+from traitlets import Instance
+from traitlets import TraitError
+from traitlets import Unicode
+from traitlets import signature_has_traits
+from traitlets import validate
 
 from spectrochempy.application import error_
 from spectrochempy.core.project.abstractproject import AbstractProject
@@ -43,7 +40,7 @@ class Script(HasTraits):
 
     See Also
     --------
-    Project: Object containing `NDDataset`\'s, sub-\ `Project`\ 's and `Script`\ .
+    Project: Object containing `NDDataset`\'s, sub-\\ `Project`\\ 's and `Script`.
 
     Examples
     --------
@@ -66,7 +63,6 @@ class Script(HasTraits):
     def __init__(
         self, name="unamed_script", content=None, parent=None, priority=50.0, **kwargs
     ):
-
         self.name = name
         self.content = content
         self.parent = parent
@@ -124,12 +120,11 @@ class Script(HasTraits):
 
     @validate("_content")
     def _content_validate(self, proposal):
-
         pv = proposal["value"]
         if len(pv) < 1:  # do not allow null but None
             raise TraitError("Script content must be non Null!")
         if pv is None:
-            return
+            return None
 
         try:
             ast.parse(pv)
@@ -169,13 +164,11 @@ class Script(HasTraits):
         """
         if name is None:
             return "Script"
-        else:
-            return name == "Script"
+        return name == "Script"
 
     def execute(self, localvars=None):
         co = (
-            "from spectrochempy import *\n"
-            "import spectrochempy as scp\n" + self._content
+            "from spectrochempy import *\nimport spectrochempy as scp\n" + self._content
         )
         code = compile(co, "<string>", "exec")
         if localvars is None:
@@ -202,9 +195,7 @@ class Script(HasTraits):
         try:
             exec(code, globals(), localvars)
         except NameError as e:
-            error_(
-                e + ". pass the variable `locals()` : this may solve " "this problem! "
-            )
+            error_(e + ". pass the variable `locals()` : this may solve this problem! ")
 
 
 def run_script(script, localvars=None):

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# -*- coding: utf-8 -*-
+
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -162,9 +161,7 @@ class MetaConfigurable(Configurable):
                 value = base64.b64encode(value).decode()
 
             # replace other serializable value by an equivalent
-            elif isinstance(value, (type(cycler), Path)):
-                value = str(value)
-            elif isinstance(value, Quantity):
+            elif isinstance(value, (type(cycler), Path)) or isinstance(value, Quantity):
                 value = str(value)
             elif isinstance(value, np.ndarray):
                 # we need to transform it to a list of elements, bUT with python

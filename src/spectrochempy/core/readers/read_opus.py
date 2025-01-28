@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -11,14 +10,19 @@ This module extend NDDataset with the import method for OPUS generated data file
 __all__ = ["read_opus"]
 __dataset_methods__ = __all__
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC
+from datetime import datetime
+from datetime import timedelta
 
 import numpy as np
-from brukeropusreader.opus_parser import parse_data, parse_meta
+from brukeropusreader.opus_parser import parse_data
+from brukeropusreader.opus_parser import parse_meta
 
 from spectrochempy.application import debug_
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
@@ -174,7 +178,7 @@ def _read_opus(*args, **kwargs):
     else:  # pragma: no cover
         raise ValueError("acqdate can not be interpreted.")
     utc_dt = date_time - timedelta(hours=gmt_offset_hour)
-    utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+    utc_dt = utc_dt.replace(tzinfo=UTC)
     timestamp = utc_dt.timestamp()
 
     yaxis = Coord(
@@ -194,7 +198,7 @@ def _read_opus(*args, **kwargs):
     dataset.filename = filename
     dataset.origin = "opus"
     dataset.description = "Dataset from opus files. \n"
-    dataset.history = str(datetime.now(timezone.utc)) + ": import from opus files \n"
+    dataset.history = str(datetime.now(UTC)) + ": import from opus files \n"
 
     # reset modification date to cretion date
     dataset._modified = dataset._created

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -12,10 +11,12 @@ import re
 import types
 import uuid
 import warnings
-from datetime import datetime, timezone
+from datetime import UTC
+from datetime import datetime
 
 import numpy as np
-from quaternion import as_float_array, as_quat_array
+from quaternion import as_float_array
+from quaternion import as_quat_array
 
 #
 # constants
@@ -99,7 +100,9 @@ def as_quaternion(*args):
         r, i = args
         w, x, y, z = r.real, r.imag, i.real, i.imag
 
-    data = as_quat_array(list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten())))
+    data = as_quat_array(
+        list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten(), strict=False))
+    )
     return data.reshape(w.shape)
 
 
@@ -117,7 +120,7 @@ def quat_as_complex_array(arr):
     tuple
         Tuple of two complex array.
     """
-    if not arr.dtype == np.quaternion:
+    if arr.dtype != np.quaternion:
         # no change
         return arr
 
@@ -174,7 +177,7 @@ def dict_compare(d1, d2, check_equal_only=True):
                 modified.add(o)
             else:
                 # in principe we vae here two list of same length
-                for i1, i2 in zip(d1[o], d2[o]):
+                for i1, i2 in zip(d1[o], d2[o], strict=False):
                     if np.any(i1 != i2):
                         modified.add(o)
         else:
@@ -185,10 +188,9 @@ def dict_compare(d1, d2, check_equal_only=True):
 
     if not check_equal_only:
         return added, removed, modified, same
-    else:
-        if modified or removed or added:
-            return False
-        return True
+    if modified or removed or added:
+        return False
+    return True
 
 
 def get_component(data, select="REAL"):
@@ -421,7 +423,7 @@ def make_new_object(objtype):
 
     # new id and date
     new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split("-")[0])
-    new._date = datetime.now(timezone.utc)
+    new._date = datetime.now(UTC)
 
     return new
 
@@ -533,8 +535,7 @@ def spacing_(arr):
     if len(spacings) == 1:
         # uniform spacing
         return spacings[0]
-    else:
-        return spacings
+    return spacings
 
 
 #

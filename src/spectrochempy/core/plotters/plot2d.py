@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -22,11 +21,13 @@ from copy import copy as cpy
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import MaxNLocator, ScalarFormatter
+from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.docreps import add_docstring
-from spectrochempy.utils.plots import make_label, plot_method
+from spectrochempy.utils.plots import make_label
+from spectrochempy.utils.plots import plot_method
 
 _PLOT2D_DOC = """
 ax : |Axes| instance. Optional
@@ -185,7 +186,7 @@ def plot_2D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     lw = kwargs.get("linewidth", kwargs.get("lw", prefs.lines_linewidth))
     ls = kwargs.get("linestyle", kwargs.get("ls", prefs.lines_linestyle))
-    marker = kwargs.get("marker", kwargs.get("m", None))
+    marker = kwargs.get("marker", kwargs.get("m"))
     markersize = kwargs.get("markersize", kwargs.get("ms", prefs.lines_markersize))
 
     alpha = kwargs.get("calpha", prefs.contour_alpha)
@@ -372,7 +373,7 @@ def plot_2D(dataset, method=None, **kwargs):
     ax.grid(prefs.axes_grid)
 
     # matplotlib.colors.Normalize object
-    norm = kwargs.get("norm", None)
+    norm = kwargs.get("norm")
 
     cmap = kwargs.get("colormap", "Undefined")
     if cmap == "Undefined":
@@ -518,7 +519,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # display a title
     # ------------------------------------------------------------------------
-    title = kwargs.get("title", None)
+    title = kwargs.get("title")
     if title:
         ax.set_title(title)
     elif kwargs.get("plottitle", False):
@@ -528,7 +529,7 @@ def plot_2D(dataset, method=None, **kwargs):
     # labels
     # ----------------------------------------------------------------------------------
     # x label
-    xlabel = kwargs.get("xlabel", None)
+    xlabel = kwargs.get("xlabel")
     if show_x_points:
         xlabel = "data points"
     if not xlabel:
@@ -548,7 +549,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # y label
     # ------------------------------------------------------------------------
-    ylabel = kwargs.get("ylabel", None)
+    ylabel = kwargs.get("ylabel")
     if show_y_points:
         ylabel = "data points"
     if not ylabel:
@@ -571,7 +572,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # z label
     # ------------------------------------------------------------------------
-    zlabel = kwargs.get("zlabel", None)
+    zlabel = kwargs.get("zlabel")
     if not zlabel:
         if method in ["stack"]:
             zlabel = make_label(y, new.dims[-2])
@@ -742,7 +743,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
 
     # display a title
     # ------------------------------------------------------------------------
-    title = kwargs.get("title", None)
+    title = kwargs.get("title")
     if title:
         ax.set_title(title)
 
@@ -750,14 +751,14 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     # labels
     # ------------------------------------------------------------------------
     # x label
-    xlabel = kwargs.get("xlabel", None)
+    xlabel = kwargs.get("xlabel")
     if not xlabel:
         xlabel = make_label(new.x, "x")
     ax.set_xlabel(xlabel, x=(ax.bbox._bbox.x0 + ax.bbox._bbox.x1) / 2 - xe)
 
     # y label
     # ------------------------------------------------------------------------
-    ylabel = kwargs.get("ylabel", None)
+    ylabel = kwargs.get("ylabel")
     if not ylabel:
         ylabel = make_label(new.y, "y")
     ym = (ylim[0] + ylim[1]) / 2
@@ -780,7 +781,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
 
     # z label
     # ------------------------------------------------------------------------
-    zlabel = kwargs.get("zlabel", None)
+    zlabel = kwargs.get("zlabel")
     if not zlabel:
         zlabel = make_label(new, "value")
 

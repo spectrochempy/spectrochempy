@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -14,7 +13,9 @@ import re
 import struct
 import subprocess
 import sys
-from importlib.metadata import distributions, requires, version
+from importlib.metadata import distributions
+from importlib.metadata import requires
+from importlib.metadata import version
 from os import environ
 from pathlib import Path
 

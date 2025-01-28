@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -31,7 +30,8 @@ import requests
 import traitlets as tr
 from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
-from IPython.display import clear_output, publish_display_data
+from IPython.display import clear_output
+from IPython.display import publish_display_data
 from jinja2 import Template
 from setuptools_scm import get_version
 from traitlets.config.application import Application
@@ -40,7 +40,8 @@ from traitlets.config.manager import BaseJSONConfigManager
 
 from spectrochempy.application.datadir import DataDir
 from spectrochempy.application.general_preferences import GeneralPreferences
-from spectrochempy.utils.file import find_or_create_spectrochempy_dir, pathclean
+from spectrochempy.utils.file import find_or_create_spectrochempy_dir
+from spectrochempy.utils.file import pathclean
 
 # ======================================================================================
 # Setup
@@ -700,7 +701,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
                     print(info_string.strip())
 
         # force update of rcParams
-        for rckey in mpl.rcParams.keys():
+        for rckey in mpl.rcParams:
             key = rckey.replace("_", "__").replace(".", "_").replace("-", "___")
             try:
                 mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
@@ -766,10 +767,8 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             etype = exceptions.SpectroChemPyError
             emessage = str(args[0])
         elif len(args) == 2:
-            etype = args[0] if args else kwargs.get("type", None)
-            emessage = (
-                args[1] if args and len(args) > 1 else kwargs.get("message", None)
-            )
+            etype = args[0] if args else kwargs.get("type")
+            emessage = args[1] if args and len(args) > 1 else kwargs.get("message")
         else:
             raise KeyError("wrong arguments have been passed to error_")
         self._catch_exceptions(etype, emessage, None)

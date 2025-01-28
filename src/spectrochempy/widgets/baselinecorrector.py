@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -9,7 +8,8 @@ from functools import partial
 
 from IPython.display import display
 
-from spectrochempy.application import info_, warning_
+from spectrochempy.application import info_
+from spectrochempy.application import warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.readers.importer import read
@@ -24,7 +24,8 @@ def _ipywidgets_is_not_available():
 
 
 if not _ipywidgets_is_not_available():
-    from ipywidgets import Layout, widgets
+    from ipywidgets import Layout
+    from ipywidgets import widgets
 
 __all__ = ["BaselineCorrector"]
 
@@ -104,7 +105,7 @@ class BaselineCorrector:
         if _ipywidgets_is_not_available():
             raise ImportError('This widget requires "ipywidgets" to be installed.')
 
-        if not isinstance(X, (NDDataset, type(None))):
+        if not isinstance(X, NDDataset | type(None)):
             raise ValueError("X must be None or a valid NDDataset")
 
         self.blc = Baseline()
@@ -303,7 +304,7 @@ class BaselineCorrector:
                 self._enabled_process(True)
                 self._process_clicked()
             else:
-                raise IOError("Could not read or merge uploaded files")
+                raise OSError("Could not read or merge uploaded files")
         else:
             self._enabled_process(False)
             warning_("process canceled because X is None")
@@ -338,6 +339,7 @@ class BaselineCorrector:
     def _save_clicked(self, b=None):
         if self.blc.corrected is not None:
             return self.blc.corrected.write()
+        return None
 
 
 # Utility functions
@@ -369,8 +371,7 @@ def _str_to_slice(strg, dataset, dim):
         stop = _str_to_num(match.group(2))
         step = _str_to_num(match.group(3))
         return dataset._get_slice(slice(start, stop, step), dim)
-    else:
-        raise ValueError(f"Something is wrong in the slice definition: {strg}.")
+    raise ValueError(f"Something is wrong in the slice definition: {strg}.")
 
 
 def _ranges_to_str(ranges):
@@ -386,7 +387,7 @@ def _ranges_to_str(ranges):
 def _str_to_ranges(strg):
     strg = strg.strip()
     strg = strg.replace(" ", "")
-    return eval(f"({strg})")
+    return eval(f"({strg})")  # noqa: S307
 
 
 def _round_ranges(ranges, decimals=2):

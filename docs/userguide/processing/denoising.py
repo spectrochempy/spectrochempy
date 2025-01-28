@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -31,7 +30,6 @@
 
 # %%
 import spectrochempy as scp
-
 
 # %% [markdown]
 # ## Denoising 2D spectra

@@ -31,7 +31,9 @@
 
 # %%
 import spectrochempy as scp
-from spectrochempy import MASKED, DimensionalityError, error_
+from spectrochempy import MASKED
+from spectrochempy import DimensionalityError
+from spectrochempy import error_
 
 # %%
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")

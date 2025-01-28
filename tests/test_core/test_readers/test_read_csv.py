@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 import pytest
 
@@ -22,7 +21,6 @@ IR_FOLDER = DATADIR / "irdata"
 #     reason="Experimental data not available for testing",
 # )
 def test_read_csv():
-
     prefs.csv_delimiter = ","
 
     A = scp.read_csv("agirdata/P350/TGA/tg.csv", directory=DATADIR, origin="tga")

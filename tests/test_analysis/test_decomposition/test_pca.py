@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 """
 Tests for the PCA module
@@ -49,9 +48,10 @@ def test_pca():
     pca = PCA()
     pca.fit(dataset)
     assert pca._X.shape == (55, 5549)
-    testing.assert_dataset_equal(
-        pca.X, dataset
-    ), "input dataset should be reflected in the internal variable X"
+    (
+        testing.assert_dataset_equal(pca.X, dataset),
+        "input dataset should be reflected in the internal variable X",
+    )
 
     # set n_components during init
     pca = PCA(n_components=5)
@@ -110,9 +110,10 @@ def test_pca():
     pca.fit(dataset)
     assert pca._X.shape == (55, 5216), "missing row or col should be removed"
     assert pca.X.shape == (55, 5549), "missing row or col restored"
-    testing.assert_dataset_equal(
-        pca.X, dataset
-    ), "input dataset should be reflected in the internal variable X (where mask is restored)"
+    (
+        testing.assert_dataset_equal(pca.X, dataset),
+        "input dataset should be reflected in the internal variable X (where mask is restored)",
+    )
 
     # much better fit when masking eratic data
     # more variance explained with less components

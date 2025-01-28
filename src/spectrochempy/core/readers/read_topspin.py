@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -33,9 +32,11 @@ from quaternion import as_quat_array
 
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.units import ur
-from spectrochempy.extern.nmrglue import read_fid, read_pdata
+from spectrochempy.extern.nmrglue import read_fid
+from spectrochempy.extern.nmrglue import read_pdata
 from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
@@ -890,7 +891,7 @@ _docstring.delete_params("Importer.see_also", "read_topspin")
 
 @_docstring.dedent
 def read_topspin(*paths, **kwargs):
-    """
+    r"""
     Open Bruker TOPSPIN (NMR) dataset.
 
     Parameters
@@ -905,11 +906,11 @@ def read_topspin(*paths, **kwargs):
 
     Other Parameters
     ----------------
-    expno : `int`\ , optional
+    expno : `int`, optional
         Experiment number.
-    procno : `int`\ , optional
+    procno : `int`, optional
         Processing number.
-    use_list : `bool` or `str`\ , optional, default: `False`
+    use_list : `bool` or `str`, optional, default: `False`
         Whether to use a list to make indirect coordinates for pseudo-2D spectra (e.g., for relaxation experiments). If `True` the list `vdlist` is used. If a string, the list with the given name is used.
     %(Importer.other_parameters)s
 
@@ -1022,6 +1023,7 @@ def _read_topspin(*args, **kwargs):
                             dataRI.flatten(),
                             dataIR.flatten(),
                             dataII.flatten(),
+                            strict=False,
                         )
                     )
                 )
@@ -1054,7 +1056,7 @@ def _read_topspin(*args, **kwargs):
         )
 
     # read the acqu and proc
-    valid_keys = list(zip(*nmr_valid_meta))[0]
+    valid_keys = list(zip(*nmr_valid_meta, strict=False))[0]
     keys_units = dict(nmr_valid_meta)
 
     for item in keys:
@@ -1185,7 +1187,7 @@ def _read_topspin(*args, **kwargs):
             if not isinstance(use_list, str):
                 use_list = "vdlist"
             use_list = f_expno / use_list
-            with open(use_list, mode="r") as f:
+            with open(use_list) as f:
                 vd = [float(val) for val in f.readlines()]
             coord = Coord(vd, title="time", units="s")
             coords.append(coord)
@@ -1235,9 +1237,7 @@ def _read_topspin(*args, **kwargs):
     dataset.units = "count"
     dataset.title = "intensity"
     dataset.origin = "topspin"
-    dataset.name = (
-        f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"  # noqa: E231
-    )
+    dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"  # noqa: E231
     dataset.filename = f_name
     if dataset.meta.date is not None:
         dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])

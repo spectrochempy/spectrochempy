@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -20,7 +19,9 @@ import numpy as np
 
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.utils.docreps import _docstring
 
 try:
@@ -196,7 +197,7 @@ def _add_omnic_info(dataset, **kwargs):
     dataset.units = "absorbance"
     dataset.title = "absorbance"
     dataset.name = name
-    dataset.description = "Dataset from .csv file: {}\n".format(desc)
+    dataset.description = f"Dataset from .csv file: {desc}\n"
     dataset.history = "Read from omnic exported csv file."
     dataset.origin = "omnic"
 

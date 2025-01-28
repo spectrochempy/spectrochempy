@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,14 +6,12 @@
 __all__ = ["read_zip"]
 __dataset_methods__ = __all__
 
-from spectrochempy.core.readers.importer import (
-    ALIAS,
-    FILETYPES,
-    Importer,
-    _importer_method,
-    _openfid,
-    read,
-)
+from spectrochempy.core.readers.importer import ALIAS
+from spectrochempy.core.readers.importer import FILETYPES
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _openfid
+from spectrochempy.core.readers.importer import read
 from spectrochempy.utils.docreps import _docstring
 
 # ======================================================================================
@@ -96,8 +93,11 @@ def _read_zip(*args, **kwargs):
 
         def extract(children, **kwargs):
             extension = children.name.split(".")[-1]
-            if extension.lower() not in list(zip(*(ALIAS + FILETYPES)))[0]:
-                return
+            if (
+                extension.lower()
+                not in list(zip(*(ALIAS + FILETYPES), strict=False))[0]
+            ):
+                return None
             origin = kwargs.get("origin", "")
             return read(children.name, content=children.read_bytes(), origin=origin)
 
@@ -109,17 +109,16 @@ def _read_zip(*args, **kwargs):
                 if count == only:
                     # limits to only this number of files
                     break
-                elif "__MACOSX" in str(children.name):
+                if "__MACOSX" in str(children.name):
                     continue  # bypass non-data files
-                elif ".DS_Store" in str(children.name):
+                if ".DS_Store" in str(children.name):
                     continue
-                else:
-                    # print(count, children)
-                    # TODO: why this pose problem in pycharm-debug?????
-                    d = extract(children, **kwargs)
-                    if d is not None:
-                        datasets.append(d)
-                        count += 1
+                # print(count, children)
+                # TODO: why this pose problem in pycharm-debug?????
+                d = extract(children, **kwargs)
+                if d is not None:
+                    datasets.append(d)
+                    count += 1
         else:
             for file in files:
                 d = extract(file, **kwargs)
@@ -128,5 +127,4 @@ def _read_zip(*args, **kwargs):
 
         if len(datasets) == 1:
             return datasets[0]
-        else:
-            return datasets
+        return datasets

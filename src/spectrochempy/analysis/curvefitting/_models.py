@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -101,7 +100,7 @@ def make_units_compatibility(func):
 # ======================================================================================
 # PolynomialBaseline
 # ======================================================================================
-class polynomialbaseline(object):
+class polynomialbaseline:
     r"""
     Arbitrary-degree polynomial (degree limited to 10, however).
 
@@ -160,7 +159,7 @@ class polynomialbaseline(object):
 # ======================================================================================
 # GaussianModel
 # ======================================================================================
-class gaussianmodel(object):
+class gaussianmodel:
     """
     Normalized 1D gaussian function.
 
@@ -192,7 +191,7 @@ class gaussianmodel(object):
 # ======================================================================================
 # LorentzianModel
 # ======================================================================================
-class lorentzianmodel(object):
+class lorentzianmodel:
     """
     A standard Lorentzian function (also known as the Cauchy distribution).
 
@@ -223,7 +222,7 @@ class lorentzianmodel(object):
 # ======================================================================================
 # VoigtModel
 # ======================================================================================
-class voigtmodel(object):
+class voigtmodel:
     """
     A Voigt model constructed as the convolution of a :class:`GaussianModel` and
     a :class:`LorentzianModel` .
@@ -264,7 +263,7 @@ class voigtmodel(object):
 # ======================================================================================
 # Asymmetric Voigt Model
 # ======================================================================================
-class asymmetricvoigtmodel(object):
+class asymmetricvoigtmodel:
     """
     An asymmetric Voigt model.
 
@@ -295,11 +294,10 @@ class asymmetricvoigtmodel(object):
         lb = (1.0 - ratio) * g / 2.0
         if ratio < 1.0e-16:
             return lorentzianmodel().f(x, ampl, pos, lb * 2.0, **kargs)
-        else:
-            w = wofz(((x - pos) + 1.0j * lb) * 2**-0.5 / gb)
-            w = w.real * (2.0 * np.pi) ** -0.5 / gb
-            w = w * abs(x[1] - x[0])
-            return ampl * w
+        w = wofz(((x - pos) + 1.0j * lb) * 2**-0.5 / gb)
+        w = w.real * (2.0 * np.pi) ** -0.5 / gb
+        w = w * abs(x[1] - x[0])
+        return ampl * w
 
 
 # ======================================================================================
@@ -307,7 +305,7 @@ class asymmetricvoigtmodel(object):
 # ======================================================================================
 
 
-class sigmoidmodel(object):
+class sigmoidmodel:
     """
     A Sigmoid function.
 
@@ -335,7 +333,7 @@ class sigmoidmodel(object):
 # ======================================================================================
 # User defined model
 # ======================================================================================
-class usermodel(object):
+class usermodel:
     """
     Base class for user defined models
     """

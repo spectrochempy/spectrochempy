@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -19,12 +18,10 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
-from spectrochempy.utils.misc import (
-    as_quaternion,
-    get_component,
-    largest_power_of_2,
-    typequaternion,
-)
+from spectrochempy.utils.misc import as_quaternion
+from spectrochempy.utils.misc import get_component
+from spectrochempy.utils.misc import largest_power_of_2
+from spectrochempy.utils.misc import typequaternion
 
 
 # ======================================================================================
@@ -177,7 +174,7 @@ def _interferogram_fft(data):
     def _get_zpd(data, mode="max"):
         if mode == "max":
             return np.argmax(data, -1)
-        elif mode == "abs":
+        if mode == "abs":
             return int(np.argmax(np.abs(data), -1))
 
     zpd = _get_zpd(data, mode="abs")

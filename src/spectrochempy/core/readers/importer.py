@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -18,17 +17,21 @@ from zipfile import ZipFile
 
 import requests
 import yaml
-from traitlets import Dict, HasTraits, List, Type, Unicode
+from traitlets import Dict
+from traitlets import HasTraits
+from traitlets import List
+from traitlets import Type
+from traitlets import Unicode
 
-from spectrochempy.application import info_, warning_
+from spectrochempy.application import info_
+from spectrochempy.application import warning_
 from spectrochempy.utils.docreps import _docstring
-from spectrochempy.utils.exceptions import DimensionsCompatibilityError, ProtocolError
-from spectrochempy.utils.file import (
-    check_filename_to_open,
-    get_directory_name,
-    get_filenames,
-    pathclean,
-)
+from spectrochempy.utils.exceptions import DimensionsCompatibilityError
+from spectrochempy.utils.exceptions import ProtocolError
+from spectrochempy.utils.file import check_filename_to_open
+from spectrochempy.utils.file import get_directory_name
+from spectrochempy.utils.file import get_filenames
+from spectrochempy.utils.file import pathclean
 
 FILETYPES = [
     ("scp", "SpectroChemPy files (*.scp)"),
@@ -88,9 +91,9 @@ class Importer(HasTraits):
         super().__init__()
 
         self.filetypes = dict(FILETYPES)
-        temp = list(zip(*FILETYPES))
+        temp = list(zip(*FILETYPES, strict=False))
         temp.reverse()
-        self.protocols = dict(zip(*temp))
+        self.protocols = dict(zip(*temp, strict=False))
 
         #  add alias
 
@@ -100,7 +103,7 @@ class Importer(HasTraits):
         self.datasets = []
         self.default_key = kwargs.pop("default_key", ".scp")
 
-        if "merge" not in kwargs.keys():
+        if "merge" not in kwargs:
             # if merge is not specified, but the args are provided as a single list,
             # then will are supposed to merge the datasets. If merge is specified then
             # it has priority.
@@ -139,7 +142,12 @@ class Importer(HasTraits):
                 if len(self.datasets) > 1:
                     self.datasets = self._do_merge(self.datasets, **kwargs)
 
-            elif key and key[1:] not in list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]:
+            elif (
+                key
+                and key[1:]
+                not in list(zip(*FILETYPES, strict=False))[0]
+                + list(zip(*ALIAS, strict=False))[0]
+            ):
                 raise TypeError(f"Filetype `{key}` is unknown in spectrochempy")
             else:
                 # here files are read / or remotely from the disk using filenames
@@ -165,19 +173,18 @@ class Importer(HasTraits):
                 nd.name = name
             return nd
 
-        else:
-            nds = self.datasets
-            names = kwargs.pop("names", None)
-            if names and len(names) == len(nds):
-                for nd, name in zip(nds, names):
-                    nd.name = name
-            elif names and len(names) != len(nds):
-                warn(
-                    "length of the `names` list and of the list of datasets mismatch - names not applied"
-                )
-            return sorted(
-                nds, key=str
-            )  # return a sorted list (sorted according to their string representation)
+        nds = self.datasets
+        names = kwargs.pop("names", None)
+        if names and len(names) == len(nds):
+            for nd, name in zip(nds, names, strict=False):
+                nd.name = name
+        elif names and len(names) != len(nds):
+            warn(
+                "length of the `names` list and of the list of datasets mismatch - names not applied"
+            )
+        return sorted(
+            nds, key=str
+        )  # return a sorted list (sorted according to their string representation)
 
     def _setup_objtype(self, *args, **kwargs):
         # check if the first argument is an instance of NDDataset or Project
@@ -201,7 +208,7 @@ class Importer(HasTraits):
         return args, kwargs
 
     def _switch_protocol(self, key, files, **kwargs):
-        protocol = kwargs.get("protocol", None)
+        protocol = kwargs.get("protocol")
         if protocol is not None and protocol != "ALL":
             if not isinstance(protocol, list):
                 protocol = [protocol]
@@ -304,24 +311,24 @@ def _importer_method(func):
 # --------------------------------------------------------------------------------------
 
 _docstring.get_sections(
-    """
+    r"""
 See Also
 --------
 read : Generic reader inferring protocol from the filename extension.
 read_zip : Read Zip archives (containing spectrochempy readable files)
 read_dir : Read an entire directory.
 read_opus : Read OPUS spectra.
-read_labspec : Read Raman LABSPEC spectra (:file:`.txt`\ ).
-read_omnic : Read Omnic spectra (:file:`.spa`\ , :file:`.spg`\ , :file:`.srs`\ ).
-read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`\ ).
-read_galactic : Read Galactic files (:file:`.spc`\ ).
+read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
+read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+read_galactic : Read Galactic files (:file:`.spc`).
 read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
 read_topspin : Read TopSpin Bruker NMR spectra.
-read_csv : Read CSV files (:file:`.csv`\ ).
-read_jcamp : Read Infrared JCAMP-DX files (:file:`.jdx`\ , :file:`.dx`\ ).
-read_matlab : Read Matlab files (:file:`.mat`\ , :file:`.dso`\ ).
+read_csv : Read CSV files (:file:`.csv`).
+read_jcamp : Read Infrared JCAMP-DX files (:file:`.jdx`, :file:`.dx`).
+read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
 read_carroucell : Read files in a directory after a carroucell experiment.
-read_wire : Read REnishaw Wire files (:file:`.wdf`\ ).
+read_wire : Read REnishaw Wire files (:file:`.wdf`).
 """,
     sections=["See Also"],
     base="Importer",
@@ -343,16 +350,16 @@ def read(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name for the
         file(s) to be loaded:
 
-        * *e.g.,* ( filename1, filename2, ...,  \*\*kwargs )*
+        * *e.g.,* ( filename1, filename2, ...,  **kwargs )*
 
         If the list of filenames are enclosed into brackets:
 
-        * *e.g.,* ( **[** *filename1, filename2, ...* **]**, \*\*kwargs *)*
+        * *e.g.,* ( **[** *filename1, filename2, ...* **]**, **kwargs *)*
 
         The returned datasets are merged to form a single dataset,
         except if ``merge`` is set to `False`.
 
-        If a source is not provided (*i.e.,* no ``paths`` , nor ``content``\ ),
+        If a source is not provided (*i.e.,* no ``paths`` , nor ``content``),
         a dialog box will be opened to select files.
     %(kwargs)s
 
@@ -363,14 +370,14 @@ def read(*paths, **kwargs):
 
     Other Parameters
     ----------------
-    protocol : `str`\ , optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``\ , ``'omnic'``\ ,
-        ``'opus'``\ , ``'topspin'``\ , ``'matlab'``\ , ``'jcamp'``\ , ``'csv'``\ ,
-        ``'excel'``\ }. If not provided, the correct protocol
+    protocol : `str`, optional
+        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'excel'``\\ }. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
-    merge : `bool`\ , optional, default: `False`
+    merge : `bool`, optional, default: `False`
         If `True` and several filenames or a ``directory`` have been provided as
         arguments, then a single `NDDataset` with merged (stacked along the first
         dimension) is returned.
@@ -378,11 +385,11 @@ def read(*paths, **kwargs):
         Sort multiple filename by acquisition date.
     description : `str`, optional
         A Custom description.
-    origin : one of {``'omnic'``\ , ``'tga'``\ }, optional
+    origin : one of {``'omnic'``, ``'tga'``\\ }, optional
         Used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra.
         Up to now only ``'omnic'`` and ``'tga'`` have been implemented.
-    csv_delimiter : `str`\ , optional, default: `~spectrochempy.preferences.csv_delimiter`
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
         Set the column delimiter in CSV file.
     content : `bytes` object, optional
         Instead of passing a filename for further reading, a bytes content can be
@@ -390,9 +397,9 @@ def read(*paths, **kwargs):
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a GUI Dash application to handle drag and drop of files into a
         Browser.
-    iterdir : `bool`\ , optional, default: `True`
+    iterdir : `bool`, optional, default: `True`
         If `True` and no filename was provided, all files present in the provided
-        ``directory`` are returned (and merged if ``merge`` is `True`\ .
+        ``directory`` are returned (and merged if ``merge`` is `True`.
         It is assumed that all the files correspond to current reading protocol.
 
         .. versionchanged:: 0.6.2
@@ -485,7 +492,7 @@ def read(*paths, **kwargs):
 
     importer = Importer()
 
-    protocol = kwargs.get("protocol", None)
+    protocol = kwargs.get("protocol")
     available_protocols = list(importer.protocols.values())
     available_protocols.extend(
         list(importer.alias.keys())
@@ -493,7 +500,7 @@ def read(*paths, **kwargs):
     if protocol is None:
         kwargs["filetypes"] = list(importer.filetypes.values())
         kwargs["protocol"] = "ALL"
-        default_filter = kwargs.get("default_filter", None)
+        default_filter = kwargs.get("default_filter")
         if default_filter is not None:
             kwargs["default_filter"] = importer.filetypes[default_filter]
     else:
@@ -529,7 +536,7 @@ _docstring.delete_params("Importer.see_also", "read_dir")
 
 @_docstring.dedent
 def read_dir(directory=None, **kwargs):
-    """
+    r"""
     Read an entire directory.
 
     Open a list of readable files in a and store data/metadata in a dataset or a list of
@@ -538,7 +545,7 @@ def read_dir(directory=None, **kwargs):
     * 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
       distinct files are stored in distinct `NDdataset`\ s.
     * 1D spectroscopic data (e.g., :file:`.spa` files) in a given directory are merged
-      into single `NDDataset`\ , providing their unique dimension are compatible.
+      into single `NDDataset`, providing their unique dimension are compatible.
       If not, an error is generated.
     * non-readable files are ignored
 
@@ -579,7 +586,7 @@ def read_dir(directory=None, **kwargs):
 #     Download and read files or an entire directory from any url
 #
 #     The first usage in spectrochempy is the loading of test files in the
-#     `spectrochempy_data repository <https://github.com/spectrochempy/spectrochempy_data>`__\ .
+#     `spectrochempy_data repository <https://github.com/spectrochempy/spectrochempy_data>`__.
 #     This is done only if the data are not yet
 #     downloaded and present in the `~spectrochempy.preferences.datadir` directory.
 #
@@ -626,7 +633,9 @@ def _read_dir(*args, **kwargs):
     directory = get_directory_name(directory)
     files = get_filenames(directory, **kwargs)
     datasets = []
-    valid_extensions = list(zip(*FILETYPES))[0] + list(zip(*ALIAS))[0]
+    valid_extensions = (
+        list(zip(*FILETYPES, strict=False))[0] + list(zip(*ALIAS, strict=False))[0]
+    )
     for key in [key for key in files.keys() if key[1:] in valid_extensions]:
         if key:
             importer = Importer()
@@ -650,10 +659,9 @@ def _read_(*args, **kwargs):
 
     if kwargs.pop("remote", False):
         return Importer._read_remote(*args, **kwargs)
-    elif not filename or filename.is_dir():
+    if not filename or filename.is_dir():
         return Importer._read_dir(*args, **kwargs)
-    else:
-        raise FileNotFoundError
+    raise FileNotFoundError
 
     # protocol = kwargs.get("protocol", None)
     # if protocol and ".scp" in protocol:
@@ -735,7 +743,7 @@ def _write_downloaded_file(content, dst):
 
 def _get_url_content_and_save(url, dst, replace, read_only=False):
     if not replace and dst.exists():
-        return
+        return None
 
     try:
         r = requests.get(url, allow_redirects=True)
@@ -791,12 +799,11 @@ def _download_from_github(path, dst, replace=False):
     if index is None:
         return _get_url_content_and_save(path, dst, replace)
 
-    else:
-        # download folder
-        for filename in index["files"]:
-            _get_url_content_and_save(f"{path}/{filename}", dst / filename, replace)
-        for folder in index["folders"]:
-            _download_from_github(f"{relative_path}/{folder}", dst / folder)
+    # download folder
+    for filename in index["files"]:
+        _get_url_content_and_save(f"{path}/{filename}", dst / filename, replace)
+    for folder in index["folders"]:
+        _download_from_github(f"{relative_path}/{folder}", dst / folder)
 
 
 def _is_relative_to(path, base):
@@ -864,9 +871,8 @@ def _read_remote(*args, **kwargs):
         # we are going to download the whole testdata directory
         # -> use a faster method
         _download_full_testdata_directory()
-        return
-    else:
-        content = _download_from_github(relative_path, dst, replace)
+        return None
+    content = _download_from_github(relative_path, dst, replace)
 
     if not download_only:
         if content is None:
@@ -874,7 +880,5 @@ def _read_remote(*args, **kwargs):
                 return read_method(
                     dataset, dst / _relative_to(savedpath, dst), **kwargs
                 )
-            else:
-                return read_method(dataset, dst, **kwargs)
-        else:
-            return read_method(dataset, dst, content=content, **kwargs)
+            return read_method(dataset, dst, **kwargs)
+        return read_method(dataset, dst, content=content, **kwargs)

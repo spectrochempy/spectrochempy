@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -26,7 +25,9 @@ import traceback
 import matplotlib.pyplot as plt
 import numpy
 from numpydoc.docscrape import get_doc_object
-from numpydoc.validate import Validator, error, validate
+from numpydoc.validate import Validator
+from numpydoc.validate import error
+from numpydoc.validate import validate
 
 # With template backend, matplotlib plots nothing
 # matplotlib.use("template")

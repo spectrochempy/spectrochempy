@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 import pytest
 
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
@@ -14,7 +13,6 @@ from spectrochempy.utils import testing
 
 
 def test_compare_ndarrays(IR_dataset_1D):
-
     nda1 = NDArray(IR_dataset_1D)
     nda2 = nda1.copy()
 
@@ -49,7 +47,6 @@ def test_compare_ndarrays(IR_dataset_1D):
 
 
 def test_compare_coords(IR_dataset_2D):
-
     x1 = IR_dataset_2D.x
     x2 = x1.copy()
 
@@ -128,7 +125,6 @@ def test_compare_project(simple_project):
 
 
 def test_compare_units():
-
     testing.assert_units_equal(ur.km, ur.m)
     with pytest.raises(AssertionError):
         testing.assert_units_equal(ur.km, ur.m, strict=True)

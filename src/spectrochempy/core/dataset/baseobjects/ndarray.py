@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -20,43 +19,39 @@ import warnings
 from datetime import datetime
 
 import numpy as np
-from traitlets import (
-    Bool,
-    HasTraits,
-    Instance,
-    Integer,
-    List,
-    Unicode,
-    Union,
-    default,
-    validate,
-)
+from traitlets import Bool
+from traitlets import HasTraits
+from traitlets import Instance
+from traitlets import Integer
+from traitlets import List
+from traitlets import Unicode
+from traitlets import Union
+from traitlets import default
+from traitlets import validate
 
-from spectrochempy.application import error_, info_
+from spectrochempy.application import error_
+from spectrochempy.application import info_
 from spectrochempy.core.dataset.baseobjects.meta import Meta
-from spectrochempy.core.units import (
-    DimensionalityError,
-    Quantity,
-    Unit,
-    set_nmr_context,
-    ur,
-)
+from spectrochempy.core.units import DimensionalityError
+from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import Unit
+from spectrochempy.core.units import set_nmr_context
+from spectrochempy.core.units import ur
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils.constants import INPLACE, MASKED, NOMASK, MaskedConstant
+from spectrochempy.utils.constants import INPLACE
+from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.constants import NOMASK
+from spectrochempy.utils.constants import MaskedConstant
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.file import pathclean
-from spectrochempy.utils.misc import (
-    TYPE_FLOAT,
-    TYPE_INTEGER,
-    is_number,
-    is_sequence,
-    make_new_object,
-)
-from spectrochempy.utils.print import (
-    convert_to_html,
-    insert_masked_print,
-    numpyprintoptions,
-)
+from spectrochempy.utils.misc import TYPE_FLOAT
+from spectrochempy.utils.misc import TYPE_INTEGER
+from spectrochempy.utils.misc import is_number
+from spectrochempy.utils.misc import is_sequence
+from spectrochempy.utils.misc import make_new_object
+from spectrochempy.utils.print import convert_to_html
+from spectrochempy.utils.print import insert_masked_print
+from spectrochempy.utils.print import numpyprintoptions
 
 # ======================================================================================
 # Constants
@@ -74,7 +69,7 @@ numpyprintoptions()
 # The basic NDArray class
 # ======================================================================================
 class NDArray(HasTraits):
-    """
+    r"""
     The basic  `NDArray` object.
 
     The  `NDArray` class is an array (numpy :term:`array-like`) container, usually not
@@ -98,7 +93,7 @@ class NDArray(HasTraits):
         a  `NDArray` or any subclass of  `NDArray` . Any size or shape of data is
         accepted. If not given, an empty `NDArray` will be inited.
         At the initialisation the provided data will be eventually cast to a
-        `numpy.ndarray`\ .
+        `numpy.ndarray`.
         If a subclass of  `NDArray` is passed which already contains some mask, labels,
         or units, these elements
         will
@@ -232,7 +227,7 @@ class NDArray(HasTraits):
         if mask is not NOMASK:
             self.mask = mask
 
-        if "dims" in kwargs.keys():
+        if "dims" in kwargs:
             self.dims = kwargs.pop("dims")
 
         self.units = kwargs.pop("units", None)
@@ -312,9 +307,8 @@ class NDArray(HasTraits):
                         # particular case of mask
                         if attr != "mask":
                             return False
-                        else:
-                            if other.mask != self.mask:
-                                return False
+                        if other.mask != self.mask:
+                            return False
                     eq &= np.all(sattr == oattr)
                     if not eq:
                         return False
@@ -416,8 +410,7 @@ class NDArray(HasTraits):
         # this operation. Only a subsequent squeeze operation will do it
         if not return_index:
             return new
-        else:
-            return new, keys
+        return new, keys
 
     def __hash__(self):
         # all instance of this class has same hash, so they can be compared
@@ -436,8 +429,7 @@ class NDArray(HasTraits):
         # len of the last dimension
         if not self.is_empty:
             return self.shape[0]
-        else:
-            return 0
+        return 0
 
     def __ne__(self, other, attrs=None):
         return not self.__eq__(other, attrs)
@@ -468,7 +460,7 @@ class NDArray(HasTraits):
                     self._mask = m.swapaxes(i, 0)
             return self._mask
 
-        elif isinstance(value, Quantity):
+        if isinstance(value, Quantity):
             # first convert value to the current units
             value.ito(self.units)
             value = np.asarray(value.magnitude)  # , copy=self.copy)
@@ -543,8 +535,7 @@ class NDArray(HasTraits):
         # return the validated data
         if self._copy:
             return data.copy()
-        else:
-            return data
+        return data
 
     @default("_dims")
     def _dims_default(self):
@@ -595,11 +586,11 @@ class NDArray(HasTraits):
         # as integer or string
 
         if dims is None:
-            return
+            return None
 
         if is_sequence(dims):
             if np.all([d is None for d in dims]):
-                return
+                return None
         else:
             dims = [dims]
 
@@ -676,25 +667,24 @@ class NDArray(HasTraits):
                     start = self.shape[axis] + key
             stop = start + 1  # in order to keep a non squeezed slice
             return slice(start, stop, 1)
-        else:
-            start, stop, step = key.start, key.stop, key.step
-            if start is not None and not isinstance(start, TYPE_INTEGER):
-                start = self._loc2index(start, dim, units=units)
-                if isinstance(start, tuple):
-                    start, info = start
-            if stop is not None and not isinstance(stop, TYPE_INTEGER):
-                stop = self._loc2index(stop, dim, units=units)
-                if isinstance(stop, tuple):
-                    stop, info = stop
-                if start is not None and stop < start:
-                    start, stop = stop, start
-                if stop != start:
-                    stop = stop + 1  # to include last loc or label index
-            if step is not None and not isinstance(step, (int, np.int_, np.int64)):
-                raise NotImplementedError(
-                    "step in location slicing is not yet possible."
-                )  # TODO: we have may be a special case with
-                # datetime  # step = 1
+        start, stop, step = key.start, key.stop, key.step
+        if start is not None and not isinstance(start, TYPE_INTEGER):
+            start = self._loc2index(start, dim, units=units)
+            if isinstance(start, tuple):
+                start, info = start
+        if stop is not None and not isinstance(stop, TYPE_INTEGER):
+            stop = self._loc2index(stop, dim, units=units)
+            if isinstance(stop, tuple):
+                stop, info = stop
+            if start is not None and stop < start:
+                start, stop = stop, start
+            if stop != start:
+                stop = stop + 1  # to include last loc or label index
+        if step is not None and not isinstance(step, (int, np.int_, np.int64)):
+            raise NotImplementedError(
+                "step in location slicing is not yet possible."
+            )  # TODO: we have may be a special case with
+            # datetime  # step = 1
         if step is None:
             if start is not None or stop is not None:
                 step = 1
@@ -739,52 +729,48 @@ class NDArray(HasTraits):
         if self.is_empty and not self.is_labeled:
             raise IndexError(f"Could not find this location {loc} on an empty array")
 
-        else:
-            data = self.data
+        data = self.data
 
-            if is_number(loc):
-                # get the index of a given values
-                error = None
-                if np.all(loc > data.max()) or np.all(loc < data.min()):
-                    info_(
-                        f"This coordinate ({loc}) is outside the axis limits "
-                        f"({data.min()}-{data.max()}).\n"
-                        f"The closest limit index is returned"
-                    )
-                    error = "out_of_limits"
-                index = (np.abs(data - loc)).argmin()
-                # TODO: add some precision to this result
-                if not error:
-                    return index
-                else:
-                    return index, error
-
-            elif is_sequence(loc):
-                # TODO: is there a simpler way to do this with numpy functions
-                index = []
-                for lo in loc:
-                    index.append(
-                        (np.abs(data - lo)).argmin()
-                    )  # TODO: add some precision to this result
+        if is_number(loc):
+            # get the index of a given values
+            error = None
+            if np.all(loc > data.max()) or np.all(loc < data.min()):
+                info_(
+                    f"This coordinate ({loc}) is outside the axis limits "
+                    f"({data.min()}-{data.max()}).\n"
+                    f"The closest limit index is returned"
+                )
+                error = "out_of_limits"
+            index = (np.abs(data - loc)).argmin()
+            # TODO: add some precision to this result
+            if not error:
                 return index
+            return index, error
 
-            elif self.is_labeled:
-                # TODO: look in all row of labels
-                labels = self._labels
-                indexes = np.argwhere(labels == loc).flatten()
-                if indexes.size > 0:
-                    return indexes[0]
-                else:
-                    raise IndexError(f"Could not find this label: {loc}")
+        if is_sequence(loc):
+            # TODO: is there a simpler way to do this with numpy functions
+            index = []
+            for lo in loc:
+                index.append(
+                    (np.abs(data - lo)).argmin()
+                )  # TODO: add some precision to this result
+            return index
 
-            elif isinstance(loc, datetime):
-                # not implemented yet
-                raise NotImplementedError(
-                    "datetime as location is not yet implemented"
-                )  # TODO: date!
+        if self.is_labeled:
+            # TODO: look in all row of labels
+            labels = self._labels
+            indexes = np.argwhere(labels == loc).flatten()
+            if indexes.size > 0:
+                return indexes[0]
+            raise IndexError(f"Could not find this label: {loc}")
 
-            else:
-                raise IndexError(f"Could not find this location: {loc}")
+        if isinstance(loc, datetime):
+            # not implemented yet
+            raise NotImplementedError(
+                "datetime as location is not yet implemented"
+            )  # TODO: date!
+
+        raise IndexError(f"Could not find this location: {loc}")
 
     def _make_index(self, key):
         if isinstance(key, np.ndarray) and key.dtype == bool:
@@ -875,8 +861,7 @@ class NDArray(HasTraits):
         # no particular validation for now.
         if self._copy:
             return mask.copy()
-        else:
-            return mask
+        return mask
 
     @default("_meta")
     def _meta_default(self):
@@ -896,7 +881,10 @@ class NDArray(HasTraits):
         out = ""
 
         shape_ = (
-            x for x in itertools.chain.from_iterable(list(zip(self.dims, self.shape)))
+            x
+            for x in itertools.chain.from_iterable(
+                list(zip(self.dims, self.shape, strict=False))
+            )
         )
 
         shape = (", ".join(["{}:{}"] * self.ndim)).format(*shape_)
@@ -1027,8 +1015,7 @@ class NDArray(HasTraits):
             return 1
         if self.data is None:
             return 0
-        else:
-            return len([x for x in self.data.shape if x > 1])
+        return len([x for x in self.data.shape if x > 1])
 
     def _str_shape(self):
         if self.is_empty:
@@ -1037,7 +1024,10 @@ class NDArray(HasTraits):
         out = ""
 
         shape_ = (
-            x for x in itertools.chain.from_iterable(list(zip(self.dims, self.shape)))
+            x
+            for x in itertools.chain.from_iterable(
+                list(zip(self.dims, self.shape, strict=False))
+            )
         )
 
         shape = (", ".join(["{}:{}"] * self.ndim)).format(*shape_)
@@ -1056,7 +1046,7 @@ class NDArray(HasTraits):
         # prefix = ['']
         if self.is_empty and "data: ..." not in header:
             return header + "{}".format(textwrap.indent("empty", " " * 9))
-        elif self.is_empty:
+        if self.is_empty:
             return "{}".format(textwrap.indent("empty", " " * 9))
 
         print_unit = True
@@ -1128,8 +1118,7 @@ class NDArray(HasTraits):
         uar = data
         if units:
             return Quantity(uar, units)
-        else:
-            return uar
+        return uar
 
     @staticmethod
     def _umasked(data, mask):
@@ -1202,9 +1191,7 @@ class NDArray(HasTraits):
             do_copy = cpy.copy
 
         new = make_new_object(self)
-        for (
-            attr
-        ) in (
+        for attr in (
             self.__dir__()
         ):  # do not use  dir(self) as the order in __dir__ list is important
             try:
@@ -1277,8 +1264,7 @@ class NDArray(HasTraits):
             #    self._dims = self._dims_default()
             dims = self._dims[:ndim]
             return dims
-        else:
-            return []
+        return []
 
     @dims.setter
     def dims(self, values):
@@ -1317,8 +1303,7 @@ class NDArray(HasTraits):
         """
         if self._filename:
             return self._filename.stem + self.suffix
-        else:
-            return None
+        return None
 
     @filename.setter
     def filename(self, val):
@@ -1410,8 +1395,7 @@ class NDArray(HasTraits):
 
         if self.labels.ndim > 1:
             return self.labels[level]
-        else:
-            return self._labels
+        return self._labels
 
     @property
     def has_data(self):
@@ -1428,7 +1412,7 @@ class NDArray(HasTraits):
         """
         True is the name has been defined (bool).
         """
-        return not (self.name == self.id)
+        return self.name != self.id
 
     @property
     def has_units(self):
@@ -1479,8 +1463,7 @@ class NDArray(HasTraits):
         """
         if name is None:
             return self.__class__.__name__
-        else:
-            return name == self.__class__.__name__
+        return name == self.__class__.__name__
 
     @property
     def is_float(self):
@@ -1532,8 +1515,7 @@ class NDArray(HasTraits):
             return False
         if self._labels is not None and np.any(self.labels != ""):
             return True
-        else:
-            return False
+        return False
 
     @property
     def is_masked(self):
@@ -1542,9 +1524,9 @@ class NDArray(HasTraits):
         """
         if isinstance(self._mask, np.ndarray):
             return np.any(self._mask)
-        elif self._mask == NOMASK or self._mask is None:
+        if self._mask == NOMASK or self._mask is None:
             return False
-        elif isinstance(self._mask, (np.bool_, bool)):
+        if isinstance(self._mask, (np.bool_, bool)):
             return self._mask
 
         return False
@@ -1671,36 +1653,34 @@ class NDArray(HasTraits):
                 # no labels
                 return
 
-            else:
-                if (self.data is not None) and (labels.shape[0] != self.shape[0]):
-                    # allow the fact that the labels may have been passed in a
-                    # transposed array
-                    if labels.ndim > 1 and (labels.shape[-1] == self.shape[0]):
-                        labels = labels.T
-                    else:
-                        raise ValueError(
-                            f"labels {labels.shape} and data {self.shape} "
-                            f"shape mismatch!"
-                        )
-
-                if np.any(self._labels):
-                    info_(
-                        f"{type(self).__name__} is already a labeled array.\nThe "
-                        f"explicitly provided labels will "
-                        f"be appended to the current labels"
+            if (self.data is not None) and (labels.shape[0] != self.shape[0]):
+                # allow the fact that the labels may have been passed in a
+                # transposed array
+                if labels.ndim > 1 and (labels.shape[-1] == self.shape[0]):
+                    labels = labels.T
+                else:
+                    raise ValueError(
+                        f"labels {labels.shape} and data {self.shape} shape mismatch!"
                     )
 
-                    labels = labels.squeeze()
-                    self._labels = self._labels.squeeze()
-                    if self._labels.ndim > 1:
-                        self._labels = self._labels.T
-                    self._labels = np.vstack((self._labels, labels)).T
+            if np.any(self._labels):
+                info_(
+                    f"{type(self).__name__} is already a labeled array.\nThe "
+                    f"explicitly provided labels will "
+                    f"be appended to the current labels"
+                )
 
+                labels = labels.squeeze()
+                self._labels = self._labels.squeeze()
+                if self._labels.ndim > 1:
+                    self._labels = self._labels.T
+                self._labels = np.vstack((self._labels, labels)).T
+
+            else:
+                if self._copy:
+                    self._labels = labels.copy()
                 else:
-                    if self._copy:
-                        self._labels = labels.copy()
-                    else:
-                        self._labels = labels
+                    self._labels = labels
 
     @property
     def limits(self):
@@ -1771,8 +1751,7 @@ class NDArray(HasTraits):
         """
         if self.is_masked and not self.is_empty:
             return self._umasked(self.data, self.mask)
-        else:
-            return self.data
+        return self.data
 
     @property
     def meta(self):
@@ -1795,8 +1774,7 @@ class NDArray(HasTraits):
         """
         if self._name:
             return self._name
-        else:
-            return self._id
+        return self._id
 
     @name.setter
     def name(self, name):
@@ -1815,8 +1793,7 @@ class NDArray(HasTraits):
 
         if not self.size:
             return 0
-        else:
-            return self.data.ndim
+        return self.data.ndim
 
     @property
     def real(self):
@@ -1845,8 +1822,7 @@ class NDArray(HasTraits):
     def roi_values(self):
         if self.units is None:
             return list(np.array(self.roi))
-        else:
-            return list(self._uarray(self.roi, self.units))
+        return list(self._uarray(self.roi, self.units))
 
     @property
     def shape(self):
@@ -1860,11 +1836,10 @@ class NDArray(HasTraits):
         if self.data is None and self.is_labeled:
             return (self.labels.shape[0],)
 
-        elif self.data is None:
+        if self.data is None:
             return ()
 
-        else:
-            return self.data.shape
+        return self.data.shape
 
     @property
     def size(self):
@@ -1878,10 +1853,9 @@ class NDArray(HasTraits):
         if self._data is None and self.is_labeled:
             return self.labels.shape[-1]
 
-        elif self._data is None:
+        if self._data is None:
             return None
-        else:
-            return self._data.size
+        return self._data.size
 
     def squeeze(self, *dims, inplace=False, return_axis=False, **kwargs):
         """
@@ -2003,8 +1977,7 @@ class NDArray(HasTraits):
         """
         if self._title:
             return self._title
-        else:
-            return "<untitled>"
+        return "<untitled>"
 
     @title.setter
     def title(self, title):
@@ -2076,7 +2049,7 @@ class NDArray(HasTraits):
             units = None
             if self.units is None:
                 return new
-            elif force:
+            if force:
                 new._units = None
                 if inplace:
                     self._units = None
@@ -2354,9 +2327,8 @@ class NDArray(HasTraits):
                 data = self._uarray(self.data, self.units)
             if self.size > 1:
                 return data
-            else:
-                return data.squeeze()[()]
-        elif self.is_labeled:
+            return data.squeeze()[()]
+        if self.is_labeled:
             return self._labels[()]
 
     @property

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,21 +6,19 @@
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
-from traitlets import (
-    All,
-    Bool,
-    Enum,
-    Float,
-    Integer,
-    List,
-    Set,
-    TraitError,
-    Tuple,
-    Unicode,
-    Union,
-    default,
-    observe,
-)
+from traitlets import All
+from traitlets import Bool
+from traitlets import Enum
+from traitlets import Float
+from traitlets import Integer
+from traitlets import List
+from traitlets import Set
+from traitlets import TraitError
+from traitlets import Tuple
+from traitlets import Unicode
+from traitlets import Union
+from traitlets import default
+from traitlets import observe
 
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
@@ -333,9 +330,7 @@ class PlotPreferences(MetaConfigurable):
         config=True, kind=""
     )
     mathtext_bf = Unicode("dejavusans:bold", help=r"""bold""").tag(config=True, kind="")
-    mathtext_sf = Unicode(r"sans\-serif", help=r"""""").tag(
-        config=True, kind=""
-    )  # noqa: W605
+    mathtext_sf = Unicode(r"sans\-serif", help=r"""""").tag(config=True, kind="")  # noqa: W605
     mathtext_fontset = Unicode(
         "dejavusans",
         help=r'''Should be "dejavusans" (default),
@@ -1018,8 +1013,7 @@ class PlotPreferences(MetaConfigurable):
         c = [f"C{i}" for i in range(10)]
         if color in c:
             return f"{colors[c.index(color)]}"
-        else:
-            return f"{color}"
+        return f"{color}"
 
     def _apply_style(self, _style):
         from spectrochempy.utils.file import pathclean

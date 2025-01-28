@@ -1,97 +1,81 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module mainly contains the definition of a Meta class object.
+Meta Class Module
+===============
 
-Such object is particularly used in `SpectrochemPy` by the `NDDataset` object
-to store metadata. Like a regular dictionary, the
-elements can be accessed by key, but also by attributes, *e.g.*
-`a = meta['key']` give the same results as `a = meta.key` .
+Provides metadata storage for SpectroChemPy objects through the Meta class.
+Metadata can be accessed both as dictionary items and as attributes.
+
+Features:
+- Dictionary-like access (meta['key']) and attribute access (meta.key)
+- Read-only protection option
+- JSON serialization support
+- Deep copy support
+
+Classes
+-------
+Meta
+    Dictionary-like metadata container with attribute access
 """
-
-# from traitlets import HasTraits, Dict, Bool, default
-
-# import sys
-import copy
-import json
-
-import numpy as np
 
 __all__ = []
 
+import copy
+import json
+from typing import Any
+from typing import Optional
+from typing import Union
 
-# ======================================================================================
-# Class Meta
-# ======================================================================================
-class Meta(object):
-    """
-    A dictionary to store metadata.
+import numpy as np
 
-    The metadata are accessible by item or by attributes, and
-    the dictionary can be made read-only if necessary.
+
+class Meta:
+    """Dictionary-like metadata container with attribute access.
+
+    Provides storage for metadata that can be accessed either through dictionary
+    keys or object attributes. Can be made read-only to prevent modifications.
 
     Parameters
     ----------
-    **data : keywords
-        The dictionary can be initialized with some keywords.
+    **data : Any
+        Initial metadata as keyword arguments
 
     Examples
     --------
-    First we initialize a metadata object
+    Create metadata and set values:
 
-    >>> m = scp.Meta()
+    >>> meta = Meta()
+    >>> meta.title = "My Dataset"
+    >>> meta["author"] = "Me"
+    >>> print(meta.title)
+    My Dataset
 
-    Then, metadata can be set by attribute (or by key like in a regular
-    dictionary), and further accessed by attribute (or key):
+    Make read-only:
 
-    >>> m.chaine = "a string"
-    >>> m["entier"] = 123456
-    >>> print(m.entier)
-    123456
-    >>> print(m.chaine)
-    a string
-
-    One can make the dictionary read-only
-
-    >>> m.readonly = True
-    >>> m.chaine = "a modified string"
-    Traceback (most recent call last):
-     ...
-    ValueError : 'the metadata `chaine` is read only'
-    >>> print(m.chaine)
-    a string
+    >>> meta.readonly = True
+    >>> meta.title = "Changed"  # Raises ValueError
     """
 
-    # ----------------------------------------------------------------------------------
-    # private attributes
-    # ----------------------------------------------------------------------------------
-    _data = {}  # Internal storage for metadata
+    _data: dict[str, Any] = {}
+    readonly: bool = False
+    parent: Any | None = None
+    name: str | None = None
 
-    # ----------------------------------------------------------------------------------
-    # public attributes
-    # ----------------------------------------------------------------------------------
-    readonly = False  # Flag to make the dictionary read-only
-    parent = None  # Reference to parent object
-    name = None  # Name of the metadata object
-
-    # ----------------------------------------------------------------------------------
-    # special methods
-    # ----------------------------------------------------------------------------------
-    def __init__(self, **data):
-        # Initialize the Meta object with optional parent and name attributes.
+    def __init__(self, **data: Any) -> None:
+        # Initialize metadata object
         self.parent = data.pop("parent", None)
         self.name = data.pop("name", None)
         self._data = data
 
-    def __dir__(self):
-        # List of attributes available for the Meta object.
+    def __dir__(self) -> list[str]:
+        # List available attributes
         return ["data", "readonly", "parent", "name"]
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
         # Set attribute value, ensuring readonly attributes are not modified.
         if key not in [
             "readonly",
@@ -108,7 +92,7 @@ class Meta(object):
         else:
             self.__dict__[key] = value  # Directly set the attribute to avoid recursion
 
-    def __getattr__(self, key):
+    def __getattr__(self, key: str) -> Any:
         # Get attribute value, raising AttributeError for certain keys.
         if key.startswith("_ipython") or key.startswith("_repr"):
             raise AttributeError
@@ -116,24 +100,24 @@ class Meta(object):
             return False
         return self[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         # Set item in the dictionary, respecting readonly flag.
         if key in self.__dir__() or key.startswith("_"):
-            raise KeyError("`{}` can not be used as a metadata key".format(key))
-        elif not self.readonly:
+            raise KeyError(f"`{key}` can not be used as a metadata key")
+        if not self.readonly:
             self._data.update({key: value})
         else:
-            raise ValueError("the metadata `{}` is read only".format(key))
+            raise ValueError(f"the metadata `{key}` is read only")
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         # Get item from the dictionary.
         return self._data.get(key, None)
 
-    def __len__(self):
+    def __len__(self) -> int:
         # Return the number of items in the dictionary.
         return len(self._data)
 
-    def __copy__(self):
+    def __copy__(self) -> "Meta":
         # Create a shallow copy of the Meta object.
         ret = self.__class__()
         ret.update(copy.deepcopy(self._data))
@@ -142,11 +126,11 @@ class Meta(object):
         ret.name = self.name
         return ret
 
-    def __deepcopy__(self, memo=None):
+    def __deepcopy__(self, memo=None) -> "Meta":
         # Create a deep copy of the Meta object.
         return self.__copy__()
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         # Check equality with another Meta object or dictionary.
         m1 = self._data
         if hasattr(other, "_data"):
@@ -164,29 +148,25 @@ class Meta(object):
                 eq &= np.all(v == m2.get(k, None))
         return eq
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any) -> bool:
         # Check inequality with another Meta object or dictionary.
         return not self.__eq__(other)
 
     def __iter__(self):
         # Iterate over the keys of the dictionary.
-        for item in sorted(self._data.keys()):
-            yield item
+        yield from sorted(self._data.keys())
 
-    def __str__(self):
+    def __str__(self) -> str:
         # Return string representation of the dictionary.
         return str(self._data)
 
-    def _repr_html_(self):
+    def _repr_html_(self) -> str:
         # Return HTML representation of the dictionary.
         s = json.dumps(self._data, sort_keys=True, indent=4)
         return s.replace("\n", "<br/>").replace(" ", "&nbsp;")
 
-    # ----------------------------------------------------------------------------------
-    # public methods
-    # ----------------------------------------------------------------------------------
     @staticmethod
-    def _implements(name=None):
+    def _implements(name: str | None = None) -> str | bool:
         """
         Check if the object implements the Meta class.
 
@@ -202,130 +182,94 @@ class Meta(object):
         """
         if name is None:
             return "Meta"
-        else:
-            return name == "Meta"
+        return name == "Meta"
 
-    def to_dict(self):
-        """
-        Transform a metadata dictionary to a regular one.
+    def to_dict(self) -> dict:
+        """Convert metadata to regular dictionary.
 
         Returns
         -------
         dict
-            A regular dictionary.
+            Dictionary containing the metadata
         """
         return self._data
 
-    def get(self, key, default=None):
-        """
-        Dictionary get method.
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get metadata value by key.
 
         Parameters
         ----------
         key : str
-            Key to retrieve.
-        default : any, optional
-            Default value if the key is not found.
+            Key to retrieve
+        default : Any, optional
+            Default value if key not found
 
         Returns
         -------
-        any
-            The value associated with the key, or the default value.
+        Any
+            Value for key or default
         """
         return self._data.get(key, default)
 
-    def update(self, d):
-        """
-        Feed a metadata dictionary with the content of another dictionary.
+    def update(self, d: Union[dict, "Meta"]) -> None:
+        """Update metadata from dictionary or Meta object.
 
         Parameters
         ----------
-        d : dict-like object
-            Any dict-like object can be used, such as `dict`, traits `Dict`, or
-            another `Meta` object.
+        d : Union[Dict, Meta]
+            Source of metadata to update from
         """
         if isinstance(d, Meta) or hasattr(d, "_data"):
             d = d.to_dict()
         if d:
             self._data.update(d)
 
-    def copy(self):
-        """
-        Return a disconnected copy of self.
+    def copy(self) -> "Meta":
+        """Create a shallow copy.
 
         Returns
         -------
         Meta
-            A disconnected meta object identical to the original object.
+            New Meta instance with copied data
         """
         return self.__copy__()
 
-    def keys(self):
-        """
-        A list of metadata contained in the object.
+    def keys(self) -> list[str]:
+        """Get sorted list of metadata keys.
 
         Returns
         -------
-        list
-            A sorted key's list.
-
-        Examples
-        --------
-        >>> m = scp.Meta()
-        >>> m.td = 10
-        >>> m.si = 20
-        >>> print(m.keys())
-        ['si', 'td']
-
-        Alternatively, it is possible to iterate directly on the Meta object
-
-        >>> m = scp.Meta()
-        >>> m.td = 10
-        >>> m.si = 20
-        >>> for key in m:
-        ...     print(key)
-        si
-        td
+        List[str]
+            Sorted list of metadata keys
         """
-        return [key for key in self]
+        return list(self)
 
-    def items(self):
-        """
-        A list of metadata items contained in the object.
+    def items(self) -> list[tuple[str, Any]]:
+        """Get sorted list of metadata items.
 
         Returns
         -------
-        list
-            An item list sorted by key.
-
-        Examples
-        --------
-        >>> m = scp.Meta()
-        >>> m.td = 10
-        >>> m.si = 20
-        >>> print(m.items())
-        [('si', 20), ('td', 10)]
+        List[tuple[str, Any]]
+            List of (key, value) tuples sorted by key
         """
         return [(key, self[key]) for key in self]
 
-    def swap(self, dim1, dim2, inplace=True):
-        """
-        Permute meta corresponding to distinct axes to reflect swapping on the
-        corresponding data array.
+    def swap(self, dim1: int, dim2: int, inplace: bool = True) -> Optional["Meta"]:
+        """Swap metadata between dimensions.
 
         Parameters
         ----------
         dim1 : int
-            First dimension to swap.
+            First dimension to swap
         dim2 : int
-            Second dimension to swap.
+            Second dimension to swap
         inplace : bool, optional
-            If True, perform the operation in place. Otherwise, return a new Meta object.
+            Whether to modify in place
 
         Returns
         -------
-        Meta or None
-            The new Meta object if inplace is False, otherwise None.
+        Optional[Meta]
+            New Meta object if not inplace
         """
         newmeta = self.copy()
 
@@ -346,24 +290,23 @@ class Meta(object):
 
         if not inplace:
             return newmeta
-        else:
-            self._data = newmeta._data
+        self._data = newmeta._data
+        return None
 
-    def permute(self, *dims, inplace=True):
-        """
-        Permute the metadata according to the given dimensions.
+    def permute(self, *dims: int, inplace: bool = True) -> Optional["Meta"]:
+        """Permute metadata dimensions.
 
         Parameters
         ----------
-        dims : int
-            Dimensions to permute.
+        *dims : int
+            Dimensions to permute to
         inplace : bool, optional
-            If True, perform the operation in place. Otherwise, return a new Meta object.
+            Whether to modify in place
 
         Returns
         -------
-        Meta or None
-            The new Meta object if inplace is False, otherwise None.
+        Optional[Meta]
+            New Meta object if not inplace
         """
         newmeta = self.copy()
 
@@ -385,17 +328,16 @@ class Meta(object):
 
         if not inplace:
             return newmeta
-        else:
-            self._data = newmeta._data
+        self._data = newmeta._data
+        return None
 
     @property
-    def data(self):
-        """
-        Property to access the internal data dictionary.
+    def data(self) -> dict[str, Any]:
+        """Access internal data dictionary.
 
         Returns
         -------
-        dict
-            The internal data dictionary.
+        Dict[str, Any]
+            The metadata dictionary
         """
         return self._data

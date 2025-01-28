@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -15,7 +14,8 @@ from zoneinfo import ZoneInfo
 if sys.version_info[1] < 12:
     from datetime import datetime
 else:
-    from datetime import datetime, UTC
+    from datetime import UTC
+    from datetime import datetime
 
 import numpy as np
 
@@ -45,8 +45,7 @@ def utcnow():
     """Return the current time in UTC with a timezone."""
     if sys.version_info[1] < 12:
         return datetime.utcnow().replace(microsecond=0, tzinfo=ZoneInfo("UTC"))
-    else:
-        return datetime.now(UTC).replace(microsecond=0)
+    return datetime.now(UTC).replace(microsecond=0)
 
 
 def from_dt64_units(units):
@@ -217,8 +216,7 @@ def strptime64(val, fmt=None, tz=None):
         date = _parse(val)
         if np.isnat(date):
             raise ValueError
-        else:
-            return date
+        return date
 
     try:
         date = _parse(val)

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 from os import environ
 from pathlib import Path
@@ -17,7 +16,6 @@ from spectrochempy.utils.file import check_filenames, get_filenames, pathclean
 
 
 def test_pathclean():
-
     # Using unix/mac way to write paths
     filename = pathclean("irdata/nh4y-activation.spg")
     assert filename.suffix == ".spg"
@@ -39,7 +37,6 @@ def test_pathclean():
 
 
 def test_get_filename():
-
     # should read in the default prefs.datadir (and for testing we fix the name to environ['TEST_FILE']
     f = get_filenames(
         filetypes=["OMNIC files (*.spg *.spa *.srs)", "SpectroChemPy files (*.scp)"]
@@ -99,7 +96,6 @@ def test_get_filename():
 
 
 def test_check_filename():
-
     filename = "irdata/nh4y-activation.spg"
 
     # return a dictionary (after opening a dialog)

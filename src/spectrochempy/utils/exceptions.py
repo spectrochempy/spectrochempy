@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,6 +6,7 @@
 """
 SpectroChemPy specific exceptions
 """
+
 import inspect
 from contextlib import contextmanager
 
@@ -298,7 +298,6 @@ class ProtocolError(SpectroChemPyError):
     """
 
     def __init__(self, protocol, available_protocols):
-
         self.message = (
             f"IO - The `{protocol}` protocol is unknown or not yet implemented.\n"
             f"It is expected to be one of {tuple(available_protocols)}"
@@ -313,7 +312,7 @@ class WrongFileFormatError(SpectroChemPyError):
 
 @contextmanager
 def ignored(*exc):
-    """
+    r"""
     A context manager for ignoring exceptions.
 
     This is equivalent to::
@@ -325,7 +324,7 @@ def ignored(*exc):
 
     Parameters
     ----------
-    \*exc : Exception
+    *exc : Exception
         One or several exceptions to ignore.
 
     Examples

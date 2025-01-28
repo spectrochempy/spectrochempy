@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# -*- coding: utf-8 -*-
+
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -16,6 +15,7 @@ This module implements the base abstract classes to define models and estimators
 """
 
 import logging
+from contextlib import suppress
 from copy import copy
 
 import numpy as np
@@ -24,7 +24,8 @@ import traitlets as tr
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
-from spectrochempy.utils.constants import MASKED, NOMASK
+from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.exceptions import NotTransformedError
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
@@ -43,7 +44,7 @@ class BaseConfigurable(MetaConfigurable):
 
     Parameters
     ----------
-    log_level : any of [``"INFO"``\ , ``"DEBUG"``\ , ``"WARNING"``\ , ``"ERROR"``\ ], optional, default: ``"WARNING"``
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``\ ], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
     """
@@ -138,8 +139,8 @@ class BaseConfigurable(MetaConfigurable):
         # Transform an array-like object to NDDataset
         # or a list of array-like to a list of NDQataset
         if d is None:
-            return
-        if isinstance(d, (tuple, list)):
+            return None
+        if isinstance(d, tuple | list):
             d = [self._make_dataset(item) for item in d]
         elif not isinstance(d, NDDataset):
             d = NDDataset(d, copy=True)
@@ -219,37 +220,28 @@ class BaseConfigurable(MetaConfigurable):
                     Dtemp[~self._X_mask] = D.data.flatten()
                     Dtemp[self._X_mask] = MASKED
                     D.data = Dtemp
-                    try:
+                    with suppress(TypeError):
                         D.coordset[D.dims[-1]] = self._X_coordset[D.dims[-1]]
                         D.coordset[D.dims[-2]] = self._X_coordset[D.dims[-2]]
-                    except TypeError:
-                        # probably no coordset
-                        pass
+
             elif axis == -1 or axis == 1:
                 if np.any(masked_columns):
                     Dtemp = np.ma.zeros((M, colsize))  # note np.ma, not np.
                     Dtemp[:, ~masked_columns] = D
                     Dtemp[:, masked_columns] = MASKED
                     D.data = Dtemp
-                    try:
+                    with suppress(TypeError):
                         D.coordset[D.dims[-1]] = self._X_coordset[D.dims[-1]]
-                    except TypeError:
-                        # probably no coordset
-                        pass
 
             # Put back masked rows in D
             # -------------------------
-            elif axis == -2 or axis == 0:
-                if np.any(masked_rows):
-                    Dtemp = np.ma.zeros((rowsize, N))
-                    Dtemp[~masked_rows] = D
-                    Dtemp[masked_rows] = MASKED
-                    D.data = Dtemp
-                    try:
-                        D.coordset[D.dims[-2]] = self._X_coordset[D.dims[-2]]
-                    except TypeError:
-                        # probably no coordset
-                        pass
+            elif (axis == -2 or axis == 0) and np.any(masked_rows):
+                Dtemp = np.ma.zeros((rowsize, N))
+                Dtemp[~masked_rows] = D
+                Dtemp[masked_rows] = MASKED
+                D.data = Dtemp
+                with suppress(TypeError):
+                    D.coordset[D.dims[-2]] = self._X_coordset[D.dims[-2]]
         elif D.ndim == 1:
             # we assume here that the only case it happens is for array as explained
             # variance so that we deal with masked rows
@@ -265,19 +257,14 @@ class BaseConfigurable(MetaConfigurable):
             # Put back masked columns in D
             # ----------------------------
             J, M, N = D.shape
-            if axis == -1 or axis == 2:
-                if np.any(masked_columns):
-                    Dtemp = np.ma.zeros((J, M, colsize))  # note np.ma, not np.
-                    Dtemp[..., ~masked_columns] = D
-                    Dtemp[..., masked_columns] = MASKED
-                    D.data = Dtemp
-                    try:
-                        D.coordset[D.dims[-1]] = self._X_coordset[D.dims[-1]]
-                    except TypeError:
-                        # probably no coordset
-                        pass
+            if (axis == -1 or axis == 2) and np.any(masked_columns):
+                Dtemp = np.ma.zeros((J, M, colsize))  # note np.ma, not np.
+                Dtemp[..., ~masked_columns] = D
+                Dtemp[..., masked_columns] = MASKED
+                D.data = Dtemp
+                with suppress(TypeError):
+                    D.coordset[D.dims[-1]] = self._X_coordset[D.dims[-1]]
 
-        # return the D array with restored masked data
         return D
 
     # ----------------------------------------------------------------------------------
@@ -314,8 +301,7 @@ class BaseConfigurable(MetaConfigurable):
         self._X_coordset = copy(X._coordset)
 
         # remove masked data and return modified dataset
-        X = self._remove_masked_data(X)
-        return X
+        return self._remove_masked_data(X)
 
     @property
     def _X_is_missing(self):

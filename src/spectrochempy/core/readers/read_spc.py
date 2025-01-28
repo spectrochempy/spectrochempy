@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -19,7 +18,9 @@ import numpy as np
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.readers.importer import Importer, _importer_method, _openfid
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils.docreps import _docstring
 
@@ -32,8 +33,8 @@ _docstring.delete_params("Importer.see_also", "read_spc")
 @_docstring.dedent
 def read_spc(*paths, **kwargs):
     # type: (*str, **kwargs) -> NDDataset
-    """
-    Read GRAMS/Thermo Scientific Galactic files or a list of files with extension :file:`.spc`\ .
+    r"""
+    Read GRAMS/Thermo Scientific Galactic files or a list of files with extension :file:`.spc`.
 
     Parameters
     ----------
@@ -75,7 +76,7 @@ def _read_spc(*args, **kwargs):
     content = fid.read()
 
     # extract version
-    _, Fversn = struct.unpack("cc".encode("utf8"), content[:2])
+    _, Fversn = struct.unpack(b"cc", content[:2])
 
     # check spc version
     if Fversn == b"\x4b":
@@ -177,9 +178,9 @@ def _read_spc(*args, **kwargs):
         )
 
     # extract bit flags
-    tsprec, tcgram, tmulti, trandm, tordrd, talabs, txyxys, txvals = [
-        x == "1" for x in reversed(list("{0:08b}".format(ord(Ftflgs))))
-    ]
+    tsprec, tcgram, tmulti, trandm, tordrd, talabs, txyxys, txvals = (
+        x == "1" for x in reversed(list(f"{ord(Ftflgs):08b}"))
+    )
 
     #  Flag      Value   Description
     # TSPREC     0x01h   Y data blocks are 16 bit integer (only if fexp is NOT 0x80h)
@@ -465,7 +466,14 @@ def _read_spc(*args, **kwargs):
             floatY = (2**iexp) * (integerY / (2**32))
 
     if Flogoff:  # read log data header
-        (Logsizd, Logsizm, Logtxto, Logbins, Logdsks, Logspar,) = struct.unpack(
+        (
+            Logsizd,
+            Logsizm,
+            Logtxto,
+            Logbins,
+            Logdsks,
+            Logspar,
+        ) = struct.unpack(
             logstc_format.encode("utf-8"), content[Flogoff : Flogoff + 21]
         )
 

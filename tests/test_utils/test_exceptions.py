@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# flake8: noqa
+# ruff: noqa
 
 import pathlib
 
@@ -16,7 +15,6 @@ from spectrochempy.utils.exceptions import ProtocolError, ignored
 
 
 def test_protocolerror():
-
     # wrong protocol
     with pytest.raises(ProtocolError):
         _ = scp.read("wodger", protocol="xxx")
@@ -32,6 +30,5 @@ def test_deprecated():
 
 
 def test_ignored():
-
     with ignored(FileNotFoundError):
         pathlib.Path("file-that-does-not-exist").unlink()

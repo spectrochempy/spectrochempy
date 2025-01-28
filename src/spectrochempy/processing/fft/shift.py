@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -212,15 +211,14 @@ def fsh(dataset, pts, **kwargs):
     --------
     ls, rs, cs, roll, fsh2
     """
-    from spectrochempy.processing.fft.fft import _fft, _ifft
+    from spectrochempy.processing.fft.fft import _fft
+    from spectrochempy.processing.fft.fft import _ifft
 
     s = float(dataset.shape[-1])
 
     data = _ifft(dataset)
     data = np.exp(-2.0j * pi * pts * np.arange(s) / s) * data
-    data = _fft(data)
-
-    return data
+    return _fft(data)
 
 
 @_units_agnostic_method
@@ -257,15 +255,14 @@ def fsh2(dataset, pts, **kwargs):
     ls, rs, cs, roll, fsh2
     """
 
-    from spectrochempy.processing.fft.fft import _fft_positive, _ifft_positive
+    from spectrochempy.processing.fft.fft import _fft_positive
+    from spectrochempy.processing.fft.fft import _ifft_positive
 
     s = float(dataset.shape[-1])
 
     data = _ifft_positive(dataset)
     data = np.exp(2.0j * pi * pts * np.arange(s) / s) * data
-    data = _fft_positive(data)
-
-    return data
+    return _fft_positive(data)
 
 
 @_units_agnostic_method

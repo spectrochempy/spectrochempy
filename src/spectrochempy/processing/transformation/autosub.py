@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -7,6 +6,7 @@
 """
 Plugin module to perform automatic subtraction of ref on a dataset.
 """
+
 __all__ = ["autosub"]
 
 __dataset_methods__ = __all__
@@ -20,7 +20,7 @@ from spectrochempy.utils.coordrange import trim_ranges
 def autosub(
     dataset, ref, *ranges, dim="x", method="vardiff", return_coefs=False, inplace=False
 ):
-    """
+    r"""
     Automatic subtraction of a reference to the dataset.
 
     The subtraction coefficient are adjusted to either
@@ -35,7 +35,7 @@ def autosub(
     ref : `NDDataset`
          1D reference data, with a size matching the axis to subtract.
          (axis parameter).  # TODO : optionally use title of axis.
-    \*ranges : pair(s) of values
+    *ranges : pair(s) of values
         Any number of pairs is allowed.
         Coord range(s) in which the variance is minimized.
     dim : `str` or `int` , optional, default='x'
@@ -76,10 +76,7 @@ def autosub(
 
     # output dataset
 
-    if not inplace:
-        new = dataset.copy()
-    else:
-        new = dataset
+    new = dataset.copy() if not inplace else dataset
 
     # we assume that the last dimension ('x' for transposed array) is always the dimension to which we want
     # to subtract.
@@ -92,8 +89,8 @@ def autosub(
 
     try:
         ref.to(dataset.units)
-    except Exception:
-        raise ValueError("Units of the dataset and reference are not compatible")
+    except Exception as e:
+        raise ValueError("Units of the dataset and reference are not compatible") from e
 
     swapped = False
     if axis != -1:
@@ -125,17 +122,16 @@ def autosub(
     X_r = np.concatenate((*s,), axis=-1)
     ref_r = np.concatenate((*r,), axis=-1).squeeze()
 
-    indices, _ = list(zip(*np.ndenumerate(X_r[..., 0])))  # .squeeze())))
+    indices, _ = list(zip(*np.ndenumerate(X_r[..., 0]), strict=False))  # .squeeze())))
 
     # two methods
     # @jit
     def _f(alpha, p):
         if method == "ssdiff":
             return np.sum((p - alpha * ref_r) ** 2)
-        elif method == "vardiff":
+        if method == "vardiff":
             return np.var(np.diff(p - alpha * ref_r))
-        else:
-            raise ValueError("Not implemented for method={}".format(method))
+        raise ValueError(f"Not implemented for method={method}")
 
     # @jit(cache=True)
     def _minim():
@@ -150,8 +146,7 @@ def autosub(
             res = minimize_scalar(_f, args=(args,), method="brent")
             x.append(res.x)
 
-        x = np.asarray(x)
-        return x
+        return np.asarray(x)
 
     x = _minim()
 
@@ -164,5 +159,4 @@ def autosub(
 
     if return_coefs:
         return new, x
-    else:
-        return new
+    return new

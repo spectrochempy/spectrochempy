@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -15,7 +14,8 @@ from numpy.random import RandomState
 from sklearn import decomposition
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
-from spectrochempy.utils.decorators import deprecated, signature_has_configurable_traits
+from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 
 __all__ = ["NMF"]
@@ -30,13 +30,13 @@ class NMF(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "NMF")
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Non-Negative Matrix Factorization (NMF).
 
-    Use `sklearn.decomposition.NMF`\ .
+    Use `sklearn.decomposition.NMF`.
 
     Find two non-negative matrices, *i.e.,* matrices with all non-negative elements,
-    (``W``\ , ``H``\ ) whose product approximates the non-negative matrix `X`.
+    (``W``, ``H``) whose product approximates the non-negative matrix `X`.
     This factorization can be used for example for dimensionality reduction,
     source separation or topic extraction.
 

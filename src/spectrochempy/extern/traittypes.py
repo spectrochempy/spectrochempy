@@ -7,12 +7,14 @@
 import inspect
 import warnings
 
-from traitlets import TraitError, TraitType, Undefined
+from traitlets import TraitError
+from traitlets import TraitType
+from traitlets import Undefined
 
 from spectrochempy.extern.traittypes_utils import Sentinel
 
 
-class _DelayedImportError(object):
+class _DelayedImportError:
     def __init__(self, package_name):
         self.package_name = package_name
 
@@ -138,8 +140,7 @@ class Array(SciType):
     def make_dynamic_default(self):
         if self.default_value is None or self.default_value is Undefined:
             return self.default_value
-        else:
-            return np.copy(self.default_value)
+        return np.copy(self.default_value)
 
 
 class PandasType(SciType):
@@ -190,8 +191,7 @@ class PandasType(SciType):
     def make_dynamic_default(self):
         if self.default_value is None or self.default_value is Undefined:
             return self.default_value
-        else:
-            return self.default_value.copy()
+        return self.default_value.copy()
 
 
 class DataFrame(PandasType):
@@ -276,8 +276,7 @@ class XarrayType(SciType):
     def make_dynamic_default(self):
         if self.default_value is None or self.default_value is Undefined:
             return self.default_value
-        else:
-            return self.default_value.copy()
+        return self.default_value.copy()
 
 
 class Dataset(XarrayType):

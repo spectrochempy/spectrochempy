@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -110,8 +109,7 @@ def _zf_pad(data, pad=0, mid=False, **kwargs):
     if mid:
         h = int(data.shape[-1] / 2.0)
         return np.concatenate((data[..., :h], z, data[..., h:]), axis=-1)
-    else:
-        return np.concatenate((data, z), axis=-1)
+    return np.concatenate((data, z), axis=-1)
 
 
 # ======================================================================================

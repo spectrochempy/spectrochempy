@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -17,7 +16,7 @@ def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
 
     x = Coord(np.linspace(6000.0, 1000.0, 4000), units="cm^-1", title="wavenumbers")
     s = []
-    for arg in zip(modelname, ampl, pos, width, ratio, asym):
+    for arg in zip(modelname, ampl, pos, width, ratio, asym, strict=False):
         model = getattr(_models, arg[0] + "model")()
         kwargs = {argname: arg[index + 1] for index, argname in enumerate(model.args)}
         s.append(model.f(x.data, **kwargs))

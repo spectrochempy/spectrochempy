@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -19,13 +18,13 @@ import numpy as np
 import osqp
 import traitlets as tr
 from matplotlib import pyplot as plt
-from scipy import optimize, sparse
+from scipy import optimize
+from scipy import sparse
 
-from spectrochempy.analysis._base._analysisbase import (
-    DecompositionAnalysis,
-    NotFittedError,
-)
-from spectrochempy.application import info_, warning_
+from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
+from spectrochempy.analysis._base._analysisbase import NotFittedError
+from spectrochempy.application import info_
+from spectrochempy.application import warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -34,21 +33,22 @@ from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.optional import import_optional_dependency
-from spectrochempy.utils.traits import CoordType, NDDatasetType
+from spectrochempy.utils.traits import CoordType
+from spectrochempy.utils.traits import NDDatasetType
 
 quadprog = import_optional_dependency("quadprog", errors="ignore")
 
 
 @tr.signature_has_traits
 class IrisKernel(tr.HasTraits):
-    """
+    r"""
     Define a kernel matrix of Fredholm equation of the 1st kind.
 
     This class define a kernel matrix as a `NDDataset` compatible
-    with the `X` input `NDDataset`\ .
+    with the `X` input `NDDataset`.
 
-    Pre-defined kernels can be chosen among: {``'langmuir'``\ , ``'ca'``\ ,
-    ``'reactant-first-order'``\ , ``'product-first-order'``\ , ``'diffusion'``\ },
+    Pre-defined kernels can be chosen among: {``'langmuir'``, ``'ca'``,
+    ``'reactant-first-order'``, ``'product-first-order'``, ``'diffusion'``\ },
     a custom kernel function - a 2-variable lambda
     function `K`\ ``(p, q)`` or a function returning a `~numpy.ndarray` can be passed.
     `p` and `q` contain the values of an external experimental variable and an internal
@@ -214,13 +214,13 @@ class IrisKernel(tr.HasTraits):
                     f"Kernel type `{K.lower()}` is not implemented"
                 )
 
-            elif K.lower() in _adsorption:
+            if K.lower() in _adsorption:
                 title = "coverage"
 
                 # change default metadata
                 if qdefault:
                     q.name = "reduced adsorption energy"
-                    q.title = "$\Delta_{ads}G^{0}/RT$"
+                    q.title = r"$\Delta_{ads}G^{0}/RT$"
 
                 if pdefault:
                     p.name = "relative pressure"
@@ -243,7 +243,7 @@ class IrisKernel(tr.HasTraits):
                 # change default metadata
                 if qdefault:
                     q.name = "Ln of rate constant"
-                    q.title = "$\Ln k$"
+                    q.title = r"$\Ln k$"
                 if pdefault:
                     # change default values and units
                     p.name = "time"
@@ -296,7 +296,7 @@ class IrisKernel(tr.HasTraits):
             raise ValueError("K must be a str or a callable")
 
         # weighting coefficients for the numerical quadrature of the Fredholm integral
-        w = np.zeros((q.size))
+        w = np.zeros(q.size)
         w[0] = 0.5 * (q.data[-1] - q.data[0]) / (q.size - 1)
         w[1:-1] = 2 * w[0]
         w[-1] = w[0]
@@ -319,10 +319,10 @@ class IRIS(DecompositionAnalysis):
     _docstring.delete_params("DecompositionAnalysis.see_also", "IRIS")
 
     __doc__ = _docstring.dedent(
-        """
+        r"""
     Integral inversion solver for spectroscopic data (IRIS).
 
-    `IRIS`, a model developed by :cite:t:`stelmachowski:2013`\ , solves integral
+    `IRIS`, a model developed by :cite:t:`stelmachowski:2013`, solves integral
     equation of the first kind of 1 or 2 dimensions, *i.e.,*
     finds a distribution function :math:`f(p)` or :math:`f(c,p)` of contributions to
     univariate data :math:`a(p)` or multivariate :math:`a(c, p)` data evolving with an
@@ -340,15 +340,15 @@ class IRIS(DecompositionAnalysis):
     Regularization is triggered when `reg_par` is set to an array of two or three
     values.
 
-    If `reg_par` has two values [``min``\ , ``max``\ ], the optimum regularization
-    parameter is searched between :math:`10^{min}` and :math:`10^{max}`\ .
+    If `reg_par` has two values [``min``, ``max``\ ], the optimum regularization
+    parameter is searched between :math:`10^{min}` and :math:`10^{max}`.
     Automatic search of the regularization is made using the Cultrera_Callegaro
     algorithm (:cite:p:cultrera:2020) which involves the Menger curvature of a
     circumcircle and the golden section search method.
 
-    If three values are given ([``min``\ , ``max``\ , ``num``\ ]), then the inversion
+    If three values are given ([``min``, ``max``, ``num``\ ]), then the inversion
     will be made for ``num`` values evenly spaced on a log scale between
-    :math:`10^{min}` and :math:`10^{max}`\ .
+    :math:`10^{min}` and :math:`10^{max}`.
 
     Parameters
     ----------
@@ -398,8 +398,8 @@ class IRIS(DecompositionAnalysis):
         maxlen=3,
         default_value=None,
         allow_none=True,
-        help="Regularization parameter (two values [ ``min``\ , ``max``\ ] "
-        "or three values [ ``start``\ , ``stop``\ , ``num``\ ]. "
+        help=r"Regularization parameter (two values [ ``min``, ``max``\ ] "
+        r"or three values [ ``start``, ``stop``, ``num``\ ]. "
         "If `reg_par` is None, no :term:`regularization` is applied.",
     ).tag(config=True)
 
@@ -503,8 +503,8 @@ class IRIS(DecompositionAnalysis):
         M, N, W = K.shape[-1], X.shape[-1], X.shape[0]  # noqa: F475
         L = len(lambdas) if not self._search_reg else 4
         f = np.zeros((L, M, N))
-        RSS = np.zeros((L))
-        SM = np.zeros((L))
+        RSS = np.zeros(L)
+        SM = np.zeros(L)
 
         # Define S matrix (sharpness), see function _Smat() below
         info_("Build S matrix (sharpness)")
@@ -781,7 +781,7 @@ class IRIS(DecompositionAnalysis):
         return self._outfit[2]
 
     def inverse_transform(self):  # override the decomposition method
-        """
+        r"""
         Transform data back to the original space.
 
         The following matrix operation is performed : :math:`\hat{X} = K.f[i]`
@@ -801,7 +801,7 @@ class IRIS(DecompositionAnalysis):
         f = self.f
 
         if len(lambdas) == 1:  # no regularization or single lambda
-            X_hat = NDDataset(np.zeros((X.shape)), title=X.title, units=X.units)
+            X_hat = NDDataset(np.zeros(X.shape), title=X.title, units=X.units)
             X_hat.set_coordset(y=X.y, x=X.x)
             X_hat.data = np.dot(K.data, f.data.squeeze(axis=0))
         else:
@@ -818,12 +818,12 @@ class IRIS(DecompositionAnalysis):
         return X_hat
 
     def plotlcurve(self, scale="ll", title="L curve"):
-        """
-        Plot the ``L-Curve``\ .
+        r"""
+        Plot the ``L-Curve``.
 
         Parameters
         ----------
-        scale : `str`\ , optional, default: ``'ll'``
+        scale : `str`, optional, default: ``'ll'``
             String of 2 letters among ``'l'``\ (log) or ``'n'``\ (non-log) indicating
             whether the ``y`` and ``x`` axes should be log scales.
         title : `str`, optional, default: ``'L-curve'``
@@ -851,12 +851,12 @@ class IRIS(DecompositionAnalysis):
 
     @_docstring.dedent
     def plotmerit(self, index=None, **kwargs):
-        """
+        r"""
         Plot the input dataset, reconstructed dataset and residuals.
 
         Parameters
         ----------
-        index : `int`\ , `list` or `tuple` of `int`\ , optional, default: `None`
+        index : `int`, `list` or `tuple` of `int`, optional, default: `None`
             Index(es) of the inversions (*i.e.,* of the lambda values) to consider.
             If `None` plots for all indices.
         %(kwargs)s
@@ -886,7 +886,9 @@ class IRIS(DecompositionAnalysis):
 
             ax = super().plotmerit(X, X_hat_, **kwargs)
 
-            ax.set_title(f"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]:.2e}")
+            ax.set_title(
+                rf"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]:.2e}"
+            )
             axeslist.append(ax)
 
         return axeslist
@@ -920,7 +922,7 @@ class IRIS(DecompositionAnalysis):
         for i in index:
             ax = self.f[i].plot(method="map", **kwargs)
             ax.set_title(
-                f"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]:.2e}"
+                rf"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]:.2e}"
             )
             axeslist.append(ax)
         return axeslist

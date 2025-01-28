@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -71,10 +70,10 @@ def _integrate_method(method):
 
 @_integrate_method
 def trapezoid(dataset, **kwargs):
-    """
+    r"""
     Integrate using the composite trapezoidal rule.
 
-    Wrapper of `scpy.integrate.trapezoid`\ .
+    Wrapper of `scpy.integrate.trapezoid`.
 
     Performs the integration along the last or given dimension.
 
@@ -124,7 +123,7 @@ trapz.__doc__ = f"""
 
 @_integrate_method
 def simpson(dataset, *args, **kwargs):
-    """
+    r"""
     Integrate using the composite Simpson's rule.
 
     Wrapper of `scpy.integrate.simpson`.
@@ -153,7 +152,7 @@ def simpson(dataset, *args, **kwargs):
         Dimension along which to integrate.
         If an integer is provided, it is equivalent to the `numpy.axis` parameter
         for `~numpy.ndarray`\ s.
-    even : any of [``'avg'``\ , ``'first'``\ , ``'last'``\ }, optional, default: ``'avg'``
+    even : any of [``'avg'``, ``'first'``, ``'last'``\ }, optional, default: ``'avg'``
 
         * ``'avg'`` : Average two results: 1) use the first N-2 intervals with
           a trapezoidal rule on the last interval and 2) use the last

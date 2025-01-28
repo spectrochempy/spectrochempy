@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -100,7 +99,7 @@ scp.set_loglevel(scp.INFO)
 
 # %% [markdown]
 # We see that the API then delivers the INFO message:
-# ``"changed default log_level to INFO"``\ .
+# ``"changed default log_level to INFO"``.
 
 # %% [markdown]
 # And  finally, the next instructions reset the loglevel to ``"WARNING"``

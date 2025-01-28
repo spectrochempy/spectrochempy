@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -105,7 +104,7 @@ class GeneralPreferences(MetaConfigurable):
         pscp.mkdir(exist_ok=True)
 
         if pscp.is_file():
-            raise IOError("Intended Projects directory is actually a file.")
+            raise OSError("Intended Projects directory is actually a file.")
 
         return pscp
 

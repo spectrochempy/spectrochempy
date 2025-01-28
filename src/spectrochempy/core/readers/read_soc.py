@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ======================================================================================
 # Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
@@ -12,7 +11,8 @@ __all__ = ["read_soc", "read_ddr", "read_sdr", "read_hdr"]
 __dataset_methods__ = __all__
 
 
-from spectrochempy.core.readers.importer import Importer, _importer_method
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.read_omnic import _read_spa
 from spectrochempy.utils.docreps import _docstring
 
@@ -24,8 +24,8 @@ _docstring.delete_params("Importer.see_also", "read_soc")
 
 @_docstring.dedent
 def read_soc(*paths, **kwargs):
-    """
-    Read a Surface Optics Corps. file or a list of files with extension :file:`.ddr`\ , :file:`.hdr` or :file:`.sdr`\ .
+    r"""
+    Read a Surface Optics Corps. file or a list of files with extension :file:`.ddr`, :file:`.hdr` or :file:`.sdr`.
 
     Parameters
     ----------
@@ -56,8 +56,8 @@ def read_soc(*paths, **kwargs):
 
 @_docstring.dedent
 def read_ddr(*paths, **kwargs):
-    """
-    Open a Surface Optics Corps. file or a list of files with extension :file:`.ddr`\ .
+    r"""
+    Open a Surface Optics Corps. file or a list of files with extension :file:`.ddr`.
 
     Parameters
     ----------
@@ -88,8 +88,8 @@ def read_ddr(*paths, **kwargs):
 
 @_docstring.dedent
 def read_hdr(*paths, **kwargs):
-    """
-    Open a Surface Optics Corps. file or a list of files with extension :file:`.hdr`\ .
+    r"""
+    Open a Surface Optics Corps. file or a list of files with extension :file:`.hdr`.
 
     Parameters
     ----------
@@ -120,8 +120,8 @@ def read_hdr(*paths, **kwargs):
 
 @_docstring.dedent
 def read_sdr(*paths, **kwargs):
-    """
-    Open a Surface Optics Corps. file or a list of files with extension :file:`.sdr`\ .
+    r"""
+    Open a Surface Optics Corps. file or a list of files with extension :file:`.sdr`.
 
     Parameters
     ----------

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -75,9 +74,7 @@ X.y = (X.y - X[0].y).to("minute")
 X
 
 # %%
-subplot = (
-    X.plot()
-)  # assignment avoids the display of the object address (<matplotlib.axes._subplots.AxesSubplot ...)
+subplot = X.plot()  # assignment avoids the display of the object address (<matplotlib.axes._subplots.AxesSubplot ...)
 
 # %% [markdown]
 # ### Slicing with indexes
