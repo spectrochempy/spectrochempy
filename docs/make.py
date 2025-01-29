@@ -21,21 +21,26 @@ import shutil
 import sys
 import warnings
 import zipfile
+from contextlib import suppress
 from os import environ
 from pathlib import Path
 
 from sphinx.application import Sphinx
 
-try:
-    from sphinx.deprecation import RemovedInSphinx70Warning
+with suppress(Exception):
+    from sphinx.deprecation import RemovedInSphinx80Warning
 
-    warnings.filterwarnings(action="ignore", category=RemovedInSphinx70Warning)
+    warnings.filterwarnings(action="ignore", category=RemovedInSphinx80Warning)
 
-except ImportError:
+with suppress(Exception):
+    from sphinx.deprecation import RemovedInSphinx90Warning
+
+    warnings.filterwarnings(action="ignore", category=RemovedInSphinx90Warning)
+
+with suppress(Exception):
     from sphinx.deprecation import RemovedInSphinx10Warning
 
     warnings.filterwarnings(action="ignore", category=RemovedInSphinx10Warning)
-
 
 from apigen import Apigen
 
