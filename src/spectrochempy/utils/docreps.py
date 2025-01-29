@@ -99,8 +99,7 @@ def getdocfrom(origin):
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            response = func(*args, **kwargs)
-            return response
+            return func(*args, **kwargs)
 
         return wrapper
 
@@ -131,7 +130,7 @@ def htmldoc(text):
     for i in range(len(html)):
         html[i] = html[i].strip()
         if i == 0:
-            html[i] = "<h3>%s</h3>" % html[i]
+            html[i] = f"<h3>{html[i]}</h3>"
         html[i] = html[i].replace("Parameters", "<h4>Parameters</h4>")
         html[i] = html[i].replace("Properties", "<h4>Properties</h4>")
         html[i] = html[i].replace("Methods", "<h4>Methods</h4>")
@@ -140,6 +139,4 @@ def htmldoc(text):
                 html[i] = html[i] + "<br/>"
             if not html[i].strip().startswith("<"):
                 html[i] = "&nbsp;&nbsp;&nbsp;&nbsp;" + html[i]
-    html = "".join(html)
-
-    return html
+    return "".join(html)

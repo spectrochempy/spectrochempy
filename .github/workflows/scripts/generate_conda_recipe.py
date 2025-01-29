@@ -12,7 +12,8 @@ template_dir = repo_path / ".ci" / "templates"
 # Load template
 meta_template_file = template_dir / "meta.tmpl"
 meta_template = Template(
-    meta_template_file.read_text("utf-8"), keep_trailing_newline=True
+    meta_template_file.read_text("utf-8"),
+    keep_trailing_newline=True,
 )
 
 # Load pyproject.toml

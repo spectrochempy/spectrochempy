@@ -32,7 +32,7 @@ class ProcessingConfigurable(BaseConfigurable):
     Parameters
     ----------
     %(BaseConfigurable.parameters.log_level)s
-    """
+    """,
     )
 
     # Get doc sections for reuse in subclass

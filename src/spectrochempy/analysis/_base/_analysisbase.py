@@ -51,7 +51,7 @@ class AnalysisConfigurable(BaseConfigurable):
 
         When `warm_start` is `True`, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to `fit`.
-    """
+    """,
     )
 
     # Get doc sections for reuse in subclass
@@ -344,7 +344,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         # Slice according to n_components
         n_components = kwargs.pop(
-            "n_components", kwargs.pop("n_pc", self._n_components)
+            "n_components",
+            kwargs.pop("n_pc", self._n_components),
         )
         if n_components > self._n_components:
             warnings.warn(
@@ -401,7 +402,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         # get optional n_components
         n_components = kwargs.pop(
-            "n_components", kwargs.pop("n_pc", self._n_components)
+            "n_components",
+            kwargs.pop("n_pc", self._n_components),
         )
         if n_components > self._n_components:
             warnings.warn(
@@ -468,7 +470,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     def reconstruct(self, X_transform=None, **kwargs):
         return deprecated(replace="inverse_transform")(self.inverse_transform)(
-            X_transform, **kwargs
+            X_transform,
+            **kwargs,
         )
 
     reconstruct.__doc__ = (
@@ -572,7 +575,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         elif X_hat is None:
             raise ValueError(
                 "If X is provided, An externally computed X_hat dataset "
-                "must be also provided."
+                "must be also provided.",
             )
 
         if X._squeeze_ndim == 1:
@@ -598,7 +601,10 @@ class DecompositionAnalysis(AnalysisConfigurable):
         mad = ma * offset / 100 + ma / 10
         _ = X.plot(color=colX, **kwargs)  # - X.min()
         _ = (X_hat - mao).plot(  # - X_hat.min()
-            clear=False, ls="dashed", cmap=None, color=colXhat
+            clear=False,
+            ls="dashed",
+            cmap=None,
+            color=colXhat,
         )
         ax = (res - mad).plot(clear=False, cmap=None, color=colRes)  # -res.min()
         ax.autoscale(enable=True, axis="y")
@@ -731,7 +737,10 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         return self._score(X, Y, sample_weight)
 
     @_wrap_ndarray_output_to_nddataset(
-        units=None, title=None, meta_from=("_X", "_Y"), typex="components"
+        units=None,
+        title=None,
+        meta_from=("_X", "_Y"),
+        typex="components",
     )
     @_docstring.dedent
     def transform(self, X=None, Y=None, both=False, **kwargs):
@@ -782,7 +791,11 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     @_wrap_ndarray_output_to_nddataset(meta_from=("_X", "_Y"))
     @_docstring.dedent
     def inverse_transform(
-        self, X_transform=None, Y_transform=None, both=False, **kwargs
+        self,
+        X_transform=None,
+        Y_transform=None,
+        both=False,
+        **kwargs,
     ):
         r"""
         Transform data back to its original space.
@@ -988,7 +1001,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         elif Y_hat is None:
             raise ValueError(
                 "If Y is provided, An externally computed Y_hat dataset "
-                "must be also provided."
+                "must be also provided.",
             )
 
         if Y._squeeze_ndim == 1:
@@ -1200,7 +1213,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
             if X.coordset is None:
                 raise ValueError(
                     "The passed argument must have a x coordinates,"
-                    "or X input and Y target must be passed separately"
+                    "or X input and Y target must be passed separately",
                 )
             self._X = _make2D(X.coord(0))
             self._Y = X

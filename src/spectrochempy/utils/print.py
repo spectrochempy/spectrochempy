@@ -65,29 +65,28 @@ def colored(text, color):
 def colored_output(out):
     regex = r"^(\W*(DIMENSION|DATA).*)$"
     subst = TBold(r"\1")
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(\W{10}\(_\d{1}\))"
     subst = TBold(r"\1")
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\0{3}([\w\W]*?)\0{3}"
     subst = TBlack(r"\1")
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"
     subst = TGreen(r"\1") + r"\2"
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\0{2}([\w\W]*?)\0{2}"
     subst = TCyan(r"\1")
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\0{1}([\w\W]*?)\0{1}"
     subst = TBlue(r"\1")
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
 
-    return out
+    return re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
 
 #
@@ -117,45 +116,43 @@ def convert_to_html(obj):
     # noinspection PyPep8
     def subst(match):
         return "<div>{}</div>".format(
-            match.group(0).replace("\n", "<br/>").replace("\0", "")
+            match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
 
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"  # r"^(\W*\w+\W?\w+)(:.*$)"
     subst = r"<font color='green'>\1</font> \2"
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(.*(DIMENSION|DATA).*)$"
     subst = r"<strong>\1</strong>"
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(\W{10}\(_\d{1}\)).*$"
     subst = r"<strong>\1</strong>"
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\0{2}[\w\W]*?\0{2}"
 
-    # noinspection PyPep8
     def subst(match):
         return "<div><font color='darkcyan'>{}</font></div>".format(
-            match.group(0).replace("\n", "<br/>").replace("\0", "")
+            match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
 
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\0{1}[\w\W]*?\0{1}"
 
-    # noinspection PyPep8
     def subst(match):
         return "<div><font color='blue'>{}</font></div>".format(
-            match.group(0).replace("\n", "<br/>").replace("\0", "")
+            match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
 
-    out = re.sub(regex, subst, out, 0, re.MULTILINE)
+    out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\.{3}\s+\n"
-    out = re.sub(regex, "", out, 0, re.MULTILINE)
+    out = re.sub(regex, "", out, count=0, flags=re.MULTILINE)
 
     html = "<table style='background:transparent'>\n"
     for line in out.splitlines():
@@ -163,7 +160,9 @@ def convert_to_html(obj):
             # keep only first match
             parts = line.split(":")
             html += tr.format(
-                parts[0], ":".join(parts[1:]), "border:.5px solid lightgray; "
+                parts[0],
+                ":".join(parts[1:]),
+                "border:.5px solid lightgray; ",
             )
         elif "<strong>" in line:
             html += tr.format(line, "<hr/>", "padding-top:10px;")
@@ -294,7 +293,6 @@ def _recursive_printoption(result, mask, printopt):
             _recursive_printoption(curdata, curmask, printopt)
     else:
         np.copyto(result, printopt, where=mask)
-    return
 
 
 def insert_masked_print(ds, mask_string="--"):
@@ -393,7 +391,11 @@ def numpyprintoptions(
 
         elif isinstance(x, TYPE_COMPLEX):
             fmt = "{:{lspace}.0{prec}g}{:+{lc}.0{prec}g}j".format(
-                x.real, x.imag, prec=precision - 1, lspace=precision + spc, lc=precision
+                x.real,
+                x.imag,
+                prec=precision - 1,
+                lspace=precision + spc,
+                lc=precision,
             )
 
         elif isinstance(x, TYPE_INTEGER):

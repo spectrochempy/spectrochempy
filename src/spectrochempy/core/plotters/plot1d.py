@@ -201,11 +201,10 @@ def plot_multiple(
     def _valid(x, desc):
         if is_sequence(x) and len(x) != len(datasets):
             raise ValueError(
-                f"list of {desc} must be of same length as the datasets list"
+                f"list of {desc} must be of same length as the datasets list",
             )
         if not is_sequence(x) and x != "AUTO":
-            x = [x] * len(datasets)
-            return x
+            return [x] * len(datasets)
 
         return x
 
@@ -219,7 +218,7 @@ def plot_multiple(
                 "several plots with "
                 "the `clear=False` parameter as a work "
                 "around "
-                "solution"
+                "solution",
             )
 
     # do not save during this plots, nor apply any commands
@@ -231,7 +230,8 @@ def plot_multiple(
     kwargs["commands"] = []
     clear = kwargs.pop("clear", True)
     legend = kwargs.pop(
-        "legend", None
+        "legend",
+        None,
     )  # remove 'legend' from kwargs before calling plot
     # else it will generate a conflict
 
@@ -417,12 +417,11 @@ def plot_1D(dataset, method=None, **kwargs):
     if x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
         # discrete_data = False
-        if not np.any(xdata):
-            if x.is_labeled:
-                # discrete_data = True
-                # take into account the fact that sometimes axis
-                # have just labels
-                xdata = range(1, len(x.labels) + 1)
+        if not np.any(xdata) and x.is_labeled:
+            # discrete_data = True
+            # take into account the fact that sometimes axis
+            # have just labels
+            xdata = range(1, len(x.labels) + 1)
     else:
         xdata = range(xsize)
 
@@ -482,16 +481,17 @@ def plot_1D(dataset, method=None, **kwargs):
 
     if show_complex and pen:
         # add the imaginary component for pen only plot
-        if new.is_quaternion:
-            zimagdata = new.RI.masked_data
-        else:
-            zimagdata = new.imag.masked_data
+        zimagdata = new.RI.masked_data if new.is_quaternion else new.imag.masked_data
         ax.plot(xdata, zimagdata.T, ls="--")
 
     if kwargs.get("plot_model", False):
         modeldata = new.modeldata  # TODO: what's about mask?
         ax.plot(
-            xdata, modeldata.T, ls=":", lw="2", label=label
+            xdata,
+            modeldata.T,
+            ls=":",
+            lw="2",
+            label=label,
         )  # TODO: improve this!!!
 
     # line attributes

@@ -96,7 +96,7 @@ def _states_fft(data, tppi=False):
 
     # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(
-        data
+        data,
     ).T  # x and y are exchanged due to swapping of dims
     w, y, x, z = wt.T, yt.T, xt.T, zt.T
 
@@ -111,9 +111,7 @@ def _states_fft(data, tppi=False):
     fi = np.fft.fftshift(np.fft.fft(si), -1)
 
     # rebuild the quaternion
-    data = as_quaternion(fr, fi)
-
-    return data
+    return as_quaternion(fr, fi)
 
 
 def _echoanti_fft(data):
@@ -121,7 +119,7 @@ def _echoanti_fft(data):
 
     # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(
-        data
+        data,
     ).T  # x and y are exchanged due to swapping of dims
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
 
@@ -129,9 +127,7 @@ def _echoanti_fft(data):
     s = (x + z) - 1j * (x - z)
     fc = np.fft.fftshift(np.fft.fft(c / 2.0), -1)
     fs = np.fft.fftshift(np.fft.fft(s / 2.0), -1)
-    data = as_quaternion(fc, fs)
-
-    return data
+    return as_quaternion(fc, fs)
 
 
 def _tppi_fft(data):
@@ -139,7 +135,7 @@ def _tppi_fft(data):
 
     # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(
-        data
+        data,
     ).T  # x and y are exchanged due to swapping of dims
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
 
@@ -153,17 +149,13 @@ def _tppi_fft(data):
     fy = np.fft.fftshift(np.fft.fft(sy), -1)
 
     # rebuild the quaternion
-    data = as_quaternion(fx, fy)
-
-    return data
+    return as_quaternion(fx, fy)
 
 
 def _qf_fft(data):
     # FFT transform according to QF encoding
 
-    data = np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
-
-    return data
+    return np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
 
 
 def _interferogram_fft(data):
@@ -176,6 +168,7 @@ def _interferogram_fft(data):
             return np.argmax(data, -1)
         if mode == "abs":
             return int(np.argmax(np.abs(data), -1))
+        return None
 
     zpd = _get_zpd(data, mode="abs")
     size = data.shape[-1]
@@ -309,10 +302,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
     # output dataset inplace or not
     inplace = kwargs.pop("inplace", False)
-    if not inplace:  # default
-        new = dataset.copy()  # copy to be sure not to modify this dataset
-    else:
-        new = dataset
+    new = dataset.copy() if not inplace else dataset
 
     # The last dimension is always the dimension on which we apply the fourier transform.
     # If needed, we swap the dimensions to be sure to be in this situation
@@ -364,7 +354,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     if not x.linear:
         error_(
             "fft or ifft processing only support linear coordinates.\n"
-            "Processing was thus cancelled"
+            "Processing was thus cancelled",
         )
 
         error = True
@@ -457,7 +447,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         else:
             raise NotImplementedError(
                 f"{encoding} not yet implemented. We recommend you to put an issue on "
-                f"Github, so we will not forget to work on this!."
+                f"Github, so we will not forget to work on this!.",
             )
 
         # We need here to create a new dataset with new shape and axis
@@ -488,7 +478,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             bf1 = sfo1
             dw = x.spacing
             if isinstance(dw, list):
-                print()
+                pass  # print()
             sw = 1 / 2 / dw
             sf = -sw / 2
             size = size // 2

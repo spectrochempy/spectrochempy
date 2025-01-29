@@ -87,28 +87,26 @@ class _from_numpy_method:
                     # Probably a call from the API !
                     # We return a NDDataset class constructor
                     klass = NDDataset
+            elif instance is not None:
+                # the call is made as an attributes of the instance
+                # instance.method(...)
+                new = instance.copy()
+                args.insert(0, new)
             else:
-                # determine the input object
-                if instance is not None:
-                    # the call is made as an attributes of the instance
-                    # instance.method(...)
-                    new = instance.copy()
-                    args.insert(0, new)
-                else:
-                    dataset = cpy.copy(args[0])
-                    try:
-                        # call as a classmethod
-                        # class.method(dataset, ...)
-                        new = cls(dataset)
-                    except TypeError:
-                        if issubclass(cls, NDMath):
-                            # Probably a call from the API !
-                            # scp.method(dataset, ...)
-                            new = dataset
-                            if not isinstance(new, NDArray):
-                                # we have only an array-like dataset
-                                # make a NDDataset object from it
-                                new = NDDataset(dataset)
+                dataset = cpy.copy(args[0])
+                try:
+                    # call as a classmethod
+                    # class.method(dataset, ...)
+                    new = cls(dataset)
+                except TypeError:
+                    if issubclass(cls, NDMath):
+                        # Probably a call from the API !
+                        # scp.method(dataset, ...)
+                        new = dataset
+                        if not isinstance(new, NDArray):
+                            # we have only an array-like dataset
+                            # make a NDDataset object from it
+                            new = NDDataset(dataset)
 
             argpos = []
 
@@ -120,7 +118,7 @@ class _from_numpy_method:
                 ]:  # or (par.name == 'dataset' and instance is not None):
                     continue
                 argpos.append(
-                    args.pop(0) if args else kwargs.pop(par.name, par.default)
+                    args.pop(0) if args else kwargs.pop(par.name, par.default),
                 )
 
             # in principle args should be void at this point
@@ -208,9 +206,8 @@ def _reduce_dims(cls, dim, keepdims=False):
                     coordset.coords[idx].data = [
                         0,
                     ]
-            else:
-                if not keepdims:
-                    dims.remove(dim)
+            elif not keepdims:
+                dims.remove(dim)
         else:
             # dim being None we eventually remove the coordset
             cls.set_coordset(None)
@@ -575,7 +572,8 @@ class NDMath:
 
         if not cls.has_complex_dims:
             data = np.ma.fabs(
-                dataset, dtype=dtype
+                dataset,
+                dtype=dtype,
             )  # not a complex, return fabs should be faster
 
         elif not cls.is_quaternion:
@@ -1199,7 +1197,7 @@ class NDMath:
         if not cls._implements("NDDataset") or cls.coordset is None:
             raise Exception(
                 "Method `coordmax` apply only on NDDataset and if it has defined "
-                "coordinates"
+                "coordinates",
             )
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1233,7 +1231,7 @@ class NDMath:
         if not cls._implements("NDDataset") or cls.coordset is None:
             raise Exception(
                 "Method `coordmin` apply only on NDDataset and if it has defined "
-                "coordinates"
+                "coordinates",
             )
 
         axis, dim = cls.get_axis(dim, allows_none=True)
@@ -1590,7 +1588,13 @@ class NDMath:
 
     @_from_numpy_method
     def fromfunction(
-        cls, function, shape=None, dtype=float, units=None, coordset=None, **kwargs
+        cls,
+        function,
+        shape=None,
+        dtype=float,
+        units=None,
+        coordset=None,
+        **kwargs,
     ):
         """
         Construct a nddataset by executing a function over each coordinate.
@@ -1923,7 +1927,14 @@ class NDMath:
 
     @_from_numpy_method
     def linspace(
-        cls, start, stop, num=50, endpoint=True, retstep=False, dtype=None, **kwargs
+        cls,
+        start,
+        stop,
+        num=50,
+        endpoint=True,
+        retstep=False,
+        dtype=None,
+        **kwargs,
     ):
         """
         Return evenly spaced numbers over a specified interval.
@@ -1971,7 +1982,14 @@ class NDMath:
 
     @_from_numpy_method
     def logspace(
-        cls, start, stop, num=50, endpoint=True, base=10.0, dtype=None, **kwargs
+        cls,
+        start,
+        stop,
+        num=50,
+        endpoint=True,
+        base=10.0,
+        dtype=None,
+        **kwargs,
     ):
         """
         Return numbers spaced evenly on a log scale.
@@ -2779,12 +2797,15 @@ class NDMath:
                 fname = "add"
                 inputs[0] = np.negative(inputs[0])
             else:
-                raise NotImplementedError()
+                raise NotImplementedError
 
         return fname, inputs, objtypes, returntype, is_masked, is_quaternion
 
     def _op(
-        self, f: Callable, inputs: Sequence[ArrayLike], isufunc: bool = False
+        self,
+        f: Callable,
+        inputs: Sequence[ArrayLike],
+        isufunc: bool = False,
     ) -> tuple[np.ndarray, str | None, np.ndarray, str | None]:
         # Achieve an operation f on the objs
 
@@ -2901,11 +2922,13 @@ class NDMath:
                             pass
                         else:
                             raise CoordinatesMismatchError(
-                                obc[obj.dims[-1]].data, otc[other.dims[-1]].data
+                                obc[obj.dims[-1]].data,
+                                otc[other.dims[-1]].data,
                             ) from err
                     except AssertionError as err:
                         raise CoordinatesMismatchError(
-                            obc[obj.dims[-1]].data, otc[other.dims[-1]].data
+                            obc[obj.dims[-1]].data,
+                            otc[other.dims[-1]].data,
                         ) from err
 
                 # if other is multidimensional and as we are talking about element wise
@@ -2922,7 +2945,8 @@ class NDMath:
                             )  # we compare only data for this operation
                         except AssertionError as err:
                             raise CoordinatesMismatchError(
-                                obc[obj.dims[idx]].data, otc[other.dims[idx]].data
+                                obc[obj.dims[idx]].data,
+                                otc[other.dims[idx]].data,
                             ) from err
 
             if othertype in ["NDDataset", "Coord"]:
@@ -2968,7 +2992,9 @@ class NDMath:
                     else:
                         s = f"`{requnits}` units"
                     raise DimensionalityError(
-                        _units, requnits, extra_msg=f"\nFunction `{fname}` requires {s}"
+                        _units,
+                        requnits,
+                        extra_msg=f"\nFunction `{fname}` requires {s}",
                     )
 
             return _units
@@ -2986,22 +3012,16 @@ class NDMath:
                 if hasattr(otherq, "units"):
                     otherqm = otherq.m.data if np.ma.isMaskedArray(otherq) else otherq.m
                     otherqs[i] = otherqm * check_require_units(fname, otherq.units)
-                else:
-                    # here we want to change the behavior a pint regarding the addition
-                    # of scalar to quantity
-                    #         # in principle it is only possible with dimensionless
-                    #         quantity, else a dimensionerror is
-                    #         raised.
-                    if fname in [
-                        "add",
-                        "sub",
-                        "iadd",
-                        "isub",
-                        "and",
-                        "xor",
-                        "or",
-                    ] and hasattr(q, "units"):
-                        otherqs[i] = otherq * q.units  # take the unit of the first obj
+                elif fname in [
+                    "add",
+                    "sub",
+                    "iadd",
+                    "isub",
+                    "and",
+                    "xor",
+                    "or",
+                ] and hasattr(q, "units"):
+                    otherqs[i] = otherq * q.units  # take the unit of the first obj
 
             # some functions are not handled by pint regardings units, try to solve this
             # here
@@ -3053,7 +3073,8 @@ class NDMath:
                     # values such as log(-1)
                     # then try to use complex
                     data = getattr(np, fname)(
-                        d.astype(np.complex128), *args
+                        d.astype(np.complex128),
+                        *args,
                     )  # data = getattr(np.emath, fname)(d, *args)
                     if ws:
                         raise ValueError(ws[-1].message.args[0])
@@ -3142,7 +3163,7 @@ class NDMath:
                 inputs[0] *= np.log(inputs[1])
                 inputs = inputs[:1]
             else:
-                raise NotImplementedError()
+                raise NotImplementedError
 
         f = getattr(np, fname) if fname in ["exp"] else getattr(operator, fname)
         return f, inputs

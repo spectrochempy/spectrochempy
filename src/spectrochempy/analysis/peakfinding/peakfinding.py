@@ -205,7 +205,7 @@ def find_peaks(
     X = dataset.squeeze()
     if X.ndim > 1:
         raise ValueError(
-            "Works only for 1D NDDataset or a 2D NDdataset with `len(X.y) <= 1`"
+            "Works only for 1D NDDataset or a 2D NDdataset with `len(X.y) <= 1`",
         )
     # TODO: implement for 2D datasets (would be useful e.g., for NMR)
     # be sure that data are real (NMR case for instance)
@@ -234,7 +234,7 @@ def find_peaks(
         # TODO: what if the coordinates are not linear?
         if not lastcoord.linear:
             warning_(
-                "The x coordinates are not linear. The peak finding might be wrong."
+                "The x coordinates are not linear. The peak finding might be wrong.",
             )
             spacing = np.mean(lastcoord.spacing)
         else:

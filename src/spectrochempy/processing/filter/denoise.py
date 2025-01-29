@@ -64,13 +64,13 @@ def denoise(dataset, ratio=99.8, **kwargs):
     pca.fit(dataset)
     info_(
         f"Number of components selected for reconstruction: {pca.n_components} "
-        f"[n_observations={dataset.shape[0]}, ratio={ratio * 10: .2f}%]"
+        f"[n_observations={dataset.shape[0]}, ratio={ratio * 10: .2f}%]",
     )
     if pca.n_components < 3:
         warning_(
             f"The number of components ({pca.n_components}) selected for "
             f"reconstruction seems very low.\nYour likely to have a poor "
-            f"reconstruction.\nTry to increase the ratio."
+            f"reconstruction.\nTry to increase the ratio.",
         )
     data = pca.inverse_transform()
     if swapped:

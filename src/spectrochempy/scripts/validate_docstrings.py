@@ -113,10 +113,9 @@ def get_api_items(api_doc_fd):
             position = "autosummary"
             continue
 
-        if position == "autosummary":
-            if line == "":
-                position = "items"
-                continue
+        if position == "autosummary" and line == "":
+            position = "items"
+            continue
 
         if position == "items":
             if line == "":
@@ -174,9 +173,9 @@ class spectrochempyDocstring(Validator):
                     path.rmdir()
                 elif path.is_file():
                     path.unlink(missing_ok=True)
-            print(
+            print(  # noqa: T201
                 f"The following files were leftover from the doctest: "
-                f"{leftovers}. Please use # doctest: +SKIP"
+                f"{leftovers}. Please use # doctest: +SKIP",
             )
         return error_msgs
 
@@ -196,7 +195,7 @@ class spectrochempyDocstring(Validator):
                 "import numpy as np  # noqa: F401\n",
                 "import spectrochempy as scp  # noqa: F401\n",
                 *self.examples_source_code,
-            )
+            ),
         )
 
         error_messages = []
@@ -204,7 +203,7 @@ class spectrochempyDocstring(Validator):
             file.write(content)
             file.flush()
             cmd = ["python", "-m", "flake8", "--quiet", "--statistics", file.name]
-            response = subprocess.run(cmd, capture_output=True, check=False, text=True)
+            response = subprocess.run(cmd, capture_output=True, check=False, text=True)  # noqa: S603
             stdout = response.stdout
             stdout = stdout.replace(file.name, "")
             messages = stdout.strip("\n")
@@ -243,8 +242,9 @@ def spectrochempy_validate(func_name: str):
     if mentioned_errs:
         result["errors"].append(
             spectrochempy_error(
-                "GL04", mentioned_private_classes=", ".join(mentioned_errs)
-            )
+                "GL04",
+                mentioned_private_classes=", ".join(mentioned_errs),
+            ),
         )
 
     if doc.see_also:
@@ -255,7 +255,7 @@ def spectrochempy_validate(func_name: str):
                         "SA05",
                         reference_name=rel_name,
                         right_reference=rel_name[len("spectrochempy.") :],
-                    )
+                    ),
                 )
 
     result["examples_errs"] = ""
@@ -263,7 +263,7 @@ def spectrochempy_validate(func_name: str):
         result["examples_errs"] = doc.examples_errors
         if result["examples_errs"]:
             result["errors"].append(
-                spectrochempy_error("EX02", doctest_log=result["examples_errs"])
+                spectrochempy_error("EX02", doctest_log=result["examples_errs"]),
             )
 
         for error_code, error_message, error_count in doc.validate_pep8():
@@ -274,13 +274,13 @@ def spectrochempy_validate(func_name: str):
                     error_code=error_code,
                     error_message=error_message,
                     times_happening=times_happening,
-                )
+                ),
             )
         examples_source_code = "".join(doc.examples_source_code)
         for wrong_import in ("numpy", "spectrochempy"):
             if f"import {wrong_import}" in examples_source_code:
                 result["errors"].append(
-                    spectrochempy_error("EX04", imported_library=wrong_import)
+                    spectrochempy_error("EX04", imported_library=wrong_import),
                 )
 
     if doc.non_hyphenated_array_like():
@@ -338,7 +338,7 @@ def validate_all(prefix, ignore_deprecated=False):
                 "section": section,
                 "subsection": subsection,
                 "shared_code_with": shared_code,
-            }
+            },
         )
 
         seen[shared_code_key] = func_name
@@ -369,7 +369,7 @@ def print_validate_all_results(
                 continue
             sys.stdout.write(
                 f"{prefix}{res['file']}: {res['file_line']}: "
-                f"{err_code}: {name}: {err_desc}\n"
+                f"{err_code}: {name}: {err_desc}\n",
             )
             exit_status += 1
 
@@ -399,7 +399,7 @@ def print_validate_one_results(func_name: str):
                 continue
             sys.stderr.write(f"\t{err_desc}\n")
     else:
-        sys.stderr.write(f'Docstring for "{func_name}" correct. : )\n')  # noqa: E202
+        sys.stderr.write(f'Docstring for "{func_name}" correct. : )\n')
 
     if result["examples_errs"]:
         sys.stderr.write(header("Doctests"))
@@ -412,7 +412,10 @@ def main(func_name, prefix, errors, output_format, ignore_deprecated):
     """
     if func_name is None:
         return print_validate_all_results(
-            prefix, errors, output_format, ignore_deprecated
+            prefix,
+            errors,
+            output_format,
+            ignore_deprecated,
         )
     print_validate_one_results(func_name)
     return 0
@@ -470,5 +473,5 @@ if __name__ == "__main__":
             args.errors.split(",") if args.errors else None,
             args.format,
             args.ignore_deprecated,
-        )
+        ),
     )

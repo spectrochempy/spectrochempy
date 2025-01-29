@@ -93,7 +93,7 @@ def concatenate(*datasets, **kwargs):
     shapes = {ds.shape[:axis] + ds.shape[axis + 1 :] for ds in datasets}
     if len(shapes) != 1:
         raise exceptions.DimensionsCompatibilityError(
-            "all input arrays must have the same shape"
+            "all input arrays must have the same shape",
         )
 
     # check units
@@ -106,7 +106,7 @@ def concatenate(*datasets, **kwargs):
             for u2 in units[i + 1 :]:
                 if u1.dimensionality != u2.dimensionality:
                     raise exceptions.UnitsCompatibilityError(
-                        f"Units of the data are {[str(u) for u in units]}. The datasets can't be concatenated"
+                        f"Units of the data are {[str(u) for u in units]}. The datasets can't be concatenated",
                     )
         # should be compatible, so convert
         units = datasets[0].units
@@ -178,7 +178,7 @@ def concatenate(*datasets, **kwargs):
                 for i, coord in enumerate(coords[dim]._coords):
                     try:
                         labels_not_none = np.all(
-                            labels[:, i] != [None] * len(labels[:, i])
+                            labels[:, i] != [None] * len(labels[:, i]),
                         )
                     except ValueError:
                         labels_not_none = True
@@ -275,7 +275,7 @@ def stack(*datasets):
     shapes = {ds.shape for ds in datasets}
     if len(shapes) != 1:
         raise exceptions.DimensionsCompatibilityError(
-            "all input arrays must have the same shape"
+            "all input arrays must have the same shape",
         )
 
     # prepend a new dimension

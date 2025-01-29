@@ -152,7 +152,8 @@ class NDComplexArray(NDArray):
 
         elif data.dtype not in [typequaternion] + list(TYPE_COMPLEX):
             data = data.astype(
-                np.float64, copy=False
+                np.float64,
+                copy=False,
             )  # by default dta are float64 if the dtype is not fixed
 
         # return the validated data
@@ -243,7 +244,7 @@ class NDComplexArray(NDArray):
             # q = a + bi + cj + dk  ->   qr = a
             new._data = as_float_array(ma)[..., 0]
         else:
-            raise TypeError("dtype %s not recognized" % str(ma.dtype))
+            raise TypeError(f"dtype {ma.dtype!s} not recognized")
 
         if isinstance(ma, np.ma.masked_array):
             new._mask = ma.mask
@@ -272,7 +273,7 @@ class NDComplexArray(NDArray):
             as_float_array(ma)[..., 0] = 0  # keep only the imaginary component
             new._data = ma  # .data
         else:
-            raise TypeError("dtype %s not recognized" % str(ma.dtype))
+            raise TypeError(f"dtype {ma.dtype!s} not recognized")
 
         if isinstance(ma, np.ma.masked_array):
             new._mask = ma.mask
@@ -409,10 +410,7 @@ class NDComplexArray(NDArray):
         --------
         set_quaternion, has_complex_dims, is_complex, is_quaternion
         """
-        if not inplace:  # default is to return a new array
-            new = self.copy()
-        else:
-            new = self  # work inplace
+        new = self.copy() if not inplace else self  # default is to return a new array
 
         if new.has_complex_dims:
             # not necessary in this case, it is already complex
@@ -437,10 +435,7 @@ class NDComplexArray(NDArray):
         out
             Same object or a copy depending on the `inplace` flag.
         """
-        if not inplace:  # default is to return a new array
-            new = self.copy()
-        else:
-            new = self  # work inplace
+        new = self.copy() if not inplace else self  # default is to return a new array
 
         if new.dtype != typequaternion:  # not already a quaternion
             new._data = new._make_quaternion(new.data)
@@ -482,8 +477,8 @@ class NDComplexArray(NDArray):
                         x.T.flatten(),
                         z.T.flatten(),
                         strict=False,
-                    )
-                )
+                    ),
+                ),
             )
             new._data = q.reshape(new.shape)
 
@@ -526,8 +521,8 @@ class NDComplexArray(NDArray):
                         x.T.flatten(),
                         z.T.flatten(),
                         strict=False,
-                    )
-                )
+                    ),
+                ),
             )
             new._data = q.reshape(new.shape)
 
@@ -550,7 +545,7 @@ class NDComplexArray(NDArray):
         shcplx = (
             x
             for x in itertools.chain.from_iterable(
-                list(zip(self.dims, self.shape, cplx, strict=False))
+                list(zip(self.dims, self.shape, cplx, strict=False)),
             )
         )
 
@@ -579,10 +574,7 @@ class NDComplexArray(NDArray):
 
         if self.has_complex_dims:
             # we will display the different component separately
-            if self.is_quaternion:
-                prefix = ["RR", "RI", "IR", "II"]
-            else:
-                prefix = ["R", "I"]
+            prefix = ["RR", "RI", "IR", "II"] if self.is_quaternion else ["R", "I"]
 
         units = ufmt.format(self.units) if self.has_units else ""
 
@@ -618,8 +610,7 @@ class NDComplexArray(NDArray):
         out += f"        title: {self.title}\n" if self.title else ""
         out += header
         out += "\0{}\0".format(textwrap.indent(text.strip(), " " * 9))
-        out = out.rstrip()  # remove the trailings '\n'
-        return out
+        return out.rstrip()  # remove the trailings '\n'
 
     def _make_complex(self, data):
         if data.dtype in TYPE_COMPLEX:
@@ -628,7 +619,7 @@ class NDComplexArray(NDArray):
         if data.shape[-1] % 2 != 0:
             raise ValueError(
                 "An array of real data to be transformed to complex must have an even "
-                "number of columns!."
+                "number of columns!.",
             )
 
         data = data.astype(np.float64)
@@ -641,10 +632,7 @@ class NDComplexArray(NDArray):
         data.dtype = np.complex128
 
         # restore the previous order
-        if fortran:
-            data = np.asfortranarray(data)
-        else:
-            data = np.ascontiguousarray(data)
+        data = np.asfortranarray(data) if fortran else np.ascontiguousarray(data)
 
         self._dtype = None  # reset dtype
         return data
@@ -652,14 +640,14 @@ class NDComplexArray(NDArray):
     def _make_quaternion(self, data):
         if data.ndim % 2 != 0:
             raise ValueError(
-                "An array of data to be transformed to quaternion must be 2D."
+                "An array of data to be transformed to quaternion must be 2D.",
             )
 
         if data.dtype not in TYPE_COMPLEX:
             if data.shape[1] % 2 != 0:
                 raise ValueError(
                     "An array of real data to be transformed to quaternion must have "
-                    "even number of columns!."
+                    "even number of columns!.",
                 )
             # convert to double precision complex
             data = self._make_complex(data)
@@ -667,7 +655,7 @@ class NDComplexArray(NDArray):
         if data.shape[0] % 2 != 0:
             raise ValueError(
                 "An array data to be transformed to quaternion must have even number "
-                "of rows!."
+                "of rows!.",
             )
 
         r = data[::2]

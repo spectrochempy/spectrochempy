@@ -3,6 +3,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+from contextlib import suppress
+
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
@@ -47,8 +49,7 @@ def available_styles():
         listdir = stylelib.glob("*.mplstyle")
         for style in listdir:
             styles.append(style.stem)
-    styles = list(set(styles))  # in order to remove possible duplicates
-    return styles
+    return list(set(styles))  # in order to remove possible duplicates
 
 
 class PlotPreferences(MetaConfigurable):
@@ -71,13 +72,18 @@ class PlotPreferences(MetaConfigurable):
     # information on line properties.
     #
     lines_linewidth = Float(0.75, help=r"""line width in points""").tag(
-        config=True, gui=True, kind=""
+        config=True,
+        gui=True,
+        kind="",
     )
     lines_linestyle = Enum(
-        list(Line2D.lineStyles.keys()), default_value="-", help=r"""solid line"""
+        list(Line2D.lineStyles.keys()),
+        default_value="-",
+        help=r"""solid line""",
     ).tag(config=True, gui=True, kind="")
     lines_color = Unicode(
-        "b", help=r"""has no affect on plot(); see axes.prop_cycle"""
+        "b",
+        help=r"""has no affect on plot(); see axes.prop_cycle""",
     ).tag(config=True, kind="color")
     lines_marker = Enum(
         list(Line2D.markers.keys()),
@@ -85,16 +91,20 @@ class PlotPreferences(MetaConfigurable):
         help=r"""the default marker""",
     ).tag(config=True, kind="")
     lines_markerfacecolor = Unicode(
-        "auto", help=r"""the default markerfacecolor"""
+        "auto",
+        help=r"""the default markerfacecolor""",
     ).tag(config=True, kind="color")
     lines_markeredgecolor = Unicode(
-        "auto", help=r"""the default markeredgecolor"""
+        "auto",
+        help=r"""the default markeredgecolor""",
     ).tag(config=True, kind="color")
     lines_markeredgewidth = Float(
-        0.0, help=r"""the line width around the marker symbol"""
+        0.0,
+        help=r"""the line width around the marker symbol""",
     ).tag(config=True, kind="")
     lines_markersize = Float(7.0, help=r"""markersize, in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     lines_dash_joinstyle = Enum(
         [
@@ -139,11 +149,13 @@ class PlotPreferences(MetaConfigurable):
         help=r"""butt|round|projecting""",
     ).tag(config=True, kind="")
     lines_antialiased = Bool(
-        True, help=r"""render lines in antialiased (no jaggies)"""
+        True,
+        help=r"""render lines in antialiased (no jaggies)""",
     ).tag(config=True, kind="")
     lines_dashed_pattern = Tuple((6.0, 6.0), help=r"""""").tag(config=True, kind="")
     lines_dashdot_pattern = Tuple((3.0, 5.0, 1.0, 5.0), help=r"""""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     lines_dotted_pattern = Tuple((1.0, 3.0), help=r"""""").tag(config=True, kind="")
     lines_scale_dashes = Bool(False, help=r"""""").tag(config=True, kind="")
@@ -163,17 +175,21 @@ class PlotPreferences(MetaConfigurable):
     # information on patch properties
     #
     patch_linewidth = Float(0.3, help=r"""edge width in points.""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     patch_facecolor = Unicode("4C72B0", help=r"""""").tag(config=True, kind="color")
     patch_edgecolor = Unicode(
-        "black", help=r"""if forced, or patch is not filled"""
+        "black",
+        help=r"""if forced, or patch is not filled""",
     ).tag(config=True, kind="color")
     patch_force_edgecolor = Bool(False, help=r"""True to always use edgecolor""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     patch_antialiased = Bool(
-        True, help=r"""render patches in antialiased (no jaggies)"""
+        True,
+        help=r"""render patches in antialiased (no jaggies)""",
     ).tag(config=True, kind="")
     hatch_color = Unicode("black", help=r"""""").tag(config=True, kind="color")
     hatch_linewidth = Float(1.0, help=r"""""").tag(config=True, kind="")
@@ -225,7 +241,9 @@ class PlotPreferences(MetaConfigurable):
         help=r"""normal (or roman), italic or oblique""",
     ).tag(config=True, kind="")
     font_variant = Enum(
-        ["normal", "small-caps"], default_value="normal", help=r""""""
+        ["normal", "small-caps"],
+        default_value="normal",
+        help=r"""""",
     ).tag(config=True, kind="")
     font_weight = Enum(
         [
@@ -327,10 +345,11 @@ class PlotPreferences(MetaConfigurable):
     mathtext_rm = Unicode("dejavusans", help=r"""""").tag(config=True, kind="")
     mathtext_tt = Unicode("monospace", help=r"""""").tag(config=True, kind="")
     mathtext_it = Unicode("dejavusans:italic", help=r"""italic""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     mathtext_bf = Unicode("dejavusans:bold", help=r"""bold""").tag(config=True, kind="")
-    mathtext_sf = Unicode(r"sans\-serif", help=r"""""").tag(config=True, kind="")  # noqa: W605
+    mathtext_sf = Unicode(r"sans\-serif", help=r"""""").tag(config=True, kind="")
     mathtext_fontset = Unicode(
         "dejavusans",
         help=r'''Should be "dejavusans" (default),
@@ -354,35 +373,44 @@ class PlotPreferences(MetaConfigurable):
     # http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
     #
     axes_facecolor = Unicode("F0F0F0", help=r"""axes background color""").tag(
-        config=True, kind="color"
+        config=True,
+        kind="color",
     )
     axes_edgecolor = Unicode("black", help=r"""axes edge color""").tag(
-        config=True, kind="color"
+        config=True,
+        kind="color",
     )
     axes_linewidth = Float(0.8, help=r"""edge linewidth""").tag(config=True, kind="")
     axes_grid = Bool(False, help=r"""display grid or not""").tag(config=True, kind="")
     axes_grid_which = Unicode("major").tag(config=True, kind="")
     axes_grid_axis = Unicode("both").tag(config=True, kind="")
     axes_titlesize = Float(14.0, help=r"""fontsize of the axes title""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_titley = Float(1.0, help=r"""at the top, no autopositioning.""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_titlepad = Float(5.0, help=r"""pad between axes and title in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_titleweight = Unicode("normal", help=r"""font weight for axes title""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_labelsize = Float(10.0, help=r"""fontsize of the x any y labels""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_labelpad = Float(4.0, help=r"""space between label and axis""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_labelweight = Unicode("normal", help=r"""weight of the x and y labels""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_labelcolor = Unicode("black", help=r"""""").tag(config=True, kind="color")
     axes_axisbelow = Bool(
@@ -401,7 +429,8 @@ class PlotPreferences(MetaConfigurable):
                                        For example, use "," as a decimal separator in the fr_FR locale.""",
     ).tag(config=True, kind="")
     axes_formatter_use_mathtext = Bool(
-        False, help=r"""When True, use mathtext for scientific notation."""
+        False,
+        help=r"""When True, use mathtext for scientific notation.""",
     ).tag(config=True, kind="")
     axes_formatter_useoffset = Bool(
         False,
@@ -431,26 +460,31 @@ class PlotPreferences(MetaConfigurable):
                                     plus some margin. Use "round_number" move to the nearest "round" number""",
     ).tag(config=True, kind="")
     axes_xmargin = Float(0.05, help=r"""x margin. See `axes.Axes.margins`""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_ymargin = Float(0.05, help=r"""y margin See `axes.Axes.margins`""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes_spines_bottom = Bool(True).tag(config=True, kind="")
     axes_spines_left = Bool(True).tag(config=True, kind="")
     axes_spines_right = Bool(True).tag(config=True, kind="")
     axes_spines_top = Bool(True).tag(config=True, kind="")
     polaraxes_grid = Bool(True, help=r"""display grid on polar axes""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     axes3d_grid = Bool(True, help=r"""display grid on 3d axes""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     #
     # DATE
     #
     timezone = Unicode(
-        "UTC", help=r"""a IANA timezone string, e.g., US/Central or Europe/Paris"""
+        "UTC",
+        help=r"""a IANA timezone string, e.g., US/Central or Europe/Paris""",
     ).tag(config=True, kind="")
     date_autoformatter_year = Unicode("%Y").tag(config=True, kind="")
     date_autoformatter_month = Unicode("%b %Y").tag(config=True, kind="")
@@ -464,177 +498,230 @@ class PlotPreferences(MetaConfigurable):
     # see http://matplotlib.org/api/axis_api.html#matplotlib.axis.Tick
     #
     xtick_top = Bool(False, help=r"""draw ticks on the top side""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_bottom = Bool(True, help=r"""draw ticks on the bottom side""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_major_size = Float(3.5, help=r"""major tick size in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_minor_size = Float(2.0, help=r"""minor tick size in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_major_width = Float(0.8, help=r"""major tick width in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_minor_width = Float(0.6, help=r"""minor tick width in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_major_pad = Float(
-        3.5, help=r"""distance to major tick label in points"""
+        3.5,
+        help=r"""distance to major tick label in points""",
     ).tag(config=True, kind="")
     xtick_minor_pad = Float(
-        3.4, help=r"""distance to the minor tick label in points"""
+        3.4,
+        help=r"""distance to the minor tick label in points""",
     ).tag(config=True, kind="")
     xtick_color = Unicode(".15", help=r"""color of the tick labels""").tag(
-        config=True, kind="color"
+        config=True,
+        kind="color",
     )
     xtick_labelsize = Float(10.0, help=r"""fontsize of the tick labels""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_direction = Unicode("out", help=r"""direction""").tag(config=True, kind="")
     xtick_minor_visible = Bool(
-        False, help=r"""visibility of minor ticks on x-axis"""
+        False,
+        help=r"""visibility of minor ticks on x-axis""",
     ).tag(config=True, kind="")
     xtick_major_top = Bool(True, help=r"""draw x axis top major ticks""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_major_bottom = Bool(True, help=r"""draw x axis bottom major ticks""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_minor_top = Bool(True, help=r"""draw x axis top minor ticks""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     xtick_minor_bottom = Bool(True, help=r"""draw x axis bottom minor ticks""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_left = Bool(True, help=r"""draw ticks on the left side""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_right = Bool(False, help=r"""draw ticks on the right side""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_major_size = Float(3.5, help=r"""major tick size in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_minor_size = Float(2.0, help=r"""minor tick size in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_major_width = Float(0.8, help=r"""major tick width in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_minor_width = Float(0.6, help=r"""minor tick width in points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_major_pad = Float(
-        3.5, help=r"""distance to major tick label in points"""
+        3.5,
+        help=r"""distance to major tick label in points""",
     ).tag(config=True, kind="")
     ytick_minor_pad = Float(
-        3.4, help=r"""distance to the minor tick label in points"""
+        3.4,
+        help=r"""distance to the minor tick label in points""",
     ).tag(config=True, kind="")
     ytick_color = Unicode(".15", help=r"""color of the tick labels""").tag(
-        config=True, kind="color"
+        config=True,
+        kind="color",
     )
     ytick_labelsize = Float(10.0, help=r"""fontsize of the tick labels""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_direction = Unicode("out", help=r"""direction""").tag(config=True, kind="")
     ytick_minor_visible = Bool(
-        False, help=r"""visibility of minor ticks on y-axis"""
+        False,
+        help=r"""visibility of minor ticks on y-axis""",
     ).tag(config=True, kind="")
     ytick_major_left = Bool(True, help=r"""draw y axis left major ticks""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_major_right = Bool(True, help=r"""draw y axis right major ticks""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_minor_left = Bool(True, help=r"""draw y axis left minor ticks""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     ytick_minor_right = Bool(True, help=r"""draw y axis right minor ticks""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     #
     # GRIDS
     #
     grid_color = Unicode(".85", help=r"""grid color""").tag(config=True, kind="color")
     grid_linestyle = Enum(
-        list(Line2D.lineStyles.keys()), default_value="-", help=r"""solid"""
+        list(Line2D.lineStyles.keys()),
+        default_value="-",
+        help=r"""solid""",
     ).tag(config=True, kind="")
     grid_linewidth = Float(0.85, help=r"""in points""").tag(config=True, kind="")
     grid_alpha = Float(1.0, help=r"""transparency, between 0.0 and 1.0""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     legend_loc = Unicode("best", help=r"""""").tag(config=True, kind="")
     legend_frameon = Bool(
-        False, help=r"""if True, draw the legend on a background patch"""
+        False,
+        help=r"""if True, draw the legend on a background patch""",
     ).tag(config=True, kind="")
     #
     # LEGEND
     #
     legend_framealpha = Union(
-        (Float(0.8), Unicode("None")), help=r"""legend patch transparency"""
+        (Float(0.8), Unicode("None")),
+        help=r"""legend patch transparency""",
     ).tag(config=True, kind="", default=0.0)
     legend_facecolor = Unicode(
-        "inherit", help=r"""inherit from axes.facecolor; or color spec"""
+        "inherit",
+        help=r"""inherit from axes.facecolor; or color spec""",
     ).tag(config=True, kind="color")
     legend_edgecolor = Unicode("0.8", help=r"""background patch boundary color""").tag(
-        config=True, kind="color"
+        config=True,
+        kind="color",
     )
     legend_fancybox = Bool(
         True,
         help=r"""if True, use a rounded box for the legend background, else a rectangle""",
     ).tag(config=True, kind="")
     legend_shadow = Bool(
-        False, help=r"""if True, give background a shadow effect"""
+        False,
+        help=r"""if True, give background a shadow effect""",
     ).tag(config=True, kind="")
     legend_numpoints = Integer(
-        1, help=r"""the number of marker points in the legend line"""
+        1,
+        help=r"""the number of marker points in the legend line""",
     ).tag(config=True, kind="")
     legend_scatterpoints = Integer(1, help=r"""number of scatter points""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     legend_markerscale = Float(
-        1.0, help=r"""the relative size of legend markers vs. original"""
+        1.0,
+        help=r"""the relative size of legend markers vs. original""",
     ).tag(config=True, kind="")
     legend_fontsize = Float(9.0, help=r"""""").tag(config=True, kind="")
     legend_borderpad = Float(0.4, help=r"""border whitespace""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     legend_labelspacing = Float(
-        0.2, help=r"""the vertical space between the legend entries"""
+        0.2,
+        help=r"""the vertical space between the legend entries""",
     ).tag(config=True, kind="")
     legend_handlelength = Float(2.0, help=r"""the length of the legend lines""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     legend_handleheight = Float(0.7, help=r"""the height of the legend handle""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     legend_handletextpad = Float(
-        0.1, help=r"""the space between the legend line and legend text"""
+        0.1,
+        help=r"""the space between the legend line and legend text""",
     ).tag(config=True, kind="")
     legend_borderaxespad = Float(
-        0.5, help=r"""the border between the axes and legend edge"""
+        0.5,
+        help=r"""the border between the axes and legend edge""",
     ).tag(config=True, kind="")
     legend_columnspacing = Float(0.5, help=r"""column separation""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     figure_titlesize = Float(
-        12.0, help=r"""size of the figure title (Figure.suptitle())"""
+        12.0,
+        help=r"""size of the figure title (Figure.suptitle())""",
     ).tag(config=True, kind="")
     figure_titleweight = Unicode("normal", help=r"""weight of the figure title""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     figure_figsize = Tuple((6, 4), help=r"""figure size in inches""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     figure_dpi = Float(96.0, help=r"""figure dots per inch""").tag(config=True, kind="")
     figure_facecolor = Unicode(
-        "white", help=r"""figure facecolor; 0.75 is scalar gray"""
+        "white",
+        help=r"""figure facecolor; 0.75 is scalar gray""",
     ).tag(config=True, kind="color")
     figure_edgecolor = Unicode("white", help=r"""figure edgecolor""").tag(
-        config=True, kind="color"
+        config=True,
+        kind="color",
     )
     figure_autolayout = Bool(
         True,
@@ -651,16 +738,20 @@ class PlotPreferences(MetaConfigurable):
     interface before emitting a warning. If less than one this feature is disabled.""",
     ).tag(config=True, kind="")
     figure_subplot_left = Float(
-        0.15, help=r"""the left side of the subplots of the figure"""
+        0.15,
+        help=r"""the left side of the subplots of the figure""",
     ).tag(config=True, kind="")
     figure_subplot_right = Float(
-        0.95, help=r"""the right side of the subplots of the figure"""
+        0.95,
+        help=r"""the right side of the subplots of the figure""",
     ).tag(config=True, kind="")
     figure_subplot_bottom = Float(
-        0.12, help=r"""the bottom of the subplots of the figure"""
+        0.12,
+        help=r"""the bottom of the subplots of the figure""",
     ).tag(config=True, kind="")
     figure_subplot_top = Float(
-        0.98, help=r"""the top of the subplots of the figure"""
+        0.98,
+        help=r"""the top of the subplots of the figure""",
     ).tag(config=True, kind="")
     figure_subplot_wspace = Float(
         0.0,
@@ -677,10 +768,12 @@ class PlotPreferences(MetaConfigurable):
     # IMAGES
     #
     image_aspect = Unicode("equal", help=r"""equal | auto | a number""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     image_interpolation = Unicode(
-        "antialiased", help=r"""see help(imshow) for options"""
+        "antialiased",
+        help=r"""see help(imshow) for options""",
     ).tag(config=True, kind="")
     image_cmap = Enum(
         plt.colormaps(),
@@ -688,7 +781,8 @@ class PlotPreferences(MetaConfigurable):
         help=r"""A colormap name, gray etc...""",
     ).tag(config=True, kind="")
     image_lut = Integer(256, help=r"""the size of the colormap lookup table""").tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     image_origin = Unicode("upper", help=r"""lower | upper""").tag(config=True, kind="")
     image_resample = Bool(True, help=r"""""").tag(config=True, kind="")
@@ -703,16 +797,21 @@ class PlotPreferences(MetaConfigurable):
     # CONTOUR PLOTS
     #
     contour_negative_linestyle = Enum(
-        ["dashed", "solid"], default_value="dashed", help=r"""dashed | solid"""
+        ["dashed", "solid"],
+        default_value="dashed",
+        help=r"""dashed | solid""",
     ).tag(config=True, kind="")
     contour_corner_mask = Enum(
-        [True, False, "legacy"], default_value=True, help=r"""True | False | legacy"""
+        [True, False, "legacy"],
+        default_value=True,
+        help=r"""True | False | legacy""",
     ).tag(config=True, kind="")
     #
     # ERRORBAR
     #
     errorbar_capsize = Float(
-        1.0, help=r"""length of end cap on error bars in pixels"""
+        1.0,
+        help=r"""length of end cap on error bars in pixels""",
     ).tag(config=True, kind="")
     #
     # HIST
@@ -735,16 +834,21 @@ class PlotPreferences(MetaConfigurable):
     # SAVING FIGURES
     #
     savefig_dpi = Unicode("300", help=r'''figure dots per inch or "figure"''').tag(
-        config=True, kind=""
+        config=True,
+        kind="",
     )
     savefig_facecolor = Unicode("white", help=r"""figure facecolor when saving""").tag(
-        config=True, kind="color"
+        config=True,
+        kind="color",
     )
     savefig_edgecolor = Unicode("white", help=r"""figure edgecolor when saving""").tag(
-        config=True, kind="color"
+        config=True,
+        kind="color",
     )
     savefig_format = Enum(
-        ["png", "ps", "pdf", "svg"], default_value="png", help=r"""png, ps, pdf, svg"""
+        ["png", "ps", "pdf", "svg"],
+        default_value="png",
+        help=r"""png, ps, pdf, svg""",
     ).tag(config=True, kind="")
     savefig_bbox = Enum(
         ["tight", "standard"],
@@ -754,10 +858,12 @@ class PlotPreferences(MetaConfigurable):
     e.g. setting animation.writer to ffmpeg will not work, use ffmpeg_file instead""",
     ).tag(config=True, kind="")
     savefig_pad_inches = Float(
-        0.1, help=r'''Padding to be used when bbox is set to "tight"'''
+        0.1,
+        help=r'''Padding to be used when bbox is set to "tight"''',
     ).tag(config=True, kind="")
     savefig_jpeg_quality = Integer(
-        95, help=r"""when a jpeg is saved, the default quality parameter."""
+        95,
+        help=r"""when a jpeg is saved, the default quality parameter.""",
     ).tag(config=True, kind="")
     savefig_directory = Unicode(
         "",
@@ -808,28 +914,29 @@ class PlotPreferences(MetaConfigurable):
     # NON MATPLOTLIB OPTIONS
     # ==================================================================================
     style = Union(
-        (Unicode(), List(), Tuple()), help="Basic matplotlib style to use"
+        (Unicode(), List(), Tuple()),
+        help="Basic matplotlib style to use",
     ).tag(config=True, default_="scpy")
     stylesheets = Unicode(
         help="Directory where to look for local defined matplotlib styles when they are not in the "
-        " standard location"
+        " standard location",
     ).tag(config=True, type="folder")
     use_plotly = Bool(
         False,
         help="Use Plotly instead of MatPlotLib for plotting (mode Matplotlib more suitable for "
         "printing publication ready figures)",
     ).tag(config=True)
-    method_1D = Enum(
+    method_1D = Enum(  # noqa: N815
         ["pen", "scatter", "scatter+pen", "bar"],
         default_value="pen",
         help="Default plot methods for 1D datasets",
     ).tag(config=True)
-    method_2D = Enum(
+    method_2D = Enum(  # noqa: N815
         ["map", "image", "stack", "surface", "3D"],
         default_value="stack",
         help="Default plot methods for 2D datasets",
     ).tag(config=True)
-    method_3D = Enum(
+    method_3D = Enum(  # noqa: N815
         ["surface"],
         default_value="surface",
         help="Default plot methods for 3D datasets",
@@ -847,10 +954,12 @@ class PlotPreferences(MetaConfigurable):
         help=r"""A colormap name, gray etc...  (equivalent to image_cmap""",
     ).tag(config=True)
     max_lines_in_stack = Integer(
-        1000, min=1, help="Maximum number of lines to plot in stack plots"
+        1000,
+        min=1,
+        help="Maximum number of lines to plot in stack plots",
     ).tag(config=True)
     simplify = Bool(
-        help="Matplotlib path simplification for improving performance"
+        help="Matplotlib path simplification for improving performance",
     ).tag(config=True, group="mpl")
 
     # -1d
@@ -861,19 +970,24 @@ class PlotPreferences(MetaConfigurable):
     number_of_z_labels = Integer(5, min=3, help="Number of Z labels").tag(config=True)
     number_of_contours = Integer(50, min=10, help="Number of contours").tag(config=True)
     contour_alpha = Float(
-        1.00, min=0.0, max=1.0, help="Transparency of the contours"
+        1.00,
+        min=0.0,
+        max=1.0,
+        help="Transparency of the contours",
     ).tag(config=True)
     contour_start = Float(
-        0.05, min=0.001, help="Fraction of the maximum for starting contour levels"
+        0.05,
+        min=0.001,
+        help="Fraction of the maximum for starting contour levels",
     ).tag(config=True)
     antialiased = Bool(True, help="antialiased option for surface plot").tag(
-        config=True
+        config=True,
     )
     rcount = Integer(50, help="rcount (steps in the row mode) for surface plot").tag(
-        config=True
+        config=True,
     )
     ccount = Integer(50, help="ccount (steps in the column mode) for surface plot").tag(
-        config=True
+        config=True,
     )
 
     def __init__(self, **kwargs):
@@ -979,7 +1093,7 @@ class PlotPreferences(MetaConfigurable):
             changes = [changes]
         for _style in changes:
             try:
-                if isinstance(_style, (list, tuple)):
+                if isinstance(_style, list | tuple):
                     for s in _style:
                         self._apply_style(s)
                 else:
@@ -997,11 +1111,9 @@ class PlotPreferences(MetaConfigurable):
         fig, ax = plt.subplots()
         t = ax.text(0.5, 0.5, "Text")
         plt.ion()
-        try:
+        with suppress(Exception):
             t.set_fontsize(fontsize)
             fontsize = str(round(t.get_fontsize(), 2))
-        except Exception:
-            pass
         plt.close(fig)
         plt.ion()
         return fontsize
@@ -1054,15 +1166,15 @@ class PlotPreferences(MetaConfigurable):
                     if hasattr(self.traits()[name_], "default_args"):
                         try:
                             value = type(self.traits()[name_].default_args)(
-                                map(float, value.split(","))
+                                map(float, value.split(",")),
                             )
                         except Exception:
                             value = type(self.traits()[name_].default_args)(
-                                value.split(",")
+                                value.split(","),
                             )
                             value = tuple(map(str.strip, value))
                     else:
-                        value = type(self.traits()[name_].default_value)(eval(value))
+                        value = type(self.traits()[name_].default_value)(eval(value))  # noqa: S307
                 except Exception as e:
                     raise e
                 try:
@@ -1078,7 +1190,7 @@ class PlotPreferences(MetaConfigurable):
                 try:
                     setattr(self, name, value)
                 except TraitError:
-                    setattr(self, name, eval(value))
+                    setattr(self, name, eval(value))  # noqa: S307
 
     def to_rc_key(self, key):
         rckey = ""
@@ -1104,8 +1216,8 @@ class PlotPreferences(MetaConfigurable):
         if change.name in self.trait_names(config=True):
             key = self.to_rc_key(change.name)
             if key in mpl.rcParams:
-                if key.startswith("font"):
-                    print()
+                # if key.startswith("font"):
+                #     print()
                 try:
                     mpl.rcParams[key] = change.new
                 except ValueError:  # pragma: no cover
@@ -1119,7 +1231,6 @@ class PlotPreferences(MetaConfigurable):
                 mpl.rcParams["axes.labelsize"] = int(change.new)
             if key == "font.family":
                 self.set_latex_font(
-                    change.new
+                    change.new,
                 )  # @observe('use_latex')  # def _use_latex_changed(self, change):  #     mpl.rc(  # 'text', usetex=change.new)  #  # @observe('latex_preamble')  # def _set_latex_preamble(self,  # change):  #     mpl.rcParams[  #    #  #  #  'text.latex.preamble'] = change.new.split('\n')
         super()._anytrait_changed(change)
-        return  # EOF

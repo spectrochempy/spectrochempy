@@ -16,6 +16,7 @@ __all__ = [
 
 __dataset_methods__ = __all__
 
+from contextlib import suppress
 from copy import copy as cpy
 
 import matplotlib as mpl
@@ -238,11 +239,10 @@ def plot_2D(dataset, method=None, **kwargs):
 
     if x is not None and (not x.is_empty or x.is_labeled):
         xdata = x.data
-        if not np.any(xdata):
-            if x.is_labeled:
-                discrete_data = True
-                # take into account the fact that sometimes axis have just labels
-                xdata = range(1, len(x.labels) + 1)
+        if not np.any(xdata) and x.is_labeled:
+            discrete_data = True
+            # take into account the fact that sometimes axis have just labels
+            xdata = range(1, len(x.labels) + 1)
     else:
         xdata = range(xsize)
 
@@ -290,9 +290,8 @@ def plot_2D(dataset, method=None, **kwargs):
     if y is not None and (not y.is_empty or y.is_labeled):
         ydata = y.data
 
-        if not np.any(ydata):
-            if y.is_labeled:
-                ydata = range(1, len(y.labels) + 1)
+        if not np.any(ydata) and y.is_labeled:
+            ydata = range(1, len(y.labels) + 1)
     else:
         ydata = range(ysize)
 
@@ -379,10 +378,9 @@ def plot_2D(dataset, method=None, **kwargs):
     if cmap == "Undefined":
         cmap = kwargs.get("cmap", prefs.colormap)
 
-    if method in ["map", "image", "surface"]:
-        if norm is None:
-            zmin, zmax = zlim
-            norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
+    if method in ["map", "image", "surface"] and norm is None:
+        zmin, zmax = zlim
+        norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
 
     if method in ["surface"]:
         X, Y = np.meshgrid(xdata, ydata)
@@ -588,12 +586,14 @@ def plot_2D(dataset, method=None, **kwargs):
     else:
         ax.set_yticks([])
 
-    if "colorbar" in new.ndaxes:
+    if "colorbar" in new.ndaxes:  # noqa: SIM102
         if "surface" not in method and (not hasattr(new, "_axcb") or not new._axcb):
             axec = new.ndaxes["colorbar"]
             axec.name += nameadd
             new._axcb = mpl.colorbar.ColorbarBase(
-                axec, cmap=plt.get_cmap(cmap), norm=norm
+                axec,
+                cmap=plt.get_cmap(cmap),
+                norm=norm,
             )
             new._axcb.set_label(zlabel)
     #        else:
@@ -654,10 +654,9 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
             edgecolors="0.85" if 0 < i < ydata.size - 1 else "k",
         )
         poly.set_zorder(row.size + 1 - i)
-        try:
+        with suppress(ValueError):
             ax.add_collection(poly)
-        except ValueError:  # strange error with tests
-            pass
+
         ax.add_line(line)
 
     (x0, y0), (x1, _) = transA2D(0, 0), transA2D(1 + xe + 0.15, 1 + ze)
@@ -678,10 +677,18 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
         color="k",
     )
     ax.vlines(
-        x=xdata[0], ymin=y0 - zs, ymax=ax.get_ylim()[-1] - incz, color="k", zorder=5000
+        x=xdata[0],
+        ymin=y0 - zs,
+        ymax=ax.get_ylim()[-1] - incz,
+        color="k",
+        zorder=5000,
     )
     ax.vlines(
-        x=xdata[0], ymin=y0 - zs, ymax=ax.get_ylim()[-1] - incz, color="k", zorder=5000
+        x=xdata[0],
+        ymin=y0 - zs,
+        ymax=ax.get_ylim()[-1] - incz,
+        color="k",
+        zorder=5000,
     )
 
     x = [xdata[0], xdata[0] + incx, xdata[-1] + incx]
@@ -689,15 +696,11 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     x2 = [xdata[0], xdata[-1], xdata[-1] + incx]
     z2 = [y0 - zs, y0 - zs, y0 - zs + incz]
     poly = plt.fill_between(x, z, z2, alpha=1, facecolors=".95", edgecolors="w")
-    try:
+    with suppress(ValueError):
         ax.add_collection(poly)
-    except ValueError:
-        pass
     poly = plt.fill_between(x2, z, z2, alpha=1, facecolors=".95", edgecolors="w")
-    try:
+    with suppress(ValueError):
         ax.add_collection(poly)
-    except ValueError:
-        pass
     line = mpl.lines.Line2D(x, np.array(z), color="k", zorder=50000)
     ax.add_line(line)
     line = mpl.lines.Line2D(x2, np.array(z2), color="k", zorder=50000)
@@ -733,7 +736,7 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
             - ax.transData.inverted().transform((0, 0))
         )[0]
 
-    yt = [y for y in np.linspace(ylim[0], ylim[-1], 5)]
+    yt = list(np.linspace(ylim[0], ylim[-1], 5))
     for y in yt:
         xmin = xdata[-1] + fx(y)
         xmax = xdata[-1] + fx(y) + ctx(3.5)
@@ -815,6 +818,6 @@ def _get_clevels(data, prefs, **kwargs):
     clevelneg = -clevel
     clevelc = clevel
     if negative:
-        clevelc = sorted(list(np.concatenate((clevel, clevelneg))))
+        clevelc = sorted(np.concatenate((clevel, clevelneg)))
 
     return clevelc

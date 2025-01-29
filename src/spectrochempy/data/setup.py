@@ -73,8 +73,8 @@ def setup_mpl():
     stylesheets = Path(__file__).parent / "stylesheets"
     if not stylesheets.exists():
         raise OSError(
-            f"Can't find the stylesheets from SpectroChemPy {str(stylesheets)}.\n"
-            f"Installation incomplete!"
+            f"Can't find the stylesheets from SpectroChemPy {stylesheets!s}.\n"
+            f"Installation incomplete!",
         )
 
     # Ensure stylelib directory exists

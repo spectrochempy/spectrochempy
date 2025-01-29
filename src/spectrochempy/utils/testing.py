@@ -16,8 +16,8 @@ import numpy as np
 # from matplotlib.testing.compare import calculate_rms, ImageAssertionError
 from numpy.testing import assert_approx_equal  # noqa
 from numpy.testing import assert_array_almost_equal  # noqa
-from numpy.testing import assert_array_compare  # noqa
-from numpy.testing import assert_array_equal  # noqa
+from numpy.testing import assert_array_compare
+from numpy.testing import assert_array_equal
 from numpy.testing import assert_equal  # noqa
 from numpy.testing import assert_raises  # noqa
 
@@ -193,7 +193,7 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
                     eq &= np.all(sattr == oattr)
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are different."
+                        f"The {attr} attributes of {this} and {other} are different.",
                     )
             else:
                 return False
@@ -211,7 +211,7 @@ def compare_ndarrays(this, other, approx=False, decimal=6, data_only=False):
                 if not eq:
                     raise AssertionError(
                         f"attributes `{attr}` are not equals or one is "
-                        f"missing: \n{sattr} != {oattr}"
+                        f"missing: \n{sattr} != {oattr}",
                     )
             else:
                 raise AssertionError(f"{other} has no units")
@@ -281,7 +281,7 @@ def compare_coords(this, other, approx=False, decimal=3, data_only=False):
 
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are different."
+                        f"The {attr} attributes of {this} and {other} are different.",
                     )
             else:
                 return False
@@ -299,7 +299,7 @@ def compare_coords(this, other, approx=False, decimal=3, data_only=False):
                 if not eq:
                     raise AssertionError(
                         f"attributes `{attr}` are not equals or one is "
-                        f"missing: \n{sattr} != {oattr}"
+                        f"missing: \n{sattr} != {oattr}",
                     )
             else:
                 raise AssertionError(f"{other} has no units")
@@ -365,9 +365,8 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
         for attr in exclude:
             # these attributes are not used for comparison (comparison based on
             # data and units!)
-            if attr in attrs:
-                if attr in attrs:
-                    attrs.remove(attr)
+            if attr in attrs and attr in attrs:
+                attrs.remove(attr)
 
         # if 'title' in attrs:  #    attrs.remove('title')
         # #TODO: should we use title for comparison?
@@ -433,7 +432,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                     eq &= np.all(sattr == oattr)
                 if not eq:
                     raise AssertionError(
-                        f"The {attr} attributes of {this} and {other} are different."
+                        f"The {attr} attributes of {this} and {other} are different.",
                     )
             else:
                 return False
@@ -451,7 +450,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
                 if not eq:
                     raise AssertionError(
                         f"attributes `{attr}` are not equals or one is "
-                        f"missing: \n{sattr} != {oattr}"
+                        f"missing: \n{sattr} != {oattr}",
                     )
             else:
                 raise AssertionError(f"{other} has no units")
@@ -513,15 +512,15 @@ def assert_project_equal(proj1, proj2, **kwargs):
 
 
 def assert_project_almost_equal(proj1, proj2, **kwargs):
-    assert len(proj1.datasets) == len(proj2.datasets)
+    assert len(proj1.datasets) == len(proj2.datasets)  # noqa: S101
     for nd1, nd2 in zip(proj1.datasets, proj2.datasets, strict=False):
         compare_datasets(nd1, nd2, **kwargs)
 
-    assert len(proj1.projects) == len(proj2.projects)
+    assert len(proj1.projects) == len(proj2.projects)  # noqa: S101
     for pr1, pr2 in zip(proj1.projects, proj2.projects, strict=False):
         assert_project_almost_equal(pr1, pr2, **kwargs)
 
-    assert len(proj1.scripts) == len(proj2.scripts)
+    assert len(proj1.scripts) == len(proj2.scripts)  # noqa: S101
     for sc1, sc2 in zip(proj1.scripts, proj2.scripts, strict=False):
         assert_script_equal(sc1, sc2, **kwargs)
 
@@ -596,7 +595,7 @@ def assert_units_equal(unit1, unit2, strict=False):
     try:
         x = (1.0 * unit1).to_base_units() / (1.0 * unit2).to_base_units()
     except DimensionalityError:
-        raise AssertionError
+        raise AssertionError from None
 
     if x.dimensionless and (x == 1.0 or not strict):
         _check_absorbance_related_units(unit1, unit2)
@@ -608,9 +607,12 @@ def assert_units_equal(unit1, unit2, strict=False):
 def _check_absorbance_related_units(unit1, unit2):
     # particular case of absorbance, transmittance and absolute_transmitttance units
     lunit = ["absorbance", "transmittance", "absolute_transmittance"]
-    if f"{unit1: P}" in lunit and f"{unit2: P}" in lunit:
-        if f"{unit1: P}" != f"{unit2: P}":
-            raise AssertionError
+    if (
+        f"{unit1: P}" in lunit
+        and f"{unit2: P}" in lunit
+        and f"{unit1: P}" != f"{unit2: P}"
+    ):
+        raise AssertionError
     return True
 
 
@@ -677,11 +679,11 @@ class catch_warnings(warnings.catch_warnings):
     """
 
     def __init__(self, *classes):
-        super(catch_warnings, self).__init__(record=True)
+        super().__init__(record=True)
         self.classes = classes
 
     def __enter__(self):
-        warning_list = super(catch_warnings, self).__enter__()
+        warning_list = super().__enter__()
         if len(self.classes) == 0:
             warnings.simplefilter("always")
         else:

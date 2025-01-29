@@ -13,10 +13,10 @@
 
 - `NDDataset` class definition
 - Basic functionality:
-    - Plotting capabilities
-    - I/O operations
-    - Mathematical operations
-    - Units handling
+- Plotting capabilities
+- I/O operations
+- Mathematical operations
+- Units handling
 
 ### 🔍 Analysis
 

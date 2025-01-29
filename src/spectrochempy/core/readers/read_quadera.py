@@ -110,12 +110,14 @@ def _read_asc(*args, **kwargs):
     ):
         warn(
             "Columns names are  not those expected: the reading of your .asc file  could yield "
-            "please notify this to the developers of scpectrochempy"
+            "please notify this to the developers of scpectrochempy",
+            stacklevel=2,
         )
     if nchannels > 1 and colnames[3] != "Time":  # pragma: no cover
         warn(
             "The number of columms per channel is not that expected: the reading of your .asc file  could yield "
-            "please notify this to the developers of spectrochempy"
+            "please notify this to the developers of spectrochempy",
+            stacklevel=2,
         )
 
     # the remaining lines contain data and time coords
@@ -131,7 +133,8 @@ def _read_asc(*args, **kwargs):
         data = re.split(r"[\t+]", line.rstrip("\t"))
         for k in range(nchannels):
             datetime_ = datetime.strptime(
-                data[3 * k].strip(" "), "%m/%d/%Y %H:%M:%S.%f"
+                data[3 * k].strip(" "),
+                "%m/%d/%Y %H:%M:%S.%f",
             )
             times[j][k] = datetime_.timestamp()
             # hours are given in 12h clock format, so we need to add 12h when hour is in the afternoon

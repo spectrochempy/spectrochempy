@@ -58,7 +58,9 @@ SCPY_SUFFIX: dict[str, str] = {"NDDataset": ".scp", "Project": ".pscp"}
 
 
 def zipfile_factory(
-    file: str | pathlib.Path | BinaryIO, *args: Any, **kwargs: Any
+    file: str | pathlib.Path | BinaryIO,
+    *args: Any,
+    **kwargs: Any,
 ) -> "zipfile.ZipFile":
     """Create a ZipFile with Zip64 support.
 
@@ -273,7 +275,11 @@ class NDIO(HasTraits):
         kwargs["filetypes"] = self.filetype
         kwargs["caption"] = f"Save the current {self._implements()} as ... "
         filename = check_filename_to_save(
-            self, filename, save_as=True, suffix=default_suffix, **kwargs
+            self,
+            filename,
+            save_as=True,
+            suffix=default_suffix,
+            **kwargs,
         )
 
         if filename:
@@ -343,12 +349,12 @@ class NDIO(HasTraits):
             obj = ScpFile(fid)
         except FileNotFoundError as e:
             raise exceptions.SpectroChemPyError(
-                f"File {filename} doesn't exist!"
+                f"File {filename} doesn't exist!",
             ) from e
         except Exception as e:
             if str(e) == "File is not a zip file":
                 raise exceptions.SpectroChemPyError(
-                    "File not in 'scp' or 'pscp' format!"
+                    "File not in 'scp' or 'pscp' format!",
                 ) from e
             raise exceptions.SpectroChemPyError("Undefined error!") from e
 

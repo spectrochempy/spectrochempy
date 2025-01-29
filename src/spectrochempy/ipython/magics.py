@@ -90,7 +90,7 @@ class SpectroChemPyMagics(Magics):
                 "or element in the user namespace.\n "
                 "If no argument are given then the cell content "
                 "should "
-                "not be empty"
+                "not be empty",
             )
         name = "script"
         if "o" in opts:
@@ -101,7 +101,7 @@ class SpectroChemPyMagics(Magics):
             proj = opts["p"]
         if proj not in self.shell.user_ns:  # pragma: no cover
             raise ValueError(
-                f"Cannot find any project with name `{proj}` in the namespace."
+                f"Cannot find any project with name `{proj}` in the namespace.",
             )
         # get the proj object
         projobj = self.shell.user_ns[proj]

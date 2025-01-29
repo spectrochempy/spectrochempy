@@ -105,7 +105,7 @@ class Citation:
             "endnote": self._citation.as_endnote,
             "ris": self._citation.as_ris,
         }
-        if key in self._outputformat.keys():
+        if key in self._outputformat:
             return self.format(key)
         raise AttributeError
 
@@ -117,7 +117,7 @@ class Citation:
         try:
             self._citation.validate()
         except Exception as e:
-            raise ImportError(e)
+            raise ImportError(e) from None
 
     def save(self):
         """
@@ -190,7 +190,7 @@ def make_citation(version):
     citation.load()
     citation.update_version(version)
     citation.update_date()
-    print(citation)
+    print(citation)  # noqa: T201
     citation.save()
 
 
@@ -207,7 +207,7 @@ def make_zenodo(version):
     zenodo.load()
     zenodo.update_version(version)
     zenodo.update_date()
-    print(zenodo)
+    print(zenodo)  # noqa: T201
     zenodo.save()
 
 
@@ -245,7 +245,7 @@ def make_release_note_index(revision):
     sections = re.split(r"^\.\. section$", content, flags=re.M)
 
     # Clean and organize sections
-    header = re.sub(r"(\.\.\n(.*\n)*)", "", sections[0], 0)
+    header = re.sub(r"(\.\.\n(.*\n)*)", "", sections[0], count=0, flags=0)
     header = header.strip() + "\n"
     cleaned_sections = [header]
 
@@ -253,7 +253,11 @@ def make_release_note_index(revision):
         if section.strip().endswith("(do not delete this comment)"):
             continue
         content = re.sub(
-            r"(\.\. Add.*\(do not delete this comment\)\n)", "", section, 0
+            r"(\.\. Add.*\(do not delete this comment\)\n)",
+            "",
+            section,
+            count=0,
+            flags=0,
         )
         content = content.strip() + "\n"
         cleaned_sections.append(content)
@@ -368,7 +372,7 @@ Version {vers}
 .. toctree::
     :maxdepth: 2
 {latest}
-"""
+""",
             )
             # Sort and write version entries
             li = sorted(dicvers[vers], key=lambda x: int(str.split(x, ".")[2]))

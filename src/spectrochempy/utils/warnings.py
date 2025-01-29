@@ -114,7 +114,8 @@ def _assert_caught_expected_warning(
             saw_warning = True
 
             if check_stacklevel and issubclass(
-                actual_warning.category, (FutureWarning, DeprecationWarning)
+                actual_warning.category,
+                FutureWarning | DeprecationWarning,
             ):
                 _assert_raised_with_correct_stacklevel(actual_warning)
 
@@ -126,14 +127,14 @@ def _assert_caught_expected_warning(
 
     if not saw_warning:
         raise AssertionError(
-            f"Did not see expected warning of class {repr(expected_warning.__name__)}"
+            f"Did not see expected warning of class {expected_warning.__name__!r}",
         )
 
     if match and not matched_message:
         raise AssertionError(
-            f"Did not see warning {repr(expected_warning.__name__)} "
+            f"Did not see warning {expected_warning.__name__!r} "
             f"matching '{match}'. The emitted warning messages are "
-            f"{unmatched_messages}"
+            f"{unmatched_messages}",
         )
 
 
@@ -149,7 +150,7 @@ def _assert_caught_no_extra_warnings(
         if _is_unexpected_warning(actual_warning, expected_warning):
             unclosed = "unclosed transport <asyncio.sslproto._SSLProtocolTransport"
             if actual_warning.category is ResourceWarning and unclosed in str(
-                actual_warning.message
+                actual_warning.message,
             ):
                 # FIXME: kludge because pytest.filterwarnings does not
                 #  suppress these, xref GH#38630
@@ -161,11 +162,11 @@ def _assert_caught_no_extra_warnings(
                     actual_warning.message,
                     actual_warning.filename,
                     actual_warning.lineno,
-                )
+                ),
             )
 
     if extra_warnings:
-        raise AssertionError(f"Caused unexpected warning(s): {repr(extra_warnings)}")
+        raise AssertionError(f"Caused unexpected warning(s): {extra_warnings!r}")
 
 
 def _is_unexpected_warning(
@@ -191,4 +192,4 @@ def _assert_raised_with_correct_stacklevel(
         f"File where warning is raised: {actual_warning.filename} != "
         f"{caller.filename}. Warning message: {actual_warning.message}"
     )
-    assert actual_warning.filename == caller.filename, msg
+    assert actual_warning.filename == caller.filename, msg  # noqa: S101

@@ -151,7 +151,8 @@ class Coord(NDMath, NDArray):
     _html_output = tr.Bool(False)
     _parent_dim = tr.Unicode(allow_none=True)
     _parent = tr.Instance(
-        "spectrochempy.core.dataset.nddataset.NDDataset", allow_none=True
+        "spectrochempy.core.dataset.nddataset.NDDataset",
+        allow_none=True,
     )
     _use_time = tr.Bool(False)
     _show_datapoints = tr.Bool(True)
@@ -216,13 +217,11 @@ class Coord(NDMath, NDArray):
     @property
     def reversed(self):
         """Whether the axis is reversed."""
-        if (
+        return bool(
             self.units == "ppm"
             or self.units == "1 / centimeter"
-            and "raman" not in self.title.lower()
-        ):
-            return True
-        return False
+            and "raman" not in self.title.lower(),
+        )
 
         # Return a correct result only if the data are sorted  # return  # bool(self.data[0] > self.data[-1])
 
@@ -310,10 +309,10 @@ class Coord(NDMath, NDArray):
             self._units = new._units
             self._title = new._title
             self._roi = new._roi
-        else:
-            new.data = new._data  # here we assign to the data attribute to fire
-            # the linearisation (eventually) and the rounding
-            return new
+            return None
+        new.data = new._data  # here we assign to the data attribute to fire
+        # the linearisation (eventually) and the rounding
+        return new
 
     @property
     def masked_data(self):
@@ -610,10 +609,7 @@ class Coord(NDMath, NDArray):
         keys = self._make_index(items)
 
         # init returned object
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
+        new = self if inplace else self.copy()
 
         # slicing by index of all internal array
         if new.data is not None:
@@ -691,8 +687,7 @@ class Coord(NDMath, NDArray):
         return out
 
     def __repr__(self):
-        out = self._repr_value().rstrip()
-        return out
+        return self._repr_value().rstrip()
 
     @staticmethod
     def _unittransform(new, units):
@@ -724,7 +719,7 @@ class Coord(NDMath, NDArray):
     # Public methods and properties
     # ----------------------------------------------------------------------------------
 
-    def set_laser_frequency(self, frequency=15798.26 * ur("cm^-1")):
+    def set_laser_frequency(self, frequency=None):
         r"""
         Set the laser frequency.
 
@@ -739,6 +734,9 @@ class Coord(NDMath, NDArray):
             The laser frequency in cm^-1 or Hz. If the value is in cm^-1, the
             frequency is converted to Hz using the current speed of light value.
         """
+        if frequency is None:
+            frequency = 15798.26 * ur("cm^-1")
+
         if not isinstance(frequency, Quantity):
             frequency = frequency * ur("cm^-1")
 

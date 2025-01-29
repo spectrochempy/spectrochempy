@@ -80,7 +80,7 @@ class IrisKernel(tr.HasTraits):
                         "product-first-order",
                         "diffusion",
                         "stejskal-tanner",
-                    ]
+                    ],
                 ),
                 tr.Callable(),
                 NDDatasetType(),
@@ -139,7 +139,7 @@ class IrisKernel(tr.HasTraits):
         # as p belong CoordType, it is necessarily a Coord at this point.
         if len(p) != self._X.shape[0]:
             raise ValueError(
-                "'p' size should be consistent with the y coordinate of the dataset"
+                "'p' size should be consistent with the y coordinate of the dataset",
             )
         # change its default metadata if necessary
         # (i.e. if p was not provided as already a Coord).
@@ -164,7 +164,7 @@ class IrisKernel(tr.HasTraits):
                         "Provided q is a list a {len(q)} items. "
                         "It will be converted to a Coord object. "
                         "If this is not what you wanted, remember that only list "
-                        "of strictly 3 items are treated differently."
+                        "of strictly 3 items are treated differently.",
                     )
                 # Transform the list or array-like to Coord
                 q = Coord(q)
@@ -173,7 +173,7 @@ class IrisKernel(tr.HasTraits):
             if not isinstance(q, Coord):
                 raise ValueError(
                     "q must be provided as a list of 3 items or a array-like object "
-                    "that can be casted to a Coord object"
+                    "that can be casted to a Coord object",
                 )
 
             # At this point, q is surely a Coord.
@@ -211,7 +211,7 @@ class IrisKernel(tr.HasTraits):
         if isinstance(K, str):
             if K.lower() not in _adsorption + _kinetics + _diffusion + _stejskal_tanner:
                 raise NotImplementedError(
-                    f"Kernel type `{K.lower()}` is not implemented"
+                    f"Kernel type `{K.lower()}` is not implemented",
                 )
 
             if K.lower() in _adsorption:
@@ -271,7 +271,7 @@ class IrisKernel(tr.HasTraits):
                 kernel = np.zeros((p.size, q.size))
                 for n in np.arange(1, 100):
                     kernel += (1 / n**2) * np.exp(
-                        -(1 / 9) * n**2 * np.pi**2 * q.data * p.data[:, None]
+                        -(1 / 9) * n**2 * np.pi**2 * q.data * p.data[:, None],
                     )
                 kernel = 1 - (6 / np.pi**2) * kernel
 
@@ -305,7 +305,11 @@ class IrisKernel(tr.HasTraits):
         name = K + " kernel matrix" if isinstance(K, str) else "kernel matrix"
         dims = ["y", "x"]
         return NDDataset(
-            kernel, dims=dims, coordset=CoordSet(y=p, x=q), title=title, name=name
+            kernel,
+            dims=dims,
+            coordset=CoordSet(y=p, x=q),
+            title=title,
+            name=name,
         )
 
 
@@ -352,7 +356,7 @@ class IRIS(DecompositionAnalysis):
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_IRIS)s
-    """
+    """,
     )
 
     # ----------------------------------------------------------------------------------
@@ -428,7 +432,7 @@ class IRIS(DecompositionAnalysis):
         if qpsolver == "quadprog" and quadprog is False:
             raise ValueError(
                 "quadprog module is not installed. Please install it or run IRIS Solver "
-                "with qpsolver='osqp'"
+                "with qpsolver='osqp'",
             )
 
     @tr.validate("reg_par")
@@ -448,7 +452,7 @@ class IRIS(DecompositionAnalysis):
             _lambdas = np.logspace(reg_par[0], reg_par[1], reg_par[2])
         else:
             raise ValueError(
-                "reg_par should be either None or a set of 2 or 3 integers"
+                "reg_par should be either None or a set of 2 or 3 integers",
             )
 
         # create the lambdas coordinate
@@ -495,7 +499,7 @@ class IRIS(DecompositionAnalysis):
         lambdas = self._lambdas.data
 
         # define containers for outputs
-        M, N, W = K.shape[-1], X.shape[-1], X.shape[0]  # noqa: F475
+        M, N, W = K.shape[-1], X.shape[-1], X.shape[0]
         L = len(lambdas) if not self._search_reg else 4
         f = np.zeros((L, M, N))
         RSS = np.zeros(L)
@@ -869,7 +873,7 @@ class IRIS(DecompositionAnalysis):
         axeslist = []
         if index is None:
             index = range(len(self._lambdas))
-        if type(index) is int:
+        if isinstance(index, int):
             index = [index]
 
         for i in index:
@@ -880,7 +884,7 @@ class IRIS(DecompositionAnalysis):
             ax = super().plotmerit(X, X_hat_, **kwargs)
 
             ax.set_title(
-                rf"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]:.2e}"
+                rf"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]:.2e}",
             )
             axeslist.append(ax)
 
@@ -910,12 +914,12 @@ class IRIS(DecompositionAnalysis):
         axeslist = []
         if index is None:
             index = range(len(self._lambdas))
-        if type(index) is int:
+        if isinstance(index, int):
             index = [index]
         for i in index:
             ax = self.f[i].plot(method="map", **kwargs)
             ax.set_title(
-                rf"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]:.2e}"
+                rf"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]:.2e}",
             )
             axeslist.append(ax)
         return axeslist

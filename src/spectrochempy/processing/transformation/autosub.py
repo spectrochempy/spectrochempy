@@ -18,7 +18,13 @@ from spectrochempy.utils.coordrange import trim_ranges
 
 
 def autosub(
-    dataset, ref, *ranges, dim="x", method="vardiff", return_coefs=False, inplace=False
+    dataset,
+    ref,
+    *ranges,
+    dim="x",
+    method="vardiff",
+    return_coefs=False,
+    inplace=False,
 ):
     r"""
     Automatic subtraction of a reference to the dataset.

@@ -14,6 +14,7 @@ import datetime
 
 import numpy as np
 
+from spectrochempy.application import error_
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
@@ -77,13 +78,12 @@ def _read_txt(*args, **kwargs):
     if content:
         lines = content.decode("utf-8").splitlines()
     else:
-        fid = open(filename, encoding="utf-8")
         try:
-            lines = fid.readlines()
+            with open(filename, encoding="utf-8") as fid:
+                lines = fid.readlines()
         except UnicodeDecodeError:
-            fid = open(filename, encoding="latin-1")
-            lines = fid.readlines()
-            fid.close()
+            with open(filename, encoding="latin-1") as fid:
+                lines = fid.readlines()
 
     if len(lines) == 0:
         return None
@@ -95,7 +95,7 @@ def _read_txt(*args, **kwargs):
     while lines[i].startswith("#"):
         key, val = lines[i].split("=")
         key = key[1:]
-        if key in meta.keys():
+        if key in meta:
             key = f"{key} {i}"
         meta[key] = val.strip()
         i += 1
@@ -105,8 +105,8 @@ def _read_txt(*args, **kwargs):
     labspec_keys_1D = ["Acq. time (s)", "Dark correction"]
     labspec_keys_2D = ["Exposition", "Grating"]
 
-    if all(keywd in meta.keys() for keywd in labspec_keys_1D) or all(
-        keywd in meta.keys() for keywd in labspec_keys_2D
+    if all(keywd in meta for keywd in labspec_keys_1D) or all(
+        keywd in meta for keywd in labspec_keys_2D
     ):
         pass
     else:
@@ -200,7 +200,7 @@ def _transf_meta(y, meta):
     try:
         y.labels = [dateacq + delayspectra * i for i in range(len(y))]
     except Exception as e:
-        print(e)
+        error_(e)
 
     return dateacq, y
 

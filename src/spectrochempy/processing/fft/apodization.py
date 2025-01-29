@@ -125,7 +125,7 @@ def _apodize_method(**units):
             else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
                 error_(
                     "This method apply only to dimensions with [time] or [dimensionless] dimensionality.\n"
-                    "Apodization processing was thus cancelled"
+                    "Apodization processing was thus cancelled",
                 )
                 apod_arr = 1.0
 
@@ -384,10 +384,7 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
 
     aq = x[-1] - x[0]
     t = x / aq
-    if ssb < 2:
-        phi = 0.0
-    else:
-        phi = np.pi / ssb
+    phi = 0.0 if ssb < 2 else np.pi / ssb
     return np.sin((np.pi - phi) * t + phi) ** pow
 
 

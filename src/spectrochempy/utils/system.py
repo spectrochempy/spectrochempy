@@ -3,8 +3,11 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# ruff: noqa: S602, S603
+
 import getpass
 import platform
+import shlex
 import sys
 from subprocess import PIPE
 from subprocess import STDOUT
@@ -53,13 +56,18 @@ class _ExecCommand:
         self.commands.extend(args)
 
         silent = kwargs.pop("silent", False)
-        proc = run(
-            self.commands, text=True, stdout=PIPE, stderr=STDOUT
+        safe_command = shlex.split(" ".join(self.commands))
+        proc = run(  # noqa: S603
+            safe_command,
+            text=True,
+            stdout=PIPE,
+            stderr=STDOUT,
+            check=False,
         )  # capture_output=True)
 
         # TODO: handle error codes
         if not silent and proc.stdout:
-            print(proc.stdout)
+            print(proc.stdout)  # noqa: T201
         return proc.stdout
 
 
@@ -74,11 +82,13 @@ class sh:
 
     def __call__(self, script, silent=False):
         # use to run shell script
-
-        proc = run(script, text=True, shell=True, stdout=PIPE, stderr=STDOUT)
+        safe_script = shlex.split(script)
+        proc = run(  # noqa: S603
+            safe_script, text=True, stdout=PIPE, stderr=STDOUT, check=False
+        )
 
         if not silent:
-            print(proc.stdout)
+            print(proc.stdout)  # noqa: T201
         return proc.stdout
 
 

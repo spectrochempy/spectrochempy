@@ -39,7 +39,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     ----------
     %(AnalysisConfigurable.parameters)s
 
-    """
+    """,
     )
 
     # ----------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ class PLSRegression(CrossDecompositionAnalysis):
     ).tag(config=True)
 
     scale = tr.Bool(default_value=True, help="Whether to scale X and Y.").tag(
-        config=True
+        config=True,
     )
 
     max_iter = tr.Int(

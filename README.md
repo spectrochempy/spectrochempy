@@ -33,6 +33,7 @@ SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling Spect
   * Fitting for single/multiple datasets
 * **I/O Support**:
   * Import from various experiment formats
+  * Export to CSV, JCAMP, MATLAB ...
   * Advanced plotting capabilities
 
 > **⚠️ WARNING**: SpectroChemPy is under active development. The current design may undergo major changes. Please report any issues to our [Issue Tracker](https://github.com/spectrochempy/spectrochempy/issues).

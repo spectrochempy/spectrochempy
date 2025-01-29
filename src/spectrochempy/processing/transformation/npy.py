@@ -7,6 +7,7 @@
 In this module, we define basic functions adapted from numpy but able to
 handle our NDDataset objects.
 """
+
 __all__ = ["dot"]
 
 import numpy as np
@@ -79,16 +80,10 @@ def dot(a, b, strict=True, out=None):
     mask = data.mask
     data = data.data
 
-    if a.coordset is not None:
-        coordy = getattr(a, a.dims[0])
-    else:
-        coordy = None
-    if b.coordset is not None:
-        coordx = getattr(b, b.dims[1])
-    else:
-        coordx = None
+    coordy = getattr(a, a.dims[0]) if a.coordset is not None else None
+    coordx = getattr(b, b.dims[1]) if b.coordset is not None else None
 
-    history = "Dot product between %s and %s" % (a.name, b.name)
+    history = f"Dot product between {a.name} and {b.name}"
 
     # make the output
     # ----------------------------------------------------------------------------------

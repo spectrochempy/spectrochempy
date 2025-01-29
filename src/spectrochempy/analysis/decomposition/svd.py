@@ -91,7 +91,7 @@ class SVD(DecompositionAnalysis):
     [   94.54     99.6 ...      100      100]
     >>> print(svd.ev_ratio.data)
     [   94.54    5.059 ... 8.687e-06 7.779e-06]
-    """
+    """,
     )
 
     # ----------------------------------------------------------------------------------
@@ -104,7 +104,8 @@ class SVD(DecompositionAnalysis):
         "respectively.",
     ).tag(config=True)
     compute_uv = tr.Bool(
-        default_value=True, help="Whether or not to compute U and VT in addition to s."
+        default_value=True,
+        help="Whether or not to compute U and VT in addition to s.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------
@@ -179,7 +180,9 @@ class SVD(DecompositionAnalysis):
 
     @property
     @_wrap_ndarray_output_to_nddataset(
-        units=None, title="Singular values", typesingle="components"
+        units=None,
+        title="Singular values",
+        typesingle="components",
     )
     def singular_values(self):
         """

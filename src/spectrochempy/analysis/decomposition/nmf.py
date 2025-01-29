@@ -47,7 +47,7 @@ class NMF(DecompositionAnalysis):
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_NMF)s
-    """
+    """,
     )
 
     # ----------------------------------------------------------------------------------
@@ -115,11 +115,12 @@ class NMF(DecompositionAnalysis):
     ).tag(config=True)
 
     tol = tr.Float(default_value=1e-4, help="Tolerance of the stopping condition.").tag(
-        config=True
+        config=True,
     )
 
     max_iter = tr.Integer(
-        default_value=200, help="Maximum number of iterations before timing out."
+        default_value=200,
+        help="Maximum number of iterations before timing out.",
     ).tag(config=True)
 
     random_state = tr.Union(
@@ -215,7 +216,7 @@ class NMF(DecompositionAnalysis):
         # The _outfit members are np.ndarrays
         _outfit = self._nmf.fit(X)
         self._n_components = int(
-            self._nmf.n_components
+            self._nmf.n_components,
         )  # cast the returned int64 to int
         return _outfit
 

@@ -87,7 +87,7 @@ def _interpret_equation(eq, species):
         if s not in species:
             raise ValueError(
                 f'Species "{s}" in equation "{eq}" is not listed in species\n'
-                f"Available species : {species}"
+                f"Available species : {species}",
             )
         coef = match.group(4) if match.group(4) else 1
         try:
@@ -95,7 +95,7 @@ def _interpret_equation(eq, species):
         except ValueError:
             raise ValueError(
                 f"Stoichiometric coeffcients must be integers. Could not "
-                f"convert {coef} in int"
+                f"convert {coef} in int",
             ) from None
         if is_reactant:
             left[s] = coef
@@ -167,7 +167,8 @@ class ActionMassKinetics(tr.HasTraits):
 
     # internal parameters
     _reactions = tr.Union(
-        (tr.List(tr.Unicode()), tr.Dict()), help="List or dict of model reactions"
+        (tr.List(tr.Unicode()), tr.Dict()),
+        help="List or dict of model reactions",
     )
     _reactions_names = tr.List(tr.Unicode(), help="List of model reactions names")
     _init_concentrations = tr.Union(
@@ -202,7 +203,7 @@ class ActionMassKinetics(tr.HasTraits):
                 if set(conc.keys()) != set(self._species):
                     raise ValueError(
                         f"species names in species_concentrations[{i}] do not match "
-                        f"species names in species_concentrations[0]"
+                        f"species names in species_concentrations[0]",
                     )
 
         else:
@@ -218,7 +219,7 @@ class ActionMassKinetics(tr.HasTraits):
         else:
             raise TypeError(
                 f"reactions should contain be a dict, a list or a tuple of strings, "
-                f"not a {type(reactions).__name__}."
+                f"not a {type(reactions).__name__}.",
             )
 
         self._arrhenius = arrhenius
@@ -246,7 +247,7 @@ class ActionMassKinetics(tr.HasTraits):
             if arrhenius.shape[-1] != self.n_reactions:
                 raise ValueError(
                     f"arrhenius should contain {self.n_reactions} rate "
-                    f"constants, {arrhenius.shape[-1]} have been provided"
+                    f"constants, {arrhenius.shape[-1]} have been provided",
                 )
             if any(arrhenius < 0):
                 warnings.warn(
@@ -258,7 +259,7 @@ class ActionMassKinetics(tr.HasTraits):
             if arrhenius.shape[0] != self.n_reactions:
                 raise ValueError(
                     f"arrhenius should contain {self.n_reactions} rate "
-                    f"constants, {arrhenius.shape[0]} have been provided"
+                    f"constants, {arrhenius.shape[0]} have been provided",
                 )
             if (arrhenius < 0).any():
                 warnings.warn(
@@ -268,14 +269,14 @@ class ActionMassKinetics(tr.HasTraits):
                 )
             # now add temperature exponents = 0
             arrhenius = np.array(
-                [arrhenius[:, 0].T, np.zeros(arrhenius.shape[0]).T, arrhenius[:, 1].T]
+                [arrhenius[:, 0].T, np.zeros(arrhenius.shape[0]).T, arrhenius[:, 1].T],
             ).T
         elif arrhenius.shape[-1] == 3:
             # this is a 2D array with lines == [A, b, Ea]
             if arrhenius.shape[0] != self.n_reactions:
                 raise ValueError(
                     f"arrhenius should contain {self.n_reactions} rate "
-                    f"constants, {arrhenius.shape[0]} have been provided"
+                    f"constants, {arrhenius.shape[0]} have been provided",
                 )
             if (arrhenius[:, [0, 2]] < 0).any():
                 warnings.warn(
@@ -595,7 +596,7 @@ class ActionMassKinetics(tr.HasTraits):
                 # uncomment for debugging and optimization
                 # t1 = time.time()
 
-                exec(
+                exec(  # noqa: S102
                     f"def f_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return self._BmAt @ {self._reaction_rates}",
                     global_env,
                     locals_env,
@@ -603,7 +604,7 @@ class ActionMassKinetics(tr.HasTraits):
 
                 if use_jac:
                     # define jac_ = d[dC/dt]/dCi
-                    exec(
+                    exec(  # noqa: S102
                         f"def jac_(self, k_grid, k_dt, t, C): k = k_grid[int(t/k_dt)] ; return{self._jacobian}",
                         global_env,
                         locals_env,
@@ -648,14 +649,14 @@ class ActionMassKinetics(tr.HasTraits):
                 # uncomment for debugging and optimization
                 # t1 = time.time()
 
-                exec(
+                exec(  # noqa: S102
                     f"def f_(self, k, t, C): return{self._production_rates}",
                     global_env,
                     locals_env,
                 )
                 if use_jac:
                     # define jac_ = d[dC/dt]/dCi
-                    exec(
+                    exec(  # noqa: S102
                         f"def jac_(self, k, t, C): return{self._jacobian}",
                         global_env,
                         locals_env,
@@ -701,11 +702,15 @@ class ActionMassKinetics(tr.HasTraits):
                 C[i].y = Coord(t, title="time")
                 if left_op is None:
                     C[i].x = Coord(
-                        range(self.n_species), labels=self.species, title="species"
+                        range(self.n_species),
+                        labels=self.species,
+                        title="species",
                     )
                 elif c_names is not None:
                     C[i].x = Coord(
-                        range(left_op.shape[0]), labels=c_names, title="species"
+                        range(left_op.shape[0]),
+                        labels=c_names,
+                        title="species",
                     )
                 else:
                     C[i].x = Coord(
@@ -746,7 +751,7 @@ class ActionMassKinetics(tr.HasTraits):
                     self._arrhenius[int(i_r), 2] = dict_param[item]
                 else:
                     raise ValueError(
-                        "something went wrong in parsing the dict of params"
+                        "something went wrong in parsing the dict of params",
                     )
         else:
             for item in dict_param:
@@ -973,7 +978,7 @@ def _ct_modify_surface_kinetics(surface, param_to_set):
     for param in param_to_set:
         # check that  param_to_change exists
         try:
-            eval("surface." + param)
+            eval("surface." + param)  # noqa: S307
         except ValueError:
             info_(f"class {type(surface)} has no '{param}' attribute")
             raise
@@ -981,7 +986,7 @@ def _ct_modify_surface_kinetics(surface, param_to_set):
         # if the attribute is writable:
         if param in ("site_density", "coverages", "concentrations"):
             init_coverages = surface.coverages
-            exec("surface." + param + "=" + str(param_to_set[param]))
+            exec("surface." + param + "=" + str(param_to_set[param]))  # noqa: S102
             if param == "site_density":
                 # coverages must be reset
                 surface.coverages = init_coverages
@@ -989,27 +994,27 @@ def _ct_modify_surface_kinetics(surface, param_to_set):
         # else use Cantera methods (or derived from cantera)
         elif param.split(".")[-1] == "pre_exponential_factor":
             str_rate = "surface." + ".".join(param.split(".")[-3:-1])
-            b, E = eval(
-                str_rate + ".temperature_exponent," + str_rate + ".activation_energy "
+            b, E = eval(  # noqa: S307
+                str_rate + ".temperature_exponent," + str_rate + ".activation_energy ",
             )
             rxn = int(param.split(".")[0].split("[")[-1].split("]")[0])
             _ct_modify_rate(surface, rxn, ct.Arrhenius(param_to_set[param], b, E))
 
         elif param.split(".")[-1] == "temperature_exponent":
             str_rate = "surface." + ".".join(param.split(".")[-3:-1])
-            A, E = eval(
-                str_rate + "pre_exponential_factor," + str_rate + ".activation_energy "
+            A, E = eval(  # noqa: S307
+                str_rate + "pre_exponential_factor," + str_rate + ".activation_energy ",
             )
             rxn = int(param.split(".")[0].split("[")[-1].split("]")[0])
             _ct_modify_rate(surface, rxn, ct.Arrhenius(A, param_to_set[param], E))
 
         elif param.split(".")[-1] == "activation_energy":
             str_rate = "surface." + ".".join(param.split(".")[-3:-1])
-            A, b = eval(
+            A, b = eval(  # noqa: S307
                 str_rate
                 + "pre_exponential_factor,"
                 + str_rate
-                + ".temperature_exponent"
+                + ".temperature_exponent",
             )
             rxn = int(param.split(".")[0].split("[")[-1].split("]")[0])
             _ct_modify_rate(surface, rxn, ct.Arrhenius(A, b, param_to_set[param]))
@@ -1086,7 +1091,7 @@ class PFR:
                 _ct_modify_surface_kinetics(surface, kin_param_to_set)
             self.n_surface_species = len(surface.X)
             self.surface.append(
-                ct.ReactorSurface(kin=surface, r=self.cstr[0], A=area[0])
+                ct.ReactorSurface(kin=surface, r=self.cstr[0], A=area[0]),
             )
 
         # create and connect inlets to R_0
@@ -1101,43 +1106,42 @@ class PFR:
             inlet_gas.TPX = self.T, self.P, X
             self.inlet.append(ct.Reservoir(contents=inlet_gas, name=f"inlet_{i}"))
             self._mfc.append(
-                ct.MassFlowController(self.inlet[-1], self.cstr[0], name=f"MFC_{i}")
+                ct.MassFlowController(self.inlet[-1], self.cstr[0], name=f"MFC_{i}"),
             )
 
             if not callable(F):
                 self._mfc[-1].set_mass_flow_rate(F * inlet_gas.density)
+            elif i == 0:
+                self._mfc[-1].set_mass_flow_rate(
+                    lambda t, inlet_gas=inlet_gas: self._inlet_F[0](t)
+                    * inlet_gas.density,
+                )
+            elif i == 1:
+                self._mfc[-1].set_mass_flow_rate(
+                    lambda t, inlet_gas=inlet_gas: self._inlet_F[1](t)
+                    * inlet_gas.density,
+                )
+            elif i == 2:
+                self._mfc[-1].set_mass_flow_rate(
+                    lambda t, inlet_gas=inlet_gas: self._inlet_F[2](t)
+                    * inlet_gas.density,
+                )
+            elif i == 3:
+                self._mfc[-1].set_mass_flow_rate(
+                    lambda t, inlet_gas=inlet_gas: self._inlet_F[3](t)
+                    * inlet_gas.density,
+                )
+            elif i == 4:
+                self._mfc[-1].set_mass_flow_rate(
+                    lambda t, inlet_gas=inlet_gas: self._inlet_F[4](t)
+                    * inlet_gas.density,
+                )
+
             else:
-                # it is tricky to pass non explicit lambda functions to
-                # MassFlowControllers
-                # the following works while use of self._inlet_F[i](t) generate an error
-                # when using reactorNet.advance()
-
-                if i == 0:
-                    self._mfc[-1].set_mass_flow_rate(
-                        lambda t: self._inlet_F[0](t) * inlet_gas.density
-                    )
-                elif i == 1:
-                    self._mfc[-1].set_mass_flow_rate(
-                        lambda t: self._inlet_F[1](t) * inlet_gas.density
-                    )
-                elif i == 2:
-                    self._mfc[-1].set_mass_flow_rate(
-                        lambda t: self._inlet_F[2](t) * inlet_gas.density
-                    )
-                elif i == 3:
-                    self._mfc[-1].set_mass_flow_rate(
-                        lambda t: self._inlet_F[3](t) * inlet_gas.density
-                    )
-                elif i == 4:
-                    self._mfc[-1].set_mass_flow_rate(
-                        lambda t: self._inlet_F[4](t) * inlet_gas.density
-                    )
-
-                else:
-                    raise ValueError(
-                        "variable flow rate(s) must be associated within the first"
-                        "five MFC(s)"
-                    )
+                raise ValueError(
+                    "variable flow rate(s) must be associated within the first"
+                    "five MFC(s)",
+                )
 
         # create other cstrs and link them with the previous one through a pressure
         # controller
@@ -1150,19 +1154,24 @@ class PFR:
 
             if add_surface:
                 surface = ct.Interface(
-                    self._cti, phaseid="surface", phases=[initial_gas]
+                    self._cti,
+                    phaseid="surface",
+                    phases=[initial_gas],
                 )
                 self.n_surface_species = len(surface.X)
                 if kin_param_to_set is not None:
                     _ct_modify_surface_kinetics(surface, kin_param_to_set)
                 self.surface.append(
-                    ct.ReactorSurface(kin=surface, r=self.cstr[i], A=area[i])
+                    ct.ReactorSurface(kin=surface, r=self.cstr[i], A=area[i]),
                 )
 
             self._pc.append(
                 ct.PressureController(
-                    self.cstr[i - 1], self.cstr[i], master=self._mfc[-1], K=K
-                )
+                    self.cstr[i - 1],
+                    self.cstr[i],
+                    master=self._mfc[-1],
+                    K=K,
+                ),
             )
 
         # create the event
@@ -1171,7 +1180,7 @@ class PFR:
         event_gas.TPX = self.T, self.P, init_X
         self.event = ct.Reservoir(contents=event_gas, name="event")
         self._pc.append(
-            ct.PressureController(self.cstr[-1], self.event, master=self._mfc[-1], K=K)
+            ct.PressureController(self.cstr[-1], self.event, master=self._mfc[-1], K=K),
         )
 
         self.X = np.ones((self.n_cstr, self.n_gas_species))
@@ -1289,7 +1298,10 @@ class PFR:
 
         if logfile:
             logging.basicConfig(
-                filename=logfile, filemode="w", format="%(message)s", level=logging.INFO
+                filename=logfile,
+                filemode="w",
+                format="%(message)s",
+                level=logging.INFO,
             )
 
         def objective(
@@ -1328,7 +1340,8 @@ class PFR:
 
             try:
                 fitted_concentrations = newpfr.composition_vs_time(
-                    exp_conc.z, returnNDDataset=False
+                    exp_conc.z,
+                    returnNDDataset=False,
                 )["X"][:, -1, :].squeeze()
             except ct.CanteraError:
                 if optimizer == "differential_evolution":
@@ -1344,7 +1357,8 @@ class PFR:
 
             if "integrationError" not in locals():
                 se = np.square(
-                    exp_conc.data[:, exp_idx] - fitted_concentrations[:, fit_to_exp_idx]
+                    exp_conc.data[:, exp_idx]
+                    - fitted_concentrations[:, fit_to_exp_idx],
                 ).flatten()
                 sse = np.sum(se)
             else:
@@ -1360,7 +1374,7 @@ class PFR:
                             logging.info(
                                 "--------"
                                 + 10 * len(param_to_optimize) * "-"
-                                + "--------------"
+                                + "--------------",
                             )
                             min_sse = min(pop_sse)
                             it_min_sse = (
@@ -1372,19 +1386,19 @@ class PFR:
                             if gen == 1:
                                 logging.info(
                                     f"                      Minimum SSE: {min_sse:.3e} "
-                                    f"(Eval # {it_min_sse})"
+                                    f"(Eval # {it_min_sse})",
                                 )
                             else:
                                 logging.info(
                                     f"                      Minimum SSE: {min_sse:.3e} "
                                     f"({(min_sse - prev_min_sse) / prev_min_sse:+.3%},"
-                                    f" Eval # {it_min_sse})"
+                                    f" Eval # {it_min_sse})",
                                 )
                             logging.info(
-                                f"Execution time for the population: {toc - tic}"
+                                f"Execution time for the population: {toc - tic}",
                             )
                             logging.info(
-                                f"             Total execution time: {toc - start_time}"
+                                f"             Total execution time: {toc - start_time}",
                             )
                             logging.info(" ")
                             prev_min_sse = min_sse
@@ -1395,17 +1409,17 @@ class PFR:
                         logging.info(
                             "--------"
                             + 12 * len(param_to_optimize) * "-"
-                            + "--------------"
+                            + "--------------",
                         )
                         logging.info(
                             "Eval # | Parameters"
                             + (12 * len(param_to_optimize) - 11) * " "
-                            + "  | SSE "
+                            + "  | SSE ",
                         )
                         logging.info(
                             "-------|"
                             + 12 * len(param_to_optimize) * "-"
-                            + "--|-----------"
+                            + "--|-----------",
                         )
                         pop_sse = []
 
@@ -1470,7 +1484,7 @@ class PFR:
         if logfile:
             logging.info("*** Cantera/Spectrochempy kinetic model optimization log ***")
             logging.info(
-                f"{datetime.datetime.now()}: Starting optimization of the parameters"
+                f"{datetime.datetime.now()}: Starting optimization of the parameters",
             )
             logging.info("   Parameters to optimize:")
             for param in param_to_optimize:
@@ -1573,34 +1587,33 @@ class PFR:
                 best_string += f"{val:.5e} "
             logging.info(f"Optimized parameters: {best_string}")
             logging.info(f"             Min SSE: {res.fun:.5e}")
-        else:
-            if popsize:
-                logging.info(
-                    "Optimization did not end successfully. You might want to restart "
-                    "an optimization with the"
-                )
-                logging.info("following array specifying the last population:\n")
-                info_(f"it: {it}")
-                init_array = "init_pop = np.array([\n"
-                extra_trials = (it + 1) % (popsize * len(param_to_optimize))
-                if not extra_trials:
-                    last_pop = trials[it - popsize * len(param_to_optimize) + 1 :]
-                else:
-                    last_pop = trials[
-                        it
-                        - popsize * len(param_to_optimize)
-                        - extra_trials
-                        + 1 : -extra_trials
-                    ]
-                for trial in last_pop:
-                    init_array += "["
-                    for par in trial:
-                        init_array += f"{par:.5e}, "
-                    init_array += "],\n"
-                init_array += "])"
-                logging.info(init_array)
+        elif popsize:
+            logging.info(
+                "Optimization did not end successfully. You might want to restart "
+                "an optimization with the",
+            )
+            logging.info("following array specifying the last population:\n")
+            info_(f"it: {it}")
+            init_array = "init_pop = np.array([\n"
+            extra_trials = (it + 1) % (popsize * len(param_to_optimize))
+            if not extra_trials:
+                last_pop = trials[it - popsize * len(param_to_optimize) + 1 :]
             else:
-                logging.info("Optimization did not end successfully.")
+                last_pop = trials[
+                    it
+                    - popsize * len(param_to_optimize)
+                    - extra_trials
+                    + 1 : -extra_trials
+                ]
+            for trial in last_pop:
+                init_array += "["
+                for par in trial:
+                    init_array += f"{par:.5e}, "
+                init_array += "],\n"
+            init_array += "])"
+            logging.info(init_array)
+        else:
+            logging.info("Optimization did not end successfully.")
 
         if options["disp"]:
             info_(f"         Optimization time: {(toc - start_time)}")
@@ -1624,7 +1637,9 @@ class PFR:
         )
 
         fitted_concentrations = newpfr.composition_vs_time(exp_conc.z)["X"][
-            :, -1, :
+            :,
+            -1,
+            :,
         ].squeeze()
         newargs = (self, all_param)
 
@@ -1636,10 +1651,10 @@ class PFR:
             gen_labels = []
             for gen in range(len(func_values) // (popsize * len(param_to_optimize))):
                 gen_labels.append(
-                    ["G_" + str(gen)] * (popsize * len(param_to_optimize))
+                    ["G_" + str(gen)] * (popsize * len(param_to_optimize)),
                 )
             gen_labels.append(
-                ["G_polish"] * (len(func_values) % (popsize * len(param_to_optimize)))
+                ["G_polish"] * (len(func_values) % (popsize * len(param_to_optimize))),
             )
             gen_labels = [item for sublist in gen_labels for item in sublist]
         else:
@@ -1647,7 +1662,9 @@ class PFR:
 
         trials.set_coordset(
             Coord(
-                data=func_values, labels=gen_labels, title="objective function values"
+                data=func_values,
+                labels=gen_labels,
+                title="objective function values",
             ),
             Coord(
                 data=None,

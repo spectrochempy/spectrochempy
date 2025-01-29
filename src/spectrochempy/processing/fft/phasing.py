@@ -32,10 +32,9 @@ def _phase_method(method):
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
         # output dataset inplace (by default) or not
-        if not kwargs.pop("inplace", False):
-            new = dataset.copy()  # copy to be sure not to modify this dataset
-        else:
-            new = dataset
+        new = (
+            dataset.copy() if not kwargs.pop("inplace", False) else dataset
+        )  # copy to be sure not to modify this dataset
 
         swapped = False
         if axis != -1:
@@ -73,7 +72,8 @@ def _phase_method(method):
                 _check_units(kwargs.get("phc1", 0), "degree") - current[1]
             ).magnitude
             kwargs["pivot"] = _check_units(
-                kwargs.get("pivot", new.meta.pivot[-1]), dunits
+                kwargs.get("pivot", new.meta.pivot[-1]),
+                dunits,
             ).magnitude
             kwargs["exptc"] = _check_units(
                 kwargs.get("exptc", new.meta.get("exptc", [0] * new.ndim)[-1]),
@@ -112,7 +112,7 @@ def _phase_method(method):
         else:  # not (x.unitless or x.dimensionless or x.units.dimensionality != '[time]')
             error_(
                 "This method apply only to dimensions with [frequency] or [dimensionless] dimensionality.\n"
-                "Phase processing was thus cancelled"
+                "Phase processing was thus cancelled",
             )
 
         # restore original data order if it was swapped

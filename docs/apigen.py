@@ -78,10 +78,9 @@ class Apigen:
                     or str(_type).startswith("<function")
                     or str(_type).startswith("<property")
                 )
+                or "partial" not in str(_type)
             ):
-                # we keep only the members in __all__
-                if "partial" not in str(_type):
-                    continue
+                continue
 
             if objname != "spectrochempy" and objname.split(".")[1:][0] in [
                 "core",

@@ -6,8 +6,10 @@
 """
 Check SpectroChemPy updates
 """
+
 import json
 import time
+from contextlib import suppress
 from datetime import date
 from datetime import timedelta
 from os import environ
@@ -41,7 +43,7 @@ def _get_pypi_version():
     start_time = time.time()
     while True:
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=connection_timeout)
             if response.status_code != 200:  # pragma: no cover
                 return None
             break  # exit the while loop in case of success
@@ -59,7 +61,7 @@ def _get_pypi_version():
     versions = sorted(releases, key=parse_version)
     last_version = versions[-1]
     release_date = date.fromisoformat(
-        releases[last_version][0]["upload_time_iso_8601"].split("T")[0]
+        releases[last_version][0]["upload_time_iso_8601"].split("T")[0],
     )
     return Version(last_version), release_date
 
@@ -71,23 +73,30 @@ def _display_needs_update_message():
     fil = Path.home() / ".scpy_needs_update"
     message = None
     if fil.exists():
-        try:
-            msg = fil.read_text()
-            check_date, status, message = msg.split("%%")
-            if status == "NOT_YET_DISPLAYED":  # pragma: no cover
-                fil.write_text(f"{date.isoformat(date.today())}%%DISPLAYED%%{message}")
-            else:
-                # don't notice again if the message was already displayed
-                # in the 3 last days
-                last_view_delay = date.today() - date.fromisoformat(check_date)
-                if last_view_delay < timedelta(days=3):
-                    message = None
-        except Exception:  # pragma: no cover
-            pass
+        with suppress(Exception) as e:
+            try:
+                msg = fil.read_text()
+                check_date, status, message = msg.split("%%")
+                if status == "NOT_YET_DISPLAYED":  # pragma: no cover
+                    fil.write_text(
+                        f"{date.isoformat(date.today())}%%DISPLAYED%%{message}",
+                    )
+                else:
+                    # don't notice again if the message was already displayed
+                    # in the 3 last days
+                    last_view_delay = date.today() - date.fromisoformat(check_date)
+                    if last_view_delay < timedelta(days=3):
+                        message = None
+            except Exception as e:
+                warn(
+                    f"An error occurred while reading the update message: {e}",
+                    category=NeedsUpdateWarning,
+                    stacklevel=2,
+                )
 
     if message:  # pragma: no cover
         # TODO : find how to make a non blocking dialog (GUI?)
-        warn(message, category=NeedsUpdateWarning)
+        warn(message, category=NeedsUpdateWarning, stacklevel=2)
 
 
 # ======================================================================================
@@ -115,14 +124,13 @@ def check_update(version):
             fil.write_text(
                 f"{date.isoformat(date.today())}%%NOT_YET_DISPLAYED%%"
                 f"SpectroChemPy v{new_release} is available.\n"
-                f"{' '*11}Please consider updating, using pip or conda, for bug fixes "
+                f"{' ' * 11}Please consider updating, using pip or conda, for bug fixes "
                 f"and new features!\n"
-                f"{' '*11}*Version 0.6 has made some important changes "
-                f"that may require modification of existing scripts.*"
+                f"{' ' * 11}*Version 0.6 has made some important changes "
+                f"that may require modification of existing scripts.*",
             )
-    else:  # pragma: no cover
-        if fil.exists():
-            fil.unlink()
+    elif fil.exists():
+        fil.unlink()
 
     # finally display the message if necessary
     _display_needs_update_message()

@@ -36,6 +36,7 @@
 
 # %%
 import spectrochempy as scp
+from spectrochempy import info_
 
 # %% [markdown]
 # First, we import a sample raman spectrum:
@@ -62,7 +63,7 @@ _ = X.plot()
 # %%
 # select a region by slicing (note the original shape is (1, 1024)
 Xs = X[:, 0.0:400.0]
-print("shape: ", X.shape)
+info_("shape: ", X.shape)
 _ = Xs.plot()
 
 # %%

@@ -83,7 +83,7 @@ def _write_jcamp(*args, **kwargs):
         timestamp_index = None
         if dataset.y.labels is not None:
             for i, label in enumerate(dataset.y.labels[0]):
-                if not title_index and type(label) is str:
+                if not title_index and isinstance(label, str):
                     title_index = i
                 if not timestamp_index and type(label) is datetime:
                     timestamp_index = i

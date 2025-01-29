@@ -39,7 +39,7 @@ class LSTSQ(LinearRegressionAnalysis):
     See Also
     --------
     NNLS : Non-Negative least squares Linear Regression.
-    """
+    """,
     )
     name = "LSTSQ"
     description = "Ordinary Least Squares Linear Regression"
@@ -68,7 +68,7 @@ class NNLS(LinearRegressionAnalysis):
     See Also
     --------
     NNLS : Ordinary least squares Linear Regression.
-    """
+    """,
     )
     name = "NNLS"
     description = "Non-Negative Least Squares Linear Regression"

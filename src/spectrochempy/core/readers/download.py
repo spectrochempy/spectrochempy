@@ -85,7 +85,7 @@ def download_nist_ir(CAS, index="all"):
     --------
     read : Read data from experimental data.
     """
-    print("download_nist_ir")
+    info_("download_nist_ir")
     if isinstance(CAS, str) and "-" in CAS:
         CAS = CAS.replace("-", "")
 
@@ -104,7 +104,7 @@ def download_nist_ir(CAS, index="all"):
                 index.append(i)
                 i += 1
             except OSError:
-                raise OSError("Cannot connect to the NIST server... ")
+                raise OSError("Cannot connect to the NIST server... ") from None
 
         if len(index) == 0:
             error_(IOError, "NIST IR: no spectrum found")
@@ -128,7 +128,8 @@ def download_nist_ir(CAS, index="all"):
             response = requests.get(url, stream=True, timeout=10)
             if b"Spectrum not found" in response.content[:30]:
                 error_(
-                    IOError, f"NIST IR: Spectrum {i} does not exist... please check !"
+                    IOError,
+                    f"NIST IR: Spectrum {i} does not exist... please check !",
                 )
                 if i == index[-1] and out == []:
                     return None
@@ -151,12 +152,12 @@ def download_nist_ir(CAS, index="all"):
             # replace the default entry ":imported from jdx file":
             ds.history[0] = f"Downloaded from NIST: {url}"
             out.append(ds)
-            (Path(".") / "temp.jdx").unlink()
+            (Path() / "temp.jdx").unlink()
 
         except Exception:
             raise OSError(
-                "Can't read this JCAMP file: please report the issue to Spectrochempy developpers"
-            )
+                "Can't read this JCAMP file: please report the issue to Spectrochempy developpers",
+            ) from None
 
     if len(out) == 1:
         return out[0]

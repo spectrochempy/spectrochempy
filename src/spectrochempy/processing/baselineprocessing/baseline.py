@@ -133,7 +133,7 @@ class Baseline(AnalysisConfigurable):
     See Also
     --------
     %(Baseline.see_also.no_Baseline)s
-    """
+    """,
     )
 
     #     if not ranges and dataset.meta.regions is not None:
@@ -212,7 +212,7 @@ class Baseline(AnalysisConfigurable):
 
     snip_width = tr.Integer(
         help="The width of the window used to determine the baseline using the SNIP "
-        "algorithm."
+        "algorithm.",
     ).tag(config=True, min=0)
 
     tol = tr.Float(
@@ -223,7 +223,8 @@ class Baseline(AnalysisConfigurable):
     ).tag(config=True, min=0, max=1)
 
     max_iter = tr.Integer(50, help="Maximum number of :term:`AsLS` iteration.").tag(
-        config=True, min=1
+        config=True,
+        min=1,
     )
     n_components = tr.Integer(
         default_value=5,
@@ -260,7 +261,7 @@ baseline/trends for different segments of the data.
     # Runtime parameters
     # ----------------------------------------------------------------------------------
     _X_ranges = NDDatasetType(
-        help="The dataset containing only the sections corresponding to _ranges"
+        help="The dataset containing only the sections corresponding to _ranges",
     )
     _ranges = tr.List(help="The actual list of ranges after trim and clean-up")
 
@@ -315,15 +316,16 @@ baseline/trends for different segments of the data.
 
         if isinstance(ranges, tuple) and len(ranges) == 1:
             ranges = ranges[0]  # probably passed with no start to the compute function
-        if not isinstance(ranges, (list, tuple)):
+        if not isinstance(ranges, list | tuple):
             ranges = list(ranges)
 
-        if len(ranges) == 2:
-            if isinstance(ranges[0], TYPE_INTEGER + TYPE_FLOAT) and isinstance(
-                ranges[1], TYPE_INTEGER + TYPE_FLOAT
-            ):
-                # a pair a values, we interpret this as a single range
-                ranges = [[ranges[0], ranges[1]]]
+        if (
+            len(ranges) == 2
+            and isinstance(ranges[0], TYPE_INTEGER + TYPE_FLOAT)
+            and isinstance(ranges[1], TYPE_INTEGER + TYPE_FLOAT)
+        ):
+            # a pair a values, we interpret this as a single range
+            ranges = [[ranges[0], ranges[1]]]
 
         # prepare the final ranges : find the single values
         for i, item in enumerate(ranges[:]):
@@ -453,7 +455,11 @@ baseline/trends for different segments of the data.
             # polynomial interpolation or detrend process
             # using parameter `order` and predetermined ranges
             polycoef = np.polynomial.polynomial.polyfit(
-                xbase, Y.T, deg=self.order, rcond=None, full=False
+                xbase,
+                Y.T,
+                deg=self.order,
+                rcond=None,
+                full=False,
             )
             _store = np.polynomial.polynomial.polyval(x, polycoef)
 
@@ -560,10 +566,7 @@ baseline/trends for different segments of the data.
 
         # inverse transform to get the baseline in the original data space
         # this depends on the approach used (multivariate or not)
-        if self.multivariate:
-            baseline = T @ _store
-        else:
-            baseline = _store
+        baseline = T @ _store if self.multivariate else _store
 
         # eventually inverse lls transform
         if self.lls:
@@ -640,7 +643,7 @@ baseline/trends for different segments of the data.
             bp = Xx.data[bp] if not isinstance(bp, TYPE_FLOAT) else bp
             bplist.append(bp)
         # sort and remove duplicates
-        bplist = sorted(list(set(bplist)))
+        bplist = sorted(set(bplist))
 
         # loop on breakpoints pairs
         baseline = np.zeros_like(self._X.data)
@@ -678,8 +681,7 @@ baseline/trends for different segments of the data.
         """Computed baseline."""
         if not self._fitted:
             raise NotFittedError
-        baseline = self._outfit[0]
-        return baseline
+        return self._outfit[0]
 
     def transform(self):
         """Return a dataset with baseline removed."""
@@ -786,7 +788,10 @@ baseline/trends for different segments of the data.
         mao = ma * offset / 100
         _ = (X - X.min()).plot(color=colX, **kwargs)
         _ = (Xc - Xc.min() - mao).plot(
-            clear=False, ls="dashed", cmap=None, color=colXhat
+            clear=False,
+            ls="dashed",
+            cmap=None,
+            color=colXhat,
         )
         ax = (bas - X.min()).plot(clear=False, cmap=None, color=colRes)
         ax.autoscale(enable=True, axis="y")
@@ -848,7 +853,7 @@ def get_baseline(dataset, *ranges, **kwargs):
         if not ranges and blc.order != 1:
             warning_(
                 f"As no ranges was provided, baseline() uses the features limit "
-                f"with order='linear'. Provided order={blc.order} is ignored"
+                f"with order='linear'. Provided order={blc.order} is ignored",
             )
             blc.order = "linear"
         blc.ranges = ranges
@@ -893,7 +898,7 @@ def basc(dataset, *ranges, **kwargs):
 
 
 @_docstring.dedent
-def detrend(dataset, order="linear", breakpoints=[], **kwargs):
+def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     r"""
     Remove polynomial trend along a dimension from dataset.
 
@@ -932,6 +937,8 @@ def detrend(dataset, order="linear", breakpoints=[], **kwargs):
     """
 
     # kwargs will be removed in version 0.8
+    if breakpoints is None:
+        breakpoints = []
     inplace = kwargs.pop("inplace", None)
     if inplace is not None:
         warning_("inplace parameter was removed in version 0.7 and has no more effect.")

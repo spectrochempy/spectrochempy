@@ -120,7 +120,7 @@ def _display_info_string(**kwargs):  # pragma: no cover
 
     template = Template(_template)
     html = template.render(
-        {"logo": logo, "message": message.strip().replace("\n", "<br/>")}
+        {"logo": logo, "message": message.strip().replace("\n", "<br/>")},
     )
     publish_display_data(data={"text/html": html})
 
@@ -154,7 +154,15 @@ copyright = _get_copyright()
 
 
 def _get_release_date():
-    return subprocess.getoutput("git log -1 --tags --date=short --format='%ad'")
+    cmd = ["git", "log", "-1", "--tags", "--date=short", "--format=%ad"]
+    if all(isinstance(arg, str) for arg in cmd):
+        if all(isinstance(arg, str) for arg in cmd):
+            result = subprocess.run(cmd, capture_output=True, text=True, check=False)  # noqa: S603
+        else:
+            raise ValueError("Invalid command arguments")
+    else:
+        raise ValueError("Invalid command arguments")
+    return result.stdout.strip()
 
 
 release_date = _get_release_date()
@@ -172,7 +180,7 @@ def _download_full_testdata_directory(datadir):
 
     url = "https://github.com/spectrochempy/spectrochempy_data/archive/refs/heads/master.zip"
 
-    resp = requests.get(url, stream=True, allow_redirects=True)
+    resp = requests.get(url, stream=True, allow_redirects=True, timeout=10)
     zipfile = ZipFile(io.BytesIO(resp.content))
     files = [zipfile.open(file_name) for file_name in zipfile.namelist()]
 
@@ -270,7 +278,7 @@ class SpectroChemPy(Application):
 
     description = tr.Unicode(
         "SpectroChemPy is a framework for processing, analysing and modelling "
-        "Spectroscopic data for Chemistry with Python."
+        "Spectroscopic data for Chemistry with Python.",
     )
     "Short description of the  `SpectroChemPy` application"
 
@@ -279,7 +287,7 @@ class SpectroChemPy(Application):
 
     @tr.default("long_description")
     def _get_long_description(self):
-        desc = f"""
+        return f"""
 <p><strong>SpectroChemPy</strong> is a framework for processing, analysing and modelling
  <strong>Spectro</>scopic data for <strong>Chem</strong>istry with
  <strong>Py</strong>thon.
@@ -297,8 +305,6 @@ When using <strong>SpectroChemPy</strong> for your own work,
 you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 """
 
-        return desc
-
     # ----------------------------------------------------------------------------------
     # Configuration parameters
     # ----------------------------------------------------------------------------------
@@ -306,7 +312,8 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     _loaded_config_files = tr.List()
 
     reset_config = tr.Bool(
-        False, help="Should we restore a default configuration ?"
+        False,
+        help="Should we restore a default configuration ?",
     ).tag(config=True)
     """Flag: True if one wants to reset settings to the original config defaults."""
 
@@ -318,7 +325,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     #     return str(self.name).lower() + "_cfg"
 
     config_dir = tr.Instance(Path, help="Set the configuration directory location").tag(
-        config=True
+        config=True,
     )
     """Configuration directory."""
 
@@ -342,7 +349,8 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     """Flag to set in fully quite mode (even no warnings)."""
 
     nodisplay = tr.Bool(
-        False, help="Set NO DISPLAY mode, i.e., no graphics outputs"
+        False,
+        help="Set NO DISPLAY mode, i.e., no graphics outputs",
     ).tag(config=True)
     """Flag to set in NO DISPLAY mode."""
 
@@ -355,7 +363,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     #         self.config_manager.update(self.config_file_name, {self.__class__.__name__: {change.name: change.new, }})
 
     show_config = tr.Bool(help="Dump configuration to stdout at startup").tag(
-        config=True
+        config=True,
     )
 
     @tr.observe("show_config")
@@ -365,7 +373,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             self.start = self.start_show_config
 
     show_config_json = tr.Bool(help="Dump configuration to stdout (as JSON)").tag(
-        config=True
+        config=True,
     )
 
     @tr.observe("show_config_json")
@@ -400,56 +408,56 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
                     "handlers": ["console", "string"],
                 },
             },
-        }
+        },
     ).tag(config=True)
 
     # Command line interface
     # ----------------------------------------------------------------------------------
-    aliases = dict(
-        test="SpectroChemPy.test",
-        project="SpectroChemPy.last_project",
-        f="SpectroChemPy.startup_filename",
-        port="SpectroChemPy.port",
-    )
+    aliases = {
+        "test": "SpectroChemPy.test",
+        "project": "SpectroChemPy.last_project",
+        "f": "SpectroChemPy.startup_filename",
+        "port": "SpectroChemPy.port",
+    }
 
-    flags = dict(
-        debug=(
+    flags = {
+        "debug": (
             {"SpectroChemPy": {"log_level": DEBUG}},
             "Set log_level to DEBUG - most verbose mode.",
         ),
-        info=(
+        "info": (
             {"SpectroChemPy": {"log_level": INFO}},
             "Set log_level to INFO - verbose mode.",
         ),
-        quiet=(
+        "quiet": (
             {"SpectroChemPy": {"log_level": ERROR}},
             "Set log_level to ERROR - no verbosity at all.",
         ),
-        nodisplay=(
+        "nodisplay": (
             {"SpectroChemPy": {"nodisplay": True}},
             "Set NO DISPLAY mode to true - no graphics at all",
         ),
-        reset_config=(
+        "reset_config": (
             {"SpectroChemPy": {"reset_config": True}},
             "Reset config to default",
         ),
-        show_config=(
+        "show_config": (
             {
                 "SpectroChemPy": {
                     "show_config": True,
-                }
+                },
             },
             "Show the application's configuration (human-readable format).",
         ),
-        show_config_json=(
+        "show_config_json": (
             {
                 "SpectroChemPy": {
                     "show_config_json": True,
-                }
+                },
             },
             "Show the application's configuration (json format).",
         ),
-    )
+    }
 
     classes = tr.List(
         help="List of configurables",
@@ -496,7 +504,13 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         #    self.log.error(f"{etype.__name__}: {evalue}")
 
     def _custom_warning(
-        self, message, category, filename, lineno, file=None, line=None
+        self,
+        message,
+        category,
+        filename,
+        lineno,
+        file=None,
+        line=None,
     ):
         with self._fmtcontext():
             self.log.warning(f"({category.__name__}) {message}")
@@ -554,7 +568,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             [
                 GeneralPreferences,
                 PlotPreferences,
-            ]
+            ],
         )
 
     # ----------------------------------------------------------------------------------
@@ -579,22 +593,20 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             return self._start()
 
         if self._loaded_config_files:
-            print("Loaded config files:")
+            print("Loaded config files:")  # noqa: T201
             for fil in self._loaded_config_files:
-                print(f"  {fil}")
+                print(f"  {fil}")  # noqa: T201
 
         for classname in sorted(config):
             class_config = config[classname]
             if not class_config:
                 continue
-            print(classname)
-            pformat_kwargs = dict(indent=4)
-            if sys.version_info >= (3, 4):
-                # use compact pretty-print on Pythons that support it
-                pformat_kwargs["compact"] = True
+            print(classname)  # noqa: T201
+            pformat_kwargs = {"indent": 4}
+            pformat_kwargs["compact"] = True
             for traitname in sorted(class_config):
                 value = class_config[traitname]
-                print(f"  {traitname} = {pprint.pformat(value, **pformat_kwargs)}")
+                print(f"  {traitname} = {pprint.pformat(value, **pformat_kwargs)}")  # noqa: T201
 
         # now run the actual start function
         return self.start()
@@ -696,9 +708,8 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             if ipy is not None and "TerminalInteractiveShell" not in str(ipy):
                 _display_info_string(message=info_string.strip())
 
-            else:
-                if "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
-                    print(info_string.strip())
+            elif "/bin/scpy" not in sys.argv[0]:  # deactivate for console scripts
+                print(info_string.strip())  # noqa: T201
 
         # force update of rcParams
         for rckey in mpl.rcParams:
@@ -707,7 +718,8 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
                 mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
             except ValueError:
                 mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace(
-                    "'", ""
+                    "'",
+                    "",
                 )
             except AttributeError:
                 # print(f'{e} -> you may want to add it to PlotPreferences.py')
@@ -778,7 +790,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         Formatted warning message.
         """
         self._from_warning_ = True
-        warnings.warn(msg, *args, **kwargs)
+        warnings.warn(msg, *args, **kwargs, stacklevel=2)
         self._from_warning_ = False
 
     # ----------------------------------------------------------------------------------
@@ -839,7 +851,7 @@ reset_preferences = app.reset_preferences
 # --------------------------------------------------------------------------------------
 # Check for new release in a separate thread
 # --------------------------------------------------------------------------------------
-from spectrochempy.application._check_update import check_update  # noqa: E402
+from spectrochempy.application._check_update import check_update
 
 DISPLAY_UPDATE = threading.Thread(target=check_update, args=(version,))
 DISPLAY_UPDATE.start()
@@ -849,6 +861,7 @@ DISPLAY_UPDATE.start()
 # Download data in a separate thread
 # --------------------------------------------------------------------------------------
 DOWNLOAD_TESTDATA = threading.Thread(
-    target=_download_full_testdata_directory, args=(preferences.datadir,)
+    target=_download_full_testdata_directory,
+    args=(preferences.datadir,),
 )
 DOWNLOAD_TESTDATA.start()

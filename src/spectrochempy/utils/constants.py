@@ -6,8 +6,8 @@
 import numpy as np
 from numpy.ma.core import MaskedArray  # noqa: F401
 from numpy.ma.core import MaskedConstant  # noqa: F401
-from numpy.ma.core import masked as MASKED  # noqa: F401
-from numpy.ma.core import nomask as NOMASK  # noqa: F401
+from numpy.ma.core import masked as MASKED  # noqa: F401, N812
+from numpy.ma.core import nomask as NOMASK  # noqa: F401, N812
 
 #: Default dimension names.
 DEFAULT_DIM_NAME = list("xyzuvwpqrstijklmnoabcdefgh")[::-1]

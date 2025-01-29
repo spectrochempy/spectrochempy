@@ -88,6 +88,7 @@ def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=
         warn(
             msg,
             category=DeprecationWarning,
+            stacklevel=2,
         )
 
     if name is not None:
@@ -171,7 +172,7 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
     if old_var_keyword_parameter is None:
         raise RuntimeError(
             f"The {cls} constructor does not take **kwargs, which means that the signature "
-            "can not be expanded with trait names"
+            "can not be expanded with trait names",
         )
 
     new_parameters = []
@@ -189,7 +190,9 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
     # Append trait names as keyword only parameters in the signature
     new_parameters += [
         Parameter(
-            name, kind=Parameter.KEYWORD_ONLY, default=_get_default(value.default_value)
+            name,
+            kind=Parameter.KEYWORD_ONLY,
+            default=_get_default(value.default_value),
         )
         for name, value in traits
         if name not in old_parameter_names
@@ -387,13 +390,13 @@ class _set_output:
                         {
                             "k": Coord(
                                 None,
-                                labels=["#%d" % (i) for i in range(X_transf.shape[0])],
+                                labels=[f"#{i}" for i in range(X_transf.shape[0])],
                                 title="components",
                             ),
                             X.dims[1]: (
                                 X.coord(1).copy() if X.coord(-1) is not None else None
                             ),
-                        }
+                        },
                     )
                 if self.typex == "components":
                     X_transf.dims = [X.dims[0], "k"]
@@ -405,10 +408,10 @@ class _set_output:
                             # cannot use X.y in case of transposed X
                             "k": Coord(
                                 None,
-                                labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                                labels=[f"#{i}" for i in range(X_transf.shape[-1])],
                                 title="components",
                             ),
-                        }
+                        },
                     )
                 if self.typex == "features":
                     X_transf.dims = ["k", X.dims[1]]
@@ -416,13 +419,13 @@ class _set_output:
                         {
                             "k": Coord(
                                 None,
-                                labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                                labels=[f"#{i}" for i in range(X_transf.shape[-1])],
                                 title="components",
                             ),
                             X.dims[1]: (
                                 X.coord(1).copy() if X.coord(1) is not None else None
                             ),
-                        }
+                        },
                     )
                 if self.typey == "features":
                     X_transf.dims = [X.dims[1], "k"]
@@ -433,10 +436,10 @@ class _set_output:
                             ),
                             "k": Coord(
                                 None,
-                                labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                                labels=[f"#{i}" for i in range(X_transf.shape[-1])],
                                 title="components",
                             ),
-                        }
+                        },
                     )
                 if self.typesingle == "components":
                     # occurs when the data are 1D such as ev_ratio...
@@ -444,7 +447,7 @@ class _set_output:
                     X_transf.set_coordset(
                         k=Coord(
                             None,
-                            labels=["#%d" % (i) for i in range(X_transf.shape[-1])],
+                            labels=[f"#{i}" for i in range(X_transf.shape[-1])],
                             title="components",
                         ),
                     )
@@ -453,7 +456,7 @@ class _set_output:
                     if X.coordset[0].labels is not None:
                         labels = X.coordset[0].labels
                     else:
-                        labels = ["#%d" % (i + 1) for i in range(X.shape[-1])]
+                        labels = [f"#{i + 1}" for i in range(X.shape[-1])]
                     X_transf.dims = ["j"]
                     X_transf.set_coordset(
                         j=Coord(
@@ -510,10 +513,7 @@ def _units_agnostic_method(method):
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
         # output dataset inplace (by default) or not
-        if not kwargs.pop("inplace", False):
-            new = dataset.copy()  # copy to be sure not to modify this dataset
-        else:
-            new = dataset
+        new = dataset.copy() if not kwargs.pop("inplace", False) else dataset
 
         swapped = False
         if axis != -1:

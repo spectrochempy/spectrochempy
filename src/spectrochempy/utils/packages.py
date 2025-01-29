@@ -25,7 +25,9 @@ def list_packages(package):
 
     names = [package.__name__]
     for __, name, __ in walk_packages(
-        package.__path__, prefix=package.__name__ + ".", onerror=lambda x: None
+        package.__path__,
+        prefix=package.__name__ + ".",
+        onerror=lambda x: None,
     ):
         names.append(name)
 
@@ -42,8 +44,8 @@ def generate_api(api_path, configurables=False):
     if not dirname.endswith("spectrochempy"):
         dirname, _name = os.path.split(dirname)
         name = _name + "." + name
-    pkgs = sys.modules["spectrochempy.%s" % name]
-    api = sys.modules["spectrochempy.%s.api" % name]
+    pkgs = sys.modules[f"spectrochempy.{name}"]
+    api = sys.modules[f"spectrochempy.{name}.api"]
 
     pkgs = list_packages(pkgs)
 

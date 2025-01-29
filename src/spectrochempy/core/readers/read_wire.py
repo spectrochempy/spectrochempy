@@ -189,7 +189,7 @@ class _wdfReader:
                 self._meta.map_area_type = MapAreaType.ColumnMajor
                 warning_(
                     "Map area type is not specified, "
-                    "will assume a xy (column major) scan for the mapping data."
+                    "will assume a xy (column major) scan for the mapping data.",
                 )
             # line scan
             if self._meta.map_area_type == MapAreaType.XYLine:
@@ -213,7 +213,7 @@ class _wdfReader:
             # not implemented yet
             else:
                 error_(
-                    f"Map area type {self._meta.map_area_type.name} not implemented yet!"
+                    f"Map area type {self._meta.map_area_type.name} not implemented yet!",
                 )
 
         # Finally close the fid
@@ -296,10 +296,12 @@ class _wdfReader:
         # Username and title
         self._fid.seek(Offsets.file_info)
         self._meta.username = self._read_type(
-            "utf8", Offsets.usr_name - Offsets.file_info
+            "utf8",
+            Offsets.usr_name - Offsets.file_info,
         )
         self._dataset.description = self._read_type(
-            "utf8", Offsets.data_block - Offsets.usr_name
+            "utf8",
+            Offsets.data_block - Offsets.usr_name,
         )
 
     def _parse_others(self):
@@ -344,7 +346,7 @@ class _wdfReader:
                     [
                         windows_time_to_dt64(self._read_type("int64"))
                         for i in range(count)
-                    ]
+                    ],
                 )
                 # set the acquisition time from the first time stamp
                 self._meta.acquisition_time = data[0]
@@ -439,8 +441,7 @@ class _wdfReader:
         n_row = end - start + 1
         self._fid.seek(pos_start)
         data = fromfile(self._fid, dtype="float32", count=n_row * points)
-        data = np.array(data, dtype=float, ndmin=2)
-        return data
+        return np.array(data, dtype=float, ndmin=2)
 
     def _parse_img(self):
         """Extract the white-light JPEG image
@@ -486,7 +487,7 @@ class _wdfReader:
                 self._meta.img_origins = np.array([x_org_, y_org_])
                 # Default is microns (5)
                 self._meta.img_dimension_unit = UnitType(
-                    exif_header[ExifTags.FocalPlaneResolutionUnit]
+                    exif_header[ExifTags.FocalPlaneResolutionUnit],
                 )
                 # Give the box for cropping
                 # Following the PIL manual
@@ -514,7 +515,7 @@ class _wdfReader:
         if type in ["int16", "int32", "int64", "float", "double"]:
             if size > 1:
                 raise NotImplementedError(
-                    "Does not support read number type with size >1"
+                    "Does not support read number type with size >1",
                 )
             # unpack into unsigned values
             fmt_out = LenType["s_" + type].value
@@ -565,7 +566,7 @@ class _wdfReader:
         if not self._is_completed:
             warning_(
                 "The measurement is not completed, "
-                "will try to reshape spectra into count * pps."
+                "will try to reshape spectra into count * pps.",
             )
             try:
                 data = np.reshape(data, (count, points))
@@ -579,7 +580,7 @@ class _wdfReader:
             if w * h != count:
                 debug_(
                     "Mapping information from WMAP block not"
-                    " corresponding to ORGN block! "
+                    " corresponding to ORGN block! ",
                 )
                 error_("Can't reshape the spectra with the given mapping information.")
                 return None
@@ -588,7 +589,7 @@ class _wdfReader:
                 debug_(
                     "Mapping information from WMAP"
                     " not corresponding to DATA! "
-                    "Will not reshape the spectra"
+                    "Will not reshape the spectra",
                 )
                 error_("Reshaping spectra array failed.")
                 return None
@@ -680,34 +681,34 @@ class UnitType(IntEnum):
 
     def __str__(self):
         """Rewrite the unit name output"""
-        unit_str = dict(
-            Arbitrary="",
-            RamanShift="1/cm",  # cm^-1 by default
-            Wavelength="nm",  # nm
-            Nanometre="nm",
-            ElectronVolt="eV",
-            Micron="um",  # same for EXIF units
-            Counts="counts",
-            Electrons="electrons",
-            Millimetres="mm",
-            Metres="m",
-            Kelvin="K",
-            Pascal="Pa",
-            Seconds="s",
-            Milliseconds="ms",
-            Hours="h",
-            Days="d",
-            Pixels="px",
-            Intensity="",
-            RelativeIntensity="",
-            Degrees="°",
-            Radians="rad",
-            Celsius="°C",
-            Fahrenheit="°F",
-            KelvinPerMinute="K/min",
-            AcquisitionTime="us",
-            Microseconds="us",
-        )
+        unit_str = {
+            "Arbitrary": "",
+            "RamanShift": "1/cm",  # cm^-1 by default
+            "Wavelength": "nm",  # nm
+            "Nanometre": "nm",
+            "ElectronVolt": "eV",
+            "Micron": "um",  # same for EXIF units
+            "Counts": "counts",
+            "Electrons": "electrons",
+            "Millimetres": "mm",
+            "Metres": "m",
+            "Kelvin": "K",
+            "Pascal": "Pa",
+            "Seconds": "s",
+            "Milliseconds": "ms",
+            "Hours": "h",
+            "Days": "d",
+            "Pixels": "px",
+            "Intensity": "",
+            "RelativeIntensity": "",
+            "Degrees": "°",
+            "Radians": "rad",
+            "Celsius": "°C",
+            "Fahrenheit": "°F",
+            "KelvinPerMinute": "K/min",
+            "AcquisitionTime": "us",
+            "Microseconds": "us",
+        }
         return unit_str[self._name_]
 
 

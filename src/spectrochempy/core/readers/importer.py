@@ -103,14 +103,18 @@ class Importer(HasTraits):
         self.datasets = []
         self.default_key = kwargs.pop("default_key", ".scp")
 
-        if "merge" not in kwargs:
+        if (
+            "merge" not in kwargs
+            and args
+            and len(args) == 1
+            and isinstance(args[0], list | tuple)
+        ):
             # if merge is not specified, but the args are provided as a single list,
             # then will are supposed to merge the datasets. If merge is specified then
             # it has priority.
             # This is not useful for the 1D datasets, as if they are compatible they
             # are merged automatically
-            if args and len(args) == 1 and isinstance(args[0], (list, tuple)):
-                kwargs["merge"] = True
+            kwargs["merge"] = True
 
         args, kwargs = self._setup_objtype(*args, **kwargs)
         res = check_filename_to_open(*args, **kwargs)
@@ -121,7 +125,7 @@ class Importer(HasTraits):
             # Cancel in dialog!
             return None
 
-        for key in self.files.keys():
+        for key in self.files:
             # particular case of carroucell files
             if key == "" and kwargs.get("protocol") == ["carroucell"]:
                 key = ".carroucell"
@@ -180,10 +184,12 @@ class Importer(HasTraits):
                 nd.name = name
         elif names and len(names) != len(nds):
             warn(
-                "length of the `names` list and of the list of datasets mismatch - names not applied"
+                "length of the `names` list and of the list of datasets mismatch - names not applied",
+                stacklevel=2,
             )
         return sorted(
-            nds, key=str
+            nds,
+            key=str,
         )  # return a sorted list (sorted according to their string representation)
 
     def _setup_objtype(self, *args, **kwargs):
@@ -238,7 +244,7 @@ class Importer(HasTraits):
                     kwargs["read_method"] = read_
                     info_(
                         "File/directory not found locally: Attempt to download it from "
-                        "the GitHub repository `spectrochempy_data`..."
+                        "the GitHub repository `spectrochempy_data`...",
                     )
                     dataset = _read_remote(self.objtype(), filename, **kwargs)
 
@@ -295,7 +301,7 @@ class Importer(HasTraits):
                 datasets = [dataset]
 
             except DimensionsCompatibilityError as e:
-                warn(str(e))  # return only the list
+                warn(str(e), stacklevel=2)  # return only the list
 
         return datasets
 
@@ -495,7 +501,7 @@ def read(*paths, **kwargs):
     protocol = kwargs.get("protocol")
     available_protocols = list(importer.protocols.values())
     available_protocols.extend(
-        list(importer.alias.keys())
+        list(importer.alias.keys()),
     )  # to handle variants of protocols
     if protocol is None:
         kwargs["filetypes"] = list(importer.filetypes.values())
@@ -506,10 +512,10 @@ def read(*paths, **kwargs):
     else:
         try:
             kwargs["filetypes"] = [importer.filetypes[protocol]]
-        except KeyError:
-            raise ProtocolError(protocol, list(importer.protocols.values()))
+        except KeyError as e:
+            raise ProtocolError(protocol, list(importer.protocols.values())) from e
         except TypeError as e:
-            print(e)
+            info_(e)
 
     # deprecated kwargs
     listdir = kwargs.pop("listdir", True)
@@ -636,7 +642,7 @@ def _read_dir(*args, **kwargs):
     valid_extensions = (
         list(zip(*FILETYPES, strict=False))[0] + list(zip(*ALIAS, strict=False))[0]
     )
-    for key in [key for key in files.keys() if key[1:] in valid_extensions]:
+    for key in [key for key in files if key[1:] in valid_extensions]:
         if key:
             importer = Importer()
             nd = importer(files[key], **kwargs)
@@ -710,7 +716,7 @@ def _openfid(filename, mode="rb", **kwargs):
         kwargs["read_only"] = kwargs.get("read_only", True)
 
         # use request to read the remote content
-        r = requests.get(filename, allow_redirects=True)
+        r = requests.get(filename, allow_redirects=True, timeout=10)
         r.raise_for_status()
         content = r.content
         encoding = r.encoding
@@ -728,7 +734,7 @@ def _openfid(filename, mode="rb", **kwargs):
             else io.StringIO(content.decode(encoding))
         )
     else:
-        fid = open(filename, mode=mode)
+        fid = open(filename, mode=mode)  # noqa: SIM115
 
     return fid, kwargs
 
@@ -746,7 +752,7 @@ def _get_url_content_and_save(url, dst, replace, read_only=False):
         return None
 
     try:
-        r = requests.get(url, allow_redirects=True)
+        r = requests.get(url, allow_redirects=True, timeout=10)
 
         r.raise_for_status()
 
@@ -758,7 +764,7 @@ def _get_url_content_and_save(url, dst, replace, read_only=False):
         return r.content
 
     except OSError:
-        raise FileNotFoundError(f"Not found locally or at url: {url}")
+        raise FileNotFoundError(f"Not found locally or at url: {url}") from None
 
 
 def _download_full_testdata_directory():
@@ -768,7 +774,7 @@ def _download_full_testdata_directory():
 
     url = "https://github.com/spectrochempy/spectrochempy_data/archive/refs/heads/master.zip"
 
-    resp = requests.get(url)
+    resp = requests.get(url, timeout=10)
     zipfile = ZipFile(io.BytesIO(resp.content))
     files = [zipfile.open(file_name) for file_name in zipfile.namelist()]
 
@@ -786,15 +792,15 @@ def _download_from_github(path, dst, replace=False):
     # download on github (always save the downloaded files)
     relative_path = str(pathclean(path).as_posix())
     path = (
-        f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"  # noqa
+        f"https://github.com/spectrochempy/spectrochempy_data/raw/master/"
         f"testdata/{relative_path}"
     )
 
     # first determine if it is a directory
-    r = requests.get(path + "/__index__", allow_redirects=True)
+    r = requests.get(path + "/__index__", allow_redirects=True, timeout=10)
     index = None
     if r.status_code == 200:
-        index = yaml.load(r.content, Loader=yaml.CLoader)
+        index = yaml.safe_load(r.content)
 
     if index is None:
         return _get_url_content_and_save(path, dst, replace)
@@ -804,6 +810,7 @@ def _download_from_github(path, dst, replace=False):
         _get_url_content_and_save(f"{path}/{filename}", dst / filename, replace)
     for folder in index["folders"]:
         _download_from_github(f"{relative_path}/{folder}", dst / folder)
+    return None
 
 
 def _is_relative_to(path, base):
@@ -827,7 +834,7 @@ def _relative_to(path, base):
         return pathclean("/".join(pparts[idx + 1 :]))
     raise ValueError(
         f"'{path}' is not in the subpath of '{base}' OR one path is "
-        f"relative and the other absolute."
+        f"relative and the other absolute.",
     )
 
 
@@ -841,7 +848,8 @@ def _read_remote(*args, **kwargs):
     read_method = kwargs.pop("read_method", read)
     download_only = kwargs.pop("download_only", False)
     replace = kwargs.pop(
-        "replace_existing", False
+        "replace_existing",
+        False,
     )  # by default we download only if needed.
 
     # downloaded file
@@ -849,7 +857,7 @@ def _read_remote(*args, **kwargs):
     path = pathclean(path)
 
     # we need to download additional files for topspin
-    topspin = True if "topspin" in read_method.__name__ else False
+    topspin = "topspin" in read_method.__name__
     # we have to treat a special case: topspin, where the parent directory need
     # to be downloaded with the required file
     if topspin:
@@ -878,7 +886,10 @@ def _read_remote(*args, **kwargs):
         if content is None:
             if topspin:
                 return read_method(
-                    dataset, dst / _relative_to(savedpath, dst), **kwargs
+                    dataset,
+                    dst / _relative_to(savedpath, dst),
+                    **kwargs,
                 )
             return read_method(dataset, dst, **kwargs)
         return read_method(dataset, dst, content=content, **kwargs)
+    return None

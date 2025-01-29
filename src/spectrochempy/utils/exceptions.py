@@ -9,6 +9,7 @@ SpectroChemPy specific exceptions
 
 import inspect
 from contextlib import contextmanager
+from contextlib import suppress
 
 import pint
 
@@ -337,7 +338,5 @@ def ignored(*exc):
     ...     os.remove('file-that-does-not-exist')
     """
 
-    try:
+    with suppress(exc):
         yield
-    except exc:
-        pass

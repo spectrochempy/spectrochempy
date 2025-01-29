@@ -7,7 +7,7 @@ import textwrap
 
 import matplotlib as mpl
 import matplotlib.axes as maxes
-import mpl_toolkits.mplot3d.axes3d as maxes3D
+import mpl_toolkits.mplot3d.axes3d as maxes3D  # noqa: N812
 import numpy as np
 from matplotlib import pyplot as plt
 from pint import __version__
@@ -406,9 +406,8 @@ def show():
 
     if NO_DISPLAY:
         plt.close("all")
-    else:
-        if get_figure(clear=False):
-            plt.show(block=True)
+    elif get_figure(clear=False):
+        plt.show(block=True)
 
 
 def get_figure(**kwargs):
@@ -470,14 +469,14 @@ def get_figure(**kwargs):
         try:
             fig.set_edgecolor(edgecolor)
         except ValueError:
-            fig.set_edgecolor(eval(edgecolor))
+            fig.set_edgecolor(eval(edgecolor))  # noqa: S307
         try:
             fig.set_facecolor(facecolor)
         except ValueError:
             try:
-                fig.set_facecolor(eval(facecolor))
+                fig.set_facecolor(eval(facecolor))  # noqa: S307
             except ValueError:
-                fig.set_facecolor("#" + eval(facecolor))
+                fig.set_facecolor("#" + eval(facecolor))  # noqa: S307
         fig.set_dpi(dpi)
         fig.set_tight_layout(tight_layout)
 
@@ -550,10 +549,7 @@ def make_label(ss, lab="<no_axe_label>", use_mpl=True):
     if ss is None:
         return lab
 
-    if ss.title:
-        label = ss.title  # .replace(' ', r'\ ')
-    else:
-        label = lab
+    label = ss.title if ss.title else lab  # .replace(' ', r'\ ')
 
     if "<untitled>" in label:
         label = "values"
@@ -568,20 +564,20 @@ def make_label(ss, lab="<no_axe_label>", use_mpl=True):
                 units = units.replace("%", r"\%")
         else:
             units = ""
-        label = r"%s $\mathrm{%s}$" % (label, units)
+        label = rf"{label} $\mathrm{{{units}}}$"
     else:
         if ss.units is not None and str(ss.units) != "dimensionless":
             units = rf"{ss.units:~H}"
         else:
             units = ""
-        label = r"%s / %s" % (label, units)
+        label = rf"{label} / {units}"
 
     return label
 
 
 def make_attr(key):
-    name = "M_%s" % key[1]
-    k = r"$\mathrm{%s}$" % name
+    name = f"M_{key[1]}"
+    k = rf"$\mathrm{{{name}}}$"
 
     if "P" in name:
         m = "o"

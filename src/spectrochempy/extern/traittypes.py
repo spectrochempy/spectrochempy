@@ -1,8 +1,14 @@
-# traittypes
-# ----------
-# imported from
-# https://github.com/jupyter-widgets/traittypes
-# See LICENSES in the root folder.
+"""
+Trait types module for scientific data objects.
+
+This module provides trait types for numpy arrays, pandas dataframes, pandas series,
+xarray datasets and xarray dataarrays.
+
+Notes
+-----
+Imported from https://github.com/jupyter-widgets/traittypes
+See LICENSES in the root folder.
+"""
 
 import inspect
 import warnings
@@ -19,8 +25,8 @@ class _DelayedImportError:
         self.package_name = package_name
 
     def __getattribute__(self, name):
-        package_name = super(_DelayedImportError, self).__getattribute__("package_name")
-        raise RuntimeError("Missing dependency: %s" % package_name)
+        package_name = super().__getattribute__("package_name")
+        raise RuntimeError(f"Missing dependency: {package_name}")
 
 
 try:
@@ -40,47 +46,57 @@ be an empty dataset
 
 
 class SciType(TraitType):
+    """
+    Base trait type for scientific data objects.
 
-    """A base trait type for numpy arrays, pandas dataframes, pandas series, xarray datasets and xarray dataarrays."""
+    A base class for numpy arrays, pandas dataframes, pandas series,
+    xarray datasets and xarray dataarrays.
+
+    Attributes
+    ----------
+    validators : list
+        List of validator functions to apply to values.
+    """
 
     def __init__(self, **kwargs):
-        super(SciType, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.validators = []
 
     def valid(self, *validators):
         """
-        Register new trait validators
+        Register new trait validators.
 
-        Validators are functions that take two arguments.
-         - The trait instance
-         - The proposed value
+        Parameters
+        ----------
+        *validators : callable
+            Functions that take two arguments:
+            - The trait instance
+            - The proposed value
 
-        Validators return the (potentially modified) value, which is either
-        assigned to the HasTraits attribute or input into the next validator.
+            Validators return the (potentially modified) value, which is either
+            assigned to the HasTraits attribute or input into the next validator.
 
-        They are evaluated in the order in which they are provided to the `valid`
-        function.
-
-        Example
+        Returns
         -------
+        SciType
+            Self, to allow method chaining.
 
-        .. code:: python
+        Examples
+        --------
+        Test with a shape constraint:
 
-            # Test with a shape constraint
-            def shape(*dimensions):
-                def validator(trait, value):
-                    if value.shape != dimensions:
-                        raise TraitError('Expected an of shape %s and got and array with
-                         shape %s' % (dimensions, value.shape))
-                    else:
-                        return value
-                return validator
-
-            class Foo(HasTraits):
-                bar = Array(np.identity(2)).valid(shape(2, 2))
-            foo = Foo()
-
-            foo.bar = [1, 2]  # Should raise a TraitError
+        >>> def shape(*dimensions):
+        ...     def validator(trait, value):
+        ...         if value.shape != dimensions:
+        ...             raise TraitError(
+        ...                 f'Expected shape {dimensions}, got shape {value.shape}'
+        ...             )
+        ...         return value
+        ...     return validator
+        >>> class Foo(HasTraits):
+        ...     bar = Array(np.identity(2)).valid(shape(2, 2))
+        >>> foo = Foo()
+        >>> foo.bar = [1, 2]  # Should raise a TraitError
         """
         self.validators.extend(validators)
         return self
@@ -92,12 +108,22 @@ class SciType(TraitType):
                 value = validator(self, value)
             return value
         except (ValueError, TypeError) as e:
-            raise TraitError(e)
+            raise TraitError(e) from None
 
 
 class Array(SciType):
+    """
+    Numpy array trait type.
 
-    """A numpy array trait type."""
+    Parameters
+    ----------
+    default_value : array-like, optional
+        The default value for the trait. If Empty, defaults to np.array(0).
+    allow_none : bool, optional
+        Whether to allow None as a valid value, by default False.
+    dtype : numpy.dtype, optional
+        The dtype to enforce on values.
+    """
 
     info_text = "a numpy array"
     dtype = None
@@ -106,19 +132,19 @@ class Array(SciType):
         if value is None and not self.allow_none:
             self.error(obj, value)
         if value is None or value is Undefined:
-            return super(Array, self).validate(obj, value)
+            return super().validate(obj, value)
         try:
             r = np.asarray(value, dtype=self.dtype)
             if isinstance(value, np.ndarray) and r is not value:
                 warnings.warn(
-                    'Given trait value dtype "%s" does not match required type "%s". '
-                    "A coerced copy has been created."
-                    % (np.dtype(value.dtype).name, np.dtype(self.dtype).name)
+                    f'Given trait value dtype "{np.dtype(value.dtype).name}" does not match required type "{np.dtype(self.dtype).name}". '
+                    "A coerced copy has been created.",
+                    stacklevel=2,
                 )
             value = r
         except (ValueError, TypeError) as e:
-            raise TraitError(e)
-        return super(Array, self).validate(obj, value)
+            raise TraitError(e) from None
+        return super().validate(obj, value)
 
     def set(self, obj, value):
         new_value = self._validate(obj, value)
@@ -133,9 +159,7 @@ class Array(SciType):
             default_value = np.array(0, dtype=self.dtype)
         elif default_value is not None and default_value is not Undefined:
             default_value = np.asarray(default_value, dtype=self.dtype)
-        super(Array, self).__init__(
-            default_value=default_value, allow_none=allow_none, **kwargs
-        )
+        super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
 
     def make_dynamic_default(self):
         if self.default_value is None or self.default_value is Undefined:
@@ -144,7 +168,6 @@ class Array(SciType):
 
 
 class PandasType(SciType):
-
     """A pandas dataframe or series trait type."""
 
     info_text = "a pandas dataframe or series"
@@ -155,12 +178,12 @@ class PandasType(SciType):
         if value is None and not self.allow_none:
             self.error(obj, value)
         if value is None or value is Undefined:
-            return super(PandasType, self).validate(obj, value)
+            return super().validate(obj, value)
         try:
             value = self.klass(value)
         except (ValueError, TypeError) as e:
-            raise TraitError(e)
-        return super(PandasType, self).validate(obj, value)
+            raise TraitError(e) from None
+        return super().validate(obj, value)
 
     def set(self, obj, value):
         new_value = self._validate(obj, value)
@@ -179,14 +202,12 @@ class PandasType(SciType):
         if (klass is not None) and inspect.isclass(klass):
             self.klass = klass
         else:
-            raise TraitError("The klass attribute must be a class" " not: %r" % klass)
+            raise TraitError(f"The klass attribute must be a class not: {klass!r}")
         if default_value is Empty:
             default_value = klass()
         elif default_value is not None and default_value is not Undefined:
             default_value = klass(default_value)
-        super(PandasType, self).__init__(
-            default_value=default_value, allow_none=allow_none, **kwargs
-        )
+        super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
 
     def make_dynamic_default(self):
         if self.default_value is None or self.default_value is Undefined:
@@ -195,23 +216,21 @@ class PandasType(SciType):
 
 
 class DataFrame(PandasType):
-
     """A pandas dataframe trait type."""
 
     info_text = "a pandas dataframe"
 
     def __init__(self, default_value=Empty, allow_none=False, dtype=None, **kwargs):
         if "klass" not in kwargs and self.klass is None:
-            import pandas as pd
+            import pandas as pd  # type: ignore
 
             kwargs["klass"] = pd.DataFrame
-        super(DataFrame, self).__init__(
+        super().__init__(
             default_value=default_value, allow_none=allow_none, dtype=dtype, **kwargs
         )
 
 
 class Series(PandasType):
-
     """A pandas series trait type."""
 
     info_text = "a pandas series"
@@ -219,17 +238,16 @@ class Series(PandasType):
 
     def __init__(self, default_value=Empty, allow_none=False, dtype=None, **kwargs):
         if "klass" not in kwargs and self.klass is None:
-            import pandas as pd
+            import pandas as pd  # type: ignore
 
             kwargs["klass"] = pd.Series
-        super(Series, self).__init__(
+        super().__init__(
             default_value=default_value, allow_none=allow_none, dtype=dtype, **kwargs
         )
         self.dtype = dtype
 
 
 class XarrayType(SciType):
-
     """An xarray dataset or dataarray trait type."""
 
     info_text = "an xarray dataset or dataarray"
@@ -240,12 +258,12 @@ class XarrayType(SciType):
         if value is None and not self.allow_none:
             self.error(obj, value)
         if value is None or value is Undefined:
-            return super(XarrayType, self).validate(obj, value)
+            return super().validate(obj, value)
         try:
             value = self.klass(value)
         except (ValueError, TypeError) as e:
-            raise TraitError(e)
-        return super(XarrayType, self).validate(obj, value)
+            raise TraitError(e) from None
+        return super().validate(obj, value)
 
     def set(self, obj, value):
         new_value = self._validate(obj, value)
@@ -264,14 +282,12 @@ class XarrayType(SciType):
         if (klass is not None) and inspect.isclass(klass):
             self.klass = klass
         else:
-            raise TraitError("The klass attribute must be a class" " not: %r" % klass)
+            raise TraitError(f"The klass attribute must be a class not: {klass!r}")
         if default_value is Empty:
             default_value = klass()
         elif default_value is not None and default_value is not Undefined:
             default_value = klass(default_value)
-        super(XarrayType, self).__init__(
-            default_value=default_value, allow_none=allow_none, **kwargs
-        )
+        super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
 
     def make_dynamic_default(self):
         if self.default_value is None or self.default_value is Undefined:
@@ -280,23 +296,21 @@ class XarrayType(SciType):
 
 
 class Dataset(XarrayType):
-
     """An xarray dataset trait type."""
 
     info_text = "an xarray dataset"
 
     def __init__(self, default_value=Empty, allow_none=False, dtype=None, **kwargs):
         if "klass" not in kwargs and self.klass is None:
-            import xarray as xr
+            import xarray as xr  # type: ignore
 
             kwargs["klass"] = xr.Dataset
-        super(Dataset, self).__init__(
+        super().__init__(
             default_value=default_value, allow_none=allow_none, dtype=dtype, **kwargs
         )
 
 
 class DataArray(XarrayType):
-
     """An xarray dataarray trait type."""
 
     info_text = "an xarray dataarray"
@@ -304,10 +318,10 @@ class DataArray(XarrayType):
 
     def __init__(self, default_value=Empty, allow_none=False, dtype=None, **kwargs):
         if "klass" not in kwargs and self.klass is None:
-            import xarray as xr
+            import xarray as xr  # type: ignore
 
             kwargs["klass"] = xr.DataArray
-        super(DataArray, self).__init__(
+        super().__init__(
             default_value=default_value, allow_none=allow_none, dtype=dtype, **kwargs
         )
         self.dtype = dtype

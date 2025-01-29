@@ -107,8 +107,8 @@ _ = ax.annotate(
     xy=(2115.5, maximas.max()),
     xytext=(30, -20),
     textcoords="offset points",
-    bbox=dict(boxstyle="round4,pad=.7", fc="0.9"),
-    arrowprops=dict(arrowstyle="->", connectionstyle="angle3"),
+    bbox={"boxstyle": "round4,pad=.7", "fc": "0.9"},
+    arrowprops={"arrowstyle": "->", "connectionstyle": "angle3"},
 )
 
 # %% [markdown]

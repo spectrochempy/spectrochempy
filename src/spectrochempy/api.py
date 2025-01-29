@@ -83,14 +83,14 @@ ALL = ["NO_DISPLAY", "NO_DIALOG"]
 
 # Initialize matplotlib styles and fonts
 # -----------------------------------
-from spectrochempy.data.setup import setup_mpl  # noqa: E402
+from spectrochempy.data.setup import setup_mpl
 
 setup_mpl()
 
 # Load core API
 # ------------
-from spectrochempy import core  # noqa: E402
-from spectrochempy.core import *  # noqa: F403, F401, E402
+from spectrochempy import core
+from spectrochempy.core import *  # noqa: F403
 
 ALL += core.__all__
 
@@ -120,7 +120,7 @@ if IN_IPYTHON and KERNEL and not NO_DISPLAY:  # pragma: no cover
 
 # Path utilities and data directory setup
 # ------------------------------------
-from spectrochempy.utils.file import pathclean  # noqa: E402
+from spectrochempy.utils.file import pathclean
 
 DATADIR = pathclean(preferences.datadir)  # noqa: F405
 
@@ -136,5 +136,5 @@ if NO_DISPLAY:
     environ["TEST_FILE"] = str(DATADIR / "irdata" / "nh4y-activation.spg")
     environ["TEST_FOLDER"] = str(DATADIR / "irdata" / "subdir")
     environ["TEST_NMR_FOLDER"] = str(
-        DATADIR / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
+        DATADIR / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d",
     )
