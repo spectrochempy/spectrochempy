@@ -53,6 +53,8 @@ class _ExecCommand:
         self.commands = [command]
 
     def __call__(self, *args, **kwargs):
+        args = list(args)
+        args[-1] = str(args[-1])  # convert Path to str
         self.commands.extend(args)
 
         silent = kwargs.pop("silent", False)
