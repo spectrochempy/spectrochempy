@@ -161,6 +161,7 @@ def generate_pip_requirements(deps, opt_deps):
     req_filename.write_text(out)
 
     # OPTIONAL dependencies
+
     deps_string = underline("CORE dependencies")
     deps_string += "-r requirements.txt\n"
 
@@ -168,7 +169,7 @@ def generate_pip_requirements(deps, opt_deps):
         opt_deps_string = underline(f"{opt.upper()} dependencies")
         opt_deps_string += "\n".join(opt_deps[opt])
         out = template.render(
-            dependencies=deps_string,
+            dependencies=deps_string if opt != "colab" else "",
             optional_dependencies=opt_deps_string,
         )
         req_filename = repo_path / "requirements" / f"requirements_{opt}.txt"
