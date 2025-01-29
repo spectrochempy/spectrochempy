@@ -1,4 +1,3 @@
-
 :orphan:
 
 What's new in revision {{ revision }}
@@ -25,6 +24,8 @@ New features
   the `cantera` dependencies,
   or `pip install -e ".[dev]"` to install the package with the
   development dependencies and in editable mode.
+* Now support installation on the last version (3.10) of Google Colab. To do so, use the following command:
+  `!pip install "spectrochempy[colab]"`. See documentation for more details
 * Add a `show-version` script executable from a terminal.
 
 .. section
@@ -39,15 +40,32 @@ Bug fixes
 Dependency updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
-* now compatible with numpy>=2.0 and numpy>=1.6 as well.
-* now compatible with python 3.13
+* Major Python compatibility updates:
+    - Now supports Python 3.13
+    - Minimum Python version increased to 3.10
+    - Dropped support for Python 3.9 and below
+
+* Core dependencies updated for Python 3.13 compatibility:
+    - numpy>=2.1.0 (major update)
+    - matplotlib>=3.9.2
+    - scipy>=1.14.1
+    - scikit-learn>=1.5.2
+    - ipython>=8.17.2
+    - numpy-quaternion>=2024.0.3
+
+* New installation options:
+    - Added [colab] extra for Google Colab compatibility
+    - Updated [dev], [test], and [docs] extras with latest versions
+    - All dependencies now specify minimum versions for better compatibility
 
 .. section
 
 Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
-* minimum python version set to 3.10.
+* Minimum Python version requirement increased to 3.10
+* Several core dependencies require major version updates
+* Installation process changes with new dependency groups
 
 .. section
 
