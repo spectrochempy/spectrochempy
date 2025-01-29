@@ -29,8 +29,28 @@ renaming = {  # pip to conda
     "numpy-quaternion": "quaternion",  # Full package name
     "matplotlib": "matplotlib-base",  # Base package name
 }
-# Rename dependencies according to the mapping
-deps = [renaming.get(dep, dep) for dep in deps]
+
+
+# Function to process dependency string
+def process_dependency(dep):
+    # Split package name from version specification
+    parts = dep.split(">=")
+    if len(parts) == 1:
+        pkg_name = dep
+        version_spec = ""
+    else:
+        pkg_name = parts[0]
+        version_spec = f">={parts[1]}"
+
+    # Apply renaming if package is in the mapping
+    conda_name = renaming.get(pkg_name, pkg_name)
+
+    # Return full dependency string
+    return f"{conda_name}{version_spec}".strip()
+
+
+# Process dependencies
+deps = [process_dependency(dep) for dep in deps]
 deps_strg = "    - " + "\n    - ".join(deps)
 
 # Get version string from setuptools_scm

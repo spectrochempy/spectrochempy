@@ -100,6 +100,7 @@ jobs:
           pip install --upgrade setuptools>=61.0.0
           pip install setuptools_scm toml jinja2
           python3 .github/workflows/scripts/generate_conda_recipe.py
+          cat recipe/meta.yaml
 
       # Step 3: Build conda package
       - name: Build conda package
