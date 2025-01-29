@@ -65,7 +65,7 @@ ds = scp.read("irdata/nh4y-activation.spg")
 # Short information:
 
 # %%
-print(ds)
+scp.info_(ds)
 
 # %% [markdown]
 # Detailed information on the main metadata:

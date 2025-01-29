@@ -25,10 +25,7 @@ def _zf_method(method):
         axis, dim = dataset.get_axis(**kwargs, negative_axis=True)
 
         # output dataset inplace (by default) or not
-        if not kwargs.pop("inplace", False):
-            new = dataset.copy()  # copy to be sure not to modify this dataset
-        else:
-            new = dataset
+        new = dataset.copy() if not kwargs.pop("inplace", False) else dataset
 
         swapped = False
         if axis != -1:
@@ -41,7 +38,7 @@ def _zf_method(method):
             # this method is not valid for non-linear coordinates
             error_(
                 "zero-filling apply only to linear coordinates\n"
-                "The processing was thus cancelled"
+                "The processing was thus cancelled",
             )
             return dataset  # return the original dataset
 
@@ -66,7 +63,7 @@ def _zf_method(method):
         else:
             error_(
                 "zero-filling apply only to dimensions with [time] dimensionality or dimensionless coords\n"
-                "The processing was thus cancelled"
+                "The processing was thus cancelled",
             )
             return dataset  # return the original dataset
 

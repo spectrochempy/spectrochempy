@@ -36,7 +36,7 @@ dependencies = [
   "numpy>=1.6.0",
   "matplotlib>=3.5.0",
   "osqp",
-  "pint",
+  "pint>=24.0",
   "pyyaml",
   "numpy-quaternion",
   "requests",
@@ -132,12 +132,26 @@ local_scheme = "dirty-tag"
 
 [tool.ruff]
 line-length = 88
-indent-width = 4
 target-version = "py312"
 
 [tool.ruff.lint]
-# Enable Pyflakes, pycodestyle, isort
-select = ["E", "F", "I", "N", "UP", "S", "B", "C4", "T20", "RET", "SIM", "W"]
+# Enable specific rules
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "UP",  # pyupgrade
+  "S",   # bandit
+  "B",   # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "T20", # flake8-print
+  "RET", # flake8-return
+  "SIM", # flake8-simplify
+  "W",   # pycodestyle warnings
+  # "PERF", # perflint
+  "PLC", # pylint conventions
+]
 ignore = [
   "E402", # Module level import not at top of file
   "E501", # Line too long
@@ -149,21 +163,15 @@ ignore = [
   "N806", # Variable in function should be lowercase
 ]
 
-# Exclude a variety of commonly ignored directories.
 exclude = [
-  ".eggs",
-  ".git",
-  ".ruff_cache",
-  ".tox",
-  ".venv",
-  "__pypackages__",
-  "_build",
-  "build",
-  "dist",
-  "docs/sphinxext",
   "~*",
-  "tests",
-]
+  "tests/**",
+] # Exclude files and directories.
+
+[tool.ruff.lint.per-file-ignores]
+"docs/userguide/**/*" = ["B018", "T201", "N816"]   # accept "useless expression", "print", "mixed-case variables" in *.ipynb or py:percent files.
+"docs/gettingstarted/*" = ["B018"]  # accept "useless expression" in *.ipynb or py:percent files.
+
 
 [tool.ruff.lint.isort]
 known-first-party = ["spectrochempy"]

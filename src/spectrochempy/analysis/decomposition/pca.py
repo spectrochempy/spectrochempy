@@ -50,7 +50,7 @@ class PCA(DecompositionAnalysis):
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_PCA)s
-    """
+    """,
     )
 
     # ----------------------------------------------------------------------------------
@@ -234,13 +234,13 @@ for reproducible results across multiple function calls.""",
         elif n_components == "mle":
             if n_observations < n_features:
                 raise ValueError(
-                    "n_components='mle' is only supported if n_observations >= n_features"
+                    "n_components='mle' is only supported if n_observations >= n_features",
                 )
         elif not 0 <= n_components <= min(n_observations, n_features):
             raise ValueError(
                 f"n_components={n_components!r} must be between 0 and "
                 f"min(n_observations, n_features)={min(n_observations, n_features)!r} with "
-                "svd_solver='full'"
+                "svd_solver='full'",
             )
 
     def _fit(self, X, Y=None):
@@ -269,7 +269,7 @@ for reproducible results across multiple function calls.""",
         # with an underscore at the end
 
         self._n_components = int(
-            self._pca.n_components_
+            self._pca.n_components_,
         )  # cast the returned int64 to int
         self.n_components = self._n_components
         return _outfit
@@ -333,7 +333,9 @@ for reproducible results across multiple function calls.""",
 
     @property
     @_wrap_ndarray_output_to_nddataset(
-        units=None, title="explained variance", typesingle="components"
+        units=None,
+        title="explained variance",
+        typesingle="components",
     )
     def explained_variance(self):
         return self._pca.explained_variance_
@@ -342,7 +344,9 @@ for reproducible results across multiple function calls.""",
 
     @property
     @_wrap_ndarray_output_to_nddataset(
-        units="percent", title="explained variance ratio", typesingle="components"
+        units="percent",
+        title="explained variance ratio",
+        typesingle="components",
     )
     def explained_variance_ratio(self):
         return self._pca.explained_variance_ratio_ * 100.0
@@ -351,7 +355,9 @@ for reproducible results across multiple function calls.""",
 
     @property
     @_wrap_ndarray_output_to_nddataset(
-        units="percent", title="cumulative explained variance", typesingle="components"
+        units="percent",
+        title="cumulative explained variance",
+        typesingle="components",
     )
     def cumulative_explained_variance(self):
         return np.cumsum(self._pca.explained_variance_ratio_) * 100.0
@@ -364,7 +370,7 @@ for reproducible results across multiple function calls.""",
     def __str__(self, n_components=5):
         if not self._fitted:
             raise NotFittedError(
-                f"The fit method must be used prior using the {self.name} model"
+                f"The fit method must be used prior using the {self.name} model",
             )
 
         s = "\n"
@@ -442,10 +448,16 @@ for reproducible results across multiple function calls.""",
             ylim2 = (y1, y2)
 
         ax1 = self.ev_ratio[:n_components].plot_bar(
-            ylim=ylim1, color=color1, title="Scree plot"
+            ylim=ylim1,
+            color=color1,
+            title="Scree plot",
         )
         ax2 = self.ev_cum[:n_components].plot_scatter(
-            ylim=ylim2, color=color2, pen=True, markersize=7.0, twinx=ax1
+            ylim=ylim2,
+            color=color2,
+            pen=True,
+            markersize=7.0,
+            twinx=ax1,
         )
         ax1.set_title("Scree plot")
         return ax1, ax2

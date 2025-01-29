@@ -11,6 +11,7 @@ __all__ = ["NDDataset"]
 # import signal
 import sys
 import textwrap
+from contextlib import suppress
 from datetime import datetime
 from datetime import tzinfo
 from zoneinfo import ZoneInfo
@@ -184,7 +185,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     # dataset can be members of a project.
     _parent = tr.Instance(
-        "spectrochempy.core.project.abstractproject.AbstractProject", allow_none=True
+        "spectrochempy.core.project.abstractproject.AbstractProject",
+        allow_none=True,
     )
 
     # For the GUI interface
@@ -225,7 +227,12 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # Initialisation
     # ----------------------------------------------------------------------------------
     def __init__(
-        self, data=None, coordset=None, coordunits=None, coordtitles=None, **kwargs
+        self,
+        data=None,
+        coordset=None,
+        coordunits=None,
+        coordtitles=None,
+        **kwargs,
     ):
         super().__init__(data, **kwargs)
 
@@ -267,19 +274,19 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                         warning_(
                             "units have been set for a CoordSet, "
                             "but this will be ignored "
-                            "(units are only defined at the coordinate level"
+                            "(units are only defined at the coordinate level",
                         )
                     if t:  # pragma: no cover
                         warning_(
                             "title will be ignored as they are only defined at "
-                            "the coordinates level"
+                            "the coordinates level",
                         )
                     coord = c
 
                 _coordset.append(coord)
 
             if _coordset and set(_coordset) != {
-                Coord()
+                Coord(),
             }:  # if they are no coordinates do nothing
                 self.set_coordset(*_coordset)
 
@@ -326,10 +333,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
         # coordinate selection to test first
         if isinstance(items, str):
-            try:
+            with suppress(Exception):
                 return self._coordset[items]
-            except Exception:
-                pass
 
         # slicing
         new, items = super().__getitem__(items, return_index=True)
@@ -350,23 +355,20 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 idx = names.index(name)
                 if self._coordset[idx].is_empty:
                     new_coords[idx] = Coord(None, name=name)
-                else:  # if isinstance(item, slice):
-                    # add the slice on the corresponding coordinates on the dim to the
-                    # new list of coordinates
-                    if not isinstance(self._coordset[idx], CoordSet):
-                        new_coords[idx] = self._coordset[idx][item]
-                    else:
-                        # we must slice all internal coordinates
-                        newc = []
-                        for c in self._coordset[idx]._coords:
-                            newc.append(c[item])
-                        new_coords[idx] = CoordSet(*newc[::-1], name=name)
-                        # we reverse to be sure
-                        # the order will be  kept for internal coordinates
-                        new_coords[idx]._default = self._coordset[
-                            idx
-                        ]._default  # set the same default coord
-                        new_coords[idx]._is_same_dim = self._coordset[idx]._is_same_dim
+                elif not isinstance(self._coordset[idx], CoordSet):
+                    new_coords[idx] = self._coordset[idx][item]
+                else:
+                    # we must slice all internal coordinates
+                    newc = []
+                    for c in self._coordset[idx]._coords:
+                        newc.append(c[item])
+                    new_coords[idx] = CoordSet(*newc[::-1], name=name)
+                    # we reverse to be sure
+                    # the order will be  kept for internal coordinates
+                    new_coords[idx]._default = self._coordset[
+                        idx
+                    ]._default  # set the same default coord
+                    new_coords[idx]._is_same_dim = self._coordset[idx]._is_same_dim
 
                 # elif isinstance(item, (np.ndarray, list)):
                 #    new_coords[idx] = self._coordset[idx][item]
@@ -428,7 +430,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                     # we want the size but there is no coords, get it from the data shape
                     return self.shape[index]
                 raise AttributeError(
-                    f"Can not find `{attribute}` when no coordinate is defined"
+                    f"Can not find `{attribute}` when no coordinate is defined",
                 )
 
             return None
@@ -445,14 +447,12 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             if key in self.dims:
                 if self._coordset is None:
                     # we need to create a coordset first
-                    self.set_coordset(
-                        dict((self.dims[i], None) for i in range(self.ndim))
-                    )
+                    self.set_coordset({self.dims[i]: None for i in range(self.ndim)})
                 idx = self._coordset.names.index(key)
                 _coordset = self._coordset
                 listcoord = False
                 if isinstance(value, list):
-                    listcoord = all([isinstance(item, Coord) for item in value])
+                    listcoord = all(isinstance(item, Coord) for item in value)
                 if listcoord:
                     _coordset[idx] = list(CoordSet(value).to_dict().values())[0]
                     _coordset[idx].name = key
@@ -474,7 +474,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 raise AttributeError(f"Coordinate `{key}` is not used.")
         else:
             # print(key, value)
-            super(NDDataset, self).__setattr__(key, value)
+            super().__setattr__(key, value)
 
     def __eq__(self, other, attrs=None):
         attrs = self.__dir__()
@@ -497,10 +497,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             "ranges",
         ):
             # These attributes are not used for comparison (comparison based on data and units!)
-            try:
+            with suppress(ValueError):
                 attrs.remove(attr)
-            except ValueError:
-                pass
 
         return super().__eq__(other, attrs)
 
@@ -648,7 +646,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         if self._coordset is None:
             raise SpectroChemPyError(
                 "No coords have been defined. Slicing or selection"
-                f" by location ({loc}) needs coords definition."
+                f" by location ({loc}) needs coords definition.",
             )
 
         coord = self.coord(dim)
@@ -668,8 +666,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         )  # transfer the html flag if necessary: false by default
 
         txt = self._coordset._cstr()
-        txt = txt.rstrip()  # remove the trailing '\n'
-        return txt
+        return txt.rstrip()  # remove the trailing '\n'
 
     _repr_dims = _str_dims
 
@@ -696,13 +693,13 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 continue
 
             # For coord to be acceptable, we require at least a NDArray, a NDArray subclass or a CoordSet
-            if not isinstance(coord, (Coord, CoordSet)):
+            if not isinstance(coord, Coord | CoordSet):
                 if isinstance(coord, NDArray):
                     coord = coords[k] = Coord(coord)
                 else:
                     raise TypeError(
                         "Coordinates must be an instance or a subclass of Coord class or NDArray, or of "
-                        f" CoordSet class, but an instance of {type(coord)} has been passed"
+                        f" CoordSet class, but an instance of {type(coord)} has been passed",
                     )
 
             if self.dims and coord.name in self.dims:
@@ -716,7 +713,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                             f"the size of a coordinates array must be None or be equal"
                             f" to that of the respective `{coord.name}`"
                             f" data dimension but coordinate size={size} != data shape[{idx}]="
-                            f"{self._data.shape[idx]}"
+                            f"{self._data.shape[idx]}",
                         )
                 else:
                     pass  # bypass this checking for any other derived type (should be done in the subclass)
@@ -744,6 +741,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             # take the one which has been previously set for this dataset
             acq = self._acquisition_date.astimezone(self._timezone)
             return acq.isoformat(sep=" ", timespec="seconds")
+        return None
 
     @acquisition_date.setter
     def acquisition_date(self, value):
@@ -800,7 +798,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         history = []
         for date, value in self._history:
             date = date.astimezone(self._timezone).isoformat(
-                sep=" ", timespec="seconds"
+                sep=" ",
+                timespec="seconds",
             )
             value = value[0].capitalize() + value[1:]
             history.append(f"{date}> {value}")
@@ -880,6 +879,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
         if self._coordset is not None:
             return self._coordset.names
+        return None
 
     @property
     def coordtitles(self):
@@ -890,6 +890,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
         if self._coordset is not None:
             return self._coordset.titles
+        return None
 
     @property
     def coordunits(self):
@@ -900,6 +901,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
         if self._coordset is not None:
             return self._coordset.units
+        return None
 
     @property
     def created(self):
@@ -1066,10 +1068,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
 
         inplace = kwargs.get("inplace", False)
-        if not inplace:
-            new = self.copy()
-        else:
-            new = self
+        new = self.copy() if not inplace else self
 
         # parameter for selecting the level of labels (default None or 0)
         pos = kwargs.pop("pos", None)
@@ -1186,10 +1185,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         --------
         squeeze : The inverse operation, removing singleton dimensions.
         """
-        if not inplace:
-            new = self.copy()
-        else:
-            new = self
+        new = self.copy() if not inplace else self
 
         coordset = self.coordset
         # mask = self.mask
@@ -1270,10 +1266,9 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             axis = self.ndim + axis
 
         index = tuple(
-            [...] + [indices] + [slice(None) for i in range(self.ndim - 1 - axis)]
+            [...] + [indices] + [slice(None) for i in range(self.ndim - 1 - axis)],
         )
-        new = self[index]
-        return new
+        return self[index]
 
     @property
     def timezone(self):
@@ -1541,7 +1536,7 @@ for funcname in api_funcs:
     __all__.append(funcname)
 
 # import also npy functions  # TODO: this will be changed with __array_functions__
-from spectrochempy.processing.transformation.npy import dot  # noqa: E402
+from spectrochempy.processing.transformation.npy import dot
 
 NDDataset.dot = dot
 

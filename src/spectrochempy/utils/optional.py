@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import importlib
 import sys
 import types
@@ -30,10 +31,8 @@ def get_module_version(module: types.ModuleType) -> str:
     if version is None:
         version = getattr(module, "__VERSION__", None)
     if version is None:
-        try:
+        with contextlib.suppress(Exception):
             version = importlib.metadata.version(module.__name__).split("+")[0]
-        except Exception:
-            pass
     if version is None:
         raise ImportError(f"Can't determine version for {module.__name__}")
     return version
@@ -81,7 +80,8 @@ def import_optional_dependency(
         is False, or when the package's version is too old and `errors`
         is ``'warn'``.
     """
-    assert errors in {"warn", "raise", "ignore"}
+    if errors not in {"warn", "raise", "ignore"}:
+        raise ValueError("errors must be one of {'warn', 'raise', 'ignore'}")
 
     package_name = INSTALL_MAPPING.get(name)
     install_name = package_name if package_name is not None else name
@@ -114,7 +114,7 @@ def import_optional_dependency(
                 f"(version '{version}' currently installed)."
             )
             if errors == "warn":
-                warnings.warn(msg, UserWarning)
+                warnings.warn(msg, UserWarning, stacklevel=2)
                 return None
             if errors == "raise":
                 raise ImportError(msg)

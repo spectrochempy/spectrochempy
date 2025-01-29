@@ -42,11 +42,7 @@ def get_n_decimals(val, accuracy):
         nd = int(np.log10(abs(val) * accuracy))
     else:
         return 3
-    if nd >= 0:
-        nd = 1
-    else:
-        nd = -nd + 1
-    return nd
+    return 1 if nd >= 0 else -nd + 1
 
 
 # ======================================================================================
@@ -103,7 +99,7 @@ def as_quaternion(*args):
         w, x, y, z = r.real, r.imag, i.real, i.imag
 
     data = as_quat_array(
-        list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten(), strict=False))
+        list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten(), strict=False)),
     )
     return data.reshape(w.shape)
 
@@ -182,17 +178,14 @@ def dict_compare(d1, d2, check_equal_only=True):
                 for i1, i2 in zip(d1[o], d2[o], strict=False):
                     if np.any(i1 != i2):
                         modified.add(o)
-        else:
-            if is_sequence(d2[o]) or d1[o] != d2[o]:
-                modified.add(o)
+        elif is_sequence(d2[o]) or d1[o] != d2[o]:
+            modified.add(o)
 
-    same = set(o for o in intersect_keys if o not in modified)
+    same = {o for o in intersect_keys if o not in modified}
 
     if not check_equal_only:
         return added, removed, modified, same
-    if modified or removed or added:
-        return False
-    return True
+    return not (modified or removed or added)
 
 
 def get_component(data, select="REAL"):
@@ -250,7 +243,7 @@ def get_component(data, select="REAL"):
             new = z
         else:
             raise ValueError(
-                f"something wrong: cannot interpret `{select}` for hypercomplex (quaternion) data!"
+                f"something wrong: cannot interpret `{select}` for hypercomplex (quaternion) data!",
             )
 
     elif new.dtype in TYPE_COMPLEX:
@@ -261,12 +254,13 @@ def get_component(data, select="REAL"):
             new = x
         else:
             raise ValueError(
-                f"something wrong: cannot interpret `{select}` for complex data!"
+                f"something wrong: cannot interpret `{select}` for complex data!",
             )
     else:
         warnings.warn(
             f"No selection was performed because datasets with complex data have no "
-            f"`{select}` component. "
+            f"`{select}` component. ",
+            stacklevel=2,
         )
 
     return new
@@ -278,8 +272,7 @@ def getdocfrom(origin):
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            response = func(*args, **kwargs)
-            return response
+            return func(*args, **kwargs)
 
         return wrapper
 
@@ -310,7 +303,7 @@ def htmldoc(text):
     for i in range(len(html)):
         html[i] = html[i].strip()
         if i == 0:
-            html[i] = "<h3>%s</h3>" % html[i]
+            html[i] = f"<h3>{html[i]}</h3>"
         html[i] = html[i].replace("Parameters", "<h4>Parameters</h4>")
         html[i] = html[i].replace("Properties", "<h4>Properties</h4>")
         html[i] = html[i].replace("Methods", "<h4>Methods</h4>")
@@ -319,9 +312,7 @@ def htmldoc(text):
                 html[i] += "<br/>"
             if not html[i].strip().startswith("<"):
                 html[i] = "&nbsp;&nbsp;&nbsp;&nbsp;" + html[i]
-    html = "".join(html)
-
-    return html
+    return "".join(html)
 
 
 def interleaved2complex(data):

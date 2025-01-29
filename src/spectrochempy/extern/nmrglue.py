@@ -81,11 +81,11 @@ def create_blank_udic(ndim):
     """
     Create a blank universal dictionary for a spectrum of dimension ndim.
     """
-    udic = dict()
+    udic = {}
     udic["ndim"] = ndim
 
     for i in range(ndim):
-        d = dict()
+        d = {}
         d["sw"] = 999.99  # spectral width in Hz
         d["complex"] = True  # Quadrature, True when dimension is complex
         d["obs"] = 999.99  # Observation frequency in MHz
@@ -483,7 +483,7 @@ def open_towrite(filename, overwrite=False, mode="wb"):
     if p != "" and os.path.exists(p) is False:
         os.makedirs(p)
 
-    return open(filename, mode)
+    return open(filename, mode)  # noqa: SIM115
 
 
 ################################################
@@ -748,7 +748,7 @@ def guess_udic(dic, data, strip_fake=False):
         try:
             add_axis_to_udic(udic, dic, b_dim, strip_fake)
         except Exception:
-            warn("Failed to determine udic parameters for dim: %i" % (b_dim))
+            warn(f"Failed to determine udic parameters for dim: {b_dim}", stacklevel=2)
     return udic
 
 
@@ -807,7 +807,7 @@ def add_axis_to_udic(udic, dic, udim, strip_fake):
             car = dic[pro_file]["OFFSET"] * obs - sw / 2
 
     except KeyError:
-        warn('The chemical shift referencing was not corrected for "sr".')
+        warn('The chemical shift referencing was not corrected for "sr".', stacklevel=2)
         obs = dic[acq_file]["SFO1"]
         car = dic[acq_file]["O1"]
 
@@ -894,10 +894,7 @@ def create_dic(udic):
     ndim = udic["ndim"]
 
     # determine the size in bytes
-    if udic[ndim - 1]["complex"]:
-        bytes = 8
-    else:
-        bytes = 4
+    bytes = 8 if udic[ndim - 1]["complex"] else 4
 
     for k in range(ndim):
         bytes *= udic[k]["size"]
@@ -935,16 +932,10 @@ def create_acqus_dic(adic, direct=False):
     """
     if adic["complex"]:
         AQ_mod = 3
-        if direct:
-            TD = int(np.ceil(adic["size"] / 256.0) * 256) * 2
-        else:
-            TD = adic["size"]
+        TD = int(np.ceil(adic["size"] / 256.0) * 256) * 2 if direct else adic["size"]
     else:
         AQ_mod = 1
-        if direct:
-            TD = int(np.ceil(adic["size"] / 256.0) * 256)
-        else:
-            TD = adic["size"]
+        TD = int(np.ceil(adic["size"] / 256.0) * 256) if direct else adic["size"]
 
     s = "##NMRGLUE automatically created parameter file"
     return {"_comments": [], "_coreheader": [s], "AQ_mod": AQ_mod, "TD": TD}
@@ -1018,14 +1009,10 @@ def read_fid(
 
     """
     if os.path.isdir(dir) is not True:
-        raise OSError("directory %s does not exist" % (dir))
+        raise OSError(f"directory {dir} does not exist")
 
     # Take a shot at reading the procs file
-    if read_procs:
-        dic = read_procs_file(dir, procs_files)
-    else:
-        # create an empty dictionary
-        dic = dict()
+    dic = read_procs_file(dir, procs_files) if read_procs else {}
 
     # determine parameter automatically
     if bin_file is None:
@@ -1063,7 +1050,7 @@ def read_fid(
         try:
             dic["pprog"] = read_pprog(os.path.join(dir, pprog_file))
         except Exception:
-            warn("Error reading the pulse program")
+            warn("Error reading the pulse program", stacklevel=2)
 
     # determine file size and add to the dictionary
     dic["FILE_SIZE"] = os.stat(os.path.join(dir, bin_file)).st_size
@@ -1091,19 +1078,13 @@ def read_fid(
     if big is None:
         big = False  # default value
         if "acqus" in dic and "BYTORDA" in dic["acqus"]:
-            if dic["acqus"]["BYTORDA"] == 1:
-                big = True
-            else:
-                big = False
+            big = dic["acqus"]["BYTORDA"] == 1
 
     # determine data type (assume int32 unless DTYPA is 2)
     if isfloat is None:
         isfloat = False  # default value
         if "acqus" in dic and "DTYPA" in dic["acqus"]:
-            if dic["acqus"]["DTYPA"] == 2:
-                isfloat = True
-            else:
-                isfloat = False
+            isfloat = dic["acqus"]["DTYPA"] == 2
 
     # read the binary file
     f = os.path.join(dir, bin_file)
@@ -1136,7 +1117,7 @@ def read_acqus_file(dir=".", acqus_files=None):
                 acqus_files.append(fp)
 
     # create an empty dictionary
-    dic = dict()
+    dic = {}
 
     # read the acqus_files and add to the dictionary
     for f in acqus_files:
@@ -1180,9 +1161,7 @@ def read_procs_file(dir=".", procs_files=None):
             # procs not found in the given dir, try look adding pdata to the dir path
 
             if os.path.isdir(os.path.join(dir, "pdata")):
-                pdata_folders = [
-                    folder for folder in os.walk(os.path.join(dir, "pdata"))
-                ][0][1]
+                pdata_folders = list(os.walk(os.path.join(dir, "pdata")))[0][1]
                 if "1" in pdata_folders:
                     pdata_path = os.path.join(dir, "pdata", "1")
                 else:
@@ -1205,12 +1184,12 @@ def read_procs_file(dir=".", procs_files=None):
             pf = os.path.join(pdata_path, f)
             if not os.path.isfile(pf):
                 mesg = "The file `%s` could not be found "
-                warn(mesg % pf)
+                warn(mesg % pf, stacklevel=2)
             else:
                 procs_files[i] = pf
 
     # create an empty dictionary
-    dic = dict()
+    dic = {}
 
     # read the acqus_files and add to the dictionary
     for f in procs_files:
@@ -1248,7 +1227,7 @@ def guess_shape(dic):
     try:
         fsize = dic["FILE_SIZE"]
     except KeyError:
-        warn("cannot determine shape do to missing FILE_SIZE key")
+        warn("cannot determine shape do to missing FILE_SIZE key", stacklevel=2)
         return (1,), True
 
     # extract td0,td1,td2,td3 from dictionaries
@@ -1472,20 +1451,14 @@ def read_pdata(
     # TODO read_pdata_lowmem, write_pdata
 
     if os.path.isdir(dir) is not True:
-        raise OSError("directory %s does not exist" % (dir))
+        raise OSError(f"directory {dir} does not exist")
 
     # find binary files
     if bin_files is None:
         if os.path.isfile(os.path.join(dir, "1r")):
-            if all_components:
-                bin_files = ["1r", "1i"]
-            else:
-                bin_files = ["1r"]
+            bin_files = ["1r", "1i"] if all_components else ["1r"]
         elif os.path.isfile(os.path.join(dir, "2rr")):
-            if all_components:
-                bin_files = ["2rr", "2ri", "2ir", "2ii"]
-            else:
-                bin_files = ["2rr"]
+            bin_files = ["2rr", "2ri", "2ir", "2ii"] if all_components else ["2rr"]
         elif os.path.isfile(os.path.join(dir, "3rrr")):
             if all_components:
                 bin_files = [
@@ -1501,18 +1474,13 @@ def read_pdata(
             else:
                 bin_files = ["3rrr"]
         else:
-            raise OSError("No Bruker binary file could be found in %s" % (dir))
+            raise OSError(f"No Bruker binary file could be found in {dir}")
 
     for f in bin_files.copy():
         if not os.path.isfile(os.path.join(dir, f)):
             bin_files.remove(f)
 
-    if read_procs:
-        # read the procs_files and add to the dictionary
-        dic = read_procs_file(dir, procs_files)
-    else:
-        # create an empty dictionary
-        dic = dict()
+    dic = read_procs_file(dir, procs_files) if read_procs else {}
 
     if read_acqus:
         # If acqus files were not listed check in the usual place.
@@ -1537,27 +1505,21 @@ def read_pdata(
 
     # issue a warning is submatrix_shape or shape are still None
     if submatrix_shape is None:
-        warn("Submatrix shape not defined, returning 1D data")
+        warn("Submatrix shape not defined, returning 1D data", stacklevel=2)
     if shape is None:
-        warn("Data shape not defined, returning 1D data")
+        warn("Data shape not defined, returning 1D data", stacklevel=2)
 
     # determine endianness (assume little-endian unless BYTORDA is 1)
     if big is None:
         big = False  # default value
         if "procs" in dic and "BYTORDP" in dic["procs"]:
-            if dic["procs"]["BYTORDP"] == 1:
-                big = True
-            else:
-                big = False
+            big = dic["procs"]["BYTORDP"] == 1
 
     # determine data type (assume int32 unless DTYPA is 2)
     if isfloat is None:
         isfloat = False  # default value
         if "procs" in dic and "DTYPP" in dic["procs"]:
-            if dic["procs"]["DTYPP"] == 2:
-                isfloat = True
-            else:
-                isfloat = False
+            isfloat = dic["procs"]["DTYPP"] == 2
 
     # read the binary file
     data = [
@@ -1596,7 +1558,7 @@ def scale_pdata(dic, data, reverse=False):
     try:
         scale = np.power(2.0, -float(dic["procs"]["NC_proc"]))
     except KeyError:
-        warn("Unable to scale data, returning unscaled data")
+        warn("Unable to scale data, returning unscaled data", stacklevel=2)
         scale = 1
 
     if reverse:
@@ -1629,8 +1591,7 @@ def array_to_int(data):
             data *= 2
         else:
             break
-    intdata = data.real.astype("int32")
-    return intdata
+    return data.real.astype("int32")
 
 
 def guess_shape_and_submatrix_shape(dic):
@@ -1726,7 +1687,7 @@ def read_pdata_binary(
         data = reorder_submatrix(data, shape, submatrix_shape)
         return dic, data
     except Exception:
-        warn("unable to reorder data")
+        warn("unable to reorder data", stacklevel=2)
         return dic, data
 
 
@@ -1833,7 +1794,7 @@ def read_binary(filename, shape=(1), cplex=True, big=True, isfloat=False):
         return dic, data.reshape(shape)
 
     except ValueError:
-        warn(str(data.shape) + "cannot be shaped into" + str(shape))
+        warn(str(data.shape) + "cannot be shaped into" + str(shape), stacklevel=2)
         return dic, data
 
 
@@ -1899,7 +1860,9 @@ def uncomplexify_data(data_in, isfloat):
 # JCAMP-DX functions
 
 
-def read_jcamp(filename, encoding=locale.getpreferredencoding()):
+def read_jcamp(filename, encoding=None):
+    if encoding is None:
+        encoding = locale.getpreferredencoding()
     """
     Read a Bruker JCAMP-DX file into a dictionary.
 
@@ -1949,9 +1912,9 @@ def read_jcamp(filename, encoding=locale.getpreferredencoding()):
                     key, value = parse_jcamp_line(line, f)
                     dic[key] = value
                 except Exception:
-                    warn("Unable to correctly parse line:" + line)
+                    warn("Unable to correctly parse line:" + line, stacklevel=2)
             else:
-                warn("Extraneous line:" + line)
+                warn("Extraneous line:" + line, stacklevel=2)
 
     return dic
 
@@ -2059,10 +2022,10 @@ def read_pprog(filename):
     """
 
     # open the file
-    f = open(filename)
+    f = open(filename)  # noqa: SIM115
 
     # initialize lists and dictionaries
-    var = dict()
+    var = {}
     loop = []
     incr = [[]]
     phase = [[]]
@@ -2072,10 +2035,7 @@ def read_pprog(filename):
     # assignments and phase commands
     for line in f:
         # split line into comment and text and strip leading/trailing spaces
-        if ";" in line:
-            text = line[: line.index(";")].strip()
-        else:
-            text = line.strip()
+        text = line[: line.index(";")].strip() if ";" in line else line.strip()
 
         # remove label from text when first word is all digits or
         # has "," as the last element
@@ -2168,8 +2128,13 @@ def read_pprog(filename):
                 loop[i] = int(var[t])
 
     # create the output dictionary
-    dic = {"var": var, "incr": incr, "loop": loop, "phase": phase, "ph_extra": ph_extra}
-    return dic
+    return {
+        "var": var,
+        "incr": incr,
+        "loop": loop,
+        "phase": phase,
+        "ph_extra": ph_extra,
+    }
 
 
 def _merge_dict(a, b):

@@ -10,7 +10,7 @@ import pathlib
 import uuid
 from functools import wraps
 
-import dill
+import dill  # noqa: F401
 import traitlets as tr
 
 from spectrochempy.core.dataset.baseobjects.meta import Meta
@@ -120,7 +120,7 @@ class Project(AbstractProject, NDIO):
         else:
             raise ValueError(
                 f"objects of type {type(obj).__name__} has no name and so "
-                "cannot be appended to the project "
+                "cannot be appended to the project ",
             )
 
     def _get_from_type(self, name):
@@ -129,9 +129,7 @@ class Project(AbstractProject, NDIO):
     def _repr_html_(self):
         h = self.__str__()
         h = h.replace("\n", "<br/>\n")
-        h = h.replace(" ", "&nbsp;")
-
-        return h
+        return h.replace(" ", "&nbsp;")
 
     # ----------------------------------------------------------------------------------
     # Special methods
@@ -166,7 +164,7 @@ class Project(AbstractProject, NDIO):
         if key in self.allnames and not isinstance(value, type(self[key])):
             raise ValueError(
                 "the key exists but for a different type "
-                f"of object: {type(self[key]).__name__}"
+                f"of object: {type(self[key]).__name__}",
             )
 
         if key in self.datasets_names:
@@ -191,15 +189,14 @@ class Project(AbstractProject, NDIO):
             # allows to access project, dataset or script by attribute
             return self[item]
 
-        if item in self.meta.keys():
+        if item in self.meta:
             # return the attribute
             return self.meta[item]
 
         raise AttributeError
 
     def __iter__(self):
-        for items in self.allitems:
-            yield items
+        yield from self.allitems
 
     def __str__(self):
         s = f"Project {self.name}:\n"
@@ -214,10 +211,10 @@ class Project(AbstractProject, NDIO):
                 s += f"{sep} ⤷ {k} (sub-project)\n"
                 s = _listproj(s, v, ns)  # recursive call
 
-            for k, v in project._datasets.items():
+            for k, _v in project._datasets.items():
                 s += f"{sep} ⤷ {k} (dataset)\n"
 
-            for k, v in project._scripts.items():
+            for k, _v in project._scripts.items():
                 s += f"{sep} ⤷ {k} (script)\n"
 
             if len(s) == lens:
@@ -320,8 +317,7 @@ class Project(AbstractProject, NDIO):
         Names of all dataset included in this project.
         (does not return those located in sub-folders) (list).
         """
-        lst = list(self._datasets.keys())
-        return lst
+        return list(self._datasets.keys())
 
     @property
     def directory(self):
@@ -347,8 +343,7 @@ class Project(AbstractProject, NDIO):
         """
         Names of all subprojects included in this project (list).
         """
-        lst = list(self._projects.keys())
-        return lst
+        return list(self._projects.keys())
 
     @property
     def projects(self):
@@ -369,8 +364,7 @@ class Project(AbstractProject, NDIO):
         """
         Names of all scripts included in this project (list).
         """
-        lst = list(self._scripts.keys())
-        return lst
+        return list(self._scripts.keys())
 
     @property
     def scripts(self):
@@ -606,13 +600,12 @@ class Project(AbstractProject, NDIO):
 
 def makescript(priority=50):
     def decorator(func):
-        ss = dill.dumps(func)
-        print(ss)
+        # ss = dill.dumps(func)
+        # print(ss)
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            f = func(*args, **kwargs)
-            return f
+            return func(*args, **kwargs)
 
         return wrapper
 

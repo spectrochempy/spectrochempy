@@ -18,4 +18,4 @@ class timeit:
         self.time = perf_counter() - self.time
         self.readout = f"Elapsed Time for {self.msg}: {self.time:.6f} seconds\n"
         if not self.test_only or "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
-            print(self.readout)
+            print(self.readout)  # noqa: T201

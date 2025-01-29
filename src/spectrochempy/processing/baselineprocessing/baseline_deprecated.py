@@ -9,7 +9,7 @@ __dataset_methods__ = ["ab", "abc"]
 
 
 class BaselineCorrection(Baseline):
-    @deprecated(replace="Baseline", removed="0.7.0")
+    @deprecated(replace="Baseline", removed="0.8.0")
     def __init__(self, dataset):
         super().__init__()
 
@@ -45,17 +45,17 @@ class BaselineCorrection(Baseline):
     def run(self, *args, **kwargs):
         warning_(
             "Sorry but the interactive  method has been removed in version 0.6.6. "
-            "Use BaselineCorrector instead"
+            "Use BaselineCorrector instead",
         )
         return self.compute(*args, **kwargs)
 
 
-@deprecated(replace="basc with order=1 and model='polynomial'", removed="0.7.0")
+@deprecated(replace="basc with order=1 and model='polynomial'", removed="0.8.0")
 def ab(dataset, **kwargs):
     return abc(dataset, **kwargs)
 
 
-@deprecated(replace="basc with order=1 and model='polynomial'", removed="0.7.0")
+@deprecated(replace="basc with order=1 and model='polynomial'", removed="0.8.0")
 def abc(dataset, **kwargs):
     blc = BaselineCorrection(dataset)
     blc.model = "polynomial"

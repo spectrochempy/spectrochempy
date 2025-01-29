@@ -14,6 +14,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.readers.importer import read
 from spectrochempy.processing.baselineprocessing.baseline import Baseline
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.optional import import_optional_dependency
 
 ipywidgets = import_optional_dependency("ipywidgets", errors="ignore")
@@ -97,9 +98,10 @@ class BaselineCorrector:
            out = scp.BaselineCorrector(X)
     """
 
+    @deprecated(replace="(None)", removed="0.8.0")
     def __init__(self, X=None, initial_ranges=None):
         warning_(
-            "This widget is not supported anymore and will be removed in a future version."
+            "This widget is not supported anymore and will be removed in a future version.",
         )
 
         if _ipywidgets_is_not_available():
@@ -125,10 +127,17 @@ class BaselineCorrector:
 
         # Parameters widgets
         self._npc_slider = widgets.IntSlider(
-            description="N components", value=1, min=1, max=5
+            description="N components",
+            value=1,
+            min=1,
+            max=5,
         )
         self._order_slider = widgets.IntSlider(
-            description="Order", layout=Layout(width="350px"), value=1, min=1, max=10
+            description="Order",
+            layout=Layout(width="350px"),
+            value=1,
+            min=1,
+            max=10,
         )
 
         self._method_selector = widgets.Dropdown(
@@ -144,14 +153,14 @@ class BaselineCorrector:
             value="polynomial",
         )
         self._interpolation_control = widgets.HBox(
-            children=[self._interpolation_selector, self._order_slider]
+            children=[self._interpolation_selector, self._order_slider],
         )
 
         self._ranges_control = widgets.Textarea(description="Ranges:")
         self._x_limits_control = widgets.Text(description="x slice:")
         self._y_limits_control = widgets.Text(description="y slice:")
         self._limits_control = widgets.HBox(
-            children=[self._x_limits_control, self._y_limits_control]
+            children=[self._x_limits_control, self._y_limits_control],
         )
 
         self._io = widgets.VBox()
@@ -176,7 +185,8 @@ class BaselineCorrector:
             "interpolation_selector",
         ]:
             getattr(self, f"_{control}").observe(
-                partial(self._update, control=control), names="value"
+                partial(self._update, control=control),
+                names="value",
             )
 
         # Start
@@ -206,7 +216,7 @@ class BaselineCorrector:
             with self._output:
                 info_(
                     "No data have been defined.\n"
-                    "Use the upload button to load data to be processed!."
+                    "Use the upload button to load data to be processed!.",
                 )
 
     def _update(self, *args, **kwargs):
@@ -238,7 +248,8 @@ class BaselineCorrector:
         if self.original is not None:  # slicing was OK
             # check that no range is outside coordinates
             new_ranges, changed = _update_ranges(
-                _str_to_ranges(self._ranges_control.value), self.original.x.data
+                _str_to_ranges(self._ranges_control.value),
+                self.original.x.data,
             )
             if changed:
                 ranges = _round_ranges(new_ranges)
@@ -323,12 +334,13 @@ class BaselineCorrector:
                     (
                         [self._X.x.data[0], self._X.x.data[len_]],
                         [self._X.x.data[-len_], self._X.x.data[-1]],
-                    )
+                    ),
                 )
             self._ranges_control.value = _ranges_to_str(ranges)
 
             self._x_limits_control.value = _x_slice_to_str(
-                slice(0, len(self._X.x), 1), self._X
+                slice(0, len(self._X.x), 1),
+                self._X,
             )
             self._y_limits_control.value = _y_slice_to_str(slice(0, len(self._X.y), 1))
             # ... and baseline correct with defaults

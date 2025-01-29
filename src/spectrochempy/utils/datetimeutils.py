@@ -112,7 +112,7 @@ def get_datetime_labels(data, resolution=None, labels=None):
     if resolution is None:
         for time_units in list(CF_TO_DT64_UNITS.keys()):
             if np.all(
-                timedeltas / np.timedelta64(1, CF_TO_DT64_UNITS[time_units]) > 0.5
+                timedeltas / np.timedelta64(1, CF_TO_DT64_UNITS[time_units]) > 0.5,
             ):
                 break
     else:
@@ -124,7 +124,8 @@ def get_datetime_labels(data, resolution=None, labels=None):
         units = from_dt64_units(CF_TO_DT64_UNITS[time_units])
         label = f"relative time / {units:~K}"
     newdata = (data - acquisition_date) / np.timedelta64(
-        1, CF_TO_DT64_UNITS[time_units]
+        1,
+        CF_TO_DT64_UNITS[time_units],
     )
     return label, newdata
 

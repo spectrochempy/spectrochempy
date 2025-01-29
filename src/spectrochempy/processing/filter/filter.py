@@ -72,7 +72,7 @@ class Filter(ProcessingConfigurable):
     See Also
     --------
     %(Filter.see_also.no_Filter)s
-    """
+    """,
     )
     method = tr.Enum(
         [
@@ -169,11 +169,11 @@ and ‘nearest’.
     # Private methods
     # ----------------------------------------------------------------------------------
     def _transform(self, X):
-        kwargs = dict(  # param for avg and convolution filters
-            axis=self._dim,
-            mode="reflect" if self.mode == "interp" else self.mode,
-            cval=self.cval,
-        )
+        kwargs = {  # param for avg and convolution filters
+            "axis": self._dim,
+            "mode": "reflect" if self.mode == "interp" else self.mode,
+            "cval": self.cval,
+        }
 
         # smooth with moving average
         # --------------------------
@@ -201,13 +201,13 @@ and ‘nearest’.
         # Savitzky-Golay filter
         # ---------------------
         elif self.method == "savgol":
-            kwargs = dict(
-                axis=self._dim,
-                deriv=self.deriv,
-                delta=self.delta,
-                mode=self.mode,
-                cval=self.cval,
-            )
+            kwargs = {
+                "axis": self._dim,
+                "deriv": self.deriv,
+                "delta": self.delta,
+                "mode": self.mode,
+                "cval": self.cval,
+            }
             data = scipy.signal.savgol_filter(X, self.size, self.order, **kwargs)
 
             # Change derived data sign if we have reversed coordinate axis
@@ -298,7 +298,7 @@ def smooth(dataset, size=5, window="avg", **kwargs):
     raise ValueError(
         f"Window type '{window}' is not supported. "
         f"Supported types are 'flat' or 'avg', 'han' or 'hanning', 'hamming', "
-        f"'bartlett', 'blackman'."
+        f"'bartlett', 'blackman'.",
     )
 
 
@@ -399,5 +399,5 @@ def whittaker(dataset, lamb=1.0, order=2, **kwargs):
     %(Filter.see_also.no_whittaker)s
     """
     return Filter(method="whittaker", lamb=lamb, order=order, **kwargs).transform(
-        dataset
+        dataset,
     )

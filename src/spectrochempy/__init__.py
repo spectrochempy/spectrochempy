@@ -62,12 +62,16 @@ import numpy as np
 
 # Configure warnings for spectrochempy
 warnings.filterwarnings(
-    action="once", module="spectrochempy", category=DeprecationWarning
+    action="once",
+    module="spectrochempy",
+    category=DeprecationWarning,
 )
 
 if np.version.version[0] == "1":
     warnings.filterwarnings(
-        action="error", module="spectrochempy", category=np.VisibleDeprecationWarning
+        action="error",
+        module="spectrochempy",
+        category=np.VisibleDeprecationWarning,
     )
 else:
     warnings.filterwarnings(
@@ -91,7 +95,7 @@ warnings.filterwarnings(action="ignore", category=UnitStrippedWarning)
 # ------------------------------------------------------------------------------
 
 from spectrochempy import api
-from spectrochempy.api import *  # noqa: E402, F403
+from spectrochempy.api import *  # noqa: F403
 
 __all__ = api.__all__
 

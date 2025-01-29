@@ -156,7 +156,7 @@ scp.debug_("this is a debug message!")
 try:
     from spectrochempy import toto
 except ImportError as e:
-    scp.error_(ImportError, "OOPS, THAT'S AN IMPORT ERROR! : %s" % e)
+    scp.error_(ImportError, f"OOPS, THAT'S AN IMPORT ERROR! : {e}")
 
 # %% [markdown]
 # The error will stop the execution if not caught.
@@ -165,7 +165,7 @@ except ImportError as e:
 # displaying a message is :
 
 # %%
-try:
-    from spectrochempy import toto  # noqa: F811, F401
-except Exception:
-    pass
+from contextlib import suppress
+
+with suppress(Exception):
+    from spectrochempy import toto  # noqa: F401

@@ -29,10 +29,11 @@ try:
 except Exception:  # pragma: no cover
     try:
         locale.setlocale(
-            locale.LC_ALL, "en_US.utf8"
+            locale.LC_ALL,
+            "en_US.utf8",
         )  # to avoid problems with date format
     except Exception:
-        warnings.warn("Could not set locale: en_US or en_US.utf8")
+        warnings.warn("Could not set locale: en_US or en_US.utf8", stacklevel=2)
 
 
 # ======================================================================================
@@ -109,7 +110,7 @@ def _read_csv(*args, **kwargs):
         txt = txt.replace(",", ".")
         delimiter = ";"
 
-    d = [row for row in csv.reader(txt.splitlines(), delimiter=delimiter)]
+    d = list(csv.reader(txt.splitlines(), delimiter=delimiter))
     d = np.array(d, dtype=float).T
 
     # First column is the x coordinates
@@ -180,7 +181,7 @@ def _read_csv(*args, **kwargs):
         raise NotImplementedError(
             f"Sorry, but reading a csv file with '{origin}' origin is not implemented. "
             "Please, remove or set the keyword 'origin'\n "
-            "(Up to now implemented csv files are: `omnic` , `tga` )"
+            "(Up to now implemented csv files are: `omnic` , `tga` )",
         )
 
     # reset modification date to cretion date

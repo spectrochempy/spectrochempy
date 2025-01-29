@@ -1,3 +1,5 @@
+# ruff: noqa: S101, T201
+
 import spectrochempy as scp
 
 
@@ -10,7 +12,7 @@ def test_magic_addscript(ip):
 
     ip.run_cell("from spectrochempy import *")
 
-    assert "preferences" in ip.user_ns.keys()
+    assert "preferences" in ip.user_ns
 
     ip.run_cell("print(preferences.available_styles)", store_history=True)
     ip.run_cell("project = Project()", store_history=True)

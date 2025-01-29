@@ -3,6 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# ruff: noqa: T201
 """
 Clean, build, and release the HTML documentation for SpectroChemPy.
 
@@ -131,6 +132,8 @@ class BuildDocumentation:
 
         if noapi and not whatsnew:  # API is included when whatsnew is compiled
             environ["SPHINX_NOAPI"] = "noapi"
+            return None
+        return None
 
     @staticmethod
     def _delnb():
@@ -499,6 +502,7 @@ def main():
     return res
 
     del environ["DOC_BUILDING"]
+    return None
 
 
 # ======================================================================================

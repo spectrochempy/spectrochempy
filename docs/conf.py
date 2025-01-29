@@ -417,7 +417,7 @@ def linkcode_resolve(domain, info):
         return None
     try:
         fs = find_source()
-        filename = "spectrochempy/%s#L%d-L%d" % fs
+        filename = "spectrochempy/{}#L{}-L{}".format(*fs)
     except TypeError:
         return None
     except Exception:
@@ -496,9 +496,7 @@ exclusions = (
 
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
-    doc = (
-        True if obj.__doc__ is not None and "#NOT_IN_DOC" not in obj.__doc__ else False
-    )
+    doc = bool(obj.__doc__ is not None and "#NOT_IN_DOC" not in obj.__doc__)
 
     exclude = name in exclusions or "trait" in name or name.startswith("_") or not doc
     return skip or exclude
@@ -532,7 +530,7 @@ def shorter_signature(app, what, name, obj, options, signature, return_annotatio
             new_sig = "(" + new_sig + ")"
 
         except Exception:
-            print(sig_obj)
+            print(sig_obj)  # noqa: T201
 
     return new_sig, return_annotation
 

@@ -267,7 +267,7 @@ class NDArray(HasTraits):
             if isinstance(other, Quantity):
                 otherdata = other.magnitude
                 otherunits = other.units
-            elif isinstance(other, (float, int, np.ndarray)):
+            elif isinstance(other, float | int | np.ndarray):
                 otherdata = other
                 otherunits = False
             else:  # pragma: no cover
@@ -378,10 +378,7 @@ class NDArray(HasTraits):
                 raise e
 
         # init returned object
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
+        new = self if inplace else self.copy()
 
         # slicing by index of all internal array
         if new._data is not None:
@@ -436,13 +433,12 @@ class NDArray(HasTraits):
 
     def __repr__(self):
         out = f"{self._repr_value().strip()} ({self._repr_shape().strip()})"
-        out = out.rstrip()
-        return out
+        return out.rstrip()
 
     def __setitem__(self, items, value):
         keys = self._make_index(items)
 
-        if isinstance(value, (bool, np.bool_, MaskedConstant)):
+        if isinstance(value, bool | np.bool_ | MaskedConstant):
             # the mask is modified, not the data
             if value is MASKED:
                 value = True
@@ -468,10 +464,11 @@ class NDArray(HasTraits):
         if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
             # sometimes do not work directly : here is a work around
             self._data[keys] = np.full_like(self._data[keys], value).astype(
-                np.dtype(np.quaternion)
+                np.dtype(np.quaternion),
             )
-        else:
-            self._data[keys] = value
+            return None
+        self._data[keys] = value
+        return None
 
     def __str__(self):
         return repr(self)
@@ -485,7 +482,8 @@ class NDArray(HasTraits):
         if by is None:
             warnings.warn(
                 "parameter `by` should be set to `value` or `label` , use `value` "
-                "by default"
+                "by default",
+                stacklevel=2,
             )
             by = "value"
 
@@ -494,7 +492,7 @@ class NDArray(HasTraits):
         elif "label" in by and not self.is_labeled:
             # by = 'value'
             # pos = None
-            warnings.warn("no label to sort, use `value` by default")
+            warnings.warn("no label to sort, use `value` by default", stacklevel=2)
             args = np.argsort(self.data)
         elif "label" in by and self.is_labeled:
             labels = self._labels
@@ -516,8 +514,7 @@ class NDArray(HasTraits):
 
     def _cstr(self):
         out = f"{self._str_value()}\n{self._str_shape()}"
-        out = out.rstrip()
-        return out
+        return out.rstrip()
 
     @default("_data")
     def _data_default(self):
@@ -561,14 +558,12 @@ class NDArray(HasTraits):
                     "(DEPRECATED) has been specified. \nThe unnamed arguments will "
                     "thus be ignored.",
                     UserWarning,
+                    stacklevel=2,
                 )
             dims = kdims
 
         if dims is not None and not isinstance(dims, list):
-            if isinstance(dims, tuple):
-                dims = list(dims)
-            else:
-                dims = [dims]
+            dims = list(dims) if isinstance(dims, tuple) else [dims]
 
         if dims is not None:
             for i, item in enumerate(dims[:]):
@@ -603,7 +598,7 @@ class NDArray(HasTraits):
                 if dim not in self.dims:
                     raise ValueError(
                         f"Error: Dimension `{dim}` is not recognized "
-                        f"(not in the dimension's list: {self.dims})."
+                        f"(not in the dimension's list: {self.dims}).",
                     )
                 idx = self.dims.index(dim)
                 axis.append(idx)
@@ -612,7 +607,7 @@ class NDArray(HasTraits):
                 raise TypeError(
                     f"Dimensions must be specified as string or integer index, but a "
                     f"value of type "
-                    f"{type(dim)} has been passed (value: {dim})!"
+                    f"{type(dim)} has been passed (value: {dim})!",
                 )
 
         for i, item in enumerate(axis):
@@ -620,9 +615,7 @@ class NDArray(HasTraits):
             if item < 0:
                 axis[i] = self.ndim + item
 
-        axis = tuple(axis)
-
-        return axis
+        return tuple(axis)
 
     def _get_slice(self, key, dim):
         info = None
@@ -633,7 +626,7 @@ class NDArray(HasTraits):
 
             units = None
 
-            if isinstance(items, (tuple,)):
+            if isinstance(items, tuple):
                 items = tuple(remove_units(item) for item in items)
 
             elif isinstance(items, slice):
@@ -642,10 +635,9 @@ class NDArray(HasTraits):
                 step, _ = remove_units(items.step)
                 items = slice(start, end, step)
 
-            else:
-                if isinstance(items, Quantity):
-                    units = items.u
-                    items = float(items.m)
+            elif isinstance(items, Quantity):
+                units = items.u
+                items = float(items.m)
 
             return items, units
 
@@ -660,11 +652,10 @@ class NDArray(HasTraits):
                     start, info = start
                 if start is None:
                     return slice(None)
-            else:
-                if key < 0:  # reverse indexing
-                    axis, dim = self.get_axis(dim) if self.ndim > 1 else (0, dim)
-                    # get axis is not defined for Coord for example
-                    start = self.shape[axis] + key
+            elif key < 0:  # reverse indexing
+                axis, dim = self.get_axis(dim) if self.ndim > 1 else (0, dim)
+                # get axis is not defined for Coord for example
+                start = self.shape[axis] + key
             stop = start + 1  # in order to keep a non squeezed slice
             return slice(start, stop, 1)
         start, stop, step = key.start, key.stop, key.step
@@ -680,19 +671,17 @@ class NDArray(HasTraits):
                 start, stop = stop, start
             if stop != start:
                 stop = stop + 1  # to include last loc or label index
-        if step is not None and not isinstance(step, (int, np.int_, np.int64)):
+        if step is not None and not isinstance(step, int | np.int_ | np.int64):
             raise NotImplementedError(
-                "step in location slicing is not yet possible."
+                "step in location slicing is not yet possible.",
             )  # TODO: we have may be a special case with
             # datetime  # step = 1
-        if step is None:
-            if start is not None or stop is not None:
-                step = 1
+        if step is None and (start is not None or stop is not None):
+            step = 1
         if start is not None and stop is not None and start == stop and info is None:
             stop = stop + 1  # to include last index
 
-        newkey = slice(start, stop, step)
-        return newkey
+        return slice(start, stop, step)
 
     @default("_id")
     def _id_default(self):
@@ -711,7 +700,7 @@ class NDArray(HasTraits):
             raise NotImplementedError(
                 f"not implemented for {type(self).__name__} objects which are "
                 f"not 1-dimensional "
-                f"(current ndim: {self.ndim})"
+                f"(current ndim: {self.ndim})",
             )
 
         # check units compatibility
@@ -723,7 +712,7 @@ class NDArray(HasTraits):
             raise ValueError(
                 f"Units of the location {loc} {units} are not compatible with those of "
                 f"this array: "
-                f"{self.units}"
+                f"{self.units}",
             )
 
         if self.is_empty and not self.is_labeled:
@@ -738,7 +727,7 @@ class NDArray(HasTraits):
                 info_(
                     f"This coordinate ({loc}) is outside the axis limits "
                     f"({data.min()}-{data.max()}).\n"
-                    f"The closest limit index is returned"
+                    f"The closest limit index is returned",
                 )
                 error = "out_of_limits"
             index = (np.abs(data - loc)).argmin()
@@ -752,7 +741,7 @@ class NDArray(HasTraits):
             index = []
             for lo in loc:
                 index.append(
-                    (np.abs(data - lo)).argmin()
+                    (np.abs(data - lo)).argmin(),
                 )  # TODO: add some precision to this result
             return index
 
@@ -767,7 +756,7 @@ class NDArray(HasTraits):
         if isinstance(loc, datetime):
             # not implemented yet
             raise NotImplementedError(
-                "datetime as location is not yet implemented"
+                "datetime as location is not yet implemented",
             )  # TODO: date!
 
         raise IndexError(f"Could not find this location: {loc}")
@@ -780,12 +769,7 @@ class NDArray(HasTraits):
 
         # we need to have a list of slice for each argument
         # or a single slice acting on the axis=0
-        if isinstance(key, tuple):
-            keys = list(key)
-        else:
-            keys = [
-                key,
-            ]
+        keys = list(key) if isinstance(key, tuple) else [key]
 
         def ellipsisinkeys(_keys):
             try:
@@ -803,14 +787,14 @@ class NDArray(HasTraits):
         while ellipsisinkeys(keys):
             i = keys.index(Ellipsis)
             keys.pop(i)
-            for j in range(self.ndim - len(keys)):
+            for _j in range(self.ndim - len(keys)):
                 keys.insert(i, slice(None))
 
         if len(keys) > self.ndim:
             raise IndexError("invalid index")
 
         # pad the list with additional dimensions
-        for i in range(len(keys), self.ndim):
+        for _i in range(len(keys), self.ndim):
             keys.append(slice(None))
 
         for axis, key in enumerate(keys):
@@ -820,7 +804,7 @@ class NDArray(HasTraits):
             if is_sequence(key) and not isinstance(key, Quantity):
                 # fancy indexing
                 # all items of the sequence must be integer index
-                if np.any(list(isinstance(k, TYPE_FLOAT) for k in key)):
+                if np.any([isinstance(k, TYPE_FLOAT) for k in key]):
                     key = [self._loc2index(k, dim) for k in key]
                 keys[axis] = key
             else:
@@ -883,7 +867,7 @@ class NDArray(HasTraits):
         shape_ = (
             x
             for x in itertools.chain.from_iterable(
-                list(zip(self.dims, self.shape, strict=False))
+                list(zip(self.dims, self.shape, strict=False)),
             )
         )
 
@@ -1000,12 +984,7 @@ class NDArray(HasTraits):
 
         args = self._argsort(by, pos, descend)
 
-        if not inplace:
-            new = self[args]
-        else:
-            new = self[args, INPLACE]
-
-        return new
+        return self[args] if not inplace else self[args, INPLACE]
 
     @property
     def _squeeze_ndim(self):
@@ -1026,7 +1005,7 @@ class NDArray(HasTraits):
         shape_ = (
             x
             for x in itertools.chain.from_iterable(
-                list(zip(self.dims, self.shape, strict=False))
+                list(zip(self.dims, self.shape, strict=False)),
             )
         )
 
@@ -1089,8 +1068,7 @@ class NDArray(HasTraits):
         else:
             out += header
             out += "\0{}\0".format(textwrap.indent(text, " " * 9))
-        out = out.rstrip()  # remove the trailing '\n'
-        return out
+        return out.rstrip()  # remove the trailing '\n'
 
     @default("_title")
     def _title_default(self):
@@ -1126,9 +1104,7 @@ class NDArray(HasTraits):
 
         if not np.any(mask):
             mask = np.zeros(data.shape).astype(bool)
-        data = np.ma.masked_where(mask, data)  # np.ma.masked_array(data, mask)
-
-        return data
+        return np.ma.masked_where(mask, data)  # np.ma.masked_array(data, mask)
 
     # ------------------------------------------------------------------------
     # Public Methods and Properties
@@ -1185,10 +1161,7 @@ class NDArray(HasTraits):
         True
         """
 
-        if deep:
-            do_copy = cpy.deepcopy
-        else:
-            do_copy = cpy.copy
+        do_copy = cpy.deepcopy if deep else cpy.copy
 
         new = make_new_object(self)
         for attr in (
@@ -1262,8 +1235,7 @@ class NDArray(HasTraits):
         if ndim > 0:
             # if len(self._dims)< ndim:
             #    self._dims = self._dims_default()
-            dims = self._dims[:ndim]
-            return dims
+            return self._dims[:ndim]
         return []
 
     @dims.setter
@@ -1275,14 +1247,14 @@ class NDArray(HasTraits):
             raise ValueError(
                 f"a sequence of chars with a length of {self.ndim} is expected, "
                 f"but `{values}` "
-                f"has been provided"
+                f"has been provided",
             )
 
         for value in values:
             if value not in DEFAULT_DIM_NAME:
                 raise ValueError(
                     f"{value} value is not admitted. Dimension's name must be among "
-                    f"{DEFAULT_DIM_NAME[::-1]}."
+                    f"{DEFAULT_DIM_NAME[::-1]}.",
                 )
 
         self._dims = tuple(values)
@@ -1355,9 +1327,8 @@ class NDArray(HasTraits):
             # axis = axis[0] if axis else self.ndim - 1  # None
             if a is None:
                 a = self.ndim - 1
-            if kwargs.get("negative_axis", False):
-                if a >= 0:
-                    a = a - self.ndim
+            if kwargs.get("negative_axis", False) and a >= 0:
+                a = a - self.ndim
             axis[i] = a
             dims[i] = self.dims[a]
 
@@ -1390,7 +1361,7 @@ class NDArray(HasTraits):
             return None
 
         if level > self.labels.ndim - 1:
-            warnings.warn("There is no such level in the existing labels")
+            warnings.warn("There is no such level in the existing labels", stacklevel=2)
             return None
 
         if self.labels.ndim > 1:
@@ -1402,10 +1373,7 @@ class NDArray(HasTraits):
         """
         True if the `data` array is not empty.
         """
-        if self._data is None or self._data.size == 0:
-            return False
-
-        return True
+        return not (self._data is None or self._data.size == 0)
 
     @property
     def has_defined_name(self):
@@ -1424,9 +1392,7 @@ class NDArray(HasTraits):
         unitless : True if the data has no unit.
         dimensionless : True if the data have dimensionless units.
         """
-        if self._units is not None:
-            return True
-        return False
+        return self._units is not None
 
     @property
     def id(self):
@@ -1499,10 +1465,9 @@ class NDArray(HasTraits):
 
         Readonly property (bool).
         """
-        if ((self._data is None) or (self._data.size == 0)) and not self.is_labeled:
-            return True
-
-        return False
+        return bool(
+            (self._data is None or self._data.size == 0) and not self.is_labeled,
+        )
 
     @property
     def is_labeled(self):
@@ -1513,9 +1478,7 @@ class NDArray(HasTraits):
         # as Coord can be labelled.
         if self._data is not None and self.ndim > 1:
             return False
-        if self._labels is not None and np.any(self.labels != ""):
-            return True
-        return False
+        return bool(self._labels is not None and np.any(self.labels != ""))
 
     @property
     def is_masked(self):
@@ -1526,7 +1489,7 @@ class NDArray(HasTraits):
             return np.any(self._mask)
         if self._mask == NOMASK or self._mask is None:
             return False
-        if isinstance(self._mask, (np.bool_, bool)):
+        if isinstance(self._mask, np.bool_ | bool):
             return self._mask
 
         return False
@@ -1640,13 +1603,15 @@ class NDArray(HasTraits):
         if self.ndim > 1:
             warnings.warn(
                 "We cannot set the labels for multidimentional data - Thus, these "
-                "labels are ignored"
+                "labels are ignored",
+                stacklevel=2,
             )
         else:
             # make sure labels array is of type np.ndarray or Quantity arrays
             if not isinstance(labels, np.ndarray):
                 labels = np.array(labels, subok=True, copy=True).astype(
-                    object, copy=False
+                    object,
+                    copy=False,
                 )
 
             if not np.any(labels):
@@ -1660,14 +1625,14 @@ class NDArray(HasTraits):
                     labels = labels.T
                 else:
                     raise ValueError(
-                        f"labels {labels.shape} and data {self.shape} shape mismatch!"
+                        f"labels {labels.shape} and data {self.shape} shape mismatch!",
                     )
 
             if np.any(self._labels):
                 info_(
                     f"{type(self).__name__} is already a labeled array.\nThe "
                     f"explicitly provided labels will "
-                    f"be appended to the current labels"
+                    f"be appended to the current labels",
                 )
 
                 labels = labels.squeeze()
@@ -1676,11 +1641,10 @@ class NDArray(HasTraits):
                     self._labels = self._labels.T
                 self._labels = np.vstack((self._labels, labels)).T
 
+            elif self._copy:
+                self._labels = labels.copy()
             else:
-                if self._copy:
-                    self._labels = labels.copy()
-                else:
-                    self._labels = labels
+                self._labels = labels
 
     @property
     def limits(self):
@@ -1706,11 +1670,8 @@ class NDArray(HasTraits):
     def mask(self, mask):
         if mask is NOMASK or mask is MASKED:
             pass
-        elif isinstance(mask, (np.bool_, bool)):
-            if not mask:
-                mask = NOMASK
-            else:
-                mask = MASKED
+        elif isinstance(mask, np.bool_ | bool):
+            mask = NOMASK if not mask else MASKED
         else:
             # from now, make sure mask is of type np.ndarray if it provided
             if not isinstance(mask, np.ndarray):
@@ -1720,7 +1681,7 @@ class NDArray(HasTraits):
                 mask = NOMASK
             elif mask.shape != self.shape:
                 raise ValueError(
-                    f"mask {mask.shape} and data {self.shape} shape mismatch!"
+                    f"mask {mask.shape} and data {self.shape} shape mismatch!",
                 )
 
         # finally, set the mask of the object
@@ -1728,21 +1689,19 @@ class NDArray(HasTraits):
             self._mask = (
                 NOMASK if self.data is None else np.ones(self.shape).astype(bool)
             )
+        elif np.any(self._mask):
+            # this should happen when a new mask is added to an existing one
+            # mask to be combined to an existing one
+            info_(
+                f"{type(self).__name__} is already a masked array.\n The new "
+                f"mask will be combined with the "
+                f"current array's mask.",
+            )
+            self._mask |= mask  # combine (is a copy!)
+        elif self._copy:
+            self._mask = mask.copy()
         else:
-            if np.any(self._mask):
-                # this should happen when a new mask is added to an existing one
-                # mask to be combined to an existing one
-                info_(
-                    f"{type(self).__name__} is already a masked array.\n The new "
-                    f"mask will be combined with the "
-                    f"current array's mask."
-                )
-                self._mask |= mask  # combine (is a copy!)
-            else:
-                if self._copy:
-                    self._mask = mask.copy()
-                else:
-                    self._mask = mask
+            self._mask = mask
 
     @property
     def masked_data(self):
@@ -1880,10 +1839,7 @@ class NDArray(HasTraits):
             If `dims` is not `None` , and the dimension being squeezed is not
             of length 1
         """
-        if inplace:
-            new = self
-        else:
-            new = self.copy()
+        new = self if inplace else self.copy()
 
         dims = self._get_dims_from_args(*dims, **kwargs)
 
@@ -1931,10 +1887,7 @@ class NDArray(HasTraits):
         --------
         transpose: Permute the dimensions of an array.
         """
-        if not inplace:
-            new = self.copy()
-        else:
-            new = self
+        new = self.copy() if not inplace else self
         if self.ndim < 2:  # cannot swap axe for 1D data
             return new
 
@@ -2075,64 +2028,63 @@ class NDArray(HasTraits):
                         new = self._unittransform(new, units)
 
                 # particular case of dimensionless units: absorbance and transmittance
+                elif f"{oldunits: P}" in ["transmittance", "absolute_transmittance"]:
+                    if f"{units: P}" == "absorbance":
+                        udata = (new.data * new.units).to(units)
+                        new._data = -np.log10(udata.m)
+                        new._units = units
+                        new._title = "absorbance"
+
+                    elif f"{units: P}" in [
+                        "transmittance",
+                        "absolute_transmittance",
+                    ]:
+                        new._data = (new.data * new.units).to(units)
+                        new._units = units
+                        new._title = "transmittance"
+
+                elif f"{oldunits: P}" == "absorbance":
+                    if f"{units: P}" in ["transmittance", "absolute_transmittance"]:
+                        scale = Quantity(1.0, self._units).to(units).magnitude
+                        new._data = 10.0**-new.data * scale
+                        new._units = units
+                        new._title = "transmittance"
                 else:
-                    if f"{oldunits: P}" in ["transmittance", "absolute_transmittance"]:
-                        if f"{units: P}" == "absorbance":
-                            udata = (new.data * new.units).to(units)
-                            new._data = -np.log10(udata.m)
-                            new._units = units
-                            new._title = "absorbance"
-
-                        elif f"{units: P}" in [
-                            "transmittance",
-                            "absolute_transmittance",
-                        ]:
-                            new._data = (new.data * new.units).to(units)
-                            new._units = units
-                            new._title = "transmittance"
-
-                    elif f"{oldunits: P}" == "absorbance":
-                        if f"{units: P}" in ["transmittance", "absolute_transmittance"]:
-                            scale = Quantity(1.0, self._units).to(units).magnitude
-                            new._data = 10.0**-new.data * scale
-                            new._units = units
-                            new._title = "transmittance"
-                    else:
-                        new = self._unittransform(new, units)
-                        # change the title for spectrocopic units change
-                        if (
-                            oldunits.dimensionality
-                            in [
-                                "1/[length]",
-                                "[length]",
-                                "[length] ** 2 * [mass] / [time] ** 2",
-                            ]
-                            and new._units.dimensionality == "1/[time]"
-                        ):
-                            new._title = "frequency"
-                        elif (
-                            oldunits.dimensionality
-                            in ["1/[time]", "[length] ** 2 * [mass] / [time] ** 2"]
-                            and new._units.dimensionality == "1/[length]"
-                        ):
-                            new._title = "wavenumber"
-                        elif (
-                            oldunits.dimensionality
-                            in [
-                                "1/[time]",
-                                "1/[length]",
-                                "[length] ** 2 * [mass] / [time] ** 2",
-                            ]
-                            and new._units.dimensionality == "[length]"
-                        ):
-                            new._title = "wavelength"
-                        elif (
-                            oldunits.dimensionality
-                            in ["1/[time]", "1/[length]", "[length]"]
-                            and new._units.dimensionality
-                            == "[length] ** 2 * [mass] / [time] ** 2"
-                        ):
-                            new._title = "energy"
+                    new = self._unittransform(new, units)
+                    # change the title for spectrocopic units change
+                    if (
+                        oldunits.dimensionality
+                        in [
+                            "1/[length]",
+                            "[length]",
+                            "[length] ** 2 * [mass] / [time] ** 2",
+                        ]
+                        and new._units.dimensionality == "1/[time]"
+                    ):
+                        new._title = "frequency"
+                    elif (
+                        oldunits.dimensionality
+                        in ["1/[time]", "[length] ** 2 * [mass] / [time] ** 2"]
+                        and new._units.dimensionality == "1/[length]"
+                    ):
+                        new._title = "wavenumber"
+                    elif (
+                        oldunits.dimensionality
+                        in [
+                            "1/[time]",
+                            "1/[length]",
+                            "[length] ** 2 * [mass] / [time] ** 2",
+                        ]
+                        and new._units.dimensionality == "[length]"
+                    ):
+                        new._title = "wavelength"
+                    elif (
+                        oldunits.dimensionality
+                        in ["1/[time]", "1/[length]", "[length]"]
+                        and new._units.dimensionality
+                        == "[length] ** 2 * [mass] / [time] ** 2"
+                    ):
+                        new._title = "energy"
 
                 if force:
                     new._units = units
@@ -2147,16 +2099,16 @@ class NDArray(HasTraits):
             new._units = units
 
         else:
-            warnings.warn("There is no units for this NDArray!")
+            warnings.warn("There is no units for this NDArray!", stacklevel=2)
 
         if inplace:
             self._data = new._data
             self._units = new._units
             self._title = new._title
             self._roi = new._roi
+            return None
 
-        else:
-            return new
+        return new
 
     _docstring.get_docstring(to.__doc__, base="to")
 
@@ -2177,15 +2129,13 @@ class NDArray(HasTraits):
         q = Quantity(1.0, self.units)
         q.ito_base_units()
 
-        if not inplace:
-            new = self.copy()
-        else:
-            new = self
+        new = self.copy() if not inplace else self
 
         new.ito(q.units)
 
         if not inplace:
             return new
+        return None
 
     def to_reduced_units(self, inplace=False):
         """
@@ -2208,15 +2158,13 @@ class NDArray(HasTraits):
         q = Quantity(1.0, self.units)
         q.ito_reduced_units()
 
-        if not inplace:
-            new = self.copy()
-        else:
-            new = self
+        new = self.copy() if not inplace else self
 
         new.ito(q.units)
 
         if not inplace:
             return new
+        return None
 
     def transpose(self, *dims, inplace=False):
         """
@@ -2242,10 +2190,7 @@ class NDArray(HasTraits):
         --------
         swapdims : Interchange two dimensions of an array.
         """
-        if not inplace:
-            new = self.copy()
-        else:
-            new = self
+        new = self.copy() if not inplace else self
         if self.ndim < 2:  # cannot transpose 1D data
             return new
         if not dims or list(set(dims)) == [None]:
@@ -2299,17 +2244,17 @@ class NDArray(HasTraits):
             units = ur.Unit(units)
         elif isinstance(units, Quantity):
             raise TypeError(
-                "Units or string representation of unit is expected, not Quantity"
+                "Units or string representation of unit is expected, not Quantity",
             )
         if self.has_units and units != self._units:
             # first try to cast
             try:
                 self.to(units)
-            except Exception:
+            except Exception as e:
                 raise TypeError(
                     f"Provided units {units} does not match data units: {self._units}.\nTo force a change, "
-                    f"use the to() method, with force flag set to True"
-                )
+                    f"use the to() method, with force flag set to True",
+                ) from e
         self._units = units
 
     @property
@@ -2330,6 +2275,7 @@ class NDArray(HasTraits):
             return data.squeeze()[()]
         if self.is_labeled:
             return self._labels[()]
+        return None
 
     @property
     def value(self):

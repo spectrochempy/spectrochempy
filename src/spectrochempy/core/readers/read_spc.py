@@ -32,7 +32,6 @@ _docstring.delete_params("Importer.see_also", "read_spc")
 
 @_docstring.dedent
 def read_spc(*paths, **kwargs):
-    # type: (*str, **kwargs) -> NDDataset
     r"""
     Read GRAMS/Thermo Scientific Galactic files or a list of files with extension :file:`.spc`.
 
@@ -57,7 +56,6 @@ def read_spc(*paths, **kwargs):
     >>> scp.read_spc("galacticdata/BENZENE.spc")
     NDDataset: [float64] a.u. (shape: (y:1, x:1842))
     """
-
     kwargs["filetypes"] = ["GRAMS/Thermo Galactic files (*.spc)"]
     kwargs["protocol"] = ["spc"]
     importer = Importer()
@@ -96,7 +94,7 @@ def _read_spc(*args, **kwargs):
     else:
         raise NotImplementedError(
             f"The version {Fversn} is not yet supported. "
-            f"Currently supported versions are b'\x4b' and b'\x4c'."
+            f"Currently supported versions are b'\x4b' and b'\x4c'.",
         )
 
     # extract the header (see: Galactic Universal Data Format Specification 9/4/97)
@@ -174,7 +172,7 @@ def _read_spc(*args, **kwargs):
     if Fnsub > 1:
         raise NotImplementedError(
             "spc reader not implemented yet for multifiles. If you need it, please "
-            "submit a feature request on spectrochempy repository :-)"
+            "submit a feature request on spectrochempy repository :-)",
         )
 
     # extract bit flags
@@ -219,7 +217,8 @@ def _read_spc(*args, **kwargs):
         warn(
             "The SPC file has custom Unit Labels, but spc_reader does not yet take them into account "
             "and will use defaults. "
-            "If needed let us know and submit a feature request :) "
+            "If needed let us know and submit a feature request :) ",
+            stacklevel=2,
         )
 
     x_or_z_title = [
@@ -390,12 +389,13 @@ def _read_spc(*args, **kwargs):
 
     else:
         warn(
-            "Wrong y unit label code in the SPC file. It will be set to arbitrary intensity"
+            "Wrong y unit label code in the SPC file. It will be set to arbitrary intensity",
+            stacklevel=2,
         )
         y_unit = None
         y_title = "Arbitrary Intensity"
 
-    if Fexp == b"\x80":
+    if Fexp == b"\x80":  # noqa: SIM108
         iexp = None  # floating Point Data
     else:
         iexp = int.from_bytes(Fexp, endian)  # Datablock scaling Exponent
@@ -412,7 +412,7 @@ def _read_spc(*args, **kwargs):
     ):  # occurs when acquision time is not reported
         timestamp = 0
         acqdate = datetime.fromtimestamp(0, tz=None)
-        warn(f"No collection time found. Arbitrarily set to {acqdate}")
+        warn(f"No collection time found. Arbitrarily set to {acqdate}", stacklevel=2)
     else:
         acqdate = datetime(year, month, day, hour, minute)
         timestamp = acqdate.timestamp()
@@ -450,20 +450,27 @@ def _read_spc(*args, **kwargs):
     if iexp is None:
         # 32-bit IEEE floating numbers
         floatY = np.frombuffer(
-            content, offset=544 + txvals * Fnpts * 4, dtype=float32_dtype, count=Fnpts
+            content,
+            offset=544 + txvals * Fnpts * 4,
+            dtype=float32_dtype,
+            count=Fnpts,
         )
+    elif tsprec:
+        integerY = np.frombuffer(
+            content,
+            offset=544 + txvals * Fnpts * 4,
+            dtype=int16_dtype,
+            count=Fnpts,
+        )
+        floatY = (2**iexp) * (integerY / (2**16))
     else:
-        # fixed point signed fractions
-        if tsprec:
-            integerY = np.frombuffer(
-                content, offset=544 + txvals * Fnpts * 4, dtype=int16_dtype, count=Fnpts
-            )
-            floatY = (2**iexp) * (integerY / (2**16))
-        else:
-            integerY = np.frombuffer(
-                content, offset=544 + txvals * Fnpts * 4, dtype=int32_dtype, count=Fnpts
-            )
-            floatY = (2**iexp) * (integerY / (2**32))
+        integerY = np.frombuffer(
+            content,
+            offset=544 + txvals * Fnpts * 4,
+            dtype=int32_dtype,
+            count=Fnpts,
+        )
+        floatY = (2**iexp) * (integerY / (2**32))
 
     if Flogoff:  # read log data header
         (
@@ -474,7 +481,8 @@ def _read_spc(*args, **kwargs):
             Logdsks,
             Logspar,
         ) = struct.unpack(
-            logstc_format.encode("utf-8"), content[Flogoff : Flogoff + 21]
+            logstc_format.encode("utf-8"),
+            content[Flogoff : Flogoff + 21],
         )
 
         logtxt = str(content[Flogoff + Logtxto : len(content)].decode("utf-8"))

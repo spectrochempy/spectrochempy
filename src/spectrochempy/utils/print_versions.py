@@ -3,10 +3,13 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# ruff: noqa: S602, S603
+
 """
 Utility functions for printing version information.
 """
 
+import contextlib
 import locale
 import platform
 import re
@@ -80,8 +83,6 @@ def show_versions(file=sys.stdout):
 
     # print(json.dumps(dict(sorted(installed.items())), indent=4))
 
-    return
-
 
 def underlined_title(s, char="-", file=sys.stdout, ret=True):
     """
@@ -122,26 +123,34 @@ def _get_sys_info():
     commit = None
     if (REPOS / ".git").is_dir() and REPOS.is_dir():
         try:
-            pipe = subprocess.Popen(
-                'git log --format="%H" -n 1'.split(" "),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+            git_executable = str(Path(sys.executable).parent / "git")
+            if not Path(git_executable).is_file():
+                raise FileNotFoundError(f"Git executable not found: {git_executable}")
+            result = subprocess.run(  # noqa: S603
+                [
+                    git_executable,
+                    "log",
+                    "--format=%H",
+                    "-n",
+                    "1",
+                ],
+                capture_output=True,
+                check=True,
+                text=True,
             )
-            so, _ = pipe.communicate()
-        except Exception:
+            commit = result.stdout.strip()
+        except Exception:  # noqa: S110
             pass
         else:
-            if pipe.returncode == 0:
-                commit = so
-                try:
-                    commit = so.decode("utf-8")
-                except ValueError:
-                    pass
+            if result.returncode == 0:
+                commit = result.stdout
+                with contextlib.suppress(ValueError):
+                    commit = result.stdout
                 commit = commit.strip().strip('"')
 
     blob.append(("commit", commit))
 
-    try:
+    with contextlib.suppress(Exception):
         (sysname, _nodename, release, _version, machine, processor) = platform.uname()
         blob.extend(
             [
@@ -155,10 +164,8 @@ def _get_sys_info():
                 ("LC_ALL", f"{environ.get('LC_ALL', 'None')}"),
                 ("LANG", f"{environ.get('LANG', 'None')}"),
                 ("LOCALE", f"{locale.getlocale()}"),
-            ]
+            ],
         )
-    except Exception:
-        pass
 
     return blob
 
@@ -244,7 +251,8 @@ def get_environment_info():
         env_info["type"] = "conda"
         env_info["name"] = environ.get("CONDA_DEFAULT_ENV", "unknown")
         env_info["prefix"] = environ.get("CONDA_PREFIX", "unknown").replace(
-            user_dir, "~"
+            user_dir,
+            "~",
         )
 
     # Check for pip virtual environment
@@ -272,11 +280,8 @@ def get_installed_versions():
     """
     installed = {}
     for dist in distributions():
-        try:
+        with contextlib.suppress(Exception):  # Skip packages with invalid metadata
             installed[dist.metadata["Name"].lower()] = dist.version
-        except Exception:
-            # Skip packages with invalid metadata
-            continue
     return installed
 
 

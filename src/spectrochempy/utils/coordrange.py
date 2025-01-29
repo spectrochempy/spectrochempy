@@ -24,7 +24,7 @@ class _CoordRange(tr.HasTraits):
         if len(ranges) == 0:
             # first case: no argument passed, returns an empty range
             self.ranges = []
-        elif len(ranges) == 2 and all(isinstance(elt, (int, float)) for elt in ranges):
+        elif len(ranges) == 2 and all(isinstance(elt, int | float) for elt in ranges):
             # second case: a pair of scalars has been passed
             # using the Interval class, we have autochecking of the interval
             # validity

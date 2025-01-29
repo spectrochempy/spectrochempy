@@ -63,7 +63,7 @@ class EFA(DecompositionAnalysis):
     >>> # Plot the transposed concentration matrix  (2 x N)
     >>> _ = c.T.plot(title="Concentration")
     >>> scp.show()
-    """
+    """,
     )
 
     # ----------------------------------------------------------------------------------
@@ -71,11 +71,13 @@ class EFA(DecompositionAnalysis):
     # as they depend on the model estimator)
     # ----------------------------------------------------------------------------------
     cutoff = tr.Float(default_value=None, allow_none=True, help="Cut-off value.").tag(
-        config=True
+        config=True,
     )
 
     n_components = tr.Int(
-        allow_none=True, default_value=None, help="Number of components to keep."
+        allow_none=True,
+        default_value=None,
+        help="Number of components to keep.",
     ).tag(config=True)
 
     # ----------------------------------------------------------------------------------

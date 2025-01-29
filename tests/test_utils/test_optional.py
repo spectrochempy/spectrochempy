@@ -1,4 +1,6 @@
 # Copied from pandas.tests
+# ruff: noqa: S101
+
 
 import sys
 import types

@@ -136,7 +136,10 @@ def _read_carroucell(*args, **kwargs):
     for f in spafiles[1:]:
         if prefix(f) != curprefix:
             ds = read_omnic(
-                curfilelist, sortbydate=True, directory=directory, name=curprefix
+                curfilelist,
+                sortbydate=True,
+                directory=directory,
+                name=curprefix,
             )
             datasets.append(ds)
             curfilelist = [f]
@@ -152,7 +155,8 @@ def _read_carroucell(*args, **kwargs):
         info_("no temperature file")
     elif len(Tfile) > 1:
         warnings.warn(
-            "several .xls/.csv files. The temperature will not be read", stacklevel=2
+            "several .xls/.csv files. The temperature will not be read",
+            stacklevel=2,
         )
     else:
         Tfile = Tfile[0]
@@ -170,7 +174,8 @@ def _read_carroucell(*args, **kwargs):
             for i in range(9, sheet.nrows):
                 try:
                     time = datetime.datetime.strptime(
-                        sheet.cell(i, 0).value, "%d/%m/%y %H:%M:%S"
+                        sheet.cell(i, 0).value,
+                        "%d/%m/%y %H:%M:%S",
                     ).replace(tzinfo=UTC)
                     if ti <= time <= tf:
                         t.append(time)
@@ -184,7 +189,10 @@ def _read_carroucell(*args, **kwargs):
             tstamp = [time.timestamp() for time in t]
             # interpolate, except for the first and last points that are extrapolated
             interpolator = scipy.interpolate.interp1d(
-                tstamp, T, fill_value="extrapolate", assume_sorted=True
+                tstamp,
+                T,
+                fill_value="extrapolate",
+                assume_sorted=True,
             )
 
             for ds in datasets:

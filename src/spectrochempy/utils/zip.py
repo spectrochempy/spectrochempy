@@ -138,7 +138,7 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
         if member:
             return self.zip.read(key)
 
-        raise KeyError("%s is not a file in the archive or is not " "allowed" % key)
+        raise KeyError(f"{key} is not a file in the archive or is not allowed")
 
     def __contains__(self, key):
         return self.files.__contains__(key)

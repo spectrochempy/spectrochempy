@@ -52,7 +52,7 @@ def is_editable_install(package_name):
     spec = importlib.util.find_spec(package_name)
     if spec is None:
         return False
-    print("origin", spec.origin)
+    print("origin", spec.origin)  # noqa: T201
     return f"{package_name}/src" in spec.origin
 
 
@@ -105,7 +105,7 @@ def _insensitive_case_glob(pattern):
 def patterns(filetypes, allcase=True):
     regex = r"\*\.*\[*[0-9-]*\]*\w*\**"
     patterns = []
-    if not isinstance(filetypes, (list, tuple)):
+    if not isinstance(filetypes, list | tuple):
         filetypes = [filetypes]
     for ft in filetypes:
         m = re.finditer(regex, ft)
@@ -158,11 +158,10 @@ def pathclean(paths):
     import platform
 
     def is_windows():
-        win = "Windows" in platform.platform()
-        return win
+        return "Windows" in platform.platform()
 
     def _clean(path):
-        if isinstance(path, (Path, PosixPath, WindowsPath)):
+        if isinstance(path, Path | PosixPath | WindowsPath):
             path = path.name
         if is_windows():
             path = WindowsPath(path)  # pragma: no cover
@@ -177,10 +176,10 @@ def pathclean(paths):
         return Path(path)
 
     if paths is not None:
-        if isinstance(paths, (str, Path, PosixPath, WindowsPath)):
+        if isinstance(paths, str | Path | PosixPath | WindowsPath):
             path = str(paths)
             return _clean(path).expanduser()
-        if isinstance(paths, (list, tuple)):
+        if isinstance(paths, list | tuple):
             return [_clean(p).expanduser() if isinstance(p, str) else p for p in paths]
 
     return paths
@@ -202,6 +201,7 @@ def _get_file_for_protocol(f, **kwargs):
         if not lst:
             return None
         return f.parent / lst[0]
+    return None
 
 
 def check_filenames(*args, **kwargs):
@@ -250,7 +250,7 @@ def check_filenames(*args, **kwargs):
         ):
             # return url
             return args
-        if isinstance(args[0], (str, Path, PosixPath, WindowsPath)):
+        if isinstance(args[0], str | Path | PosixPath | WindowsPath):
             # one or several filenames are passed - make Path objects
             filenames = pathclean(args)
         elif isinstance(args[0], bytes):
@@ -259,7 +259,8 @@ def check_filenames(*args, **kwargs):
             # return a dictionary
             return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args)}
         elif isinstance(args[0], list) and isinstance(
-            args[0][0], (str, Path, PosixPath, WindowsPath)
+            args[0][0],
+            str | Path | PosixPath | WindowsPath,
         ):
             filenames = pathclean(args[0])
         elif isinstance(args[0], list) and isinstance(args[0][0], bytes):
@@ -286,7 +287,10 @@ def check_filenames(*args, **kwargs):
         filetypes = kwargs.pop("filetypes", ["all files (*)"])
         directory = pathclean(kwargs.pop("directory", None))
         filenames = get_filenames(
-            directory=directory, dictionary=True, filetypes=filetypes, **kwargs
+            directory=directory,
+            dictionary=True,
+            filetypes=filetypes,
+            **kwargs,
         )
     if filenames and not isinstance(filenames, dict):
         filenames_ = []
@@ -294,14 +298,15 @@ def check_filenames(*args, **kwargs):
             # in which directory ?
             directory = filename.parent
 
-            if directory.resolve() == Path.cwd() or directory == Path("."):
+            if directory.resolve() == Path.cwd() or directory == Path():
                 directory = ""
             kw_directory = pathclean(kwargs.get("directory"))
             if directory and kw_directory and directory != kw_directory:
                 # conflict we do not take into account the kw.
                 warnings.warn(
                     "Two different directory where specified (from args and keywords arg). "
-                    "Keyword `directory` will be ignored!"
+                    "Keyword `directory` will be ignored!",
+                    stacklevel=2,
                 )
             elif not directory and kw_directory:
                 filename = pathclean(kw_directory / filename)
@@ -439,7 +444,7 @@ def get_filenames(*filenames, **kwargs):
 
     # filenames
     # ---------
-    if len(filenames) == 1 and isinstance(filenames[0], (list, tuple)):
+    if len(filenames) == 1 and isinstance(filenames[0], list | tuple):
         filenames = filenames[0]
 
     filenames = pathclean(list(filenames))
@@ -482,7 +487,7 @@ def get_filenames(*filenames, **kwargs):
         if len(parents) > 1:
             raise ValueError(
                 "filenames provided have not the same parent directory. "
-                "This is not accepted by the readfilename function."
+                "This is not accepted by the readfilename function.",
             )
 
         # use get_directory_name to complete eventual missing part of the absolute path
@@ -495,7 +500,7 @@ def get_filenames(*filenames, **kwargs):
         # look if all the filename exists either in the specified directory,
         # else in the current directory, and finally in the default preference data directory
         temp = []
-        for i, filename in enumerate(filenames):
+        for _i, filename in enumerate(filenames):
             if not (pathclean(directory / filename)).exists():
                 # the filename provided doesn't exists in the working directory
                 # try in the data directory
@@ -524,7 +529,10 @@ def get_filenames(*filenames, **kwargs):
                 from spectrochempy.core.common.dialogs import open_dialog
 
                 filenames = open_dialog(
-                    single=False, directory=directory, filters=filetypes, **kwargs
+                    single=False,
+                    directory=directory,
+                    filters=filetypes,
+                    **kwargs,
                 )
                 if not filenames:
                     # cancel
@@ -539,7 +547,9 @@ def get_filenames(*filenames, **kwargs):
                 from spectrochempy.core.common.dialogs import open_dialog
 
                 directory = open_dialog(
-                    directory=directory, filters="directory", **kwargs
+                    directory=directory,
+                    filters="directory",
+                    **kwargs,
                 )
                 if not directory:
                     # cancel
@@ -577,14 +587,13 @@ def get_filenames(*filenames, **kwargs):
             return None
 
     # now we have either a list of the selected files
-    if isinstance(filenames, list):
-        if not all(
-            isinstance(elem, (Path, PosixPath, WindowsPath)) for elem in filenames
-        ):
-            raise OSError("one of the list elements is not a filename!")
+    if isinstance(filenames, list) and not all(
+        isinstance(elem, Path | PosixPath | WindowsPath) for elem in filenames
+    ):
+        raise OSError("one of the list elements is not a filename!")
 
     # or a single filename
-    if isinstance(filenames, (str, Path, PosixPath, WindowsPath)):
+    if isinstance(filenames, str | Path | PosixPath | WindowsPath):
         filenames = [filenames]
 
     filenames = pathclean(filenames)
@@ -664,7 +673,7 @@ def get_directory_name(directory, **kwargs):
         if (data_dir / directory).is_dir():
             return data_dir / directory
 
-        raise OSError(f'"{str(directory)}" is not a valid directory')
+        raise OSError(f'"{directory!s}" is not a valid directory')
         # warnings.warn(f'"{directory}" is not a valid directory')
         # return None
 
@@ -674,14 +683,21 @@ def get_directory_name(directory, **kwargs):
         from spectrochempy.core.common.dialogs import open_dialog
 
         directory = open_dialog(
-            single=False, directory=working_dir, filters="directory", **kwargs
+            single=False,
+            directory=working_dir,
+            filters="directory",
+            **kwargs,
         )
 
     return pathclean(directory)
 
 
 def check_filename_to_save(
-    dataset, filename=None, save_as=False, confirm=True, **kwargs
+    dataset,
+    filename=None,
+    save_as=False,
+    confirm=True,
+    **kwargs,
 ):
     from spectrochempy import NO_DIALOG
     from spectrochempy.application import info_
@@ -745,9 +761,11 @@ def check_filename_to_open(*args, **kwargs):
         elif filenames[0].startswith("http://") or filenames[0].startswith("https://"):
             key = pathclean(filenames[0]).suffix.lower()
 
-        if not key:
-            if re.match(r"^fid$|^ser$|^[1-3][ri]*$", filenames[0].name) is not None:
-                key = ".topspin"
+        if (
+            not key
+            and re.match(r"^fid$|^ser$|^[1-3][ri]*$", filenames[0].name) is not None
+        ):
+            key = ".topspin"
         if key[1:].isdigit():
             # probably an opus file
             key = ".opus"

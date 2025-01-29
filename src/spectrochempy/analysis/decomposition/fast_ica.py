@@ -52,7 +52,7 @@ class FastICA(DecompositionAnalysis):
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_FastICA)s
-    """
+    """,
     )
 
     # ----------------------------------------------------------------------------------
@@ -137,7 +137,8 @@ If empty or None and if ``fun=="logcosh"`` , `fun_args` will take value
     ).tag(config=True)
 
     max_iter = tr.Integer(
-        default_value=200, help="Maximum number of iterations before timing out."
+        default_value=200,
+        help="Maximum number of iterations before timing out.",
     ).tag(config=True)
 
     w_init = tr.Union(
@@ -223,7 +224,7 @@ array of values drawn from a normal distribution is used."""
         # The _outfit members are np.ndarrays
         _outfit = self._fast_ica.fit(X)
         self._n_components = int(
-            self._fast_ica.n_components
+            self._fast_ica.n_components,
         )  # cast the returned int64 to int
         return _outfit
 
@@ -267,7 +268,10 @@ array of values drawn from a normal distribution is used."""
 
     @property
     @_wrap_ndarray_output_to_nddataset(
-        units=None, title=None, typey="features", typex="components"
+        units=None,
+        title=None,
+        typey="features",
+        typex="components",
     )
     def mixing(self):
         r"""

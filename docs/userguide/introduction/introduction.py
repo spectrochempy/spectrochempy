@@ -105,9 +105,9 @@ nd = scp.NDDataset()
 # highly recommended.
 
 # %%
-from spectrochempy import *  # noqa
+from spectrochempy import *  # noqa: F403
 
-nd = NDDataset()
+nd = NDDataset()  # noqa: F405
 
 # %% [markdown]
 # Alternatively, you can also load only the objects and function required by your

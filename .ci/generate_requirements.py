@@ -110,7 +110,8 @@ def generate_conda_environments(deps, opt_deps):
     # Define template paths
     req_template_file = template_dir / "environment.tmpl"
     template = Template(
-        req_template_file.read_text("utf-8"), keep_trailing_newline=True
+        req_template_file.read_text("utf-8"),
+        keep_trailing_newline=True,
     )
 
     # CORE dependencies
@@ -127,12 +128,11 @@ def generate_conda_environments(deps, opt_deps):
         )
         opt_deps_string += "\n    - ".join([pip2conda(dep) for dep in opt_deps[opt]])
         out = template.render(
-            dependencies=deps_string, optional_dependencies=opt_deps_string
+            dependencies=deps_string,
+            optional_dependencies=opt_deps_string,
         )
         env_filename = repo_path / "environments" / f"environment_{opt}.yml"
         env_filename.write_text(out)
-
-    return
 
 
 def generate_pip_requirements(deps, opt_deps):
@@ -149,7 +149,8 @@ def generate_pip_requirements(deps, opt_deps):
     # Define template paths
     req_template_file = template_dir / "requirements.tmpl"
     template = Template(
-        req_template_file.read_text("utf-8"), keep_trailing_newline=True
+        req_template_file.read_text("utf-8"),
+        keep_trailing_newline=True,
     )
 
     # CORE dependencies
@@ -167,12 +168,11 @@ def generate_pip_requirements(deps, opt_deps):
         opt_deps_string = underline(f"{opt.upper()} dependencies")
         opt_deps_string += "\n".join(opt_deps[opt])
         out = template.render(
-            dependencies=deps_string, optional_dependencies=opt_deps_string
+            dependencies=deps_string,
+            optional_dependencies=opt_deps_string,
         )
         req_filename = repo_path / "requirements" / f"requirements_{opt}.txt"
         req_filename.write_text(out)
-
-    return
 
 
 def main():

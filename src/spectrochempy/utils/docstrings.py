@@ -51,10 +51,12 @@ ERROR_MSGS = {
 }
 
 
-def check_docstrings(module, obj, exclude=[]):
+def check_docstrings(module, obj, exclude=None):
+    if exclude is None:
+        exclude = []
     members = [f"{module}.{obj.__name__}"]
-    print(module)
-    print(obj.__name__)
+    print(module)  # noqa: T201
+    print(obj.__name__)  # noqa: T201
     for m in dir(obj):
         member = getattr(obj, m)
         if not m.startswith("_") and (
@@ -125,7 +127,7 @@ class SpectroChemPyDocstring(Validator):
                     path.unlink(missing_ok=True)
             raise Exception(
                 f"The following files were leftover from the doctest: "
-                f"{leftovers}. Please use # doctest: +SKIP"
+                f"{leftovers}. Please use # doctest: +SKIP",
             )
         return error_msgs
 
@@ -145,7 +147,7 @@ class SpectroChemPyDocstring(Validator):
                 "import numpy as np  # noqa: F401\n",
                 "import spectrochempy as scp  # noqa: F401\n",
                 *self.examples_source_code,
-            )
+            ),
         )
 
         error_messages = []
@@ -153,7 +155,7 @@ class SpectroChemPyDocstring(Validator):
             file.write(content)
             file.flush()
             cmd = ["python", "-m", "flake8", "--quiet", "--statistics", file.name]
-            response = subprocess.run(cmd, capture_output=True, text=True)
+            response = subprocess.run(cmd, capture_output=True, text=True, check=False)  # noqa: S603
             stdout = response.stdout
             stdout = stdout.replace(file.name, "")
             messages = stdout.strip("\n")
@@ -168,17 +170,18 @@ class SpectroChemPyDocstring(Validator):
         return "array_like" in self.raw_doc
 
 
-def remove_errors(errs, errors=[]):
+def remove_errors(errs, errors=None):
+    if errors is None:
+        errors = []
     dic_errs = dict(errs)
     if not isinstance(errors, list):
         errors = [errors]
     for err in errors:
         dic_errs.pop(err, None)
-    errs = list(dic_errs.items())
-    return errs
+    return list(dic_errs.items())
 
 
-def spectrochempy_validate(func_name, exclude=[]):
+def spectrochempy_validate(func_name, exclude=None):
     """
     Call the numpydoc validation, and add the errors specific to spectrochempy.
 
@@ -194,6 +197,8 @@ def spectrochempy_validate(func_name, exclude=[]):
     dict
         Information about the docstring and the errors found.
     """
+    if exclude is None:
+        exclude = []
     func_obj = Validator._load_obj(func_name)
     doc_obj = get_doc_object(func_obj)
     doc = SpectroChemPyDocstring(func_name, doc_obj)
@@ -204,8 +209,9 @@ def spectrochempy_validate(func_name, exclude=[]):
     if mentioned_errs:
         errs.append(
             spectrochempy_error(
-                "GL04", mentioned_private_classes=", ".join(mentioned_errs)
-            )
+                "GL04",
+                mentioned_private_classes=", ".join(mentioned_errs),
+            ),
         )
 
     has_kwargs = doc.has_kwargs
@@ -225,7 +231,7 @@ def spectrochempy_validate(func_name, exclude=[]):
                         "SA05",
                         reference_name=rel_name,
                         right_reference=rel_name[len("spectrochempy.") :],
-                    )
+                    ),
                 )
 
     result["examples_errs"] = ""
@@ -233,7 +239,7 @@ def spectrochempy_validate(func_name, exclude=[]):
         result["examples_errs"] = doc.examples_errors
         if result["examples_errs"]:
             errs.append(
-                spectrochempy_error("EX02", doctest_log=result["examples_errs"])
+                spectrochempy_error("EX02", doctest_log=result["examples_errs"]),
             )
 
         for error_code, error_message, error_count in doc.validate_pep8():
@@ -244,7 +250,7 @@ def spectrochempy_validate(func_name, exclude=[]):
                     error_code=error_code,
                     error_message=error_message,
                     times_happening=times_happening,
-                )
+                ),
             )
         examples_source_code = "".join(doc.examples_source_code)
         for wrong_import in ("numpy", "spectrochempy"):
@@ -266,14 +272,13 @@ def spectrochempy_validate(func_name, exclude=[]):
 
     result["errors"] = errs
     plt.close("all")
-    if result["file"] is None:
+    if result["file"] is None and hasattr(doc.code_obj, "fget"):
         # sometimes it is because the code_obj is a property
-        if hasattr(doc.code_obj, "fget"):
-            try:
-                result["file"] = inspect.getsourcefile(doc.code_obj.fget)
-                result["file_line"] = inspect.getsourcelines(doc.code_obj.fget)[-1]
-            except (OSError, TypeError):
-                pass
+        try:
+            result["file"] = inspect.getsourcefile(doc.code_obj.fget)
+            result["file_line"] = inspect.getsourcelines(doc.code_obj.fget)[-1]
+        except (OSError, TypeError):
+            pass
 
     return result
 
@@ -308,7 +313,7 @@ class DocstringError(Exception):
           in %(name)s.
           %(message)s\n
         """
-        print(traceback_template % traceback_details)
+        print(traceback_template % traceback_details)  # noqa: T201
 
 
 # TODO replace this in module where it is used by docrep
@@ -333,8 +338,7 @@ def getdocfrom(origin):
 
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            response = func(*args, **kwargs)
-            return response
+            return func(*args, **kwargs)
 
         return wrapper
 
@@ -365,7 +369,7 @@ def htmldoc(text):
     for i in range(len(html)):
         html[i] = html[i].strip()
         if i == 0:
-            html[i] = "<h3>%s</h3>" % html[i]
+            html[i] = f"<h3>{html[i]}</h3>"
         html[i] = html[i].replace("Parameters", "<h4>Parameters</h4>")
         html[i] = html[i].replace("Properties", "<h4>Properties</h4>")
         html[i] = html[i].replace("Methods", "<h4>Methods</h4>")
@@ -374,6 +378,4 @@ def htmldoc(text):
                 html[i] = html[i] + "<br/>"
             if not html[i].strip().startswith("<"):
                 html[i] = "&nbsp;&nbsp;&nbsp;&nbsp;" + html[i]
-    html = "".join(html)
-
-    return html
+    return "".join(html)

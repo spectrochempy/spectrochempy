@@ -91,7 +91,8 @@ class PreferencesSet(Meta):
                 res = super().__getitem__(key)
                 if res is None:
                     error_(
-                        KeyError, f"not found {key}"
+                        KeyError,
+                        f"not found {key}",
                     )  # key = key.replace('_','.').replace('...', '_').replace('..',
                     # '-')  #  # res = mpl.rcParams[key]
 
@@ -151,7 +152,7 @@ class PreferencesSet(Meta):
                 if alias[0].endswith(key) and (not starts and self.parent is not None):
                     # it is a member of a group but we don't know which one:
                     raise KeyError(
-                        f"Found several keys for {key}: {alias}, so it is ambiguous. Please choose on one of them"
+                        f"Found several keys for {key}: {alias}, so it is ambiguous. Please choose on one of them",
                     )
                 if any(par.startswith(key) for par in alias):
                     # we return the group of parameters
@@ -228,8 +229,11 @@ class PreferencesSet(Meta):
             thelp = thelp.replace("  ", " ")
         help = "\n".join(
             textwrap.wrap(
-                thelp, 100, initial_indent=" " * 20, subsequent_indent=" " * 20
-            )
+                thelp,
+                100,
+                initial_indent=" " * 20,
+                subsequent_indent=" " * 20,
+            ),
         )
 
         value = colored(value, "GREEN")
@@ -239,7 +243,9 @@ class PreferencesSet(Meta):
         print(f"{help}\n")  # noqa: T201
 
     def makestyle(
-        self, stylename: str = "mydefault", to_mpl: bool = False
+        self,
+        stylename: str = "mydefault",
+        to_mpl: bool = False,
     ) -> str | None:
         """Create a matplotlib style file.
 
@@ -438,7 +444,10 @@ class NDPlot(HasTraits):
             plt.close(self._fig)
 
     def _figure_setup(
-        self, ndim: int = 1, method: str | None = None, **kwargs: Any
+        self,
+        ndim: int = 1,
+        method: str | None = None,
+        **kwargs: Any,
     ) -> str:
         # Set up figure and axes for plotting
         # Args:
@@ -535,12 +544,12 @@ class NDPlot(HasTraits):
             ax.set_prop_cycle(
                 cycler("color", colors * len(linestyles) * len(markers))
                 + cycler("linestyle", linestyles * len(colors) * len(markers))
-                + cycler("marker", markers * len(colors) * len(linestyles))
+                + cycler("marker", markers * len(colors) * len(linestyles)),
             )
         elif ax is not None and "scatter" not in method:
             ax.set_prop_cycle(
                 cycler("color", colors * len(linestyles))
-                + cycler("linestyle", linestyles * len(colors))
+                + cycler("linestyle", linestyles * len(colors)),
             )
 
         # Get the number of the present figure
@@ -586,7 +595,12 @@ class NDPlot(HasTraits):
 
             if SHOWXPROJ:
                 axex = divider.append_axes(
-                    "top", 1.01, pad=0.01, sharex=ax, frameon=0, yticks=[]
+                    "top",
+                    1.01,
+                    pad=0.01,
+                    sharex=ax,
+                    frameon=0,
+                    yticks=[],
                 )
                 axex.tick_params(bottom="off", top="off")
                 plt.setp(axex.get_xticklabels() + axex.get_yticklabels(), visible=False)
@@ -595,7 +609,12 @@ class NDPlot(HasTraits):
 
             if SHOWYPROJ:
                 axey = divider.append_axes(
-                    "right", 1.01, pad=0.01, sharey=ax, frameon=0, xticks=[]
+                    "right",
+                    1.01,
+                    pad=0.01,
+                    sharey=ax,
+                    frameon=0,
+                    xticks=[],
                 )
                 axey.tick_params(right="off", left="off")
                 plt.setp(axey.get_xticklabels() + axey.get_yticklabels(), visible=False)
@@ -604,7 +623,12 @@ class NDPlot(HasTraits):
 
             if colorbar and not ax3d:
                 axec = divider.append_axes(
-                    "right", 0.15, pad=0.1, frameon=0, xticks=[], yticks=[]
+                    "right",
+                    0.15,
+                    pad=0.1,
+                    frameon=0,
+                    xticks=[],
+                    yticks=[],
                 )
                 axec.tick_params(right="off", left="off")
                 # plt.setp(axec.get_xticklabels(), visible=False)

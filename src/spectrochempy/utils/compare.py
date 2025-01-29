@@ -102,6 +102,7 @@ def is_numpy_array(obj):
 
     if isinstance(obj, np.ndarray):
         return True
+    return None
 
 
 def is_duck_array(obj):
@@ -257,14 +258,11 @@ def dict_compare(d1, d2, check_equal_only=True):
                 for i1, i2 in zip(d1[o], d2[o], strict=False):
                     if np.any(i1 != i2):
                         modified.add(o)
-        else:
-            if is_sequence(d2[o]) or d1[o] != d2[o]:
-                modified.add(o)
+        elif is_sequence(d2[o]) or d1[o] != d2[o]:
+            modified.add(o)
 
-    same = set(o for o in intersect_keys if o not in modified)
+    same = {o for o in intersect_keys if o not in modified}
 
     if not check_equal_only:
         return added, removed, modified, same
-    if modified or removed or added:
-        return False
-    return True
+    return not (modified or removed or added)

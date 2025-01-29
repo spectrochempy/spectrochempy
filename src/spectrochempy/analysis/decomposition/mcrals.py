@@ -65,7 +65,7 @@ class MCRALS(DecompositionAnalysis):
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_MCRALS)s
-    """
+    """,
     )
 
     # Developer notes
@@ -90,14 +90,15 @@ class MCRALS(DecompositionAnalysis):
     ).tag(config=True)
 
     max_iter = tr.Integer(50, help="Maximum number of :term:`ALS` iteration.").tag(
-        config=True
+        config=True,
     )
 
     maxdiv = tr.Integer(
-        5, help="Maximum number of successive non-converging iterations."
+        5,
+        help="Maximum number of successive non-converging iterations.",
     ).tag(config=True)
 
-    solverConc = tr.Enum(  # noqa: N815
+    solverConc = tr.Enum(
         ["lstsq", "nnls", "pnnls"],
         default_value="lstsq",
         help=(
@@ -112,7 +113,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    nonnegConc = tr.Union(  # noqa: N815
+    nonnegConc = tr.Union(
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
         help=(
@@ -127,7 +128,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    unimodConc = tr.Union(  # noqa: N815
+    unimodConc = tr.Union(
         (tr.Enum(["all"]), tr.List()),
         default_value="all",
         help=(
@@ -141,7 +142,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    unimodConcMod = tr.Enum(  # noqa: N815
+    unimodConcMod = tr.Enum(
         ["strict", "smooth"],
         default_value="strict",
         help=(
@@ -154,7 +155,7 @@ class MCRALS(DecompositionAnalysis):
         ),
     ).tag(config=True)
 
-    unimodConcTol = tr.Float(  # noqa: N815
+    unimodConcTol = tr.Float(
         default_value=1.1,
         help=(
             r"""Tolerance parameter for :term:`unimodality`.
@@ -166,7 +167,7 @@ Correction is applied only if:
         ),
     ).tag(config=True)
 
-    monoDecConc = tr.List(  # noqa: N815
+    monoDecConc = tr.List(
         default_value=[],
         help=(
             r"""Monotonic decrease constraint on concentrations.
@@ -178,7 +179,7 @@ Correction is applied only if:
         ),
     ).tag(config=True)
 
-    monoDecTol = tr.Float(  # noqa: N815
+    monoDecTol = tr.Float(
         default_value=1.1,
         help=r"""Tolerance parameter for monotonic decrease.
 
@@ -501,7 +502,7 @@ and `St`.
                 "Passing arguments such as MCRALS(X, profile) "
                 "is now deprecated. "
                 "Instead, use MCRAL() followed by MCRALS.fit(X, profile). "
-                "See the documentation and examples"
+                "See the documentation and examples",
             )
 
         # warn about deprecation
@@ -587,7 +588,7 @@ and `St`.
             raise ValueError(
                 f"None of the dimensions of the given profile "
                 f"[{profile.shape}] correspond to any of those "
-                f"of X [{self._X_shape}]."
+                f"of X [{self._X_shape}].",
             )
 
         # mask info
@@ -601,7 +602,7 @@ and `St`.
             self._C0 = C
             self._n_components = C.shape[1]
             info_(
-                f"Concentration profile initialized with {self._n_components} components"
+                f"Concentration profile initialized with {self._n_components} components",
             )
 
             # compute initial spectra (using X eventually masked)
@@ -659,7 +660,7 @@ and `St`.
             return nonnegConc
         if nonnegConc == "all":
             nonnegConc = np.arange(
-                self._n_components
+                self._n_components,
             ).tolist()  # IMPORTANT! .tolist, not list()
             # to get integer type not int64 which are not compatible with the setting
         elif np.any(nonnegConc) and (
@@ -669,7 +670,7 @@ and `St`.
             # due to a deprecation warning from traitlets.
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `nonnegConc` configuration (value: {nonnegConc})"
+                f"the `nonnegConc` configuration (value: {nonnegConc})",
             )
         return nonnegConc
 
@@ -688,7 +689,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check the "
-                f"`unimodConc` configuration (value: {unimodConc})"
+                f"`unimodConc` configuration (value: {unimodConc})",
             )
         return unimodConc
 
@@ -702,7 +703,7 @@ and `St`.
         elif len(closureConc) > self._n_components:
             raise ValueError(
                 f"The model contains only {self._n_components} components, please check "
-                f"the 'closureConc' configuration (value: {closureConc})"
+                f"the 'closureConc' configuration (value: {closureConc})",
             )
         return closureConc
 
@@ -718,7 +719,7 @@ and `St`.
         elif len(closureTarget) != ny:
             raise ValueError(
                 f"The data contain only {ny} observations, please check "
-                f"the 'closureTarget' configuration (value: {closureTarget})"
+                f"the 'closureTarget' configuration (value: {closureTarget})",
             )
         return closureTarget
 
@@ -737,7 +738,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `getC_to_C_idx`  configuration (value: {getC_to_C_idx})"
+                f"the `getC_to_C_idx`  configuration (value: {getC_to_C_idx})",
             )
         return getC_to_C_idx
 
@@ -756,7 +757,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `nonnegSpec`configuration (value: {nonnegSpec})"
+                f"the `nonnegSpec`configuration (value: {nonnegSpec})",
             )
         return nonnegSpec
 
@@ -775,7 +776,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check the "
-                f"`unimodSpec`configuration"
+                f"`unimodSpec`configuration",
             )
         return unimodSpec
 
@@ -794,7 +795,7 @@ and `St`.
         ):
             raise ValueError(
                 f"The profile has only {self._n_components} species, please check "
-                f"the `getSt_to_St_idx`  configuration (value: {getSt_to_St_idx})"
+                f"the `getSt_to_St_idx`  configuration (value: {getSt_to_St_idx})",
             )
         return getSt_to_St_idx
 
@@ -1051,7 +1052,7 @@ and `St`.
             stdev_PCA = np.std(Xhat - Xpca)
             info_(
                 f"{niter: 3d}{' ' * 6}{stdev_PCA: 10f}{' ' * 6}"
-                f"{stdev2: 10f}{' ' * 6}{change: 10f}"
+                f"{stdev2: 10f}{' ' * 6}{change: 10f}",
             )
 
             # check convergence
@@ -1069,14 +1070,14 @@ and `St`.
             if ndiv == self.maxdiv:
                 info_(
                     f"Optimization not improved after {self.maxdiv} iterations"
-                    f"... unconverged or 'tol' set too small ?"
+                    f"... unconverged or 'tol' set too small ?",
                 )
                 info_("Stop ALS optimization.")
 
             if niter == self.max_iter:
                 info_(
                     f"Convergence criterion ('tol') not reached after "
-                    f"{self.max_iter: d} iterations."
+                    f"{self.max_iter: d} iterations.",
                 )
                 info_("Stop ALS optimization.")
 

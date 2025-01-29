@@ -61,7 +61,12 @@ class Script(HasTraits):
     _parent = Instance(AbstractProject, allow_none=True)
 
     def __init__(
-        self, name="unamed_script", content=None, parent=None, priority=50.0, **kwargs
+        self,
+        name="unamed_script",
+        content=None,
+        parent=None,
+        priority=50.0,
+        **kwargs,
     ):
         self.name = name
         self.content = content
@@ -78,9 +83,7 @@ class Script(HasTraits):
         return self.execute(*args)
 
     def __eq__(self, other):
-        if self._content == other.content:
-            return True
-        return False
+        return self._content == other.content
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -107,7 +110,7 @@ class Script(HasTraits):
         raise TraitError(
             "Not a valid script name : only _, letters and numbers "
             "are valids. For the fist character, numbers are "
-            "not allowed"
+            "not allowed",
         )
 
     @property
@@ -181,7 +184,7 @@ class Script(HasTraits):
             # localvars['project']=self.parent
 
         try:
-            exec(code, globals(), localvars)
+            exec(code, globals(), localvars)  # noqa: S102
             return
 
         except NameError as e:
@@ -193,7 +196,7 @@ class Script(HasTraits):
             # TODO: check if this a real error or not  (need to come
             #  back on this later)
         try:
-            exec(code, globals(), localvars)
+            exec(code, globals(), localvars)  # noqa: S102
         except NameError as e:
             error_(e + ". pass the variable `locals()` : this may solve this problem! ")
 
@@ -230,4 +233,4 @@ def run_all_scripts(project):
     """
     # TODO: complete this run_all_script function
 
-    project
+    #  project

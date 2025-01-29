@@ -6,6 +6,7 @@
 """
 JSON utilities.
 """
+
 import base64
 import datetime
 import pathlib
@@ -40,7 +41,7 @@ def json_decoder(dic):
             return np.datetime64(dic["isoformat"])
         if klass == "NUMPY_ARRAY":
             if "base64" in dic:
-                return pickle.loads(base64.b64decode(dic["base64"]))
+                return pickle.loads(base64.b64decode(dic["base64"]))  # noqa: S301
             if "tolist" in dic:
                 return np.array(dic["tolist"], dtype=dic["dtype"])
         elif klass == "PATH":
@@ -51,7 +52,7 @@ def json_decoder(dic):
             return Unit(dic["str"])
         elif klass == "COMPLEX":
             if "base64" in dic:
-                return pickle.loads(base64.b64decode(dic["base64"]))
+                return pickle.loads(base64.b64decode(dic["base64"]))  # noqa: S301
             if "tolist" in dic:
                 return np.array(dic["tolist"], dtype=dic["dtype"]).data[()]
 
@@ -91,16 +92,16 @@ def json_serialiser(byte_obj, encoding=None):
                 dic[name] = json_serialiser(val, encoding=encoding)
         return dic
 
-    if isinstance(byte_obj, (str, int, float, bool)):
+    if isinstance(byte_obj, str | int | float | bool):
         return byte_obj
 
     if isinstance(byte_obj, np.bool_):
         return bool(byte_obj)
 
-    if isinstance(byte_obj, (np.float64, np.float32, float)):
+    if isinstance(byte_obj, np.float64 | np.float32 | float):
         return float(byte_obj)
 
-    if isinstance(byte_obj, (np.int64, np.int32, int)):
+    if isinstance(byte_obj, np.int64 | np.int32 | int):
         return int(byte_obj)
 
     if isinstance(byte_obj, tuple):
@@ -142,7 +143,7 @@ def json_serialiser(byte_obj, encoding=None):
             "__class__": "NUMPY_ARRAY",
         }
 
-    if isinstance(byte_obj, (pathlib.PosixPath, pathlib.WindowsPath)):
+    if isinstance(byte_obj, pathlib.PosixPath | pathlib.WindowsPath):
         return {"str": str(byte_obj), "__class__": "PATH"}
 
     if isinstance(byte_obj, Unit):
@@ -155,11 +156,12 @@ def json_serialiser(byte_obj, encoding=None):
             "__class__": "QUANTITY",
         }
 
-    if isinstance(byte_obj, (np.complex128, np.complex64, complex)):
+    if isinstance(byte_obj, np.complex128 | np.complex64 | complex):
         if encoding is None:
             return {
                 "tolist": json_serialiser(
-                    [byte_obj.real, byte_obj.imag], encoding=encoding
+                    [byte_obj.real, byte_obj.imag],
+                    encoding=encoding,
                 ),
                 "dtype": str(byte_obj.dtype),
                 "__class__": "COMPLEX",

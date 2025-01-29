@@ -83,7 +83,10 @@ class _QTFileDialogs:  # pragma: no cover
 
         options = FileDialog.DontResolveSymlinks | FileDialog.ShowDirsOnly
         directory = FileDialog.getExistingDirectory(
-            parent=parent, caption=caption, directory=directory, options=options
+            parent=parent,
+            caption=caption,
+            directory=directory,
+            options=options,
         )
 
         if directory:
@@ -303,7 +306,9 @@ class _TKFileDialogs:  # pragma: no cover
         return filetypes
 
     def _open_filename(
-        self, parent: object | None = None, filters: list[str] | None = None
+        self,
+        parent: object | None = None,
+        filters: list[str] | None = None,
     ) -> str | None:
         """Open dialog for selecting a file.
 
@@ -335,7 +340,9 @@ class _TKFileDialogs:  # pragma: no cover
         return None
 
     def _open_multiple_filenames(
-        self, parent: object | None = None, filters: list[str] | None = None
+        self,
+        parent: object | None = None,
+        filters: list[str] | None = None,
     ) -> list[str] | None:
         """
         Return one or several files to open.
@@ -452,7 +459,8 @@ def save_dialog(
     """
     if USE_QT:
         parent = kwargs.pop(
-            "Qt_parent", None
+            "Qt_parent",
+            None,
         )  # in case this is launched from spectrochempy_gui
 
         _ = pyqt.QApplication([])
@@ -464,7 +472,9 @@ def save_dialog(
         )
     else:
         f = _TKFileDialogs()._save_filename(
-            filename=filename, caption=caption, filters=filters
+            filename=filename,
+            caption=caption,
+            filters=filters,
         )
 
     return pathclean(f)
@@ -496,7 +506,8 @@ def open_dialog(
     """
     if USE_QT:
         parent = kwargs.pop(
-            "Qt_parent", None
+            "Qt_parent",
+            None,
         )  # in case this is launched from spectrochempy_gui
 
         _ = pyqt.QApplication([])
@@ -510,7 +521,9 @@ def open_dialog(
     if filters == "directory":
         caption = "Select a folder"
         f = klass._open_existing_directory(
-            parent=parent, caption=caption, directory=str(directory)
+            parent=parent,
+            caption=caption,
+            directory=str(directory),
         )
     elif single:
         f = klass._open_filename(parent=parent, filters=filters)

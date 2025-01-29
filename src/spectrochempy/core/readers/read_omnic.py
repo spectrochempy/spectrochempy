@@ -356,7 +356,7 @@ def _read_spg(*args, **kwargs):
 
     if nspec == 0:  # pragma: no cover
         raise OSError(
-            "Error : File format not recognized - information markers not found"
+            "Error : File format not recognized - information markers not found",
         )
 
     # container to hold values
@@ -396,23 +396,23 @@ def _read_spg(*args, **kwargs):
         raise ValueError(
             "Error : Inconsistent data set -"
             " number of wavenumber per spectrum should be "
-            "identical"
+            "identical",
         )
     if np.ptp(firstx) != 0:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - the x axis should start at same value"
+            "Error : Inconsistent data set - the x axis should start at same value",
         )
     if np.ptp(lastx) != 0:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - the x axis should end at same value"
+            "Error : Inconsistent data set - the x axis should end at same value",
         )
     if len(set(xunits)) != 1:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - data units should be identical"
+            "Error : Inconsistent data set - data units should be identical",
         )
     if len(set(units)) != 1:  # pragma: no cover
         raise ValueError(
-            "Error : Inconsistent data set - x axis units should be identical"
+            "Error : Inconsistent data set - x axis units should be identical",
         )
     data = np.ndarray((nspec, nx[0]), dtype="float32")
 
@@ -451,7 +451,7 @@ def _read_spg(*args, **kwargs):
         timestamp = fromfile(fid, dtype="uint32", count=1)
         # since 31/12/1899, 00:00
         acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
-            seconds=int(timestamp)
+            seconds=int(timestamp),
         )
         acquisitiondates.append(acqdate)
         timestamp = acqdate.timestamp()
@@ -505,7 +505,8 @@ def _read_spg(*args, **kwargs):
     # Set description, date and history
     # Omnic spg file don't have specific "origin" field stating the oirigin of the data
     dataset.description = kwargs.get(
-        "description", f"Omnic title: {spg_title}\nOmnic filename: {filename}"
+        "description",
+        f"Omnic title: {spg_title}\nOmnic filename: {filename}",
     )
 
     dataset._date = utcnow()
@@ -541,7 +542,7 @@ def _read_spa(*args, **kwargs):
     fid.seek(296)
     timestamp = fromfile(fid, dtype="uint32", count=1)
     acqdate = datetime(1899, 12, 31, 0, 0, tzinfo=UTC) + timedelta(
-        seconds=int(timestamp)
+        seconds=int(timestamp),
     )
     acquisitiondate = acqdate
 
@@ -704,12 +705,11 @@ def _read_spa(*args, **kwargs):
 
     dataset.history = "Imported from spa file(s)"
 
-    if "spa_history" in locals():
-        if len("spa_history".strip(" ")) > 0:
-            dataset.history = (
-                "Data processing history from Omnic :\n------------------------------------\n"
-                + spa_history
-            )
+    if "spa_history" in locals() and len("spa_history".strip(" ")) > 0:
+        dataset.history = (
+            "Data processing history from Omnic :\n------------------------------------\n"
+            + spa_history
+        )
 
     dataset._date = utcnow()
 
@@ -737,11 +737,8 @@ def _read_srs(*args, **kwargs):
 
     return_bg = kwargs.get("return_bg", False)
 
-    if frombytes:
-        # in this case, filename is actually a byte content
-        fid = io.BytesIO(filename)  # pragma: no cover
-    else:
-        fid = open(filename, "rb")
+    # in this case, filename is actually a byte content
+    fid = io.BytesIO(filename) if frombytes else open(filename, "rb")  # noqa: SIM115
 
     # read the file and determine whether it is a rapidscan or a high speed real time
     is_rapidscan, is_highspeed, is_tg = False, False, False
@@ -825,7 +822,7 @@ def _read_srs(*args, **kwargs):
                     "you'd like an update of the reader to read your "
                     "file type, please report the issue on "
                     "https://github.com/spectrochempy/spectrochempy"
-                    "/issues "
+                    "/issues ",
                 )
 
     if is_rapidscan:
@@ -842,7 +839,7 @@ def _read_srs(*args, **kwargs):
                 "The file is not recognized as a Rapid Scan "
                 "srs file. Please report the issue on "
                 "https://github.com/spectrochempy/spectrochempy"
-                "/issues "
+                "/issues ",
             )
 
         # find the 2 following starting indexes of sub_rs.
@@ -863,7 +860,7 @@ def _read_srs(*args, **kwargs):
                 "The file is not recognized as a Rapid Scan "
                 "srs file. Please report the issue on "
                 "https://github.com/spectrochempy/spectrochempy"
-                "/issues "
+                "/issues ",
             )
 
         pos_info_data = index[0]
@@ -892,7 +889,7 @@ def _read_srs(*args, **kwargs):
             # First get background info
             info = _read_header(fid, pos_info_bg)
 
-            if "background_name" not in info.keys():
+            if "background_name" not in info:
                 # it is a short header
                 fid.seek(index[1] + 208)
                 data = fromfile(fid, dtype="float32", count=info["nx"])
@@ -951,7 +948,7 @@ def _read_srs(*args, **kwargs):
                 "The file is not recognized as a High Speed Real "
                 "Time srs file. Please report the issue on "
                 "https://github.com/spectrochempy/spectrochempy"
-                "/issues "
+                "/issues ",
             )
 
         if not return_bg:
@@ -974,7 +971,7 @@ def _read_srs(*args, **kwargs):
             # First get background info
             info = _read_header(fid, pos_bg)
 
-            if "background_name" not in info.keys():
+            if "background_name" not in info:
                 # it is a short header
                 fid.seek(index[1] + 208)
                 data = fromfile(fid, dtype="float32", count=info["nx"])
@@ -998,7 +995,7 @@ def _read_srs(*args, **kwargs):
                 "The file is not recognized as a TG IR or GC "
                 "srs file. Please report the issue on "
                 "https://github.com/spectrochempy/spectrochempy"
-                "/issues "
+                "/issues ",
             )
 
         pos_info_data = index[0]
@@ -1018,7 +1015,7 @@ def _read_srs(*args, **kwargs):
             # First get background info
             info = _read_header(fid, pos_info_bg)
 
-            if "background_name" not in info.keys():
+            if "background_name" not in info:
                 # it is a short header
                 fid.seek(index[1] + 208)
                 data = fromfile(fid, dtype="float32", count=info["nx"])
@@ -1072,7 +1069,7 @@ def _read_srs(*args, **kwargs):
     if "history" in locals():
         dataset.history.append(
             "Omnic 'DATA PROCESSING HISTORY' :\n"
-            "--------------------------------\n" + history
+            "--------------------------------\n" + history,
         )
     dataset.history.append(str(utcnow()) + ": imported from srs file " + str(filename))
 
@@ -1296,10 +1293,9 @@ def _read_header(fid, pos):
         out["history"] = _readbtext(fid, pos + 208, None)
 
     if filetype == "srs":
-        if out["nbkgscan"] == 0:
+        if out["nbkgscan"] == 0 and out["firstx"] > out["lastx"]:
             # an interferogram in rapid scan mode
-            if out["firstx"] > out["lastx"]:
-                out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
+            out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
 
         out["name"] = _readbtext(fid, pos + 938, 256)
         fid.seek(pos + 1002)

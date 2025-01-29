@@ -39,7 +39,7 @@ class Optimize(DecompositionAnalysis):
     Parameters
     ----------
     %(AnalysisConfigurable.parameters)s
-    """
+    """,
     )
 
     # ----------------------------------------------------------------------------------
@@ -47,11 +47,13 @@ class Optimize(DecompositionAnalysis):
     # as they depend on the model estimator)
     # ----------------------------------------------------------------------------------
     max_iter = tr.Integer(
-        default_value=500, help="Maximum number of fitting iteration."
+        default_value=500,
+        help="Maximum number of fitting iteration.",
     ).tag(config=True)
 
     max_fun_calls = tr.Integer(
-        allow_none=True, help="Maximum number of function calls at each iteration."
+        allow_none=True,
+        help="Maximum number of function calls at each iteration.",
     ).tag(config=True)
 
     callback_every = tr.Integer(
@@ -67,11 +69,11 @@ class Optimize(DecompositionAnalysis):
     ).tag(config=True)
 
     script = tr.Unicode(help="Script defining models and parameters for fitting.").tag(
-        config=True
+        config=True,
     )
 
     constraints = tr.Any(allow_none=True, help="Constraints.").tag(
-        config=True
+        config=True,
     )  # TODO: adjust this
 
     dry = tr.Bool(
@@ -81,11 +83,13 @@ class Optimize(DecompositionAnalysis):
     ).tag(config=True)
 
     autobase = tr.Bool(
-        default_value=False, help="Whether to apply an automatic baseline correction."
+        default_value=False,
+        help="Whether to apply an automatic baseline correction.",
     ).tag(config=True)
 
     autoampl = tr.Bool(
-        default_value=False, help="Whether to apply an automatic amplitude correction."
+        default_value=False,
+        help="Whether to apply an automatic amplitude correction.",
     ).tag(config=True)
 
     amplitude_mode = tr.CaselessStrEnum(
@@ -347,7 +351,7 @@ class Optimize(DecompositionAnalysis):
             s = line.split(":")
             if len(s) != 2:
                 raise ValueError(
-                    f"Cannot interpret line {lc}: A semi-column is missing?"
+                    f"Cannot interpret line {lc}: A semi-column is missing?",
                 )
 
             key, values = s
@@ -368,7 +372,7 @@ class Optimize(DecompositionAnalysis):
                     # in self._list_of_baselines):
                     raise ValueError(
                         f"Shape of this model `{shape}` was not specified"
-                        f" or is not implemented"
+                        f" or is not implemented",
                     )
                 fp.model[modlabel] = shape
                 common = False
@@ -388,7 +392,7 @@ class Optimize(DecompositionAnalysis):
             if modlabel is None and not common:
                 raise ValueError(
                     "The first definition should be a label for a model or a block "
-                    "of variables or constants."
+                    "of variables or constants.",
                 )
             # get the parameters
             if key.startswith("*"):
@@ -406,7 +410,7 @@ class Optimize(DecompositionAnalysis):
             else:
                 raise ValueError(
                     f"Cannot interpret line {lc}: A parameter definition must start"
-                    f" with *,$ or >"
+                    f" with *,$ or >",
                 )
 
             # store this parameter
@@ -418,7 +422,7 @@ class Optimize(DecompositionAnalysis):
                     s[1:] = s[2:]
             if len(s) > 3:
                 raise ValueError(
-                    f"line {lc}: value, min, max should be defined in this order"
+                    f"line {lc}: value, min, max should be defined in this order",
                 )
             if len(s) == 2:
                 raise ValueError(f"only two items in line {lc}")
@@ -614,7 +618,7 @@ class Optimize(DecompositionAnalysis):
                     new_param[key] = eval(str(refpar))  # noqa: S307
                 except Exception as err:
                     raise ValueError(
-                        f"Cannot evaluate the expression {key}: {param[refpar]}"
+                        f"Cannot evaluate the expression {key}: {param[refpar]}",
                     ) from err
 
                 new_param.fixed[key] = True
@@ -1125,7 +1129,7 @@ def getmodel(
                 modelcls = usermodels[model]
             except KeyError as e:
                 raise ValueError(
-                    f"Model {model} not found in spectrochempy nor in usermodels."
+                    f"Model {model} not found in spectrochempy nor in usermodels.",
                 ) from e
         else:
             raise ValueError(f"Model {model} not found in spectrochempy.") from None

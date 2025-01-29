@@ -130,7 +130,7 @@ class Meta:
         # Create a deep copy of the Meta object.
         return self.__copy__()
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         # Check equality with another Meta object or dictionary.
         m1 = self._data
         if hasattr(other, "_data"):
@@ -148,7 +148,7 @@ class Meta:
                 eq &= np.all(v == m2.get(k, None))
         return eq
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         # Check inequality with another Meta object or dictionary.
         return not self.__eq__(other)
 

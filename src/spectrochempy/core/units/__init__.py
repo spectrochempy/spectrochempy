@@ -15,6 +15,8 @@ __all__ = [
     "DimensionalityError",
 ]
 
+import warnings
+
 from pint import __version__
 
 # check pint version
@@ -22,17 +24,17 @@ pint_version = int(__version__.split(".")[1])
 if pint_version < 20:
     raise ImportError(
         "Current pint version is {__version__} but must be 0.20 or higher. Please consider upgrading it "
-        "(e.g. `> pip install pint --upgrade` or `> conda update pint` )\n"
+        "(e.g. `> pip install pint --upgrade` or `> conda update pint` )\n",
     )
 if pint_version < 24:
-    print(
+    warnings.warn(
         f"Warning: current pint version is {__version__}. It might not be supported by SpectroChemPy in the future.\n"
-        f"Please consider upgrading it to 0.24 or higher (e.g. `> pip install pint --upgrade` or `> conda update pint`)\n"
+        f"Please consider upgrading it to 0.24 or higher (e.g. `> pip install pint --upgrade` or `> conda update pint`)\n",
+        stacklevel=2,
     )
 
 if pint_version < 24:
     from functools import wraps
-    from warnings import warn
 
     from pint import Context
     from pint import DimensionalityError
@@ -198,8 +200,7 @@ if pint_version < 24:
         p = cls.__format__("~H")
         # attempt to solve a display problem in notebook (recent version of pint
         # have a strange way to handle HTML. For me it doesn't work
-        p = p.replace(r"\[", "").replace(r"\]", "").replace(r"\ ", " ")
-        return p
+        return p.replace(r"\[", "").replace(r"\]", "").replace(r"\ ", " ")
 
     Quantity._repr_html_ = _repr_html_
     Quantity._repr_latex_ = lambda cls: "$" + cls.__format__("~L") + "$"
@@ -207,11 +208,11 @@ if pint_version < 24:
     # TODO: work on this latex format
 
     Unit.scaling = property(
-        lambda u: u._REGISTRY.Quantity(1.0, u._units).to_base_units().magnitude
+        lambda u: u._REGISTRY.Quantity(1.0, u._units).to_base_units().magnitude,
     )
 
     # --------------------------------------------------------------------------------------
-    def __format__(self, spec):
+    def __format__(self, spec):  # noqa: N807
         # modify Pint unit __format__
 
         spec = formatting.extract_custom_flags(spec or self.default_format)
@@ -237,14 +238,14 @@ if pint_version < 24:
                     units = UnitsContainer({"": 1})
                 else:
                     units = UnitsContainer(
-                        {"scaled-dimensionless (%.2g)" % self.scaling: 1}
+                        {f"scaled-dimensionless ({self.scaling:.2g})": 1},
                     )
             else:
                 units = UnitsContainer(
-                    dict(
-                        (self._REGISTRY._get_symbol(key), value)
+                    {
+                        self._REGISTRY._get_symbol(key): value
                         for key, value in self._units.items()
-                    )
+                    },
                 )
             spec = spec.replace("~", "")
         else:
@@ -259,7 +260,7 @@ if pint_version < 24:
         U_ = UnitRegistry(on_redefinition="ignore")  # filename)
 
         U_.define(
-            "__wrapped__ = 1"
+            "__wrapped__ = 1",
         )  # <- hack to avoid an error with pytest (doctest activated)
         U_.define("@alias point = count")
         U_.define("transmittance = 1. / 100.")
@@ -272,14 +273,21 @@ if pint_version < 24:
             U_.define(UnitDefinition("percent", "pct", (), ScaleConverter(1 / 100.0)))
             U_.define(
                 UnitDefinition(
-                    "weight_percent", "wt_pct", (), ScaleConverter(1 / 100.0)
-                )
+                    "weight_percent",
+                    "wt_pct",
+                    (),
+                    ScaleConverter(1 / 100.0),
+                ),
             )
         else:
             U_.define(
                 UnitDefinition(
-                    "percent", "pct", (), ScaleConverter(1 / 100.0), UnitsContainer()
-                )
+                    "percent",
+                    "pct",
+                    (),
+                    ScaleConverter(1 / 100.0),
+                    UnitsContainer(),
+                ),
             )
             U_.define(
                 UnitDefinition(
@@ -288,7 +296,7 @@ if pint_version < 24:
                     (),
                     ScaleConverter(1 / 100.0),
                     UnitsContainer(),
-                )
+                ),
             )
 
         U_.default_format = "~P"
@@ -299,7 +307,10 @@ if pint_version < 24:
         del UnitRegistry  # to avoid importing it
 
     else:
-        warn("Unit registry was already set up. Bypassed the new loading")
+        warnings.warn(
+            "Unit registry was already set up. Bypassed the new loading",
+            stacklevel=2,
+        )
 
     U_.enable_contexts("spectroscopy", "boltzmann", "chemistry")
 
@@ -384,7 +395,6 @@ if pint_version < 24:
 
 else:  # pint version >= 24
     from functools import wraps
-    from warnings import warn
 
     from pint import Context
     from pint import DimensionalityError
@@ -579,7 +589,7 @@ else:  # pint version >= 24
         Quantity = ur.Quantity
 
         ur.define(
-            "__wrapped__ = 1"
+            "__wrapped__ = 1",
         )  # <- hack to avoid an error with pytest (doctest activated)
         ur.define("@alias point = count")
         ur.define("transmittance = 1. / 100. = %")
@@ -592,7 +602,10 @@ else:  # pint version >= 24
         del UnitRegistry  # to avoid importing it
 
     else:
-        warn("Unit registry was already set up. Bypassed the new loading")
+        warnings.warn(
+            "Unit registry was already set up. Bypassed the new loading",
+            stacklevel=2,
+        )
 
     ur.enable_contexts("spectroscopy", "boltzmann", "chemistry")
 
@@ -683,7 +696,7 @@ def remove_args_units(func):
     def _remove_units(val):
         if isinstance(val, Quantity):
             val = val.m
-        elif isinstance(val, (list, tuple)):
+        elif isinstance(val, list | tuple):
             val = type(val)([_remove_units(v) for v in val])
         return val
 

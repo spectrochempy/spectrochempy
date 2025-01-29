@@ -6,6 +6,7 @@
 """
 Plugin module to extend NDDataset with a JCAMP-DX export method.
 """
+
 # import os as os
 import csv
 
@@ -92,17 +93,14 @@ def _write_csv(*args, **kwargs):
             else:
                 title_2 = dataset.title
 
-            if col_coord:
-                coltitles = [title_1, title_2]
-            else:
-                coltitles = [title_2]
+            coltitles = [title_1, title_2] if col_coord else [title_2]
 
         writer.writerow(coltitles)
         if col_coord:
             for i, data in enumerate(dataset.data):
                 writer.writerow([dataset.coordset[-1].data[i], data])
         else:
-            for i, data in enumerate(dataset.data):
+            for _i, data in enumerate(dataset.data):
                 writer.writerow([data])
 
     return filename

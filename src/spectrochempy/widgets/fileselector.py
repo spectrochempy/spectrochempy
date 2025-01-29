@@ -37,6 +37,7 @@ import IPython
 from IPython.core.interactiveshell import InteractiveShell
 
 from spectrochempy.application import warning_
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.optional import import_optional_dependency
 
@@ -114,9 +115,10 @@ class FileSelector(Base):
         alias for [''], passes all files.
     """
 
+    @deprecated(replace="(None)", removed="0.8.0")
     def __init__(self, done_callback=None, path=None, filters=None):
         warning_(
-            "This widget is not supported anymore and will be removed in a future version."
+            "This widget is not supported anymore and will be removed in a future version.",
         )
 
         if _ipywidgets_is_not_available():
@@ -147,15 +149,19 @@ class FileSelector(Base):
         self.button.on_click(self.up)
 
         self.label = widgets.Label(
-            layout=widgets.Layout(flex="100 1 auto", width="auto")
+            layout=widgets.Layout(flex="100 1 auto", width="auto"),
         )
         self.x = widgets.Button(
-            icon="close", tooltip="Close Selector", layout=widgets.Layout(width="auto")
+            icon="close",
+            tooltip="Close Selector",
+            layout=widgets.Layout(width="auto"),
         )
         self.x.on_click(lambda ev: self.stop())
 
         self.ok = widgets.Button(
-            icon="check", tooltip="OK", layout=widgets.Layout(width="auto")
+            icon="check",
+            tooltip="OK",
+            layout=widgets.Layout(width="auto"),
         )
         self.ok.on_click(lambda ev: self._ok())
 

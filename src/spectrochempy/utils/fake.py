@@ -22,11 +22,12 @@ def _make_spectra_matrix(modelname, ampl, pos, width, ratio=None, asym=None):
         s.append(model.f(x.data, **kwargs))
 
     st = np.vstack(s)
-    st = NDDataset(
-        data=st, units="absorbance", title="absorbance", coordset=[range(len(st)), x]
+    return NDDataset(
+        data=st,
+        units="absorbance",
+        title="absorbance",
+        coordset=[range(len(st)), x],
     )
-
-    return st
 
 
 def _make_concentrations_matrix(*profiles):
@@ -41,9 +42,7 @@ def _make_concentrations_matrix(*profiles):
     ct = ct - np.min(ct)
     if ct.shape[0] > 1:
         ct = ct / np.sum(ct, axis=0)
-    ct = NDDataset(data=ct, title="concentration", coordset=[range(len(ct)), t])
-
-    return ct
+    return NDDataset(data=ct, title="concentration", coordset=[range(len(ct)), t])
 
 
 def generate_fake():

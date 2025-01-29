@@ -76,7 +76,7 @@ class Exporter(HasTraits):
 
         else:
             raise TypeError(
-                "the API write method needs a NDDataset object as the first argument"
+                "the API write method needs a NDDataset object as the first argument",
             )
 
         return args

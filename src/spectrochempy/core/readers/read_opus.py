@@ -153,8 +153,8 @@ def _read_opus(*args, **kwargs):
     except KeyError:
         raise KeyError(
             f"{filename} is not an Absorbance spectrum. It cannot be read with the "
-            f"`read_opus` import method"
-        )
+            f"`read_opus` import method",
+        ) from None
     # todo: read background
 
     # xaxis
@@ -169,11 +169,13 @@ def _read_opus(*args, **kwargs):
     gmt_offset_hour = float(acqtime.split("GMT")[1].split(")")[0])
     if len(acqdate.split("/")[0]) == 2:
         date_time = datetime.strptime(
-            acqdate + "_" + acqtime.split()[0], "%d/%m/%Y_%H:%M:%S.%f"
+            acqdate + "_" + acqtime.split()[0],
+            "%d/%m/%Y_%H:%M:%S.%f",
         )
     elif len(acqdate.split("/")[0]) == 4:
         date_time = datetime.strptime(
-            acqdate + "_" + acqtime.split()[0], "%Y/%m/%d_%H:%M:%S"
+            acqdate + "_" + acqtime.split()[0],
+            "%Y/%m/%d_%H:%M:%S",
         )
     else:  # pragma: no cover
         raise ValueError("acqdate can not be interpreted.")
@@ -209,5 +211,4 @@ def _read_opus(*args, **kwargs):
 def _read_data(fid):
     data = fid.read()
     meta_data = parse_meta(data)
-    opus_data = parse_data(data, meta_data)
-    return opus_data
+    return parse_data(data, meta_data)

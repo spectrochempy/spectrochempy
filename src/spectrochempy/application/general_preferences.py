@@ -29,7 +29,7 @@ class GeneralPreferences(MetaConfigurable):
     # ----------------------------------------------------------------------------------
     # NON GUI
     show_info_on_loading = tr.Bool(True, help="Display info on loading").tag(
-        config=True
+        config=True,
     )
     use_qt = tr.Bool(
         False,
@@ -49,15 +49,18 @@ class GeneralPreferences(MetaConfigurable):
     ).tag(config=True, gui=True, kind="folder")
 
     workspace = tr.Union(
-        (tr.Instance(Path), tr.Unicode()), help="Workspace directory by default"
+        (tr.Instance(Path), tr.Unicode()),
+        help="Workspace directory by default",
     ).tag(config=True, gui=True, kind="folder")
 
     autoload_project = tr.Bool(
-        True, help="Automatic loading of the last project at startup"
+        True,
+        help="Automatic loading of the last project at startup",
     ).tag(config=True, gui=True)
 
     autosave_project = tr.Bool(
-        True, help="Automatic saving of the current project"
+        True,
+        help="Automatic saving of the current project",
     ).tag(config=True, gui=True)
 
     project_directory = tr.Union(
@@ -66,7 +69,8 @@ class GeneralPreferences(MetaConfigurable):
     ).tag(config=True, kind="folder")
 
     last_project = tr.Union(
-        (tr.Instance(Path, allow_none=True), tr.Unicode()), help="Last used project"
+        (tr.Instance(Path, allow_none=True), tr.Unicode()),
+        help="Last used project",
     ).tag(config=True, gui=True, kind="file")
 
     show_close_dialog = tr.Bool(
@@ -75,7 +79,9 @@ class GeneralPreferences(MetaConfigurable):
     ).tag(config=True, gui=True)
 
     csv_delimiter = tr.Enum(
-        [",", ";", r"\t", " "], default_value=",", help="CSV data delimiter"
+        [",", ";", r"\t", " "],
+        default_value=",",
+        help="CSV data delimiter",
     ).tag(config=True, gui=True)
 
     check_update_frequency = tr.Enum(
@@ -149,7 +155,8 @@ class GeneralPreferences(MetaConfigurable):
                 warnings.warn(
                     "Log level not changed: invalid value given\n"
                     "string values must be DEBUG, INFO, WARNING, "
-                    "or ERROR"
+                    "or ERROR",
+                    stacklevel=2,
                 )
         self.parent.log_level = value
 

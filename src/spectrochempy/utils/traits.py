@@ -28,7 +28,7 @@ class SpectroChemPyType(SciType):
         try:
             value = self.klass(value)
         except (ValueError, TypeError) as e:
-            raise tr.TraitError(e)
+            raise tr.TraitError(e) from None
         return super().validate(obj, value)
 
     def set(self, obj, value):
@@ -48,9 +48,7 @@ class SpectroChemPyType(SciType):
         if (klass is not None) and inspect.isclass(klass):
             self.klass = klass
         else:
-            raise tr.TraitError(
-                "The klass attribute must be a class" " not: %r" % klass
-            )
+            raise tr.TraitError(f"The klass attribute must be a class not: {klass!r}")
         if default_value is Empty:
             default_value = klass()
         elif default_value is not None and default_value is not tr.Undefined:

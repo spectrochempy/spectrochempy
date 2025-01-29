@@ -64,7 +64,7 @@ class DataDir(tr.HasTraits):
         def _listdir(strg, initial, nst):
             nst += 1
             for fil in pathclean(initial).glob(
-                "*"
+                "*",
             ):  # glob.glob(os.path.join(initial, '*')):
                 filename = fil.name  # os.path.basename(f)
                 if filename.startswith("."):  # pragma: no cover

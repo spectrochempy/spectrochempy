@@ -81,7 +81,7 @@ def _read_jdx(*args, **kwargs):
     if content is not None:
         fid = io.StringIO(content.decode("utf-8"))
     else:
-        fid = open(filename)
+        fid = open(filename)  # noqa: SIM115
 
     # Read header of outer Block
 
@@ -176,7 +176,7 @@ def _read_jdx(*args, **kwargs):
                     if len(intensities) > 0:
                         allintensities += intensities
                 spectra = np.array(
-                    [allintensities]
+                    [allintensities],
                 )  # convert allintensities into an array
                 spectra[
                     spectra == "?"
@@ -184,10 +184,7 @@ def _read_jdx(*args, **kwargs):
                 spectra = spectra.astype(np.float32)
                 spectra *= yfactor
                 # add spectra in "data" matrix
-                if not data.size:
-                    data = spectra
-                else:
-                    data = np.concatenate((data, spectra), 0)
+                data = spectra if not data.size else np.concatenate((data, spectra), 0)
 
         # Check "firstx", "lastx" and "nx"
         if firstx[i] != 0 and lastx[i] != 0 and nx[i] != 0:
@@ -199,19 +196,20 @@ def _read_jdx(*args, **kwargs):
                 # Check the consistency of xaxis
                 if nx[i] - nx[i - 1] != 0:
                     raise ValueError(
-                        "Inconsistent data set: number of wavenumber per spectrum should be identical"
+                        "Inconsistent data set: number of wavenumber per spectrum should be identical",
                     )
                 if firstx[i] - firstx[i - 1] != 0:
                     raise ValueError(
-                        "Inconsistent data set: the x axis should start at same value"
+                        "Inconsistent data set: the x axis should start at same value",
                     )
                 if lastx[i] - lastx[i - 1] != 0:
                     raise ValueError(
-                        "Inconsistent data set: the x axis should end at same value"
+                        "Inconsistent data set: the x axis should end at same value",
                     )
         else:
             raise ValueError(
-                "##FIRST, ##LASTX or ##NPOINTS are unusable in the spectrum n°", i + 1
+                "##FIRST, ##LASTX or ##NPOINTS are unusable in the spectrum n°",
+                i + 1,
             )
 
         # Creation of the acquisition date
@@ -246,11 +244,11 @@ def _read_jdx(*args, **kwargs):
         if i > 0:
             if yunits[i] != yunits[i - 1]:
                 raise ValueError(
-                    f"##YUNITS should be the same for all spectra (check spectrum n°{i + 1}"
+                    f"##YUNITS should be the same for all spectra (check spectrum n°{i + 1}",
                 )
             if xunits[i] != xunits[i - 1]:
                 raise ValueError(
-                    f"##XUNITS should be the same for all spectra (check spectrum n°{i + 1}"
+                    f"##XUNITS should be the same for all spectra (check spectrum n°{i + 1}",
                 )
 
     # Determine xaxis name ****************************************************

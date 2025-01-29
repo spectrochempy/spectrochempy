@@ -7,7 +7,7 @@ class OutputWidgetHandler(logging.Handler):
     """Custom logging handler sending logs to an output widget"""
 
     def __init__(self, *args, **kwargs):
-        super(OutputWidgetHandler, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         layout = {"width": "100%", "height": "160px", "border": "1px solid black"}
         self.out = widgets.Output(layout=layout)
 

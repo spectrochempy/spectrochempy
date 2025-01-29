@@ -44,7 +44,7 @@ class SIMPLISMA(DecompositionAnalysis):
     See Also
     --------
     %(DecompositionAnalysis.see_also.no_SIMPLISMA)s
-    """
+    """,
     )
 
     # TODO : adapt to 3DDataset ?
@@ -102,7 +102,7 @@ class SIMPLISMA(DecompositionAnalysis):
             raise ValueError(
                 "Passing arguments such as SIMPLISMA(X) is now deprecated. "
                 "Instead, use SIMPLISMA() followed by SIMPLISMA.fit(X). "
-                "See the documentation and exemples"
+                "See the documentation and exemples",
             )
 
         # warn about deprecations
@@ -137,7 +137,7 @@ class SIMPLISMA(DecompositionAnalysis):
         if n < 2:
             raise ValueError(
                 "Oh you did not just... 'MA' in simplisMA stands for Mixture Analysis. "
-                "The number of pure compounds should be an integer larger than 2"
+                "The number of pure compounds should be an integer larger than 2",
             )
         return n  # <-- do not forget this, or the returned value
         # for max_components is None
@@ -147,7 +147,7 @@ class SIMPLISMA(DecompositionAnalysis):
         if self._fitted:
             return self._outfit[1]
         raise exceptions.NotFittedError(
-            "The model was not yet fitted. Execute `fit` first!"
+            "The model was not yet fitted. Execute `fit` first!",
         )
 
     # ------------------------------------------------------------------------------
@@ -280,7 +280,12 @@ class SIMPLISMA(DecompositionAnalysis):
 
                 # add summary to log
                 llog = self._str_iter_summary(
-                    j, maxPIndex[j], maxPCoordinate[j], rsquare0, stdev_res0, ""
+                    j,
+                    maxPIndex[j],
+                    maxPCoordinate[j],
+                    rsquare0,
+                    stdev_res0,
+                    "",
                 )
                 info_(llog)
 
@@ -304,7 +309,7 @@ class SIMPLISMA(DecompositionAnalysis):
 
                     while ans.lower() != "a":
                         new = input(
-                            "   |--> enter the new index (int) or variable value (float): "
+                            "   |--> enter the new index (int) or variable value (float): ",
                         )
                         try:
                             new = int(new)
@@ -317,15 +322,24 @@ class SIMPLISMA(DecompositionAnalysis):
                                 maxPCoordinate[j] = xdata[maxPIndex[j]]
                             except ValueError:
                                 info_(
-                                    "Incorrect answer. Please enter a valid index or value"
+                                    "Incorrect answer. Please enter a valid index or value",
                                 )
 
                         rsquare0, stdev_res0 = self._figures_of_merit(
-                            X, maxPIndex, C, St, j
+                            X,
+                            maxPIndex,
+                            C,
+                            St,
+                            j,
                         )
 
                         llog = self._str_iter_summary(
-                            j, maxPIndex[j], maxPCoordinate[j], rsquare0, stdev_res0, ""
+                            j,
+                            maxPIndex[j],
+                            maxPCoordinate[j],
+                            rsquare0,
+                            stdev_res0,
+                            "",
                         )
                         info_("   |--> changed pure variable #1")
                         info_(llog)
@@ -361,7 +375,12 @@ class SIMPLISMA(DecompositionAnalysis):
 
                 # add summary to log
                 llog = self._str_iter_summary(
-                    j, maxPIndex[j], maxPCoordinate[j], rsquarej, stdev_resj, diff
+                    j,
+                    maxPIndex[j],
+                    maxPCoordinate[j],
+                    rsquarej,
+                    stdev_resj,
+                    diff,
                 )
                 info_(llog)
 
@@ -387,12 +406,12 @@ class SIMPLISMA(DecompositionAnalysis):
                     while ans.lower() not in ["a", "c", "r", "f"]:
                         ans = input(
                             "   |--> (a) Accept and continue, (c) Change, (r) Reject, "
-                            "(f) Accept and finish: "
+                            "(f) Accept and finish: ",
                         )
 
                     while ans.lower() == "c":
                         new = input(
-                            "   |--> enter the new index (int) or variable value (float): "
+                            "   |--> enter the new index (int) or variable value (float): ",
                         )
                         try:
                             new = int(new)
@@ -405,11 +424,15 @@ class SIMPLISMA(DecompositionAnalysis):
                                 maxPCoordinate[j] = xdata[maxPIndex[j]]
                             except ValueError:
                                 info_(
-                                    "   |--> Incorrect answer. Please enter a valid index or value"
+                                    "   |--> Incorrect answer. Please enter a valid index or value",
                                 )
 
                         rsquarej, stdev_resj = self._figures_of_merit(
-                            X, maxPIndex, C, St, j
+                            X,
+                            maxPIndex,
+                            C,
+                            St,
+                            j,
                         )
                         diff = 100 * (stdev_resj - prev_stdev_res) / prev_stdev_res
                         prev_stdev_res + stdev_resj
@@ -426,10 +449,10 @@ class SIMPLISMA(DecompositionAnalysis):
                         info_(llog)
 
                         info_(
-                            f"purest variable #{j + 1} set at index = {maxPIndex[j]} ; x = {maxPCoordinate[j]}"
+                            f"purest variable #{j + 1} set at index = {maxPIndex[j]} ; x = {maxPCoordinate[j]}",
                         )
                         ans = input(
-                            "   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop: "
+                            "   |--> (a) Accept and continue, (c) Change, (r) Reject, (f) Accept and stop: ",
                         )
 
                     if ans.lower() == "r":
@@ -466,7 +489,7 @@ class SIMPLISMA(DecompositionAnalysis):
             if j == n_components and not interactive:
                 info_(
                     f"**** Reached maximum number of pure compounds 'n_components' "
-                    f"({n_components})"
+                    f"({n_components})",
                 )
                 info_("**** End of SIMPL(I)SMA analysis.")
                 finished = True

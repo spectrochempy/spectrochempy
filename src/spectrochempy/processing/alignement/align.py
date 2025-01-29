@@ -148,7 +148,7 @@ def align(dataset, *others, **kwargs):
     axis, dims = dataset.get_axis(only_first=False, **kwargs)
 
     # check compatibility of the dims and prepare the dimension for alignment
-    for axis, dim in zip(axis, dims, strict=False):
+    for _axis, dim in zip(axis, dims, strict=False):
         # get all objects to align
         _objects = {}
         _nobj = 0
@@ -158,7 +158,7 @@ def align(dataset, *others, **kwargs):
                 error_(
                     f"Bad object(s) found: {object}. Note that only NDDataset "
                     f"objects are accepted "
-                    f"for alignment"
+                    f"for alignment",
                 )
                 return None
 
@@ -202,7 +202,7 @@ def align(dataset, *others, **kwargs):
         ndec = get_n_decimals(new_coord.data.max(), 1.0e-5)
 
         # loop on all object
-        for index, object in _objects.items():
+        for _index, object in _objects.items():
             obj = object["obj"]
 
             if obj is ref_obj:
@@ -218,7 +218,7 @@ def align(dataset, *others, **kwargs):
             if not coord.is_units_compatible(ref_coord):
                 # not compatible, stop everything
                 raise exceptions.UnitsCompatibilityError(
-                    "NDataset to align must have compatible units!"
+                    "NDataset to align must have compatible units!",
                 )
 
             # do units transform if necesssary so coords can be compared
@@ -269,10 +269,7 @@ def align(dataset, *others, **kwargs):
             new_obj_data = np.full(new_obj_shape, np.nan)
 
             # create new dataset for obj and ref_objects
-            if copy:
-                new_obj = obj.copy()
-            else:
-                new_obj = obj
+            new_obj = obj.copy() if copy else obj
 
             # update the data and mask
             coord = obj.coordset[dim]
@@ -303,7 +300,7 @@ def align(dataset, *others, **kwargs):
                 label_shape = list(coord.labels.shape)
                 label_shape[0] = new_coord.size
                 new_coord._labels = np.zeros(tuple(label_shape)).astype(
-                    coord.labels.dtype
+                    coord.labels.dtype,
                 )
                 new_coord._labels[:] = "--"
                 new_coord._labels[dim_loc] = coord.labels
@@ -320,14 +317,14 @@ def align(dataset, *others, **kwargs):
 
             if method == "interpolate":
                 warning_(
-                    "Interpolation not yet implemented - for now equivalent to `outer`"
+                    "Interpolation not yet implemented - for now equivalent to `outer`",
                 )
 
         # the new transformed object must be in the same order as the passed
         # objects
         # and the missing values must be masked (for the moment they are defined to NaN
 
-        for index, object in _objects.items():
+        for _index, object in _objects.items():
             obj = object["obj"]
             # obj[np.where(np.isnan(obj))] = MASKED  # mask NaN values
             obj[

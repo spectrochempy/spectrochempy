@@ -95,16 +95,15 @@ def plot_with_transposed(dataset, **kwargs):
     Alias of plot_2D (with `method` argument set to `with_transposed` ).
     """
     kwargs["method"] = "with_transposed"
-    axes = multiplot(dataset, **kwargs)
-    return axes
+    return multiplot(dataset, **kwargs)
 
 
 multiplot_with_transposed = plot_with_transposed
 
 
 def multiplot(
-    datasets=[],
-    labels=[],
+    datasets=None,
+    labels=None,
     nrow=1,
     ncol=1,
     method="stack",
@@ -183,6 +182,10 @@ def multiplot(
 
     # some basic checking
     # ------------------------------------------------------------------------
+    if labels is None:
+        labels = []
+    if datasets is None:
+        datasets = []
     show_transposed = False
     if method in "with_transposed":
         show_transposed = True
@@ -195,7 +198,7 @@ def multiplot(
     single = False
     if not is_sequence(datasets):
         single = True
-        datasets = list([datasets])  # make a list
+        datasets = [datasets]  # make a list
 
     if len(datasets) < nrow * ncol and not show_transposed:
         # not enough datasets given in this list.
@@ -213,7 +216,7 @@ def multiplot(
         if nrow * ncol < len(datasets):
             ncol += 1
 
-    ndims = set([dataset.ndim for dataset in datasets])
+    ndims = {dataset.ndim for dataset in datasets}
     if len(ndims) > 1:
         raise NotImplementedError("mixed dataset shape.")
     ndim = list(ndims)[0]
@@ -249,7 +252,7 @@ def multiplot(
     if sharex not in [None, True, False, "all", "col"]:
         raise ValueError(
             "invalid option for sharex. Should be"
-            " among (None, False, True, 'all' or 'col')"
+            " among (None, False, True, 'all' or 'col')",
         )
 
     if sharex:
@@ -271,14 +274,14 @@ def multiplot(
     if sharey not in [None, False, True, "all", "col"]:
         raise ValueError(
             f"invalid option for {textsharey}. Should be"
-            " among (None, False, True, 'all' or 'row')"
+            " among (None, False, True, 'all' or 'row')",
         )
 
     if sharez not in [None, False, True, "all", "col", "row"]:
         raise ValueError(
             f"invalid option for {textsharez}. Should be"
             " among (None, False, True, "
-            "'all', 'row' or 'col')"
+            "'all', 'row' or 'col')",
         )
 
     if sharey:
@@ -338,21 +341,22 @@ def multiplot(
                 # hide the redondant ticklabels on left side of interior figures
                 plt.setp(axes[ax.name].get_yticklabels(), visible=False)
                 axes[ax.name].yaxis.set_tick_params(
-                    which="both", labelleft=False, labelright=False
+                    which="both",
+                    labelleft=False,
+                    labelright=False,
                 )
                 axes[ax.name].yaxis.offsetText.set_visible(False)
             if irow < nrow - 1 and sharex:
                 # hide the bottom ticklabels of interior rows
                 plt.setp(axes[ax.name].get_xticklabels(), visible=False)
                 axes[ax.name].xaxis.set_tick_params(
-                    which="both", labelbottom=False, labeltop=False
+                    which="both",
+                    labelbottom=False,
+                    labeltop=False,
                 )
                 axes[ax.name].xaxis.offsetText.set_visible(False)
 
-            if show_transposed and irow == 1:
-                transposed = True
-            else:
-                transposed = False
+            transposed = bool(show_transposed and irow == 1)
 
             dataset.plot(
                 method=method,
@@ -419,7 +423,12 @@ def multiplot(
         hs = kwargs.get("hspace", kw.get("hspace", 0) * 1.1)
 
         plt.subplots_adjust(
-            left=left, bottom=bottom, right=right, top=top, wspace=ws, hspace=hs
+            left=left,
+            bottom=bottom,
+            right=right,
+            top=top,
+            wspace=ws,
+            hspace=hs,
         )
 
     do_tight_layout(fig, axes, suptitle, **kwargs)

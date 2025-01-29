@@ -34,12 +34,11 @@ def make_units_compatibility(func):
         if isinstance(arg, Quantity):
             arg.ito(x_units)  # eventually convert units and rescale
         # set units to those of x
+        elif x_units is not None:
+            arg = arg * x_units
         else:
-            if x_units is not None:
-                arg = arg * x_units
-            else:
-                # do not take into account unit of arg
-                return arg
+            # do not take into account unit of arg
+            return arg
         return arg.magnitude
 
     @wraps(func)

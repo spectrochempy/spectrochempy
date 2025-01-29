@@ -24,6 +24,7 @@ Supports both FID and processed data (1D and nD)
 __all__ = ["read_topspin"]
 __dataset_methods__ = __all__
 
+import contextlib
 import re
 from datetime import datetime
 
@@ -800,26 +801,22 @@ def _remove_digital_filter(dic, data):
         raise KeyError("dictionary does not contain DSPFVS parameter")
     dspfvs = dic["acqus"]["DSPFVS"]
 
-    if "GRPDLY" not in dic["acqus"]:
-        grpdly = 0
-    else:
-        grpdly = dic["acqus"]["GRPDLY"]
+    grpdly = dic["acqus"].get("GRPDLY", 0)
 
     if grpdly > 0:  # use group delay value if provided (not 0 or -1)
         phase = grpdly
 
     # Determine the phase correction
+    elif dspfvs >= 14:  # DSPFVS greater than 14 give no phase correction.
+        phase = 0.0
     else:
-        if dspfvs >= 14:  # DSPFVS greater than 14 give no phase correction.
-            phase = 0.0
-        else:
-            if dspfvs < 10:
-                dspfvs = 10  # default for DQD  # loop up the phase in the table
-            if dspfvs not in bruker_dsp_table:
-                raise KeyError("dspfvs not in lookup table")
-            if decim not in bruker_dsp_table[dspfvs]:
-                raise KeyError("decim not in lookup table")
-            phase = bruker_dsp_table[dspfvs][decim]
+        if dspfvs < 10:
+            dspfvs = 10  # default for DQD  # loop up the phase in the table
+        if dspfvs not in bruker_dsp_table:
+            raise KeyError("dspfvs not in lookup table")
+        if decim not in bruker_dsp_table[dspfvs]:
+            raise KeyError("decim not in lookup table")
+        phase = bruker_dsp_table[dspfvs][decim]
     # fft
     si = data.shape[-1]
     pdata = np.fft.fftshift(np.fft.fft(data, si, axis=-1), -1) / float(si / 2)
@@ -839,11 +836,9 @@ def _remove_digital_filter(dic, data):
     td = dic["acqus"]["TD"] // 2
     td = int(td) - int(rp)
     dic["acqus"]["TD"] = td * 2
-    data = data[..., :td]
+    return data[..., :td]
 
     # debug_('Bruker digital filter : removed %s points' % rp)
-
-    return data
 
 
 # def _scale(meta, dim=-1, reverse=None):
@@ -947,7 +942,7 @@ def _read_topspin(*args, **kwargs):
     #    content = kwargs.get('content', None)
 
     # is-it a processed dataset file (1r, 2rr ....) ?
-    processed = True if path.match("pdata/*/*") else False
+    processed = bool(path.match("pdata/*/*"))
 
     # ----------------------------------------------------------------------------------
     # start reading ....
@@ -994,7 +989,7 @@ def _read_topspin(*args, **kwargs):
                     td = dic["acqu"]["TD"] // 2
                     data = data.reshape(-1, td)
                 except ValueError:
-                    raise KeyError("Inconsistency between TD's and data size")
+                    raise KeyError("Inconsistency between TD's and data size") from None
 
             # reduce to td
             ntd = dic["acqus"]["TD"] // 2
@@ -1024,8 +1019,8 @@ def _read_topspin(*args, **kwargs):
                             dataIR.flatten(),
                             dataII.flatten(),
                             strict=False,
-                        )
-                    )
+                        ),
+                    ),
                 )
                 data = data.reshape(shape)
 
@@ -1052,7 +1047,7 @@ def _read_topspin(*args, **kwargs):
     if parmode + 1 != data.ndim:
         raise KeyError(
             f"The NMR data were not read properly as the PARMODE+1 parameter ({parmode + 1}) doesn't fit"
-            f" the actual number of dimensions ({data.ndim})"
+            f" the actual number of dimensions ({data.ndim})",
         )
 
     # read the acqu and proc
@@ -1073,18 +1068,16 @@ def _read_topspin(*args, **kwargs):
                 units = ur(keys_units[key.lower()]) if keys_units[key.lower()] else None
 
                 if units is not None:
-                    if isinstance(value, (float, int)):
+                    if isinstance(value, float | int):
                         value = value * units  # make a quantity
-                    elif isinstance(value, list) and isinstance(value[0], (float, int)):
+                    elif isinstance(value, list) and isinstance(value[0], float | int):
                         value = np.array(value) * units
 
                 if key.lower() not in meta:
                     meta[key.lower()] = [None] * data.ndim
 
-                try:
+                with contextlib.suppress(Exception):
                     meta[key.lower()][dim] = value
-                except Exception:
-                    pass
 
         else:
             meta[item.lower()] = dic[item]
@@ -1104,12 +1097,11 @@ def _read_topspin(*args, **kwargs):
     if datatype in ["SER"]:
         meta.isfreq.insert(0, False)
 
-        if meta.fnmode[-2] == 0:
-            # For historical reasons,
-            # MC2 is interpreted when the acquisition status
-            # parameter FnMODE has the value undefined, i.e. 0
-            if meta.mc2 is not None:
-                meta.fnmode[-2] = meta.mc2[-2] + 1
+        # For historical reasons,
+        # MC2 is interpreted when the acquisition status
+        # parameter FnMODE has the value undefined, i.e. 0
+        if meta.fnmode[-2] == 0 and meta.mc2 is not None:
+            meta.fnmode[-2] = meta.mc2[-2] + 1
 
         meta.encoding[-2] = FnMODE[meta.fnmode[-2]]
         meta.iscomplex[-2] = meta.fnmode[-2] > 1
@@ -1138,7 +1130,7 @@ def _read_topspin(*args, **kwargs):
     ]
 
     if processed:
-        meta.si = [si for si in data.shape]
+        meta.si = list(data.shape)
         meta.isfreq = [True] * (parmode + 1)  # at least we assume this
         meta.phc0 = [0] * data.ndim
 
@@ -1149,7 +1141,8 @@ def _read_topspin(*args, **kwargs):
     # normalised amplitudes to ns=1 and rg=1
     def _norm(dat):
         meta.ns = meta.get(
-            "ns", [1] * data.ndim
+            "ns",
+            [1] * data.ndim,
         )  # sometimes these parameters are not present
         meta.rg = meta.get("rg", [1.0] * data.ndim)
         fac = float(meta.ns[-1]) * float(meta.rg[-1])
@@ -1197,7 +1190,8 @@ def _read_topspin(*args, **kwargs):
             dw = (1.0 / meta.sw_h[axis]).to("us")
             coordpoints = np.arange(meta.td[axis])
             coord = Coord(
-                coordpoints * dw, title=f"F{axis + 1} acquisition time"
+                coordpoints * dw,
+                title=f"F{axis + 1} acquisition time",
             )  # TODO: use AQSEQ for >2D data
 
             coord.larmor = meta.sfo1[axis]
@@ -1237,7 +1231,7 @@ def _read_topspin(*args, **kwargs):
     dataset.units = "count"
     dataset.title = "intensity"
     dataset.origin = "topspin"
-    dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"  # noqa: E231
+    dataset.name = f"{f_name.name} expno:{expno} procno:{procno} ({datatype})"
     dataset.filename = f_name
     if dataset.meta.date is not None:
         dataset.acquisition_date = datetime.fromtimestamp(dataset.meta.date[-1])

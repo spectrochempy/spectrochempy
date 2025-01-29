@@ -161,14 +161,14 @@ class MetaConfigurable(Configurable):
                 value = base64.b64encode(value).decode()
 
             # replace other serializable value by an equivalent
-            elif isinstance(value, (type(cycler), Path)) or isinstance(value, Quantity):
+            elif isinstance(value, type(cycler) | Path | Quantity):
                 value = str(value)
             elif isinstance(value, np.ndarray):
                 # we need to transform it to a list of elements, bUT with python
                 # built-in types, which is not the case e.g., for int64
                 value = value.tolist()
 
-            if isinstance(value, (list, tuple)):
+            if isinstance(value, list | tuple):
                 # replace other serializable value by an equivalent
                 value = [str(v) if isinstance(v, Path) else v for v in value]
                 value = [str(v) if isinstance(v, Quantity) else v for v in value]
@@ -179,6 +179,6 @@ class MetaConfigurable(Configurable):
                 {
                     self.__class__.__name__: {
                         change.name: value,
-                    }
+                    },
                 },
             )

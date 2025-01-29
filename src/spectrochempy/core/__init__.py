@@ -25,6 +25,7 @@ Notes
 The imports are organized in logical groups and timed using the `timeit` context manager.
 All public API elements are collected in the __all__ list.
 """
+# ruff: noqa: F405
 
 import logging
 
@@ -37,30 +38,30 @@ __all__: list[str] = []
 # Application Components
 # ------------------------------------------------------------------------------
 with timeit("application"):
-    from spectrochempy.application import CRITICAL  # noqa: E402
-    from spectrochempy.application import DEBUG  # noqa: E402
-    from spectrochempy.application import ERROR  # noqa: E402
-    from spectrochempy.application import INFO  # noqa: E402
-    from spectrochempy.application import WARNING  # noqa: E402
-    from spectrochempy.application import authors  # noqa: E402
-    from spectrochempy.application import config_dir  # noqa: E402
-    from spectrochempy.application import config_manager  # noqa: E402
-    from spectrochempy.application import contributors  # noqa: E402
-    from spectrochempy.application import copyright  # noqa: E402
-    from spectrochempy.application import debug_  # noqa: E402
-    from spectrochempy.application import description  # noqa: E402
-    from spectrochempy.application import error_  # noqa: E402
-    from spectrochempy.application import info_  # noqa: E402
-    from spectrochempy.application import license  # noqa: E402
-    from spectrochempy.application import long_description  # noqa: E402
-    from spectrochempy.application import plot_preferences  # noqa: E402
-    from spectrochempy.application import preferences  # noqa: E402
-    from spectrochempy.application import release  # noqa: E402
-    from spectrochempy.application import release_date  # noqa: E402
-    from spectrochempy.application import reset_preferences  # noqa: E402
-    from spectrochempy.application import url  # noqa: E402
-    from spectrochempy.application import version  # noqa: E402
-    from spectrochempy.application import warning_  # noqa: E402
+    from spectrochempy.application import CRITICAL
+    from spectrochempy.application import DEBUG
+    from spectrochempy.application import ERROR
+    from spectrochempy.application import INFO
+    from spectrochempy.application import WARNING
+    from spectrochempy.application import authors
+    from spectrochempy.application import config_dir
+    from spectrochempy.application import config_manager
+    from spectrochempy.application import contributors
+    from spectrochempy.application import copyright
+    from spectrochempy.application import debug_
+    from spectrochempy.application import description
+    from spectrochempy.application import error_
+    from spectrochempy.application import info_
+    from spectrochempy.application import license
+    from spectrochempy.application import long_description
+    from spectrochempy.application import plot_preferences
+    from spectrochempy.application import preferences
+    from spectrochempy.application import release
+    from spectrochempy.application import release_date
+    from spectrochempy.application import reset_preferences
+    from spectrochempy.application import url
+    from spectrochempy.application import version
+    from spectrochempy.application import warning_
 
     def set_loglevel(level: str | int = logging.WARNING) -> None:
         """Set the logging level for SpectroChemPy.
@@ -121,31 +122,31 @@ with timeit("application"):
 
 # Constants
 with timeit("constants"):
-    from spectrochempy.utils.constants import EPSILON  # noqa: E402
-    from spectrochempy.utils.constants import INPLACE  # noqa: E402
-    from spectrochempy.utils.constants import MASKED  # noqa: E402
-    from spectrochempy.utils.constants import NOMASK  # noqa: E402
+    from spectrochempy.utils.constants import EPSILON
+    from spectrochempy.utils.constants import INPLACE
+    from spectrochempy.utils.constants import MASKED
+    from spectrochempy.utils.constants import NOMASK
     from spectrochempy.utils.plots import show
-    from spectrochempy.utils.print_versions import show_versions  # noqa: E402
+    from spectrochempy.utils.print_versions import show_versions
 
     __all__ += ["show", "MASKED", "NOMASK", "EPSILON", "INPLACE", "show_versions"]
 
 # Units
 with timeit("units"):
-    from spectrochempy.core.units import *  # noqa: E402,F403,F401
+    from spectrochempy.core.units import *  # noqa: F403
 
     __all__ += [
-        "Unit",  # noqa: F405
-        "Quantity",  # noqa: F405
-        "ur",  # noqa: F405
-        "set_nmr_context",  # noqa: F405
-        "DimensionalityError",  # noqa: F405
-    ]
+        "Unit",
+        "Quantity",
+        "ur",
+        "set_nmr_context",
+        "DimensionalityError",
+    ]  # noqa: F405
 
 # Dataset
 with timeit("dataset"):
-    from spectrochempy.core.dataset import api  # noqa: E402
-    from spectrochempy.core.dataset.api import *  # noqa: E402,F403,F401
+    from spectrochempy.core.dataset import api
+    from spectrochempy.core.dataset.api import *  # noqa: F403
 
     __all__ += api.__all__
 
@@ -155,54 +156,54 @@ with timeit("dataset"):
 
 # Plotting
 with timeit("plotter"):
-    from spectrochempy.core.plotters import api  # noqa: E402
-    from spectrochempy.core.plotters.api import *  # noqa: E402,F403,F401
+    from spectrochempy.core.plotters import api
+    from spectrochempy.core.plotters.api import *  # noqa: F403
 
     __all__ += api.__all__
 
 # I/O Operations
 with timeit("readers"):
-    from spectrochempy.core.readers import api  # noqa: E402
-    from spectrochempy.core.readers.api import *  # noqa: E402,F403,F401
+    from spectrochempy.core.readers import api
+    from spectrochempy.core.readers.api import *  # noqa: F403
 
     __all__ += api.__all__
 
 with timeit("writers"):
-    from spectrochempy.core.writers import api  # noqa: E402
-    from spectrochempy.core.writers.api import *  # noqa: E402,F403,F401
+    from spectrochempy.core.writers import api
+    from spectrochempy.core.writers.api import *  # noqa: F403
 
     __all__ += api.__all__
 
 # Project Management
 with timeit("project"):
-    from spectrochempy.core.project.project import Project  # noqa: E402,F403,F401
+    from spectrochempy.core.project.project import Project
 
     __all__ += ["Project"]
 
 # Scripting
 with timeit("script"):
-    from spectrochempy.core.script import *  # noqa: E402,F403,F401
+    from spectrochempy.core.script import *  # noqa: F403
 
     __all__ += ["Script", "run_script", "run_all_scripts"]  # noqa: F405
 
 # Interactive Components
 with timeit("widgets"):
-    from spectrochempy.widgets import api  # noqa: E402
-    from spectrochempy.widgets.api import *  # noqa: E402,F403,F401
+    from spectrochempy.widgets import api
+    from spectrochempy.widgets.api import *  # noqa: F403
 
     __all__ += api.__all__
 
 # Analysis Tools
 with timeit("analysis"):
-    from spectrochempy.analysis import api  # noqa: E402
-    from spectrochempy.analysis.api import *  # noqa: E402,F403,F401
+    from spectrochempy.analysis import api
+    from spectrochempy.analysis.api import *  # noqa: F403
 
     __all__ += api.__all__
 
 # Data Processing
 with timeit("processing"):
-    from spectrochempy.processing import api  # noqa: E402
-    from spectrochempy.processing.api import *  # noqa: E402,F403,F401
+    from spectrochempy.processing import api
+    from spectrochempy.processing.api import *  # noqa: F403
 
     __all__ += api.__all__
 

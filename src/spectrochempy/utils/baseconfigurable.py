@@ -47,7 +47,7 @@ class BaseConfigurable(MetaConfigurable):
     log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``\ ], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
-    """
+    """,
     )
 
     # Get doc sections for reuse in subclass
@@ -63,7 +63,7 @@ class BaseConfigurable(MetaConfigurable):
     _X_mask = Array(allow_none=True, help="Mask information of the input X data")
     _X_preprocessed = Array(help="Preprocessed inital input X data")
     _X_shape = tr.Tuple(
-        help="Original shape of the input X data, before any transformation"
+        help="Original shape of the input X data, before any transformation",
     )
     _X_coordset = tr.Instance(CoordSet, allow_none=True)
     _is_dataset = tr.Bool(help="True if the input X data is a NDDataset")
@@ -125,7 +125,7 @@ class BaseConfigurable(MetaConfigurable):
                 raise KeyError(
                     f"'{k}' is not a valid configuration parameters. "
                     f"Use the method `parameters()` to check the current "
-                    f"allowed parameters and their current value."
+                    f"allowed parameters and their current value.",
                 )
 
         # If warm start we can use the previous fit as starting profiles.

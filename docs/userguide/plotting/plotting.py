@@ -239,12 +239,12 @@ _ = ax.annotate(
     xy=(3600.0, 1.25),
     xytext=(-10, -50),
     textcoords="offset points",
-    arrowprops=dict(
-        arrowstyle="fancy",
-        color="0.5",
-        shrinkB=5,
-        connectionstyle="arc3,rad=-0.3",
-    ),
+    arrowprops={
+        "arrowstyle": "fancy",
+        "color": "0.5",
+        "shrinkB": 5,
+        "connectionstyle": "arc3,rad=-0.3",
+    },
 )
 
 # %% [markdown]

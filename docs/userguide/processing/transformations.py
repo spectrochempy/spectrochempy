@@ -95,8 +95,8 @@ _ = dataset.plot()
 
 # %%
 dataset[:, 1290.0:890.0] = MASKED  # we mask the unwanted columns
-datasetT = dataset.T
-datasetT
+t_dataset = dataset.T
+t_dataset
 
 # %% [markdown]
 # As it can be observed the dimension `x`and `y`have been exchanged, *e.g.* the original shape was **(x: 5549, y: 55)**,
@@ -107,7 +107,7 @@ datasetT
 # Let's visualize the result:
 
 # %%
-_ = datasetT.plot()
+_ = t_dataset.plot()
 
 # %% [markdown]
 # ## Changing units
@@ -137,7 +137,7 @@ except DimensionalityError as e:
 
 # %%
 d = dataset.to("meter", force=True)
-print(d.units)
+d.units
 
 # %% [markdown]
 # When units are compatible there is no problem to modify it. For instance, we can

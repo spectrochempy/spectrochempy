@@ -10,6 +10,7 @@ Plugin module to extend NDDataset with the import methods method.
 __all__ = ["read_matlab", "read_mat"]
 __dataset_methods__ = __all__
 
+import contextlib
 from datetime import datetime
 
 import numpy as np
@@ -115,7 +116,7 @@ def _read_mat(*args, **kwargs):
         elif data.dtype.char == "U":
             # this is an array of string
             info_(
-                f"The mat file contains an array of strings named '{name}' which will not be converted to NDDataset"
+                f"The mat file contains an array of strings named '{name}' which will not be converted to NDDataset",
             )
             continue
 
@@ -137,25 +138,16 @@ def _read_mat(*args, **kwargs):
 @_importer_method
 def _read_dso(dataset, name, data):
     name_mat = data["name"][0][0]
-    if len(name_mat) == 0:
-        name = ""
-    else:
-        name = name_mat[0]
+    name = "" if len(name_mat) == 0 else name_mat[0]
 
     typedata_mat = data["type"][0][0]
-    if len(typedata_mat) == 0:
-        typedata = ""
-    else:
-        typedata = typedata_mat[0]
+    typedata = "" if len(typedata_mat) == 0 else typedata_mat[0]
 
     if typedata != "data":
         return (name, data)
 
     author_mat = data["author"][0][0]
-    if len(author_mat) == 0:
-        author = "*unknown*"
-    else:
-        author = author_mat[0]
+    author = "*unknown*" if len(author_mat) == 0 else author_mat[0]
 
     date_mat = data["date"][0][0]
     if len(date_mat) == 0:
@@ -212,18 +204,16 @@ def _read_dso(dataset, name, data):
                 try:
                     coord.title = data["axisscale"][0][0][i][1][0]
                 except Exception:
-                    try:
+                    with contextlib.suppress(Exception):
                         coord.title = data["axisscale"][0][0][i][1][0][0]
-                    except Exception:
-                        pass
 
         if not isinstance(coord, Coord):
-            coord = Coord(data=[j for j in range(dat.shape[i])], title="index")
+            coord = Coord(data=list(range(dat.shape[i])), title="index")
 
         coords.append(coord)
 
     dataset.data = dat
-    dataset.set_coordset(*[coord for coord in coords])
+    dataset.set_coordset(*list(coords))
     dataset.author = author
     dataset.name = name
     dataset.date = date
