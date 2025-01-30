@@ -35,7 +35,11 @@ If you want to install the development version, you can use the following comman
 
 .. sourcecode:: ipython3
 
-! git clone --depth=1 https://github.com/spectrochempy/spectrochempy.git &>> install.log
+    ! git clone --depth=1 https://github.com/atravert/spectrochempy.git
+    ! pip install -r ./spectrochempy/requirements/requirements_colab.txt
+    ! pip install ./spectrochempy --no-deps
+
+! git clone --depth=1    &>> install.log
 ! pip install ./spectrochempy[colab] &>> install.log
 ! rm -rf ./spectrochempy/
 
