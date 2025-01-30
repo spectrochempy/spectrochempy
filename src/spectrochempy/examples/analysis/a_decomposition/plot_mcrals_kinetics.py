@@ -9,7 +9,7 @@ MCR-ALS with kinetic constraints
 ================================
 
 In this example, we perform the MCR ALS optimization of the UV-vis of spectra resulting
-from a three-component reaction `A` \-> `B` \-> `C` which was investigated by UV–Vis
+from a three-component reaction `A` -> `B` -> `C` which was investigated by UV–Vis
 spectroscopy. Full details on the reaction and data acquisition conditions can be found
 in :cite:t:`bijlsma:2001` .
 The data can be downloded from the author website `Biosystems Data Analysis group
@@ -37,7 +37,7 @@ ds = scp.read("matlabdata/METING9.MAT")
 print("\n NDDataset names: " + str([d.name for d in ds]))
 
 # %%
-# We load the experimental spectra (in `ds[1]`\), add the `y` (time) and `x`
+# We load the experimental spectra (in `ds[1]`), add the `y` (time) and `x`
 # (wavelength) coordinates, and keep one spectrum of out 4:
 D = scp.NDDataset(ds[1][:, 1:].data.T)
 D.y = scp.Coord(ds[0].data.squeeze(), title="time") / 60
@@ -93,9 +93,9 @@ mcr_2.kwargsGetConc = {"ivp_solver_kwargs": {"return_NDDataset": False}}
 mcr_2.fit(X, Ckin)
 
 # %%
-# Now, let\'s compare the concentration profile of MCR-ALS
+# Now, let's compare the concentration profile of MCR-ALS
 # (C = X(C$_{kin}^+$ X)$^+$) with
-# that of the optimized kinetic model (C$_{kin}$ \equiv$ `C_constrained`):
+# that of the optimized kinetic model (C$_{kin}$ $\equiv$ `C_constrained`):
 
 # sphinx_gallery_thumbnail_number = 6
 
@@ -103,7 +103,7 @@ _ = mcr_2.C.T.plot()
 _ = mcr_2.C_constrained.T.plot(clear=False)
 
 # %%
-# Finally, let\'s plot some of the pure spectra profiles St, and the
+# Finally, let's plot some of the pure spectra profiles St, and the
 #  reconstructed dataset  (X_hat = C St) vs original dataset (X) and residuals.
 _ = mcr_2.St.plot()
 _ = mcr_2.plotmerit(nb_traces=10)

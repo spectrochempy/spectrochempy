@@ -73,7 +73,7 @@ _ = X_hat_a.plot(title=r"$\hat{X} = \bar{X} + A S^t$")
 # %%
 # Or using the transform() method:
 X_hat_b = ica.inverse_transform()
-_ = X_hat_b.plot(title="$\hat{X} =$ ica.inverse_transform()")
+_ = X_hat_b.plot(title=r"$\hat{X} =$ ica.inverse_transform()")
 
 # %%
 # Finally, the quality of the reconstriction can be checked by `plotmerit()`
