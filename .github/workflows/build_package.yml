@@ -139,9 +139,9 @@ jobs:
 
       # Step 6: Publish packages to Anaconda.org
       - name: Upload to Anaconda.org
-        if: |
-          github.repository == 'spectrochempy/spectrochempy' &&
-          (github.event_name == 'release' || github.event_name == 'push')
+        # if: |
+        #   github.repository == 'spectrochempy/spectrochempy' &&
+        #   (github.event_name == 'release' || github.event_name == 'push')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
