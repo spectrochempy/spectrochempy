@@ -95,9 +95,17 @@ def find_peaks(
         Peak properties including heights, widths, prominences, and more.
         All values use appropriate units when use_coord=True.
 
+    Notes
+    -----
+    - Peak positions are refined using quadratic interpolation when window_length > 1
+    - The function handles units automatically when use_coord=True
+    - For noisy data, consider preprocessing with smoothing functions
+
     Examples
     --------
     Basic peak finding with height threshold:
+    >>> dataset = scp.read("irdata/nh4y-activation.spg")
+    >>> X = dataset[0, 1800.0:1300.0]
     >>> peaks, props = X.find_peaks(height=1.5)
 
     Find well-separated peaks with minimum width:
@@ -110,12 +118,6 @@ def find_peaks(
     ...     prominence=0.5,
     ...     width=20.0
     ... )
-
-    Notes
-    -----
-    - Peak positions are refined using quadratic interpolation when window_length > 1
-    - The function handles units automatically when use_coord=True
-    - For noisy data, consider preprocessing with smoothing functions
     """
     # get the dataset
     X = dataset.squeeze()
