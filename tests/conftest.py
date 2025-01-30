@@ -87,32 +87,64 @@ def ip(session_ip):
     yield session_ip
 
 
-@pytest.fixture(autouse=True)
-def cleanup_ipython():
-    """
-    Fixture to cleanup IPython resources after tests.
-    """
+def _cleanup_ipython_files():
+    """Helper function to force cleanup IPython files"""
     import os
+    import glob
+    import time
+    from pathlib import Path
+    import shutil
 
-    # Set environment variable to prevent IPython from creating history files
-    os.environ["IPYTHON_HISTORY"] = "0"
-
-    yield
-
-    # Cleanup IPython history after tests
+    # Try to close any IPython connections
     try:
         from IPython import get_ipython
 
         ip = get_ipython()
         if ip is not None:
-            ip.history_manager.cleanup()
-            ip.history_manager.db.close()
-            # Give Windows some time to release the file handle
-            import time
-
-            time.sleep(0.1)
+            if hasattr(ip, "history_manager") and ip.history_manager is not None:
+                ip.history_manager.reset()
+                ip.history_manager.cleanup()
+                ip.history_manager.db.close()
     except Exception:
         pass
+
+    # Wait for handles to be released
+    time.sleep(0.2)
+
+    # Force delete temp files
+    temp_dir = os.environ.get("TEMP", os.environ.get("TMP", os.path.expanduser("~")))
+    patterns = ["test_hist.sqlite", "test_hist.sqlite-journal"]
+
+    for pattern in patterns:
+        for file in glob.glob(os.path.join(temp_dir, f"*{pattern}")):
+            try:
+                os.close(os.open(file, os.O_RDONLY))  # Force close any open handles
+                Path(file).unlink()
+            except Exception:
+                try:
+                    # If can't delete, try to rename first
+                    new_name = f"{file}.delete_me"
+                    os.rename(file, new_name)
+                    os.remove(new_name)
+                except Exception:
+                    pass
+
+
+@pytest.fixture(scope="session", autouse=True)
+def session_cleanup():
+    """Session-level fixture to ensure cleanup"""
+    import os
+
+    os.environ["IPYTHON_HISTORY"] = "0"
+    yield
+    _cleanup_ipython_files()
+
+
+@pytest.fixture(autouse=True)
+def cleanup_ipython():
+    """Per-test cleanup of IPython resources"""
+    yield
+    _cleanup_ipython_files()
 
 
 # --------------------------------------------------------------------------------------
