@@ -87,6 +87,34 @@ def ip(session_ip):
     yield session_ip
 
 
+@pytest.fixture(autouse=True)
+def cleanup_ipython():
+    """
+    Fixture to cleanup IPython resources after tests.
+    """
+    import os
+
+    # Set environment variable to prevent IPython from creating history files
+    os.environ["IPYTHON_HISTORY"] = "0"
+
+    yield
+
+    # Cleanup IPython history after tests
+    try:
+        from IPython import get_ipython
+
+        ip = get_ipython()
+        if ip is not None:
+            ip.history_manager.cleanup()
+            ip.history_manager.db.close()
+            # Give Windows some time to release the file handle
+            import time
+
+            time.sleep(0.1)
+    except Exception:
+        pass
+
+
 # --------------------------------------------------------------------------------------
 # create reference arrays
 # --------------------------------------------------------------------------------------
