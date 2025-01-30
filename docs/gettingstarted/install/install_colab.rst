@@ -29,19 +29,15 @@ install the stable release of SpectroChemPy in Colab.
 
 .. sourcecode:: ipython3
 
-    ! pip install spectrochempy[colab] &>> install.log
+    ! pip install spectrochempy &>> install.log
 
 If you want to install the development version, you can use the following commands:
 
 .. sourcecode:: ipython3
 
-    ! git clone --depth=1 https://github.com/atravert/spectrochempy.git
-    ! pip install -r ./spectrochempy/requirements/requirements_colab.txt
-    ! pip install ./spectrochempy --no-deps
-
-! git clone --depth=1    &>> install.log
-! pip install ./spectrochempy[colab] &>> install.log
-! rm -rf ./spectrochempy/
+    ! git clone --depth=1 https://github.com/atravert/spectrochempy.git &>> install.log
+    ! pip install ./spectrochempy &>> install.log
+    ! rm -rf spectrochempy
 
 The whole process takes less than 1 minute.
 
