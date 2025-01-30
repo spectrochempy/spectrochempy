@@ -19,7 +19,7 @@ To start with Colab, go to the
 and create a new notebook or simply execute the `example notebook on Colab <https://colab.research.google.com/github/spectrochempy/spectrochempy_tutorials/blob/main/colab/0_install_spectrochempy_on_colaboratory_tutorial.ipynb>`__  |Open in Colab|
 
 .. |Open in Colab| image:: https://colab.research.google.com/assets/colab-badge.svg
-   :target: https://colab.research.google.com/github/spectrochempy/spectrochempy_tutorials/blob/main/colab/0_install_spectrochempy_on_colaboratory_tutorial.ipynb.ipynb
+   :target: https://colab.research.google.com/github/spectrochempy/spectrochempy_tutorials/blob/main/colab/0_install_spectrochempy_on_colaboratory_tutorial.ipynb
 
 Load and install SpectroChemPy with pip
 ---------------------------------------
