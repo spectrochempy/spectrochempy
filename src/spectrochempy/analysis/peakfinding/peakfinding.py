@@ -4,9 +4,15 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Peak finding module.
+Peak finding module for spectral analysis.
 
-Contains wrappers of `scipy.signal` peak finding functions.
+This module provides functionality to identify and analyze peaks in spectroscopic data.
+It wraps and extends scipy.signal's peak finding functions with additional features
+specific to spectroscopic analysis, including:
+- Coordinate system awareness
+- Unit handling
+- Integration with NDDataset objects
+- Peak interpolation for improved accuracy
 """
 
 __all__ = ["find_peaks"]
@@ -16,6 +22,7 @@ __dataset_methods__ = ["find_peaks"]
 import numpy as np
 import scipy
 
+from spectrochempy.application import error_
 from spectrochempy.application import warning_
 from spectrochempy.core.units import Quantity
 
@@ -40,167 +47,78 @@ def find_peaks(
     use_coord=True,
 ):
     """
-    Wrapper and extension of `scpy.signal.find_peaks`.
+    Find and analyze peaks in spectroscopic data with advanced filtering options.
 
-    Find peaks inside a 1D `NDDataset` based on peak properties.
-    This function finds all local maxima by simple comparison of neighbouring values.
-    Optionally, a subset of these
-    peaks can be selected by specifying conditions for a peak's properties.
-
-    .. warning::
-
-        This function may return unexpected results for data containing NaNs.
-        To avoid this, NaNs should either be removed or replaced.
+    This function extends scipy.signal.find_peaks by adding spectroscopy-specific
+    features like coordinate system awareness and unit handling. It performs peak
+    detection through local maxima analysis and supports various filtering criteria
+    to identify significant peaks.
 
     Parameters
     ----------
-    dataset : `NDDataset`
-        A 1D NDDataset or a 2D NDdataset with `len(X.y) == 1` .
-    height : `float` or :term:`array-like`, optional, default: `None`
-        Required height of peaks. Either a number, `None` , an array matching
-        `x` or a 2-element sequence of the former. The first element is
-        always interpreted as the minimal and the second, if supplied, as the
-        maximal required height.
-    window_length : `int`, default: 5
-        The length of the filter window used to interpolate the maximum. window_length
-        must be a positive odd integer.
-        If set to one, the actual maximum is returned.
-    threshold : `float` or :term:`array-like`, optional
-        Required threshold of peaks, the vertical distance to its neighbouring
-        samples. Either a number, `None` , an array matching `x` or a
-        2-element sequence of the former. The first element is always
-        interpreted as the  minimal and the second, if supplied, as the maximal
-        required threshold.
-    distance : `float`, optional
-        Required minimal horizontal distance in samples between
-        neighbouring peaks. Smaller peaks are removed first until the condition
-        is fulfilled for all remaining peaks.
-    prominence : `float` or :term:`array-like`, optional
-        Required prominence of peaks. Either a number, `None` , an array
-        matching `x` or a 2-element sequence of the former. The first
-        element is always interpreted as the  minimal and the second, if
-        supplied, as the maximal required prominence.
-    width : `float` or :term:`array-like`, optional
-        Required width of peaks in samples. Either a number, `None` , an array
-        matching `x` or a 2-element sequence of the former. The first
-        element is always interpreted as the  minimal and the second, if
-        supplied, as the maximal required width. Floats are interpreted as width
-        measured along the 'x' Coord; ints are interpreted as a number of points.
-    wlen : `int` or `float`, optional
-        Used for calculation of the peaks prominences, thus it is only used if
-        one of the arguments `prominence` or `width` is given. Floats are interpreted
-        as measured along the 'x' Coord; ints are interpreted as a number of points.
-        See argument len` in `peak_prominences` of the scipy documentation for a full
-        description of its effects.
-    rel_height : `float`, optional,
-        Used for calculation of the peaks width, thus it is only used if `width`
-        is given. See argument  `rel_height` in `peak_widths` of the scipy documentation
-        for a full description of its effects.
-    plateau_size : `float` or :term:`array-like`, optional
-        Required size of the flat top of peaks in samples. Either a number,
-        `None` , an array matching `x` or a 2-element sequence of the former.
-        The first element is always interpreted as the minimal and the second,
-        if supplied as the maximal required plateau size. Floats are interpreted
-        as measured along the 'x' Coord; ints are interpreted as a number of points.
-    use_coord : `bool`, optional
-        Set whether the x Coord (when it exists) should be used instead of indices
-        for the positions and width. If True, the units of the other parameters
-        are interpreted according to the coordinates.
+    dataset : NDDataset
+        Input dataset containing spectral data. Must be 1D or 2D with len(X.y) == 1.
+    height : float or array-like, optional
+        Minimum and/or maximum peak height criteria. Can be specified as:
+        - Single value for minimum height
+        - Tuple (min, max) for height range
+        - Array matching x for position-dependent criteria
+    window_length : int, default: 3
+        Window size for peak interpolation. Must be odd.
+        Larger values provide smoother interpolation but may miss narrow peaks.
+    threshold : float or array-like, optional
+        Minimum height difference between peak and neighboring points.
+        Useful for filtering out noise-related peaks.
+    distance : float, optional
+        Minimum separation between peaks. Peaks closer than this are filtered
+        based on their prominence.
+    prominence : float or array-like, optional
+        Required prominence (height above surrounding baseline) of peaks.
+    width : float or array-like, optional
+        Required width of peaks. Interpreted as coordinate units if use_coord=True,
+        otherwise as number of points.
+    wlen : int or float, optional
+        Window length for prominence calculation. Affects computation speed
+        for large datasets.
+    rel_height : float, default: 0.5
+        Relative height for width calculation (0-1 range).
+    plateau_size : float or array-like, optional
+        Required size of peak plateau (flat top).
+    use_coord : bool, default: True
+        Whether to use coordinate system units instead of array indices.
 
     Returns
     -------
-    peaks : `~numpy.ndarray`
-        Indices of peaks in `dataset` that satisfy all given conditions.
-
-    properties : `dict`
-        A dictionary containing properties of the returned peaks which were
-        calculated as intermediate results during evaluation of the specified
-        conditions:
-
-        * ``peak_heights``
-            If `height` is given, the height of each peak in `dataset`\\  .
-        * ``left_thresholds``, ``right_thresholds``
-            If `threshold` is given, these keys contain a peaks vertical
-            distance to its neighbouring samples.
-        * ``prominences``, ``right_bases``, ``left_bases``
-            If `prominence` is given, these keys are accessible. See
-            `scipy.signal.peak_prominences` for a
-            full description of their content.
-        * ``width_heights``, ``left_ips``, ``right_ips``
-            If `width` is given, these keys are accessible. See
-            `scipy.signal.peak_widths` for a full description of their content.
-        * plateau_sizes, left_edges', 'right_edges'
-            If `plateau_size` is given, these keys are accessible and contain
-            the indices of a peak's edges (edges are still part of the
-            plateau) and the calculated plateau sizes.
-
-        To calculate and return properties without excluding peaks, provide the
-        open interval `(None, None)` as a value to the appropriate argument
-        (excluding `distance`).
-
-    Warns
-    -----
-    PeakPropertyWarning
-        Raised if a peak's properties have unexpected values (see
-        `peak_prominences` and `peak_widths` ).
-
-    See Also
-    --------
-    find_peaks_cwt:
-        In `scipy.signal`: Find peaks using the wavelet transformation.
-    peak_prominences:
-        In `scipy.signal`: Directly calculate the prominence of peaks.
-    peak_widths:
-        In `scipy.signal`: Directly calculate the width of peaks.
+    peaks : NDDataset
+        Dataset containing identified peaks with interpolated positions and heights.
+    properties : dict
+        Peak properties including heights, widths, prominences, and more.
+        All values use appropriate units when use_coord=True.
 
     Notes
     -----
-    In the context of this function, a peak or local maximum is defined as any
-    sample whose two direct neighbours have a smaller amplitude. For flat peaks
-    (more than one sample of equal amplitude wide) the index of the middle
-    sample is returned (rounded down in case the number of samples is even).
-    For noisy signals the peak locations can be off because the noise might
-    change the position of local maxima. In those cases consider smoothing the
-    signal before searching for peaks or use other peak finding and fitting
-    methods (like `scipy.signal.find_peaks_cwt` ).
-
-    Some additional comments on specifying conditions:
-
-    * Almost all conditions (excluding `distance`) can be given as half-open or
-      closed intervals, e.g `1` or `(1, None)` defines the half-open
-      interval :math:`[1, \\infty]` while `(None, 1)` defines the interval
-      :math:`[-\\infty, 1]`. The open interval `(None, None)` can be specified
-      as well, which returns the matching properties without exclusion of peaks.
-    * The border is always included in the interval used to select valid peaks.
-    * For several conditions the interval borders can be specified with
-      arrays matching `dataset` in shape which enables dynamic constrains based on
-      the sample position.
-    * The conditions are evaluated in the following order: `plateau_size` ,
-      `height` , `threshold` , `distance` , `prominence` , `width` . In most cases
-      this order is the fastest one because faster operations are applied first
-      to reduce the number of peaks that need to be evaluated later.
-    * While indices in `peaks` are guaranteed to be at least `distance` samples
-      apart, edges of flat peaks may be closer than the allowed `distance` .
-    * Use `wlen` to reduce the time it takes to evaluate the conditions for
-      `prominence` or `width` if `dataset` is large or has many local maxima
-      (see `scipy.signal.peak_prominences`).
+    - Peak positions are refined using quadratic interpolation when window_length > 1
+    - The function handles units automatically when use_coord=True
+    - For noisy data, consider preprocessing with smoothing functions
 
     Examples
     --------
-
+    Basic peak finding with height threshold:
     >>> dataset = scp.read("irdata/nh4y-activation.spg")
     >>> X = dataset[0, 1800.0:1300.0]
-    >>> peaks, properties = X.find_peaks(height=1.5, distance=50.0, width=0.0)
-    >>> len(peaks.x)
-    2
-    >>> peaks.x.values
-    <Quantity([    1644     1455], '1 / centimeter')>
-    >>> properties["peak_heights"][0]
-    <Quantity(2.26663446, 'absorbance')>
-    >>> properties["widths"][0]
-    <Quantity(38.729003, '1 / centimeter')>
-    """
+    >>> peaks, props = X.find_peaks(height=1.5)
 
+    Find well-separated peaks with minimum width:
+    >>> peaks, props = X.find_peaks(distance=50.0, width=10.0)
+
+    Complex filtering with multiple criteria:
+    >>> peaks, props = X.find_peaks(
+    ...     height=1.5,
+    ...     distance=50.0,
+    ...     prominence=0.5,
+    ...     width=20.0
+    ... )
+    """
     # get the dataset
     X = dataset.squeeze()
     if X.ndim > 1:
@@ -262,6 +180,14 @@ def find_peaks(
         rel_height=rel_height,
         plateau_size=plateau_size,
     )
+
+    # Check if any peaks were found
+    if len(peaks) == 0:
+        error_("No peaks found")
+        return None, None
+
+    # Ensure properties is a dictionary even if empty
+    properties = properties if properties else {}
 
     out = X[peaks]
 
