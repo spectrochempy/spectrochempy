@@ -104,6 +104,13 @@ docs = [
   "sphinxcontrib-bibtex>=2.6.1", # Latest for 3.13
   "json5>=0.9.14",             # Latest for 3.13
 ]
+build = [
+  "setuptools>=64",
+  "setuptools_scm>=8",
+  "toml",
+  "jinja2",
+  "anaconda-client",
+]
 cantera = ["cantera"]
 colab = [
   "brukeropusreader>=1.3.4",
