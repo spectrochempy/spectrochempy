@@ -13,17 +13,63 @@ import pytest
 
 import spectrochempy
 
-# try:
-# Work only if spectrochempy is installed
-# except ModuleNotFoundError:  # pragma: no cover
-#     raise ModuleNotFoundError(
-#         "You must install spectrochempy and its dependencies before executing tests!"
-#     )
+# Disable IPython history at import time
+import os
+
+os.environ["IPYTHON_HISTORY"] = "0"
 
 
-# ----------------------------
-# Cleaning when exiting pytest
-# ----------------------------
+def _force_cleanup_ipython():
+    """Aggressive cleanup of IPython resources"""
+    import glob
+    import os
+    import shutil
+    from pathlib import Path
+
+    # Kill IPython
+    try:
+        from IPython import get_ipython
+
+        ip = get_ipython()
+        if ip is not None and hasattr(ip, "history_manager"):
+            ip.history_manager.enabled = False  # Disable history
+            ip.history_manager = None  # Remove manager
+    except:
+        pass
+
+    # Find and remove all IPython history files
+    patterns = ["*test_hist*", "*history.sqlite*"]
+    temp_paths = [
+        os.environ.get("TEMP", ""),
+        os.environ.get("TMP", ""),
+        os.path.expanduser("~"),
+        os.getcwd(),
+    ]
+
+    for temp_dir in temp_paths:
+        if not temp_dir:
+            continue
+        for pattern in patterns:
+            try:
+                for file in glob.glob(
+                    os.path.join(temp_dir, "**", pattern), recursive=True
+                ):
+                    try:
+                        Path(file).unlink(missing_ok=True)
+                    except:
+                        try:
+                            os.remove(file)
+                        except:
+                            pass
+            except:
+                pass
+
+
+def pytest_sessionstart(session):
+    """Set up test session"""
+    _force_cleanup_ipython()
+
+
 def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
     """whole test run finishes."""
 
@@ -43,6 +89,9 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
     docs = cwd / "docs"
     for f in list(docs.glob("**/*.ipynb")):
         f.unlink()
+
+    # Force IPython cleanup
+    _force_cleanup_ipython()
 
 
 # ======================================================================================
@@ -74,10 +123,15 @@ print("DATADIR: ", datadir)
 # --------------------------------------------------------------------------------------
 @pytest.fixture(scope="session")
 def session_ip():
+    """Modified session fixture to prevent history"""
     try:
         from IPython.testing.globalipapp import start_ipython
 
-        return start_ipython()
+        os.environ["IPYTHON_HISTORY"] = "0"  # Ensure history is disabled
+        ip = start_ipython()
+        if hasattr(ip, "history_manager"):
+            ip.history_manager.enabled = False
+        return ip
     except ImportError:
         return None
 
@@ -85,66 +139,6 @@ def session_ip():
 @pytest.fixture(scope="module")
 def ip(session_ip):
     yield session_ip
-
-
-def _cleanup_ipython_files():
-    """Helper function to force cleanup IPython files"""
-    import os
-    import glob
-    import time
-    from pathlib import Path
-    import shutil
-
-    # Try to close any IPython connections
-    try:
-        from IPython import get_ipython
-
-        ip = get_ipython()
-        if ip is not None:
-            if hasattr(ip, "history_manager") and ip.history_manager is not None:
-                ip.history_manager.reset()
-                ip.history_manager.cleanup()
-                ip.history_manager.db.close()
-    except Exception:
-        pass
-
-    # Wait for handles to be released
-    time.sleep(0.2)
-
-    # Force delete temp files
-    temp_dir = os.environ.get("TEMP", os.environ.get("TMP", os.path.expanduser("~")))
-    patterns = ["test_hist.sqlite", "test_hist.sqlite-journal"]
-
-    for pattern in patterns:
-        for file in glob.glob(os.path.join(temp_dir, f"*{pattern}")):
-            try:
-                os.close(os.open(file, os.O_RDONLY))  # Force close any open handles
-                Path(file).unlink()
-            except Exception:
-                try:
-                    # If can't delete, try to rename first
-                    new_name = f"{file}.delete_me"
-                    os.rename(file, new_name)
-                    os.remove(new_name)
-                except Exception:
-                    pass
-
-
-@pytest.fixture(scope="session", autouse=True)
-def session_cleanup():
-    """Session-level fixture to ensure cleanup"""
-    import os
-
-    os.environ["IPYTHON_HISTORY"] = "0"
-    yield
-    _cleanup_ipython_files()
-
-
-@pytest.fixture(autouse=True)
-def cleanup_ipython():
-    """Per-test cleanup of IPython resources"""
-    yield
-    _cleanup_ipython_files()
 
 
 # --------------------------------------------------------------------------------------
