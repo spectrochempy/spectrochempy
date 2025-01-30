@@ -123,12 +123,21 @@ def generate_conda_environments(deps, opt_deps):
 
     # OPTIONAL dependencies
     for opt in opt_deps:
+        if opt in [
+            "colab",
+        ]:
+            continue  # bypass this for conda
         opt_deps_string = (
             "\n" + underline(f"{opt.upper()} dependencies", indent=4) + "    - "
         )
         opt_deps_string += "\n    - ".join([pip2conda(dep) for dep in opt_deps[opt]])
         out = template.render(
-            dependencies=deps_string,
+            dependencies=deps_string
+            if opt
+            not in [
+                "build",
+            ]
+            else "",
             optional_dependencies=opt_deps_string,
         )
         env_filename = repo_path / "environments" / f"environment_{opt}.yml"
@@ -166,10 +175,19 @@ def generate_pip_requirements(deps, opt_deps):
     deps_string += "-r requirements.txt\n"
 
     for opt in opt_deps:
+        if opt in [
+            "build",
+        ]:
+            continue  # bypass this for pip
         opt_deps_string = underline(f"{opt.upper()} dependencies")
         opt_deps_string += "\n".join(opt_deps[opt])
         out = template.render(
-            dependencies=deps_string if opt != "colab" else "",
+            dependencies=deps_string
+            if opt
+            not in [
+                "colab",
+            ]
+            else "",
             optional_dependencies=opt_deps_string,
         )
         req_filename = repo_path / "requirements" / f"requirements_{opt}.txt"
