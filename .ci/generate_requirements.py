@@ -79,17 +79,33 @@ def pip2conda(package):
     # Convert pip version specifier to conda format
     package = re.sub("==", "=", package).strip()
 
+    # Handle python spec
+    package = package.split(";", maxsplit=1)
+    package = (
+        package[0]
+        if len(package) < 2
+        else (
+            package[0]
+            + " # "
+            + package[1]
+            .strip()
+            .replace("python_version", "python")
+            .replace("'", "")
+            .replace('"', "")
+            .replace(" ", "")
+        )
+    )
+
     # Handle version comparisons
-    for compare in ("<=", ">=", "="):
+    for compare in ("<=", ">=", "=", "<", ">"):
         if compare not in package:
             continue
-
-        pkg, version = package.split(compare)
+        pkg, version = package.split(compare, maxsplit=1)
         if pkg in renaming:
             return "".join((renaming[pkg], compare, version))
+        return "".join((pkg, compare, version))
 
-        break
-
+    # compare was not found
     if package in renaming:
         return renaming[package]
 
@@ -123,10 +139,6 @@ def generate_conda_environments(deps, opt_deps):
 
     # OPTIONAL dependencies
     for opt in opt_deps:
-        if opt in [
-            "colab",
-        ]:
-            continue  # bypass this for conda
         opt_deps_string = (
             "\n" + underline(f"{opt.upper()} dependencies", indent=4) + "    - "
         )
@@ -182,12 +194,7 @@ def generate_pip_requirements(deps, opt_deps):
         opt_deps_string = underline(f"{opt.upper()} dependencies")
         opt_deps_string += "\n".join(opt_deps[opt])
         out = template.render(
-            dependencies=deps_string
-            if opt
-            not in [
-                "colab",
-            ]
-            else "",
+            dependencies=deps_string,
             optional_dependencies=opt_deps_string,
         )
         req_filename = repo_path / "requirements" / f"requirements_{opt}.txt"
