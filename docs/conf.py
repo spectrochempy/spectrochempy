@@ -97,6 +97,10 @@ exclude_patterns = [
     "_static",
     "**.ipynb_checkpoints",
     "~temp",
+    "generated",
+    "gettingstarted/examples/gallery/**/*.py",
+    "gettingstarted/examples/gallery/**/*.ipynb",
+    "**.md5",
 ]
 
 # The reST default role (used for this markup: `text` ) to use for all
@@ -225,98 +229,6 @@ html_context = {
     "bibyear": "{" + f"{datetime.today().year}" + "}",
 }
 
-# -- Options for LaTeX output ----------------------------------------------------------
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title, author, documentclass  [
-# howto/manual]).
-latex_documents = [
-    (
-        "index",
-        "spectrochempy.tex",
-        "SpectroChemPy Documentation",
-        "A. Travert & C. Fernandez",
-        "manual",
-        False,
-    ),
-]
-
-# The name of an image file (relative to this directory) to place at the top of
-# the title page.
-latex_logo = "_static/scpy.png"
-
-# For "manual" documents, if this is true, then toplevel headings are parts,
-# not chapters.
-latex_use_parts = False
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    "papersize": "a4paper",  # ''letterpaper',
-    # The font size ('10pt', '11pt' or '12pt').
-    "pointsize": "10pt",
-    # remove blank pages (between the title page and the TOC, etc.)
-    "classoptions": ",openany,oneside",
-    "babel": "\\usepackage[english]{babel}",
-    # Additional stuff for the LaTeX preamble.
-    "preamble": r"""
-\usepackage{hyperref}
-\setcounter{tocdepth}{3}
-""",
-}
-
-# If false, no module index is generated.
-latex_use_modindex = True
-
-# If true, show page references after internal links.
-# latex_show_pagerefs = False
-
-# If true, show URL addresses after external links.
-# latex_show_urls = False
-
-# Documents to append as an appendix to all manuals.
-# latex_appendices = []
-
-# If false, no module index is generated.
-# latex_domain_indices = True
-
-
-# -- Options for PDF output ---------------------------------------
-
-# Grouping the document tree into PDF files. List of tuples
-# (source start file, target name, title, author).
-pdf_documents = [
-    (
-        "index",
-        "SpectroChempy",
-        "Spectrochempy Documentation",
-        "A. Travert & C. Fernandez",
-    ),
-]
-
-# A comma-separated list of custom stylesheets. Example:
-pdf_stylesheets = ["sphinx", "kerning", "a4"]
-
-# Create a compressed PDF
-# Use True/False or 1/0
-# Example: compressed=True
-# pdf_compressed=False
-
-# A colon-separated list of folders to search for fonts. Example:
-# pdf_font_path=['/usr/share/fonts', '/usr/share/texmf-dist/fonts/']
-
-# Language to be used for hyphenation support
-pdf_language = "en_EN"
-
-# If false, no index is generated.
-# pdf_use_index = True
-
-# If false, no modindex is generated.
-# pdf_use_modindex = True
-
-# If false, no coverpage is generated.
-# pdf_use_coverpage = True
-
-
 # Sphinx-gallery ---------------------------------------------------------------
 # Generate the plots for the gallery
 from sphinx_gallery.sorting import FileNameSortKey
@@ -353,13 +265,11 @@ sphinx_gallery_conf = {
     "pypandoc": True,
     "remove_config_comments": True,
     "within_subsection_order": FileNameSortKey,
-    "first_notebook_cell": """
-        # Load common imports
-        import spectrochempy as scp
-        import numpy as np
-        import matplotlib.pyplot as plt
-    """,
+    "image_scrapers": ("matplotlib",),
+    "filename_pattern": "/plot",
+    "ignore_pattern": "__init__\\.py",
 }
+
 suppress_warnings = [
     "sphinx_gallery",
 ]

@@ -94,51 +94,40 @@ download_testdata()  # (download done using mamba install spectrochempy_data)
 # Class BuildDocumentation
 # ======================================================================================
 class BuildDocumentation:
-    def __init__(
-        self,
-        delnb=False,
-        noapi=False,
-        noexec=False,
-        tutorials=False,
-        warningiserror=False,
-        verbosity=0,
-        jobs="auto",
-        whatsnew=False,
-    ):
-        # determine if we are in the development branch (latest) or master (stable)
+    def __init__(self, **kwargs):
+        self._doc_version = self._determine_version()
+        self.settings = self._init_settings(kwargs)
+
+    def _determine_version(self):
         if "+" in version:
-            self._doc_version = "dirty"
-        elif "dev" in version:
-            print("\n\nWe are creating the latest (dev) documentation.\n")
-            self._doc_version = "latest"
-        else:
-            print("\n\nWe are creating the stable documentation.\n")
-            self._doc_version = "stable"
+            return "dirty"
+        return "latest" if "dev" in version else "stable"
 
-        self.delnb = delnb
-        self.noapi = noapi
-        self.noexec = noexec
-        self.tutorials = tutorials
-        self.warningiserror = warningiserror
-        self.verbosity = verbosity
+    def _init_settings(self, kwargs):
+        settings = {
+            "delnb": kwargs.get("delnb", False),
+            "noapi": kwargs.get("noapi", False),
+            "noexec": kwargs.get("noexec", False),
+            "tutorials": kwargs.get("tutorials", False),
+            "warningiserror": kwargs.get("warningiserror", False),
+            "verbosity": kwargs.get("verbosity", 0),
+            "jobs": self._get_jobs(kwargs.get("jobs", "auto")),
+            "whatsnew": kwargs.get("whatsnew", False),
+        }
 
-        # Determine number of jobs
-        if jobs == "auto":
-            jobs = mp.cpu_count()
-        else:
-            try:
-                jobs = int(jobs)
-            except ValueError:
-                print("Error: --jobs argument must be an integer or 'auto'")
-                return 1
-        self.jobs = jobs
-
-        self.whatsnew = whatsnew
-
-        if noapi and not whatsnew:  # API is included when whatsnew is compiled
+        if settings["noapi"] and not settings["whatsnew"]:
             environ["SPHINX_NOAPI"] = "noapi"
-            return None
-        return None
+
+        return settings
+
+    def _get_jobs(self, jobs):
+        if jobs == "auto":
+            return mp.cpu_count()
+        try:
+            return int(jobs)
+        except ValueError:
+            print("Error: --jobs argument must be an integer or 'auto'")
+            return 1
 
     @staticmethod
     def _delnb():
@@ -180,10 +169,16 @@ class BuildDocumentation:
             ).lower()
         return answer[:1] == "y"
 
-    @staticmethod
-    def _sync_notebooks():
-        # Use jupytext to sync py and ipynb files in userguide
+    def _sync_notebooks(self):
+        """Improved notebook synchronization with better error handling"""
+        print("\nSynchronizing notebooks...")
+        for item in self._get_notebook_files():
+            try:
+                self._sync_notebook_pair(item)
+            except Exception as e:
+                print(f"Failed to sync {item}: {e}")
 
+    def _get_notebook_files(self):
         pyfiles = set()
         print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
 
@@ -203,33 +198,27 @@ class BuildDocumentation:
             # add only the full path without suffix
             pyfiles.add(f.with_suffix(""))
 
-        count = 0
-        for item in pyfiles:
-            py = item.with_suffix(".py")
+        return pyfiles
 
-            # Set up pairing for this notebook/script pair
-            print(f"Setting up pairing for: {item}")
-            try:
-                # Setup the pairing between py and ipynb
-                sh.jupytext(
-                    "--set-formats",
-                    "ipynb,py:percent",
-                    str(
-                        item.with_suffix(".py")
-                        if py.exists()
-                        else item.with_suffix(".ipynb")
-                    ),
-                    silent=False,
-                )
-                count += 1
-            except Exception as e:
-                print(f"Warning: Failed to set up pairing for {item}: {str(e)}")
+    def _sync_notebook_pair(self, item):
+        py = item.with_suffix(".py")
 
-        if count == 0:
-            print("\nAll notebooks are already up-to-date and paired")
-        else:
-            print(f"\nSuccessfully paired {count} files")
-        print("\n")
+        # Set up pairing for this notebook/script pair
+        print(f"Setting up pairing for: {item}")
+        try:
+            # Setup the pairing between py and ipynb
+            sh.jupytext(
+                "--set-formats",
+                "ipynb,py:percent",
+                str(
+                    item.with_suffix(".py")
+                    if py.exists()
+                    else item.with_suffix(".ipynb")
+                ),
+                silent=False,
+            )
+        except Exception as e:
+            print(f"Warning: Failed to set up pairing for {item}: {str(e)}")
 
     def _make_dirs(self):
         # Create the directories required to build the documentation.
@@ -257,15 +246,27 @@ class BuildDocumentation:
     # COMMANDS
     # ----------------------------------------------------------------------------------
     def _make_docs(self, builder="html"):
-        # Make the html documentation
+        """Simplified documentation building process"""
+        if builder != "html":
+            raise ValueError("Only HTML builder is supported")
 
+        self._prepare_build()
+        build_result = self._run_sphinx_build(builder)
+        self._post_build(builder)
+
+        return build_result
+
+    def _prepare_build(self):
+        self._make_dirs()
+
+        # APIGEN?
+        if not self.settings["noapi"]:
+            self._apigen()
+
+        self._sync_notebooks()
+
+    def _run_sphinx_build(self, builder):
         doc_version = self._doc_version
-
-        if builder not in [
-            "html",
-        ]:
-            raise ValueError('Not a supported builder: Must be "html"')
-
         BUILDDIR = DOCREPO / builder
 
         print(
@@ -276,15 +277,6 @@ class BuildDocumentation:
             f"\n{'#' * 80}"
         )
 
-        # self._make_dirs()
-
-        # APIGEN?
-        if not self.noapi:
-            self._apigen()
-
-        self._sync_notebooks()
-
-        # run sphinx
         print(f"{'-' * 80}\n")
         print(f"\n{builder.upper()} BUILDING")
         print(f"{'-' * 80}\n")
@@ -298,19 +290,23 @@ class BuildDocumentation:
             str(outdir),
             str(doctreesdir),
             builder,
-            warningiserror=self.warningiserror,
-            parallel=self.jobs,
-            verbosity=self.verbosity,
+            warningiserror=self.settings["warningiserror"],
+            parallel=self.settings["jobs"],
+            verbosity=self.settings["verbosity"],
         )
-        if self.noexec:
+        if self.settings["noexec"]:
             sp.config.nbsphinx_execute = "never"
             sp.config.plot_gallery = 0
 
-        res = sp.build()
+        return sp.build()
+
+    def _post_build(self, builder):
+        doc_version = self._doc_version
+        BUILDDIR = DOCREPO / builder
 
         print(
-            f"\n{'-' * 130}\nBuild finished. The {builder.upper()} pages "
-            f"are in {outdir}."
+            f"\n{'-' * 130}\nBuild finished. The {builder.UPPER()} pages "
+            f"are in {BUILDDIR}/{doc_version}."
         )
 
         if doc_version == "stable":
@@ -321,8 +317,6 @@ class BuildDocumentation:
 
         if builder == "html":
             self._make_redirection_page()
-
-        return res
 
     def clean(self):
         # Clean/remove the built documentation.
