@@ -35,7 +35,7 @@
 #
 # This tutorial shows the specifics related to infrared data import in Spectrochempy.
 # As prerequisite, the user is
-# expected to have read the [Import Tutorial](import.ipynb).
+# expected to have read the [Import Tutorial](import.rst).
 #
 # Let's first import spectrochempy:
 
@@ -76,7 +76,7 @@ import spectrochempy as scp
 #
 # ### a) import spg file
 #
-# Let's import an .spg file from the `datadir` (see [Import Tutorial](import.ipynb))
+# Let's import an .spg file from the `datadir` (see [Import Tutorial](import.rst))
 # and display its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}
@@ -172,7 +172,7 @@ X.y
 #    spectrum at the jth  wavenumber.
 #    However, this is subject to change, for instance if you perform operation on your
 #    data such as
-# [Transposition](../processing/transformations.ipynb#Transposition). At any time
+# [Transposition](../processing/transformations.rst#Transposition). At any time
 # the attribute `dims` gives the correct names (which can be modified) and order of
 # the dimensions.
 

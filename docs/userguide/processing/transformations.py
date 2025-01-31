@@ -59,7 +59,7 @@ ax = dataset.plot()
 dataset.max()
 
 # %% [markdown]
-# One way is to apply the max function to only a part of the spectrum (using [slicing](slicing.ipynb)). Another way is to
+# One way is to apply the max function to only a part of the spectrum (using [slicing](slicing.rst)). Another way is to
 # mask the undesired data.
 #
 # Masking values in this case is straightforward. Just set a value `masked` or True for those data you want to mask.
@@ -149,4 +149,4 @@ dataset.y.ito("hours")
 _ = dataset.plot()
 
 # %% [markdown]
-# See [Units and Quantities](../units/units.ipynb) for more details on these units operations
+# See [Units and Quantities](../units/units.rst) for more details on these units operations

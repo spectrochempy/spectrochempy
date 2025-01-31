@@ -75,7 +75,7 @@ from spectrochempy import NDDataset
 
 # %% [markdown]
 # For a convenient usage of units, we will also directly import
-# **[ur]((../units/units.ipynb)**, the unit registry which contains all available
+# **[ur]((../units/units.rst)**, the unit registry which contains all available
 # units.
 # %%
 from spectrochempy import ur

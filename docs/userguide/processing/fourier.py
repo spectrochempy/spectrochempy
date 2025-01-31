@@ -114,7 +114,7 @@ _ = ax.legend(loc="lower right")
 # ### Line broadening
 # Often before applying FFT, some exponential multiplication `em`or other broadening filters such as `gm` or `sp`
 # are applied.
-# See the dedicated [apodization tutorial](apodization.ipynb).
+# See the dedicated [apodization tutorial](apodization.rst).
 
 # %%
 fid2 = fid.em(lb="50. Hz")
@@ -142,7 +142,7 @@ print("si = ", spec3.size)
 
 # %% [markdown]
 # ### Time domain baseline correction
-# See the dedicated [Time domain baseline correction tutorial](td_baseline.ipynb).
+# See the dedicated [Time domain baseline correction tutorial](td_baseline.rst).
 
 # %% [markdown]
 # ### Magnitude calculation

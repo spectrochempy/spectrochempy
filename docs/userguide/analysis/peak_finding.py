@@ -29,9 +29,9 @@
 #
 # This tutorial shows how to find peaks and determine peak maxima with spectrochempy.
 # As prerequisite, the user is
-# expected to have read the [Import](../importexport/import.ipynb),
-# [Import IR](../importexport/importIR.ipynb),
-# [slicing](../processing/slicing.ipynb) tutorials.
+# expected to have read the [Import](../importexport/import.rst),
+# [Import IR](../importexport/importIR.rst),
+# [slicing](../processing/slicing.rst) tutorials.
 #
 
 # %% [markdown]
@@ -84,7 +84,7 @@ _ = reg.plot()
 # one finds that it is located at ~ 2115.5 cm$^{-1}$. The exact x-coordinate value can
 # be obtained using the
 # following code
-# (see the [slicing tutorial](../processing/slicing.ipynb) for more info):
+# (see the [slicing tutorial](../processing/slicing.rst) for more info):
 
 # %%
 pos = reg.x[2115.5].values

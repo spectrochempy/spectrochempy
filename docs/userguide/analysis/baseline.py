@@ -34,8 +34,8 @@
 # operations in a more direct way.
 #
 # As prerequisite,
-# the user is expected to have read the [Import](../importexport/import.ipynb)
-# and [Import IR](../importexport/importIR.ipynb) tutorials.
+# the user is expected to have read the [Import](../importexport/import.rst)
+# and [Import IR](../importexport/importIR.rst) tutorials.
 
 
 # %% [markdown]

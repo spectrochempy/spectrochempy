@@ -232,7 +232,7 @@ ndOH.plot()
 
 # %% [markdown]
 # We can perform a linear baseline correction to start with this data (see the
-# [baseline tutorial](../processing/baseline.ipynb)).
+# [baseline tutorial](../processing/baseline.rst)).
 # For removing a linear baseline, the fastest method is however to use the `abc` (
 # automatic baseline correction)
 
@@ -245,7 +245,7 @@ ndOHcorr.plot()
 #
 # Below we will need to start with some guess of the peak position and width.
 # For this we can use the `find_peaks()` method
-# (see [Peak finding tutorial](../analysis/peak_finding.ipynb))
+# (see [Peak finding tutorial](../analysis/peak_finding.rst))
 
 # %%
 peaks, _ = ndOHcorr.find_peaks()

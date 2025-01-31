@@ -18,6 +18,7 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
+
 * Improvement of the installation process using pip.
   One can now install the package using command
   like `pip install spectrochempy[cantera]` to install the package with the cantera
@@ -33,6 +34,7 @@ New features
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+
 * Bug #777. Now `scp.show_version()`` works as expected
 
 .. section
@@ -40,6 +42,7 @@ Bug fixes
 Dependency updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
+
 * Major Python compatibility updates:
     - Now supports Python 3.13
     - Minimum Python version increased to 3.10
@@ -63,6 +66,7 @@ Dependency updates
 Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
+
 * Minimum Python version requirement increased to 3.10
 * Several core dependencies require major version updates
 * Installation process changes with new dependency groups
