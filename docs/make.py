@@ -182,10 +182,10 @@ class BuildDocumentation:
 
     @staticmethod
     def _sync_notebooks():
-        # Use  jupytext to sync py and ipynb files in userguide
+        # Use jupytext to sync py and ipynb files in userguide
 
         pyfiles = set()
-        print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytex\n{'-' * 80}")
+        print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
 
         py = list(SRC.glob("**/*.py"))
         py.extend(list(SRC.glob("**/*.ipynb")))
@@ -206,36 +206,29 @@ class BuildDocumentation:
         count = 0
         for item in pyfiles:
             py = item.with_suffix(".py")
-            ipynb = item.with_suffix(".ipynb")
 
-            args = None
-
-            if not ipynb.exists():
-                args = [
-                    "--update-metadata",
-                    '{"jupytext": {"notebook_metadata_filter":"all"}}',
-                    "--to",
-                    "ipynb",
-                    py,
-                ]
-
-            elif not py.exists():
-                args = [
-                    "--update-metadata",
-                    '{"jupytext": {"notebook_metadata_filter":"all"}}',
-                    "--to",
-                    "py:percent",
-                    ipynb,
-                ]
-
-            if args is not None:
-                print(f"sync: {item}")
+            # Set up pairing for this notebook/script pair
+            print(f"Setting up pairing for: {item}")
+            try:
+                # Setup the pairing between py and ipynb
+                sh.jupytext(
+                    "--set-formats",
+                    "ipynb,py:percent",
+                    str(
+                        item.with_suffix(".py")
+                        if py.exists()
+                        else item.with_suffix(".ipynb")
+                    ),
+                    silent=False,
+                )
                 count += 1
-
-                sh.jupytext(*args, silent=False)
+            except Exception as e:
+                print(f"Warning: Failed to set up pairing for {item}: {str(e)}")
 
         if count == 0:
-            print("\nAll notebooks are up-to-date and synchronised with py files")
+            print("\nAll notebooks are already up-to-date and paired")
+        else:
+            print(f"\nSuccessfully paired {count} files")
         print("\n")
 
     def _make_dirs(self):

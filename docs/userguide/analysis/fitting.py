@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -28,6 +28,7 @@
 #       version_major: 2
 #       version_minor: 0
 # ---
+
 # %% [markdown]
 # # Fitting
 #

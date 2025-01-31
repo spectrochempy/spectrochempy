@@ -343,7 +343,6 @@ sphinx_gallery_conf = {
     "reference_url": {
         "spectrochempy": None,
     },
-    "default_thumb_file": "_static/scpy.png",
     "show_memory": False,
     "thumbnail_size": (400, 400),
     "abort_on_example_error": False,
@@ -362,7 +361,7 @@ sphinx_gallery_conf = {
     """,
 }
 suppress_warnings = [
-    # "sphinx_gallery",
+    "sphinx_gallery",
 ]
 
 # nbsphinx ---------------------------------------------------------------------
@@ -371,6 +370,10 @@ suppress_warnings = [
 nbsphinx_execute_arguments = [
     "--InlineBackend.figure_formats={'jpg', 'png'}",
     "--InlineBackend.rc={'figure.dpi': 96}",
+]
+
+nbsphinx_exclude_patterns = [
+    "gettingstarted/examples/gallery/*",
 ]
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)

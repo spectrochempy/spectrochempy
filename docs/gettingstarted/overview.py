@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -28,6 +28,7 @@
 #       version_major: 2
 #       version_minor: 0
 # ---
+
 # %% [markdown]
 # # Overview
 
@@ -89,7 +90,7 @@ _ = region.plot()
 # %% [markdown]
 # ### Maths on datasets
 
-# %% tags=[]
+# %%
 region.y -= region.y[0]  # make y coordinate relative to the first point
 region.y.title = "time of dehydratation"
 region -= region[-1]  # suppress the last spectra to all
@@ -104,7 +105,7 @@ _ = region.plot(colorbar=True)
 # %% [markdown]
 # #### Smoothing
 
-# %% tags=[]
+# %%
 smoothed = region.smooth(window_length=51, window="hanning")
 _ = smoothed.plot(colormap="magma")
 
@@ -131,7 +132,7 @@ _ = blc.corrected.plot()
 #
 # #### IRIS processing
 
-# %% tags=[]
+# %%
 ds = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
 pressure = [
     0.00300,

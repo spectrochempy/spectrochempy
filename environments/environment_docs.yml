@@ -43,18 +43,18 @@ dependencies:
     - scipy>=1.14.1
     - setuptools-scm>=8.0.1
     - tzlocal
-    - xlrd>
+    - xlrd
 
     # DOCS dependencies
     # -----------------
     - ipywidgets>=8.1.1
-    - jupytext>=1.16.1
+    - jupytext
     - nbsphinx>=0.9.3
     - numpydoc>=1.6.0
-    - pypandoc>=1.13
+    - pypandoc_binary
     - sphinx>=7.2.6
     - sphinx-copybutton>=0.5.2
-    - sphinx-gallery>=0.15.0
+    - sphinx-gallery<=0.7.0
     - sphinx-rtd-theme>=2.0.0
     - sphinxcontrib-bibtex>=2.6.1
     - json5>=0.9.14

@@ -45,7 +45,7 @@ dependencies = [
   "scipy>=1.14.1",              # Required for 3.13
   "setuptools-scm>=8.0.1",      # Current requirement
   "tzlocal",               # For 3.13 support
-  "xlrd>",                # Compatible with 3.13
+  "xlrd",                # Compatible with 3.13
 ]
 
 [project.optional-dependencies]
@@ -94,13 +94,13 @@ test = [
 docs = [
   #"cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
   "ipywidgets>=8.1.1",         # Required for 3.13
-  "jupytext>=1.16.1",          # Latest for 3.13
+  "jupytext",          # Latest for 3.13
   "nbsphinx>=0.9.3",           # Compatible with 3.13
   "numpydoc>=1.6.0",           # Latest for 3.13
-  "pypandoc>=1.13",            # Latest for 3.13
+  "pypandoc_binary",
   "sphinx>=7.2.6",             # Latest for 3.13
   "sphinx-copybutton>=0.5.2",  # Latest for 3.13
-  "sphinx-gallery>=0.15.0",    # Latest for 3.13
+  "sphinx-gallery<=0.7.0",    # Latest for 3.13
   "sphinx-rtd-theme>=2.0.0",   # Latest for 3.13
   "sphinxcontrib-bibtex>=2.6.1", # Latest for 3.13
   "json5>=0.9.14",             # Latest for 3.13

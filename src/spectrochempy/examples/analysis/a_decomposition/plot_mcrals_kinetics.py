@@ -94,8 +94,8 @@ mcr_2.fit(X, Ckin)
 
 # %%
 # Now, let's compare the concentration profile of MCR-ALS
-# (C = X(C$_{kin}^+$ X)$^+$) with
-# that of the optimized kinetic model (C$_{kin}$ $\equiv$ `C_constrained`):
+# (C = X(C_{kin}^+ X)^+) with
+# that of the optimized kinetic model (C_{kin} \equiv `C_constrained`):
 
 # sphinx_gallery_thumbnail_number = 6
 
