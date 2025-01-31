@@ -99,7 +99,7 @@ docs = [
   "numpydoc",
   "pypandoc_binary",
   "sphinx",
-  "sphinx-copybutto",
+  "sphinx-copybutton",
   "sphinx-gallery",
   "sphinx-rtd-theme",
   "sphinxcontrib-bibtex",
