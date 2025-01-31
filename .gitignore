@@ -131,3 +131,4 @@ _ressources
 _tools
 .venv
 sg_execution_times.rst
+docs/_build

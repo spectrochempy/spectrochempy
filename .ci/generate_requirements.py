@@ -79,17 +79,31 @@ def pip2conda(package):
     # Convert pip version specifier to conda format
     package = re.sub("==", "=", package).strip()
 
+    # Handle python spec
+    package = package.split(";", maxsplit=1)
+    package = (
+        package[0]
+        if len(package) < 2
+        else package[0]
+        + " # "
+        + package[1]
+        .strip()
+        .replace("python_version", "python")
+        .replace("'", "")
+        .replace('"', "")
+        .replace(" ", "")
+    )
+
     # Handle version comparisons
-    for compare in ("<=", ">=", "="):
+    for compare in ("<=", ">=", "=", "<", ">"):
         if compare not in package:
             continue
-
-        pkg, version = package.split(compare)
+        pkg, version = package.split(compare, maxsplit=1)
         if pkg in renaming:
             return "".join((renaming[pkg], compare, version))
+        return "".join((pkg, compare, version))
 
-        break
-
+    # compare was not found
     if package in renaming:
         return renaming[package]
 

@@ -321,23 +321,31 @@ pdf_language = "en_EN"
 # Generate the plots for the gallery
 from sphinx_gallery.sorting import FileNameSortKey
 
+example_source_dir = "../src/spectrochempy/examples"
+example_generated_dir = "gettingstarted/examples/gallery/"
+
 sphinx_gallery_conf = {
     "plot_gallery": "True",
-    "examples_dirs": [
-        "../src/spectrochempy/examples/core",
-        "../src/spectrochempy/examples/processing",
-        "../src/spectrochempy/examples/analysis",
-    ],
-    "gallery_dirs": [
-        "gettingstarted/examples/gallery/auto_examples_core",
-        "gettingstarted/examples/gallery/auto_examples_processing",
-        "gettingstarted/examples/gallery/auto_examples_analysis",
-    ],
-    "backreferences_dir": "gallery/backreferences",
     "doc_module": "spectrochempy",
+    # Source example files in separate directory
+    "examples_dirs": [
+        f"{example_source_dir}/core",
+        f"{example_source_dir}/processing",
+        f"{example_source_dir}/analysis",
+    ],
+    # Generated RST files in generated directory
+    "gallery_dirs": [
+        f"{example_generated_dir}/auto_examples_core",
+        f"{example_generated_dir}/auto_examples_processing",
+        f"{example_generated_dir}/auto_examples_analysis",
+    ],
+    "backreferences_dir": f"{example_generated_dir}/backreferences",
     "reference_url": {
         "spectrochempy": None,
     },
+    "default_thumb_file": "_static/scpy.png",
+    "show_memory": False,
+    "thumbnail_size": (400, 400),
     "abort_on_example_error": False,
     "only_warn_on_example_error": True,
     "capture_repr": ("_repr_html_", "__repr__"),
@@ -346,6 +354,12 @@ sphinx_gallery_conf = {
     "pypandoc": True,
     "remove_config_comments": True,
     "within_subsection_order": FileNameSortKey,
+    "first_notebook_cell": """
+        # Load common imports
+        import spectrochempy as scp
+        import numpy as np
+        import matplotlib.pyplot as plt
+    """,
 }
 suppress_warnings = [
     # "sphinx_gallery",
