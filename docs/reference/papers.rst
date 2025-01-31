@@ -19,7 +19,7 @@ Papers citing `SpectroChemPy`
 ====
 
 - Metal-organic frameworks based on pyrazolates for the selective and efficient capture of formaldehyde
- :cite:t:`Sadovnik:2024`, `DOI: 10.1038/s41467-024-53572-z <https://doi.org/10.1038/s41467-024-53572-z>`__.
+  :cite:t:`Sadovnik:2024`, `DOI: 10.1038/s41467-024-53572-z <https://doi.org/10.1038/s41467-024-53572-z>`__.
 
 - Investigating nalidixic acid adsorption onto ferrihydrite and maghemite surfaces: molecular-level insights via
   continuous-flow ATR-FTIR spectroscopy,
