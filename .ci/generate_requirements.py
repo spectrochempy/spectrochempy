@@ -75,6 +75,7 @@ def pip2conda(package):
         "gitpython": "git",  # Full package name
         "numpy-quaternion": "quaternion",  # Full package name
         "matplotlib": "matplotlib-base",  # Base package name
+        "pypandoc_binary": "pypandoc",  # Full package name
     }
     # Convert pip version specifier to conda format
     package = re.sub("==", "=", package).strip()

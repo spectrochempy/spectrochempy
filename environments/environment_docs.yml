@@ -50,7 +50,7 @@ dependencies:
     - jupytext
     - nbsphinx>=0.9.3
     - numpydoc>=1.6.0
-    - pypandoc_binary
+    - pypandoc
     - sphinx>=7.2.6
     - sphinx-copybutton>=0.5.2
     - sphinx-gallery<=0.7.0
