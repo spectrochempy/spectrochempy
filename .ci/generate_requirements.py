@@ -84,7 +84,7 @@ def pip2conda(package):
         if compare not in package:
             continue
 
-        pkg, version = package.split(compare)
+        pkg, version = package.split(compare, maxsplit=1)
         if pkg in renaming:
             return "".join((renaming[pkg], compare, version))
 
@@ -123,10 +123,6 @@ def generate_conda_environments(deps, opt_deps):
 
     # OPTIONAL dependencies
     for opt in opt_deps:
-        if opt in [
-            "colab",
-        ]:
-            continue  # bypass this for conda
         opt_deps_string = (
             "\n" + underline(f"{opt.upper()} dependencies", indent=4) + "    - "
         )
