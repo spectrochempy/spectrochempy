@@ -13,7 +13,7 @@ Papers citing `SpectroChemPy`
 
 - Discriminating Analysis of Metal Ions via Multivariate Curve Resolution–Alternating Least Squares Applied to Silver
   Nanoparticle Sensor,
-    :cite:t:`Rossi:2025`, `DOI: 10.3390/nano15010057 <https://doi.org/10.3390/nano15010057>`__.
+  :cite:t:`Rossi:2025`, `DOI: 10.3390/nano15010057 <https://doi.org/10.3390/nano15010057>`__.
 
 2024
 ====
