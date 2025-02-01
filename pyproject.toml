@@ -95,7 +95,7 @@ docs = [
   #"cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
   "ipykernel",
   "ipywidgets",
-  "jsonschema>=4.17.3",
+  "jsonschema<4.0.0",
   "jupyter",
   "jupytext",
   "nbformat>=5.7.0",

@@ -546,6 +546,7 @@ def sync_notebooks():
             or "gallery" in f.parts
             or "examples" in f.parts
             or "sphinxext" in f.parts
+            or "_build" in f.parts
         ) or f.name in ["conf.py", "make.py", "apigen.py"]:
             continue
         pyfiles.add(f.with_suffix(""))

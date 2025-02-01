@@ -35,7 +35,7 @@ def build_html():
     run(
         [
             shlex.quote(arg)
-            for arg in ["sphinx-build", "-b", "html", "docs", "docs/_build/html"]
+            for arg in ["sphinx-build", "-j1", "-b", "html", "docs", "docs/_build/html"]
         ],
         check=True,
     )
