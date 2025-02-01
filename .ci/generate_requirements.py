@@ -12,11 +12,13 @@ The script uses template files from the .ci/templates directory to generate the 
 Dependencies are managed in a centralized way through these templates, ensuring consistency
 across different package management systems (conda, pip) and development environments.
 
-Notes:
+Notes
+-----
     - All generated files include warnings about their auto-generated nature
     - Dependencies are automatically converted between conda and pip formats
     - Version specifications are properly handled across different formats
     - The script is designed to be run from the root of the repository and as a pre-commit hook.
+
 """
 
 import re
@@ -45,6 +47,7 @@ def underline(s, indent=None):
     -------
     str
         The underlined string.
+
     """
     x = "" if indent is None else " " * indent
     return f"{x}# {s}\n{x}# {'-' * len(s)}\n"
@@ -69,6 +72,7 @@ def pip2conda(package):
     Handles two cases:
     1. Packages to rename (defined in RENAME)
     2. Version specifications (converting == to =)
+
     """
     # Mapping between conda and pip package names
     renaming = {  # pip to conda
@@ -123,6 +127,7 @@ def generate_conda_environments(deps, opt_deps):
         List of core dependencies.
     opt_deps : dict
         Dictionary of optional dependencies.
+
     """
     # Define template paths
     req_template_file = template_dir / "environment.tmpl"
@@ -167,6 +172,7 @@ def generate_pip_requirements(deps, opt_deps):
         List of core dependencies.
     opt_deps : dict
         Dictionary of optional dependencies.
+
     """
     # Define template paths
     req_template_file = template_dir / "requirements.tmpl"
@@ -203,9 +209,7 @@ def generate_pip_requirements(deps, opt_deps):
 
 
 def main():
-    """
-    Main function to generate package configuration files.
-    """
+    """Generate package configuration files."""
     # Load pyproject.toml
     pyproject_file = repo_path / "pyproject.toml"
     pyproject = toml.load(pyproject_file)

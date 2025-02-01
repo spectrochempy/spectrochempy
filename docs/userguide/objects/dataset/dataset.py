@@ -49,7 +49,7 @@
 #
 # This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful
 # for applications.
-# See the **[Examples](../../gallery/auto_examples/index.rst)** for
+# See the See the [Examples](../../gettingstarted/examples/gallery/auto_examples/index.rst) for
 # additional information about such possible applications.
 
 # %% [markdown]
@@ -746,7 +746,7 @@ d3D_copy = d3D[:]
 # Finally, it is also possible to initialize a dataset using an existing one:
 
 # %%
-d3Dduplicate = NDDataset(d3D, name="duplicate of %s" % d3D.name, units="absorbance")
+d3Dduplicate = NDDataset(d3D, name=f"duplicate of {d3D.name}", units="absorbance")
 d3Dduplicate
 
 # %% [markdown]

@@ -9,6 +9,7 @@
 Tests for the PCA module
 
 """
+
 import os
 
 import matplotlib.pyplot as plt

@@ -21,10 +21,15 @@
 
 # DOCS dependencies
 # -----------------
+ipykernel
 ipywidgets
+jsonschema>=4.17.3
+jupyter
 jupytext
+nbformat>=5.7.0
 nbsphinx
 numpydoc
+pickleshare
 pypandoc_binary
 sphinx
 sphinx-copybutton

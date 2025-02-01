@@ -5,9 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
-""" Tests integration
-
-"""
+"""Tests integration"""
 
 
 def test_integrate(IR_dataset_2D):

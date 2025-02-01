@@ -40,7 +40,7 @@ gitversion = get_version(root="..", relative_to=__file__)
 
 class Zenodo:
     """
-    Handles Zenodo metadata file operations.
+    Handle Zenodo metadata file operations.
 
     This class manages the zenodo.json file which contains metadata for Zenodo
     repositories including version information and publication dates.
@@ -51,30 +51,22 @@ class Zenodo:
         self._js = None
 
     def load(self):
-        """
-        Load the zenodo.json file
-        """
+        """Load the zenodo.json file."""
         with self._infile.open("r") as fid:
             self._js = json.load(fid)
 
     def save(self):
-        """
-        Write the zenodo.json file
-        """
+        """Write the zenodo.json file."""
         with self._infile.open("w") as fid:
             json.dump(self._js, fid, indent=2)
             fid.write("\n")  # add a trailing blank line for pre-commit compat.
 
     def update_date(self):
-        """
-        Update the publication date metadata
-        """
+        """Update the publication date metadata."""
         self._js["publication_date"] = date.today().isoformat()
 
     def update_version(self, version=None):
-        """
-        Update the version string metadata
-        """
+        """Update the version string metadata."""
         if version is None:
             version = gitversion
         self._js["version"] = ".".join(version.split(".")[:3])
@@ -110,9 +102,7 @@ class Citation:
         raise AttributeError
 
     def load(self):
-        """
-        Load the CITATION.cff file
-        """
+        """Load the CITATION.cff file."""
         self._citation = create_citation(self._infile, url=None)
         try:
             self._citation.validate()
@@ -120,9 +110,7 @@ class Citation:
             raise ImportError(e) from None
 
     def save(self):
-        """
-        Write the CITATION.cff file
-        """
+        """Write the CITATION.cff file."""
         with self._infile.open("w") as fid:
             fid.write(yaml.dump(self._citation.cffobj, indent=2))
 
@@ -131,7 +119,7 @@ class Citation:
 
     def format(self, fmt="apa"):
         """
-        Return a str with citation in the given format
+        Return a str with citation in the given format.
 
         Parameters
         ----------
@@ -145,7 +133,6 @@ class Citation:
 
         Examples
         --------
-
         >>> citation = Citation()
         >>> apa = citation.format("apa")
 
@@ -159,19 +146,16 @@ class Citation:
 
         >>> print(citation)
         Travert A., Fernandez C. ...
+
         """
         return self._outputformat[fmt]()
 
     def update_date(self):
-        """
-        Update the released-date metadata .
-        """
+        """Update the released-date metadata ."""
         self._citation.cffobj["date-released"] = date.today().isoformat()
 
     def update_version(self, version=None):
-        """
-        Update the version metadata.
-        """
+        """Update the version metadata."""
         if version is None:
             version = gitversion
         self._citation.cffobj["version"] = ".".join(version.split(".")[:3])
@@ -185,6 +169,7 @@ def make_citation(version):
     ----------
     version : str
         Version string to use in citation
+
     """
     citation = Citation()
     citation.load()
@@ -202,6 +187,7 @@ def make_zenodo(version):
     ----------
     version : str
         Version string to use in Zenodo metadata
+
     """
     zenodo = Zenodo()
     zenodo.load()
@@ -227,6 +213,7 @@ def make_release_note_index(revision):
     2. Updates the changelog
     3. Creates version-specific release notes
     4. Generates an index of all release notes
+
     """
     # Clean up old dev files
     files = WN.glob("v*.dev*.rst")
@@ -342,6 +329,7 @@ def _generate_release_index(revision):
     ----------
     revision : str
         Current version being processed
+
     """
     # Collect and sort version files
     files = WN.glob("v*.rst")

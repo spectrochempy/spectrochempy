@@ -32,7 +32,7 @@ dependencies:
     - ipython
     - jinja2
     - numpy
-    - quaternion
+    - quaternion>=2024
     - matplotlib-base
     - osqp
     - pint
@@ -46,10 +46,15 @@ dependencies:
 
     # DOCS dependencies
     # -----------------
+    - ipykernel
     - ipywidgets
+    - jsonschema>=4.17.3
+    - jupyter
     - jupytext
+    - nbformat>=5.7.0
     - nbsphinx
     - numpydoc
+    - pickleshare
     - pypandoc
     - sphinx
     - sphinx-copybutton

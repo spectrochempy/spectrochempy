@@ -117,14 +117,13 @@ _ = ax.annotate(
 # datasets with many - possibly
 # shifting peaks. The maxima of a given spectrum can be found automatically by the
 # find_peaks() method which is based
-# on
-# [scpy.signal.find_peaks()](
+# on [scpy.signal.find_peaks()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html).
 # It returns two outputs: `peaks` a NDDataset grouping the peak maxima (wavenumbers and
 # absorbance) and `properties`
 # a dictionary containing properties of the returned peaks (it is empty
 # if no particular option is selected,
-# [see below](#options) for more information).
+# `see below<#options>`_ for more information).
 
 # %% [markdown]
 # ###  Default behaviour
@@ -139,7 +138,7 @@ peaks, _ = last.find_peaks(distance=5.0)
 # we do not catch the second output (properties) as it is void in this case
 
 # %% [markdown]
-# `peaks` is a NDDataset. Its `x` attribute gives the peak position
+# `peaks` is a NDDataset. Its `x` attribute gives the peak position:
 
 # %%
 peaks.x.values
@@ -453,9 +452,7 @@ print(f"prominence with reduced window: {properties['prominences'][0]: 0.4f}")
 # method is **very approximate** and
 # more advanced methods (such as peak fitting), also implemented in spectrochempy
 # should be used (see e.g.,
-# [this example](
-# /gallery/auto_examples/fitting/plot_fit.html#sphx-glr-gallery-auto
-# -examples-fitting-plot-fit-py)).
+# [this example](/gallery/auto_examples/fitting/plot_fit.html#sphx-glr-gallery-auto-examples-fitting-plot-fit-py)
 # On the other hand, **the magnitude of the width is generally fine**.
 #
 # This estimate is based on an algorithm similar to that used for the "bases" above,
@@ -546,7 +543,7 @@ peaks, properties = s.find_peaks(
 )
 
 table_pos = "  ".join([f"{peaks[i].x.value.m: >10.3f}" for i in range(len(peaks))])
-print(f'{"peak_position (cm⁻¹)": >26}: {table_pos}')
+print(f"{'peak_position (cm⁻¹)': >26}: {table_pos}")
 for key in properties:
     table_property = "  ".join(
         [f"{properties[key][i].m: >10.3f}" for i in range(len(peaks))]

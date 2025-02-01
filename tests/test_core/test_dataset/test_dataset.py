@@ -256,7 +256,7 @@ def test_nddataset_coords_indexer():
     coords = da.coordset
     assert len(coords) == 3
     assert_array_almost_equal(
-        da.coordset[2].data, coord0, decimal=2, err_msg="get axis by index " "failed"
+        da.coordset[2].data, coord0, decimal=2, err_msg="get axis by index failed"
     )
     # we use almost as SpectroChemPy round the coordinate numbers
     assert_array_almost_equal(

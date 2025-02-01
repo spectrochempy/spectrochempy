@@ -172,7 +172,7 @@ X.y
 #    spectrum at the jth  wavenumber.
 #    However, this is subject to change, for instance if you perform operation on your
 #    data such as
-# [Transposition](../processing/transformations.rst#Transposition). At any time
+# [Transposition](../processing/transformations.html#Transposition). At any time
 # the attribute `dims` gives the correct names (which can be modified) and order of
 # the dimensions.
 

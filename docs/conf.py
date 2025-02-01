@@ -3,17 +3,17 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-SpectroChemPy documentation build configuration file
-"""
+# ruff: noqa: T201,S603
+"""SpectroChemPy documentation build configuration file."""
 
 import inspect
 import os
+import pathlib
 import sys
 import warnings
 from datetime import datetime
 
-import spectrochempy as scp  # isort:skip
+import spectrochempy  # isort:skip
 
 # set a filename and default folder by default for notebook which have file dialogs
 os.environ["TUTORIAL_FILENAME"] = "wodger.spg"
@@ -79,10 +79,10 @@ master_doc = "index"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 
-version = scp.application.version  # .split('+')[0]
+version = spectrochempy.application.version  # .split('+')[0]
 release = version.split("+")[0]
 project = f"SpectroChemPy v{version}"
-copyright = scp.application.copyright
+copyright = spectrochempy.application.copyright
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -233,7 +233,7 @@ html_context = {
 from sphinx_gallery.sorting import FileNameSortKey
 
 example_source_dir = "../src/spectrochempy/examples"
-example_generated_dir = "gettingstarted/examples/gallery/"
+example_generated_dir = "gettingstarted/examples/gallery"
 
 sphinx_gallery_conf = {
     "plot_gallery": "True",
@@ -267,6 +267,8 @@ sphinx_gallery_conf = {
     "image_scrapers": ("matplotlib",),
     "filename_pattern": "/plot",
     "ignore_pattern": "__init__\\.py",
+    "min_reported_time": 0,
+    "show_signature": False,  # Disable the signature if it's causing issues
 }
 
 suppress_warnings = [
@@ -282,7 +284,7 @@ nbsphinx_execute_arguments = [
 ]
 
 nbsphinx_exclude_patterns = [
-    "gettingstarted/examples/gallery/*",
+    f"{example_generated_dir}/*",
 ]
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
@@ -335,7 +337,7 @@ def linkcode_resolve(domain, info):
             obj = getattr(obj, part)
 
         fn = inspect.getsourcefile(obj)
-        fn = os.path.relpath(fn, start=os.path.dirname(scp.__file__))
+        fn = os.path.relpath(fn, start=os.path.dirname(spectrochempy.__file__))
         source, lineno = inspect.getsourcelines(obj)
         return fn, lineno, lineno + len(source) - 1
 
@@ -420,8 +422,12 @@ exclusions = (
     "with_traceback",
 )
 
+# Add newline at end of files
+rst_epilog = "\n"
+
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
+    """Determine whether to skip a member during autodoc generation."""
     doc = bool(obj.__doc__ is not None and "#NOT_IN_DOC" not in obj.__doc__)
 
     exclude = name in exclusions or "trait" in name or name.startswith("_") or not doc
@@ -429,9 +435,7 @@ def autodoc_skip_member(app, what, name, obj, skip, options):
 
 
 def shorter_signature(app, what, name, obj, options, signature, return_annotation):
-    """
-    Prevent displaying self in signature.
-    """
+    """Prevent displaying self in signature."""
     if what == "data":
         signature = "(dataset)"
         what = "function"
@@ -481,7 +485,210 @@ def setup(app):
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
-    # # Ignore .ipynb files
-    # app.registry.source_suffix.pop(".ipynb", None)
-    # app.registry.source_suffix.pop(".py", None)
-    # app.registry.source_suffix.pop(".py.md5", None)
+    app.connect("builder-inited", on_builder_inited)
+    app.connect("build-finished", on_builder_finished)
+
+
+def on_builder_inited(app):
+    """Actions to perform when the builder is initialized."""
+    from spectrochempy.utils.file import download_testdata
+
+    # Set environment variable to indicate that we are building the docs
+    # (necessary for spectrochempy to bypass dialogs and interactive plots)
+    print("Set DOC_BUILDING environment variable")
+    os.environ["DOC_BUILDING"] = "yes"
+
+    # Download test data
+    print(f"\n{'-' * 80}\nDownload test data\n{'-' * 80}")
+    download_testdata()
+
+    # Generate API
+    apigen()
+
+    # Sync notebooks
+    sync_notebooks()
+
+
+def on_builder_finished(app, exception):
+    """Actions to perform when the builder is finished."""
+    # Remove environment variable
+    print("Remove DOC_BUILDING environment variable")
+    os.environ.pop("DOC_BUILDING", None)
+
+
+def apigen():
+    """Regenerate the reference API list."""
+    print(f"\n{'-' * 80}\nRegenerate the reference API list\n{'-' * 80}")
+    Apigen()
+
+
+def sync_notebooks():
+    """Synchronize notebooks."""
+    import shlex
+    from pathlib import Path
+    from subprocess import PIPE
+    from subprocess import STDOUT
+    from subprocess import run
+
+    print(f"\n{'-' * 80}\nSynchronize notebooks\n{'-' * 80}")
+
+    DOCS = Path(__file__).parent
+    SRC = DOCS
+
+    pyfiles = set()
+    py = list(SRC.glob("**/*.py"))
+    py.extend(list(SRC.glob("**/*.ipynb")))
+
+    for f in py[:]:
+        if (
+            "generated" in f.parts
+            or ".ipynb_checkpoints" in f.parts
+            or "gallery" in f.parts
+            or "examples" in f.parts
+            or "sphinxext" in f.parts
+        ) or f.name in ["conf.py", "make.py", "apigen.py"]:
+            continue
+        pyfiles.add(f.with_suffix(""))
+
+    for item in pyfiles:
+        py = item.with_suffix(".py")
+        ipynb = item.with_suffix(".ipynb")
+        file_to_pair = py if py.exists() else ipynb
+
+        try:
+            command = f"jupytext --sync {file_to_pair}"
+            sanitized_command = shlex.split(command)
+            result = run(
+                sanitized_command,
+                text=True,
+                stdout=PIPE,
+                stderr=STDOUT,
+                check=False,
+            ).stdout
+            if "Updating" in result:
+                updated_files = [
+                    line.split()[-1]
+                    for line in result.splitlines()
+                    if "Updating" in line
+                ]
+                for updated_file in updated_files:
+                    print(f"Updated: {updated_file}")
+            else:
+                print(f"Unchanged: {file_to_pair}")
+        except Exception as e:
+            print(f"Warning: Failed to synchronize {item}: {str(e)}")
+
+
+# ======================================================================================
+# Class Apigen
+# ======================================================================================
+class Apigen:
+    """Generate api.rst."""
+
+    header = """
+.. Generate API reference pages, but don't display these pages in tables.
+.. Do not modify directly because this file is automatically generated
+.. when the documentation is built.
+.. Only classes and methods appearing in __all__ statements are scanned.
+
+:orphan:
+
+.. currentmodule:: spectrochempy
+.. autosummary::
+   :toctree: generated/
+
+"""
+
+    def __init__(self):
+        entries = self.list_entries()
+        self.write_api_rst(entries)
+
+    @staticmethod
+    def get_packages():
+        from spectrochempy.utils.packages import list_packages
+
+        pkgs = list_packages(spectrochempy)
+        for pkg in pkgs[:]:
+            if pkg.endswith(".api"):
+                pkgs.remove(pkg)
+        return pkgs
+
+    def get_members(self, obj, objname, alls=None):
+        res = []
+        members = inspect.getmembers(obj)
+        for member in members:
+            _name, _type = member
+            if _name == "transform":
+                pass
+            if (
+                (alls is not None and _name not in alls)
+                or str(_name).startswith("_")
+                or not str(_type).startswith("<")
+                or "HasTraits" in str(_type)
+                or "cross_validation_lock" in str(_name)
+                or not (
+                    str(_type).startswith("<class")
+                    or str(_type).startswith("<function")
+                    or str(_type).startswith("<property")
+                )
+                or "partial" not in str(_type)
+            ):
+                continue
+
+            if objname != "spectrochempy" and objname.split(".")[1:][0] in [
+                "core",
+                "analysis",
+                "utils",
+                "widgets",
+            ]:
+                continue
+
+            module = ".".join(objname.split(".")[1:])
+            module = module + "." if module else ""
+            # print(f"{module}{_name}\t\t{_type}")
+
+            res.append(f"{module}{_name}")
+
+            # if str(_type).startswith("<class"):
+            #     # find also members in class
+            #     klass = getattr(obj, _name)
+            #     subres = self.get_members(klass, objname + "." + _name)
+            #     res.extend(subres)
+
+        return res
+
+    def list_entries(self):
+        from traitlets import import_item
+
+        pkgs = self.get_packages()
+
+        results = []
+        for pkg_name in pkgs:
+            if pkg_name.startswith("spectrochempy.examples") or pkg_name.startswith(
+                "spectrochempy.extern"
+            ):
+                continue
+
+            pkg = import_item(pkg_name)
+            try:
+                alls = pkg.__all__
+
+            except AttributeError:
+                # warn("This module has no __all__ attribute")
+                continue
+
+            if alls == []:
+                continue
+
+            res = self.get_members(pkg, pkg_name, alls)
+            results.extend(res)
+
+        return results
+
+    def write_api_rst(self, items):
+        REFERENCE = pathlib.Path(__file__).parent / "reference"
+
+        with open(REFERENCE / "api.rst", "w") as f:
+            f.write(self.header)
+            for item in items:
+                f.write(f"    {item}\n")

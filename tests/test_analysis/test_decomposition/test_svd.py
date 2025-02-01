@@ -7,6 +7,7 @@
 """
 Tests for the SVD class
 """
+
 from os import environ
 
 import pytest

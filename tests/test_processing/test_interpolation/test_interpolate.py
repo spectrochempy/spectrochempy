@@ -5,9 +5,8 @@
 # ======================================================================================
 # ruff: noqa
 
-""" Tests for the interpolate module
+"""Tests for the interpolate module"""
 
-"""
 import pytest
 
 # align

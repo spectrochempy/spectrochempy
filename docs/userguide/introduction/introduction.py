@@ -54,7 +54,7 @@
 # The ``User's guide and tutorials`` section is designed to give you a quick overview of the main features of **SpectroChemPy**. It does not cover all
 # features, but should help you to get started quickly, and to find your way around.
 # For more details on the various features, check out the [Public API reference](../../reference/index.rst) section which gives
-# a more detailed description of the API. You can also refer to the [Gallery of example](../../gallery/auto_examples/index.html)
+# a more detailed description of the API. You can also refer to the [Gallery of example](../../gettingstarted/gallery/auto_examples/index.rst)
 #
 # ## What to do if questions arise
 #
@@ -130,7 +130,7 @@ nd
 #
 # * [Core objects](../objects/index.rst) : This is really the starting point for understanding how SpectroChemPy works. In fact, virtually all the functions offered by the API use one of these objects: `NDDataset` (the most important!) , `Project` or `Script`.
 #
-# * [Import & export](../importexport./importexport.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
+# * [Import & export](../importexport/importexport.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
 #
 # * [Processing](../processing/processing.rst) : This section explains how to prepare datasets for future analysis. By processing, we mean methods which generally return the same dataset transformed by mathematical operations (for example, this may be a `sqrt` or `log` operation, or a `fft` operation or many others), or part of a dataset transformed by a slicing or concatenation operation.
 #
