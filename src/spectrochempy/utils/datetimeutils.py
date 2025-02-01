@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Datetime utilities
-"""
+"""Datetime utilities."""
 
 import re
 import sys
@@ -74,7 +72,7 @@ CF_TO_DT64_UNITS = {
 
 def get_datetime_labels(data, resolution=None, labels=None):
     """
-    A helper function to convert datetime axis to a relative time axis.
+    Convert datetime axis to a relative time axis.
 
     Datetime are given in seconds (or other) from a acquisition date
     depending on the resolution of the datetimes. To change the default resolution,
@@ -105,6 +103,7 @@ def get_datetime_labels(data, resolution=None, labels=None):
         The axis label
     data : numpy array of floats
         The array of values relative to the acquisition date.
+
     """
     data = np.asarray(data).ravel()
     acquisition_date = data[0]
@@ -138,9 +137,7 @@ def encode_datetime64(data, **attrs):
 
 
 def decode_datetime64(data, *attrs):
-    """
-    Utility to decode numpy.datetime64 encoded by encode_datetime64
-    """
+    """Decode numpy.datetime64 encoded by encode_datetime64."""
     raise NotImplementedError  # TODO: implement decode_datetime64
 
 

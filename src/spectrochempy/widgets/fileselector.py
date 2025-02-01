@@ -27,9 +27,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # --------------------------------------------------------------------------------------
-"""
-Widgets for the Jupyter notebook and Jupyter lab.
-"""
+"""Widgets for the Jupyter notebook and Jupyter lab."""
 
 from contextlib import contextmanager
 
@@ -113,6 +111,7 @@ class FileSelector(Base):
         Only show files ending in one of these strings. Normally used for
         picking file extensions. None is an
         alias for [''], passes all files.
+
     """
 
     @deprecated(replace="(None)", removed="0.8.0")

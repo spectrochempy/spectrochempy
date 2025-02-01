@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module defines functions related to interpolations.
-"""
+"""Module defines functions related to interpolations."""
 
 __all__ = ["interpolate"]
 

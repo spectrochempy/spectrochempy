@@ -5,9 +5,7 @@
 # ======================================================================================
 # ruff: noqa: S602, S603
 
-"""
-Utility functions for printing version information.
-"""
+"""Utility functions for printing version information."""
 
 import contextlib
 import locale
@@ -33,6 +31,7 @@ def show_versions(file=sys.stdout):
     ----------
     file : file-like, optional
         Print to the given file-like object. Defaults to sys.stdout.
+
     """
     underlined_title("SYSTEM INFO", "=", file=file)
     for key, val in _get_sys_info():
@@ -98,6 +97,7 @@ def underlined_title(s, char="-", file=sys.stdout, ret=True):
         Print to the given file-like object. Defaults to sys.stdout.
     ret : bool, optional
         Whether to add a newline before the title. Defaults to True.
+
     """
     n = "\n" if ret else ""
     print(n + s, file=file)
@@ -106,12 +106,13 @@ def underlined_title(s, char="-", file=sys.stdout, ret=True):
 
 def _get_sys_info():
     """
-    Returns system information as a list of tuples.
+    Return system information as a list of tuples.
 
     Returns
     -------
     list of tuples
         System information.
+
     """
     # copied from XArray
 
@@ -187,6 +188,7 @@ def check_dependencies(deps, other_deps, installed):
     -------
     str
         Formatted string of dependency comparison results.
+
     """
     # make a dictionary of package and version requirements
     requirements = {"core": deps, **other_deps}
@@ -230,6 +232,7 @@ def get_user_directory():
     -------
     str
         User home directory path.
+
     """
     return str(Path.home())
 
@@ -242,6 +245,7 @@ def get_environment_info():
     -------
     dict
         Dictionary of environment information.
+
     """
     env_info = {}
     user_dir = get_user_directory()
@@ -277,6 +281,7 @@ def get_installed_versions():
     -------
     dict
         Dictionary of installed packages and their versions.
+
     """
     installed = {}
     for dist in distributions():

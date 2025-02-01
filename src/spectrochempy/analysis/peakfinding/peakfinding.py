@@ -118,6 +118,7 @@ def find_peaks(
     ...     prominence=0.5,
     ...     width=20.0
     ... )
+
     """
     # get the dataset
     X = dataset.squeeze()

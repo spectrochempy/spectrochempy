@@ -4,8 +4,9 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module extend NDDataset with the import method for OMNIC generated data
-files.
+Extend NDDataset with the import method for OMNIC generated data files.
+
+This module provides functions to read OMNIC generated data files.
 """
 
 __all__ = ["read_omnic", "read_spg", "read_spa", "read_srs"]
@@ -38,7 +39,7 @@ _docstring.delete_params("Importer.see_also", "read_omnic")
 
 @_docstring.dedent
 def read_omnic(*paths, **kwargs):
-    """
+    r"""
     Open a Thermo Nicolet OMNIC file.
 
     Open Omnic file or a list of :file:`.spg`, :file:`.spa` or
@@ -62,7 +63,7 @@ def read_omnic(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -70,18 +71,18 @@ def read_omnic(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     read_spg : Read grouped Omnic spectra.
     read_spa : Read single Omnic spectra.
     read_srs : Read series Omnic spectra.
     %(Importer.see_also.no_read_omnic)s
 
     Examples
-    ---------
+    --------
     Reading a single OMNIC file  (providing a windows type filename relative
     to the default `datadir` )
 
-    >>> scp.read_omnic('irdata\\\\nh4y-activation.spg')
+    >>> scp.read_omnic('irdata\\nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
     Reading a single OMNIC file  (providing a unix/python type filename
@@ -163,8 +164,8 @@ def read_omnic(*paths, **kwargs):
     2
     >>> scp.read_omnic({filename1.name: content1, filename2.name: content2}, merge=True)
     NDDataset: [float64] a.u. (shape: (y:3, x:5549))
-    """
 
+    """
     kwargs["filetypes"] = ["OMNIC files (*.spa *.spg)", "OMNIC series (*.srs)"]
     kwargs["protocol"] = ["omnic", "spa", "spg", "srs"]
     importer = Importer()
@@ -181,7 +182,7 @@ def read_spg(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -189,7 +190,7 @@ def read_spg(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     read_spg : Read grouped Omnic spectra.
     read_spa : Read single Omnic spectra.
     read_srs : Read series Omnic spectra.
@@ -201,12 +202,11 @@ def read_spg(*paths, **kwargs):
     is constrained to ``.spg``.
 
     Examples
-    ---------
-
+    --------
     >>> scp.read_spg('irdata/nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
-    """
 
+    """
     kwargs["filetypes"] = ["OMNIC files (*.spg)"]
     kwargs["protocol"] = ["spg", "spa"]
     importer = Importer()
@@ -223,7 +223,7 @@ def read_spa(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -231,7 +231,7 @@ def read_spa(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also)s
 
     Notes
@@ -240,14 +240,13 @@ def read_spa(*paths, **kwargs):
     is contrain to ``.spa``.
 
     Examples
-    ---------
-
+    --------
     >>> scp.read_spa('irdata/subdir/20-50/7_CZ0-100 Pd_21.SPA')
     NDDataset: [float64] a.u. (shape: (y:1, x:5549))
     >>> scp.read_spa(directory='irdata/subdir', merge=True)
     NDDataset: [float64] a.u. (shape: (y:4, x:5549))
-    """
 
+    """
     kwargs["filetypes"] = ["OMNIC files (*.spa)"]
     kwargs["protocol"] = ["spa"]
     importer = Importer()
@@ -257,14 +256,14 @@ def read_spa(*paths, **kwargs):
 @_docstring.dedent
 def read_srs(*paths, **kwargs):
     r"""
-    Open a Thermo Nicolet file or a list of files with extension ``.srs``
+    Open a Thermo Nicolet file or a list of files with extension ``.srs``.
 
     Parameters
     ----------
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
         When return_bg is set to 'True', the series background is returned.
 
@@ -275,7 +274,7 @@ def read_srs(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also)s
 
     Notes
@@ -284,11 +283,11 @@ def read_srs(*paths, **kwargs):
     is constrained to ``.srs``.
 
     Examples
-    ---------
+    --------
     >>> scp.read_srs('irdata/omnic_series/rapid_scan_reprocessed.srs')
     NDDataset: [float64] a.u. (shape: (y:643, x:3734))
-    """
 
+    """
     kwargs["filetypes"] = ["OMNIC series (*.srs)"]
     kwargs["protocol"] = ["srs"]
     importer = Importer()
@@ -1126,8 +1125,8 @@ def _nextline(pos):
 
 
 def _read_header(fid, pos):
-    """
-    read spectrum/ifg/series header
+    r"""
+    Read spectrum/ifg/series header.
 
     Parameters
     ----------
@@ -1195,8 +1194,8 @@ def _read_header(fid, pos):
         - history (text), 1200 bytes behind (only initial history.
            When reprocessed, updated history is at the end of the file after the
            b`\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff` sequence
-    """
 
+    """
     out = {}
     # determine the type of file
     fid.seek(0)
@@ -1317,7 +1316,8 @@ def _read_header(fid, pos):
 
 
 def _read_srs_spectra(fid, pos_data, n_spectra, n_points):
-    """read the spectra/interferogram names and data of a series
+    """
+    Read the spectra/interferogram names and data of a series.
 
     fid: BufferedReader
     pos_data: int
@@ -1326,7 +1326,6 @@ def _read_srs_spectra(fid, pos_data, n_spectra, n_points):
 
     returns: names (list), spectral data (ndarray)
     """
-
     # container for names and data
     names = []
     data = np.zeros((n_spectra, n_points))

@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the Singular Value Decomposition (SVD) class.
-"""
+"""Implements the Singular Value Decomposition (SVD) class."""
 
 import numpy as np
 import traitlets as tr
@@ -24,6 +22,7 @@ __configurables__ = ["SVD"]
 def _svd_flip(U, VT, u_based_decision=True):
     """
     Sign correction to ensure deterministic output from SVD.
+
     Adjusts the columns of u and the rows of v such that the loadings in the
     columns in u that are largest in absolute value are always positive.
 
@@ -36,8 +35,8 @@ def _svd_flip(U, VT, u_based_decision=True):
     Notes
     -----
     Copied and modified from scikit-learn.utils.extmath (BSD 3 Licence)
-    """
 
+    """
     if u_based_decision:
         # columns of U, rows of VT
         max_abs_cols = np.argmax(np.abs(U), axis=0)
@@ -175,6 +174,7 @@ class SVD(DecompositionAnalysis):
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y=None)
 
@@ -185,18 +185,14 @@ class SVD(DecompositionAnalysis):
         typesingle="components",
     )
     def singular_values(self):
-        """
-        Return a NDDataset containing singular values.
-        """
+        """Return a NDDataset containing singular values."""
         return self._outfit[1]
 
     sv = singular_values
 
     @property
     def explained_variance(self):
-        """
-        Return a NDDataset of the explained variance.
-        """
+        """Return a NDDataset of the explained variance."""
         size = self.sv.size
         ev = self.sv**2 / (size - 1)
         ev.name = "ev"
@@ -207,9 +203,7 @@ class SVD(DecompositionAnalysis):
 
     @property
     def explained_variance_ratio(self):
-        """
-        Return Explained Variance per singular values.
-        """
+        """Return Explained Variance per singular values."""
         ratio = self.ev * 100.0 / np.sum(self.ev)
         ratio.name = "ev_ratio"
         ratio.title = "explained variance ratio"
@@ -220,9 +214,7 @@ class SVD(DecompositionAnalysis):
 
     @property
     def cumulative_explained_variance(self):
-        """
-        Return Cumulative Explained Variance.
-        """
+        """Return Cumulative Explained Variance."""
         ev_cum = np.cumsum(self.ev_ratio)
         ev_cum.name = "ev_cum"
         ev_cum.title = "cumulative explained variance"
@@ -256,7 +248,5 @@ class SVD(DecompositionAnalysis):
 
     @property
     def s(self):
-        """
-        Return Vector of singular values .
-        """
+        """Return Vector of singular values ."""
         return self._outfit[1]

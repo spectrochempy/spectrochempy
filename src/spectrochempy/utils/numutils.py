@@ -3,6 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+
 import numpy as np
 
 
@@ -11,6 +12,7 @@ import numpy as np
 # ======================================================================================
 def get_n_decimals(n, sigdigits=3):
     """
+    Return the number of significant decimals to use when rounding a float.
 
     Parameters
     ----------
@@ -32,6 +34,8 @@ def get_n_decimals(n, sigdigits=3):
 
 def spacings(arr, sd=4):
     """
+    Return the spacing in the one-dimensional input array.
+
     Return a scalar for the spacing in the one-dimensional input array
     (if it is uniformly spaced, else return an array of the different spacings.
 
@@ -46,6 +50,11 @@ def spacings(arr, sd=4):
     float or array
         Spacing or list of spacing in the given array.
     """
+    if len(arr) == 0:
+        raise ValueError("Input array cannot be empty.")
+    if len(arr) == 1:
+        return 0
+
     spacings = np.diff(arr)
     # we need to take into account only the significant digits
     nd = get_n_decimals(spacings.max(), sd)
@@ -66,7 +75,7 @@ def gt_eps(arr):
     arr : array to check
 
     Returns
-    --------
+    -------
     bool : results of checking
         True means that at least some values are greater than epsilon.
     """

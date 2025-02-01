@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the base abstract classes to define estimators such as PCA, ...
-"""
+"""Module implementing the base abstract classes to define estimators such as PCA, ..."""
 
 import traitlets as tr
 
@@ -120,6 +118,7 @@ class ProcessingConfigurable(BaseConfigurable):
         -------
         `NDDataset`
             The transformed dataset.
+
         """
         self._transformed = False  # reinit this flag
 
@@ -148,9 +147,7 @@ class ProcessingConfigurable(BaseConfigurable):
 
     @property
     def log(self):
-        """
-        Return ``log`` output.
-        """
+        """Return ``log`` output."""
         # A string handler (#1) is defined for the Spectrochempy logger,
         # thus we will return it's content
         return app.log.handlers[1].stream.getvalue().rstrip()

@@ -3,9 +3,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module define a generic class to import files and contents.
-"""
+"""Define a generic class to import files and contents."""
+
 __all__ = ["write"]
 __dataset_methods__ = __all__
 
@@ -127,7 +126,7 @@ def write(dataset, filename=None, **kwargs):
     save : Generic function for saving a NDDataset in SpectroChemPy format.
 
     Examples
-    ---------
+    --------
     write a dataset (providing a windows type filename relative to the default `Datadir` )
 
     >>> nd = scp.read_opus('irdata/OPUS')

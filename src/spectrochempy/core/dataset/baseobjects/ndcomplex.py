@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements a subclass of  `NDArray` with complex/quaternion related attributes.
-"""
+"""Module that implements a subclass of `NDArray` with complex/quaternion related attributes."""
 
 __all__ = []
 
@@ -37,7 +35,7 @@ class NDComplexArray(NDArray):
 
     def __init__(self, data=None, **kwargs):
         r"""
-        This class provides the complex/quaternion related functionalities to  `NDArray` .
+        Provide the complex/quaternion related functionalities to `NDArray`.
 
         It is a subclass bringing complex and quaternion related attributes.
 
@@ -122,8 +120,8 @@ class NDComplexArray(NDArray):
         >>> myarray = NDComplexArray([1. + 0j, 2., 3.])
         >>> myarray
         NDComplexArray: [complex128] unitless (size: 3)
-        """
 
+        """
         super().__init__(data=data, **kwargs)
 
     # ----------------------------------------------------------------------------------
@@ -180,9 +178,7 @@ class NDComplexArray(NDArray):
 
     @property
     def is_complex(self):
-        """
-        True if the 'data' are complex (Readonly property).
-        """
+        """True if the 'data' are complex (Readonly property)."""
         if self._data is None:
             return False
         return self._data.dtype in TYPE_COMPLEX
@@ -325,9 +321,7 @@ class NDComplexArray(NDArray):
 
     @property
     def limits(self):
-        """
-        Range of the data.
-        """
+        """Range of the data."""
         if self.data is None:
             return None
 
@@ -359,6 +353,7 @@ class NDComplexArray(NDArray):
         -------
         component
             Component of the complex or hypercomplex array.
+
         """
         if not select:
             # no selection - returns inchanged
@@ -409,6 +404,7 @@ class NDComplexArray(NDArray):
         See Also
         --------
         set_quaternion, has_complex_dims, is_complex, is_quaternion
+
         """
         new = self.copy() if not inplace else self  # default is to return a new array
 
@@ -434,6 +430,7 @@ class NDComplexArray(NDArray):
         -------
         out
             Same object or a copy depending on the `inplace` flag.
+
         """
         new = self.copy() if not inplace else self  # default is to return a new array
 
@@ -461,8 +458,8 @@ class NDComplexArray(NDArray):
         -------
         transposed
             Same object or a copy depending on the `inplace` flag.
-        """
 
+        """
         new = super().transpose(*dims, inplace=inplace)
 
         if new.is_quaternion:
@@ -502,8 +499,8 @@ class NDComplexArray(NDArray):
         -------
         transposed
             Same object or a copy depending on the `inplace` flag.
-        """
 
+        """
         new = super().swapdims(dim1, dim2, inplace=inplace)
 
         # we need also to swap the quaternion

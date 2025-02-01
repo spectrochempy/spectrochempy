@@ -3,10 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-A collection of NMR spectral processing functions which operate on the last
-dimension (1) of 2D arrays.
-"""
+"""NMR spectral processing functions which operate on the last dimension (1) of 2D arrays."""
 
 __all__ = ["pk", "pk_exp"]
 __dataset_methods__ = __all__
@@ -167,6 +164,7 @@ def pk(dataset, phc0=0.0, phc1=0.0, exptc=0.0, pivot=0.0, **kwargs):
     --------
     ps_exp : Exponential Phase Correction.
     pk : Automatic or manual phasing.
+
     """
     phc0 = pi * phc0 / 180.0
     size = dataset.shape[-1]
@@ -216,8 +214,8 @@ def pk_exp(dataset, phc0=0.0, pivot=0.0, exptc=0.0, **kwargs):
     --------
     ps : Linear Phase Correction.
     pk : Automatic or manual phasing.
-    """
 
+    """
     return pk(dataset, phc0=phc0, phc1=0, pivot=pivot, exptc=exptc)
 
 

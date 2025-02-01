@@ -39,6 +39,7 @@ def denoise(dataset, ratio=99.8, **kwargs):
         integer it is equivalent to the usual `axis` numpy parameter.
     log_level : int, optional, default: "WARNING"
         Set the logging level for the method.
+
     """
     from spectrochempy.analysis.decomposition.pca import PCA
 
@@ -126,8 +127,8 @@ def despike(dataset, size=9, delta=2, method="katsumoto"):
     -------
     `NDdataset`
         The despike dataset
-    """
 
+    """
     new = dataset.copy()
 
     # machine epsilon

@@ -9,9 +9,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the base class for all configurables.
-"""
+"""Implements the base class for all configurables."""
 
 from pathlib import Path
 
@@ -64,6 +62,7 @@ class MetaConfigurable(Configurable):
         -------
         `dict`
             A regular dictionary.
+
         """
         d = {}
         for k, v in self.traits(config=True).items():
@@ -84,7 +83,7 @@ class MetaConfigurable(Configurable):
 
     def params(self, default=False):
         """
-        Current or default configuration values.
+        Return current or default configuration values.
 
         Parameters
         ----------
@@ -96,6 +95,7 @@ class MetaConfigurable(Configurable):
         -------
         `dict`
             Current or default configuration values.
+
         """
         d = Adict()
         if not default:
@@ -108,15 +108,11 @@ class MetaConfigurable(Configurable):
 
     @deprecated(replace="params", removed="0.7.1")
     def parameters(self, default=False):
-        """
-        Alias for `params` method.
-        """
+        """Alias for `params` method."""
         return self.params(default=default)
 
     def reset(self):
-        """
-        Reset configuration parameters to their default values
-        """
+        """Reset configuration parameters to their default values."""
         # for this we need to remove the section corresponding
         # to the current configurable (i.e., self.name)
         if self.name in self.config:

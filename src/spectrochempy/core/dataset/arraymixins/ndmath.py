@@ -1,6 +1,4 @@
-"""
-NDMath class - Mathematical operations for N-dimensional arrays.
-"""
+"""NDMath class - Mathematical operations for N-dimensional arrays."""
 
 # Standard library imports
 import copy as cpy
@@ -352,7 +350,7 @@ def _logical_binary_ufuncs():
 
 class NDMath:
     """
-    This class provides the math and some other array manipulation functionalities to  `NDArray` or  `Coord` .
+    Provides the math and some other array manipulation functionalities to  `NDArray` or  `Coord` .
 
     Below is a list of mathematical functions (numpy) implemented (or
     planned for implementation).
@@ -388,6 +386,7 @@ class NDMath:
     >>> nd2.data
     array([[  -2.005,   -2.003, ...,   -1.826,   -1.831],
            [  -1.983,   -1.984, ...,   -1.698,   -1.704]])
+
     """
 
     __radian = "radian"
@@ -549,12 +548,12 @@ class NDMath:
     # ----------------------------------------------------------------------------------
     @_from_numpy_method
     def absolute(cls, dataset, dtype=None):
-        """
+        r"""
         Calculate the absolute value of the given NDDataset element-wise.
 
         `abs` is a shorthand for this function. For complex input, a + ib, the absolute
         value is
-        :math:`\\sqrt{ a^2 + b^2}` .
+        :math:`\sqrt{ a^2 + b^2}` .
 
         Parameters
         ----------
@@ -568,8 +567,8 @@ class NDMath:
         -------
         `~spectrochempy.core.dataset.nddataset.NDDataset`
             The absolute value of each element in dataset.
-        """
 
+        """
         if not cls.has_complex_dims:
             data = np.ma.fabs(
                 dataset,
@@ -619,8 +618,8 @@ class NDMath:
         See Also
         --------
         conj, real, imag, RR, RI, IR, II, part, set_complex, is_complex
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
 
         if cls.is_quaternion:
@@ -670,8 +669,8 @@ class NDMath:
         numpy.round, around, spectrochempy.round, spectrochempy.around: Equivalent
         methods.
         ceil, fix, floor, rint, trunc
-        """
 
+        """
         m = np.ma.round(dataset, decimals)
         if hasattr(m, "mask"):
             cls._data = m.data
@@ -729,6 +728,7 @@ class NDMath:
         -----
         Not a Number (NaN), positive infinity and negative infinity
         evaluate to `True` because these are not equal to zero.
+
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
         return np.all(dataset, axis, keepdims=keepdims)
@@ -773,8 +773,8 @@ class NDMath:
         -----
         For dataset with complex or hypercomplex type type, the default is the
         value with the maximum real part.
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         quaternion = False
         if dataset.dtype in [np.quaternion]:
@@ -872,8 +872,8 @@ class NDMath:
         fmin : Element-wise minimum of two datasets, ignoring any NaNs.
         argmax : Return the indices or coordinates of the maximum values.
         argmin : Return the indices or coordinates of the minimum values.
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         quaternion = False
         if dataset.dtype in [np.quaternion]:
@@ -971,8 +971,8 @@ class NDMath:
         See Also
         --------
         all : Test whether all array elements along a given axis evaluate to True.
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         return np.any(dataset, axis, keepdims=keepdims)
 
@@ -1018,20 +1018,16 @@ class NDMath:
 
         Examples
         --------
-
         >>> scp.arange(1, 20.0001, 1, units='s', name='mycoord')
         NDDataset: [float64] s (size: 20)
-        """
 
+        """
         return cls(np.arange(start, stop, step, dtype), **kwargs)
 
     @_reduce_method
     @_from_numpy_method
     def argmax(cls, dataset, dim=None):
-        """
-        Indexes of maximum of data along axis.
-        """
-
+        """Indexes of maximum of data along axis."""
         axis, dim = cls.get_axis(dim, allows_none=True)
         idx = np.ma.argmax(dataset, axis)
         if cls.ndim > 1 and axis is None:
@@ -1041,10 +1037,7 @@ class NDMath:
     @_reduce_method
     @_from_numpy_method
     def argmin(cls, dataset, dim=None):
-        """
-        Indexes of minimum of data along axis.
-        """
-
+        """Indexes of minimum of data along axis."""
         axis, dim = cls.get_axis(dim, allows_none=True)
         idx = np.ma.argmin(dataset, axis)
         if cls.ndim > 1 and axis is None:
@@ -1099,7 +1092,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -1113,8 +1105,8 @@ class NDMath:
         >>> m = scp.average(nd, dim='y', weights=np.arange(55))
         >>> m.data
         array([   1.789,    1.789, ...,    1.222,     1.22])
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         m, sumweight = np.ma.average(dataset, axis=axis, weights=weights, returned=True)
 
@@ -1163,6 +1155,7 @@ class NDMath:
             An array with the elements of `a` , but where values
             < `a_min` are replaced with `a_min` , and those > `a_max`
             with `a_max` .
+
         """
         # if len(args) > 2 or len(args) == 0:
         #     raise ValueError('Clip requires at least one argument or at most two
@@ -1190,10 +1183,7 @@ class NDMath:
     @_reduce_method
     @_from_numpy_method
     def coordmax(cls, dataset, dim=None):
-        """
-        Find coordinates of the maximum of data along axis.
-        """
-
+        """Find coordinates of the maximum of data along axis."""
         if not cls._implements("NDDataset") or cls.coordset is None:
             raise Exception(
                 "Method `coordmax` apply only on NDDataset and if it has defined "
@@ -1224,10 +1214,7 @@ class NDMath:
     @_reduce_method
     @_from_numpy_method
     def coordmin(cls, dataset, dim=None):
-        """
-        Find oordinates of the mainimum of data along axis.
-        """
-
+        """Find oordinates of the mainimum of data along axis."""
         if not cls._implements("NDDataset") or cls.coordset is None:
             raise Exception(
                 "Method `coordmin` apply only on NDDataset and if it has defined "
@@ -1285,7 +1272,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -1298,8 +1284,8 @@ class NDMath:
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
         array([   100.7,    100.7, ...,       74,    73.98])
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         data = np.ma.cumsum(dataset, axis=axis, dtype=dtype)
         cls._data = data.data
@@ -1331,8 +1317,8 @@ class NDMath:
         -------
         diag
             The extracted diagonal or constructed diagonal array.
-        """
 
+        """
         new = cls
 
         if new.ndim == 1:
@@ -1402,14 +1388,13 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.full((2, 2), 0.5, units='s', title='initial')
         >>> nd
         NDDataset: [float64] s (shape: (y:2, x:2))
         >>> nd.diagonal(title='diag')
         NDDataset: [float64] s (size: 2)
-        """
 
+        """
         axis, dim = cls.get_axis(dim)
         if hasattr(dataset, "mask"):
             data = np.ma.diagonal(dataset, offset=offset)
@@ -1478,11 +1463,10 @@ class NDMath:
 
         Examples
         --------
-
         >>> scp.empty([2, 2], dtype=int, units='s')
         NDDataset: [int64] s (shape: (y:2, x:2))
-        """
 
+        """
         return cls(np.empty(shape, dtype), dtype=dtype, **kwargs)
 
     @_from_numpy_method
@@ -1533,8 +1517,8 @@ class NDMath:
         This function does *not* initialize the returned array; to do that use
         for instance `zeros_like` , `ones_like` or `full_like` instead.  It may be
         marginally faster than the functions that do set the array values.
-        """
 
+        """
         cls._data = np.empty_like(dataset, dtype)
         cls._dtype = np.dtype(dtype)
 
@@ -1575,15 +1559,14 @@ class NDMath:
 
         Examples
         --------
-
         >>> scp.eye(2, dtype=int)
         NDDataset: [float64] unitless (shape: (y:2, x:2))
         >>> scp.eye(3, k=1, units='km').values
         <Quantity([[       0        1        0]
          [       0        0        1]
          [       0        0        0]], 'kilometer')>
-        """
 
+        """
         return cls(np.eye(N, M, k, dtype), **kwargs)
 
     @_from_numpy_method
@@ -1645,8 +1628,8 @@ class NDMath:
         ['t']
         >>> d
         NDDataset: [float64] km (size: 6)
-        """
 
+        """
         from spectrochempy.core.dataset.coordset import CoordSet
 
         if coordset is not None:
@@ -1705,15 +1688,14 @@ class NDMath:
 
         Examples
         --------
-
         >>> iterable = (x * x for x in range(5))
         >>> d = scp.fromiter(iterable, float, units='km')
         >>> d
         NDDataset: [float64] km (size: 5)
         >>> d.data
         array([       0,        1,        4,        9,       16])
-        """
 
+        """
         return cls(np.fromiter(iterable, dtype=dtype, count=count), **kwargs)
 
     @_from_numpy_method
@@ -1759,13 +1741,12 @@ class NDMath:
 
         Examples
         --------
-
         >>> scp.full((2, ), np.inf)
         NDDataset: [float64] unitless (size: 2)
         >>> scp.NDDataset.full((2, 2), 10, dtype=np.int)
         NDDataset: [int64] unitless (shape: (y:2, x:2))
-        """
 
+        """
         return cls(np.full(shape, fill_value, dtype), dtype=dtype, **kwargs)
 
     @_from_numpy_method
@@ -1832,8 +1813,8 @@ class NDMath:
 
         >>> scp.NDDataset(x).full_like(1, units='km')
         NDDataset: [float64] km (size: 6)
-        """
 
+        """
         cls._data = np.full_like(dataset, fill_value, dtype)
         cls._dtype = np.dtype(dtype)
 
@@ -1881,8 +1862,8 @@ class NDMath:
                    progression.
         arange : Similar to linspace, with the step size specified instead of the
                  number of samples.
-        """
 
+        """
         return cls(np.geomspace(start, stop, num, endpoint, dtype), **kwargs)
 
     @_from_numpy_method
@@ -1916,13 +1897,12 @@ class NDMath:
 
         Examples
         --------
-
         >>> scp.identity(3).data
         array([[       1,        0,        0],
                [       0,        1,        0],
                [       0,        0,        1]])
-        """
 
+        """
         return cls(np.identity(n, dtype), **kwargs)
 
     @_from_numpy_method
@@ -1976,8 +1956,8 @@ class NDMath:
         step : float, optional
             Only returned if retstep is True
             Size of spacing between samples.
-        """
 
+        """
         return cls(np.linspace(start, stop, num, endpoint, retstep, dtype), **kwargs)
 
     @_from_numpy_method
@@ -2036,8 +2016,8 @@ class NDMath:
         linspace : Similar to logspace, but with the samples uniformly distributed
                    in linear space, instead of log space.
         geomspace : Similar to logspace, but with endpoints specified directly.
-        """
 
+        """
         return cls(np.logspace(start, stop, num, endpoint, base, dtype), **kwargs)
 
     @_reduce_method
@@ -2082,7 +2062,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -2095,8 +2074,8 @@ class NDMath:
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.x
         Coord: [float64] cm⁻¹ (size: 5549)
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.mean(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
 
@@ -2150,7 +2129,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.ones(5, units='km')
         >>> nd
         NDDataset: [float64] km (size: 5)
@@ -2171,8 +2149,8 @@ class NDMath:
         >>> scp.ones((2, 2)).values
         array([[       1,        1],
                [       1,        1]])
-        """
 
+        """
         return cls(np.ones(shape), dtype=dtype, **kwargs)
 
     @_from_numpy_method
@@ -2220,7 +2198,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> x = np.arange(6)
         >>> x = x.reshape((2, 3))
         >>> x = scp.NDDataset(x, units='s')
@@ -2228,8 +2205,8 @@ class NDMath:
         NDDataset: [float64] s (shape: (y:2, x:3))
         >>> scp.ones_like(x, dtype=float, units='J')
         NDDataset: [float64] J (shape: (y:2, x:3))
-        """
 
+        """
         cls._data = np.ones_like(dataset, dtype)
         cls._dtype = np.dtype(dtype)
 
@@ -2261,6 +2238,7 @@ class NDMath:
         -----
         Use `pipe` when chaining together functions that expect
         a `NDDataset`.
+
         """
         if isinstance(func, tuple):
             func, target = func
@@ -2298,8 +2276,8 @@ class NDMath:
         -------
         ptp
             A new dataset holding the result.
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.ptp(dataset, axis=axis, keepdims=keepdims)
 
@@ -2315,7 +2293,7 @@ class NDMath:
 
     @_from_numpy_method
     def random(cls, size=None, dtype=None, **kwargs):
-        """
+        r"""
         Return random floats in the half-open interval [0.0, 1.0).
 
         Results are from the “continuous uniform” distribution over the stated interval.
@@ -2323,7 +2301,7 @@ class NDMath:
         .. note::
             To sample :math:`\\mathrm{Uniform}[a, b)` with :math:`b > a`, multiply the
             output of random by (b-a) and
-            add a, i.e.: :math:`(b - a) * \\mathrm{random}() + a`.
+            add a, i.e.: :math:`(b - a) * \mathrm{random}() + a`.
 
         Parameters
         ----------
@@ -2343,6 +2321,7 @@ class NDMath:
         random
             Array of random floats of shape size (unless size=None, in which case a
             single float is returned).
+
         """
         from numpy.random import default_rng
 
@@ -2415,7 +2394,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -2428,8 +2406,8 @@ class NDMath:
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
         array([ 0.08521,  0.08543, ...,    0.251,   0.2537])
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.std(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
 
@@ -2477,7 +2455,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -2490,8 +2467,8 @@ class NDMath:
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
         array([   100.7,    100.7, ...,       74,    73.98])
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.sum(dataset, axis=axis, dtype=dtype, keepdims=keepdims)
 
@@ -2568,7 +2545,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.read('irdata/nh4y-activation.spg')
         >>> nd
         NDDataset: [float64] a.u. (shape: (y:55, x:5549))
@@ -2581,8 +2557,8 @@ class NDMath:
         NDDataset: [float64] a.u. (size: 5549)
         >>> m.data
         array([0.007262, 0.007299, ...,  0.06298,  0.06438])
-        """
 
+        """
         axis, dim = cls.get_axis(dim, allows_none=True)
         m = np.ma.var(dataset, axis=axis, dtype=dtype, ddof=ddof, keepdims=keepdims)
 
@@ -2637,7 +2613,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> nd = scp.NDDataset.zeros(6)
         >>> nd
         NDDataset: [float64] unitless (size: 6)
@@ -2649,8 +2624,8 @@ class NDMath:
         >>> nd = scp.zeros((5, 10), dtype=np.int, units='absorbance')
         >>> nd
         NDDataset: [int64] a.u. (shape: (y:5, x:10))
-        """
 
+        """
         return cls(np.zeros(shape), dtype=dtype, **kwargs)
 
     @_from_numpy_method
@@ -2697,7 +2672,6 @@ class NDMath:
 
         Examples
         --------
-
         >>> x = np.arange(6)
         >>> x = x.reshape((2, 3))
         >>> nd = scp.NDDataset(x, units='s')
@@ -2712,8 +2686,8 @@ class NDMath:
         >>> nd.values
             <Quantity([[       0        0        0]
          [       0        0        0]], 'second')>
-        """
 
+        """
         cls._data = np.zeros_like(dataset, dtype)
         cls._dtype = np.dtype(dtype)
 

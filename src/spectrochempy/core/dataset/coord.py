@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the class  `Coord` .
-"""
+"""Module implementing the class `Coord`."""
 
 __all__ = ["Coord"]
 
@@ -122,7 +120,6 @@ class Coord(NDMath, NDArray):
 
     Examples
     --------
-
     We first import the object from the api :
 
     >>> from spectrochempy import Coord
@@ -144,6 +141,7 @@ class Coord(NDMath, NDArray):
     >>> c1 = Coord(labels=tarr, title='mylabels')
     >>> c1
     Coord: [labels] [  a   b   c   d   e   f] (size: 6)
+
     """
 
     _copy = tr.Bool()
@@ -228,7 +226,8 @@ class Coord(NDMath, NDArray):
     @property
     @_docstring.dedent
     def data(self):
-        """%(data)s
+        """
+        %(data)s.
 
         Notes
         -----
@@ -237,6 +236,7 @@ class Coord(NDMath, NDArray):
         If the spacing between the data is constant with the accuracy given by the
         significant digits, the data are thus linearized
         and the `linear` attribute is set to True.
+
         """
         data = super().data
         # now eventually round the data to the number of significant digits
@@ -298,7 +298,7 @@ class Coord(NDMath, NDArray):
 
     @_docstring.dedent
     def to(self, other, inplace=False, force=False):
-        """%(to)s"""
+        """%(to)s."""
         new = super().to(other, force=force)
 
         if inplace:
@@ -324,9 +324,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def linear(self):
-        """
-        Whether the coordinates axis is linear (i.e. regularly spaced)
-        """
+        """Whether the coordinates axis is linear (i.e. regularly spaced)."""
         if self.has_data and self.dtype.kind not in "M":
             return self._linear
         return False
@@ -515,10 +513,10 @@ class Coord(NDMath, NDArray):
 
         Examples
         --------
-
         >>> dataset = scp.read("irdata/nh4y-activation.spg")
         >>> dataset.x.loc2index(1644.0)
         4517
+
         """
         res = self._loc2index(loc)
         if isinstance(res, tuple):
@@ -733,6 +731,7 @@ class Coord(NDMath, NDArray):
         frequency : `float` or `Quantity`, optional, default=15798.26 * ur("cm^-1")
             The laser frequency in cm^-1 or Hz. If the value is in cm^-1, the
             frequency is converted to Hz using the current speed of light value.
+
         """
         if frequency is None:
             frequency = 15798.26 * ur("cm^-1")
@@ -774,9 +773,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def show_datapoints(self):
-        """
-        Bool : True if axis must discard values and show only datapoints.
-        """
+        """Bool : True if axis must discard values and show only datapoints."""
         if "laser_frequency" not in self.meta or self.units.dimensionality not in [
             "[time]",
             "[length]",
@@ -791,9 +788,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def larmor(self):
-        """
-        Return larmor frequency in NMR spectroscopy context.
-        """
+        """Return larmor frequency in NMR spectroscopy context."""
         return self._larmor
 
     @larmor.setter
@@ -802,9 +797,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def laser_frequency(self):
-        """
-        Laser frequency if needed (Quantity).
-        """
+        """Laser frequency if needed (Quantity)."""
         return self.meta.laser_frequency
 
     @laser_frequency.setter
@@ -825,6 +818,7 @@ class Coord(NDMath, NDArray):
         ----------
         sigdigits :  Int, optional, default=4
             The number of significant digit for coordinates values.
+
         """
         if not self.has_data or self.data.size < 3:
             return
@@ -868,11 +862,12 @@ class Coord(NDMath, NDArray):
         """
         Number of significant digits for rounding coordinate values.
 
-        Note
+        Note:
         ----
         The number of significant digits is used when linearizing the coordinates. It is
         also used when setting the coordinates values at the Coord initialization
         or everytime the data array is changed.
+
         """
         return self._sigdigits
 
@@ -888,9 +883,10 @@ class Coord(NDMath, NDArray):
         It will be a scalar if the coordinates are uniformly spaced, else
         an array of the different spacings.
 
-        Note
+        Note:
         ----
         The spacing is returned in the units of the coordinate.
+
         """
         units = self.units if self.units is not None else 1
         if self.has_data:

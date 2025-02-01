@@ -3,6 +3,4 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Package defiing import methods for external data files.
-"""
+"""Package defiing import methods for external data files."""

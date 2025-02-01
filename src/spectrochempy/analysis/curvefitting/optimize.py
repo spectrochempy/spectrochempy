@@ -115,7 +115,18 @@ class Optimize(DecompositionAnalysis):
         warm_start=False,
         **kwargs,
     ):
-        """ """
+        """
+        Initialize the Optimize class with configuration parameters.
+
+        Parameters
+        ----------
+        log_level : str, optional
+            Logging level, by default "WARNING".
+        warm_start : bool, optional
+            If True, use warm start, by default False.
+        **kwargs : dict
+            Additional keyword arguments.
+        """
         # An empty __doc__ must be placed here, else Configurable.__doc__ will appear
 
         # call the super class for initialisation of the configuration parameters
@@ -221,9 +232,7 @@ class Optimize(DecompositionAnalysis):
             return data - mdata
 
         def fun_chi2(params, X):  # , *constraints):
-            """
-            Return sum((y - x)**2)
-            """
+            """Return sum((y - x)**2)."""
             global chi2
 
             # model
@@ -233,9 +242,7 @@ class Optimize(DecompositionAnalysis):
 
         # callback function--------------------------------------------------------
         def callback(*args, **kwargs):
-            """
-            callback log.info function
-            """
+            """Log info function for callback."""
             global niter, chi2, everyiter, ncalls
             niter += 1
 
@@ -459,9 +466,7 @@ class Optimize(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     @tr.default("_script")
     def _script_default(self):
-        """
-        Return a default script.
-        """
+        """Return a default script."""
         return """
         # -----------------------------------------------------------------------
         # syntax for parameters definition:
@@ -911,8 +916,8 @@ class Optimize(DecompositionAnalysis):
         -------
         `NDDataset`
             The fitted model.
-        """
 
+        """
         return self.inverse_transform()
 
     def _get_components(self):
@@ -937,6 +942,7 @@ class Optimize(DecompositionAnalysis):
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y=None)
 
@@ -1097,7 +1103,7 @@ def getmodel(
     Get the model for a given x vector.
 
     Parameters
-    -----------
+    ----------
     x : ndarray
         Array of frequency where to evaluate the model values returned by the
         f function.
@@ -1119,6 +1125,7 @@ def getmodel(
     -------
     `~numpy.ndarray`
         Array containing the calculated model.
+
     """
     model = par.model[modelname]
     try:

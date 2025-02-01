@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the class _CoordRange.
-"""
+"""Module that implements the class _CoordRange."""
 
 import traitlets as tr
 
@@ -46,12 +44,14 @@ class _CoordRange(tr.HasTraits):
         return value
 
     def _clean_ranges(self, ranges):
-        """Sort and merge overlapping ranges
+        """
+        Sort and merge overlapping ranges.
+
         It works as follows::
         1. orders each interval
         2. sorts intervals
         3. merge overlapping intervals
-        4. reverse the orders if required
+        4. reverse the orders if required.
         """
         # transforms each pairs into valid interval
         # should generate an error if a pair is not valid
@@ -80,7 +80,7 @@ def trim_ranges(*ranges, reversed=False):
     *e.g.,* [[a, b], [c, d]] with a < b < c < d or a > b > c > d.
 
     Parameters
-    -----------
+    ----------
     *ranges :  iterable
         An interval or a set of intervals.
         set of  intervals. If none is given, the range will be a set of an empty
@@ -97,8 +97,8 @@ def trim_ranges(*ranges, reversed=False):
 
     Examples
     --------
-
     >>> scp.trim_ranges([1, 4], [7, 5], [6, 10])
     [[1, 4], [5, 10]]
+
     """
     return _CoordRange(*ranges, reversed=reversed).ranges

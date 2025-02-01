@@ -7,7 +7,7 @@
 # ruff: noqa
 """
 Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)
-================================================================================
+=================================================================================
 Various examples of processing NMR spectra
 """
 
@@ -235,6 +235,6 @@ _ = f1.plotmerit(offset=2)
 
 # %%
 # This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (*.ipynb).
+# when the example is run as a notebook (`.ipynb`).
 
 # scp.show()

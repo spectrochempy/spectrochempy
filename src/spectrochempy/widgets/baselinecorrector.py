@@ -96,6 +96,7 @@ class BaselineCorrector:
 
     [In 2] X = scp.read_omnic("irdata/nh4y-activation.spg")
            out = scp.BaselineCorrector(X)
+
     """
 
     @deprecated(replace="(None)", removed="0.8.0")
@@ -321,8 +322,7 @@ class BaselineCorrector:
             warning_("process canceled because X is None")
 
     def _process_clicked(self, b=None):
-        """(re)process dataset (slicing) and baseline correct"""
-
+        """(re)process dataset (slicing) and baseline correct."""
         if not self._done:
             # first processing,
             # defines default ranges (5% of the X axis at both ends)...
@@ -403,7 +403,7 @@ def _str_to_ranges(strg):
 
 
 def _round_ranges(ranges, decimals=2):
-    """round x values for better reading"""
+    """Round x values for better reading."""
     ranges = list(ranges)
     for i, item in enumerate(ranges):
         if isinstance(item, float):  # pragma: cover

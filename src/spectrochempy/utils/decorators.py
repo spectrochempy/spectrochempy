@@ -23,8 +23,9 @@ from spectrochempy.utils.docreps import _docstring
 
 def preserve_signature(f):
     """
-    A decorator for decorators, which preserves the signature of the function
-    being wrapped. This preservation allows IDE function parameter hints to work
+    Preserve the signature of the function being wrapped.
+
+    This preservation allows IDE function parameter hints to work
     on the wrapped function. To do this, the `__signature__` dunder is defined, or
     inherited, from the function being wrapped to the resulting wrapped function.
 
@@ -51,6 +52,7 @@ def preserve_signature(f):
     ...         return wrapper(*args, **kwargs)
     ...
     ...     return wrapper
+
     """
     # add '__signature__' if it does not exist
     # - this will preserve parameter hints in IDE's
@@ -62,7 +64,7 @@ def preserve_signature(f):
 
 def deprecated(name=None, *, kind="method", replace="", removed=None, extra_msg=""):
     """
-    Deprecation decorator.
+    Deprecate a function or attribute.
 
     Parameters
     ----------

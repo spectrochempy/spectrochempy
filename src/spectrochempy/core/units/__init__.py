@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-The core interface to the Pint library.
-"""
+"""The core interface to the Pint library."""
 
 __all__ = [
     "Unit",
@@ -369,8 +367,8 @@ if pint_version < 24:
         ...     fppm = fhz.to('ppm')
         >>> print("{:~.3f}".format(fppm))
         133.333 ppm
-        """
 
+        """
         if not isinstance(larmor, U_.Quantity):
             larmor = larmor * U_.MHz
 
@@ -424,8 +422,7 @@ else:  # pint version >= 24
     # SpectroChemPy specific formatters
     # ##################################################################################
     class ScpDefaultFormatter(DefaultFormatter):
-        """subclasses the DefaultFormatter to provide a specific formatting for
-        SpectroChemPy"""
+        """Subclasses the DefaultFormatter to provide a specific formatting for SpectroChemPy."""
 
         def format_unit(self, unit, uspec, sort_func, **babel_kwds) -> str:
             numerator, denominator = prepare_compount_unit(
@@ -448,8 +445,7 @@ else:  # pint version >= 24
             )
 
     class ScpCompactFormatter(CompactFormatter):
-        """subclasses the CompactFormatter to provide a specific formatting for
-        SpectroChemPy"""
+        """Subclasses the CompactFormatter to provide a specific formatting for SpectroChemPy."""
 
         def format_unit(self, unit, uspec, sort_func, **babel_kwds) -> str:
             numerator, denominator = prepare_compount_unit(
@@ -472,8 +468,7 @@ else:  # pint version >= 24
             )
 
     class ScpPrettyFormatter(PrettyFormatter):
-        """subclasses the PretyFormatter to provide a specific formatting for
-        SpectroChemPy"""
+        """Subclasses the PretyFormatter to provide a specific formatting for SpectroChemPy."""
 
         def format_unit(self, unit, uspec, sort_func, **babel_kwds) -> str:
             numerator, denominator = prepare_compount_unit(
@@ -497,8 +492,7 @@ else:  # pint version >= 24
             )
 
     class ScpHTMLFormatter(HTMLFormatter):
-        """subclasses the HTMLFormatter to provide a specific formatting for
-        SpectroChemPy"""
+        """Subclasses the HTMLFormatter to provide a specific formatting for SpectroChemPy."""
 
         def format_unit(self, unit, uspec, sort_func, **babel_kwds) -> str:
             numerator, denominator = prepare_compount_unit(
@@ -529,8 +523,7 @@ else:  # pint version >= 24
             )
 
     class ScpLatexFormatter(LatexFormatter):
-        """subclasses the LatexFormatter to provide a specific formatting for
-        SpectroChemPy"""
+        """Subclasses the LatexFormatter to provide a specific formatting for SpectroChemPy."""
 
         def format_unit(self, unit, uspec, sort_func, **babel_kwds) -> str:
             numerator, denominator = prepare_compount_unit(
@@ -560,8 +553,7 @@ else:  # pint version >= 24
             return formatted.replace("[", "{").replace("]", "}")
 
     class ScpFullFormatter(FullFormatter):
-        """subclasses the Formatter to provide a specific formatting for
-        SpectroChemPy"""
+        """Subclasses the Formatter to provide a specific formatting for SpectroChemPy."""
 
         default_format: str = "~P"
 
@@ -658,8 +650,8 @@ else:  # pint version >= 24
         ...     fppm = fhz.to('ppm')
         >>> print("{:~.3f}".format(fppm))
         133.333 ppm
-        """
 
+        """
         if not isinstance(larmor, ur.Quantity):
             larmor = larmor * ur.MHz
 
@@ -689,9 +681,7 @@ else:  # pint version >= 24
 
 
 def remove_args_units(func):
-    """
-    Decorator which remove units of arguments of a function
-    """
+    """Remove units of arguments of a function."""
 
     def _remove_units(val):
         if isinstance(val, Quantity):

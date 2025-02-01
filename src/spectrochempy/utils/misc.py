@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Various methods and classes used in other part of the program.
-"""
+"""Various methods and classes used in other part of the program."""
 
 import functools
 import re
@@ -89,6 +87,7 @@ def as_quaternion(*args):
         quaternion array: w, x, y, z. If there is only two, they are casted to complex
         and correspond respectively
         to w + i.x and y + j.z.
+
     """
     if len(args) == 4:
         # we assume here that the for components have been provided w, x, y, z
@@ -117,6 +116,7 @@ def quat_as_complex_array(arr):
     -------
     tuple
         Tuple of two complex array.
+
     """
     if arr.dtype != np.quaternion:
         # no change
@@ -148,7 +148,6 @@ def dict_compare(d1, d2, check_equal_only=True):
 
     Examples
     --------
-
         >>> from spectrochempy.utils.compare import dict_compare
         >>>
         >>> x = dict(a=1, b=2)
@@ -158,6 +157,7 @@ def dict_compare(d1, d2, check_equal_only=True):
         set() set() {'a'} {'b'}
         >>> dict_compare(x, y)
         False
+
     """
     # from http://stackoverflow.com/questions/4527942/comparing-two-dictionaries-in-python
     # modified to account for the comparison of list objects
@@ -215,6 +215,7 @@ def get_component(data, select="REAL"):
         dataset:
         e.g., for dims = ['y','x'], 'IR' means that the `y` component is imaginary
         while the `x` is real.
+
     """
     if not select:
         return data
@@ -292,6 +293,7 @@ def htmldoc(text):
     -------
     out : str
         The html string.
+
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r"<b>\1</b>\2", text)
@@ -316,23 +318,17 @@ def htmldoc(text):
 
 
 def interleaved2complex(data):
-    """
-    Make a complex array from interleaved data.
-    """
+    """Make a complex array from interleaved data."""
     return data[..., ::2] + 1j * data[..., 1::2]
 
 
 def interleaved2quaternion(data):
-    """
-    Make a complex array from interleaved data.
-    """
+    """Make a complex array from interleaved data."""
     return data[..., ::2] + 1j * data[..., 1::2]
 
 
 def is_iterable(arg):
-    """
-    Determine if an object is iterable.
-    """
+    """Determine if an object is iterable."""
     return hasattr(arg, "__iter__")
 
 
@@ -347,9 +343,7 @@ def is_number(x):
 
 
 def is_sequence(arg):
-    """
-    Determine if an object is iterable but is not a string.
-    """
+    """Determine if an object is iterable but is not a string."""
     return (not hasattr(arg, "strip")) and hasattr(arg, "__iter__")
 
 
@@ -366,6 +360,7 @@ def largest_power_of_2(value):
     -------
     pw : int
         Power of 2.
+
     """
     return int(pow(2, np.ceil(np.log(value) / np.log(2))))
 
@@ -410,8 +405,8 @@ def make_new_object(objtype):
     Returns
     -------
     new : the new object of same type
-    """
 
+    """
     new = type(objtype)()
 
     # new id and date
@@ -502,9 +497,7 @@ def make_new_object(objtype):
 
 def spacing_(arr):
     """
-    Return a scalar for the spacing in the one-dimensional input array
-    (if it is uniformly spaced,
-    else return an array of the different spacings.
+    Return the spacing in a 1D array if uniformly spaced, else return different spacings.
 
     Parameters
     ----------
@@ -513,6 +506,7 @@ def spacing_(arr):
     Returns
     -------
     out : float or array
+
     """
     spacings = np.diff(arr)
     # we need to take into account only the significative digits

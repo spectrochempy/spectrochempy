@@ -177,6 +177,6 @@ _ = G[::10].plot()
 
 # %%
 # This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (*.ipynb).
+# when the example is run as a notebook (`.ipynb`).
 
 # scp.show()

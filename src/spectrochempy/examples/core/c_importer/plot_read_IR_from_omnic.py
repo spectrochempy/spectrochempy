@@ -6,7 +6,7 @@
 # ruff: noqa
 """
 Loading an IR (omnic SPG) experimental file
-============================================
+===========================================
 
 Here we load an experimental SPG file (OMNIC) and plot it.
 

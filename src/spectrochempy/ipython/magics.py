@@ -3,9 +3,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Magic ipython Classes
-"""
+"""Magic ipython Classes."""
+
 from IPython.core.error import UsageError
 from IPython.core.magic import Magics
 from IPython.core.magic import line_cell_magic
@@ -25,7 +24,7 @@ __all__ = ["SpectroChemPyMagics"]
 @magics_class
 class SpectroChemPyMagics(Magics):
     """
-    This class implements the addscript ipython magic function.
+    Implements the addscript ipython magic function.
 
     The ipython extensions`can be loaded via `%load_ext spectrochempy.ipython`
     or be configured to be autoloaded by IPython at startup time.
@@ -34,7 +33,7 @@ class SpectroChemPyMagics(Magics):
     @line_cell_magic
     def addscript(self, pars="", cell=None):
         """
-        This works both as **%addscript** and as **%%addscript**.
+        Work both as **%addscript** and as **%%addscript**.
 
         This magic command can either take a local filename, element in the
         namespace or history range (see %history),
@@ -77,6 +76,7 @@ class SpectroChemPyMagics(Magics):
            In[4]: %addscript MyClass
 
            In[5]: %addscript mymodule.myfunction
+
         """
         opts, args = self.parse_options(pars, "p:o:s:n:a")
 
@@ -154,7 +154,8 @@ class SpectroChemPyMagics(Magics):
 
 def load_ipython_extension(ipython):
     """
-    The ipython extensions`can be loaded via `%load_ext spectrochempy.ipython`
-    or be configured to be autoloaded by IPython at startup time.
+    Load the ipython extensions via `%load_ext spectrochempy.ipython`.
+
+    The extensions can also be configured to be autoloaded by IPython at startup time.
     """
     ipython.register_magics(SpectroChemPyMagics)

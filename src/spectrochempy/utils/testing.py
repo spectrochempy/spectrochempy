@@ -537,6 +537,8 @@ def assert_script_equal(sc1, sc2, **kwargs):
 # ======================================================================================
 class RandomSeedContext:
     """
+    Context manager to seed and restore the numpy RNG state.
+
     A context manager (for use with the `with` statement) that will seed the
     numpy random number generator (RNG) to a specific value, and then restore
     the RNG state back to whatever it was before.
@@ -557,6 +559,7 @@ class RandomSeedContext:
 
             randarr = random.randn(100)
             ... run your test using `randarr` ...
+
     """
 
     def __init__(self, seed):
@@ -589,6 +592,7 @@ def assert_units_equal(unit1, unit2, strict=False):
         Other units to be compared
     strict :  bool, optional, default: False
         If True, units should be exactly the same: `km` != `mm` .
+
     """
     from pint import DimensionalityError
 
@@ -618,7 +622,8 @@ def _check_absorbance_related_units(unit1, unit2):
 
 class raises:
     """
-    A decorator to mark that a test should raise a given exception.
+    Decorator to mark that a test should raise a given exception.
+
     Use as follows::
 
         @raises(ZeroDivisionError)
@@ -659,9 +664,9 @@ class raises:
 
 class catch_warnings(warnings.catch_warnings):
     """
-    A high-powered version of warnings.catch_warnings to use for testing
-    and to make sure that there is no dependence on the order in which
-    the tests are run.
+    A high-powered version of warnings.catch_warnings.
+
+    To use for testing and to make sure that there is no dependence on the order in which the tests are run.
 
     This completely blitzes any memory of any warnings that have
     appeared before so that all warnings will be caught and displayed.

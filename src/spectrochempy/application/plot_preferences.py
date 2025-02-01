@@ -32,8 +32,7 @@ from spectrochempy.utils.metaconfigurable import MetaConfigurable
 # --------------------------------------------------------------------------------------
 def available_styles():
     """
-    All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_
-    which are available in  `SpectroChemPy`
+    All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_ which are available in  `SpectroChemPy`.
 
     Returns
     -------
@@ -53,9 +52,7 @@ def available_styles():
 
 
 class PlotPreferences(MetaConfigurable):
-    """
-    This is a port of matplotlib.rcParams to our configuration system (traitlets)
-    """
+    """Port of matplotlib.rcParams to our configuration system (traitlets)."""
 
     name = Unicode("PlotPreferences")
     description = Unicode("Options for Matplotlib")

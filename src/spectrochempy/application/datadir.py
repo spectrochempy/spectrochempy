@@ -3,9 +3,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module provides the DataDir class.
-"""
+"""Provides the DataDir class."""
+
 from os import environ
 from pathlib import Path
 
@@ -19,9 +18,7 @@ from spectrochempy.utils.file import pathclean
 # DataDir class
 # ======================================================================================
 class DataDir(tr.HasTraits):
-    """
-    A class used to determine the path to the testdata directory.
-    """
+    """A class used to determine the path to the testdata directory."""
 
     path = tr.Instance(Path)
 
@@ -58,6 +55,7 @@ class DataDir(tr.HasTraits):
         -------
         `str`
             Display of the datadir content
+
         """
         strg = f"{self.path.name}\n"  # os.path.basename(self.path) + "\n"
 

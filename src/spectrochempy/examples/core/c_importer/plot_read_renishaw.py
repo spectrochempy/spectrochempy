@@ -8,7 +8,7 @@
 """
 Reading Renishaw WiRE files
 ===========================
-This example shows how to read a Renishaw WiRE files (*.wdf format).
+This example shows how to read a Renishaw WiRE files (``.wdf`` format).
 
 The spectral data used has been downloaded from
 https://github.com/alchem0x2A/py-wdf-reader (MIT License) and stored in the

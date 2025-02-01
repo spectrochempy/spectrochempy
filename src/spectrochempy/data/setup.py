@@ -23,6 +23,7 @@ def is_on_github_actions():
     -------
     bool
         True if running on GitHub Actions, False otherwise.
+
     """
     required_vars = ["CI", "GITHUB_RUN_ID", "GITHUB_REPOSITORY"]
     return all(var in environ and environ.get(var) for var in required_vars)
@@ -45,6 +46,7 @@ def setup_mpl():
         If matplotlib is not installed
     IOError
         If source directories for styles or fonts are not found
+
     """
     # Check execution environment
     GITHUB = is_on_github_actions()

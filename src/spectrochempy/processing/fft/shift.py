@@ -4,8 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-A collection of NMR spectral processing functions which operate on the last
-dimension (1) of 2D arrays.
+NMR spectral processing functions which operate on the last dimension (1) of 2D arrays.
 
 Adapted from NMRGLUE proc_base (New BSD License)
 """
@@ -54,6 +53,7 @@ def rs(dataset, pts=0.0, **kwargs):
     See Also
     --------
     roll : shift without zero filling.
+
     """
     data = np.roll(dataset, int(pts))
     data[..., : int(pts)] = 0
@@ -91,6 +91,7 @@ def ls(dataset, pts=0.0, **kwargs):
     See Also
     --------
     roll : shift without zero filling.
+
     """
     data = np.roll(dataset, -int(pts))
     data[..., -int(pts) :] = 0
@@ -130,8 +131,8 @@ def cs(dataset, pts=0.0, neg=False, **kwargs):
     See Also
     --------
     roll : shift without zero filling.
-    """
 
+    """
     return roll(dataset, pts, neg, **kwargs)
 
 
@@ -168,6 +169,7 @@ def roll(dataset, pts=0.0, neg=False, **kwargs):
     See Also
     --------
     ls, rs, cs, fsh, fsh2
+
     """
     data = np.roll(dataset, int(pts))
     if neg:
@@ -210,6 +212,7 @@ def fsh(dataset, pts, **kwargs):
     See Also
     --------
     ls, rs, cs, roll, fsh2
+
     """
     from spectrochempy.processing.fft.fft import _fft
     from spectrochempy.processing.fft.fft import _ifft
@@ -253,8 +256,8 @@ def fsh2(dataset, pts, **kwargs):
     See Also
     --------
     ls, rs, cs, roll, fsh2
-    """
 
+    """
     from spectrochempy.processing.fft.fft import _fft_positive
     from spectrochempy.processing.fft.fft import _ifft_positive
 
@@ -286,8 +289,8 @@ def dc(dataset, **kwargs):
     ----------------
     len : float, optional
         Proportion in percent of the data at the end of the dataset to take into account. By default, 25%.
-    """
 
+    """
     len = int(kwargs.pop("len", 0.25) * dataset.shape[-1])
     dc = np.mean(np.atleast_2d(dataset)[..., -len:])
     dataset -= dc

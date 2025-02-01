@@ -58,10 +58,7 @@ ERROR_MSGS = {
 
 
 def spectrochempy_error(code, **kwargs):
-    """
-    Copy of the numpydoc error function, since ERROR_MSGS can't be updated
-    with our custom errors yet.
-    """
+    """Copy of the numpydoc error function, since ERROR_MSGS can't be updated with our custom errors yet."""
     return (code, ERROR_MSGS[code].format(**kwargs))
 
 
@@ -91,6 +88,7 @@ def get_api_items(api_doc_fd):
     subsection : str
         The name of the subsection in the API page where the object item is
         located.
+
     """
     current_module = "spectrochempy"
     previous_line = current_section = current_subsection = ""
@@ -231,6 +229,7 @@ def spectrochempy_validate(func_name: str):
     -------
     `dict`
         Information about the docstring and the errors found.
+
     """
     func_obj = Validator._load_obj(func_name)
     # Some objects are instances, e.g. IndexSlice, which numpydoc can't validate
@@ -292,8 +291,7 @@ def spectrochempy_validate(func_name: str):
 
 def validate_all(prefix, ignore_deprecated=False):
     """
-    Execute the validation of all docstrings, and return a dict with the
-    results.
+    Execute the validation of all docstrings, and return a dict with the results.
 
     Parameters
     ----------
@@ -308,6 +306,7 @@ def validate_all(prefix, ignore_deprecated=False):
     `dict`
         A dictionary with an item for every function/method... containing
         all the validation information.
+
     """
     result = {}
     seen = {}
@@ -407,9 +406,7 @@ def print_validate_one_results(func_name: str):
 
 
 def main(func_name, prefix, errors, output_format, ignore_deprecated):
-    """
-    Main entry point. Call the validation for one or for all docstrings.
-    """
+    """Call the validation for one or for all docstrings."""
     if func_name is None:
         return print_validate_all_results(
             prefix,

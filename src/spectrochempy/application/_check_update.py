@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Check SpectroChemPy updates
-"""
+"""Check SpectroChemPy updates."""
 
 import json
 import time
@@ -25,18 +23,14 @@ from packaging.version import parse as parse_version
 # Exception for this module
 # --------------------------------------------------------------------------------------
 class NeedsUpdateWarning(UserWarning):
-    """
-    Warning raised when Spectrochempy needs update
-    """
+    """Warning raised when Spectrochempy needs update."""
 
 
 # --------------------------------------------------------------------------------------
 # Pypi version checking
 # --------------------------------------------------------------------------------------
 def _get_pypi_version():
-    """
-    Get the last released pypi version
-    """
+    """Get the last released pypi version."""
     url = "https://pypi.python.org/pypi/spectrochempy/json"
 
     connection_timeout = 30  # secondss

@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the base abstract classes to define estimators such as PCA, ...
-"""
+"""Module implementing the base abstract classes to define estimators such as PCA, ..."""
 
 import logging
 import warnings
@@ -81,7 +79,6 @@ class AnalysisConfigurable(BaseConfigurable):
         warm_start=False,
         **kwargs,
     ):
-        """ """
         self._warm_start = warm_start
 
         super().__init__(log_level=log_level, **kwargs)
@@ -139,6 +136,7 @@ class AnalysisConfigurable(BaseConfigurable):
         --------
         fit_transform :  Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``.
         fit_reduce : Alias of `fit_transform` (Deprecated).
+
         """
         self._fitted = False  # reinit this flag
 
@@ -180,18 +178,14 @@ class AnalysisConfigurable(BaseConfigurable):
 
     @property
     def log(self):
-        """
-        Return ``log`` output.
-        """
+        """Return ``log`` output."""
         # A string handler (#1) is defined for the Spectrochempy logger,
         # thus we will return it's content
         return app.log.handlers[1].stream.getvalue().rstrip()
 
     @property
     def X(self):
-        """
-        Return the X input dataset (eventually modified by the model).
-        """
+        """Return the X input dataset (eventually modified by the model)."""
         if self._X_is_missing:
             raise NotFittedError
         # We use X property only to show this information to the end user. Internally
@@ -224,6 +218,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     PCA : Perform Principal Components Analysis.
     SIMPLISMA : SIMPLe to use Interactive Self-modeling Mixture Analysis.
     SVD : Perform a Singular Value Decomposition.
+
     """
 
     # This class is subclass AnalysisConfigurable, so we define only additional
@@ -330,6 +325,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             The number of components to use for the reduction. If not given
             the number of components is eventually the one specified or determined
             in the `fit` process.
+
         """
         if not self._fitted:
             raise NotFittedError()
@@ -396,6 +392,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         See Also
         --------
         reconstruct : Alias of inverse_transform (Deprecated).
+
         """
         if not self._fitted:
             raise NotFittedError
@@ -453,6 +450,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         Other Parameters
         ----------------
         %(analysis_transform.other_parameters)s
+
         """
         try:
             self.fit(X, Y)
@@ -493,6 +491,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         -------
         `~spectrochempy.core.dataset.nddataset.NDDataset`
             Dataset with shape (:term:`n_components`, :term:`n_features`)
+
         """
         if n_components is None or n_components > self._n_components:
             n_components = self._n_components
@@ -509,14 +508,13 @@ class DecompositionAnalysis(AnalysisConfigurable):
         See Also
         --------
         get_components : Retrieve only the specified number of components.
+
         """
         return self._get_components()
 
     @property
     def n_components(self):
-        """
-        Number of components that were fitted.
-        """
+        """Number of components that were fitted."""
         if self._fitted:
             return self._n_components
         raise NotFittedError("n_components")
@@ -562,6 +560,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Number of lines to display. Default is ``'all'``.
         **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the `X` dataset.
+
         """
         colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
 
@@ -617,9 +616,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
     @property
     def Y(self):
-        r"""
-        The `Y` input.
-        """
+        r"""The `Y` input."""
         # We use Y property only to show this information to the end-user. Internally
         # we use _Y attribute to refer to the input data
         if self._Y_is_missing:
@@ -639,6 +636,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     See Also
     --------
     PLSRegression : Perform a Partial Least Square Regression .
+
     """
 
     # This class is a subclass of DecompositionAnalysis, so we define only additional
@@ -679,6 +677,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         -------
         `NDDataset`
             Datasets with shape (:term:`n_observations`,) or ( :term:`n_observations`, :term:`n_targets`).
+
         """
         if not self._fitted:
             raise NotFittedError()
@@ -717,6 +716,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         -------
         `float`
             :math:`R^2` of `predict`\ (X) w.r.t `Y`.
+
         """
         if not self._fitted:
             raise NotFittedError()
@@ -764,6 +764,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         -------
         x_score, y_score: `NDDataset` or tuple of `NDDataset`
             Datasets with shape (:term:`n_observations`, :term:`n_components`).
+
         """
         if not self._fitted:
             raise NotFittedError()
@@ -826,6 +827,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         See Also
         --------
         reconstruct : Alias of inverse_transform (Deprecated).
+
         """
         if not self._fitted:
             raise NotFittedError
@@ -870,8 +872,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Returns
         -------
         %(analysis_transform.returns)s
-        """
 
+        """
         self.fit(X, Y)
         if both:
             return self.transform(X, Y)
@@ -977,8 +979,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Whether to plot points with nonfinite c (i.e. inf, -inf or nan).
             If True the points are drawn with the bad
             colormap color (see Colormap.set_bad).
-        """
 
+        """
         s = kwargs.pop("s", None)
         c = kwargs.pop("c", None)
         marker = kwargs.pop("marker", None)
@@ -1183,6 +1185,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         -------
         self
             Returns the instance itself.
+
         """
         self._fitted = False  # reiniit this flag
 
@@ -1237,9 +1240,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
 
     @property
     def Y(self):
-        """
-        Return the `Y` input dataset.
-        """
+        """Return the `Y` input dataset."""
         # We use Y property only to show this information to the end user. Internally
         # we use _Y attribute to refer to the input data
         if self._Y_is_missing:
@@ -1323,6 +1324,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         -------
         `~spectrochempy.core.dataset.nddataset.NDDataset`
             Predicted values (object of type of the input) using a ahape (:term:`n_observations`,).
+
         """
         if not self._fitted:
             raise NotFittedError()
@@ -1377,6 +1379,7 @@ class LinearRegressionAnalysis(AnalysisConfigurable):
         -------
         `float`
             :math:`R^2` of `predict` (`X` ) wrt. `Y` .
+
         """
         if not self._fitted:
             raise NotFittedError()

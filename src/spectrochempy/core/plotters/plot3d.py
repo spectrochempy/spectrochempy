@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module should be able to handle a large set of plot types related to 3D plots.
-"""
+"""Module to handle a large set of plot types related to 3D plots."""
 
 __all__ = ["plot_3D", "plot_surface", "plot_waterfall"]
 
@@ -68,7 +66,7 @@ def plot_waterfall(dataset, **kwargs):
 @add_docstring(_PLOT3D_DOC)
 def plot_3D(dataset, method="surface", **kwargs):
     """
-    Plot of 2D array as 3D plot
+    Plot of 2D array as 3D plot.
 
     Parameters
     ----------
@@ -97,6 +95,7 @@ def plot_3D(dataset, method="surface", **kwargs):
     plot_surface
     plot_waterfall
     multiplot
+
     """
     from spectrochempy.core.plotters.plot2d import plot_2D
 

@@ -207,8 +207,8 @@ def em(dataset, lb=1, shifted=0, **kwargs):
     See Also
     --------
     gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
-    """
 
+    """
     # units are set by a decorator
 
     x = dataset
@@ -288,8 +288,8 @@ def gm(dataset, gb=1, lb=0, shifted=0, **kwargs):
     See Also
     --------
     em, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
-    """
 
+    """
     x = dataset
 
     g = np.ones_like(x)
@@ -371,8 +371,8 @@ def sp(dataset, ssb=1, pow=1, **kwargs):
     See Also
     --------
     em, gm, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
-    """
 
+    """
     x = dataset
 
     # ssb
@@ -400,6 +400,7 @@ def sine(dataset, *args, **kwargs):
     See Also
     --------
     em, gm, sp, sinm, qsin, hamming, triang, bartlett, blackmanharris
+
     """
     return sp(dataset, *args, **kwargs)
 
@@ -421,6 +422,7 @@ def sinm(dataset, ssb=1, **kwargs):
     See Also
     --------
     em, gm, sp, sine, qsin, hamming, triang, bartlett, blackmanharris
+
     """
     return sp(dataset, ssb=ssb, pow=1, **kwargs)
 
@@ -432,6 +434,7 @@ def qsin(dataset, ssb=1, **kwargs):
     See Also
     --------
     em, gm, sp, sine, sinm, hamming, triang, bartlett, blackmanharris
+
     """
     return sp(dataset, ssb=ssb, pow=2, **kwargs)
 
@@ -491,8 +494,8 @@ def general_hamming(dataset, alpha, **kwargs):
     See Also
     --------
     gm, sp, sine, sinm, qsin, hamming, triang, bartlett, blackmanharris
-    """
 
+    """
     x = dataset
 
     return windows.general_hamming(len(x), alpha, sym=True)
@@ -546,8 +549,8 @@ def hamming(dataset, **kwargs):
     See Also
     --------
     general_hamming, hann
-    """
 
+    """
     return general_hamming(dataset, alpha=0.54)
 
 
@@ -599,6 +602,7 @@ def hann(dataset, **kwargs):
     See Also
     --------
     general_hamming, hamming
+
     """
     return general_hamming(dataset, alpha=0.5)
 
@@ -645,8 +649,8 @@ def triang(dataset, **kwargs):
     See Also
     --------
     gm, sp, sine, sinm, qsin, hamming, bartlett, blackmanharris
-    """
 
+    """
     x = dataset
 
     return x * windows.triang(len(x), sym=True)
@@ -701,8 +705,8 @@ def bartlett(dataset, **kwargs):
     See Also
     --------
     triang : A triangular window that does not touch zero at the ends.
-    """
 
+    """
     x = dataset
 
     return x * windows.bartlett(len(x), sym=True)
@@ -746,8 +750,8 @@ def blackmanharris(dataset, **kwargs):
         True if we make the transform inplace.  If False, the function return a new datase
     retapod : bool, keyword parameter, optional, default=False
         True to return the apodization array along with the apodized object.
-    """
 
+    """
     x = dataset
 
     return x * windows.blackmanharris(len(x), sym=True)

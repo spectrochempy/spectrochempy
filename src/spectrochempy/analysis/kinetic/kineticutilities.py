@@ -5,9 +5,7 @@
 # ======================================================================================
 # pragma: no cover
 # excluded for coverage for the moment
-"""
-Utility functions to deal with Cantera input/output.
-"""
+"""Utility functions to deal with Cantera input/output."""
 
 import datetime
 import logging
@@ -59,7 +57,7 @@ SCIPY_MINIMIZE_METHODS = [
 
 # exception used in this module
 class SolverError(SpectroChemPyError):
-    """Error raised if solve_ivp (integrate) return a status < 0"""
+    """Error raised if solve_ivp (integrate) return a status < 0."""
 
 
 # ------------------------------------------------------------------------------------
@@ -140,8 +138,8 @@ class ActionMassKinetics(tr.HasTraits):
         in Kelvin. A function can also be provided which output a temperature `T` in K
         vs. time `t`.
 
-    Examples:
-    ---------
+    Examples
+    --------
     # A simple A → B → C:
     >>> reactions = ("A -> B", "B -> C")
     >>> species_concentrations = {"A": 1.0, "B": 0.0, "C": 0.0}
@@ -163,6 +161,7 @@ class ActionMassKinetics(tr.HasTraits):
     >>> info_(f"Concentrations at {T[1]}K, t = 4 : {C_exp[1][4.].data}")
     Concentrations at 298.0K, t = 4 : [[  0.7355   0.1879  0.07666]]
     Concentrations at 308.0K, t = 4 : [[  0.5448    0.236   0.2192]]
+
     """
 
     # internal parameters
@@ -311,7 +310,7 @@ class ActionMassKinetics(tr.HasTraits):
     @property
     def A(self):
         r"""
-        Stoichiometry matrix A
+        Stoichiometry matrix A.
 
         Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`.
         """
@@ -320,7 +319,7 @@ class ActionMassKinetics(tr.HasTraits):
     @property
     def B(self):
         r"""
-        Stoichiometry matrix B
+        Stoichiometry matrix B.
 
         Stoichiometry matrices `A` and `B` are defined in :cite:t:`chellaboina:2009`.
         """
@@ -328,12 +327,12 @@ class ActionMassKinetics(tr.HasTraits):
 
     @property
     def n_reactions(self):
-        """Number of reaction reactions"""
+        """Number of reaction reactions."""
         return len(self._reactions)
 
     @property
     def n_species(self):
-        """Number of species"""
+        """Number of species."""
         return len(self._species)
 
     @property
@@ -349,7 +348,7 @@ class ActionMassKinetics(tr.HasTraits):
         return list(self._init_concentrations.values())
 
     def _write_reaction_rates(self):
-        """Return the expressions of production rates as a string"""
+        """Return the expressions of production rates as a string."""
         block = "["
         for j, line in enumerate(self._A):
             reac_rate = f"k[{j}]"
@@ -367,7 +366,7 @@ class ActionMassKinetics(tr.HasTraits):
         info_(self._write_reaction_rates().replace(",", ",\n"))
 
     def _write_production_rates(self):
-        """Return the expressions of production rates as a string"""
+        """Return the expressions of production rates as a string."""
         block = "["
         for line in (self._B - self._A).T:
             prod_rate = ""
@@ -400,7 +399,7 @@ class ActionMassKinetics(tr.HasTraits):
         info_(self._write_production_rates().replace(",", ",\n"))
 
     def _write_jacobian(self):
-        """Return the expressions of the jacobian of the production rates as a string"""
+        """Return the expressions of the jacobian of the production rates as a string."""
         block = "["
         for _i, line in enumerate((self._B - self._A).T):
             jac = "["
@@ -567,6 +566,7 @@ class ActionMassKinetics(tr.HasTraits):
 
             * message : `str`
               Human-readable description of the termination reason.
+
         """
         # uncomment for debugging and optimization
         # import time
@@ -774,7 +774,7 @@ class ActionMassKinetics(tr.HasTraits):
         Fit rate parameters and concentrations to a concentration profile.
 
         Parameters
-        ------------
+        ----------
         Cexp : `NDDataset` or `list` ot `tuple` of NDDatasets
             Experimental concentration profiles on which to fit the model.
             each set of concentrations can contain more concentration profiles than those to fit.
@@ -794,11 +794,11 @@ class ActionMassKinetics(tr.HasTraits):
             keyword arguments the optimization (see `~scipy.optimize.minimize`).
 
         Returns
-        --------
+        -------
         `dict`
             A result dictionary.
-        """
 
+        """
         if optimizer_kwargs is None:
             optimizer_kwargs = {}
         if ivp_solver_kwargs is None:
@@ -815,8 +815,7 @@ class ActionMassKinetics(tr.HasTraits):
             k_dt,
             C_op,
         ):
-            """returns the SSE on concentrations profiles"""
-
+            """Return the SSE on concentrations profiles."""
             for param, item in zip(params, dict_param_to_optimize, strict=False):
                 dict_param_to_optimize[item] = param
 
@@ -940,8 +939,7 @@ def _cantera_is_not_available():
 
 def _ct_modify_rate(reactive_phase, i_reaction, rate):
     """
-    Modify the reaction rate of with index i_reaction to have the same rate parameters
-    as rate.
+    Modify the reaction rate of with index i_reaction to have the same rate parameters as rate.
 
     Parameters
     ----------
@@ -952,8 +950,8 @@ def _ct_modify_rate(reactive_phase, i_reaction, rate):
     Returns
     -------
     reactive_phase
-    """
 
+    """
     rxn = reactive_phase.reaction(i_reaction)
     rxn.rate = rate
     reactive_phase.modify_reaction(i_reaction, rxn)
@@ -962,11 +960,12 @@ def _ct_modify_rate(reactive_phase, i_reaction, rate):
 
 def _ct_modify_surface_kinetics(surface, param_to_set):
     """
-    Changes a set of numerical parameters of an Interface among following:
+    Change a set of numerical parameters of an Interface.
+
+    Among the following:
     site_density, coverages, concentrations,
     pre-exponential factor, temperature_exponent, activation_energy.
     """
-
     if _cantera_is_not_available():
         return
 
@@ -1031,6 +1030,7 @@ class PFR:
         surface named 'surface'.
     init_X : `dict`, :term:`array-like`
         Initial composition of the reactors.
+
     """
 
     def __init__(
@@ -1255,8 +1255,7 @@ class PFR:
         profile at the outlet of the pfr.
 
         Parameters
-        ------------
-
+        ----------
         exp_conc: NDDataset
             experimental concentration profiles on which to fit the model. Can contain
             more concentration profiles than those to fit. the y Coord should be time.
@@ -1285,6 +1284,7 @@ class PFR:
         Returns
         -------
         `dict`
+
         """
         # global variables to keep track of iterations and optimization history
         global it, trials, func_values, popsize, pop_sse, prev_min_sse

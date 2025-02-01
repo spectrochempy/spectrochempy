@@ -40,7 +40,7 @@ class Script(HasTraits):
 
     See Also
     --------
-    Project: Object containing `NDDataset`\'s, sub-\\ `Project`\\ 's and `Script`.
+    Project: Object containing `NDDataset`'s, sub-`Project`'s and `Script`.
 
     Examples
     --------
@@ -53,6 +53,7 @@ class Script(HasTraits):
     Execute a script
 
     >>> scp.run_script(myscript)
+
     """
 
     _name = Unicode()
@@ -150,7 +151,7 @@ class Script(HasTraits):
     @staticmethod
     def _implements(name=None):
         """
-        Utility to check if the current object implement `Project` .
+        Check if the current object implements `Project`.
 
         Rather than isinstance(obj, Project) use object._implements('Project').
         This is useful to check type without importing the module
@@ -164,6 +165,7 @@ class Script(HasTraits):
         Returns
         -------
         Bool or str
+
         """
         if name is None:
             return "Script"
@@ -217,8 +219,8 @@ def run_script(script, localvars=None):
     -------
     out
         Output of the script if any.
-    """
 
+    """
     return script.execute(localvars)
 
 
@@ -230,6 +232,7 @@ def run_all_scripts(project):
     ----------
     project : project instance
         The project in which the scripts have to be executed
+
     """
     # TODO: complete this run_all_script function
 

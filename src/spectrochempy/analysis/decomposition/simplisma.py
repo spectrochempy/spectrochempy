@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implement the SIMPLISMA class.
-"""
+"""Module implementing the SIMPLISMA class."""
 
 __all__ = ["SIMPLISMA"]
 __configurables__ = ["SIMPLISMA"]
@@ -532,14 +530,13 @@ class SIMPLISMA(DecompositionAnalysis):
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y=None)
 
     @property
     def C(self):
-        """
-        Intensities ('concentrations') of pure compounds in spectra.
-        """
+        """Intensities ('concentrations') of pure compounds in spectra."""
         C = self.transform()
         C.name = "Relative Concentrations"
         C.coord(-1).title = "# pure compound"
@@ -548,9 +545,7 @@ class SIMPLISMA(DecompositionAnalysis):
 
     @property
     def St(self):
-        """
-        Spectra of pure compounds.
-        """
+        """Spectra of pure compounds."""
         St = self.components
         St.name = "Pure compound spectra"
         St.description = "Pure compound spectra matrix from SIMPLISMA:"  # + logs
@@ -558,9 +553,7 @@ class SIMPLISMA(DecompositionAnalysis):
 
     @property
     def Pt(self):
-        """
-        Purity spectra.
-        """
+        """Purity spectra."""
         Pt = self.St.copy()  # get a container
         Pt.data = self._outfit[2]
         Pt.name = "Purity spectra"
@@ -570,9 +563,7 @@ class SIMPLISMA(DecompositionAnalysis):
 
     @property
     def s(self):
-        """
-        Standard deviation spectra.
-        """
+        """Standard deviation spectra."""
         s = self.St.copy()  # get a container
         s.data = self._outfit[3]
         s.name = "Standard deviation spectra"

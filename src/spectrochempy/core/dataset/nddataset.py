@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the `NDDataset` class.
-"""
+"""Module implementing the `NDDataset` class."""
 
 __all__ = ["NDDataset"]
 # import signal
@@ -162,6 +160,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     -----
     The underlying array in a `NDDataset` object can be accessed through the
     `data` attribute, which will return a conventional `~numpy.ndarray`.
+
     """
 
     # Examples
@@ -734,9 +733,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # ----------------------------------------------------------------------------------
     @property
     def acquisition_date(self):
-        """
-        Acquisition date.
-        """
+        """Acquisition date."""
         if self._acquisition_date is not None:
             # take the one which has been previously set for this dataset
             acq = self._acquisition_date.astimezone(self._timezone)
@@ -759,6 +756,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             Name of the coordinates.
         **kwargs
             Optional keyword parameters passed to the coordset.
+
         """
         if not coords and not kwargs:
             # reset coordinates
@@ -780,9 +778,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     @property
     def author(self):
-        """
-        Creator of the dataset (str).
-        """
+        """Creator of the dataset (str)."""
         return self._author
 
     @author.setter
@@ -791,10 +787,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     @property
     def history(self):
-        """
-        Describes the history of actions made on this array (List of strings).
-        """
-
+        """Describes the history of actions made on this array (List of strings)."""
         history = []
         for date, value in self._history:
             date = date.astimezone(self._timezone).isoformat(
@@ -832,6 +825,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         -------
          `Coord`
             Coordinates along the given axis.
+
         """
         idx = self._get_dims_index(dim)[0]  # should generate an error if the
         # dimension name is not recognized
@@ -905,9 +899,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     @property
     def created(self):
-        """
-        Creation date object (Datetime).
-        """
+        """Creation date object (Datetime)."""
         created = self._created.astimezone(self._timezone)
         return created.isoformat(sep=" ", timespec="seconds")
 
@@ -927,17 +919,13 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         super()._set_data(data)
 
     def delete_coordset(self):
-        """
-        Delete all coordinate settings.
-        """
+        """Delete all coordinate settings."""
         self._coordset = None
 
     # ...........................................................................................................
     @property
     def description(self):
-        """
-        Provides a description of the underlying data (str).
-        """
+        """Provides a description of the underlying data (str)."""
         return self._description
 
     comment = description
@@ -950,9 +938,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     @property
     def local_timezone(self):
-        """
-        Return the local timezone.
-        """
+        """Return the local timezone."""
         return str(get_localzone())
 
     @property
@@ -970,9 +956,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     @property
     def modified(self):
-        """
-        Date of modification (readonly property).
-        """
+        """Date of modification (readonly property)."""
         modified = self._modified.astimezone(self._timezone)
         return modified.isoformat(sep=" ", timespec="seconds")
 
@@ -1012,30 +996,26 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
         Set one or more coordinates at once.
 
-        Warnings
+        Warnings:
         --------
         This method replace all existing coordinates.
 
-        See Also
+        See Also:
         --------
         add_coordset : Add one or a set of coordinates from a dataset.
         set_coordtitles : Set titles of the one or more coordinates.
         set_coordunits : Set units of the one or more coordinates.
-        """
 
+        """
         self._coordset = None
         self.add_coordset(*args, dims=self.dims, **kwargs)
 
     def set_coordtitles(self, *args, **kwargs):
-        """
-        Set titles of the one or more coordinates.
-        """
+        """Set titles of the one or more coordinates."""
         self._coordset.set_titles(*args, **kwargs)
 
     def set_coordunits(self, *args, **kwargs):
-        """
-        Set units of the one or more coordinates.
-        """
+        """Set units of the one or more coordinates."""
         self._coordset.set_units(*args, **kwargs)
 
     def sort(self, **kwargs):
@@ -1065,8 +1045,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         -------
         `NDDataset`
             Sorted dataset.
-        """
 
+        """
         inplace = kwargs.get("inplace", False)
         new = self.copy() if not inplace else self
 
@@ -1149,6 +1129,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         ValueError
             If `dim` is not `None` , and the dimension being squeezed is not
             of length 1.
+
         """
         # make a copy of the original dims
         old = self.dims[:]
@@ -1184,6 +1165,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         See Also
         --------
         squeeze : The inverse operation, removing singleton dimensions.
+
         """
         new = self.copy() if not inplace else self
 
@@ -1227,8 +1209,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         See Also
         --------
         transpose : Transpose a dataset.
-        """
 
+        """
         new = super().swapdims(dim1, dim2, inplace=inplace)
         new.history = f"Data swapped between dims {dim1} and {dim2}"
         return new
@@ -1250,8 +1232,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         -------
         `NDDataset`
             A sub dataset defined by the input indices.
-        """
 
+        """
         # handle the various syntax to pass the axis
         dims = self._get_dims_from_args(**kwargs)
         axis = self._get_dims_index(dims)
@@ -1305,8 +1287,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             The numpy masked array from the NDDataset data.
 
         Examples
-        ========
-
+        --------
         >>> dataset = scp.read('wodger.spg')
         >>> a = scp.to_array(dataset)
 
@@ -1317,6 +1298,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         or
 
         >>> a = dataset.masked_data
+
         """
         return np.ma.array(self)
 
@@ -1330,6 +1312,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         -------
         object
             A axrray.DataArray object.
+
         """
         # Information about DataArray from the DataArray docstring
         #
@@ -1423,6 +1406,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         See Also
         --------
         swapdims : Interchange two dimensions of a NDDataset.
+
         """
         new = super().transpose(*dims, inplace=inplace)
         new.history = (

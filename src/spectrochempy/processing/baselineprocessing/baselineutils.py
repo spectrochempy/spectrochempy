@@ -30,8 +30,8 @@ def lls(data):
     See Also
     --------
     lls_inv : Inverse log-log-square operator.
-    """
 
+    """
     return np.log(np.log(np.sqrt(data + 1) + 1) + 1)
 
 
@@ -52,6 +52,6 @@ def lls_inv(data):
     See Also
     --------
     lls : Log-log-square operator.
-    """
 
+    """
     return (np.exp(np.exp(data) - 1) - 1) ** 2 - 1

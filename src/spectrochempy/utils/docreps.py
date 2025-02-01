@@ -79,9 +79,7 @@ _docstring = DocstringProcessor()
 
 # TODO replace this in module where it is used by docrep
 def add_docstring(*args):
-    """
-    Decorator which add a docstring to the actual func doctring.
-    """
+    """Add a docstring to the actual function docstring."""
 
     def new_doc(func):
         for item in args:
@@ -119,6 +117,7 @@ def htmldoc(text):
     -------
     out : str
         The html string.
+
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r"<b>\1</b>\2", text)

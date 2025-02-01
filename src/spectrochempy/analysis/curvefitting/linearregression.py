@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Implementation of least squares Linear Regression.
-"""
+"""Implementation of least squares Linear Regression."""
 
 import traitlets as tr
 

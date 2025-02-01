@@ -159,9 +159,7 @@ def _qf_fft(data):
 
 
 def _interferogram_fft(data):
-    """
-    FFT transform for rapid-scan interferograms. Phase corrected using the Mertz method.
-    """
+    """FFT transform for rapid-scan interferograms. Phase corrected using the Mertz method."""
 
     def _get_zpd(data, mode="max"):
         if mode == "max":
@@ -237,6 +235,7 @@ def ifft(dataset, size=None, **kwargs):
     See Also
     --------
     fft : Direct Fourier transform.
+
     """
     return fft(dataset, size=size, inv=True, **kwargs)
 
@@ -289,6 +288,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     See Also
     --------
     ifft : Inverse Fourier transform.
+
     """
     # datatype
     is_nmr = dataset.origin.lower() in [
@@ -610,6 +610,7 @@ def ht(dataset, N=None):
     -------
     ndata : ndarray
         NMR data which has been Hilvert transformed.
+
     """
     # create an empty output array
     fac = N / dataset.shape[-1]

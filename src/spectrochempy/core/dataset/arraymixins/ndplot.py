@@ -4,8 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-NDPlot Module
-============
+NDPlot Module.
 
 This module defines plotting functionality for NDDataset objects. Provides:
 
@@ -26,6 +25,7 @@ Notes
 - Supports both Matplotlib and TODO: Plotly backends
 - Handles unit-aware plotting
 - Manages plot style preferences
+
 """
 
 __all__ = ["plot"]
@@ -212,12 +212,14 @@ class PreferencesSet(Meta):
             self.help(key)
 
     def help(self, key: str) -> None:
-        """Display help for a preference parameter.
+        """
+        Display help for a preference parameter.
 
         Parameters
         ----------
         key : str
             Parameter name to show help for
+
         """
         value = self[key]
         trait = plot_preferences.traits()[key]
@@ -247,7 +249,8 @@ class PreferencesSet(Meta):
         stylename: str = "mydefault",
         to_mpl: bool = False,
     ) -> str | None:
-        """Create a matplotlib style file.
+        """
+        Create a matplotlib style file.
 
         Parameters
         ----------
@@ -260,6 +263,7 @@ class PreferencesSet(Meta):
         -------
         str
             Name of created style file if successful
+
         """
         if stylename.startswith("scpy"):
             error_(
@@ -363,7 +367,8 @@ class PreferencesSet(Meta):
 
 
 class NDPlot(HasTraits):
-    """Plotting interface for NDDataset objects.
+    """
+    Plotting interface for NDDataset objects.
 
     Provides methods for:
     - 1D, 2D and 3D plotting
@@ -382,7 +387,8 @@ class NDPlot(HasTraits):
     _preferences = Instance(PreferencesSet, allow_none=True)
 
     def plot(self, method: str | None = None, **kwargs: Any) -> _Axes | None:
-        """Plot the dataset using the specified method.
+        """
+        Plot the dataset using the specified method.
 
         Parameters
         ----------
@@ -395,6 +401,7 @@ class NDPlot(HasTraits):
         -------
         _Axes
             Matplotlib axes containing the plot
+
         """
         # --------------------------------------------------------------------
         # select plotter depending on the dimension of the data
@@ -437,9 +444,7 @@ class NDPlot(HasTraits):
         return ax
 
     def close_figure(self):
-        """
-        Close a Matplotlib figure associated to this dataset.
-        """
+        """Close a Matplotlib figure associated to this dataset."""
         if self._fig is not None:
             plt.close(self._fig)
 
@@ -717,9 +722,7 @@ class NDPlot(HasTraits):
 
     @property
     def preferences(self):
-        """
-        `Meta` instance object - Additional metadata.
-        """
+        """`Meta` instance object - Additional metadata."""
         return self._preferences
 
     @preferences.setter
@@ -730,23 +733,17 @@ class NDPlot(HasTraits):
 
     @property
     def fig(self):
-        """
-        Matplotlib figure associated to this dataset.
-        """
+        """Matplotlib figure associated to this dataset."""
         return self._fig
 
     @property
     def fignum(self):
-        """
-        Matplotlib figure associated to this dataset.
-        """
+        """Matplotlib figure associated to this dataset."""
         return self._fignum
 
     @property
     def ndaxes(self):
-        """
-        A dictionary containing all the axes of the current figures.
-        """
+        """A dictionary containing all the axes of the current figures."""
         return self._ndaxes
 
     @ndaxes.setter
@@ -764,51 +761,37 @@ class NDPlot(HasTraits):
 
     @property
     def ax(self):
-        """
-        The main matplotlib axe associated to this dataset.
-        """
+        """The main matplotlib axe associated to this dataset."""
         return self._ndaxes["main"]
 
     @property
     def axT(self):
-        """
-        The matplotlib axe associated to the transposed dataset.
-        """
+        """The matplotlib axe associated to the transposed dataset."""
         return self._ndaxes["mainT"]
 
     @property
     def axec(self):
-        """
-        Matplotlib colorbar axe associated to this dataset.
-        """
+        """Matplotlib colorbar axe associated to this dataset."""
         return self._ndaxes["colorbar"]
 
     @property
     def axecT(self):
-        """
-        Matplotlib colorbar axe associated to the transposed dataset.
-        """
+        """Matplotlib colorbar axe associated to the transposed dataset."""
         return self._ndaxes["colorbarT"]
 
     @property
     def axex(self):
-        """
-        Matplotlib projection x axe associated to this dataset.
-        """
+        """Matplotlib projection x axe associated to this dataset."""
         return self._ndaxes["xproj"]
 
     @property
     def axey(self):
-        """
-        Matplotlib projection y axe associated to this dataset.
-        """
+        """Matplotlib projection y axe associated to this dataset."""
         return self._ndaxes["yproj"]
 
     @property
     def divider(self):
-        """
-        Matplotlib plot divider.
-        """
+        """Matplotlib plot divider."""
         return self._divider
 
 

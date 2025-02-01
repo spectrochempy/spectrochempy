@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module provides methods for reading data in a directory after a carroucell experiment.
-"""
+"""Provides methods for reading data in a directory after a carroucell experiment."""
 
 __all__ = ["read_carroucell"]
 __dataset_methods__ = __all__
@@ -69,7 +67,7 @@ def read_carroucell(directory=None, **kwargs):
     %(Importer.see_also.no_read_carroucell)s
 
     Notes
-    ------
+    -----
     All files are expected to be present in the same directory and their filenames
     are expected to be in the format : :file:`X_samplename_YYY.spa`
     and for the background files : :file:`X_BCKG_YYYBG.spa`
@@ -77,10 +75,10 @@ def read_carroucell(directory=None, **kwargs):
 
     Examples
     --------
-
     >>> scp.read_carroucell("irdata/carroucell_samp")
     no temperature file
     [NDDataset: [float64] a.u. (shape: (y:6, x:11098)), NDDataset: ...
+
     """
     kwargs["filetypes"] = ["Carroucell files (*.spa)"]
     kwargs["protocol"] = ["carroucell"]
