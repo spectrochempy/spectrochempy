@@ -235,7 +235,7 @@ example_source_dir = "../src/spectrochempy/examples"
 example_generated_dir = "gettingstarted/examples/gallery"
 
 
-def reset_spectrochempy_modules():
+def reset_spectrochempy_modules(*args):
     """Reset function for spectrochempy modules."""
     import spectrochempy  # noqa: F401
 
