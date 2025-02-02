@@ -102,11 +102,13 @@ jobs:
       - name: Build docs
         run: |
           echo "Recreating docs"
-          if [[ ${{ github.ref }} == refs/heads/docs/* ]]; then
-            python docs/make.py -j1 html --no-api --no-exec
-          else
-            python docs/make.py -j1 html
-          fi
+          python docs/make.py -j1 html
+
+        # if [[ ${{ github.ref }} == refs/heads/docs/* ]]; then
+        #  python docs/make.py -j1 html --no-api --no-exec
+        # else
+        #  python docs/make.py -j1 html
+        # fi
 
       # Upload build artifacts
       - name: Upload build artifacts
