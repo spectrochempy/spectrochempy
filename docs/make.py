@@ -273,7 +273,8 @@ class BuildDocumentation:
         if not self.settings["noapi"]:
             self._apigen()
 
-        self._sync_notebooks()
+        if not self.settings["nosync"]:
+            self._sync_notebooks()
 
         # Get previous versions and pass them to the template
         previous_versions = self._get_previous_versions()
@@ -296,8 +297,8 @@ class BuildDocumentation:
             f"\n{'-' * 80}"
         )
         srcdir = confdir = DOCS
-        outdir = f"{BUILDDIR}/{doc_version}"
-        doctreesdir = f"{DOCTREES}/{doc_version}"
+        outdir = f"{BUILDDIR}/latest"
+        doctreesdir = f"{DOCTREES}/latest"
 
         sp = Sphinx(
             str(srcdir),
@@ -315,17 +316,18 @@ class BuildDocumentation:
         """Post-build actions."""
         doc_version = self._doc_version
         BUILDDIR = DOCREPO / builder
+        sh(f"cp -r {BUILDDIR}/latest/ {BUILDDIR}")
+
+        if doc_version == "stable":
+            # Move stable version to "stable/" subdirectory and populate the root directory
+            stable_dir = BUILDDIR / "stable"
+            sh(f"rm -rf {stable_dir}")
+            sh(f"cp -r {BUILDDIR}/latest/ {stable_dir}")
 
         print(
             f"\n{'-' * 130}\nBuild finished. The {builder.upper()} pages "
-            f"are in {BUILDDIR}/{doc_version}."
+            f"are in {BUILDDIR}/{doc_version} and copied in {BUILDDIR}."
         )
-
-        if doc_version == "stable":
-            # Move stable version to "stable/" subdirectory
-            stable_dir = BUILDDIR / "stable"
-            sh(f"rm -rf {stable_dir}")
-            sh(f"mv {BUILDDIR}/{doc_version} {stable_dir}")
 
         del environ["DOC_BUILDING"]
 
@@ -485,6 +487,13 @@ def main():
         "--no-exec",
         "-E",
         help="do not execute notebooks",
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--no-sync",
+        "-Y",
+        help="do not sync py and ipynb files",
         action="store_true",
     )
 

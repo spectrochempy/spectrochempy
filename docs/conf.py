@@ -247,7 +247,7 @@ def get_previous_versions():
     versions = []
     html_dir = PROJECT / "build" / "html"
     for item in html_dir.iterdir():
-        if item.is_dir() and item.name not in ["stable", "latest", "downloads"]:
+        if item.is_dir() and item.name not in ["stable", "downloads"]:
             versions.append(item.name)
     return versions
 
