@@ -92,7 +92,6 @@ warnings.filterwarnings(action="ignore", category=UnitStrippedWarning)
 # ------------------------------------------------------------------------------
 # API imports
 # ------------------------------------------------------------------------------
-
 from spectrochempy import api
 from spectrochempy.api import *  # noqa: F403
 

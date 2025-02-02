@@ -13,11 +13,11 @@
                 <dt>Other versions</dt>
                 {% for slug, url in versions %}
                     {% if slug != current_version %}
-                        <dd><a href="https://www.spectrochempy.fr{{ url }}">{{ slug.upper() }}</a></dd>
+                        <dd><a href="{{ url }}">{{ slug.upper() }}</a></dd>
                     {% endif %}
                 {% endfor %}
                 {% for version in (previous_versions | join(',')).split(',') %}
-                    <dd><a href="https://www.spectrochempy.fr/{{ version }}/">{{ version }}</a></dd>
+                    <dd><a href="/{{ version }}/">{{ version }}</a></dd>
                 {% endfor %}
             </dl>
             <hr/>
@@ -42,7 +42,7 @@
         <div class="admonition warning">
             <p class="first admonition-title">Warning</p>
             <p class="last"> You are reading the documentation related to the development version.
-                <a href="https://www.spectrochempy.fr/stable/index.html">Go here</a> if you are looking for the documentation of the stable
+                <a href="/{{release}}/index.html">Go here</a> if you are looking for the documentation of the stable
                 release.
             </p>
         </div>

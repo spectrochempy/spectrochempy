@@ -54,8 +54,7 @@
 # The ``User's guide and tutorials`` section is designed to give you a quick overview of the main features of **SpectroChemPy**. It does not cover all
 # features, but should help you to get started quickly, and to find your way around.
 # For more details on the various features, check out the [Public API reference](../../reference/index.rst) section which gives
-# a more detailed description of the API. You can also refer to the [Gallery of example](../../gettingstarted/gallery/auto_examples/index.html)
-#
+# [Gallery of Examples](../../gettingstarted/gallery/auto_examples/index.html)
 # ## What to do if questions arise
 #
 # If, despite this documentation, which we're constantly trying to improve, you still have unresolved questions, don't hesitate to post your question on the [discussion forum](https://github.com/spectrochempy/spectrochempy/discussions). You can also post on [StackOverflow](https://stackoverflow.com), if you prefer, but don't forget to put "Spectrochempy" in the title (as there are no tags yet to enable us to find new questions easily.
