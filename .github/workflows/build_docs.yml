@@ -51,6 +51,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
 
       # Step 2: Setup Python environment using Micromamba
@@ -81,7 +83,7 @@ jobs:
       - name: Clone gh-pages branch
         run: |
           mkdir -p build
-          git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/html
+          git clone --branch=gh-pages --single-branch https://github.com/${{ github.repository }}.git build/html
 
       - name: Get previous tag
         id: prev_tag
@@ -100,7 +102,11 @@ jobs:
       - name: Build docs
         run: |
           echo "Recreating docs"
-          python docs/make.py -j1 html
+          if [[ ${{ github.ref }} == refs/heads/docs/* ]]; then
+            python docs/make.py -j1 html --no-api --no-exec
+          else
+            python docs/make.py -j1 html
+          fi
 
       # Upload build artifacts
       - name: Upload build artifacts
@@ -119,3 +125,4 @@ jobs:
           branch: gh-pages
           folder: build/html/
           single-commit: true
+          repository-name: ${{ github.repository }}

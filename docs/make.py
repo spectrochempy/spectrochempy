@@ -298,8 +298,8 @@ class BuildDocumentation:
             f"\n{'-' * 80}"
         )
         srcdir = confdir = DOCS
-        outdir = f"{BUILDDIR}/latest"
-        doctreesdir = f"{DOCTREES}/latest"
+        outdir = f"{BUILDDIR}"
+        doctreesdir = f"{DOCTREES}/{doc_version}"
 
         sp = Sphinx(
             str(srcdir),
@@ -317,18 +317,17 @@ class BuildDocumentation:
         """Post-build actions."""
         doc_version = self._doc_version
         BUILDDIR = DOCREPO / builder
-        sh(f"cp -r {BUILDDIR}/latest/ {BUILDDIR}")
-
-        if doc_version == "stable":
-            # Move stable version to "stable/" subdirectory and populate the root directory
-            stable_dir = BUILDDIR / "stable"
-            sh(f"rm -rf {stable_dir}")
-            sh(f"cp -r {BUILDDIR}/latest/ {stable_dir}")
 
         print(
             f"\n{'-' * 130}\nBuild finished. The {builder.upper()} pages "
-            f"are in {BUILDDIR}/{doc_version} and copied in {BUILDDIR}."
+            f"are in {BUILDDIR}."
         )
+
+        if doc_version == "stable":
+            # Move stable version to "stable/" subdirectory
+            stable_dir = BUILDDIR / "stable"
+            sh(f"rm -rf {stable_dir}")
+            sh(f"cp -r {BUILDDIR} {stable_dir}")
 
         del environ["DOC_BUILDING"]
 
