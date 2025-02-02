@@ -82,6 +82,12 @@ Glossary
         Number of ``targets``. A target is a property to predict using cross-decomposition methods such as PLS.
         Typically a target is a composition variable such as a concentration.
 
+    NMF
+        NMF stands for ``Non-negative Matrix Factorization``.
+        NMF is a method for factorizing a non-negative matrix :math:`X` into two non-negative matrices
+        :math:`W` and :math:`H` such as :math:`X = W \cdot H`. NMF is often used for feature extraction
+        and dimensionality reduction.
+
     PCA
         ``Principal Component Analysis``.
         PCA is directly related to the :term:`SVD`. Its master equation is:

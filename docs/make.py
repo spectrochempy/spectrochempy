@@ -240,7 +240,7 @@ class BuildDocumentation:
         """Get a list of previous versions from the HTML directory."""
         versions = []
         for item in HTML.iterdir():
-            if item.is_dir() and item.name not in ["latest", "stable"]:
+            if item.is_dir() and item.name not in ["stable", "downloads"]:
                 versions.append(item.name)
         return versions
 
@@ -279,6 +279,9 @@ class BuildDocumentation:
         previous_versions = self._get_previous_versions()
         environ["PREVIOUS_VERSIONS"] = ",".join(previous_versions)
 
+        # Set Sphinx configuration options based on settings
+        environ["SPHINX_NOEXEC"] = "1" if self.settings["noexec"] else "0"
+
     def _run_sphinx_build(self, builder):
         """Run the Sphinx build process."""
         version = self._version
@@ -286,16 +289,12 @@ class BuildDocumentation:
         BUILDDIR = DOCREPO / builder
 
         print(
-            f"{'#' * 80}\n"
+            f"\n{'-' * 80}\n"
             f"Building {builder.upper()} documentation ({doc_version.capitalize()} "
             f"version : {version})"
             f"\n in {BUILDDIR}"
-            f"\n{'#' * 80}"
+            f"\n{'-' * 80}"
         )
-
-        print(f"{'-' * 80}\n")
-        print(f"\n{builder.upper()} BUILDING")
-        print(f"{'-' * 80}\n")
         srcdir = confdir = DOCS
         outdir = f"{BUILDDIR}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"
@@ -310,10 +309,6 @@ class BuildDocumentation:
             parallel=self.settings["jobs"],
             verbosity=self.settings["verbosity"],
         )
-        if self.settings["noexec"]:
-            sp.config.nbsphinx_execute = "never"
-            sp.config.plot_gallery = 0
-
         return sp.build()
 
     def _post_build(self, builder):
@@ -331,11 +326,6 @@ class BuildDocumentation:
             stable_dir = BUILDDIR / "stable"
             sh(f"rm -rf {stable_dir}")
             sh(f"mv {BUILDDIR}/{doc_version} {stable_dir}")
-        elif doc_version == "latest":
-            # Move latest version to the root
-            root_dir = BUILDDIR / "latest"
-            sh(f"rm -rf {root_dir}")
-            sh(f"mv {BUILDDIR}/{doc_version} {root_dir}")
 
         del environ["DOC_BUILDING"]
 

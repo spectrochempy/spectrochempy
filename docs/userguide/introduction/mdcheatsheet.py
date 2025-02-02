@@ -221,17 +221,20 @@
 #
 # Alternatively, you can add an ID above the section:
 # ```
-# <a id="section_ID"></a>
+# <a id="processing_functions"></a>
 # ```
-#
-# **Important**
-# Each ID in the notebook must be unique.
-#
-# To link to a section that has an ID, use the following code:
+
+# %% [markdown]
+# <a id="processing_functions"></a>
+# ## Processing Functions
+# This is the section that the internal link points to.
+
+# %% [markdown]
+# Now you can link to the section using:
 # ```
-# [Section title](#section_ID)
+# [processing_functions](#processing_functions)
 # ```
-# [Section title](#section_ID)
+# [processing_functions](#processing_functions)
 
 # %% [markdown]
 # ## External links
