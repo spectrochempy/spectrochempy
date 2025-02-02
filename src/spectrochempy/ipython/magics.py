@@ -65,7 +65,6 @@ class SpectroChemPyMagics(Magics):
 
         Examples
         --------
-
         .. sourcecode:: ipython
 
            In[1]: %addscript myscript.py

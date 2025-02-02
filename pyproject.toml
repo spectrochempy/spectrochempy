@@ -95,10 +95,10 @@ docs = [
   #"cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
   "ipykernel",
   "ipywidgets",
-  "jsonschema<4.0.0",
+  "jsonschema",
   "jupyter",
   "jupytext",
-  "nbformat>=5.7.0",
+  "nbformat",
   "nbsphinx",
   "numpydoc",
   "pickleshare",
@@ -111,8 +111,8 @@ docs = [
   "json5",
 ]
 build = [
-  "setuptools>=64",
-  "setuptools_scm>=8",
+  "setuptools",
+  "setuptools_scm",
   "toml",
   "jinja2",
   "anaconda-client",

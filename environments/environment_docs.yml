@@ -48,10 +48,10 @@ dependencies:
     # -----------------
     - ipykernel
     - ipywidgets
-    - jsonschema<4.0.0
+    - jsonschema
     - jupyter
     - jupytext
-    - nbformat>=5.7.0
+    - nbformat
     - nbsphinx
     - numpydoc
     - pickleshare

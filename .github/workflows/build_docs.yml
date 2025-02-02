@@ -78,16 +78,27 @@ jobs:
         run: |
           python3 .github/workflows/scripts/set_env_var.py
 
-      - name: Build docs
+      - name: Clone gh-pages branch
         run: |
           mkdir -p build
-
-          # List available kernels for debugging
-          jupyter kernelspec list
-
-          echo "cloning gh-pages repository"
           git clone --branch=gh-pages --single-branch https://github.com/spectrochempy/spectrochempy.git build/html
 
+      - name: Get previous tag
+        id: prev_tag
+        run: |
+          git fetch --tags
+          echo "PREV_TAG=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_ENV
+
+      - name: Move previous stable version
+        if: steps.set_env_var.outputs.DOC_VERSION == 'stable'
+        run: |
+          PREV_TAG=${{ env.PREV_TAG }}
+          if [ -d "build/html/stable" ]; then
+            mv build/html/stable build/html/${PREV_TAG}
+          fi
+
+      - name: Build docs
+        run: |
           echo "Recreating docs"
           python docs/make.py -j1 html
 
