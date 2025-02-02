@@ -83,7 +83,7 @@
 # <img src='images/enter_md.png' />
 #
 # ## Markdown cheat sheet
-# To get more information on Markdown format, you can look [here](mdcheatsheet.rst).
+# To get more information on Markdown format, you can look [here](mdcheatsheet.html).
 #
 # # Using the application in a web browser
 #

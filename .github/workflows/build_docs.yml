@@ -85,30 +85,15 @@ jobs:
           mkdir -p build
           git clone --branch=gh-pages --single-branch https://github.com/${{ github.repository }}.git build/html
 
-      - name: Get previous tag
-        id: prev_tag
-        run: |
-          git fetch --tags
-          echo "PREV_TAG=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_ENV
-
-      - name: Move previous stable version
-        if: steps.set_env_var.outputs.DOC_VERSION == 'stable'
-        run: |
-          PREV_TAG=${{ env.PREV_TAG }}
-          if [ -d "build/html/stable" ]; then
-            mv build/html/stable build/html/${PREV_TAG}
-          fi
-
       - name: Build docs
         run: |
           echo "Recreating docs"
+          # python docs/make.py -j1 html
+          if [[ ${{ github.ref }} == refs/heads/docs/* ]]; then
+          python docs/make.py -j1 html --no-api --no-exec
+          else
           python docs/make.py -j1 html
-
-        # if [[ ${{ github.ref }} == refs/heads/docs/* ]]; then
-        #  python docs/make.py -j1 html --no-api --no-exec
-        # else
-        #  python docs/make.py -j1 html
-        # fi
+          fi
 
       # Upload build artifacts
       - name: Upload build artifacts

@@ -215,7 +215,7 @@
 # For the text inside the parentheses, replace any spaces and special characters with a hyphen. For example,
 # if your section is called `processing_functions` , you'd enter:
 # ```
-# [processing_functions](#processing_functions)
+# [processing functions](#processing-functions)
 # ```
 # [processing_functions](#processing_functions)
 #
@@ -232,7 +232,7 @@
 # %% [markdown]
 # Now you can link to the section using:
 # ```
-# [processing_functions](#processing_functions)
+# [processing functions](#processing-functions)
 # ```
 # [processing_functions](#processing_functions)
 
