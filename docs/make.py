@@ -66,8 +66,8 @@ URL_SCPY = "www.spectrochempy.fr"
 
 # GENERAL PATHS
 DOCS = Path(__file__).parent
-TEMPLATES = DOCS / "_templates"
-STATIC = DOCS / "_static"
+TEMPLATES = DOCS / "templates"
+STATIC = DOCS / "static"
 PROJECT = DOCS.parent
 DOCREPO = PROJECT / "build"
 DOCTREES = DOCREPO / "~doctrees"
@@ -236,6 +236,14 @@ class BuildDocumentation:
 
         Apigen()
 
+    def _get_previous_versions(self):
+        """Get a list of previous versions from the HTML directory."""
+        versions = []
+        for item in HTML.iterdir():
+            if item.is_dir() and item.name not in ["latest", "stable"]:
+                versions.append(item.name)
+        return versions
+
     # COMMANDS
     # ----------------------------------------------------------------------------------
     def _make_docs(self, builder="html"):
@@ -266,6 +274,10 @@ class BuildDocumentation:
             self._apigen()
 
         self._sync_notebooks()
+
+        # Get previous versions and pass them to the template
+        previous_versions = self._get_previous_versions()
+        environ["PREVIOUS_VERSIONS"] = ",".join(previous_versions)
 
     def _run_sphinx_build(self, builder):
         """Run the Sphinx build process."""
@@ -315,10 +327,15 @@ class BuildDocumentation:
         )
 
         if doc_version == "stable":
-            doc_version = "latest"
-            # make also the latest identical
-            sh(f"rm -rf {BUILDDIR}/latest")
-            sh(f"cp -r  {BUILDDIR}/stable {BUILDDIR}/latest")
+            # Move stable version to "stable/" subdirectory
+            stable_dir = BUILDDIR / "stable"
+            sh(f"rm -rf {stable_dir}")
+            sh(f"mv {BUILDDIR}/{doc_version} {stable_dir}")
+        elif doc_version == "latest":
+            # Move latest version to the root
+            root_dir = BUILDDIR / "latest"
+            sh(f"rm -rf {root_dir}")
+            sh(f"mv {BUILDDIR}/{doc_version} {root_dir}")
 
         del environ["DOC_BUILDING"]
 

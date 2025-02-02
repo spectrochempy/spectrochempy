@@ -16,6 +16,9 @@
                         <dd><a href="https://www.spectrochempy.fr{{ url }}">{{ slug.upper() }}</a></dd>
                     {% endif %}
                 {% endfor %}
+                {% for version in previous_versions.split(',') %}
+                    <dd><a href="https://www.spectrochempy.fr/{{ version }}/">{{ version }}</a></dd>
+                {% endfor %}
             </dl>
             <hr/>
             <dl>

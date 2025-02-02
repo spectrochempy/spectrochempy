@@ -61,7 +61,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = ["templates"]
 
 # The suffix of source filenames.
 source_suffix = ".rst"
@@ -92,8 +92,8 @@ today_fmt = "%B %d, %Y"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = [
-    "_templates",
-    "_static",
+    "templates",
+    "static",
     "**.ipynb_checkpoints",
     "~temp",
     "generated",
@@ -158,17 +158,17 @@ html_theme_options = {
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 
-html_logo = "_static/scpy.png"
+html_logo = "static/scpy.png"
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
 
-html_favicon = "_static/scpy.ico"
+html_favicon = "static/scpy.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = ["static"]
 html_css_files = [
     "css/spectrochempy.css",
 ]
