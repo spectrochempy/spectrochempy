@@ -126,7 +126,7 @@ documentation = "https://www.spectrochempy.fr/latest"
 issues = "https://github.com/spectrochempy/spectrochempy/issues"
 
 [project.scripts]
-show-versions = "spectrochempy.scripts.show_versions:main"
+show_versions = "spectrochempy.scripts.show_versions:main"
 
 [tool.setuptools]
 include-package-data = true
