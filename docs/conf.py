@@ -411,7 +411,7 @@ def linkcode_resolve(domain, info):
 # Autosummary --------------------------------------------------------------------------
 
 pattern = os.environ.get("SPHINX_NOAPI")
-include_api = pattern == "1"
+include_api = pattern is None or pattern == "0"
 autosummary_generate = True if include_api else ["index"]
 
 autodoc_typehints = "none"
