@@ -357,6 +357,7 @@ class BuildDocumentation:
         doc_version = self._doc_version
 
         # Copy latest to tag directory in BUILDDIR.parent directory
+        print(f"execute : cp -r {HTML/doc_version}/ {HTML}/")
         sh(f"cp -r {HTML/doc_version}/ {HTML}/")
 
         # Remove it if doc_version is 'latest' as all content is in the parent directory
