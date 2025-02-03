@@ -237,7 +237,7 @@ github_repository = os.environ.get("GITHUB_REPOSITORY", "")
 
 if on_github_actions:
     print(f"Building on GitHub Actions in repository: {github_repository}")
-    root = ""
+    root = "/"
     if "spectrochempy/spectrochempy" not in github_repository:
         # we are not on the main site so we cannot use  spectrochempy.fr
         root = "/spectrochempy/"
