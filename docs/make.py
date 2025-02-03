@@ -131,7 +131,7 @@ class BuildDocumentation:
             "whatsnew": kwargs.get("whatsnew", False),
         }
 
-        environ["SPHINX_NOEXEC"] = "1" if self.settings["noexec"] else "0"
+        environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
         environ["SPHINX_NOAPI"] = (
             1 if settings["noapi"] and not settings["whatsnew"] else 0
         )
