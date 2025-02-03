@@ -47,14 +47,14 @@ def _make_concentrations_matrix(*profiles):
 
 def generate_fake():
     """
-    Generate a fake 2D experimental spectra
+    Generate a fake 2D experimental spectra.
 
-    returns
+    Returns
     -------
     datasets:
         2D spectra, individual spectra and concentrations
-    """
 
+    """
     # define properties of the spectra and concentration profiles
     # ----------------------------------------------------------------------------------
     from spectrochempy.analysis.curvefitting import _models

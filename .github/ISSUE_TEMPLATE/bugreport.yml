@@ -53,10 +53,10 @@ body:
         Please describe any other information you want to share.
 
   - type: textarea
-    id: show-versions
+    id: show_versions
     attributes:
      label: Environment
      description: |
-       Paste the output of `scp.show_versions()` here (you can also use `show-versions` command in a console with the package installed).
+       Paste the output of `scp.show_versions()` here (you can also use `show_versions` command in a console with the package installed).
     validations:
       required: true

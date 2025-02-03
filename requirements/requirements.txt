@@ -24,7 +24,7 @@ docrep
 ipython
 jinja2
 numpy
-numpy-quaternion
+numpy-quaternion>=2024
 matplotlib
 osqp
 pint

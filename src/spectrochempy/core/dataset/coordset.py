@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements class `CoordSet` .
-"""
+"""Module that implements class `CoordSet` ."""
 
 __all__ = ["CoordSet"]
 
@@ -101,6 +99,7 @@ class CoordSet(HasTraits):
 
     >>> cs.v_1
     Coord: [float64] K (size: 4)
+
     """
 
     # Hidden attributes containing the collection of objects
@@ -268,7 +267,7 @@ class CoordSet(HasTraits):
     @staticmethod
     def _implements(name=None):
         """
-        Utility to check if the current object implement `CoordSet` .
+        Check if the current object implements `CoordSet`.
 
         Rather than isinstance(obj, CoordSet) use object._implements('CoordSet').
 
@@ -360,39 +359,29 @@ class CoordSet(HasTraits):
 
     @property
     def coords(self):
-        """
-        Coordinates in the coordset (list).
-        """
+        """Coordinates in the coordset (list)."""
         return self._coords
 
     @property
     def has_defined_name(self):
-        """
-        True if the name has been defined (bool).
-        """
+        """True if the name has been defined (bool)."""
         return self.name != self.id
 
     @property
     def id(self):
-        """
-        Object identifier (Readonly property).
-        """
+        """Object identifier (Readonly property)."""
         return self._id
 
     @property
     def is_empty(self):
-        """
-        True if there is no coords defined (bool).
-        """
+        """True if there is no coords defined (bool)."""
         if self._coords:
             return len(self._coords) == 0
         return False
 
     @property
     def is_same_dim(self):
-        """
-        True if the coords define a single dimension (bool).
-        """
+        """True if the coords define a single dimension (bool)."""
         return self._is_same_dim
 
     @property
@@ -434,9 +423,7 @@ class CoordSet(HasTraits):
 
     @property
     def names(self):
-        """
-        Names of the coords in the current coords (list - read only property).
-        """
+        """Names of the coords in the current coords (list - read only property)."""
         _names = []
         if self._coords:
             for item in self._coords:
@@ -449,9 +436,7 @@ class CoordSet(HasTraits):
     # ----------------------------------------------------------------------------------
     @property
     def default(self):
-        """
-        Default coordinates (Coord).
-        """
+        """Default coordinates (Coord)."""
         return self._coords[self._default]
 
     @property
@@ -473,9 +458,7 @@ class CoordSet(HasTraits):
 
     @property
     def titles(self):
-        """
-        Titles of the coords in the current coords (list).
-        """
+        """Titles of the coords in the current coords (list)."""
         _titles = []
         for item in self._coords:
             if isinstance(item, Coord):
@@ -490,23 +473,17 @@ class CoordSet(HasTraits):
 
     @property
     def labels(self):
-        """
-        Labels of the coordinates in the current coordset (list).
-        """
+        """Labels of the coordinates in the current coordset (list)."""
         return [item.labels for item in self._coords]
 
     @property
     def is_labeled(self):
-        """
-        returns True if one of the coords is labeled.
-        """
+        """Returns True if one of the coords is labeled."""
         return any(item.is_labeled for item in self._coords)
 
     @property
     def units(self):
-        """
-        Units of the coords in the current coords (list).
-        """
+        """Units of the coords in the current coords (list)."""
         return [item.units for item in self._coords]
 
     # ----------------------------------------------------------------------------------
@@ -520,6 +497,7 @@ class CoordSet(HasTraits):
         -------
         object
             an exact copy of the current object
+
         """
         return self.__copy__()
 
@@ -531,6 +509,7 @@ class CoordSet(HasTraits):
         -------
         out : list
             list of all coordinates names (including reference to other coordinates).
+
         """
         keys = []
         if self.names:
@@ -540,23 +519,11 @@ class CoordSet(HasTraits):
         return keys
 
     def select(self, val):
-        """
-        Select the default coord index.
-        """
+        """Select the default coord index."""
         self._default = min(max(0, int(val) - 1), len(self.names))
 
     def set(self, *args, **kwargs):
-        """
-        Set one or more coordinates in the current CoordSet.
-
-        Parameters
-        ----------
-        *args
-        **kwargs
-
-        Returns
-        -------
-        """
+        """Set one or more coordinates in the current CoordSet."""
         if not args and not kwargs:
             return
 
@@ -601,6 +568,7 @@ class CoordSet(HasTraits):
         alphabetical order :
         e.g, the first title will be for the `x` coordinates, the second for the `y` ,
         etc.
+
         """
         if len(args) == 1 and (is_sequence(args[0]) or isinstance(args[0], CoordSet)):
             args = args[0]
@@ -638,6 +606,7 @@ class CoordSet(HasTraits):
         If the args are not named, then the attributions are made in coordinate's name
         alphabetical order :
         e.g, the first units will be for the `x` coordinates, the second for the `y` , etc.
+
         """
         force = kwargs.pop("force", False)
 
@@ -663,6 +632,7 @@ class CoordSet(HasTraits):
         out : dict
             A dictionary where keys are the names of the coordinates, and the values
             the coordinates themselves.
+
         """
         return dict(zip(self.names, self._coords, strict=False))
 
@@ -675,6 +645,7 @@ class CoordSet(HasTraits):
         k**warg
             Only keywords among the CoordSet.names are allowed - they denotes the name
             of a dimension.
+
         """
         dims = kwargs.keys()
         for dim in list(dims)[:]:

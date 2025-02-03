@@ -4,10 +4,9 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module defines the `application` on which the API rely.
+Defines the `application` on which the API rely.
 
-It also defines
-the default application preferences and IPython magic functions.
+It also defines the default application preferences and IPython magic functions.
 """
 
 import importlib
@@ -228,8 +227,7 @@ cite = (
 
 def _get_config_dir():
     """
-    Determines the SpectroChemPy configuration directory name and
-    creates the directory if it doesn't exist.
+    Determine the SpectroChemPy configuration directory name and creates the directory if it doesn't exist.
 
     This directory is typically `$HOME/.spectrochempy/config` ,
     but if the
@@ -243,8 +241,8 @@ def _get_config_dir():
     -------
     config_dir : str
         The absolute path to the configuration directory.
-    """
 
+    """
     # first look for SCP_CONFIG_HOME
     scp = environ.get("SCP_CONFIG_HOME")
 
@@ -263,8 +261,9 @@ def _get_config_dir():
 # ======================================================================================
 class SpectroChemPy(Application):
     """
-    This class SpectroChemPy is the main class, containing most of the setup,
-    configuration and more.
+    SpectroChemPy is the main class, containing most of the setup.
+
+    Configuration and more.
     """
 
     icon = tr.Unicode("scpy.png")
@@ -575,9 +574,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
     # Public methods and properties
     # ----------------------------------------------------------------------------------
     def start_show_config(self):
-        """
-        Start function used when show_config is True.
-        """
+        """Start function used when show_config is True."""
         config = self.config.copy()
         # exclude show_config flags from displayed config
         for cls in self.__class__.mro():
@@ -613,12 +610,13 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
 
     def initialize(self, argv=None):
         """
-        Initialisation function for the API applications.
+        Initialize the API applications.
 
         Parameters
         ----------
         argv :  List, [optional].
             List of configuration parameters.
+
         """
         # parse the argv
         # --------------------------------------------------------------------
@@ -682,9 +680,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             sys.excepthook = self._catch_exceptions
 
     def reset_preferences(self):
-        """
-        Reset all preferences to default.
-        """
+        """Reset all preferences to default."""
         self.reset_config = True
         self._init_all_preferences()
         self.reset_config = False
@@ -752,23 +748,17 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
             self.log_format = fmt
 
     def info_(self, msg, *args, **kwargs):
-        """
-        Formatted info message.
-        """
+        """Format an info message."""
         with self._fmtcontext():
             self.log.info(msg, *args, **kwargs)
 
     def debug_(self, msg, *args, **kwargs):
-        """
-        Formatted debug message.
-        """
+        """Format a debug message."""
         with self._fmtcontext():
             self.log.debug("DEBUG | " + msg, *args, **kwargs)
 
     def error_(self, *args, **kwargs):
-        """
-        Formatted error message.
-        """
+        """Format an error message."""
         if isinstance(args[0], Exception):
             e = args[0]
             etype = type(e)
@@ -786,9 +776,7 @@ you are kindly requested to cite it this way: <pre>{cite}</pre></p>.
         self._catch_exceptions(etype, emessage, None)
 
     def warning_(self, msg, *args, **kwargs):
-        """
-        Formatted warning message.
-        """
+        """Format a warning message."""
         self._from_warning_ = True
         warnings.warn(msg, *args, **kwargs, stacklevel=2)
         self._from_warning_ = False

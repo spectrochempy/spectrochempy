@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -29,6 +29,7 @@
 #       version_major: 2
 #       version_minor: 0
 # ---
+
 # %% [markdown]
 # # API Configuration
 
@@ -92,7 +93,7 @@ print(f"Default: {scp.get_loglevel()}")  # print the current loglevel
 # %% [markdown]
 # It yields `30` the numerical value corresponding to the `WARNING` level. Now, the
 # next instruction
-# lowers the loglevel to ``"INFO"``\ :
+# lowers the loglevel to ``"INFO"``:
 # %%
 scp.set_loglevel(scp.INFO)
 

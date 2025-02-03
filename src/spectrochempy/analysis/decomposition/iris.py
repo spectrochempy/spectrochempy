@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the IRIS class.
-"""
+"""Module that implements the IRIS class."""
 
 __all__ = ["IrisKernel", "IRIS"]
 __configurables__ = ["IRIS"]
@@ -55,7 +53,7 @@ class IrisKernel(tr.HasTraits):
     physico-chemical parameter, respectively.
 
     Parameters
-    -----------
+    ----------
     X : `NDDataset`
         The 1D or 2D dataset for the kernel is defined.
     K : any of [ ``'langmuir'`` , ``'ca'`` , ``'reactant-first-order'`` , ``'product-first-order'`` , ``'diffusion'`` ] or `callable` or `NDDataset`
@@ -66,6 +64,7 @@ class IrisKernel(tr.HasTraits):
     q :  `Coord` or ``iterable`` of 3 values
         Internal variable. Must be provided if the kernel `K` is passed as a `str` or
         `callable`.
+
     """
 
     _X = NDDatasetType(allow_none=True)
@@ -552,10 +551,10 @@ class IRIS(DecompositionAnalysis):
             # --------------------------------------------------------------------------
             def solve_for_lambda(X, K, P0, lamda, S):
                 """
-                QP optimization
+                QP optimization.
 
-                parameters:
-                -----------
+                Parameters
+                ----------
                 X: NDDataset of experimental spectra
                 K: NDDataset, kernel dataset
                 P0: the lambda independent part of P
@@ -563,9 +562,10 @@ class IRIS(DecompositionAnalysis):
                 S: penalty function (sharpness)
                 verbose: print info
 
-                returns:
-                --------
+                Returns
+                -------
                 f, RSS and SM for a given regularization parameter
+
                 """
                 M, N, _ = K.shape[-1], X.shape[-1], X.shape[0]
                 fi = np.zeros((M, N))
@@ -789,6 +789,7 @@ class IRIS(DecompositionAnalysis):
         -------
         `~spectrochempy.core.dataset.nddataset.NDDataset`
             The reconstructed dataset.
+
         """
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using this method")
@@ -831,6 +832,7 @@ class IRIS(DecompositionAnalysis):
         -------
         `~matplotlib.axes.Axes`
                 The matplotlib axe.
+
         """
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using this method")
@@ -867,6 +869,7 @@ class IRIS(DecompositionAnalysis):
         Other Parameters
         ----------------
         %(plotmerit.other_parameters)s
+
         """
         X = self.X
         X_hat = self.inverse_transform()
@@ -909,8 +912,8 @@ class IRIS(DecompositionAnalysis):
         -------
         `list` of `~matplotlib.axes.Axes`
             Subplots.
-        """
 
+        """
         axeslist = []
         if index is None:
             index = range(len(self._lambdas))
@@ -931,8 +934,9 @@ class IRIS(DecompositionAnalysis):
 
 def _menger(x, y):
     """
-    returns the Menger curvature of a triplet of
-    points. x, y = sets of 3 cartesian coordinates
+    Return the Menger curvature of a triplet of points.
+
+    x, y = sets of 3 cartesian coordinates.
     """
     numerator = 2 * (((x[1] - x[0]) * (y[2] - y[1])) - ((y[1] - y[0]) * (x[2] - x[1])))
     if abs(numerator) <= EPSILON:
@@ -948,7 +952,7 @@ def _menger(x, y):
 
 
 def _Smat(q):
-    """returns the matrix used to compute the norm of f second derivative"""
+    """Return the matrix used to compute the norm of f second derivative."""
     m = len(q)
     S = np.zeros((m, m))
     S[0, 0] = 6
@@ -993,7 +997,6 @@ def _nearestPD(A, shift):  # pragma: no cover
 
     copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd.
     """
-
     B = 0.5 * (A + A.T)
     _, s, V = np.linalg.svd(B)
 
@@ -1031,7 +1034,6 @@ def _isPD(B):  # pragma: no cover
 
     copyright: see https://gist.github.com/fasiha/fdb5cec2054e6f1c6ae35476045a0bbd.
     """
-
     try:
         _ = np.linalg.cholesky(B)
         return True

@@ -13,13 +13,13 @@ Papers citing `SpectroChemPy`
 
 - Discriminating Analysis of Metal Ions via Multivariate Curve Resolution–Alternating Least Squares Applied to Silver
   Nanoparticle Sensor,
-    :cite:t:`Rossi:2025`, `DOI: 10.3390/nano15010057 <https://doi.org/10.3390/nano15010057>`__.
+  :cite:t:`Rossi:2025`, `DOI: 10.3390/nano15010057 <https://doi.org/10.3390/nano15010057>`__.
 
 2024
 ====
 
 - Metal-organic frameworks based on pyrazolates for the selective and efficient capture of formaldehyde
- :cite:t:`Sadovnik:2024`, `DOI: 10.1038/s41467-024-53572-z <https://doi.org/10.1038/s41467-024-53572-z>`__.
+  :cite:t:`Sadovnik:2024`, `DOI: 10.1038/s41467-024-53572-z <https://doi.org/10.1038/s41467-024-53572-z>`__.
 
 - Investigating nalidixic acid adsorption onto ferrihydrite and maghemite surfaces: molecular-level insights via
   continuous-flow ATR-FTIR spectroscopy,

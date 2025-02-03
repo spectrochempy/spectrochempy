@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module extend NDDataset with the import method for Thermo galactic (spc) data files.
-"""
+"""Extend NDDataset with the import method for Thermo galactic (spc) data files."""
 
 __all__ = ["read_spc"]
 __dataset_methods__ = __all__
@@ -40,7 +38,7 @@ def read_spc(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -48,13 +46,14 @@ def read_spc(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_spc)s
 
     Examples
-    ---------
+    --------
     >>> scp.read_spc("galacticdata/BENZENE.spc")
     NDDataset: [float64] a.u. (shape: (y:1, x:1842))
+
     """
     kwargs["filetypes"] = ["GRAMS/Thermo Galactic files (*.spc)"]
     kwargs["protocol"] = ["spc"]

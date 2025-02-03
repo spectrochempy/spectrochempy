@@ -5,8 +5,7 @@
 # ======================================================================================
 
 """
-NDDataset Input/Output Module
-============================
+NDDataset Input/Output Module.
 
 This module implements input/output functionality for NDDataset objects. It provides:
 
@@ -62,7 +61,8 @@ def zipfile_factory(
     *args: Any,
     **kwargs: Any,
 ) -> "zipfile.ZipFile":
-    """Create a ZipFile with Zip64 support.
+    """
+    Create a ZipFile with Zip64 support.
 
     Parameters
     ----------
@@ -77,6 +77,7 @@ def zipfile_factory(
     -------
     zipfile.ZipFile
         Configured zip file object
+
     """
     if not hasattr(file, "read"):
         file = os.fspath(file)
@@ -87,7 +88,8 @@ def zipfile_factory(
 
 
 class NDIO(HasTraits):
-    """Input/Output interface for NDDataset objects.
+    """
+    Input/Output interface for NDDataset objects.
 
     This class provides methods for:
     - Saving/loading datasets in native format
@@ -122,9 +124,7 @@ class NDIO(HasTraits):
 
     @property
     def filename(self):
-        """
-        Current filename for this dataset.
-        """
+        """Current filename for this dataset."""
         if self._filename:
             try:
                 return self._filename.relative_to(self.preferences.datadir)
@@ -139,9 +139,7 @@ class NDIO(HasTraits):
 
     @property
     def filetype(self):
-        """
-        Type of current file.
-        """
+        """Type of current file."""
         klass = self._implements()
         return [f"SpectroChemPy {klass} file (*{SCPY_SUFFIX[klass]})"]
 
@@ -171,7 +169,8 @@ class NDIO(HasTraits):
     # Public methods
     # ----------------------------------------------------------------------------------
     def save(self, **kwargs: Any) -> pathlib.Path | None:
-        """Save dataset in native .scp format.
+        """
+        Save dataset in native .scp format.
 
         Parameters
         ----------
@@ -187,6 +186,7 @@ class NDIO(HasTraits):
         --------
         save_as : Save with new filename
         write : Export to different format
+
         """
         # By default we save the file in the self.directory and with the
         # name + suffix depending
@@ -222,13 +222,13 @@ class NDIO(HasTraits):
             Optional keyword parameters (see Other Parameters).
 
         Other Parameters
-        -----------------
+        ----------------
         directory : str, optional
             If specified, the given `directory` and the `filename` will be
             appended.
 
         See Also
-        ---------
+        --------
         save : Save current dataset.
         write : Export current dataset to different format.
 
@@ -256,6 +256,7 @@ class NDIO(HasTraits):
         Remove this file
 
         >>> filename.unlink()
+
         """
         if filename:
             # we have a filename
@@ -315,7 +316,6 @@ class NDIO(HasTraits):
 
         Examples
         --------
-
         >>> nd1 = scp.read('irdata/nh4y-activation.spg')
         >>> f = nd1.save()
         >>> f.name
@@ -326,6 +326,7 @@ class NDIO(HasTraits):
 
         >>> from spectrochempy import *
         >>> nd2 = NDDataset.load(f)
+
         """
         content = kwargs.get("content")
 
@@ -379,7 +380,8 @@ class NDIO(HasTraits):
 
     @classmethod
     def loads(cls, js: dict[str, Any]) -> Any:
-        """Deserialize dataset from JSON.
+        """
+        Deserialize dataset from JSON.
 
         Parameters
         ----------
@@ -395,6 +397,7 @@ class NDIO(HasTraits):
         ------
         TypeError
             If JSON cannot be deserialized
+
         """
         from spectrochempy.core.dataset.nddataset import NDDataset
         from spectrochempy.core.project.project import Project
@@ -487,8 +490,8 @@ class NDIO(HasTraits):
         ----------
         filename: str of  `pathlib` object
             File name where to save the current object.
-        """
 
+        """
         # Stage data in a temporary file on disk, before writing to zip.
         import tempfile
         import zipfile

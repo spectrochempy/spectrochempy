@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -29,6 +29,7 @@
 #       version_major: 2
 #       version_minor: 0
 # ---
+
 # %% [markdown]
 # # One-dimensional (1D) Fourier transformation
 
@@ -113,7 +114,7 @@ _ = ax.legend(loc="lower right")
 # ### Line broadening
 # Often before applying FFT, some exponential multiplication `em`or other broadening filters such as `gm` or `sp`
 # are applied.
-# See the dedicated [apodization tutorial](apodization.ipynb).
+# See the dedicated [apodization tutorial](apodization.rst).
 
 # %%
 fid2 = fid.em(lb="50. Hz")
@@ -141,7 +142,7 @@ print("si = ", spec3.size)
 
 # %% [markdown]
 # ### Time domain baseline correction
-# See the dedicated [Time domain baseline correction tutorial](td_baseline.ipynb).
+# See the dedicated [Time domain baseline correction tutorial](td_baseline.rst).
 
 # %% [markdown]
 # ### Magnitude calculation

@@ -21,6 +21,7 @@ https://github.com/mhvwerts/whittaker-eilers-smoother/blob/master/whittaker_smoo
 See Licence in the LICENCES folder of the repository
 (LICENCES/WHITTAKER_SMOOTH_LICENCE.rst)
 and has been slightly modified.
+
 """
 
 import numpy as np
@@ -45,8 +46,8 @@ def speyediff(N, d, format="csc"):
     -------
     scipy.sparse.csc_matrix
         A (N-d) x N sparse difference matrix.
-    """
 
+    """
     # assert not (d < 0), "d must be non negative"  (this will be checked elsewhere)
     shape = (N - d, N)
     diagonals = np.zeros(2 * d + 1)
@@ -83,8 +84,8 @@ def whittaker_smooth(y, lmbd, d=2):
     References
     ----------
     .. [1] P. H. C. Eilers, "A perfect smoother", Anal. Chem. 2003, (75), 3631-3636
-    """
 
+    """
     m = len(y)
     E = sparse.eye(m, format="csc")
     D = speyediff(m, d, format="csc")

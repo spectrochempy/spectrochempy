@@ -4,7 +4,7 @@ import ipywidgets as widgets
 
 
 class OutputWidgetHandler(logging.Handler):
-    """Custom logging handler sending logs to an output widget"""
+    """Custom logging handler sending logs to an output widget."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -12,7 +12,7 @@ class OutputWidgetHandler(logging.Handler):
         self.out = widgets.Output(layout=layout)
 
     def emit(self, record):
-        """Overload of logging.Handler method"""
+        """Overload of logging.Handler method."""
         formatted_record = self.format(record)
         new_output = {
             "name": "stdout",
@@ -26,5 +26,5 @@ class OutputWidgetHandler(logging.Handler):
     #     display(self.out)
 
     def clear_logs(self):
-        """Clear the current logs"""
+        """Clear the current logs."""
         self.out.clear_output()

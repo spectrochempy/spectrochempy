@@ -1,4 +1,4 @@
-.. _examples-core-index:
+.. _examples-analysis-index:
 
 ##################
 Analysis NDDataset

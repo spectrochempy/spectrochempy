@@ -20,9 +20,9 @@ def assert_produces_warning(
     match: str | None = None,
 ):
     """
-    Context manager for running code expected to either raise a specific
-    warning, or not raise any warnings. Verifies that the code raises the
-    expected warning, and that it does not raise any other unexpected
+    Context manager to assert that code raises a specific warning or no warnings.
+
+    Verifies that the code raises the expected warning, and that it does not raise any other unexpected
     warnings. It is basically a wrapper around `warnings.catch_warnings` .
 
     Parameters
@@ -74,6 +74,7 @@ def assert_produces_warning(
     AssertionError: Did not see expected warning of class 'UserWarning'.
 
     ..warn:: This is *not* thread-safe.
+
     """
     __tracebackhide__ = True
 

@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Plugin module to extend NDDataset with a JCAMP-DX export method.
-"""
+"""Plugin module to extend NDDataset with a JCAMP-DX export method."""
 # import os as os
 
 from spectrochempy.core.writers.exporter import Exporter
@@ -38,9 +36,9 @@ def write_excel(*args, **kwargs):
 
     Examples
     --------
-
     The extension will be added automatically
     >>> X.write_xls('myfile')
+
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["Microsoft Excel files (*.xls)"]

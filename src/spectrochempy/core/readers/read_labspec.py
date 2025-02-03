@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-r"""
-This module extend NDDataset with the import method for Labspec *.txt generated data files.
-"""
+"""Extend NDDataset with the import method for Labspec *.txt generated data files."""
 
 __all__ = ["read_labspec"]
 __dataset_methods__ = __all__
@@ -40,7 +38,7 @@ def read_labspec(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -48,14 +46,14 @@ def read_labspec(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_labspec)s
 
     Examples
     --------
     >>> A = scp.read_labspec('ramandata/labspec/Activation.txt')
-    """
 
+    """
     kwargs["filetypes"] = ["LABSPEC exported files (*.txt)"]
     kwargs["protocol"] = ["labspec", "txt"]
     importer = Importer()

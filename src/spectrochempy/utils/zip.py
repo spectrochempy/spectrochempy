@@ -31,6 +31,7 @@ def make_zipfile(file, **kwargs):
     Returns
     -------
     zipfile
+
     """
     import zipfile
 
@@ -65,6 +66,7 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
         List of all files in the archive with a ` .npy` extension.
     zip : ZipFile instance
         The ZipFile object initialized with the zipped archive.
+
     """
 
     def __init__(self, fid):
@@ -85,9 +87,7 @@ class ScpFile(Mapping):  # lgtm[py/missing-equals]
         self.close()
 
     def close(self):
-        """
-        Close the file.
-        """
+        """Close the file."""
         if self.zip is not None:
             self.zip.close()
             self.zip = None

@@ -18,6 +18,7 @@ See :ref:`release` for a full changelog including other versions of SpectroChemP
 New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
+
 * Improvement of the installation process using pip.
   One can now install the package using command
   like `pip install spectrochempy[cantera]` to install the package with the cantera
@@ -27,12 +28,14 @@ New features
 * Now support installation on the last version (3.10) of Google Colab. To do so, use the following command:
   `!pip install "spectrochempy[colab]"`. See documentation for more details
 * Add a `show-version` script executable from a terminal.
+* Revision of the documentation to improve the user experience.
 
 .. section
 
 Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
+
 * Bug #777. Now `scp.show_version()`` works as expected
 
 .. section
@@ -40,18 +43,11 @@ Bug fixes
 Dependency updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
+
 * Major Python compatibility updates:
     - Now supports Python 3.13
     - Minimum Python version increased to 3.10
     - Dropped support for Python 3.9 and below
-
-* Core dependencies updated for Python 3.13 compatibility:
-    - numpy>=2.1.0 (major update)
-    - matplotlib>=3.9.2
-    - scipy>=1.14.1
-    - scikit-learn>=1.5.2
-    - ipython>=8.17.2
-    - numpy-quaternion>=2024.0.3
 
 * New installation options:
     - Added [colab] extra for Google Colab compatibility
@@ -63,6 +59,7 @@ Dependency updates
 Breaking changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
+
 * Minimum Python version requirement increased to 3.10
 * Several core dependencies require major version updates
 * Installation process changes with new dependency groups

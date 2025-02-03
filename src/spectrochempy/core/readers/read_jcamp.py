@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module to extend NDDataset with the import methods.
-"""
+"""Module to extend NDDataset with import methods."""
 
 __all__ = ["read_jcamp"]
 __dataset_methods__ = __all__
@@ -41,7 +39,7 @@ def read_jcamp(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -49,8 +47,9 @@ def read_jcamp(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_jcamp)s
+
     """
     kwargs["filetypes"] = ["JCAMP-DX files (*.jdx *.dx)"]
     kwargs["protocol"] = ["jcamp"]

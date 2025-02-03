@@ -3,15 +3,11 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Various objects
-"""
+"""Various objects."""
 
 
 class Adict(dict):
-    """
-    A simple dict with attribute-access
-    """
+    """A simple dict with attribute-access."""
 
     def __getattr__(self, key):
         try:

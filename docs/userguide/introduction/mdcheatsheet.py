@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -26,6 +26,7 @@
 #   nbsphinx:
 #     orphan: true
 # ---
+
 # %% [markdown]
 # # Markdown Cheat Sheet
 
@@ -214,23 +215,26 @@
 # For the text inside the parentheses, replace any spaces and special characters with a hyphen. For example,
 # if your section is called `processing_functions` , you'd enter:
 # ```
-# [processing_functions](#processing_functions)
+# [processing functions](#processing-functions)
 # ```
 # [processing_functions](#processing_functions)
 #
 # Alternatively, you can add an ID above the section:
 # ```
-# <a id="section_ID"></a>
+# <a id="processing_functions"></a>
 # ```
-#
-# **Important**
-# Each ID in the notebook must be unique.
-#
-# To link to a section that has an ID, use the following code:
+
+# %% [markdown]
+# <a id="processing_functions"></a>
+# ## Processing Functions
+# This is the section that the internal link points to.
+
+# %% [markdown]
+# Now you can link to the section using:
 # ```
-# [Section title](#section_ID)
+# [processing functions](#processing-functions)
 # ```
-# [Section title](#section_ID)
+# [processing_functions](#processing_functions)
 
 # %% [markdown]
 # ## External links

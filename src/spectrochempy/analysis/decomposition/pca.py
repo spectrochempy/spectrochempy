@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Implementation of Principal Component Analysis (using scikit-learn library)
-"""
+"""Implementation of Principal Component Analysis (using scikit-learn library)."""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -314,21 +312,18 @@ for reproducible results across multiple function calls.""",
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y=None)
 
     @property
     def loadings(self):
-        """
-        Return PCA loadings.
-        """
+        """Return PCA loadings."""
         return self.get_components()
 
     @property
     def scores(self):
-        """
-        Returns PCA scores.
-        """
+        """Returns PCA scores."""
         return self.transform(self.X)
 
     @property
@@ -400,6 +395,7 @@ for reproducible results across multiple function calls.""",
         ----------
         n_components : int, optional
             The number of components to print.
+
         """
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using this method")
@@ -431,6 +427,7 @@ for reproducible results across multiple function calls.""",
         -------
         `list` of `~matplotlib.axes.Axes`
             The list of axes.
+
         """
         # get n_components
         if n_components is None:
@@ -502,6 +499,7 @@ for reproducible results across multiple function calls.""",
         -------
         `~matplotlib.axes.Axes`
             The matplotlib axes.
+
         """
         self.prefs = self.X.preferences
 

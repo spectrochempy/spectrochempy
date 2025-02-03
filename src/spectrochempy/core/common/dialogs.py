@@ -4,8 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-File I/O Dialog Module
-=====================
+File I/O Dialog Module.
 
 This module implements file dialog functionality for SpectroChemPy, supporting both
 Qt and Tkinter backends. It provides:
@@ -61,7 +60,8 @@ class _QTFileDialogs:  # pragma: no cover
         caption: str = "Select a folder",
         directory: str | None = None,
     ) -> str | None:
-        """Open dialog for selecting an existing directory.
+        """
+        Open dialog for selecting an existing directory.
 
         Parameters
         ----------
@@ -76,8 +76,8 @@ class _QTFileDialogs:  # pragma: no cover
         -------
         Optional[str]
             Selected directory path or None if cancelled
-        """
 
+        """
         if directory is None:
             directory = str(preferences.datadir)
 
@@ -102,7 +102,8 @@ class _QTFileDialogs:  # pragma: no cover
         caption: str = "Select file",
         filters: list[str] | None = None,
     ) -> str | None:
-        """Open dialog for selecting a file.
+        """
+        Open dialog for selecting a file.
 
         Parameters
         ----------
@@ -119,8 +120,8 @@ class _QTFileDialogs:  # pragma: no cover
         -------
         Optional[str]
             Selected file path or None if cancelled
-        """
 
+        """
         if directory is None:
             directory = str(preferences.datadir)
 
@@ -161,8 +162,8 @@ class _QTFileDialogs:  # pragma: no cover
         -------
         Optional[List[str]]
             List of selected file paths or None if cancelled
-        """
 
+        """
         if directory is None:
             directory = str(preferences.datadir)
 
@@ -185,7 +186,8 @@ class _QTFileDialogs:  # pragma: no cover
         caption: str = "Save as...",
         filters: list[str] | None = None,
     ) -> str | None:
-        """Open dialog for saving a file.
+        """
+        Open dialog for saving a file.
 
         Parameters
         ----------
@@ -202,8 +204,8 @@ class _QTFileDialogs:  # pragma: no cover
         -------
         Optional[str]
             Selected save file path or None if cancelled
-        """
 
+        """
         directory = str(filename)
 
         options = (
@@ -247,7 +249,8 @@ class _TKFileDialogs:  # pragma: no cover
         caption: str = "Select a folder",
         directory: str = "",
     ) -> str | None:
-        """Open dialog for selecting an existing directory.
+        """
+        Open dialog for selecting an existing directory.
 
         Parameters
         ----------
@@ -262,8 +265,8 @@ class _TKFileDialogs:  # pragma: no cover
         -------
         Optional[str]
             Selected directory path or None if cancelled
-        """
 
+        """
         directory = filedialog.askdirectory(
             # parent=parent,
             initialdir=directory,
@@ -277,7 +280,8 @@ class _TKFileDialogs:  # pragma: no cover
 
     @staticmethod
     def filetypes(filters: list[str]) -> list[tuple[str, tuple[str, ...]]]:
-        """Convert Qt filter patterns to Tkinter format.
+        """
+        Convert Qt filter patterns to Tkinter format.
 
         Parameters
         ----------
@@ -288,8 +292,8 @@ class _TKFileDialogs:  # pragma: no cover
         -------
         List[Tuple[str, Tuple[str, ...]]]
             Tkinter-compatible file type specifications
-        """
 
+        """
         regex = r"(.*)\((.*)\)"
         filetypes = []
         for _filter in filters:
@@ -310,7 +314,8 @@ class _TKFileDialogs:  # pragma: no cover
         parent: object | None = None,
         filters: list[str] | None = None,
     ) -> str | None:
-        """Open dialog for selecting a file.
+        """
+        Open dialog for selecting a file.
 
         Parameters
         ----------
@@ -323,8 +328,8 @@ class _TKFileDialogs:  # pragma: no cover
         -------
         Optional[str]
             Selected file path or None if cancelled
-        """
 
+        """
         filename = filedialog.askopenfilename(
             # parent=parent,
             filetypes=self.filetypes(filters),
@@ -358,6 +363,7 @@ class _TKFileDialogs:  # pragma: no cover
         -------
         Optional[List[str]]
             List of selected file paths or None if cancelled
+
         """
         filename = filedialog.askopenfilenames(
             # parent=parent,
@@ -380,7 +386,8 @@ class _TKFileDialogs:  # pragma: no cover
         caption: str = "Save as...",
         filters: list[str] | None = None,
     ) -> Path | None:
-        """Open dialog for saving a file.
+        """
+        Open dialog for saving a file.
 
         Parameters
         ----------
@@ -397,6 +404,7 @@ class _TKFileDialogs:  # pragma: no cover
         -------
         Optional[Path]
             Selected save file path or None if cancelled
+
         """
         dftext = ""
         directory = "."
@@ -439,7 +447,8 @@ def save_dialog(
     filters: tuple[str, ...] = ("All Files (*)",),
     **kwargs,
 ) -> Path | None:  # pragma: no cover
-    """Display a save file dialog.
+    """
+    Display a save file dialog.
 
     Parameters
     ----------
@@ -456,6 +465,7 @@ def save_dialog(
     -------
     Optional[Path]
         Selected save file path or None if cancelled
+
     """
     if USE_QT:
         parent = kwargs.pop(
@@ -486,7 +496,8 @@ def open_dialog(
     filters: str | tuple[str, ...] = ("All Files (*)",),
     **kwargs,
 ) -> Path | list[Path] | None:  # pragma: no cover
-    """Display an open file/directory dialog.
+    """
+    Display an open file/directory dialog.
 
     Parameters
     ----------
@@ -503,6 +514,7 @@ def open_dialog(
     -------
     Optional[Union[Path, List[Path]]]
         Selected path(s) or None if cancelled
+
     """
     if USE_QT:
         parent = kwargs.pop(

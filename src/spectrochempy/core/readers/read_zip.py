@@ -30,7 +30,7 @@ def read_zip(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -38,12 +38,11 @@ def read_zip(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_zip)s
 
     Examples
     --------
-
     >>> A = scp.read_zip('agirdata/P350/FTIR/FTIR.zip', only=50, origin='omnic')
     >>> print(A)
     NDDataset: [float64]  a.u. (shape: (y:50, x:2843))

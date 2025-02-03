@@ -10,7 +10,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-This module implements the base abstract classes to define models and estimators
+Implements the base abstract classes to define models and estimators.
+
 (analysis, processing, ...).
 """
 
@@ -91,7 +92,16 @@ class BaseConfigurable(MetaConfigurable):
         log_level=logging.WARNING,
         **kwargs,
     ):
-        """ """
+        """
+        Initialize the BaseConfigurable class.
+
+        Parameters
+        ----------
+        log_level : int, optional
+            The log level at startup. Default is logging.WARNING.
+        **kwargs : dict
+            Additional keyword arguments for configuration.
+        """
         # An empty __doc__ is placed here, else Configurable.__doc__
         # will appear when there is no __init___.doc in subclass
         from spectrochempy.application import app
@@ -332,9 +342,7 @@ class BaseConfigurable(MetaConfigurable):
 
     @property
     def log(self):
-        """
-        Return ``log`` output.
-        """
+        """Return ``log`` output."""
         # A string handler (#1) is defined for the Spectrochempy logger,
         # thus we will return it's content
         from spectrochempy.application import app

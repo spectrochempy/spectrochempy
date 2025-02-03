@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -18,7 +18,7 @@
 # # Slicing NDDatasets
 #
 # This tutorial shows how to handle NDDatasets using python slicing. As prerequisite, the user is
-# expected to have read the [Import Tutorials](../importexport/import.ipynb).
+# expected to have read the [Import Tutorials](../importexport/import.rst).
 
 # %%
 import numpy as np

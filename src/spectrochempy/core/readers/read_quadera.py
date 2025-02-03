@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Plugin module to extend NDDataset with the import methods method.
-"""
+"""Plugin module to extend NDDataset with the import methods method."""
 
 __all__ = ["read_quadera"]
 __dataset_methods__ = __all__
@@ -39,7 +37,7 @@ def read_quadera(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -51,21 +49,21 @@ def read_quadera(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_quadera)s
 
     Notes
-    ------
+    -----
     Currently the acquisition time is that of the first channel as the timeshift of
     other channels are typically
     within few seconds, and the data of other channels are NOT interpolated
     Todo: check with users whether data interpolation should be made
 
     Examples
-    ---------
-
+    --------
     >>> scp.read_quadera('msdata/ion_currents.asc')
     NDDataset: [float64] A (shape: (y:16975, x:10))
+
     """
     kwargs["filetypes"] = ["Quadera files (*.asc)"]
     kwargs["protocol"] = ["asc"]

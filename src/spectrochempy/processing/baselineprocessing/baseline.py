@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the `Baseline` class for baseline corrections and related methods.
-"""
+"""Module implementing the `Baseline` class for baseline corrections and related methods."""
 
 import numpy as np
 import scipy.interpolate
@@ -94,7 +92,7 @@ class Baseline(AnalysisConfigurable):
 
     When dealing with 2D datasets, the baseline correction can be applied either
     sequentially (default) or using a multivariate approach (parameter
-    `multivariate`set to `True).
+    `multivariate` set to `True`).
 
     - The ``'sequential'`` approach which can be used for both 1D and 2D datasets
       consists in fitting the baseline sequentially for each observation row (spectrum).
@@ -103,7 +101,7 @@ class Baseline(AnalysisConfigurable):
       observations).
       The 2D dataset is first dimensionally reduced into several principal
       components using a conventional Singular Value Decomposition :term:`SVD` or a
-      non-negative matrix factorization (`NMF`).
+      non-negative matrix factorization (:term:`NMF`).
       Each component is then fitted before an inverse transform performed to recover
       the baseline correction.
 
@@ -111,8 +109,8 @@ class Baseline(AnalysisConfigurable):
     baseline.
 
     - ``'detrend'`` : remove trends from data. Depending on the ``order`` parameter,
-      the detrend can be constant (mean removal), linear (order=1), quadratic (order=2)
-      or `cubic`(order=3).
+      the detrend can be `constant` (mean removal), `linear` (order=1), `quadratic` (order=2)
+      or `cubic` (order=3).
     - ``'asls'`` : Asymmetric Least Squares Smoothing baseline correction. This method
       is based on the work of Eilers and Boelens (:cite:`eilers:2005`).
     - ``'snip'`` : Simple Non-Iterative Peak (SNIP) detection algorithm
@@ -121,10 +119,10 @@ class Baseline(AnalysisConfigurable):
     - ``'polynomial'`` : Fit a nth-degree polynomial to the data. The order of
       the polynomial is defined by the ``order`` parameter. The baseline is then
       obtained by evaluating the polynomial at each feature defined in predefined
-      `ranges`.
+      `ranges` parameter.
 
-    By default, `ranges` is set to the feature limits (i.e. `ranges=[features[0],
-    features[-1]]`)
+    By default, `ranges` is set to the feature limits (i.e., ``ranges=[features[0],
+    features[-1]]``) and the baseline is fitted on the full range of the dataset.
 
     Parameters
     ----------
@@ -161,15 +159,15 @@ class Baseline(AnalysisConfigurable):
         default_value="polynomial",
         help="""The model used to determine the baseline.
 
-* 'polynomial': the baseline correction is determined by a nth-degree polynomial fitted
+* `polynomial`: the baseline correction is determined by a nth-degree polynomial fitted
   on the data belonging to the selected `ranges`. The `order` parameter to determine the
   degree of the polynomial.
-* 'detrend': removes a constant, linear or polynomial trend to the data. The order of
+* `detrend`: removes a constant, linear or polynomial trend to the data. The order of
   the trend is determined by the `order` parameter.
-* 'asls': the baseline is determined by an asymmetric least square algorithm.
-* 'snip': the baseline is determined by a simple non-iterative peak detection
+* `asls`: the baseline is determined by an asymmetric least square algorithm.
+* `snip`: the baseline is determined by a simple non-iterative peak detection
   algorithm.
-* 'rubberband': the baseline is determined by a rubberband algorithm.
+* `rubberband`: the baseline is determined by a rubberband algorithm.
 """,
     ).tag(config=True)
 
@@ -190,11 +188,11 @@ class Baseline(AnalysisConfigurable):
         help=r"""Polynom order to use for polynomial/pchip interpolation or detrend.
 
 * If an integer is provided, it is the order of the polynom to fit, i.e. 1 for linear,
-* If a string if provided among  'constant', 'linear', 'quadratic' and 'cubic',
-  it is equivalent to order O (constant) to 3 (cubic).
+* If a string if provided among  `constant`, `linear`, `quadratic` and `cubic`,
+  it is equivalent to order O (`constant`) to 3 (`cubic`).
 * If a string equal to `pchip` is provided, the polynomial interpolation is replaced
   by a piecewise cubic hermite interpolation
-  (see `scipy.interpolate.PchipInterpolator`\ """,
+  (see `scipy.interpolate.PchipInterpolator`)""",
     ).tag(config=True, min=1)
 
     lamb = tr.Float(
@@ -598,6 +596,7 @@ baseline/trends for different segments of the data.
         Returns
         -------
         %(analysis_fit.returns)s
+
         """
         self._fitted = False  # reinit this flag
 
@@ -698,9 +697,7 @@ baseline/trends for different segments of the data.
 
     @_docstring.dedent
     def params(self, default=False):
-        """
-        %(MetaConfigurable.parameters_doc)s
-        """
+        """%(MetaConfigurable.parameters_doc)s."""
         d = super().params(default)
         if not default:
             d.ranges = self._ranges
@@ -709,7 +706,7 @@ baseline/trends for different segments of the data.
     @property
     def used_ranges(self):
         """
-        The actual ranges used during fitting
+        The actual ranges used during fitting.
 
         Eventually the features limits are included and the list returned is trimmed,
         cleaned and ordered.
@@ -759,6 +756,7 @@ baseline/trends for different segments of the data.
             Number of lines to display. Default is ``'all'``.
         **others : Other keywords parameters
             Parameters passed to the internal `plot` method of the datasets.
+
         """
         colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
 
@@ -839,13 +837,13 @@ def get_baseline(dataset, *ranges, **kwargs):
     -----
     For more flexibility and functionality, it is advised to use the Baseline class
     processor instead.
-    """
 
+    """
     blc = Baseline()
     # by default, model is 'polynomial' and order is 1.
     # kwargs can overwrite these default values
-    for key in kwargs:
-        setattr(blc, key, kwargs[key])
+    for key, value in kwargs.items():
+        setattr(blc, key, value)
 
     # if model is 'polynomial' and no ranges is provided, we use the features limits
     # and order='linear'
@@ -893,6 +891,7 @@ def basc(dataset, *ranges, **kwargs):
     -----
     For more flexibility and functionality, it is advised to use the Baseline class
     processor instead.
+
     """
     return dataset - get_baseline(dataset, *ranges, **kwargs)
 
@@ -909,7 +908,7 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     ----------
     dataset : `NDDataset`
         The input data.
-    order : non-negative `int` or a `str` among ['constant', 'linear', 'quadratic', 'cubic'], optional, default:'linear'
+    order : non-negative `int` or `str` among `['constant', 'linear', 'quadratic', 'cubic']`, optional, default:'linear'
         The order of the polynomial trend.
 
         * If ``order=0`` or ``'constant'`` , the mean of data is subtracted to remove
@@ -934,8 +933,8 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     See Also
     --------
     %(Baseline.see_also.no_detrend)s
-    """
 
+    """
     # kwargs will be removed in version 0.8
     if breakpoints is None:
         breakpoints = []
@@ -995,6 +994,7 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     See Also
     --------
     %(Baseline.see_also.no_asls)s
+
     """
     blc = Baseline()
     blc.model = "asls"
@@ -1010,7 +1010,7 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
 @_docstring.dedent
 def snip(dataset, snip_width=50):
     """
-    Simple Non-Iterative Peak (SNIP) detection algorithm
+    Perform Simple Non-Iterative Peak (SNIP) detection algorithm.
 
     See :cite:t:`ryan:1988` .
 
@@ -1029,6 +1029,7 @@ def snip(dataset, snip_width=50):
     See Also
     --------
     %(Baseline.see_also.no_snip)s
+
     """
     blc = Baseline()
     blc.model = "snip"
@@ -1059,6 +1060,7 @@ def rubberband(dataset):
     See Also
     --------
     %(Baseline.see_also.no_rubberband)s
+
     """
     blc = Baseline()
     blc.model = "rubberband"

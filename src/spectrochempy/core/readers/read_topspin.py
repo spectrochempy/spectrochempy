@@ -19,6 +19,7 @@ Functions
 Notes
 -----
 Supports both FID and processed data (1D and nD)
+
 """
 
 __all__ = ["read_topspin"]
@@ -788,7 +789,8 @@ bruker_dsp_table = {
 def _remove_digital_filter(dic, data):
     """
     Remove the digital filter from Bruker data.
-    nmrglue modified Digital Filter Processing
+
+    nmrglue modified Digital Filter Processing.
     """
     if "acqus" not in dic:
         raise KeyError("dictionary does not contain acqus parameters")
@@ -896,7 +898,7 @@ def read_topspin(*paths, **kwargs):
     %(kwargs)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -910,10 +912,10 @@ def read_topspin(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_topspin)s
-    """
 
+    """
     kwargs["filetypes"] = [
         "Bruker TOPSPIN fid's or processed data files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
         "Compressed TOPSPIN data directories (*.zip)",

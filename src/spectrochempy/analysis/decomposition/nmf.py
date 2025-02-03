@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Implementation of NMF model (using scikit-learn library)
-"""
+"""Implementation of NMF model (using scikit-learn library)."""
 
 import logging
 
@@ -255,5 +253,6 @@ class NMF(DecompositionAnalysis):
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y=None)

@@ -4,8 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-SpectroChemPy Core Package
-=========================
+SpectroChemPy Core Package.
 
 This package defines the core functionality of the SpectroChemPy API, including:
 
@@ -24,6 +23,7 @@ Notes
 -----
 The imports are organized in logical groups and timed using the `timeit` context manager.
 All public API elements are collected in the __all__ list.
+
 """
 # ruff: noqa: F405
 
@@ -64,24 +64,28 @@ with timeit("application"):
     from spectrochempy.application import warning_
 
     def set_loglevel(level: str | int = logging.WARNING) -> None:
-        """Set the logging level for SpectroChemPy.
+        """
+        Set the logging level for SpectroChemPy.
 
         Parameters
         ----------
         level : Union[str, int]
             Logging level (e.g. 'WARNING', 'DEBUG', etc. or logging constants)
+
         """
         if isinstance(level, str):
             level = getattr(logging, level.upper())
         preferences.log_level = level
 
     def get_loglevel() -> int:
-        """Get current logging level.
+        """
+        Get current logging level.
 
         Returns
         -------
         int
             Current logging level
+
         """
         return preferences.log_level
 

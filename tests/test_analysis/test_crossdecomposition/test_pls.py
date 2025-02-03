@@ -9,6 +9,7 @@
 Tests for the PLSRegression module
 
 """
+
 from os import environ
 
 import matplotlib.pyplot as plt

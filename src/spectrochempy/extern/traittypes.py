@@ -8,6 +8,7 @@ Notes
 -----
 Imported from https://github.com/jupyter-widgets/traittypes
 See LICENSES in the root folder.
+
 """
 
 import inspect
@@ -56,6 +57,7 @@ class SciType(TraitType):
     ----------
     validators : list
         List of validator functions to apply to values.
+
     """
 
     def __init__(self, **kwargs):
@@ -97,6 +99,7 @@ class SciType(TraitType):
         ...     bar = Array(np.identity(2)).valid(shape(2, 2))
         >>> foo = Foo()
         >>> foo.bar = [1, 2]  # Should raise a TraitError
+
         """
         self.validators.extend(validators)
         return self
@@ -123,6 +126,7 @@ class Array(SciType):
         Whether to allow None as a valid value, by default False.
     dtype : numpy.dtype, optional
         The dtype to enforce on values.
+
     """
 
     info_text = "a numpy array"

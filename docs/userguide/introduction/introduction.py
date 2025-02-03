@@ -8,7 +8,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -54,8 +54,7 @@
 # The ``User's guide and tutorials`` section is designed to give you a quick overview of the main features of **SpectroChemPy**. It does not cover all
 # features, but should help you to get started quickly, and to find your way around.
 # For more details on the various features, check out the [Public API reference](../../reference/index.rst) section which gives
-# a more detailed description of the API. You can also refer to the [Gallery of example](../../gallery/auto_examples/index.html)
-#
+# [Gallery of Examples](../../gettingstarted/gallery/auto_examples/index.html)
 # ## What to do if questions arise
 #
 # If, despite this documentation, which we're constantly trying to improve, you still have unresolved questions, don't hesitate to post your question on the [discussion forum](https://github.com/spectrochempy/spectrochempy/discussions). You can also post on [StackOverflow](https://stackoverflow.com), if you prefer, but don't forget to put "Spectrochempy" in the title (as there are no tags yet to enable us to find new questions easily.
@@ -73,7 +72,7 @@
 # If you are already an experienced `python` user, you can certainly use your favorite
 # IDE to run your scripts, debug them and display the results. But if you want an easier
 # way, especially if you are a beginner, we recommend you to use `Jupyter Lab` to do it.
-# To get started, you can follow this link : [Jupyter Lab interface](interface.ipynb).
+# To get started, you can follow this link : [Jupyter Lab interface](interface.rst).
 
 # %% [markdown]
 # ### Loading the API
@@ -130,11 +129,11 @@ nd
 #
 # * [Core objects](../objects/index.rst) : This is really the starting point for understanding how SpectroChemPy works. In fact, virtually all the functions offered by the API use one of these objects: `NDDataset` (the most important!) , `Project` or `Script`.
 #
-# * [Import & export](../importexport.importexport.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
+# * [Import & export](../importexport/importexport.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
 #
 # * [Processing](../processing/processing.rst) : This section explains how to prepare datasets for future analysis. By processing, we mean methods which generally return the same dataset transformed by mathematical operations (for example, this may be a `sqrt` or `log` operation, or a `fft` operation or many others), or part of a dataset transformed by a slicing or concatenation operation.
 #
 # * [Analysis](../analysis/analysis.rst) : This section presents the analysis methods implemented in SpectroChemPy. Generally speaking, analysis methods are any methods used to extract properties or characteristics from one or more NDDatasets. Analysis methods include statistical methods (mean, standard deviation, etc.), peaks, integration, etc.
 # But perhaps the most important is the implementation of various chemometrics methods (PCA, PLS-R, EFA, MCR-ALS, ...), data fit methods, and baseline extraction.
 #
-# * [Plotting](../plotting/plotting.py) : Finally, this section attempts to give the basics for using the plot methods included in SpectroChemPy.  These methods do not claim to cover all needs, and so it may be worthwhile for the user to learn how to use packages such as matplotlib, on which the methods described in this section are based.
+# * [Plotting](../plotting/plotting.rst) : Finally, this section attempts to give the basics for using the plot methods included in SpectroChemPy.  These methods do not claim to cover all needs, and so it may be worthwhile for the user to learn how to use packages such as matplotlib, on which the methods described in this section are based.

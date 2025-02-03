@@ -4,8 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Meta Class Module
-===============
+Meta Class Module.
 
 Provides metadata storage for SpectroChemPy objects through the Meta class.
 Metadata can be accessed both as dictionary items and as attributes.
@@ -34,7 +33,8 @@ import numpy as np
 
 
 class Meta:
-    """Dictionary-like metadata container with attribute access.
+    """
+    Dictionary-like metadata container with attribute access.
 
     Provides storage for metadata that can be accessed either through dictionary
     keys or object attributes. Can be made read-only to prevent modifications.
@@ -58,6 +58,7 @@ class Meta:
 
     >>> meta.readonly = True
     >>> meta.title = "Changed"  # Raises ValueError
+
     """
 
     _data: dict[str, Any] = {}
@@ -179,23 +180,27 @@ class Meta:
         -------
         bool
             True if the name matches "Meta", False otherwise.
+
         """
         if name is None:
             return "Meta"
         return name == "Meta"
 
     def to_dict(self) -> dict:
-        """Convert metadata to regular dictionary.
+        """
+        Convert metadata to regular dictionary.
 
         Returns
         -------
         dict
             Dictionary containing the metadata
+
         """
         return self._data
 
     def get(self, key: str, default: Any = None) -> Any:
-        """Get metadata value by key.
+        """
+        Get metadata value by key.
 
         Parameters
         ----------
@@ -208,16 +213,19 @@ class Meta:
         -------
         Any
             Value for key or default
+
         """
         return self._data.get(key, default)
 
     def update(self, d: Union[dict, "Meta"]) -> None:
-        """Update metadata from dictionary or Meta object.
+        """
+        Update metadata from dictionary or Meta object.
 
         Parameters
         ----------
         d : Union[Dict, Meta]
             Source of metadata to update from
+
         """
         if isinstance(d, Meta) or hasattr(d, "_data"):
             d = d.to_dict()
@@ -225,37 +233,44 @@ class Meta:
             self._data.update(d)
 
     def copy(self) -> "Meta":
-        """Create a shallow copy.
+        """
+        Create a shallow copy.
 
         Returns
         -------
         Meta
             New Meta instance with copied data
+
         """
         return self.__copy__()
 
     def keys(self) -> list[str]:
-        """Get sorted list of metadata keys.
+        """
+        Get sorted list of metadata keys.
 
         Returns
         -------
         List[str]
             Sorted list of metadata keys
+
         """
         return list(self)
 
     def items(self) -> list[tuple[str, Any]]:
-        """Get sorted list of metadata items.
+        """
+        Get sorted list of metadata items.
 
         Returns
         -------
         List[tuple[str, Any]]
             List of (key, value) tuples sorted by key
+
         """
         return [(key, self[key]) for key in self]
 
     def swap(self, dim1: int, dim2: int, inplace: bool = True) -> Optional["Meta"]:
-        """Swap metadata between dimensions.
+        """
+        Swap metadata between dimensions.
 
         Parameters
         ----------
@@ -270,6 +285,7 @@ class Meta:
         -------
         Optional[Meta]
             New Meta object if not inplace
+
         """
         newmeta = self.copy()
 
@@ -294,7 +310,8 @@ class Meta:
         return None
 
     def permute(self, *dims: int, inplace: bool = True) -> Optional["Meta"]:
-        """Permute metadata dimensions.
+        """
+        Permute metadata dimensions.
 
         Parameters
         ----------
@@ -307,6 +324,7 @@ class Meta:
         -------
         Optional[Meta]
             New Meta object if not inplace
+
         """
         newmeta = self.copy()
 
@@ -333,11 +351,13 @@ class Meta:
 
     @property
     def data(self) -> dict[str, Any]:
-        """Access internal data dictionary.
+        """
+        Access internal data dictionary.
 
         Returns
         -------
         Dict[str, Any]
             The metadata dictionary
+
         """
         return self._data

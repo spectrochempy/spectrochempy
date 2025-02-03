@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Module to perform fitting of 1D or n-D spectral data.
-"""
+"""Module to perform fitting of 1D or n-D spectral data."""
 
 __all__ = []
 
@@ -21,8 +19,9 @@ import numpy as np
 # =============================================================================
 class FitParameters(UserDict):
     """
-    Allow passing a dictionary of parameters with additional properties
-    to the fit function. Check if the parameter is between the specified bounds
+    Allow passing a dictionary of parameters with additional properties to the fit function.
+
+    Check if the parameter is between the specified bounds
     if any.
     """
 
@@ -142,7 +141,7 @@ class FitParameters(UserDict):
     @staticmethod
     def _evaluate(strg):
         """
-        Allow the evaluation of strings containing some operations
+        Allow the evaluation of strings containing some operations.
 
         Parameters
         ----------
@@ -154,6 +153,7 @@ class FitParameters(UserDict):
         ------
         value : float or bool
             Value of the string, or False, if there is an error
+
         """
         res = False
 
@@ -179,9 +179,7 @@ class FitParameters(UserDict):
 
     # ----------------------------------------------------------------------------------
     def to_internal(self, key, expi=None):
-        """
-        If expi is not none, several parameters to create.
-        """
+        """If expi is not none, several parameters to create."""
         key = str(key)
         if key not in self.data:
             raise KeyError(f"parameter `{key}` is not found")

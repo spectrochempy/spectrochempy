@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -34,8 +34,8 @@
 # operations in a more direct way.
 #
 # As prerequisite,
-# the user is expected to have read the [Import](../importexport/import.ipynb)
-# and [Import IR](../importexport/importIR.ipynb) tutorials.
+# the user is expected to have read the [Import](../importexport/import.rst)
+# and [Import IR](../importexport/importIR.rst) tutorials.
 
 
 # %% [markdown]

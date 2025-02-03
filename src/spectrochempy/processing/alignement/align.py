@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module defines functions related to NDDataset alignment.
-"""
+"""Module defining functions related to NDDataset alignment."""
 
 __all__ = ["align"]
 __dataset_methods__ = __all__
@@ -33,6 +31,7 @@ def can_merge_or_align(coord1, coord2):
     -------
     can_merge, can_align : tuple of bools
         Two flags about merge and alignment possibility.
+
     """
     if coord1 == coord2:
         # same coordinates
@@ -62,7 +61,7 @@ def align(dataset, *others, **kwargs):
     Align individual `NDDataset` along given dimensions using various methods.
 
     Parameters
-    -----------
+    ----------
     dataset : `NDDataset`
         Dataset on which we want to align other objects.
     *others : `NDDataset`
@@ -106,7 +105,7 @@ def align(dataset, *others, **kwargs):
         in principle only if reindexing is not necessary.
 
     Returns
-    --------
+    -------
     tuple of `NDDataset`
         Same objects as datasets with dimensions aligned.
 
@@ -115,6 +114,7 @@ def align(dataset, *others, **kwargs):
     ValueError
         Issued when the dimensions given in `dim` or `dims` argument are not
         compatibles (units, titles, etc.).
+
     """
     # TODO: Perform an alignment along numeric labels
     # TODO: add example in docs

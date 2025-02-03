@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implements the MCRALS class.
-"""
+"""Module that implements the MCRALS class."""
 # ruff: noqa: N815
 
 # DEVNOTE:
@@ -1128,6 +1126,7 @@ and `St`.
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y)
 
@@ -1150,6 +1149,7 @@ and `St`.
         Other Parameters
         ----------------
         %(analysis_transform.other_parameters)s
+
         """
         return super().fit_transform(X, Y, **kwargs)
 
@@ -1172,23 +1172,20 @@ and `St`.
         Other Parameters
         ----------------
         %(analysis_transform.other_parameters)s
+
         """
         return super().inverse_transform(X_transform, **kwargs)
 
     @property
     def C(self):
-        """
-        The final concentration profiles.
-        """
+        """The final concentration profiles."""
         C = self.transform()
         C.name = "Pure concentration profile, mcs-als of " + self.X.name
         return C
 
     @property
     def St(self):
-        """
-        The final spectra profiles.
-        """
+        """The final spectra profiles."""
         St = self.components
         St.name = "Pure spectra profile, mcs-als of " + self.X.name
         return St
@@ -1196,9 +1193,7 @@ and `St`.
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
     def C_constrained(self):
-        """
-        The last constrained concentration profiles, i.e. after applying the hard and soft constraints.
-        """
+        """The last constrained concentration profiles, i.e. after applying the hard and soft constraints."""
         return self._outfit[2]
 
     @property
@@ -1215,31 +1210,23 @@ and `St`.
     @property
     @deprecated(replace="St_ls")
     def St_unconstrained(self):
-        """
-        Deprecated. Equivalent to `St_ls`.
-        """
+        """Deprecated. Equivalent to `St_ls`."""
         return self.St_ls
 
     @property
     @deprecated(replace="St_ls")
     def S_soft(self):
-        """
-        Deprecated. Equivalent to `St_ls`.
-        """
+        """Deprecated. Equivalent to `St_ls`."""
         return self.St_ls
 
     @property
     def extraOutputGetConc(self):
-        """
-        The extra outputs of the external function used to get concentrations.
-        """
+        """The extra outputs of the external function used to get concentrations."""
         return self._outfit[4]
 
     @property
     def extraOutputGetSpec(self):
-        """
-        The extra outputs of the external function used to get spectra.
-        """
+        """The extra outputs of the external function used to get spectra."""
         return self._outfit[5]
 
     @property

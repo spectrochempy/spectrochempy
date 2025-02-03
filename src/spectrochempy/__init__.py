@@ -39,8 +39,7 @@
 # ======================================================================================
 
 """
-SpectroChemPy API Module
-========================
+SpectroChemPy API Module.
 
 SpectroChemPy is a framework for processing, analyzing and modeling Spectroscopic data
 for Chemistry with Python. It is a cross-platform software, running on Linux, Windows or OS X.
@@ -93,11 +92,11 @@ warnings.filterwarnings(action="ignore", category=UnitStrippedWarning)
 # ------------------------------------------------------------------------------
 # API imports
 # ------------------------------------------------------------------------------
-
 from spectrochempy import api
 from spectrochempy.api import *  # noqa: F403
 
 __all__ = api.__all__
+# __all__ = []
 
 
 def __getattr__(name: str) -> Any:
@@ -122,6 +121,7 @@ def __getattr__(name: str) -> Any:
     ------
     AttributeError
         If the requested attribute doesn't exist in NDDataset
+
     """
     from spectrochempy.core.dataset.nddataset import NDDataset
 

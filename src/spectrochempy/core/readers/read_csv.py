@@ -55,7 +55,7 @@ def read_csv(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -67,8 +67,7 @@ def read_csv(*paths, **kwargs):
     %(Importer.see_also.no_read_csv)s
 
     Examples
-    ---------
-
+    --------
     >>> scp.read_csv('agirdata/P350/TGA/tg.csv')
     NDDataset: [float64] unitless (shape: (y:1, x:3247))
 
@@ -82,6 +81,7 @@ def read_csv(*paths, **kwargs):
 
     >>> prefs = scp.preferences
     >>> B = scp.read_csv('irdata/IR.CSV', origin='omnic', csv_delimiter=',')
+
     """
     kwargs["filetypes"] = ["CSV files (*.csv)"]
     kwargs["protocol"] = ["csv"]

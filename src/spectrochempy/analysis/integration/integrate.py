@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Integration methods.
-"""
+"""Integration methods."""
 
 __all__ = ["simps", "trapz", "simpson", "trapezoid"]
 
@@ -106,8 +104,8 @@ def trapezoid(dataset, **kwargs):
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].trapezoid()
     NDDataset: [float64] a.u..cm^-1 (size: 55)
-    """
 
+    """
     return scipy.integrate.trapezoid(dataset.data, **kwargs)
 
 
@@ -173,6 +171,7 @@ def simpson(dataset, *args, **kwargs):
     >>> dataset = scp.read('irdata/nh4y-activation.spg')
     >>> dataset[:,1250.:1800.].simpson()
     NDDataset: [float64] a.u..cm^-1 (size: 55)
+
     """
     return scipy.integrate.simpson(dataset.data, **kwargs)
 

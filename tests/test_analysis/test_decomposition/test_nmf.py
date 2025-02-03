@@ -9,6 +9,7 @@
 Tests for the NMF module
 
 """
+
 import os
 
 import pytest

@@ -38,7 +38,9 @@
 
 
 """
-Functions for reading and writing Bruker binary (ser/fid) files, Bruker
+Functions for reading and writing Bruker files.
+
+Among them : binary (ser/fid) files, Bruker
 JCAMP-DX parameter (acqus) files, and Bruker pulse program (pulseprogram)
 files.
 
@@ -78,9 +80,7 @@ import numpy as np
 
 
 def create_blank_udic(ndim):
-    """
-    Create a blank universal dictionary for a spectrum of dimension ndim.
-    """
+    """Create a blank universal dictionary for a spectrum of dimension ndim."""
     udic = {}
     udic["ndim"] = ndim
 
@@ -115,7 +115,7 @@ def create_blank_udic(ndim):
 
 class unit_conversion:
     """
-    Provides methods to convert between common NMR units
+    Provides methods to convert between common NMR units.
 
     Parameters
     ----------
@@ -133,9 +133,7 @@ class unit_conversion:
     """
 
     def __init__(self, size, cplx, sw, obs, car):
-        """
-        create and set up a unit_conversion object
-        """
+        """Create and set up a unit_conversion object."""
         # fundamental units
         self._size = int(size)
         self._cplx = bool(cplx)
@@ -187,9 +185,7 @@ class unit_conversion:
 
     # routers
     def __unit2pnt(self, val, units):
-        """
-        Convert units to points
-        """
+        """Convert units to points."""
         units = units.upper()
         if units == "PPM":
             pts = self.__ppm2pts(val)
@@ -211,9 +207,7 @@ class unit_conversion:
         return pts
 
     def __pnt2unit(self, val, units):
-        """
-        Convert points to units
-        """
+        """Convert points to units."""
         units = units.upper()
         # if self._cplx:
         #     val = val-round(val)
@@ -234,17 +228,13 @@ class unit_conversion:
         return k
 
     def __str2pnt(self, s):
-        """
-        Convert string with units to points
-        """
+        """Convert string with units to points."""
         units = s.strip(string.digits + string.whitespace + "." + "-").upper()
         val = float(s.strip(string.ascii_letters + string.whitespace + "%"))
         return self.__unit2pnt(val, units)
 
     def __convert(self, val, unit=None):
-        """
-        Convert string or value/unit pair
-        """
+        """Convert string or value/unit pair."""
         if isinstance(val, str):
             return self.__str2pnt(val)
         if unit is None:
@@ -253,140 +243,96 @@ class unit_conversion:
 
     # User functions
     def f(self, val, unit=None):
-        """
-        Convert string or value/unit pair to float
-        """
+        """Convert string or value/unit pair to float."""
         return self.__convert(val, unit)
 
     def i(self, val, unit=None):
-        """
-        Convert string or value/unit pair to integer
-        """
+        """Convert string or value/unit pair to integer."""
         return int(round(self.__convert(val, unit)))
 
     def ppm(self, val):
-        """
-        Convert to ppm
-        """
+        """Convert to ppm."""
         return self.__pnt2unit(val, "PPM")
 
     def hz(self, val):
-        """
-        Convert to Hz
-        """
+        """Convert to Hz."""
         return self.__pnt2unit(val, "HZ")
 
     def percent(self, val):
-        """
-        Convert to percent
-        """
+        """Convert to percent."""
         return self.__pnt2unit(val, "PERCENT")
 
     def seconds(self, val):
-        """
-        Convert to seconds
-        """
+        """Convert to seconds."""
         return self.__pnt2unit(val, "SEC")
 
     def sec(self, val):
-        """
-        Convert to seconds
-        """
+        """Convert to seconds."""
         return self.__pnt2unit(val, "SEC")
 
     def ms(self, val):
-        """
-        Convert to milliseconds (ms)
-        """
+        """Convert to milliseconds (ms)."""
         return self.__pnt2unit(val, "MS")
 
     def us(self, val):
-        """
-        Convert to microseconds (us)
-        """
+        """Convert to microseconds (us)."""
         return self.__pnt2unit(val, "US")
 
     def unit(self, val, unit):
-        """
-        Convert val points to unit
-        """
+        """Convert val points to unit."""
         return self.__pnt2unit(val, unit)
 
     # limits and scales
     def percent_limits(self):
-        """
-        Return tuple of left and right edges in percent
-        """
+        """Return tuple of left and right edges in percent."""
         return 0.0, 100.0
 
     def percent_scale(self):
-        """
-        Return array of percent values
-        """
+        """Return array of percent values."""
         return np.linspace(0.0, 100.0, self._size)
 
     def ppm_limits(self):
-        """
-        Return tuple of left and right edges in ppm
-        """
+        """Return tuple of left and right edges in ppm."""
         return self.ppm(0), self.ppm(self._size - 1)
 
     def ppm_scale(self):
-        """
-        Return array of ppm values
-        """
+        """Return array of ppm values."""
         x0, x1 = self.ppm_limits()
         return np.linspace(x0, x1, self._size)
 
     def hz_limits(self):
-        """
-        Return tuple of left and right edges in Hz
-        """
+        """Return tuple of left and right edges in Hz."""
         return self.hz(0), self.hz(self._size - 1)
 
     def hz_scale(self):
-        """
-        Return array of Hz values
-        """
+        """Return array of Hz values."""
         x0, x1 = self.hz_limits()
         return np.linspace(x0, x1, self._size)
 
     def sec_limits(self):
-        """
-        Return tuple of left and right edges in seconds
-        """
+        """Return tuple of left and right edges in seconds."""
         return self.sec(0), self.sec(self._size - 1)
 
     def sec_scale(self):
-        """
-        Return array of seconds values
-        """
+        """Return array of seconds values."""
         x0, x1 = self.sec_limits()
         return np.linspace(x0, x1, self._size)
 
     def ms_limits(self):
-        """
-        Return tuple of left and right edges in milliseconds
-        """
+        """Return tuple of left and right edges in milliseconds."""
         return self.ms(0), self.ms(self._size - 1)
 
     def ms_scale(self):
-        """
-        Return array of seconds values
-        """
+        """Return array of seconds values."""
         x0, x1 = self.ms_limits()
         return np.linspace(x0, x1, self._size)
 
     def us_limits(self):
-        """
-        Return tuple of left and right edges in milliseconds
-        """
+        """Return tuple of left and right edges in milliseconds."""
         return self.us(0), self.us(self._size - 1)
 
     def us_scale(self):
-        """
-        Return array of seconds values
-        """
+        """Return array of seconds values."""
         x0, x1 = self.us_limits()
         return np.linspace(x0, x1, self._size)
 
@@ -409,6 +355,7 @@ def uc_from_udic(udic, dim=-1):
     -------
     uc : unit conversion object.
         Unit conversion object for given dimension.
+
     """
     if dim == -1:
         dim = udic["ndim"] - 1  # last dimension
@@ -435,6 +382,7 @@ def uc_from_freqscale(scale, obs, unit="ppm"):
     -------
     uc : unit conversion object.
         Unit conversion object for given axis.
+
     """
     scale = np.array(scale)
     size = len(scale)
@@ -469,7 +417,7 @@ def uc_from_freqscale(scale, obs, unit="ppm"):
 
 def open_towrite(filename, overwrite=False, mode="wb"):
     """
-    Open filename for writing and return file object
+    Open filename for writing and return file object.
 
     Function checks if file exists (and raises IOError if overwrite=False) and
     creates necessary directories as needed.
@@ -520,10 +468,7 @@ def size_and_ndtofrom_iter(shape, slices):
 
 
 def index2trace_flat(shape, index):
-    """
-    Calculate trace number from shape and index of all indirect dimensions
-    assuming a flat structure
-    """
+    """Calculate trace number from shape and index of all indirect dimensions assuming a flat structure."""
     # We need to perform:
     # index[0]*shape[1]*...shape[-1] + index[1]*shape[2]*...shape[-1] + ...
     # + index[-1]*shape[-1] + index[-1]
@@ -537,9 +482,7 @@ def index2trace_flat(shape, index):
 
 
 def trace2index_flat(shape, ntrace):
-    """
-    Calculate the index of a trace assuming a flat structure
-    """
+    """Calculate the index of a trace assuming a flat structure."""
     # algorithm is to take quotient/remainers of sizes in reverse
     q = ntrace  # seed quotient with remained
     index = []
@@ -551,10 +494,7 @@ def trace2index_flat(shape, ntrace):
 
 
 def index2trace_opp(shape, index):
-    """
-    Calculate trace number from shape and index of all indirect dimensions
-    assuming a phase ordering opposite the time increments.
-    """
+    """Calculate trace number from shape and index of all indirect dimensions assuming a phase ordering opposite the time increments."""
     n = len(shape)
     # deal with the phase component
     phases = [v % 2 for v in index]
@@ -567,10 +507,7 @@ def index2trace_opp(shape, index):
 
 
 def trace2index_opp(shape, ntrace):
-    """
-    Calculate the index of a trace assuming opposite phase/time increment
-    ordering
-    """
+    """Calculate the index of a trace assuming opposite phase/time increment ordering."""
     n = len(shape)
     q, r = divmod(ntrace, 2**n)
     to_add = list(trace2index_flat([2] * n, r))[::-1]
@@ -581,10 +518,7 @@ def trace2index_opp(shape, ntrace):
 
 
 def index2trace_reg(shape, index):
-    """
-    Calculate trace number from shape and index of all indirect dimensions
-    assuming the same  phase and time ordering.
-    """
+    """Calculate trace number from shape and index of all indirect dimensions assuming the same  phase and time ordering."""
     n = len(shape)
     # deal with the phase component
     phases = [v % 2 for v in index]
@@ -597,10 +531,7 @@ def index2trace_reg(shape, index):
 
 
 def trace2index_reg(shape, ntrace):
-    """
-    Calculate the index of a trace assuming the same phase/time increment
-    ordering
-    """
+    """Calculate the index of a trace assuming the same phase/time increment ordering."""
     n = len(shape)
     q, r = divmod(ntrace, 2**n)
     to_add = list(trace2index_flat([2] * n, r))
@@ -612,7 +543,7 @@ def trace2index_reg(shape, ntrace):
 
 def fft_positive(data):
     """
-    Fourier transform with positive exponential, NMR ordering of results
+    Fourier transform with positive exponential, NMR ordering of results.
 
     This is similar to the transform performed by NMRPipe's FFT function.
 
@@ -701,9 +632,7 @@ def fsh2(data, pts):
 
 
 def create_data(data):
-    """
-    Create a bruker data array (recast into a complex128 or int32)
-    """
+    """Create a bruker data array (recast into a complex128 or int32)."""
     if np.iscomplexobj(data):
         return np.array(data, dtype="complex128")
     return np.array(data, dtype="int32")
@@ -928,6 +857,7 @@ def create_dic(udic):
 def create_acqus_dic(adic, direct=False):
     """
     Create a Bruker acqus dictionary from an Universal axis dictionary.
+
     Set direct=True for direct dimension.
     """
     if adic["complex"]:
@@ -1108,6 +1038,7 @@ def read_acqus_file(dir=".", acqus_files=None):
     -------
     dic : dict
         Dictionary of Bruker parameters.
+
     """
     if acqus_files is None:
         acqus_files = []
@@ -1145,8 +1076,8 @@ def read_procs_file(dir=".", procs_files=None):
     -------
     dic : dict
         Dictionary of Bruker parameters.
-    """
 
+    """
     if procs_files is None:
         # Reading standard procs files
         procs_files = []
@@ -1554,6 +1485,7 @@ def scale_pdata(dic, data, reverse=False):
     -------
     sdata : array
         Scaled data.
+
     """
     try:
         scale = np.power(2.0, -float(dic["procs"]["NC_proc"]))
@@ -1568,8 +1500,7 @@ def scale_pdata(dic, data, reverse=False):
 
 def array_to_int(data):
     """
-    Cast bruker (processed) data into int32 and normalise to have
-    the absolute maximum intensity in the range [2**28, 2**29]
+    Cast bruker (processed) data into int32 and normalise to have the absolute maximum intensity in the range [2**28, 2**29].
 
     Parameters
     ----------
@@ -1584,8 +1515,8 @@ def array_to_int(data):
     intdata : array
         Real valued data scaled to have the maximum intensity between
         2**28 and 2**29, converted to type int32
-    """
 
+    """
     for _ in range(30):
         if np.max(abs(data)) < 2**28:
             data *= 2
@@ -1595,9 +1526,7 @@ def array_to_int(data):
 
 
 def guess_shape_and_submatrix_shape(dic):
-    """
-    Guess the data shape and the shape of the processed data submatrix.
-    """
+    """Guess the data shape and the shape of the processed data submatrix."""
     if "procs" not in dic:  # unknown dimensionality and shapes
         return None, None
 
@@ -1802,9 +1731,7 @@ def read_binary(filename, shape=(1), cplex=True, big=True, isfloat=False):
 
 
 def get_data(f, big, isfloat):
-    """
-    Get binary data from file object with given endianness and data type.
-    """
+    """Get binary data from file object with given endianness and data type."""
     if isfloat:
         if big:
             return np.frombuffer(f.read(), dtype=">f8")
@@ -1815,9 +1742,7 @@ def get_data(f, big, isfloat):
 
 
 def get_trace(f, num_points, big, isfloat):
-    """
-    Get trace of num_points from file with given endianness and data type.
-    """
+    """Get trace of num_points from file with given endianness and data type."""
     if isfloat:
         if big:
             bsize = num_points * np.dtype(">f8").itemsize
@@ -1835,17 +1760,12 @@ def get_trace(f, num_points, big, isfloat):
 
 
 def complexify_data(data):
-    """
-    Complexify data packed real, imag.
-    """
+    """Complexify data packed real, imag."""
     return data[..., ::2] + data[..., 1::2] * 1.0j
 
 
 def uncomplexify_data(data_in, isfloat):
-    """
-    Uncomplexify data (pack real,imag) into a int32 or float64 array,
-    depending on isfloat.
-    """
+    """Uncomplexify data (pack real,imag) into a int32 or float64 array, depending on isfloat."""
     size = list(data_in.shape)
     size[-1] = size[-1] * 2
     if isfloat:
@@ -1928,7 +1848,6 @@ def parse_jcamp_line(line, f):
     parameter value extends over multiple lines.
 
     """
-
     # extract key= text from line
     key = line[3 : line.index("=")]
     text = line[line.index("=") + 1 :].lstrip()
@@ -1966,9 +1885,7 @@ def parse_jcamp_line(line, f):
 
 
 def parse_jcamp_value(text):
-    """
-    Parse value text from Bruker JCAMP-DX file returning the value.
-    """
+    """Parse value text from Bruker JCAMP-DX file returning the value."""
     if text == "":
         return None
     if text.startswith("<") and text.endswith(">"):
@@ -2020,7 +1937,6 @@ def read_pprog(filename):
     write_pprog : Write a Bruker pulse program to file.
 
     """
-
     # open the file
     f = open(filename)  # noqa: SIM115
 

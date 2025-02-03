@@ -43,7 +43,7 @@ def concatenate(*datasets, **kwargs):
         Optional keyword parameters (see Other Parameters).
 
     Returns
-    --------
+    -------
     out
         A `NDDataset` created from the contenations of the `NDDataset` input objects.
 
@@ -56,7 +56,7 @@ def concatenate(*datasets, **kwargs):
         The axis along which the operation is applied.
 
     See Also
-    ---------
+    --------
     stack : Stack of `NDDataset` objects along a new dimension.
 
     Examples
@@ -76,8 +76,8 @@ def concatenate(*datasets, **kwargs):
     >>> E = A.concatenate(B, axis=1)
     >>> A.shape, B.shape, E.shape
     ((55, 5549), (55, 5549), (55, 11098))
-    """
 
+    """
     # check uise
     if "force_stack" in kwargs:
         deprecated("force_stack", replace="method stack()")
@@ -126,29 +126,29 @@ def concatenate(*datasets, **kwargs):
             if i == 0:
                 continue
             meta = dataset.meta
-            for item in meta0:
-                if item in ["file_size", "pprog", "phc0", "phc1", "nsold"]:
+            for key in meta0:
+                if key in ["file_size", "pprog", "phc0", "phc1", "nsold"]:
                     continue
-                keepitem = item if item != "date" else "timestamp"
-                if np.any(meta0[item][-1] != meta[item][-1]):
-                    if hasattr(meta0[item][-1], "size") and meta0[item][-1].size > 1:
+                keepitem = key if key != "date" else "timestamp"
+                if np.any(meta0[key][-1] != meta[key][-1]):
+                    if hasattr(meta0[key][-1], "size") and meta0[key][-1].size > 1:
                         # case of pulse length or delays for instance
-                        for i in range(meta0[item][-1].size):
-                            if np.any(meta0[item][-1][i] == meta[item][-1][i]):
+                        for i in range(meta0[key][-1].size):
+                            if np.any(meta0[key][-1][i] == meta[key][-1][i]):
                                 continue
-                            itemi = f"{item}{i}"
+                            itemi = f"{key}{i}"
                             if itemi not in metacoords:
                                 metacoords[itemi] = [
-                                    meta0[item][-1][i],
-                                    meta[item][-1][i],
+                                    meta0[key][-1][i],
+                                    meta[key][-1][i],
                                 ]
                             else:
-                                metacoords[itemi].append(meta[item][-1][i])
+                                metacoords[itemi].append(meta[key][-1][i])
                         continue
                     if keepitem not in metacoords:
-                        metacoords[keepitem] = [meta0[item][-1], meta[item][-1]]
+                        metacoords[keepitem] = [meta0[key][-1], meta[key][-1]]
                     else:
-                        metacoords[keepitem].append(meta[item][-1])
+                        metacoords[keepitem].append(meta[key][-1])
 
     for _i, dataset in enumerate(datasets):
         d = dataset.masked_data
@@ -202,8 +202,8 @@ def concatenate(*datasets, **kwargs):
     # for topspin data, we can create new coordinates from metadata
     if datasets[0].origin == "topspin" and metacoords != {}:
         c = []
-        for item in metacoords:
-            c.append(Coord(metacoords[item], title=item))
+        for key, value in metacoords.items():
+            c.append(Coord(value, title=key))
         out.y = CoordSet(c)
 
     out._mask = mask
@@ -252,7 +252,7 @@ def stack(*datasets):
         The dataset to be stacked to the current dataset.
 
     Returns
-    --------
+    -------
     out
         A `NDDataset` created from the stack of the `datasets` datasets.
 
@@ -262,14 +262,13 @@ def stack(*datasets):
 
     Examples
     --------
-
     >>> A = scp.read('irdata/nh4y-activation.spg', protocol='omnic')
     >>> B = scp.read('irdata/nh4y-activation.scp')
     >>> C = scp.stack(A, B)
     >>> print(C)
     NDDataset: [float64] a.u. (shape: (z:2, y:55, x:5549))
-    """
 
+    """
     datasets = _get_copy(datasets)
 
     shapes = {ds.shape for ds in datasets}

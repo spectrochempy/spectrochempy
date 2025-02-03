@@ -12,9 +12,7 @@ from spectrochempy.extern.traittypes import SciType
 
 
 class SpectroChemPyType(SciType):
-    """
-    A SpectroChemPy trait type.
-    """
+    """A SpectroChemPy trait type."""
 
     info_text = "a Spectrochempy object"
 
@@ -62,9 +60,7 @@ class SpectroChemPyType(SciType):
 
 
 class NDDatasetType(SpectroChemPyType):
-    """
-    A NDDataset trait type.
-    """
+    """A NDDataset trait type."""
 
     info_text = "a SpectroChemPy NDDataset"
 
@@ -82,9 +78,7 @@ class NDDatasetType(SpectroChemPyType):
 
 
 class CoordType(SpectroChemPyType):
-    """
-    A NDDataset trait type.
-    """
+    """A NDDataset trait type."""
 
     info_text = "a SpectroChemPy coordinates object"
 
@@ -98,9 +92,7 @@ class CoordType(SpectroChemPyType):
 
 
 class PositiveInteger(tr.Integer):
-    """
-    A trait for positive integer values.
-    """
+    """A trait for positive integer values."""
 
     info_text = "a positive integer"
     default_value = 0
@@ -116,9 +108,7 @@ class PositiveInteger(tr.Integer):
 
 
 class PositiveOddInteger(tr.Integer):
-    """
-    A trait for positive odd integer values.
-    """
+    """A trait for positive odd integer values."""
 
     info_text = "a positive odd integer"
     default_value = 1

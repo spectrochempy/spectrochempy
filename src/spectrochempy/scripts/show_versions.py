@@ -5,7 +5,7 @@ from spectrochempy.utils.print_versions import show_versions
 
 
 def main():
-    """Main entry point for the script."""
+    """Run the main entry point for the script."""
     show_versions(file=sys.stdout)
     return 0
 

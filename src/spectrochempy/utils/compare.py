@@ -20,6 +20,7 @@ def is_iterable(obj):
     Returns
     -------
     bool
+
     """
     from spectrochempy.core.units import Quantity
 
@@ -33,7 +34,7 @@ def is_iterable(obj):
 
 def is_number(obj):
     """
-    Check if an object is a number
+    Check if an object is a number.
 
     Parameters
     ----------
@@ -43,6 +44,7 @@ def is_number(obj):
     Returns
     -------
     bool
+
     """
     # try:
     #     if is_numpy_array(obj) or is_duck_array(obj):
@@ -66,6 +68,7 @@ def is_sequence(obj):
     Returns
     -------
     bool
+
     """
     return not is_string(obj) and is_iterable(obj)
 
@@ -82,6 +85,7 @@ def is_string(obj):
     Returns
     -------
     bool
+
     """
     return isinstance(obj, str)
 
@@ -98,8 +102,8 @@ def is_numpy_array(obj):
     Returns
     -------
     bool
-    """
 
+    """
     if isinstance(obj, np.ndarray):
         return True
     return None
@@ -117,8 +121,8 @@ def is_duck_array(obj):
     Returns
     -------
     bool
-    """
 
+    """
     if is_numpy_array(obj):
         return False
 
@@ -142,6 +146,7 @@ def is_quantity(obj):
     Returns
     -------
     bool
+
     """
     return hasattr(obj, "_units") and hasattr(obj, "_magnitude")
 
@@ -158,6 +163,7 @@ def is_sequence_with_quantity_elements(obj):
     Returns
     -------
     bool
+
     """
     return is_sequence(obj) and any(is_quantity(item) for item in obj)
 
@@ -176,6 +182,7 @@ def is_array_like(obj):
     Returns
     -------
     bool
+
     """
     return (
         is_quantity(obj)
@@ -187,7 +194,7 @@ def is_array_like(obj):
 
 def is_datetime64(obj):
     """
-    Utility to check if obj or obj.data is a np.datetime64 object.
+    Check if obj or obj.data is a np.datetime64 object.
 
     Parameters
     ----------
@@ -198,6 +205,7 @@ def is_datetime64(obj):
     -------
     bool
         Whether the obj or obj.data has a np.datetime64 dtype or not
+
     """
     dt64 = np.datetime64
     if hasattr(obj, "_data"):
@@ -227,7 +235,6 @@ def dict_compare(d1, d2, check_equal_only=True):
 
     Examples
     --------
-
         >>> from spectrochempy.utils.compare import dict_compare
         >>>
         >>> x = dict(a=1, b=2)
@@ -237,6 +244,7 @@ def dict_compare(d1, d2, check_equal_only=True):
         set() set() {'a'} {'b'}
         >>> dict_compare(x, y)
         False
+
     """
     # from
     # http://stackoverflow.com/questions/4527942/comparing-two-dictionaries-in-python

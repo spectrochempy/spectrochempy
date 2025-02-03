@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Implementation of Partial Least Square regression (using scikit-learn library)
-"""
+"""Implementation of Partial Least Square regression (using scikit-learn library)."""
 
 import traitlets as tr
 from sklearn import cross_decomposition
@@ -177,6 +175,7 @@ class PLSRegression(CrossDecompositionAnalysis):
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y)
 

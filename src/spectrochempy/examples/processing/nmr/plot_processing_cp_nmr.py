@@ -7,7 +7,7 @@
 # ruff: noqa
 """
 Analysis CP NMR spectra
-========================
+=======================
 Example with handling of a series of CP NMR spectra.
 """
 
@@ -256,6 +256,6 @@ _ = ax.set_xlim(0, 16000)
 
 # %%
 # This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (*.ipynb).
+# when the example is run as a notebook (`.ipynb`).
 
 # scp.show()

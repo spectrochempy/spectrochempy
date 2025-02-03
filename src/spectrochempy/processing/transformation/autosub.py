@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Plugin module to perform automatic subtraction of ref on a dataset.
-"""
+"""Plugin module to perform automatic subtraction of ref on a dataset."""
 
 __all__ = ["autosub"]
 
@@ -57,7 +55,7 @@ def autosub(
         In this case we do not need to catch the function output.
 
     Returns
-    --------
+    -------
     out : `NDDataset`
         The subtracted dataset.
     coefs : `~numpy.ndarray` .
@@ -70,16 +68,15 @@ def autosub(
     abc : Automatic baseline corrections.
 
     Examples
-    ---------
-
+    --------
     >>> path_A = 'irdata/nh4y-activation.spg'
     >>> A = scp.read(path_A, protocol='omnic')
     >>> ref = A[0, :]  # let's subtrack the first row
     >>> B = A.autosub(ref, [3900., 3700.], [1600., 1500.], inplace=False)
     >>> B
     NDDataset: [float64]  a.u. (shape: (y:55, x:5549))
-    """
 
+    """
     # output dataset
 
     new = dataset.copy() if not inplace else dataset

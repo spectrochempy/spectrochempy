@@ -3,10 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-In this module, methods are provided to download external datasets
-from public database.
-"""
+"""In this module, methods are provided to download external datasets from public database."""
 
 __all__ = ["load_iris", "download_nist_ir"]
 __dataset_methods__ = __all__
@@ -38,6 +35,7 @@ def load_iris():
     See Also
     --------
     read : Read data from experimental data.
+
     """
     from sklearn.datasets import load_iris as sklearn_iris
 
@@ -65,7 +63,7 @@ def load_iris():
 
 def download_nist_ir(CAS, index="all"):
     """
-    Upload IR spectra from NIST webbook
+    Upload IR spectra from NIST webbook.
 
     Parameters
     ----------
@@ -84,6 +82,7 @@ def download_nist_ir(CAS, index="all"):
     See Also
     --------
     read : Read data from experimental data.
+
     """
     info_("download_nist_ir")
     if isinstance(CAS, str) and "-" in CAS:

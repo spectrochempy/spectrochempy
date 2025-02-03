@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Module containing 1D plotting function(s).
-"""
+"""Module containing 1D plotting function(s)."""
 
 __all__ = [
     "plot_1D",
@@ -193,6 +191,7 @@ def plot_multiple(
     plot_scatter
     plot_bar
     plot_scatter_pen
+
     """
     if not is_sequence(datasets):
         # we need a sequence. Else it is a single plot.
@@ -309,8 +308,8 @@ def plot_1D(dataset, method=None, **kwargs):
     plot_bar
     plot_scatter_pen
     plot_multiple
-    """
 
+    """
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = dataset.preferences

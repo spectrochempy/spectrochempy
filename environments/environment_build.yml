@@ -26,8 +26,8 @@ dependencies:
 
     # BUILD dependencies
     # ------------------
-    - setuptools>=64
-    - setuptools_scm>=8
+    - setuptools
+    - setuptools_scm
     - toml
     - jinja2
     - anaconda-client

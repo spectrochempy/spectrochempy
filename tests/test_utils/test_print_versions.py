@@ -5,11 +5,12 @@
 # ======================================================================================
 # ruff: noqa
 import io
-
-import spectrochempy as scp
+import subprocess
 
 
 def test_show_versions() -> None:
+    import spectrochempy as scp
+
     print(scp.show_versions)
     f = io.StringIO()
     scp.show_versions(file=f)
@@ -22,5 +23,23 @@ def test_show_versions() -> None:
     assert "SPECTROCHEMPY" in f.getvalue()
 
 
+# def test_show_versions_script() -> None:
+#     result = subprocess.run(
+#         ["python", "-m", "spectrochempy", "show_versions"],
+#         stdout=subprocess.PIPE,
+#         stderr=subprocess.PIPE,
+#         text=True,
+#     )
+#     output = result.stdout
+#     assert "INSTALLED PACKAGES" in output
+#     assert "python" in output
+#     assert "numpy" in output
+#     assert "pint" in output
+#     assert "matplotlib" in output
+#     assert "pytest" in output
+#     assert "SPECTROCHEMPY" in output
+
+
 if __name__ == "__main__":
     test_show_versions()
+    test_show_versions_script()

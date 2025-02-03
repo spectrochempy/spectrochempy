@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -29,9 +29,9 @@
 #
 # This tutorial shows how to find peaks and determine peak maxima with spectrochempy.
 # As prerequisite, the user is
-# expected to have read the [Import](../importexport/import.ipynb),
-# [Import IR](../importexport/importIR.ipynb),
-# [slicing](../processing/slicing.ipynb) tutorials.
+# expected to have read the [Import](../importexport/import.rst),
+# [Import IR](../importexport/importIR.rst),
+# [slicing](../processing/slicing.rst) tutorials.
 #
 
 # %% [markdown]
@@ -84,7 +84,7 @@ _ = reg.plot()
 # one finds that it is located at ~ 2115.5 cm$^{-1}$. The exact x-coordinate value can
 # be obtained using the
 # following code
-# (see the [slicing tutorial](../processing/slicing.ipynb) for more info):
+# (see the [slicing tutorial](../processing/slicing.rst) for more info):
 
 # %%
 pos = reg.x[2115.5].values
@@ -117,14 +117,13 @@ _ = ax.annotate(
 # datasets with many - possibly
 # shifting peaks. The maxima of a given spectrum can be found automatically by the
 # find_peaks() method which is based
-# on
-# [scpy.signal.find_peaks()](
+# on [scpy.signal.find_peaks()](
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html).
 # It returns two outputs: `peaks` a NDDataset grouping the peak maxima (wavenumbers and
 # absorbance) and `properties`
 # a dictionary containing properties of the returned peaks (it is empty
 # if no particular option is selected,
-# [see below](#options) for more information).
+# `see below<#options>`_ for more information).
 
 # %% [markdown]
 # ###  Default behaviour
@@ -139,7 +138,7 @@ peaks, _ = last.find_peaks(distance=5.0)
 # we do not catch the second output (properties) as it is void in this case
 
 # %% [markdown]
-# `peaks` is a NDDataset. Its `x` attribute gives the peak position
+# `peaks` is a NDDataset. Its `x` attribute gives the peak position:
 
 # %%
 peaks.x.values
@@ -361,7 +360,7 @@ _ = ax.legend(fontsize=6)
 #
 # Let's illustrate this for the second-highest peak which height is comprised between
 # ~ 0.15 and 0.22 and see which
-# properties are returned when, on top of `height` , we pass `prominence=0`\ : this will
+# properties are returned when, on top of `height` , we pass `prominence=0`: this will
 # return the properties
 # associated to the prominence and warrant that this peak will not be rejected on the
 # prominence criterion.
@@ -390,7 +389,7 @@ properties
 # align="center" />
 #
 # The following code shows how to plot the maximum and the two "base points" from the
-# previous output of `find_peaks()`\ :
+# previous output of `find_peaks()`:
 
 # %%
 ax = s.plot_pen()
@@ -453,9 +452,7 @@ print(f"prominence with reduced window: {properties['prominences'][0]: 0.4f}")
 # method is **very approximate** and
 # more advanced methods (such as peak fitting), also implemented in spectrochempy
 # should be used (see e.g.,
-# [this example](
-# /gallery/auto_examples/fitting/plot_fit.html#sphx-glr-gallery-auto
-# -examples-fitting-plot-fit-py)).
+# [this example](/gallery/auto_examples/fitting/plot_fit.html#sphx-glr-gallery-auto-examples-fitting-plot-fit-py)
 # On the other hand, **the magnitude of the width is generally fine**.
 #
 # This estimate is based on an algorithm similar to that used for the "bases" above,
@@ -513,7 +510,7 @@ _ = ax.axvline(wr, linestyle="--", color="green")
 #
 # The self-contained code snippet below can be used to display in a matplotlib plot
 # and print the various
-# peak properties of a single peak as returned by `find_peaks()`\ :
+# peak properties of a single peak as returned by `find_peaks()`:
 
 # %%
 # user defined parameters ------------------------------
@@ -546,7 +543,7 @@ peaks, properties = s.find_peaks(
 )
 
 table_pos = "  ".join([f"{peaks[i].x.value.m: >10.3f}" for i in range(len(peaks))])
-print(f'{"peak_position (cm⁻¹)": >26}: {table_pos}')
+print(f"{'peak_position (cm⁻¹)': >26}: {table_pos}")
 for key in properties:
     table_property = "  ".join(
         [f"{properties[key][i].m: >10.3f}" for i in range(len(peaks))]

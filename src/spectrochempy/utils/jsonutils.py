@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-JSON utilities.
-"""
+"""JSON utilities."""
 
 import base64
 import datetime
@@ -27,9 +25,7 @@ def fromisoformat(s):
 # JSON UTILITIES
 # ======================================================================================
 def json_decoder(dic):
-    """
-    Decode a serialised json object.
-    """
+    """Decode a serialised json object."""
     from spectrochempy.core.units import Quantity
     from spectrochempy.core.units import Unit
 
@@ -62,9 +58,7 @@ def json_decoder(dic):
 
 
 def json_serialiser(byte_obj, encoding=None):
-    """
-    Return a serialised json object.
-    """
+    """Return a serialised json object."""
     from spectrochempy.core.dataset.arraymixins.ndplot import PreferencesSet
     from spectrochempy.core.units import Quantity
     from spectrochempy.core.units import Unit

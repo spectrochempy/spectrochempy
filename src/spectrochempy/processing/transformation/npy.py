@@ -3,10 +3,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-In this module, we define basic functions adapted from numpy but able to
-handle our NDDataset objects.
-"""
 
 __all__ = ["dot"]
 
@@ -47,6 +43,7 @@ def dot(a, b, strict=True, out=None):
     --------
     numpy.dot : Equivalent function for ndarrays.
     numpy.ma.dot : Equivalent function for masked ndarrays.
+
     """
     # if not a._implements('NDDataset'):
     #     raise TypeError('A dataset of type NDDataset is  '

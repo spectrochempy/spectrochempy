@@ -60,13 +60,13 @@ class Project(AbstractProject, NDIO):
 
     Examples
     --------
-
     >>> myproj = scp.Project(name='project_1')
     >>> ds = scp.NDDataset([1., 2., 3.], name='dataset_1')
     >>> myproj.add_dataset(ds)
     >>> print(myproj)
     Project project_1:
         ⤷ dataset_1 (dataset)
+
     """
 
     _id = tr.Unicode()
@@ -253,9 +253,7 @@ class Project(AbstractProject, NDIO):
 
     @property
     def id(self):
-        """
-        Readonly object identifier (str).
-        """
+        """Readonly object identifier (str)."""
         return self._id
 
     @property
@@ -277,10 +275,7 @@ class Project(AbstractProject, NDIO):
 
     @property
     def parent(self):
-        """
-        Instance of the Project which is the parent (if any) of the
-        current project (project).
-        """
+        """Instance of the Project which is the parent (if any) of the current project (project)."""
         return self._parent
 
     @parent.setter
@@ -315,6 +310,7 @@ class Project(AbstractProject, NDIO):
     def datasets_names(self):
         """
         Names of all dataset included in this project.
+
         (does not return those located in sub-folders) (list).
         """
         return list(self._datasets.keys())
@@ -326,8 +322,9 @@ class Project(AbstractProject, NDIO):
     @property
     def datasets(self):
         """
-        Datasets included in this project excluding those
-        located in subprojects (list).
+        Datasets included in this project excluding those located in subprojects.
+
+        (list).
         """
         d = []
         for name in self.datasets_names:
@@ -340,16 +337,12 @@ class Project(AbstractProject, NDIO):
 
     @property
     def projects_names(self):
-        """
-        Names of all subprojects included in this project (list).
-        """
+        """Names of all subprojects included in this project (list)."""
         return list(self._projects.keys())
 
     @property
     def projects(self):
-        """
-        Subprojects included in this project (list).
-        """
+        """Subprojects included in this project (list)."""
         p = []
         for name in self.projects_names:
             p.append(self._projects[name])
@@ -361,16 +354,12 @@ class Project(AbstractProject, NDIO):
 
     @property
     def scripts_names(self):
-        """
-        Names of all scripts included in this project (list).
-        """
+        """Names of all scripts included in this project (list)."""
         return list(self._scripts.keys())
 
     @property
     def scripts(self):
-        """
-        Scripts included in this project (list).
-        """
+        """Scripts included in this project (list)."""
         s = []
         for name in self.scripts_names:
             s.append(self._scripts[name])
@@ -382,16 +371,12 @@ class Project(AbstractProject, NDIO):
 
     @property
     def allnames(self):
-        """
-        Names of all objects contained in this project (list).
-        """
+        """Names of all objects contained in this project (list)."""
         return self.datasets_names + self.projects_names + self.scripts_names
 
     @property
     def allitems(self):
-        """
-        All items contained in this project (list).
-        """
+        """All items contained in this project (list)."""
         return (
             list(self._datasets.items())
             + list(self._projects.items())
@@ -404,7 +389,7 @@ class Project(AbstractProject, NDIO):
     @staticmethod
     def _implements(name=None):
         """
-        Utility to check if the current object implement `Project` .
+        Check if the current object implements `Project` .
 
         Rather than isinstance(obj, Project) use object._implements('Project').
         This is useful to check type without importing the module.
@@ -414,9 +399,7 @@ class Project(AbstractProject, NDIO):
         return name == "Project"
 
     def copy(self):
-        """
-        Make an exact copy of the current project.
-        """
+        """Make an exact copy of the current project."""
         return self.__copy__()
 
     # ----------------------------------------------------------------------------------
@@ -439,12 +422,12 @@ class Project(AbstractProject, NDIO):
 
         Examples
         --------
-
         >>> ds1 = scp.NDDataset([1, 2, 3])
         >>> ds2 = scp.NDDataset([4, 5, 6])
         >>> ds3 = scp.NDDataset([7, 8, 9])
         >>> proj = scp.Project()
         >>> proj.add_datasets(ds1, ds2, ds3)
+
         """
         for ds in datasets:
             self.add_dataset(ds)
@@ -468,12 +451,11 @@ class Project(AbstractProject, NDIO):
 
         Examples
         --------
-
         >>> ds1 = scp.NDDataset([1, 2, 3])
         >>> proj = scp.Project()
         >>> proj.add_dataset(ds1, name='Toto')
-        """
 
+        """
         dataset.parent = self
         if name is None:
             name = dataset.name
@@ -495,14 +477,13 @@ class Project(AbstractProject, NDIO):
         ----------
         name : str
             Name of the dataset to remove.
+
         """
         self._datasets[name]._parent = None  # remove the parent info
         del self._datasets[name]  # remove the object from the list of datasets
 
     def remove_all_dataset(self):
-        """
-        Remove all dataset from the project.
-        """
+        """Remove all dataset from the project."""
         for v in self._datasets.values():
             v._parent = None
         self._datasets = {}
@@ -518,6 +499,7 @@ class Project(AbstractProject, NDIO):
         ----------
         projects : project instances
             The projects to add to the current ones.
+
         """
         for proj in projects:
             self.add_project(proj)
@@ -530,6 +512,7 @@ class Project(AbstractProject, NDIO):
         ----------
         proj : a project instance
             A project to add to the current one.
+
         """
         proj.parent = self
         if name is None:
@@ -546,14 +529,13 @@ class Project(AbstractProject, NDIO):
         ----------
         name : str
             Name of the project to remove.
+
         """
         self._projects[name]._parent = None
         del self._projects[name]
 
     def remove_all_project(self):
-        """
-        Remove all projects from the current project.
-        """
+        """Remove all projects from the current project."""
         for v in self._projects.values():
             v._parent = None
         self._projects = {}
@@ -568,6 +550,7 @@ class Project(AbstractProject, NDIO):
         Parameters
         ----------
         scripts : `Script` instances
+
         """
         for sc in scripts:
             self.add_script(sc)
@@ -580,6 +563,7 @@ class Project(AbstractProject, NDIO):
         ----------
         script : a `Script` instance
         name : str
+
         """
         script.parent = self
         if name is None:

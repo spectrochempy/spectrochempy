@@ -305,6 +305,7 @@ def insert_masked_print(ds, mask_string="--"):
     ----------
     ds : `NDDataset` instance
     mask_string : str
+
     """
     from spectrochempy.utils.constants import NOMASK
 
@@ -348,7 +349,7 @@ def numpyprintoptions(
     **kargs,
 ):
     """
-    Method to control array printing.
+    Control array printing.
 
     Parameters
     ----------
@@ -360,6 +361,7 @@ def numpyprintoptions(
     spc
     linewidth
     kargs
+
     """
 
     def _format_object(x):

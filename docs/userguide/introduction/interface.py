@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -30,6 +30,7 @@
 #       version_major: 2
 #       version_minor: 0
 # ---
+
 # %% [markdown]
 # # Starting Jupyter lab
 #
@@ -82,8 +83,7 @@
 # <img src='images/enter_md.png' />
 #
 # ## Markdown cheat sheet
-# To get more information on Markdown format, you can look [here](mdcheatsheet.ipynb).
-#
+# To get more information on Markdown format, you can look [here](mdcheatsheet.html)
 # # Using the application in a web browser
 #
 # <div class='alert alert-warning'>

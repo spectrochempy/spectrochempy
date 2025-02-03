@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Plotters.
-"""
+"""Plotters."""
 
 __all__ = [
     "plot_2D",
@@ -131,8 +129,8 @@ def plot_2D(dataset, method=None, **kwargs):
     plot_image
     plot_surface
     plot_waterfall
-    """
 
+    """
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = dataset.preferences

@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module extend NDDataset with the import method for OPUS generated data files.
-"""
+"""Extend NDDataset with the import method for OPUS generated data files."""
 
 __all__ = ["read_opus"]
 __dataset_methods__ = __all__
@@ -33,7 +31,7 @@ _docstring.delete_params("Importer.see_also", "read_opus")
 
 @_docstring.dedent
 def read_opus(*paths, **kwargs):
-    """
+    r"""
     Open Bruker OPUS file(s).
 
     Eventually group them in a single dataset. Only Absorbance spectra are
@@ -44,7 +42,7 @@ def read_opus(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -52,15 +50,15 @@ def read_opus(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_opus)s
 
     Examples
-    ---------
+    --------
     Reading a single OPUS file  (providing a windows type filename relative to
     the default `datadir` )
 
-    >>> scp.read_opus('irdata\\\\OPUS\\\\test.0000')
+    >>> scp.read_opus('irdata\\OPUS\\test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
     Reading a single OPUS file  (providing a unix/python type filename relative to the
@@ -124,8 +122,8 @@ def read_opus(*paths, **kwargs):
 
     >>> scp.read_opus(directory='irdata/OPUS', merge=True)
     NDDataset: [float64] a.u. (shape: (y:4, x:2567))
-    """
 
+    """
     kwargs["filetypes"] = ["Bruker OPUS files (*.[0-9]*)"]
     kwargs["protocol"] = ["opus"]
     importer = Importer()

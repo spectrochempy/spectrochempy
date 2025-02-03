@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Plugin module to extend NDDataset with the import methods method.
-"""
+"""Plugin module to extend NDDataset with the import methods method."""
 
 __all__ = ["read_matlab", "read_mat"]
 __dataset_methods__ = __all__
@@ -46,7 +44,7 @@ def read_matlab(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -54,14 +52,14 @@ def read_matlab(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_matlab)s
 
     Examples
-    ---------
-
+    --------
     >>> scp.read_matlab('matlabdata/dso.mat')
     NDDataset: [float64] unitless (shape: (y:20, x:426))
+
     """
     kwargs["filetypes"] = ["MATLAB files (*.mat *.dso)"]
     kwargs["protocol"] = ["matlab", "mat", "dso"]

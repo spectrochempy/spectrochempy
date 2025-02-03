@@ -6,7 +6,7 @@
 # ruff: noqa
 """
 Exponential window multiplication
-=====================================================
+=================================
 
 In this example, we perform exponential window multiplication to apodize a NMR signal in the time domain.
 

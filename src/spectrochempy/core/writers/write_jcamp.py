@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Plugin module to extend NDDataset with a JCAMP-DX export method.
-"""
+"""Plugin module to extend NDDataset with a JCAMP-DX export method."""
 
 from datetime import datetime
 
@@ -47,6 +45,7 @@ def write_jcamp(*args, **kwargs):
     --------
     The extension will be added automatically
     >>> X.write_jcamp('myfile')
+
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["JCAMP-DX files (*.jdx)"]

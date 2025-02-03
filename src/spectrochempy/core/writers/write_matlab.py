@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Plugin module to extend NDDataset with a JCAMP-DX export method.
-"""
+"""Plugin module to extend NDDataset with a JCAMP-DX export method."""
 
 from spectrochempy.core.writers.exporter import Exporter
 from spectrochempy.core.writers.exporter import exportermethod
@@ -30,9 +28,9 @@ def write_matlab(*args, **kwargs):
 
     Examples
     --------
-
     The extension will be added automatically
     >>> X.write_matlab('myfile')
+
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["MATLAB files (*.mat)"]

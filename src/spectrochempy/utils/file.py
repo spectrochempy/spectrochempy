@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-File utilities.
-"""
+"""File utilities."""
 
 import importlib.util
 import re
@@ -130,30 +128,6 @@ def pathclean(paths):
     -------
     pathlib or list of pathlib
         Cleaned path(s).
-
-    Examples
-    --------
-    >>> from spectrochempy.utils.file import pathclean
-
-    Using unix/mac way to write paths
-    >>> filename = pathclean('irdata/nh4y-activation.spg')
-    >>> filename.suffix
-    '.spg'
-    >>> filename.parent.name
-    'irdata'
-
-    or Windows
-    >>> filename = pathclean("irdata\\\\nh4y-activation.spg")
-    >>> filename.parent.name
-    'irdata'
-
-    Due to the escape character \\ in Unix, path string should be escaped \\\\ or the raw-string prefix `r` must be used
-    as shown below
-    >>> filename = pathclean(r"irdata\\nh4y-activation.spg")
-    >>> filename.suffix
-    '.spg'
-    >>> filename.parent.name
-    'irdata'
     """
     import platform
 
@@ -231,9 +205,6 @@ def check_filenames(*args, **kwargs):
     --------
     check_filename_to_open
     check_filename_to_save
-
-    Examples
-    --------
     """
     # from spectrochempy.application import info_
     from spectrochempy.core import preferences as prefs
@@ -404,7 +375,7 @@ def get_filenames(*filenames, **kwargs):
         Other optional keyword parameters. See Other Parameters.
 
     Returns
-    --------
+    -------
     out
         List of filenames.
 
@@ -424,12 +395,9 @@ def get_filenames(*filenames, **kwargs):
 
     Warnings
     --------
-    if several filenames are provided in the arguments, they must all reside in the same directory!
-
-    Examples
-    --------
+    if several filenames are provided in the arguments,
+    they must all reside in the same directory!
     """
-
     from spectrochempy import NO_DIALOG
     from spectrochempy.core import preferences as prefs
 
@@ -647,11 +615,11 @@ def get_directory_name(directory, **kwargs):
         A directory name. If not provided, a dialog box is opened to select a directory.
 
     Returns
-    --------
+    -------
     out: `pathlib.Path` object
         valid directory name.
-    """
 
+    """
     from spectrochempy import NO_DIALOG
     from spectrochempy.core import preferences as prefs
 

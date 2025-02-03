@@ -21,14 +21,19 @@
 
 # DOCS dependencies
 # -----------------
-ipywidgets>=8.1.1
-jupytext>=1.16.1
-nbsphinx>=0.9.3
-numpydoc>=1.6.0
-pypandoc>=1.13
-sphinx>=7.2.6
-sphinx-copybutton>=0.5.2
-sphinx-gallery>=0.15.0
-sphinx-rtd-theme>=2.0.0
-sphinxcontrib-bibtex>=2.6.1
-json5>=0.9.14
+ipykernel
+ipywidgets
+jsonschema
+jupyter
+jupytext
+nbformat
+nbsphinx
+numpydoc
+pickleshare
+pypandoc_binary
+sphinx
+sphinx-copybutton
+sphinx-gallery
+sphinx-rtd-theme
+sphinxcontrib-bibtex
+json5

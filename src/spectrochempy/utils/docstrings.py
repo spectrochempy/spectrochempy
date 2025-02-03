@@ -54,6 +54,10 @@ ERROR_MSGS = {
 def check_docstrings(module, obj, exclude=None):
     if exclude is None:
         exclude = []
+    exclude = exclude + [
+        "GL02",
+        "GL03",
+    ]
     members = [f"{module}.{obj.__name__}"]
     print(module)  # noqa: T201
     print(obj.__name__)  # noqa: T201
@@ -78,8 +82,9 @@ def check_docstrings(module, obj, exclude=None):
 
 def spectrochempy_error(code, **kwargs):
     """
-    Copy of the numpydoc error function, since ERROR_MSGS can't be updated
-    with our custom errors yet.
+    Copy of the numpydoc error function.
+
+    Since ERROR_MSGS can't be updated with our custom errors yet.
     """
     return (code, ERROR_MSGS[code].format(**kwargs))
 
@@ -196,6 +201,7 @@ def spectrochempy_validate(func_name, exclude=None):
     -------
     dict
         Information about the docstring and the errors found.
+
     """
     if exclude is None:
         exclude = []
@@ -318,9 +324,7 @@ class DocstringError(Exception):
 
 # TODO replace this in module where it is used by docrep
 def add_docstring(*args):
-    """
-    Decorator which add a docstring to the actual func doctring.
-    """
+    """Add a docstring to the actual function docstring."""
 
     def new_doc(func):
         for item in args:
@@ -358,6 +362,7 @@ def htmldoc(text):
     -------
     out : str
         The html string.
+
     """
     p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
     html = p.sub(r"<b>\1</b>\2", text)

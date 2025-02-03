@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module define a generic class to import directories, files and contents.
-"""
+"""Define a generic class to import directories, files, and contents."""
 
 __all__ = ["read", "read_dir"]  # , "read_remote"]
 __dataset_methods__ = __all__
@@ -345,8 +343,8 @@ _docstring.delete_params("Importer.see_also", "read")
 
 @_docstring.dedent
 def read(*paths, **kwargs):
-    """
-    Generic read method.
+    r"""
+    Read data from various file formats.
 
     This method is generally able to load experimental files based on extensions.
 
@@ -356,16 +354,16 @@ def read(*paths, **kwargs):
         The data source(s) can be specified by the name or a list of name for the
         file(s) to be loaded:
 
-        * *e.g.,* ( filename1, filename2, ...,  **kwargs )*
+        - e.g., ( filename1, filename2, ...,  kwargs )
 
         If the list of filenames are enclosed into brackets:
 
-        * *e.g.,* ( **[** *filename1, filename2, ...* **]**, **kwargs *)*
+        - e.g., ( [filename1, filename2, ...], kwargs )
 
         The returned datasets are merged to form a single dataset,
         except if ``merge`` is set to `False`.
 
-        If a source is not provided (*i.e.,* no ``paths`` , nor ``content``),
+        If a source is not provided (i.e., no ``paths`` , nor ``content``),
         a dialog box will be opened to select files.
     %(kwargs)s
 
@@ -379,7 +377,7 @@ def read(*paths, **kwargs):
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
         ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
-        ``'excel'``\\ }. If not provided, the correct protocol
+        ``'excel'``}. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     directory : `~pathlib.Path` object objects or valid urls, optional
         From where to read the files.
@@ -391,7 +389,7 @@ def read(*paths, **kwargs):
         Sort multiple filename by acquisition date.
     description : `str`, optional
         A Custom description.
-    origin : one of {``'omnic'``, ``'tga'``\\ }, optional
+    origin : one of {``'omnic'``, ``'tga'``}, optional
         Used when reading with the CSV protocol. In order to properly interpret CSV file
         it can be necessary to set the origin of the spectra.
         Up to now only ``'omnic'`` and ``'tga'`` have been implemented.
@@ -430,11 +428,11 @@ def read(*paths, **kwargs):
     %(Importer.see_also.no_read)s
 
     Examples
-    ---------
+    --------
     Reading a single OPUS file  (providing a windows type filename relative
     to the default `~spectrochempy.preferences.datadir` )
 
-    >>> scp.read('irdata\\\\OPUS\\\\test.0000')
+    >>> scp.read('irdata\\OPUS\\test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
     Reading a single OPUS file  (providing a unix/python type filename relative
@@ -494,8 +492,8 @@ def read(*paths, **kwargs):
 
     >>> scp.read(directory='irdata/OPUS', merge=True)
     [NDDataset: [float64] a.u. (shape: (y:1, x:5549)), NDDataset: [float64] a.u. (shape: (y:4, x:2567))]
-    """
 
+    """
     importer = Importer()
 
     protocol = kwargs.get("protocol")
@@ -548,12 +546,12 @@ def read_dir(directory=None, **kwargs):
     Open a list of readable files in a and store data/metadata in a dataset or a list of
     datasets according to the following rules :
 
-    * 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
+    - 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
       distinct files are stored in distinct `NDdataset`\ s.
-    * 1D spectroscopic data (e.g., :file:`.spa` files) in a given directory are merged
+    - 1D spectroscopic data (e.g., :file:`.spa` files) in a given directory are merged
       into single `NDDataset`, providing their unique dimension are compatible.
       If not, an error is generated.
-    * non-readable files are ignored
+    - non-readable files are ignored
 
     Parameters
     ----------
@@ -561,7 +559,7 @@ def read_dir(directory=None, **kwargs):
         Folder where are located the files to read.
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
         Depending on the python version, the order of the datasets in the list
         may change.
@@ -572,13 +570,13 @@ def read_dir(directory=None, **kwargs):
 
     Examples
     --------
-
     >>> scp.preferences.csv_delimiter = ','
     >>> A = scp.read_dir('irdata')
     >>> len(A)
     4
 
     >>> B = scp.read_dir()
+
     """
     kwargs["iterdir"] = True
     importer = Importer()

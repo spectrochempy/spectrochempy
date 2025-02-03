@@ -35,7 +35,7 @@ dependencies = [
   "ipython",
   "jinja2",
   "numpy",
-  "numpy-quaternion",
+  "numpy-quaternion>=2024",
   "matplotlib",
   "osqp",
   "pint",
@@ -51,63 +51,68 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   # various
-  "toml>=0.10.2",
-  "ruff>=0.2.0",
-  "pre-commit>=3.6.0",
+  "toml",
+  "ruff",
+  "pre-commit",
   # interactive
-  "jupyter>=1.0.0",
-  "jupyterlab>=4.3.4",         # Required for 3.13
-  "ipykernel>=6.29.0",         # Required for 3.13
-  "ipyparallel>=8.6.1",        # Required for 3.13
-  "nodejs>=0.1.1",
-  "jupyter_server>=2.12.0",     # Required for 3.13
+  "jupyter",
+  "jupyterlab",
+  "ipykernel",
+  "ipyparallel",
+  "nodejs",
+  "jupyter_server",
   # test
-  "coverage>=7.4.0",           # Latest for 3.13
-  "ipywidgets>=8.1.1",         # Required for 3.13
-  "pyfakefs>=5.3.2",           # Compatible with 3.13
-  "pytest>=8.0.0",             # Latest for 3.13
-  "pytest-cov>=4.1.0",
-  "pytest-doctestplus>=1.2.0",
-  "pytest-ruff>=0.2.1",
-  "pytest-mock>=3.12.0",
-  "numpydoc>=1.6.0",             # Required for 3.13
+  "coverage",
+  "ipywidgets",
+  "pyfakefs",
+  "pytest",
+  "pytest-cov",
+  "pytest-doctestplus",
+  "pytest-ruff",
+  "pytest-mock",
+  "numpydoc",
 ]
 interactive = [
-  "jupyter>=1.0.0",
-  "jupyterlab>=4.3.4",         # Required for 3.13
-  "ipykernel>=6.29.0",         # Required for 3.13
-  "ipyparallel>=8.6.1",        # Required for 3.13
-  "nodejs>=0.1.1",
-  "jupyter_server>=2.12.0",     # Required for 3.13
+  "jupyter",
+  "jupyterlab",
+  "ipykernel",
+  "ipyparallel",
+  "nodejs",
+  "jupyter_server",
 ]
 test = [
-  "coverage>=7.4.0",           # Latest for 3.13
-  "ipywidgets>=8.1.1",         # Required for 3.13
-  "pyfakefs>=5.3.2",           # Compatible with 3.13
-  "pytest>=8.0.0",             # Latest for 3.13
-  "pytest-cov>=4.1.0",
-  "pytest-doctestplus>=1.2.0",
-  "pytest-ruff>=0.2.1",
-  "pytest-mock>=3.12.0",
-  "numpydoc>=1.6.0",
+  "coverage",
+  "ipywidgets",
+  "pyfakefs",
+  "pytest",
+  "pytest-cov",
+  "pytest-doctestplus",
+  "pytest-ruff",
+  "pytest-mock",
+  "numpydoc",
 ]
 docs = [
   #"cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
-  "ipywidgets>=8.1.1",         # Required for 3.13
-  "jupytext>=1.16.1",          # Latest for 3.13
-  "nbsphinx>=0.9.3",           # Compatible with 3.13
-  "numpydoc>=1.6.0",           # Latest for 3.13
-  "pypandoc>=1.13",            # Latest for 3.13
-  "sphinx>=7.2.6",             # Latest for 3.13
-  "sphinx-copybutton>=0.5.2",  # Latest for 3.13
-  "sphinx-gallery>=0.15.0",    # Latest for 3.13
-  "sphinx-rtd-theme>=2.0.0",   # Latest for 3.13
-  "sphinxcontrib-bibtex>=2.6.1", # Latest for 3.13
-  "json5>=0.9.14",             # Latest for 3.13
+  "ipykernel",
+  "ipywidgets",
+  "jsonschema",
+  "jupyter",
+  "jupytext",
+  "nbformat",
+  "nbsphinx",
+  "numpydoc",
+  "pickleshare",
+  "pypandoc_binary",
+  "sphinx",
+  "sphinx-copybutton",
+  "sphinx-gallery",
+  "sphinx-rtd-theme",
+  "sphinxcontrib-bibtex",
+  "json5",
 ]
 build = [
-  "setuptools>=64",
-  "setuptools_scm>=8",
+  "setuptools",
+  "setuptools_scm",
   "toml",
   "jinja2",
   "anaconda-client",
@@ -121,7 +126,7 @@ documentation = "https://www.spectrochempy.fr/latest"
 issues = "https://github.com/spectrochempy/spectrochempy/issues"
 
 [project.scripts]
-show-versions = "spectrochempy.scripts.show_versions:main"
+show_versions = "spectrochempy.scripts.show_versions:main"
 
 [tool.setuptools]
 include-package-data = true
@@ -148,6 +153,7 @@ target-version = "py312"
 [tool.ruff.lint]
 # Enable specific rules
 select = [
+  "D",   # pydocstyle
   "E",   # pycodestyle errors
   "F",   # pyflakes
   "I",   # isort
@@ -172,6 +178,18 @@ ignore = [
   "N803", # Argument name should be lowercase
   "N805", # First argument of a method should be named 'self'
   "N806", # Variable in function should be lowercase
+  "D100", # Missing docstring in public module
+  "D101", # Missing docstring in public class
+  "D102", # Missing docstring in public method
+  "D103", # Missing docstring in public function
+  "D104", # Missing doctring in public package
+  "D105", # Missing docstring in magic method
+  "D107", # Missing docstring in __init__
+  "D203", # Incorrect blank line before class
+  "D212", # Docstring should start on first line
+  "D413", # Missing blank line after last section
+  "D417", # Missing argument descriptions in the docstring
+
 ]
 
 exclude = [

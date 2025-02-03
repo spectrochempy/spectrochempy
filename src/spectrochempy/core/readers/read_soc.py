@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module extend NDDataset with the import method for Thermo galactic (spc) data files.
-"""
+"""Extend NDDataset with the import method for Thermo galactic (spc) data files."""
 
 __all__ = ["read_soc", "read_ddr", "read_sdr", "read_hdr"]
 __dataset_methods__ = __all__
@@ -32,7 +30,7 @@ def read_soc(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -44,10 +42,10 @@ def read_soc(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_soc)s
-    """
 
+    """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.ddr *.hdr *.sdr)"]
     kwargs["protocol"] = ["soc", "ddr", "hdr", "sdr"]
     importer = Importer()
@@ -64,7 +62,7 @@ def read_ddr(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -76,10 +74,10 @@ def read_ddr(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also)s
-    """
 
+    """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.ddr)"]
     kwargs["protocol"] = ["ddr"]
     importer = Importer()
@@ -96,7 +94,7 @@ def read_hdr(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -108,10 +106,10 @@ def read_hdr(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also)s
-    """
 
+    """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.hdr)"]
     kwargs["protocol"] = ["hdr"]
     importer = Importer()
@@ -128,7 +126,7 @@ def read_sdr(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -140,10 +138,10 @@ def read_sdr(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also)s
-    """
 
+    """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.sdr)"]
     kwargs["protocol"] = ["sdr"]
     importer = Importer()

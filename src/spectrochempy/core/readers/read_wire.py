@@ -3,8 +3,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-r"""
-This module extend NDDataset with the import method for Renishaw WiRe generated data files.
+"""
+Module extends NDDataset with the import method for Renishaw WiRe generated data files.
 
 Notes
 -----
@@ -42,6 +42,7 @@ The original code was inspired by Henderson, Alex DOI:10.5281/zenodo.495477
 
 See also gwyddion for the DATA types
 https://sourceforge.net/p/gwyddion/code/HEAD/tree/trunk/gwyddion/modules/file/renishaw.c
+
 """
 
 __all__ = ["read_wdf", "read_wire"]
@@ -79,7 +80,7 @@ except ImportError:
 
 class _wdfReader:
     """
-    Reader for Renishaw(TM) WiRE Raman spectroscopy files (.wdf format)
+    Reader for Renishaw(TM) WiRE Raman spectroscopy files (.wdf format).
 
     The wdf file format is separated into several DataBlocks, with starting 4-char
     strings such as (incomplete list):
@@ -112,12 +113,11 @@ class _wdfReader:
 
     Notes
     -----
-
     Metadata :
     title (str) : Title of measurement
     username (str) : Username
     application_name (str) : Default WiRE
-    application_version (int,) * 4 : Version number, e.g. [4, 4, 0, 6602]
+    application_version (int,) x 4 : Version number, e.g. [4, 4, 0, 6602]
     measurement_type (int) : Type of measurement
                              0=unknown, 1=single, 2=multi, 3=mapping
     scan_type (int) : Scan of type, see values in scan_types
@@ -230,7 +230,7 @@ class _wdfReader:
     # Private methods
     # ----------------------------------------------------------------------------------
     def _locate_all_blocks(self):
-        """Get information for all data blocks and store them inside self._block_info"""
+        """Get information for all data blocks and store them inside self._block_info."""
         block_info = {}
         curpos = 0
         finished = False
@@ -244,7 +244,7 @@ class _wdfReader:
         return block_info
 
     def _locate_single_block(self, pos):
-        """Get block information starting at pos"""
+        """Get block information starting at pos."""
         self._fid.seek(pos)
         block_name = self._fid.read(0x4).decode("ascii")
         if len(block_name) < 4:
@@ -254,7 +254,7 @@ class _wdfReader:
         return block_name, block_uid, block_size
 
     def _parse_header(self):
-        """Solve block WDF1"""
+        """Solve block WDF1."""
         self._fid.seek(0)  # return to the head
 
         block_ID = self._fid.read(Offsets.block_id).decode("ascii")
@@ -306,7 +306,7 @@ class _wdfReader:
 
     def _parse_others(self):
         """
-        Get information from ORGN block
+        Get information from ORGN block.
 
         Additional dimensions information is stored in the ORGN block.
         """
@@ -365,7 +365,7 @@ class _wdfReader:
         return dimensions
 
     def _parse_dimension(self, dim):
-        """Get information from XLST or YLST blocks"""
+        """Get information from XLST or YLST blocks."""
         if dim.upper() not in ["X", "Y"]:
             raise ValueError("Direction argument `dir` must be X or Y!")
 
@@ -390,7 +390,7 @@ class _wdfReader:
         return coord
 
     def _parse_mapping(self, others):
-        """Get information about mapping in StreamLine and StreamLineHR"""
+        """Get information about mapping in StreamLine and StreamLineHR."""
         try:
             _, pos, _ = self._block_info["WMAP"]
         except KeyError:
@@ -422,7 +422,7 @@ class _wdfReader:
         return x_size, y_size
 
     def _parse_data(self, start=0, end=-1):
-        """Get information from DATA block"""
+        """Get information from DATA block."""
         if end == -1:  # take all spectra
             end = self._meta.count - 1
         if (start not in range(self._meta.count)) or (
@@ -444,9 +444,11 @@ class _wdfReader:
         return np.array(data, dtype=float, ndmin=2)
 
     def _parse_img(self):
-        """Extract the white-light JPEG image
-        The size of while-light image is coded in its EXIF
-        Use PIL to parse the EXIF information
+        """
+        Extract the white-light JPEG image.
+
+        The size of while-light image is coded in its EXIF.
+        Use PIL to parse the EXIF information.
         """
         try:
             _, pos, size = self._block_info["WHTL"]
@@ -472,7 +474,7 @@ class _wdfReader:
                 x_org_, y_org_ = exif_header[ExifTags.FocalPlaneXYOrigins]
 
                 def rational2float(v):
-                    """Pillow<7.2.0 returns tuple, Pillow>=7.2.0 returns IFDRational"""
+                    """Pillow<7.2.0 returns tuple, Pillow>=7.2.0 returns IFDRational."""
                     if not isinstance(v, IFDRational):
                         return v[0] / v[1]
                     return float(v)
@@ -504,14 +506,14 @@ class _wdfReader:
             self._meta.img.close()
 
     def _get_type_string(self, attr, data_type):
-        """Get the enumerated-data_type as string"""
+        """Get the enumerated-data_type as string."""
         val = getattr(self, attr)  # No error checking
         if data_type is None:
             return val
         return data_type(val).name
 
     def _read_type(self, type, size=1):
-        """Unpack struct data for certain type"""
+        """Unpack struct data for certain type."""
         if type in ["int16", "int32", "int64", "float", "double"]:
             if size > 1:
                 raise NotImplementedError(
@@ -535,10 +537,10 @@ class _wdfReader:
         return self._meta.count == self._meta.capacity
 
     def __calc_crop_box(self):
-        """Helper function to calculate crop box"""
+        """Calculate crop box."""
 
         def _proportion(x, minmax, pixels):
-            """Get proportional pixels"""
+            """Get proportional pixels."""
             min, max = minmax
             return int(pixels * (x - min) / (max - min))
 
@@ -558,15 +560,13 @@ class _wdfReader:
         return (left, top, right, bottom)
 
     def _reshape_data(self, data, map_shape=None):
-        """
-        Reshape spectra into w * h * points if mapping data else count * points
-        """
+        """Reshape spectra into w x h x points if mapping data else count x points."""
         count = self._meta.count
         points = self._meta.point_per_spectrum
         if not self._is_completed:
             warning_(
                 "The measurement is not completed, "
-                "will try to reshape spectra into count * pps.",
+                "will try to reshape spectra into count x pps.",
             )
             try:
                 data = np.reshape(data, (count, points))
@@ -680,7 +680,7 @@ class UnitType(IntEnum):
     Microseconds = 25
 
     def __str__(self):
-        """Rewrite the unit name output"""
+        """Rewrite the unit name output."""
         unit_str = {
             "Arbitrary": "",
             "RamanShift": "1/cm",  # cm^-1 by default
@@ -756,7 +756,7 @@ class DataType(IntEnum):
 
 
 class Offsets(IntEnum):
-    """Offsets to the start of block"""
+    """Offsets to the start of block."""
 
     # General offsets
     block_name = 0x0
@@ -779,7 +779,7 @@ class Offsets(IntEnum):
 
 
 class ExifTags(IntEnum):
-    """Customized EXIF TAGS"""
+    """Customized EXIF TAGS."""
 
     # Standard EXIF TAGS
     FocalPlaneXResolution = 0xA20E
@@ -808,7 +808,7 @@ def read_wire(*paths, **kwargs):
     %(Importer.parameters)s
 
     Returns
-    --------
+    -------
     %(Importer.returns)s
 
     Other Parameters
@@ -816,10 +816,10 @@ def read_wire(*paths, **kwargs):
     %(Importer.other_parameters)s
 
     See Also
-    ---------
+    --------
     %(Importer.see_also.no_read_wire)s
-    """
 
+    """
     kwargs["filetypes"] = ["Renishaw WiRE files (*.wdf)"]
     kwargs["protocol"] = ["wire", "wdf"]
     importer = Importer()

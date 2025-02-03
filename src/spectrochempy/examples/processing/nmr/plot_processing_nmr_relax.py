@@ -93,6 +93,6 @@ _ = fitter.plotmerit(dsint, som, method="scatter", title="T1 relaxation fitting"
 
 # %%
 # This ends the example ! The following line can be removed or commented
-# when the example is run as a notebook (*.ipynb).
+# when the example is run as a notebook (`.ipynb`).
 
 # scp.show()

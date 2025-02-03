@@ -142,9 +142,7 @@ class GeneralPreferences(MetaConfigurable):
 
     @property
     def log_level(self):
-        """
-        Logging level (int).
-        """
+        """Logging level (int)."""
         return self.parent.log_level
 
     @log_level.setter

@@ -79,6 +79,7 @@ def import_optional_dependency(
         None is returned when the package is not found and `errors`
         is False, or when the package's version is too old and `errors`
         is ``'warn'``.
+
     """
     if errors not in {"warn", "raise", "ignore"}:
         raise ValueError("errors must be one of {'warn', 'raise', 'ignore'}")

@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module holds the definitions all the various models.
-"""
+"""Module holding the definitions of all the various models."""
 
 from functools import wraps
 
@@ -26,9 +24,7 @@ __all__ = [
 
 
 def make_units_compatibility(func):
-    """
-    Decorator to take into account the input features (units, type...)
-    """
+    """Take into account the input features (units, type...)."""
 
     def _convert_to_units(arg, x_units):
         if isinstance(arg, Quantity):
@@ -160,13 +156,13 @@ class polynomialbaseline:
 # GaussianModel
 # ======================================================================================
 class gaussianmodel:
-    """
+    r"""
     Normalized 1D gaussian function.
 
     .. math::
-        f(x) = \\frac{ampl}{\\sqrt{2 \\pi \\sigma^2} } \\exp({\\frac{-(x-pos)^2}{2 \\sigma^2}})
+        f(x) = \frac{ampl}{\sqrt{2 \pi \sigma^2} } \exp({\frac{-(x-pos)^2}{2 \sigma^2}})
 
-    where :math:`\\sigma = \\frac{width}{2.3548}` .
+    where :math:`\sigma = \frac{width}{2.3548}` .
     """
 
     type = "1D"
@@ -192,13 +188,13 @@ class gaussianmodel:
 # LorentzianModel
 # ======================================================================================
 class lorentzianmodel:
-    """
+    r"""
     A standard Lorentzian function (also known as the Cauchy distribution).
 
     .. math::
-        f(x) = \\frac{ampl * \\lambda}{\\pi [(x-pos)^2+ \\lambda^2]}
+        f(x) = \frac{ampl * \lambda}{\pi [(x-pos)^2+ \lambda^2]}
 
-    where :math:`\\lambda = \\frac{width}{2}` .
+    where :math:`\lambda = \frac{width}{2}` .
     """
 
     type = "1D"
@@ -224,8 +220,7 @@ class lorentzianmodel:
 # ======================================================================================
 class voigtmodel:
     """
-    A Voigt model constructed as the convolution of a :class:`GaussianModel` and
-    a :class:`LorentzianModel` .
+    A Voigt model constructed as the convolution of a :class:`GaussianModel` and a :class:`LorentzianModel` .
 
     Commonly used for spectral line fitting.
     """
@@ -306,11 +301,11 @@ class asymmetricvoigtmodel:
 
 
 class sigmoidmodel:
-    """
+    r"""
     A Sigmoid function.
 
     .. math::
-        f(x) = \\frac{1.}{1 + \\exp(\\lambda (x-pos))}
+        f(x) = \frac{1.}{1 + \exp(\lambda (x-pos))}
     """
 
     type = "1D"
@@ -321,7 +316,6 @@ class sigmoidmodel:
     $ ampl: %(ampl).3f, 0.0, None
     $ pos: %(pos).3f, %(poslb).3f, %(poshb).3f
     $ asym: %(asym).3f, 0.0, None
-
     """
 
     @make_units_compatibility
@@ -334,9 +328,7 @@ class sigmoidmodel:
 # User defined model
 # ======================================================================================
 class usermodel:
-    """
-    Base class for user defined models
-    """
+    """Base class for user defined models."""
 
     type = "1D"
     args = []

@@ -3,7 +3,4 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Package with modules related to the analysis of `NDDataset`\'s or
-`Project`\\ 's.
-"""
+r"""Package with modules related to the analysis of `NDDataset`\'s or `Project`'s."""

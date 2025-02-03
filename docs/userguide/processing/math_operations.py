@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.4
+#       jupytext_version: 1.16.6
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -23,6 +23,7 @@
 #     pygments_lexer: ipython3
 #     version: 3.10.8
 # ---
+
 # %% [markdown]
 # # Mathematical operations
 
@@ -119,11 +120,11 @@ np.sqrt(dx)
 # * [add](#add)(x1, x2, **kwargs): Add arguments element-wise.
 # * [subtract](#subtract)(x1, x2, **kwargs): Subtract arguments, element-wise.
 # * [multiply](#multiply)(x1, x2, **kwargs): Multiply arguments element-wise.
-# * [divide](#divide) or [true_divide](#true_divide)(x1, x2, **kwargs): Returns a true division of the inputs,
+# * [divide](#divide) or [true_divide](#divide)(x1, x2, **kwargs): Returns a true division of the inputs,
 # element-wise.
 # * [floor_divide](#floor_divide)(x1, x2, **kwargs): Return the largest integer smaller or equal to the division of
 # the inputs.
-# * [mod](#mod) or [remainder](#remainder)(x1, x2,**kwargs): Return element-wise remainder of division.
+# * [mod](#mod) or [remainder](#mod)(x1, x2,**kwargs): Return element-wise remainder of division.
 # * [fmod](#fmod)(x1, x2, **kwargs): Return the element-wise remainder of division.
 
 # %% [markdown]

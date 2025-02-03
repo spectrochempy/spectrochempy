@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Plugin module to extend NDDataset with a JCAMP-DX export method.
-"""
+"""Plugin module to extend NDDataset with a JCAMP-DX export method."""
 
 # import os as os
 import csv
@@ -47,12 +45,12 @@ def write_csv(*args, **kwargs):
 
     Examples
     --------
-
     >>> ds = scp.NDDataset([1, 2, 3])
     >>> f1 = ds.write_csv('myfile')
 
     >>> ds = scp.read('irdata/nh4y-activation.spg')
     >>> f2 = ds[0].write_csv('single_spectrum.csv')
+
     """
     exporter = Exporter()
     kwargs["filetypes"] = ["CSV files (*.csv)"]

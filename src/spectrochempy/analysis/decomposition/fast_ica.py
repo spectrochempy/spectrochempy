@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Implementation of FastICA model (using scikit-learn library)
-"""
+"""Implementation of FastICA model (using scikit-learn library)."""
 
 import traitlets as tr
 from numpy.random import RandomState
@@ -263,6 +261,7 @@ array of values drawn from a normal distribution is used."""
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y=None)
 

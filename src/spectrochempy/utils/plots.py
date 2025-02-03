@@ -17,9 +17,7 @@ pint_version = int(__version__.split(".")[1])
 
 @maxes.subplot_class_factory
 class _Axes(maxes.Axes):
-    """
-    Subclass of matplotlib Axes class
-    """
+    """Subclass of matplotlib Axes class."""
 
     from spectrochempy.core.units import remove_args_units
 
@@ -232,64 +230,77 @@ class _Axes(maxes.Axes):
 
     @remove_args_units
     def spy(self, *args, **kwargs):
+        """Plot a spy."""
         return super().spy(*args, **kwargs)
 
     @remove_args_units
     def tripcolor(self, *args, **kwargs):
+        """Plot a tripcolor."""
         return super().tripcolor(*args, **kwargs)
 
     @remove_args_units
     def triplot(self, *args, **kwargs):
+        """Plot a triplot."""
         return super().triplot(*args, **kwargs)
 
     @remove_args_units
     def tricontour(self, *args, **kwargs):
+        """Plot a tricontour."""
         return super().tricontour(*args, **kwargs)
 
     @remove_args_units
     def tricontourf(self, *args, **kwargs):
+        """Plot a tricontourf."""
         return super().tricontourf(*args, **kwargs)
 
     @remove_args_units
     def annotate(self, *args, **kwargs):
+        """Add an annotation to the axes."""
         return super().annotate(*args, **kwargs)
 
     @remove_args_units
     def text(self, *args, **kwargs):
+        """Add text to the axes."""
         return super().text(*args, **kwargs)
 
     @remove_args_units
     def table(self, *args, **kwargs):
+        """Add a table to the axes."""
         return super().table(*args, **kwargs)
 
     @remove_args_units
     def arrow(self, *args, **kwargs):
+        """Add an arrow to the axes."""
         return super().arrow(*args, **kwargs)
 
     @remove_args_units
     def set_xlim(self, *args, **kwargs):
+        """Set the x-axis limits."""
         return super().set_xlim(*args, **kwargs)
 
     @remove_args_units
     def set_ylim(self, *args, **kwargs):
+        """Set the y-axis limits."""
         return super().set_ylim(*args, **kwargs)
 
 
 class _Axes3D(maxes3D.Axes3D):
+    """Subclass of matplotlib Axes3D class."""
+
     from spectrochempy.core.units import remove_args_units
 
     def __init__(self, *args, **kwargs):
+        """Initialize the 3D axes."""
         super().__init__(*args, **kwargs)
 
     @remove_args_units
     def plot_surface(self, *args, **kwargs):
+        """Plot a surface."""
         return super().plot_surface(*args, **kwargs)
 
 
 def plot_method(type, doc):
-    """
-    Decorator to select a plot method from the function name
-    """
+    """Select a plot method from the function name."""
 
     def decorator_plot_method(func):
         method = func.__name__.split("plot_")[-1]
@@ -381,7 +392,7 @@ NGreen = cmyk2rgb(85, 0, 60, 10)
 
 def figure(preferences=None, **kwargs):
     """
-    Method to open a new figure.
+    Open a new figure.
 
     Parameters
     ----------
@@ -389,8 +400,8 @@ def figure(preferences=None, **kwargs):
         Keywords arguments to be passed to the matplotlib figure constructor.
     Preferences : Meta dictionary
         Per object saved plot configuration.
-    """
 
+    """
     from spectrochempy.core.dataset.baseobjects.meta import Meta
 
     if preferences is None:
@@ -399,9 +410,7 @@ def figure(preferences=None, **kwargs):
 
 
 def show():
-    """
-    Method to force the `matplotlib` figure display.
-    """
+    """Force the `matplotlib` figure display."""
     from spectrochempy import NO_DISPLAY
 
     if NO_DISPLAY:
@@ -442,8 +451,8 @@ def get_figure(**kwargs):
     Returns
     -------
     matplotlib figure instance
-    """
 
+    """
     n = plt.get_fignums()
 
     clear = kwargs.get("clear", True)
@@ -505,6 +514,7 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
     Returns
     -------
     Plotly figure instance
+
     """
     from spectrochempy.utils.optional import import_optional_dependency
 
@@ -523,7 +533,7 @@ def get_plotly_figure(clear=True, fig=None, **kwargs):
 
 class colorscale:
     def normalize(self, vmin, vmax, cmap="viridis", rev=False, offset=0):
-        """ """
+        """Normalize the color scale based on the given parameters."""
         if rev:
             cmap = cmap + "_r"
         _colormap = plt.get_cmap(cmap)
@@ -532,6 +542,7 @@ class colorscale:
         self.scalarMap = mpl.cm.ScalarMappable(norm=_norm, cmap=_colormap)
 
     def rgba(self, z, offset=0):
+        """Return the rgba color for the given value."""
         c = np.array(self.scalarMap.to_rgba(z.squeeze() - offset))
         c[0:3] *= 255
         c[0:3] = np.round(c[0:3].astype("uint16"), 0)
@@ -542,10 +553,7 @@ colorscale = colorscale()
 
 
 def make_label(ss, lab="<no_axe_label>", use_mpl=True):
-    """
-    Make a label from title and units.
-    """
-
+    """Make a label from title and units."""
     if ss is None:
         return lab
 

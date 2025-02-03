@@ -1,21 +1,14 @@
-# intentionnaly masked with ~
+# Backup files
 *~
 ~*
 
-# ignored extensions
+# Logs and temporary files
 *.log
-.eggs
-*.egg-info
 *.bak
-*.pkl
 *.orig
-*.so
-*.mo
-*.pot
+*.pkl
 *.tar
 *.bz2
-*.py[cod]
-*.pdf
 *.zip
 *.egg
 *.manifest
@@ -26,66 +19,14 @@
 *.pptx
 *.jdx
 *.sample
+*.fdb_latexmk
+*.goutputstream*
 
-# git files
-*_LOCAL_*.*
-*_REMOTE_*.*
-*_BACKUP_*.*
-*_BASE_*.*
-.gitignore_*
-
-# local files or directory
-.editorconfig
-/extdata/
-/git_hooks/
-/installed.txt
-thumb.png
-
-# Mac OS specific
-.DS_Store
-
-# pycharm project
-.idea/
-
-# Spyder project
-.spyderproject
-.spyproject
-
-# Example, ipython notebook,  jupytext, checkpoints
-*.ipynb_checkpoints/
-*.ipynb
-*.pct.md
-
-# VS
-!.vscode/
-!.vscode/settings.json
-
-# caches
+# Python specific
+*.py[cod]
 __pycache__/
 .cache/
 /.pytest_cache/
-
-# Sphinx documentation
-docs/reference/generated
-docs/reference/api.rst
-build/
-gallery/
-docs/savefig/
-dist/
-build/
-
-# tests
-tests/figures
-/tests_extern_packages/
-
-# Latex
-*.fdb_latexmk
-
-# Docker / bitbucket
-.dockerignore
-.pipeline*.sh
-
-# Distribution / packaging
 .Python
 develop-eggs/
 eggs/
@@ -96,38 +37,79 @@ sdist/
 var/
 *.egg-info/
 .coverage
-
-saved_pkglist.txt
-
-Icon*
-
-# pip virtual environment
-/env/
-HIZECOKE_TEST.pscp
-process.pscp
-
-# unknown
-.goutputstream*
-
-*.py-donotwork
-/patch.diff
-
-
 .hypothesis/
-/htmlcov/
+htmlcov/
 cov.coverage
 cov.syspath.txt
 coverage.xml
-
-# docs automatically generated
-/res.docstrings.txt
-essai.py
-/out/
-*dev*.rst
 coverage.json
 
+# Jupyter notebooks
+*.ipynb_checkpoints/
+*.ipynb
+*.pct.md
+
+# Sphinx documentation
+docs/reference/generated
+docs/reference/api.rst
+build/
+gallery/
+docs/savefig/
+docs/_build
+
+# Tests
+tests/figures
+/tests_extern_packages/
+
+# Distribution / packaging
+dist/
+saved_pkglist.txt
+
+# Local files or directories
+.editorconfig
+/extdata/
+/git_hooks/
+/installed.txt
+thumb.png
+
+# Mac OS specific
+.DS_Store
+Icon*
+
+# IDE specific
+.idea/
+.spyderproject
+.spyproject
+.vscode
+*.code-workspace
+
+# Docker / bitbucket
+.dockerignore
+.pipeline*.sh
+
+# Pip virtual environment
+/env/
+.venv
+
+# Git specific
+*_LOCAL_*.*
+*_REMOTE_*.*
+*_BACKUP_*.*
+*_BASE_*.*
+.gitignore_*
+
+# Unknown
+process.pscp
+HIZECOKE_TEST.pscp
+essai.py
+res.docstrings.txt
+out/
+*dev*.rst
 data/stylesheets/mydefault.mplstyle
 _ressources
 _tools
-.venv
 sg_execution_times.rst
+
+myfile.csv
+_sandbox
+docs/static/video

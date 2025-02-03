@@ -6,7 +6,6 @@
 """
 Apigen is used to generate API reference api.rst automatically.
 
-
 Usage
 -----
     $ python apigen.py
@@ -30,9 +29,7 @@ REFERENCE = pathlib.Path(__file__).parent / "reference"
 # Class Apigen
 # ======================================================================================
 class Apigen:
-    """
-    Generate api.rst
-    """
+    """Generate api.rst."""
 
     header = """
 .. Generate API reference pages, but don't display these pages in tables.

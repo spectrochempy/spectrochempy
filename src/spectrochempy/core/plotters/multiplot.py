@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Module containing multiplot function(s).
-"""
+"""Module containing multiplot function(s)."""
 
 __all__ = [
     "multiplot",
@@ -89,8 +87,7 @@ def multiplot_image(datasets, **kwargs):
 
 def plot_with_transposed(dataset, **kwargs):
     """
-    Plot a 2D dataset as a stacked plot with its transposition in a second
-    axe.
+    Plot a 2D dataset as a stacked plot with its transposition in a second axe.
 
     Alias of plot_2D (with `method` argument set to `with_transposed` ).
     """
@@ -178,8 +175,8 @@ def multiplot(
         Title of the figure to display on top.
     suptitle_color : color
         Color of the subtitles
-    """
 
+    """
     # some basic checking
     # ------------------------------------------------------------------------
     if labels is None:

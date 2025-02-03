@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-This module implement the EFA (Evolving Factor Analysis) class.
-"""
+"""Module implementing the EFA (Evolving Factor Analysis) class."""
 
 import numpy as np
 import traitlets as tr
@@ -186,6 +184,7 @@ class EFA(DecompositionAnalysis):
         See Also
         --------
         %(analysis_fit.see_also)s
+
         """
         return super().fit(X, Y=None)
 
@@ -206,6 +205,7 @@ class EFA(DecompositionAnalysis):
         Other Parameters
         ----------------
         %(analysis_transform.other_parameters)s
+
         """
         return super().fit_transform(X, **kwargs)
 
@@ -218,9 +218,7 @@ class EFA(DecompositionAnalysis):
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def f_ev(self):
-        """
-        Eigenvalues for the forward analysis ( `NDDataset` ).
-        """
+        """Eigenvalues for the forward analysis ( `NDDataset` )."""
         f = self._outfit[0]
         if self.cutoff is not None:
             f = np.max((f, np.ones_like(f) * self.cutoff), axis=0)
@@ -229,9 +227,7 @@ class EFA(DecompositionAnalysis):
     @property
     @_wrap_ndarray_output_to_nddataset(units=None, title="keep", typex="components")
     def b_ev(self):
-        """
-        Eigenvalues for the backward analysis ( `NDDataset` ).
-        """
+        """Eigenvalues for the backward analysis ( `NDDataset` )."""
         b = self._outfit[1]
         if self.cutoff is not None:
             b = np.max((b, np.ones_like(b) * self.cutoff), axis=0)

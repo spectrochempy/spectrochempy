@@ -283,6 +283,7 @@ def smooth(dataset, size=5, window="avg", **kwargs):
     See Also
     --------
     %(Filter.see_also.no_smooth)s
+
     """
     if window in ["flat", "avg", "han", "hanning", "hamming", "bartlett", "blackman"]:
         if window == "flat":
@@ -342,6 +343,7 @@ def savgol(dataset, size=5, order=2, **kwargs):
     -----
     Even spacing of the axis coordinates is NOT checked.
     Be aware that Savitzky-Golay algorithm is based on indexes, not on coordinates.
+
     """
     # TODO : check if coordinates are evenly spaced
 
@@ -397,6 +399,7 @@ def whittaker(dataset, lamb=1.0, order=2, **kwargs):
     See Also
     --------
     %(Filter.see_also.no_whittaker)s
+
     """
     return Filter(method="whittaker", lamb=lamb, order=order, **kwargs).transform(
         dataset,
