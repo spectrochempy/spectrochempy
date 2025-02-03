@@ -131,8 +131,10 @@ class BuildDocumentation:
             "whatsnew": kwargs.get("whatsnew", False),
         }
 
-        if settings["noapi"] and not settings["whatsnew"]:
-            environ["SPHINX_NOAPI"] = "noapi"
+        environ["SPHINX_NOEXEC"] = "1" if self.settings["noexec"] else "0"
+        environ["SPHINX_NOAPI"] = (
+            1 if settings["noapi"] and not settings["whatsnew"] else 0
+        )
 
         return settings
 
@@ -329,7 +331,6 @@ class BuildDocumentation:
         environ["DOC_BUILDING"] = "yes"
         environ["PREVIOUS_VERSIONS"] = ",".join(previous_versions)
         environ["LAST_RELEASE"] = self._last_release
-        environ["SPHINX_NOEXEC"] = "1" if self.settings["noexec"] else "0"
 
     def _run_sphinx_build(self):
         """Run the Sphinx build process."""
