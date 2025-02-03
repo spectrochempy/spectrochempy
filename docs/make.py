@@ -360,16 +360,21 @@ class BuildDocumentation:
         # Check if the source directory exists and is not empty
         source_dir = HTML / doc_version
         if source_dir.exists() and any(source_dir.iterdir()):
-            # Copy latest to tag directory in BUILDDIR.parent directory
-            sh(f"cp -rf {source_dir}/ {HTML}/")
+            # Copy all files, including hidden ones, from source_dir to HTML
+            for item in source_dir.iterdir():
+                dest = HTML / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dest, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(item, dest)
             print(f"Copied contents of {source_dir} to {HTML}/")
         else:
             print(f"Warning: Source directory {source_dir} does not exist or is empty")
 
         # Remove it if doc_version is 'latest' as all content is in the parent directory
-        # if doc_version == "latest" and source_dir.exists():
-        #     sh(f"rm -r {source_dir}")
-        #     print(f"Removed directory {source_dir}")
+        if doc_version == "latest" and source_dir.exists():
+            shutil.rmtree(source_dir)
+            print(f"Removed directory {source_dir}")
 
         # Remove the environment variables
         del environ["DOC_BUILDING"]
