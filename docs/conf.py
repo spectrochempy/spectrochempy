@@ -231,17 +231,30 @@ warnings.filterwarnings(
     " non-GUI backend, so cannot show the figure.",
 )
 
+# Check if we are building on GitHub Actions
+on_github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
+github_repository = os.environ.get("GITHUB_REPOSITORY", "")
+
+if on_github_actions:
+    print(f"Building on GitHub Actions in repository: {github_repository}")
+    root = ""
+    if "spectrochempy/spectrochempy" not in github_repository:
+        # we are not on the main site so we cannot use  spectrochempy.fr
+        root = "/spectrochempy/"
+else:
+    print("Building locally")
+    root = HTML
 previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 last_release = os.environ.get("LAST_RELEASE", "")
 html_context = {
     "current_version": "stable" if ("dev" not in version) else "latest",
-    "release": last_release,
+    "release": root + last_release,
     "base_url": "..",
     "versions": [
-        ("latest", "/index.html"),
+        ("latest", root + "/index.html"),
         # Add previous versions dynamically
     ]
-    + [(v, f"/{v}/index.html") for v in previous_versions],
+    + [(v, root + f"/{v}/index.html") for v in previous_versions],
     # previous_versions": previous_versions,
     # This is for the citing page
     "version": release,
@@ -249,6 +262,8 @@ html_context = {
     "bibmonth": "{" + f"{datetime.today().month}" + "}",
     "year": f"{datetime.today().year}",
     "bibyear": "{" + f"{datetime.today().year}" + "}",
+    "on_github_actions": on_github_actions,
+    "github_repository": github_repository,
 }
 
 # Sphinx-gallery ---------------------------------------------------------------

@@ -258,7 +258,13 @@ class BuildDocumentation:
                 tag = HTML / self._get_previous_tag()
                 if item.name == "stable" and not tag.exists():
                     item = item.rename(tag)
-                versions.append(item.name)
+                    print(f"Renamed directory stable to {tag}")
+                if item.name == "stable" and tag.exists():
+                    # tag directory already exist, remove any "stable" directory remaining
+                    shutil.rmtree(item, ignore_errors=True)
+                    print(f"Removed directory {item}")
+                else:
+                    versions.append(item.name)
         return versions
 
     # COMMANDS

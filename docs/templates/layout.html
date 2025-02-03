@@ -49,3 +49,10 @@
     {% endif %}
     {{ super() }}
 {% endblock %}
+
+{% block sidebar %}
+    {{ super() }}
+    <div class="version">
+        {{ version }}
+    </div>
+{% endblock %}
