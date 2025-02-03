@@ -51,4 +51,17 @@
     <div class="version">
         {{ version }}
     </div>
+    <!-- Debugging paths -->
+    <div class="debug">
+        <p>Current Version: {{ current_version }}</p>
+        <p>Release: {{ release }}</p>
+        <p>Base URL: {{ base_url }}</p>
+        <p>Versions:</p>
+        <ul>
+            {% for slug, url in versions %}
+                <li>{{ slug }}: {{ url }}</li>
+            {% endfor %}
+        </ul>
+        <p>Previous Versions: {{ previous_versions }}</p>
+    </div>
 {% endblock %}
