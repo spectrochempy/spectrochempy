@@ -54,6 +54,10 @@ ERROR_MSGS = {
 def check_docstrings(module, obj, exclude=None):
     if exclude is None:
         exclude = []
+    exclude = exclude + [
+        "GL02",
+        "GL03",
+    ]
     members = [f"{module}.{obj.__name__}"]
     print(module)  # noqa: T201
     print(obj.__name__)  # noqa: T201

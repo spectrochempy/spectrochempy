@@ -248,13 +248,13 @@ previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 last_release = os.environ.get("LAST_RELEASE", "")
 html_context = {
     "current_version": "stable" if ("dev" not in version) else "latest",
-    "release": root + last_release,
+    "release": str(root) + "/" + last_release,
     "base_url": "..",
     "versions": [
-        ("latest", root + "/index.html"),
+        ("latest", str(root) + "/index.html"),
         # Add previous versions dynamically
     ]
-    + [(v, root + f"/{v}/index.html") for v in previous_versions],
+    + [(v, str(root) + f"/{v}/index.html") for v in previous_versions],
     # previous_versions": previous_versions,
     # This is for the citing page
     "version": release,
