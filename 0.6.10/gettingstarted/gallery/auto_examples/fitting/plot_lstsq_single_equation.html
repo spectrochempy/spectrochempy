@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solve a linear equation using LSTSQ &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Fitting 1D dataset" href="plot_fit.html" />
+    <link rel="prev" title="Example of the fitting package usage" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#example-of-the-analysis-package-usage">Example of the analysis package usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#example-of-the-fitting-package-usage">Example of the fitting package usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#how-to-use-nddataset">How to use NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-dataset-examples">Plotting dataset examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing-dataset-examples">Processing dataset examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project Management</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#read-write">Read / Write</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Example of the analysis package usage</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Example of the fitting package usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../nddataset/index.html">How to use NDDataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/index.html">Plotting dataset examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../processing/index.html">Processing dataset examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/index.html">Project Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../read/index.html">Read / Write</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/reference/index.html">Public API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example’s gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Example of the fitting package usage</a></li>
+      <li class="breadcrumb-item active">Solve a linear equation using LSTSQ</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/gettingstarted/gallery/auto_examples/fitting/plot_lstsq_single_equation.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gettingstarted-gallery-auto-examples-fitting-plot-lstsq-single-equation-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="solve-a-linear-equation-using-lstsq">
+<span id="sphx-glr-gettingstarted-gallery-auto-examples-fitting-plot-lstsq-single-equation-py"></span><h1>Solve a linear equation using LSTSQ<a class="headerlink" href="#solve-a-linear-equation-using-lstsq" title="Permalink to this heading">¶</a></h1>
+<p>In this example, we find the least  square solution of a simple linear
+equation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 2</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">spectrochempy</span> <span class="k">as</span> <span class="nn">scp</span>
+</pre></div>
+</div>
+<p>Let’s take a similar example to the one given in the <a class="reference external" href="https://numpy.org/doc/stable/reference/routines.linalg.html#module-numpy.linalg" title="(in NumPy v1.24)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.linalg</span></code></a>
+documentation</p>
+<p>We have some noisy data that represent the distance <code class="xref py py-obj docutils literal notranslate"><span class="pre">d</span></code> traveled by some
+objects versus time <code class="xref py py-obj docutils literal notranslate"><span class="pre">t</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span></a><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;hour&quot;</span><span class="p">)</span>
+
+<a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span></a><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">],</span> <span class="n">coordset</span><span class="o">=</span><span class="p">[</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;distance&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;kilometer&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Here is a plot of these data-points:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot_scatter.html#spectrochempy.NDDataset.plot_scatter" title="spectrochempy.NDDataset.plot_scatter" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">plot_scatter</span></a><span class="p">(</span><span class="n">markersize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">mfc</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../_images/sphx_glr_plot_lstsq_single_equation_001.png" srcset="../../../../_images/sphx_glr_plot_lstsq_single_equation_001.png" alt="plot lstsq single equation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;_Axes: xlabel=&#39;time $\\mathrm{/\\ \\mathrm{h}}$&#39;, ylabel=&#39;distance $\\mathrm{/\\ \\mathrm{km}}$&#39;&gt;
+</pre></div>
+</div>
+<p>We want to fit a line through these data-points of equation</p>
+<div class="math notranslate nohighlight">
+\[d = v.t + d_0\]</div>
+<p>By examining the coefficients, we see that the line should have a
+gradient of roughly 1 km/h and cut the y-axis at, more or less, -1 km.</p>
+<p>Using LSTSQ, the solution is found very easily:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.LSTSQ.html#spectrochempy.LSTSQ" title="spectrochempy.LSTSQ" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">lst</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.LSTSQ.html#spectrochempy.LSTSQ" title="spectrochempy.LSTSQ" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">LSTSQ</span></a><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">t</span></a><span class="p">,</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">d0</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.LSTSQ.transform.html#spectrochempy.LSTSQ.transform" title="spectrochempy.LSTSQ.transform" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">lst</span><span class="o">.</span><span class="n">transform</span></a><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;speed : {:.3fK},  d0 : {:.3fK}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">d0</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>speed : 1.000 kilometer.hour^-1,  d0 : -0.950 kilometer
+</pre></div>
+</div>
+<p>Final plot</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot_scatter.html#spectrochempy.NDDataset.plot_scatter" title="spectrochempy.NDDataset.plot_scatter" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">d</span><span class="o">.</span><span class="n">plot_scatter</span></a><span class="p">(</span>
+    <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">mfc</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">mec</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Original data&quot;</span><span class="p">,</span>
+    <span class="n">suptitle</span><span class="o">=</span><span class="s2">&quot;Least-square fitting &quot;</span> <span class="s2">&quot;example&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">dfit</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.LSTSQ.inverse_transform.html#spectrochempy.LSTSQ.inverse_transform" title="spectrochempy.LSTSQ.inverse_transform" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">lst</span><span class="o">.</span><span class="n">inverse_transform</span></a><span class="p">()</span>
+
+<a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot_pen.html#spectrochempy.NDDataset.plot_pen" title="spectrochempy.NDDataset.plot_pen" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">dfit</span><span class="o">.</span><span class="n">plot_pen</span></a><span class="p">(</span><span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Fitted line&quot;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../_images/sphx_glr_plot_lstsq_single_equation_002.png" srcset="../../../../_images/sphx_glr_plot_lstsq_single_equation_002.png" alt="plot lstsq single equation" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;_Axes: xlabel=&#39;time $\\mathrm{/\\ \\mathrm{h}}$&#39;, ylabel=&#39;distance $\\mathrm{/\\ \\mathrm{km}}$&#39;&gt;
+</pre></div>
+</div>
+<p>Note: The same result can be obtained directly using <code class="xref py py-obj docutils literal notranslate"><span class="pre">d</span></code> as a single
+parameter on LSTSQ (as <code class="xref py py-obj docutils literal notranslate"><span class="pre">t</span></code> is the <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> coordinate axis!)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.LSTSQ.html#spectrochempy.LSTSQ" title="spectrochempy.LSTSQ" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">lst</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.LSTSQ.html#spectrochempy.LSTSQ" title="spectrochempy.LSTSQ" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">LSTSQ</span></a><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">d</span></a><span class="p">)</span>
+
+<span class="n">v</span><span class="p">,</span> <span class="n">d0</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.LSTSQ.transform.html#spectrochempy.LSTSQ.transform" title="spectrochempy.LSTSQ.transform" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">lst</span><span class="o">.</span><span class="n">transform</span></a><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;speed : {:.3fK},  d0 : {:.3fK}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">d0</span><span class="p">))</span>
+
+<span class="c1"># scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>speed : 1.000 kilometer.hour^-1,  d0 : -0.950 kilometer
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.401 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gettingstarted-gallery-auto-examples-fitting-plot-lstsq-single-equation-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../../_downloads/92f03da9b49415ef0efe8268c7358c43/plot_lstsq_single_equation.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_lstsq_single_equation.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../../_downloads/a6efab7ebb02f5027ec66b66f01ca849/plot_lstsq_single_equation.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_lstsq_single_equation.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Example of the fitting package usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_fit.html" class="btn btn-neutral float-right" title="Fitting 1D dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

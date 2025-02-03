@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NDDataset coordinates example &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="NDDataset creation and plotting example" href="plot_create_dataset.html" />
+    <link rel="prev" title="Units manipulation examples" href="plot_units.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#example-of-the-analysis-package-usage">Example of the analysis package usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#example-of-the-fitting-package-usage">Example of the fitting package usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#how-to-use-nddataset">How to use NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-dataset-examples">Plotting dataset examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing-dataset-examples">Processing dataset examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project Management</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#read-write">Read / Write</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../analysis/index.html">Example of the analysis package usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fitting/index.html">Example of the fitting package usage</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">How to use NDDataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/index.html">Plotting dataset examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../processing/index.html">Processing dataset examples</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../project/index.html">Project Management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../read/index.html">Read / Write</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/reference/index.html">Public API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../userguide/reference/faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Example’s gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">How to use NDDataset</a></li>
+      <li class="breadcrumb-item active">NDDataset coordinates example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/gettingstarted/gallery/auto_examples/nddataset/plot_coordinates.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-gettingstarted-gallery-auto-examples-nddataset-plot-coordinates-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="nddataset-coordinates-example">
+<span id="sphx-glr-gettingstarted-gallery-auto-examples-nddataset-plot-coordinates-py"></span><h1>NDDataset coordinates example<a class="headerlink" href="#nddataset-coordinates-example" title="Permalink to this heading">¶</a></h1>
+<p>In this example, we show how coordinates can be used in SpectroChemPy</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">spectrochempy</span> <span class="k">as</span> <span class="nn">scp</span>
+</pre></div>
+</div>
+<section id="uploading-a-dataset">
+<h2>Uploading a dataset<a class="headerlink" href="#uploading-a-dataset" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.read.html#spectrochempy.read" title="spectrochempy.read" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-function"><span class="n">scp</span><span class="o">.</span><span class="n">read</span></a><span class="p">(</span><span class="s2">&quot;irdata/CO@Mo_Al2O3.SPG&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">X</span></code> has two coordinates:
+* <code class="xref py py-obj docutils literal notranslate"><span class="pre">wavenumbers</span></code> named “x”
+* and <code class="xref py py-obj docutils literal notranslate"><span class="pre">timestamps</span></code> (<em>i.e.,</em> the time of recording) named “y”.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.coordset.html#spectrochempy.NDDataset.coordset" title="spectrochempy.NDDataset.coordset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X</span><span class="o">.</span><span class="n">coordset</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>CoordSet: [x:wavenumbers, y:acquisition timestamp (GMT)]
+</pre></div>
+</div>
+<p>To display them individually use the <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> attributes of
+the dataset <code class="docutils literal notranslate"><span class="pre">X</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.LinearCoord.html#spectrochempy.LinearCoord" title="spectrochempy.LinearCoord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span><span class="o">.</span><span class="n">x</span></a>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 3112</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> wavenumbers</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[    4000     3999 ...     1001    999.9] cm⁻¹</font></div></td><tr>
+</table>
+</div>
+<br />
+<br /><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span><span class="o">.</span><span class="n">y</span></a>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 19</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> acquisition timestamp (GMT)</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[1.477e+09 1.477e+09 ... 1.477e+09 1.477e+09] s</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       labels</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='darkcyan'>         [[  2016-10-18 13:49:35+00:00   2016-10-18 13:54:06+00:00 ...   2016-10-18 16:01:33+00:00   2016-10-18 16:06:37+00:00]<br/>          [  *Résultat de Soustraction:04_Mo_Al2O3_calc_0.003torr_LT_after sulf_Oct 18 15:46:42 2016 (GMT+02:00)<br/>             *Résultat de Soustraction:04_Mo_Al2O3_calc_0.004torr_LT_after sulf_Oct 18 15:51:12 2016 (GMT+02:00) ...<br/>             *Résultat de Soustraction:04_Mo_Al2O3_calc_0.905torr_LT_after sulf_Oct 18 17:58:42 2016 (GMT+02:00)<br/>             *Résultat de Soustraction:04_Mo_Al2O3_calc_1.004torr_LT_after sulf_Oct 18 18:03:41 2016 (GMT+02:00)]]</font></div></td><tr>
+</table>
+</div>
+<br />
+<br /></section>
+<section id="setting-new-coordinates">
+<h2>Setting new coordinates<a class="headerlink" href="#setting-new-coordinates" title="Permalink to this heading">¶</a></h2>
+<p>In this example, each experiment have a timestamp corresponds to the time
+when a given pressure of CO in the infrared cell was set.</p>
+<p>Hence, it would be interesting to replace the “useless” timestamps (<code class="docutils literal notranslate"><span class="pre">y</span></code>)
+by a pressure coordinates:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pressures</span></a> <span class="o">=</span> <span class="p">[</span>
+    <span class="mf">0.00300</span><span class="p">,</span>
+    <span class="mf">0.00400</span><span class="p">,</span>
+    <span class="mf">0.00900</span><span class="p">,</span>
+    <span class="mf">0.01400</span><span class="p">,</span>
+    <span class="mf">0.02100</span><span class="p">,</span>
+    <span class="mf">0.02600</span><span class="p">,</span>
+    <span class="mf">0.03600</span><span class="p">,</span>
+    <span class="mf">0.05100</span><span class="p">,</span>
+    <span class="mf">0.09300</span><span class="p">,</span>
+    <span class="mf">0.15000</span><span class="p">,</span>
+    <span class="mf">0.20300</span><span class="p">,</span>
+    <span class="mf">0.30000</span><span class="p">,</span>
+    <span class="mf">0.40400</span><span class="p">,</span>
+    <span class="mf">0.50300</span><span class="p">,</span>
+    <span class="mf">0.60200</span><span class="p">,</span>
+    <span class="mf">0.70200</span><span class="p">,</span>
+    <span class="mf">0.80100</span><span class="p">,</span>
+    <span class="mf">0.90500</span><span class="p">,</span>
+    <span class="mf">1.00400</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>A first way to do this is to replace the time coordinates by the pressure
+coordinate</p></li>
+</ol>
+<p><em>(we first make a copy of the time coordinates for later use the original will
+be destroyed by the following operation)</em></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_times</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.copy.html#spectrochempy.CoordSet.copy" title="spectrochempy.CoordSet.copy" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">copy</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now we perform the replacement with this new coordinate:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_pressures</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class"><span class="n">scp</span><span class="o">.</span><span class="n">Coord</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pressures</span></a><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;pressure&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;torr&quot;</span><span class="p">)</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span><span class="o">.</span><span class="n">y</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_pressures</span></a>
+<span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span><span class="o">.</span><span class="n">y</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Coord: [float64] torr (size: 19)
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>A second way is to affect several coordinates to the corresponding dimension.
+To do this, the simplest is to affect a list of coordinates instead of a single one:</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span><span class="o">.</span><span class="n">y</span></a> <span class="o">=</span> <span class="p">[</span><a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_times</span></a><span class="p">,</span> <a href="../../../../userguide/reference/generated/spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_pressures</span></a><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span><span class="o">.</span><span class="n">y</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>CoordSet: [_1:acquisition timestamp (GMT), _2:pressure]
+</pre></div>
+</div>
+<p>By default, the current coordinate is the first one (here <code class="xref py py-obj docutils literal notranslate"><span class="pre">c_times</span></code>).
+For example, it will be used for plotting:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prefs</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.preferences.html#spectrochempy.NDDataset.preferences" title="spectrochempy.NDDataset.preferences" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X</span><span class="o">.</span><span class="n">preferences</span></a>
+<a href="https://docs.python.org/3/library/stdtypes.html#tuple" title="builtins.tuple" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">prefs</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">figsize</span></a> <span class="o">=</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot_map.html#spectrochempy.NDDataset.plot_map" title="spectrochempy.NDDataset.plot_map" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X</span><span class="o">.</span><span class="n">plot_map</span></a><span class="p">(</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../../../_images/sphx_glr_plot_coordinates_001.png" srcset="../../../../_images/sphx_glr_plot_coordinates_001.png" alt="plot coordinates" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../../_images/sphx_glr_plot_coordinates_002.png" srcset="../../../../_images/sphx_glr_plot_coordinates_002.png" alt="plot coordinates" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p>To seamlessly work with the second coordinates (pressures),
+we can change the default coordinate:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.select.html#spectrochempy.CoordSet.select" title="spectrochempy.CoordSet.select" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">select</span></a><span class="p">(</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># to select coordinate ``_2``</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.default.html#spectrochempy.CoordSet.default" title="spectrochempy.CoordSet.default" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">default</span></a>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 19</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> pressure</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>  coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>[   0.003    0.004 ...    0.905    1.004] torr</font></div></td><tr>
+</table>
+</div>
+<br />
+<br /><p>Let’s now plot the spectral range of interest. The default coordinate is now used:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X_</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X</span></a><span class="p">[:,</span> <span class="mf">2250.0</span><span class="p">:</span><span class="mf">1950.0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.default.html#spectrochempy.CoordSet.default" title="spectrochempy.CoordSet.default" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">X_</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">default</span></a><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X_</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot_map.html#spectrochempy.NDDataset.plot_map" title="spectrochempy.NDDataset.plot_map" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">X_</span><span class="o">.</span><span class="n">plot_map</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../../../_images/sphx_glr_plot_coordinates_003.png" srcset="../../../../_images/sphx_glr_plot_coordinates_003.png" alt="plot coordinates" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../../_images/sphx_glr_plot_coordinates_004.png" srcset="../../../../_images/sphx_glr_plot_coordinates_004.png" alt="plot coordinates" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Coord: [float64] torr (size: 19)
+</pre></div>
+</div>
+<p>The same can be done for the x coordinates.</p>
+<p>Let’s take for instance row with index 10 of the previous dataset</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">row10</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">X_</span></a><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">row10</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.coordset.html#spectrochempy.NDDataset.coordset" title="spectrochempy.NDDataset.coordset" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-property"><span class="n">row10</span><span class="o">.</span><span class="n">coordset</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../../_images/sphx_glr_plot_coordinates_005.png" srcset="../../../../_images/sphx_glr_plot_coordinates_005.png" alt="plot coordinates" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>CoordSet: [x:wavenumbers]
+</pre></div>
+</div>
+<p>Now we wants to add a coordinate with the wavelength instead of wavenumber.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="../../../../userguide/reference/generated/spectrochempy.LinearCoord.html#spectrochempy.LinearCoord" title="spectrochempy.LinearCoord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_wavenumber</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.copy.html#spectrochempy.CoordSet.copy" title="spectrochempy.CoordSet.copy" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">row10</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span></a><span class="p">()</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.LinearCoord.html#spectrochempy.LinearCoord" title="spectrochempy.LinearCoord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_wavelength</span></a> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">row10</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">to</span></a><span class="p">(</span><span class="s2">&quot;nanometer&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><a href="../../../../userguide/reference/generated/spectrochempy.LinearCoord.html#spectrochempy.LinearCoord" title="spectrochempy.LinearCoord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_wavenumber</span></a><span class="p">,</span> <a href="../../../../userguide/reference/generated/spectrochempy.LinearCoord.html#spectrochempy.LinearCoord" title="spectrochempy.LinearCoord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_wavelength</span></a><span class="p">)</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.html#spectrochempy.CoordSet" title="spectrochempy.CoordSet" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">row10</span><span class="o">.</span><span class="n">x</span></a> <span class="o">=</span> <span class="p">[</span><a href="../../../../userguide/reference/generated/spectrochempy.LinearCoord.html#spectrochempy.LinearCoord" title="spectrochempy.LinearCoord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_wavenumber</span></a><span class="p">,</span> <a href="../../../../userguide/reference/generated/spectrochempy.LinearCoord.html#spectrochempy.LinearCoord" title="spectrochempy.LinearCoord" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">c_wavelength</span></a><span class="p">]</span>
+<a href="../../../../userguide/reference/generated/spectrochempy.CoordSet.select.html#spectrochempy.CoordSet.select" title="spectrochempy.CoordSet.select" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">row10</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">select</span></a><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <a href="../../../../userguide/reference/generated/spectrochempy.NDDataset.plot.html#spectrochempy.NDDataset.plot" title="spectrochempy.NDDataset.plot" class="sphx-glr-backref-module-spectrochempy sphx-glr-backref-type-py-method"><span class="n">row10</span><span class="o">.</span><span class="n">plot</span></a><span class="p">()</span>
+
+<span class="c1"># scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)</span>
+</pre></div>
+</div>
+<img src="../../../../_images/sphx_glr_plot_coordinates_006.png" srcset="../../../../_images/sphx_glr_plot_coordinates_006.png" alt="plot coordinates" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>LinearCoord: [float64] cm⁻¹ (size: 312) LinearCoord: [float64] nm (size: 312)
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  2.080 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-gettingstarted-gallery-auto-examples-nddataset-plot-coordinates-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../../_downloads/47f1d013621b8bd5b9f497c9a2999138/plot_coordinates.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_coordinates.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../../_downloads/69f20ef9f1d75086d6938970135c0fec/plot_coordinates.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_coordinates.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_units.html" class="btn btn-neutral float-left" title="Units manipulation examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_create_dataset.html" class="btn btn-neutral float-right" title="NDDataset creation and plotting example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

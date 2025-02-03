@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.CoordSet &mdash; SpectroChemPy v0.5.5 0.5.5 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/theme_override.css" type="text/css" />
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="spectrochempy.empty" href="spectrochempy.empty.html" />
+    <link rel="prev" title="spectrochempy.LinearCoord" href="spectrochempy.LinearCoord.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.5.5
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> SpectroChemPy </span>
+        version: stable
+        <span class="fa fa-caret-down"></span>
+      </span>
+        <div class="rst-other-versions">
+            <dl>
+                <dt>Other versions</dt>
+                
+                    
+                        <dd><a href="https://www.spectrochempy.fr/latest/index.html"">LATEST</a></dd>
+                    
+                
+                    
+                
+            </dl>
+            <hr/>
+            <dl>
+                <dt>Sources on GitHub</dt>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
+                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
+
+            </dl>
+
+        </div>
+    </div>
+
+    
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <strong>SpectroChemPy</strong>  ?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/papers.html">Papers citing <strong>SpectroChemPy</strong></a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../objects.html">Data structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../importexport/importexport.html">Import &amp; Export</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plotting/plotting.html">Plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../processing/processing.html">Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analysis/analysis.html">Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../units/units.html">Units &amp; Quantities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/api.html">API Configuration</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference &amp; Help</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Public API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-the-api">Loading the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#the-nddataset-object">The NDDataset Object</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#coordinates-related-objects">Coordinates-related objects</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.Coord.html">spectrochempy.Coord</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectrochempy.LinearCoord.html">spectrochempy.LinearCoord</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">spectrochempy.CoordSet</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#creating-nddataset">Creating NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#export-a-nddataset">Export a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#select-data-in-a-nddataset">Select data in a NDDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#plotting-functions">Plotting functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#processing">Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#fitting">Fitting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#analysis">Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#project-management">Project management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#utilities">Utilities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently asked questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licences">Third-party Licences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing  <strong>SpectroChemPy</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.5.5</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Public API reference</a></li>
+      <li class="breadcrumb-item active">spectrochempy.CoordSet</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/userguide/reference/generated/spectrochempy.CoordSet.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+    
+    
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-coordset">
+<h1>spectrochempy.CoordSet<a class="headerlink" href="#spectrochempy-coordset" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CoordSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy/core/dataset/coordset.py#L40-L1108"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.CoordSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>A collection of Coord objects for a NDArray object with validation.</p>
+<p>This object is an iterable containing a collection of Coord objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*coords</strong> (<em>|NDarray| , |NDArray| subclass or |CoordSet| sequence of objects.</em>) – If an instance of CoordSet is found, instead of an array, this means
+that all coordinates in this coords describe the same axis.
+It is assumed that the coordinates are passed in the order of the
+dimensions of a nD numpy array (
+<a class="reference external" href="https://docs.scipy.org/doc/numpy-1.14.1/glossary.html#term-row-major">row-major</a>
+order), i.e., for a 3d object : ‘z’, ‘y’, ‘x’.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword parameters (see Other Parameters).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Other Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>x</strong> (<em>|NDarray| , |NDArray| subclass or |CoordSet|</em>) – A single coordinate associated to the ‘x’-dimension.
+If a coord was already passed in the argument, this will overwrite
+the previous. It is thus not recommended to simultaneously use
+both way to initialize the coordinates to avoid such conflicts.</p></li>
+<li><p><strong>y, z, u, …</strong> (<em>|NDarray| , |NDArray| subclass or |CoordSet|</em>) – Same as <code class="xref py py-obj docutils literal notranslate"><span class="pre">x</span></code> for the others dimensions.</p></li>
+<li><p><strong>dims</strong> (<em>list of string, optional</em>) – Names of the dims to use corresponding to the coordinates. If not
+given, standard names are used: x, y, …</p></li>
+<li><p><strong>copy</strong> (<em>bool, optional</em>) – Perform a copy of the passed object. Default is True.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="spectrochempy.Coord.html#spectrochempy.Coord" title="spectrochempy.Coord"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Coord</span></code></a></dt><dd><p>Explicit coordinates object.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.LinearCoord.html#spectrochempy.LinearCoord" title="spectrochempy.LinearCoord"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LinearCoord</span></code></a></dt><dd><p>Implicit coordinates object.</p>
+</dd>
+<dt><a class="reference internal" href="spectrochempy.NDDataset.html#spectrochempy.NDDataset" title="spectrochempy.NDDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NDDataset</span></code></a></dt><dd><p>The main object of SpectroChempy which makes use of CoordSet.</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">spectrochempy</span> <span class="kn">import</span> <span class="n">Coord</span><span class="p">,</span> <span class="n">CoordSet</span>
+</pre></div>
+</div>
+<p>Define 4 coordinates, with two for the same dimension</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">coord0</span> <span class="o">=</span> <span class="n">Coord</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">10.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;distance&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coord1</span> <span class="o">=</span> <span class="n">Coord</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">20.</span><span class="p">,</span> <span class="mf">25.</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;temperature&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coord1b</span> <span class="o">=</span> <span class="n">Coord</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;millitesla&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;magnetic field&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coord2</span> <span class="o">=</span> <span class="n">Coord</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1000.</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;hour&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;elapsed time&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now create a coordset</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span> <span class="o">=</span> <span class="n">CoordSet</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="n">coord0</span><span class="p">,</span> <span class="n">u</span><span class="o">=</span><span class="n">coord2</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="p">[</span><span class="n">coord1</span><span class="p">,</span> <span class="n">coord1b</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Display some coordinates</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">u</span>
+<span class="go">Coord: [float64] hr (size: 6)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">v</span>
+<span class="go">CoordSet: [_1:temperature, _2:magnetic field]</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cs</span><span class="o">.</span><span class="n">v_1</span>
+<span class="go">Coord: [float64] K (size: 4)</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.copy.html#spectrochempy.CoordSet.copy" title="spectrochempy.CoordSet.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.copy</span></code></a>([keepname])</p></td>
+<td><p>Make a disconnected copy of the current coords.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.keys.html#spectrochempy.CoordSet.keys" title="spectrochempy.CoordSet.keys"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.keys</span></code></a>()</p></td>
+<td><p>Alias for names.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.select.html#spectrochempy.CoordSet.select" title="spectrochempy.CoordSet.select"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.select</span></code></a>(val)</p></td>
+<td><p>Select the default coord index.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.set.html#spectrochempy.CoordSet.set" title="spectrochempy.CoordSet.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.set</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Set one or more coordinates in the current CoordSet.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.set_titles.html#spectrochempy.CoordSet.set_titles" title="spectrochempy.CoordSet.set_titles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.set_titles</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Set one or more coord title at once.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.set_units.html#spectrochempy.CoordSet.set_units" title="spectrochempy.CoordSet.set_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.set_units</span></code></a>(*args, **kwargs)</p></td>
+<td><p>Set one or more coord units at once.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.to_dict.html#spectrochempy.CoordSet.to_dict" title="spectrochempy.CoordSet.to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.to_dict</span></code></a>()</p></td>
+<td><p>Return a dict of the coordinates from the coordset.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.update.html#spectrochempy.CoordSet.update" title="spectrochempy.CoordSet.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.update</span></code></a>(**kwargs)</p></td>
+<td><p>Update a specific coordinates in the CoordSet.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.available_names.html#spectrochempy.CoordSet.available_names" title="spectrochempy.CoordSet.available_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.available_names</span></code></a></p></td>
+<td><p>Chars that can be used for dimension name (list).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.coords.html#spectrochempy.CoordSet.coords" title="spectrochempy.CoordSet.coords"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.coords</span></code></a></p></td>
+<td><p>Coordinates in the coordset (list).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.default.html#spectrochempy.CoordSet.default" title="spectrochempy.CoordSet.default"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.default</span></code></a></p></td>
+<td><p>Default coordinates (Coord).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.has_defined_name.html#spectrochempy.CoordSet.has_defined_name" title="spectrochempy.CoordSet.has_defined_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.has_defined_name</span></code></a></p></td>
+<td><p>True if the name has been defined (bool).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.id.html#spectrochempy.CoordSet.id" title="spectrochempy.CoordSet.id"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.id</span></code></a></p></td>
+<td><p>Object identifier (Readonly property).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.is_empty.html#spectrochempy.CoordSet.is_empty" title="spectrochempy.CoordSet.is_empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.is_empty</span></code></a></p></td>
+<td><p>True if there is no coords defined (bool).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.is_labeled.html#spectrochempy.CoordSet.is_labeled" title="spectrochempy.CoordSet.is_labeled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.is_labeled</span></code></a></p></td>
+<td><p>returns True if one of the coords is labeled.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.is_same_dim.html#spectrochempy.CoordSet.is_same_dim" title="spectrochempy.CoordSet.is_same_dim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.is_same_dim</span></code></a></p></td>
+<td><p>True if the coords define a single dimension (bool).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.labels.html#spectrochempy.CoordSet.labels" title="spectrochempy.CoordSet.labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.labels</span></code></a></p></td>
+<td><p>Labels of the coordinates in the current coordset (list).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.names.html#spectrochempy.CoordSet.names" title="spectrochempy.CoordSet.names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.names</span></code></a></p></td>
+<td><p>Names of the coords in the current coords (list - read only property).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.size.html#spectrochempy.CoordSet.size" title="spectrochempy.CoordSet.size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.size</span></code></a></p></td>
+<td><p>Sizes of the coord object for each dimension (int or tuple of int).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.sizes.html#spectrochempy.CoordSet.sizes" title="spectrochempy.CoordSet.sizes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.sizes</span></code></a></p></td>
+<td><p>Sizes of the coord object for each dimension (int or tuple of int).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="spectrochempy.CoordSet.titles.html#spectrochempy.CoordSet.titles" title="spectrochempy.CoordSet.titles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.titles</span></code></a></p></td>
+<td><p>Titles of the coords in the current coords (list).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="spectrochempy.CoordSet.units.html#spectrochempy.CoordSet.units" title="spectrochempy.CoordSet.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CoordSet.units</span></code></a></p></td>
+<td><p>Units of the coords in the current coords (list).</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.available_names">
+<span class="sig-name descname"><span class="pre">available_names</span></span><a class="headerlink" href="#spectrochempy.CoordSet.available_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chars that can be used for dimension name (list).</p>
+<p>It returns DEFAULT_DIM_NAMES less those already in use.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.coords">
+<span class="sig-name descname"><span class="pre">coords</span></span><a class="headerlink" href="#spectrochempy.CoordSet.coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coordinates in the coordset (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.default">
+<span class="sig-name descname"><span class="pre">default</span></span><a class="headerlink" href="#spectrochempy.CoordSet.default" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default coordinates (Coord).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.has_defined_name">
+<span class="sig-name descname"><span class="pre">has_defined_name</span></span><a class="headerlink" href="#spectrochempy.CoordSet.has_defined_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the name has been defined (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#spectrochempy.CoordSet.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object identifier (Readonly property).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.is_empty">
+<span class="sig-name descname"><span class="pre">is_empty</span></span><a class="headerlink" href="#spectrochempy.CoordSet.is_empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if there is no coords defined (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.is_labeled">
+<span class="sig-name descname"><span class="pre">is_labeled</span></span><a class="headerlink" href="#spectrochempy.CoordSet.is_labeled" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns True if one of the coords is labeled.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.is_same_dim">
+<span class="sig-name descname"><span class="pre">is_same_dim</span></span><a class="headerlink" href="#spectrochempy.CoordSet.is_same_dim" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the coords define a single dimension (bool).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.labels">
+<span class="sig-name descname"><span class="pre">labels</span></span><a class="headerlink" href="#spectrochempy.CoordSet.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Labels of the coordinates in the current coordset (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.names">
+<span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#spectrochempy.CoordSet.names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Names of the coords in the current coords (list - read only property).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.size">
+<span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#spectrochempy.CoordSet.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sizes of the coord object for each dimension (int or tuple of int).</p>
+<p>(readonly property). If the set is for a single dimension return a
+single size as all coordinates must have the same.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.sizes">
+<span class="sig-name descname"><span class="pre">sizes</span></span><a class="headerlink" href="#spectrochempy.CoordSet.sizes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sizes of the coord object for each dimension (int or tuple of int).</p>
+<p>(readonly property). If the set is for a single dimension return a
+single size as all coordinates must have the same.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.titles">
+<span class="sig-name descname"><span class="pre">titles</span></span><a class="headerlink" href="#spectrochempy.CoordSet.titles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Titles of the coords in the current coords (list).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.CoordSet.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#spectrochempy.CoordSet.units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Units of the coords in the current coords (list).</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="examples-using-spectrochempy-coordset">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">spectrochempy.CoordSet</span></code><a class="headerlink" href="#examples-using-spectrochempy-coordset" title="Permalink to this heading">¶</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide catalyst."><img alt="" src="../../../_images/sphx_glr_plot_2D_iris_thumb.png" />
+<p><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/analysis/plot_2D_iris.html#sphx-glr-gettingstarted-gallery-auto-examples-analysis-plot-2d-iris-py"><span class="std std-ref">2D-IRIS analysis example</span></a></p>
+  <div class="sphx-glr-thumbnail-title">2D-IRIS analysis example</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In this example, we show how coordinates can be used in SpectroChemPy"><img alt="" src="../../../_images/sphx_glr_plot_coordinates_thumb.png" />
+<p><a class="reference internal" href="../../../gettingstarted/gallery/auto_examples/nddataset/plot_coordinates.html#sphx-glr-gettingstarted-gallery-auto-examples-nddataset-plot-coordinates-py"><span class="std std-ref">NDDataset coordinates example</span></a></p>
+  <div class="sphx-glr-thumbnail-title">NDDataset coordinates example</div>
+</div></div><div style='clear:both'></div></section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="spectrochempy.LinearCoord.html" class="btn btn-neutral float-left" title="spectrochempy.LinearCoord" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectrochempy.empty.html" class="btn btn-neutral float-right" title="spectrochempy.empty" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2023 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Apr 13, 2023.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
