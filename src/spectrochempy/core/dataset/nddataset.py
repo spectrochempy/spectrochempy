@@ -43,11 +43,11 @@ from spectrochempy.utils.system import get_user_and_node
 # ======================================================================================
 @tr.signature_has_traits
 class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
-    r"""
+    """
     The main N-dimensional dataset class used by  `SpectroChemPy`.
 
     The `NDDataset` is the main object use by SpectroChemPy. Like numpy
-    `~numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and
+    `~numpy.ndarray`s, `NDDataset` have the capability to be sliced, sorted and
     subject to mathematical operations. But, in addition, `NDDataset` may have units,
     can be masked and each dimensions can have coordinates also with units. This make
     `NDDataset` aware of unit compatibility,
@@ -55,7 +55,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     application of mathematical operations.
     In addition or in replacement of numerical data for coordinates,
     `NDDataset` can also have labeled coordinates where labels can be different kind of
-    objects (`str`, `datetime`, `~numpy.ndarray` or other `NDDataset`\ 's, etc...).
+    objects (`str`, `datetime`, `~numpy.ndarray` or other `NDDataset`'s, etc...).
 
     Parameters
     ----------
@@ -76,7 +76,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     coordset : `CoordSet` instance, optional
         It contains the coordinates for the different dimensions of the `data`.
         if `CoordSet` is provided, it must specify the `coord` and `labels` for all
-        dimensions of the `data`. Multiple `coord`\ 's can be specified in a
+        dimensions of the `data`. Multiple `coord`'s can be specified in a
         `CoordSet` instance for each dimension.
     coordunits : `list`, optional, default: `None`
         A list of units corresponding to the dimensions in the order of the
@@ -118,7 +118,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         masked array to be ignored.
     units : `Unit` instance or `str`, optional
         Units of the data. If data is a `Quantity` then `units` is set to
-        the unit of the `data`\ ; if a unit is also
+        the unit of the `data`; if a unit is also
         explicitly provided an error is raised. Handling of units use the
         `pint <https://pint.readthedocs.org/>`__
         package.
@@ -132,7 +132,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         It is optional but recommended to give a title to each ndarray data.
     dlabel :  `str`, optional
         Alias of `title` .
-    meta : `dict`\ -like object, optional
+    meta : `dict`-like object, optional
         Additional metadata for this object. Must be dict-like but no
         further restriction is placed on meta.
     author : `str`, optional

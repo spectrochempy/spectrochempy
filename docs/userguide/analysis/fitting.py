@@ -44,7 +44,7 @@ from spectrochempy import ur
 # In the first example, we find the least square solution of a simple linear equation.
 #
 # Let's first create a NDDataset with some data. We have for instance some noisy data
-# that represent the distance ``d`` traveled by some objects versus time ``t``\ :
+# that represent the distance ``d`` traveled by some objects versus time ``t``:
 
 
 # %%
@@ -326,7 +326,7 @@ shape: asymmetricvoigtmodel
 #
 # To define a given parameter, we have to write its `name` and a set of 3 values:
 # the expected `value` and 2 limits
-# for the allowed variations : `low_bound`,  `high_bound`\ :
+# for the allowed variations : `low_bound`,  `high_bound`:
 #
 # ```
 # name : value, low_bound,  high_bound
@@ -338,10 +338,10 @@ shape: asymmetricvoigtmodel
 # * `*` denotes fixed parameters
 # * `>` say that the given parameters is actually defined in a COMMON block
 #
-# `COMMON`\ is the common block containing parameters to which a parameter in the MODEL
+# `COMMON`is the common block containing parameters to which a parameter in the MODEL
 # blocks can make reference using
-# the  `>` markers.  (\ `>` obviously is forbidden in the COMMON block)
-# common block parameters should not have a `_`\ (underscore) in their names
+# the  `>` markers.  (`>` obviously is forbidden in the COMMON block)
+# common block parameters should not have a `_`(underscore) in their names
 #
 # With this parameter script definition, you can thus make rather complex search for
 # modelling, as you can make
@@ -350,7 +350,7 @@ shape: asymmetricvoigtmodel
 # The line shape can be (up to now) in the following list of shape (for 1D models -
 # see below for 2D):
 #
-# * PolynomialBaseline -> `polynomialbaseline`\ :
+# * PolynomialBaseline -> `polynomialbaseline`:
 #
 #   Arbitrary-degree polynomial (degree limited to 10, however). As a linear
 #   baseline is automatically calculated
@@ -371,7 +371,7 @@ shape: asymmetricvoigtmodel
 #   ```
 #
 #
-# * Gaussian Model -> `gaussianmodel`\ :
+# * Gaussian Model -> `gaussianmodel`:
 #
 #   Normalized 1D gaussian function.
 #
@@ -388,7 +388,7 @@ shape: asymmetricvoigtmodel
 #   ```
 #
 #
-# * Lorentzian Model -> `lorentzianmodel`\ :
+# * Lorentzian Model -> `lorentzianmodel`:
 #
 #   A standard Lorentzian function (also known as the Cauchy distribution).
 #
@@ -405,7 +405,7 @@ shape: asymmetricvoigtmodel
 #   ```
 #
 #
-# * Voigt Model -> `voigtmodel`\ :
+# * Voigt Model -> `voigtmodel`:
 #
 #   A Voigt model constructed as the convolution of a `GaussianModel` and
 #   a `LorentzianModel` -- commonly used for spectral line fitting.
@@ -420,7 +420,7 @@ shape: asymmetricvoigtmodel
 #   ```
 #
 #
-# * Asymmetric Voigt Model -> `asymmetricvoigtmodel`\ :
+# * Asymmetric Voigt Model -> `asymmetricvoigtmodel`:
 #
 #   An asymmetric Voigt model
 #   (A. L. Stancik and E. B. Brauns, Vibrational Spectroscopy, 2008, 47, 66-69)

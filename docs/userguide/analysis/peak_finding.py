@@ -360,7 +360,7 @@ _ = ax.legend(fontsize=6)
 #
 # Let's illustrate this for the second-highest peak which height is comprised between
 # ~ 0.15 and 0.22 and see which
-# properties are returned when, on top of `height` , we pass `prominence=0`\ : this will
+# properties are returned when, on top of `height` , we pass `prominence=0`: this will
 # return the properties
 # associated to the prominence and warrant that this peak will not be rejected on the
 # prominence criterion.
@@ -389,7 +389,7 @@ properties
 # align="center" />
 #
 # The following code shows how to plot the maximum and the two "base points" from the
-# previous output of `find_peaks()`\ :
+# previous output of `find_peaks()`:
 
 # %%
 ax = s.plot_pen()
@@ -510,7 +510,7 @@ _ = ax.axvline(wr, linestyle="--", color="green")
 #
 # The self-contained code snippet below can be used to display in a matplotlib plot
 # and print the various
-# peak properties of a single peak as returned by `find_peaks()`\ :
+# peak properties of a single peak as returned by `find_peaks()`:
 
 # %%
 # user defined parameters ------------------------------

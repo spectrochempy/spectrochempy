@@ -93,7 +93,7 @@ print(f"Default: {scp.get_loglevel()}")  # print the current loglevel
 # %% [markdown]
 # It yields `30` the numerical value corresponding to the `WARNING` level. Now, the
 # next instruction
-# lowers the loglevel to ``"INFO"``\ :
+# lowers the loglevel to ``"INFO"``:
 # %%
 scp.set_loglevel(scp.INFO)
 
