@@ -133,7 +133,7 @@ class BuildDocumentation:
 
         environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
         environ["SPHINX_NOAPI"] = (
-            1 if settings["noapi"] and not settings["whatsnew"] else 0
+            "1" if settings["noapi"] and not settings["whatsnew"] else "0"
         )
 
         return settings
