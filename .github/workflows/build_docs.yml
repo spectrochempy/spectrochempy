@@ -90,9 +90,9 @@ jobs:
           echo "Recreating docs"
           # python docs/make.py -j1 html
           if [[ ${{ github.ref }} == refs/heads/docs/* ]]; then
-          python docs/make.py -j1 html --no-api --no-exec
+          python docs/make.py -v -j1 html --no-api --no-exec
           else
-          python docs/make.py -j1 html
+          python docs/make.py -v -j1 html
           fi
 
       # Upload build artifacts
