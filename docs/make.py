@@ -358,9 +358,7 @@ class BuildDocumentation:
         doc_version = self._doc_version
 
         # Copy latest to tag directory in BUILDDIR.parent directory
-        sh("shopt -s dotglob;")
         sh(f"cp -rf {HTML/doc_version}/* {HTML}/")
-        sh("shopt -u dotglob")
 
         # Remove it if doc_version is 'latest' as all content is in the parent directory
         if doc_version == "latest":
