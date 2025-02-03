@@ -255,8 +255,9 @@ class BuildDocumentation:
             if item.is_dir() and version_pattern.match(item.name):
                 # Temporary: we need a transition to the new way of handling version
                 # if stable replace by the tag of the last release
-                if item.name == "stable":
-                    item = item.rename(HTML / self._get_previous_tag())
+                tag = HTML / self._get_previous_tag()
+                if item.name == "stable" and not tag.exists():
+                    item = item.rename(tag)
                 versions.append(item.name)
         return versions
 
