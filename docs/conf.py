@@ -7,6 +7,7 @@
 """SpectroChemPy documentation build configuration file."""
 
 import inspect
+import json
 import os
 import sys
 import warnings
@@ -200,18 +201,12 @@ html_last_updated_fmt = "%b %d, %Y"
 # typographically correct entities.
 html_use_smartypants = True
 
-# Custom sidebar templates, maps document names to template names.
-# html_sidebars = {}
-
-# Additional templates that should be rendered to pages, maps page names to
-# template names.
-# html_additional_pages = {}
-
 # If true, links to the reST sources are added to the pages.
 html_show_sourcelink = True
 
 # Don't add .txt suffix to source files:
 html_sourcelink_suffix = ""
+
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False
 
@@ -221,6 +216,7 @@ html_show_copyright = True
 # Output file base name for HTML help builder.
 htmlhelp_basename = "spectrochempydoc"
 
+# If True remove the flags in doctests
 trim_doctests_flags = True
 
 # Remove matplotlib agg warnings from generated doc when using plt.show
@@ -234,28 +230,29 @@ warnings.filterwarnings(
 # Check if we are building on GitHub Actions
 on_github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
 github_repository = os.environ.get("GITHUB_REPOSITORY", "")
-
+root = ""
 if on_github_actions:
     print(f"Building on GitHub Actions in repository: {github_repository}")
-    root = "/"
+    root = ""
     if "spectrochempy/spectrochempy" not in github_repository:
         # we are not on the main site so we cannot use  spectrochempy.fr
-        root = "/spectrochempy/"
-else:
-    print("Building locally")
-    root = HTML
+        root = "/spectrochempy"
+
+# get previous versions and save versions dic them in the versions.json file
 previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 last_release = os.environ.get("LAST_RELEASE", "")
+versions = [("STABLE", f"{root}/{last_release}/index.html")]
+versions += [(v, f"{root}/{v}/index.html") for v in previous_versions if v != "latest"]
+versions_file = STATIC / "versions.json"
+js = {"versions": [{"name": k, "url": v} for k, v in versions]}
+with versions_file.open("w") as f:
+    json.dump(js, f, indent=4)
+print(f"Saved versions to {versions_file}")
+
 html_context = {
     "current_version": "stable" if ("dev" not in version) else "latest",
-    "release": str(root) + "/" + last_release,
-    "base_url": "..",
-    "versions": [
-        ("latest", str(root) + "/index.html"),
-        # Add previous versions dynamically
-    ]
-    + [(v, str(root) + f"/{v}/index.html") for v in previous_versions],
-    # previous_versions": previous_versions,
+    "latest_version": f"{root}/index.html",
+    "release": f"{root}/{last_release}/index.html",
     # This is for the citing page
     "version": release,
     "bibversion": "{" + release + "}",

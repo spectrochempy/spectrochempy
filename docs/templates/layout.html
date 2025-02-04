@@ -1,67 +1,29 @@
 {% extends "!layout.html" %}
 
 {% block menu %}
-    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
-      <span class="rst-current-version" data-toggle="rst-current-version">
-        <span class="fa fa-book"> SpectroChemPy </span>
-        version: {{ current_version }}
-        <span class="fa fa-caret-down"></span>
-      </span>
-        <div class="rst-other-versions">
-            <dl>
-                <dt>Other versions</dt>
-                {% for slug, url in versions %}
-                    {% if slug != current_version %}
-                        <dd><a href="{{ url }}">{{ slug.upper() }}</a></dd>
-                    {% endif %}
-                {% endfor %}
-                {% for version in (previous_versions | join(',')).split(',') %}
-                    <dd><a href="/{{ version }}/">{{ version }}</a></dd>
-                {% endfor %}
-            </dl>
-            <hr/>
-            <dl>
-                <dt>Sources on GitHub</dt>
-                <dd><a href="https://github.com/spectrochempy/spectrochempy/releases/latest">Stable</a></dd>
-                <dd><a href="https://github.com/spectrochempy/spectrochempy/tree/master/">Latest</a></dd>
-            </dl>
-        </div>
+    <div class="version-selector">
+        <span class="fa fa-book"> SpectroChemPy  version:</span>
+        <select id="versions-dropdown">
+            <option value={{latest_version}} disabled selected>LATEST</option>
+        </select>
     </div>
-
     {{ super() }}
 {% endblock %}
-
-{% block versions %}{% endblock %}
 
 {% block document %}
     {% if current_version == 'latest' %}
         <div class="admonition warning">
             <p class="first admonition-title">Warning</p>
             <p class="last"> You are reading the documentation related to the development version.
-                <a href="/{{release}}/index.html">Go here</a> if you are looking for the documentation of the stable
+                <a href="{{release}}">Go here</a> if you are looking for the documentation of the stable
                 release.
             </p>
         </div>
     {% endif %}
-        <!-- Debugging paths -->
-        <div class="debug">
-            <p>Current Version: {{ current_version }}</p>
-            <p>Release: {{ release }}</p>
-            <p>Base URL: {{ base_url }}</p>
-            <p>Versions:</p>
-            <ul>
-                {% for slug, url in versions %}
-                    <li>{{ slug }}: {{ url }}</li>
-                {% endfor %}
-            </ul>
-            <p>Previous Versions: {{ previous_versions }}</p>
-        </div>
     {{ super() }}
 {% endblock %}
 
-{% block sidebar %}
+{% block extrahead %}
     {{ super() }}
-    <div class="version">
-        {{ version }}
-    </div>
+    <script src="{{ pathto('_static/js/versions.js', 1) }}"></script>
 {% endblock %}

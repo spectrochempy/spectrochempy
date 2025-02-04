@@ -98,24 +98,6 @@ class BuildDocumentation:
     def __init__(self, **kwargs):
         """Initialize the BuildDocumentation class with settings."""
         self.settings = self._init_settings(kwargs)
-        self._doc_version = None
-        self._version = None
-
-    def _determine_version(self):
-        """Determine the version of the documentation to build."""
-        from spectrochempy.api import version  # Import here to avoid unnecessary delay
-
-        last_tag = self._get_previous_tag()
-        if "+" in version:
-            return version, last_tag, "dirty"
-        return version, last_tag, "latest" if "dev" in version else last_tag
-
-    def _get_previous_tag(self):
-        """Get the previous tag from the git repository."""
-        sh("git fetch --tags", silent=True)
-        rev = sh("git rev-list --tags --max-count=1", silent=True)
-        result = sh(f"git describe --tags {rev}", silent=True)
-        return result.strip()
 
     def _init_settings(self, kwargs):
         """Initialize settings from keyword arguments."""
@@ -136,7 +118,8 @@ class BuildDocumentation:
 
         return settings
 
-    def _get_jobs(self, jobs):
+    @staticmethod
+    def _get_jobs(jobs):
         """Get the number of jobs to use for building the documentation."""
         if jobs == "auto":
             return mp.cpu_count()
@@ -172,7 +155,8 @@ class BuildDocumentation:
             except Exception as e:
                 print(f"Failed to sync {item}: {e}")
 
-    def _get_notebook_files(self):
+    @staticmethod
+    def _get_notebook_files():
         """Get a set of notebook files to be synchronized."""
         pyfiles = set()
         print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
@@ -195,7 +179,8 @@ class BuildDocumentation:
 
         return pyfiles
 
-    def _sync_notebook_pair(self, item):
+    @staticmethod
+    def _sync_notebook_pair(item):
         """Synchronize a pair of notebook and script files."""
         py = item.with_suffix(".py")
         ipynb = item.with_suffix(".ipynb")
@@ -221,6 +206,23 @@ class BuildDocumentation:
                 print(f"Unchanged: {file_to_pair}")
         except Exception as e:
             print(f"Warning: Failed to synchronize {item}: {str(e)}")
+
+    def _determine_version(self):
+        """Determine the version of the documentation to build."""
+        from spectrochempy.api import version  # Import here to avoid unnecessary delay
+
+        last_tag = self._get_previous_tag()
+        if "+" in version:
+            return version, last_tag, "dirty"
+        return version, last_tag, "latest" if "dev" in version else last_tag
+
+    @staticmethod
+    def _get_previous_tag():
+        """Get the previous tag from the git repository."""
+        sh("git fetch --tags", silent=True)
+        rev = sh("git rev-list --tags --max-count=1", silent=True)
+        result = sh(f"git describe --tags {rev}", silent=True)
+        return result.strip()
 
     def _make_dirs(self):
         """Create the directories required to build the documentation."""
@@ -290,7 +292,7 @@ class BuildDocumentation:
         # Determine the version of the documentation to build
         self._version, self._last_release, self._doc_version = self._determine_version()
 
-        # Get previous versions and pass them to the template
+        # Get previous versions and save them in a json file to b use by the versions.js scipt
         previous_versions = self._get_previous_versions()
 
         # Clean the build target directory

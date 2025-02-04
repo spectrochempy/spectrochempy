@@ -36,11 +36,8 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
     for f in list(cwd.glob("**/*.jdx")):
         f.unlink()
     for f in list(cwd.glob("**/*.json")):
-        if (
-            f.name
-            not in [
-                "zenodo.json",
-            ]
+        if (  # important: add any parts to exclude from deleting json files
+            f.name not in ["zenodo.json", "versions.json", "preferences.json"]
             and ".vscode" not in f.parts
             and ".venv" not in f.parts
         ):

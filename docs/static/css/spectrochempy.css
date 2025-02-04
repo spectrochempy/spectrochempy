@@ -191,3 +191,23 @@ html.writer-html4 .rst-content dl:not(.docutils) dl:not(.option-list):not(.field
     background: #e7f2fa;
     color: #555;
 }
+
+/* Style for version selector */
+.version-selector {
+    display: flex;
+    align-items: center;
+    margin: .3em;
+}
+
+
+.version-selector .fa-book, .version-selector label, .version-selector select {
+    margin-right: 10px;
+    font-size: 11pt;
+}
+
+select {
+    background-color: #343131;
+    border: none;
+    box-shadow: none;
+    color: #969595;
+}
