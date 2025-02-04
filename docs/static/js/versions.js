@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
     const versionsDropdown = document.getElementById("versions-dropdown");
 
-    // Fetch the available versions from a JSON file
-    fetch("/_static/versions.json")
+    // Construct the correct path to the versions.json file
+    const basePath = window.location.pathname.split('/').slice(0, -1).join('/');
+    const versionsPath = `${basePath}/_static/versions.json`;
+
+    // Fetch the available versions from the JSON file
+    fetch(versionsPath)
         .then(response => response.json())
         .then(data => {
             data.versions.forEach(version => {
