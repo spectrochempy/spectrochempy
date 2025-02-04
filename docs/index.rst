@@ -53,7 +53,6 @@ Among its major features:
 .. toctree::
     :hidden:
 
-    Home <self>
     whatsnew/latest
     whatsnew/index
 
