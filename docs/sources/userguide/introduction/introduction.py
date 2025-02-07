@@ -129,11 +129,11 @@ nd
 #
 # * [Core objects](../objects/index.rst) : This is really the starting point for understanding how SpectroChemPy works. In fact, virtually all the functions offered by the API use one of these objects: `NDDataset` (the most important!) , `Project` or `Script`.
 #
-# * [Import & export](../importexport/importexport.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
+# * [Import & export](../importexport/index.rst) : This part shows how to import spectroscopic data and transform it into an NDDataset, the object on which processsing and analysis procedures will then be applied.
 #
-# * [Processing](../processing/processing.rst) : This section explains how to prepare datasets for future analysis. By processing, we mean methods which generally return the same dataset transformed by mathematical operations (for example, this may be a `sqrt` or `log` operation, or a `fft` operation or many others), or part of a dataset transformed by a slicing or concatenation operation.
+# * [Processing](../processing/index.rst) : This section explains how to prepare datasets for future analysis. By processing, we mean methods which generally return the same dataset transformed by mathematical operations (for example, this may be a `sqrt` or `log` operation, or a `fft` operation or many others), or part of a dataset transformed by a slicing or concatenation operation.
 #
-# * [Analysis](../analysis/analysis.rst) : This section presents the analysis methods implemented in SpectroChemPy. Generally speaking, analysis methods are any methods used to extract properties or characteristics from one or more NDDatasets. Analysis methods include statistical methods (mean, standard deviation, etc.), peaks, integration, etc.
+# * [Analysis](../analysis/index.rst) : This section presents the analysis methods implemented in SpectroChemPy. Generally speaking, analysis methods are any methods used to extract properties or characteristics from one or more NDDatasets. Analysis methods include statistical methods (mean, standard deviation, etc.), peaks, integration, etc.
 # But perhaps the most important is the implementation of various chemometrics methods (PCA, PLS-R, EFA, MCR-ALS, ...), data fit methods, and baseline extraction.
 #
-# * [Plotting](../plotting/plotting.rst) : Finally, this section attempts to give the basics for using the plot methods included in SpectroChemPy.  These methods do not claim to cover all needs, and so it may be worthwhile for the user to learn how to use packages such as matplotlib, on which the methods described in this section are based.
+# * [Plotting](../plotting/plotting.ipynb) : Finally, this section attempts to give the basics for using the plot methods included in SpectroChemPy.  These methods do not claim to cover all needs, and so it may be worthwhile for the user to learn how to use packages such as matplotlib, on which the methods described in this section are based.

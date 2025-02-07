@@ -37,7 +37,7 @@
 # SpectroChemPy.
 #
 # See the [gallery of examples](examples/index.rst) and consult the
-# [user's guide](../userguide/introduction/introduction.ipynb)
+# [user's guide](../userguide/introduction/introduction.rst)
 # for more information on using SpectroChemPy
 #
 # Before using the package, we must load the **API (Application Programming Interface)**

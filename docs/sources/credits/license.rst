@@ -4,7 +4,7 @@ SpectroChempy License
 =====================
 
 .. raw:: html
-   :file: ../static/license_CeCILL.html
+   :file: ../../_static/license_CeCILL.html
 
 Other Licenses
 ==============

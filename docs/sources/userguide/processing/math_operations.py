@@ -65,7 +65,7 @@ np.sqrt(dx)
 # * [negative](#negative)(x, **kwargs): Numerical negative, element-wise.
 # * [absolute](#abs)(x, **kwargs): Calculate the absolute value, element-wise. Alias: [abs](#abs)
 # * [fabs](#abs)(x, **kwargs): Calculate the absolute value, element-wise. Complex values are not handled,
-# use [absolute](#absolute) to find the absolute values of complex data.
+# use [absolute](#abs) to find the absolute values of complex data.
 # * [conj](#)(x, **kwargs): Return the complex conjugate, element-wise.
 # * [rint](#rint)(x, **kwargs) :Round to the nearest integer, element-wise.
 # * [floor](#floor)(x, **kwargs): Return the floor of the input, element-wise.
@@ -124,8 +124,6 @@ np.sqrt(dx)
 # element-wise.
 # * [floor_divide](#floor_divide)(x1, x2, **kwargs): Return the largest integer smaller or equal to the division of
 # the inputs.
-# * [mod](#mod) or [remainder](#mod)(x1, x2,**kwargs): Return element-wise remainder of division.
-# * [fmod](#fmod)(x1, x2, **kwargs): Return the element-wise remainder of division.
 
 # %% [markdown]
 # ## Usage
@@ -333,6 +331,9 @@ _ = out.plot(figsize=(6, 2.5))
 # %%
 np.sign(dataset)
 
+# %% [markdown]
+# ##### logical_not
+# Compute the truth value of NOT x element-wise. Returned object is a ndarray
 # %%
 np.logical_not(dataset < 0)
 

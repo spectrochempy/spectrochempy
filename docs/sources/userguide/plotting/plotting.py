@@ -43,7 +43,7 @@
 #
 # Finally, some commands and objects used here are described in-depth in the sections related to
 # [import](../importexport/import.rst) and [slicing](../processing/slicing.rst) of NDDatasets and the *
-# [NDDatasets](../dataset/dataset.rst) themselves.
+# [NDDatasets](../dataset/dataset.ipynb) themselves.
 # %% [markdown]
 # ## Load the API
 # First, before anything else, we import the spectrochempy API:

@@ -10,6 +10,8 @@ Processing
    transformations
    math_operations
    smoothing
+   baseline
+   denoising
    apodization
    td_baseline
    fourier

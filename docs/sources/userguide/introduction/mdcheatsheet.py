@@ -22,7 +22,6 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.10
 #   nbsphinx:
 #     orphan: true
 # ---
@@ -225,14 +224,13 @@
 # ```
 
 # %% [markdown]
-# <a id="processing_functions"></a>
 # ## Processing Functions
 # This is the section that the internal link points to.
 
 # %% [markdown]
 # Now you can link to the section using:
 # ```
-# [processing functions](#processing-functions)
+# [processing_functions](#processing_functions)
 # ```
 # [processing_functions](#processing_functions)
 
