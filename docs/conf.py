@@ -31,8 +31,8 @@ URL_SCPY = "www.spectrochempy.fr"
 
 # GENERAL PATHS
 DOCS = Path(__file__).parent
-TEMPLATES = DOCS / "templates"
-STATIC = DOCS / "static"
+TEMPLATES = DOCS / "_templates"
+STATIC = DOCS / "_static"
 PROJECT = DOCS.parent
 DOCREPO = PROJECT / "build"
 DOCTREES = DOCREPO / "~doctrees"
@@ -41,7 +41,7 @@ DOWNLOADS = HTML / "downloads"
 SOURCES = PROJECT / PROJECTNAME
 
 # DOCUMENTATION SRC PATH
-SRC = DOCS
+SRC = DOCS / "sources"
 USERGUIDE = SRC / "userguide"
 GETTINGSTARTED = SRC / "gettingstarted"
 DEVGUIDE = SRC / "devguide"
@@ -69,6 +69,9 @@ extensions = [
     "sphinx_copybutton",
     "sphinx.ext.mathjax",
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.githubpages",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
@@ -77,15 +80,16 @@ extensions = [
     "matplotlib.sphinxext.plot_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.githubpages",
     "sphinxcontrib.bibtex",
     "nbsphinx",
+    "sphinx.ext.viewcode",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["templates"]
+templates_path = ["../_templates", "_templates"]
+# for some reason, the templates are not taken into account without specifiying
+# twe two locations (it looks like sphinx is looking for the templates relative to the source
+# directory instead of the conf.py dir.
 
 # The suffix of source filenames.
 source_suffix = ".rst"
@@ -112,17 +116,23 @@ copyright = spectrochempy.application.copyright
 # Else, today_fmt is used as the format for a strftime call.
 today_fmt = "%B %d, %Y"
 
+# Disable localization
+locale_dirs = []  # empty list disables localization
+gettext_compact = False
+language = "en"
+
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = [
-    "templates",
-    "static",
+    "_templates",
+    "_static",
     "**.ipynb_checkpoints",
     "~temp",
     "generated",
     "gettingstarted/examples/gallery/**/*.py",
     "gettingstarted/examples/gallery/**/*.ipynb",
     "**.md5",
+    "locales",  # ignore locales directory
 ]
 
 # The reST default role (used for this markup: `text` ) to use for all
@@ -178,17 +188,17 @@ html_theme_options = {
 # html_short_title = None
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "static/scpy.png"
+html_logo = "_static/scpy.png"
 
-# The name of an image file (within the static path) to use as favicon of the
+# The name of an image file (within the _static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = "static/scpy.ico"
+html_favicon = "_static/scpy.ico"
 
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
+# Add any paths that contain custom _static files (such as style sheets) here,
+# relative to this directory. They are copied after the builtin _static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["static"]
+html_static_path = ["_static"]
 html_css_files = [
     "css/spectrochempy.css",
 ]
@@ -213,9 +223,6 @@ html_show_sphinx = False
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 html_show_copyright = True
 
-# Output file base name for HTML help builder.
-htmlhelp_basename = "spectrochempydoc"
-
 # If True remove the flags in doctests
 trim_doctests_flags = True
 
@@ -239,6 +246,7 @@ if on_github_actions:
         root = "/spectrochempy"
 
 # get previous versions and save versions dic them in the versions.json file
+# which will be used by versions.js script to display the versions in the sidebar
 previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 last_release = os.environ.get("LAST_RELEASE", "")
 versions = [("STABLE", f"{root}/{last_release}/index.html")]
@@ -246,7 +254,9 @@ versions += [(v, f"{root}/{v}/index.html") for v in previous_versions if v != "l
 versions_file = STATIC / "versions.json"
 js = {"versions": [{"name": k, "url": v} for k, v in versions]}
 with versions_file.open("w") as f:
-    json.dump(js, f, indent=4)
+    js = json.dumps(js, indent=4)
+    js = js.strip() + "\n"  # add a new line at the end
+    f.write(js)
 print(f"Saved versions to {versions_file}")
 
 html_context = {
@@ -267,7 +277,7 @@ html_context = {
 # Generate the plots for the gallery
 from sphinx_gallery.sorting import FileNameSortKey
 
-example_source_dir = "../src/spectrochempy/examples"
+example_source_dir = str(PROJECT) + "/src/spectrochempy/examples"
 example_generated_dir = "gettingstarted/examples/gallery"
 
 
@@ -390,7 +400,10 @@ def linkcode_resolve(domain, info):
         fn = inspect.getsourcefile(obj)
         fn = Path(fn).relative_to(Path(spectrochempy.__file__).parent)
         source, lineno = inspect.getsourcelines(obj)
-        return fn, lineno, lineno + len(source) - 1
+        end_lineno = lineno + len(source) - 1
+        if end_lineno >= len(source):
+            end_lineno = len(source) - 1
+        return fn, lineno, end_lineno
 
     if domain != "py" or not info["module"]:
         return None
