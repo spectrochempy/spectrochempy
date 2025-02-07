@@ -214,25 +214,25 @@
 # For the text inside the parentheses, replace any spaces and special characters with a hyphen. For example,
 # if your section is called `processing_functions` , you'd enter:
 # ```
-# [processing functions](#processing-functions)
+# [processing functions](#Processing_functions)
 # ```
-# [processing_functions](#processing_functions)
+# [processing functions](#Processing_functions)
 #
 # Alternatively, you can add an ID above the section:
 # ```
-# <a id="processing_functions"></a>
+# <a id="Processing_functions"></a>
 # ```
 
 # %% [markdown]
-# ## Processing Functions
+# ## Processing functions
 # This is the section that the internal link points to.
 
 # %% [markdown]
 # Now you can link to the section using:
 # ```
-# [processing_functions](#processing_functions)
+# [processing_functions](#Processing_functions)
 # ```
-# [processing_functions](#processing_functions)
+# [processing_functions](#Processing_functions)
 
 # %% [markdown]
 # ## External links
