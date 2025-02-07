@@ -13,7 +13,7 @@ from spectrochempy.application import warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.plotters.multiplot import multiplot
 from spectrochempy.core.readers.importer import read
-from spectrochempy.processing.baselineprocessing.baseline import Baseline
+from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.optional import import_optional_dependency
 
