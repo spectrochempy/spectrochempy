@@ -113,3 +113,6 @@ sg_execution_times.rst
 myfile.csv
 _sandbox
 docs/static/video
+.ci/scp_*
+.tempdirs
+docs/sources/reference/generated
