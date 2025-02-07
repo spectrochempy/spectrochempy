@@ -35,7 +35,7 @@ dependencies = [
   "ipython",
   "jinja2",
   "numpy",
-  "numpy-quaternion>=2024",
+  "numpy-quaternion",
   "matplotlib",
   "osqp",
   "pint",
@@ -198,8 +198,8 @@ exclude = [
 ] # Exclude files and directories.
 
 [tool.ruff.lint.per-file-ignores]
-"docs/userguide/**/*" = ["B018", "T201", "N816"]   # accept "useless expression", "print", "mixed-case variables" in *.ipynb or py:percent files.
-"docs/gettingstarted/*" = ["B018"]  # accept "useless expression" in *.ipynb or py:percent files.
+"docs/sources/userguide/**/*" = ["B018", "T201", "N816"]   # accept "useless expression", "print", "mixed-case variables" in *.ipynb or py:percent files.
+"docs/sources/gettingstarted/*" = ["B018"]  # accept "useless expression" in *.ipynb or py:percent files.
 
 
 [tool.ruff.lint.isort]
@@ -211,3 +211,17 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.numpydoc_validation]
+checks = [
+    "all",   # report on all checks, except the below
+    "ES01",
+    "EX01",
+    "SA01",
+    "ES01",
+]
+# remember to use single quotes for regex in TOML
+exclude = [  # don't report on objects that match any of these regex
+    '\.undocumented_method$',
+    '\.__repr__$',
+]
