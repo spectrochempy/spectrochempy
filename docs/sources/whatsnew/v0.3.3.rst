@@ -21,4 +21,4 @@ Bug fixes
 ~~~~~~~~~
 
 -  Fix bug in ``read_srs`` .
--  Fix gettingstarted/overview.py after IRIS refactoring.
+-  Fix gettingstarted/overview after IRIS refactoring.

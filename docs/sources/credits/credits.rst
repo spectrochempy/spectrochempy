@@ -1,4 +1,4 @@
-.. _credits:
+.. _detailed_credits:
 
 Acknowledgments
 ================

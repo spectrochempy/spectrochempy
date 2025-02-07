@@ -90,9 +90,9 @@ description of the API. You can also refer to the :ref:`examples-index` for more
 
 * :doc:`userguide/introduction/introduction`
 * :doc:`userguide/objects/index`
-* :doc:`userguide/importexport/importexport`
-* :doc:`userguide/processing/processing`
-* :doc:`userguide/analysis/analysis`
+* :doc:`userguide/importexport/index`
+* :doc:`userguide/processing/index`
+* :doc:`userguide/analysis/index`
 * :doc:`userguide/plotting/plotting`
 
 .. toctree::
@@ -101,10 +101,11 @@ description of the API. You can also refer to the :ref:`examples-index` for more
     :caption: User's Guide & Tutorials
 
     userguide/introduction/introduction
+    userguide/api/api
     userguide/objects/index
-    userguide/importexport/importexport
-    userguide/processing/processing
-    userguide/analysis/analysis
+    userguide/importexport/index
+    userguide/processing/index
+    userguide/analysis/index
     userguide/plotting/plotting
 
 .. _reference:
@@ -147,7 +148,7 @@ Contribute
     Sharing examples & tutorials <devguide/examples>
     devguide/index
 
-.. _credits:
+.. _main_credits:
 
 ********
 Credits
