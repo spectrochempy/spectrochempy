@@ -610,7 +610,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 desc += "{}\n".format(textwrap.indent(par, " " * 15))
             # the three escaped null characters are here to facilitate
             # the generation of html outputs
-            desc = f"\0\0\0{desc.rstrip()}\0\0\0\n"
+            desc = rf"\0\0\0{desc.rstrip()}\0\0\0\n"
             out += desc
 
         if self._history:
@@ -623,7 +623,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 hist += "{}\n".format(textwrap.indent(par, " " * 15))
             # the three escaped null characters are here to facilitate
             # the generation of html outputs
-            hist = f"\0\0\0{hist.rstrip()}\0\0\0\n"
+            hist = rf"\0\0\0{hist.rstrip()}\0\0\0\n"
             out += hist
 
         out += f"{self._str_value().rstrip()}\n"
@@ -956,7 +956,14 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
 
     @property
     def modified(self):
-        """Date of modification (readonly property)."""
+        """
+        Date of modification (readonly property).
+
+        Returns
+        -------
+        str
+            Date of modification in isoformat.
+        """
         modified = self._modified.astimezone(self._timezone)
         return modified.isoformat(sep=" ", timespec="seconds")
 
@@ -996,11 +1003,18 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         """
         Set one or more coordinates at once.
 
-        Warnings:
+        Parameters
+        ----------
+        *args : `Coord` or `CoordSet`
+            One or more coordinates.
+        **kwargs
+            Optional keyword parameters passed to the coordset.
+
+        Warnings
         --------
         This method replace all existing coordinates.
 
-        See Also:
+        See Also
         --------
         add_coordset : Add one or a set of coordinates from a dataset.
         set_coordtitles : Set titles of the one or more coordinates.
@@ -1406,7 +1420,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         See Also
         --------
         swapdims : Interchange two dimensions of a NDDataset.
-
         """
         new = super().transpose(*dims, inplace=inplace)
         new.history = (

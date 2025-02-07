@@ -356,14 +356,23 @@ class BaselineCorrector:
 
 # Utility functions
 def _x_slice_to_str(slice, dataset, decimals=2):
-    return (
-        f"[{round(dataset.x.data[slice.start], decimals)} : "
-        f"{round(dataset.x.data[slice.stop - 1], decimals)} : {slice.step}]"
+    start = (
+        round(dataset.x.data[slice.start], decimals) if slice.start is not None else ""
     )
+    stop = (
+        round(dataset.x.data[slice.stop - 1], decimals)
+        if slice.stop is not None
+        else ""
+    )
+    step = slice.step if slice.step is not None else ""
+    return f"[{start} : {stop} : {step}]"
 
 
 def _y_slice_to_str(slice):
-    return f"[{slice.start} : {slice.stop} : {slice.step}]"
+    start = slice.start if slice.start is not None else ""
+    stop = slice.stop if slice.stop is not None else ""
+    step = slice.step if slice.step is not None else ""
+    return f"[{start} : {stop} : {step}]"
 
 
 def _str_to_num(strg):
