@@ -2,7 +2,6 @@
 
 .. currentmodule:: {{ module }}
 
-
 .. autoclass:: {{ objname }}
 
    {% if '__init__' in methods %}
@@ -12,7 +11,6 @@
    {% block attributes_summary %}
    {% if attributes %}
    .. rubric:: Attributes Summary
-
 
    .. autosummary::
    {% for item in attributes %}
@@ -24,7 +22,6 @@
    {% block methods_summary %}
    {% if methods %}
    .. rubric:: Methods Summary
-
 
    .. autosummary::
    {% for item in methods %}
@@ -53,7 +50,6 @@
    {%- endfor %}
    {% endif %}
    {% endblock %}
-
 
 .. rubric:: Examples using {{fullname}}
 .. _sphx_glr_backref_{{fullname}}:
