@@ -862,8 +862,8 @@ class Coord(NDMath, NDArray):
         """
         Number of significant digits for rounding coordinate values.
 
-        Note:
-        ----
+        Notes
+        -----
         The number of significant digits is used when linearizing the coordinates. It is
         also used when setting the coordinates values at the Coord initialization
         or everytime the data array is changed.
@@ -883,8 +883,8 @@ class Coord(NDMath, NDArray):
         It will be a scalar if the coordinates are uniformly spaced, else
         an array of the different spacings.
 
-        Note:
-        ----
+        Notes
+        -----
         The spacing is returned in the units of the coordinate.
 
         """

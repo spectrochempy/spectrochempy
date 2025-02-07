@@ -32,7 +32,7 @@ dependencies:
     - ipython
     - jinja2
     - numpy
-    - quaternion>=2024
+    - quaternion
     - matplotlib-base
     - osqp
     - pint

@@ -67,8 +67,8 @@ URL_SCPY = "www.spectrochempy.fr"
 
 # GENERAL PATHS
 DOCS = Path(__file__).parent
-TEMPLATES = DOCS / "templates"
-STATIC = DOCS / "static"
+TEMPLATES = DOCS / "_templates"
+STATIC = DOCS / "_static"
 PROJECT = DOCS.parent
 BUILDDIR = PROJECT / "build"
 DOCTREES = BUILDDIR / "~doctrees"
@@ -77,7 +77,7 @@ DOWNLOADS = HTML / "downloads"
 SOURCES = PROJECT / PROJECTNAME
 
 # DOCUMENTATION SRC PATH
-SRC = DOCS
+SRC = DOCS / "sources"
 USERGUIDE = SRC / "userguide"
 GETTINGSTARTED = SRC / "gettingstarted"
 DEVGUIDE = SRC / "devguide"
@@ -98,24 +98,6 @@ class BuildDocumentation:
     def __init__(self, **kwargs):
         """Initialize the BuildDocumentation class with settings."""
         self.settings = self._init_settings(kwargs)
-        self._doc_version = None
-        self._version = None
-
-    def _determine_version(self):
-        """Determine the version of the documentation to build."""
-        from spectrochempy.api import version  # Import here to avoid unnecessary delay
-
-        last_tag = self._get_previous_tag()
-        if "+" in version:
-            return version, last_tag, "dirty"
-        return version, last_tag, "latest" if "dev" in version else last_tag
-
-    def _get_previous_tag(self):
-        """Get the previous tag from the git repository."""
-        sh("git fetch --tags", silent=True)
-        rev = sh("git rev-list --tags --max-count=1", silent=True)
-        result = sh(f"git describe --tags {rev}", silent=True)
-        return result.strip()
 
     def _init_settings(self, kwargs):
         """Initialize settings from keyword arguments."""
@@ -129,16 +111,16 @@ class BuildDocumentation:
             "verbosity": kwargs.get("verbosity", 0),
             "jobs": self._get_jobs(kwargs.get("jobs", "auto")),
             "whatsnew": kwargs.get("whatsnew", False),
+            "buildtag": kwargs.get("buildtag", None),
         }
 
         environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
-        environ["SPHINX_NOAPI"] = (
-            "1" if settings["noapi"] and not settings["whatsnew"] else "0"
-        )
+        environ["SPHINX_NOAPI"] = "1" if settings["noapi"] else "0"
 
         return settings
 
-    def _get_jobs(self, jobs):
+    @staticmethod
+    def _get_jobs(jobs):
         """Get the number of jobs to use for building the documentation."""
         if jobs == "auto":
             return mp.cpu_count()
@@ -155,6 +137,7 @@ class BuildDocumentation:
             sh.rm(nb)
         for nbch in SRC.glob("**/.ipynb_checkpoints"):
             sh(f"rm -r {nbch}")
+        print(f"Removed all ipynb files in {SRC}")
 
     @staticmethod
     def _confirm(action):
@@ -174,7 +157,8 @@ class BuildDocumentation:
             except Exception as e:
                 print(f"Failed to sync {item}: {e}")
 
-    def _get_notebook_files(self):
+    @staticmethod
+    def _get_notebook_files():
         """Get a set of notebook files to be synchronized."""
         pyfiles = set()
         print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
@@ -197,7 +181,8 @@ class BuildDocumentation:
 
         return pyfiles
 
-    def _sync_notebook_pair(self, item):
+    @staticmethod
+    def _sync_notebook_pair(item):
         """Synchronize a pair of notebook and script files."""
         py = item.with_suffix(".py")
         ipynb = item.with_suffix(".ipynb")
@@ -224,30 +209,40 @@ class BuildDocumentation:
         except Exception as e:
             print(f"Warning: Failed to synchronize {item}: {str(e)}")
 
+    def _determine_version(self):
+        """Determine the version of the documentation to build."""
+        from spectrochempy.api import version  # Import here to avoid unnecessary delay
+
+        last_tag = self._get_previous_tag()
+        if "+" in version:
+            return version, last_tag, "dirty"
+        if self.buildtag is not None:
+            return self.buildtag, last_tag, "tagged"
+        return version, last_tag, "latest" if "dev" in version else last_tag
+
+    @staticmethod
+    def _get_previous_tag():
+        """Get the previous tag from the git repository."""
+        sh("git fetch --tags", silent=True)
+        rev = sh("git rev-list --tags --max-count=1", silent=True)
+        result = sh(f"git describe --tags {rev}", silent=True)
+        return result.strip()
+
     def _make_dirs(self):
         """Create the directories required to build the documentation."""
-        doc_version = self._doc_version
+        # doc_version = self._doc_version
 
         # Create regular directories if they do not exist already.
         build_dirs = [
             BUILDDIR,
             DOCTREES,
             HTML,
-            DOCTREES / doc_version,
-            HTML / doc_version,
+            DOCTREES / "latest",
+            HTML / "latest",
             # DOWNLOADS,
         ]
         for d in build_dirs:
             Path.mkdir(d, parents=True, exist_ok=True)
-
-    @staticmethod
-    def _apigen():
-        """Regenerate the reference API list."""
-        from apigen import Apigen  # Import here to avoid unnecessary delay
-
-        print(f"\n{'-' * 80}\nRegenerate the reference API list\n{'-' * 80}")
-
-        Apigen()
 
     def _get_previous_versions(self):
         """Get a list of previous versions from the HTML directory."""
@@ -269,8 +264,6 @@ class BuildDocumentation:
                     versions.append(item.name)
         return versions
 
-    # COMMANDS
-    # ----------------------------------------------------------------------------------
     def _make_docs(self):
         """Simplified documentation building process."""
         self._prepare_build()
@@ -283,16 +276,42 @@ class BuildDocumentation:
         """Prepare the build environment."""
         from spectrochempy.utils.file import download_testdata
 
-        print(
-            f"\n{'-' * 80}\n"
-            "Preparing to build the documentation - load spectrochempy and testdata"
-            f"\n{'-' * 80}"
-        )
+        self.buildtag = self.settings["buildtag"]
+        if self.buildtag:
+            print(
+                f"\n{'-' * 80}\n"
+                f"Preparing to build the older documentation for tag {self.buildtag}"
+                f"\n{'-' * 80}"
+            )
+            try:
+                from tools.regenerate_docs import BuildOldTagDocs
+
+                tagbuilder = BuildOldTagDocs(tag_name=self.buildtag)
+                self.workingdir = tagbuilder.workingdir
+                # Copy the docs directory from the tag to the working directory
+                tagbuilder.copy_docs_directory_from_tag()
+                # Replace some files by those of the current version of spectrochempy
+                # tagbuilder.replace_docs_members()
+            except Exception as e:
+                print(f"Error: {e}")
+                error = 1
+                shutil.rmtree(self.workingdir)
+                return error
+
+        else:
+            print(
+                f"\n{'-' * 80}\n"
+                "Preparing to build the documentation - load spectrochempy and testdata"
+                f"\n{'-' * 80}"
+            )
 
         # Determine the version of the documentation to build
         self._version, self._last_release, self._doc_version = self._determine_version()
 
-        # Get previous versions and pass them to the template
+        # Create the directories required for building the documentation
+        self._make_dirs()
+
+        # Get previous versions and save them in a json file to b use by the versions.js scipt
         previous_versions = self._get_previous_versions()
 
         # Clean the build target directory
@@ -313,15 +332,8 @@ class BuildDocumentation:
                 item.unlink()
                 print(f"Removed file: {item}")
 
-        # Create the directories required for building the documentation
-        self._make_dirs()
-
         # Download the test data
         download_testdata()
-
-        # Create the API directory
-        if not self.settings["noapi"]:
-            self._apigen()
 
         # Sync the notebooks with the Python scripts
         if not self.settings["nosync"]:
@@ -331,6 +343,8 @@ class BuildDocumentation:
         environ["DOC_BUILDING"] = "yes"
         environ["PREVIOUS_VERSIONS"] = ",".join(previous_versions)
         environ["LAST_RELEASE"] = self._last_release
+
+        return None
 
     def _run_sphinx_build(self):
         """Run the Sphinx build process."""
@@ -344,7 +358,8 @@ class BuildDocumentation:
             f"\n in {HTML}"
             f"\n{'-' * 80}"
         )
-        srcdir = confdir = DOCS
+        srcdir = DOCS / "sources"
+        confdir = DOCS
         outdir = f"{HTML}/{doc_version}"
         doctreesdir = f"{DOCTREES}/{doc_version}"
 
@@ -354,7 +369,7 @@ class BuildDocumentation:
             str(outdir),
             str(doctreesdir),
             "html",
-            warningiserror=self.settings["warningiserror"],
+            exception_on_warning=self.settings["warningiserror"],
             parallel=self.settings["jobs"],
             verbosity=self.settings["verbosity"],
         )
@@ -389,17 +404,19 @@ class BuildDocumentation:
         del environ["SPHINX_NOEXEC"]
         del environ["SPHINX_NOAPI"]
 
+    # COMMANDS
+    # ----------------------------------------------------------------------------------
+
     def clean(self):
         """Clean/remove the built documentation."""
         print(f"\n{'-' * 80}\nCleaning\n{'-' * 80}")
 
-        doc_version = self._doc_version
+        for doc_version in ["latest", "tagged", "dirty"]:
+            shutil.rmtree(HTML / doc_version, ignore_errors=True)
+            print(f"removed {HTML / doc_version}")
+            shutil.rmtree(DOCTREES / doc_version, ignore_errors=True)
+            print(f"removed {DOCTREES / doc_version}")
 
-        raise Exception("Not implemented yet")
-        shutil.rmtree(HTML / doc_version, ignore_errors=True)
-        print(f"removed {HTML / doc_version}")
-        shutil.rmtree(DOCTREES / doc_version, ignore_errors=True)
-        print(f"removed {DOCTREES / doc_version}")
         shutil.rmtree(API, ignore_errors=True)
         print(f"removed {API}")
         shutil.rmtree(DEV_API, ignore_errors=True)
@@ -532,7 +549,7 @@ def main():
     )
 
     parser.add_argument(
-        "--delnb", "-D", help="delete all ipynb files", action="store_true"
+        "--del-nb", "-D", help="delete all ipynb files", action="store_true"
     )
 
     parser.add_argument(
@@ -557,7 +574,7 @@ def main():
     )
 
     parser.add_argument(
-        "--upload-tutorials", "-T", help="zip and upload tutorials", action="store_true"
+        "--upload-tutorials", "-Z", help="zip and upload tutorials", action="store_true"
     )
 
     parser.add_argument(
@@ -605,6 +622,10 @@ def main():
         "--sync-nb", "-S", help="sync .py and notebooks", action="store_true"
     )
 
+    parser.add_argument(
+        "--tag", "-T", type=str, help="Git tag to read from to regenerate old docs"
+    )
+
     args = parser.parse_args()
 
     if args.command not in commands:
@@ -618,7 +639,7 @@ def main():
         args.html = True
 
     build = BuildDocumentation(
-        delnb=args.delnb,
+        delnb=args.del_nb,
         noapi=args.no_api,
         noexec=args.no_exec,
         nosync=args.no_sync,
@@ -627,6 +648,7 @@ def main():
         verbosity=args.verbosity,
         jobs=args.jobs,
         whatsnew=args.whatsnew,
+        buildtag=args.tag,
     )
 
     buildcommand = getattr(build, args.command)
@@ -639,4 +661,16 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
+    sys.argv = [
+        "make.py",
+        #    "clean",
+        "html",
+        "-T",
+        "0.6.10",
+        "-v",
+        "-j1",
+        #     # "--no-sync",
+        #     "--no-exec",
+        #     # "-W",
+    ]
     sys.exit(main())

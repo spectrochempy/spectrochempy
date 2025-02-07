@@ -27,9 +27,8 @@ jobs:
 
       - name: Create Release
         uses: thomaseizinger/create-release@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           target_commitish: ${{ github.event.pull_request.merge_commit_sha }}
           tag_name: ${{ env.RELEASE_VERSION }}
           name: SpectroChemPy v.${{ env.RELEASE_VERSION }}
