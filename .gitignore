@@ -116,3 +116,4 @@ docs/static/video
 .ci/scp_*
 .tempdirs
 docs/sources/reference/generated
+.venv310
