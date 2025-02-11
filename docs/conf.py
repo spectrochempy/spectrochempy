@@ -25,23 +25,19 @@ import spectrochempy  # isort:skip
 
 # CONSTANTS
 PROJECTNAME = "spectrochempy"
-REPO_URI = f"spectrochempy/src/{PROJECTNAME}"
-API_GITHUB_URL = "https://api.github.com"
-URL_SCPY = "www.spectrochempy.fr"
 
 # GENERAL PATHS
-DOCS = Path(__file__).parent
-TEMPLATES = DOCS / "_templates"
-STATIC = DOCS / "_static"
-PROJECT = DOCS.parent
-DOCREPO = PROJECT / "build"
-DOCTREES = DOCREPO / "~doctrees"
-HTML = DOCREPO / "html"
-DOWNLOADS = HTML / "downloads"
-SOURCES = PROJECT / PROJECTNAME
+CONFDIR = Path(os.environ.get("SPHINX_CONFDIR"))
+TEMPLATES = CONFDIR / "_templates"
+STATIC = CONFDIR / "_static"
+PROJECT = CONFDIR.parent
+BUILDIR = PROJECT / "build"
+DOCTREES = BUILDIR / "~doctrees"
+HTML = BUILDIR / "html"
+SOURCES = Path(os.environ.get("SOURCES"))
 
 # DOCUMENTATION SRC PATH
-SRC = DOCS / "sources"
+SRC = Path(os.environ.get("SPHINX_SRCDIR"))
 USERGUIDE = SRC / "userguide"
 GETTINGSTARTED = SRC / "gettingstarted"
 DEVGUIDE = SRC / "devguide"
@@ -63,7 +59,7 @@ GALLERY = GETTINGSTARTED / "examples" / "gallery"
 sys._called_from_sphinx = True
 
 # Sphinx Extensions
-sys.path.insert(0, DOCS / "sphinxext")
+sys.path.insert(0, str(CONFDIR / "sphinxext"))
 
 extensions = [
     "sphinx_copybutton",
@@ -277,7 +273,7 @@ html_context = {
 # Generate the plots for the gallery
 from sphinx_gallery.sorting import FileNameSortKey
 
-example_source_dir = str(PROJECT) + "/src/spectrochempy/examples"
+example_source_dir = str(SOURCES / "examples")
 example_generated_dir = "gettingstarted/examples/gallery"
 
 
