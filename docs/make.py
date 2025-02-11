@@ -1000,5 +1000,7 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    # sys.argv = ["make.py", "html", "--no-api", "--no-exec",  "-T", "0.6.10"]
+    # on_github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
+    # if not on_github_actions:
+    #     sys.argv = ["make.py", "html", "--no-api", "--no-exec",] #  "-T", "0.6.10"]
     sys.exit(main())

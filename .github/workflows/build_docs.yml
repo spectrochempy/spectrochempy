@@ -50,10 +50,10 @@ jobs:
       # Step 1: Get the code
       - name: Checkout code
         uses: actions/checkout@v4
-        # with:
-        #   repository: ${{ github.repository }}
-        #   ref: ${{ github.ref }}
-        #   fetch-depth: 0
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       # step 2: Set up Python
       - name: Set up Python
