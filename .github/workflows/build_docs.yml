@@ -113,9 +113,8 @@ jobs:
       - name: Build docs
         run: |
           . .venv/bin/activate
-          echo "Recreating docs"
-          # bypass the current build for the moment
-          # python3 docs/make.py -v -j1 html
+          echo "Udating docs"
+          python3 docs/make.py -v -j1 html
 
       # Step 11: Build oldest version of the documentation if it doesn't yet exist
       - name: Build oldest version of the documentation
