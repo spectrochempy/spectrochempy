@@ -984,8 +984,11 @@ def main():
             res = buildcommand()
 
         finally:
-            # Always attempt cleanup and restore original version
-            if build_old is not None:
+            # attempt cleanup and restore original version
+            # not necessary in github workflow
+            on_github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
+
+            if build_old is not None and not on_github_actions:
                 build_old.restore_original_version()
                 build_old.cleanup()
 
