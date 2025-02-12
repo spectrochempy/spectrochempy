@@ -47,7 +47,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     The main N-dimensional dataset class used by  `SpectroChemPy`.
 
     The `NDDataset` is the main object use by SpectroChemPy. Like numpy
-    `~numpy.ndarray`s, `NDDataset` have the capability to be sliced, sorted and
+    `~numpy.ndarray`'s, `NDDataset` have the capability to be sliced, sorted and
     subject to mathematical operations. But, in addition, `NDDataset` may have units,
     can be masked and each dimensions can have coordinates also with units. This make
     `NDDataset` aware of unit compatibility,

@@ -273,6 +273,10 @@ class BuildOldTagDocs:
 
     def restore_original_version(self):
         """Restore the original version of spectrochempy."""
+        # if we are building in githu, we do not need to restore the original version
+        if ON_GITHUB:
+            return
+
         try:
             # Install the original and latest version from the base directory
             sh(
