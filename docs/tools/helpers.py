@@ -33,7 +33,9 @@ class sh:
         """
         return _ExecCommand(command)
 
-    def __call__(self, script: str | Path, silent: bool = False, capture_stderr: bool = False) -> str | None:
+    def __call__(
+        self, script: str | Path, silent: bool = False, capture_stderr: bool = False
+    ) -> str | None:
         """
         Run a shell script safely.
 
@@ -103,7 +105,9 @@ class _ExecCommand:
         """
         self.commands: list[str] = [command]
 
-    def __call__(self, *args, silent: bool = False, capture_stderr: bool = False) -> str | None:
+    def __call__(
+        self, *args, silent: bool = False, capture_stderr: bool = False
+    ) -> str | None:
         """
         Execute the command with given arguments.
 

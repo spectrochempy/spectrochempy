@@ -78,7 +78,7 @@ jobs:
           uv --version
 
       # Step 5: Install spectrochempy and dependencies using uv
-      - name: Install spectrochempy 
+      - name: Install spectrochempy
         run: |
            . .venv/bin/activate
            uv pip install -e ".[docs]"
@@ -88,8 +88,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
-          pandoc --version 
-      
+          pandoc --version
+
       # Step 7: Setup Jupyter kernel for notebooks
       - name: Setup Jupyter kernel
         run: |

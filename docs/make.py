@@ -8,14 +8,35 @@
 Documentation Builder for SpectroChemPy.
 
 This script manages the building process of SpectroChemPy's documentation.
-
-Features
---------
-- Clean/rebuild of HTML documentation
+It handles:
+- Building HTML documentation for current and older versions
 - API documentation generation
-- Notebook synchronization
-- Tutorial packaging
-- Support for building documentation of older versions
+- Notebook synchronization with their Python counterparts
+- Tutorial packaging and distribution
+- Multiple version support with Git tags
+- Directory structure management for documentation
+- Test data downloading and setup
+
+Commands
+--------
+html :
+    Build HTML documentation
+clean :
+    Remove built documentation and clean notebooks
+sync-nb :
+    Synchronize notebooks with Python files
+tutorials :
+    Create zip archive of tutorials
+
+Options
+-------
+--del-nb, -D : Delete all ipynb files
+--no-api, -A : Skip API regeneration
+--no-exec, -E : Do not execute notebooks
+--no-sync, -Y : Skip py/ipynb synchronization
+--jobs, -j : Number of parallel jobs
+--tag-name, -T : Build docs for specific version
+--clear, -C : Clear html directory
 
 Examples
 --------
