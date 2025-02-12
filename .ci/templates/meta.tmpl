@@ -25,9 +25,7 @@ source:
 build:
   string: {{ devstring }}
   noarch: python
-  script:
-    - export SETUPTOOLS_SCM_PRETEND_VERSION={{ version }}
-    - python -m pip install .
+  script: export SETUPTOOLS_SCM_PRETEND_VERSION={{ version }} && python -m pip install .
 
 requirements:
   host:
