@@ -247,13 +247,13 @@ previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 last_release = os.environ.get("LAST_RELEASE", "")
 versions = [("STABLE", f"{root}/{last_release}/index.html")]
 versions += [(v, f"{root}/{v}/index.html") for v in previous_versions if v != "latest"]
-versions_file = STATIC / "versions.json"
-js = {"versions": [{"name": k, "url": v} for k, v in versions]}
-with versions_file.open("w") as f:
-    js = json.dumps(js, indent=4)
-    js = js.strip() + "\n"  # add a new line at the end
-    f.write(js)
-print(f"Saved versions to {versions_file}")
+# versions_file = STATIC / "versions.json"
+# js = {"versions": [{"name": k, "url": v} for k, v in versions]}
+# with versions_file.open("w") as f:
+#     js = json.dumps(js, indent=4)
+#     js = js.strip() + "\n"  # add a new line at the end
+#     f.write(js)
+# print(f"Saved versions to {versions_file}")
 
 html_context = {
     "current_version": "stable" if ("dev" not in version) else "latest",

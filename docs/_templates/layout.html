@@ -3,7 +3,6 @@
     <div class="version-selector">
         <span class="fa fa-book"> SpectroChemPy  version:</span>
         <select id="versions-dropdown">
-            <option value={{latest_version}} disabled selected>LATEST</option>
         </select>
     </div>
     {{ super() }}
@@ -24,5 +23,6 @@
 
 {% block extrahead %}
     {{ super() }}
+    <html data-versions="{{ os.environ.get('PREVIOUS_VERSIONS', '') }}">
     <script src="{{ pathto('_static/js/versions.js', 1) }}"></script>
 {% endblock %}
