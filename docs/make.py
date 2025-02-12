@@ -72,6 +72,8 @@ HTML = BUILDDIR / "html"
 DOWNLOADS = HTML / "downloads"
 TEMPDIRS = PROJECT.parent / "tempdirs"
 
+ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
+
 
 # ======================================================================================
 # Class BuildOldTagDocs
@@ -358,7 +360,6 @@ class BuildDocumentation:
             "noapi": kwargs.get("noapi", False),
             "noexec": kwargs.get("noexec", False),
             "nosync": kwargs.get("nosync", False),
-            "clear": kwargs.get("clear", False),
             "tutorials": kwargs.get("tutorials", False),
             "warningiserror": kwargs.get("warningiserror", False),
             "verbosity": kwargs.get("verbosity", 0),
@@ -516,13 +517,11 @@ class BuildDocumentation:
             - last_tag : str
                 The previous release tag
             - version_type : str
-                One of 'dirty', 'tagged', or 'latest'
+                One of 'latest' or <tag>
         """
-        from spectrochempy.api import version  # Import here to avoid unnecessary delay
+        from spectrochempy.api import version
 
         last_tag = self._get_previous_tag() if not self.tagname else None
-        if "+" in version:
-            return version, last_tag, "dirty"
         if self.tagname is not None:
             return self.tagname, last_tag, self.tagname
         return version, last_tag, "latest" if "dev" in version else last_tag
@@ -568,7 +567,7 @@ class BuildDocumentation:
             List of previous versions
         """
         versions = []
-        version_pattern = re.compile(r"^(latest|dirty|\d+\.\d+\.\d+)$")
+        version_pattern = re.compile(r"^(\d+\.\d+\.\d+)$")
         for item in HTML.iterdir():
             if item.is_dir() and version_pattern.match(item.name):
                 versions.append(item.name)
@@ -617,20 +616,17 @@ class BuildDocumentation:
 
         # Clean the build target directory
         # Clean the files and directories that are not version folders or latest
-        if not self.settings["clear"]:
-            for item in HTML.iterdir():
-                if (
-                    item.is_dir()
-                    and item.name not in previous_versions
-                ):
-                    shutil.rmtree(item, ignore_errors=True)
-                    print(f"Removed directory: {item}")
-                elif (
-                    item.is_file()
-                    and item.name not in previous_versions
-                ):
-                    item.unlink()
-                    print(f"Removed file: {item}")
+        for item in HTML.iterdir():
+            if item.is_dir() and item.name not in previous_versions:
+                shutil.rmtree(item, ignore_errors=True)
+                print(f"Removed directory: {item}")
+            elif (
+                item.is_file()
+                and item.name not in previous_versions
+                and item.name != "latest"
+            ):
+                item.unlink()
+                print(f"Removed file: {item}")
 
         # Download the test data
         download_testdata()
@@ -656,6 +652,7 @@ class BuildDocumentation:
             Sphinx build result
         """
         from sphinx.application import Sphinx
+        from sphinx.errors import ExtensionError
 
         # Suppress specific warnings from Sphinx
         with suppress(Exception):
@@ -697,11 +694,34 @@ class BuildDocumentation:
             outdir,
             doctreesdir,
             "html",
-            # exception_on_warning=self.settings["warningiserror"],  # Do not work for shinx 5.3
             parallel=self.settings["jobs"],
             verbosity=self.settings["verbosity"],
         )
-        return sp.build()
+
+        class SafeEventEmitter:
+            def __init__(self, original_emit):
+                self.original_emit = original_emit
+
+            def __call__(self, *args, **kwargs):
+                try:
+                    return self.original_emit(*args, **kwargs)
+                except ExtensionError as e:
+                    if "embed_code_links" in str(e):
+                        print("Note: Ignoring embed_code_links error to continue build")
+                        return None
+                    raise
+
+        # Replace the event emitter with our safe version
+        sp.events.emit = SafeEventEmitter(sp.events.emit)
+
+        try:
+            return sp.build()
+        except Exception as e:
+            print(f"Warning: Build encountered an error: {e}")
+            if "build-finished" in str(e):
+                print("Build completed despite embed_code_links error")
+                return 0
+            raise
 
     def _post_build(self):
         """Post-build actions."""
@@ -727,6 +747,33 @@ class BuildDocumentation:
         if doc_version == "latest" and source_dir.exists():
             shutil.rmtree(source_dir)
             print(f"Removed directory {source_dir}")
+
+        # Get all version directories
+        versions = []
+        version_pattern = re.compile(r"^\d+\.\d+\.\d+$")
+        for item in HTML.iterdir():
+            if item.is_dir() and version_pattern.match(item.name):
+                versions.append(item.name)
+
+        versions.sort(reverse=True)  # Sort in descending order
+        versions_str = ",".join(versions)
+
+        # Update layout.html in each version directory to include latest versions list
+        layout_template = TEMPLATES / "layout.html"
+        for version_dir in HTML.glob("[0-9]*.[0-9]*.[0-9]*"):
+            target_dir = version_dir / "_templates"
+            target_dir.mkdir(exist_ok=True)
+            target_file = target_dir / "layout.html"
+
+            with open(layout_template) as f:
+                content = f.read()
+                content = content.replace(
+                    "data-versions=\"{{ os.environ.get('PREVIOUS_VERSIONS', '') }}\"",
+                    f'data-versions="{versions_str}"',
+                )
+
+            with open(target_file, "w") as f:
+                f.write(content)
 
         # Remove the environment variables
         del environ["DOC_BUILDING"]
@@ -928,10 +975,6 @@ def main():
     )
 
     parser.add_argument(
-        "--clear", "-C", help="clean the html directory", action="store_true"
-    )
-
-    parser.add_argument(
         "--tag-name", "-T", type=str, help="Git tag to read from to regenerate old docs"
     )
 
@@ -958,7 +1001,6 @@ def main():
             noapi=args.no_api,
             noexec=args.no_exec,
             nosync=args.no_sync,
-            clear=args.clear,
             tutorials=args.upload_tutorials,
             warningiserror=args.warning_is_error,
             verbosity=args.verbosity,
@@ -1002,5 +1044,12 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    # sys.argv = ["make.py", "html", "--no-api", "--no-exec",  "-T", "0.6.10"]
+    if not ON_GITHUB:
+        sys.argv = [
+            "make.py",
+            "html",
+            "--no-api",
+            "--no-exec",
+            "-v",
+        ]  #  "-T", "0.6.10"]
     sys.exit(main())

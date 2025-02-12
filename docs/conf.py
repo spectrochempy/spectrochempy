@@ -7,7 +7,6 @@
 """SpectroChemPy documentation build configuration file."""
 
 import inspect
-import json
 import os
 import sys
 import warnings
@@ -259,6 +258,7 @@ html_context = {
     "current_version": "stable" if ("dev" not in version) else "latest",
     "latest_version": f"{root}/index.html",
     "release": f"{root}/{last_release}/index.html",
+    "previous_versions": os.environ.get("PREVIOUS_VERSIONS", "").split(","),  # Added
     # This is for the citing page
     "version": release,
     "bibversion": "{" + release + "}",
