@@ -619,9 +619,9 @@ class BuildDocumentation:
         # Get previous versions and save them in a json file to b use by the versions.js scipt
         previous_versions = self._get_previous_versions()
 
-        # Clean the build target directory
+        # Eventually clean the build target directory
         # Clean the files and directories that are not version folders or latest
-        if not self.settings["clear"]:
+        if self.settings["clear"]:
             for item in HTML.iterdir():
                 if item.is_dir() and item.name not in previous_versions:
                     shutil.rmtree(item, ignore_errors=True)
