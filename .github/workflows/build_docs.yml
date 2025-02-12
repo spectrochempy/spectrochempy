@@ -55,47 +55,77 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      # Step 2: Setup Python environment using Micromamba
-      # This installs all documentation dependencies
-      - name: Install Conda environment with Micromamba
-        uses: mamba-org/setup-micromamba@v1
+      # step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          environment-file: environments/environment_docs.yml
-          environment-name: scpy_docs
-          condarc-file: .github/workflows/data/condarc.yml
-          create-args: >-
-            python=3.12
-          cache-environment: true
+          python-version: "3.10"
 
+      # step 3: Create a virtual environment (necessary to use pip interface)
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+
+      # step 4: Install uv
+      - name: Install uv and verify installation
+        run: |
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade uv
+          which uv
+          uv --version
+
+      # Step 5: Install spectrochempy and dependencies using uv
       - name: Install spectrochempy
         run: |
-          python3 -m pip install --no-deps .
+           . .venv/bin/activate
+           uv pip install -e ".[docs]"
 
+      # Step 6: Install Pandoc and check version
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+          pandoc --version
+
+      # Step 7: Setup Jupyter kernel for notebooks
       - name: Setup Jupyter kernel
         run: |
-          python3 -m pip install ipykernel
+          . .venv/bin/activate
+          uv pip install ipykernel
           python3 -m ipykernel install --user --name python3 --display-name "Python 3"
 
+      # Step 8: Set up version environment variable
       - name: Set up version environment variable
         run: |
+          . .venv/bin/activate
           python3 .github/workflows/scripts/set_env_var.py
 
+      # Step 9: Clone gh-pages branch
       - name: Clone gh-pages branch
         run: |
           mkdir -p build
           git clone --branch=gh-pages --single-branch https://github.com/${{ github.repository }}.git build/html
 
+      # Step 10: Build the documentation
       - name: Build docs
         run: |
-          echo "Recreating docs"
-          # python docs/make.py -j1 html
-          if [[ ${{ github.ref }} == refs/heads/docs/* ]]; then
-          python docs/make.py -v -j1 html --no-api --no-exec --no-sync
-          else
-          python docs/make.py -v -j1 html
+          . .venv/bin/activate
+          echo "Udating docs"
+          python3 docs/make.py -v -j1 html
+
+      # Step 11: Build oldest version of the documentation if it doesn't yet exist
+      - name: Build oldest version of the documentation
+        run: |
+          . .venv/bin/activate
+          if [ ! -d build/html/0.6.10 ]; then
+            echo "Recreating oldest docs"
+            python3 docs/make.py -v -j1 html -T 0.6.10
           fi
 
-      # Upload build artifacts
+      # Step 12: Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:

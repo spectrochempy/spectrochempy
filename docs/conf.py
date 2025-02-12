@@ -7,7 +7,6 @@
 """SpectroChemPy documentation build configuration file."""
 
 import inspect
-import json
 import os
 import sys
 import warnings
@@ -25,23 +24,19 @@ import spectrochempy  # isort:skip
 
 # CONSTANTS
 PROJECTNAME = "spectrochempy"
-REPO_URI = f"spectrochempy/src/{PROJECTNAME}"
-API_GITHUB_URL = "https://api.github.com"
-URL_SCPY = "www.spectrochempy.fr"
 
 # GENERAL PATHS
-DOCS = Path(__file__).parent
-TEMPLATES = DOCS / "_templates"
-STATIC = DOCS / "_static"
-PROJECT = DOCS.parent
-DOCREPO = PROJECT / "build"
-DOCTREES = DOCREPO / "~doctrees"
-HTML = DOCREPO / "html"
-DOWNLOADS = HTML / "downloads"
-SOURCES = PROJECT / PROJECTNAME
+CONFDIR = Path(os.environ.get("SPHINX_CONFDIR"))
+TEMPLATES = CONFDIR / "_templates"
+STATIC = CONFDIR / "_static"
+PROJECT = CONFDIR.parent
+BUILDIR = PROJECT / "build"
+DOCTREES = BUILDIR / "~doctrees"
+HTML = BUILDIR / "html"
+SOURCES = Path(os.environ.get("SOURCES"))
 
 # DOCUMENTATION SRC PATH
-SRC = DOCS / "sources"
+SRC = Path(os.environ.get("SPHINX_SRCDIR"))
 USERGUIDE = SRC / "userguide"
 GETTINGSTARTED = SRC / "gettingstarted"
 DEVGUIDE = SRC / "devguide"
@@ -63,7 +58,7 @@ GALLERY = GETTINGSTARTED / "examples" / "gallery"
 sys._called_from_sphinx = True
 
 # Sphinx Extensions
-sys.path.insert(0, DOCS / "sphinxext")
+sys.path.insert(0, str(CONFDIR / "sphinxext"))
 
 extensions = [
     "sphinx_copybutton",
@@ -249,20 +244,21 @@ if on_github_actions:
 # which will be used by versions.js script to display the versions in the sidebar
 previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 last_release = os.environ.get("LAST_RELEASE", "")
-versions = [("STABLE", f"{root}/{last_release}/index.html")]
-versions += [(v, f"{root}/{v}/index.html") for v in previous_versions if v != "latest"]
-versions_file = STATIC / "versions.json"
-js = {"versions": [{"name": k, "url": v} for k, v in versions]}
-with versions_file.open("w") as f:
-    js = json.dumps(js, indent=4)
-    js = js.strip() + "\n"  # add a new line at the end
-    f.write(js)
-print(f"Saved versions to {versions_file}")
+# versions = [("STABLE", f"{root}/{last_release}/index.html")]
+# versions += [(v, f"{root}/{v}/index.html") for v in previous_versions if v != "latest"]
+# versions_file = STATIC / "versions.json"
+# js = {"versions": [{"name": k, "url": v} for k, v in versions]}
+# with versions_file.open("w") as f:
+#     js = json.dumps(js, indent=4)
+#     js = js.strip() + "\n"  # add a new line at the end
+#     f.write(js)
+# print(f"Saved versions to {versions_file}")
 
 html_context = {
     "current_version": "stable" if ("dev" not in version) else "latest",
     "latest_version": f"{root}/index.html",
     "release": f"{root}/{last_release}/index.html",
+    "previous_versions": os.environ.get("PREVIOUS_VERSIONS", "").split(","),  # Added
     # This is for the citing page
     "version": release,
     "bibversion": "{" + release + "}",
@@ -277,7 +273,7 @@ html_context = {
 # Generate the plots for the gallery
 from sphinx_gallery.sorting import FileNameSortKey
 
-example_source_dir = str(PROJECT) + "/src/spectrochempy/examples"
+example_source_dir = str(SOURCES / "examples")
 example_generated_dir = "gettingstarted/examples/gallery"
 
 

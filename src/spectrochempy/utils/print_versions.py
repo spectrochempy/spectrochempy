@@ -263,7 +263,7 @@ def get_environment_info():
     elif sys.prefix != sys.base_prefix:
         env_info["type"] = "venv"
         env_info["name"] = environ.get("VIRTUAL_ENV", "").split("/")[-1]
-        env_info["prefix"] = str(Path(sys.prefix).relative_to(user_dir))
+        env_info["prefix"] = str(Path(sys.prefix))  # .relative_to(user_dir))
 
     else:
         env_info["type"] = "system"

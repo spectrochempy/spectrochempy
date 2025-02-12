@@ -25,9 +25,7 @@ source:
 build:
   string: dev48
   noarch: python
-  script:
-    - export SETUPTOOLS_SCM_PRETEND_VERSION=0.6.11
-    - python -m pip install .
+  script: export SETUPTOOLS_SCM_PRETEND_VERSION=0.6.11 && python -m pip install .
 
 requirements:
   host:
@@ -120,7 +118,6 @@ about:
     ## License
 
     [CeCILL-B FREE SOFTWARE LICENSE AGREEMENT](https://cecill.info/licences/Licence_CeCILL-B_V1-en.html)
-
 
 extra:
   recipe-maintainers:

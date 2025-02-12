@@ -30,7 +30,7 @@ nbformat
 nbsphinx
 numpydoc
 pickleshare
-pypandoc_binary
+pypandoc
 sphinx
 sphinx-copybutton
 sphinx-gallery
