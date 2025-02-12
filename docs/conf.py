@@ -244,8 +244,8 @@ if on_github_actions:
 # which will be used by versions.js script to display the versions in the sidebar
 previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 last_release = os.environ.get("LAST_RELEASE", "")
-versions = [("STABLE", f"{root}/{last_release}/index.html")]
-versions += [(v, f"{root}/{v}/index.html") for v in previous_versions if v != "latest"]
+# versions = [("STABLE", f"{root}/{last_release}/index.html")]
+# versions += [(v, f"{root}/{v}/index.html") for v in previous_versions if v != "latest"]
 # versions_file = STATIC / "versions.json"
 # js = {"versions": [{"name": k, "url": v} for k, v in versions]}
 # with versions_file.open("w") as f:

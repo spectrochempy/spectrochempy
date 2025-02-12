@@ -106,6 +106,8 @@ def pip2conda(package):
         if compare not in package:
             continue
         pkg, version = package.split(compare, maxsplit=1)
+        pkg = pkg.strip()
+        version = version.strip()
         if pkg in renaming:
             return "".join((renaming[pkg], compare, version))
         return "".join((pkg, compare, version))

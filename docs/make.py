@@ -360,6 +360,7 @@ class BuildDocumentation:
             "noapi": kwargs.get("noapi", False),
             "noexec": kwargs.get("noexec", False),
             "nosync": kwargs.get("nosync", False),
+            "clear": kwargs.get("clear", False),
             "tutorials": kwargs.get("tutorials", False),
             "warningiserror": kwargs.get("warningiserror", False),
             "verbosity": kwargs.get("verbosity", 0),
@@ -616,17 +617,14 @@ class BuildDocumentation:
 
         # Clean the build target directory
         # Clean the files and directories that are not version folders or latest
-        for item in HTML.iterdir():
-            if item.is_dir() and item.name not in previous_versions:
-                shutil.rmtree(item, ignore_errors=True)
-                print(f"Removed directory: {item}")
-            elif (
-                item.is_file()
-                and item.name not in previous_versions
-                and item.name != "latest"
-            ):
-                item.unlink()
-                print(f"Removed file: {item}")
+        if not self.settings["clear"]:
+            for item in HTML.iterdir():
+                if item.is_dir() and item.name not in previous_versions:
+                    shutil.rmtree(item, ignore_errors=True)
+                    print(f"Removed directory: {item}")
+                elif item.is_file() and item.name not in previous_versions:
+                    item.unlink()
+                    print(f"Removed file: {item}")
 
         # Download the test data
         download_testdata()
@@ -975,6 +973,10 @@ def main():
     )
 
     parser.add_argument(
+        "--clear", "-C", help="clear the html directory", action="store_true"
+    )
+
+    parser.add_argument(
         "--tag-name", "-T", type=str, help="Git tag to read from to regenerate old docs"
     )
 
@@ -1001,6 +1003,7 @@ def main():
             noapi=args.no_api,
             noexec=args.no_exec,
             nosync=args.no_sync,
+            clear=args.clear,
             tutorials=args.upload_tutorials,
             warningiserror=args.warning_is_error,
             verbosity=args.verbosity,
