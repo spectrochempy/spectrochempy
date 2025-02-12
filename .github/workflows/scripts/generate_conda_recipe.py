@@ -40,13 +40,13 @@ def process_dependency(dep):
         version_spec = ""
     else:
         pkg_name = parts[0].strip()
-        version_spec = f">={parts[1]}"
+        version_spec = f">={parts[1]"
 
     # Apply renaming if package is in the mapping
     conda_name = renaming.get(pkg_name, pkg_name)
 
     # Return full dependency string
-    return f"{conda_name}{version_spec}".strip()
+    return f"{conda_name} {version_spec}".strip()
 
 
 # Process dependencies
