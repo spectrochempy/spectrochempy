@@ -430,28 +430,6 @@ class BuildDocumentation:
             sh(f"rm -r {nbch}")
         print(f"Removed all ipynb files in {self.SRC}")
 
-    @staticmethod
-    def _confirm(action):
-        """
-        Ask user to confirm an action by entering Y or N (case-insensitive).
-
-        Parameters
-        ----------
-        action : str
-            The action to confirm
-
-        Returns
-        -------
-        bool
-            True if user confirms, False otherwise
-        """
-        answer = ""
-        while answer not in ["y", "n"]:
-            answer = input(
-                f"OK to continue `{action}` Y[es]/[N[o] ? ",
-            ).lower()
-        return answer[:1] == "y"
-
     def _sync_notebooks(self):
         """
         Synchronize notebook and Python script pairs.
@@ -781,19 +759,20 @@ class BuildDocumentation:
         versions.sort(reverse=True)  # Sort in descending order
         versions_str = ",".join(versions)
 
-        # Update layout.html in each version directory to include latest versions list
+        # Update layout.html to include latest versions list
         layout_template = TEMPLATES / "layout.html"
+        with open(layout_template) as f:
+            content = f.read()
+            content = content.replace(
+                "data-versions=\"{{ os.environ.get('PREVIOUS_VERSIONS', '') }}\"",
+                f'data-versions="{versions_str}"',
+            )
+
+        # Update also in each version directory
         for version_dir in HTML.glob("[0-9]*.[0-9]*.[0-9]*"):
             target_dir = version_dir / "_templates"
             target_dir.mkdir(exist_ok=True)
             target_file = target_dir / "layout.html"
-
-            with open(layout_template) as f:
-                content = f.read()
-                content = content.replace(
-                    "data-versions=\"{{ os.environ.get('PREVIOUS_VERSIONS', '') }}\"",
-                    f'data-versions="{versions_str}"',
-                )
 
             with open(target_file, "w") as f:
                 f.write(content)
