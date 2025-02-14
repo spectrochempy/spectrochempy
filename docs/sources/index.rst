@@ -167,4 +167,3 @@ Credits
     credits/citing
     credits/license
     credits/seealso
-    
