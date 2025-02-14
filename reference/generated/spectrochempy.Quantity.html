@@ -1,0 +1,1426 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.Quantity &mdash; SpectroChemPy v0.6.11.dev82 0.6.11.dev82 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/spectrochempy.css?v=08b5a373" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/spectrochempy.css?v=08b5a373" />
+
+  
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5253294d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+ 
+<html data-versions="0.6.10">
+<script src="../../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+<div class="version-selector">
+    <span class="fa fa-book"> SpectroChemPy version:</span>
+    <select id="versions-dropdown">
+    </select>
+</div>
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/latest.html">What’s new in revision 0.6.11.dev</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#new-features">New features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#dependency-updates">Dependency updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-6">Version 0.6</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/latest.html">What’s new in revision 0.6.11.dev</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#dependency-updates">Dependency updates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.10.html">What’s new in revision 0.6.10</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.10.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.10.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.10.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.9.html">What’s new in revision 0.6.9</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.8.html">What’s new in revision 0.6.8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.8.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.8.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.8.html#breaking-changes">Breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.7.html">What’s new in revision 0.6.7</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.7.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.6.html">What’s new in revision 0.6.6</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.6.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.6.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.5.html">What’s new in revision 0.6.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.4.html">What’s new in revision 0.6.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.4.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.4.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.4.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.4.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.3.html">What’s new in revision 0.6.3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.3.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.2.html">What’s new in revision 0.6.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.2.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.2.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.2.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.1.html">What’s new in revision 0.6.1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.1.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.1.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-5">Version 0.5</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.5.html">What’s new in revision 0.5.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.4.html">What’s new in revision 0.5.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.4.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.3.html">What’s new in revision 0.5.3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.3.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.3.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.2.html">What’s new in revision 0.5.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.1.html">What’s new in revision 0.5.1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.1.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.1.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.0.html">What’s new in revision 0.5.0 [2023-01-11]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.0.html#breaking-changes">Breaking changes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-4">Version 0.4</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.10.html">What’s new in revision 0.4.10 [2023-01-07]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.10.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.9.html">What’s new in revision 0.4.9 [2023-01-05]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.9.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.7.html">What’s new in revision 0.4.7 [2022-05-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.6.html">What’s new in revision 0.4.6 [2022-05-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.6.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.6.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.5.html">What’s new in revision 0.4.5 [2022-04-09]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.4.html">What’s new in revision 0.4.4 [2022-03-22]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.4.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.3.html">What’s new in revision 0.4.3 [2022-03-20]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.3.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.2.html">What’s new in revision 0.4.2 [2022-03-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.2.html#deprecations">Deprecations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.1.html">What’s new in revision 0.4.1 [2022-03-14]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.1.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.1.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.1.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-3">Version 0.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.3.3.html">What’s new in revision 0.3.3 [2022-03-9]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.3.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.3.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.3.2.html">What’s new in revision 0.3.2 [2022-01-31]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.3.1.html">What’s new in revision 0.3.1 [2022-01-21]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.1.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.3.0.html">What’s new in revision 0.3.0 [2022-01-20]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.0.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-2">Version 0.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.23.html">What’s new in revision 0.2.23 [2022-01-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.23.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.22.html">What’s new in revision 0.2.22 [2022-01-10]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.22.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.21.html">What’s new in revision 0.2.21 [2022-01-09]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.21.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.21.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.18.html">What’s new in revision 0.2.18 [2022-01-05]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.18.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.18.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.17.html">What’s new in revision 0.2.17 [2021-11-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.17.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.17.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.16.html">What’s new in revision 0.2.16 [2021-11-11]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.16.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.16.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.15.html">What’s new in revision 0.2.15 [2021-03-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.15.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.15.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.14.html">What’s new in revision 0.2.14 [2021-02-25]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.14.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.14.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.13.html">What’s new in revision 0.2.13 [2021-02-23]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.13.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.12.html">What’s new in revision 0.2.12 [2021-02-23]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.12.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.11.html">What’s new in revision 0.2.11 [2021-02-17]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.11.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.10.html">What’s new in revision 0.2.10 [2021-02-14]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.10.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.9.html">What’s new in revision 0.2.9 [2021-11-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.8.html">What’s new in revision 0.2.8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.8.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.8.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.7.html">What’s new in revision 0.2.7</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.7.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.6.html">What’s new in revision 0.2.6</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.6.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.5.html">What’s new in revision 0.2.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.4.html">What’s new in revision 0.2.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.4.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.4.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.0.html">What’s new in revision 0.2.0</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.0.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-1">Version 0.1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.1.0.html">Revisions 0.1.0 to 0.1.19</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/whyscpy.html">Why <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code>  ?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/whyscpy.html#designed-for-open-science">Designed for Open Science</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/whyscpy.html#open-source-software-on-an-open-source-platform">Open Source Software on an Open-Source Platform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/whyscpy.html#powered-by-python">Powered by Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/whyscpy.html#why-not-spectrochempy">Why NOT <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code> ?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/overview.html#NDDataset,-the-main-object">NDDataset, the main object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Display-dataset-information">Display dataset information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Plotting-a-dataset">Plotting a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Slicing-a-dataset">Slicing a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Maths-on-datasets">Maths on datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Processing-a-dataset">Processing a dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/overview.html#Smoothing">Smoothing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/overview.html#Baseline-correction">Baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Analysis">Analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/overview.html#IRIS-processing">IRIS processing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html#how-to-use-nddataset">How to use NDDataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html#import-export">Import / Export</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html#plotting-datasets">Plotting datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html#project-management">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental 1D NMR data</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting librairie</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#decomposition">Decomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#cross-decomposition">Cross-decomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#curvefitting">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris.html">2D-IRIS analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#apodization">Apodization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#baseline">Baseline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#denoising">Denoising</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#filtering">filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#processing-nmr-datasets">Processing NMR datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#processing-raman-datasets">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/d_baseline/index.html">Baseline</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/d_baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/index.html">filtering</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/index.html">Processing NMR datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/index.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/index.html#installation-of-spectrochempy">Installation of <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_mac.html">Installation Guide for Mac OSX</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_mac.html#installation-using-conda">Installation using Conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_mac.html#installation-using-pip">Installation using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_mac.html#check-the-installation">Check the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_win.html">Installation Guide for Windows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_win.html#installation-using-conda">Installation using Conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_win.html#installation-using-pip">Installation using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_win.html#check-the-installation">Check the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_sources.html">Installation from sources (master or develop versions)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#installing-git">Installing git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#cloning-the-repository-locally">Cloning the repository locally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#create-a-conda-environment">Create a conda environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#install-spectrochempy-in-this-environment">Install <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code> in this environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#updating-spectrochempy">Updating <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_colab.html">Install in Google Colaboratory (Colab)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_colab.html#load-and-install-spectrochempy-with-pip">Load and install SpectroChemPy with pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_colab.html#load-data-files">Load data files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_adds.html">Install optional dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_adds.html#examples-and-test-data">Examples and test data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_adds.html#cantera">Cantera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_adds.html#qt">QT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide &amp; Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/introduction/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/introduction/introduction.html#About-this-user's-guide">About this user’s guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/introduction/introduction.html#How-to-get-started">How to get started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/introduction/introduction.html#Writing-and-executing-SpectroChemPy-scripts">Writing and executing SpectroChemPy scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/introduction/introduction.html#Loading-the-API">Loading the API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/introduction/introduction.html#Where-to-go-next?">Where to go next?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/api/api.html">API Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/api/api.html#General-information">General information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/api/api.html#Loglevel">Loglevel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/api/api.html#Error-handling">Error handling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/index.html#nddataset">NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html">The NDDataset object</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#1D-Dataset-(unidimensional-dataset)">1D-Dataset (unidimensional dataset)</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#nD-Dataset-(multidimensional-dataset)">nD-Dataset (multidimensional dataset)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#About-the-dates-and-times">About the dates and times</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#About-the-history-attribute">About the <code class="docutils literal notranslate"><span class="pre">history</span></code> attribute</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Units">Units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Coordinates">Coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Labels">Labels</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Sharing-coordinates-between-dimensions">Sharing coordinates between dimensions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Setting-coordinates-using-set_coordset">Setting coordinates using <code class="docutils literal notranslate"><span class="pre">set_coordset</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Syntax-1">Syntax 1</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Syntax-2">Syntax 2</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Adding-several-coordinates-to-a-single-dimension">Adding several coordinates to a single dimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Summary-of-the-coordinate-setting-syntax">Summary of the coordinate setting syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Create-a-dataset-from-a-function">Create a dataset from a function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Using-numpy-like-constructors-of-NDDatasets">Using numpy-like constructors of NDDatasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Copying-existing-NDDataset">Copying existing NDDataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/dataset/dataset.html#Importing-from-external-dataset">Importing from external dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/index.html#project">Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/objects/project/project.html">Project management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/project/project.html#Project-creation">Project creation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/project/project.html#Remove-an-element-from-a-project">Remove an element from a project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/project/project.html#Get-project's-elements">Get project’s elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/objects/project/project.html#Saving-and-loading-projects">Saving and loading projects</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/objects/project/project.html#Saving">Saving</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/objects/project/project.html#Loading">Loading</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/objects/index.html#script">Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/importexport/import.html">Import Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/import.html#Dialog-boxes">Dialog boxes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/import.html#Import-with-explicit-directory-or-file-pathnames">Import with explicit directory or file pathnames</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/importexport/import.html#A-good-practice:-use-relative-paths">A good practice: use relative paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/importexport/import.html#Good-practice:-use-os-or-pathlib-modules">Good practice: use <code class="docutils literal notranslate"><span class="pre">os</span></code> or <code class="docutils literal notranslate"><span class="pre">pathlib</span></code> modules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/import.html#Another-default-search-directory:-datadir">Another default search directory: <code class="docutils literal notranslate"><span class="pre">datadir</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importIR.html#Supported-file-formats">Supported file formats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importIR.html#Import-of-OMNIC-files">Import of OMNIC files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/importexport/importIR.html#a)-import-spg-file">a) import spg file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/importexport/importIR.html#Acquisition-dates-and-y-axis">Acquisition dates and <code class="docutils literal notranslate"><span class="pre">y</span></code> axis</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/importexport/importIR.html#The-order-of-spectra">The order of spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/importexport/importIR.html#b)-Import-of-.spa-files">b) Import of .spa files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importIR.html#Import-of-Bruker-OPUS-files">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/importexport/importIR.html#Import/Export-of-JCAMP-DX-files">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/processing/index.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/slicing.html">Slicing NDDatasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/slicing.html#What-is-the-slicing-?">What is the slicing ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/slicing.html#Slicing-of-NDDatasets">Slicing of NDDatasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/slicing.html#Slicing-with-indexes">Slicing with indexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/slicing.html#Slicing-with-coordinates">Slicing with coordinates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/transformations.html">Basic transformations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/transformations.html#Masking-data">Masking data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/transformations.html#Transposition">Transposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/transformations.html#Changing-units">Changing units</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/math_operations.html">Mathematical operations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/math_operations.html#Ufuncs-(Universal-Numpy's-functions)">Ufuncs (Universal Numpy’s functions)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/math_operations.html#List-of-UFuncs-working-on-NDDataset:">List of UFuncs working on <code class="docutils literal notranslate"><span class="pre">NDDataset</span></code>:</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Functions-affecting-magnitudes-of-the-number-but-keeping-units">Functions affecting magnitudes of the number but keeping units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Functions-affecting-magnitudes-of-the-number-but-also-units">Functions affecting magnitudes of the number but also units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Functions-that-require-no-units-or-dimensionless-units-for-inputs.-Returns-dimensionless-objects.">Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Functions-that-return-numpy-arrays-(Work-only-for-NDDataset)">Functions that return numpy arrays (<em>Work only for NDDataset</em>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Trigonometric-functions.-Require-unitless-data-or-radian-units.">Trigonometric functions. Require unitless data or radian units.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Hyperbolic-functions">Hyperbolic functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Unit-conversions">Unit conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Binary-Ufuncs">Binary Ufuncs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/math_operations.html#Usage">Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Unary-functions">Unary functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/math_operations.html#id1">Functions affecting magnitudes of the number but keeping units</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/math_operations.html#id2">Functions affecting magnitudes of the number but also units</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/math_operations.html#id3">Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/math_operations.html#id4">Functions that return numpy arrays (<em>Work only for NDDataset</em>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/math_operations.html#Trigonometric-functions.-Require-dimensionless/unitless-dataset-or-radians.">Trigonometric functions. Require dimensionless/unitless dataset or radians.</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/math_operations.html#Angle-units-conversion">Angle units conversion</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/math_operations.html#id5">Hyperbolic functions</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/math_operations.html#Binary-functions">Binary functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/math_operations.html#Arithmetic">Arithmetic</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/math_operations.html#Complex-or-hypercomplex-NDDatasets">Complex or hypercomplex NDDatasets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/smoothing.html">Filtering, Smoothing and Denoising</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/smoothing.html#The-Filter-processor">The <code class="docutils literal notranslate"><span class="pre">Filter</span></code> processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/smoothing.html#Moving-average">Moving average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/smoothing.html#Convolution-with-window-filters">Convolution with window filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/smoothing.html#Savitzky-Golay-filter">Savitzky-Golay filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/smoothing.html#Whittaker-Eilers-filter">Whittaker-Eilers filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/smoothing.html#Filtering-using-API-or-NDDataset-methods.">Filtering using API or NDDataset methods.</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/smoothing.html#The-smooth-method">The <code class="docutils literal notranslate"><span class="pre">smooth</span></code> method</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/smoothing.html#Window-size-influence">Window size influence</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/smoothing.html#Convolution-with-windows">Convolution with windows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/smoothing.html#Savitzky-Golay-filter:savgol">Savitzky-Golay filter:<code class="docutils literal notranslate"><span class="pre">savgol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/smoothing.html#Whittaker-eilers-filter-:-whittaker">Whittaker-eilers filter : <code class="docutils literal notranslate"><span class="pre">whittaker</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/baseline.html">Baseline corrections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/baseline.html#The-Baseline-processor">The <code class="docutils literal notranslate"><span class="pre">Baseline</span></code> processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/baseline.html#How-it-works?">How it works?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/baseline.html#Example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/baseline.html#Overview-of-the-other-model">Overview of the other model</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/baseline.html#Polynomial">Polynomial</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/baseline.html#Multivariate-approach">Multivariate approach</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/baseline.html#Baseline-correction-using-NDDataset-or-API-methods">Baseline correction using NDDataset or API methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/baseline.html#Detrending">Detrending</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/baseline.html#Constant-trend">Constant trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/baseline.html#Linear-trend">Linear trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/baseline.html#Polynomial-trend">Polynomial trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/baseline.html#Detrend-independently-on-several-data-segment">Detrend independently on several data segment</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/baseline.html#basc">basc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/baseline.html#Rubberband">Rubberband</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/baseline.html#Code-snippet-for-'advanced'-baseline-correction">Code snippet for ‘advanced’ baseline correction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/denoising.html">Denoising</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/denoising.html#Denoising-2D-spectra">Denoising 2D spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/denoising.html#Removing-cosmic-rays-spike-from-Raman-spectra">Removing cosmic rays spike from Raman spectra</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/denoising.html#Median-filter">Median filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/denoising.html#despike-method"><code class="docutils literal notranslate"><span class="pre">despike</span></code> method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/apodization.html">Apodization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/apodization.html#Introduction">Introduction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/apodization.html#Plot-of-the-Real-and-Imaginary-original-data">Plot of the Real and Imaginary original data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/apodization.html#Exponential-multiplication">Exponential multiplication</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/apodization.html#Shifted-apodization">Shifted apodization</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/apodization.html#Other-apodization-functions">Other apodization functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/apodization.html#Gaussian-Lorentzian-apodization">Gaussian-Lorentzian apodization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/apodization.html#Shifted-Gaussian-Lorentzian-apodization">Shifted Gaussian-Lorentzian apodization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/processing/apodization.html#Apodization-using-sine-window-multiplication">Apodization using sine window multiplication</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/fourier.html">One-dimensional (1D) Fourier transformation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/fourier.html#FFT-of-1D-NMR-spectra">FFT of 1D NMR spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/fourier.html#Preprocessing">Preprocessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/fourier.html#Line-broadening">Line broadening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/fourier.html#Zero-filling">Zero-filling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/fourier.html#Time-domain-baseline-correction">Time domain baseline correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/fourier.html#Magnitude-calculation">Magnitude calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/fourier.html#Power-spectrum">Power spectrum</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/interferogram.html">FTIR interferogram processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/interferogram.html#Comparison-with-the-OMNIC-processing.">Comparison with the OMNIC processing.</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/processing/alignment.html">Alignment of datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/alignment.html#Example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/alignment.html#Methods-for-alignments">Methods for alignments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/alignment.html#inner-method"><code class="docutils literal notranslate"><span class="pre">inner</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/alignment.html#first-method"><code class="docutils literal notranslate"><span class="pre">first</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/processing/alignment.html#last-method"><code class="docutils literal notranslate"><span class="pre">last</span></code> method</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/processing/alignment.html#Alignment-along-several-dimensions">Alignment along several dimensions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/analysis/index.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/peak_finding.html">Peak Maxima Finding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#Loading-an-experimental-dataset">Loading an experimental dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#Find-maxima-by-manual-inspection-of-the-plot">Find maxima by manual inspection of the plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#Find-maxima-with-an-automated-method:-find_peaks()">Find maxima with an automated method: <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#Default-behaviour">Default behaviour</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#Options-of-find_peaks()">Options of <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#More-on-peak-properties">More on peak properties</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#Prominence">Prominence</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#Width">Width</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/peak_finding.html#A-code-snippet-to-display-properties">A code snippet to display properties</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/fitting.html">Fitting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/fitting.html#Solving-a-linear-equation-using-the-least-square-method-(LSTSQ)">Solving a linear equation using the least square method (LSTSQ)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/fitting.html#Least-square-with-non-negativity-constraint-(NNLS)">Least square with non-negativity constraint (NNLS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/fitting.html#NDDataset-modelling-using-non-linear-optimisation-method">NDDataset modelling using non-linear optimisation method</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/fitting.html#Baseline-correction">Baseline correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/fitting.html#Peak-finding">Peak finding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/fitting.html#Fitting-script">Fitting script</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/fitting.html#Syntax-for-parameters-definition">Syntax for parameters definition</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/pca.html">Principal Component Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/pca.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/pca.html#Loading-of-the-dataset">Loading of the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/pca.html#Running-a-PCA">Running a PCA</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/pls.html">Partial Least Squares Regression (PLSRegression)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/pls.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/pls.html#Loading-of-the-dataset">Loading of the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/pls.html#Running-PLSRegression">Running PLSRegression</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/analysis/mcr_als.html">MCR ALS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#The-(minimal)-dataset">The (minimal) dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#Initial-guess-and-MCR-ALS-optimization">Initial guess and MCR ALS optimization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#Case-of-initial-spectral-profiles">Case of initial spectral profiles</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#ALS-Optimization">ALS Optimization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#More-information-about-the-MCRALS-estimator">More information about the MCRALS estimator</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#Solutions">Solutions</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#A-basic-illustration-of-the-rotational-ambiguity">A basic illustration of the rotational ambiguity</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#Guessing-the-concentration-profile-with-PCA-+-EFA">Guessing the concentration profile with PCA + EFA</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#Use-of-PCA-to-assess-the-number-of-pure-species">Use of PCA to assess the number of pure species</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#Determination-of-initial-concentrations-using-EFA">Determination of initial concentrations using EFA</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/analysis/mcr_als.html#Augmented-datasets">Augmented datasets</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../userguide/plotting/plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Load-the-API">Load the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Loading-the-data">Loading the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Preparing-the-data">Preparing the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Selecting-the-output-window">Selecting the output window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Default-plotting">Default plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Changing-the-aspect-of-the-plot">Changing the aspect of the plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../userguide/plotting/plotting.html#Change-the-NDDataset.preferences">Change the <code class="docutils literal notranslate"><span class="pre">NDDataset.preferences</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Adding-titles-and-annotations">Adding titles and annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Changing-the-plot-style-using-matplotlib-style-sheets">Changing the plot style using matplotlib style sheets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Create-your-own-style">Create your own style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Changing-the-type-of-plot">Changing the type of plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Plotting-1D-datasets">Plotting 1D datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Plotting-several-dataset-on-the-same-figure">Plotting several dataset on the same figure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../userguide/plotting/plotting.html#Overview-of-the-main-configuration-parameters">Overview of the main configuration parameters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing.html">Contributing to SpectroChemPy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing.html#general-principles">General Principles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/issues.html">Reporting Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing.html#be-prepared-to-work-on-the-code">Be prepared to work on the code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#version-control-git-and-github">Version control, Git, and GitHub</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#installing-git">Installing git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#optional-installing-a-gui-git-client">Optional: installing a GUI git client</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#forking-the-spectrochempy-repository">Forking the spectrochempy repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#creating-a-python-development-environment">Creating a Python development environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#controlling-the-environments">Controlling the environments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#creating-a-branch">Creating a branch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing.html#contributing-your-changes-to-spectrochempy">Contributing your changes to SpectroChemPy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#commit-your-code">Commit your code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#push-your-changes">Push your changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#review-your-code">Review Your Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#make-the-pull-request-pr">Make the pull request (PR)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#update-your-pull-request">Update your pull request</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#automatically-fix-formatting-errors">Automatically fix formatting errors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#delete-your-merged-branch-optional">Delete your merged branch (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing.html#tips-for-a-successful-pull-request">Tips for a successful pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codebase.html">Contributing to the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#code-standards">Code standards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#pre-commit">Pre-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#optional-dependencies">Optional dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_codebase.html#python-pep8-black">Python (PEP8 / black)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_codebase.html#backwards-compatibility">Backwards compatibility</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#testing-with-continuous-integration">Testing with continuous integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#test-driven-development-code-writing">Test-driven development/code writing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_codebase.html#writing-tests">Writing tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_codebase.html#using-pytest">Using <code class="docutils literal notranslate"><span class="pre">pytest</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#running-the-test-suite">Running the test suite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#documenting-change-log">Documenting change log</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/codespec_adding_reader.html">Adding a Reader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#add-a-test-and-sample-files">1. Add a test and sample files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#complete-filetypes-and-alias">2. Complete FILETYPES and ALIAS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#create-the-reader-xxx-py-file">3. Create the reader_xxx.py file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#general-guidelines-for-data-and-metadata-format">3. General Guidelines for data and metadata format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#polish-your-code-and-make-the-pull-requests">4. Polish your code and make the Pull Requests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_documentation.html">Contributing to the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_documentation.html#about-the-spectrochempy-documentation">About the spectrochempy documentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_docstring.html">SpectroChemPy Docstring Guide</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../devguide/contributing_docstring.html#about-docstrings-and-standards">About docstrings and standards</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../devguide/contributing_docstring.html#writing-a-docstring">Writing a docstring</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_documentation.html#updating-a-spectrochempy-docstring">Updating a spectrochempy docstring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_documentation.html#how-to-build-the-spectrochempy-documentation">How to build the spectrochempy documentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_documentation.html#requirements">Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_documentation.html#building-the-documentation">Building the documentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_documentation.html#building-master-branch-documentation">Building master branch documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.6.11.dev82</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">spectrochempy.Quantity</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/reference/generated/spectrochempy.Quantity.rst" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+<div class="admonition warning">
+    <p class="first admonition-title">Warning</p>
+    <p class="last"> You are reading the documentation related to the development version.
+        <a href="/0.6.10/index.html">Go here</a> if you are looking for the documentation of the stable
+        release.
+    </p>
+</div>
+
+
+           <div itemprop="articleBody">
+             
+  <section id="spectrochempy-quantity">
+<h1>spectrochempy.Quantity<a class="headerlink" href="#spectrochempy-quantity" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="spectrochempy.Quantity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Quantity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity" title="Link to this definition"></a></dt>
+<dd><p class="rubric">Attributes Summary</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.dimensionality" title="spectrochempy.Quantity.dimensionality"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dimensionality</span></code></a></p></td>
+<td><p>returns: <em>dict</em> -- Dimensionality of the PlainQuantity, e.g. <code class="docutils literal notranslate"><span class="pre">{length:</span> <span class="pre">1,</span> <span class="pre">time:</span> <span class="pre">-1}</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.dimensionless" title="spectrochempy.Quantity.dimensionless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dimensionless</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.m" title="spectrochempy.Quantity.m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">m</span></code></a></p></td>
+<td><p>PlainQuantity's magnitude.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.magnitude" title="spectrochempy.Quantity.magnitude"><code class="xref py py-obj docutils literal notranslate"><span class="pre">magnitude</span></code></a></p></td>
+<td><p>PlainQuantity's magnitude.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.u" title="spectrochempy.Quantity.u"><code class="xref py py-obj docutils literal notranslate"><span class="pre">u</span></code></a></p></td>
+<td><p>PlainQuantity's units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.unitless" title="spectrochempy.Quantity.unitless"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unitless</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.units" title="spectrochempy.Quantity.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">units</span></code></a></p></td>
+<td><p>PlainQuantity's units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.default_format" title="spectrochempy.Quantity.default_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_format</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.check" title="spectrochempy.Quantity.check"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check</span></code></a>(dimension)</p></td>
+<td><p>Return true if the quantity's dimension matches passed dimension.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.compute" title="spectrochempy.Quantity.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(**kwargs)</p></td>
+<td><p>Compute the Dask array wrapped by pint.PlainQuantity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.dot" title="spectrochempy.Quantity.dot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dot</span></code></a>(b)</p></td>
+<td><p>Dot product of two arrays.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.from_list" title="spectrochempy.Quantity.from_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_list</span></code></a>(quant_list[, units])</p></td>
+<td><p>Transforms a list of Quantities into an numpy.array quantity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.from_sequence" title="spectrochempy.Quantity.from_sequence"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_sequence</span></code></a>(cls, seq[, units])</p></td>
+<td><p>Transforms a sequence of Quantities into an numpy.array quantity.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.is_compatible_with" title="spectrochempy.Quantity.is_compatible_with"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_compatible_with</span></code></a>(self, other, *contexts, ...)</p></td>
+<td><p>check if the other object is compatible</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.ito" title="spectrochempy.Quantity.ito"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ito</span></code></a>([other])</p></td>
+<td><p>Inplace rescale to different units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.ito_base_units" title="spectrochempy.Quantity.ito_base_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ito_base_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity rescaled to plain units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.ito_preferred" title="spectrochempy.Quantity.ito_preferred"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ito_preferred</span></code></a>([preferred_units])</p></td>
+<td><p>Return Quantity converted to a unit composed of the preferred units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.ito_reduced_units" title="spectrochempy.Quantity.ito_reduced_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ito_reduced_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity scaled in place to reduced units, i.e. one unit per dimension.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.ito_root_units" title="spectrochempy.Quantity.ito_root_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ito_root_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity rescaled to root units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.m_as" title="spectrochempy.Quantity.m_as"><code class="xref py py-obj docutils literal notranslate"><span class="pre">m_as</span></code></a>(units)</p></td>
+<td><p>PlainQuantity's magnitude expressed in particular units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.persist" title="spectrochempy.Quantity.persist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">persist</span></code></a>(**kwargs)</p></td>
+<td><p>Persist the Dask Array wrapped by pint.PlainQuantity.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.prod" title="spectrochempy.Quantity.prod"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prod</span></code></a>(_prod_dispatcher)def prod(a[, axis, ...])</p></td>
+<td><p>Return the product of quantity elements over a given axis</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.to" title="spectrochempy.Quantity.to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to</span></code></a>([other])</p></td>
+<td><p>Return PlainQuantity rescaled to different units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.to_base_units" title="spectrochempy.Quantity.to_base_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_base_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity rescaled to plain units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.to_compact" title="spectrochempy.Quantity.to_compact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_compact</span></code></a>(quantity, unit)</p></td>
+<td><p>&quot;Return PlainQuantity rescaled to compact, human-readable units.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.to_preferred" title="spectrochempy.Quantity.to_preferred"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_preferred</span></code></a>([preferred_units])</p></td>
+<td><p>Return Quantity converted to a unit composed of the preferred units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.to_reduced_units" title="spectrochempy.Quantity.to_reduced_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_reduced_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity scaled in place to reduced units, i.e. one unit per dimension.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.to_root_units" title="spectrochempy.Quantity.to_root_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_root_units</span></code></a>()</p></td>
+<td><p>Return PlainQuantity rescaled to root units.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#spectrochempy.Quantity.unit_items" title="spectrochempy.Quantity.unit_items"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unit_items</span></code></a>()</p></td>
+<td><p>A view of the unit items.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#spectrochempy.Quantity.visualize" title="spectrochempy.Quantity.visualize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visualize</span></code></a>(**kwargs)</p></td>
+<td><p>Produce a visual representation of the Dask graph.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.dimensionality">
+<span class="sig-name descname"><span class="pre">dimensionality</span></span><a class="headerlink" href="#spectrochempy.Quantity.dimensionality" title="Link to this definition"></a></dt>
+<dd><p>returns: <em>dict</em> – Dimensionality of the PlainQuantity, e.g. <code class="docutils literal notranslate"><span class="pre">{length:</span> <span class="pre">1,</span> <span class="pre">time:</span> <span class="pre">-1}</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.dimensionless">
+<span class="sig-name descname"><span class="pre">dimensionless</span></span><a class="headerlink" href="#spectrochempy.Quantity.dimensionless" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.m">
+<span class="sig-name descname"><span class="pre">m</span></span><a class="headerlink" href="#spectrochempy.Quantity.m" title="Link to this definition"></a></dt>
+<dd><p>PlainQuantity’s magnitude. Short form for <a class="reference internal" href="#spectrochempy.Quantity.magnitude" title="spectrochempy.Quantity.magnitude"><code class="xref py py-obj docutils literal notranslate"><span class="pre">magnitude</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.magnitude">
+<span class="sig-name descname"><span class="pre">magnitude</span></span><a class="headerlink" href="#spectrochempy.Quantity.magnitude" title="Link to this definition"></a></dt>
+<dd><p>PlainQuantity’s magnitude. Long form for <a class="reference internal" href="#spectrochempy.Quantity.m" title="spectrochempy.Quantity.m"><code class="xref py py-obj docutils literal notranslate"><span class="pre">m</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.u">
+<span class="sig-name descname"><span class="pre">u</span></span><a class="headerlink" href="#spectrochempy.Quantity.u" title="Link to this definition"></a></dt>
+<dd><p>PlainQuantity’s units. Short form for <a class="reference internal" href="#spectrochempy.Quantity.units" title="spectrochempy.Quantity.units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">units</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.unitless">
+<span class="sig-name descname"><span class="pre">unitless</span></span><a class="headerlink" href="#spectrochempy.Quantity.unitless" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.units">
+<span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#spectrochempy.Quantity.units" title="Link to this definition"></a></dt>
+<dd><p>PlainQuantity’s units. Long form for <a class="reference internal" href="#spectrochempy.Quantity.u" title="spectrochempy.Quantity.u"><code class="xref py py-obj docutils literal notranslate"><span class="pre">u</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.default_format">
+<span class="sig-name descname"><span class="pre">default_format</span></span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.default_format" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods Documentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.check">
+<span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.check" title="Link to this definition"></a></dt>
+<dd><p>Return true if the quantity’s dimension matches passed dimension.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.compute" title="Link to this definition"></a></dt>
+<dd><p>Compute the Dask array wrapped by pint.PlainQuantity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>dict</em>) – Any keyword arguments to pass to <code class="docutils literal notranslate"><span class="pre">dask.compute</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>pint.PlainQuantity</em> – A pint.PlainQuantity wrapped numpy array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.dot">
+<span class="sig-name descname"><span class="pre">dot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.dot" title="Link to this definition"></a></dt>
+<dd><p>Dot product of two arrays.</p>
+<p>Wraps np.dot().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.from_list">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quant_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.from_list" title="Link to this definition"></a></dt>
+<dd><p>Transforms a list of Quantities into an numpy.array quantity.
+If no units are specified, the unit of the first element will be used.
+Same as from_sequence.</p>
+<p>If units is not specified and list is empty, the unit cannot be determined
+and a ValueError is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quant_list</strong> (<em>list of pint.PlainQuantity</em>) – list of pint.PlainQuantity</p></li>
+<li><p><strong>units</strong> (<em>UnitsContainer, str or pint.PlainQuantity</em>) – units of the physical quantity to be created (Default value = None)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>pint.PlainQuantity</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.from_sequence">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">cls,</span> <span class="pre">seq:</span> <span class="pre">Sequence[PlainQuantity[MagnitudeT]],</span> <span class="pre">units=None</span> <span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">PlainQuantity[MagnitudeT]:</span> <span class="pre">&quot;&quot;&quot;Transforms</span> <span class="pre">a</span> <span class="pre">sequence</span> <span class="pre">of</span> <span class="pre">Quantities</span> <span class="pre">into</span> <span class="pre">an</span> <span class="pre">numpy.array</span> <span class="pre">quantity.</span> <span class="pre">If</span> <span class="pre">no</span> <span class="pre">units</span> <span class="pre">are</span> <span class="pre">specified,</span> <span class="pre">the</span> <span class="pre">unit</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">element</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">used.</span> <span class="pre">If</span> <span class="pre">units</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">specified</span> <span class="pre">and</span> <span class="pre">sequence</span> <span class="pre">is</span> <span class="pre">empty,</span> <span class="pre">the</span> <span class="pre">unit</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">determined</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">ValueError</span> <span class="pre">is</span> <span class="pre">raised.</span> <span class="pre">Parameters</span> <span class="pre">----------</span> <span class="pre">seq</span> <span class="pre">:</span> <span class="pre">sequence</span> <span class="pre">of</span> <span class="pre">pint.PlainQuantity</span> <span class="pre">sequence</span> <span class="pre">of</span> <span class="pre">pint.PlainQuantity</span> <span class="pre">units</span> <span class="pre">:</span> <span class="pre">UnitsContainer,</span> <span class="pre">str</span> <span class="pre">or</span> <span class="pre">pint.PlainQuantity</span> <span class="pre">units</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">physical</span> <span class="pre">quantity</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">created</span> <span class="pre">(Default</span> <span class="pre">value</span> <span class="pre">=</span> <span class="pre">None)</span> <span class="pre">Returns</span> <span class="pre">-------</span> <span class="pre">pint.PlainQuantity</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">len_seq</span> <span class="pre">=</span> <span class="pre">len(seq)</span> <span class="pre">if</span> <span class="pre">units</span> <span class="pre">is</span> <span class="pre">None:</span> <span class="pre">if</span> <span class="pre">len_seq:</span> <span class="pre">units</span> <span class="pre">=</span> <span class="pre">seq[0].u</span> <span class="pre">else:</span> <span class="pre">raise</span> <span class="pre">ValueError(&quot;Cannot</span> <span class="pre">determine</span> <span class="pre">units</span> <span class="pre">from</span> <span class="pre">empty</span> <span class="pre">sequence!&quot;)</span> <span class="pre">a</span> <span class="pre">=</span> <span class="pre">np.empty(len_seq)</span> <span class="pre">for</span> <span class="pre">i,</span> <span class="pre">seq_i</span> <span class="pre">in</span> <span class="pre">enumerate(seq</span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.from_sequence" title="Link to this definition"></a></dt>
+<dd><p>Transforms a sequence of Quantities into an numpy.array quantity.
+If no units are specified, the unit of the first element will be used.</p>
+<p>If units is not specified and sequence is empty, the unit cannot be determined
+and a ValueError is raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq</strong> (<em>sequence of pint.PlainQuantity</em>) – sequence of pint.PlainQuantity</p></li>
+<li><p><strong>units</strong> (<em>UnitsContainer, str or pint.PlainQuantity</em>) – units of the physical quantity to be created (Default value = None)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>pint.PlainQuantity</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.is_compatible_with">
+<span class="sig-name descname"><span class="pre">is_compatible_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other:</span> <span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*contexts:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">Context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**ctx_kwargs:</span> <span class="pre">Any</span> <span class="pre">)</span> <span class="pre">-&gt;</span> <span class="pre">bool:</span> <span class="pre">&quot;&quot;&quot;check</span> <span class="pre">if</span> <span class="pre">the</span> <span class="pre">other</span> <span class="pre">object</span> <span class="pre">is</span> <span class="pre">compatible</span> <span class="pre">Parameters</span> <span class="pre">----------</span> <span class="pre">other</span> <span class="pre">The</span> <span class="pre">object</span> <span class="pre">to</span> <span class="pre">check.</span> <span class="pre">Treated</span> <span class="pre">as</span> <span class="pre">dimensionless</span> <span class="pre">if</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">PlainQuantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Unit</span> <span class="pre">or</span> <span class="pre">str.</span> <span class="pre">*contexts</span> <span class="pre">:</span> <span class="pre">str</span> <span class="pre">or</span> <span class="pre">pint.Context</span> <span class="pre">Contexts</span> <span class="pre">to</span> <span class="pre">use</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">transformation.</span> <span class="pre">**ctx_kwargs</span> <span class="pre">:</span> <span class="pre">Values</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">Context/s</span> <span class="pre">Returns</span> <span class="pre">-------</span> <span class="pre">bool</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">from</span> <span class="pre">.unit</span> <span class="pre">import</span> <span class="pre">PlainUnit</span> <span class="pre">if</span> <span class="pre">contexts</span> <span class="pre">or</span> <span class="pre">self._REGISTRY._active_ctx:</span> <span class="pre">try:</span> <span class="pre">self.to(other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*contexts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**ctx_kwargs)</span> <span class="pre">return</span> <span class="pre">True</span> <span class="pre">except</span> <span class="pre">DimensionalityError:</span> <span class="pre">return</span> <span class="pre">False</span> <span class="pre">if</span> <span class="pre">isinstance(other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">(PlainQuantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PlainUnit)</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.is_compatible_with" title="Link to this definition"></a></dt>
+<dd><p>check if the other object is compatible</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> – The object to check. Treated as dimensionless if not a
+PlainQuantity, Unit or str.</p></li>
+<li><p><strong>*contexts</strong> (<em>str or pint.Context</em>) – Contexts to use in the transformation.</p></li>
+<li><p><strong>**ctx_kwargs</strong> – Values for the Context/s</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>bool</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.ito">
+<span class="sig-name descname"><span class="pre">ito</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">contexts</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">ctx_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.ito" title="Link to this definition"></a></dt>
+<dd><p>Inplace rescale to different units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<em>pint.PlainQuantity, str or dict</em>) – Destination units. (Default value = None)</p></li>
+<li><p><strong>*contexts</strong> (<em>str or pint.Context</em>) – Contexts to use in the transformation.</p></li>
+<li><p><strong>**ctx_kwargs</strong> – Values for the Context/s</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.ito_base_units">
+<span class="sig-name descname"><span class="pre">ito_base_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.ito_base_units" title="Link to this definition"></a></dt>
+<dd><p>Return PlainQuantity rescaled to plain units.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.ito_preferred">
+<span class="sig-name descname"><span class="pre">ito_preferred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preferred_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.ito_preferred" title="Link to this definition"></a></dt>
+<dd><p>Return Quantity converted to a unit composed of the preferred units.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ureg</span> <span class="o">=</span> <span class="n">pint</span><span class="o">.</span><span class="n">UnitRegistry</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">acre</span><span class="p">)</span><span class="o">.</span><span class="n">to_preferred</span><span class="p">([</span><span class="n">ureg</span><span class="o">.</span><span class="n">meters</span><span class="p">])</span>
+<span class="go">&lt;Quantity(4046.87261, &#39;meter ** 2&#39;)&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">force_pound</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">m</span><span class="p">))</span><span class="o">.</span><span class="n">to_preferred</span><span class="p">([</span><span class="n">ureg</span><span class="o">.</span><span class="n">W</span><span class="p">])</span>
+<span class="go">&lt;Quantity(4.44822162, &#39;watt * second&#39;)&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.ito_reduced_units">
+<span class="sig-name descname"><span class="pre">ito_reduced_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.ito_reduced_units" title="Link to this definition"></a></dt>
+<dd><p>Return PlainQuantity scaled in place to reduced units, i.e. one unit per
+dimension. This will not reduce compound units (e.g., ‘J/kg’ will not
+be reduced to m**2/s**2), nor can it make use of contexts at this time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.ito_root_units">
+<span class="sig-name descname"><span class="pre">ito_root_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.ito_root_units" title="Link to this definition"></a></dt>
+<dd><p>Return PlainQuantity rescaled to root units.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.m_as">
+<span class="sig-name descname"><span class="pre">m_as</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.m_as" title="Link to this definition"></a></dt>
+<dd><p>PlainQuantity’s magnitude expressed in particular units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>units</strong> (<em>pint.PlainQuantity, str or dict</em>) – destination units</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.persist">
+<span class="sig-name descname"><span class="pre">persist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.persist" title="Link to this definition"></a></dt>
+<dd><p>Persist the Dask Array wrapped by pint.PlainQuantity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>dict</em>) – Any keyword arguments to pass to <code class="docutils literal notranslate"><span class="pre">dask.persist</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>pint.PlainQuantity</em> – A pint.PlainQuantity wrapped Dask array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.prod">
+<span class="sig-name descname"><span class="pre">prod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_prod_dispatcher)def</span> <span class="pre">prod(a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=np._NoValue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=np._NoValue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where=np._NoValue</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.prod" title="Link to this definition"></a></dt>
+<dd><p>Return the product of quantity elements over a given axis</p>
+<p>Wraps np.prod().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.to">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">contexts</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">ctx_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.to" title="Link to this definition"></a></dt>
+<dd><p>Return PlainQuantity rescaled to different units.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<em>pint.PlainQuantity, str or dict</em>) – destination units. (Default value = None)</p></li>
+<li><p><strong>*contexts</strong> (<em>str or pint.Context</em>) – Contexts to use in the transformation.</p></li>
+<li><p><strong>**ctx_kwargs</strong> – Values for the Context/s</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>pint.PlainQuantity</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.to_base_units">
+<span class="sig-name descname"><span class="pre">to_base_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.to_base_units" title="Link to this definition"></a></dt>
+<dd><p>Return PlainQuantity rescaled to plain units.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.to_compact">
+<span class="sig-name descname"><span class="pre">to_compact</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity:</span> <span class="pre">PlainQuantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit:</span> <span class="pre">UnitsContainer</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None)</span> <span class="pre">-&gt;</span> <span class="pre">PlainQuantity:</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">&quot;Return</span> <span class="pre">PlainQuantity</span> <span class="pre">rescaled</span> <span class="pre">to</span> <span class="pre">compact</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">human-readable</span> <span class="pre">units.</span> <span class="pre">To</span> <span class="pre">get</span> <span class="pre">output</span> <span class="pre">in</span> <span class="pre">terms</span> <span class="pre">of</span> <span class="pre">a</span> <span class="pre">different</span> <span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use</span> <span class="pre">the</span> <span class="pre">unit</span> <span class="pre">parameter.</span> <span class="pre">Examples</span> <span class="pre">--------</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">import</span> <span class="pre">pint</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">ureg</span> <span class="pre">=</span> <span class="pre">pint.UnitRegistry()</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">(200e-9*ureg.s).to_compact()</span> <span class="pre">&lt;Quantity(200.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'nanosecond')&gt;</span> <span class="pre">&gt;&gt;&gt;</span> <span class="pre">(1e-2*ureg('kg</span> <span class="pre">m/s^2')).to_compact('N')</span> <span class="pre">&lt;Quantity(10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'millinewton')&gt;</span> <span class="pre">&quot;&quot;&quot;</span> <span class="pre">if</span> <span class="pre">not</span> <span class="pre">isinstance(quantity.magnitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numbers.Number)</span> <span class="pre">and</span> <span class="pre">not</span> <span class="pre">hasattr(</span> <span class="pre">quantity.magnitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&quot;nominal_value&quot;</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.to_compact" title="Link to this definition"></a></dt>
+<dd><p>“Return PlainQuantity rescaled to compact, human-readable units.</p>
+<p>To get output in terms of a different unit, use the unit parameter.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ureg</span> <span class="o">=</span> <span class="n">pint</span><span class="o">.</span><span class="n">UnitRegistry</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mf">200e-9</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">to_compact</span><span class="p">()</span>
+<span class="go">&lt;Quantity(200.0, &#39;nanosecond&#39;)&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mf">1e-2</span><span class="o">*</span><span class="n">ureg</span><span class="p">(</span><span class="s1">&#39;kg m/s^2&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">to_compact</span><span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
+<span class="go">&lt;Quantity(10.0, &#39;millinewton&#39;)&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.to_preferred">
+<span class="sig-name descname"><span class="pre">to_preferred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">preferred_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.to_preferred" title="Link to this definition"></a></dt>
+<dd><p>Return Quantity converted to a unit composed of the preferred units.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ureg</span> <span class="o">=</span> <span class="n">pint</span><span class="o">.</span><span class="n">UnitRegistry</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">acre</span><span class="p">)</span><span class="o">.</span><span class="n">to_preferred</span><span class="p">([</span><span class="n">ureg</span><span class="o">.</span><span class="n">meters</span><span class="p">])</span>
+<span class="go">&lt;Quantity(4046.87261, &#39;meter ** 2&#39;)&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">ureg</span><span class="o">.</span><span class="n">force_pound</span><span class="o">*</span><span class="n">ureg</span><span class="o">.</span><span class="n">m</span><span class="p">))</span><span class="o">.</span><span class="n">to_preferred</span><span class="p">([</span><span class="n">ureg</span><span class="o">.</span><span class="n">W</span><span class="p">])</span>
+<span class="go">&lt;Quantity(4.44822162, &#39;watt * second&#39;)&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.to_reduced_units">
+<span class="sig-name descname"><span class="pre">to_reduced_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.to_reduced_units" title="Link to this definition"></a></dt>
+<dd><p>Return PlainQuantity scaled in place to reduced units, i.e. one unit per
+dimension. This will not reduce compound units (intentionally), nor
+can it make use of contexts at this time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.to_root_units">
+<span class="sig-name descname"><span class="pre">to_root_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.to_root_units" title="Link to this definition"></a></dt>
+<dd><p>Return PlainQuantity rescaled to root units.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.unit_items">
+<span class="sig-name descname"><span class="pre">unit_items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.unit_items" title="Link to this definition"></a></dt>
+<dd><p>A view of the unit items.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spectrochempy.Quantity.visualize">
+<span class="sig-name descname"><span class="pre">visualize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/spectrochempy/spectrochempy/blob/master/spectrochempy.py"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spectrochempy.Quantity.visualize" title="Link to this definition"></a></dt>
+<dd><p>Produce a visual representation of the Dask graph.</p>
+<p>The graphviz library is required.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>dict</em>) – Any keyword arguments to pass to <code class="docutils literal notranslate"><span class="pre">dask.visualize</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p class="rubric">Examples using spectrochempy.Quantity</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="In this example, we show how units can be used in SpectroChemPy"><img alt="" src="../../_images/sphx_glr_plot_c_units_thumb.png" />
+<p><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html#sphx-glr-gettingstarted-examples-gallery-auto-examples-core-a-nddataset-plot-c-units-py"><span class="std std-ref">Units manipulation examples</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Units manipulation examples</div>
+</div></div></section>
+
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2025 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Feb 14, 2025.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

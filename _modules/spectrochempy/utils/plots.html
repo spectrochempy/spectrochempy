@@ -1,0 +1,1621 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>spectrochempy.utils.plots &mdash; SpectroChemPy v0.6.11.dev82 0.6.11.dev82 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/spectrochempy.css?v=08b5a373" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/spectrochempy.css?v=08b5a373" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/scpy.ico"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5253294d"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+<html data-versions="0.6.10">
+<script src="../../../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+<div class="version-selector">
+    <span class="fa fa-book"> SpectroChemPy version:</span>
+    <select id="versions-dropdown">
+    </select>
+</div>
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/latest.html">What’s new in revision 0.6.11.dev</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/latest.html#new-features">New features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/latest.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/latest.html#dependency-updates">Dependency updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/latest.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/latest.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whatsnew/index.html">Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/index.html#version-0-6">Version 0.6</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/latest.html">What’s new in revision 0.6.11.dev</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/latest.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/latest.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/latest.html#dependency-updates">Dependency updates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/latest.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/latest.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.10.html">What’s new in revision 0.6.10</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.10.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.10.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.10.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.9.html">What’s new in revision 0.6.9</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.8.html">What’s new in revision 0.6.8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.8.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.8.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.8.html#breaking-changes">Breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.7.html">What’s new in revision 0.6.7</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.7.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.6.html">What’s new in revision 0.6.6</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.6.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.6.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.5.html">What’s new in revision 0.6.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.4.html">What’s new in revision 0.6.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.4.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.4.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.4.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.4.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.3.html">What’s new in revision 0.6.3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.3.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.2.html">What’s new in revision 0.6.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.2.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.2.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.2.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.6.1.html">What’s new in revision 0.6.1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.1.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.6.1.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/index.html#version-0-5">Version 0.5</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.5.5.html">What’s new in revision 0.5.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.5.4.html">What’s new in revision 0.5.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.4.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.5.3.html">What’s new in revision 0.5.3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.3.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.3.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.5.2.html">What’s new in revision 0.5.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.5.1.html">What’s new in revision 0.5.1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.1.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.1.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.5.0.html">What’s new in revision 0.5.0 [2023-01-11]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.5.0.html#breaking-changes">Breaking changes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/index.html#version-0-4">Version 0.4</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.10.html">What’s new in revision 0.4.10 [2023-01-07]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.10.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.9.html">What’s new in revision 0.4.9 [2023-01-05]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.9.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.7.html">What’s new in revision 0.4.7 [2022-05-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.6.html">What’s new in revision 0.4.6 [2022-05-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.6.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.6.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.5.html">What’s new in revision 0.4.5 [2022-04-09]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.4.html">What’s new in revision 0.4.4 [2022-03-22]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.4.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.3.html">What’s new in revision 0.4.3 [2022-03-20]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.3.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.2.html">What’s new in revision 0.4.2 [2022-03-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.2.html#deprecations">Deprecations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.4.1.html">What’s new in revision 0.4.1 [2022-03-14]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.1.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.1.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.4.1.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/index.html#version-0-3">Version 0.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.3.3.html">What’s new in revision 0.3.3 [2022-03-9]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.3.3.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.3.3.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.3.2.html">What’s new in revision 0.3.2 [2022-01-31]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.3.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.3.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.3.1.html">What’s new in revision 0.3.1 [2022-01-21]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.3.1.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.3.0.html">What’s new in revision 0.3.0 [2022-01-20]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.3.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.3.0.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/index.html#version-0-2">Version 0.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.23.html">What’s new in revision 0.2.23 [2022-01-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.23.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.22.html">What’s new in revision 0.2.22 [2022-01-10]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.22.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.21.html">What’s new in revision 0.2.21 [2022-01-09]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.21.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.21.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.18.html">What’s new in revision 0.2.18 [2022-01-05]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.18.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.18.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.17.html">What’s new in revision 0.2.17 [2021-11-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.17.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.17.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.16.html">What’s new in revision 0.2.16 [2021-11-11]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.16.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.16.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.15.html">What’s new in revision 0.2.15 [2021-03-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.15.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.15.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.14.html">What’s new in revision 0.2.14 [2021-02-25]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.14.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.14.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.13.html">What’s new in revision 0.2.13 [2021-02-23]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.13.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.12.html">What’s new in revision 0.2.12 [2021-02-23]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.12.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.11.html">What’s new in revision 0.2.11 [2021-02-17]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.11.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.10.html">What’s new in revision 0.2.10 [2021-02-14]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.10.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.9.html">What’s new in revision 0.2.9 [2021-11-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.8.html">What’s new in revision 0.2.8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.8.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.8.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.7.html">What’s new in revision 0.2.7</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.7.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.6.html">What’s new in revision 0.2.6</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.6.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.5.html">What’s new in revision 0.2.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.4.html">What’s new in revision 0.2.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.4.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.4.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.2.0.html">What’s new in revision 0.2.0</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../whatsnew/v0.2.0.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../whatsnew/index.html#version-0-1">Version 0.1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../whatsnew/v0.1.0.html">Revisions 0.1.0 to 0.1.19</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/whyscpy.html">Why <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code>  ?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/whyscpy.html#designed-for-open-science">Designed for Open Science</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/whyscpy.html#open-source-software-on-an-open-source-platform">Open Source Software on an Open-Source Platform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/whyscpy.html#powered-by-python">Powered by Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/whyscpy.html#why-not-spectrochempy">Why NOT <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code> ?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/overview.html#NDDataset,-the-main-object">NDDataset, the main object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/overview.html#Display-dataset-information">Display dataset information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/overview.html#Plotting-a-dataset">Plotting a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/overview.html#Slicing-a-dataset">Slicing a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/overview.html#Maths-on-datasets">Maths on datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/overview.html#Processing-a-dataset">Processing a dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/overview.html#Smoothing">Smoothing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/overview.html#Baseline-correction">Baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/overview.html#Analysis">Analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/overview.html#IRIS-processing">IRIS processing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/index.html#how-to-use-nddataset">How to use NDDataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/index.html#import-export">Import / Export</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/index.html#plotting-datasets">Plotting datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/index.html#project-management">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental 1D NMR data</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting librairie</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#decomposition">Decomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#cross-decomposition">Cross-decomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#curvefitting">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris.html">2D-IRIS analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/index.html#apodization">Apodization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/index.html#baseline">Baseline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/index.html#denoising">Denoising</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/index.html#filtering">filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/index.html#processing-nmr-datasets">Processing NMR datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/index.html#processing-raman-datasets">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/d_baseline/index.html">Baseline</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/d_baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/filtering/index.html">filtering</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/nmr/index.html">Processing NMR datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gettingstarted/install/index.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/install/index.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../gettingstarted/install/index.html#installation-of-spectrochempy">Installation of <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/install/install_mac.html">Installation Guide for Mac OSX</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_mac.html#installation-using-conda">Installation using Conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_mac.html#installation-using-pip">Installation using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_mac.html#check-the-installation">Check the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/install/install_win.html">Installation Guide for Windows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_win.html#installation-using-conda">Installation using Conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_win.html#installation-using-pip">Installation using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_win.html#check-the-installation">Check the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/install/install_sources.html">Installation from sources (master or develop versions)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_sources.html#installing-git">Installing git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_sources.html#cloning-the-repository-locally">Cloning the repository locally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_sources.html#create-a-conda-environment">Create a conda environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_sources.html#install-spectrochempy-in-this-environment">Install <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code> in this environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_sources.html#updating-spectrochempy">Updating <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/install/install_colab.html">Install in Google Colaboratory (Colab)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_colab.html#load-and-install-spectrochempy-with-pip">Load and install SpectroChemPy with pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_colab.html#load-data-files">Load data files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../gettingstarted/install/install_adds.html">Install optional dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_adds.html#examples-and-test-data">Examples and test data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_adds.html#cantera">Cantera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../gettingstarted/install/install_adds.html#qt">QT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide &amp; Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/introduction/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/introduction/introduction.html#About-this-user's-guide">About this user’s guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/introduction/introduction.html#How-to-get-started">How to get started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/introduction/introduction.html#Writing-and-executing-SpectroChemPy-scripts">Writing and executing SpectroChemPy scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/introduction/introduction.html#Loading-the-API">Loading the API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/introduction/introduction.html#Where-to-go-next?">Where to go next?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/api/api.html">API Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/api/api.html#General-information">General information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/api/api.html#Loglevel">Loglevel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/api/api.html#Error-handling">Error handling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/objects/index.html#nddataset">NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html">The NDDataset object</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#1D-Dataset-(unidimensional-dataset)">1D-Dataset (unidimensional dataset)</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#nD-Dataset-(multidimensional-dataset)">nD-Dataset (multidimensional dataset)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#About-the-dates-and-times">About the dates and times</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#About-the-history-attribute">About the <code class="docutils literal notranslate"><span class="pre">history</span></code> attribute</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Units">Units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Coordinates">Coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Labels">Labels</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Sharing-coordinates-between-dimensions">Sharing coordinates between dimensions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Setting-coordinates-using-set_coordset">Setting coordinates using <code class="docutils literal notranslate"><span class="pre">set_coordset</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Syntax-1">Syntax 1</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Syntax-2">Syntax 2</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Adding-several-coordinates-to-a-single-dimension">Adding several coordinates to a single dimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Summary-of-the-coordinate-setting-syntax">Summary of the coordinate setting syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Create-a-dataset-from-a-function">Create a dataset from a function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Using-numpy-like-constructors-of-NDDatasets">Using numpy-like constructors of NDDatasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Copying-existing-NDDataset">Copying existing NDDataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/dataset/dataset.html#Importing-from-external-dataset">Importing from external dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/objects/index.html#project">Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/objects/project/project.html">Project management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/project/project.html#Project-creation">Project creation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/project/project.html#Remove-an-element-from-a-project">Remove an element from a project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/project/project.html#Get-project's-elements">Get project’s elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/objects/project/project.html#Saving-and-loading-projects">Saving and loading projects</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/objects/project/project.html#Saving">Saving</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/objects/project/project.html#Loading">Loading</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/objects/index.html#script">Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/importexport/import.html">Import Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/importexport/import.html#Dialog-boxes">Dialog boxes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/importexport/import.html#Import-with-explicit-directory-or-file-pathnames">Import with explicit directory or file pathnames</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/importexport/import.html#A-good-practice:-use-relative-paths">A good practice: use relative paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/importexport/import.html#Good-practice:-use-os-or-pathlib-modules">Good practice: use <code class="docutils literal notranslate"><span class="pre">os</span></code> or <code class="docutils literal notranslate"><span class="pre">pathlib</span></code> modules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/importexport/import.html#Another-default-search-directory:-datadir">Another default search directory: <code class="docutils literal notranslate"><span class="pre">datadir</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/importexport/importIR.html#Supported-file-formats">Supported file formats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/importexport/importIR.html#Import-of-OMNIC-files">Import of OMNIC files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/importexport/importIR.html#a)-import-spg-file">a) import spg file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/importexport/importIR.html#Acquisition-dates-and-y-axis">Acquisition dates and <code class="docutils literal notranslate"><span class="pre">y</span></code> axis</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/importexport/importIR.html#The-order-of-spectra">The order of spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/importexport/importIR.html#b)-Import-of-.spa-files">b) Import of .spa files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/importexport/importIR.html#Import-of-Bruker-OPUS-files">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/importexport/importIR.html#Import/Export-of-JCAMP-DX-files">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/processing/index.html">Processing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/slicing.html">Slicing NDDatasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/slicing.html#What-is-the-slicing-?">What is the slicing ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/slicing.html#Slicing-of-NDDatasets">Slicing of NDDatasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/slicing.html#Slicing-with-indexes">Slicing with indexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/slicing.html#Slicing-with-coordinates">Slicing with coordinates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/transformations.html">Basic transformations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/transformations.html#Masking-data">Masking data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/transformations.html#Transposition">Transposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/transformations.html#Changing-units">Changing units</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/math_operations.html">Mathematical operations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Ufuncs-(Universal-Numpy's-functions)">Ufuncs (Universal Numpy’s functions)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/math_operations.html#List-of-UFuncs-working-on-NDDataset:">List of UFuncs working on <code class="docutils literal notranslate"><span class="pre">NDDataset</span></code>:</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Functions-affecting-magnitudes-of-the-number-but-keeping-units">Functions affecting magnitudes of the number but keeping units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Functions-affecting-magnitudes-of-the-number-but-also-units">Functions affecting magnitudes of the number but also units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Functions-that-require-no-units-or-dimensionless-units-for-inputs.-Returns-dimensionless-objects.">Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Functions-that-return-numpy-arrays-(Work-only-for-NDDataset)">Functions that return numpy arrays (<em>Work only for NDDataset</em>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Trigonometric-functions.-Require-unitless-data-or-radian-units.">Trigonometric functions. Require unitless data or radian units.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Hyperbolic-functions">Hyperbolic functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Unit-conversions">Unit conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Binary-Ufuncs">Binary Ufuncs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Usage">Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Unary-functions">Unary functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/math_operations.html#id1">Functions affecting magnitudes of the number but keeping units</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/math_operations.html#id2">Functions affecting magnitudes of the number but also units</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/math_operations.html#id3">Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/math_operations.html#id4">Functions that return numpy arrays (<em>Work only for NDDataset</em>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Trigonometric-functions.-Require-dimensionless/unitless-dataset-or-radians.">Trigonometric functions. Require dimensionless/unitless dataset or radians.</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Angle-units-conversion">Angle units conversion</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/math_operations.html#id5">Hyperbolic functions</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Binary-functions">Binary functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Arithmetic">Arithmetic</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/math_operations.html#Complex-or-hypercomplex-NDDatasets">Complex or hypercomplex NDDatasets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/smoothing.html">Filtering, Smoothing and Denoising</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/smoothing.html#The-Filter-processor">The <code class="docutils literal notranslate"><span class="pre">Filter</span></code> processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Moving-average">Moving average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Convolution-with-window-filters">Convolution with window filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Savitzky-Golay-filter">Savitzky-Golay filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Whittaker-Eilers-filter">Whittaker-Eilers filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Filtering-using-API-or-NDDataset-methods.">Filtering using API or NDDataset methods.</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/smoothing.html#The-smooth-method">The <code class="docutils literal notranslate"><span class="pre">smooth</span></code> method</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Window-size-influence">Window size influence</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Convolution-with-windows">Convolution with windows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Savitzky-Golay-filter:savgol">Savitzky-Golay filter:<code class="docutils literal notranslate"><span class="pre">savgol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/smoothing.html#Whittaker-eilers-filter-:-whittaker">Whittaker-eilers filter : <code class="docutils literal notranslate"><span class="pre">whittaker</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/baseline.html">Baseline corrections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/baseline.html#The-Baseline-processor">The <code class="docutils literal notranslate"><span class="pre">Baseline</span></code> processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/baseline.html#How-it-works?">How it works?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/baseline.html#Example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/baseline.html#Overview-of-the-other-model">Overview of the other model</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/baseline.html#Polynomial">Polynomial</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/baseline.html#Multivariate-approach">Multivariate approach</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/baseline.html#Baseline-correction-using-NDDataset-or-API-methods">Baseline correction using NDDataset or API methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/baseline.html#Detrending">Detrending</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/baseline.html#Constant-trend">Constant trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/baseline.html#Linear-trend">Linear trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/baseline.html#Polynomial-trend">Polynomial trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/baseline.html#Detrend-independently-on-several-data-segment">Detrend independently on several data segment</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/baseline.html#basc">basc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/baseline.html#Rubberband">Rubberband</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/baseline.html#Code-snippet-for-'advanced'-baseline-correction">Code snippet for ‘advanced’ baseline correction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/denoising.html">Denoising</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/denoising.html#Denoising-2D-spectra">Denoising 2D spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/denoising.html#Removing-cosmic-rays-spike-from-Raman-spectra">Removing cosmic rays spike from Raman spectra</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/denoising.html#Median-filter">Median filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/denoising.html#despike-method"><code class="docutils literal notranslate"><span class="pre">despike</span></code> method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/apodization.html">Apodization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/apodization.html#Introduction">Introduction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/apodization.html#Plot-of-the-Real-and-Imaginary-original-data">Plot of the Real and Imaginary original data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/apodization.html#Exponential-multiplication">Exponential multiplication</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/apodization.html#Shifted-apodization">Shifted apodization</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/apodization.html#Other-apodization-functions">Other apodization functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/apodization.html#Gaussian-Lorentzian-apodization">Gaussian-Lorentzian apodization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/apodization.html#Shifted-Gaussian-Lorentzian-apodization">Shifted Gaussian-Lorentzian apodization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/processing/apodization.html#Apodization-using-sine-window-multiplication">Apodization using sine window multiplication</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/fourier.html">One-dimensional (1D) Fourier transformation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/fourier.html#FFT-of-1D-NMR-spectra">FFT of 1D NMR spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/fourier.html#Preprocessing">Preprocessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/fourier.html#Line-broadening">Line broadening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/fourier.html#Zero-filling">Zero-filling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/fourier.html#Time-domain-baseline-correction">Time domain baseline correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/fourier.html#Magnitude-calculation">Magnitude calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/fourier.html#Power-spectrum">Power spectrum</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/interferogram.html">FTIR interferogram processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/interferogram.html#Comparison-with-the-OMNIC-processing.">Comparison with the OMNIC processing.</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/processing/alignment.html">Alignment of datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/alignment.html#Example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/alignment.html#Methods-for-alignments">Methods for alignments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/alignment.html#inner-method"><code class="docutils literal notranslate"><span class="pre">inner</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/alignment.html#first-method"><code class="docutils literal notranslate"><span class="pre">first</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/processing/alignment.html#last-method"><code class="docutils literal notranslate"><span class="pre">last</span></code> method</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/processing/alignment.html#Alignment-along-several-dimensions">Alignment along several dimensions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/analysis/index.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html">Peak Maxima Finding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#Loading-an-experimental-dataset">Loading an experimental dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#Find-maxima-by-manual-inspection-of-the-plot">Find maxima by manual inspection of the plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#Find-maxima-with-an-automated-method:-find_peaks()">Find maxima with an automated method: <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#Default-behaviour">Default behaviour</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#Options-of-find_peaks()">Options of <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#More-on-peak-properties">More on peak properties</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#Prominence">Prominence</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#Width">Width</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/peak_finding.html#A-code-snippet-to-display-properties">A code snippet to display properties</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/analysis/peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/analysis/fitting.html">Fitting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/fitting.html#Solving-a-linear-equation-using-the-least-square-method-(LSTSQ)">Solving a linear equation using the least square method (LSTSQ)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/fitting.html#Least-square-with-non-negativity-constraint-(NNLS)">Least square with non-negativity constraint (NNLS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/fitting.html#NDDataset-modelling-using-non-linear-optimisation-method">NDDataset modelling using non-linear optimisation method</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/fitting.html#Baseline-correction">Baseline correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/fitting.html#Peak-finding">Peak finding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/fitting.html#Fitting-script">Fitting script</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/fitting.html#Syntax-for-parameters-definition">Syntax for parameters definition</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/analysis/pca.html">Principal Component Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/pca.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/pca.html#Loading-of-the-dataset">Loading of the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/pca.html#Running-a-PCA">Running a PCA</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/analysis/pls.html">Partial Least Squares Regression (PLSRegression)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/pls.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/pls.html#Loading-of-the-dataset">Loading of the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/pls.html#Running-PLSRegression">Running PLSRegression</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html">MCR ALS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#The-(minimal)-dataset">The (minimal) dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#Initial-guess-and-MCR-ALS-optimization">Initial guess and MCR ALS optimization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#Case-of-initial-spectral-profiles">Case of initial spectral profiles</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#ALS-Optimization">ALS Optimization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#More-information-about-the-MCRALS-estimator">More information about the MCRALS estimator</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#Solutions">Solutions</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#A-basic-illustration-of-the-rotational-ambiguity">A basic illustration of the rotational ambiguity</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#Guessing-the-concentration-profile-with-PCA-+-EFA">Guessing the concentration profile with PCA + EFA</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#Use-of-PCA-to-assess-the-number-of-pure-species">Use of PCA to assess the number of pure species</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#Determination-of-initial-concentrations-using-EFA">Determination of initial concentrations using EFA</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/analysis/mcr_als.html#Augmented-datasets">Augmented datasets</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../userguide/plotting/plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Load-the-API">Load the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Loading-the-data">Loading the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Preparing-the-data">Preparing the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Selecting-the-output-window">Selecting the output window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Default-plotting">Default plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Changing-the-aspect-of-the-plot">Changing the aspect of the plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Change-the-NDDataset.preferences">Change the <code class="docutils literal notranslate"><span class="pre">NDDataset.preferences</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Adding-titles-and-annotations">Adding titles and annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Changing-the-plot-style-using-matplotlib-style-sheets">Changing the plot style using matplotlib style sheets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Create-your-own-style">Create your own style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Changing-the-type-of-plot">Changing the type of plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Plotting-1D-datasets">Plotting 1D datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Plotting-several-dataset-on-the-same-figure">Plotting several dataset on the same figure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../userguide/plotting/plotting.html#Overview-of-the-main-configuration-parameters">Overview of the main configuration parameters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devguide/index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../devguide/contributing.html">Contributing to SpectroChemPy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing.html#general-principles">General Principles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/issues.html">Reporting Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing.html#be-prepared-to-work-on-the-code">Be prepared to work on the code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#version-control-git-and-github">Version control, Git, and GitHub</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#installing-git">Installing git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#optional-installing-a-gui-git-client">Optional: installing a GUI git client</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#forking-the-spectrochempy-repository">Forking the spectrochempy repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#creating-a-python-development-environment">Creating a Python development environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#controlling-the-environments">Controlling the environments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#creating-a-branch">Creating a branch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing.html#contributing-your-changes-to-spectrochempy">Contributing your changes to SpectroChemPy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#commit-your-code">Commit your code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#push-your-changes">Push your changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#review-your-code">Review Your Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#make-the-pull-request-pr">Make the pull request (PR)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#update-your-pull-request">Update your pull request</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#automatically-fix-formatting-errors">Automatically fix formatting errors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing.html#delete-your-merged-branch-optional">Delete your merged branch (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing.html#tips-for-a-successful-pull-request">Tips for a successful pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../devguide/contributing_codebase.html">Contributing to the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_codebase.html#code-standards">Code standards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_codebase.html#pre-commit">Pre-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_codebase.html#optional-dependencies">Optional dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing_codebase.html#python-pep8-black">Python (PEP8 / black)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing_codebase.html#backwards-compatibility">Backwards compatibility</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_codebase.html#testing-with-continuous-integration">Testing with continuous integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_codebase.html#test-driven-development-code-writing">Test-driven development/code writing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing_codebase.html#writing-tests">Writing tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing_codebase.html#using-pytest">Using <code class="docutils literal notranslate"><span class="pre">pytest</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_codebase.html#running-the-test-suite">Running the test suite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_codebase.html#documenting-change-log">Documenting change log</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../devguide/contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/codespec_adding_reader.html">Adding a Reader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/codespec_adding_reader.html#add-a-test-and-sample-files">1. Add a test and sample files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/codespec_adding_reader.html#complete-filetypes-and-alias">2. Complete FILETYPES and ALIAS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/codespec_adding_reader.html#create-the-reader-xxx-py-file">3. Create the reader_xxx.py file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/codespec_adding_reader.html#general-guidelines-for-data-and-metadata-format">3. General Guidelines for data and metadata format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/codespec_adding_reader.html#polish-your-code-and-make-the-pull-requests">4. Polish your code and make the Pull Requests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../devguide/contributing_documentation.html">Contributing to the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_documentation.html#about-the-spectrochempy-documentation">About the spectrochempy documentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing_docstring.html">SpectroChemPy Docstring Guide</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../devguide/contributing_docstring.html#about-docstrings-and-standards">About docstrings and standards</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../devguide/contributing_docstring.html#writing-a-docstring">Writing a docstring</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_documentation.html#updating-a-spectrochempy-docstring">Updating a spectrochempy docstring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../devguide/contributing_documentation.html#how-to-build-the-spectrochempy-documentation">How to build the spectrochempy documentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing_documentation.html#requirements">Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing_documentation.html#building-the-documentation">Building the documentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../devguide/contributing_documentation.html#building-master-branch-documentation">Building master branch documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">SpectroChemPy v0.6.11.dev82</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">spectrochempy.utils.plots</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+<div class="admonition warning">
+    <p class="first admonition-title">Warning</p>
+    <p class="last"> You are reading the documentation related to the development version.
+        <a href="/0.6.10/index.html">Go here</a> if you are looking for the documentation of the stable
+        release.
+    </p>
+</div>
+
+
+           <div itemprop="articleBody">
+             
+  <h1>Source code for spectrochempy.utils.plots</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ======================================================================================</span>
+<span class="c1"># Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.</span>
+<span class="c1"># CeCILL-B FREE SOFTWARE LICENSE AGREEMENT</span>
+<span class="c1"># See full LICENSE agreement in the root directory.</span>
+<span class="c1"># ======================================================================================</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.axes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">maxes</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">mpl_toolkits.mplot3d.axes3d</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">maxes3D</span>  <span class="c1"># noqa: N812</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pint</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
+
+<span class="n">pint_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<span class="nd">@maxes</span><span class="o">.</span><span class="n">subplot_class_factory</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Axes</span><span class="p">(</span><span class="n">maxes</span><span class="o">.</span><span class="n">Axes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Subclass of matplotlib Axes class.&quot;&quot;&quot;</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy.core.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_args_units</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># def draw(self, renderer):</span>
+    <span class="c1">#    #    # with plt.rc_context({&quot;something&quot;: self.xxx}):</span>
+    <span class="c1">#    return super().draw(renderer)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">errorbar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot_date</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">loglog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">semilogx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">semilogy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fill_between</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fill_betweenx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">barh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bar_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bar_label</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stem</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">eventplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">eventplot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pie</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stackplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stackplot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">broken_barh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">broken_barh</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">vlines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hlines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axhline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axhspan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">axhspan</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axvline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axvspan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">axline</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">acorr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">acorr</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">angle_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">angle_spectrum</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cohere</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">cohere</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">csd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">csd</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">magnitude_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">magnitude_spectrum</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">phase_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">phase_spectrum</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">psd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">psd</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">specgram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">specgram</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">xcorr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">xcorr</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">boxplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">violinplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">violinplot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">violin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">violin</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bxp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">bxp</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hexbin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">hexbin</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hist2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stairs</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contourf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">imshow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">matshow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">matshow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pcolor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pcolorfast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pcolorfast</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pcolormesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">spy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a spy.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">spy</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tripcolor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a tripcolor.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">tripcolor</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">triplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a triplot.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">triplot</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tricontour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a tricontour.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">tricontour</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tricontourf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a tricontourf.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">tricontourf</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">annotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an annotation to the axes.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add text to the axes.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a table to the axes.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">arrow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an arrow to the axes.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_xlim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the x-axis limits.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_ylim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the y-axis limits.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_Axes3D</span><span class="p">(</span><span class="n">maxes3D</span><span class="o">.</span><span class="n">Axes3D</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Subclass of matplotlib Axes3D class.&quot;&quot;&quot;</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy.core.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">remove_args_units</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the 3D axes.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@remove_args_units</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot a surface.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">plot_surface</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_method</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select a plot method from the function name.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator_plot_method</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;plot_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy.core.plotters.plot1d</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_1D</span>
+
+                <span class="n">_</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">plot_1D</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_plotly&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plotly</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;plot_</span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">wrapper</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="si">{</span><span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span>
+
+<span class="s2">Parameters</span>
+<span class="s2">----------</span>
+<span class="s2">dataset : `NDDataset`</span>
+<span class="s2">    The dataset to plot.</span>
+<span class="s2">**kwargs</span>
+<span class="s2">    Optional keyword parameters (see Other Parameters).</span>
+
+
+<span class="s2">Other Parameters</span>
+<span class="s2">----------------</span>
+<span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="si">}</span>
+
+<span class="s2">See Also</span>
+<span class="s2">--------</span>
+<span class="s2">plot_1D</span>
+<span class="s2">plot_pen</span>
+<span class="s2">plot_bar</span>
+<span class="s2">plot_scatter_pen</span>
+<span class="s2">plot_multiple</span>
+<span class="s2">plot_2D</span>
+<span class="s2">plot_stack</span>
+<span class="s2">plot_map</span>
+<span class="s2">plot_image</span>
+<span class="s2">plot_3D</span>
+<span class="s2">plot_surface</span>
+<span class="s2">plot_waterfall</span>
+<span class="s2">multiplot</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">plot_</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">return</span> <span class="n">decorator_plot_method</span>
+
+
+<span class="c1"># color conversion function</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cmyk2rgb</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">K</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CMYK to RGB conversion.</span>
+
+<span class="sd">    C,M,Y,K are given in percent.</span>
+<span class="sd">    The R,G,B values are returned in the range of 0..1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">C</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="n">C</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">Y</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">M</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">K</span> <span class="o">/</span> <span class="mf">100.0</span>
+
+    <span class="c1"># The red (R) color is calculated from the cyan (C) and black (K) colors:</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="c1"># The green color (G) is calculated from the magenta (M) and black (K) colors:</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="c1"># The blue color (B) is calculated from the yellow (Y) and black (K) colors:</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">Y</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">R</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">B</span>
+
+
+<span class="c1"># Constants</span>
+<span class="c1"># --------------------------------------------------------------------------------------</span>
+<span class="c1"># For color blind people, it is safe to use only 4 colors in graphs:</span>
+<span class="c1"># see http://jfly.iam.u-tokyo.ac.jp/color/ichihara_etal_2008.pdf</span>
+<span class="c1">#   Black CMYK=0,0,0,0</span>
+<span class="c1">#   Red CMYK= 0, 77, 100, 0 %</span>
+<span class="c1">#   Blue CMYK= 100, 30, 0, 0 %</span>
+<span class="c1">#   Green CMYK= 85, 0, 60, 10 %</span>
+<span class="n">NBlack</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">NRed</span> <span class="o">=</span> <span class="n">cmyk2rgb</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">77</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">NBlue</span> <span class="o">=</span> <span class="n">cmyk2rgb</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">NGreen</span> <span class="o">=</span> <span class="n">cmyk2rgb</span><span class="p">(</span><span class="mi">85</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="c1"># TODO : make a color cycle based on these colors</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">figure</span><span class="p">(</span><span class="n">preferences</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Open a new figure.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Kwargs : any</span>
+<span class="sd">        Keywords arguments to be passed to the matplotlib figure constructor.</span>
+<span class="sd">    Preferences : Meta dictionary</span>
+<span class="sd">        Per object saved plot configuration.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy.core.dataset.baseobjects.meta</span><span class="w"> </span><span class="kn">import</span> <span class="n">Meta</span>
+
+    <span class="k">if</span> <span class="n">preferences</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">preferences</span> <span class="o">=</span> <span class="n">Meta</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">get_figure</span><span class="p">(</span><span class="n">preferences</span><span class="o">=</span><span class="n">preferences</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="show">
+<a class="viewcode-back" href="../../../reference/generated/spectrochempy.show.html#spectrochempy.show">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Force the `matplotlib` figure display.&quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DISPLAY</span>
+
+    <span class="k">if</span> <span class="n">NO_DISPLAY</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">get_figure</span><span class="p">(</span><span class="n">clear</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_figure</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the figure where to plot.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    clear : bool</span>
+<span class="sd">        If False the last used figure is returned.</span>
+<span class="sd">    figsize : 2-tuple of floats, default: rcParams[&quot;figure.figsize&quot;])</span>
+<span class="sd">        Figure dimension (width, height) in inches.</span>
+<span class="sd">    dpi : float, default: rcParams[&quot;figure.dpi&quot;] (default: 100.0)</span>
+<span class="sd">        Dots per inch.</span>
+<span class="sd">    facecolor : default: rcParams[&quot;figure.facecolor&quot;] (default: &#39;white&#39;)</span>
+<span class="sd">        The figure patch facecolor.</span>
+<span class="sd">    edgecolor : default: preferences.figure_edgecolor (default: &#39;white&#39;)</span>
+<span class="sd">        The figure patch edge color.</span>
+<span class="sd">    frameon : bool, default: preferences.figure_frameon (default: True)</span>
+<span class="sd">        If False, suppress drawing the figure background patch.</span>
+<span class="sd">    tight_layout : bool or dict, default: preferences.figure.autolayout</span>
+<span class="sd">        If False use subplotpars. If True adjust subplot parameters using tight_layout</span>
+<span class="sd">        with default padding. When providing a dict containing the keys pad, w_pad,</span>
+<span class="sd">        h_pad, and rect, the default tight_layout paddings will be overridden.</span>
+<span class="sd">    constrained_layout : bool, default: preferences.figure_constrained_layout</span>
+<span class="sd">        If True use constrained layout to adjust positioning of plot elements.</span>
+<span class="sd">        Like tight_layout, but designed to be more flexible.</span>
+<span class="sd">        See Constrained Layout Guide for examples.</span>
+<span class="sd">    preferences : Meta object,</span>
+<span class="sd">        Per object plot configuration.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matplotlib figure instance</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_fignums</span><span class="p">()</span>
+
+    <span class="n">clear</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;clear&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">n</span> <span class="ow">or</span> <span class="n">clear</span><span class="p">:</span>
+        <span class="c1"># create a figure</span>
+        <span class="n">prefs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;preferences&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">figsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;figsize&quot;</span><span class="p">,</span> <span class="n">prefs</span><span class="o">.</span><span class="n">figure_figsize</span><span class="p">)</span>
+        <span class="n">dpi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dpi&quot;</span><span class="p">,</span> <span class="n">prefs</span><span class="o">.</span><span class="n">figure_dpi</span><span class="p">))</span>
+        <span class="n">facecolor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;facecolor&quot;</span><span class="p">,</span> <span class="n">prefs</span><span class="o">.</span><span class="n">figure_facecolor</span><span class="p">)</span>
+        <span class="n">edgecolor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;edgecolor&quot;</span><span class="p">,</span> <span class="n">prefs</span><span class="o">.</span><span class="n">figure_edgecolor</span><span class="p">)</span>
+        <span class="n">frameon</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frameon&quot;</span><span class="p">,</span> <span class="n">prefs</span><span class="o">.</span><span class="n">figure_frameon</span><span class="p">)</span>
+        <span class="n">tight_layout</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;autolayout&quot;</span><span class="p">,</span> <span class="n">prefs</span><span class="o">.</span><span class="n">figure_autolayout</span><span class="p">)</span>
+
+        <span class="c1"># get the current figure (or the last used)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_dpi</span><span class="p">(</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_frameon</span><span class="p">(</span><span class="n">frameon</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="n">edgecolor</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">edgecolor</span><span class="p">))</span>  <span class="c1"># noqa: S307</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">facecolor</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">facecolor</span><span class="p">))</span>  <span class="c1"># noqa: S307</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="nb">eval</span><span class="p">(</span><span class="n">facecolor</span><span class="p">))</span>  <span class="c1"># noqa: S307</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_dpi</span><span class="p">(</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_tight_layout</span><span class="p">(</span><span class="n">tight_layout</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fig</span>
+
+    <span class="c1"># a figure already exists - if several we take the last</span>
+    <span class="k">return</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">n</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+
+<span class="c1"># FOR PLOTLY</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_plotly_figure</span><span class="p">(</span><span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the figure where to plot.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    clear : bool</span>
+<span class="sd">        If False the figure provided in the `fig` parameters is used.</span>
+<span class="sd">    fig : plotly figure</span>
+<span class="sd">        If provided, and clear is not True, it will be used for plotting</span>
+<span class="sd">    kwargs : any</span>
+<span class="sd">        Keywords arguments to be passed to the plotly figure constructor.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Plotly figure instance</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy.utils.optional</span><span class="w"> </span><span class="kn">import</span> <span class="n">import_optional_dependency</span>
+
+    <span class="n">go</span> <span class="o">=</span> <span class="n">import_optional_dependency</span><span class="p">(</span><span class="s2">&quot;plotly.graph_objects&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">go</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Plotly is not installed. Uee pip or conda to install it&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">clear</span> <span class="ow">or</span> <span class="n">fig</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># create a figure</span>
+        <span class="k">return</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+
+    <span class="c1"># a figure already exists - if several we take the last</span>
+    <span class="k">return</span> <span class="n">fig</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">colorscale</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">,</span> <span class="n">rev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalize the color scale based on the given parameters.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rev</span><span class="p">:</span>
+            <span class="n">cmap</span> <span class="o">=</span> <span class="n">cmap</span> <span class="o">+</span> <span class="s2">&quot;_r&quot;</span>
+        <span class="n">_colormap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+
+        <span class="n">_norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span> <span class="o">-</span> <span class="n">offset</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalarMap</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">_norm</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">_colormap</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">rgba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the rgba color for the given value.&quot;&quot;&quot;</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalarMap</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">z</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span> <span class="o">-</span> <span class="n">offset</span><span class="p">))</span>
+        <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">255</span>
+        <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint16&quot;</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;rgba</span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="n">colorscale</span> <span class="o">=</span> <span class="n">colorscale</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">make_label</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">lab</span><span class="o">=</span><span class="s2">&quot;&lt;no_axe_label&gt;&quot;</span><span class="p">,</span> <span class="n">use_mpl</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make a label from title and units.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">lab</span>
+
+    <span class="n">label</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">title</span> <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">title</span> <span class="k">else</span> <span class="n">lab</span>  <span class="c1"># .replace(&#39; &#39;, r&#39;\ &#39;)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;&lt;untitled&gt;&quot;</span> <span class="ow">in</span> <span class="n">label</span><span class="p">:</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;values&quot;</span>
+
+    <span class="k">if</span> <span class="n">use_mpl</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">units</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;dimensionless&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;absolute_transmittance&quot;</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;/\ </span><span class="si">{</span><span class="n">ss</span><span class="o">.</span><span class="n">units</span><span class="si">:</span><span class="s2">~L</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="n">pint_version</span> <span class="o">&lt;</span> <span class="mi">24</span><span class="p">:</span>
+                <span class="n">units</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\%&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> $\mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="se">}}</span><span class="s2">$&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">units</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">units</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;dimensionless&quot;</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ss</span><span class="o">.</span><span class="n">units</span><span class="si">:</span><span class="s2">~H</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="n">units</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">label</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">make_attr</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;M_</span><span class="si">{</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">&quot;$\mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="se">}}</span><span class="s2">$&quot;</span>
+
+    <span class="k">if</span> <span class="s2">&quot;P&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;o&quot;</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">NBlack</span>
+    <span class="k">elif</span> <span class="s2">&quot;A&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;^&quot;</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">NBlue</span>
+    <span class="k">elif</span> <span class="s2">&quot;B&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="s2">&quot;s&quot;</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">NRed</span>
+
+    <span class="k">if</span> <span class="s2">&quot;400&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+
+    <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">s</span>
+</pre></div>
+
+           </div>
+          </div>
+
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2025 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Feb 14, 2025.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

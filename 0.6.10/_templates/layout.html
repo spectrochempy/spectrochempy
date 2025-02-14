@@ -1,0 +1,28 @@
+{% extends "!layout.html" %}
+{% block menu %}
+<div class="version-selector">
+    <span class="fa fa-book"> SpectroChemPy version:</span>
+    <select id="versions-dropdown">
+    </select>
+</div>
+{{ super() }}
+{% endblock %}
+
+{% block document %}
+{% if current_version == 'latest' %}
+<div class="admonition warning">
+    <p class="first admonition-title">Warning</p>
+    <p class="last"> You are reading the documentation related to the development version.
+        <a href="{{release}}">Go here</a> if you are looking for the documentation of the stable
+        release.
+    </p>
+</div>
+{% endif %}
+{{ super() }}
+{% endblock %}
+
+{% block extrahead %}
+{{ super() }}
+<html data-versions="{{ previous_versions|join(',') if previous_versions else '' }}">
+<script src="{{ pathto('_static/js/versions.js', 1) }}"></script>
+{% endblock %}
