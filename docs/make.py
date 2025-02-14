@@ -772,7 +772,8 @@ class BuildDocumentation:
         del environ["DOC_BUILDING"]
         del environ["PREVIOUS_VERSIONS"]
         del environ["SPHINX_NOEXEC"]
-        del environ["SPHINX_PATTERN"]
+        if "SPHINX_PATTERN" in environ:
+            del environ["SPHINX_PATTERN"]
 
     # COMMANDS
     # ----------------------------------------------------------------------------------
