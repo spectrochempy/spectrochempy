@@ -84,7 +84,8 @@
 #
 # ## Markdown cheat sheet
 # To get more information on Markdown format, you can look [here](mdcheatsheet.ipynb)
-# # Using the application in a web browser
+#
+# ## Using the application in a web browser
 #
 # <div class='alert alert-warning'>
 #    <b>In Progress</b>

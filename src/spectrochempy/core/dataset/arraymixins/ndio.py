@@ -4,7 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-"""
+r"""
 NDDataset Input/Output Module.
 
 This module implements input/output functionality for NDDataset objects. It provides:
@@ -23,7 +23,7 @@ Functions
 ---------
 load(filename, **kwargs)
     Load a dataset from a .scp file
-zipfile_factory(file, *args, **kwargs)
+zipfile_factory(file, \*args, \*\*kwargs)
     Create a ZipFile with proper configuration
 """
 
@@ -212,7 +212,7 @@ class NDIO(HasTraits):
 
     def save_as(self, filename="", **kwargs):
         """
-        Save the current NDDataset in SpectroChemPy format (*.scp).
+        Save the current NDDataset in SpectroChemPy format (.scp).
 
         Parameters
         ----------

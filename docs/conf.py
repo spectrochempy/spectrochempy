@@ -47,6 +47,11 @@ API = REFERENCE / "generated"
 DEV_API = DEVGUIDE / "generated"
 GALLERY = GETTINGSTARTED / "examples" / "gallery"
 
+# Get sphinx pattern
+pattern = os.environ.get("SPHINX_PATTERN")
+single_doc = pattern is not None and pattern not in ["noapi", "whatsnew"]
+include_api = pattern is None or pattern == "whatsnew"
+
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
 
@@ -71,7 +76,6 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.linkcode",
     "sphinx.ext.todo",
-    "sphinx_gallery.gen_gallery",
     "matplotlib.sphinxext.plot_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
@@ -79,6 +83,10 @@ extensions = [
     "nbsphinx",
     "sphinx.ext.viewcode",
 ]
+if not single_doc:
+    extensions += [
+        "sphinx_gallery.gen_gallery",
+    ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["../_templates", "_templates"]
@@ -116,20 +124,6 @@ locale_dirs = []  # empty list disables localization
 gettext_compact = False
 language = "en"
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-exclude_patterns = [
-    "_templates",
-    "_static",
-    "**.ipynb_checkpoints",
-    "~temp",
-    "generated",
-    "gettingstarted/examples/gallery/**/*.py",
-    "gettingstarted/examples/gallery/**/*.ipynb",
-    "**.md5",
-    "locales",  # ignore locales directory
-]
-
 # The reST default role (used for this markup: `text` ) to use for all
 # documents.
 default_role = "py:obj"
@@ -157,6 +151,65 @@ todo_include_todos = True
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
 
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
+exclude_patterns = [
+    "_templates",
+    "_static",
+    "**.ipynb_checkpoints",
+    "~temp",
+    "generated",
+    "gettingstarted/examples/gallery/**/*.py",
+    "gettingstarted/examples/gallery/**/*.ipynb",
+    "**.md5",
+    "locales",  # ignore locales directory
+]
+
+if pattern:
+    for path in SRC.rglob("*"):
+        if path.suffix in (".rst", ".ipynb"):
+            rel_path = path.relative_to(SRC)
+
+            # Skip root index.rst
+            if path.name == "index.rst" and path.parent == SRC:
+                continue
+
+            # Handle different pattern cases
+            if (
+                (
+                    pattern == "noapi"
+                    and (
+                        "generated" in rel_path.parts
+                        or (
+                            rel_path.parts[0] == "reference"
+                            and rel_path.parts[-1] == "index.rst"
+                        )
+                    )
+                )
+                or (
+                    pattern == "whatsnew"
+                    and "generated" not in rel_path.parts
+                    and rel_path.parts[0] != "whatsnew"
+                )
+                or (
+                    single_doc
+                    and str(rel_path) != pattern
+                    and rel_path.parts[-1] not in ["glossary.rst", "bibliography.rst"]
+                )
+            ):
+                exclude_patterns.append(str(rel_path))
+
+    import jinja2
+
+    with open(os.path.join(SRC, "index.rst.tmpl"), encoding="utf-8") as f:
+        t = jinja2.Template(f.read())
+    with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
+        f.write(
+            t.render(
+                include_api=include_api,
+                single_doc=(pattern if single_doc else None),
+            )
+        )
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -244,15 +297,6 @@ if on_github_actions:
 # which will be used by versions.js script to display the versions in the sidebar
 previous_versions = os.environ.get("PREVIOUS_VERSIONS", "").split(",")
 last_release = os.environ.get("LAST_RELEASE", "")
-# versions = [("STABLE", f"{root}/{last_release}/index.html")]
-# versions += [(v, f"{root}/{v}/index.html") for v in previous_versions if v != "latest"]
-# versions_file = STATIC / "versions.json"
-# js = {"versions": [{"name": k, "url": v} for k, v in versions]}
-# with versions_file.open("w") as f:
-#     js = json.dumps(js, indent=4)
-#     js = js.strip() + "\n"  # add a new line at the end
-#     f.write(js)
-# print(f"Saved versions to {versions_file}")
 
 html_context = {
     "current_version": "stable" if ("dev" not in version) else "latest",
@@ -276,53 +320,46 @@ from sphinx_gallery.sorting import FileNameSortKey
 example_source_dir = str(SOURCES / "examples")
 example_generated_dir = "gettingstarted/examples/gallery"
 
-
-# def reset_spectrochempy_modules(*args):
-#     """Reset function for spectrochempy modules."""
-#     import spectrochempy  # noqa: F401
-
-
 # Check for the SPHINX_NOEXEC environment variable
 noexec = os.environ.get("SPHINX_NOEXEC") == "1"
 
-sphinx_gallery_conf = {
-    "plot_gallery": not noexec,
-    "doc_module": "spectrochempy",
-    # Source example files in separate directory
-    "examples_dirs": [
-        f"{example_source_dir}/core",
-        f"{example_source_dir}/processing",
-        f"{example_source_dir}/analysis",
-    ],
-    # Generated RST files in generated directory
-    "gallery_dirs": [
-        f"{example_generated_dir}/auto_examples_core",
-        f"{example_generated_dir}/auto_examples_processing",
-        f"{example_generated_dir}/auto_examples_analysis",
-    ],
-    "backreferences_dir": f"{example_generated_dir}/backreferences",
-    "reference_url": {
-        "spectrochempy": None,
-    },
-    "show_memory": False,
-    "thumbnail_size": (400, 400),
-    "abort_on_example_error": False,
-    "only_warn_on_example_error": True,
-    "capture_repr": ("_repr_html_", "__repr__"),
-    "expected_failing_examples": [],
-    "download_all_examples": False,
-    "pypandoc": True,
-    "remove_config_comments": True,
-    "within_subsection_order": FileNameSortKey,
-    "image_scrapers": ("matplotlib",),
-    "filename_pattern": "/plot",
-    "ignore_pattern": "__init__.py",
-    "min_reported_time": 0,
-    "show_signature": False,  # Disable the signature if it's causing issues
-    # "reset_modules": [
-    #     reset_spectrochempy_modules,
-    # ],
-}
+if not single_doc:
+    # generate example only if were are in full doc mode
+    sphinx_gallery_conf = {
+        "plot_gallery": not noexec,
+        "doc_module": "spectrochempy",
+        # Source example files in separate directory
+        "examples_dirs": [
+            f"{example_source_dir}/core",
+            f"{example_source_dir}/processing",
+            f"{example_source_dir}/analysis",
+        ],
+        # Generated RST files in generated directory
+        "gallery_dirs": [
+            f"{example_generated_dir}/auto_examples_core",
+            f"{example_generated_dir}/auto_examples_processing",
+            f"{example_generated_dir}/auto_examples_analysis",
+        ],
+        "backreferences_dir": f"{example_generated_dir}/backreferences",
+        "reference_url": {
+            "spectrochempy": None,
+        },
+        "show_memory": False,
+        "thumbnail_size": (400, 400),
+        "abort_on_example_error": False,
+        "only_warn_on_example_error": True,
+        "capture_repr": ("_repr_html_", "__repr__"),
+        "expected_failing_examples": [],
+        "download_all_examples": False,
+        "pypandoc": True,
+        "remove_config_comments": True,
+        "within_subsection_order": FileNameSortKey,
+        "image_scrapers": ("matplotlib",),
+        "filename_pattern": "/plot",
+        "ignore_pattern": "__init__.py",
+        "min_reported_time": 0,
+        "show_signature": False,  # Disable the signature if it's causing issues
+    }
 
 suppress_warnings = [
     "sphinx_gallery",
@@ -415,9 +452,6 @@ def linkcode_resolve(domain, info):
 
 
 # Autosummary --------------------------------------------------------------------------
-
-pattern = os.environ.get("SPHINX_NOAPI")
-include_api = pattern is None or pattern == "0"
 autosummary_generate = True if include_api else ["index"]
 
 autodoc_typehints = "none"
