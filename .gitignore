@@ -1,119 +1,144 @@
-# Backup files
-*~
-~*
-
-# Logs and temporary files
-*.log
-*.bak
-*.orig
-*.pkl
-*.tar
-*.bz2
-*.zip
-*.egg
-*.manifest
-*.spec
-*.pyc
+###############################
+# SpectroChemPy specific     #
+###############################
 *.scp
 *.pscp
-*.pptx
-*.jdx
-*.sample
-*.fdb_latexmk
-*.goutputstream*
+process.pscp
+HIZECOKE_TEST.pscp
+data/stylesheets/mydefault.mplstyle
 
-# Python specific
+###############################
+# Python                      #
+###############################
 *.py[cod]
 __pycache__/
-.cache/
-/.pytest_cache/
-.Python
-develop-eggs/
-eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
 *.egg-info/
+*.egg
+develop-eggs/
+dist/
+build/
+eggs/
+parts/
+bin/
+var/
+sdist/
+.Python
+.pytest_cache/
 .coverage
 .hypothesis/
 htmlcov/
-cov.coverage
-cov.syspath.txt
 coverage.xml
 coverage.json
+cov.coverage
+cov.syspath.txt
 
-# Jupyter notebooks
-*.ipynb_checkpoints/
+###############################
+# Virtual Environments        #
+###############################
+.venv*
+/env/
+/venv/
+pip-log.txt
+
+###############################
+# Jupyter                     #
+###############################
+.ipynb_checkpoints/
 *.ipynb
 *.pct.md
 
-# Sphinx documentation
-docs/reference/generated
+###############################
+# Documentation              #
+###############################
+# Sphinx
+docs/reference/generated/
 docs/reference/api.rst
-build/
-gallery/
+docs/_build/
 docs/savefig/
-docs/_build
+docs/static/video
+docs/sources/reference/generated
+docs/sources/index.rst
+gallery/
+sg_execution_times.rst
+savefig
 
-# Tests
-tests/figures
-/tests_extern_packages/
-
-# Distribution / packaging
-dist/
-saved_pkglist.txt
-
-# Local files or directories
-.editorconfig
-/extdata/
-/git_hooks/
-/installed.txt
-thumb.png
-
-# Mac OS specific
-.DS_Store
-Icon*
-
-# IDE specific
-.idea/
-.spyderproject
-.spyproject
-.vscode
+###############################
+# IDE & Editors              #
+###############################
+# VSCode
+.vscode/
 *.code-workspace
 
-# Docker / bitbucket
-.dockerignore
-.pipeline*.sh
+# PyCharm/IntelliJ
+.idea/
 
-# Pip virtual environment
-/env/
-.venv
+# Spyder
+.spyderproject
+.spyproject
 
-# Git specific
+###############################
+# Operating System           #
+###############################
+# macOS
+.DS_Store
+Icon?
+
+###############################
+# Temporary & Backup         #
+###############################
+*.log
+*.bak
+*~
+~*
+*.orig
+*.pkl
+*.manifest
+*.spec
+*.tar
+*.bz2
+*.zip
+out/
+.tempdirs
+
+###############################
+# Testing                    #
+###############################
+tests/figures/
+/tests_extern_packages/
+
+###############################
+# Version Control           #
+###############################
+# Git
 *_LOCAL_*.*
 *_REMOTE_*.*
 *_BACKUP_*.*
 *_BASE_*.*
 .gitignore_*
+.git/
 
-# Unknown
-process.pscp
-HIZECOKE_TEST.pscp
+###############################
+# Project Specific          #
+###############################
+/extdata/
+/git_hooks/
+/installed.txt
+thumb.png
+.dockerignore
+.pipeline*.sh
 essai.py
 res.docstrings.txt
-out/
 *dev*.rst
-data/stylesheets/mydefault.mplstyle
 _ressources
 _tools
-sg_execution_times.rst
-
 myfile.csv
 _sandbox
-docs/static/video
 .ci/scp_*
-.tempdirs
-docs/sources/reference/generated
-.venv310
+
+###############################
+# Data Files                #
+###############################
+*.jdx
+*.sample
+*.pptx
+saved_pkglist.txt

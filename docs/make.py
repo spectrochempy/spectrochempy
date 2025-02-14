@@ -363,6 +363,16 @@ class BuildDocumentation:
         elif settings["whatsnew"]:
             os.environ["SPHINX_PATTERN"] = "whatsnew"
 
+        self.single_doc_html = None
+        if self.singledoc and (
+            self.singledoc.endswith(".rst") or self.singledoc.endswith(".ipynb")
+        ):
+            self.single_doc_html = Path(self.singledoc).with_suffix(".html").as_posix()
+        elif self.singledoc:
+            self.single_doc_html = (
+                f"reference/generated/spectrochempy.{self.single_doc}.html"
+            )
+
     def _init_settings(self, kwargs):
         # Initialize settings from keyword arguments.
         # Parameters:
@@ -582,7 +592,6 @@ class BuildDocumentation:
         self._prepare_build()
         build_result = self._run_sphinx_build()
         self._post_build()
-
         return build_result
 
     def _prepare_build(self):
@@ -706,7 +715,8 @@ class BuildDocumentation:
         sp.events.emit = SafeEventEmitter(sp.events.emit)
 
         try:
-            return sp.build()
+            sp.build()
+            return 0
         except Exception as e:
             print(f"Warning: Build encountered an error: {e}")
             if "build-finished" in str(e):
@@ -1031,16 +1041,17 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    # if not ON_GITHUB:
-    #     sys.argv = [
-    #         "make.py",
-    #         "html",
-    #         # "--no-api",
-    #         # "--no-exec",
-    #         # "--no-sync",
-    #         "-v",
-    #         "--single-doc",
-    #         # "userguide/objects/dataset/dataset.ipynb",
-    #         "spectrochempy.IRIS",
-    #     ]  #  "-T", "0.6.10"]
+    if not ON_GITHUB:
+        sys.argv = [
+            "make.py",
+            "html",
+            # "--no-api",
+            # "--no-exec",
+            # "--no-sync",
+            "-v",
+            "--single-doc",
+            "gettingstarted/install/index.rst",
+            # "userguide/objects/dataset/dataset.ipynb",
+            # "spectrochempy.IRIS",
+        ]  #  "-T", "0.6.10"]
     sys.exit(main())
