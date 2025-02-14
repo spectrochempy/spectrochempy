@@ -13,7 +13,9 @@ import warnings
 from datetime import datetime
 from pathlib import Path
 
-import spectrochempy  # isort:skip
+import jinja2
+
+import spectrochempy
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -199,17 +201,15 @@ if pattern:
             ):
                 exclude_patterns.append(str(rel_path))
 
-    import jinja2
-
-    with open(os.path.join(SRC, "index.rst.tmpl"), encoding="utf-8") as f:
-        t = jinja2.Template(f.read())
-    with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
-        f.write(
-            t.render(
-                include_api=include_api,
-                single_doc=(pattern if single_doc else None),
-            )
+with open(os.path.join(SRC, "index.rst.tmpl"), encoding="utf-8") as f:
+    t = jinja2.Template(f.read())
+with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
+    f.write(
+        t.render(
+            include_api=include_api,
+            single_doc=(pattern if single_doc else None),
         )
+    )
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

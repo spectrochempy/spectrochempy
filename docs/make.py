@@ -1031,16 +1031,16 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    if not ON_GITHUB:
-        sys.argv = [
-            "make.py",
-            "html",
-            # "--no-api",
-            # "--no-exec",
-            # "--no-sync",
-            "-v",
-            "--single-doc",
-            # "userguide/objects/dataset/dataset.ipynb",
-            "spectrochempy.IRIS",
-        ]  #  "-T", "0.6.10"]
+    # if not ON_GITHUB:
+    #     sys.argv = [
+    #         "make.py",
+    #         "html",
+    #         # "--no-api",
+    #         # "--no-exec",
+    #         # "--no-sync",
+    #         "-v",
+    #         "--single-doc",
+    #         # "userguide/objects/dataset/dataset.ipynb",
+    #         "spectrochempy.IRIS",
+    #     ]  #  "-T", "0.6.10"]
     sys.exit(main())
