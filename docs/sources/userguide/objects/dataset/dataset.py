@@ -348,6 +348,10 @@ d1D.to("J")
 d1D.to("K")
 
 # %% [markdown]
+# For more examples on how to use units with NDDataset, see the
+# [gallery example](gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html
+
+# %% [markdown]
 # ## Coordinates
 
 # %% [markdown]

@@ -17,6 +17,8 @@ It handles:
 - Directory structure management for documentation
 - Test data downloading and setup
 
+Some code is copied from the Pandas project's documentation builder.
+
 Commands
 --------
 html :
@@ -37,6 +39,9 @@ Options
 --jobs, -j : Number of parallel jobs
 --tag-name, -T : Build docs for specific version
 --clear, -C : Clear html directory
+--warning-is-error, -W : Fail if warnings are raised
+--single-doc : Build a single document
+--whatsnew : Build only the whatsnew document
 
 Examples
 --------
@@ -322,35 +327,16 @@ class BuildDocumentation:
 
     Handles all aspects of documentation building including configuration,
     notebook synchronization, and HTML generation.
-
-    Attributes
-    ----------
-    settings : dict
-        Build configuration settings
-    SRC : Path
-        Source directory path
-    GETTINGSTARTED : Path
-        Getting started guide directory
-    DEVGUIDE : Path
-        Developer guide directory
-    REFERENCE : Path
-        API reference directory
-    API : Path
-        Generated API documentation directory
-    DEV_API : Path
-        Generated developer API directory
-    GALLERY : Path
-        Examples gallery directory
     """
 
     def __init__(self, **kwargs):
-        """Initialize the BuildDocumentation class with settings."""
-        self.settings = self._init_settings(kwargs)
+        # Initialize the BuildDocumentation class with settings.
+        self.settings = settings = self._init_settings(kwargs)
 
         # DOCUMENTATION SRC PATH
         # They depends if we are building the documentation
         #  for the latest version or for an older one
-        self.tagname = self.settings["tagname"]
+        self.tagname = settings["tagname"]
         if self.tagname:
             self.SRC = SRC = Path(kwargs.get("workingdir")) / "docs"
             self.PROJECT_SOURCES = Path(kwargs.get("workingdir")) / "spectrochempy"
@@ -366,54 +352,81 @@ class BuildDocumentation:
         self.DEV_API = self.DEVGUIDE / "generated"
         self.GALLERY = self.GETTINGSTARTED / "examples" / "gallery"
 
+        # Set environmetnt variables for sphinx
+        environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
+        self.singledoc = settings["singledoc"]
+        if self.singledoc:
+            self.singledoc = self._single_doc(self.singledoc)
+            os.environ["SPHINX_PATTERN"] = self.singledoc
+        elif settings["noapi"]:
+            os.environ["SPHINX_PATTERN"] = "noapi"
+        elif settings["whatsnew"]:
+            os.environ["SPHINX_PATTERN"] = "whatsnew"
+
     def _init_settings(self, kwargs):
-        """
-        Initialize settings from keyword arguments.
+        # Initialize settings from keyword arguments.
+        # Parameters:
+        # kwargs : dict - Keyword arguments to initialize settings from
+        # Returns: dict - Dictionary of initialized settings
 
-        Parameters
-        ----------
-        kwargs : dict
-            Keyword arguments to initialize settings from
-
-        Returns
-        -------
-        dict
-            Dictionary of initialized settings
-        """
-        settings = {
+        return {
             "delnb": kwargs.get("delnb", False),
             "noapi": kwargs.get("noapi", False),
             "noexec": kwargs.get("noexec", False),
             "nosync": kwargs.get("nosync", False),
             "clear": kwargs.get("clear", False),
             "tutorials": kwargs.get("tutorials", False),
-            "warningiserror": kwargs.get("warningiserror", False),
             "verbosity": kwargs.get("verbosity", 0),
             "jobs": self._get_jobs(kwargs.get("jobs", "auto")),
+            "warningiserror": kwargs.get("warning_is_error", False),
             "whatsnew": kwargs.get("whatsnew", False),
             "tagname": kwargs.get("tagname", None),
+            "singledoc": kwargs.get("singledoc", None),
         }
 
-        environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
-        environ["SPHINX_NOAPI"] = "1" if settings["noapi"] else "0"
+    def _single_doc(self, singledoc):
+        # Make sure the provided value for --single is a path to an existing
+        # .rst/.ipynb file, or a spectrochempy object that can be imported.
+        # For example, citing.rst or spectrochempy.IRIS. For the latter,
+        # return the corresponding file path
+        # (e.g. reference/generated/spectrochempy.IRIS.rst).
+        # adapted from pandas
 
-        return settings
+        extension = os.path.splitext(singledoc)[-1]
+        if extension in (".rst", ".ipynb"):
+            if (self.SRC / singledoc).exists():
+                return singledoc
+            raise FileNotFoundError(f"File {str(self.SRC / singledoc)} not found")
+
+        if singledoc.startswith("spectrochempy."):
+            try:
+                import spectrochempy
+
+                obj = spectrochempy
+                for name in singledoc.split(".")[1:]:
+                    obj = getattr(obj, name)
+            except AttributeError as err:
+                raise ImportError(f"Could not import {singledoc}") from err
+            else:
+                # delete the eventual already generated entry
+                if Path(self.API / f"{singledoc}.rst").exists():
+                    Path(self.API / f"{singledoc}.rst").unlink()
+                return singledoc[len("spectrochempy.") :]
+        else:
+            raise ValueError(
+                f"--single={singledoc} not understood. "
+                "Value should be a valid path to a .rst or .ipynb file, "
+                "or a valid spectrochempy object "
+                "(e.g. citing.rst or spectrochempy.IRIS)"
+            )
 
     @staticmethod
     def _get_jobs(jobs):
-        """
-        Get the number of jobs to use for building the documentation.
+        # Get the number of jobs to use for building the documentation.
+        # Parameters:
+        # jobs : str - Number of jobs to use, or 'auto' to use all CPU cores
+        # Returns: int - Number of jobs to use
 
-        Parameters
-        ----------
-        jobs : str
-            Number of jobs to use, or 'auto' to use all available CPU cores
-
-        Returns
-        -------
-        int
-            Number of jobs to use
-        """
         if jobs == "auto":
             return mp.cpu_count()
         try:
@@ -423,42 +436,32 @@ class BuildDocumentation:
             return 1
 
     def _delnb(self):
-        """Remove all Jupyter notebook files."""
+        # Remove all Jupyter notebook files.
+
         for nb in self.SRC.rglob("**/*.ipynb"):
             sh.rm(nb)
         for nbch in self.SRC.glob("**/.ipynb_checkpoints"):
             sh(f"rm -r {nbch}")
         print(f"Removed all ipynb files in {self.SRC}")
 
-    @staticmethod
-    def _confirm(action):
-        """
-        Ask user to confirm an action by entering Y or N (case-insensitive).
-
-        Parameters
-        ----------
-        action : str
-            The action to confirm
-
-        Returns
-        -------
-        bool
-            True if user confirms, False otherwise
-        """
-        answer = ""
-        while answer not in ["y", "n"]:
-            answer = input(
-                f"OK to continue `{action}` Y[es]/[N[o] ? ",
-            ).lower()
-        return answer[:1] == "y"
-
     def _sync_notebooks(self):
-        """
-        Synchronize notebook and Python script pairs.
+        # Synchronize notebook and Python script pairs.
+        # Finds and synchronizes all notebook/script pairs using jupytext,
+        # with error handling for individual files.
 
-        Finds and synchronizes all notebook/script pairs using jupytext,
-        with error handling for individual files.
-        """
+        print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
+        if self.settings["nosync"]:
+            print("Skipping notebook synchronization as option --no-sync is set")
+            return
+
+        if self.singledoc:
+            if not self.singledoc.endswith(".ipynb"):
+                print("Nothing to sync")
+                return
+            print(f"Syncing only {self.singledoc}")
+            self._sync_notebook_pair(self.SRC / self.singledoc)
+            return
+
         for item in self._get_notebook_files():
             try:
                 self._sync_notebook_pair(item)
@@ -466,17 +469,10 @@ class BuildDocumentation:
                 print(f"Failed to sync {item}: {e}")
 
     def _get_notebook_files(self):
-        """
-        Get a set of notebook files to be synchronized.
+        # Get a set of notebook files to be synchronized.
+        # Returns: set - Set of notebook files to be synchronized
 
-        Returns
-        -------
-        set
-            Set of notebook files to be synchronized
-        """
         pyfiles = set()
-        print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
-
         py = list(self.SRC.glob("**/*.py"))
         py.extend(list(self.SRC.glob("**/*.ipynb")))
 
@@ -497,14 +493,10 @@ class BuildDocumentation:
 
     @staticmethod
     def _sync_notebook_pair(item):
-        """
-        Synchronize a pair of notebook and script files.
+        # Synchronize a pair of notebook and script files.
+        # Parameters:
+        # item : Path - Path to the notebook or script file to synchronize
 
-        Parameters
-        ----------
-        item : Path
-            Path to the notebook or script file to synchronize
-        """
         py = item.with_suffix(".py")
         ipynb = item.with_suffix(".ipynb")
 
@@ -531,20 +523,13 @@ class BuildDocumentation:
             print(f"Warning: Failed to synchronize {item}: {str(e)}")
 
     def _determine_version(self):
-        """
-        Determine the version of the documentation to build.
+        # Determine the version of the documentation to build.
+        # Returns: tuple - Contains (version, last_tag, version_type)
+        # where:
+        # - version : str - The version number
+        # - last_tag : str - The previous release tag
+        # - version_type : str - One of 'latest' or <tag>
 
-        Returns
-        -------
-        tuple
-            Contains (version, last_tag, version_type) where:
-            - version : str
-                The version number
-            - last_tag : str
-                The previous release tag
-            - version_type : str
-                One of 'latest' or <tag>
-        """
         from spectrochempy.api import version
 
         last_tag = self._get_previous_tag() if not self.tagname else None
@@ -554,21 +539,17 @@ class BuildDocumentation:
 
     @staticmethod
     def _get_previous_tag():
-        """
-        Get the previous tag from the git repository.
+        # Get the previous tag from the git repository.
+        # Returns: str - The previous release tag
 
-        Returns
-        -------
-        str
-            The previous release tag
-        """
         sh("git fetch --tags", silent=True)
         rev = sh("git rev-list --tags --max-count=1", silent=True)
         result = sh(f"git describe --tags {rev}", silent=True)
         return result.strip()
 
     def _make_dirs(self):
-        """Create the directories required to build the documentation."""
+        # Create the directories required to build the documentation.
+
         doc_version = self._doc_version
 
         # Create regular directories if they do not exist already.
@@ -584,14 +565,9 @@ class BuildDocumentation:
             Path.mkdir(d, parents=True, exist_ok=True)
 
     def _get_previous_versions(self):
-        """
-        Get a list of previous versions from the HTML directory.
+        # Get a list of previous versions from the HTML directory.
+        # Returns: list - List of previous versions
 
-        Returns
-        -------
-        list
-            List of previous versions
-        """
         versions = []
         version_pattern = re.compile(r"^(\d+\.\d+\.\d+)$")
         for item in HTML.iterdir():
@@ -600,14 +576,9 @@ class BuildDocumentation:
         return versions
 
     def _make_docs(self):
-        """
-        Simplified documentation building process.
+        # Simplified documentation building process.
+        # Returns: int - Sphinx build result
 
-        Returns
-        -------
-        int
-            Sphinx build result
-        """
         self._prepare_build()
         build_result = self._run_sphinx_build()
         self._post_build()
@@ -615,7 +586,8 @@ class BuildDocumentation:
         return build_result
 
     def _prepare_build(self):
-        """Prepare the build environment."""
+        # Prepare the build environment.
+
         from spectrochempy.utils.file import download_testdata
 
         if self.tagname:
@@ -666,14 +638,9 @@ class BuildDocumentation:
         return
 
     def _run_sphinx_build(self):
-        """
-        Run the Sphinx build process.
+        # Run the Sphinx build process.
+        # Returns: int - Sphinx build result
 
-        Returns
-        -------
-        int
-            Sphinx build result
-        """
         from sphinx.application import Sphinx
         from sphinx.errors import ExtensionError
 
@@ -717,6 +684,7 @@ class BuildDocumentation:
             outdir,
             doctreesdir,
             "html",
+            warningiserror=self.settings["warningiserror"],
             parallel=self.settings["jobs"],
             verbosity=self.settings["verbosity"],
         )
@@ -747,7 +715,8 @@ class BuildDocumentation:
             raise
 
     def _post_build(self):
-        """Post-build actions."""
+        # Post-build actions.
+
         doc_version = self._doc_version
 
         # Check if the source directory exists and is not empty
@@ -781,19 +750,20 @@ class BuildDocumentation:
         versions.sort(reverse=True)  # Sort in descending order
         versions_str = ",".join(versions)
 
-        # Update layout.html in each version directory to include latest versions list
+        # Update layout.html to include latest versions list
         layout_template = TEMPLATES / "layout.html"
+        with open(layout_template) as f:
+            content = f.read()
+            content = content.replace(
+                "data-versions=\"{{ os.environ.get('PREVIOUS_VERSIONS', '') }}\"",
+                f'data-versions="{versions_str}"',
+            )
+
+        # Update also in each version directory
         for version_dir in HTML.glob("[0-9]*.[0-9]*.[0-9]*"):
             target_dir = version_dir / "_templates"
             target_dir.mkdir(exist_ok=True)
             target_file = target_dir / "layout.html"
-
-            with open(layout_template) as f:
-                content = f.read()
-                content = content.replace(
-                    "data-versions=\"{{ os.environ.get('PREVIOUS_VERSIONS', '') }}\"",
-                    f'data-versions="{versions_str}"',
-                )
 
             with open(target_file, "w") as f:
                 f.write(content)
@@ -802,7 +772,8 @@ class BuildDocumentation:
         del environ["DOC_BUILDING"]
         del environ["PREVIOUS_VERSIONS"]
         del environ["SPHINX_NOEXEC"]
-        del environ["SPHINX_NOAPI"]
+        if "SPHINX_PATTERN" in environ:
+            del environ["SPHINX_PATTERN"]
 
     # COMMANDS
     # ----------------------------------------------------------------------------------
@@ -845,20 +816,7 @@ class BuildDocumentation:
             )
 
         # Make zip of all ipynb
-        def zipdir(path, dest, ziph):
-            """
-            Zip the directory.
-
-            Parameters
-            ----------
-            path : Path
-                Path to the directory to zip
-            dest : Path
-                Destination path in the zip file
-            ziph : ZipFile
-                Zip file handle
-            """
-            # ziph is zipfile handle
+        def _zipdir(path, dest, ziph):
             for inb in path.rglob("**/*.ipynb"):
                 if ".ipynb_checkpoints" in inb.parent.suffix:
                     continue
@@ -874,8 +832,8 @@ class BuildDocumentation:
                 ziph.write(inb, arcname=arcnb)
 
         zipf = zipfile.ZipFile("~notebooks.zip", "w", zipfile.ZIP_STORED)
-        zipdir(self.SRC, "notebooks", zipf)
-        zipdir(self.GALLERY / "auto_examples", Path("notebooks") / "examples", zipf)
+        _zipdir(self.SRC, "notebooks", zipf)
+        _zipdir(self.GALLERY / "auto_examples", Path("notebooks") / "examples", zipf)
         zipf.close()
 
         sh(
@@ -970,7 +928,7 @@ def main():
     )
 
     parser.add_argument(
-        "--single",
+        "--single-doc",
         metavar="FILENAME",
         type=str,
         default=None,
@@ -1030,10 +988,11 @@ def main():
             nosync=args.no_sync,
             clear=args.clear,
             tutorials=args.upload_tutorials,
-            warningiserror=args.warning_is_error,
             verbosity=args.verbosity,
             jobs=args.jobs,
+            warningiserror=args.warning_is_error,
             whatsnew=args.whatsnew,
+            singledoc=args.single_doc,
         )
 
         buildcommand = getattr(build, args.command)
@@ -1072,12 +1031,16 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    if not ON_GITHUB:
-        sys.argv = [
-            "make.py",
-            "html",
-            "--no-api",
-            "--no-exec",
-            "-v",
-        ]  #  "-T", "0.6.10"]
+    # if not ON_GITHUB:
+    #     sys.argv = [
+    #         "make.py",
+    #         "html",
+    #         # "--no-api",
+    #         # "--no-exec",
+    #         # "--no-sync",
+    #         "-v",
+    #         "--single-doc",
+    #         # "userguide/objects/dataset/dataset.ipynb",
+    #         "spectrochempy.IRIS",
+    #     ]  #  "-T", "0.6.10"]
     sys.exit(main())

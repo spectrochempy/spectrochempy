@@ -40,7 +40,7 @@ ds.x.units = "nm"
 # %%
 # Fit the SIMPLISMA model
 print("Fit SIMPLISMA on {}\n".format(ds.name))
-simpl = scp.SIMPLISMA(max_components=20, tol=0.2, noise=3, log_level="INFO")
+simpl = scp.SIMPLISMA(n_components=20, tol=0.2, noise=3, log_level="INFO")
 simpl.fit(ds)
 
 # %%

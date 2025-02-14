@@ -149,4 +149,4 @@ dataset.y.ito("hours")
 _ = dataset.plot()
 
 # %% [markdown]
-# See [Units and Quantities](../objects/dataset/dataset.rst#Units) for more details on these units operations
+# See [Units](../objects/dataset/dataset.ipynb#Units) for more details on these units operations

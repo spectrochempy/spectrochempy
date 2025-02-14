@@ -50,7 +50,7 @@ _common_see_also = """
 See Also
 --------
 Baseline : Manual baseline correction processor.
-get_baseline : Compuute a baseline using the `Baseline` class.
+get_baseline : Compute a baseline using the `Baseline` class.
 basc : Make a baseline correction using the `Baseline` class.
 asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
 snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
@@ -83,7 +83,7 @@ _docstring.delete_params("Baseline.see_also", "rubberband")
 # if they are not yet present.
 class Baseline(AnalysisConfigurable):
     __doc__ = _docstring.dedent(
-        r"""
+        """
     Baseline Correction processor.
 
     The baseline correction can be applied to 1D datasets consisting in a single row
@@ -147,10 +147,10 @@ class Baseline(AnalysisConfigurable):
         help="For 2D datasets, if `True` or if multivariate='svd' or 'nmf' , a "
         "multivariate method is used to fit a "
         "baseline on the principal components determined using a SVD decomposition "
-        r" if `multivariate='svd'`\ or `True`, or a NMF factorization if "
-        r"`multivariate='nmf'`,"
+        " if `multivariate='svd'` or `True`, or a NMF factorization if "
+        "`multivariate='nmf'`,"
         "followed by an inverse-transform to retrieve the baseline corrected "
-        "dataset. If `False` , a sequential method is used which consists in fitting a "
+        "dataset. If `False`, a sequential method is used which consists in fitting a "
         "baseline on each row (observations) of the dataset.",
     ).tag(config=True)
 
@@ -185,7 +185,7 @@ class Baseline(AnalysisConfigurable):
             tr.CaselessStrEnum(["constant", "linear", "quadratic", "cubic", "pchip"]),
         ),
         default_value=1,
-        help=r"""Polynom order to use for polynomial/pchip interpolation or detrend.
+        help="""Polynom order to use for polynomial/pchip interpolation or detrend.
 
 * If an integer is provided, it is the order of the polynom to fit, i.e. 1 for linear,
 * If a string if provided among  `constant`, `linear`, `quadratic` and `cubic`,
@@ -238,7 +238,7 @@ class Baseline(AnalysisConfigurable):
         "numerical values (start, end). Single values are internally converted to "
         "a pair (start=value, end=start). The limits of the spectra are "
         "automatically added during the fit process unless the `remove_limit` "
-        r"parameter is `True`\ ",
+        "parameter is `True`.",
     ).tag(config=True)
 
     include_limits = tr.Bool(
@@ -683,7 +683,14 @@ baseline/trends for different segments of the data.
         return self._outfit[0]
 
     def transform(self):
-        """Return a dataset with baseline removed."""
+        """
+        Return a dataset with baseline removed.
+
+        Returns
+        -------
+        NDDataset
+            Dataset with baseline correction applied
+        """
         if self.model == "asls" and hasattr(self, "Xmasked"):
             corrected = self.Xmasked - self.baseline
         else:
@@ -901,14 +908,14 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     r"""
     Remove polynomial trend along a dimension from dataset.
 
-    Depending on the ``order``parameter, `detrend` removes the best-fit polynomial line
+    Depending on the ``order`` parameter, `detrend` removes the best-fit polynomial line
     (in the least squares sense) from the data and returns the remaining data.
 
     Parameters
     ----------
     dataset : `NDDataset`
         The input data.
-    order : non-negative `int` or `str` among `['constant', 'linear', 'quadratic', 'cubic']`, optional, default:'linear'
+    order : non-negative `int` or `str` among ['constant', 'linear', 'quadratic', 'cubic'], optional, default:'linear'
         The order of the polynomial trend.
 
         * If ``order=0`` or ``'constant'`` , the mean of data is subtracted to remove

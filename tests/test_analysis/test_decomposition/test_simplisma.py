@@ -54,7 +54,7 @@ def test_simplisma():
     ds.y.units = "hours"
     ds.x.units = "cm^-1"
 
-    sma = SIMPLISMA(max_components=20, tol=0.2, noise=3, log_level="INFO")
+    sma = SIMPLISMA(n_components=20, tol=0.2, noise=3, log_level="INFO")
     sma.fit(ds)
 
     sma.C.T.plot(title="Concentration")

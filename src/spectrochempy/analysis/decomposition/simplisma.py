@@ -138,7 +138,7 @@ class SIMPLISMA(DecompositionAnalysis):
                 "The number of pure compounds should be an integer larger than 2",
             )
         return n  # <-- do not forget this, or the returned value
-        # for max_components is None
+        # for n_components is None
 
     @tr.default("_components")
     def _components_default(self):
