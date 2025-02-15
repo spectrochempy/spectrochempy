@@ -1,176 +1,132 @@
 .. _install_win:
 
 Installation Guide for Windows
-===============================
+=============================
 
-Installation using Conda
-------------------------
+This guide covers different methods for installing SpectroChemPy on Windows.
 
-.. _conda_win:
+.. contents:: Table of Contents
+   :local:
+   :depth: 2
 
-The following steps have been checked only with windows 10 but should work with previous versions as well.
+Requirements
+------------
 
-We highly recommend that all new users install `SpectroChemPy` interface via Conda. You can install Spectrochempy in a dedicated environment (recommended, steps 4 and 5. below). You can also use your base environment or an existing environment (then skip steps 4 and 5.)
+* Python 3.10 or newer
 
-#.  Open a command prompt (Select the Start button and type cmd), or preferably     open the Anaconda Prompt in the Anaconda start Menu.
+.. code-block:: bash
 
-    .. image:: images/prompt.png
-       :width: 200
-       :alt: Anaconda Prompt
+    # Check python version
+    python --version  # Should be 3.10 or newer
 
+Environment Setup
+----------------
 
-#.  Update conda (yes, even if you have just installed the distribution...):
+.. tabs::
 
-    .. sourcecode:: bat
-
-        (base) C:\<yourDefaultPath>> conda update conda
-
-    where `<yourDefaultPath>` is you default workspace directory (often:
-    `C:\\Users\\<user>`)
-
-#.  Add channels to get specific packages:
-
-    .. sourcecode:: bat
-
-        (base) C:\<yourDefaultPath>> conda config --add channels conda-forge
-        (base) C:\<yourDefaultPath>> conda config --add channels spectrocat
-        (base) C:\<yourDefaultPath>> conda config --add channels cantera
-
-#.  **Recommended**: you can create a dedicated environment. We will name it     `scpy` in this example but, of course, you can use whatever name you want.
-
-    .. sourcecode:: bat
-
-        (base) C:\<yourDefaultPath>> conda create --name scpy
-
-    Switch to this environment. At this point, `(scpy)` should
-    appear before the prompt instead of `(base)` .
-
-    .. sourcecode:: bat
-
-        (base) C:\<yourDefaultPath>> conda activate scpy
-        (scpy) C:\<yourDefaultPath>>
-
-    .. Note::
-
-        You can make the scipy environment permanent by creating and using the
-        following batch file (.bat)
-
-        .. sourcecode:: bat
-
-            @REM launch a cmd window in scpy environment (path should beadapted)
-            @CALL CD C:\<yourWorkingFolder>
-            @CALL CMD /K C:\<yourAnacondaFolder>\Scripts\activate.bat scpy
-
-        This script, where `<yourAnacondaFolder>` is the installation directory
-        of your Miniconda/Anaconda distribution
-        will open a command prompt  in  C:\\<yourWorkingFolder> with the `scpy`
-        environment activated.
-
-        Save the .bat file, for instance in
-        `C:\\<yourAnacondaFolder>\Scripts\activate-scpy.bat`,
-        create a shortcut, name it, for instance, `Anaconda prompt (scpy)`
-        and place it in an easily accessible place (e.g. the Windows Startmenu
-        Folder).
-
-#. Install `SpectroChemPy`
-
-   The conda installer has to solve all packages dependencies and is definitely
-   a bit slow. So we recommend to install `mamba <https://github.com/mamba-org/mamba>`__
-   as a drop-in replacement via:
-
-   .. sourcecode:: bash
-
-        (scpy) C:\<yourDefaultPath>> conda install mamba
-
-   To install a stable version of spectrochempy, then you just have to do :
-
-   .. sourcecode:: bash
-
-        (scpy) C:\<yourDefaultPath>> mamba install spectrochempy
-
-   or if you rather prefer not to use mamba:
-
-   .. sourcecode:: bat
-
-        (scpy) C:\<yourDefaultPath>> conda install spectrochempy
-
-   This can take time, depending on your python installation and the number of
-   missing packages.
+   .. tab:: Mamba (Recommended)
+      
+      1. Install Mambaforge:
+         
+         * Download `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_
+         * Run the installer
+         * Open cmd prompt
+ 
 
 
-   If you prefer to deal with the latest development version, you must use the
-   following command to install from the
-   `spectrocat/label/dev <https://anaconda.org/spectrocat/spectrochempy>`_
-   channel instead of the `spectrocat` channel:
 
-   .. sourcecode:: bat
+      3. Create environment:
 
-        (scpy) C:\<yourDefaultPath>> mamba install -c spectrocat/label/dev spectrochempy
+         .. code-block:: bat
 
+            mamba create --name scpy python=3.10
+            mamba activate scpy
 
-Installation using pip
+   .. tab:: Using pip and venv
+      
+      1. Open Command Prompt
+      2. Create virtual environment:
+
+         .. code-block:: bat
+
+            python -m venv scpy
+            scpy\Scripts\activate
+
+      3. Upgrade pip:
+
+         .. code-block:: bat
+
+            python -m pip install --upgrade pip
+
+Installing SpectroChemPy
+-----------------------
+
+.. tabs::
+
+   .. tab:: Using Mamba (Recommended)
+      
+      .. code-block:: bat
+
+         mamba install -c spectrocat spectrochempy
+
+      Development version:
+
+      .. code-block:: bat
+
+         mamba install -c spectrocat/label/dev spectrochempy
+
+   .. tab:: Using Pip
+      
+      .. code-block:: bat
+
+         # Install SpectroChemPy
+         python -m pip install spectrochempy
+
+         # or if you want to install interactive version (including jupyter)
+         python -m pip install "spectrochempy[interactive]"
+
+Verifying Installation
 ----------------------
 
-If you prefer to use pip, here are the installation steps. We assume that you have a working installation of python > 3.6.
+1. Start IPython:
 
-#. Open a terminal and update pip:
+   .. code-block:: bat
 
-   .. sourcecode:: bat
+      ipython
 
-      C:\<yourDefaultPath>> py -m pip install --user --upgrade pip
+2. Import SpectroChemPy:
 
-#. Creating a virtual environment
+   .. code-block:: ipython
 
-   .. sourcecode:: bat
+      In [1]: from spectrochempy import *
 
-        C:\<yourDefaultPath>> py -m venv env
-        C:\<yourDefaultPath>> .\env\Scripts\activate
+   You should see:
 
-   Check that you in the correct environment
+   .. code-block:: text
 
-   .. sourcecode:: bat
+      SpectroChemPy's API - v.0.6.10
+      © Copyright 2014-2025 - A.Travert & C.Fernandez @ LCS
 
-        C:\<yourDefaultPath>> where python
+Additional Tips
+---------------
 
-        ...\env\Scripts\python.exe
+Creating a Permanent Environment Shortcut
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#. Install all required packages
+Create a batch file (`.bat`) with:
 
-   The easiest way to achieve this is to use the requirements.txt present on our github repository or in the present documentation (<link>)
+.. code-block:: bat
 
-   .. sourcecode:: bat
+    @REM launch cmd in scpy environment
+    @CALL CD C:\<yourWorkingFolder>
+    @CALL CMD /K C:\<yourMambaForgeFolder>\Scripts\activate.bat scpy
 
-        C:\<yourDefaultPath>> py -m pip install -r https://www.spectrochempy.fr/downloads/requirements.txt
+Save as `activate-scpy.bat` and create a shortcut named "Mamba prompt (scpy)".
 
-#. Install spectrochempy from pypi
+Next Steps
+----------
 
-   .. sourcecode:: bat
+Proceed to the :ref:`userguide` to start using SpectroChemPy.
 
-        C:\<yourDefaultPath>> python -m pip install spectrochempy
-
-
-Check the Installation
-------------------------
-
-Check the installation by running a `IPython <https://ipython.readthedocs.io/en/stable/>`_ session by issuing in the terminal the following command:
-
-.. sourcecode:: bat
-
-     C:\<yourDefaultPath>> ipython
-
-Then execute the following command:
-
-.. sourcecode:: ipython
-
-    In [1]: from spectrochempy import *
-
-If this goes well, you should see the following output, indicating that
-Spectrochempy is likely functional !
-
-.. sourcecode:: ipython
-
-    SpectroChemPy's API - v.0.2.16
-    © Copyright 2014-2021 - A.Travert & C.Fernandez @ LCS
-
-
-The recommended next step is to proceed to the :ref:`userguide` .
+.. note::
+   If you encounter any issues, see :doc:`../getting_help` for support options.

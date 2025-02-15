@@ -145,7 +145,6 @@ For more detailed instructions and alternative installation methods:
 
 * :doc:`install_win` - Windows installation
 * :doc:`install_mac_linux` - macOS/Linux installation
-* :doc:`install_sources` - Installation from source code
 * :doc:`install_colab` - Using Google Colab
 * :doc:`install_adds` - Additional components
 
@@ -155,6 +154,5 @@ For more detailed instructions and alternative installation methods:
 
     install_win
     install_mac_linux
-    install_sources
     install_colab
     install_adds
