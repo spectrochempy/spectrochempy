@@ -27,18 +27,18 @@ import spectrochempy
 # CONSTANTS
 PROJECTNAME = "spectrochempy"
 
-# GENERAL PATHS
-CONFDIR = Path(os.environ.get("SPHINX_CONFDIR"))
+# GENERAL PATH
+CONFDIR = Path(os.environ.get("SPHINX_CONFDIR", Path(__file__).parent))
 TEMPLATES = CONFDIR / "_templates"
 STATIC = CONFDIR / "_static"
 PROJECT = CONFDIR.parent
 BUILDIR = PROJECT / "build"
 DOCTREES = BUILDIR / "~doctrees"
 HTML = BUILDIR / "html"
-SOURCES = Path(os.environ.get("SOURCES"))
+SOURCES = Path(os.environ.get("SOURCES", PROJECT / "src" / "spectrochempy"))
 
 # DOCUMENTATION SRC PATH
-SRC = Path(os.environ.get("SPHINX_SRCDIR"))
+SRC = Path(os.environ.get("SPHINX_SRCDIR", PROJECT / "docs" / "sources"))
 USERGUIDE = SRC / "userguide"
 GETTINGSTARTED = SRC / "gettingstarted"
 DEVGUIDE = SRC / "devguide"
@@ -51,7 +51,7 @@ GALLERY = GETTINGSTARTED / "examples" / "gallery"
 
 # Get sphinx pattern
 pattern = os.environ.get("SPHINX_PATTERN")
-single_doc = pattern is not None and pattern not in ["noapi", "whatsnew"]
+single_doc_or_dir = pattern is not None and pattern not in ["noapi", "whatsnew"]
 include_api = pattern is None or pattern == "whatsnew"
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -86,7 +86,7 @@ extensions = [
     "nbsphinx",
     "sphinx.ext.viewcode",
 ]
-if not single_doc:
+if not single_doc_or_dir:
     extensions += [
         "sphinx_gallery.gen_gallery",
     ]
@@ -177,7 +177,14 @@ if pattern:
             if path.name == "index.rst" and path.parent == SRC:
                 continue
 
-            # Handle different pattern cases
+            # Handle directory builds
+            if pattern.startswith("dir:"):
+                build_dir = pattern[4:]
+                if not str(rel_path).startswith(build_dir):
+                    exclude_patterns.append(str(rel_path))
+                continue
+
+            # Handle other patterns
             if (
                 (
                     pattern == "noapi"
@@ -195,7 +202,7 @@ if pattern:
                     and rel_path.parts[0] != "whatsnew"
                 )
                 or (
-                    single_doc
+                    single_doc_or_dir
                     and str(rel_path) != pattern
                     and rel_path.parts[-1] not in ["glossary.rst", "bibliography.rst"]
                 )
@@ -208,7 +215,8 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
     f.write(
         t.render(
             include_api=include_api,
-            single_doc=(pattern if single_doc else None),
+            single=single_doc_or_dir is not None,
+            pattern=pattern,
         )
     )
 # -- Options for HTML output ---------------------------------------------------
@@ -324,7 +332,7 @@ example_generated_dir = "gettingstarted/examples/gallery"
 # Check for the SPHINX_NOEXEC environment variable
 noexec = os.environ.get("SPHINX_NOEXEC") == "1"
 
-if not single_doc:
+if not single_doc_or_dir:
     # generate example only if were are in full doc mode
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,

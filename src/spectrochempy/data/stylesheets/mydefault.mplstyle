@@ -1,10 +1,10 @@
 
-_internal.classic_mode                   : True
+_internal.classic_mode                   : False
 
 agg.path.chunksize                       : 0
 animation.bitrate                        : -1
-animation.codec                          : mpeg4
-animation.convert_args                   :
+animation.codec                          : h264
+animation.convert_args                   : -layers, OptimizePlus
 animation.convert_path                   : convert
 animation.embed_limit                    : 20.0
 animation.ffmpeg_args                    :
@@ -12,13 +12,13 @@ animation.ffmpeg_path                    : ffmpeg
 animation.frame_format                   : png
 animation.html                           : none
 animation.writer                         : ffmpeg
-axes.autolimit_mode                      : round_numbers
-axes.axisbelow                           : False
+axes.autolimit_mode                      : data
+axes.axisbelow                           : line
 axes.edgecolor                           : k
 axes.facecolor                           : F0F0F0
-axes.formatter.limits                    : -7, 7
+axes.formatter.limits                    : -5, 6
 axes.formatter.min_exponent              : 0
-axes.formatter.offset_threshold          : 2
+axes.formatter.offset_threshold          : 4
 axes.formatter.use_locale                : False
 axes.formatter.use_mathtext              : False
 axes.formatter.useoffset                 : True
@@ -26,10 +26,10 @@ axes.grid                                : True
 axes.grid.axis                           : x
 axes.grid.which                          : major
 axes.labelcolor                          : blue
-axes.labelpad                            : 5.0
+axes.labelpad                            : 4.0
 axes.labelsize                           : 14.0
 axes.labelweight                         : normal
-axes.linewidth                           : 1.0
+axes.linewidth                           : 0.8
 axes.prop_cycle                          : cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
 axes.spines.bottom                       : True
 axes.spines.left                         : True
@@ -37,13 +37,13 @@ axes.spines.right                        : True
 axes.spines.top                          : True
 axes.titlecolor                          : auto
 axes.titlelocation                       : center
-axes.titlepad                            : 5.0
+axes.titlepad                            : 6.0
 axes.titlesize                           : 14.0
 axes.titleweight                         : normal
 axes.titley                              : 1.0
 axes.unicode_minus                       : True
-axes.xmargin                             : 0.0
-axes.ymargin                             : 0.0
+axes.xmargin                             : 0.05
+axes.ymargin                             : 0.05
 axes.zmargin                             : 0.05
 axes3d.automargin                        : False
 axes3d.grid                              : True
@@ -55,29 +55,29 @@ axes3d.yaxis.panecolor                   : (0.9, 0.9, 0.9, 0.5)
 axes3d.zaxis.panecolor                   : (0.925, 0.925, 0.925, 0.5)
 
 boxplot.bootstrap                        : None
-boxplot.boxprops.color                   : b
+boxplot.boxprops.color                   : black
 boxplot.boxprops.linestyle               : -
 boxplot.boxprops.linewidth               : 1.0
-boxplot.capprops.color                   : k
+boxplot.capprops.color                   : black
 boxplot.capprops.linestyle               : -
 boxplot.capprops.linewidth               : 1.0
-boxplot.flierprops.color                 : b
+boxplot.flierprops.color                 : black
 boxplot.flierprops.linestyle             : none
 boxplot.flierprops.linewidth             : 1.0
-boxplot.flierprops.marker                : +
-boxplot.flierprops.markeredgecolor       : k
+boxplot.flierprops.marker                : o
+boxplot.flierprops.markeredgecolor       : black
 boxplot.flierprops.markeredgewidth       : 1.0
-boxplot.flierprops.markerfacecolor       : auto
+boxplot.flierprops.markerfacecolor       : none
 boxplot.flierprops.markersize            : 6.0
 boxplot.meanline                         : False
-boxplot.meanprops.color                  : r
-boxplot.meanprops.linestyle              : -
+boxplot.meanprops.color                  : C2
+boxplot.meanprops.linestyle              : --
 boxplot.meanprops.linewidth              : 1.0
-boxplot.meanprops.marker                 : s
-boxplot.meanprops.markeredgecolor        : k
-boxplot.meanprops.markerfacecolor        : r
+boxplot.meanprops.marker                 : ^
+boxplot.meanprops.markeredgecolor        : C2
+boxplot.meanprops.markerfacecolor        : C2
 boxplot.meanprops.markersize             : 6.0
-boxplot.medianprops.color                : r
+boxplot.medianprops.color                : C1
 boxplot.medianprops.linestyle            : -
 boxplot.medianprops.linewidth            : 1.0
 boxplot.notch                            : False
@@ -87,8 +87,8 @@ boxplot.showcaps                         : True
 boxplot.showfliers                       : True
 boxplot.showmeans                        : False
 boxplot.vertical                         : True
-boxplot.whiskerprops.color               : b
-boxplot.whiskerprops.linestyle           : --
+boxplot.whiskerprops.color               : black
+boxplot.whiskerprops.linestyle           : -
 boxplot.whiskerprops.linewidth           : 1.0
 boxplot.whiskers                         : 1.5
 
@@ -97,17 +97,17 @@ contour.corner_mask                      : True
 contour.linewidth                        : None
 contour.negative_linestyle               : dashed
 
-date.autoformatter.day                   : %b %d %Y
-date.autoformatter.hour                  : %H:%M:%S
-date.autoformatter.microsecond           : %H:%M:%S.%f
-date.autoformatter.minute                : %H:%M:%S.%f
-date.autoformatter.month                 : %b %Y
-date.autoformatter.second                : %H:%M:%S.%f
+date.autoformatter.day                   : %Y-%m-%d
+date.autoformatter.hour                  : %m-%d %H
+date.autoformatter.microsecond           : %M:%S.%f
+date.autoformatter.minute                : %d %H:%M
+date.autoformatter.month                 : %Y-%m
+date.autoformatter.second                : %H:%M:%S
 date.autoformatter.year                  : %Y
 date.converter                           : auto
 date.interval_multiples                  : True
 
-errorbar.capsize                         : 3.0
+errorbar.capsize                         : 0.0
 
 figure.autolayout                        : False
 figure.constrained_layout.h_pad          : 0.04167
@@ -117,26 +117,26 @@ figure.constrained_layout.w_pad          : 0.04167
 figure.constrained_layout.wspace         : 0.02
 figure.dpi                               : 96.0
 figure.edgecolor                         : white
-figure.facecolor                         : 0.75
+figure.facecolor                         : white
 figure.figsize                           : 5.5, 3.5
 figure.frameon                           : True
 figure.hooks                             :
-figure.labelsize                         : medium
+figure.labelsize                         : large
 figure.labelweight                       : normal
-figure.subplot.bottom                    : 0.1
+figure.subplot.bottom                    : 0.11
 figure.subplot.hspace                    : 0.2
 figure.subplot.left                      : 0.125
 figure.subplot.right                     : 0.9
-figure.subplot.top                       : 0.9
+figure.subplot.top                       : 0.88
 figure.subplot.wspace                    : 0.2
-figure.titlesize                         : medium
+figure.titlesize                         : large
 figure.titleweight                       : normal
-font.cursive                             : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive
+font.cursive                             : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, Comic Neue, Comic Sans MS, cursive
 font.family                              : monospace
-font.fantasy                             : Comic Sans MS, Chicago, Charcoal, ImpactWestern, xkcd script, fantasy
-font.monospace                           : DejaVu Sans Mono, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace
-font.sans-serif                          : DejaVu Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
-font.serif                               : DejaVu Serif, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
+font.fantasy                             : Chicago, Charcoal, Impact, Western, xkcd script, fantasy
+font.monospace                           : DejaVu Sans Mono, Bitstream Vera Sans Mono, Computer Modern Typewriter, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace
+font.sans-serif                          : DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
+font.serif                               : DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 font.size                                : 14.0
 font.stretch                             : normal
 font.style                               : normal
@@ -145,32 +145,32 @@ font.weight                              : normal
 
 grid.alpha                               : 1.0
 grid.color                               : .85
-grid.linestyle                           : :
-grid.linewidth                           : 0.5
+grid.linestyle                           : -
+grid.linewidth                           : 0.8
 
-hatch.color                              : k
+hatch.color                              : black
 hatch.linewidth                          : 1.0
 hist.bins                                : 10
 
 image.aspect                             : equal
 image.cmap                               : viridis
 image.composite_image                    : True
-image.interpolation                      : bilinear
+image.interpolation                      : auto
 image.interpolation_stage                : auto
 image.lut                                : 256
 image.origin                             : upper
-image.resample                           : False
+image.resample                           : True
 
-keymap.back                              : left, c, backspace
+keymap.back                              : left, c, backspace, MouseButton.BACK
 keymap.copy                              : ctrl+c, cmd+c
-keymap.forward                           : right, v
+keymap.forward                           : right, v, MouseButton.FORWARD
 keymap.fullscreen                        : f, ctrl+f
 keymap.grid                              : g
 keymap.grid_minor                        : G
 keymap.help                              : f1
 keymap.home                              : h, r, home
 keymap.pan                               : p
-keymap.quit                              : ctrl+w, cmd+w
+keymap.quit                              : ctrl+w, cmd+w, q
 keymap.quit_all                          :
 keymap.save                              : s, ctrl+s
 keymap.xscale                            : k, L
@@ -180,38 +180,38 @@ keymap.zoom                              : o
 legend.borderaxespad                     : 0.5
 legend.borderpad                         : 0.4
 legend.columnspacing                     : 2.0
-legend.edgecolor                         : inherit
+legend.edgecolor                         : 0.8
 legend.facecolor                         : inherit
-legend.fancybox                          : False
+legend.fancybox                          : True
 legend.fontsize                          : 11.0
-legend.framealpha                        : None
+legend.framealpha                        : 0.8
 legend.frameon                           : True
 legend.handleheight                      : 0.7
 legend.handlelength                      : 2.0
 legend.handletextpad                     : 0.8
 legend.labelcolor                        : None
 legend.labelspacing                      : 0.5
-legend.loc                               : upper right
+legend.loc                               : best
 legend.markerscale                       : 1.0
-legend.numpoints                         : 2
-legend.scatterpoints                     : 3
+legend.numpoints                         : 1
+legend.scatterpoints                     : 1
 legend.shadow                            : False
 legend.title_fontsize                    : None
 lines.antialiased                        : True
 lines.color                              : b
 lines.dash_capstyle                      : butt
 lines.dash_joinstyle                     : round
-lines.dashdot_pattern                    : 3.0, 5.0, 1.0, 5.0
-lines.dashed_pattern                     : 6.0, 6.0
-lines.dotted_pattern                     : 1.0, 3.0
+lines.dashdot_pattern                    : 6.4, 1.6, 1.0, 1.6
+lines.dashed_pattern                     : 3.7, 1.6
+lines.dotted_pattern                     : 1.0, 1.65
 lines.linestyle                          : -
-lines.linewidth                          : 1.0
+lines.linewidth                          : 1.5
 lines.marker                             : None
 lines.markeredgecolor                    : auto
-lines.markeredgewidth                    : 0.5
+lines.markeredgewidth                    : 1.0
 lines.markerfacecolor                    : auto
 lines.markersize                         : 6.0
-lines.scale_dashes                       : False
+lines.scale_dashes                       : True
 lines.solid_capstyle                     : projecting
 lines.solid_joinstyle                    : round
 
@@ -225,17 +225,17 @@ mathtext.fallback                        : cm
 mathtext.fontset                         : custom
 mathtext.it                              : monospace:italic
 mathtext.rm                              : monospace
-mathtext.sf                              : sans\-serif
+mathtext.sf                              : sans
 mathtext.tt                              : monospace
 
 patch.antialiased                        : True
 patch.edgecolor                          : k
 patch.facecolor                          : 4C72B0
-patch.force_edgecolor                    : True
+patch.force_edgecolor                    : False
 patch.linewidth                          : 0.3
 path.effects                             :
 path.simplify                            : True
-path.simplify_threshold                  : 0.1111111111111111
+path.simplify_threshold                  : 0.111111111111
 path.sketch                              : None
 path.snap                                : True
 pcolor.shading                           : auto
@@ -255,9 +255,9 @@ ps.useafm                                : False
 ps.usedistiller                          : None
 
 savefig.bbox                             : standard
-savefig.dpi                              : 100.0
-savefig.edgecolor                        : w
-savefig.facecolor                        : w
+savefig.dpi                              : figure
+savefig.edgecolor                        : auto
+savefig.facecolor                        : auto
 savefig.format                           : png
 savefig.orientation                      : portrait
 savefig.pad_inches                       : 0.1
@@ -271,7 +271,7 @@ svg.image_inline                         : True
 
 text.antialiased                         : True
 text.color                               : .15
-text.hinting                             : auto
+text.hinting                             : force_autohint
 text.hinting_factor                      : 8
 text.kerning_factor                      : 0
 text.latex.preamble                      :
@@ -282,47 +282,47 @@ xaxis.labellocation                      : center
 xtick.alignment                          : center
 xtick.bottom                             : True
 xtick.color                              : .15
-xtick.direction                          : in
+xtick.direction                          : out
 xtick.labelbottom                        : True
 xtick.labelcolor                         : inherit
 xtick.labelsize                          : 14.0
 xtick.labeltop                           : False
 xtick.major.bottom                       : True
-xtick.major.pad                          : 4.0
-xtick.major.size                         : 4.0
+xtick.major.pad                          : 3.5
+xtick.major.size                         : 3.5
 xtick.major.top                          : True
-xtick.major.width                        : 0.5
+xtick.major.width                        : 0.8
 xtick.minor.bottom                       : True
 xtick.minor.ndivs                        : auto
-xtick.minor.pad                          : 4.0
+xtick.minor.pad                          : 3.4
 xtick.minor.size                         : 2.0
 xtick.minor.top                          : True
 xtick.minor.visible                      : False
-xtick.minor.width                        : 0.5
-xtick.top                                : True
+xtick.minor.width                        : 0.6
+xtick.top                                : False
 
 yaxis.labellocation                      : center
-ytick.alignment                          : center
+ytick.alignment                          : center_baseline
 ytick.color                              : .15
-ytick.direction                          : in
+ytick.direction                          : out
 ytick.labelcolor                         : inherit
 ytick.labelleft                          : True
 ytick.labelright                         : False
 ytick.labelsize                          : 14.0
 ytick.left                               : True
 ytick.major.left                         : True
-ytick.major.pad                          : 4.0
+ytick.major.pad                          : 3.5
 ytick.major.right                        : True
-ytick.major.size                         : 4.0
-ytick.major.width                        : 0.5
+ytick.major.size                         : 3.5
+ytick.major.width                        : 0.8
 ytick.minor.left                         : True
 ytick.minor.ndivs                        : auto
-ytick.minor.pad                          : 4.0
+ytick.minor.pad                          : 3.4
 ytick.minor.right                        : True
 ytick.minor.size                         : 2.0
 ytick.minor.visible                      : False
-ytick.minor.width                        : 0.5
-ytick.right                              : True
+ytick.minor.width                        : 0.6
+ytick.right                              : False
 
 
 ##

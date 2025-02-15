@@ -1171,7 +1171,8 @@ class PlotPreferences(MetaConfigurable):
                             )
                             value = tuple(map(str.strip, value))
                     else:
-                        value = type(self.traits()[name_].default_value)(eval(value))  # noqa: S307
+                        val = eval(value) if value else 0  # noqa: S307
+                        value = type(self.traits()[name_].default_value)(val)
                 except Exception as e:
                     raise e
                 try:
