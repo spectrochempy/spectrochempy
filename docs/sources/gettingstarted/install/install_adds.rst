@@ -107,8 +107,8 @@ If you encounter issues:
 See Also
 --------
 * :doc:`install_sources` - Building from source
-* :doc:`../../userguide/plotting` - Plotting configuration
-* :doc:`../../userguide/io` - Data import/export
+* :doc:`../../userguide/plotting/plotting` - Plotting configuration
+* :doc:`../../userguide/importexport/import` - Data import/export
 
 .. toctree::
    :hidden:
