@@ -215,7 +215,7 @@ with open(os.path.join(SRC, "index.rst"), "w", encoding="utf-8") as f:
     f.write(
         t.render(
             include_api=include_api,
-            single=single_doc_or_dir is not None,
+            single=single_doc_or_dir,
             pattern=pattern,
         )
     )
