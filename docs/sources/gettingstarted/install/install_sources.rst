@@ -1,9 +1,9 @@
 .. _install_sources:
 
 Installation from Sources
-=========================
+========================
 
-.. contents:: Table of Contents
+.. contents:: Contents
    :local:
    :depth: 2
 
@@ -40,44 +40,35 @@ Installation Methods
 
 .. tabs::
 
-    .. tab:: Using mamba (recommended)
+    .. tab:: mamba (recommended)
 
-        1. Install Mambaforge from `miniforge <https://github.com/conda-forge/miniforge>`_
+        .. code-block:: bash
 
-        2. Create and activate environment:
-
-        .. sourcecode:: bash
-
+            # Install Mambaforge
+            # Get it from: https://github.com/conda-forge/miniforge#mambaforge
+            
+            # Create environment
             mamba env create -n scpy -f environments/environment.yml
             mamba activate scpy
+            
+            # Install package
+            python -m pip install -e . --no-deps
 
-        3. Install SpectroChemPy:
+    .. tab:: pip
 
-        .. sourcecode:: bash
+        .. code-block:: bash
 
-            python -m pip install . --no-deps
-
-    .. tab:: Using pip
-
-        1. Create virtual environment:
-
-        .. sourcecode:: bash
-
+            # Create environment
             python -m venv scpy-env
             source scpy-env/bin/activate  # Linux/macOS
             # or
-            scpy-env\Scripts\activate  # Windows
-
-        2. Install with optional components:
-
-        .. sourcecode:: bash
-         
-            python -m pip install .
-
-
+            scpy-env\Scripts\activate     # Windows
+            
+            # Install package
+            python -m pip install -e .
 
 Verifying Installation
--------------------
+----------------------
 
 .. sourcecode:: python
 
@@ -85,7 +76,7 @@ Verifying Installation
     print(version)
 
 Updating SpectroChemPy
--------------------
+----------------------
 
 Update source code:
 

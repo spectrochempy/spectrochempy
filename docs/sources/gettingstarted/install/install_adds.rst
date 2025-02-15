@@ -115,6 +115,6 @@ See Also
    :maxdepth: 1
 
    install_sources
-   ../../userguide/plotting
-   ../../userguide/io
+   ../../userguide/plotting/plotting
+   ../../userguide/importexport/import
    ..//getting_help
