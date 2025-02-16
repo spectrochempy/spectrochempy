@@ -1,0 +1,2462 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mathematical operations &mdash; SpectroChemPy v0.6.11.dev82 0.6.11.dev82 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/spectrochempy.css?v=08b5a373" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/spectrochempy.css?v=08b5a373" />
+
+  
+    <link rel="shortcut icon" href="../../_static/scpy.ico"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5253294d"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Filtering, Smoothing and Denoising" href="smoothing.html" />
+    <link rel="prev" title="Basic transformations" href="transformations.html" />
+ 
+<html data-versions="0.6.10">
+<script src="../../_static/js/versions.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/scpy.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+<div class="version-selector">
+    <span class="fa fa-book"> SpectroChemPy version:</span>
+    <select id="versions-dropdown">
+    </select>
+</div>
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/latest.html">What’s new in revision 0.6.11.dev</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#new-features">New features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#dependency-updates">Dependency updates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/latest.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../whatsnew/index.html">Release notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-6">Version 0.6</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/latest.html">What’s new in revision 0.6.11.dev</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#dependency-updates">Dependency updates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/latest.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.10.html">What’s new in revision 0.6.10</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.10.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.10.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.10.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.9.html">What’s new in revision 0.6.9</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.8.html">What’s new in revision 0.6.8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.8.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.8.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.8.html#breaking-changes">Breaking changes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.7.html">What’s new in revision 0.6.7</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.7.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.6.html">What’s new in revision 0.6.6</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.6.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.6.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.5.html">What’s new in revision 0.6.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.4.html">What’s new in revision 0.6.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.4.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.4.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.4.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.4.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.3.html">What’s new in revision 0.6.3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.3.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.2.html">What’s new in revision 0.6.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.2.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.2.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.2.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.6.1.html">What’s new in revision 0.6.1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.1.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.6.1.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-5">Version 0.5</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.5.html">What’s new in revision 0.5.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.4.html">What’s new in revision 0.5.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.4.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.3.html">What’s new in revision 0.5.3</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.3.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.3.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.2.html">What’s new in revision 0.5.2</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.1.html">What’s new in revision 0.5.1</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.1.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.1.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.5.0.html">What’s new in revision 0.5.0 [2023-01-11]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.5.0.html#breaking-changes">Breaking changes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-4">Version 0.4</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.10.html">What’s new in revision 0.4.10 [2023-01-07]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.10.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.9.html">What’s new in revision 0.4.9 [2023-01-05]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.9.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.7.html">What’s new in revision 0.4.7 [2022-05-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.6.html">What’s new in revision 0.4.6 [2022-05-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.6.html#bug-fixes">Bug fixes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.6.html#deprecations">Deprecations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.5.html">What’s new in revision 0.4.5 [2022-04-09]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.4.html">What’s new in revision 0.4.4 [2022-03-22]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.4.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.3.html">What’s new in revision 0.4.3 [2022-03-20]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.3.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.2.html">What’s new in revision 0.4.2 [2022-03-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.2.html#deprecations">Deprecations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.4.1.html">What’s new in revision 0.4.1 [2022-03-14]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.1.html#breaking-changes">Breaking changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.1.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.4.1.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-3">Version 0.3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.3.3.html">What’s new in revision 0.3.3 [2022-03-9]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.3.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.3.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.3.2.html">What’s new in revision 0.3.2 [2022-01-31]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.2.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.2.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.3.1.html">What’s new in revision 0.3.1 [2022-01-21]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.1.html#new-features">New features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.3.0.html">What’s new in revision 0.3.0 [2022-01-20]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.3.0.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-2">Version 0.2</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.23.html">What’s new in revision 0.2.23 [2022-01-16]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.23.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.22.html">What’s new in revision 0.2.22 [2022-01-10]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.22.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.21.html">What’s new in revision 0.2.21 [2022-01-09]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.21.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.21.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.18.html">What’s new in revision 0.2.18 [2022-01-05]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.18.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.18.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.17.html">What’s new in revision 0.2.17 [2021-11-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.17.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.17.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.16.html">What’s new in revision 0.2.16 [2021-11-11]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.16.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.16.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.15.html">What’s new in revision 0.2.15 [2021-03-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.15.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.15.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.14.html">What’s new in revision 0.2.14 [2021-02-25]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.14.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.14.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.13.html">What’s new in revision 0.2.13 [2021-02-23]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.13.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.12.html">What’s new in revision 0.2.12 [2021-02-23]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.12.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.11.html">What’s new in revision 0.2.11 [2021-02-17]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.11.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.10.html">What’s new in revision 0.2.10 [2021-02-14]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.10.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.10.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.9.html">What’s new in revision 0.2.9 [2021-11-29]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.9.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.8.html">What’s new in revision 0.2.8</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.8.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.8.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.7.html">What’s new in revision 0.2.7</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.7.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.7.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.6.html">What’s new in revision 0.2.6</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.6.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.6.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.5.html">What’s new in revision 0.2.5</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.5.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.5.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.4.html">What’s new in revision 0.2.4</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.4.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.4.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.2.0.html">What’s new in revision 0.2.0</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.0.html#new-features">New features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../whatsnew/v0.2.0.html#bug-fixes">Bug fixes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../whatsnew/index.html#version-0-1">Version 0.1</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../whatsnew/v0.1.0.html">Revisions 0.1.0 to 0.1.19</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/whyscpy.html">Why <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code>  ?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/whyscpy.html#designed-for-open-science">Designed for Open Science</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/whyscpy.html#open-source-software-on-an-open-source-platform">Open Source Software on an Open-Source Platform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/whyscpy.html#powered-by-python">Powered by Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/whyscpy.html#why-not-spectrochempy">Why NOT <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code> ?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/overview.html">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/overview.html#NDDataset,-the-main-object">NDDataset, the main object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Display-dataset-information">Display dataset information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Plotting-a-dataset">Plotting a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Slicing-a-dataset">Slicing a dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Maths-on-datasets">Maths on datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Processing-a-dataset">Processing a dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/overview.html#Smoothing">Smoothing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/overview.html#Baseline-correction">Baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/overview.html#Analysis">Analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/overview.html#IRIS-processing">IRIS processing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html">Core functionalities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html#how-to-use-nddataset">How to use NDDataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html#import-export">Import / Export</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html#plotting-datasets">Plotting datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/index.html#project-management">Project Management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/index.html">How to use NDDataset</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_a_create_dataset.html">NDDataset creation and plotting example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_b_coordinates.html">NDDataset coordinates example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html">Units manipulation examples</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/index.html">Import / Export</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_generic_read.html">Reading datasets</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_omnic.html">Loading an IR (omnic SPG) experimental file</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_IR_from_opus.html">Loading Bruker OPUS files</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_nmr_from_bruker.html">Loading of experimental 1D NMR data</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_raman_from_labspec.html">Loading RAMAN experimental file</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/c_importer/plot_read_renishaw.html">Reading Renishaw WiRE files</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/index.html">Plotting datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plot_multiple.html">Using <code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_multiple</span></code> to plot several datasets on the same figure</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/d_plotting/plot_plotting.html">Introduction to the plotting librairie</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/index.html">Project Management</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_core/e_project/plot_project.html">Project creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html">Analysis NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#decomposition">Decomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#cross-decomposition">Cross-decomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/index.html#curvefitting">Curvefitting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/index.html">Decomposition</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa.html">EFA example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_efa_keller_massart.html">EFA (Keller and Massart original example)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_fast_ica.html">FastICA example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_iris.html">2D-IRIS analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_chrom1.html">MCR-ALS example (adapted from Jaumot et al. 2005)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_mcrals_kinetics.html">MCR-ALS with kinetic constraints</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_nmf.html">NMF analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_iris.html">PCA example (iris dataset)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_pca_spec.html">PCA analysis example</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/a_decomposition/plot_simplisma.html">SIMPLISMA example</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/index.html">Cross-decomposition</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/b_crossdecomposition/plot_pls.html">PLS regression example</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/index.html">Curvefitting</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html">Fitting 1D dataset</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_lstsq_single_equation.html">Solve a linear equation using LSTSQ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html">Processing NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#apodization">Apodization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#baseline">Baseline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#denoising">Denoising</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#filtering">filtering</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#processing-nmr-datasets">Processing NMR datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/index.html#processing-raman-datasets">Processing Raman datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/index.html">Apodization</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_em.html">Exponential window multiplication</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/apodization/plot_proc_sp.html">Sine bell and squared Sine bell window multiplication</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/d_baseline/index.html">Baseline</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/d_baseline/plot_baseline_correction.html">NDDataset baseline correction</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/index.html">Denoising</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_denoising.html">Denoising a 2D Raman spectrum</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/denoising/plot_despike.html">Removing cosmic ray spikes from a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/index.html">filtering</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/filtering/plot_filter.html">Savitky-Golay and Whittaker-Eilers smoothing of a Raman spectrum</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/index.html">Processing NMR datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_cp_nmr.html">Analysis CP NMR spectra</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr.html">Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/nmr/plot_processing_nmr_relax.html">Processing Relaxation measurement</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/index.html">Processing Raman datasets</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../gettingstarted/examples/gallery/auto_examples_processing/raman/plot_processing_raman.html">Processing RAMAN spectra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted/install/index.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/index.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gettingstarted/install/index.html#installation-of-spectrochempy">Installation of <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_mac.html">Installation Guide for Mac OSX</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_mac.html#installation-using-conda">Installation using Conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_mac.html#installation-using-pip">Installation using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_mac.html#check-the-installation">Check the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_win.html">Installation Guide for Windows</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_win.html#installation-using-conda">Installation using Conda</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_win.html#installation-using-pip">Installation using pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_win.html#check-the-installation">Check the Installation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_sources.html">Installation from sources (master or develop versions)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#installing-git">Installing git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#cloning-the-repository-locally">Cloning the repository locally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#create-a-conda-environment">Create a conda environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#install-spectrochempy-in-this-environment">Install <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code> in this environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_sources.html#updating-spectrochempy">Updating <code class="xref py py-obj docutils literal notranslate"><span class="pre">SpectroChemPy</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_colab.html">Install in Google Colaboratory (Colab)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_colab.html#load-and-install-spectrochempy-with-pip">Load and install SpectroChemPy with pip</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_colab.html#load-data-files">Load data files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../gettingstarted/install/install_adds.html">Install optional dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_adds.html#examples-and-test-data">Examples and test data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_adds.html#cantera">Cantera</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../gettingstarted/install/install_adds.html#qt">QT</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User's Guide &amp; Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction/introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/introduction.html#About-this-user's-guide">About this user’s guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/introduction.html#How-to-get-started">How to get started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../introduction/introduction.html#Writing-and-executing-SpectroChemPy-scripts">Writing and executing SpectroChemPy scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../introduction/introduction.html#Loading-the-API">Loading the API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction/introduction.html#Where-to-go-next?">Where to go next?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/api.html">API Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/api.html#General-information">General information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/api.html#Loglevel">Loglevel</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../api/api.html#Error-handling">Error handling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../objects/index.html">Core objects</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../objects/index.html#nddataset">NDDataset</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../objects/dataset/dataset.html">The NDDataset object</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#1D-Dataset-(unidimensional-dataset)">1D-Dataset (unidimensional dataset)</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../objects/dataset/dataset.html#nD-Dataset-(multidimensional-dataset)">nD-Dataset (multidimensional dataset)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#About-the-dates-and-times">About the dates and times</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#About-the-history-attribute">About the <code class="docutils literal notranslate"><span class="pre">history</span></code> attribute</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Units">Units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Coordinates">Coordinates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Labels">Labels</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../objects/dataset/dataset.html#More-insight-on-coordinates">More insight on coordinates</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Sharing-coordinates-between-dimensions">Sharing coordinates between dimensions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Setting-coordinates-using-set_coordset">Setting coordinates using <code class="docutils literal notranslate"><span class="pre">set_coordset</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../objects/dataset/dataset.html#Syntax-1">Syntax 1</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../objects/dataset/dataset.html#Syntax-2">Syntax 2</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Adding-several-coordinates-to-a-single-dimension">Adding several coordinates to a single dimension</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Summary-of-the-coordinate-setting-syntax">Summary of the coordinate setting syntax</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../objects/dataset/dataset.html#Methods-to-create-NDDataset">Methods to create NDDataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Create-a-dataset-from-a-function">Create a dataset from a function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Using-numpy-like-constructors-of-NDDatasets">Using numpy-like constructors of NDDatasets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Copying-existing-NDDataset">Copying existing NDDataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/dataset/dataset.html#Importing-from-external-dataset">Importing from external dataset</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/index.html#project">Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../objects/project/project.html">Project management</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../objects/project/project.html#Project-creation">Project creation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/project/project.html#Remove-an-element-from-a-project">Remove an element from a project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/project/project.html#Get-project's-elements">Get project’s elements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../objects/project/project.html#Saving-and-loading-projects">Saving and loading projects</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../objects/project/project.html#Saving">Saving</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../objects/project/project.html#Loading">Loading</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../objects/index.html#script">Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../importexport/index.html">Import &amp; Export</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../importexport/import.html">Import Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/import.html#Dialog-boxes">Dialog boxes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/import.html#Import-with-explicit-directory-or-file-pathnames">Import with explicit directory or file pathnames</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../importexport/import.html#A-good-practice:-use-relative-paths">A good practice: use relative paths</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../importexport/import.html#Good-practice:-use-os-or-pathlib-modules">Good practice: use <code class="docutils literal notranslate"><span class="pre">os</span></code> or <code class="docutils literal notranslate"><span class="pre">pathlib</span></code> modules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/import.html#Another-default-search-directory:-datadir">Another default search directory: <code class="docutils literal notranslate"><span class="pre">datadir</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../importexport/importIR.html">Import IR Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/importIR.html#Supported-file-formats">Supported file formats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/importIR.html#Import-of-OMNIC-files">Import of OMNIC files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../importexport/importIR.html#a)-import-spg-file">a) import spg file</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../importexport/importIR.html#Acquisition-dates-and-y-axis">Acquisition dates and <code class="docutils literal notranslate"><span class="pre">y</span></code> axis</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../importexport/importIR.html#The-order-of-spectra">The order of spectra</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../importexport/importIR.html#b)-Import-of-.spa-files">b) Import of .spa files</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/importIR.html#Import-of-Bruker-OPUS-files">Import of Bruker OPUS files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importexport/importIR.html#Import/Export-of-JCAMP-DX-files">Import/Export of JCAMP-DX files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Processing</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="slicing.html">Slicing NDDatasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="slicing.html#What-is-the-slicing-?">What is the slicing ?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="slicing.html#Slicing-of-NDDatasets">Slicing of NDDatasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="slicing.html#Slicing-with-indexes">Slicing with indexes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="slicing.html#Slicing-with-coordinates">Slicing with coordinates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="transformations.html">Basic transformations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="transformations.html#Masking-data">Masking data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.html#Transposition">Transposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="transformations.html#Changing-units">Changing units</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Mathematical operations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Ufuncs-(Universal-Numpy's-functions)">Ufuncs (Universal Numpy’s functions)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#List-of-UFuncs-working-on-NDDataset:">List of UFuncs working on <code class="docutils literal notranslate"><span class="pre">NDDataset</span></code>:</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Functions-affecting-magnitudes-of-the-number-but-keeping-units">Functions affecting magnitudes of the number but keeping units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Functions-affecting-magnitudes-of-the-number-but-also-units">Functions affecting magnitudes of the number but also units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Functions-that-require-no-units-or-dimensionless-units-for-inputs.-Returns-dimensionless-objects.">Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Functions-that-return-numpy-arrays-(Work-only-for-NDDataset)">Functions that return numpy arrays (<em>Work only for NDDataset</em>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Trigonometric-functions.-Require-unitless-data-or-radian-units.">Trigonometric functions. Require unitless data or radian units.</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Hyperbolic-functions">Hyperbolic functions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Unit-conversions">Unit conversions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Binary-Ufuncs">Binary Ufuncs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Usage">Usage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Unary-functions">Unary functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id1">Functions affecting magnitudes of the number but keeping units</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id2">Functions affecting magnitudes of the number but also units</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id3">Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id4">Functions that return numpy arrays (<em>Work only for NDDataset</em>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#Trigonometric-functions.-Require-dimensionless/unitless-dataset-or-radians.">Trigonometric functions. Require dimensionless/unitless dataset or radians.</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#Angle-units-conversion">Angle units conversion</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id5">Hyperbolic functions</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#Binary-functions">Binary functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#Arithmetic">Arithmetic</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Complex-or-hypercomplex-NDDatasets">Complex or hypercomplex NDDatasets</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="smoothing.html">Filtering, Smoothing and Denoising</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="smoothing.html#The-Filter-processor">The <code class="docutils literal notranslate"><span class="pre">Filter</span></code> processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="smoothing.html#Moving-average">Moving average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="smoothing.html#Convolution-with-window-filters">Convolution with window filters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="smoothing.html#Savitzky-Golay-filter">Savitzky-Golay filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="smoothing.html#Whittaker-Eilers-filter">Whittaker-Eilers filter</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="smoothing.html#Filtering-using-API-or-NDDataset-methods.">Filtering using API or NDDataset methods.</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="smoothing.html#The-smooth-method">The <code class="docutils literal notranslate"><span class="pre">smooth</span></code> method</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="smoothing.html#Window-size-influence">Window size influence</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="smoothing.html#Convolution-with-windows">Convolution with windows</a></li>
+<li class="toctree-l4"><a class="reference internal" href="smoothing.html#Savitzky-Golay-filter:savgol">Savitzky-Golay filter:<code class="docutils literal notranslate"><span class="pre">savgol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="smoothing.html#Whittaker-eilers-filter-:-whittaker">Whittaker-eilers filter : <code class="docutils literal notranslate"><span class="pre">whittaker</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="baseline.html">Baseline corrections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="baseline.html#The-Baseline-processor">The <code class="docutils literal notranslate"><span class="pre">Baseline</span></code> processor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="baseline.html#How-it-works?">How it works?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="baseline.html#Example">Example</a></li>
+<li class="toctree-l4"><a class="reference internal" href="baseline.html#Overview-of-the-other-model">Overview of the other model</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="baseline.html#Polynomial">Polynomial</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="baseline.html#Multivariate-approach">Multivariate approach</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="baseline.html#Baseline-correction-using-NDDataset-or-API-methods">Baseline correction using NDDataset or API methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="baseline.html#Detrending">Detrending</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="baseline.html#Constant-trend">Constant trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="baseline.html#Linear-trend">Linear trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="baseline.html#Polynomial-trend">Polynomial trend</a></li>
+<li class="toctree-l5"><a class="reference internal" href="baseline.html#Detrend-independently-on-several-data-segment">Detrend independently on several data segment</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="baseline.html#basc">basc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="baseline.html#Rubberband">Rubberband</a></li>
+<li class="toctree-l4"><a class="reference internal" href="baseline.html#Code-snippet-for-'advanced'-baseline-correction">Code snippet for ‘advanced’ baseline correction</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="denoising.html">Denoising</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="denoising.html#Denoising-2D-spectra">Denoising 2D spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="denoising.html#Removing-cosmic-rays-spike-from-Raman-spectra">Removing cosmic rays spike from Raman spectra</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="denoising.html#Median-filter">Median filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="denoising.html#despike-method"><code class="docutils literal notranslate"><span class="pre">despike</span></code> method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="apodization.html">Apodization</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="apodization.html#Introduction">Introduction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="apodization.html#Plot-of-the-Real-and-Imaginary-original-data">Plot of the Real and Imaginary original data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="apodization.html#Exponential-multiplication">Exponential multiplication</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="apodization.html#Shifted-apodization">Shifted apodization</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="apodization.html#Other-apodization-functions">Other apodization functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="apodization.html#Gaussian-Lorentzian-apodization">Gaussian-Lorentzian apodization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="apodization.html#Shifted-Gaussian-Lorentzian-apodization">Shifted Gaussian-Lorentzian apodization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="apodization.html#Apodization-using-sine-window-multiplication">Apodization using sine window multiplication</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="td_baseline.html">Time domain baseline correction (NMR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fourier.html">One-dimensional (1D) Fourier transformation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="fourier.html#FFT-of-1D-NMR-spectra">FFT of 1D NMR spectra</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fourier.html#Preprocessing">Preprocessing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="fourier.html#Line-broadening">Line broadening</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fourier.html#Zero-filling">Zero-filling</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fourier.html#Time-domain-baseline-correction">Time domain baseline correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fourier.html#Magnitude-calculation">Magnitude calculation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="fourier.html#Power-spectrum">Power spectrum</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="fourier.html#Real-Fourier-transform">Real Fourier transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interferogram.html">FTIR interferogram processing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="interferogram.html#Comparison-with-the-OMNIC-processing.">Comparison with the OMNIC processing.</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="alignment.html">Alignment of datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="alignment.html#Example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="alignment.html#Methods-for-alignments">Methods for alignments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="alignment.html#inner-method"><code class="docutils literal notranslate"><span class="pre">inner</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="alignment.html#first-method"><code class="docutils literal notranslate"><span class="pre">first</span></code> method</a></li>
+<li class="toctree-l4"><a class="reference internal" href="alignment.html#last-method"><code class="docutils literal notranslate"><span class="pre">last</span></code> method</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="alignment.html#Alignment-along-several-dimensions">Alignment along several dimensions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis/index.html">Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/peak_finding.html">Peak Maxima Finding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/peak_finding.html#Loading-an-experimental-dataset">Loading an experimental dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/peak_finding.html#Find-maxima-by-manual-inspection-of-the-plot">Find maxima by manual inspection of the plot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/peak_finding.html#Find-maxima-with-an-automated-method:-find_peaks()">Find maxima with an automated method: <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/peak_finding.html#Default-behaviour">Default behaviour</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/peak_finding.html#Options-of-find_peaks()">Options of <code class="docutils literal notranslate"><span class="pre">find_peaks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/peak_finding.html#More-on-peak-properties">More on peak properties</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/peak_finding.html#Prominence">Prominence</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/peak_finding.html#Width">Width</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/peak_finding.html#A-code-snippet-to-display-properties">A code snippet to display properties</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/peak_integration.html">Peak Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/fitting.html">Fitting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/fitting.html#Solving-a-linear-equation-using-the-least-square-method-(LSTSQ)">Solving a linear equation using the least square method (LSTSQ)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/fitting.html#Least-square-with-non-negativity-constraint-(NNLS)">Least square with non-negativity constraint (NNLS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/fitting.html#NDDataset-modelling-using-non-linear-optimisation-method">NDDataset modelling using non-linear optimisation method</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/fitting.html#Baseline-correction">Baseline correction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/fitting.html#Peak-finding">Peak finding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/fitting.html#Fitting-script">Fitting script</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/fitting.html#Syntax-for-parameters-definition">Syntax for parameters definition</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/pca.html">Principal Component Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/pca.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/pca.html#Loading-of-the-dataset">Loading of the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/pca.html#Running-a-PCA">Running a PCA</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/pls.html">Partial Least Squares Regression (PLSRegression)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/pls.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/pls.html#Loading-of-the-dataset">Loading of the dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/pls.html#Running-PLSRegression">Running PLSRegression</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis/mcr_als.html">MCR ALS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/mcr_als.html#Introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/mcr_als.html#The-(minimal)-dataset">The (minimal) dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/mcr_als.html#Initial-guess-and-MCR-ALS-optimization">Initial guess and MCR ALS optimization</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/mcr_als.html#Case-of-initial-spectral-profiles">Case of initial spectral profiles</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/mcr_als.html#ALS-Optimization">ALS Optimization</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/mcr_als.html#More-information-about-the-MCRALS-estimator">More information about the MCRALS estimator</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/mcr_als.html#Solutions">Solutions</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/mcr_als.html#A-basic-illustration-of-the-rotational-ambiguity">A basic illustration of the rotational ambiguity</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../analysis/mcr_als.html#Guessing-the-concentration-profile-with-PCA-+-EFA">Guessing the concentration profile with PCA + EFA</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/mcr_als.html#Use-of-PCA-to-assess-the-number-of-pure-species">Use of PCA to assess the number of pure species</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../analysis/mcr_als.html#Determination-of-initial-concentrations-using-EFA">Determination of initial concentrations using EFA</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../analysis/mcr_als.html#Augmented-datasets">Augmented datasets</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plotting/plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Load-the-API">Load the API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Loading-the-data">Loading the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Preparing-the-data">Preparing the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Selecting-the-output-window">Selecting the output window</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Default-plotting">Default plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Changing-the-aspect-of-the-plot">Changing the aspect of the plot</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plotting.html#Change-the-NDDataset.preferences">Change the <code class="docutils literal notranslate"><span class="pre">NDDataset.preferences</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Adding-titles-and-annotations">Adding titles and annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Changing-the-plot-style-using-matplotlib-style-sheets">Changing the plot style using matplotlib style sheets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Create-your-own-style">Create your own style</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Changing-the-type-of-plot">Changing the type of plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Plotting-1D-datasets">Plotting 1D datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Plotting-several-dataset-on-the-same-figure">Plotting several dataset on the same figure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plotting/plotting.html#Overview-of-the-main-configuration-parameters">Overview of the main configuration parameters</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contribute</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/issues.html">Bug reports &amp; feature request</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/examples.html">Sharing examples &amp; tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devguide/index.html">Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing.html">Contributing to SpectroChemPy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing.html#general-principles">General Principles</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/issues.html">Reporting Issues</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing.html#be-prepared-to-work-on-the-code">Be prepared to work on the code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#version-control-git-and-github">Version control, Git, and GitHub</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#installing-git">Installing git</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#optional-installing-a-gui-git-client">Optional: installing a GUI git client</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#forking-the-spectrochempy-repository">Forking the spectrochempy repository</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#creating-a-python-development-environment">Creating a Python development environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#controlling-the-environments">Controlling the environments</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#creating-a-branch">Creating a branch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing.html#contributing-your-changes-to-spectrochempy">Contributing your changes to SpectroChemPy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#commit-your-code">Commit your code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#push-your-changes">Push your changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#review-your-code">Review Your Code</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#make-the-pull-request-pr">Make the pull request (PR)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#update-your-pull-request">Update your pull request</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#automatically-fix-formatting-errors">Automatically fix formatting errors</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing.html#delete-your-merged-branch-optional">Delete your merged branch (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing.html#tips-for-a-successful-pull-request">Tips for a successful pull request</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codebase.html">Contributing to the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#code-standards">Code standards</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#pre-commit">Pre-commit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#optional-dependencies">Optional dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_codebase.html#python-pep8-black">Python (PEP8 / black)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_codebase.html#backwards-compatibility">Backwards compatibility</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#testing-with-continuous-integration">Testing with continuous integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#test-driven-development-code-writing">Test-driven development/code writing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_codebase.html#writing-tests">Writing tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_codebase.html#using-pytest">Using <code class="docutils literal notranslate"><span class="pre">pytest</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#running-the-test-suite">Running the test suite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_codebase.html#documenting-change-log">Documenting change log</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_codespecifics.html">Contributing to specific parts of the code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/codespec_adding_reader.html">Adding a Reader</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#add-a-test-and-sample-files">1. Add a test and sample files</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#complete-filetypes-and-alias">2. Complete FILETYPES and ALIAS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#create-the-reader-xxx-py-file">3. Create the reader_xxx.py file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#general-guidelines-for-data-and-metadata-format">3. General Guidelines for data and metadata format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/codespec_adding_reader.html#polish-your-code-and-make-the-pull-requests">4. Polish your code and make the Pull Requests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../devguide/contributing_documentation.html">Contributing to the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_documentation.html#about-the-spectrochempy-documentation">About the spectrochempy documentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_docstring.html">SpectroChemPy Docstring Guide</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../devguide/contributing_docstring.html#about-docstrings-and-standards">About docstrings and standards</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../devguide/contributing_docstring.html#writing-a-docstring">Writing a docstring</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_documentation.html#updating-a-spectrochempy-docstring">Updating a spectrochempy docstring</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../devguide/contributing_documentation.html#how-to-build-the-spectrochempy-documentation">How to build the spectrochempy documentation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_documentation.html#requirements">Requirements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_documentation.html#building-the-documentation">Building the documentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../devguide/contributing_documentation.html#building-master-branch-documentation">Building master branch documentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Credits</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html">Acknowledgments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/credits.html#third-party-licenses">Third-party Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/citing.html">Citing SpectroChemPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html">SpectroChempy License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/license.html#other-licenses">Other Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../credits/seealso.html">See also</a></li>
+</ul>
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SpectroChemPy v0.6.11.dev82</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Processing</a></li>
+      <li class="breadcrumb-item active">Mathematical operations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/userguide/processing/math_operations.ipynb" rel="nofollow"> View page source</a>
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="transformations.html" class="btn btn-neutral float-left" title="Basic transformations" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="smoothing.html" class="btn btn-neutral float-right" title="Filtering, Smoothing and Denoising" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+<div class="admonition warning">
+    <p class="first admonition-title">Warning</p>
+    <p class="last"> You are reading the documentation related to the development version.
+        <a href="/0.6.10/index.html">Go here</a> if you are looking for the documentation of the stable
+        release.
+    </p>
+</div>
+
+
+           <div itemprop="articleBody">
+             
+  <section id="Mathematical-operations">
+<h1>Mathematical operations<a class="headerlink" href="#Mathematical-operations" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="kn">import</span> <span class="n">MASKED</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DimensionalityError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">spectrochempy</span><span class="w"> </span><span class="kn">import</span> <span class="n">error_</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<table>
+<tr>
+<td>
+
+<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAAlw
+SFlzAAAJOgAACToB8GSSSgAAAetpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6
+bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8x
+OTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAg
+eG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMu
+YWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+bWF0cGxvdGxpYiB2ZXJzaW9uIDIuMS4wLCBo
+dHRwOi8vbWF0cGxvdGxpYi5vcmcvPC94bXA6Q3JlYXRvclRvb2w+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6
+T3JpZW50YXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgqNQaNYAAAGiUlE
+QVRIDY1We4xU1Rn/3XPuYx47u8w+hnU38hTcuoUEt/6D2y4RB0ME1BoEd9taJaKh9CFiN7YGp7appUAMNmktMZFoJTYVLVQ0smsy
+26CN0SU1QgsuFAaW3WVmx33N677O6XfuyoIxTXqSO/fec+75fd93vt/3/UbDV0aKSZmCpkFMLz3T9utuu2N+o98aDSMBKVAo89z5
+y+zEz3ZafcCOfvWdlGCalqKn1Bf71CygTd+mf1esSOnpdMpTb+vWpTZuWVfe3jLPa5tzHYNm0T5N0gpdkkHaDBeGBU6d1/t/fyS8
++/CbqdfUvmsx1PuMgc2bNxv79u1zgd31r+7JH1jbIZKxWRXAcYUQ8IWvBfBXNjEuJWPgMA02NR7C3/pYT9fjdZ3A9tGrWF8YSJHn
+qcDz3y7q2T967PZv+gnYJdd1mEZ+62zGDQV/dQgKhmLzDNOXCEWM3j6eTT5Y3w78dOBKJLR1PQf+4ivPj76UPZnssBN+wbM9Aet/
+AV81Mf1EEULXYfOobvX2WWQk0aoioXwwSmirOlioY0mu8BIouzYl7P8GV3vpqCCEZvlFz769w08oLDWvyKIyL1asSm28d6WfzA97
+ztvvV1kexUMsmhlkULEkuGYmFYC6AvfUrITnwUKl5K79lkjeSSRRTCTbQPd95e1WzMbZSya74XoXAxctCllCnbECMOjZNGRwvzIX
+nD85wbkMmKK+U045Dtdi8Qp+SAxU2GTg2bYlC9224pgvmSb54vkVTBQYyhUt2KjAMyMmPjwRQW5Mh2WKwJhlBh6jVGagFM84wZnQ
+4bpC0Rt4pk1PbSt0NDcxDA5xryosDHWgtbM0DGZDWLSoiDMDYeQnGVrmOThxLozB0RAaahzkJzjKNqcIQBymJFMkOlN8Dqjpg0XY
+Tx5xO/QbmmUrqIjGJznq47TqTaClKYfjp+PInLMwnOdYvtQBZ2XcunQY+VwIo4U4muoFEjVEFE6lQyEUKzHYfgQG9ylCyngU+Cxj
+tOqxCDGHcCsOMCs6iQul5ZiStdATYxjMZXDLTUVwLY8Jey4uOh2IxjwsrP8UXJYxUrkZrghBahzV5iXU6gNkq0Z1EzIsUBUSCV2n
+EOHo0LVxHCpuxabJJdhi5PFnvw5vLXwXIfNZvD/+JNo/X40NegE54sUaazl+UL8XD1x+FB9Ijjt4EQfdGN6J/x131LwIV9ap/AYs
+0x1fz1ZKFbh6A7qKy/By9Dg6G36Ep91vUJJ15Cqr0Z67E8/HzmBrw1OwxWyM+3Mo6BAuSB17oyfx0Oyl2DN0Hqs/70Cx6hBCvESF
+UY1ShWXZZEE7OTAYxZzaPH4TuoiusZvRnunFy2NbiHYuBp2vB66srX4vMEjpRKPxKXmnoQ4+Mn4DPiv8CYcrs3GfNUXJLtM+alSO
+hrMj/KT+wBNW3+E/2liywNO3iSflbaFva/+stGDTxE0E9Sjaox8HBhxpEamzMGSEaFKg+mjEddzDh1MxTDq3YV1kGBsjfwW3S9Cq
+anjmko+ndlb1UR3s6K8JlfphNWq9Ew/7c61T2BB/EbcaNkb8GBaE0tANH7/M34PLdhJDzjIcL9xPbdTG6zyM72Y+wXPHmvB489No
+fm0b5HnbQ9Rgp/7DSSd29AeVvPeNyK6JcYl/yQVi5dBjuGvoV/gaJe47s45QUxrDmcYX0MBsdF7egvXZ7+O0vZA4X8QmOQWjlSK7
+RDz5wIM30gp9UbWcGjXxhzdDu1SiNSpx6kcQB57rPnr/3dlkZarWLnlRq5oPET1dOCIOk4wALib9eeS5iygfhkd09H0DWphB/+gs
++PcOAS+ssrFmmXXgVfR0de9cpbAJfH3Q1jofW9DZk56dDcVsq9YcsoUMEd1qyLoT3BX1YiyHMJuk97hyjqIoE91t+NcTLeN0ZrfM
+oXatZbu6G0h4VG+ibqq0IJVK6cAjo6serG3vSUezCMct0yQeSOFJSUImqb2qbknUpDqlZxE0QZ+ZUpSlZx79h4Nda6zef9dlk121
+JDjbR5XggPRZlRnS6bRQRtLpn4++cuie/Yvn2svmNxuLw9WCcYIl4fEoTEGiSTUqJdfgU+8ROqf1iMkLzS389YtNPXc/PH8l8ONB
+JZkHD+4JtD04HmVEDWWErmBhzV2/2LB1bemJG6krzv2S6NOHUgtEP0Oif5pE/3fHoruP7N8RiP61GArzSwbUhJJQpXJKiKbfr/3b
+IhKq76sKPUdF9NW/LSqfSn6vjv8C45H/6FSgvZQAAAAASUVORK5CYII='
+     style='height:25px; border-radius:12px; display:inline-block; float:left; vertical-align:middle'>
+</img>
+
+</td>
+<td>
+
+&nbsp;&nbsp;<span style='font-size:12px'>SpectroChemPy's API - v.0.6.11.dev82<br/>© Copyright 2014-2025 - A.Travert & C.Fernandez @ LCS</span>
+
+</td>
+</tr>
+</table>
+</div></div>
+</div>
+<section id="Ufuncs-(Universal-Numpy's-functions)">
+<h2>Ufuncs (Universal Numpy’s functions)<a class="headerlink" href="#Ufuncs-(Universal-Numpy's-functions)" title="Link to this heading"></a></h2>
+<p>A universal function (or <code class="docutils literal notranslate"><span class="pre">ufunc</span></code> in short) is a function that operates on numpy arrays in an element-by-element fashion, supporting array broadcasting, type casting, and several other standard features. That is, a <code class="docutils literal notranslate"><span class="pre">ufunc</span></code> is a “vectorized” wrapper for a function that takes a fixed number of specific inputs and produces a fixed number of specific outputs.</p>
+<p>For instance, in numpy to calculate the square root of each element of a given nd-array, we can write something like this using the <code class="docutils literal notranslate"><span class="pre">np.sqrt</span></code> functions :</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">])</span>
+<span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([       1,    1.414,    1.732,        2,    2.449])
+</pre></div></div>
+</div>
+<p>As seen above, <code class="docutils literal notranslate"><span class="pre">np.sqrt(x)</span></code> return a numpy array.</p>
+<p>The interesting thing, it that <code class="docutils literal notranslate"><span class="pre">ufunc</span></code>’s can also work with <code class="docutils literal notranslate"><span class="pre">NDDataset</span></code> .</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dx</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dx</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> NDDataset_a929275b</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> runner@fv-az1912-370</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2025-02-16 01:30:52+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong><font color='green'>      history</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> \0\0\02025-02-16 01:30:52+00:00> Ufunc sqrt applied.\0\0\0\n          DATA </strong></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> sqrt(<untitled>)</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         [       1    1.414    1.732        2    2.449]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         size</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 5</td><tr>
+</table></div>
+</div>
+</section>
+<section id="List-of-UFuncs-working-on-NDDataset:">
+<h2>List of UFuncs working on <code class="docutils literal notranslate"><span class="pre">NDDataset</span></code>:<a class="headerlink" href="#List-of-UFuncs-working-on-NDDataset:" title="Link to this heading"></a></h2>
+<section id="Functions-affecting-magnitudes-of-the-number-but-keeping-units">
+<h3>Functions affecting magnitudes of the number but keeping units<a class="headerlink" href="#Functions-affecting-magnitudes-of-the-number-but-keeping-units" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#negative"><span class="std std-ref">negative</span></a>(x, **kwargs): Numerical negative, element-wise.</p></li>
+<li><p><a class="reference internal" href="#abs"><span class="std std-ref">absolute</span></a>(x, **kwargs): Calculate the absolute value, element-wise. Alias: <a class="reference internal" href="#abs"><span class="std std-ref">abs</span></a></p></li>
+<li><p><a class="reference internal" href="#abs"><span class="std std-ref">fabs</span></a>(x, **kwargs): Calculate the absolute value, element-wise. Complex values are not handled, use <a class="reference internal" href="#abs"><span class="std std-ref">absolute</span></a> to find the absolute values of complex data.</p></li>
+<li><p><a class="reference internal" href="#"><span class="doc">conj</span></a>(x, **kwargs): Return the complex conjugate, element-wise.</p></li>
+<li><p><a class="reference internal" href="#rint"><span class="std std-ref">rint</span></a>(x, **kwargs) :Round to the nearest integer, element-wise.</p></li>
+<li><p><a class="reference internal" href="#floor"><span class="std std-ref">floor</span></a>(x, **kwargs): Return the floor of the input, element-wise.</p></li>
+<li><p><a class="reference internal" href="#ceil"><span class="std std-ref">ceil</span></a>(x, **kwargs): Return the ceiling of the input, element-wise.</p></li>
+<li><p><a class="reference internal" href="#trunc"><span class="std std-ref">trunc</span></a>(x, **kwargs): Return the truncated value of the input, element-wise.</p></li>
+</ul>
+</section>
+<section id="Functions-affecting-magnitudes-of-the-number-but-also-units">
+<h3>Functions affecting magnitudes of the number but also units<a class="headerlink" href="#Functions-affecting-magnitudes-of-the-number-but-also-units" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#sqrt"><span class="std std-ref">sqrt</span></a>(x, **kwargs): Return the non-negative square-root of an array, element-wise.</p></li>
+<li><p><a class="reference internal" href="#square"><span class="std std-ref">square</span></a>(x, **kwargs): Return the element-wise square of the input.</p></li>
+<li><p><a class="reference internal" href="#cbrt"><span class="std std-ref">cbrt</span></a>(x, **kwargs): Return the cube-root of an array, element-wise.</p></li>
+<li><p><a class="reference internal" href="#reciprocal"><span class="std std-ref">reciprocal</span></a>(x, **kwargs): Return the reciprocal of the argument, element-wise.</p></li>
+</ul>
+</section>
+<section id="Functions-that-require-no-units-or-dimensionless-units-for-inputs.-Returns-dimensionless-objects.">
+<h3>Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.<a class="headerlink" href="#Functions-that-require-no-units-or-dimensionless-units-for-inputs.-Returns-dimensionless-objects." title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#exp"><span class="std std-ref">exp</span></a>(x, **kwargs): Calculate the exponential of all elements in the input array.</p></li>
+<li><p><a class="reference internal" href="#exp"><span class="std std-ref">exp2</span></a>(x, <strong>kwargs): Calculate 2</strong>p for all p in the input array.</p></li>
+<li><p><a class="reference internal" href="#exp"><span class="std std-ref">expm1</span></a>(x, **kwargs): Calculate <code class="docutils literal notranslate"><span class="pre">exp(x)</span> <span class="pre">-</span> <span class="pre">1</span></code> for all elements in the array.</p></li>
+<li><p><a class="reference internal" href="#log"><span class="std std-ref">log</span></a>(x, **kwargs): Natural logarithm, element-wise.</p></li>
+<li><p><a class="reference internal" href="#log"><span class="std std-ref">log2</span></a>(x, **kwargs): Base-2 logarithm of x.</p></li>
+<li><p><a class="reference internal" href="#log"><span class="std std-ref">log10</span></a>(x, **kwargs): Return the base 10 logarithm of the input array, element-wise.</p></li>
+<li><p><a class="reference internal" href="#log"><span class="std std-ref">log1p</span></a>(x, **kwargs): Return <code class="docutils literal notranslate"><span class="pre">log(x</span> <span class="pre">+</span> <span class="pre">1)</span></code> , element-wise.</p></li>
+</ul>
+</section>
+<section id="Functions-that-return-numpy-arrays-(Work-only-for-NDDataset)">
+<h3>Functions that return numpy arrays (<em>Work only for NDDataset</em>)<a class="headerlink" href="#Functions-that-return-numpy-arrays-(Work-only-for-NDDataset)" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#sign"><span class="std std-ref">sign</span></a>(x): Returns an element-wise indication of the sign of a number.</p></li>
+<li><p><a class="reference internal" href="#logical_not"><span class="std std-ref">logical_not</span></a>(x): Compute the truth value of NOT x element-wise.</p></li>
+<li><p><a class="reference internal" href="#isfinite"><span class="std std-ref">isfinite</span></a>(x): Test element-wise for finiteness.</p></li>
+<li><p><a class="reference internal" href="#isinf"><span class="std std-ref">isinf</span></a>(x): Test element-wise for positive or negative infinity.</p></li>
+<li><p><a class="reference internal" href="#isnan"><span class="std std-ref">isnan</span></a>(x): Test element-wise for <code class="docutils literal notranslate"><span class="pre">NaN</span></code> and return result as a boolean array.</p></li>
+<li><p><a class="reference internal" href="#signbit"><span class="std std-ref">signbit</span></a>(x): Returns element-wise <code class="docutils literal notranslate"><span class="pre">True</span></code> where signbit is set.</p></li>
+</ul>
+</section>
+<section id="Trigonometric-functions.-Require-unitless-data-or-radian-units.">
+<h3>Trigonometric functions. Require unitless data or radian units.<a class="headerlink" href="#Trigonometric-functions.-Require-unitless-data-or-radian-units." title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#sin"><span class="std std-ref">sin</span></a>(x, **kwargs): Trigonometric sine, element-wise.</p></li>
+<li><p><a class="reference internal" href="#cos"><span class="std std-ref">cos</span></a>(x, **kwargs): Trigonometric cosine element-wise.</p></li>
+<li><p><a class="reference internal" href="#tan"><span class="std std-ref">tan</span></a>(x, **kwargs): Compute tangent element-wise.</p></li>
+<li><p><a class="reference internal" href="#arcsin"><span class="std std-ref">arcsin</span></a>(x, **kwargs): Inverse sine, element-wise.</p></li>
+<li><p><a class="reference internal" href="#arccos"><span class="std std-ref">arccos</span></a>(x, **kwargs): Trigonometric inverse cosine, element-wise.</p></li>
+<li><p><a class="reference internal" href="#arctan"><span class="std std-ref">arctan</span></a>(x, **kwargs): Trigonometric inverse tangent, element-wise.</p></li>
+</ul>
+</section>
+<section id="Hyperbolic-functions">
+<h3>Hyperbolic functions<a class="headerlink" href="#Hyperbolic-functions" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#sinh"><span class="std std-ref">sinh</span></a>(x, **kwargs): Hyperbolic sine, element-wise.</p></li>
+<li><p><a class="reference internal" href="#cosh"><span class="std std-ref">cosh</span></a>(x, **kwargs): Hyperbolic cosine, element-wise.</p></li>
+<li><p><a class="reference internal" href="#tanh"><span class="std std-ref">tanh</span></a>(x, **kwargs): Compute hyperbolic tangent element-wise.</p></li>
+<li><p><a class="reference internal" href="#arcsinh"><span class="std std-ref">arcsinh</span></a>(x, **kwargs): Inverse hyperbolic sine element-wise.</p></li>
+<li><p><a class="reference internal" href="#arccosh"><span class="std std-ref">arccosh</span></a>(x, **kwargs): Inverse hyperbolic cosine, element-wise.</p></li>
+<li><p><a class="reference internal" href="#arctanh"><span class="std std-ref">arctanh</span></a>(x, **kwargs): Inverse hyperbolic tangent element-wise.</p></li>
+</ul>
+</section>
+<section id="Unit-conversions">
+<h3>Unit conversions<a class="headerlink" href="#Unit-conversions" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#deg2rad"><span class="std std-ref">deg2rad</span></a>(x, **kwargs): Convert angles from degrees to radians.</p></li>
+<li><p><a class="reference internal" href="#rad2deg"><span class="std std-ref">rad2deg</span></a>(x, **kwargs): Convert angles from radians to degrees.</p></li>
+</ul>
+</section>
+<section id="Binary-Ufuncs">
+<h3>Binary Ufuncs<a class="headerlink" href="#Binary-Ufuncs" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="#add"><span class="std std-ref">add</span></a>(x1, x2, **kwargs): Add arguments element-wise.</p></li>
+<li><p><a class="reference internal" href="#subtract"><span class="std std-ref">subtract</span></a>(x1, x2, **kwargs): Subtract arguments, element-wise.</p></li>
+<li><p><a class="reference internal" href="#multiply"><span class="std std-ref">multiply</span></a>(x1, x2, **kwargs): Multiply arguments element-wise.</p></li>
+<li><p><a class="reference internal" href="#divide"><span class="std std-ref">divide</span></a> or <a class="reference internal" href="#divide"><span class="std std-ref">true_divide</span></a>(x1, x2, **kwargs): Returns a true division of the inputs, element-wise.</p></li>
+<li><p><a class="reference internal" href="#floor_divide"><span class="std std-ref">floor_divide</span></a>(x1, x2, **kwargs): Return the largest integer smaller or equal to the division of the inputs.</p></li>
+</ul>
+</section>
+</section>
+<section id="Usage">
+<h2>Usage<a class="headerlink" href="#Usage" title="Link to this heading"></a></h2>
+<p>To demonstrate the use of mathematical operations on spectrochempy object, we will first load an experimental 2D dataset.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d2D</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">read_omnic</span><span class="p">(</span><span class="s2">&quot;irdata/nh4y-activation.spg&quot;</span><span class="p">)</span>
+<span class="n">prefs</span> <span class="o">=</span> <span class="n">d2D</span><span class="o">.</span><span class="n">preferences</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colormap</span> <span class="o">=</span> <span class="s2">&quot;magma&quot;</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">colorbar</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">prefs</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">d2D</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_8_0.png" src="../../_images/userguide_processing_math_operations_8_0.png" />
+</div>
+</div>
+<p>Let’s select only the first row of the 2D dataset ( the <code class="docutils literal notranslate"><span class="pre">squeeze</span></code> method is used to remove the residual size 1 dimension). In addition, we mask the saturated region.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">d2D</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_10_0.png" src="../../_images/userguide_processing_math_operations_10_0.png" />
+</div>
+</div>
+<p>This dataset will be artificially modified already using some mathematical operation (subtraction with a scalar) to present negative values, and we will also mask some data</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">-=</span> <span class="mf">2.0</span>  <span class="c1"># add an offset to make that some of the values become negative</span>
+<span class="n">dataset</span><span class="p">[</span><span class="mf">1290.0</span><span class="p">:</span><span class="mf">890.0</span><span class="p">]</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">MASKED</span>  <span class="c1"># additionally we mask some data</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_12_0.png" src="../../_images/userguide_processing_math_operations_12_0.png" />
+</div>
+</div>
+<section id="Unary-functions">
+<h3>Unary functions<a class="headerlink" href="#Unary-functions" title="Link to this heading"></a></h3>
+<section id="id1">
+<h4>Functions affecting magnitudes of the number but keeping units<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<section id="negative">
+<h5>negative<a class="headerlink" href="#negative" title="Link to this heading"></a></h5>
+<p>Numerical negative, element-wise, keep units</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">negative</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>  <span class="c1"># the same results is obtained using out=-dataset</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">),</span> <span class="n">show_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_16_0.png" src="../../_images/userguide_processing_math_operations_16_0.png" />
+</div>
+</div>
+</section>
+<section id="abs">
+<h5>abs<a class="headerlink" href="#abs" title="Link to this heading"></a></h5>
+</section>
+<section id="absolute-(alias-of-abs)">
+<h5>absolute (alias of abs)<a class="headerlink" href="#absolute-(alias-of-abs)" title="Link to this heading"></a></h5>
+</section>
+<section id="fabs-(absolute-for-float-arrays)">
+<h5>fabs (absolute for float arrays)<a class="headerlink" href="#fabs-(absolute-for-float-arrays)" title="Link to this heading"></a></h5>
+<p>Numerical absolute value element-wise, element-wise, keep units</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_18_0.png" src="../../_images/userguide_processing_math_operations_18_0.png" />
+</div>
+</div>
+</section>
+<section id="rint">
+<h5>rint<a class="headerlink" href="#rint" title="Link to this heading"></a></h5>
+<p>Round elements of the array to the nearest integer, element-wise, keep units</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>  <span class="c1"># not that title is not modified for this ufunc</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_20_0.png" src="../../_images/userguide_processing_math_operations_20_0.png" />
+</div>
+</div>
+</section>
+<section id="floor">
+<h5>floor<a class="headerlink" href="#floor" title="Link to this heading"></a></h5>
+<p>Return the floor of the input, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_22_0.png" src="../../_images/userguide_processing_math_operations_22_0.png" />
+</div>
+</div>
+</section>
+<section id="ceil">
+<h5>ceil<a class="headerlink" href="#ceil" title="Link to this heading"></a></h5>
+<p>Return the ceiling of the input, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_24_0.png" src="../../_images/userguide_processing_math_operations_24_0.png" />
+</div>
+</div>
+</section>
+<section id="trunc">
+<h5>trunc<a class="headerlink" href="#trunc" title="Link to this heading"></a></h5>
+<p>Return the truncated value of the input, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trunc</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_26_0.png" src="../../_images/userguide_processing_math_operations_26_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="id2">
+<h4>Functions affecting magnitudes of the number but also units<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<section id="sqrt">
+<h5>sqrt<a class="headerlink" href="#sqrt" title="Link to this heading"></a></h5>
+<p>Return the non-negative square-root of an array, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+    <span class="n">dataset</span>
+<span class="p">)</span>  <span class="c1"># as they are some negative elements, return dataset has complex dtype.</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot_1D</span><span class="p">(</span><span class="n">show_complex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_28_1.png" src="../../_images/userguide_processing_math_operations_28_1.png" />
+</div>
+</div>
+</section>
+<section id="square">
+<h5>square<a class="headerlink" href="#square" title="Link to this heading"></a></h5>
+<p>Return the element-wise square of the input.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_30_0.png" src="../../_images/userguide_processing_math_operations_30_0.png" />
+</div>
+</div>
+</section>
+<section id="cbrt">
+<h5>cbrt<a class="headerlink" href="#cbrt" title="Link to this heading"></a></h5>
+<p>Return the cube-root of an array, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cbrt</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_32_0.png" src="../../_images/userguide_processing_math_operations_32_0.png" />
+</div>
+</div>
+</section>
+<section id="reciprocal">
+<h5>reciprocal<a class="headerlink" href="#reciprocal" title="Link to this heading"></a></h5>
+<p>Return the reciprocal of the argument, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">(</span><span class="n">dataset</span> <span class="o">+</span> <span class="mf">3.0</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_34_0.png" src="../../_images/userguide_processing_math_operations_34_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="id3">
+<h4>Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<section id="exp">
+<h5>exp<a class="headerlink" href="#exp" title="Link to this heading"></a></h5>
+<p>Exponential of all elements in the input array, element-wise</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_37_0.png" src="../../_images/userguide_processing_math_operations_37_0.png" />
+</div>
+</div>
+<p>Obviously numpy exponential functions applies only to dimensionless array. Else an error is generated.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># A dimensionality error will be generated</span>
+<span class="k">except</span> <span class="n">DimensionalityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">error_</span><span class="p">(</span><span class="n">DimensionalityError</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ ERROR | DimensionalityError: Cannot convert from &#39;m&#39; to &#39;&#39;
+Function `exp` requires DIMENSIONLESS input
+</pre></div></div>
+</div>
+</section>
+<section id="exp2">
+<h5>exp2<a class="headerlink" href="#exp2" title="Link to this heading"></a></h5>
+<p>Calculate 2**p for all p in the input array.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_41_0.png" src="../../_images/userguide_processing_math_operations_41_0.png" />
+</div>
+</div>
+</section>
+<section id="expm1">
+<h5>expm1<a class="headerlink" href="#expm1" title="Link to this heading"></a></h5>
+<p>Calculate <code class="docutils literal notranslate"><span class="pre">exp(x)</span> <span class="pre">-</span> <span class="pre">1</span></code> for all elements in the array.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expm1</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_43_0.png" src="../../_images/userguide_processing_math_operations_43_0.png" />
+</div>
+</div>
+</section>
+<section id="log">
+<h5>log<a class="headerlink" href="#log" title="Link to this heading"></a></h5>
+<p>Natural logarithm, element-wise.</p>
+<p>This doesn’t generate un error for negative numbrs, but the output is masked for those values</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">),</span> <span class="n">show_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_45_1.png" src="../../_images/userguide_processing_math_operations_45_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">dataset</span> <span class="o">-</span> <span class="n">dataset</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_46_1.png" src="../../_images/userguide_processing_math_operations_46_1.png" />
+</div>
+</div>
+</section>
+<section id="log2">
+<h5>log2<a class="headerlink" href="#log2" title="Link to this heading"></a></h5>
+<p>Base-2 logarithm of x.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_48_1.png" src="../../_images/userguide_processing_math_operations_48_1.png" />
+</div>
+</div>
+</section>
+<section id="log10">
+<h5>log10<a class="headerlink" href="#log10" title="Link to this heading"></a></h5>
+<p>Return the base 10 logarithm of the input array, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_50_1.png" src="../../_images/userguide_processing_math_operations_50_1.png" />
+</div>
+</div>
+</section>
+<section id="log1p">
+<h5>log1p<a class="headerlink" href="#log1p" title="Link to this heading"></a></h5>
+<p>Return <code class="docutils literal notranslate"><span class="pre">log(x</span> <span class="pre">+</span> <span class="pre">1)</span></code> , element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_52_1.png" src="../../_images/userguide_processing_math_operations_52_1.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="id4">
+<h4>Functions that return numpy arrays (<em>Work only for NDDataset</em>)<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<section id="sign">
+<h5>sign<a class="headerlink" href="#sign" title="Link to this heading"></a></h5>
+<p>Returns an element-wise indication of the sign of a number. Returned object is a ndarray</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+masked_array(data=[       1,        1, ...,        1,        1],
+             mask=[  False,   False, ...,   False,   False],
+       fill_value=1e+20)
+</pre></div></div>
+</div>
+</section>
+<section id="logical_not">
+<h5>logical_not<a class="headerlink" href="#logical_not" title="Link to this heading"></a></h5>
+<p>Compute the truth value of NOT x element-wise. Returned object is a ndarray</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">dataset</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+masked_array(data=[       1,        1, ...,        1,        1],
+             mask=[  False,   False, ...,   False,   False],
+       fill_value=True)
+</pre></div></div>
+</div>
+</section>
+<section id="isfinite">
+<h5>isfinite<a class="headerlink" href="#isfinite" title="Link to this heading"></a></h5>
+<p>Test element-wise for finiteness.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+masked_array(data=[       1,        1, ...,        1,        1],
+             mask=[  False,   False, ...,   False,   False],
+       fill_value=True)
+</pre></div></div>
+</div>
+</section>
+<section id="isinf">
+<h5>isinf<a class="headerlink" href="#isinf" title="Link to this heading"></a></h5>
+<p>Test element-wise for positive or negative infinity.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+masked_array(data=[       0,        0, ...,        0,        0],
+             mask=[  False,   False, ...,   False,   False],
+       fill_value=True)
+</pre></div></div>
+</div>
+</section>
+<section id="isnan">
+<h5>isnan<a class="headerlink" href="#isnan" title="Link to this heading"></a></h5>
+<p>Test element-wise for <code class="docutils literal notranslate"><span class="pre">NaN</span></code> and return result as a boolean array.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+masked_array(data=[       0,        0, ...,        0,        0],
+             mask=[  False,   False, ...,   False,   False],
+       fill_value=True)
+</pre></div></div>
+</div>
+</section>
+<section id="signbit">
+<h5>signbit<a class="headerlink" href="#signbit" title="Link to this heading"></a></h5>
+<p>Returns element-wise <code class="docutils literal notranslate"><span class="pre">True</span></code> where signbit is set.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">signbit</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+masked_array(data=[       0,        0, ...,        0,        0],
+             mask=[  False,   False, ...,   False,   False],
+       fill_value=True)
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Trigonometric-functions.-Require-dimensionless/unitless-dataset-or-radians.">
+<h4>Trigonometric functions. Require dimensionless/unitless dataset or radians.<a class="headerlink" href="#Trigonometric-functions.-Require-dimensionless/unitless-dataset-or-radians." title="Link to this heading"></a></h4>
+<p>In the below examples, unit of data in dataset is absorbance (then dimensionless)</p>
+<section id="sin">
+<h5>sin<a class="headerlink" href="#sin" title="Link to this heading"></a></h5>
+<p>Trigonometric sine, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_68_0.png" src="../../_images/userguide_processing_math_operations_68_0.png" />
+</div>
+</div>
+</section>
+<section id="cos">
+<h5>cos<a class="headerlink" href="#cos" title="Link to this heading"></a></h5>
+<p>Trigonometric cosine element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_70_0.png" src="../../_images/userguide_processing_math_operations_70_0.png" />
+</div>
+</div>
+</section>
+<section id="tan">
+<h5>tan<a class="headerlink" href="#tan" title="Link to this heading"></a></h5>
+<p>Compute tangent element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">dataset</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_72_0.png" src="../../_images/userguide_processing_math_operations_72_0.png" />
+</div>
+</div>
+</section>
+<section id="arcsin">
+<h5>arcsin<a class="headerlink" href="#arcsin" title="Link to this heading"></a></h5>
+<p>Inverse sine, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (RuntimeWarning) invalid value encountered in arcsin
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_74_1.png" src="../../_images/userguide_processing_math_operations_74_1.png" />
+</div>
+</div>
+</section>
+<section id="arccos">
+<h5>arccos<a class="headerlink" href="#arccos" title="Link to this heading"></a></h5>
+<p>Trigonometric inverse cosine, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (RuntimeWarning) invalid value encountered in arccos
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_76_1.png" src="../../_images/userguide_processing_math_operations_76_1.png" />
+</div>
+</div>
+</section>
+<section id="arctan">
+<h5>arctan<a class="headerlink" href="#arctan" title="Link to this heading"></a></h5>
+<p>Trigonometric inverse tangent, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_78_0.png" src="../../_images/userguide_processing_math_operations_78_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="Angle-units-conversion">
+<h4>Angle units conversion<a class="headerlink" href="#Angle-units-conversion" title="Link to this heading"></a></h4>
+<section id="rad2deg">
+<h5>rad2deg<a class="headerlink" href="#rad2deg" title="Link to this heading"></a></h5>
+<p>Convert angles from radians to degrees (warning: unitless or dimensionless are assumed to be radians, so no error will be issued).</p>
+<p>for instance, if we take the z axis (the data magnitude) in the figure above, it’s expressed in radians. We can change to degrees easily.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rad2deg</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">out</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span>  <span class="c1"># just to avoid a too long title</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_82_0.png" src="../../_images/userguide_processing_math_operations_82_0.png" />
+</div>
+</div>
+</section>
+<section id="deg2rad">
+<h5>deg2rad<a class="headerlink" href="#deg2rad" title="Link to this heading"></a></h5>
+<p>Convert angles from degrees to radians.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+<span class="n">out</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;data&quot;</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_84_0.png" src="../../_images/userguide_processing_math_operations_84_0.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="id5">
+<h4>Hyperbolic functions<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<section id="sinh">
+<h5>sinh<a class="headerlink" href="#sinh" title="Link to this heading"></a></h5>
+<p>Hyperbolic sine, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sinh</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_87_0.png" src="../../_images/userguide_processing_math_operations_87_0.png" />
+</div>
+</div>
+</section>
+<section id="cosh">
+<h5>cosh<a class="headerlink" href="#cosh" title="Link to this heading"></a></h5>
+<p>Hyperbolic cosine, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cosh</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_89_0.png" src="../../_images/userguide_processing_math_operations_89_0.png" />
+</div>
+</div>
+</section>
+<section id="tanh">
+<h5>tanh<a class="headerlink" href="#tanh" title="Link to this heading"></a></h5>
+<p>Compute hyperbolic tangent element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_91_0.png" src="../../_images/userguide_processing_math_operations_91_0.png" />
+</div>
+</div>
+</section>
+<section id="arcsinh">
+<h5>arcsinh<a class="headerlink" href="#arcsinh" title="Link to this heading"></a></h5>
+<p>Inverse hyperbolic sine element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsinh</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_93_0.png" src="../../_images/userguide_processing_math_operations_93_0.png" />
+</div>
+</div>
+</section>
+<section id="arccosh">
+<h5>arccosh<a class="headerlink" href="#arccosh" title="Link to this heading"></a></h5>
+<p>Inverse hyperbolic cosine, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccosh</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_95_1.png" src="../../_images/userguide_processing_math_operations_95_1.png" />
+</div>
+</div>
+</section>
+<section id="arctanh">
+<h5>arctanh<a class="headerlink" href="#arctanh" title="Link to this heading"></a></h5>
+<p>Inverse hyperbolic tangent element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctanh</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ WARNING | (RuntimeWarning) invalid value encountered in arctanh
+ WARNING | (UserWarning) Given trait value dtype &#34;float64&#34; does not match required type &#34;float64&#34;. A coerced copy has been created.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_97_1.png" src="../../_images/userguide_processing_math_operations_97_1.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="Binary-functions">
+<h3>Binary functions<a class="headerlink" href="#Binary-functions" title="Link to this heading"></a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dataset2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">(</span><span class="n">dataset</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># create a second dataset</span>
+<span class="n">dataset2</span><span class="p">[</span><span class="mf">5000.0</span><span class="p">:</span><span class="mf">4000.0</span><span class="p">]</span> <span class="o">=</span> <span class="n">MASKED</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">dataset2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_99_0.png" src="../../_images/userguide_processing_math_operations_99_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_99_1.png" src="../../_images/userguide_processing_math_operations_99_1.png" />
+</div>
+</div>
+<section id="Arithmetic">
+<h4>Arithmetic<a class="headerlink" href="#Arithmetic" title="Link to this heading"></a></h4>
+<section id="add">
+<h5>add<a class="headerlink" href="#add" title="Link to this heading"></a></h5>
+<p>Add arguments element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">dataset2</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_102_0.png" src="../../_images/userguide_processing_math_operations_102_0.png" />
+</div>
+</div>
+</section>
+<section id="subtract">
+<h5>subtract<a class="headerlink" href="#subtract" title="Link to this heading"></a></h5>
+<p>Subtract arguments, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">dataset2</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_104_0.png" src="../../_images/userguide_processing_math_operations_104_0.png" />
+</div>
+</div>
+</section>
+<section id="multiply">
+<h5>multiply<a class="headerlink" href="#multiply" title="Link to this heading"></a></h5>
+<p>Multiply arguments element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">dataset2</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_106_0.png" src="../../_images/userguide_processing_math_operations_106_0.png" />
+</div>
+</div>
+</section>
+<section id="divide">
+<h5>divide<a class="headerlink" href="#divide" title="Link to this heading"></a></h5>
+<p>or ##### true_divide Returns a true division of the inputs, element-wise.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">divide</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">dataset2</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_108_0.png" src="../../_images/userguide_processing_math_operations_108_0.png" />
+</div>
+</div>
+</section>
+<section id="floor_divide">
+<h5>floor_divide<a class="headerlink" href="#floor_divide" title="Link to this heading"></a></h5>
+<p>Return the largest integer smaller or equal to the division of the inputs.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor_divide</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">dataset2</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/userguide_processing_math_operations_110_0.png" src="../../_images/userguide_processing_math_operations_110_0.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+</section>
+<section id="Complex-or-hypercomplex-NDDatasets">
+<h2>Complex or hypercomplex NDDatasets<a class="headerlink" href="#Complex-or-hypercomplex-NDDatasets" title="Link to this heading"></a></h2>
+<p>NDDataset objects with complex data are handled differently than in <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> .</p>
+<p>Instead, complex data are stored by interlacing the real and imaginary part. This allows the definition of data that can be complex in several axis, and <em>e .g.,</em> allows 2D-hypercomplex array that can be transposed (useful for NMR data).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">da</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span><span class="n">j</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mi">0</span><span class="n">j</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">1.3</span> <span class="o">+</span> <span class="mf">2.0</span><span class="n">j</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">0.5</span><span class="n">j</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">4.2</span><span class="n">j</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mi">3</span><span class="n">j</span><span class="p">],</span>
+        <span class="p">[</span><span class="mf">5.0</span> <span class="o">+</span> <span class="mf">4.2</span><span class="n">j</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mi">3</span><span class="n">j</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">da</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> NDDataset_ae1ad09c</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> runner@fv-az1912-370</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2025-02-16 01:31:01+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <untitled></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         R[[       1        2]<br/>           [     1.3        2]<br/>           [       1        2]<br/>           [       5        2]]<br/>         I[[       2        0]<br/>           [       2      0.5]<br/>           [     4.2        3]<br/>           [     4.2        3]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:4, x:2(complex))</td><tr>
+</table></div>
+</div>
+<p>A dataset of type float can be transformed into a complex dataset (using two consecutive rows to create a complex row)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">da</span> <span class="o">=</span> <span class="n">scp</span><span class="o">.</span><span class="n">NDDataset</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">da</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[53]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> NDDataset_ae1ad09f</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> runner@fv-az1912-370</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2025-02-16 01:31:02+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <untitled></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         [[       0        1        2        3]<br/>          [       4        5        6        7]<br/>          ...<br/>          [      32       33       34       35]<br/>          [      36       37       38       39]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:10, x:4)</td><tr>
+</table></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dac</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">set_complex</span><span class="p">()</span>
+<span class="n">dac</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[54]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> NDDataset_ae1ad0a0</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> runner@fv-az1912-370</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2025-02-16 01:31:02+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <untitled></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         R[[       0        2]<br/>           [       4        6]<br/>           ...<br/>           [      32       34]<br/>           [      36       38]]<br/>         I[[       1        3]<br/>           [       5        7]<br/>           ...<br/>           [      33       35]<br/>           [      37       39]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:10, x:2(complex))</td><tr>
+</table></div>
+</div>
+<p>Note the <code class="docutils literal notranslate"><span class="pre">x</span></code>dimension size is divided by a factor of two</p>
+<p>A dataset which is complex in two dimensions is called hypercomplex (it’s datatype in SpectroChemPy is set to quaternion).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">daq</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">set_quaternion</span><span class="p">()</span>  <span class="c1"># equivalently one can use the set_hypercomplex method</span>
+<span class="n">daq</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[55]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<table style='background:transparent'>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>         name</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> NDDataset_ae1ad0a3</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       author</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> runner@fv-az1912-370</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>      created</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> 2025-02-16 01:31:02+00:00</td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><strong>          DATA </strong></td><td style='text-align:left; padding-bottom:0px; padding-top:0px; padding-top:10px; '><hr/></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        title</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <untitled></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>       values</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> <div><font color='blue'>         RR[[       0        2]<br/>            [       8       10]<br/>            ...<br/>            [      24       26]<br/>            [      32       34]]<br/>         RI[[       1        3]<br/>            [       9       11]<br/>            ...<br/>            [      25       27]<br/>            [      33       35]]<br/>         IR[[       4        6]<br/>            [      12       14]<br/>            ...<br/>            [      28       30]<br/>            [      36       38]]<br/>         II[[       5        7]<br/>            [      13       15]<br/>            ...<br/>            [      29       31]<br/>            [      37       39]]</font></div></td><tr>
+<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'>        shape</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px solid lightgray;  '> (y:5(complex), x:2(complex))</td><tr>
+</table></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">daq</span><span class="o">.</span><span class="n">dtype</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[56]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+dtype(quaternion)
+</pre></div></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="transformations.html" class="btn btn-neutral float-left" title="Basic transformations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="smoothing.html" class="btn btn-neutral float-right" title="Filtering, Smoothing and Denoising" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2014-2025 - A.Travert &amp; C.Fernandez @ LCS.
+      <span class="lastupdated">Last updated on Feb 16, 2025.
+      </span></p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
