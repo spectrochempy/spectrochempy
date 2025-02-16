@@ -103,18 +103,3 @@ If you encounter issues:
 2. Check dependency versions: ``mamba list`` / ``pip list``
 3. Update all packages: ``mamba update --all`` / ``pip install --upgrade spectrochempy``
 4. See :doc:`../getting_help` for support
-
-See Also
---------
-* :doc:`install_sources` - Building from source
-* :doc:`../../userguide/plotting/plotting` - Plotting configuration
-* :doc:`../../userguide/importexport/import` - Data import/export
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-
-   install_sources
-   /userguide/plotting/plotting
-   /userguide/importexport/import
-   ..//getting_help

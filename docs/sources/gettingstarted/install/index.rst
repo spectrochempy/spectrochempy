@@ -146,6 +146,7 @@ For more detailed instructions and alternative installation methods:
 * :doc:`install_mac_linux` - macOS/Linux installation
 * :doc:`install_colab` - Using Google Colab
 * :doc:`install_adds` - Additional components
+* :doc:`install_sources` - Installing from sources
 
 .. toctree::
     :maxdepth: 3
@@ -155,3 +156,4 @@ For more detailed instructions and alternative installation methods:
     install_mac_linux
     install_colab
     install_adds
+    install_sources

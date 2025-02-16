@@ -14,9 +14,7 @@ Any kind of contribution is welcome! While we encourage following these guidelin
 don't let them prevent you from contributing. This guide covers both basic 
 contributions like issue reporting and advanced topics like code development.
 
-.. toctree::
-
-    issues
+For information about reporting issues, please see the :doc:`issues page </devguide/issues>`.
 
 Getting Started with Development
 ================================

@@ -332,6 +332,15 @@ example_generated_dir = "gettingstarted/examples/gallery"
 # Check for the SPHINX_NOEXEC environment variable
 noexec = os.environ.get("SPHINX_NOEXEC") == "1"
 
+
+def _get_default_image_scraper():
+    # Return the default image scraper function
+    # This is now defined at module level so it can be pickled
+    import sphinx_gallery.scrapers
+
+    return sphinx_gallery.scrapers.matplotlib_scraper
+
+
 if not single_doc_or_dir:
     # generate example only if were are in full doc mode
     sphinx_gallery_conf = {
@@ -363,7 +372,9 @@ if not single_doc_or_dir:
         "pypandoc": True,
         "remove_config_comments": True,
         "within_subsection_order": FileNameSortKey,
-        "image_scrapers": ("matplotlib",),
+        "image_scrapers": (
+            _get_default_image_scraper(),
+        ),  # Use the function getter instead of direct function reference
         "filename_pattern": "/plot",
         "ignore_pattern": "__init__.py",
         "min_reported_time": 0,
@@ -372,6 +383,7 @@ if not single_doc_or_dir:
 
 suppress_warnings = [
     "sphinx_gallery",
+    "config.cache",
 ]
 
 # nbsphinx ---------------------------------------------------------------------

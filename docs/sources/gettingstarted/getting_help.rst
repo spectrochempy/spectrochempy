@@ -78,13 +78,6 @@ We welcome contributions!
 * Submit pull requests
 * Improve documentation
 
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-
-   /userguide/index
-   /reference/index
-   /gettingstarted/examples/index
 
 For more information about contributing, see :doc:`../devguide/contributing`.
 
