@@ -1,7 +1,7 @@
 .. _install_sources:
 
 Installation from Sources
-========================
+=========================
 
 .. contents:: Contents
    :local:
@@ -11,7 +11,7 @@ Prerequisites
 -------------
 
 Git Installation
-^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 Install ``git`` if not already present:
 

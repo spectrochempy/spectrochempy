@@ -1,5 +1,7 @@
 .. _contributing.bugs_report:
 
+:orphan:  # Add this to mark it as standalone
+
 Reporting Issues
 =================
 

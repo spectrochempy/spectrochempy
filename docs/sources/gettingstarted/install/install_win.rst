@@ -1,7 +1,7 @@
 .. _install_win:
 
 Installation Guide for Windows
-=============================
+==============================
 
 This guide covers different methods for installing SpectroChemPy on Windows.
 
@@ -20,7 +20,7 @@ Requirements
     python --version  # Should be 3.10 or newer
 
 Environment Setup
-----------------
+-----------------
 
 .. tabs::
 
@@ -59,7 +59,7 @@ Environment Setup
             python -m pip install --upgrade pip
 
 Installing SpectroChemPy
------------------------
+------------------------
 
 .. tabs::
 

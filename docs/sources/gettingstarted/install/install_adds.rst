@@ -36,7 +36,7 @@ Installation options:
          You may need to configure data paths when using manual installation.
 
 Scientific Computing Extensions
------------------------------
+-------------------------------
 
 Cantera
 ~~~~~~~
@@ -66,10 +66,10 @@ Required for chemical kinetics, thermodynamics and transport processes.
          pip install cantera>=2.6.0
 
 GUI Support
-----------
+-----------
 
 Qt Backend
-~~~~~~~~~
+~~~~~~~~~~
 For interactive matplotlib plots:
 
 .. tabs::
@@ -96,7 +96,7 @@ Usage in Jupyter:
    Qt backend is recommended for detailed plot manipulation and better interactivity.
 
 Troubleshooting
---------------
+---------------
 If you encounter issues:
 
 1. Verify base installation: ``python -c "import spectrochempy"``
@@ -115,6 +115,6 @@ See Also
    :maxdepth: 1
 
    install_sources
-   ../../userguide/plotting/plotting
-   ../../userguide/importexport/import
+   /userguide/plotting/plotting
+   /userguide/importexport/import
    ..//getting_help

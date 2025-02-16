@@ -12,6 +12,16 @@ This is the list of changes to `SpectroChemPy` between each release. For full de
 see the `commit logs <https://github.com/spectrochempy/spectrochempy/commits/>`_ .
 For install and upgrade instructions, see :ref:`installation`.
 
+.. _whatsnew:
+
+What's New
+==========
+
+.. toctree::
+   :maxdepth: 2
+
+   latest
+
 Version 0.6
 --------------
 

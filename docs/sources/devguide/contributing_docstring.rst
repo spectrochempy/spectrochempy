@@ -1,3 +1,5 @@
+:orphan:
+
 .. _docstring:
 
 SpectroChemPy Docstring Guide
@@ -86,7 +88,7 @@ For choices, list options in curly braces:
     axis : {0, 1, None}, default None
 
 Examples Section
---------------
+----------------
 
 Examples should be:
 

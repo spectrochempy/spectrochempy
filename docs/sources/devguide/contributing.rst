@@ -37,6 +37,8 @@ Version Control Setup
 Optional: Install a GUI client like `SourceTree <https://www.sourcetreeapp.com>`__ 
 or `GitHub Desktop <https://desktop.github.com>`__
 
+.. _contributing.environment:
+
 Setting Up Your Development Environment
 ---------------------------------------
 

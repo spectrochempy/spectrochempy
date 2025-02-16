@@ -1,24 +1,23 @@
 .. _installation:
 
-########################
-Installation guide
-########################
+Installation Guide
+==================
 
 .. contents:: Table of Contents
    :local:
    :depth: 3
 
 Prerequisites
-*************
+-------------
 
 `SpectroChemPy` requires Python 3.10 or higher (tested up to 3.13). Python is a widely-adopted 
 scientific programming language, particularly suited for data analysis and scientific computing.
 
 Installing Python
-=================
+-----------------
 
 Conda Package Managers (Recommended)
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We recommend using one of these package managers for installing Python and managing dependencies:
 
@@ -28,7 +27,7 @@ We recommend using one of these package managers for installing Python and manag
 * `Micromamba <https://mamba.readthedocs.io/en/latest/installation.html#micromamba>`_ - Minimal mamba
 
 Installation Steps
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 1. Download your chosen package manager
 2. Run the installer for your platform
@@ -40,7 +39,7 @@ Installation Steps
    conda --version  # or mamba --version
 
 Alternative Installation Methods
---------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. tabs::
 
@@ -61,7 +60,7 @@ Alternative Installation Methods
 
       **Using Official Installer:**
 
-      * Download from `Python.org <https://www.python.org/downloads/macos/>`_
+      * Download from `Python.org (macOS) <https://www.python.org/downloads/macos/>`_
       * Run the installer
       * Verify with ``python3 --version``
 
@@ -69,7 +68,7 @@ Alternative Installation Methods
       
       **Using Official Installer:**
 
-      * Download from `Python.org <https://www.python.org/downloads/windows/>`_
+      * Download from `Python.org (Windows) <https://www.python.org/downloads/windows/>`_
       * Run installer (check "Add Python to PATH")
       * Verify with ``python --version``
 
@@ -97,10 +96,10 @@ Alternative Installation Methods
          sudo dnf install python3.10
 
 Installing SpectroChemPy
-************************
+------------------------
 
 Create Environment
-------------------
+~~~~~~~~~~~~~~~~~~
 
 First, create and activate a dedicated environment:
 
@@ -115,7 +114,7 @@ First, create and activate a dedicated environment:
    source scpy/bin/activate  # On Windows: scpy\Scripts\activate
 
 Install Package
----------------
+~~~~~~~~~~~~~~~
 
 .. tabs::
 
@@ -139,7 +138,7 @@ Install Package
 
 
 Additional Resources
-********************
+--------------------
 
 For more detailed instructions and alternative installation methods:
 

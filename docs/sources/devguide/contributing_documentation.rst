@@ -19,6 +19,7 @@ SpectroChemPy documentation consists of:
 3. **Examples** in Jupyter notebooks
 
 We use:
+
 - **reStructuredText** (reST) markup
 - **Sphinx** documentation builder
 - **NumPy docstring standard**
@@ -29,6 +30,7 @@ Documentation Sources
 
 API Documentation
 ~~~~~~~~~~~~~~~~~
+
 - Lives in docstrings within Python code
 - Follows :ref:`NumPy docstring standard <docstring>`
 - Examples are tested during builds
@@ -42,11 +44,11 @@ Guides & Tutorials
 - All code examples are tested
 
 Building Documentation
---------------------
+----------------------
 
 Quick Start
 ~~~~~~~~~~~
-1. Set up development environment (:ref:`guide <contributing_environment>`)
+1. Set up development environment (:ref:`guide <contributing.environment>`)
 2. Navigate to ``docs/`` directory
 3. Build HTML::
 
@@ -56,6 +58,7 @@ Quick Start
 
 Build Options
 ~~~~~~~~~~~~~
+
 - Full rebuild::
 
     python make.py clean

@@ -130,6 +130,6 @@ Step 5: Documentation
 1. Add docstrings following NumPy style
 2. Include examples in docstrings
 3. Add reader to main documentation
-4. Update CHANGELOG.rst
+4. Update `whatsnew/changelog.rst`
 
 For complete implementation examples, see existing readers in ``spectrochempy/core/readers/``.

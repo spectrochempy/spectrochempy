@@ -71,7 +71,7 @@ Documentation
 Contribute
 ==========
 
-We welcome contributions! See our :doc:`Contributing Guide </devguide/contributing>` to learn how to:
+We welcome contributions! 
 
 * Report bugs
 * Suggest features
@@ -85,4 +85,6 @@ We welcome contributions! See our :doc:`Contributing Guide </devguide/contributi
    /userguide/index
    /reference/index
    /gettingstarted/examples/index
-   /devguide/contributing
+
+For more information about contributing, see :doc:`../devguide/contributing`.
+

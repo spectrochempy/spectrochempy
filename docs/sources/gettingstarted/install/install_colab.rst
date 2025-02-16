@@ -1,8 +1,8 @@
 .. _install_colab:
 
-*************************************
+**************************************
 Install in Google Colaboratory (Colab)
-*************************************
+**************************************
 
 .. contents:: Table of Contents
    :local:
@@ -85,7 +85,7 @@ Equivalently by importing the files module from the
     files.upload()
 
 Using Google Drive
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 By connecting the notebook to your Google Drive (this of course requires that your
 local files are synchronized with Google drive), using the file-explorer pane.
@@ -96,7 +96,7 @@ local files are synchronized with Google drive), using the file-explorer pane.
     drive.mount('/content/drive')
 
 Using Git Repository
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
 By cloning a git repository using `git clone` .
 
