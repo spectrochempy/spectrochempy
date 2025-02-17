@@ -46,6 +46,7 @@ dependencies:
 
     # DOCS dependencies
     # -----------------
+    - cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7
     - ipykernel
     - ipywidgets
     - jsonschema
@@ -56,10 +57,10 @@ dependencies:
     - numpydoc
     - pickleshare
     - pypandoc
-    - sphinx
+    - sphinx<=7.0.0
     - sphinx-tabs
     - sphinx-copybutton
-    - sphinx-gallery
+    - sphinx-gallery<=0.7.0
     - sphinx-rtd-theme
     - sphinxcontrib-bibtex
     - json5
