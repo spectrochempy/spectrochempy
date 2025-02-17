@@ -9,7 +9,7 @@ from spectrochempy.extern.nmrglue import (
     read_jcamp,
     read_binary,
     complexify_data,
-    read_pdata,
+    # read_pdata,
     scale_pdata,
 )
 
