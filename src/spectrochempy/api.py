@@ -60,7 +60,7 @@ if "pytest" in sys.argv[0] or "py.test" in sys.argv[0]:
     NO_DISPLAY = True
     NO_DIALOG = True
 
-    # Enable display for individual PyCharm test runs
+    # Enable display for individual test runs
     if (
         len(sys.argv) > 1
         and any(arg.split("::")[0].endswith(".py") for arg in sys.argv[1:])
