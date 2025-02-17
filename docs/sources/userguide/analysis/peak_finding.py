@@ -452,7 +452,7 @@ print(f"prominence with reduced window: {properties['prominences'][0]: 0.4f}")
 # method is **very approximate** and
 # more advanced methods (such as peak fitting), also implemented in spectrochempy
 # should be used (see e.g.,
-# [this example](/gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.rst)
+# [this example](/gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html)).
 # On the other hand, **the magnitude of the width is generally fine**.
 #
 # This estimate is based on an algorithm similar to that used for the "bases" above,
