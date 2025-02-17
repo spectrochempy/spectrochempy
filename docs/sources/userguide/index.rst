@@ -18,4 +18,3 @@ A comprehensive guide to using SCPY.
    processing/index
    analysis/index
    plotting/plotting
-

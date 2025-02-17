@@ -25,41 +25,41 @@ Environment Setup
 .. tabs::
 
     .. tab:: Using conda/mamba (recommended)
-        
+
         We strongly recommend using mamba as it's significantly faster at resolving dependencies.
 
         1. Install Mambaforge
 
         Download and install `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_
-      
-      
+
+
         2. Add required channels:
 
         .. code-block:: bat
 
             mamba config --add channels conda-forge
             mamba config --add channels spectrocat
-           
+
         3. Create and activate environment
 
         .. code-block:: bash
 
             # Create new environment
             mamba create -n scpy python=3.10
-            
+
             # Activate it
             mamba activate scpy
 
     .. tab:: Using pip and venv
-            
+
         .. code-block:: bash
 
             # Create environment
             python -m venv scpy-env
-            
+
             # Activate it
-            source scpy-env/bin/activate  
-            
+            source scpy-env/bin/activate
+
             # Update pip
             python -m pip install --upgrade pip
 
@@ -69,7 +69,7 @@ Install SpectroChemPy
 
 .. tabs::
 
-    .. tab:: Using conda/mamba 
+    .. tab:: Using conda/mamba
 
         Stable version
 

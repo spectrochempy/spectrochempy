@@ -10,8 +10,8 @@ Contributing to SpectroChemPy
 General Principles
 ==================
 
-Any kind of contribution is welcome! While we encourage following these guidelines, 
-don't let them prevent you from contributing. This guide covers both basic 
+Any kind of contribution is welcome! While we encourage following these guidelines,
+don't let them prevent you from contributing. This guide covers both basic
 contributions like issue reporting and advanced topics like code development.
 
 For information about reporting issues, please see the :doc:`issues page </devguide/issues>`.
@@ -22,17 +22,17 @@ Getting Started with Development
 Version Control Setup
 ---------------------
 
-1. Create a `GitHub account <https://github.com/signup/free>`__ if you haven't 
+1. Create a `GitHub account <https://github.com/signup/free>`__ if you haven't
    already
 2. Install Git:
-   
-   * macOS: Via `XCode <https://developer.apple.com/xcode/>`__ 
+
+   * macOS: Via `XCode <https://developer.apple.com/xcode/>`__
      or `git-scm.com <https://git-scm.com/download/mac>`__
      or `Homebrew <https://brew.sh>`__ using ``brew install git``
    * Windows: From `git-scm.com <https://git-scm.com/download/win>`__
    * Linux: ``sudo apt-get install git`` or ``pip install gitpython``
 
-Optional: Install a GUI client like `SourceTree <https://www.sourcetreeapp.com>`__ 
+Optional: Install a GUI client like `SourceTree <https://www.sourcetreeapp.com>`__
 or `GitHub Desktop <https://desktop.github.com>`__
 
 .. _contributing.environment:
@@ -59,7 +59,7 @@ Setting Up Your Development Environment
 
           python3 -m venv .venv
           source .venv/bin/activate
-   
+
     .. tab:: Windows
 
        .. sourcecode:: bash

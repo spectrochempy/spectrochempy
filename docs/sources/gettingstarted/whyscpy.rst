@@ -36,7 +36,7 @@ In particular, `SpectroChemPy` :
 Open Source and Free
 ====================
 
-`SpectroChemPy` is free software under the `CeCILL-B License <https://cecill.info/index.en.html>`__, 
+`SpectroChemPy` is free software under the `CeCILL-B License <https://cecill.info/index.en.html>`__,
 similar to BSD licenses. The license requires:
 
 * Strong citation requirements
@@ -51,7 +51,7 @@ Python-Powered Analysis
 Benefits of using Python:
 
 * Popular in data science
-* Cross-platform compatibility 
+* Cross-platform compatibility
 * Extensive scientific libraries (numpy, scipy, matplotlib)
 * Active community support
 * Easy integration with other tools

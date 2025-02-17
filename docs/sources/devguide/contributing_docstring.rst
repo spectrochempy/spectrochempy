@@ -19,7 +19,7 @@ SpectroChemPy uses `numpydoc <https://numpydoc.readthedocs.io/>`_ format for doc
 1. A short summary (one line)
 2. An extended description (optional)
 3. Parameters section
-4. Returns/Yields section 
+4. Returns/Yields section
 5. See Also section (optional)
 6. Notes section (optional)
 7. Examples section
@@ -112,7 +112,7 @@ For plots, use the plot directive:
     .. plot::
         :context: close-figs
 
-        >>> ds = scp.read("myfile.spg") 
+        >>> ds = scp.read("myfile.spg")
         >>> ds.plot()
 
 See the `numpydoc guide <https://numpydoc.readthedocs.io/>`_ for more details.

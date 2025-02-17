@@ -132,7 +132,7 @@ def test_read_pdata_dimensions(tmp_path, ndim):
     """
     data_dir = tmp_path / f"{ndim}d_processed"
     data_dir.mkdir()
-    
+
     # Create necessary files based on dimension
     if ndim == 1:
         files = ["1r"]
@@ -140,11 +140,11 @@ def test_read_pdata_dimensions(tmp_path, ndim):
         files = ["2rr"]
     else:
         files = ["3rrr"]
-        
+
     # Create dummy processed data files
     for f in files:
         (data_dir / f).touch()
-        
+
     dic, data = read_pdata(data_dir)
     assert data.ndim == ndim
     """

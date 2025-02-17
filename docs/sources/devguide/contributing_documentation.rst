@@ -36,7 +36,7 @@ API Documentation
 - Examples are tested during builds
 - Located in ``docs/reference``
 
-Guides & Tutorials 
+Guides & Tutorials
 ~~~~~~~~~~~~~~~~~~
 - Written in reST or Jupyter notebooks
 - Located in ``docs/userguide/``
@@ -88,5 +88,5 @@ Writing Tips
 5. Link related sections
 6. Follow :ref:`docstring guide <docstring>`
 
-See the `Sphinx reStructuredText primer <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_ 
+See the `Sphinx reStructuredText primer <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`_
 for detailed syntax guide.

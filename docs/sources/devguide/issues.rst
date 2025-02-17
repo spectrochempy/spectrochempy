@@ -29,8 +29,8 @@ Bug reports should:
 
        >>> nd = NDDataset()
 
-   
-#. Include the full version string of SpectroChemPy. 
+
+#. Include the full version string of SpectroChemPy.
    You can use the built-in property:
 
    .. sourcecode:: ipython3
@@ -38,7 +38,7 @@ Bug reports should:
        >>> print(version)
        0.1.23...
 
-   
+
 #. Explain why the current behavior is wrong/not desired and what you expect instead.
 
 The issue will then show up to the SpectroChemPy community and be open to comments/ideas from others.

@@ -32,6 +32,7 @@ numpydoc
 pickleshare
 pypandoc
 sphinx
+sphinx-tabs
 sphinx-copybutton
 sphinx-gallery
 sphinx-rtd-theme

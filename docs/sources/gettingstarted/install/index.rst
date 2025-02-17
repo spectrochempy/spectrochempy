@@ -10,7 +10,7 @@ Installation Guide
 Prerequisites
 -------------
 
-`SpectroChemPy` requires Python 3.10 or higher (tested up to 3.13). Python is a widely-adopted 
+`SpectroChemPy` requires Python 3.10 or higher (tested up to 3.13). Python is a widely-adopted
 scientific programming language, particularly suited for data analysis and scientific computing.
 
 Installing Python
@@ -44,17 +44,17 @@ Alternative Installation Methods
 .. tabs::
 
    .. tab:: macOS
-      
+
       **Using Homebrew:**
 
       .. code-block:: bash
 
          # Install Homebrew
          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-         
+
          # Install Python
          brew install python
-         
+
          # Verify installation
          python3 --version
 
@@ -65,7 +65,7 @@ Alternative Installation Methods
       * Verify with ``python3 --version``
 
    .. tab:: Windows
-      
+
       **Using Official Installer:**
 
       * Download from `Python.org (Windows) <https://www.python.org/downloads/windows/>`_
@@ -119,19 +119,19 @@ Install Package
 .. tabs::
 
    .. tab:: Using Mamba (Recommended)
-      
+
       .. code-block:: bash
 
          mamba install -c spectrocat spectrochempy
 
    .. tab:: Using Conda
-      
+
       .. code-block:: bash
 
          conda install -c spectrocat spectrochempy
 
    .. tab:: Using Pip
-      
+
       .. code-block:: bash
 
          python -m pip install spectrochempy

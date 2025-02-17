@@ -22,13 +22,13 @@ Installation options:
 .. tabs::
 
    .. tab:: Using mamba (recommended)
-      
+
       .. code-block:: bash
 
          mamba install -c spectrocat spectrochempy_data
 
    .. tab:: Manual download
-      
+
       Download from `GitHub releases <https://github.com/spectrochempy/spectrochempy_data/tags>`__
       and extract to your preferred location.
 
@@ -46,7 +46,7 @@ Required for chemical kinetics, thermodynamics and transport processes.
 .. tabs::
 
    .. tab:: Using mamba (recommended)
-      
+
       Stable version:
 
       .. code-block:: bash
@@ -60,7 +60,7 @@ Required for chemical kinetics, thermodynamics and transport processes.
          mamba install -c cantera/label/dev cantera
 
    .. tab:: Using pip
-      
+
       .. code-block:: bash
 
          pip install cantera>=2.6.0
@@ -75,13 +75,13 @@ For interactive matplotlib plots:
 .. tabs::
 
    .. tab:: Using mamba (recommended)
-      
+
       .. code-block:: bash
 
          mamba install "pyqt>=5.15.0"
 
    .. tab:: Using pip
-      
+
       .. code-block:: bash
 
          pip install "pyqt5>=5.15.0"

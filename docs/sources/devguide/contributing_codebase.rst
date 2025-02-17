@@ -30,7 +30,7 @@ Pre-commit
 ----------
 
 We encourage you to use `pre-commit hooks <https://pre-commit.com/>`__
-to automatically run ``ruff check`` and ``ruff format`` when you make a git commit. 
+to automatically run ``ruff check`` and ``ruff format`` when you make a git commit.
 This can be done by installing ``pre-commit``:
 
     .. code-block:: bash
@@ -61,7 +61,7 @@ If you want to run checks on all files before committing, you can run:
 Optional dependencies
 ---------------------
 
-Optional dependencies (e.g., cantera, nmrglue, ...) should be imported with 
+Optional dependencies (e.g., cantera, nmrglue, ...) should be imported with
 the private helper
 ``spectrochempy.utils.optional.import_optional_dependency`` . This ensures a
 consistent error message when the dependency is not met.
@@ -99,7 +99,7 @@ You can also check only the files that have changed compared to main::
     ruff check $(git diff upstream/master --name-only -- "*.py")
     ruff format $(git diff upstream/master --name-only -- "*.py")
 
-If in the code, some part of the code should not be checked by ruff, 
+If in the code, some part of the code should not be checked by ruff,
 you can use the following comment::
 
     # ruff: skip
@@ -111,7 +111,7 @@ or on a line basis::
 You can also use the following comment to ignore a specific rule::
 
     # ruff: ignore=E501
-    or 
+    or
     # noqa: E501
 
 Backwards compatibility

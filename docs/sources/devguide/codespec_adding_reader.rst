@@ -68,14 +68,14 @@ Create ``spectrochempy/core/readers/reader_xxx.py``:
 
     def read_spc(*paths, **kwargs):
         """Read Thermo Galactic .spc file(s).
-        
+
         Parameters
         ----------
         *paths : str or Path
             Path(s) to .spc file(s)
         **kwargs
             Additional import options
-            
+
         Returns
         -------
         NDDataset or list of NDDataset
@@ -110,14 +110,14 @@ Example of proper axis setup:
     # Set up coordinates
     x_data = get_wavelengths(file)  # Your implementation
     x_coord = scp.Coord(x_data, title="wavelength", units="nm")
-    
-    y_data = get_timestamps(file)  # Your implementation 
+
+    y_data = get_timestamps(file)  # Your implementation
     y_coord = scp.Coord(y_data, title="Time", units="s",
                         labels=acquisition_dates)
-                        
+
     # Create dataset
     data = get_spectra(file)  # Your implementation
-    dataset = NDDataset(data, 
+    dataset = NDDataset(data,
                        coords=[y_coord, x_coord],
                        title="Absorption",
                        units="absorbance")

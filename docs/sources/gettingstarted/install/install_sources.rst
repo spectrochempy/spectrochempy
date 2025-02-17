@@ -46,11 +46,11 @@ Installation Methods
 
             # Install Mambaforge
             # Get it from: https://github.com/conda-forge/miniforge#mambaforge
-            
+
             # Create environment
             mamba env create -n scpy -f environments/environment.yml
             mamba activate scpy
-            
+
             # Install package
             python -m pip install -e . --no-deps
 
@@ -63,7 +63,7 @@ Installation Methods
             source scpy-env/bin/activate  # Linux/macOS
             # or
             scpy-env\Scripts\activate     # Windows
-            
+
             # Install package
             python -m pip install -e .
 

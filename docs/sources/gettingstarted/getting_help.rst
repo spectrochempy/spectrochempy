@@ -21,7 +21,7 @@ For bug reports and feature requests:
 
 .. tip::
    When reporting bugs, include:
-   
+
    * SpectroChemPy version (``import spectrochempy; print(spectrochempy.version)``)
    * Python environment (e.g., conda, pip, OS package manager)
    * You can use the command ``show_versions`` to get a detailed list of the versions of the packages used by SpectroChemPy
@@ -62,7 +62,7 @@ Documentation
 
 .. note::
    Before asking for help:
-   
+
    1. Search existing issues/discussions
    2. Check the documentation
    3. Try to create a minimal example that demonstrates your problem
@@ -71,7 +71,7 @@ Documentation
 Contribute
 ==========
 
-We welcome contributions! 
+We welcome contributions!
 
 * Report bugs
 * Suggest features
@@ -80,4 +80,3 @@ We welcome contributions!
 
 
 For more information about contributing, see :doc:`../devguide/contributing`.
-

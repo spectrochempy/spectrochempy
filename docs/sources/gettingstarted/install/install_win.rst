@@ -25,13 +25,13 @@ Environment Setup
 .. tabs::
 
    .. tab:: Mamba (Recommended)
-      
+
       1. Install Mambaforge:
-         
+
          * Download `Mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`_
          * Run the installer
          * Open cmd prompt
- 
+
 
 
 
@@ -43,7 +43,7 @@ Environment Setup
             mamba activate scpy
 
    .. tab:: Using pip and venv
-      
+
       1. Open Command Prompt
       2. Create virtual environment:
 
@@ -64,7 +64,7 @@ Installing SpectroChemPy
 .. tabs::
 
    .. tab:: Using Mamba (Recommended)
-      
+
       .. code-block:: bat
 
          mamba install -c spectrocat spectrochempy
@@ -76,7 +76,7 @@ Installing SpectroChemPy
          mamba install -c spectrocat/label/dev spectrochempy
 
    .. tab:: Using Pip
-      
+
       .. code-block:: bat
 
          # Install SpectroChemPy

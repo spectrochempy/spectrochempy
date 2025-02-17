@@ -24,7 +24,7 @@ Quick Start
 
 To start with Colab, go to the
 `Colab website <https://colab.research.google.com/notebooks/intro.ipynb#recent=true>`__
-and create a new notebook. 
+and create a new notebook.
 
 For learning purpose you can also simply execute the
 `example notebook on Colab <https://colab.research.google.com/github/spectrochempy/spectrochempy_tutorials/blob/main/colab/0_install_spectrochempy_on_colaboratory_tutorial.ipynb>`__  |Open in Colab|
@@ -76,7 +76,7 @@ Using File Explorer
 Through the file-explorer pane located on the left-hand side of the Colab window
 (NOT the File menu which is devoted to notebooks and scripts management !).
 
-Equivalently by importing the files module from the 
+Equivalently by importing the files module from the
 `google.colab`` library and running the `files.upload()` widget (works best on Google Chrome).
 
 .. sourcecode:: ipython3
@@ -107,7 +107,7 @@ By cloning a git repository using `git clone` .
 
 .. note::
 
-    Colab has no direct access to your local drive. Choose the most appropriate method 
+    Colab has no direct access to your local drive. Choose the most appropriate method
     above for your data access needs.
 
 Then as usual in Jupyter Notebook you can start using SpectroChemPy by inserting
