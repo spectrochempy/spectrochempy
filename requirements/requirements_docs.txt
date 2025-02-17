@@ -31,10 +31,10 @@ nbsphinx
 numpydoc
 pickleshare
 pypandoc
-sphinx <= 7.0.0
+sphinx
 sphinx-tabs
 sphinx-copybutton
-sphinx-gallery <= 0.7.0
+sphinx-gallery
 sphinx-rtd-theme
 sphinxcontrib-bibtex
 json5
