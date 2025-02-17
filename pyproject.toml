@@ -92,7 +92,7 @@ test = [
   "numpydoc",
 ]
 docs = [
-  "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
+  # "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
   "ipykernel",
   "ipywidgets",
   "jsonschema",
@@ -102,7 +102,7 @@ docs = [
   "nbsphinx",
   "numpydoc",
   "pickleshare",
-  "pypandoc",                                                                    #_binary",
+  "pypandoc",                #_binary",
   "sphinx <= 7.0.0",
   "sphinx-tabs",
   "sphinx-copybutton",

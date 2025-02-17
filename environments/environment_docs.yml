@@ -46,7 +46,6 @@ dependencies:
 
     # DOCS dependencies
     # -----------------
-    - cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7
     - ipykernel
     - ipywidgets
     - jsonschema
