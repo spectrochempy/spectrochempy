@@ -25,10 +25,9 @@ New features
   the `cantera` dependencies,
   or `pip install -e ".[dev]"` to install the package with the
   development dependencies and in editable mode.
-* Now support installation on the last version (3.10) of Google Colab. To do so, use the following command:
-  `!pip install "spectrochempy[colab]"`. See documentation for more details
-* Add a `show-version` script executable from a terminal.
-* Revision of the documentation to improve the user experience.
+* Now support installation on the last version (3.10) of Google Colab.
+* Add a `show_version` script executable from a terminal.
+* Revision/update of the documentation to improve the user experience.
 
 .. section
 
@@ -50,7 +49,6 @@ Dependency updates
     - Dropped support for Python 3.9 and below
 
 * New installation options:
-    - Added [colab] extra for Google Colab compatibility
     - Updated [dev], [test], and [docs] extras with latest versions
     - All dependencies now specify minimum versions for better compatibility
 
