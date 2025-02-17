@@ -19,11 +19,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 100
 
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install json5 pyyaml cffconvert
+          python3 -m pip install json5 pyyaml
+          python3 -m pip install "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7"
           python3 -m pip install setuptools_scm
 
       - name: Create release branch

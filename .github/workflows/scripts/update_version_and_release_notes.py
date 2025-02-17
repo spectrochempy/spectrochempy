@@ -28,14 +28,14 @@ from cffconvert.cli.create_citation import create_citation
 from setuptools_scm import get_version
 
 # Path configurations
-CI = Path(__file__).parent
-PROJECT = CI.parent
-CITATION = PROJECT / "src/spectrochempy/data/CITATION.cff"
-ZENODO = PROJECT / "src/spectrochempy/data/zenodo.json"
+WORKFLOWS = Path(__file__).parent.parent
+PROJECT = WORKFLOWS.parent.parent
+CITATION = WORKFLOWS / "data" / "CITATION.cff"
+ZENODO = WORKFLOWS / "data" / "zenodo.json"
 DOCS = PROJECT / "docs"
-WN = DOCS / "whatsnew"
+WN = DOCS / "sources" / "whatsnew"
 
-gitversion = get_version(root="..", relative_to=__file__)
+gitversion = get_version(root=PROJECT, relative_to=__file__)
 
 
 class Zenodo:
