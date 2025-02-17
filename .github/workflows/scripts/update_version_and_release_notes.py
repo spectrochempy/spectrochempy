@@ -33,7 +33,7 @@ PROJECT = WORKFLOWS.parent.parent
 CITATION = WORKFLOWS / "data" / "CITATION.cff"
 ZENODO = WORKFLOWS / "data" / "zenodo.json"
 DOCS = PROJECT / "docs"
-WN = DOCS / "whatsnew"
+WN = DOCS / "sources" / "whatsnew"
 
 gitversion = get_version(root=PROJECT, relative_to=__file__)
 
