@@ -41,6 +41,7 @@ Options
 --clear, -C : Clear html directory
 --warning-is-error, -W : Fail if warnings are raised
 --single-doc : Build a single document
+--directory, -d : Build a specific directory
 --whatsnew : Build only the whatsnew document
 
 Examples
@@ -355,13 +356,25 @@ class BuildDocumentation:
         # Set environmetnt variables for sphinx
         environ["SPHINX_NOEXEC"] = "1" if settings["noexec"] else "0"
         self.singledoc = settings["singledoc"]
-        if self.singledoc:
+        self.directory = settings["directory"]
+
+        if self.directory:
+            self.directory = self._validate_directory(self.directory)
+            os.environ["SPHINX_PATTERN"] = f"dir:{self.directory}"
+        elif self.singledoc:
             self.singledoc = self._single_doc(self.singledoc)
             os.environ["SPHINX_PATTERN"] = self.singledoc
         elif settings["noapi"]:
             os.environ["SPHINX_PATTERN"] = "noapi"
         elif settings["whatsnew"]:
             os.environ["SPHINX_PATTERN"] = "whatsnew"
+
+    def _validate_directory(self, directory):
+        """Validate and return normalized directory path."""
+        dir_path = self.SRC / directory
+        if not dir_path.is_dir():
+            raise ValueError(f"Directory {directory} not found in sources")
+        return directory
 
     def _init_settings(self, kwargs):
         # Initialize settings from keyword arguments.
@@ -382,6 +395,7 @@ class BuildDocumentation:
             "whatsnew": kwargs.get("whatsnew", False),
             "tagname": kwargs.get("tagname", None),
             "singledoc": kwargs.get("singledoc", None),
+            "directory": kwargs.get("directory", None),
         }
 
     def _single_doc(self, singledoc):
@@ -582,13 +596,10 @@ class BuildDocumentation:
         self._prepare_build()
         build_result = self._run_sphinx_build()
         self._post_build()
-
         return build_result
 
     def _prepare_build(self):
         # Prepare the build environment.
-
-        from spectrochempy.utils.file import download_testdata
 
         if self.tagname:
             print(
@@ -602,6 +613,13 @@ class BuildDocumentation:
                 "Preparing to build the documentation - load spectrochempy and testdata"
                 f"\n{'-' * 80}"
             )
+
+        print("Loading spectrochempy and downloading test data...")
+
+        from spectrochempy.utils.file import download_testdata
+
+        # Download the test data
+        download_testdata()
 
         # Determine the version of the documentation to build
         self._version, self._last_release, self._doc_version = self._determine_version()
@@ -622,9 +640,6 @@ class BuildDocumentation:
                 elif item.is_file() and item.name not in previous_versions:
                     item.unlink()
                     print(f"Removed file: {item}")
-
-        # Download the test data
-        download_testdata()
 
         # Sync the notebooks with the Python scripts
         if not self.settings["nosync"]:
@@ -706,7 +721,8 @@ class BuildDocumentation:
         sp.events.emit = SafeEventEmitter(sp.events.emit)
 
         try:
-            return sp.build()
+            sp.build()
+            return 0
         except Exception as e:
             print(f"Warning: Build encountered an error: {e}")
             if "build-finished" in str(e):
@@ -963,6 +979,15 @@ def main():
         "--tag-name", "-T", type=str, help="Git tag to read from to regenerate old docs"
     )
 
+    parser.add_argument(
+        "--directory",
+        "-d",
+        metavar="DIR",
+        type=str,
+        default=None,
+        help="directory to build (e.g., gettingstarted/install)",
+    )
+
     args = parser.parse_args()
 
     if args.command not in commands:
@@ -993,6 +1018,7 @@ def main():
             warningiserror=args.warning_is_error,
             whatsnew=args.whatsnew,
             singledoc=args.single_doc,
+            directory=args.directory,
         )
 
         buildcommand = getattr(build, args.command)
@@ -1031,16 +1057,22 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    # if not ON_GITHUB:
-    #     sys.argv = [
-    #         "make.py",
-    #         "html",
-    #         # "--no-api",
-    #         # "--no-exec",
-    #         # "--no-sync",
-    #         "-v",
-    #         "--single-doc",
-    #         # "userguide/objects/dataset/dataset.ipynb",
-    #         "spectrochempy.IRIS",
-    #     ]  #  "-T", "0.6.10"]
+    if not ON_GITHUB:
+        sys.argv = [
+            "make.py",
+            "html",
+            # "--no-api",
+            # --no-exec",
+            # "--no-sync",
+            # "-vv",
+            # "--directory",
+            # "devguide/",
+            # "gettingstarted/install/",
+            # "--single-doc",
+            # "gettingstarted/overview.ipynb",
+            # "gettingstarted/getting_help.rst",
+            # "gettingstarted/install/index.rst",
+            # "userguide/objects/dataset/dataset.ipynb",
+            # "spectrochempy.IRIS",
+        ]  #  "-T", "0.6.10"]
     sys.exit(main())

@@ -1,6 +1,6 @@
 :orphan:
 
-{% if not single_doc -%}
+{% if not single -%}
 .. _home:
 
 #####################################################################
@@ -68,6 +68,7 @@ Getting Started
 * :doc:`gettingstarted/overview`
 * :doc:`gettingstarted/examples/index`
 * :doc:`gettingstarted/install/index`
+* :doc:`gettingstarted/getting_help`
 
 .. toctree::
     :maxdepth: 1
@@ -78,6 +79,7 @@ Getting Started
     gettingstarted/overview
     Examples <gettingstarted/examples/index>
     Installation <gettingstarted/install/index>
+    gettingstarted/getting_help
 
 .. _userguide:
 
@@ -115,6 +117,7 @@ description of the API. You can also refer to the :ref:`examples-index` for more
 ***********************
 Reference
 ***********************
+
 {% if include_api -%}
 * :doc:`reference/index`
 {% endif -%}
@@ -126,6 +129,7 @@ Reference
     :maxdepth: 3
     :hidden:
     :caption: Reference
+
     {% if include_api -%}
     reference/index
     {% endif -%}
@@ -141,7 +145,7 @@ Contribute
 
 * :doc:`devguide/issues`
 * :doc:`devguide/examples`
-* :doc:`devguide/index`
+* :doc:`devguide/contributing`
 
 .. toctree::
     :maxdepth: 1
@@ -173,19 +177,25 @@ Credits
     credits/license
     credits/seealso
 
-{% elif single_doc and single_doc.endswith('.ipynb') -%}
+{% elif single and pattern.endswith('.ipynb') -%}
 .. toctree::
     :maxdepth: 3
     :titlesonly:
 
-    {{ single_doc[:-6] }}
-{% elif single_doc and single_doc.endswith('.rst') -%}
+    {{ pattern[:-6] }}
+{% elif single and pattern.endswith('.rst') -%}
 .. toctree::
     :maxdepth: 3
     :titlesonly:
 
-    {{ single_doc[:-4] }}
-{% elif single_doc and single_doc.count('.') <= 1 %}
+    {{ pattern[:-4] }}
+{% elif single and pattern.startswith('dir:') -%}
+.. toctree::
+    :maxdepth: 3
+    :titlesonly:
+
+    {{ pattern[4:] }}index.rst
+{% elif single and pattern.count('.') <= 1 %}
 .. currentmodule:: spectrochempy
 
 * :doc:`reference/bibliography`
@@ -203,7 +213,7 @@ Credits
     :nosignatures:
     :toctree: reference/generated/
 
-    {{ single_doc }}
+    {{ pattern }}
 
 
 {% endif %}

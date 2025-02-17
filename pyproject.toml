@@ -102,21 +102,16 @@ docs = [
   "nbsphinx",
   "numpydoc",
   "pickleshare",
-  "pypandoc", #_binary",
-  "sphinx",
+  "pypandoc",             #_binary",
+  "sphinx",               #<7.0.0",
+  "sphinx-tabs",
   "sphinx-copybutton",
-  "sphinx-gallery",
+  "sphinx-gallery",       # <=0.7.0",
   "sphinx-rtd-theme",
   "sphinxcontrib-bibtex",
   "json5",
 ]
-build = [
-  "setuptools",
-  "setuptools_scm",
-  "toml",
-  "jinja2",
-  "anaconda-client",
-]
+build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
 cantera = ["cantera"]
 
 [project.urls]
@@ -192,14 +187,17 @@ ignore = [
 
 ]
 
-exclude = [
-  "~*",
-  "tests/**",
-] # Exclude files and directories.
+exclude = ["~*", "tests/**"] # Exclude files and directories.
 
 [tool.ruff.lint.per-file-ignores]
-"docs/sources/userguide/**/*" = ["B018", "T201", "N816"]   # accept "useless expression", "print", "mixed-case variables" in *.ipynb or py:percent files.
-"docs/sources/gettingstarted/*" = ["B018"]  # accept "useless expression" in *.ipynb or py:percent files.
+"docs/sources/userguide/**/*" = [
+  "B018",
+  "T201",
+  "N816",
+] # accept "useless expression", "print", "mixed-case variables" in *.ipynb or py:percent files.
+"docs/sources/gettingstarted/*" = [
+  "B018",
+] # accept "useless expression" in *.ipynb or py:percent files.
 
 
 [tool.ruff.lint.isort]
@@ -214,14 +212,50 @@ line-ending = "auto"
 
 [tool.numpydoc_validation]
 checks = [
-    "all",   # report on all checks, except the below
-    "ES01",
-    "EX01",
-    "SA01",
-    "ES01",
+  "all",  # report on all checks, except the below
+  "ES01",
+  "EX01",
+  "SA01",
+  "ES01",
 ]
 # remember to use single quotes for regex in TOML
-exclude = [  # don't report on objects that match any of these regex
-    '\.undocumented_method$',
-    '\.__repr__$',
+exclude = [ # don't report on objects that match any of these regex
+  '\.undocumented_method$',
+  '\.__repr__$',
 ]
+
+[tool.doc8]
+ignore = ["D001"]
+ignore_path = ["docs/_build"]
+max-line-length = 100
+verbose = 1
+
+[tool.pytest.ini_options]
+markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
+testpaths = ["tests"]
+addopts = ["--ignore=~*", "--doctest-plus", "-p no:warnings"]
+doctest_plus = "enabled"
+doctest_optionflags = [
+  "ELLIPSIS",
+  "NORMALIZE_WHITESPACE",
+  "IGNORE_EXCEPTION_DETAIL",
+  "ALLOW_UNICODE",
+  "ALLOW_BYTES",
+]
+
+[tool.coverage.run]
+source = ["src/spectrochempy/"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "'# '",
+  "if self.debug:",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if 0:",
+  "if __name__ == .__main__.:",
+  "def __repr__",
+  "if settings.DEBUG",
+]
+ignore_errors = true

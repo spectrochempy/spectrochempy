@@ -1,13 +1,14 @@
 .. _whyscpy:
 
 **********************
-Why `SpectroChemPy`  ?
+Why SpectroChemPy?
 **********************
 
 **Table of Contents**
 
-.. contents::
+.. contents:: Contents
    :local:
+   :depth: 2
 
 The `SpectroChemPy` project was developed to provide advanced spectroscopic data processing and analysis tools initially for internal purposes in the `LCS <https://www.lcs.ensicaen.fr/>`__, for the following reasons:
 
@@ -32,26 +33,31 @@ In particular, `SpectroChemPy` :
 
    SpectroChemPy is probably not free of bugs in some (hopefully rare) cases. In any case, critical bugs affecting data     integrity will be reported in the documentation for the version(s) of `SpectroChemPy` concerned, allowing the source of these errors to be traced.
 
-Open Source Software on an Open-Source Platform
-===============================================
+Open Source and Free
+====================
 
-Although powerful and popular tools have been developed by instrument manufacturers, software companies, or academic research groups, most are proprietary or require proprietary computing environments (e.g., MATLAB). The cost of licensing can be problematic in some cases: "isolated" research groups, developing countries, PhD or postdoc students leaving a group with their data, etc.
+`SpectroChemPy` is free software under the `CeCILL-B License <https://cecill.info/index.en.html>`__,
+similar to BSD licenses. The license requires:
 
-It was important for us to be able to share spectroscopic data / data processing tools / data analysis tools with our colleagues, without imposing them a financial burden... or pushing them to use cracked copies.
+* Strong citation requirements
+* Attribution in derivative works
+* Web presence attribution
 
-`SpectroChemPy` is free and under a free software license (`License [CeCILL-B] <https://cecill.info/index.en.html>`__). CeCILL-B follows the principle of the popular BSD license and its variants (Apache, X11 or W3C among others). In exchange for strong citation obligations (in all software incorporating a program covered by CeCILL-B and also through a Web site), the author authorizes the reuse of its software without any other constraints.
+In return, users can freely use and modify the software.
 
-Powered by Python
-=================
+Python-Powered Analysis
+=======================
 
-Python is probably the most popular open-source language used by Data Scientists. It is extensible and cross-platform, which allows `SpectroChemPy` to be used in an entirely free software environment. `SpectroChemPy` uses state-of-the-art libraries for numerical computation (`numpy <https://numpy.org/>`__, `scipy <https://www.scipy.org/>`__) and visualization (`matplotlib <https://matplotlib.org/>`__).
+Benefits of using Python:
 
-The Python community being extremely dynamic, all users should easily find resources to solve specific needs that are not (yet) directly or completely satisfied by `SpectroChemPy` .
+* Popular in data science
+* Cross-platform compatibility
+* Extensive scientific libraries (numpy, scipy, matplotlib)
+* Active community support
+* Easy integration with other tools
 
-We also count on motivated members of this community (of which you are a part), to contribute to the improvement of `SpectroChemPy` through (:ref:`contributing.bugs_report` ), or contributions to the code (:ref:`develguide` ).
-
-Why NOT `SpectroChemPy` ?
-=========================
+Why NOT SpectroChemPy ?
+=======================
 
 You might **NOT** want to use `SpectroChemPy` if:
 

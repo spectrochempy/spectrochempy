@@ -114,7 +114,7 @@ jobs:
         run: |
           . .venv/bin/activate
           echo "Udating docs"
-          python3 docs/make.py -v -j1 html
+          python3 docs/make.py -j1 html
 
       # Step 11: Build oldest version of the documentation if it doesn't yet exist
       - name: Build oldest version of the documentation
@@ -122,7 +122,7 @@ jobs:
           . .venv/bin/activate
           if [ ! -d build/html/0.6.10 ]; then
             echo "Recreating oldest docs"
-            python3 docs/make.py -v -j1 html -T 0.6.10
+            python3 docs/make.py -j1 html -T 0.6.10
           fi
 
       # Step 12: Upload build artifacts

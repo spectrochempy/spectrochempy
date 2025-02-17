@@ -610,7 +610,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 desc += "{}\n".format(textwrap.indent(par, " " * 15))
             # the three escaped null characters are here to facilitate
             # the generation of html outputs
-            desc = rf"\0\0\0{desc.rstrip()}\0\0\0\n"
+            desc = f"\0\0\0{desc.rstrip()}\0\0\0\n"
             out += desc
 
         if self._history:
@@ -623,7 +623,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 hist += "{}\n".format(textwrap.indent(par, " " * 15))
             # the three escaped null characters are here to facilitate
             # the generation of html outputs
-            hist = rf"\0\0\0{hist.rstrip()}\0\0\0\n"
+            hist = f"\0\0\0{hist.rstrip()}\0\0\0\n"
             out += hist
 
         out += f"{self._str_value().rstrip()}\n"

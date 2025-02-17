@@ -24,23 +24,25 @@ Some extra checks can be run by
 ``pre-commit`` - see :ref:`here <contributing.pre-commit>` for how to
 run them.
 
-Additional standards are outlined on the :ref:`spectrochempy code style guide <code_style>` .
-
 .. _contributing.pre-commit:
 
 Pre-commit
 ----------
 
-We encourage you to use `pre-commit hooks <https://pre-commit.com/>`
-to automatically run ``black`` , ``flake8`` when you make a git commit. This
-can be done by installing ``pre-commit`` ::
+We encourage you to use `pre-commit hooks <https://pre-commit.com/>`__
+to automatically run ``ruff check`` and ``ruff format`` when you make a git commit.
+This can be done by installing ``pre-commit``:
 
-    pip install pre-commit
+    .. code-block:: bash
+
+        pip install pre-commit
 
 
-and then running::
+and then running:
 
-    pre-commit install
+    .. code-block:: bash
+
+        pre-commit install
 
 
 from the root of the spectrochempy repository. Now all of the styling checks will be
@@ -48,27 +50,20 @@ run each time you commit changes without your needing to run each one manually.
 In addition, using ``pre-commit`` will also allow you to more easily
 remain up to date with our code checks as they change.
 
-Note that if needed, you can skip these checks with ``git commit --no-verify`` .
+If you want to run checks on all files before committing, you can run:
 
-If you don't want to use ``pre-commit`` as part of your workflow, you can still use it
-to run its checks with::
+    .. code-block:: bash
 
-    pre-commit run --files <files you have modified>
+        pre-commit run --all-files
 
-without needing to have done ``pre-commit install`` beforehand.
-
-If you want to run checks on all recently committed files on upstream/master you can use::
-
-    pre-commit run --from-ref=upstream/master --to-ref=HEAD --all-files
-
-without needing to have done ``pre-commit install`` beforehand.
 
 
 Optional dependencies
 ---------------------
 
-Optional dependencies (e.g., cantera, nmrglue, ...) should be imported with the private helper
-``spectrochempy.optional.import_optional_dependency`` . This ensures a
+Optional dependencies (e.g., cantera, nmrglue, ...) should be imported with
+the private helper
+``spectrochempy.utils.optional.import_optional_dependency`` . This ensures a
 consistent error message when the dependency is not met.
 
 All methods using an optional dependency should include a test asserting that an
@@ -77,54 +72,47 @@ should be skipped if the library is present.
 
 All optional dependencies should be documented in
 :ref:`install_adds` and the minimum required version should be
-set in the ``spectrochempy.optional.VERSIONS`` dict.
+set in the ``spectrochempy.utils.optional.VERSIONS`` dict.
 
 
 .. _contributing.code-formatting:
 
-Python (PEP8 / black)
-~~~~~~~~~~~~~~~~~~~~~
+Python (PEP8 / ruff)
+~~~~~~~~~~~~~~~~~~~~
 
-spectrochempy follows the `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ standard
-and uses `Black <https://black.readthedocs.io/en/stable/>`_ and
-`Flake8 <http://flake8.pycqa.org/en/latest/>`_ to ensure a consistent code
-format throughout the project. We encourage you to use :ref:`pre-commit <contributing.pre-commit>` .
+SpectroChemPy follows the `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ standard
+and uses `ruff <https://docs.astral.sh/ruff/>`_ as an extremely fast Python linter and code formatter
+to ensure consistent code format throughout the project. We encourage you to use :ref:`pre-commit <contributing.pre-commit>`.
 
-:ref:`Continuous Integration <contributing.ci>` will run those tools and
-report any stylistic errors in your code. Therefore, it is helpful before
-submitting code to run the check yourself::
+:ref:`Continuous Integration <contributing.ci>` will run ruff and report any
+stylistic errors in your code. Therefore, it is helpful before submitting code
+to run the checks yourself::
 
-   black spectrochempy
-   git diff upstream/master -u -- "*.py" | flake8 --diff
+    ruff check .
+    ruff format .
 
-to auto-format your code. Additionally, many editors have plugins that will
-apply ``black`` as you edit files.
+to auto-format your code and fix any style issues. Additionally, many editors
+have plugins that will apply ruff formatting as you edit files.
 
-One caveat about ``git diff upstream/master -u -- "*.py" | flake8 --diff`` : this
-command will catch any stylistic errors in your changes specifically, but
-beware it may not catch all of them. For example, if you delete the only
-usage of an imported function, it is stylistically incorrect to import an
-unused function. However, style-checking the diff will not catch this because
-the actual import is not part of the diff. Thus, for completeness, you should
-run this command, though it may take longer::
+You can also check only the files that have changed compared to main::
 
-   git diff upstream/master --name-only -- "*.py" | xargs -r flake8
+    ruff check $(git diff upstream/master --name-only -- "*.py")
+    ruff format $(git diff upstream/master --name-only -- "*.py")
 
-Note that on macOS, the ``-r`` flag is not available, so you have to omit it and
-run this slightly modified command::
+If in the code, some part of the code should not be checked by ruff,
+you can use the following comment::
 
-   git diff upstream/master --name-only -- "*.py" | xargs flake8
+    # ruff: skip
 
-Windows does not support the ``xargs`` command (unless installed for example
-via the `MinGW <http://www.mingw.org/>`__ toolchain), but one can imitate the
-behavior as follows::
+or on a line basis::
 
-    for /f %i in ('git diff upstream/master --name-only -- "*.py"') do flake8 %i
+    # ruff: skip-line
 
-This will get all the files being changed by the PR (and ending with ``.py``),
-and run ``flake8`` on them, one after the other.
+You can also use the following comment to ignore a specific rule::
 
-Note that these commands can be run analogously with ``black`` .
+    # ruff: ignore=E501
+    or
+    # noqa: E501
 
 Backwards compatibility
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,7 +126,7 @@ directive to the deprecated functions or methods.
 
     from spectrochempy.utils.decorators import deprecated
 
-    @deprecated("This function is deprecated and may be removed in future version")
+    @deprecated(replace="new_func", removed="0.8")
     def old_func():
         """Summary of the function.
 
@@ -163,7 +151,7 @@ You'll also need to
 Testing with continuous integration
 -----------------------------------
 
-The spectrochempy test suite will run automatically on `GitHub Actions <https://github.com/features/actions/>`,
+The spectrochempy test suite will run automatically on `GitHub Actions <https://github.com/features/actions/>`__,
 once your pull request is submitted.
 
 A pull-request will be considered for merging when you have an all 'green' build. If any tests are failing,
@@ -226,6 +214,7 @@ We would name this file ``test_ds.py`` and put in an appropriate place in the ``
 See files in ``tests`` directory.
 
 .. code-block:: python
+    :caption: Example test file
 
     import numpy as np
     import pytest
@@ -306,7 +295,7 @@ A test run of this using yields:
 Running the test suite
 ----------------------
 
-The tests can then be run directly inside your Git clone by typing::
+The tests can then be run directly inside your Git clone by typing:
 
 .. code-block:: bash
 
@@ -316,13 +305,13 @@ The test suite is exhaustive and takes several minutes to run.  Often it is
 worth running only a subset of tests first around your changes before running the
 entire suite.
 
-The easiest way to do this is with::
+The easiest way to do this is with:
 
 .. code-block:: bash
 
     pytest spectrochempy/path/to/test.py -k regex_matching_test_name
 
-Or with one of the following constructs::
+Or with one of the following constructs:
 
 .. code-block:: bash
 
@@ -330,25 +319,14 @@ Or with one of the following constructs::
     pytest tests/[test-module].py::[TestClass]
     pytest tests/[test-module].py::[TestClass]::[test_method]
 
-Using `pytest-xdist <https://pypi.org/project/pytest-xdist>`_, one can
-speed up local testing on multicore machines. To use this feature, you will
-need to install ``pytest-xdist`` via::
-
-.. code-block:: bash
-
-    mamba install pytest-xdist
-
-This can significantly reduce the time it takes to locally run tests before
-submitting a pull request.
-
 For more, see the `pytest <https://docs.pytest.org/en/latest/>`_ documentation.
 
 
 Documenting change log
 -----------------------
 
-Changes should be reflected in the release notes located in ``CHANGELOG.md`` in the root directory of the spectrochempy package.
+Changes should be reflected in the release notes located in ``whatsnew/changelog.rst`` in the `docs` directory of the spectrochempy package.
 This file contains an ongoing change log for each release.  Add an entry to this file to
 document your fix, enhancement or (unavoidable) breaking change.  Include the
-GitHub issue number when adding your entry (using ``(issue #1234)``` where ``1234`` is the
+GitHub issue number when adding your entry (using ``(issue #1234)`` where ``1234`` is the
 issue/pull request number).
