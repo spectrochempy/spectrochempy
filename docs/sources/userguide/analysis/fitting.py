@@ -210,7 +210,7 @@ dfit.plot_pen(clear=False, color="g", lw=2, label=" Fitted line", legend="best")
 # First we will load an IR dataset
 
 # %%
-nd = scp.read('irdata/nh4y-activation.spg"')
+nd = scp.read("irdata/nh4y-activation.spg")
 
 # %% [markdown]
 # As we want to start with a single 1D spectra, we select the last one (index -1)
@@ -232,7 +232,7 @@ ndOH.plot()
 
 # %% [markdown]
 # We can perform a linear baseline correction to start with this data (see the
-# [baseline tutorial](../processing/baseline.rst)).
+# :doc:`baseline tutorial </userguide/processing/baseline>`).
 # For removing a linear baseline, the fastest method is however to use the `abc` (
 # automatic baseline correction)
 
@@ -245,7 +245,7 @@ ndOHcorr.plot()
 #
 # Below we will need to start with some guess of the peak position and width.
 # For this we can use the `find_peaks()` method
-# (see [Peak finding tutorial](../analysis/peak_finding.rst))
+# (see :doc:`Peak finding tutorial </userguide/analysis/peak_finding>`)
 
 # %%
 peaks, _ = ndOHcorr.find_peaks()

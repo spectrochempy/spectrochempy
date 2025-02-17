@@ -76,7 +76,7 @@ import spectrochempy as scp
 #
 # ### a) import spg file
 #
-# Let's import an .spg file from the `datadir` (see [Import Tutorial](import.rst))
+# Let's import an .spg file from the `datadir` (see :ref:`import.ipynb` for details)):
 # and display its main attributes:
 
 # %% {"pycharm": {"name": "#%%\n"}}

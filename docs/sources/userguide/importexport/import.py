@@ -32,7 +32,7 @@
 # ---
 
 # %% [markdown]
-# # Import Data
+# # Import Data in SpectroChemPy
 #
 # This tutorial shows how to import data in **SpectroChemPy (SCPy)** .
 #
