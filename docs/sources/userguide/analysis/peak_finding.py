@@ -452,7 +452,7 @@ print(f"prominence with reduced window: {properties['prominences'][0]: 0.4f}")
 # method is **very approximate** and
 # more advanced methods (such as peak fitting), also implemented in spectrochempy
 # should be used (see e.g.,
-# [this example](/gallery/auto_examples/fitting/plot_fit.html#sphx-glr-gallery-auto-examples-fitting-plot-fit-py)
+# [this example](/gettingstarted/examples/gallery/auto_examples_analysis/c_curvefitting/plot_fit.html)
 # On the other hand, **the magnitude of the width is generally fine**.
 #
 # This estimate is based on an algorithm similar to that used for the "bases" above,
@@ -469,7 +469,6 @@ print(f"prominence with reduced window: {properties['prominences'][0]: 0.4f}")
 # the calculation of the width), the width and the left and right interpolated positions
 # ("ips") of the intersection
 # of the horizontal line with the spectrum:
-
 # %%
 peaks, properties = s.find_peaks(height=0.2, width=0)
 properties

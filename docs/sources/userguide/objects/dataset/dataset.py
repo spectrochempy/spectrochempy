@@ -49,7 +49,7 @@
 #
 # This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful
 # for applications.
-# See the See the [Examples](../../gettingstarted/examples/gallery/auto_examples_core/index.rst) for
+# See the See the [Examples](../../../gettingstarted/examples/gallery/auto_examples_core/index.rst) for
 # additional information about such possible applications.
 
 # %% [markdown]
