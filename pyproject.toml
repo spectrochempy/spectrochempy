@@ -198,7 +198,7 @@ exclude = ["~*", "tests/**"] # Exclude files and directories.
 "docs/sources/gettingstarted/*" = [
   "B018",
 ] # accept "useless expression" in *.ipynb or py:percent files.
-
+"src/spectrochempy/extern/brukeropus/**/*" = ["T201", "D"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["spectrochempy"]
