@@ -8,9 +8,9 @@ This script manages project versioning and documentation by:
 4. Maintaining changelog documentation
 
 The script handles these files:
-- CITATION.cff: Citation information
-- zenodo.json: Zenodo metadata
-- docs/whatsnew/: Release notes and changelog
+- /data/CITATION.cff: Citation information
+- /data/zenodo.json: Zenodo metadata
+- /docs/whatsnew/: Release notes and changelog
 
 Usage:
     python update_version_and_release_notes.py [version]
@@ -30,8 +30,8 @@ from setuptools_scm import get_version
 # Path configurations
 WORKFLOWS = Path(__file__).parent.parent
 PROJECT = WORKFLOWS.parent.parent
-CITATION = WORKFLOWS / "data" / "CITATION.cff"
-ZENODO = WORKFLOWS / "data" / "zenodo.json"
+CITATION = PROJECT / "data" / "CITATION.cff"
+ZENODO = PROJECT / "data" / "zenodo.json"
 DOCS = PROJECT / "docs"
 WN = DOCS / "sources" / "whatsnew"
 
