@@ -402,7 +402,7 @@ def test_coord():
     assert "<div><font color='darkcyan'>[  a   b ..." in s
 
     c = Coord()
-    assert "<div><font color='blue'>Undefined</font></div>" in c._repr_html_()
+    assert "<div><font color='#2D7FF9'>Undefined</font></div>" in c._repr_html_()
 
     # several row of label
     coord0.labels = list("klmnopqrst")
