@@ -137,6 +137,6 @@ jobs:
 
       - name: Code Climate reporting
         if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
-        uses: paambaati/codeclimate-action@v5.0.0
+        uses: paambaati/codeclimate-action@v9.0.0
         env:
           CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
