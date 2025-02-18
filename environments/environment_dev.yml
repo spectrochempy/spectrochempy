@@ -25,7 +25,6 @@ dependencies:
 
     # CORE dependencies
     # -----------------
-    - brukeropusreader
     - colorama
     - dill
     - docrep

@@ -17,7 +17,6 @@
 
 # CORE dependencies
 # -----------------
-brukeropusreader
 colorama
 dill
 docrep
