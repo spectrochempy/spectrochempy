@@ -122,7 +122,7 @@ def convert_to_html(obj):
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"  # r"^(\W*\w+\W?\w+)(:.*$)"
-    subst = r"<font color='green'>\1</font> \2"
+    subst = r"<font color='#28A745'>\1</font> \2"  # accent-green (attribute names)
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(.*(DIMENSION|DATA).*)$"
@@ -135,7 +135,7 @@ def convert_to_html(obj):
 
     regex = r"\0{2}[\w\W]*?\0{2}"
 
-    def subst(match):
+    def subst(match):  # (labels)
         return "<div><font color='darkcyan'>{}</font></div>".format(
             match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
@@ -144,8 +144,8 @@ def convert_to_html(obj):
 
     regex = r"\0{1}[\w\W]*?\0{1}"
 
-    def subst(match):
-        return "<div><font color='blue'>{}</font></div>".format(
+    def subst(match):  # accent-blue (numeric data)
+        return "<div><font color='#2D7FF9'>{}</font></div>".format(
             match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
 

@@ -38,9 +38,9 @@ def test_nmr_reader_1D():
     ndd.read_topspin(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == "NDDataset: [complex128] unitless (size: 12411)"
     assert (
-        "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='green'> "
+        "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='#28A745'> "
         " coordinates</font> </td><td style='text-align:left; padding-bottom:0px; padding-top:0px; border:.5px "
-        "solid lightgray;  '> <div><font color='blue'>[       0        4 ... 4.964e+04 4.964e+04] us</font></div>"
+        "solid lightgray;  '> <div><font color='#2D7FF9'>[       0        4 ... 4.964e+04 4.964e+04] us</font></div>"
         "</td><tr>" in ndd._repr_html_()
     )
 
