@@ -66,7 +66,7 @@ jobs:
             here:
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}.
 
-            I've updated the CHANGELOG.md, CITATION.cff, zenodo.json plus eventual
+            I've updated the docs/whatsnew/*rst files, CITATION.cff, zenodo.json plus eventual
             changes on the requirements/environment files:
             ${{ steps.make-commit.outputs.commit }}.
             Merging this PR should be followed by the creation of the corresponding

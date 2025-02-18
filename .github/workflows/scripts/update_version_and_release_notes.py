@@ -30,8 +30,8 @@ from setuptools_scm import get_version
 # Path configurations
 WORKFLOWS = Path(__file__).parent.parent
 PROJECT = WORKFLOWS.parent.parent
-CITATION = PROJECT / "data" / "CITATION.cff"
-ZENODO = PROJECT / "data" / "zenodo.json"
+CITATION = PROJECT / "CITATION.cff"
+ZENODO = PROJECT / "zenodo.json"
 DOCS = PROJECT / "docs"
 WN = DOCS / "sources" / "whatsnew"
 
