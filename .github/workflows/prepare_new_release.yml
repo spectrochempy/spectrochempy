@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 100
+          fetch-depth: 0
 
       - name: Install dependencies
         run: |
@@ -53,9 +53,8 @@ jobs:
 
       - name: Create pull request into master
         uses: thomaseizinger/create-pull-request@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           head: release/${{ github.event.inputs.versionString }}
           base: master
           reviewers: ${{ github.actor }}
