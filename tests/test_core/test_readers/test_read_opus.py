@@ -24,9 +24,13 @@ OPUSDATA = DATADIR / "irdata" / "OPUS"
 
 def test_read_opus():
     # single file
-    A = NDDataset.read_opus(OPUSDATA / "test.0000")
+    A = NDDataset.read_opus(OPUSDATA / "test.0000", type="AB")
     assert A.shape == (1, 2567)
     assert A[0, 2303.8694].data == pytest.approx(2.72740, 0.00001)
+
+    # background
+    B = NDDataset.read_opus(OPUSDATA / "background.0", type="RF")
+    assert B.shape == (1, 4096)
 
     # read contents
     p = OPUSDATA / "test.0000"
@@ -36,3 +40,7 @@ def test_read_opus():
     assert F.shape == (1, 2567)
 
     assert NDDataset.read_opus(OPUSDATA / "background.0") is None
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

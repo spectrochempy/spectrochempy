@@ -36,12 +36,26 @@ def read_opus(*paths, **kwargs):
     r"""
     Open Bruker OPUS file(s).
 
-    Eventually group them in a single dataset. Only Absorbance spectra are
-    extracted ("AB" field). Returns an error if dimensions are incompatibles.
+    Eventually group them in a single dataset. Returns an error if dimensions are incompatibles.
+
 
     Parameters
     ----------
     %(Importer.parameters)s
+    type : str, optional
+        The type of data to be read. Possible values are:
+
+        - "AB": Absorbance (default if present in the file)
+        - "TR": Transmittance
+        - "KM": Kubelka-Munk
+        - "RAM": Raman
+        - "EMI": Emission
+        - "RFL": Reflectance
+        - "LRF": log(Reflectance)
+        - "ATR": ATR
+        - "PAS": Photoacoustic
+
+        An error is raised if the specified type is not present in the file.
 
     Returns
     -------
@@ -135,38 +149,63 @@ def read_opus(*paths, **kwargs):
 # ======================================================================================
 # Private Functions
 # ======================================================================================
-@_importer_method
-def _read_opus(*args, **kwargs):
-    debug_("Bruker OPUS import")
 
-    dataset, filename = args
+_data_types = {
+    "sm": "Single-channel sample spectra",
+    "rf": "Single-channel reference spectra",
+    "igsm": "Sample interferogram",
+    "igrf": "Reference interferogram",
+    "phsm": "Sample phase",
+    "phrf": "Reference phase",
+    "a": "Absorbance",
+    "t": "Transmittance",
+    "r": "Reflectance",
+    "km": "Kubelka-Munk",
+    "tr": "Trace (Intensity over Time)",
+    "gcig": "gc File (Series of Interferograms)",
+    "gcsc": "gc File (Series of Spectra)",
+    "ra": "Raman",
+    "e": "Emission",
+    "pw": "Power",
+    "logr": "log(Reflectance)",
+    "atr": "ATR",
+    "pas": "Photoacoustic",
+}
+_spectra_types = {
+    "RF": "Single-channel reference spectra",
+    "SM": "Single-channel sample spectra",
+    "IGRF": "Reference interferogram",
+    "IGSM": "Sample interferogram",
+    "PHRF": "Reference phase",
+    "PHSM": "Sample phase",
+    "AB": "Absorbance",
+    "TR": "Transmittance",
+    "KM": "Kubelka-Munk",
+    "RAM": "Raman",
+    "EMI": "Emission",
+    "RFL": "Reflectance",
+    "LRF": "log(Reflectance)",
+    "ATR": "ATR",
+    "PAS": "Photoacoustic",
+}
 
-    fid, kwargs = _openfid(filename, **kwargs)
+_units = {
+    "WN": ("wavenumber", "cm^-1"),
+    "WL": ("wavelength", "µm"),
+    "Absorbance": "absorbance",  # defined in core/units
+    "Transmittance": "transmittance",
+    "Kubelka-Munk": "Kubelka_Munk",
+}
 
-    opus_data = OPUSFile(fid)
 
-    # data
-    try:
-        opus_data.print_parameters()
-        npt = opus_data["AB Data Parameter"]["NPT"]
-        data = opus_data["AB"][:npt]
-        dataset.data = np.array(data[np.newaxis], dtype="float32")
-    except KeyError:
-        raise KeyError(
-            f"{filename} is not an Absorbance spectrum. It cannot be read with the "
-            f"`read_opus` import method",
-        ) from None
-    # todo: read background
+def _data_from_value(dic, value):
+    return [k for k, v in dic.items() if v == value][0]
 
-    # xaxis
-    fxv = opus_data["AB Data Parameter"]["FXV"]
-    lxv = opus_data["AB Data Parameter"]["LXV"]
-    xaxis = Coord.linspace(fxv, lxv, npt, title="wavenumbers", units="cm^-1")
 
-    # yaxis
-    name = opus_data["Sample"]["SNM"]
-    acqdate = opus_data["AB Data Parameter"]["DAT"]
-    acqtime = opus_data["AB Data Parameter"]["TIM"]
+def _get_timestamp_from(params):
+    # get the acquisition timestamp
+    acqdate = params.dat
+    acqtime = params.tim
     gmt_offset_hour = float(acqtime.split("GMT")[1].split(")")[0])
     if len(acqdate.split("/")[0]) == 2:
         date_time = datetime.strptime(
@@ -182,25 +221,71 @@ def _read_opus(*args, **kwargs):
         raise ValueError("acqdate can not be interpreted.")
     utc_dt = date_time - timedelta(hours=gmt_offset_hour)
     utc_dt = utc_dt.replace(tzinfo=UTC)
-    timestamp = utc_dt.timestamp()
+    return utc_dt, utc_dt.timestamp()
+
+
+@_importer_method
+def _read_opus(*args, **kwargs):
+    debug_("Bruker OPUS import")
+
+    dataset, filename = args
+
+    fid, kwargs = _openfid(filename, **kwargs)
+
+    opus_data = OPUSFile(fid)
+
+    # data present
+    all_data_types = opus_data.all_data_keys  # type of data present in the file
+
+    # check if the data type is specified
+    typ = kwargs.get("type", "AB")
+    spectra_type = _spectra_types.get(typ)
+    if spectra_type is None:
+        raise ValueError(
+            f"Unknown data type {typ}. Possible values are: {list(_spectra_types.keys())}",
+        )
+    data_type = _data_from_value(_data_types, spectra_type)
+
+    if data_type not in all_data_types:
+        available_data_types = ".".join(
+            [k for k, v in _spectra_types.items() if v in all_data_types]
+        )
+        raise ValueError(
+            f"The data type {typ} is not present in the file. "
+            f"Available data types are: {available_data_types}",
+        )
+
+    d = getattr(opus_data, data_type)
+
+    # data
+    dataset.data = d.y if d.y.ndim > 1 else d.y[np.newaxis]
+    dataset.title = spectra_type.lower()
+    dataset.units = _units.get(spectra_type)
+
+    # xaxis
+    title, units = _units.get(getattr(d.params, "dxu"))  # noqa: B009
+    xaxis = Coord(d.x, title=title, units=units)
+
+    # yaxis (in case this is not a data series)
+    # TODO: check if this is a data series and read eventually 2D data
+    name = opus_data.params.snm
+    dt, timestamp = _get_timestamp_from(d.params)
 
     yaxis = Coord(
         [timestamp],
         title="acquisition timestamp (GMT)",
         units="s",
-        labels=([utc_dt], [name], [filename]),
+        labels=([dt], [name], [filename]),
     )
 
     # set dataset's Coordset
     dataset.set_coordset(y=yaxis, x=xaxis)
-    dataset.units = "absorbance"
-    dataset.title = "absorbance"
 
     # Set name, origin, description and history
     dataset.name = filename.name
     dataset.filename = filename
     dataset.origin = "opus"
-    dataset.description = "Dataset from opus files. \n"
+    dataset.description = "Dataset from opus files. \nSpectra type: " + spectra_type
     dataset.history = str(datetime.now(UTC)) + ": import from opus files \n"
 
     # reset modification date to cretion date

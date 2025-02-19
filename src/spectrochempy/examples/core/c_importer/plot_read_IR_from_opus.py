@@ -29,4 +29,4 @@ _ = Z.plot()
 # This ends the example ! The following line can be uncommented if no plot shows when
 # running the .py script with python
 
-# scp.show()
+scp.show()

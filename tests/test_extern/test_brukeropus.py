@@ -56,8 +56,8 @@ def test_opus_file_detection(test_directory):
     all_files = find_all_files(test_directory)
     opus_files = find_opus_files(test_directory, recursive=True)
 
-    assert len(all_files) == 8, "No files found in test directory"
-    assert len(opus_files) == 6, "No OPUS files found in test directory"
+    assert len(all_files) == 7, "No files found in test directory"
+    assert len(opus_files) == 5, "No OPUS files found in test directory"
 
     # Test that files with OPUS extension are valid OPUS files
     opus_data = [read_opus(f) for f in opus_files]

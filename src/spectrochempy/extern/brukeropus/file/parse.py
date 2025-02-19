@@ -38,7 +38,7 @@ def read_opus_file_bytes(filepath) -> bytes:
                     pass  # Empty file (or file with fewer than 4 bytes)
         else:
             raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), filepath)
-    elif isinstance(filepath, io.BufferedReader):
+    elif isinstance(filepath, io.BufferedReader | io.BytesIO):
         try:
             first_four = filepath.read(4)
             if first_four == b"\n\n\xfe\xfe":

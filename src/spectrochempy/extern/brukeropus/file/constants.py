@@ -177,7 +177,7 @@ CODE_3 = {
     8: "gc File, Series of Interferograms",
     9: "gc File, Series of Spectra",
     10: "Raman",
-    11: "Emisson",
+    11: "Emission",
     12: "Reflectance",
     13: "Directory",
     14: "Power",
