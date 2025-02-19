@@ -54,6 +54,12 @@ def read_opus(*paths, **kwargs):
         - "LRF": log(Reflectance)
         - "ATR": ATR
         - "PAS": Photoacoustic
+        - "RF": Single-channel reference spectra
+        - "SM": Single-channel sample spectra
+        - "IGRF": Reference interferogram
+        - "IGSM": Sample interferogram
+        - "PHRF": Reference phase
+        - "PHSM": Sample phase
 
         An error is raised if the specified type is not present in the file.
 
