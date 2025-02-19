@@ -1,4 +1,5 @@
 import errno
+import io
 import os
 import struct
 
@@ -26,16 +27,26 @@ def read_opus_file_bytes(filepath) -> bytes:
         **filebytes (bytes):** raw bytes of OPUS file or `None` (if filepath does not point to an OPUS file)
     """
     filebytes = None
-    if os.path.isfile(filepath):
-        with open(filepath, "rb") as f:
-            try:
-                first_four = f.read(4)
-                if first_four == b"\n\n\xfe\xfe":
-                    filebytes = first_four + f.read()
-            except:  # noqa: E722, S110
-                pass  # Empty file (or file with fewer than 4 bytes)
+    if isinstance(filepath, str):
+        if os.path.isfile(filepath):
+            with open(filepath, "rb") as f:
+                try:
+                    first_four = f.read(4)
+                    if first_four == b"\n\n\xfe\xfe":
+                        filebytes = first_four + f.read()
+                except:  # noqa: E722, S110
+                    pass  # Empty file (or file with fewer than 4 bytes)
+        else:
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), filepath)
+    elif isinstance(filepath, io.BufferedReader):
+        try:
+            first_four = filepath.read(4)
+            if first_four == b"\n\n\xfe\xfe":
+                filebytes = first_four + filepath.read()
+        except:  # noqa: E722, S110
+            pass  # Empty file (or file with fewer than 4 bytes)
     else:
-        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), filepath)
+        raise TypeError("filepath must be a string or a BufferedReader")
     return filebytes
 
 

@@ -12,14 +12,16 @@ from datetime import datetime
 from datetime import timedelta
 
 import numpy as np
-from brukeropusreader.opus_parser import parse_data
-from brukeropusreader.opus_parser import parse_meta
 
 from spectrochempy.application import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
+
+# from brukeropusreader.opus_parser import parse_data
+# from brukeropusreader.opus_parser import parse_meta
+from spectrochempy.extern.brukeropus import OPUSFile
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docreps import _docstring
 
@@ -141,10 +143,11 @@ def _read_opus(*args, **kwargs):
 
     fid, kwargs = _openfid(filename, **kwargs)
 
-    opus_data = _read_data(fid)
+    opus_data = OPUSFile(fid)
 
     # data
     try:
+        opus_data.print_parameters()
         npt = opus_data["AB Data Parameter"]["NPT"]
         data = opus_data["AB"][:npt]
         dataset.data = np.array(data[np.newaxis], dtype="float32")
@@ -204,9 +207,3 @@ def _read_opus(*args, **kwargs):
     dataset._modified = dataset._created
 
     return dataset
-
-
-def _read_data(fid):
-    data = fid.read()
-    meta_data = parse_meta(data)
-    return parse_data(data, meta_data)

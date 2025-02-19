@@ -153,9 +153,9 @@ class OPUSFile:
 
     def _get_data_vel(self, data_block: FileBlock):
         """Get the mirror velocity setting for the data `Fileblock` (based on whether it is reference or sample)"""
-        if data_block.type[1] == 2 and "vel" in self.rf_params:
+        if data_block.type[1] == 2 and "vel" in self.rf_params.keys():  # noqa: SIM118
             return self.rf_params.vel
-        if data_block.type[1] != 2 and "vel" in self.params:
+        if data_block.type[1] != 2 and "vel" in self.params.keys():  # noqa: SIM118
             return self.params.vel
         return 0
 
@@ -263,7 +263,7 @@ class Parameters:
 
     def __init__(self, blocks: list):
         self._params = {}
-        if type(blocks) is FileBlock:
+        if isinstance(blocks, FileBlock):
             blocks = [blocks]
         for block in blocks:
             self._params.update(block.data)
