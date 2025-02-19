@@ -457,15 +457,15 @@ def test_coordset_arithmetics():
     # typical use case
     ds = NDDataset([0.0, 1.0, 2.0])
     x2 = Coord(np.array([0.5, 0.8, 9.0]))
-    x1 = Coord(np.array([0.5, 0.8, 9.0]))
+    x1 = Coord(np.array([1.5, 5.8, -9.0]))
     ds.x = CoordSet(Coord(x2), Coord(x1))
 
     diff = ds.x - ds.x[0]
 
     assert_coord_almost_equal(diff["_1"], x1 - x1[0])
-    assert_coord_almost_equal(diff["_1"], x2 - x2[0])
+    assert_coord_almost_equal(diff["_2"], x2 - x2[0])
 
-    # in the following case, the coordinates are not considered
+    # in the following, the coordinates are not considered by default
     # as multi coordinates, so the slicing returns a Coord, not a
     # slices Coorset:
     x = CoordSet(Coord(x2), Coord(x1))
@@ -478,4 +478,4 @@ def test_coordset_arithmetics():
     x._is_same_dim = True
     diff = x - x[0]
     assert_coord_almost_equal(diff["_1"], x1 - x1[0])
-    assert_coord_almost_equal(diff["_1"], x2 - x2[0])
+    assert_coord_almost_equal(diff["_2"], x2 - x2[0])
