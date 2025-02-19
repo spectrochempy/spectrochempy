@@ -25,7 +25,7 @@ New features
 
 Bug fixes
 ~~~~~~~~~
-.. Add here new bug fixes (do not delete this comment)
+* Bug #696. Now subtraction od multicoordinates works transparently
 
 
 .. section
