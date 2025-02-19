@@ -14,13 +14,11 @@ from datetime import timedelta
 import numpy as np
 
 from spectrochempy.application import debug_
+from spectrochempy.application import warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
-
-# from brukeropusreader.opus_parser import parse_data
-# from brukeropusreader.opus_parser import parse_meta
 from spectrochempy.extern.brukeropus import OPUSFile
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docreps import _docstring
@@ -177,23 +175,26 @@ _data_types = {
     "atr": "ATR",
     "pas": "Photoacoustic",
 }
-_spectra_types = {
-    "RF": "Single-channel reference spectra",
-    "SM": "Single-channel sample spectra",
-    "IGRF": "Reference interferogram",
-    "IGSM": "Sample interferogram",
-    "PHRF": "Reference phase",
-    "PHSM": "Sample phase",
-    "AB": "Absorbance",
-    "TR": "Transmittance",
-    "KM": "Kubelka-Munk",
-    "RAM": "Raman",
-    "EMI": "Emission",
-    "RFL": "Reflectance",
-    "LRF": "log(Reflectance)",
-    "ATR": "ATR",
-    "PAS": "Photoacoustic",
+
+_types_parameters = {
+    "RF": "rf",
+    "SM": "sm",
+    "IGRF": "igrf",
+    "IGSM": "igsm",
+    "PHRF": "phrf",
+    "PHSM": "phsm",
+    "AB": "a",
+    "TR": "t",
+    "KM": "km",
+    "RAM": "ra",
+    "EMI": "e",
+    "RFL": "r",
+    "LRF": "logr",
+    "ATR": "atr",
+    "PAS": "pas",
 }
+
+_types_parameters_inv = {v: k for k, v in _types_parameters.items()}
 
 _units = {
     "WN": ("wavenumber", "cm^-1"),
@@ -202,10 +203,6 @@ _units = {
     "Transmittance": "transmittance",
     "Kubelka-Munk": "Kubelka_Munk",
 }
-
-
-def _data_from_value(dic, value):
-    return [k for k, v in dic.items() if v == value][0]
 
 
 def _get_timestamp_from(params):
@@ -240,33 +237,55 @@ def _read_opus(*args, **kwargs):
 
     opus_data = OPUSFile(fid)
 
-    # data present
+    # Which data are present in the file?
     all_data_types = opus_data.all_data_keys  # type of data present in the file
+    possible_type_parameters = [_types_parameters_inv[k] for k in all_data_types]
 
-    # check if the data type is specified
-    typ = kwargs.get("type", "AB")
-    spectra_type = _spectra_types.get(typ)
-    if spectra_type is None:
-        raise ValueError(
-            f"Unknown data type {typ}. Possible values are: {list(_spectra_types.keys())}",
-        )
-    data_type = _data_from_value(_data_types, spectra_type)
+    # Get type parameter
+    type_parameter = kwargs.get("type")
 
-    if data_type not in all_data_types:
-        available_data_types = ".".join(
-            [k for k, v in _spectra_types.items() if v in all_data_types]
+    # Check if the data type is specified
+    if type_parameter is None:
+        # if AB in possible_type_parameters, take it as default (backward compatibility)
+        if "AB" in possible_type_parameters:
+            type_parameter = "AB"
+
+        # if RAM, it is a raman spectra
+        elif "RAM" in possible_type_parameters:
+            type_parameter = "RAM"
+
+        # if EMI, it is an emission spectra
+        elif "EMI" in possible_type_parameters:
+            type_parameter = "EMI"
+
+        # it may be a single background
+        elif possible_type_parameters == ["RF", "IGRF"]:
+            type_parameter = "RF"
+
+        else:
+            raise ValueError(
+                f"Please specify the type of data to read. Possible values for this file are: {possible_type_parameters}"
+            )
+        warning_(
+            f"Default type parameter {type_parameter} is used.\n"
+            "Please specify the type of data to read if this is not the correct data type to read.\n"
+            f"Possible values for this file are: {possible_type_parameters}"
         )
+
+    elif type_parameter is not None and type_parameter not in possible_type_parameters:
         raise ValueError(
-            f"The data type {typ} is not present in the file. "
-            f"Available data types are: {available_data_types}",
+            f"The data type {type_parameter} is not present in the file. Possible values for this file are: {possible_type_parameters}"
         )
+
+    data_type = _types_parameters[type_parameter]
 
     d = getattr(opus_data, data_type)
 
     # data
     dataset.data = d.y if d.y.ndim > 1 else d.y[np.newaxis]
-    dataset.title = spectra_type.lower()
-    dataset.units = _units.get(spectra_type)
+    desc = _data_types[data_type]
+    dataset.title = desc.lower()
+    dataset.units = _units.get(desc)  # None if not found in _units
 
     # xaxis
     title, units = _units.get(getattr(d.params, "dxu"))  # noqa: B009
@@ -291,7 +310,7 @@ def _read_opus(*args, **kwargs):
     dataset.name = filename.name
     dataset.filename = filename
     dataset.origin = "opus"
-    dataset.description = "Dataset from opus files. \nSpectra type: " + spectra_type
+    dataset.description = "Dataset from opus files. \nSpectra type: " + desc
     dataset.history = str(datetime.now(UTC)) + ": import from opus files \n"
 
     # reset modification date to cretion date
