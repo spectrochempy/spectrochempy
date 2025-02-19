@@ -278,6 +278,63 @@ class CoordSet(HasTraits):
         return name == "CoordSet"
 
     # ----------------------------------------------------------------------------------
+    # Special methods
+    # ----------------------------------------------------------------------------------
+
+    def __sub__(self, other):
+        """
+        Subtraction of coordinates.
+
+        Parameters
+        ----------
+        other : CoordSet
+            The coordinates to subtract.
+
+        Returns
+        -------
+        sub : CoordSet
+            The difference of the coordinates.
+
+        """
+        out = []
+        if isinstance(other, CoordSet):
+            for coord1, coord2 in zip(self.coords, other.coords, strict=False):
+                out.append(coord1 - coord2)
+        else:
+            raise NotImplementedError(
+                f"Subtraction f a CoordSet with an object of type {type(other)} is not implemented yet"
+            )
+
+        return CoordSet(list(out))
+
+    def __add__(self, other):
+        """
+        Subtraction of coordinates.
+
+        Parameters
+        ----------
+        other : CoordSet,
+            The coordinates to subtract.
+
+        Returns
+        -------
+        add : CoordSet
+            The sum of the coordinates.
+
+        """
+        out = []
+        if isinstance(other, CoordSet):
+            for coord1, coord2 in zip(self.coords, other.coords, strict=False):
+                out.append(coord1 + coord2)
+
+        else:
+            raise NotImplementedError(
+                f"Addition of a CoordSet with an object of type {type(other)} is not implemented yet"
+            )
+
+        return CoordSet(list(out))
+
+    # ----------------------------------------------------------------------------------
     # Validation methods
     # ----------------------------------------------------------------------------------
     @validate("_coords")

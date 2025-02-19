@@ -16,7 +16,9 @@ import pytest
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import DimensionalityError, ur
+from spectrochempy.utils.testing import assert_coord_almost_equal
 
 
 # ======================================================================================
@@ -449,3 +451,31 @@ def test_issue_310():
     assert D.dims == ["y", "x"]
 
     assert str(D[:, 1]) == "NDDataset: [float64] unitless (shape: (y:10, x:1))"
+
+
+def test_coordset_arithmetics():
+    # typical use case
+    ds = NDDataset([0.0, 1.0, 2.0])
+    x2 = Coord(np.array([0.5, 0.8, 9.0]))
+    x1 = Coord(np.array([0.5, 0.8, 9.0]))
+    ds.x = CoordSet(Coord(x2), Coord(x1))
+
+    diff = ds.x - ds.x[0]
+
+    assert_coord_almost_equal(diff["_1"], x1 - x1[0])
+    assert_coord_almost_equal(diff["_1"], x2 - x2[0])
+
+    # in the following case, the coordinates are not considered
+    # as multi coordinates, so the slicing returns a Coord, not a
+    # slices Coorset:
+    x = CoordSet(Coord(x2), Coord(x1))
+    try:
+        diff = x - x[0]
+    except Exception as e:
+        assert type(e) is NotImplementedError
+
+    # but we can declare the coordinates as multi-coordinates:
+    x._is_same_dim = True
+    diff = x - x[0]
+    assert_coord_almost_equal(diff["_1"], x1 - x1[0])
+    assert_coord_almost_equal(diff["_1"], x2 - x2[0])
