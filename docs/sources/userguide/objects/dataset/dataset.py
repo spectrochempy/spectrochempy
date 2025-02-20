@@ -542,14 +542,14 @@ d3D.v_1
 
 # %% [markdown]
 # ## Math operations on coordinates
-# arithmetic operations can be performed on single coordinates:
+# Arithmetic operations can be performed on single coordinates:
 
 # %%
 d3D.u = d3D.u * 2
 d3D.u
 
 # %% [markdown]
-# ufunc numpy functions can also be applied, and will affect both the magnitude and
+# The ufunc numpy functions can also be applied, and will affect both the magnitude and
 # the units of the coordinates:
 
 # %%
@@ -575,7 +575,7 @@ except NotImplementedError as e:
     scp.error_(NotImplementedError, e)
 
 # %% [markdown]
-# Only subtraction between multiple coordinates, and will return a new `CoordSet` where each coordinate
+# Only subtraction between multiple coordinates is allowed, and will return a new `CoordSet` where each coordinate
 # has been subtracted::
 
 # %%
