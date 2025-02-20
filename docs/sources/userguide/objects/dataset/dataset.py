@@ -582,11 +582,12 @@ d3D.v = d3D.v - d3D.v[0]
 d3D.v
 
 # %% [markdown]
-# Of course, it is always possible to carry out operations on a coordinate
-# has been subtracted by the reference values:
+# It is always possible to carry out operations on a given coordinate
+# of a CoordSet. This must be done by accessing the coordinate by its name, e.g. `'temperature'` or `'_2'` for
+# the second coordinate of the `v` dimension:
 
 # %%
-d3D.v_2 = d3D.v_2 + 5.0
+d3D.v["_2"] = d3D.v["_2"] + 5.0
 d3D.v
 
 # %% [markdown]
