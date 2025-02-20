@@ -283,17 +283,17 @@ class CoordSet(HasTraits):
 
     def __sub__(self, other):
         """
-        Subtraction of coordinates.
+        Subtraction of Coordsets.
 
         Parameters
         ----------
         other : CoordSet
-            The coordinates to subtract.
+            The Coordset to subtract to self.
 
         Returns
         -------
         sub : CoordSet
-            The difference of the coordinates.
+            The difference of the Coordsets.
 
         """
         out = []
@@ -309,17 +309,17 @@ class CoordSet(HasTraits):
 
     def __add__(self, other):
         """
-        Subtraction of coordinates.
+        Addition of Coordsets.
 
         Parameters
         ----------
         other : CoordSet,
-            The coordinates to subtract.
+            The Coordset to add to self.
 
         Returns
         -------
         add : CoordSet
-            The sum of the coordinates.
+            The sum of the Coordsets.
 
         """
         out = []
