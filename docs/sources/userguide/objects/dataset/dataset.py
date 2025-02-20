@@ -541,6 +541,56 @@ d3D
 d3D.v_1
 
 # %% [markdown]
+# ## Math operations on coordinates
+# Arithmetic operations can be performed on single coordinates:
+
+# %%
+d3D.u = d3D.u * 2
+d3D.u
+
+# %% [markdown]
+# The ufunc numpy functions can also be applied, and will affect both the magnitude and
+# the units of the coordinates:
+
+# %%
+d3D.u = 1.5 + np.sqrt(d3D.u)
+d3D.u
+
+# %% [markdown]
+# A particularly frequent use case is to subtract the initial value from a coordinate. This can be done
+# directly with the `-` operator:
+
+# %%
+d3D.u = d3D.u - d3D.u[0]
+d3D.u
+
+# %% [markdown]
+# The operations above will generally *not* work on multiple coordinates, and
+# will raise an error if attempted:
+
+# %%
+try:
+    d3D.v = d3D.v - 1.5
+except NotImplementedError as e:
+    scp.error_(NotImplementedError, e)
+
+# %% [markdown]
+# Only subtraction between multiple coordinates is allowed, and will return a new `CoordSet` where each coordinate
+# has been subtracted::
+
+# %%
+d3D.v = d3D.v - d3D.v[0]
+d3D.v
+
+# %% [markdown]
+# Of course, it is always possible to carry out operations on a coordinate
+# has been subtracted by the reference values:
+
+# %%
+d3D.v_2 = d3D.v_2 + 5.0
+d3D.v
+
+# %% [markdown]
 # ## Summary of the coordinate setting syntax
 # Some additional information about coordinate setting syntax
 
