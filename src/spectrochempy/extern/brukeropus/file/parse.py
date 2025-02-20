@@ -26,6 +26,7 @@ def read_opus_file_bytes(filepath) -> bytes:
     -------
         **filebytes (bytes):** raw bytes of OPUS file or `None` (if filepath does not point to an OPUS file)
     """
+    # Modified original function to accept a BufferedReader or BytesIO object
     filebytes = None
     if isinstance(filepath, str):
         if os.path.isfile(filepath):

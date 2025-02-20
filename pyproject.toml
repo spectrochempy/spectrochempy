@@ -28,7 +28,6 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-  # "brukeropusreader",
   "colorama",
   "dill",
   "docrep",
