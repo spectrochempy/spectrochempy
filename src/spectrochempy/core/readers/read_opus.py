@@ -14,12 +14,16 @@ from datetime import timedelta
 import numpy as np
 
 from spectrochempy.application import debug_
-from spectrochempy.application import warning_
+
+# from spectrochempy.application import warning_
+from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.extern.brukeropus import OPUSFile
+from spectrochempy.extern.brukeropus.file.utils import get_block_type_label
+from spectrochempy.extern.brukeropus.file.utils import get_param_label
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docreps import _docstring
 
@@ -143,6 +147,24 @@ def read_opus(*paths, **kwargs):
     >>> scp.read_opus(directory='irdata/OPUS', merge=True)
     NDDataset: [float64] a.u. (shape: (y:4, x:2567))
 
+    Bruker OPUS files often contain several types of data (AB, RF, IGSM ...).
+    In some cases, the type of data can be inferred from the file content.
+    For instance, if the file contains a single background spectrum, it is inferred
+    as a reference spectrum. In the following example, the file `background.0` is
+    correctly inferred as a reference spectrum.
+
+    >>> B = scp.read_opus('irdata/OPUS/background.0')
+    >>> B
+    NDDataset: [float64] a.u. (shape: (y:1, x:4096))
+
+    If the type of data can not be inferred, an error is raised. In the following
+    example, if the file `test.0000` contains only sample spectra (SM), the type of data
+    must be specified.
+
+    >>> A = scp.read_opus('irdata/OPUS/test.0000', type='SM')
+    >>> A
+    NDDataset: [float64] a.u. (shape: (y:1, x:2567))
+
     """
     kwargs["filetypes"] = ["Bruker OPUS files (*.[0-9]*)"]
     kwargs["protocol"] = ["opus"]
@@ -227,6 +249,27 @@ def _get_timestamp_from(params):
     return utc_dt, utc_dt.timestamp()
 
 
+def _load_parameters_into_meta(opus_data):
+    # Load the parameters in the metadata.
+    meta = Meta()
+    param_infos = [
+        ("Sample/Result Parameters", "params"),
+        ("Reference Parameters", "rf_params"),
+    ]
+    for title, attr in param_infos:
+        meta[attr] = Meta(name=title)
+        blocks = getattr(opus_data, attr).blocks
+        for block in blocks:
+            id = f"block{block.type[2]}"
+            meta[attr][id] = Meta(name=get_block_type_label(block.type))
+            for key in block.keys:
+                name = get_param_label(key)
+                value = getattr(getattr(opus_data, attr), key)
+                meta[attr][id][key] = Meta(name=name, read_only=True, value=value)
+
+    return meta
+
+
 @_importer_method
 def _read_opus(*args, **kwargs):
     debug_("Bruker OPUS import")
@@ -266,11 +309,11 @@ def _read_opus(*args, **kwargs):
             raise ValueError(
                 f"Please specify the type of data to read. Possible values for this file are: {possible_type_parameters}"
             )
-        warning_(
-            f"Default type parameter {type_parameter} is used.\n"
-            "Please specify the type of data to read if this is not the correct data type to read.\n"
-            f"Possible values for this file are: {possible_type_parameters}"
-        )
+        # warning_(
+        #     f"Default type parameter {type_parameter} is used.\n"
+        #     "Please specify the type of data to read if this is not the correct data type to read.\n"
+        #     f"Possible values for this file are: {possible_type_parameters}"
+        # )
 
     elif type_parameter is not None and type_parameter not in possible_type_parameters:
         raise ValueError(
@@ -312,6 +355,9 @@ def _read_opus(*args, **kwargs):
     dataset.origin = "opus"
     dataset.description = "Dataset from opus files. \nSpectra type: " + desc
     dataset.history = str(datetime.now(UTC)) + ": import from opus files \n"
+
+    # add other parameters in metadata
+    dataset.meta = _load_parameters_into_meta(opus_data)
 
     # reset modification date to cretion date
     dataset._modified = dataset._created
