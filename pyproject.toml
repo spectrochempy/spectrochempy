@@ -1,19 +1,12 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools-scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools>=64", "setuptools-scm>=8", "wheel"]
 
 [project]
-name = "spectrochempy"
-description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
-readme = "README.md"
-dynamic = ["version"]
-requires-python = ">=3.10"
-license = { text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT" }
 authors = [
-  { name = "Arnaud Travert", email = "contact@spectrochempy.fr" },
-  { name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr" },
+  {name = "Arnaud Travert", email = "contact@spectrochempy.fr"},
+  {name = "Christian Fernandez", email = "christian.fernandez@ensicaen.fr"},
 ]
-keywords = ["spectroscopy", "chemistry", "data analysis"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Topic :: Utilities",
@@ -46,21 +39,28 @@ dependencies = [
   "tzlocal",
   "xlrd",
 ]
+description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
+dynamic = ["version"]
+keywords = ["spectroscopy", "chemistry", "data analysis"]
+license = {text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT"}
+name = "spectrochempy"
+readme = "README.md"
+requires-python = ">=3.10"
 
 [project.optional-dependencies]
+build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
+cantera = ["cantera"]
 dev = [
   # various
   "toml",
   "ruff",
-  "pre-commit",
-  # interactive
+  "pre-commit", # interactive
   "jupyter",
   "jupyterlab",
   "ipykernel",
   "ipyparallel",
   "nodejs",
-  "jupyter_server",
-  # test
+  "jupyter_server", # test
   "coverage",
   "ipywidgets",
   "pyfakefs",
@@ -70,6 +70,27 @@ dev = [
   "pytest-ruff",
   "pytest-mock",
   "numpydoc",
+]
+docs = [
+  # "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
+  "ipykernel == 6.29.5",
+  "ipywidgets == 8.1.5",
+  "jsonschema == 4.23.0",
+  "jupyter == 1.1.1",
+  "jupytext == 1.16.7",
+  "nbconvert == 7.16.6",
+  "nbformat == 5.10.4",
+  "nbsphinx == 0.9.6",
+  "numpydoc == 1.8.0",
+  "pickleshare",
+  "pypandoc == 1.15", #_binary",
+  "sphinx == 8.1.3", #_binary",
+  "sphinx-tabs == 3.4.7",
+  "sphinx-copybutton == 0.5.2",
+  "sphinx-gallery == 0.19.0",
+  "sphinx-rtd-theme--3.0.2",
+  "sphinxcontrib-bibtex == 2.6.3",
+  "json5 == 0.10.0",
 ]
 interactive = [
   "jupyter",
@@ -90,35 +111,12 @@ test = [
   "pytest-mock",
   "numpydoc",
 ]
-docs = [
-  # "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
-  "ipykernel==6.29.5",
-  "ipywidgets==8.1.5",
-  "jsonschema==4.23.0",
-  "jupyter==1.1.1",
-  "jupytext==1.16.7",
-  "nbconvert==7.16.6",
-  "nbformat==5.10.4",
-  "nbsphinx==0.9.6",
-  "numpydoc==1.8.0",
-  "pickleshare",
-  "pypandoc==1.15",             #_binary",
-  "sphinx==8.1.3",       #_binary",
-  "sphinx-tabs==3.4.7",
-  "sphinx-copybutton==0.5.2",
-  "sphinx-gallery==0.19.0",
-  "sphinx-rtd-theme--3.0.2",
-  "sphinxcontrib-bibtex==2.6.3",
-  "json5=0.10.0",
-]
-build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
-cantera = ["cantera"]
 
 [project.urls]
-homepage = "https://www.spectrochempy.fr"
-repository = "https://github.com/spectrochempy/spectrochempy"
 documentation = "https://www.spectrochempy.fr/latest"
+homepage = "https://www.spectrochempy.fr"
 issues = "https://github.com/spectrochempy/spectrochempy/issues"
+repository = "https://github.com/spectrochempy/spectrochempy"
 
 [project.scripts]
 show_versions = "spectrochempy.scripts.show_versions:main"
@@ -147,23 +145,6 @@ target-version = "py312"
 
 [tool.ruff.lint]
 # Enable specific rules
-select = [
-  "D",   # pydocstyle
-  "E",   # pycodestyle errors
-  "F",   # pyflakes
-  "I",   # isort
-  "N",   # pep8-naming
-  "UP",  # pyupgrade
-  "S",   # bandit
-  "B",   # flake8-bugbear
-  "C4",  # flake8-comprehensions
-  "T20", # flake8-print
-  "RET", # flake8-return
-  "SIM", # flake8-simplify
-  "W",   # pycodestyle warnings
-  # "PERF", # perflint
-  "PLC", # pylint conventions
-]
 ignore = [
   "E402", # Module level import not at top of file
   "E501", # Line too long
@@ -184,42 +165,58 @@ ignore = [
   "D212", # Docstring should start on first line
   "D413", # Missing blank line after last section
   "D417", # Missing argument descriptions in the docstring
-
+]
+select = [
+  "D", # pydocstyle
+  "E", # pycodestyle errors
+  "F", # pyflakes
+  "I", # isort
+  "N", # pep8-naming
+  "UP", # pyupgrade
+  "S", # bandit
+  "B", # flake8-bugbear
+  "C4", # flake8-comprehensions
+  "T20", # flake8-print
+  "RET", # flake8-return
+  "SIM", # flake8-simplify
+  "W", # pycodestyle warnings  # "PERF", # perflint
+  "PLC", # pylint conventions
 ]
 
 exclude = ["~*", "tests/**"] # Exclude files and directories.
 
 [tool.ruff.lint.per-file-ignores]
+"docs/sources/gettingstarted/*" = [
+  "B018",
+] # accept "useless expression" in *.ipynb or py:percent files.
 "docs/sources/userguide/**/*" = [
   "B018",
   "T201",
   "N816",
 ] # accept "useless expression", "print", "mixed-case variables" in *.ipynb or py:percent files.
-"docs/sources/gettingstarted/*" = [
-  "B018",
-] # accept "useless expression" in *.ipynb or py:percent files.
 "src/spectrochempy/extern/brukeropus/**/*" = ["T201", "D"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["spectrochempy"]
 force-single-line = true
+known-first-party = ["spectrochempy"]
 
 [tool.ruff.format]
-quote-style = "double"
 indent-style = "space"
-skip-magic-trailing-comma = false
 line-ending = "auto"
+quote-style = "double"
+skip-magic-trailing-comma = false
 
 [tool.numpydoc_validation]
 checks = [
-  "all",  # report on all checks, except the below
+  "all", # report on all checks, except the below
   "ES01",
   "EX01",
   "SA01",
   "ES01",
 ]
 # remember to use single quotes for regex in TOML
-exclude = [ # don't report on objects that match any of these regex
+exclude = [
+  # don't report on objects that match any of these regex
   '\.undocumented_method$',
   '\.__repr__$',
 ]
@@ -231,10 +228,7 @@ max-line-length = 100
 verbose = 1
 
 [tool.pytest.ini_options]
-markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
-testpaths = ["tests"]
 addopts = ["--ignore=~*", "--doctest-plus", "-p no:warnings"]
-doctest_plus = "enabled"
 doctest_optionflags = [
   "ELLIPSIS",
   "NORMALIZE_WHITESPACE",
@@ -242,6 +236,9 @@ doctest_optionflags = [
   "ALLOW_UNICODE",
   "ALLOW_BYTES",
 ]
+doctest_plus = "enabled"
+markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
+testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["src/spectrochempy/"]
