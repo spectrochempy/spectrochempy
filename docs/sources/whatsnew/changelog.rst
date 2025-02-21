@@ -20,6 +20,7 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- The `readonly` attribute of Meta object now applies to all nested objects.
 
 .. section
 
@@ -27,6 +28,7 @@ Bug fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fix the `readonly` attribute of `Meta` objects used to contains dataset metadata.
 
 .. section
 

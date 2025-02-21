@@ -32,6 +32,69 @@ from typing import Union
 import numpy as np
 
 
+class ReadOnlyDict(dict):
+    """
+    Dictionary subclass that can be made read-only to prevent modifications.
+
+    Parameters
+    ----------
+    *args : Any
+        Initial dictionary as positional arguments
+    **kwargs : Any
+        Initial dictionary as keyword arguments
+
+    Attributes
+    ----------
+    _readonly : bool
+        Flag to make dictionary read-only
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        self._readonly = False
+        super().__init__()
+        for key, value in dict(*args, **kwargs).items():
+            if isinstance(value, dict):
+                value = ReadOnlyDict(value)
+            elif isinstance(value, Meta):
+                value.readonly = self._readonly
+            super().__setitem__(key, value)
+
+    def set_readonly(self, readonly):
+        self._readonly = readonly
+        for value in self.values():
+            if isinstance(value, ReadOnlyDict):
+                value.set_readonly(readonly)
+            elif isinstance(value, Meta):
+                value.readonly = readonly
+
+    def __setitem__(self, key, value):
+        if self._readonly:
+            raise ValueError("This dictionary is read-only")
+        if isinstance(value, dict) and not isinstance(value, ReadOnlyDict):
+            value = ReadOnlyDict(value)
+        elif isinstance(value, Meta):
+            value.readonly = self._readonly
+        super().__setitem__(key, value)
+
+    def update(self, *args, **kwargs):
+        if self._readonly:
+            raise ValueError("This dictionary is read-only")
+        for key, value in dict(*args, **kwargs).items():
+            if isinstance(value, dict):
+                if key in self and isinstance(self[key], ReadOnlyDict):
+                    self[key].update(value)
+                else:
+                    self[key] = ReadOnlyDict(value)
+            elif isinstance(value, Meta):
+                if key in self and isinstance(self[key], Meta):
+                    self[key].update(value.to_dict())
+                else:
+                    self[key] = value
+            else:
+                self[key] = value
+
+
 class Meta:
     """
     Dictionary-like metadata container with attribute access.
@@ -43,6 +106,15 @@ class Meta:
     ----------
     **data : Any
         Initial metadata as keyword arguments
+
+    Attributes
+    ----------
+    readonly : bool
+        Flag to make metadata read-only
+    parent : Any
+        Parent object of the metadata
+    name : str
+        Name of the metadata
 
     Examples
     --------
@@ -61,16 +133,13 @@ class Meta:
 
     """
 
-    _data: dict[str, Any] = {}
-    readonly: bool = False
-    parent: Any | None = None
-    name: str | None = None
+    _readonly = False
 
     def __init__(self, **data: Any) -> None:
         # Initialize metadata object
         self.parent = data.pop("parent", None)
         self.name = data.pop("name", None)
-        self._data = data
+        self._data = ReadOnlyDict(**data)
 
     def __dir__(self) -> list[str]:
         # List available attributes
@@ -80,6 +149,7 @@ class Meta:
         # Set attribute value, ensuring readonly attributes are not modified.
         if key not in [
             "readonly",
+            "_readonly",
             "parent",
             "name",
             "_data",
@@ -89,9 +159,21 @@ class Meta:
             "_cross_validation_lock",
             "__wrapped__",
         ]:
+            if self._readonly:
+                raise ValueError("This Meta object is read-only")
+
             self[key] = value
         else:
-            self.__dict__[key] = value  # Directly set the attribute to avoid recursion
+            if key in ["_data"] and not isinstance(value, ReadOnlyDict):
+                value = ReadOnlyDict(value)
+            try:
+                object.__setattr__(
+                    self, key, value
+                )  # Directly set the attribute to avoid recursion
+            except AttributeError as e:
+                raise AttributeError(
+                    f"Cannot set Attribute `{key}` with value `{value}`"
+                ) from e
 
     def __getattr__(self, key: str) -> Any:
         # Get attribute value, raising AttributeError for certain keys.
@@ -105,10 +187,11 @@ class Meta:
         # Set item in the dictionary, respecting readonly flag.
         if key in self.__dir__() or key.startswith("_"):
             raise KeyError(f"`{key}` can not be used as a metadata key")
-        if not self.readonly:
-            self._data.update({key: value})
-        else:
-            raise ValueError(f"the metadata `{key}` is read only")
+        if isinstance(value, dict) and not isinstance(value, ReadOnlyDict):
+            value = ReadOnlyDict(value)
+        elif isinstance(value, Meta):
+            value.readonly = self._readonly
+        self._data[key] = value
 
     def __getitem__(self, key: str) -> Any:
         # Get item from the dictionary.
@@ -121,8 +204,11 @@ class Meta:
     def __copy__(self) -> "Meta":
         # Create a shallow copy of the Meta object.
         ret = self.__class__()
+        readonly = self.readonly  # Save readonly state
+        self.readonly = False  # Temporarily disable readonly
         ret.update(copy.deepcopy(self._data))
-        ret.readonly = self.readonly
+        self.readonly = readonly
+        ret.readonly = readonly
         ret.parent = self.parent
         ret.name = self.name
         return ret
@@ -195,6 +281,14 @@ class Meta:
         dict
             Dictionary containing the metadata
 
+        See Also
+        --------
+        json_serialiser : Convert Meta object to JSON object.
+        json_decoder : Decode a JSON object previously created with `json_serialiser` to Meta object.
+
+        .. warning::
+            This method does not change the eventully nested Meta objects to dict.
+
         """
         return self._data
 
@@ -227,10 +321,22 @@ class Meta:
             Source of metadata to update from
 
         """
-        if isinstance(d, Meta) or hasattr(d, "_data"):
-            d = d.to_dict()
-        if d:
-            self._data.update(d)
+        d = d.to_dict() if hasattr(d, "_data") and not isinstance(d, Meta) else d
+
+        for key, value in d.items():
+            if isinstance(value, dict):
+                if key in self._data and isinstance(self._data[key], ReadOnlyDict):
+                    self._data[key].update(value)
+                else:
+                    self._data[key] = ReadOnlyDict(value)
+            elif isinstance(value, Meta):
+                if key in self._data and isinstance(self._data[key], Meta):
+                    for k, v in value.items():
+                        self._data[key][k] = v
+                else:
+                    self._data[key] = value
+            else:
+                self._data[key] = value
 
     def copy(self) -> "Meta":
         """
@@ -361,3 +467,15 @@ class Meta:
 
         """
         return self._data
+
+    @property
+    def readonly(self) -> bool:
+        return self._readonly
+
+    @readonly.setter
+    def readonly(self, value: bool) -> None:
+        self._readonly = value
+        try:
+            self._data.set_readonly(value)
+        except AttributeError as e:
+            raise e

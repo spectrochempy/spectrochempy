@@ -1,8 +1,8 @@
 from pathlib import Path
 import os  # kept for os.walk
 import pytest
-from spectrochempy.extern.brukeropus import read_opus
-from spectrochempy.extern.brukeropus import find_opus_files
+from spectrochempy.extern.brukeropus.file import read_opus
+from spectrochempy.extern.brukeropus.file import find_opus_files
 from spectrochempy.extern.brukeropus import OPUSFile
 from spectrochempy import preferences as prefs
 

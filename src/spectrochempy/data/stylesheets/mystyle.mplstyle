@@ -14,8 +14,8 @@ animation.html                           : none
 animation.writer                         : ffmpeg
 axes.autolimit_mode                      : data
 axes.axisbelow                           : line
-axes.edgecolor                           : black
-axes.facecolor                           : white
+axes.edgecolor                           : k
+axes.facecolor                           : F0F0F0
 axes.formatter.limits                    : -5, 6
 axes.formatter.min_exponent              : 0
 axes.formatter.offset_threshold          : 4
@@ -25,12 +25,12 @@ axes.formatter.useoffset                 : True
 axes.grid                                : False
 axes.grid.axis                           : both
 axes.grid.which                          : major
-axes.labelcolor                          : black
+axes.labelcolor                          : k
 axes.labelpad                            : 4.0
-axes.labelsize                           : 9.0
+axes.labelsize                           : 10.0
 axes.labelweight                         : normal
 axes.linewidth                           : 0.8
-axes.prop_cycle                          : cycler('color', ['0.00', '0.40', '0.60', '0.70'])
+axes.prop_cycle                          : cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
 axes.spines.bottom                       : True
 axes.spines.left                         : True
 axes.spines.right                        : True
@@ -38,7 +38,7 @@ axes.spines.top                          : True
 axes.titlecolor                          : auto
 axes.titlelocation                       : center
 axes.titlepad                            : 6.0
-axes.titlesize                           : 12.0
+axes.titlesize                           : 14.0
 axes.titleweight                         : normal
 axes.titley                              : None
 axes.unicode_minus                       : True
@@ -115,10 +115,10 @@ figure.constrained_layout.hspace         : 0.02
 figure.constrained_layout.use            : False
 figure.constrained_layout.w_pad          : 0.04167
 figure.constrained_layout.wspace         : 0.02
-figure.dpi                               : 150.0
+figure.dpi                               : 96.0
 figure.edgecolor                         : white
 figure.facecolor                         : white
-figure.figsize                           : 3.5, 2.5
+figure.figsize                           : 5.5, 3.5
 figure.frameon                           : True
 figure.hooks                             :
 figure.labelsize                         : large
@@ -137,14 +137,14 @@ font.fantasy                             : Chicago, Charcoal, Impact, Western, x
 font.monospace                           : DejaVu Sans Mono, Bitstream Vera Sans Mono, Computer Modern Typewriter, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace
 font.sans-serif                          : DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
 font.serif                               : DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
-font.size                                : 9.0
+font.size                                : 10.0
 font.stretch                             : normal
 font.style                               : normal
 font.variant                             : normal
 font.weight                              : normal
 
 grid.alpha                               : 1.0
-grid.color                               : black
+grid.color                               : .85
 grid.linestyle                           : -
 grid.linewidth                           : 0.8
 
@@ -153,7 +153,7 @@ hatch.linewidth                          : 1.0
 hist.bins                                : 10
 
 image.aspect                             : equal
-image.cmap                               : gray
+image.cmap                               : viridis
 image.composite_image                    : True
 image.interpolation                      : auto
 image.interpolation_stage                : auto
@@ -198,7 +198,7 @@ legend.scatterpoints                     : 1
 legend.shadow                            : False
 legend.title_fontsize                    : None
 lines.antialiased                        : True
-lines.color                              : black
+lines.color                              : b
 lines.dash_capstyle                      : butt
 lines.dash_joinstyle                     : round
 lines.dashdot_pattern                    : 6.4, 1.6, 1.0, 1.6
@@ -229,8 +229,8 @@ mathtext.sf                              : sans
 mathtext.tt                              : monospace
 
 patch.antialiased                        : True
-patch.edgecolor                          : black
-patch.facecolor                          : gray
+patch.edgecolor                          : k
+patch.facecolor                          : 4C72B0
 patch.force_edgecolor                    : False
 patch.linewidth                          : 0.3
 path.effects                             :
@@ -270,7 +270,7 @@ svg.id                                   : None
 svg.image_inline                         : True
 
 text.antialiased                         : True
-text.color                               : black
+text.color                               : .15
 text.hinting                             : force_autohint
 text.hinting_factor                      : 8
 text.kerning_factor                      : 0
@@ -281,11 +281,11 @@ text.usetex                              : False
 xaxis.labellocation                      : center
 xtick.alignment                          : center
 xtick.bottom                             : True
-xtick.color                              : black
+xtick.color                              : .15
 xtick.direction                          : out
 xtick.labelbottom                        : True
 xtick.labelcolor                         : inherit
-xtick.labelsize                          : 8.0
+xtick.labelsize                          : 10.0
 xtick.labeltop                           : False
 xtick.major.bottom                       : True
 xtick.major.pad                          : 3.5
@@ -303,12 +303,12 @@ xtick.top                                : False
 
 yaxis.labellocation                      : center
 ytick.alignment                          : center_baseline
-ytick.color                              : black
+ytick.color                              : .15
 ytick.direction                          : out
 ytick.labelcolor                         : inherit
 ytick.labelleft                          : True
 ytick.labelright                         : False
-ytick.labelsize                          : 8.0
+ytick.labelsize                          : 10.0
 ytick.left                               : True
 ytick.major.left                         : True
 ytick.major.pad                          : 3.5
@@ -331,11 +331,11 @@ ytick.right                              : False
 ##@method_1D                             : pen
 ##@method_2D                             : stack
 ##@method_3D                             : surface
-##@colorbar                              : True
+##@colorbar                              : False
 ##@show_projections                      : False
 ##@show_projection_x                     : False
 ##@show_projection_y                     : False
-##@colormap                              : magma
+##@colormap                              : viridis
 ##@max_lines_in_stack                    : 1000
 ##@simplify                              : False
 ##@number_of_x_labels                    : 5
