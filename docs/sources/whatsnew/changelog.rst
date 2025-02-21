@@ -27,9 +27,8 @@ New features
 Bug fixes
 ~~~~~~~~~
 
-* Bug #696. Subtraction/Addition of multicoordinates works transparently
-
-- Fix the `readonly` attribute of `Meta` objects used to contains dataset metadata.
+- Bug #696. Subtraction/Addition of multicoordinates works transparently
+- Fix the `readonly` attribute of `Meta` objects used to contain dataset metadata.
 
 .. section
 
@@ -37,6 +36,7 @@ Dependency updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- Removed `brukeropusreader` package dependency.
 
 .. section
 
