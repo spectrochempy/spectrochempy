@@ -60,6 +60,6 @@ dependencies:
     - sphinx-tabs=3.4.7
     - sphinx-copybutton=0.5.2
     - sphinx-gallery=0.19.0
-    - sphinx-rtd-theme--3.0.2
+    - sphinx-rtd-theme=3.0.2
     - sphinxcontrib-bibtex=2.6.3
     - json5=0.10.0
