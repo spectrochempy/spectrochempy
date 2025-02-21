@@ -56,7 +56,6 @@
 # **Below (and in the next sections), we try to give an almost complete view of the
 # NDDataset features.**
 
-# %%
 # %% [markdown]
 # As we will make some reference to the
 # **[numpy](https://numpy.org/doc/stable/index.html)** library, we also import it here.
@@ -539,6 +538,57 @@ d3D
 
 # %%
 d3D.v_1
+
+# %% [markdown]
+# ## Math operations on coordinates
+# Arithmetic operations can be performed on single coordinates:
+
+# %%
+d3D.u = d3D.u * 2
+d3D.u
+
+# %% [markdown]
+# The ufunc numpy functions can also be applied, and will affect both the magnitude and
+# the units of the coordinates:
+
+# %%
+d3D.u = 1.5 + np.sqrt(d3D.u)
+d3D.u
+
+# %% [markdown]
+# A particularly frequent use case is to subtract the initial value from a coordinate. This can be done
+# directly with the `-` operator:
+
+# %%
+d3D.u = d3D.u - d3D.u[0]
+d3D.u
+
+# %% [markdown]
+# The operations above will generally *not* work on multiple coordinates, and
+# will raise an error if attempted:
+
+# %%
+try:
+    d3D.v = d3D.v - 1.5
+except NotImplementedError as e:
+    scp.error_(NotImplementedError, e)
+
+# %% [markdown]
+# Only subtraction between multiple coordinates is allowed, and will return a new `CoordSet` where each coordinate
+# has been subtracted:
+
+# %%
+d3D.v = d3D.v - d3D.v[0]
+d3D.v
+
+# %% [markdown]
+# It is always possible to carry out operations on a given coordinate
+# of a CoordSet. This must be done by accessing the coordinate by its name, e.g. `'temperature'` or `'_2'` for
+# the second coordinate of the `v` dimension:
+
+# %%
+d3D.v["_2"] = d3D.v["_2"] + 5.0
+d3D.v
 
 # %% [markdown]
 # ## Summary of the coordinate setting syntax

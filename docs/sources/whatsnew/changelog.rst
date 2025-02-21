@@ -26,7 +26,8 @@ New features
 
 Bug fixes
 ~~~~~~~~~
-.. Add here new bug fixes (do not delete this comment)
+
+* Bug #696. Subtraction/Addition of multicoordinates works transparently
 
 - Fix the `readonly` attribute of `Meta` objects used to contains dataset metadata.
 
