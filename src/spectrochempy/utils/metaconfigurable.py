@@ -170,11 +170,15 @@ class MetaConfigurable(Configurable):
                 value = [str(v) if isinstance(v, Quantity) else v for v in value]
                 value = [v.tolist() if isinstance(v, np.ndarray) else v for v in value]
 
-            self.cfg.update(
-                self.name,
-                {
-                    self.__class__.__name__: {
-                        change.name: value,
+            try:
+                self.cfg.update(
+                    self.name,
+                    {
+                        self.__class__.__name__: {
+                            change.name: value,
+                        },
                     },
-                },
-            )
+                )
+            except Exception as e:
+                print(e)  # noqa: T201
+                pass

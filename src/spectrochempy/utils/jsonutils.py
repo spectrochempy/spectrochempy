@@ -25,12 +25,13 @@ def fromisoformat(s):
 # JSON UTILITIES
 # ======================================================================================
 def json_decoder(dic):
-    """Decode a serialised json object."""
+    """Decode a serialized json object."""
+    from spectrochempy.core.dataset.baseobjects.meta import Meta
     from spectrochempy.core.units import Quantity
     from spectrochempy.core.units import Unit
 
     if "__class__" in dic:
-        klass = dic["__class__"]
+        klass = dic.pop("__class__")
         if klass == "DATETIME":
             return fromisoformat(dic["isoformat"])
         if klass == "DATETIME64":
@@ -51,6 +52,15 @@ def json_decoder(dic):
                 return pickle.loads(base64.b64decode(dic["base64"]))  # noqa: S301
             if "tolist" in dic:
                 return np.array(dic["tolist"], dtype=dic["dtype"]).data[()]
+        elif klass == "META":
+            kwargs = {}
+            for k, v in dic.items():
+                if k == "data":
+                    for kk, vv in v.items():
+                        kwargs[kk] = json_decoder(vv) if isinstance(vv, dict) else vv
+            meta = Meta(parent=dic.get("parent"), name=dic.get("name"), **kwargs)
+            meta.readonly = dic.get("readonly", False)
+            return meta
 
         raise TypeError(dic["__class__"])
 
@@ -84,6 +94,9 @@ def json_serialiser(byte_obj, encoding=None):
             # Warning with parent-> circular dependencies!
             if name != "parent":
                 dic[name] = json_serialiser(val, encoding=encoding)
+            # we need to differentiate normal dic from Meta object
+            if byte_obj._implements("Meta"):
+                dic["__class__"] = "META"
         return dic
 
     if isinstance(byte_obj, str | int | float | bool):

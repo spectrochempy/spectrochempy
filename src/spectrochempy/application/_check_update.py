@@ -119,9 +119,7 @@ def check_update(version):
                 f"{date.isoformat(date.today())}%%NOT_YET_DISPLAYED%%"
                 f"SpectroChemPy v{new_release} is available.\n"
                 f"{' ' * 11}Please consider updating, using pip or conda, for bug fixes "
-                f"and new features!\n"
-                f"{' ' * 11}*Version 0.6 has made some important changes "
-                f"that may require modification of existing scripts.*",
+                f"and new features!\n",
             )
     elif fil.exists():
         fil.unlink()

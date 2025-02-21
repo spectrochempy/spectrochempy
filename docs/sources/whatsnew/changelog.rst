@@ -20,14 +20,15 @@ New features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- The `readonly` attribute of Meta object now applies to all nested objects.
 
 .. section
 
 Bug fixes
 ~~~~~~~~~
 
-* Bug #696. Subtraction/Addition of multicoordinates works transparently
-
+- Bug #696. Subtraction/Addition of multicoordinates works transparently
+- Fix the `readonly` attribute of `Meta` objects used to contain dataset metadata.
 
 .. section
 
@@ -35,6 +36,7 @@ Dependency updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- Removed `brukeropusreader` package dependency.
 
 .. section
 
