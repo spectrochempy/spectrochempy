@@ -350,10 +350,7 @@ print(X)
 # [Bruker OPUS](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/opus-spectroscopy-software.html)
 # files have also a proprietary file format. The Opus reader (`read_opus()` )
 # of spectrochempy is essentially a wrapper of the python module
-# [brukeropusreader](https://github.com/spectrochempy/brukeropusreader) developed by
-# QED. It imports absorbance
-# spectra (the AB block), acquisition times and name of spectra.
-#
+# [brukeropus](https://github.com/joshduran/brukeropus) developed by Josh Duran.
 # The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files.
 # Hence, one can open sample Opus files contained in the `datadir` using:
 
