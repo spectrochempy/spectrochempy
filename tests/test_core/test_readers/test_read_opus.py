@@ -84,28 +84,33 @@ class TestOpusMetadata:
         params = self.meta["params"]
         assert params.name == "Sample/Result Parameters"
         assert "optical" in params
+
         assert params.optical.name == "Optical Parameters"
-        assert "Fourier Transform" in params
+        assert "apf" in params["fourier_transform"]
+        assert (
+            params["Fourier Transform"].name == "Fourier Transform Parameters"
+        )  # alternative way to get an item
+        assert "hfq" in params["Fourier transform"]
 
     def test_block_metadata(self):
         """Test block-specific metadata."""
-        block1 = self.meta["params"]["block1"]
-        assert "DAT" in block1
-        assert "TIM" in block1
-        assert block1["DAT"].value == "expected_date_value"
-        assert block1["TIM"].value == "expected_time_value"
+        optics = self.meta["params"]["optical"]
+        assert "bms" in optics
+        assert "acc" in optics
+        assert optics["bms"].name == "Beamsplitter"
+        assert optics["bms"].value == "KBr"
 
     def test_rf_params(self):
         """Test reference parameters metadata."""
         rf_params = self.meta["rf_params"]
-        assert "block1" in rf_params
-        assert "block2" in rf_params
+        assert "acquisition" in rf_params
+        assert "optical" in rf_params
 
-        block1 = rf_params["block1"]
-        assert "DAT" in block1
-        assert "TIM" in block1
-        assert block1["DAT"].value == "expected_date_value"
-        assert block1["TIM"].value == "expected_time_value"
+        acquisition = rf_params["acquisition"]
+        assert "aqm" in acquisition
+        assert "del" in acquisition
+        assert acquisition["AQM"].name == "Acquisition Mode"
+        assert acquisition["DEL"].value == 0
 
 
 class TestOpusMerging:

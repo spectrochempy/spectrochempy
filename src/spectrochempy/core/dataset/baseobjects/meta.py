@@ -130,7 +130,10 @@ class Meta:
 
     def __getitem__(self, key: str) -> Any:
         # Get item from the dictionary.
-        return self._data.get(key, None)
+        res = self._data.get(key, None)
+        if res is None:
+            res = self._data.get(key.replace(" ", "_").lower(), None)
+        return res
 
     def __len__(self) -> int:
         # Return the number of items in the dictionary.
