@@ -8,7 +8,7 @@
 from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.units import ur
 from spectrochempy.utils.testing import raises
-from spectrochempy.utils.jsonutils import json_decoder, json_serialiser
+from spectrochempy.utils.jsonutils import json_decoder, json_encoder
 import copy
 
 
@@ -287,7 +287,7 @@ def test_json_serialization():
     meta = Meta(
         nested=Meta(key="value"), td=[200, 400], si=2048, dicnested={"key": "value"}
     )
-    json_str = json_serialiser(meta)
+    json_str = json_encoder(meta)
     meta2 = json_decoder(json_str)
     assert meta == meta2
 
@@ -328,8 +328,8 @@ def test_preferences_set_help():
 
 def test_preferences_set_makestyle():
     prefs = PreferencesSet()
-    stylename = prefs.makestyle("mystyle")
-    assert stylename == "mystyle"
+    stylename = prefs.makestyle("mydefault")
+    assert stylename == "mydefault"
 
 
 if __name__ == "__main__":

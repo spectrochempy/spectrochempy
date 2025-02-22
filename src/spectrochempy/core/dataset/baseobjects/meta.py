@@ -31,68 +31,8 @@ from typing import Union
 
 import numpy as np
 
-
-class ReadOnlyDict(dict):
-    """
-    Dictionary subclass that can be made read-only to prevent modifications.
-
-    Parameters
-    ----------
-    *args : Any
-        Initial dictionary as positional arguments
-    **kwargs : Any
-        Initial dictionary as keyword arguments
-
-    Attributes
-    ----------
-    _readonly : bool
-        Flag to make dictionary read-only
-
-    """
-
-    def __init__(self, *args, **kwargs):
-        self._readonly = False
-        super().__init__()
-        for key, value in dict(*args, **kwargs).items():
-            if isinstance(value, dict):
-                value = ReadOnlyDict(value)
-            elif isinstance(value, Meta):
-                value.readonly = self._readonly
-            super().__setitem__(key, value)
-
-    def set_readonly(self, readonly):
-        self._readonly = readonly
-        for value in self.values():
-            if isinstance(value, ReadOnlyDict):
-                value.set_readonly(readonly)
-            elif isinstance(value, Meta):
-                value.readonly = readonly
-
-    def __setitem__(self, key, value):
-        if self._readonly:
-            raise ValueError("This dictionary is read-only")
-        if isinstance(value, dict) and not isinstance(value, ReadOnlyDict):
-            value = ReadOnlyDict(value)
-        elif isinstance(value, Meta):
-            value.readonly = self._readonly
-        super().__setitem__(key, value)
-
-    def update(self, *args, **kwargs):
-        if self._readonly:
-            raise ValueError("This dictionary is read-only")
-        for key, value in dict(*args, **kwargs).items():
-            if isinstance(value, dict):
-                if key in self and isinstance(self[key], ReadOnlyDict):
-                    self[key].update(value)
-                else:
-                    self[key] = ReadOnlyDict(value)
-            elif isinstance(value, Meta):
-                if key in self and isinstance(self[key], Meta):
-                    self[key].update(value.to_dict())
-                else:
-                    self[key] = value
-            else:
-                self[key] = value
+from spectrochempy.utils.jsonutils import json_encoder
+from spectrochempy.utils.objects import ReadOnlyDict
 
 
 class Meta:
@@ -153,11 +93,6 @@ class Meta:
             "parent",
             "name",
             "_data",
-            "_trait_values",
-            "_trait_notifiers",
-            "_trait_validators",
-            "_cross_validation_lock",
-            "__wrapped__",
         ]:
             if self._readonly:
                 raise ValueError("This Meta object is read-only")
@@ -245,7 +180,7 @@ class Meta:
 
     def __str__(self) -> str:
         # Return string representation of the dictionary.
-        return str(self._data)
+        return str(json_encoder(self._data))
 
     def _repr_html_(self) -> str:
         # Return HTML representation of the dictionary.
@@ -264,8 +199,9 @@ class Meta:
 
         Returns
         -------
-        bool
-            True if the name matches "Meta", False otherwise.
+        bool or str
+            True if the name matches "Meta" False otherwise.
+            Returns "Meta" if no name is provided.
 
         """
         if name is None:
@@ -283,8 +219,8 @@ class Meta:
 
         See Also
         --------
-        json_serialiser : Convert Meta object to JSON object.
-        json_decoder : Decode a JSON object previously created with `json_serialiser` to Meta object.
+        json_encoder : Convert Meta object to JSON object.
+        json_decoder : Decode a JSON object previously created with `json_encoder` to Meta object.
 
         .. warning::
             This method does not change the eventully nested Meta objects to dict.
@@ -361,6 +297,18 @@ class Meta:
 
         """
         return list(self)
+
+    def values(self) -> list[Any]:
+        """
+        Get list of metadata values.
+
+        Returns
+        -------
+        List[Any]
+            List of metadata values
+
+        """
+        return [self[key] for key in self]
 
     def items(self) -> list[tuple[str, Any]]:
         """

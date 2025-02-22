@@ -218,6 +218,23 @@ _types_parameters = {
 
 _types_parameters_inv = {v: k for k, v in _types_parameters.items()}
 
+_blocks_parameters = {
+    0: "",
+    1: "Data Status",  # 'Data Status Parameters',
+    2: "Instrument Status",  # 'Instrument Status Parameters',
+    3: "Acquisition",  # 'Acquisition Parameters',
+    4: "Fourier Transform",  # 'Fourier Transform Parameters',
+    5: "Plot and Display",  # 'Plot and Display Parameters',
+    6: "Optical",  # 'Optical Parameters',
+    7: "GC",  # 'GC Parameters',
+    8: "Library Search",  # 'Library Search Parameters',
+    9: "Communication",  # 'Communication Parameters',
+    10: "Sample Origin",  # 'Sample Origin Parameters',
+    11: "Lab and Process",  # 'Lab and Process Parameters',
+}
+
+_blocks_parameters_inv = {v: k for k, v in _blocks_parameters.items()}
+
 _units = {
     "WN": ("wavenumber", "cm^-1"),
     "WL": ("wavelength", "µm"),
@@ -260,7 +277,7 @@ def _load_parameters_into_meta(opus_data):
         meta[attr] = Meta(name=title)
         blocks = getattr(opus_data, attr).blocks
         for block in blocks:
-            id = f"block{block.type[2]}"
+            id = f"{_blocks_parameters[block.type[2]].lower().replace(' ', '_')}"
             meta[attr][id] = Meta(name=get_block_type_label(block.type))
             for key in block.keys:
                 name = get_param_label(key)
@@ -358,6 +375,9 @@ def _read_opus(*args, **kwargs):
 
     # add other parameters in metadata
     dataset.meta = _load_parameters_into_meta(opus_data)
+
+    # add info about other type present in th file and which could be alternatively read.
+    dataset.meta["other_data_types"] = possible_type_parameters
 
     # reset modification date to cretion date
     dataset._modified = dataset._created

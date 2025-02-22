@@ -67,7 +67,7 @@ def json_decoder(dic):
     return dic
 
 
-def json_serialiser(byte_obj, encoding=None):
+def json_encoder(byte_obj, encoding=None):
     """Return a serialised json object."""
     from spectrochempy.core.dataset.arraymixins.ndplot import PreferencesSet
     from spectrochempy.core.units import Quantity
@@ -93,7 +93,7 @@ def json_serialiser(byte_obj, encoding=None):
 
             # Warning with parent-> circular dependencies!
             if name != "parent":
-                dic[name] = json_serialiser(val, encoding=encoding)
+                dic[name] = json_encoder(val, encoding=encoding)
             # we need to differentiate normal dic from Meta object
             if byte_obj._implements("Meta"):
                 dic["__class__"] = "META"
@@ -112,15 +112,15 @@ def json_serialiser(byte_obj, encoding=None):
         return int(byte_obj)
 
     if isinstance(byte_obj, tuple):
-        return tuple([json_serialiser(v, encoding=encoding) for v in byte_obj])
+        return tuple([json_encoder(v, encoding=encoding) for v in byte_obj])
 
     if isinstance(byte_obj, list):
-        return [json_serialiser(v, encoding=encoding) for v in byte_obj]
+        return [json_encoder(v, encoding=encoding) for v in byte_obj]
 
     if isinstance(byte_obj, dict):
         dic = {}
         for k, v in byte_obj.items():
-            dic[k] = json_serialiser(v, encoding=encoding)
+            dic[k] = json_encoder(v, encoding=encoding)
         return dic
 
     if isinstance(byte_obj, datetime.datetime):
@@ -141,7 +141,7 @@ def json_serialiser(byte_obj, encoding=None):
             if str(byte_obj.dtype).startswith("datetime64"):
                 byte_obj = np.datetime_as_string(byte_obj, timezone="UTC")
             return {
-                "tolist": json_serialiser(byte_obj.tolist(), encoding=encoding),
+                "tolist": json_encoder(byte_obj.tolist(), encoding=encoding),
                 "dtype": str(dtype),
                 "__class__": "NUMPY_ARRAY",
             }
@@ -159,14 +159,14 @@ def json_serialiser(byte_obj, encoding=None):
 
     if isinstance(byte_obj, Quantity):
         return {
-            "tuple": json_serialiser(byte_obj.to_tuple(), encoding=encoding),
+            "tuple": json_encoder(byte_obj.to_tuple(), encoding=encoding),
             "__class__": "QUANTITY",
         }
 
     if isinstance(byte_obj, np.complex128 | np.complex64 | complex):
         if encoding is None:
             return {
-                "tolist": json_serialiser(
+                "tolist": json_encoder(
                     [byte_obj.real, byte_obj.imag],
                     encoding=encoding,
                 ),
