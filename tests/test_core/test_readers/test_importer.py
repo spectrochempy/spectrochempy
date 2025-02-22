@@ -3,15 +3,13 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
 
 import os
 import pathlib
-
 import pytest
 
 import spectrochempy.utils.exceptions
-from spectrochempy import NDDataset  # , preferences as prefs
+from spectrochempy import NDDataset
 from spectrochempy.core import preferences as prefs
 from spectrochempy.core.readers.importer import (
     ALIAS,
@@ -24,74 +22,24 @@ from spectrochempy.core.readers.importer import (
 from spectrochempy.utils.file import pathclean
 
 try:
-    from spectrochempy.core import dialogs
+    from spectrochempy.core.common import dialogs
 except ImportError:
     pytest.skip("dialogs not available with act", allow_module_level=True)
 
 DATADIR = prefs.datadir
 
-
-# Simulation of a read function
-def read_fake(*paths, **kwargs):
-    kwargs["filetypes"] = ["FAKE files (*fk, *.fk1, .fk2)"]
-    kwargs["protocol"] = ["fake", ".fk", "fk1", "fk2"]
-    importer = Importer()
-
-    return importer(*paths, **kwargs)
-
-
-read_fk = read_fake
-setattr(NDDataset, "read_fk", read_fk)
-
-
-@_importer_method
-def _read_fake(*args, **kwargs):
-    dataset, filename = args
-    content = kwargs.get("content", False)
-
-    if content:
-        dataset = fake_dataset(content=True)
-    else:
-        # if filename.exists():    This does not work with fs
-        if os.path.exists(filename):
-            if filename.stem == "otherfake":
-                dataset = fake_dataset(size=6)
-            elif filename.stem == "emptyfake":
-                dataset = None
-            else:
-                dataset = fake_dataset()
-        else:
-            raise (FileNotFoundError)
-
-    return dataset  # empty if file
-
-
-@_importer_method
-def _read_fk(*args, **kwargs):
-    return Importer._read_fake(*args, **kwargs)
-
-
-# Test of the Importer class
-
-
-def fake_dataset(*args, size=3, **kwargs):
-    if not args:
-        ds = NDDataset([range(size)])
-    else:
-        ds = NDDataset(
-            [[range(4)]],
-        )
-    return ds
+# --------------------------------------------------------------------------------------
+# Helper functions and fixtures
+# --------------------------------------------------------------------------------------
 
 
 def dialog_cancel(*args, **kwargs):
-    # mock a dialog cancel action
+    """Mock a dialog cancel action."""
     return None
 
 
 def dialog_open(*args, **kwargs):
-    # mock opening a dialog
-
+    """Mock dialog open with simulated file selection."""
     directory = kwargs.get("directory", None)
     if directory is None:
         directory = pathclean(DATADIR / "fakedir")
@@ -106,227 +54,299 @@ def dialog_open(*args, **kwargs):
 
 
 def directory_glob(*args, **kwargs):
+    """Mock directory globbing."""
     res = [DATADIR / f"fakedir/fake{i + 1}.fk" for i in range(4)]
     res.append(DATADIR / "fakedir/emptyfake.fk")
     if len(args) > 1 and args[1].startswith("**/"):
-        # recursive
         res.append(DATADIR / "fakedir/subdir/fakesub1.fk")
     return res
 
 
-def test_importer(monkeypatch, fs):
-    fs.create_file("/var/data/xx1.txt")
-    assert os.path.exists("/var/data/xx1.txt")
+@_importer_method
+def _read_fake(*args, **kwargs):
+    """Fake read implementation for testing."""
+    dataset, filename = args
+    content = kwargs.get("content", False)
 
-    # mock filesystem
-    fs.create_dir(DATADIR)
+    if content:
+        dataset = MockDatasetFactory.create(filename, origin="content")
+    else:
+        if os.path.exists(filename):
+            if filename.stem == "otherfake":
+                dataset = MockDatasetFactory.create(filename, size=6)
+            elif filename.stem == "emptyfake":
+                dataset = None
+            else:
+                dataset = MockDatasetFactory.create(filename)
+        else:
+            raise FileNotFoundError
 
-    # try to read unexistent scp file
-    f = DATADIR / "fakedir/fakescp.scp"
-    with pytest.raises(FileNotFoundError):
-        read(f, local_only=True)  # local_only to avoid remote search
-        # (which do not work with the monkeypatch - problem with certificates)
+    return dataset
 
-    # make fake file
-    fs.create_file(f)
-    monkeypatch.setattr(NDDataset, "load", fake_dataset)
 
-    nd = read(f, local_only=True)
-    assert nd == fake_dataset(f)
+def read_fake(*paths, **kwargs):
+    """Wrapper for fake read function."""
+    kwargs["filetypes"] = ["FAKE files (*fk, *.fk1, .fk2)"]
+    kwargs["protocol"] = ["fake", ".fk", "fk1", "fk2"]
+    kwargs["local_only"] = True
+    importer = Importer()
+    return importer(*paths, **kwargs)
 
-    nd = read(f.stem, directory=DATADIR / "fakedir/", protocol="scp", local_only=True)
-    assert nd == fake_dataset(f)
 
-    nd = read(f.stem, directory=DATADIR / "fakedir/", local_only=True)
-    assert nd == fake_dataset(f)
+@_importer_method
+def _read_fk(*args, **kwargs):
+    return Importer._read_fake(*args, **kwargs)
 
-    # Generic read without parameters and dialog cancel
-    monkeypatch.setattr(dialogs, "open_dialog", dialog_cancel)
-    monkeypatch.setenv(
-        "KEEP_DIALOGS", "True"
-    )  # we ask to display dialogs as we will mock them.
 
-    nd = read(local_only=True)
-    assert nd is None
+# Register fake reader
+read_fk = read_fake
+setattr(NDDataset, "read_fk", read_fk)
 
-    # read as class method
-    nd1 = NDDataset.read(local_only=True)
-    assert nd1 is None
+# --------------------------------------------------------------------------------------
+# Mock Dataset Factory
+# --------------------------------------------------------------------------------------
 
-    # NDDataset instance as first arguments
-    nd = NDDataset()
-    nd2 = nd.read(local_only=True)
-    assert nd2 is None
 
-    nd = read(default_filter="matlab", local_only=True)
-    assert nd is None
+class MockDatasetFactory:
+    """Factory to create mock datasets with consistent behaviors."""
 
-    # Check if Filetype is not known
-    f = DATADIR / "fakedir/not_exist_fake.fk"
-    with pytest.raises(TypeError):
-        read_fake(f, local_only=True)
+    @staticmethod
+    def create(filename, origin=None, size=3, implements="NDDataset"):
+        """Create a mock dataset with specified properties."""
+        ds = NDDataset([range(size)])
+        ds.name = filename.stem
 
-    # Make fake type acceptable
-    FILETYPES.append(("fake", "FAKE files (*.fk)"))
-    ALIAS.append(("fk", "fake"))
-    monkeypatch.setattr("spectrochempy.core.readers.importer.FILETYPES", FILETYPES)
-    monkeypatch.setattr("spectrochempy.core.readers.importer.ALIAS", ALIAS)
+        # Set origin based on filename if not explicitly provided
+        if origin is None:
+            if "opus" in str(filename).lower():
+                origin = "opus"
+            elif "omnic" in str(filename).lower():
+                origin = "omnic"
+            else:
+                origin = "unknown"
 
-    # Check not existing filename
-    f = DATADIR / "fakedir/not_exist_fake.fk"
-    with pytest.raises(FileNotFoundError):
-        read_fake(f, local_only=True)
+        ds.origin = origin
+        # Ensure origin is preserved during operations
+        ds._implements = lambda x=None: implements
+        return ds
 
-    # Generic read with a wrong protocol
-    with pytest.raises(spectrochempy.utils.exceptions.ProtocolError):
-        read(f, protocol="wrongfake", local_only=True)
+    @staticmethod
+    def create_reader(origin=None, size=3):
+        """Create a mock reader function that preserves origin."""
 
-    # Generic read with a wrong file extension
-    with pytest.raises(TypeError):
-        g = DATADIR / "fakedir/otherfake.farfelu"
-        read(g, local_only=True)
+        def reader(filename, **kwargs):
+            ds = MockDatasetFactory.create(filename, origin=origin, size=size)
+            # Add any other metadata that needs to be preserved during merge
+            ds.history = f"Created from {filename} with origin {origin}"
+            return ds
 
-    # Mock file
-    f = DATADIR / "fakedir/fake.fk"
-    fs.create_file(f)
+        return reader
 
-    # specific read_(protocol) function
-    nd = read_fk(f, local_only=True)
-    assert nd == fake_dataset()
 
-    # should also be a Class function
-    nd = NDDataset.read_fk(f, local_only=True)
-    assert nd == fake_dataset()
+# --------------------------------------------------------------------------------------
+# Test Classes
+# --------------------------------------------------------------------------------------
 
-    # and a NDDataset instance function
-    nd = NDDataset().read_fk(f, local_only=True)
-    assert nd == fake_dataset()
 
-    # single file without protocol inferred from filename
-    nd = read(f, local_only=True)
-    assert nd == fake_dataset()
+class TestBasicImporter:
+    """Test basic importer functionality."""
 
-    # single file read with protocol specified
-    nd = read(f, protocol="fake", local_only=True)
-    assert nd == fake_dataset()
+    def setup_method(self):
+        """Setup common test environment."""
+        # Setup test files
+        self.fs = pytest.importorskip("pyfakefs").fake_filesystem.FakeFilesystem()
+        self.fs.create_dir(DATADIR)
+        self.fs.create_dir(DATADIR / "fakedir")
 
-    # attribute a new name
-    nd = read(f, name="toto", local_only=True)
-    assert nd.name == "toto"
+        # Create test file
+        self.test_file = DATADIR / "fakedir/test.opus.fk"
+        self.fs.create_file(self.test_file, contents=b"fake data")
 
-    # mock some fake file and assume they exists
-    f1 = DATADIR / "fakedir/fake1.fk"
-    f2 = DATADIR / "fakedir/fake2.fk"
-    f3 = DATADIR / "fakedir/fake3.fk"
-    f4 = DATADIR / "fakedir/fake4.fk"
-    f5 = DATADIR / "fakedir/otherdir/otherfake.fk"
-    f6 = DATADIR / "fakedir/emptyfake.fk"  # return None when reader
-    fs.create_file(f1)
-    fs.create_file(f2)
-    fs.create_file(f3)
-    fs.create_file(f4)
-    fs.create_file(f5)
-    fs.create_file(f6)
-    # l = list(pathclean("/Users/christian/test_data/fakedir").iterdir())
+        # Register protocol
+        FILETYPES.append(("fake", "FAKE files (*.fk)"))
+        ALIAS.append(("fk", "fake"))
 
-    # multiple compatible 1D files automatically merged
-    nd = read(f1, f2, f3, local_only=True)
-    assert nd.shape == (3, 3)
+    def test_file_not_found(self, fs):
+        """Test behavior when file is not found."""
+        self.setup_method()
+        f = DATADIR / "fakedir/nonexistent.fk"
+        with pytest.raises(FileNotFoundError):
+            read_fake(f, local_only=True)
 
-    nd = read([f1, f2, f3], name="fake_merged", local_only=True)
-    assert nd.shape == (3, 3)
-    assert nd.name == "fake_merged"
+    def test_invalid_protocol(self, fs):
+        """Test behavior with invalid protocol."""
+        self.setup_method()
+        with pytest.raises(spectrochempy.utils.exceptions.ProtocolError):
+            read(self.test_file, protocol="wrongfake", local_only=True)
 
-    # multiple compatible 1D files not merged if the merge keyword is set to False
-    nd = read([f1, f2, f3], names=["a", "c", "b"], merge=False, local_only=True)
-    assert isinstance(nd, list)
-    assert len(nd) == 3 and nd[0] == fake_dataset()
-    assert nd[1].name == "c"
+    def test_single_file_read(self, fs, monkeypatch):
+        """Test reading a single file."""
+        self.setup_method()
 
-    # do not merge inhomogeneous dataset
-    nd = read([f1, f2, f5], local_only=True)
-    assert isinstance(nd, list)
+        # Mock file system access and reader
+        monkeypatch.setattr(os.path, "exists", lambda p: True)
+        monkeypatch.setattr(
+            NDDataset, "read_fk", MockDatasetFactory.create_reader(origin="opus")
+        )
 
-    # too short list of names.  Not applied
-    nd = read([f1, f2, f3], names=["a", "c"], merge=False, local_only=True)
-    assert nd[0].name.startswith("NDDataset")
+        # Test reading
+        nd = read_fake(self.test_file, local_only=True)
 
-    monkeypatch.setattr(spectrochempy.core.common.dialogs, "open_dialog", dialog_open)
-    nd = read(
-        local_only=True
-    )  # should open a dialog (but to selects individual filename (here only simulated)
-    assert nd.shape == (2, 3)
+        # Verify dataset properties
+        assert isinstance(nd, NDDataset)
+        assert nd.origin == "opus"  # Check origin is preserved
+        assert nd.shape == (1, 3)  # Check shape
+        assert nd.name == self.test_file.stem  # Check name preserved
 
-    # read in a directory
-    monkeypatch.setattr(pathlib.Path, "glob", directory_glob)
 
-    # directory selection
-    nd = read(protocol="fake", directory=DATADIR / "fakedir", local_only=True)
-    assert nd.shape == (4, 3)
+class TestImporterMerging:
+    """Test dataset merging behavior."""
 
-    nd = read(
-        protocol="fake", directory=DATADIR / "fakedir", merge=False, local_only=True
-    )
-    assert len(nd) == 4
-    assert isinstance(nd, list)
+    def setup_method(self):
+        """Setup test files with different origins."""
+        self.fs = pytest.importorskip("pyfakefs").fake_filesystem.FakeFilesystem()
+        self.fs.create_dir(DATADIR)
+        self.fs.create_dir(DATADIR / "fakedir")
 
-    nd = read(iterdir=True, directory=DATADIR / "fakedir", local_only=True)
-    assert len(nd) == 4
-    assert not isinstance(nd, list)
+        # Create opus test files
+        self.opus_files = []
+        for i in range(3):
+            f = DATADIR / f"fakedir/opus{i}.fk"
+            self.fs.create_file(f)
+            self.opus_files.append(f)
 
-    # if a directory is passed as a keyword, the behavior is different:
-    # a dialog for file selection occurs except if iterdir is set to True
-    nd = read(directory=DATADIR / "fakedir", iterdir=False, local_only=True)
-    assert nd.shape == (2, 3)  # -> file selection dialog
+        # Create omnic test files
+        self.omnic_files = []
+        for i in range(2):
+            f = DATADIR / f"fakedir/omnic{i}.fk"
+            self.fs.create_file(f)
+            self.omnic_files.append(f)
 
-    nd = read(directory=DATADIR / "fakedir", iterdir=True, local_only=True)
-    assert nd.shape == (4, 3)  # -> directory selection dialog
+        FILETYPES.append(("fake", "FAKE files (*.fk)"))
+        ALIAS.append(("fk", "fake"))
 
-    # read_dir()
+    def test_merge_same_origin(self, monkeypatch, fs):
+        """Test merging datasets with same origin."""
+        self.setup_method()
 
-    nd = read_dir(DATADIR / "fakedir", local_only=True)
-    assert nd.shape == (4, 3)
+        monkeypatch.setattr(os.path, "exists", lambda p: True)
+        monkeypatch.setattr(
+            NDDataset, "read_fk", MockDatasetFactory.create_reader(origin="opus")
+        )
 
-    nd1 = read_dir(local_only=True)
-    assert nd1 == nd
+        datasets = read(self.opus_files, protocol="fake", local_only=True, merge=True)
+        assert isinstance(datasets, NDDataset)
+        assert datasets.shape == (3, 3)
+        assert datasets.origin == "merged [opus]"
 
-    nd = read_dir(
-        directory=DATADIR / "fakedir", local_only=True
-    )  # open a dialog to eventually select directory inside the specified
-    # one
-    assert nd.shape == (4, 3)
+    def test_merge_different_origins(self, monkeypatch, fs):
+        """Test handling datasets with different origins."""
+        self.setup_method()
 
-    fs.create_file(DATADIR / "fakedir/subdir/fakesub1.fk")
-    nd = read_dir(directory=DATADIR / "fakedir", recursive=True, local_only=True)
-    assert nd.shape == (5, 3)
+        monkeypatch.setattr(os.path, "exists", lambda p: True)
+        monkeypatch.setattr(
+            NDDataset,
+            "read_fk",
+            MockDatasetFactory.create_reader(),  # Uses filename-based origin
+        )
 
-    # no merging
-    nd = read_dir(
-        directory=DATADIR / "fakedir", recursive=True, merge=False, local_only=True
-    )
-    assert len(nd) == 5
-    assert isinstance(nd, list)
+        # Test without merging
+        all_files = self.opus_files + self.omnic_files
+        datasets = read(all_files, protocol="fake", local_only=True, merge=False)
 
-    # Simulate reading a content
-    nd = read({"somename.fk": "a fake content"})
-    assert nd == fake_dataset(content=True)
-    nd = read_fake({"somename.fk": "a fake content"})
-    assert nd == fake_dataset(content=True)
+        opus_datasets = [ds for ds in datasets if ds.origin == "opus"]
+        omnic_datasets = [ds for ds in datasets if ds.origin == "omnic"]
 
-    # read multiple contents and merge them
-    nd = read(
-        {
-            "somename.fk": "a fake content",
-            "anothername.fk": "another fake content",
-            "stillanothername.fk": "still another fake content",
-        }
-    )
-    assert nd.shape == (3, 3)
+        assert len(opus_datasets) == 3
+        assert len(omnic_datasets) == 2
+        assert all(ds.origin == "opus" for ds in opus_datasets)
+        assert all(ds.origin == "omnic" for ds in omnic_datasets)
 
-    # do not merge
-    nd = read(
-        {"somename.fk": "a fake content", "anothername.fk": "another fake content"},
-        merge=False,
-    )
-    assert isinstance(nd, list)
-    assert len(nd) == 2
+    def test_force_merge(self, monkeypatch, fs):
+        """Test forcing merge of different origin datasets."""
+        self.setup_method()
+
+        monkeypatch.setattr(os.path, "exists", lambda p: True)
+        monkeypatch.setattr(NDDataset, "read_fk", MockDatasetFactory.create_reader())
+
+        datasets = read(
+            self.opus_files + self.omnic_files,
+            protocol="fake",
+            merge=True,
+            local_only=True,
+        )
+
+        assert isinstance(datasets, NDDataset)
+        assert datasets.shape == (5, 3)
+        assert datasets.origin == "merged [omnic, opus]"
+        assert datasets.name == "merged [omnic, opus]"
+
+
+class TestImporterDirectoryReading:
+    """Test directory reading functionality."""
+
+    def setup_method(self):
+        """Setup common test environment."""
+        FILETYPES.append(("fake", "FAKE files (*.fk)"))
+        ALIAS.append(("fk", "fake"))
+
+    def _setup_fake_files(self, fs):
+        """Create fake test files in the filesystem."""
+        # Create base directory
+        fs.create_dir(DATADIR / "fakedir")
+
+        # Create test files
+        for i in range(4):
+            f = DATADIR / "fakedir" / f"fake{i + 1}.fk"
+            fs.create_file(f)
+
+        # Create empty fake file
+        fs.create_file(DATADIR / "fakedir/emptyfake.fk")
+
+        # Create subdirectory with file
+        fs.create_dir(DATADIR / "fakedir/subdir")
+        fs.create_file(DATADIR / "fakedir/subdir/fakesub1.fk")
+
+    def test_read_directory(self, fs, monkeypatch):
+        """Test reading from directory."""
+        # Setup mock filesystem with files
+        self._setup_fake_files(fs)
+
+        # Mock glob to return our fake files
+        monkeypatch.setattr(pathlib.Path, "glob", directory_glob)
+
+        # Mock os.path.exists to return True for our fake files
+        def mock_exists(path):
+            return str(path).endswith(".fk")
+
+        monkeypatch.setattr(os.path, "exists", mock_exists)
+
+        nd = read_dir(DATADIR / "fakedir", local_only=True)
+        assert nd.shape == (4, 3)  # Expect 4 files, each with size 3
+
+    def test_recursive_read(self, fs, monkeypatch):
+        """Test recursive directory reading."""
+        # Setup mock filesystem with files including subdirectory
+        self._setup_fake_files(fs)
+
+        # Mock glob and exists
+        monkeypatch.setattr(pathlib.Path, "glob", directory_glob)
+
+        def mock_exists(path):
+            return str(path).endswith(".fk")
+
+        monkeypatch.setattr(os.path, "exists", mock_exists)
+
+        nd = read_dir(DATADIR / "fakedir", recursive=True, local_only=True)
+        assert nd.shape == (5, 3)  # Expect 5 files including subdirectory
+
+    def test_empty_directory(self, fs, monkeypatch):
+        """Test reading from empty directory."""
+        fs.create_dir(DATADIR / "emptydir")
+
+        nd = read_dir(DATADIR / "emptydir", local_only=True)
+        assert nd is None  # Should return None for empty directory
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

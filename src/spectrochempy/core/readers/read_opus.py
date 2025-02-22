@@ -367,9 +367,9 @@ def _read_opus(*args, **kwargs):
     dataset.set_coordset(y=yaxis, x=xaxis)
 
     # Set name, origin, description and history
-    dataset.name = filename.name
+    dataset.name = filename.stem
     dataset.filename = filename
-    dataset.origin = "opus"
+    dataset.origin = f"opus-{type_parameter}"
     dataset.description = "Dataset from opus files. \nSpectra type: " + desc
     dataset.history = str(datetime.now(UTC)) + ": import from opus files \n"
 

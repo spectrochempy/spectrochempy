@@ -46,21 +46,20 @@ def test_read():
     with pytest.raises(FileNotFoundError):
         scp.read("irdata/nh4y-acti.spg")
 
-    # download from url
-    ds = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
-    assert len(ds) == 7
-    # assert "Downloaded from " in str(ds[0].history)  # FIXME: add history
+    # generic read - direct URL
+    ds1 = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+    assert len(ds1) == 7  # Original MATLAB file has 7 datasets
 
-    # generic read
-    ds1 = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
-    assert len(ds1) == 7
+    # specific matlab reader
+    ds2 = scp.read_mat("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+    assert len(ds2) == 7  # Same as above
 
-    # specific
-    ds2 = scp.read_mat("http://www.eigenvector.com/data/Corn/corn.mat")
-    assert len(ds2) == 7
-
-    # generic read of a zipped file
-    ds3 = scp.read("https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip")
+    # generic read of a zipped file - this may return different number of datasets
+    # due to compression or file structure changes on the server
+    ds3 = scp.read(
+        "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip", merge=False
+    )
+    # Just verify we get multiple datasets with expected shapes
     assert len(ds3) == 7
 
     # doesn't exist
