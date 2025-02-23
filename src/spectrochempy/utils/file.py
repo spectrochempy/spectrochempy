@@ -103,7 +103,7 @@ def _insensitive_case_glob(pattern):
 def patterns(filetypes, allcase=True):
     regex = r"\*\.*\[*[0-9-]*\]*\w*\**"
     patterns = []
-    if not isinstance(filetypes, list | tuple):
+    if not isinstance(filetypes, (list, tuple)):  # noqa: UP038
         filetypes = [filetypes]
     for ft in filetypes:
         m = re.finditer(regex, ft)
@@ -135,7 +135,7 @@ def pathclean(paths):
         return "Windows" in platform.platform()
 
     def _clean(path):
-        if isinstance(path, Path | PosixPath | WindowsPath):
+        if isinstance(path, (Path, PosixPath, WindowsPath)):  # noqa: UP038  (syntax error in pyfakefs with modern union operators)
             path = path.name
         if is_windows():
             path = WindowsPath(path)  # pragma: no cover
@@ -150,10 +150,10 @@ def pathclean(paths):
         return Path(path)
 
     if paths is not None:
-        if isinstance(paths, str | Path | PosixPath | WindowsPath):
+        if isinstance(paths, (str, Path, PosixPath, WindowsPath)):  # noqa: UP038
             path = str(paths)
             return _clean(path).expanduser()
-        if isinstance(paths, list | tuple):
+        if isinstance(paths, (list, tuple)):  # noqa: UP038
             return [_clean(p).expanduser() if isinstance(p, str) else p for p in paths]
 
     return paths
@@ -221,7 +221,7 @@ def check_filenames(*args, **kwargs):
         ):
             # return url
             return args
-        if isinstance(args[0], str | Path | PosixPath | WindowsPath):
+        if isinstance(args[0], (str, Path, PosixPath, WindowsPath)):  # noqa: UP038
             # one or several filenames are passed - make Path objects
             filenames = pathclean(args)
         elif isinstance(args[0], bytes):
@@ -229,9 +229,8 @@ def check_filenames(*args, **kwargs):
             # as filename where not given we passed the 'unnamed' string
             # return a dictionary
             return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args)}
-        elif isinstance(args[0], list) and isinstance(
-            args[0][0],
-            str | Path | PosixPath | WindowsPath,
+        elif isinstance(args[0], list) and isinstance(  # noqa: UP038
+            args[0][0], (str, Path, PosixPath, WindowsPath)
         ):
             filenames = pathclean(args[0])
         elif isinstance(args[0], list) and isinstance(args[0][0], bytes):
@@ -412,7 +411,7 @@ def get_filenames(*filenames, **kwargs):
 
     # filenames
     # ---------
-    if len(filenames) == 1 and isinstance(filenames[0], list | tuple):
+    if len(filenames) == 1 and isinstance(filenames[0], (list, tuple)):  # noqa: UP038
         filenames = filenames[0]
 
     filenames = pathclean(list(filenames))
@@ -556,12 +555,13 @@ def get_filenames(*filenames, **kwargs):
 
     # now we have either a list of the selected files
     if isinstance(filenames, list) and not all(
-        isinstance(elem, Path | PosixPath | WindowsPath) for elem in filenames
+        isinstance(elem, (Path, PosixPath, WindowsPath))  # noqa: UP038
+        for elem in filenames  # noqa: UP038
     ):
         raise OSError("one of the list elements is not a filename!")
 
     # or a single filename
-    if isinstance(filenames, str | Path | PosixPath | WindowsPath):
+    if isinstance(filenames, (str, Path, PosixPath, WindowsPath)):  # noqa: UP038
         filenames = [filenames]
 
     filenames = pathclean(filenames)
