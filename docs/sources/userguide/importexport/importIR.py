@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.16
+#     version: 3.10.16
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -348,42 +348,127 @@ print(X)
 # ## Import of Bruker OPUS files
 #
 # [Bruker OPUS](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/opus-spectroscopy-software.html)
-# files have also a proprietary file format. The Opus reader (`read_opus()` )
-# of spectrochempy is essentially a wrapper of the python module
+# files have also a proprietary file format. The Opus reader (`read_opus()` ) of spectrochempy is essentially a wrapper of the python module
 # [brukeropus](https://github.com/joshduran/brukeropus) developed by Josh Duran.
-# The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files.
+# The use of `read_opus()` is similar to that of  `read_omnic()`.
+#
 # Hence, one can open sample Opus files contained in the `datadir` using:
 
 # %%
-Z = scp.read_opus(["test.0000", "test.0001", "test.0002"], directory="irdata/OPUS")
+import spectrochempy as scp
+
+Z = scp.read_opus("irdata/OPUS/test.0002")
 print(Z)
 
 # %% [markdown]
-# or:
+# For multifile loading, one can use:
 
 # %%
-Z2 = scp.read_opus("irdata/OPUS")
-print(Z2)
+Z1 = scp.read_opus(["test.0000", "test.0001", "test.0002"], directory="irdata/OPUS")
+print(Z1)
 
 # %% [markdown]
-# Note above that a warning was issued because the `irdata/OPUS` contains a
-# background file
-# (single beam) which is not read by SpectroChemPy.
+# or, if all files in a directory must be read:
+
+# %%
+Z1 = scp.read_opus("irdata/OPUS")
+print(Z1)
+
+# %% [markdown]
+# Here a warning is issued because not all files have the same size. In this case they cannot automatically merged.
+
+# %% [markdown]
+# <div class='alert alert-info'>
+# <b>Note</b>
 #
-# Finally, supplementary information can be obtained by the direct use of
-# `brukeropusreader` .
+# By default absortion spectra (AB) are load, if present in the file.
+#
+# Opus file however can contain several files and they can be retrieved eventually using the correct type in the call to `read_opus`:
+#
+# Types possibly availables and readables by `read_opus` are listed here:
+#
+# - `AB`: Absorbance (default if present in the file)
+# - `TR`: Transmittance
+# - `KM`: Kubelka-Munk
+# - `RAM`: Raman
+# - `EMI`: Emission
+# - `RFL`: Reflectance
+# - `LRF`: log(Reflectance)
+# - `ATR`: ATR
+# - `PAS`: Photoacoustic
+# - `RF`: Single-channel reference spectra
+# - `SM`: Single-channel sample spectra
+# - `IGRF`: Reference interferogram
+# - `IGSM`: Sample interferogram
+# - `PHRF`: Reference phase
+# - `PHSM`: Sample phase
+#
+# </div>
+
+# %% [markdown]
+# It is possible to know which are the other types availables in the original file:
+
+# %%
+Z.meta.other_data_types
+
+# %% [markdown]
+# Thus if one wants to load the single-channel sample spectra, the read function syntax would be:
+
+# %%
+ZSM = scp.read_opus("irdata/OPUS/test.0002", type="SM")
+print(ZSM)
+
+# %% [markdown]
+# ### Reading OPUS file Metadata
+#
+# AS just seen above, more informations can be obtained on the experiment and spectrometer parameters using the dataset metadata (`meta`attribute).
 #
 # For instance:
 
 # %%
-from brukeropusreader import read_file  # noqa: E402
+Z3 = scp.read_opus("irdata/OPUS/test.0001")
+print(Z3)
 
-opusfile = scp.DATADIR / "irdata" / "OPUS" / "test.0000"  # the full path of the file
-Z3 = read_file(opusfile)  # returns a dictionary of the data and metadata extracted
-for key in Z3:
-    print(key)
+# %%
+metadata = Z3.meta
 
-Z3["Optik"]  # looks what is the Optik block:
+# %% [markdown]
+# The metadata object is a readonly dictionary-like object (which can be nested, i.e., it can contains other metadata objects).
+# It can be accessed as follows:
+#
+# - List parameter blocks presents at the first level in the metadata (with the corresponding access key)
+
+# %%
+for k, v in metadata.items():
+    print(k, v)
+
+    # print(f"* {v.name} [{k}]")
+
+# %% [markdown]
+# - Access and list the blocks contained in `params`
+
+# %%
+for (
+    kk,
+    vv,
+) in (
+    metadata.params.items()
+):  # note here that we use the block key as an attribute of the metadata object
+    print(f"* {vv.name} [{kk}]")
+
+# %% [markdown]
+#   Note: if you just need the keys but not the actual name of the block, it is simpler to do this:
+
+# %%
+print(metadata.params.keys())
+
+# %%
+print(metadata.params)
+
+# %% [markdown]
+# - Access parameters of a given block
+
+# %%
 
 # %% [markdown]
 # ## Import/Export of JCAMP-DX files

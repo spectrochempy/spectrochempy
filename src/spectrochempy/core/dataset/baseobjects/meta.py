@@ -116,6 +116,10 @@ class Meta:
             raise AttributeError
         if key in ["__wrapped__"]:
             return False
+        if key.startswith("_") and key not in ["_readonly", "_data"]:
+            raise AttributeError(
+                f"a Meta attribute cannot start with an underscore: {key}"
+            )
         return self[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -130,6 +134,8 @@ class Meta:
 
     def __getitem__(self, key: str) -> Any:
         # Get item from the dictionary.
+        if key.startswith("_"):
+            raise KeyError(f"item cannot start with an underscore: {key}")
         res = self._data.get(key, None)
         if res is None:
             res = self._data.get(key.replace(" ", "_").lower(), None)

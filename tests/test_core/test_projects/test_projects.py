@@ -14,7 +14,7 @@ from spectrochempy.core.script import Script, run_script
 prefs = preferences
 
 try:
-    from spectrochempy.core import dialogs
+    from spectrochempy.core.common import dialogs
 except ImportError:
     import pytest
 

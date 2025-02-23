@@ -21,7 +21,7 @@ nmrdatadir = pathclean(prefs.datadir) / "nmrdata" / "bruker" / "tests" / "nmr"
 cwd = pathlib.Path.cwd()
 
 try:
-    from spectrochempy.core import dialogs
+    from spectrochempy.core.common import dialogs
 except ImportError:
     pytest.skip("dialogs not available with act", allow_module_level=True)
 
@@ -87,5 +87,8 @@ def test_ndio_2D(IR_dataset_2D):
     assert nd.directory == irdatadir
     f.unlink()
 
+
+if __name__ == "__main__":
+    pytest.main([__file__])
 
 # EOF
