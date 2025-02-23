@@ -546,7 +546,9 @@ def get_filenames(*filenames, **kwargs):
             # on mac case insensitive OS this cause doubling the number of files.
             # Eliminates doublons:
             filenames = list(set(filenames))
-
+            filenames = [
+                f for f in filenames if f.name not in [".DS_Store", "__index__"]
+            ]
             filenames = pathclean(filenames)
 
         if not filenames:
