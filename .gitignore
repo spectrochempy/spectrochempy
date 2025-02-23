@@ -5,7 +5,7 @@
 *.pscp
 process.pscp
 HIZECOKE_TEST.pscp
-data/stylesheets/mydefault.mplstyle
+mydefault.mplstyle
 
 ###############################
 # Python                      #
