@@ -19,7 +19,7 @@ irdatadir = pathclean(prefs.datadir) / "irdata"
 cwd = Path.cwd()
 
 try:
-    from spectrochempy.core import dialogs
+    from spectrochempy.core.common import dialogs
 except ImportError:
     pytest.skip("dialogs not available with act", allow_module_level=True)
 

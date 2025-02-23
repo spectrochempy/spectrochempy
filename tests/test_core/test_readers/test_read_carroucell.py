@@ -14,7 +14,7 @@ from spectrochempy import NDDataset, info_
 from spectrochempy import preferences as prefs
 
 try:
-    from spectrochempy.core import dialogs
+    from spectrochempy.core.common import dialogs
 except ImportError:
     pytest.skip("dialogs not available with act", allow_module_level=True)
 

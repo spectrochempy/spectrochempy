@@ -24,7 +24,7 @@ from spectrochempy.core.readers.importer import (
 from spectrochempy.utils.file import pathclean
 
 try:
-    from spectrochempy.core import dialogs
+    from spectrochempy.core.common import dialogs
 except ImportError:
     pytest.skip("dialogs not available with act", allow_module_level=True)
 

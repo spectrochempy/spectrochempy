@@ -21,7 +21,7 @@ nmrdatadir = pathclean(prefs.datadir) / "nmrdata" / "bruker" / "tests" / "nmr"
 cwd = pathlib.Path.cwd()
 
 try:
-    from spectrochempy.core import dialogs
+    from spectrochempy.core.common import dialogs
 except ImportError:
     pytest.skip("dialogs not available with act", allow_module_level=True)
 
