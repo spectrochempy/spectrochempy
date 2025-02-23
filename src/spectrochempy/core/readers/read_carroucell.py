@@ -21,6 +21,7 @@ from spectrochempy.application import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import merge_datasets
 from spectrochempy.core.readers.read_omnic import read_omnic
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docreps import _docstring
@@ -82,6 +83,10 @@ def read_carroucell(directory=None, **kwargs):
     """
     kwargs["filetypes"] = ["Carroucell files (*.spa)"]
     kwargs["protocol"] = ["carroucell"]
+    if "merge" not in kwargs:
+        kwargs["merge"] = False
+        # do not merge automatically (opposite of the normal behavior)
+        # merging of datasets is done in the importer if needed
     importer = Importer()
 
     return importer(directory, **kwargs)
@@ -202,6 +207,14 @@ def _read_carroucell(*args, **kwargs):
                 T_ds = interpolator(tstamp_ds)
                 newlabels = np.hstack((ds.y.labels, T_ds.reshape((50, 1))))
                 ds.y = Coord(title=ds.y.title, data=ds.y.data, labels=newlabels)
+
+    # in the case of this importer, merge is false by default, so no merge will
+    # be done in the calling function _switch_protocol.
+    # But in the case where all spectra have the same number, we should merge
+    # the datasets. So this will be done here
+
+    if len(datasets) > 1 and datasets[0].shape[0] == 1:
+        datasets = merge_datasets(datasets)
 
     if len(datasets) == 1:
         return datasets[0]  # a single dataset is returned
