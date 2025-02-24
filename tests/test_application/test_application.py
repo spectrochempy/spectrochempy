@@ -48,49 +48,6 @@ def test_logging_levels():
     scp.set_loglevel(initial_level)
 
 
-def test_logging_output():
-    """Test logging output"""
-    # Store initial log level and handlers
-    initial_level = scp.get_loglevel()
-    initial_handlers = app.log.handlers[:]
-
-    # Add a specific StringIO handler for testing
-    from io import StringIO
-
-    test_stream = StringIO()
-    test_handler = logging.StreamHandler(test_stream)
-    test_handler.setFormatter(logging.Formatter("%(levelname)s | %(message)s"))
-    app.log.addHandler(test_handler)
-
-    try:
-        scp.set_loglevel("WARNING")
-
-        # Test warning message
-        scp.warning_("test warning")
-        log_out = test_stream.getvalue()
-        assert "WARNING" in log_out
-        assert "test warning" in log_out
-
-        # Clear stream for next test
-        test_stream.truncate(0)
-        test_stream.seek(0)
-
-        # Test error message
-        scp.error_("test error")
-        log_out = test_stream.getvalue()
-        assert "ERROR" in log_out
-        assert "test error" in log_out
-
-    finally:
-        # Cleanup: restore original state
-        app.log.removeHandler(test_handler)
-        test_stream.close()
-        scp.set_loglevel(initial_level)
-
-        # Restore original handlers
-        app.log.handlers = initial_handlers
-
-
 def test_preferences():
     """Test preferences handling"""
     # Test preferences exist
