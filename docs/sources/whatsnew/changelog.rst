@@ -26,8 +26,8 @@ New features
 Bug fixes
 ~~~~~~~~~
 
-* Bug #696. Subtraction/Addition of multicoordinates works transparently
-
+- Bug #696. Subtraction/Addition of multicoordinates works transparently
+- Bug #827. The git installation in non-developper usage of spectrochempy is no more needed.
 
 .. section
 
