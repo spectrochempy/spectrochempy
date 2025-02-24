@@ -25,8 +25,7 @@ New features
 
 Bug fixes
 ~~~~~~~~~
-
-* Bug #696. Subtraction/Addition of multicoordinates works transparently
+.. Add here new bug fixes (do not delete this comment)
 
 
 .. section
