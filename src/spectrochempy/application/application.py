@@ -154,13 +154,10 @@ copyright = _get_copyright()
 
 def _get_release_date():
     cmd = ["git", "log", "-1", "--tags", "--date=short", "--format=%ad"]
-    if all(isinstance(arg, str) for arg in cmd):
-        if all(isinstance(arg, str) for arg in cmd):
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)  # noqa: S603
-        else:
-            raise ValueError("Invalid command arguments")
-    else:
-        raise ValueError("Invalid command arguments")
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)  # noqa: S603
+    except FileNotFoundError:
+        return "unknown"
     return result.stdout.strip()
 
 
