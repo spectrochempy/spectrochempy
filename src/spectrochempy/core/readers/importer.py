@@ -111,7 +111,7 @@ class Importer(HasTraits):
             and isinstance(args[0], list | tuple)
         ):
             # if merge is not specified, but the args are provided as a single list,
-            # then will are supposed to merge the datasets. If merge is specified then
+            # then we are supposed to merge the datasets. If merge is specified then
             # it has priority.
             # This is not useful for the 1D datasets, as if they are compatible they
             # are merged automatically
@@ -630,7 +630,7 @@ def _read_scp(*args, **kwargs):
 
 @_importer_method
 def _read_(*args, **kwargs):
-    dataset, filename = args
+    _, filename = args
 
     if kwargs.pop("remote", False):
         return Importer._read_remote(*args, **kwargs)
@@ -924,8 +924,8 @@ def merge_datasets(datasets, **kwargs):
 
             return [dataset]
 
-        except Exception as e:
-            warn(str(e), stacklevel=2)
+        except Exception:  # noqa: S110
+            pass  # warn(str(e), stacklevel=2)
 
     # Group datasets by origin
     groups = group_datasets_by_origin(datasets)

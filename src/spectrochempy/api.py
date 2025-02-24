@@ -138,3 +138,6 @@ if NO_DISPLAY:
     environ["TEST_NMR_FOLDER"] = str(
         DATADIR / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d",
     )
+
+# For new version, where dialog are removed,
+NO_DIALOG = True
