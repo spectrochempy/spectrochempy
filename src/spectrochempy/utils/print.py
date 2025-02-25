@@ -208,7 +208,10 @@ def convert_to_html(obj):
 
     obj._html_output = False
 
-    return f"{html_output[0]}\n<details><summary><strong>Data and dimensions details (click to display)</strong></summary>{'\n'.join(html_output[1:])}</details>"
+    html = f"{html_output[0]}"
+    if data_section or dim_section:
+        html += f"\n<details><summary><strong>Data and dimensions details (click to display)</strong></summary>{'\n'.join(html_output[1 : len(html_output)])}</details>"
+    return html
 
 
 # ======================================================================================
