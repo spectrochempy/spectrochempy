@@ -109,58 +109,10 @@ def convert_to_html(obj):
         "padding-top:0px; {2} '>{1}</td><tr>\n"
     )
 
-    # CSS for accordion
-    accordion_css = """
-    <style>
-    .scp-accordion {
-        margin-bottom: 1rem;
-    }
-    .scp-accordion-header {
-        background-color: #f8f9fa;
-        padding: 0.5rem;
-        cursor: pointer;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-    }
-    .scp-accordion-header:hover {
-        background-color: #e9ecef;
-    }
-    .scp-accordion-content {
-        padding: 0.5rem;
-        border: 1px solid #dee2e6;
-        border-top: none;
-        display: none;
-    }
-    .scp-accordion-header.active + .scp-accordion-content {
-        display: block;
-    }
-    </style>
-    """
-
-    # JavaScript for accordion functionality
-    accordion_js = """
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const headers = document.querySelectorAll('.scp-accordion-header');
-        headers.forEach(header => {
-            header.addEventListener('click', function() {
-                this.classList.toggle('active');
-                const content = this.nextElementSibling;
-                if (content.style.display === 'block') {
-                    content.style.display = 'none';
-                } else {
-                    content.style.display = 'block';
-                }
-            });
-        });
-    });
-    </script>
-    """
-
     obj._html_output = True
+
     out = obj._cstr()
 
-    # Process regular content
     regex = r"\0{3}[\w\W]*?\0{3}"
 
     # noinspection PyPep8
@@ -204,53 +156,22 @@ def convert_to_html(obj):
     regex = r"\.{3}\s+\n"
     out = re.sub(regex, "", out, count=0, flags=re.MULTILINE)
 
-    # Build HTML with accordion sections
-    html = accordion_css
-    html += "<div class='scp-container'>\n"
-
-    current_section = None
-    section_content = ""
-
+    html = "<table style='background:transparent'>\n"
     for line in out.splitlines():
-        if "DIMENSION" in line or "DATA" in line:
-            # Close previous section if exists
-            if current_section:
-                html += f"""
-                    <div class='scp-accordion'>
-                        <div class='scp-accordion-header'>{current_section}</div>
-                        <div class='scp-accordion-content'>
-                            <table style='background:transparent'>{section_content}</table>
-                        </div>
-                    </div>
-                """
-                section_content = ""
-
-            current_section = line.strip()
-
-        elif "</font> :" in line:
+        if "</font> :" in line:
+            # keep only first match
             parts = line.split(":")
-            section_content += tr.format(
-                parts[0], ":".join(parts[1:]), "border:.5px solid lightgray; "
+            html += tr.format(
+                parts[0],
+                ":".join(parts[1:]),
+                "border:.5px solid lightgray; ",
             )
-
         elif "<strong>" in line:
-            section_content += tr.format(line, "<hr/>", "padding-top:10px;")
-
-    # Close last section
-    if current_section and section_content:
-        html += f"""
-            <div class='scp-accordion'>
-                <div class='scp-accordion-header'>{current_section}</div>
-                <div class='scp-accordion-content'>
-                    <table style='background:transparent'>{section_content}</table>
-                </div>
-            </div>
-        """
-
-    html += "</div>\n"
-    html += accordion_js
+            html += tr.format(line, "<hr/>", "padding-top:10px;")
+    html += "</table>"
 
     obj._html_output = False
+
     return html
 
 
