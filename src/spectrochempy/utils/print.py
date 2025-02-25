@@ -98,9 +98,7 @@ def html_output(out):
     return out
 
 
-def convert_to_html(obj):
-    """Convert object representation to HTML with collapsible sections."""
-    # Style for regular table rows
+def _process_section(section):
     tr = (
         "<tr>"
         "<td style='padding-right:5px; padding-bottom:0px; "
@@ -109,9 +107,7 @@ def convert_to_html(obj):
         "padding-top:0px; {2} '>{1}</td><tr>\n"
     )
 
-    obj._html_output = True
-
-    out = obj._cstr()
+    out = "\n".join(section)
 
     regex = r"\0{3}[\w\W]*?\0{3}"
 
@@ -167,12 +163,52 @@ def convert_to_html(obj):
                 "border:.5px solid lightgray; ",
             )
         elif "<strong>" in line:
-            html += tr.format(line, "<hr/>", "padding-top:10px;")
+            html += tr.format(line, "<hr/>", "padding-top:0px;")
     html += "</table>"
+
+    return html
+
+
+def convert_to_html(obj):
+    """Convert object representation to HTML with separate sections for description, DATA, and DIMENSION."""
+    obj._html_output = True
+    out = obj._cstr()
+
+    # Split output into sections
+    sections = out.split("\n")
+    description_section = []
+    data_section = []
+    dim_section = []
+
+    in_desc = True
+    in_data = False
+    for line in sections:
+        # change selector vs the positiion in the file
+        if "DATA" in line:
+            in_desc = False
+            in_data = True
+        elif "DIMENSION" in line:
+            in_desc = False
+            in_data = False
+        if in_desc:
+            description_section.append(line)
+        elif in_data:
+            data_section.append(line)
+        else:
+            dim_section.append(line)
+
+    # Process each section
+    html_output = []
+    if description_section:
+        html_output.append(_process_section(description_section))
+    if data_section:
+        html_output.append(_process_section(data_section))
+    if dim_section:
+        html_output.append(_process_section(dim_section))
 
     obj._html_output = False
 
-    return html
+    return f"{html_output[0]}\n<details><summary><strong>Data and dimensions details (click to display)</strong></summary>{'\n'.join(html_output[1:])}</details>"
 
 
 # ======================================================================================
