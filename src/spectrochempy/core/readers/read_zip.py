@@ -98,7 +98,9 @@ def _read_zip(*args, **kwargs):
             ):
                 return None
             origin = kwargs.get("origin", "")
-            return read(children.name, content=children.read_bytes(), origin=origin)
+            return read(
+                children.name, content=children.read_bytes(), origin=origin, merge=False
+            )
 
         # We assume that we have only a single dir with not subdir
         if dirs:

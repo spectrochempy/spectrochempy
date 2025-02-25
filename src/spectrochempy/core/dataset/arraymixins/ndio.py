@@ -47,7 +47,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.file import check_filename_to_save
 from spectrochempy.utils.file import pathclean
-from spectrochempy.utils.jsonutils import json_serialiser
+from spectrochempy.utils.jsonutils import json_encoder
 from spectrochempy.utils.misc import TYPE_BOOL
 from spectrochempy.utils.zip import ScpFile
 
@@ -375,7 +375,7 @@ class NDIO(HasTraits):
         return new
 
     def dumps(self, encoding=None):
-        js = json_serialiser(self, encoding=encoding)
+        js = json_encoder(self, encoding=encoding)
         return json.dumps(js, indent=2)
 
     @classmethod
@@ -418,7 +418,7 @@ class NDIO(HasTraits):
                     if val is None:
                         pass
 
-                    elif key in ["_meta", "_ranges", "_preferences"]:
+                    elif key in ["_meta", "_preferences"]:  # "_ranges",
                         setattr(obj, key, item_to_attr(getattr(obj, key), val))
 
                     elif key in ["_coordset"]:

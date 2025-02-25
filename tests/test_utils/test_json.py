@@ -10,15 +10,15 @@ import pickle
 
 import numpy as np
 
-from spectrochempy.utils.jsonutils import json_decoder, json_serialiser
+from spectrochempy.utils.jsonutils import json_decoder, json_encoder
 
 
-def test_json_serialiser_decoder(IR_dataset_2D):
+def test_json_encoder_decoder(IR_dataset_2D):
     nd = IR_dataset_2D.copy()
 
     # make a json string to write (without encoding)
 
-    js = json_serialiser(nd, encoding=None)
+    js = json_encoder(nd, encoding=None)
     js_string = json.dumps(js, indent=2)
     print("no encoding", len(js_string))
 
@@ -28,7 +28,7 @@ def test_json_serialiser_decoder(IR_dataset_2D):
     assert np.all(np.array(js["data"]["tolist"]) == jsd["data"])
 
     # encoding  base 64
-    js = json_serialiser(nd, encoding="base64")
+    js = json_encoder(nd, encoding="base64")
     js_string = json.dumps(js, indent=2)
     print("base64", len(js_string))
 

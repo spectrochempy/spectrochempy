@@ -229,8 +229,10 @@ def check_filenames(*args, **kwargs):
             # as filename where not given we passed the 'unnamed' string
             # return a dictionary
             return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args)}
-        elif isinstance(args[0], list) and isinstance(  # noqa: UP038
-            args[0][0], (str, Path, PosixPath, WindowsPath)
+        elif isinstance(args[0], (list, tuple)) and (  # noqa: UP038
+            isinstance(  # noqa: UP038
+                args[0][0], (str, Path, PosixPath, WindowsPath)
+            )
         ):
             filenames = pathclean(args[0])
         elif isinstance(args[0], list) and isinstance(args[0][0], bytes):
@@ -546,7 +548,9 @@ def get_filenames(*filenames, **kwargs):
             # on mac case insensitive OS this cause doubling the number of files.
             # Eliminates doublons:
             filenames = list(set(filenames))
-
+            filenames = [
+                f for f in filenames if f.name not in [".DS_Store", "__index__"]
+            ]
             filenames = pathclean(filenames)
 
         if not filenames:

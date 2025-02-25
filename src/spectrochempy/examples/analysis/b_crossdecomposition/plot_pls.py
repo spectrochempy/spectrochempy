@@ -18,7 +18,9 @@ import spectrochempy as scp
 
 # %%
 # The data set is available to download from the Eigenvector Archive:
-ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
+ds_list = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+ds_list_names = [f"{i} : {ds.name}({ds.shape})" for i, ds in enumerate(ds_list)]
+print(ds_list_names)
 
 # %%
 # This data set, originally taken at Cargil,  consists of 80 samples of corn measured on
@@ -71,4 +73,4 @@ _ = ax.legend(loc="lower right")
 # This ends the example ! The following line can be uncommented if no plot shows when
 # running the .py script with python
 
-# scp.show()
+scp.show()

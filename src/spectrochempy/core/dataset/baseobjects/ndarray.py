@@ -230,7 +230,9 @@ class NDArray(HasTraits):
 
         self.units = kwargs.pop("units", None)
 
-        self.meta = kwargs.pop("meta", {})
+        self.meta = (
+            kwargs.pop("meta", {}) if isinstance(kwargs.get("meta", {}), dict) else {}
+        )
 
         self.name = kwargs.pop("name", None)
 
@@ -1168,7 +1170,7 @@ class NDArray(HasTraits):
                 setattr(new, f"_{attr}", _attr)
 
             except ValueError:
-                # ensure that if deepcopy do not work, a shadow copy can be done
+                # ensure that if deepcopy do not work, a shallow copy can be done
                 _attr = do_copy(getattr(self, f"_{attr}"))
                 setattr(new, f"_{attr}", _attr)
 

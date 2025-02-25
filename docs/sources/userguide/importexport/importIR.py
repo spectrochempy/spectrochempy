@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.16
+#     version: 3.13.2
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -33,34 +33,97 @@
 # %% [markdown]
 # # Import IR Data
 #
-# This tutorial shows the specifics related to infrared data import in Spectrochempy.
-# As prerequisite, the user is
-# expected to have read the [Import Tutorial](import.rst).
-#
-# Let's first import spectrochempy:
+# This tutorial demonstrates how to import infrared spectroscopy data in SpectroChemPy.
 
 # %%
 import spectrochempy as scp
 
 # %% [markdown]
-# ## Supported file formats
+# ## Summary
 #
-# At the time of writing of this tutorial (Scpy v.0.2), spectrochempy has the following
-# readers which are specific
-# to IR data:
+# ### Supported IR File Formats
 #
-# - `read_omnic()` to open omnic (spa and spg) files
-# - `read_opus()` to open Opus (.0, ...) files
-# - `read_jcamp()` to open an IR JCAMP-DX datafile
-# - `read()` which is the generic reader. The type of data is then deduced from the
-# file extension.
+# SpectroChemPy supports these IR-specific formats:
 #
-# General purpose data exchange formats such as .csv or .mat will be treated in
-# another tutorial (yet to come...) can also be read using:
+# | Format | Function | Description |
+# |--------|----------|-------------|
+# | OMNIC | `read_omnic()` | Thermo Scientific (.spa, .spg) |
+# | OPUS | `read_opus()` | Bruker OPUS (.0, ...) |
+# | JCAMP-DX | `read_jcamp()` | Standard IR exchange format |
 #
-# - `read_csv()` to open .csv files
-# - `read_matlab()` to open .mat files
+# ### Reading OMNIC Files
 #
+# #### Single Spectra (.spa)
+#
+# ```python
+# # Read a single spectrum
+# spectrum = scp.read_omnic("path/to/spectrum.spa")
+#
+# # Read multiple spectra from a directory
+# spectra = scp.read_omnic("path/to/directory")
+# ```
+# #### Groups of Spectra (.spg)
+#
+# ```python
+# # Read a group of spectra
+# spectrumgroup = scp.read_omnic("path/to/spectrumgroup.SPG", description="Some interesting data")
+#
+# # Access metadata
+# print(f"Title: {dataset.title}")
+# print(f"Shape: {dataset.shape}")
+# print(f"Units: {dataset.units}")
+# ```
+
+# %% [markdown]
+# ### Reading OPUS Files
+#
+# OPUS files can contain multiple data types:
+#
+# ```python
+# # Read default absorbance data
+# spectrum = scp.read_opus("path/to/spectrum.0002")
+#
+# # Read specific data type
+# spectrum = scp.read_opus("path/to/spectrum.0002", type="TR")  # Transmittance
+#
+# # Read multiple spectra from a directory
+# spectra = scp.read_omnic("path/to/directory")
+#
+# ```
+
+# %% [markdown]
+# ### Best Practices
+#
+# 1. Use Path objects for file handling:
+
+# %% [markdown]
+#    ```python
+#    data_path = Path("irdata/spectra")
+#    dataset = scp.read_omnic(data_path / "sample.spg")
+#    ```
+
+# %% [markdown]
+# 2. Handle missing files and errors:
+
+# %% [markdown]
+#    ```python
+#    try:
+#        dataset = scp.read_opus("sample.0")
+#    except (OSError, ValueError) as e:
+#        print(f"Error reading file: {e}")
+#    ```
+
+# %% [markdown]
+# 3. Check available data types before reading OPUS files:
+
+# %% [markdown]
+#    ```python
+#    dataset = scp.read_opus("sample.0")
+#    available_types = dataset.meta.other_data_types
+#    print(f"Available types: {available_types}")
+#    ```
+
+# %% [markdown]
 # ## Import of OMNIC files
 #
 # Thermo Scientific [OMNIC](https://www.thermofisher.com/search/results?query=OMNIC)
@@ -139,7 +202,7 @@ X.values
 X.data
 
 # %%
-X.units  # TODO: correct this display
+X.units
 
 # %% [markdown]
 # - `shape` is the same as the ndarray `shape` attribute and gives the shape of the
@@ -212,10 +275,10 @@ X.y -= X.y[0]
 # It is also possible to use the ability of SpectroChemPy to handle unit changes. For
 # this one can use the `to` or `ito` (inplace) methods.
 #
-# `ipython3
+# ```ipython3
 # val = val.to(some_units)
 # val.ito(some_units)   # the same inplace
-# `
+# ```
 
 # %%
 X.y.ito("minute")
@@ -244,9 +307,9 @@ X.y.values
 
 # %% [markdown]
 # or using the inplace add operator:
-# `ipython3
+# ```ipython3
 # X.y += 2
-# `
+# ```
 
 
 # %% [markdown]
@@ -312,12 +375,12 @@ Y
 # in the function call:
 
 # %%
-list_files = [
+list_files = (
     "7_CZ0-100_Pd_101.SPA",
     "7_CZ0-100_Pd_102.SPA",
     "7_CZ0-100_Pd_103.SPA",
     "7_CZ0-100_Pd_104.SPA",
-]
+)
 X = scp.read_omnic(list_files, directory="irdata/subdir")
 print(X)
 
@@ -336,9 +399,9 @@ print(X)
 #
 # There is a difference in specifying the directory to read as an argument as above or
 # as a keyword like here:
-# `ipython3
+# ```ipython3
 # X = scp.read_omnic(directory='irdata/subdir')
-# `
+# ```
 # in the latter case, a **dialog** is opened to select files in the given directory,
 # while in the former,
 # the file are read silently and concatenated (if possible).
@@ -348,45 +411,135 @@ print(X)
 # ## Import of Bruker OPUS files
 #
 # [Bruker OPUS](https://www.bruker.com/en/products-and-solutions/infrared-and-raman/opus-spectroscopy-software.html)
-# files have also a proprietary file format. The Opus reader (`read_opus()` )
-# of spectrochempy is essentially a wrapper of the python module
-# [brukeropusreader](https://github.com/spectrochempy/brukeropusreader) developed by
-# QED. It imports absorbance
-# spectra (the AB block), acquisition times and name of spectra.
+# files have also a proprietary file format. The Opus reader (`read_opus()` ) of spectrochempy is essentially a wrapper of the python module
+# [brukeropus](https://github.com/joshduran/brukeropus) developed by Josh Duran.
+# The use of `read_opus()` is similar to that of  `read_omnic()`.
 #
-# The use of `read_opus()` is similar to that of  `read_omnic()` for .spa files.
 # Hence, one can open sample Opus files contained in the `datadir` using:
 
 # %%
-Z = scp.read_opus(["test.0000", "test.0001", "test.0002"], directory="irdata/OPUS")
+import spectrochempy as scp
+
+Z = scp.read_opus("irdata/OPUS/test.0002")
 print(Z)
 
 # %% [markdown]
-# or:
+# For multifile loading, one can use:
 
 # %%
-Z2 = scp.read_opus("irdata/OPUS")
-print(Z2)
+Z1 = scp.read_opus(["test.0000", "test.0001", "test.0002"], directory="irdata/OPUS")
+print(Z1)
 
 # %% [markdown]
-# Note above that a warning was issued because the `irdata/OPUS` contains a
-# background file
-# (single beam) which is not read by SpectroChemPy.
+# or, if all files in a directory must be read:
+
+# %%
+LZ = scp.read_opus("irdata/OPUS")
+LZ
+
+# %% [markdown]
+# By default all files in a directory are merged if they are compatible.
+# In the present case, a warning is issued because not all files have the same size.
+# In this case they cannot automatically merged.
+# So compatible files are merged (4 of them) but one remain unmerged.
 #
-# Finally, supplementary information can be obtained by the direct use of
-# `brukeropusreader` .
+# If one desire to load of files into separate datasets, then set the merge attribute to False.
+
+# %%
+LZ1 = scp.read_opus("irdata/OPUS", merge=False)
+LZ1
+
+# %% [markdown]
+# <div class='alert alert-info'>
+# <b>Note</b>
+#
+# By default absortion spectra (AB) are load, if present in the file.
+#
+# Opus file however can contain several files and they can be retrieved eventually using the correct type in the call to `read_opus`:
+#
+# Types possibly availables and readables by `read_opus` are listed here:
+#
+# - `AB`: Absorbance (default if present in the file)
+# - `TR`: Transmittance
+# - `KM`: Kubelka-Munk
+# - `RAM`: Raman
+# - `EMI`: Emission
+# - `RFL`: Reflectance
+# - `LRF`: log(Reflectance)
+# - `ATR`: ATR
+# - `PAS`: Photoacoustic
+# - `RF`: Single-channel reference spectra
+# - `SM`: Single-channel sample spectra
+# - `IGRF`: Reference interferogram
+# - `IGSM`: Sample interferogram
+# - `PHRF`: Reference phase
+# - `PHSM`: Sample phase
+#
+# </div>
+
+# %% [markdown]
+# It is possible to know which are the other types availables in the original file:
+
+# %%
+Z.meta.other_data_types
+
+# %% [markdown]
+# Thus if one wants to load the single-channel sample spectra, the read function syntax would be:
+
+# %%
+ZSM = scp.read_opus("irdata/OPUS/test.0002", type="SM")
+print(ZSM)
+
+# %% [markdown]
+# ### Reading OPUS file Metadata
+#
+# As just seen above, more informations can be obtained on the experiment and spectrometer parameters using the dataset metadata (`meta`attribute).
 #
 # For instance:
 
 # %%
-from brukeropusreader import read_file  # noqa: E402
+Z.meta
 
-opusfile = scp.DATADIR / "irdata" / "OPUS" / "test.0000"  # the full path of the file
-Z3 = read_file(opusfile)  # returns a dictionary of the data and metadata extracted
-for key in Z3:
-    print(key)
+# %%
+metadata = Z.meta
 
-Z3["Optik"]  # looks what is the Optik block:
+# %% [markdown]
+# The metadata object is a readonly dictionary-like object (which can be nested, i.e., it can contains other metadata objects).
+# It can be accessed as follows:
+#
+# - List parameter blocks presents at the first level in the metadata (with the corresponding access key)
+
+# %%
+for k, v in metadata.items():
+    print(k, v)
+
+    # print(f"* {v.name} [{k}]")
+
+# %% [markdown]
+# - Access and list the blocks contained in `params`
+
+# %%
+for (
+    kk,
+    vv,
+) in (
+    metadata.params.items()
+):  # note here that we use the block key as an attribute of the metadata object
+    print(f"* {vv.name} [{kk}]")
+
+# %% [markdown]
+#   Note: if you just need the keys but not the actual name of the block, it is simpler to do this:
+
+# %%
+print(metadata.params.keys())
+
+# %%
+print(metadata.params)
+
+# %% [markdown]
+# - Access parameters of a given block
+
+# %%
 
 # %% [markdown]
 # ## Import/Export of JCAMP-DX files

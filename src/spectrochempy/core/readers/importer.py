@@ -23,8 +23,11 @@ from traitlets import Unicode
 
 from spectrochempy.application import info_
 from spectrochempy.application import warning_
+from spectrochempy.processing.transformation.concatenate import concatenate
+from spectrochempy.processing.transformation.concatenate import stack
 from spectrochempy.utils.docreps import _docstring
-from spectrochempy.utils.exceptions import DimensionsCompatibilityError
+
+# from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 from spectrochempy.utils.exceptions import ProtocolError
 from spectrochempy.utils.file import check_filename_to_open
 from spectrochempy.utils.file import get_directory_name
@@ -108,7 +111,7 @@ class Importer(HasTraits):
             and isinstance(args[0], list | tuple)
         ):
             # if merge is not specified, but the args are provided as a single list,
-            # then will are supposed to merge the datasets. If merge is specified then
+            # then we are supposed to merge the datasets. If merge is specified then
             # it has priority.
             # This is not useful for the 1D datasets, as if they are compatible they
             # are merged automatically
@@ -142,7 +145,7 @@ class Importer(HasTraits):
                     key_ = list(files_.keys())[0]
                     self._switch_protocol(key_, files_, **kwargs)
                 if len(self.datasets) > 1:
-                    self.datasets = self._do_merge(self.datasets, **kwargs)
+                    self.datasets = merge_datasets(self.datasets, **kwargs)
 
             elif (
                 key
@@ -262,48 +265,16 @@ class Importer(HasTraits):
                     datasets.extend(dataset)
 
         if len(datasets) > 1:
-            datasets = self._do_merge(datasets, **kwargs)
-            if kwargs.get("merge", False):
-                datasets[0].name = pathclean(filename).stem
-                datasets[0].filename = pathclean(filename)
+            datasets = merge_datasets(datasets, **kwargs)
+            # if kwargs.get("merge", False):
+            #     datasets[0].name = pathclean(filename).stem
+            #     datasets[0].filename = pathclean(filename)
 
         self.datasets.extend(datasets)
 
-    def _do_merge(self, datasets, **kwargs):
-        # several datasets returned (only if several files have been passed) and the `merge` keyword argument is False
-        merged = kwargs.get("merge", False)
-        shapes = list({nd.shape if hasattr(nd, "shape") else None for nd in datasets})
-        if len(shapes) == 1 and None not in shapes:
-            # homogeneous set of files
-            # we can merge them if they are 1D spectra
-            if len(shapes[0]) == 1 or shapes[0][0] == 1:
-                merged = kwargs.get("merge", True)  # priority to the keyword setting
-        else:
-            # not homogeneous
-            merged = kwargs.get("merge", False)
 
-        if merged:
-            # Try to stack the dataset into a single one
-            try:
-                if datasets[0].ndim == 1:
-                    dataset = self.objtype.stack(datasets)
-                    dataset.history = "Stacked from several files"
-                else:
-                    dataset = self.objtype.concatenate(datasets, axis=0)
-                    dataset.history = "Merged from several files"
-
-                if dataset.coordset is not None and kwargs.pop("sortbydate", True):
-                    dataset.sort(dim=0, inplace=True)
-                    #  dataset.history = "Sorted"  (this not always by date:
-                    #  actually for now it is by value which can be a date or not)
-                datasets = [dataset]
-
-            except DimensionsCompatibilityError as e:
-                warn(str(e), stacklevel=2)  # return only the list
-
-        return datasets
-
-
+# DECORATORS
+# --------------------------------------------------------------------------------------
 def _importer_method(func):
     # Decorator to define a given read function as belonging to Importer
     setattr(Importer, func.__name__, staticmethod(func))
@@ -515,15 +486,15 @@ def read(*paths, **kwargs):
         except TypeError as e:
             info_(e)
 
-    # deprecated kwargs
-    listdir = kwargs.pop("listdir", True)
-    if "listdir" in kwargs and "iterdir" not in kwargs:
-        kwargs["iterdir"] = listdir
-        warning_(
-            "argument `listdir` is deprecated, use ìterdir` instead",
-            category=DeprecationWarning,
-        )
-
+    # # deprecated kwargs
+    # listdir = kwargs.pop("listdir", True)
+    # if "listdir" in kwargs and "iterdir" not in kwargs:
+    #     kwargs["iterdir"] = listdir
+    #     warning_(
+    #         "argument `listdir` is deprecated, use ìterdir` instead",
+    #         category=DeprecationWarning,
+    #     )
+    kwargs["iterdir"] = kwargs.pop("iterdir", True)
     return importer(*paths, **kwargs)
 
 
@@ -659,7 +630,7 @@ def _read_scp(*args, **kwargs):
 
 @_importer_method
 def _read_(*args, **kwargs):
-    dataset, filename = args
+    _, filename = args
 
     if kwargs.pop("remote", False):
         return Importer._read_remote(*args, **kwargs)
@@ -891,3 +862,119 @@ def _read_remote(*args, **kwargs):
             return read_method(dataset, dst, **kwargs)
         return read_method(dataset, dst, content=content, **kwargs)
     return None
+
+
+# Utilities
+# --------------------------------------------------------------------------------------
+def group_datasets_by_origin(datasets):
+    """
+    Group datasets by their origin attribute.
+
+    Parameters
+    ----------
+    datasets : list of NDDataset
+        List of datasets to group
+
+    Returns
+    -------
+    dict
+        Dictionary with origin as key and list of datasets as value
+    """
+    groups = {}
+    for ds in datasets:
+        origin = getattr(ds, "origin", None)
+        if origin not in groups:
+            groups[origin] = []
+        groups[origin].append(ds)
+    return groups
+
+
+def merge_datasets(datasets, **kwargs):
+    """Merge datasets based on origin and shape compatibility."""
+    if not datasets:
+        return datasets
+
+    # Override merge setting if explicitly set in kwargs
+    if "merge" in kwargs:
+        merged = kwargs["merge"]
+        if not merged:
+            return datasets
+
+        # Try to merge all datasets regardless of origin
+        try:
+            if datasets[0].ndim == 1:
+                dataset = stack(datasets)
+                dataset.history = "Stacked from several files"
+            else:
+                dataset = concatenate(datasets, axis=0)
+                dataset.history = "Merged from several files"
+
+            # Set merged origin and name
+            origins = sorted({ds.origin for ds in datasets if ds.origin})
+            if origins:
+                merged_name = f"merged [{', '.join(origins)}]"
+                dataset.origin = merged_name
+                dataset.name = merged_name  # Set name to same as origin
+
+            if dataset.coordset is not None and kwargs.pop("sortbydate", True):
+                dataset.sort(dim=0, inplace=True)
+
+            # Remove any filename that might have been set
+            dataset.filename = None
+
+            return [dataset]
+
+        except Exception:  # noqa: S110
+            pass  # warn(str(e), stacklevel=2)
+
+    # Group datasets by origin
+    groups = group_datasets_by_origin(datasets)
+
+    # If only one group with None origin and same shape, try to merge
+    if len(groups) == 1 and None in groups:
+        shapes = {tuple(ds.shape) for ds in groups[None]}
+        if len(shapes) == 1:
+            try:
+                if datasets[0].ndim == 1:
+                    dataset = stack(datasets)
+                    dataset.history = "Stacked from several files"
+                else:
+                    dataset = concatenate(datasets, axis=0)
+                    dataset.history = "Merged from several files"
+
+                if dataset.coordset is not None and kwargs.pop("sortbydate", True):
+                    dataset.sort(dim=0, inplace=True)
+                return [dataset]
+            except Exception as e:
+                warn(str(e), stacklevel=2)
+                return datasets
+
+    # Process each group
+    merged_datasets = []
+    for _origin, group in groups.items():
+        # Group by shape within each origin group
+        shape_groups = {}
+        for ds in group:
+            shape = tuple(ds.shape)
+            if shape not in shape_groups:
+                shape_groups[shape] = []
+            shape_groups[shape].append(ds)
+
+        # Try to merge each shape group
+        for shape_group in shape_groups.values():
+            try:
+                if shape_group[0].ndim == 1:
+                    merged = stack(shape_group)
+                    merged.history = "Stacked from several files"
+                else:
+                    merged = concatenate(shape_group, axis=0)
+                    merged.history = "Merged from several files"
+
+                if merged.coordset is not None and kwargs.pop("sortbydate", True):
+                    merged.sort(dim=0, inplace=True)
+                merged_datasets.append(merged)
+            except Exception as e:
+                warn(str(e), stacklevel=2)
+                merged_datasets.extend(shape_group)
+
+    return merged_datasets

@@ -23,6 +23,7 @@ NMRDATA = DATADIR / "nmrdata"
 #     reason="Experimental data not available for testing",
 # )
 def test_readtopspin():
+    # TODO: revise this to make all dataset 2D even if shape[0]=1. Just for consistency.
     # A.plot()
     nd = scp.read_topspin(nmrdir / "exam2d_HC/3/pdata/1/2rr")
     assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:1024, x:1024))"
@@ -49,9 +50,11 @@ def test_readtopspin():
     nd = scp.read_topspin(directory=nmrdir)
     assert nd.name == "topspin_2d expno:1 procno:1 (SER)"
 
-    nd = scp.read_topspin(nmrdir, glob="topspin*/*/pdata/*/*")
+    nd = scp.read_topspin(
+        nmrdir, glob="topspin*/*/pdata/*/*"
+    )  # TODO: check this more deeply!
     assert isinstance(nd, list)
-    assert str(nd[0]) == "NDDataset: [complex128] pp (size: 16384)"
+    assert str(nd[0]) == "NDDataset: [complex128] pp (shape: (y:1, x:16384))"
     assert str(nd[1]) == "NDDataset: [quaternion] pp (shape: (y:1024, x:2048))"
 
 

@@ -3,7 +3,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
 
 import os
 import pathlib
@@ -11,6 +10,8 @@ import pathlib
 import numpy as np
 import pkg_resources
 import pytest
+
+from pathlib import Path
 
 import spectrochempy
 

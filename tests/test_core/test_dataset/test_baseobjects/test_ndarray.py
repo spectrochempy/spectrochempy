@@ -61,7 +61,7 @@ def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
     assert d0.name == "xxxx"
     d0.title = "yyyy"
     assert d0.title == "yyyy"
-    d0.meta = []
+    d0.meta = {}
     d0.meta.something = "a_value"
     assert d0.meta.something == "a_value"
     assert d0[1].value == 2  # only a single element so we get a squeezed array

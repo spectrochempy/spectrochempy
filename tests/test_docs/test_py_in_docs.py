@@ -22,7 +22,7 @@ import spectrochempy as scp
 
 pytestmark = [
     pytest.mark.slow,
-    pytest.mark.skip(reason="Too slow and redundant with docs building process"),
+    #    pytest.mark.skip(reason="Too slow and redundant with docs building process"),
 ]
 
 repo = Path(__file__).parent.parent.parent

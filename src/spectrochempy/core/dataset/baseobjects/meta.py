@@ -31,6 +31,9 @@ from typing import Union
 
 import numpy as np
 
+from spectrochempy.utils.jsonutils import json_encoder
+from spectrochempy.utils.objects import ReadOnlyDict
+
 
 class Meta:
     """
@@ -43,6 +46,15 @@ class Meta:
     ----------
     **data : Any
         Initial metadata as keyword arguments
+
+    Attributes
+    ----------
+    readonly : bool
+        Flag to make metadata read-only
+    parent : Any
+        Parent object of the metadata
+    name : str
+        Name of the metadata
 
     Examples
     --------
@@ -61,16 +73,13 @@ class Meta:
 
     """
 
-    _data: dict[str, Any] = {}
-    readonly: bool = False
-    parent: Any | None = None
-    name: str | None = None
+    _readonly = False
 
     def __init__(self, **data: Any) -> None:
         # Initialize metadata object
         self.parent = data.pop("parent", None)
         self.name = data.pop("name", None)
-        self._data = data
+        self._data = ReadOnlyDict(**data)
 
     def __dir__(self) -> list[str]:
         # List available attributes
@@ -80,18 +89,26 @@ class Meta:
         # Set attribute value, ensuring readonly attributes are not modified.
         if key not in [
             "readonly",
+            "_readonly",
             "parent",
             "name",
             "_data",
-            "_trait_values",
-            "_trait_notifiers",
-            "_trait_validators",
-            "_cross_validation_lock",
-            "__wrapped__",
         ]:
+            if self._readonly:
+                raise ValueError("This Meta object is read-only")
+
             self[key] = value
         else:
-            self.__dict__[key] = value  # Directly set the attribute to avoid recursion
+            if key in ["_data"] and not isinstance(value, ReadOnlyDict):
+                value = ReadOnlyDict(value)
+            try:
+                object.__setattr__(
+                    self, key, value
+                )  # Directly set the attribute to avoid recursion
+            except AttributeError as e:
+                raise AttributeError(
+                    f"Cannot set Attribute `{key}` with value `{value}`"
+                ) from e
 
     def __getattr__(self, key: str) -> Any:
         # Get attribute value, raising AttributeError for certain keys.
@@ -99,20 +116,30 @@ class Meta:
             raise AttributeError
         if key in ["__wrapped__"]:
             return False
+        if key.startswith("_") and key not in ["_readonly", "_data"]:
+            raise AttributeError(
+                f"a Meta attribute cannot start with an underscore: {key}"
+            )
         return self[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
         # Set item in the dictionary, respecting readonly flag.
         if key in self.__dir__() or key.startswith("_"):
             raise KeyError(f"`{key}` can not be used as a metadata key")
-        if not self.readonly:
-            self._data.update({key: value})
-        else:
-            raise ValueError(f"the metadata `{key}` is read only")
+        if isinstance(value, dict) and not isinstance(value, ReadOnlyDict):
+            value = ReadOnlyDict(value)
+        elif isinstance(value, Meta):
+            value.readonly = self._readonly
+        self._data[key] = value
 
     def __getitem__(self, key: str) -> Any:
         # Get item from the dictionary.
-        return self._data.get(key, None)
+        if key.startswith("_"):
+            raise KeyError(f"item cannot start with an underscore: {key}")
+        res = self._data.get(key, None)
+        if res is None:
+            res = self._data.get(key.replace(" ", "_").lower(), None)
+        return res
 
     def __len__(self) -> int:
         # Return the number of items in the dictionary.
@@ -121,8 +148,11 @@ class Meta:
     def __copy__(self) -> "Meta":
         # Create a shallow copy of the Meta object.
         ret = self.__class__()
+        readonly = self.readonly  # Save readonly state
+        self.readonly = False  # Temporarily disable readonly
         ret.update(copy.deepcopy(self._data))
-        ret.readonly = self.readonly
+        self.readonly = readonly
+        ret.readonly = readonly
         ret.parent = self.parent
         ret.name = self.name
         return ret
@@ -159,7 +189,7 @@ class Meta:
 
     def __str__(self) -> str:
         # Return string representation of the dictionary.
-        return str(self._data)
+        return str(json_encoder(self._data))
 
     def _repr_html_(self) -> str:
         # Return HTML representation of the dictionary.
@@ -178,8 +208,9 @@ class Meta:
 
         Returns
         -------
-        bool
-            True if the name matches "Meta", False otherwise.
+        bool or str
+            True if the name matches "Meta" False otherwise.
+            Returns "Meta" if no name is provided.
 
         """
         if name is None:
@@ -194,6 +225,14 @@ class Meta:
         -------
         dict
             Dictionary containing the metadata
+
+        See Also
+        --------
+        json_encoder : Convert Meta object to JSON object.
+        json_decoder : Decode a JSON object previously created with `json_encoder` to Meta object.
+
+        .. warning::
+            This method does not change the eventully nested Meta objects to dict.
 
         """
         return self._data
@@ -227,10 +266,22 @@ class Meta:
             Source of metadata to update from
 
         """
-        if isinstance(d, Meta) or hasattr(d, "_data"):
-            d = d.to_dict()
-        if d:
-            self._data.update(d)
+        d = d.to_dict() if hasattr(d, "_data") and not isinstance(d, Meta) else d
+
+        for key, value in d.items():
+            if isinstance(value, dict):
+                if key in self._data and isinstance(self._data[key], ReadOnlyDict):
+                    self._data[key].update(value)
+                else:
+                    self._data[key] = ReadOnlyDict(value)
+            elif isinstance(value, Meta):
+                if key in self._data and isinstance(self._data[key], Meta):
+                    for k, v in value.items():
+                        self._data[key][k] = v
+                else:
+                    self._data[key] = value
+            else:
+                self._data[key] = value
 
     def copy(self) -> "Meta":
         """
@@ -255,6 +306,18 @@ class Meta:
 
         """
         return list(self)
+
+    def values(self) -> list[Any]:
+        """
+        Get list of metadata values.
+
+        Returns
+        -------
+        List[Any]
+            List of metadata values
+
+        """
+        return [self[key] for key in self]
 
     def items(self) -> list[tuple[str, Any]]:
         """
@@ -361,3 +424,15 @@ class Meta:
 
         """
         return self._data
+
+    @property
+    def readonly(self) -> bool:
+        return self._readonly
+
+    @readonly.setter
+    def readonly(self, value: bool) -> None:
+        self._readonly = value
+        try:
+            self._data.set_readonly(value)
+        except AttributeError as e:
+            raise e

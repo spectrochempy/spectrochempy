@@ -294,7 +294,7 @@ blc.params()
 # spectrometer. This dataset (and others) can be loaded from http://www.eigenvector.com.
 
 # %%
-A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")[4]
+A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)[4]
 
 # %% [markdown]
 # Add some label for a better reading of the data axis
