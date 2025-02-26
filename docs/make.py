@@ -1013,7 +1013,7 @@ def main():
         print("The --tagname option is only valid with the html command.")
         return 1
 
-    if not args.directory.endswith("/"):
+    if args.directory and not args.directory.endswith("/"):
         args.directory += "/"
 
     if not args.tag_name:
