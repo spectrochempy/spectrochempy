@@ -224,7 +224,13 @@ def convert_to_html(obj):
 
     html = f"{html_output[0]}"
     if data_section or dim_section:
-        html += f'\n<details class="scp-output"><summary><strong>Data and dimensions details</strong></summary>{"\n".join(html_output[1:])}</details>'
+        details_content = "\n".join(html_output[1:])
+        html += (
+            '<details class="scp-output">'
+            "<summary><strong>Data and dimensions details</strong></summary>"
+            f"{details_content}"
+            "</details>"
+        )
 
     s = "<div class='scp-output'>"
     s += f"<details open><summary>{obj.__class__.__name__}</summary>"
