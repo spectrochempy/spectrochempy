@@ -382,7 +382,10 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
     assert nd.is_masked
 
     # test repr_html
-    assert "<table style='background:transparent'>" in nd._repr_html_()
+    assert (
+        "<div class='scp-output'><details open><summary>NDArray</summary>"
+        in nd._repr_html_()
+    )
 
     # test iterations
 
