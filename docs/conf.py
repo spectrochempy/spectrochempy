@@ -84,7 +84,6 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "sphinxcontrib.bibtex",
     "nbsphinx",
-    "sphinx.ext.viewcode",
 ]
 if not single_doc_or_dir:
     extensions += [
