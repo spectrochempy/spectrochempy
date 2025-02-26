@@ -463,7 +463,7 @@ def linkcode_resolve(domain, info):
         return None
     try:
         fs = find_source()
-        filename = "spectrochempy/{}#L{}-L{}".format(*fs)
+        filename = "src/spectrochempy/{}#L{}-L{}".format(*fs)
     except TypeError:
         return None
     except Exception:
