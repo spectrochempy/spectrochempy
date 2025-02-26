@@ -222,7 +222,6 @@ X.y.values
 # X.y += 2
 # ```
 
-
 # %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
 # ### The order of spectra
 #
@@ -293,7 +292,7 @@ list_files = (
     "7_CZ0-100_Pd_104.SPA",
 )
 X = scp.read_omnic(list_files, directory="irdata/subdir")
-print(X)
+X
 
 # %% [markdown]
 # When compatible .spa files are alone in a directory, a very convenient is to call the
@@ -318,4 +317,50 @@ print(X)
 # the file are read silently and concatenated (if possible).
 # </div>
 
-# %% {"editable": true, "slideshow": {"slide_type": ""}}
+# %% [markdown]
+# ## Handling Metadata
+
+# %%
+# Example of accessing and modifying metadata
+X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
+print("Original metadata:")
+print(f"Title: {X.title}")
+print(f"Origin: {X.origin}")
+print(f"Description: {X.description}")
+
+# Modify metadata
+X.origin = "OMNIC measurement"
+X.description = "Modified description"
+print("\nModified metadata:")
+print(f"Title: {X.title}")
+print(f"Origin: {X.origin}")
+print(f"Description: {X.description}")
+
+# %% [markdown]
+# ## Error Handling
+
+# %%
+# Example of proper error handling
+try:
+    X = scp.read_omnic("nonexistent_file.spa")
+except FileNotFoundError as e:
+    print(f"File not found: {e}")
+except Exception as e:
+    print(f"Error reading file: {e}")
+
+# %% [markdown]
+# ## Advanced Data Operations
+
+# %%
+# Example of data manipulation
+X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
+
+# Baseline correction
+X_corrected = X - X[0]  # Subtract first spectrum as baseline
+
+# Normalization
+X_normalized = X / X.max()
+
+print("Original data shape:", X.shape)
+print("Max value before normalization:", X.max())
+print("Max value after normalization:", X_normalized.max())

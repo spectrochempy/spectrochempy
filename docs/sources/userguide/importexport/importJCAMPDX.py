@@ -30,23 +30,19 @@
 #       version_minor: 0
 # ---
 
-# %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
+# %% [markdown]
 # # Import/Export of JCAMP-DX files
 #
 # [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developed for IR
-# data and extended to
-# other spectroscopies. At present, the JCAMP-DX reader implemented in Spectrochempy is
-# limited to IR data and
-# AFFN encoding (see R. S. McDonald and Paul A. Wilks, JCAMP-DX: A Standard Form for
-# Exchange of Infrared Spectra in
-# Readable Form, Appl. Spec., 1988, 1, 151–162. doi:10.1366/0003702884428734 for
-# details).
+# data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented
+# in SpectroChemPy is limited to IR data and AFFN encoding (see McDonald and Wilks, 1988 [^1]).
 #
-# The JCAMP-DX reader of spectrochempy has been essentially written to read again the
-# jcamp-dx files exported by
-# spectrochempy `write_jdx()` writer.
+# The JCAMP-DX reader of SpectroChemPy has been essentially written to read JCAMP-DX files
+# exported by the SpectroChemPy `write_jdx()` writer.
 #
-# Hence, for instance, the first dataset can be saved in the JCAMP-DX format:
+# [^1]: R. S. McDonald and Paul A. Wilks, "JCAMP-DX: A Standard Form for Exchange of Infrared
+# Spectra in Computer Readable Form", Applied Spectroscopy, 1988, 42(1), 151–162.
+# DOI: [10.1366/0003702884428734](https://doi.org/10.1366/0003702884428734)
 
 # %%
 import spectrochempy as scp
@@ -66,22 +62,13 @@ S0.write_jcamp("CO@Mo_Al2O3_0.jdx", confirm=False)
 newS0 = scp.read_jcamp("CO@Mo_Al2O3_0.jdx")
 newS0
 
-
 # %% [markdown]
 # It is important to note here that the conversion to JCAMP-DX changes the last digits
 # of absorbance and wavenumbers:
 
 
 # %%
-def difference(x, y):
-    from numpy import abs
-    from numpy import max
-
-    nonzero = y.data != 0
-    error = abs(x.data - y.data)
-    max_relative_error = max(error[nonzero] / abs(y.data[nonzero]))
-    return max(error), max_relative_error
-
+from spectrochempy.utils.compare import difference
 
 # %%
 max_error, max_rel_error = difference(S0, newS0)

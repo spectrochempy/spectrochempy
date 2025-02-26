@@ -233,7 +233,7 @@ def convert_to_html(obj):
         )
 
     s = "<div class='scp-output'>"
-    s += f"<details open><summary>{obj.__class__.__name__}</summary>"
+    s += f"<details open><summary>{obj.__str__()}</summary>"
     s += html
     s += "</details>"
     s += "</div>"
