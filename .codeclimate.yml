@@ -32,7 +32,7 @@ checks:
       threshold: 20
 
 include_patterns:
-  - "src/"
+  - src/
 
 exclude_patterns:
   - src/spectrochempy/extern/

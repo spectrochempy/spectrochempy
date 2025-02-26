@@ -1,0 +1,80 @@
+/* SpectroChemPy output styling */
+.scp-output {
+    font-family: Arial, sans-serif;
+    font-size: 1em;
+    color: #333;
+    line-height: 1.1em;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.scp-output details {
+    margin: 0;
+    padding: 2px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.scp-output summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.scp-output summary:hover {
+    background: #dad8d8;
+}
+
+/* Parameters display styling */
+.scp-output.section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0;
+    margin-left: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.scp-output .meta-name,
+.scp-output .attr-name {
+    font-weight: 500;
+    color: #28A745;
+    text-align: right;
+}
+
+.scp-output .attr-name {
+    min-width: 100px;
+}
+
+.scp-output .meta-name {
+    min-width: 150px;
+}
+
+.scp-output .meta-value,
+.scp-output .attr-value {
+    flex: 1;
+}
+
+.scp-output .numeric {
+    color: #2D7FF9;
+    margin-left: 100px;
+    /* Blue */
+}
+
+.scp-output .label {
+    color: darkcyan;
+    margin-left: 100px;
+}
+
+.scp-output .attr-value .numeric {
+    color: #2D7FF9;
+    margin-left: 0px;
+    /* Blue */
+}
+
+.scp-output .attr-value .label {
+    color: darkcyan;
+    margin-left: 100px;
+}

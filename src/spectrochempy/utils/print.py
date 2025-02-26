@@ -99,19 +99,28 @@ def html_output(out):
 
 
 def _process_section(section):
-    tr = (
-        "<tr>"
-        "<td style='padding-right:5px; padding-bottom:0px; "
-        "padding-top:0px; width:124px'>{0}</td>"
-        "<td style='text-align:left; padding-bottom:0px; "
-        "padding-top:0px; {2} '>{1}</td><tr>\n"
-    )
+    # tr = (
+    #     "<tr>"
+    #     "<td style='padding-right:5px; padding-bottom:0px; "
+    #     "padding-top:0px; width:124px'>{0}</td>"
+    #     "<td style='text-align:left; padding-bottom:0px; "
+    #     "padding-top:0px; {2} '>{1}</td><tr>\n"
+    # )
+    def _make_section(k, v, details=False):
+        s = "<div class='scp-output section'>"
+        s += "<details>" if details else ""
+        s += "<summary>" if details else "<div class='meta-name'>"
+        s += f"{k}"
+        s += "</summary>" if details else "</div><div>:</div>"
+        s += f"<div class='meta-value'>{v}</div>"
+        s += "</details>" if details else ""
+        s += "</div>"
+        return s
 
     out = "\n".join(section)
 
     regex = r"\0{3}[\w\W]*?\0{3}"
 
-    # noinspection PyPep8
     def subst(match):
         return "<div>{}</div>".format(
             match.group(0).replace("\n", "<br/>").replace("\0", ""),
@@ -119,8 +128,8 @@ def _process_section(section):
 
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
-    regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"  # r"^(\W*\w+\W?\w+)(:.*$)"
-    subst = r"<font color='#28A745'>\1</font> \2"  # accent-green (attribute names)
+    regex = r"^(\W{0,12}\w+\W?\w+):(\W{1}.*$)"
+    subst = r'<div class="scp-output section"><div class="attr-name">\1</div><div>:</div><div class="attr-value">\2</div></div>'
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(.*(DIMENSION|DATA).*)$"
@@ -134,7 +143,7 @@ def _process_section(section):
     regex = r"\0{2}[\w\W]*?\0{2}"
 
     def subst(match):  # (labels)
-        return "<div><font color='darkcyan'>{}</font></div>".format(
+        return "<div class='label'>{}</div>".format(
             match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
 
@@ -143,34 +152,34 @@ def _process_section(section):
     regex = r"\0{1}[\w\W]*?\0{1}"
 
     def subst(match):  # accent-blue (numeric data)
-        return "<div><font color='#2D7FF9'>{}</font></div>".format(
+        return "<div class='numeric'>{}</div>".format(
             match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
 
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\.{3}\s+\n"
-    out = re.sub(regex, "", out, count=0, flags=re.MULTILINE)
+    return re.sub(regex, "", out, count=0, flags=re.MULTILINE)
 
-    html = "<table style='background:transparent'>\n"
-    for line in out.splitlines():
-        if "</font> :" in line:
-            # keep only first match
-            parts = line.split(":")
-            html += tr.format(
-                parts[0],
-                ":".join(parts[1:]),
-                "border:.5px solid lightgray; ",
-            )
-        elif "<strong>" in line:
-            html += tr.format(line, "<hr/>", "padding-top:0px;")
-    html += "</table>"
+    # html = "<table style='background:transparent'>\n"
+    # for line in out.splitlines():
+    #     if "</font> :" in line:
+    #         # keep only first match
+    #         parts = line.split(":")
+    #         html += tr.format(
+    #             parts[0],
+    #             ":".join(parts[1:]),
+    #             "border:.5px solid lightgray; ",
+    #         )
+    #     elif "<strong>" in line:
+    #         html += tr.format(line, "<hr/>", "padding-top:0px;")
+    # html += "</table>"
 
-    return html
+    # return html
 
 
 def convert_to_html(obj):
-    """Convert object representation to HTML with separate sections for description, DATA, and DIMENSION."""
+    """Convert object representation to HTML with separate sections."""
     obj._html_output = True
     out = obj._cstr()
 
@@ -183,7 +192,6 @@ def convert_to_html(obj):
     in_desc = True
     in_data = False
     for line in sections:
-        # change selector vs the positiion in the file
         if "DATA" in line:
             in_desc = False
             in_data = True
@@ -197,21 +205,34 @@ def convert_to_html(obj):
         else:
             dim_section.append(line)
 
-    # Process each section
+    # Process each section with CSS classes
     html_output = []
     if description_section:
-        html_output.append(_process_section(description_section))
+        html_output.append(
+            f'<div class="scp-output">{_process_section(description_section)}</div>'
+        )
     if data_section:
-        html_output.append(_process_section(data_section))
+        html_output.append(
+            f'<div class="scp-output">{_process_section(data_section)}</div>'
+        )
     if dim_section:
-        html_output.append(_process_section(dim_section))
+        html_output.append(
+            f'<div class="scp-output">{_process_section(dim_section)}</div>'
+        )
 
     obj._html_output = False
 
     html = f"{html_output[0]}"
     if data_section or dim_section:
-        html += f"\n<details><summary><strong>Data and dimensions details (click to display)</strong></summary>{'\n'.join(html_output[1 : len(html_output)])}</details>"
-    return html
+        html += f'\n<details class="scp-output"><summary><strong>Data and dimensions details</strong></summary>{"\n".join(html_output[1:])}</details>'
+
+    s = "<div class='scp-output'>"
+    s += f"<details open><summary>{obj.__class__.__name__}</summary>"
+    s += html
+    s += "</details>"
+    s += "</div>"
+
+    return s
 
 
 # ======================================================================================

@@ -219,15 +219,23 @@ def test_nested_meta():
     meta = Meta()
     nested_meta = Meta(key="value")
     meta.nested = nested_meta
+    secound_nested_meta = Meta(key2="value2")
+    meta.nested.nested2 = secound_nested_meta
 
     assert isinstance(meta.nested, Meta)
     assert meta.nested.key == "value"
+    assert isinstance(meta.nested.nested2, Meta)
+    assert meta.nested.nested2.key2 == "value2"
 
     # Test read-only with nested Meta
     meta.readonly = True
     with raises(ValueError):
         meta.nested.key = "new value"
     assert meta.nested.key == "value"
+    assert meta.nested.readonly is True
+    assert meta.nested.nested2.readonly is True
+    with raises(ValueError):
+        meta.nested.nested2.key2 = "new value2"
 
     # Test updating nested Meta
     meta.readonly = False

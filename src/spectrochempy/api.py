@@ -140,4 +140,4 @@ if NO_DISPLAY:
     )
 
 # For new version, where dialog are removed,
-NO_DIALOG = True
+# NO_DIALOG = True

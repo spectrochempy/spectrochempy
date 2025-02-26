@@ -189,12 +189,75 @@ class Meta:
 
     def __str__(self) -> str:
         # Return string representation of the dictionary.
-        return str(json_encoder(self._data))
+
+        js = json_encoder(self)
+
+        def _remove_class_keys(js):
+            # remove class = __META__ from the json string
+            for k, v in list(js.items()):
+                if k == "__class__":
+                    js.pop(k)
+                if isinstance(v, dict):
+                    js[k] = _remove_class_keys(v)
+            return js
+
+        js = _remove_class_keys(js)
+
+        return json.dumps(js, sort_keys=True, indent=4)
 
     def _repr_html_(self) -> str:
         # Return HTML representation of the dictionary.
-        s = json.dumps(self._data, sort_keys=True, indent=4)
-        return s.replace("\n", "<br/>").replace(" ", "&nbsp;")
+        js = json_encoder(self)
+
+        def _make_html(js):
+            # make an HTML representation of the json string
+            s = ""
+
+            # search first parameters which are not dict/meta objects
+            def _make_section(k, v, details=False):
+                s = "<div class='scp-output section'>"
+                s += "<details>" if details else ""
+                s += "<summary>" if details else "<div class='meta-name'>"
+                s += f"{k}"
+                s += "</summary>" if details else "</div><div>:</div>"
+                s += f"<div class='meta-value'>{v}</div>"
+                s += "</details>" if details else ""
+                s += "</div>"
+                return s
+
+            for k, v in js.items():
+                if not isinstance(v, dict):
+                    s += _make_section(k, v)
+            # then search for dict/meta objects
+            for k, v in js.items():
+                if isinstance(v, dict):
+                    key = f"{v['name']} [{k}]" if "name" in v else k
+                    # case of opus metadata for example:
+                    if list(v["data"].keys()) == ["value"]:
+                        s += _make_section(key, v["data"]["value"])
+                    else:
+                        s += _make_section(key, _make_html(v["data"]), details=True)
+            return s
+
+        s = "<div class='scp-output'>"
+        if self.name is not None:
+            s += f"<details open><summary>{self.name.strip()}</summary>"
+
+        # if self.readonly:
+        #     s += "<div class='scp-output section'>"
+        #     s += "<div class='meta-name'>readonly</div><div>:</div>"
+        #     s += "<div class='meta-value'>True</div>"
+        #     s += "</div>"
+
+        s += _make_html(js["data"])
+        if self.name is not None:
+            s += "</details>"
+        s += "</div>"
+        return s
+
+    def html(self) -> str:
+        # Return string representation of the dictionary.
+        return self._repr_html_()
 
     @staticmethod
     def _implements(name: str | None = None) -> str | bool:

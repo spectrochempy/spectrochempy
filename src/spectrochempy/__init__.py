@@ -98,6 +98,12 @@ from spectrochempy.api import *  # noqa: F403
 __all__ = api.__all__
 # __all__ = []
 
+# Setup Jupyter integration if we're in a notebook
+from spectrochempy.application.jupyter import is_notebook, setup_jupyter_css  # noqa: I001
+
+if is_notebook():
+    setup_jupyter_css()
+
 
 def __getattr__(name: str) -> Any:
     """

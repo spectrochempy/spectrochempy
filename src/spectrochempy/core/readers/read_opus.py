@@ -282,7 +282,7 @@ def _load_parameters_into_meta(opus_data):
             for key in block.keys:
                 name = get_param_label(key)
                 value = getattr(getattr(opus_data, attr), key)
-                meta[attr][id][key] = Meta(name=name, read_only=True, value=value)
+                meta[attr][id][key] = Meta(name=name, value=value)
 
     return meta
 
@@ -375,9 +375,13 @@ def _read_opus(*args, **kwargs):
 
     # add other parameters in metadata
     dataset.meta = _load_parameters_into_meta(opus_data)
+    dataset.meta.name = "OPUS Parameters"
 
     # add info about other type present in th file and which could be alternatively read.
     dataset.meta["other_data_types"] = possible_type_parameters
+
+    # set the dataset as readonly now that all the metadata is set
+    dataset.meta.readonly = True
 
     # reset modification date to cretion date
     dataset._modified = dataset._created

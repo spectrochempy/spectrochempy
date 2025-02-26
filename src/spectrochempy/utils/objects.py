@@ -173,6 +173,9 @@ class ReadOnlyDict(dict):
                         item.set_readonly(readonly)
             elif isinstance(value, ReadOnlyDict):
                 value.set_readonly(readonly)
+            elif isinstance(value, dict):
+                value = ReadOnlyDict(value)
+                value.set_readonly(readonly)
             elif hasattr(value, "_implements") and value._implements("Meta"):
                 value.readonly = readonly
 

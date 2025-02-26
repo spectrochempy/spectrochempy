@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.16
+#     version: 3.13.2
 #   toc-showcode: false
 #   toc-showtags: false
 #   widgets:
@@ -45,6 +45,8 @@ import spectrochempy as scp
 
 # %% [markdown]
 # ## Dialog boxes
+#
+# .. deprecated: v.0.7
 #
 # Retrieving Files and Directories, in day-to-day work is often made through Dialog
 # Boxes. While we do not recommend
