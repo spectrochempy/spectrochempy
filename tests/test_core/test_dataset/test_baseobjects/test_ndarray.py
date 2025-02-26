@@ -383,7 +383,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
 
     # test repr_html
     assert (
-        "<div class='scp-output'><details open><summary>NDArray</summary>"
+        "<div class='scp-output'><details open><summary>NDArray: [float64]"
         in nd._repr_html_()
     )
 
