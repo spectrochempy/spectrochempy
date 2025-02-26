@@ -678,6 +678,15 @@ class BuildDocumentation:
         version = self._version
         doc_version = self._doc_version
 
+        # Copy custom CSS file to the _static/css directory
+        custom_css_src = (
+            PROJECT / "src" / "spectrochempy" / "data" / "css" / "custom.css"
+        )
+        custom_css_dest = STATIC / "css" / "custom.css"
+        custom_css_dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(custom_css_src, custom_css_dest)
+        print(f"Copied custom CSS from {custom_css_src} to {custom_css_dest}")
+
         print(
             f"\n{'-' * 80}\n"
             f"Building HTML documentation ({doc_version.capitalize()} "
@@ -1004,6 +1013,9 @@ def main():
         print("The --tagname option is only valid with the html command.")
         return 1
 
+    if not args.directory.endswith("/"):
+        args.directory += "/"
+
     if not args.tag_name:
         # build the documentation for the latest version
         build = BuildDocumentation(
@@ -1069,7 +1081,7 @@ if __name__ == "__main__":
             # "userguide/",
             # "gettingstarted/install/",
             # "--single-doc",
-            "userguide/importexport",
+            "userguide/importexport/",
             # "gettingstarted/overview.ipynb",
             # "gettingstarted/getting_help.rst",
             # "gettingstarted/install/index.rst",

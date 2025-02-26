@@ -72,7 +72,7 @@ newS0
 # of absorbance and wavenumbers:
 
 
-# %% {"editable": true, "slideshow": {"slide_type": ""}}
+# %%
 def difference(x, y):
     from numpy import abs
     from numpy import max
@@ -92,3 +92,6 @@ print(f"Max relative difference in absorbance: {max_rel_error:.3g}")
 max_error, max_rel_error = difference(S0.x, newS0.x)
 print(f"Max absolute difference in wavenumber: {max_error:.3g}")
 print(f"Max relative difference in wavenumber: {max_rel_error:.3g}")
+
+# %% [markdown]
+# But this is much beyond the experimental accuracy of the data.

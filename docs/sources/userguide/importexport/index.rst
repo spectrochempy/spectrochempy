@@ -6,5 +6,5 @@ Import & Export
 .. toctree::
    :maxdepth: 3
 
-   import.ipynb
-   importIR.rst
+   import
+   importIR
