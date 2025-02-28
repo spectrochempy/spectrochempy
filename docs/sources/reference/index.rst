@@ -48,7 +48,7 @@ The NDDataset Object
 
 The `NDDataset` is the main object use by `SpectroChemPy` .
 
-Like `numpy.ndarray`\ s, `NDDataset` have the capability to be sliced, sorted and subject to mathematical operations.
+Like `numpy.ndarray`s, `NDDataset` have the capability to be sliced, sorted and subject to mathematical operations.
 
 But, in addition, `NDDataset` may have units, can be masked and each dimension can also have coordinated with units.
 This make `NDDataset` aware of unit compatibility, *e.g.,*, for binary operation such as additions or subtraction or

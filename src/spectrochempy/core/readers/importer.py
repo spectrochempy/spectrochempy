@@ -521,7 +521,7 @@ def read_dir(directory=None, **kwargs):
     datasets according to the following rules :
 
     - 2D spectroscopic data (e.g. valid .spg files or matlab arrays, etc...) from
-      distinct files are stored in distinct `NDdataset`\ s.
+      distinct files are stored in distinct `NDdataset`s.
     - 1D spectroscopic data (e.g., :file:`.spa` files) in a given directory are merged
       into single `NDDataset`, providing their unique dimension are compatible.
       If not, an error is generated.

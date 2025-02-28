@@ -36,9 +36,9 @@ def read_carroucell(directory=None, **kwargs):
     r"""
     Open :file:`.spa` files in a directory after a :term:`carroucell` experiment.
 
-    The files for a given sample are grouped in `NDDataset`\ s (sorted by
+    The files for a given sample are grouped in `NDDataset`s (sorted by
     acquisition date).
-    The `NDDataset`\ s are returned in a list sorted by sample number.
+    The `NDDataset`s are returned in a list sorted by sample number.
     When the file containing the temperature data is present, the temperature is read
     and assigned as a label to each spectrum.
 
