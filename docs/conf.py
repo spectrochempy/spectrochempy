@@ -272,6 +272,12 @@ html_show_sourcelink = True
 
 # Don't add .txt suffix to source files:
 html_sourcelink_suffix = ""
+html_copy_source = True
+# Add this line to ensure proper content type for RST files
+html_extra_path = []  # You might need this if you have extra static files
+
+# Add these lines to set the content type for RST files
+rst_mimetype = "text/x-rst"
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False
@@ -599,3 +605,5 @@ def setup(app):
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
+    # Add this line to set the content type for RST files
+    app.config.rst_mimetype = rst_mimetype
