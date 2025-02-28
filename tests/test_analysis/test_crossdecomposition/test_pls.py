@@ -45,7 +45,17 @@ def test_PLS_docstrings():
 # test pls
 # ---------
 def test_pls():
-    datasets = read("http://www.eigenvector.com/data/Corn/corn.mat")
+    datasets = read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+    # information: [20x59 char ]    Information about the data
+    # m5spec: [80x700 dataset] Spectra on instrument m5
+    # mp5spec: [80x700 dataset] Spectra on instrument mp5
+    # mp6spec: [80x700 dataset] Spectra on instrument mp6
+    # propvals: [80x4 dataset]   Property values for samples
+    # m5nbs: [ 3x700 dataset] NBS glass stds on m5
+    # mp5nbs: [ 4x700 dataset] NBS glass stds on mp5
+    # mp6nbs: [ 4x700 dataset] NBS glass stds on mp6
+    assert len(datasets) == 7
+
     Xc = datasets[-3][:57]  # corn spectra, calibration
     Xv = datasets[-3][57:]  # corn spectra, validation
     Yc = datasets[4][:57]  # properties values, calibration

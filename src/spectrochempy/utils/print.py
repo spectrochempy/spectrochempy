@@ -98,22 +98,29 @@ def html_output(out):
     return out
 
 
-def convert_to_html(obj):
-    tr = (
-        "<tr>"
-        "<td style='padding-right:5px; padding-bottom:0px; "
-        "padding-top:0px; width:124px'>{0}</td>"
-        "<td style='text-align:left; padding-bottom:0px; "
-        "padding-top:0px; {2} '>{1}</td><tr>\n"
-    )
+def _process_section(section):
+    # tr = (
+    #     "<tr>"
+    #     "<td style='padding-right:5px; padding-bottom:0px; "
+    #     "padding-top:0px; width:124px'>{0}</td>"
+    #     "<td style='text-align:left; padding-bottom:0px; "
+    #     "padding-top:0px; {2} '>{1}</td><tr>\n"
+    # )
+    def _make_section(k, v, details=False):
+        s = "<div class='scp-output section'>"
+        s += "<details>" if details else ""
+        s += "<summary>" if details else "<div class='meta-name'>"
+        s += f"{k}"
+        s += "</summary>" if details else "</div><div>:</div>"
+        s += f"<div class='meta-value'>{v}</div>"
+        s += "</details>" if details else ""
+        s += "</div>"
+        return s
 
-    obj._html_output = True
-
-    out = obj._cstr()
+    out = "\n".join(section)
 
     regex = r"\0{3}[\w\W]*?\0{3}"
 
-    # noinspection PyPep8
     def subst(match):
         return "<div>{}</div>".format(
             match.group(0).replace("\n", "<br/>").replace("\0", ""),
@@ -121,22 +128,22 @@ def convert_to_html(obj):
 
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
-    regex = r"^(\W{0,12}\w+\W?\w+)(:\W{1}.*$)"  # r"^(\W*\w+\W?\w+)(:.*$)"
-    subst = r"<font color='#28A745'>\1</font> \2"  # accent-green (attribute names)
+    regex = r"^(\W{0,12}\w+\W?\w+):(\W{1}.*$)"
+    subst = r'<div class="scp-output section"><div class="attr-name">\1</div><div>:</div><div class="attr-value">\2</div></div>'
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
-    regex = r"^(.*(DIMENSION|DATA).*)$"
-    subst = r"<strong>\1</strong>"
+    regex = r"^(.*(DIMENSION|SUMMARY|DATA).*)$"
+    subst = r"<summary>\1</summary>"
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"^(\W{10}\(_\d{1}\)).*$"
-    subst = r"<strong>\1</strong>"
+    subst = r"<span>\1</span>"
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\0{2}[\w\W]*?\0{2}"
 
     def subst(match):  # (labels)
-        return "<div><font color='darkcyan'>{}</font></div>".format(
+        return "<div class='label'>{}</div>".format(
             match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
 
@@ -145,32 +152,58 @@ def convert_to_html(obj):
     regex = r"\0{1}[\w\W]*?\0{1}"
 
     def subst(match):  # accent-blue (numeric data)
-        return "<div><font color='#2D7FF9'>{}</font></div>".format(
+        return "<div class='numeric'>{}</div>".format(
             match.group(0).replace("\n", "<br/>").replace("\0", ""),
         )
 
     out = re.sub(regex, subst, out, count=0, flags=re.MULTILINE)
 
     regex = r"\.{3}\s+\n"
-    out = re.sub(regex, "", out, count=0, flags=re.MULTILINE)
+    return re.sub(regex, "", out, count=0, flags=re.MULTILINE)
 
-    html = "<table style='background:transparent'>\n"
-    for line in out.splitlines():
-        if "</font> :" in line:
-            # keep only first match
-            parts = line.split(":")
-            html += tr.format(
-                parts[0],
-                ":".join(parts[1:]),
-                "border:.5px solid lightgray; ",
-            )
-        elif "<strong>" in line:
-            html += tr.format(line, "<hr/>", "padding-top:10px;")
-    html += "</table>"
+
+def convert_to_html(obj, open=False, id=None):
+    """Convert object representation to HTML with separate sections."""
+    obj._html_output = True
+    out = obj._cstr()
+
+    # Split output into lines
+    lines = out.split("\n")
+
+    collapsable_sections = {0: ["SUMMARY"]}
+    section = 0
+    for line in lines:
+        if "DATA" in line or "DIMENSION" in line:
+            section += 1
+            collapsable_sections[section] = []
+        collapsable_sections[section].append(line)
+
+    # Process each section with CSS classes
+    html_output = []
+    for section in collapsable_sections.values():
+        open = "" if section[0] != "SUMMARY" else "open"
+        ps = _process_section(section)
+        if ps == "<summary>SUMMARY</summary>":
+            continue  # summary empty
+        html_output.append(
+            f'<div class="scp-output section"><details {open}>{ps}</details></div>'
+        )
 
     obj._html_output = False
 
-    return html
+    s = "<div class='scp-output'>"
+    open = "" if not open else "open"
+    idx = f"{id}: " if id is not None else ""
+    s += f"<details {open}><summary>{idx}{obj.__str__()}[{obj.name}]</summary>"
+    s += "\n".join(html_output)
+    s += "</details>"
+    s += "</div>"
+
+    s = s.replace("SUMMARY", "Summary")
+    s = s.replace("DIMENSION", "Dimension")
+    s = s.replace("DATA", "Data")
+
+    return s  # noqa: RET504
 
 
 # ======================================================================================

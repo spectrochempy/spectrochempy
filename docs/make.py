@@ -480,6 +480,8 @@ class BuildDocumentation:
             if self.directory and str(self.directory) not in str(item):
                 continue
             try:
+                if self.settings["delnb"]:
+                    item.with_suffix(".ipynb").unlink()
                 self._sync_notebook_pair(item)
             except Exception as e:
                 print(f"Failed to sync {item}: {e}")
@@ -679,6 +681,15 @@ class BuildDocumentation:
 
         version = self._version
         doc_version = self._doc_version
+
+        # Copy custom CSS file to the _static/css directory
+        custom_css_src = (
+            PROJECT / "src" / "spectrochempy" / "data" / "css" / "custom.css"
+        )
+        custom_css_dest = STATIC / "css" / "custom.css"
+        custom_css_dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(custom_css_src, custom_css_dest)
+        print(f"Copied custom CSS from {custom_css_src} to {custom_css_dest}")
 
         print(
             f"\n{'-' * 80}\n"
@@ -1006,6 +1017,9 @@ def main():
         print("The --tagname option is only valid with the html command.")
         return 1
 
+    if args.directory and not args.directory.endswith("/"):
+        args.directory += "/"
+
     if not args.tag_name:
         # build the documentation for the latest version
         build = BuildDocumentation(
@@ -1059,22 +1073,4 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    if not ON_GITHUB:
-        sys.argv = [
-            "make.py",
-            "html",
-            # "--no-api",
-            # --no-exec",
-            # "--no-sync",
-            # "-vv",
-            # "--directory",
-            # "devguide/",
-            # "gettingstarted/install/",
-            # "--single-doc",
-            # "gettingstarted/overview.ipynb",
-            # "gettingstarted/getting_help.rst",
-            # "gettingstarted/install/index.rst",
-            # "userguide/objects/dataset/dataset.ipynb",
-            # "spectrochempy.IRIS",
-        ]  #  "-T", "0.6.10"]
     sys.exit(main())

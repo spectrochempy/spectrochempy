@@ -1297,6 +1297,8 @@ def _read_header(fid, pos):
             out["firstx"], out["lastx"] = out["lastx"], out["firstx"]
 
         out["name"] = _readbtext(fid, pos + 938, 256)
+        # Hack because name seems not to be well read for srs
+        out["name"] = out["name"].split("\n")[0]
         fid.seek(pos + 1002)
         out["collection_length"] = fromfile(fid, "float32", 1) * 60
         fid.seek(pos + 1006)

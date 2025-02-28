@@ -56,7 +56,7 @@ import spectrochempy as scp
 # protein and starch values for each of the samples. This dataset (and others) can be loaded from
 # [http://www.eigenvector.com](http://www.eigenvector.com/data/).
 # %%
-A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat")
+A = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
 
 # %% [markdown]
 # The .mat file contains 7 eigenvectors's datasets which are thus returned in A as a list of 7

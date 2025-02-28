@@ -55,7 +55,7 @@
 # features, but should help you to get started quickly, and to find your way around.
 # For more details on the various features, check out the [Public API reference](../../reference/index.rst) section which gives
 # [Gallery of Examples](../../gettingstarted/examples/index.rst)
-
+#
 # ## What to do if questions arise
 #
 # If, despite this documentation, which we're constantly trying to improve,

@@ -274,3 +274,26 @@ def dict_compare(d1, d2, check_equal_only=True):
     if not check_equal_only:
         return added, removed, modified, same
     return not (modified or removed or added)
+
+
+def difference(x, y):
+    """
+    Calculate absolute and relative differences between two datasets.
+
+    Parameters
+    ----------
+    x, y : NDDataset
+        Datasets to compare
+
+    Returns
+    -------
+    tuple
+        Maximum absolute error and maximum relative error
+    """
+    from numpy import abs
+    from numpy import max
+
+    nonzero = y.data != 0
+    error = abs(x.data - y.data)
+    max_relative_error = max(error[nonzero] / abs(y.data[nonzero]))
+    return max(error), max_relative_error

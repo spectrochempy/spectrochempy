@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.16
+#     version: 3.13.2
 #   toc-showcode: false
 #   toc-showtags: false
 #   widgets:
@@ -44,164 +44,161 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# ## Dialog boxes
-#
-# Retrieving Files and Directories, in day-to-day work is often made through Dialog
-# Boxes. While we do not recommend
-# this procedure for advanced usage (see below), it is quite easy to do that with SCPy.
-# To do so, we can use the
-# `read` function which open a dialog, allowing the selection of data file form various
-# origin. By default,
-# the native SCPy type of data is proposed (file suffix: ` .scp` ). The desired type of
-# files to display can be chosen
-# in a dropdown field.
+# ## Generic read command
+
+# %% [markdown]
+# To read a file containing spectrocopic data or similar,
+# the `read` method can be used.
+# This method will try to guess the file format based on
+# the file extension.
 
 # %%
-X = scp.read()
+X = scp.read("wodger.spg")
 
 # %% [markdown]
-# The dialog box such as shown in this image:
-#
-# <center><img id='drawings' width='600px'  src='./images/read.png'></img></center>
-#
-# The dialog Box allows selecting the file which data will be loaded in the variable
-# `X`\. Try for instance to run the
-# cell below, and select an omnic spg datafile (select the .spg extension), which you
-# can find in the `irdata` directory.
-#
-# <div class='alert alert-warning'>
-# <b>Tip</b>
-#
-# the dialog box does not necessarily pop up in the foreground: check your task bar !
-# </div>
-#
-# Printing the returned NDDataset object X should read like this, with indication of
-# the dataset `shape` , *i.e., * the `y` and  `x` dimension sizes:
-
+# The above command will extract the data from the file `wodger.spg`
+# and store it in a `NDDataset` object named `X`.
+# To display information about the dataset, simply type `X`
+# in a cell and run it.
 # %%
-print(X)
+X
 
 # %% [markdown]
-# The size of the `y` and `x` dimension will depend, of course, of the file that you
-# have selected ! If you did not
-# select any file ( *e.g.,* by pressing 'cancel' in th Dialog Box), the result will be
-# `None` , as nothing has been loaded in `X` .
-#
-# <div class='alert alert-info'>
-# <b>Note</b>
-#
-# By default, the Dialog Box opens in the last directory you have used. However, if a
-# directory path is specified, the dialog should open from this directory.
-# </div>
-
-# %%
-X = scp.read_omnic(
-    "irdata/subdir"
-)  # a WARNING is issued when some files are unreadable in the subdir (and thus ignored)
-print(X)
+# In this case, the data were in an OMNIC file format,
+# and the `read` method guessed it correctly using the file name extension.
+# The `read` method can also read other file formats, such as
+# OPUS, JCAMP-DX, CSV, MATLAB, TOPSPIN, etc. or even a directory.
 
 # %% [markdown]
-# See below for more information
-#
-# - At the time of writing this tutorial (SpectroChemPy v.0.1.23), the following
-# commands will behave similarly:
-#     - `read` to open any kind of recognised data files based on the file suffix
-#       (e.g., .spg, etc...)
-#     - `read_omnic` to open omnic (spa and spg) files
-#     - `read_opus` to open Bruker Opus (.0, ...) files
-#     - `read_labspec` to open LABSPEC6 files - this assumes they have been exported
-#       as .txt files
-#     - `read_topspin` to open Bruker Topspin NMR files
-#     - `read_csv` to open csv files
-#     - `read_jcamp` to open an IR JCAMP-DX datafile
-#     - `read_matlab` to open MATLAB (.mat) files including Eingenvector's Dataset
-#       objects
-#
-#
-# - Additionally
-#     - `read_dir` to open readable files in a directory
-#
-#
-# - The list of readers available will hopefully increase in future **SCPy** releases.
-#
-# If successful, the output of the above cell should read something like
-#
-#     Out[2] NDDataset: [float64] a.u. (shape: (y:4, x:5549))
+# ## Using a specific reader
 
 # %% [markdown]
-# ## Import with explicit directory or file pathnames
-#
-# While the use of Dialog Box seems at first 'user-friendly', you will probably
-# experience that this is often **NOT**
-# efficient because you will have to select the file *each time* the notebook (or the
-# script) is run... Hence, the above commands can be used with the indication of the
-# path to a directory, and/or to a filename.
-#
-# If only a directory is indicated, the dialog box will open in this directory.
-#
-# Note that on Windows the path separator is a backslash `\\` .
-# However, in many contexts,
-# backslash is also used as an escape character in order to represent non-printable
-# characters. To avoid problems,
-# either it has to be escaped itself,  a double backslash or one can also use raw
-# string literals
-# to represent Windows paths. These are string literals that have an `r` prepended to
-# them. In raw string literals
-# the `\\` represents a literal backslash: `r'C:\users\Brian'` :
-#
-# For instance, on Windows systems, the two following commands are fully equivalent:
-#
-# ```ipython3
-# X = scp.read_omnic(directory='C:\\users\\Brian')
-# ```
-#
-# or
-#
-# ```ipython3
-# X = scp.read_omnic(directory=r'C:\users\Brian')
-# ```
-#
-# and will open the dialog box at the root directory of the `C:` drive.
-#
-# You can avoid using the form `\\` or the use of raw strings by using conventional
-# slash `/` . In python, they play the path separator role, as well in Windows than in
-# other UNIX-based system (Linux, OSX, ...)
-#
-# ```ipython3
-# X = scp.read_omnic(directory='C:/users/Brian')
-# ```
+# Instead of using the generic read method, you can also use a specific
+# reader, such as `read_omnic`, `read_opus`, `read_csv`, `read_jcamp`, etc.
+# These methods are more specific and will only read the file format
+# they are. For example, `read_omnic` will only read OMNIC files.
 
 # %% [markdown]
-# If a `filename` is passed in argument, like here:
-# ```ipython3
-# X = scp.read_omnic('wodger.spg', directory='C:/')
-# ```
-# then SpectroChemPy will attempt opening a file named `wodger.spg` supposedly located
-# in `C:\\` .
+# The following table lists the available file readers in SCPy
+# along with the corresponding file formats and extensions they support:
 #
+# | Reader         | File Formats                                      | Extensions      |
+# |---------------|-------------------------------------------------|----------------|
+# | read_omnic,<br/>read_spa,<br/>read_spg,<br/>read_srs    | Thermo Scientific/Nicolet OMNIC files          | .spa, .spg, .srs     |
+# | read_opus     | Bruker OPUS files                              | .0, .1, .000, ... |
+# | read_csv      | Comma-Separated Values (CSV) files             | .csv           |
+# | read_jcamp, <br/>read_dx| JCAMP-DX spectral data files                   | .dx, .jdx      |
+# | read_matlab,<br/>read_mat   | MATLAB files                                   | .mat, .dso     |
+# | read_topspin  | Bruker TopSpin NMR files                       | fid, ser, 1r, 1i, 2rr... |
+# | read_labspec  | LABSPEC6 spectral data files                   | .txt           |
+# | read_wire,<br/>read_wdf | Renishaw Wire files                     | .wdf           |
+# | read_scp      | SpectroChemPy-specific files                   | .scp           |
+# | read_soc,<br/>read_ddr,<br/>read_hdr,<br/>read_sdr     | Surface Optics Corporation files               | .ddr, .hdr, .sdr |
+# | read_galactic | Galactic spectral files                        | .spc           |
+# | read_quadera  | Pfeiffer Vacuum QUADERA mass spectrometer files | .txt           |
+# | read          | Generic reader (automatically detects format)  | -              |
+# | read_dir      | Reads all supported files in a directory       | -              |
+# | read_zip      | Reads files from a ZIP archive                 | .zip           |
+# | read_carroucell | Reads files from a carrousel experiment directory | -          |
 #
-# Imagine now that the file of interest is actually located in
-# `C:\users\Brian\s\Life` . The following
-# commands are all equivalent and will allow opening the file:
+# The `read_dir` function scans a directory and reads all supported files,
+# returning a list of `NDDataset` objects.
 #
-# - using only the full pathname of the file:
-# ```ipython3
-# X = scp.read_omnic('C:/users/Brian/s/Life/wodger.spg')
-# ```
+# Other reader functions return either a single `NDDataset` or multiple `NDDataset`
+# objects, depending on the file type and content.
 #
-# - or using a combination of directory and file pathnames:
-# ```ipython3
-# X = scp.read_omnic('wodger.spg', directory='C:/users/Brian/s/Life'
-# X = scp.read_omnic('Life/wodger.spg', directory='C:/users/Brian/s')
-# ```
-#
-# - etc...
+# Further details on specific cases are provided below. See the section [Reading directories](#Reading-directories).
 
 # %% [markdown]
-# ### A good practice: use relative paths
+# ## Using relative or absolute pathnames
+
+# %% [markdown]
+# In the above examples, the file `wodger.spg` was read from the current working directory.
 #
-# The above directives require explicitly writing the absolute pathnames, which are
-# virtually always computer specific.
+# If the file is located in another directory, the full path to the file can be provided. For example:
+#
+# ```ipython
+# X = scp.read('/users/Brian/s/Life/wodger.spg')
+# ```
+#
+# or, for Windows:
+#
+# ```ipython
+# X = scp.read(r'C:\users\Brian\s\Life\wodger.spg')
+# ```
+#
+# Notes:
+# - The path separator is a backslash `\` on Windows, but in many contexts, backslash is also used as an escape character to
+#   represent non-printable characters.
+#   To avoid problems, either it has to be escaped itself, a double backslash `\\`, or one can also use raw string literals
+#   to represent Windows paths.
+#   These are string literals that have an `r` prepended to them. In raw string literals, the `\\` represents
+#   a literal backslash: `r'C:\users\Brian'`.
+# - In python, the slash `/` is used as the path separator in all systems (Windows, Linux, OSX, ...).
+#   So it can be used in all cases. For exemple:
+#
+#   ```ipython
+#   X = scp.read('C:/users/Brian/s/Life/wodger.spg')
+#
+#   ```
+#
+# - The use of relative pathnames is a good practice. SpectroChemPy readers use relative paths.
+#   If the given path is not absolute,
+#   then SpectroChemPy will search relative to the current directory or to a directory specified using the `directory`keywords.
+#
+#   For example:
+#
+#   ```ipython
+#   X = scp.read('wodger.spg', directory='C:/users/Brian/s/Life')
+#   X = scp.read('Life/wodger.spg', directory='C:\\users\\Brian\\s')
+#
+#   ```
+#
+# - The `os` or `pathlib` modules can be used to work with pathnames.
+#   See the section
+#   [Good practice:Use of os or pathlib packages](#Use-os-or-pathlib-packages).
+# - The `preferences.datadir` variable can be used to set a default directory where to look for data.
+#   See the section [Another default search directory: datadir](#Another-default-search-directory:-datadir).
+#
+
+# %% [markdown]
+# ## Good practices
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# ### Use relative paths
+#
+# As path are system dependent, it is a good practice to use relative pathnames in scripts and notebooks.
+#
 # If, for instance, Brian has a project organised in a folder (`s` ) with a directory
 # dedicated to input data (`Life` )
 # and a notebook for preprocessing (`welease.ipynb` ) as illustrate below:
@@ -219,30 +216,33 @@ print(X)
 # Then running this project in John's Linux computer (e.g. in `/home/john/s_copy` )
 # will certainly result in execution
 # errors if absolute paths are used in the notebook:
+#
 # ```text
 # OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
 # ```
-# In this respect, a good practice consists in using relative pathnames in scripts and
-# notebooks.
+#
 # Fortunately, SpectroChemPy readers use relative paths. If the given path is not
 # absolute, then SpectroChemPy will search in the current directory. Hence, the opening
 # of the `spg` file from scripts in `welease.ipynb` can be made
 # by the command:
-# ```ipython3
-# X = scp.read_omnic('Life/wodger.spg')
-# ```
-# or:
-# ```ipython3
-# X = scp.read_omnic('wodger.spg', directory='Life')
+#
+# ```ipython
+# X = scp.read('Life/wodger.spg')
 # ```
 #
-# ### Good practice: use `os` or `pathlib` modules
+# or:
+#
+# ```ipython
+# X = scp.read('wodger.spg', directory='Life')
+# ```
+#
+# ### Use os or pathlib packages
 #
 # In python, working with pathnames is classically done with dedicated modules such as
 # `os` or `pathlib` python modules.
 # With `os` we mention the following methods that can be particularly useful:
 #
-# ```ipython3
+# ```ipython
 # import os
 # os.getcwd()              # returns the absolute path of the current working directory
 #                          # preferences.datadir
@@ -253,7 +253,8 @@ print(X)
 # ```
 #
 # Using `Pathlib` is even simpler:
-# ```ipython3
+#
+# ```ipython
 # from pathlib import Path
 # Path.cwd()               # returns the absolute path of the current working directory
 # Path.home()              # returns the home directory of the user
@@ -261,15 +262,15 @@ print(X)
 # components
 # ```
 #
-#  The interested readers will find more details on the use of these modules here:
+# The interested readers will find more details on the use of these modules here:
+#
 # - [os](https://docs.python.org/3/library/os.html)
 # - [pathlib](https://docs.python.org/3/library/pathlib.html)
 #
-# ## Another default search directory: `datadir`
+# #### Another default search directory: datadir
 #
 # Spectrochempy also comes with the definition of a second default directory path where
-# to look at the data:
-# the `datadir` directory. It is defined in the variable `preferences.datadir` which
+# to look at the data: the `datadir` directory. It is defined in the variable `preferences.datadir` which
 # is imported at the same time as spectrochempy. By default, `datadir` points in the
 # '$HOME/.spectrochempy/tesdata' directory.:
 
@@ -281,13 +282,13 @@ DATADIR
 # DATADIR is already a pathlib object and so can be used easily
 
 # %%
-X = scp.read_omnic(DATADIR / "wodger.spg")
+scp.read_omnic(DATADIR / "wodger.spg")
 
 # %% [markdown]
 # It can be set to another pathname *permanently* (i.e., even after computer restart)
 # by a new assignment:
 #
-# ```ipython3
+# ```python
 # scp.preferences.datadir = 'C:/users/Brian/s/Life'
 # ```
 #
@@ -299,8 +300,112 @@ X = scp.read_omnic(DATADIR / "wodger.spg")
 # files using this order of
 # precedence:
 #
-#    1. try absolute path
-#    2. try in current working directory
-#    3. try in `datadir`
-#    4. if none of these works: generate an OSError (file or directory not found)
+# 1. try absolute path
+# 2. try in current working directory
+# 3. try in `datadir`
+# 4. if none of these works: generate an OSError (file or directory not found)
 #
+# %% [markdown]
+# ## Reading directories
+
+# %% [markdown]
+# The `read_dir` function is designed to read an entire directory, create NDDatasets for each file, and finally merge all compatible datasets. Let's see an example:
+
+# %% [markdown]
+# - Here is a list of the files presents in `DATADIR/irdata/subdir/`
+
+# %%
+folder = DATADIR / "irdata" / "subdir"
+[str(item.relative_to(DATADIR)) for item in folder.glob("*.*")]
+
+# %% [markdown]
+# - Now read all files in the `DATADIR/irdata/subdir/` directory  (*i.e.,*, four `.spa` files and one `.srs` file). Any file in unknown format will be ignored silently:
+
+# %%
+scp.read_dir(folder)
+# %% [markdown]
+# The above command have read all files in the `DATADIR/irdata/subdir/` directory and merged them into two groups of compatible NDDatasets:
+#
+# * a first `NDDataset` object (id: 0, shape [335,1868]) comes from the single `.srs` file.
+# * a second `NDDataset` object (id: 1, shape [335,1868]) comes from the merging of four `.spa` files.
+
+# %% [markdown]
+# Merging  compatible NDDataset is the default behavior of `read_dir`  (or  equivalently `read`). If you want to read the files separately, you can use the `merge=False` keyword:
+# %%
+scp.read_dir(folder, merge=False)
+
+# %% [markdown]
+# As expected the result is a list of 5 NDDataset objects, one for each file in the directory.
+
+# %% [markdown]
+# ## Additional options for reading directories
+
+# %% [markdown]
+# The `read_dir`/`read` function has additional options to control the behavior of the reading process:
+#
+# - `recursive`: if `True`, the function will scan the directory recursively and read all supported files in all subdirectories.
+# - `pattern`: a string or a list of strings that can be used to filter the files to be read. Only files whose name matches the pattern will be read.
+
+# %% [markdown]
+# Let's see an example with the `recursive` option:
+#
+# First we list files in all directories under `DATADIR/irdata/subdir/`:
+
+# %%
+[str(item.relative_to(DATADIR)) for item in folder.glob("**/*.*")]
+
+# %% [markdown]
+# the ìrdata/subdir/` directory contains two subdirectory `1-20` and `20-50` with two additional `.spa` files.
+#
+# Now we read all files (a total of 9) in the `DATADIR/irdata/subdir/` directory and its subdirectories:
+# %%
+scp.read_dir(folder, recursive=True, merge=False)
+# %% [markdown]
+# and we allow merging them:
+# %%
+scp.read_dir(folder, recursive=True)
+# %% [markdown]
+# As the 8 `.spa` files are compatible, they are merged into a single `NDDataset` object. The `.srs` file is read separately.
+
+# %% [markdown]
+# Specific reader can equivalently read folder recursively:
+# %%
+scp.read_omnic(folder, recursive=True)
+
+# %% [markdown]
+# Let's see an example with the `pattern` option:
+#
+# We read all files in the `DATADIR/irdata/subdir/` directory and its subdirectories, but only those with the `.spa` extension and whose name contains the string `4`:
+# %%
+scp.read_dir(folder, recursive=True, pattern="*4*")
+
+# %% [markdown]
+# The above pattern "\*4\*" match only two files which are then merged and returned as a single `NDDataset` object.
+
+# %% [markdown]
+# This `pattern` option is obviously interesting to select only a type of extension:
+
+# %%
+scp.read_dir(folder, recursive=True, pattern="*.spa")
+
+# %%
+scp.read(folder, recursive=True, pattern="*.spa")  # equivalent
+
+# %%
+scp.read_omnic(folder, recursive=True, pattern="*4.spa")  # equivalent
+
+# %% [markdown]
+# This way the ".srs" file is ignored.
+
+# %% [markdown]
+# ## Reading files from a ZIP archive
+
+# %% [markdown]
+# The `read_zip` function is designed to read files from a ZIP archive. It can be used to read a single file
+# or all files in the archive. As usual, by default all files are merged. The `merge` keyword can be used to
+# read the files separately.
+
+# %%
+scp.read(
+    "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip", merge=False
+)

@@ -229,8 +229,10 @@ def check_filenames(*args, **kwargs):
             # as filename where not given we passed the 'unnamed' string
             # return a dictionary
             return {pathclean(f"no_name_{i}"): arg for i, arg in enumerate(args)}
-        elif isinstance(args[0], list) and isinstance(  # noqa: UP038
-            args[0][0], (str, Path, PosixPath, WindowsPath)
+        elif isinstance(args[0], (list, tuple)) and (  # noqa: UP038
+            isinstance(  # noqa: UP038
+                args[0][0], (str, Path, PosixPath, WindowsPath)
+            )
         ):
             filenames = pathclean(args[0])
         elif isinstance(args[0], list) and isinstance(args[0][0], bytes):
@@ -535,10 +537,19 @@ def get_filenames(*filenames, **kwargs):
 
             if kwargs.get("protocol") != ["topspin"]:
                 # automatic reading of the whole directory
+                fil = []
                 for pat in patterns(filetypes):
                     if kwargs.get("recursive", False):
                         pat = f"**/{pat}"
-                    filenames.extend(list(directory.glob(pat)))
+                    fil.extend(list(directory.glob(pat)))
+                pattern = kwargs.get("pattern", ["*"])
+                pattern = pattern if isinstance(pattern, list) else [pattern]
+                for kw_pat in pattern:
+                    kw_pat = _insensitive_case_glob(kw_pat)
+                    if kwargs.get("recursive", False):
+                        kw_pat = f"**/{kw_pat}"
+                    fil2 = [f for f in list(directory.glob(kw_pat)) if f in fil]
+                    filenames.extend(fil2)
             else:
                 # Topspin directory detection
                 filenames = [directory]
@@ -546,7 +557,9 @@ def get_filenames(*filenames, **kwargs):
             # on mac case insensitive OS this cause doubling the number of files.
             # Eliminates doublons:
             filenames = list(set(filenames))
-
+            filenames = [
+                f for f in filenames if f.name not in [".DS_Store", "__index__"]
+            ]
             filenames = pathclean(filenames)
 
         if not filenames:

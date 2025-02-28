@@ -6,15 +6,19 @@
 # ruff: noqa
 import pytest
 
-pytestmark = pytest.mark.skipif(
-    pytest.importorskip("ipywidgets", reason="ipywidgets not installed") is None,
-    reason="ipywidgets not installed",
-)
+pytestmark = [
+    pytest.mark.skip(reason="DEPRECATED - to be removed"),
+]
 
-pytestmark = pytest.mark.skipif(
-    pytest.importorskip("tkinter", reason="tkinter not installed") is None,
-    reason="tkinter not installed  - happens with act testing",
-)
+# pytestmark = pytest.mark.skipif(
+#     pytest.importorskip("ipywidgets", reason="ipywidgets not installed") is None,
+#     reason="ipywidgets not installed",
+# )
+
+# pytestmark = pytest.mark.skipif(
+#     pytest.importorskip("tkinter", reason="tkinter not installed") is None,
+#     reason="tkinter not installed  - happens with act testing",
+# )
 
 import numpy as np
 import pytest

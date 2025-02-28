@@ -88,4 +88,7 @@ def test_ndio_2D(IR_dataset_2D):
     f.unlink()
 
 
+if __name__ == "__main__":
+    pytest.main([__file__])
+
 # EOF

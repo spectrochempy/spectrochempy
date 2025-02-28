@@ -399,10 +399,10 @@ def test_coord():
     assert "(size: 10)" in s
 
     s = coord0._repr_html_()
-    assert "<div><font color='darkcyan'>[  a   b ..." in s
+    assert "<div class='label'>[  a   b ...   i   j]</div>" in s
 
     c = Coord()
-    assert "<div><font color='#2D7FF9'>Undefined</font></div>" in c._repr_html_()
+    assert "<div class='numeric'>Undefined</div>" in c._repr_html_()
 
     # several row of label
     coord0.labels = list("klmnopqrst")
