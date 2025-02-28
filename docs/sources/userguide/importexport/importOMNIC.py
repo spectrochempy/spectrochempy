@@ -137,7 +137,6 @@ X.x
 #     - the name of each spectrum.
 
 # %%
-print(X.y)
 X.y
 
 # %% [markdown]

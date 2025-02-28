@@ -162,7 +162,7 @@ def _process_section(section):
     return re.sub(regex, "", out, count=0, flags=re.MULTILINE)
 
 
-def convert_to_html(obj, open=True, id=None):
+def convert_to_html(obj, open=False, id=None):
     """Convert object representation to HTML with separate sections."""
     obj._html_output = True
     out = obj._cstr()
