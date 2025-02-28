@@ -33,6 +33,7 @@ from spectrochempy.utils.file import check_filename_to_open
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
 from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.objects import ScpObjectList
 
 FILETYPES = [
     ("scp", "SpectroChemPy files (*.scp)"),
@@ -188,9 +189,11 @@ class Importer(HasTraits):
                 "length of the `names` list and of the list of datasets mismatch - names not applied",
                 stacklevel=2,
             )
-        return sorted(
-            nds,
-            key=str,
+        return ScpObjectList(
+            sorted(
+                nds,
+                key=str,
+            )
         )  # return a sorted list (sorted according to their string representation)
 
     def _setup_objtype(self, *args, **kwargs):
@@ -333,9 +336,6 @@ def read(*paths, **kwargs):
 
         The returned datasets are merged to form a single dataset,
         except if ``merge`` is set to `False`.
-
-        If a source is not provided (i.e., no ``paths`` , nor ``content``),
-        a dialog box will be opened to select files.
     %(kwargs)s
 
     Returns
@@ -345,54 +345,57 @@ def read(*paths, **kwargs):
 
     Other Parameters
     ----------------
-    protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
-        ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
-    directory : `~pathlib.Path` object objects or valid urls, optional
-        From where to read the files.
-    merge : `bool`, optional, default: `False`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged (stacked along the first
-        dimension) is returned.
-    sortbydate : `bool`, optional, default: `True`
-        Sort multiple filename by acquisition date.
-    description : `str`, optional
-        A Custom description.
-    origin : one of {``'omnic'``, ``'tga'``}, optional
-        Used when reading with the CSV protocol. In order to properly interpret CSV file
-        it can be necessary to set the origin of the spectra.
-        Up to now only ``'omnic'`` and ``'tga'`` have been implemented.
-    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
-        Set the column delimiter in CSV file.
     content : `bytes` object, optional
         Instead of passing a filename for further reading, a bytes content can be
         directly provided as bytes objects.
         The most convenient way is to use a dictionary. This feature is particularly
         useful for a GUI Dash application to handle drag and drop of files into a
         Browser.
-    iterdir : `bool`, optional, default: `True`
-        If `True` and no filename was provided, all files present in the provided
-        ``directory`` are returned (and merged if ``merge`` is `True`.
-        It is assumed that all the files correspond to current reading protocol.
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
+        Set the column delimiter in CSV file.
+    description : `str`, optional
+        A Custom description.
+    directory : `~pathlib.Path` object objects or valid urls, optional
+        From where to read the files.
+    download_only: `bool`, optional, default: `False`
+        Used only when url are specified.  If True, only downloading and saving of the
+        files is performed, with no attempt to read their content.
+    merge : `bool`, optional, default: `False`
+        If `True` and several filenames or a ``directory`` have been provided as
+        arguments, then a single `NDDataset` with merged dataset (stacked along the first
+        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+        then several NDDatasets can be returned for different groups of compatible datasets.
+    origin : str, optional
+        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+        automatically, but can be set manually.
 
-        .. versionchanged:: 0.6.2
+        It is used for instance whn reading directory with different types of files, for merging
+        the datasets with compatible dimensions and different origin into different groups.
 
-            ``iterdir`` replace the deprecated ``listdir`` argument.
+        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+        have been implemented.
+    pattern : `str`, optional
+        A pattern to filter the files to read.
 
+        .. versionadded:: 0.7.2
+    protocol : `str`, optional
+        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'excel'``}. If not provided, the correct protocol
+        is inferred (whenever it is possible) from the filename extension.
+    read_only: `bool`, optional, default: `True`
+        Used only when url are specified.  If True, saving of the
+        files is performed in the current directory, or in the directory specified by
+        the directory parameter.
     recursive : `bool`, optional, default: `False`
         Read also in subfolders.
     replace_existing: `bool`, optional, default: `False`
         Used only when url are specified. By default, existing files are not replaced
         so not downloaded.
-    download_only: `bool`, optional, default: `False`
-        Used only when url are specified.  If True, only downloading and saving of the
-        files is performed, with no attempt to read their content.
-    read_only: `bool`, optional, default: `True`
-        Used only when url are specified.  If True, saving of the
-        files is performed in the current directory, or in the directory specified by
-        the directory parameter.
+    sortbydate : `bool`, optional, default: `True`
+        Sort multiple filename by acquisition date.
 
     See Also
     --------
