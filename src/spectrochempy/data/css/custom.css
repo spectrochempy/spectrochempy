@@ -2,14 +2,11 @@
 .scp-output {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .scp-output details {
-    margin: 0;
     padding: 1px;
-    border: 1px solid #888;
-    border-radius: 4px;
 }
 
 .scp-output summary {
@@ -26,14 +23,10 @@
 .scp-output .section {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    gap: 0.5em;
-    padding: 1px;
-    margin-left: 1px 1px 1px 20px;
-    border: 1px solid #888;
-    border-radius: 4px;
+    gap: 2px;
     font-family: Arial, sans-serif;
     font-size: 10pt;
+    margin-left: 15px;
 }
 
 .scp-output .meta-name,

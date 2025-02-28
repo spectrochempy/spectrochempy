@@ -27,6 +27,7 @@ New features
   (`<https://github.com/joshduran/brukeropus>`_). It can read most of the spectra types contained in OPUS files,
   as reference experiment and not only AB type spectra as previously.
 - Import/Export tutorials updated to reflect the new `brukeropus` package.
+- `read_dir()` (as well as equivalent `read()`) has a new keyword argument `pattern` to filter files to read in a directory.`
 
 .. section
 

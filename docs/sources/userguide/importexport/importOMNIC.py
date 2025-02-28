@@ -291,7 +291,7 @@ list_files = (
     "7_CZ0-100_Pd_103.SPA",
     "7_CZ0-100_Pd_104.SPA",
 )
-X = scp.read_omnic(list_files, directory="irdata/subdir")
+X = scp.read_omnic(list_files, directory="irdata/subdir", name="Merge 7_CZ0-100 Pd")
 X
 
 # %% [markdown]
@@ -301,7 +301,7 @@ X
 
 # %%
 X = scp.read_omnic("irdata/subdir/1-20")
-print(X)
+X
 
 # %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
 # <div class='alert alert-warning'>
@@ -320,47 +320,69 @@ print(X)
 # %% [markdown]
 # ## Handling Metadata
 
+# %% [markdown]
+# Here is an example of accessing metadata
+
 # %%
-# Example of accessing and modifying metadata
 X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
-print("Original metadata:")
 print(f"Title: {X.title}")
 print(f"Origin: {X.origin}")
 print(f"Description: {X.description}")
 
-# Modify metadata
+# %% [markdown]
+# and now do some modifications:
+
+# %%
+X.title = "Modified title"
 X.origin = "OMNIC measurement"
 X.description = "Modified description"
-print("\nModified metadata:")
+print("Modified metadata:")
 print(f"Title: {X.title}")
 print(f"Origin: {X.origin}")
 print(f"Description: {X.description}")
+
+# %% [markdown]
+# Reading the metadata now reflect the change
+
+# %%
+X.title
 
 # %% [markdown]
 # ## Error Handling
 
+# %% [markdown]
+# When trying to read file, it is a good practice to handle errors explicitely. For example:
+
 # %%
-# Example of proper error handling
 try:
     X = scp.read_omnic("nonexistent_file.spa")
-except FileNotFoundError as e:
-    print(f"File not found: {e}")
+except FileNotFoundError:
+    scp.error_(FileNotFoundError, "File not found")
 except Exception as e:
-    print(f"Error reading file: {e}")
+    scp.error_(f"Error reading file: {e}")
 
 # %% [markdown]
 # ## Advanced Data Operations
 
+# %% [markdown]
+# Example of data manipulation:
+
 # %%
-# Example of data manipulation
 X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 
-# Baseline correction
+# %% [markdown]
+# * Baseline correction
+
+# %%
 X_corrected = X - X[0]  # Subtract first spectrum as baseline
 
-# Normalization
+# %% [markdown]
+# * Normalization
+
+# %%
 X_normalized = X / X.max()
 
+# %%
 print("Original data shape:", X.shape)
 print("Max value before normalization:", X.max())
 print("Max value after normalization:", X_normalized.max())

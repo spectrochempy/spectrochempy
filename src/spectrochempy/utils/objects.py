@@ -6,7 +6,7 @@
 """
 Various utility objects for SpectroChemPy.
 
-This module provides enhanced dictionary classes with additional features
+This module provides enhanced dictionary and list classes with additional features
 like attribute access and read-only capabilities.
 """
 
@@ -278,3 +278,28 @@ class ReadOnlyDict(dict):
         new_dict = ReadOnlyDict(self)
         new_dict._readonly = self._readonly
         return new_dict
+
+
+class ScpObjectList(list):
+    """A list subclass that allows html representation of the list of spectrochempy objects."""
+
+    def _repr_html_(self):
+        """
+        Return the html representation of the list of spectrochempy objects.
+
+        Returns
+        -------
+        str
+            The html representation of the list of spectrochempy objects.
+        """
+        from spectrochempy.utils.print import convert_to_html
+
+        objtypes = list({item._implements() for item in self})
+        objtypes = "mixed" if len(objtypes) > 1 else objtypes[0]
+        html = (
+            f"<details><summary>List (len={len(self)}, type={objtypes})</summary><ul>"
+        )
+        for i, item in enumerate(self):
+            html += f"<div class='scp-output section'>{convert_to_html(item, open=False, id=i)}</div>\n"
+        html += "</details>"
+        return html
