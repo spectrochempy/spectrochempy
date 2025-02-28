@@ -113,7 +113,7 @@ jobs:
       - name: Build docs
         run: |
           . .venv/bin/activate
-          echo "Udating docs"
+          echo "Updating docs"
           python3 docs/make.py -j1 html
 
       # Step 11: Build oldest version of the documentation if it doesn't yet exist

@@ -122,23 +122,31 @@ X
 # ```
 #
 # or, for Windows:
+#
 # ```ipython
 # X = scp.read(r'C:\users\Brian\s\Life\wodger.spg')
 # ```
 #
 # Notes:
-# - The path separator is a backslash `\` on Windows, but in many contexts, backslash is also used as an escape character to represent non-printable characters.
-#   To avoid problems, either it has to be escaped itself, a double backslash `\\`, or one can also use raw string literals to represent Windows paths.
-#   These are string literals that have an `r` prepended to them. In raw string literals, the `\\` represents a literal backslash: `r'C:\users\Brian'`.
-# - In python, the slash `/` is used as the path separator in all systems (Windows, Linux, OSX, ...). So it can be used in all cases. For exemple:
+# - The path separator is a backslash `\` on Windows, but in many contexts, backslash is also used as an escape character to
+#   represent non-printable characters.
+#   To avoid problems, either it has to be escaped itself, a double backslash `\\`, or one can also use raw string literals
+#   to represent Windows paths.
+#   These are string literals that have an `r` prepended to them. In raw string literals, the `\\` represents
+#   a literal backslash: `r'C:\users\Brian'`.
+# - In python, the slash `/` is used as the path separator in all systems (Windows, Linux, OSX, ...).
+#   So it can be used in all cases. For exemple:
 #
 #   ```ipython
 #   X = scp.read('C:/users/Brian/s/Life/wodger.spg')
 #
 #   ```
 #
-# - The use of relative pathnames is a good practice. SpectroChemPy readers use relative paths. If the given path is not absolute,
-#   then SpectroChemPy will search relative to the current directory or to a directory specified using the `directory`keywords. For example:
+# - The use of relative pathnames is a good practice. SpectroChemPy readers use relative paths.
+#   If the given path is not absolute,
+#   then SpectroChemPy will search relative to the current directory or to a directory specified using the `directory`keywords.
+#
+#   For example:
 #
 #   ```ipython
 #   X = scp.read('wodger.spg', directory='C:/users/Brian/s/Life')
@@ -146,8 +154,10 @@ X
 #
 #   ```
 #
-# - The `os` or `pathlib` modules can be used to work with pathnames. See the section [Good practice: use `os` or `pathlib` modules](#Good-practice:-use-os-or-pathlib-modules).
-# - The `preferences.datadir` variable can be used to set a default directory where to look for data. See the section [Use a default search directory: `datadir`](#Use-a-default-search-directory:-`datadir`).
+# - The `os` or `pathlib` modules can be used to work with pathnames.
+#   See the section [Good practice: use `os` or `pathlib` modules](#Good-practice:-use-os-or-pathlib-modules).
+# - The `preferences.datadir` variable can be used to set a default directory where to look for data.
+#   See the section [Use a default search directory: `datadir`](#Use-a-default-search-directory:-`datadir`).
 #
 
 # %% [markdown]
@@ -173,6 +183,7 @@ X
 # Then running this project in John's Linux computer (e.g. in `/home/john/s_copy` )
 # will certainly result in execution
 # errors if absolute paths are used in the notebook:
+#
 # ```text
 # OSError: Can't find this filename C:\users\Brian\s\life\wodger.spg
 # ```
@@ -185,7 +196,9 @@ X
 # ```ipython
 # X = scp.read('Life/wodger.spg')
 # ```
+#
 # or:
+#
 # ```ipython
 # X = scp.read('wodger.spg', directory='Life')
 # ```
@@ -216,15 +229,15 @@ X
 # components
 # ```
 #
-#  The interested readers will find more details on the use of these modules here:
+# The interested readers will find more details on the use of these modules here:
+#
 # - [os](https://docs.python.org/3/library/os.html)
 # - [pathlib](https://docs.python.org/3/library/pathlib.html)
 #
 # #### Another default search directory: `datadir`
 #
 # Spectrochempy also comes with the definition of a second default directory path where
-# to look at the data:
-# the `datadir` directory. It is defined in the variable `preferences.datadir` which
+# to look at the data: the `datadir` directory. It is defined in the variable `preferences.datadir` which
 # is imported at the same time as spectrochempy. By default, `datadir` points in the
 # '$HOME/.spectrochempy/tesdata' directory.:
 
@@ -254,10 +267,10 @@ scp.read_omnic(DATADIR / "wodger.spg")
 # files using this order of
 # precedence:
 #
-#    1. try absolute path
-#    2. try in current working directory
-#    3. try in `datadir`
-#    4. if none of these works: generate an OSError (file or directory not found)
+# 1. try absolute path
+# 2. try in current working directory
+# 3. try in `datadir`
+# 4. if none of these works: generate an OSError (file or directory not found)
 #
 # %% [markdown]
 # ## Reading directories
@@ -266,7 +279,7 @@ scp.read_omnic(DATADIR / "wodger.spg")
 # The `read_dir` function is designed to read an entire directory, create NDDatasets for each file, and finally merge all compatible datasets. Let's see an example:
 
 # %% [markdown]
-# -  first print a list of the files presents in `DATADIR/irdata/subdir/`
+# - Here is a list of the files presents in `DATADIR/irdata/subdir/`
 
 # %%
 folder = DATADIR / "irdata" / "subdir"
@@ -279,6 +292,7 @@ folder = DATADIR / "irdata" / "subdir"
 scp.read_dir(folder)
 # %% [markdown]
 # The above command have read all files in the `DATADIR/irdata/subdir/` directory and merged them into two groups of compatible NDDatasets:
+#
 # * a first `NDDataset` object (id: 0, shape [335,1868]) comes from the single `.srs` file.
 # * a second `NDDataset` object (id: 1, shape [335,1868]) comes from the merging of four `.spa` files.
 
@@ -362,8 +376,3 @@ scp.read_omnic(folder, recursive=True, pattern="*4.spa")  # equivalent
 scp.read(
     "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip", merge=False
 )
-# %%
-X
-# %%
-X.y
-# %%

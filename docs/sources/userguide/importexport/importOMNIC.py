@@ -30,7 +30,7 @@
 #       version_minor: 0
 # ---
 
-# %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
+# %% [markdown]
 # # Import of OMNIC files
 #
 # Thermo Scientific [OMNIC](https://www.thermofisher.com/search/results?query=OMNIC)
@@ -43,7 +43,7 @@
 # The Omnic reader of Spectrochempy ( `read_omnic()` ) has been developed based on
 # posts in open forums on the .spa file format and extended to .spg file formats.
 
-# %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
+# %% [markdown]
 # ## Import spg file
 #
 # Let's import an .spg file from the `datadir` (see :ref:`import.ipynb` for details)):
@@ -57,7 +57,7 @@ X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 X
 
 # %% [markdown]
-# The displayed attributes are detailed in the following.
+# The displayed attributes are detailed in the following:
 #
 # - `name` is the name of the group of spectra as it appears in the .spg file. OMNIC
 #   sets this name to the .spg filename used at the creation of the group.
@@ -92,19 +92,18 @@ X.description
 
 # %% [markdown]
 # - `history` records changes made to the dataset. Here, right after its creation, it
-# has been sorted by date
-# (see below).
+#   has been sorted by date (see below).
 #
 # Then come the attributes related to the data themselves:
 #
 # - `title` (not to be confused with the `name` of the dataset) describes the nature
-# of data (here **absorbance** ).
+#   of data (here **absorbance** ).
 #
 # - `values` shows the data as quantity (with their units when they exist - here a.u.
-# for absorbance units).
+#   for absorbance units).
 #
 # - The numerical values ar accessed through the `data` attribute and the units
-# throughout `units` attribute.
+#   throughout `units` attribute.
 
 # %%
 X.values
@@ -117,12 +116,12 @@ X.units
 
 # %% [markdown]
 # - `shape` is the same as the ndarray `shape` attribute and gives the shape of the
-# data array, here 19 x 3112.
+#   data array, here 19 x 3112.
 #
 # Then come the attributes related to the dimensions of the dataset.
 #
 # - `x` : this dimension has one coordinate (a `Coord` object) made of the 3112 the
-# wavenumbers.
+#   wavenumbers.
 
 # %%
 print(X.x)
@@ -131,10 +130,11 @@ X.x
 # %% [markdown]
 # - `y` : this dimension contains:
 #
-#     - one coordinate made of the 19 acquisition timestamps
-#     - two labels
-#         - the acquisition date (UTC) of each spectrum
-#         - the name of each spectrum.
+#   - one coordinate made of the 19 acquisition timestamps
+#   - two labels:
+#
+#     - the acquisition date (UTC) of each spectrum
+#     - the name of each spectrum.
 
 # %%
 print(X.y)
@@ -146,14 +146,14 @@ X.y
 #    spectrum at the jth  wavenumber.
 #    However, this is subject to change, for instance if you perform operation on your
 #    data such as
-# [Transposition](../processing/transformations.rst#Transposition). At any time
-# the attribute `dims` gives the correct names (which can be modified) and order of
-# the dimensions.
+#    [Transposition](../processing/transformations.ipynb#Transposition). At any time
+#    the attribute `dims` gives the correct names (which can be modified) and order of
+#    the dimensions.
 
 # %%
 X.dims
 
-# %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
+# %% [markdown]
 # ### Acquisition dates and `y` axis
 #
 # The acquisition timestamps are the *Unix times* of the acquisition, i.e. the time
@@ -186,7 +186,7 @@ X.y -= X.y[0]
 # It is also possible to use the ability of SpectroChemPy to handle unit changes. For
 # this one can use the `to` or `ito` (inplace) methods.
 #
-# ```ipython3
+# ```ipython
 # val = val.to(some_units)
 # val.ito(some_units)   # the same inplace
 # ```
@@ -217,12 +217,13 @@ X.y = X.y + 2
 X.y.values
 
 # %% [markdown]
-# or using the inplace add operator:
-# ```ipython3
-# X.y += 2
-# ```
+# or using the inplace add/subtract operator:
 
-# %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
+# %%
+X.y -= 2  # this restore the previous coordinates
+X.y.values
+
+# %% [markdown]
 # ### The order of spectra
 #
 # The order of spectra in OMNIC .spg files depends on the order in which the spectra
@@ -237,8 +238,7 @@ X2 = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG", sortbydate=False)
 
 # %% [markdown]
 # In the present case, this will change nothing because the spectra in the OMNIC file
-# were already ordered by
-# increasing data.
+# were already ordered by increasing data.
 #
 # Finally, it is worth mentioning that a `NDDataset` can generally be manipulated as
 # numpy ndarray. Hence, for
@@ -252,12 +252,12 @@ X.y.values  # displays the `y` dimension
 # <div class='alert alert-info'>
 # <b>Note</b>
 #
-# **Case of groups with different wavenumbers** <br/>
+# <strong>Case of groups with different wavenumbers</strong> <br/>
 # An OMNIC .spg file can contain spectra having different wavenumber axes (e.g.
 # different spacings or wavenumber
 # ranges). In its current implementation, the spg reader will purposely return an error
 # because such spectra
-# *cannot* be included in a single NDDataset which, by definition, contains items that
+# <i>cannot</i> be included in a single NDDataset which, by definition, contains items that
 # share common axes or dimensions !
 # Future releases might include an option to deal with such a case and return a list of
 # NDDatasets. Let us know if you
@@ -265,22 +265,23 @@ X.y.values  # displays the `y` dimension
 # (https://www.spectrochempy.fr/dev/dev/issues.html).
 #
 
-# %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
+# %% [markdown]
 # ## Import of .spa files
 #
 # The import of a single spectrum follows exactly the same rules as that of the import
 # of a group:
 
 # %%
-Y = scp.read_omnic("irdata/subdir/7_CZ0-100_Pd_101.SPA")
-Y
+scp.read_omnic("irdata/subdir/7_CZ0-100_Pd_101.SPA")
 
 # %% [markdown]
 # The omnic reader can also import several spa files together, providing that they share
-# a common axis for the
-# wavenumbers. This is the case of the following files in the irdata/subdir directory:
-# "7_CZ0-100 Pd_101.SPA", ...,
-# "7_CZ0-100 Pd_104.spa". It is possible to import them in a single NDDataset by using
+# a common axis for the wavenumbers.
+#
+# This is the case of the following files in the irdata/subdir directory:
+# "7_CZ0-100 Pd_101.SPA", ..., "7_CZ0-100 Pd_104.spa".
+#
+# It is possible to import them in a single NDDataset by using
 # the list of filenames
 # in the function call:
 
@@ -291,8 +292,7 @@ list_files = (
     "7_CZ0-100_Pd_103.SPA",
     "7_CZ0-100_Pd_104.SPA",
 )
-X = scp.read_omnic(list_files, directory="irdata/subdir", name="Merge 7_CZ0-100 Pd")
-X
+scp.read_omnic(list_files, directory="irdata/subdir", name="Merged 7_CZ0-100 Pd")
 
 # %% [markdown]
 # When compatible .spa files are alone in a directory, a very convenient is to call the
@@ -300,22 +300,45 @@ X
 # using only the directory path as argument that will gather the .spa files together:
 
 # %%
-X = scp.read_omnic("irdata/subdir/1-20")
-X
+scp.read_omnic("irdata/subdir/1-20")
 
-# %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
-# <div class='alert alert-warning'>
-# <b>Warning</b>
+# %% [markdown]
+# In the case  where not all files are compatibles, they are returned in different NDDatasets(with independent merging).
 #
-# There is a difference in specifying the directory to read as an argument as above or
-# as a keyword like here:
-# ```ipython3
-# X = scp.read_omnic(directory='irdata/subdir')
-# ```
-# in the latter case, a **dialog** is opened to select files in the given directory,
-# while in the former,
-# the file are read silently and concatenated (if possible).
-# </div>
+# For example:
+
+# %%
+Y = scp.read_omnic("irdata/subdir/")
+Y
+
+# %% [markdown]
+# Here we get a list of two NDDataset because there is two type of file in the directory (`.spa` and `.srs`).
+#
+# The desired dataset can be obtained using a list:
+
+# %%
+Y[1]
+
+# %% [markdown]
+# Other ways to select only the required file with extension (`.spa`)are:
+#
+# - writing a list as previously explicitely  listing the required files.
+# - using a more specific reader:
+
+# %%
+scp.read_spa("irdata/subdir/")
+
+# %% [markdown]
+# - using a pattern filter
+
+# %%
+scp.read_omnic("irdata/subdir/", pattern="*.spa")
+
+# %% [markdown]
+# One advantage of the latter solution is a greter flexibility. For instance the lollowing will select only the `*101.spa` and `*102.spa`:
+
+# %%
+scp.read_omnic("irdata/subdir/", pattern="*10[12].spa", merge=False)
 
 # %% [markdown]
 # ## Handling Metadata
@@ -371,13 +394,13 @@ except Exception as e:
 X = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
 
 # %% [markdown]
-# * Baseline correction
+# - Baseline correction
 
 # %%
 X_corrected = X - X[0]  # Subtract first spectrum as baseline
 
 # %% [markdown]
-# * Normalization
+# - Normalization
 
 # %%
 X_normalized = X / X.max()

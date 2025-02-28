@@ -480,6 +480,8 @@ class BuildDocumentation:
             if self.directory and str(self.directory) not in str(item):
                 continue
             try:
+                if self.settings["delnb"]:
+                    item.with_suffix(".ipynb").unlink()
                 self._sync_notebook_pair(item)
             except Exception as e:
                 print(f"Failed to sync {item}: {e}")
@@ -1071,23 +1073,4 @@ def main():
 
 # ======================================================================================
 if __name__ == "__main__":
-    if not ON_GITHUB:
-        sys.argv = [
-            "make.py",
-            "html",
-            # "--no-api",
-            # --no-exec",
-            # "--no-sync",
-            # "-vv",
-            "--directory",
-            # "userguide/",
-            # "gettingstarted/install/",
-            # "--single-doc",
-            "userguide/importexport/",
-            # "gettingstarted/overview.ipynb",
-            # "gettingstarted/getting_help.rst",
-            # "gettingstarted/install/index.rst",
-            # "userguide/objects/dataset/dataset.ipynb",
-            # "spectrochempy.IRIS",
-        ]  #  "-T", "0.6.10"]
     sys.exit(main())
