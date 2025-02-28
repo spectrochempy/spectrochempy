@@ -13,8 +13,6 @@ SpectroChemPy
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3823841.svg)](https://doi.org/10.5281/zenodo.3823841)
 ![Conda](https://img.shields.io/conda/l/spectrocat/spectrochempy)
 
-
-
 ## What is SpectroChemPy?
 
 SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python. It is a cross-platform software, running on Linux, Windows or OS X.
@@ -41,10 +39,10 @@ SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling Spect
 ## Quick Links
 
 * 📚 [Documentation](https://www.spectrochempy.fr)
-* 🚀 [Installation Guide](https://www.spectrochempy.fr/stable/gettingstarted/install/index.html)
-* 📓 [Example Notebooks](https://www.spectrochempy.fr/downloads/stable-spectrochempy-notebooks.zip)
+* 🚀 [Installation Guide](https://www.spectrochempy.fr/gettingstarted/install/index.html)
+* 📓 [Example Notebooks](https://www.spectrochempy.fr/gettingstarted/examples/index.html)
 * 🐛 [Issue Tracker](https://github.com/spectrochempy/spectrochempy/issues)
-* 📝 [How to Cite](https://www.spectrochempy.fr/stable/credits/citing.html)
+* 📝 [How to Cite](https://www.spectrochempy.fr/credits/citing.html)
 * 💻 [Source Code](https://github.com/spectrochempy/spectrochempy)
 
 ## License
