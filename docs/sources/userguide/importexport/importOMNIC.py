@@ -62,13 +62,13 @@ X
 # - `name` is the name of the group of spectra as it appears in the .spg file. OMNIC
 #   sets this name to the .spg filename used at the creation of the group.
 #   In this example, the name ("Group sust Mo_Al2O3_base line.SPG") differs
-#   from the filename ("CO@Mo_Al2O3.SPG") because the latter has been changed from
+#   from the filename (`"CO@Mo_Al2O3.SPG"`) because the latter has been changed from
 #   outside OMNIC (directly in the OS).
 #
 # - `author` is that of the creator of the NDDataset (not of the .spg file, which, to
 #   our knowledge, does not have
 #   this type of attribute). The string is composed of the username and of the machine
-#   name as given by the OS, e.g., 'username@machinename' .
+#   name as given by the OS, e.g., `"username@machinename"`.
 #   It can be accessed and changed using `X.author` .
 #
 # - `created` is the creation date of the NDDataset (again not that of the .spg file).
@@ -260,8 +260,8 @@ X.y.values  # displays the `y` dimension
 # share common axes or dimensions !
 # Future releases might include an option to deal with such a case and return a list of
 # NDDatasets. Let us know if you
-# are interested in such a feature, see [Bug reports and enhancement requests]
-# (https://www.spectrochempy.fr/dev/dev/issues.html).
+# are interested in such a feature, see <a href="https://www.spectrochempy.fr/devguide/issues.html">Bug reports and enhancement requests.</a>
+# </div>
 #
 
 # %% [markdown]

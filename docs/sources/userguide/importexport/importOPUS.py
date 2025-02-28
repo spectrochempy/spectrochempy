@@ -51,12 +51,6 @@ import spectrochempy as scp
 Z = scp.read_opus("irdata/OPUS/test.0002")
 Z
 
-# %%
-Z.meta
-
-# %%
-Z.meta.params.fourier_transform
-
 # %% [markdown] {"editable": true, "slideshow": {"slide_type": ""}}
 # <div class='alert alert-info'>
 # <b>Note:</b><br/>

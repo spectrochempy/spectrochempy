@@ -155,14 +155,47 @@ X
 #   ```
 #
 # - The `os` or `pathlib` modules can be used to work with pathnames.
-#   See the section [Good practice: use `os` or `pathlib` modules](#Good-practice:-use-os-or-pathlib-modules).
+#   See the section
+#   [Good practice:Use of os or pathlib packages](#Use-os-or-pathlib-packages).
 # - The `preferences.datadir` variable can be used to set a default directory where to look for data.
-#   See the section [Use a default search directory: `datadir`](#Use-a-default-search-directory:-`datadir`).
+#   See the section [Another default search directory: datadir](#Another-default-search-directory:-datadir).
 #
 
 # %% [markdown]
-# ## Good pratices
-# #### Use relative paths
+# ## Good practices
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# ### Use relative paths
 #
 # As path are system dependent, it is a good practice to use relative pathnames in scripts and notebooks.
 #
@@ -203,7 +236,7 @@ X
 # X = scp.read('wodger.spg', directory='Life')
 # ```
 #
-# #### Use `os` or `pathlib` modules
+# ### Use os or pathlib packages
 #
 # In python, working with pathnames is classically done with dedicated modules such as
 # `os` or `pathlib` python modules.
@@ -234,7 +267,7 @@ X
 # - [os](https://docs.python.org/3/library/os.html)
 # - [pathlib](https://docs.python.org/3/library/pathlib.html)
 #
-# #### Another default search directory: `datadir`
+# #### Another default search directory: datadir
 #
 # Spectrochempy also comes with the definition of a second default directory path where
 # to look at the data: the `datadir` directory. It is defined in the variable `preferences.datadir` which
