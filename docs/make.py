@@ -477,6 +477,8 @@ class BuildDocumentation:
             return
 
         for item in self._get_notebook_files():
+            if self.directory and str(self.directory) not in str(item):
+                continue
             try:
                 self._sync_notebook_pair(item)
             except Exception as e:
