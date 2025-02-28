@@ -84,16 +84,16 @@ X
 #
 # | Reader         | File Formats                                      | Extensions      |
 # |---------------|-------------------------------------------------|----------------|
-# | read_omnic, read_spa, read_spg, read_srs    | Thermo Scientific/Nicolet OMNIC files          | .spa, .spg     |
+# | read_omnic,<br/>read_spa,<br/>read_spg,<br/>read_srs    | Thermo Scientific/Nicolet OMNIC files          | .spa, .spg, .srs     |
 # | read_opus     | Bruker OPUS files                              | .0, .1, .000, ... |
 # | read_csv      | Comma-Separated Values (CSV) files             | .csv           |
-# | read_jcamp    | JCAMP-DX spectral data files                   | .dx, .jdx      |
-# | read_matlab, read_mat   | MATLAB files                                   | .mat, .dso     |
+# | read_jcamp, <br/>read_dx| JCAMP-DX spectral data files                   | .dx, .jdx      |
+# | read_matlab,<br/>read_mat   | MATLAB files                                   | .mat, .dso     |
 # | read_topspin  | Bruker TopSpin NMR files                       | fid, ser, 1r, 1i, 2rr... |
 # | read_labspec  | LABSPEC6 spectral data files                   | .txt           |
-# | read_wire, read_wdf | Renishaw Wire files                     | .wdf           |
+# | read_wire,<br/>read_wdf | Renishaw Wire files                     | .wdf           |
 # | read_scp      | SpectroChemPy-specific files                   | .scp           |
-# | read_soc , read_ddr, read_hdr, read_sdr     | Surface Optics Corporation files               | .ddr, .hdr, .sdr |
+# | read_soc,<br/>read_ddr,<br/>read_hdr,<br/>read_sdr     | Surface Optics Corporation files               | .ddr, .hdr, .sdr |
 # | read_galactic | Galactic spectral files                        | .spc           |
 # | read_quadera  | Pfeiffer Vacuum QUADERA mass spectrometer files | .txt           |
 # | read          | Generic reader (automatically detects format)  | -              |

@@ -35,14 +35,11 @@
 #
 # [JCAMP-DX](http://www.jcamp-dx.org/) is an open format initially developed for IR
 # data and extended to other spectroscopies. At present, the JCAMP-DX reader implemented
-# in SpectroChemPy is limited to IR data and AFFN encoding (see McDonald and Wilks, 1988 [^1]).
+# in SpectroChemPy is limited to IR data and AFFN encoding (see <cite data-cite="mcdonald:1988">McDonald and Wilks, 1988</cite>.
 #
 # The JCAMP-DX reader of SpectroChemPy has been essentially written to read JCAMP-DX files
 # exported by the SpectroChemPy `write_jdx()` writer.
 #
-# [^1]: R. S. McDonald and Paul A. Wilks, "JCAMP-DX: A Standard Form for Exchange of Infrared
-# Spectra in Computer Readable Form", Applied Spectroscopy, 1988, 42(1), 151–162.
-# DOI: [10.1366/0003702884428734](https://doi.org/10.1366/0003702884428734)
 
 # %%
 import spectrochempy as scp
