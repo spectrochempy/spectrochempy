@@ -208,7 +208,7 @@ region.plot(colorbar=True)
 # - [Plotting tutorial](../userguide/plotting/plotting.ipynb) for more information on advanced plotting.
 
 # %% [markdown]
-# ## Data Processing Techniques ⚙️
+# ## Data Processing Techniques
 #
 # SpectroChemPy includes numerous processing methods. Here are some common examples:
 
