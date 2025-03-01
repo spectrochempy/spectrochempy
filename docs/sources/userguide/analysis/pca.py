@@ -76,7 +76,7 @@ X = A[-1]
 X
 
 # %%
-_ = X.plot()
+X.plot()
 
 # %% [markdown]
 # This original matrix ('m1') does not contain information as to the actual elution time, wavelength,

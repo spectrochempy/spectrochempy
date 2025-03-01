@@ -598,7 +598,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         ma = max(X.max(), X_hat.max())
         mao = ma * offset / 100
         mad = ma * offset / 100 + ma / 10
-        _ = X.plot(color=colX, **kwargs)  # - X.min()
+        X.plot(color=colX, **kwargs)  # - X.min()
         _ = (X_hat - mao).plot(  # - X_hat.min()
             clear=False,
             ls="dashed",

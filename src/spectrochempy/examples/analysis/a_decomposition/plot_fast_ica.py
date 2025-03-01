@@ -30,7 +30,7 @@ X.y.title = "elution time"
 X.x.title = "wavelength"
 X.y.units = "hours"
 X.x.units = "cm^-1"
-_ = X.plot()
+X.plot()
 
 # %%
 # Create and fit a FastICA object

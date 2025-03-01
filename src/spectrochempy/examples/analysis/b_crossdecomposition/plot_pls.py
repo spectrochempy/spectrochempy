@@ -34,7 +34,7 @@ X = ds_list[4]
 X.title = "reflectance"
 X.x.title = "Wavelength"
 X.x.units = "nm"
-_ = X.plot(cmap=None)
+X.plot(cmap=None)
 
 # %%
 # The values of the properties we want to predict are in the 4th dattaset named `'propval'` dataset:

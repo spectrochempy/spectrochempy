@@ -41,7 +41,7 @@ _ = dataset.plot_map()
 # %%
 # Extract slices along x
 s = dataset[-27.6, :]
-_ = s.plot()
+s.plot()
 
 # %%
 # Baseline correction of this slice

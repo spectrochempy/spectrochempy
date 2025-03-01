@@ -84,7 +84,7 @@ X = A[-1]
 X
 
 # %%
-_ = X.plot()
+X.plot()
 
 # %% [markdown]
 # The original dataset is the 'm1' matrix and does not contain information as to the

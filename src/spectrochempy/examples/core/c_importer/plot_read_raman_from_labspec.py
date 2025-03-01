@@ -33,7 +33,7 @@ A.plot(colorbar=True)
 A.plot_map(colorbar=True)
 
 A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
-_ = A.plot()
+A.plot()
 
 # %%
 # Open a dialog - note the presence of the keyword directory
@@ -42,7 +42,7 @@ B = scp.read_labspec(directory=ramandir)
 # %%
 # this pack all spectra of the subdir directory (without dialog - look at the difference above)
 B = scp.read_labspec(ramandir / "subdir")
-_ = B.plot()
+B.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

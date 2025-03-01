@@ -80,8 +80,8 @@ X.coordset
 
 prefs = X.preferences
 prefs.figure.figsize = (7, 3)
-_ = X.plot(colorbar=True)
-_ = X.plot_map(colorbar=True)
+X.plot(colorbar=True)
+X.plot_map(colorbar=True)
 
 # %%
 # To seamlessly work with the second coordinates (pressures), we can change the default

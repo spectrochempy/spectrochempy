@@ -44,13 +44,13 @@ new2, curve2 = dataset1D.copy().em(
 # %%
 # Plotting
 
-_ = dataset1D.plot(zlim=(-2, 2), color="k")
+dataset1D.plot(zlim=(-2, 2), color="k")
 
-_ = curve1.plot(color="r")
-_ = new1.plot(color="r", clear=False, label=" em = 20 hz")
+curve1.plot(color="r")
+new1.plot(color="r", clear=False, label=" em = 20 hz")
 
-_ = curve2.plot(color="b", clear=False)
-_ = new2.plot(dcolor="b", clear=False, label=" em = 30 HZ, shifted = ")
+curve2.plot(color="b", clear=False)
+new2.plot(dcolor="b", clear=False, label=" em = 30 HZ, shifted = ")
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
@@ -59,3 +59,5 @@ _ = new2.plot(dcolor="b", clear=False, label=" em = 30 HZ, shifted = ")
 # scp.show()
 
 # sphinx_gallery_thumbnail_number = -1
+
+# %%

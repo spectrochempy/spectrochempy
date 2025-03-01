@@ -27,12 +27,12 @@ A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
 
 # %%
 # Plot the spectrum
-_ = A.plot()
+A.plot()
 
 # %%
 # Crop the spectrum to a useful region
 B = A[60.0:]
-_ = B.plot()
+B.plot()
 
 # %%
 # Baseline correction
@@ -140,7 +140,7 @@ plot_result(Bs, corr, baseline)
 
 C = scp.read_labspec("Activation.txt", directory=ramandir)
 # C = C[20:]  # discard the first 20 spectra
-_ = C.plot()
+C.plot()
 
 # %%
 # Now we apply the AsLS method on the series of spectra

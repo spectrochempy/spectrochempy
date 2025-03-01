@@ -101,7 +101,7 @@ _ = nd4.plot()
 # %%
 X = nd1[0]
 nd5 = scp.despike(X, size=11, delta=5)
-_ = X.plot()
+X.plot()
 _ = nd5.plot(clear=False, ls="-", c="r")
 
 # %% [markdown]
@@ -111,7 +111,7 @@ _ = nd5.plot(clear=False, ls="-", c="r")
 
 # %%
 nd5b = scp.despike(X, size=21, delta=2)
-_ = X.plot()
+X.plot()
 _ = nd5b.plot(clear=False, ls="-", c="r")
 
 # %% [markdown]

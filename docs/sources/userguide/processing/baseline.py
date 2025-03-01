@@ -54,7 +54,7 @@ X = scp.read("irdata/nh4y-activation.spg")
 prefs = X.preferences
 prefs.figure.figsize = (8, 4)
 # plot the spectra
-_ = X.plot()
+X.plot()
 
 # %% [markdown]
 # ## The `Baseline` processor
@@ -119,7 +119,7 @@ _ = X2.plot()
 
 # %%
 X[:, 891.0:1234.0] = scp.MASKED
-_ = X.plot()
+X.plot()
 
 # %% [markdown]
 # Fitting the baseline is done transparently
@@ -312,7 +312,7 @@ A.x.units = "nm"
 prefs = A.preferences
 prefs.figure.figsize = (7, 3)
 prefs.colormap = "magma_r"
-_ = A.plot()
+A.plot()
 
 # %% [markdown]
 # ### Detrending
@@ -367,7 +367,7 @@ R = A[0]
 R1 = R.detrend()
 
 # plots
-_ = R.plot(label="original")
+R.plot(label="original")
 R1.plot(label="detrended", clear=False)
 ax = (R - R1).plot(label="trend", clear=False, cmap=None, color="red", ls=":")
 ax.legend(loc="upper left")
@@ -385,7 +385,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 # with breakpoints
 bp = [1300.0, 1856.0]  # warning must be float to set location, in int for indices
 R2 = R.detrend(breakpoints=bp)
-_ = R.plot()
+R.plot()
 R2.plot(clear=False)
 ax = (R - R2).plot(clear=False, cmap=None, color="red", ls=":")
 _ = ax.set_ylim([-0.3, 0.8])

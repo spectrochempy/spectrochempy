@@ -54,7 +54,7 @@ prefs = X.preferences
 prefs.figure.figsize = (8, 4)
 
 # and use plot method of the NDDataset
-_ = X.plot()
+X.plot()
 
 # %% [markdown]
 # To have a better view of the filters effect, we will zoom on a smaller region:

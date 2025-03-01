@@ -43,7 +43,7 @@ D = scp.NDDataset(ds[1][:, 1:].data.T)
 D.y = scp.Coord(ds[0].data.squeeze(), title="time") / 60
 D.x = scp.Coord(ds[1][:, 0].data.squeeze(), title="wavelength / cm$^{-1}$")
 D = D[::4]
-_ = D.plot()
+D.plot()
 
 # %%
 # A first estimate of the concentrations can be obtained by EFA:

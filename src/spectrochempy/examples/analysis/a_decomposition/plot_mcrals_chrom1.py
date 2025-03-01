@@ -58,7 +58,7 @@ guess = datasets[3]
 
 # %%
 # Plot of X and of the guess:
-_ = X.plot()
+X.plot()
 _ = guess.plot()
 
 # %%

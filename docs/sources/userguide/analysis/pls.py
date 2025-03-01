@@ -77,7 +77,7 @@ X = A[-3]
 X.title = "absorbance"
 X.x.title = "Wavelength"
 X.x.units = "nm"
-_ = X.plot(cmap=None)
+X.plot(cmap=None)
 
 # %%
 X_ = X.detrend()

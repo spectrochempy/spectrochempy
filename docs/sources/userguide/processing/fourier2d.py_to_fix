@@ -154,7 +154,7 @@ spect = spec.zf_size(size=512, dim="y")
 spect.em(lb=10 * ur.Hz, inplace=True, dim="y")
 s = spect.fft(dim="y")
 prefs.contour_start = 0.12
-_ = s.plot_map()
+s.plot_map()
 
 # %% [markdown]
 # Here is an expansion:
@@ -197,8 +197,8 @@ prefs.contour_start = 0.07
 s = s2.fft(256, dim="y")
 s = s.pk(phc0=-40, dim="y")
 s = s.pk(phc0=-5, rel=True)
-_ = s.plot_map(xlim=ex, ylim=ey)
-_ = s.plot_map()
+s.plot_map(xlim=ex, ylim=ey)
+s.plot_map()
 
 # %% [markdown]
 # ## Processing a QF encoded file

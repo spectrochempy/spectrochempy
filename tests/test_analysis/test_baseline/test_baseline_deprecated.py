@@ -235,7 +235,7 @@ def test_userguide_example():
     prefs = X.preferences
     prefs.figure.figsize = (7, 3)
     prefs.colormap = "magma"
-    _ = X.plot()
+    X.plot()
 
     # %% [markdown]
     # ## Background subtraction
