@@ -63,7 +63,12 @@ div.graphviz {
 }
 
 /* add some space around titles */
-.rst-content h1, .rst-content h2, .rst-content h3, .rst-content h4, .rst-content h5, .rst-content h6 {
+.rst-content h1,
+.rst-content h2,
+.rst-content h3,
+.rst-content h4,
+.rst-content h5,
+.rst-content h6 {
     margin-bottom: 12px;
     margin-top: 24px;
 }
@@ -87,10 +92,12 @@ table div.MathJax_Display {
 dl.glossary dd ul {
     margin-bottom: 12px !important;
 }
+
 dl.glossary dd {
     margin-top: 4px;
     margin-bottom: 18px;
 }
+
 dl.glossary dt {
     margin-bottom: 2px;
 }
@@ -110,11 +117,13 @@ footer p {
 div.wy-nav-content a:link {
     color: #0069d6;
 }
-div.wy-nav-content a:visited  {
+
+div.wy-nav-content a:visited {
     color: #9151b6;
 }
+
 div.wy-nav-content a:hover {
-    text-decoration:underline;
+    text-decoration: underline;
 }
 
 /*
@@ -184,7 +193,8 @@ div.pkgnav ul li a:hover {
 }
 
 /* style of the attributes */
-html.writer-html4 .rst-content dl:not(.docutils) dl:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple)>dt, html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple) dl:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple)>dt {
+html.writer-html4 .rst-content dl:not(.docutils) dl:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple)>dt,
+html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple) dl:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple)>dt {
     margin-bottom: 6px;
     border: none;
     /* border-left: 3px solid #ccc; */
@@ -193,21 +203,30 @@ html.writer-html4 .rst-content dl:not(.docutils) dl:not(.option-list):not(.field
 }
 
 /* Style for version selector */
+.wy-side-nav-search>div.switch-menus {
+    position: relative;
+    display: block;
+    margin-top: -1.7em;
+    margin-bottom: .2em;
+    font-weight: 400;
+    color: hsla(0, 0%, 100%, .3);
+}
+
 .version-selector {
     display: flex;
     align-items: center;
     margin: .3em;
 }
 
-
-.version-selector .fa-book, .version-selector label, .version-selector select {
+.version-selector select {
     margin-right: 10px;
     font-size: 11pt;
 }
 
 select {
-    background-color: #343131;
+    /* background-color: #227fbb; */
+    background: transparent;
     border: none;
     box-shadow: none;
-    color: #969595;
+    color: #fffdfd;
 }

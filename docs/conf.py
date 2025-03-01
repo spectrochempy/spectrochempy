@@ -84,6 +84,7 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "sphinxcontrib.bibtex",
     "nbsphinx",
+    "sphinx_design",
 ]
 if not single_doc_or_dir:
     extensions += [
@@ -228,7 +229,7 @@ html_theme = "sphinx_rtd_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "logo_only": True,
+    "logo_only": False,
     "collapse_navigation": False,
     "display_version": True,
     "navigation_depth": 5,
@@ -271,7 +272,7 @@ html_last_updated_fmt = "%b %d, %Y"
 html_use_smartypants = True
 
 # If true, links to the reST sources are added to the pages.
-html_show_sourcelink = True
+html_show_sourcelink = False
 
 # Don't add .txt suffix to source files:
 html_sourcelink_suffix = ""

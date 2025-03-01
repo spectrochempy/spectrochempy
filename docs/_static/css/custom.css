@@ -11,7 +11,8 @@
 
 .scp-output summary {
     cursor: pointer;
-    font-weight: bold;
+    font-weight: normal;
+    /*bold;*/
     font-size: 11pt;
 }
 
