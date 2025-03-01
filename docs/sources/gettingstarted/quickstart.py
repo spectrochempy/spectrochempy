@@ -21,70 +21,83 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.11.11
+#     version: 3.13.2
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
 #       version_major: 2
 #       version_minor: 0
 # ---
-
-# %% [markdown]
-#
-
+# ruff: noqa: T201
 # %% [markdown]
 # # Quickstart Tutorial
-
-# %% [markdown]
-# Welcome to SpectroChemPy! This tutorial will give you a quick overview of the main features
-# and capabilities of the library. We'll cover:
 #
-# 1. Loading and displaying spectroscopic data
-# 2. Basic data manipulation and plotting
-# 3. Processing techniques (smoothing, baseline correction)
-# 4. Advanced analysis methods
+# **Contents**
+# - [Installing SpectroChemPy](#installing-spectrochempy)
+# - [Getting Started](#getting-started)
+# - [Working with Spectroscopic Data](#working-with-spectroscopic-data)
+# - [Data Processing Techniques](#data-processing-techniques)
+# - [Advanced Analysis](#advanced-analysis)
 #
-# For more detailed information, check out:
-# * [Gallery of Examples](examples/index.rst)
-# * [User's Guide](../userguide/introduction/introduction.rst)
-# * [API Reference](../reference/index.rst)
+# > **What you'll learn**
+# > * Load and visualize spectroscopic data
+# > * Perform basic data manipulation and plotting
+# > * Apply common processing techniques
+# > * Use advanced analysis methods
 
 # %% [markdown]
 # ## Installing SpectroChemPy
-# If you haven't already, install SpectroChemPy.
 #
-# You can install it using `pip`:
+# > **Prerequisites**
+# > * Python 3.8 or later
+# > * Basic knowledge of Python
+# > * Jupyter notebook environment
+#
+# You can install SpectroChemPy using either pip or mamba:
+#
+# **Using pip:**
 # ```bash
 # pip install spectrochempy
 # ```
 #
-# or `mamba`:
+# **Using mamba:**
 # ```bash
 # mamba install -c spectrocat spectrochempy
 # ```
-# See the [Installation Guide](install/index.rst)
-# for detailled instructions.
+#
+# See the [Installation Guide](install/index.rst) for detailed instructions.
 
 # %% [markdown]
 # In the following, we assume that we are running `spectrochempy` in a Jupyter notebook.
 # See [here](../userguide/introduction/interface.ipynb) for details on how to start a Jupyter notebook.
 
 # %% [markdown]
-# ## Importing SpectroChemPy
-# First, let's import SpectroChemPy (it may take a few seconds to load the library).
+# ## Getting Started
 #
-# By convention, we use the alias `scp`:
+# Let's start by importing SpectroChemPy and checking its version:
 
 # %%
 import spectrochempy as scp
 
 # %% [markdown]
-# ## Loading Data
+# ## Working with Spectroscopic Data
 #
-# As an example, let's load some FTIR (Fourier Transform Infrared) data:
+# ### Loading Data
+#
+# SpectroChemPy supports many file formats including:
+# * OMNIC (.spa, .spg)
+# * JCAMP-DX (.dx, .jdx)
+# * CSV files
+# * And [many more](../userguide/importexport/import.ipynb)
+#
+# Let's load an example FTIR dataset:
 
 # %%
+# Load FTIR data of NH4Y zeolite activation
 ds = scp.read("irdata/nh4y-activation.spg")
+print(f"Dataset shape: {ds.shape}")  # Show dimensions
+print(f"x-axis unit: {ds.x.units}")  # Show wavenumber units
+print(f"y-axis unit: {ds.y.units}")  # Show time units
 
 # %% [markdown]
 # The `read` function is a powerful method that can load various file formats. In this case,
@@ -187,10 +200,10 @@ region.plot(colorbar=True)
 # - Statistical analysis
 # - Data transformation
 # - And more
-
+#
 # For more information, see:
 #
-# - [Data Manipulation tutorial](../userguide/objects/dataset/dataset.ipynb) section.
+# - [More insight on the NDDataset objects](../userguide/objects/dataset/dataset.ipynb) section.
 # - [API Reference](../reference/index.rst) for a full list of available operations.
 # - [Plotting tutorial](../userguide/plotting/plotting.ipynb) for more information on advanced plotting.
 
@@ -244,8 +257,9 @@ blc.corrected.plot()
 # * Derivatives
 # * Peak detection
 # * And more
-
+#
 # For more information, see the [Processing tutorial](../userguide/processing/index.rst) section.
+
 # %% [markdown]
 # ## Advanced Analysis
 #
@@ -311,15 +325,27 @@ iris.plotdistribution(-7, colormap="magma")
 # * And more
 #
 # For more information, see the [Advanced Analysis tutorial](../userguide/analysis/index.rst) section or the [Example's gallery](examples/index.rst).
+
 # %% [markdown]
-# ## Conclusion
+# ## Next Steps
 #
-# This tutorial provided a quick overview of SpectroChemPy's main features.
+# Now that you've got a taste of SpectroChemPy's capabilities, here are some suggestions for diving deeper:
 #
-# For more detailed information, check out:
-# * [Gallery of Examples](examples/index.rst)
-# * [User's Guide](../userguide/index.rst)
-# * [API Reference](../reference/index.rst)
-#
-# If you have any questions or need help, feel free to ask on the
-# [SpectroChemPy discussion pages](https://github.com/spectrochempy/spectrochempy/discussions).
+# <div class="grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+#     <div class="grid-item">
+#         <h3><a href="examples/index">Examples Gallery</a></h3>
+#         <p>Browse through practical examples and use cases</p>
+#     </div>
+#     <div class="grid-item">
+#         <h3><a href="../userguide/index">User Guide</a></h3>
+#         <p>Learn about specific features in detail</p>
+#     </div>
+#     <div class="grid-item">
+#         <h3><a href="../reference/index">API Reference</a></h3>
+#         <p>Explore the complete API documentation</p>
+#     </div>
+#     <div class="grid-item">
+#         <h3><a href="https://github.com/spectrochempy/spectrochempy/discussions">Get Help</a></h3>
+#         <p>Join our community discussions</p>
+#     </div>
+# </div>

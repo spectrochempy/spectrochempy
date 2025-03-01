@@ -79,12 +79,12 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx.ext.todo",
     "sphinx_tabs.tabs",
-    "matplotlib.sphinxext.plot_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "sphinxcontrib.bibtex",
     "nbsphinx",
     "sphinx_design",
+    "jupyter_sphinx",
 ]
 if not single_doc_or_dir:
     extensions += [
@@ -609,5 +609,9 @@ def setup(app):
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
-    # Add this line to set the content type for RST files
     app.config.rst_mimetype = rst_mimetype
+
+
+# Add jupyter-sphinx configuration at the root level
+jupyter_execute_default_kernel = "python3"
+jupyter_execute_notebooks = "auto"

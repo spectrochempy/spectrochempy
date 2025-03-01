@@ -49,6 +49,7 @@ dependencies:
     - ipywidgets=8.1.5
     - jsonschema=4.23.0
     - jupyter=1.1.1
+    - jupyter-sphinx
     - jupytext=1.16.7
     - nbconvert=7.16.6
     - nbformat=5.10.4

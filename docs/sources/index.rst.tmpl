@@ -48,7 +48,7 @@ SpectroChemPy: Advanced Spectroscopic Data Analysis
 * :doc:`Why Spectrochempy? <gettingstarted/whyscpy>`
 * :doc:`5-minute quickstart <gettingstarted/quickstart>`
 * :doc:`Installation guide <gettingstarted/install/index>`
-* :doc:`Getting help  <gettingstarted/getting_help>` `
+* :doc:`Getting help  <gettingstarted/getting_help>`
 
 .. grid:: 2
     :gutter: 3
@@ -84,6 +84,20 @@ SpectroChemPy: Advanced Spectroscopic Data Analysis
     :limit: 3
 
 .. toctree::
+    :hidden:
+
+    whatsnew/latest
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+    :caption: Getting Started
+
+    5-minute quickstart <gettingstarted/quickstart>
+    Installation guide <gettingstarted/install/index
+    Getting help  <gettingstarted/getting_help
+
+.. toctree::
     :maxdepth: 3
     :hidden:
     :caption: Documentation
@@ -94,6 +108,50 @@ SpectroChemPy: Advanced Spectroscopic Data Analysis
     Examples <examples/index>
     Development <devguide/index>
     Credits & License <credits/index>
+
+.. toctree::
+    :maxdepth: 3
+    :hidden:
+    :caption: User's Guide & Tutorials
+
+    userguide/introduction/introduction
+    userguide/api/api
+    userguide/objects/index
+    userguide/importexport/index
+    userguide/processing/index
+    userguide/analysis/index
+    userguide/plotting/plotting
+
+.. toctree::
+    :maxdepth: 3
+    :hidden:
+    :caption: Reference
+
+    {% if include_api -%}
+    reference/index
+    {% endif -%}
+    reference/glossary
+    reference/bibliography
+    reference/papers
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+    :caption: Contribute
+
+    Bug reports & feature request <devguide/issues>
+    Sharing examples & tutorials <devguide/examples>
+    devguide/index
+
+.. toctree::
+    :maxdepth: 1
+    :hidden:
+    :caption: Credits
+
+    credits/credits
+    credits/citing
+    credits/license
+    credits/seealso
 
 {% elif single and pattern.endswith('.ipynb') -%}
 .. toctree::
