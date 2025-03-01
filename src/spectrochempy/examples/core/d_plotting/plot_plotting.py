@@ -46,17 +46,17 @@ dataset = dataset[:, ::100]
 datasets = [dataset[0], dataset[10], dataset[20], dataset[50], dataset[53]]
 labels = ["sample {}".format(label) for label in ["S1", "S10", "S20", "S50", "S53"]]
 
-_ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
+scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # %%
 # plot multiple with style
-_ = scp.plot_multiple(
+scp.plot_multiple(
     method="scatter", style="sans", datasets=datasets, labels=labels, legend="best"
 )
 
 # %%
 # check that style reinit to default
-_ = scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
+scp.plot_multiple(method="scatter", datasets=datasets, labels=labels, legend="best")
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

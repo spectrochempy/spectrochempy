@@ -30,7 +30,7 @@
 # ---
 # ruff: noqa: T201
 # %% [markdown]
-# # Quickstart Tutorial
+# # Quickstart Tutorial 🚀
 #
 # **Contents**
 # - [Installing SpectroChemPy](#installing-spectrochempy)
@@ -39,16 +39,16 @@
 # - [Data Processing Techniques](#data-processing-techniques)
 # - [Advanced Analysis](#advanced-analysis)
 #
-# > **What you'll learn**
+# > **What you'll learn** 📝
 # > * Load and visualize spectroscopic data
 # > * Perform basic data manipulation and plotting
 # > * Apply common processing techniques
 # > * Use advanced analysis methods
 
 # %% [markdown]
-# ## Installing SpectroChemPy
+# ## Installing SpectroChemPy 💻
 #
-# > **Prerequisites**
+# > **Prerequisites** ✅
 # > * Python 3.8 or later
 # > * Basic knowledge of Python
 # > * Jupyter notebook environment
@@ -80,9 +80,9 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# ## Working with Spectroscopic Data
+# ## Working with Spectroscopic Data 📊
 #
-# ### Loading Data
+# ### Loading Data 📥
 #
 # SpectroChemPy supports many file formats including:
 # * OMNIC (.spa, .spg)
@@ -208,7 +208,7 @@ region.plot(colorbar=True)
 # - [Plotting tutorial](../userguide/plotting/plotting.ipynb) for more information on advanced plotting.
 
 # %% [markdown]
-# ## Data Processing Techniques
+# ## Data Processing Techniques ⚙️
 #
 # SpectroChemPy includes numerous processing methods. Here are some common examples:
 
@@ -261,7 +261,7 @@ blc.corrected.plot()
 # For more information, see the [Processing tutorial](../userguide/processing/index.rst) section.
 
 # %% [markdown]
-# ## Advanced Analysis
+# ## Advanced Analysis 🔬
 #
 # ### IRIS Processing example
 #
@@ -324,28 +324,14 @@ iris.plotdistribution(-7, colormap="magma")
 # * Kinetic modeling
 # * And more
 #
-# For more information, see the [Advanced Analysis tutorial](../userguide/analysis/index.rst) section or the [Example's gallery](examples/index.rst).
+# For more information, see the [Advanced Analysis tutorial](../userguide/analysis/index.rst) section.
 
 # %% [markdown]
-# ## Next Steps
+# ## Next Steps 🎯
 #
 # Now that you've got a taste of SpectroChemPy's capabilities, here are some suggestions for diving deeper:
 #
-# <div class="grid-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-#     <div class="grid-item">
-#         <h3><a href="examples/index">Examples Gallery</a></h3>
-#         <p>Browse through practical examples and use cases</p>
-#     </div>
-#     <div class="grid-item">
-#         <h3><a href="../userguide/index">User Guide</a></h3>
-#         <p>Learn about specific features in detail</p>
-#     </div>
-#     <div class="grid-item">
-#         <h3><a href="../reference/index">API Reference</a></h3>
-#         <p>Explore the complete API documentation</p>
-#     </div>
-#     <div class="grid-item">
-#         <h3><a href="https://github.com/spectrochempy/spectrochempy/discussions">Get Help</a></h3>
-#         <p>Join our community discussions</p>
-#     </div>
-# </div>
+# - `Examples Gallery <examples/index>`_ 📚: Browse through practical examples and use cases
+# - `User Guide <../userguide/index>`_ 📖: Learn about specific features in detail
+# - `API Reference <../reference/index>`_ 🔍: Explore the complete API documentation
+# - `Get Help <https://github.com/spectrochempy/spectrochempy/discussions>`_ 💬: Join our community discussions

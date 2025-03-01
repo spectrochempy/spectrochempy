@@ -55,7 +55,7 @@ B4.plot(cmap=None)
 # Note that we can use the `legend` option to place the legend at the best location.
 # We can also use the `shift` option to shift the traces vertically.
 datasets = list(B4)
-_ = scp.plot_multiple(
+scp.plot_multiple(
     datasets,
     method="pen",
     legend="best",

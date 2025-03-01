@@ -445,7 +445,7 @@ labels = [f"sample {label}" for label in ["S1", "S10", "S20", "S50", "S53"]]
 prefs.reset()
 prefs.axes.facecolor = ".99"
 prefs.axes.grid = True
-_ = scp.plot_multiple(
+scp.plot_multiple(
     method="scatter", me=10, datasets=datasets, labels=labels, legend="best"
 )
 
