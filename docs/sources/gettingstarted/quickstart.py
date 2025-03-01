@@ -39,14 +39,14 @@
 # - [Data Processing Techniques](#data-processing-techniques)
 # - [Advanced Analysis](#advanced-analysis)
 #
-# > **What you'll learn** 📝
+# > **What you'll learn**
 # > * Load and visualize spectroscopic data
 # > * Perform basic data manipulation and plotting
 # > * Apply common processing techniques
 # > * Use advanced analysis methods
 
 # %% [markdown]
-# ## Installing SpectroChemPy 💻
+# ## Installing SpectroChemPy
 #
 # > **Prerequisites** ✅
 # > * Python 3.8 or later
@@ -80,9 +80,9 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# ## Working with Spectroscopic Data 📊
+# ## Working with Spectroscopic Data
 #
-# ### Loading Data 📥
+# ### Loading Data
 #
 # SpectroChemPy supports many file formats including:
 # * OMNIC (.spa, .spg)
@@ -261,7 +261,7 @@ blc.corrected.plot()
 # For more information, see the [Processing tutorial](../userguide/processing/index.rst) section.
 
 # %% [markdown]
-# ## Advanced Analysis 🔬
+# ## Advanced Analysis
 #
 # ### IRIS Processing example
 #
