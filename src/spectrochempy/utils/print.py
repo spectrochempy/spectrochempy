@@ -181,20 +181,20 @@ def convert_to_html(obj, open=False, id=None):
     # Process each section with CSS classes
     html_output = []
     for section in collapsable_sections.values():
-        open = ""  # if section[0] != "SUMMARY" else "open"  # closed by default
+        open = ""  # if section[0] != "SUMMARY" else " open"  # closed by default
         ps = _process_section(section)
         if ps == "<summary>SUMMARY</summary>":
             continue  # summary empty
         html_output.append(
-            f'<div class="scp-output section"><details {open}>{ps}</details></div>'
+            f'<div class="scp-output section"><details{open}>{ps}</details></div>'
         )
 
     obj._html_output = False
 
     s = "<div class='scp-output'>"
-    open = "" if not open else "open"
+    open = "" if not open else " open"
     idx = f"{id}: " if id is not None else ""
-    s += f"<details {open}><summary>{idx}{obj.__str__()}[{obj.name}]</summary>"
+    s += f"<details{open}><summary>{idx}{obj.__str__()}[{obj.name}]</summary>"
     s += "\n".join(html_output)
     s += "</details>"
     s += "</div>"
