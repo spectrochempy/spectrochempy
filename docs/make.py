@@ -876,6 +876,22 @@ class BuildDocumentation:
             self._delnb()  # Erase nb before starting
         self._sync_notebooks()
 
+    def linkcheck(self):
+        """Check the links in the documentation."""
+        from sphinx.cmd.build import build_main
+
+        srcdir = str(DOCS)
+        args = [
+            "-b",
+            "linkcheck",  # Use linkcheck builder
+            "-W",  # Treat warnings as errors
+            "-n",
+            "-q",  # Run in nit-picky mode, quietly
+            str(srcdir),  # Source directory
+            str(BUILDDIR / "linkcheck"),  # Output directory
+        ]
+        return build_main(args)
+
 
 # ======================================================================================
 def main():
@@ -896,6 +912,7 @@ def main():
     - html : Build HTML documentation
     - clean : Remove built documentation
     - sync-nb : Synchronize notebooks
+    - linkcheck : Check the links in the documentation
 
     Use -h/--help to see all available options.
     """

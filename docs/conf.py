@@ -430,7 +430,7 @@ nbsphinx_custom_formats = {
 
 # Configure sphinxcontrib-bibtex
 
-bibtex_bibfiles = ["reference/bibliography.bib"]
+bibtex_bibfiles = [str(REFERENCE / "bibliography.bib")]
 bibtex_default_style = "plain"
 bibtex_reference_style = "author_year"
 bibtex_cite_id = "{key}"
