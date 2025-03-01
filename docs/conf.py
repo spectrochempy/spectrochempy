@@ -228,9 +228,9 @@ html_theme = "sphinx_rtd_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "logo_only": True,
-    "collapse_navigation": False,
+    "logo_only": False,
     "display_version": True,
+    "collapse_navigation": False,
     "navigation_depth": 5,
     "sticky_navigation": True,
     "prev_next_buttons_location": "both",
