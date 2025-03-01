@@ -230,6 +230,7 @@ html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     "logo_only": True,
     "collapse_navigation": False,
+    "display_version": True,
     "navigation_depth": 5,
     "sticky_navigation": True,
     "prev_next_buttons_location": "both",
