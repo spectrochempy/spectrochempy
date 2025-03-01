@@ -27,6 +27,9 @@ class _Axes(maxes.Axes):
     # def draw(self, renderer):
     #    #    # with plt.rc_context({"something": self.xxx}):
     #    return super().draw(renderer)
+    def _repr_html_(self):
+        # Suppress text output in notebooks
+        return ""
 
     @remove_args_units
     def plot(self, *args, **kwargs):

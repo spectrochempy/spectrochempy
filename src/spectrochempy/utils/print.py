@@ -181,7 +181,7 @@ def convert_to_html(obj, open=False, id=None):
     # Process each section with CSS classes
     html_output = []
     for section in collapsable_sections.values():
-        open = "" if section[0] != "SUMMARY" else "open"
+        open = ""  # if section[0] != "SUMMARY" else "open"  # closed by default
         ps = _process_section(section)
         if ps == "<summary>SUMMARY</summary>":
             continue  # summary empty
