@@ -19,9 +19,11 @@ New features
 - Import/Export tutorials have been updated to reflect the new `brukeropus` package.
 - `read_dir()` (as well as the equivalent `read()`) has a new keyword argument `pattern` to filter files to read in a directory.
 - Text output of the `plot()` method is now suppressed in Jupyter notebooks, i.e.,
-  ```ipython
-  In [1]: ds.plot()
-  ```
+
+  .. code-block:: ipython
+
+    ds.plot()
+
   will no longer display the text output of the `plot` method but the plot alone.
 
 Bug fixes
