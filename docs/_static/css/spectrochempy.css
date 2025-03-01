@@ -230,3 +230,14 @@ select {
     box-shadow: none;
     color: #fffdfd;
 }
+
+/* Hide the breadcrumbs */
+
+.wy-breadcrumbs {
+    display: none !important;
+}
+
+/* Hide the breadcrumb separator as well */
+.wy-breadcrumbs-aside {
+    display: none !important;
+}

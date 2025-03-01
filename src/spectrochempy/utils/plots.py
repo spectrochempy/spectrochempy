@@ -27,6 +27,12 @@ class _Axes(maxes.Axes):
     # def draw(self, renderer):
     #    #    # with plt.rc_context({"something": self.xxx}):
     #    return super().draw(renderer)
+
+    def _implements(self, type=None):
+        if type is None:
+            return "_Axes"
+        return type == "_Axes"
+
     def _repr_html_(self):
         # Suppress text output in notebooks
         return ""
