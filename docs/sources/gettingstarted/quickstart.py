@@ -28,6 +28,8 @@
 #       version_major: 2
 #       version_minor: 0
 # ---
+
+# %%
 # ruff: noqa: T201
 # %% [markdown]
 # # Quickstart Tutorial 🚀
@@ -49,7 +51,7 @@
 # ## Installing SpectroChemPy
 #
 # > **Prerequisites** ✅
-# > * Python 3.8 or later
+# > * Python 3.10 or later
 # > * Basic knowledge of Python
 # > * Jupyter notebook environment
 #
