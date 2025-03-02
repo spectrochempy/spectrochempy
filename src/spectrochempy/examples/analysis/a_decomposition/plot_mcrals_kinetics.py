@@ -34,7 +34,7 @@ ds = scp.read("matlabdata/METING9.MAT")
 # (t=0). The second dataset contains the UV-VIS spectra of the reaction mixture, recorded at different time points.
 # The first column of the matrix contains the wavelength axis and the remaining columns
 # are the measured UV-VIS spectra (wavelengths x timepoints)
-print("\n NDDataset names: " + str([d.name for d in ds]))
+print("NDDataset names: " + str([d.name for d in ds]))
 
 # %%
 # We load the experimental spectra (in `ds[1]`), add the `y` (time) and `x`
