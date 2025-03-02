@@ -150,8 +150,8 @@ _ = pca.screeplot()
 # Scores and Loadings can be plotted using the usual plot() method, with prior transpositon
 # for the scores:
 # %%
-_ = pca.scores.T.plot()
-_ = pca.loadings.plot()
+pca.scores.T.plot()
+pca.loadings.plot()
 
 # %% [markdown]
 # Examination of the plots above indicate that the 4th component has a structured,
@@ -164,12 +164,12 @@ _ = pca.loadings.plot()
 # %%
 pca = scp.PCA(n_components=4)
 pca.fit(X)
-_ = pca.plotmerit()
+pca.plotmerit()
 
 # %% [markdown]
 # The number of spectra can be limited by the `nb_traces` attributes:
 # %%
-_ = pca.plotmerit(nb_traces=5)
+pca.plotmerit(nb_traces=5)
 
 # %% [markdown]
 # and if needed both datasets can be shifted using the `offset` attribute (in percet of the fullscale):

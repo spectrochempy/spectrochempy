@@ -92,7 +92,7 @@ blc.fit(X[0])
 # get the new dataset with the baseline subtracted
 X1 = blc.transform()
 # plot X, X1 and the baseline using the processor plot method
-_ = blc.plot()
+blc.plot()
 
 # %% [markdown]
 # One can also use the property `corrected` instead of the method `transform()`,
@@ -110,7 +110,7 @@ blc.fit(X)
 # get the new dataset with the baseline subtracted
 X2 = blc.transform()
 # plot the baseline corrected series of spectra
-_ = X2.plot()
+X2.plot()
 
 # %% [markdown]
 # The baseline models implemented in SpectroChemPy are able to handle missing data.
@@ -127,7 +127,7 @@ X.plot()
 # %%
 blc.fit(X)
 X3 = blc.transform()
-_ = X3.plot()
+X3.plot()
 
 # %% [markdown]
 # ### Overview of the other model
@@ -220,7 +220,7 @@ blc.order = "pchip"
 blc.fit(X[0])
 # get and plot the corrected dataset
 X5 = blc.transform()
-_ = blc.plot()
+blc.plot()
 
 # %% [markdown]
 # **AsLS :  Asymmetric Least Squares Smoothing baseline correction**
@@ -233,7 +233,7 @@ blc.lamb = 10**9
 blc.asymmetry = 0.002
 blc.fit(X)
 X6 = blc.transform()
-_ = X6.plot()
+X6.plot()
 
 # %% [markdown]
 # **SNIP : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm**
@@ -245,7 +245,7 @@ blc.model = "snip"
 blc.snip_width = 200
 blc.fit(X)
 X7 = blc.transform()
-_ = X7.plot()
+X7.plot()
 
 # %% [markdown]
 # ### Multivariate approach
@@ -273,7 +273,7 @@ blc.fit(X)
 # get the corrected dataset
 X8 = blc.transform()
 # plot the result
-_ = X8.plot()
+X8.plot()
 
 # %% [markdown]
 # Finally, for all the example shown above, we have used the same instance of Baseline. It may be a problem to remember which setting has been done, and may impact new output. To know the actual status, one can use the `params` method. This will list all actual parameters.
@@ -330,7 +330,7 @@ A.plot()
 
 # %%
 A1 = A.detrend(order="constant")  # Here we use a NDDataset method
-_ = A1.plot()
+A1.plot()
 
 # %% [markdown]
 # #### Linear trend
@@ -341,7 +341,7 @@ _ = A1.plot()
 A2 = scp.detrend(
     A
 )  # Here we use the API method (this is fully equivalent to the NDDataset method)
-_ = A2.plot()
+A2.plot()
 
 # %% [markdown]
 # #### Polynomial trend
@@ -351,7 +351,7 @@ _ = A2.plot()
 
 # %%
 A3 = A.detrend(order="quadratic")  # one can also use `order=2`
-_ = A3.plot()
+A3.plot()
 
 # %% [markdown]
 # #### Detrend independently on several data segment
@@ -407,7 +407,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 
 # %%
 Aa = A.basc()
-_ = Aa.plot()  # range are automatically set to the start and end of the spectra, model='polynomial', order='linear'
+Aa.plot()  # range are automatically set to the start and end of the spectra, model='polynomial', order='linear'
 
 # %% [markdown]
 # All parameters of `Baseline` can be used in basc. It is thus probably quite conveninent if one wants to write shorter code.
@@ -422,7 +422,7 @@ _ = Aa.plot()  # range are automatically set to the start and end of the spectra
 
 # %%
 Ab = scp.rubberband(A)
-_ = Ab.plot()
+Ab.plot()
 
 # %% [markdown]
 # ### Code snippet for 'advanced' baseline correction

@@ -119,7 +119,7 @@ d1D
 print(d1D)
 
 # %%
-_ = d1D.plot(figsize=(3, 2))
+d1D.plot(figsize=(3, 2))
 
 # %% [markdown]
 # Except few additional metadata such `author` , `created` ..., there is not much
@@ -823,7 +823,7 @@ if datadir.exists():
 # %%
 nd = NDDataset.read_omnic(datadir / "irdata/nh4y-activation.spg")
 nd.preferences.reset()
-_ = nd.plot()
+nd.plot()
 
 # %% [markdown]
 # Even if we do not specify the **datadir**, the application first look in the

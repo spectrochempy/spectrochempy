@@ -71,7 +71,7 @@ prefs.contour_start = 0.05
 # and now plotting of contours using `plot_map` .
 
 # %%
-_ = ser.plot_map()
+ser.plot_map()
 
 # %% [markdown]
 # ### Processing steps
@@ -97,13 +97,13 @@ _ = ser.plot_map()
 
 # %%
 row0 = ser[0]
-_ = row0.plot()
+row0.plot()
 
 # %% [markdown]
 # We can zoom to have a better look at the echo (with the imaginary component)
 
 # %%
-_ = row0.plot(show_complex=True, xlim=(0, 10000))
+row0.plot(show_complex=True, xlim=(0, 10000))
 
 # %% [markdown]
 # Now we will perform the processing of the first row and adjust the parameters for apodization, zero-filling, etc...
@@ -125,7 +125,7 @@ newrow.plot()
 apod.plot(clear=False, xlim=(0, 20000), c="red")
 
 f0 = newrow.fft()  # fourier transform
-_ = f0.plot(show_complex=True)
+f0.plot(show_complex=True)
 
 # %% [markdown]
 # Once we have found correct parameters for correcting the first row, we can apply them for the whole 2D dataset in
@@ -137,14 +137,14 @@ sert.zf_size(size=2048, inplace=True)  # zero-filling
 sert.em(
     lb=20 * ur.Hz, shifted=shifted, inplace=True
 )  # shifted was set in the previous step
-_ = sert.plot_map()
+sert.plot_map()
 
 # %% [markdown]
 # Transform in F2
 
 # %%
 spec = sert.fft()
-_ = spec.plot_map()
+spec.plot_map()
 
 # %% [markdown]
 # Now we can process the F1 dimension ('y')
@@ -161,7 +161,7 @@ s.plot_map()
 
 # %%
 spk = s.pk(phc0=0, dim="y")
-_ = spk.plot_map(xlim=(50, 0), ylim=(-40, -15))
+spk.plot_map(xlim=(50, 0), ylim=(-40, -15))
 
 # %% [markdown]
 # ## Processing of an Echo-AntiEcho encoded dataset
@@ -183,9 +183,9 @@ sert = ser.dc()
 sert.sp(ssb=2, inplace=True)  # Sine apodization
 s2 = sert.fft(1024)
 s2.pk(phc0=-90, inplace=True)  # phasing
-_ = s2[0].plot()
+s2[0].plot()
 ex = (3.5, 2.5)
-_ = s2[0].plot(xlim=ex)
+s2[0].plot(xlim=ex)
 
 # %%
 s2.sp(ssb=2, dim="y", inplace=True)
@@ -215,7 +215,7 @@ sert = ser.dc()
 sert.sp(ssb=2, inplace=True)  # Sine apodization
 s2 = sert.fft(1024)
 s3 = s2.pk(phc0=-140, phc1=95)
-_ = s3[0].plot()
+s3[0].plot()
 
 # %%
 s3.sp(ssb=0, dim="y", inplace=True)
@@ -229,4 +229,4 @@ sa = s.abs()
 prefs.contour_start = 0.005
 prefs.show_projections = True
 prefs.figure.figsize = (7, 7)
-_ = sa.plot_map()
+sa.plot_map()

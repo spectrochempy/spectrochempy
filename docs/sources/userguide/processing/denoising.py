@@ -48,14 +48,14 @@ nd1 = nd.snip()
 # plot
 prefs = nd1.preferences
 prefs.figure.figsize = (9, 5)
-_ = nd1.plot()
+nd1.plot()
 
 # %% [markdown]
 # We can apply a Savgol filter to denoise the spectra
 
 # %%
 nd2 = nd1.savgol(size=7, order=2)
-_ = nd2.plot()
+nd2.plot()
 
 # %% [markdown]
 # The problem is that, not only the spikes are not removed, but they are also broadened.
@@ -112,7 +112,7 @@ nd5.plot(clear=False, ls="-", c="r")
 # %%
 nd5b = scp.despike(X, size=21, delta=2)
 X.plot()
-_ = nd5b.plot(clear=False, ls="-", c="r")
+nd5b.plot(clear=False, ls="-", c="r")
 
 # %% [markdown]
 # Last we can apply it to the full 2D dataset

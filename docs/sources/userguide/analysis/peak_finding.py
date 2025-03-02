@@ -74,7 +74,7 @@ prefs.colormap = "Dark2"
 
 # %%
 reg = ds[:, 2300.0:1900.0]
-_ = reg.plot()
+reg.plot()
 
 # %% [markdown]
 # ## Find maxima by manual inspection of the plot
@@ -95,7 +95,7 @@ pos
 
 # %%
 maximas = reg[:, pos].squeeze()
-_ = maximas.plot(marker="s", ls="--", color="blue")
+maximas.plot(marker="s", ls="--", color="blue")
 
 # %%
 ax = reg.plot()
@@ -209,7 +209,7 @@ evol.x = scp.Coord(
 evol.preferences.method_1D = "scatter+pen"
 
 # plot it
-_ = evol.plot(ls=":")
+evol.plot(ls=":")
 
 # %% [markdown]
 # ###  Options of `find_peaks()` <a id='options'></a>

@@ -72,7 +72,7 @@ dataset[:, 1290.0:890.0] = MASKED
 # Here is a display the figure with the new mask
 
 # %%
-_ = dataset.plot_stack()
+dataset.plot_stack()
 
 # %% [markdown]
 # Now the max function return the  maximum in the unmasked region, which is exactly what we wanted.
@@ -85,7 +85,7 @@ dataset.max()
 
 # %%
 dataset.remove_masks()
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # ## Transposition
@@ -107,7 +107,7 @@ t_dataset
 # Let's visualize the result:
 
 # %%
-_ = t_dataset.plot()
+t_dataset.plot()
 
 # %% [markdown]
 # ## Changing units
@@ -121,7 +121,7 @@ _ = t_dataset.plot()
 dataset.units = "radian"
 
 # %%
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # Trying to change it in 'meter' for instance, will generate an error!
@@ -146,7 +146,7 @@ d.units
 
 # %%
 dataset.y.ito("hours")
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # See [Units](../objects/dataset/dataset.ipynb#Units) for more details on these units operations

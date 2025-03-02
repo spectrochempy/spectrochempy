@@ -128,13 +128,10 @@ dataset[:, 1290.0:920.0] = scp.MASKED
 # As the current NDDataset is 2D, a **stack plot** is displayed by default, with a **viridis** colormap.
 
 # %%
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
-# Note, in the cell above, that we used ` _ = ... `  syntax.
-# This is to avoid any output but the plot from this statement.
-#
-# Note also that the `plot()` method uses some of NDDataset metadata: the `NDDataset.x` coordinate `data` (here the
+# Note that the `plot()` method uses some of NDDataset attributes: the `NDDataset.x` coordinate `data` (here the
 # wavenumber values), `name` (here 'wavenumbers'), `units` (here 'cm-1') as well as the `NDDataset.title`
 # (here 'absorbance') and `NDDataset.units (here 'absorbance').
 # %% [markdown]
@@ -153,7 +150,7 @@ prefs.colormap = "magma"  # The default colormap is viridis
 prefs.axes.facecolor = ".95"  # Make the graph background colored in a light gray
 prefs.axes.grid = True
 
-_ = dataset.plot()
+dataset.plot()
 
 
 # %% [markdown]
@@ -161,7 +158,7 @@ _ = dataset.plot()
 # If you prefer not using colormap, `cmap=None` should be used. For instance:
 
 # %%
-_ = dataset.plot(cmap=None, colorbar=False)
+dataset.plot(cmap=None, colorbar=False)
 
 # %% [markdown]
 # Note that, by default, **sans-serif** font are used for all text in the figure.
@@ -169,7 +166,7 @@ _ = dataset.plot(cmap=None, colorbar=False)
 
 # %%
 prefs.font.family = "monospace"
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # Once changed, the `NDDataset.preferences` attributes will be used for the subsequent plots, but can be reset to the
@@ -191,7 +188,7 @@ prefs.colormap
 # but 'magma' can be passed to the `plot()` method:
 
 # %%
-_ = dataset.plot(colormap="magma")
+dataset.plot(colormap="magma")
 
 # %% [markdown]
 # while the `preferences.colormap` is still set to `viridis':
@@ -203,7 +200,7 @@ prefs.colormap
 # and will be used by default for the next plots:
 
 # %%
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # ## Adding titles and annotations
@@ -262,11 +259,11 @@ _ = ax.annotate(
 
 # %%
 prefs.style = "grayscale"
-_ = dataset.plot()
+dataset.plot()
 
 # %%
 prefs.style = "ggplot"
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # Other styles are :
@@ -281,7 +278,7 @@ _ = dataset.plot()
 # %%
 prefs.reset()
 prefs.style = "grayscale", "paper"
-_ = dataset.plot(colorbar=True)
+dataset.plot(colorbar=True)
 
 # %% [markdown]
 # As previously, style specification can also be done directly in the plot method without
@@ -289,7 +286,7 @@ _ = dataset.plot(colorbar=True)
 
 # %%
 prefs.colormap = "magma"
-_ = dataset.plot(style=["scpy", "paper"])
+dataset.plot(style=["scpy", "paper"])
 
 # %% [markdown]
 # To get a list of all available styles :
@@ -302,7 +299,7 @@ prefs.available_styles
 
 # %%
 prefs.reset()
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # ## Create your own style
@@ -333,17 +330,17 @@ prefs.axes.labelcolor = "blue"
 prefs.axes.grid = True
 prefs.axes.grid_axis = "x"
 
-_ = dataset.plot()
+dataset.plot()
 
 prefs.makestyle()
 
 # %%
 prefs.reset()
-_ = dataset.plot()  # plot with the default scpy style
+dataset.plot()  # plot with the default scpy style
 
 # %%
 prefs.style = "mydefault"
-_ = dataset.plot()  # plot with our own style
+dataset.plot()  # plot with our own style
 
 # %% [markdown]
 # ## Changing the type of plot
@@ -361,7 +358,7 @@ prefs.reset()
 prefs.method_2D = "map"  # this will change permanently the type of 2D plot
 prefs.colormap = "magma"
 prefs.figure_figsize = (5, 3)
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # You can also, for an individual plot use specialised plot commands, such as `plot_stack()` , `plot_map()` ,
@@ -371,13 +368,13 @@ _ = dataset.plot()
 # These modes are illustrated below:
 # %%
 prefs.axes_facecolor = "white"
-_ = dataset.plot_image(colorbar=True)  # will use image_cmap preference!
+dataset.plot_image(colorbar=True)  # will use image_cmap preference!
 
 # %% [markdown]
 # Here we use the generic `plot()` with the `method' argument and we change the image_cmap:
 
 # %%
-_ = dataset.plot(method="image", image_cmap="jet", colorbar=True)
+dataset.plot(method="image", image_cmap="jet", colorbar=True)
 
 # %% [markdown]
 # The colormap normalization can be changed using the `norm` parameter, as illustrated below,
@@ -387,7 +384,7 @@ _ = dataset.plot(method="image", image_cmap="jet", colorbar=True)
 import matplotlib as mpl
 
 norm = mpl.colors.CenteredNorm()
-_ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
+dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
 
 # %% [markdown]
 # or below for a log scale (more information about colormap normalization can be found
@@ -395,32 +392,32 @@ _ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
 
 # %%
 norm = mpl.colors.LogNorm(vmin=0.1, vmax=4.0)
-_ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
+dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
 
 # %% [markdown]
 # Below an example of a waterfall plot:
 
 # %%
 prefs.reset()
-_ = dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
+dataset.plot_waterfall(figsize=(7, 4), y_reverse=True)
 
 # %% [markdown]
 # And finally an example of a surface plot:
 
 # %%
 prefs.reset()
-_ = dataset.plot_surface(figsize=(7, 7), linewidth=0, y_reverse=True, autolayout=False)
+dataset.plot_surface(figsize=(7, 7), linewidth=0, y_reverse=True, autolayout=False)
 # %% [markdown]
 # ## Plotting 1D datasets
 
 # %%
 prefs.reset()
 d1D = dataset[-1]  # select the last row of the previous 2D dataset
-_ = d1D.plot(color="r")
+d1D.plot(color="r")
 
 # %%
 prefs.style = "seaborn-v0_8-paper"
-_ = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
+dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 
 # %% [markdown]
 # ## Plotting several dataset on the same figure
@@ -434,7 +431,7 @@ ds1 = dataset[:nspec]  # split the dataset into too parts
 ds2 = dataset[nspec:] - 2.0  # add an offset to the second part
 
 ax1 = ds1.plot_stack()
-_ = ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4))
+ds2.plot_stack(ax=ax1, clear=False, zlim=(-2.5, 4))
 
 # %% [markdown]
 # For 1D datasets only, you can also use the `plot_multiple`method:

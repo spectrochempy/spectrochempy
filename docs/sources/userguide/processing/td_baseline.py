@@ -46,11 +46,11 @@ path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "h3po4
 fid = scp.read_topspin(path, expno=4)
 prefs = fid.preferences
 prefs.figure.figsize = (7, 3)
-_ = fid.plot(show_complex=True)
+fid.plot(show_complex=True)
 
 # %%
 spec = scp.fft(fid)
-_ = spec.plot(xlim=(5, -5))
+spec.plot(xlim=(5, -5))
 
 # %% [markdown]
 # We can see that in the middle of the spectrum there are an artifact (a transmitter spike)
@@ -61,18 +61,18 @@ _ = spec.plot(xlim=(5, -5))
 # %%
 dc_corrected_fid = fid.dc()
 spec = scp.fft(dc_corrected_fid)
-_ = spec.plot(xlim=(5, -5))
+spec.plot(xlim=(5, -5))
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "cadmium"
 fid2 = scp.read_topspin(path, expno=100)
-_ = fid2.plot(show_complex=True)
+fid2.plot(show_complex=True)
 
 # %%
 spec2 = scp.fft(fid2)
-_ = spec2.plot()
+spec2.plot()
 
 # %%
 dc_corrected_fid2 = fid2.dc()
 spec2 = scp.fft(dc_corrected_fid2)
-_ = spec2.plot()
+spec2.plot()
