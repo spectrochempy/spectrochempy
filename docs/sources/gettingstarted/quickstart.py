@@ -333,7 +333,7 @@ iris.plotdistribution(-7, colormap="magma")
 #
 # Now that you've got a taste of SpectroChemPy's capabilities, here are some suggestions for diving deeper:
 #
-# - `Examples Gallery <examples/index>`_ 📚: Browse through practical examples and use cases
-# - `User Guide <../userguide/index>`_ 📖: Learn about specific features in detail
-# - `API Reference <../reference/index>`_ 🔍: Explore the complete API documentation
-# - `Get Help <https://github.com/spectrochempy/spectrochempy/discussions>`_ 💬: Join our community discussions
+# - [Examples Gallery](examples/index) 📈: Browse through practical examples and use cases
+# - [User Guide](../userguide/index) 📖: Learn about specific features in detail
+# - [API Reference](../reference/index) 🔍: Explore the complete API documentation
+# - [Get Help](https://github.com/spectrochempy/spectrochempy/discussions) 💬: Join our community discussions

@@ -52,7 +52,7 @@ GALLERY = GETTINGSTARTED / "examples" / "gallery"
 # Get sphinx pattern
 pattern = os.environ.get("SPHINX_PATTERN")
 single_doc_or_dir = pattern is not None and pattern not in ["noapi", "whatsnew"]
-include_api = pattern is None or pattern == "whatsnew"
+include_api = pattern is None
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
@@ -84,7 +84,6 @@ extensions = [
     "sphinxcontrib.bibtex",
     "nbsphinx",
     "sphinx_design",
-    "jupyter_sphinx",
 ]
 if not single_doc_or_dir:
     extensions += [
@@ -197,9 +196,8 @@ if pattern:
                     )
                 )
                 or (
-                    pattern == "whatsnew"
-                    and "generated" not in rel_path.parts
-                    and rel_path.parts[0] != "whatsnew"
+                    pattern == "whatsnew" and "whatsnew" not in rel_path.parts
+                    # and rel_path.parts[0] != "whatsnew"
                 )
                 or (
                     single_doc_or_dir
@@ -329,6 +327,10 @@ html_context = {
     "on_github_actions": on_github_actions,
     "github_repository": github_repository,
 }
+
+# ABlog configuration
+blog_path = "sources/news"
+blog_post_pattern = "news/*"
 
 # Sphinx-gallery ---------------------------------------------------------------
 # Generate the plots for the gallery

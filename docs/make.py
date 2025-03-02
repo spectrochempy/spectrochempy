@@ -464,7 +464,7 @@ class BuildDocumentation:
         # with error handling for individual files.
 
         print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
-        if self.settings["nosync"]:
+        if self.settings["nosync"] or self.settings["whatsnew"]:
             print("Skipping notebook synchronization as option --no-sync is set")
             return
 
@@ -618,12 +618,13 @@ class BuildDocumentation:
                 f"\n{'-' * 80}"
             )
 
-        print("Loading spectrochempy and downloading test data...")
+        if not self.settings["whatsnew"]:
+            print("Loading spectrochempy and downloading test data...")
 
-        from spectrochempy.utils.file import download_testdata
+            from spectrochempy.utils.file import download_testdata
 
-        # Download the test data
-        download_testdata()
+            # Download the test data
+            download_testdata()
 
         # Determine the version of the documentation to build
         self._version, self._last_release, self._doc_version = self._determine_version()

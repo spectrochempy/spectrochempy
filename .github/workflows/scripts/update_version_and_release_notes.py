@@ -24,7 +24,13 @@ from datetime import date
 from pathlib import Path
 
 import yaml
-from cffconvert.cli.create_citation import create_citation
+
+try:
+    NO_CFFCONVERT = False
+    from cffconvert.cli.create_citation import create_citation
+except ImportError:
+    NO_CFFCONVERT = True
+
 from setuptools_scm import get_version
 
 # Path configurations
@@ -358,7 +364,7 @@ Version {vers}
 --------------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 {latest}
 """,
             )
@@ -392,7 +398,7 @@ if __name__ == "__main__":
     new_revision = sys.argv[1] if len(sys.argv) > 1 else "unreleased"
 
     # Update citation and Zenodo info for actual releases
-    if new_revision != "unreleased":
+    if new_revision != "unreleased" and not NO_CFFCONVERT:
         make_citation(new_revision)
         make_zenodo(new_revision)
 
