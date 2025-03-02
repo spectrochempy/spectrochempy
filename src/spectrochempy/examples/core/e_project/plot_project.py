@@ -28,15 +28,22 @@ proj = scp.Project(
     label="main project",
 )
 
-assert proj.projects_names == ["P350", "A350", "B350"]
+proj.projects_names
 
 # %%
 # Add for example two datasets to the `A350` subproject.
 
+# %%
+# Create two datasets
 ir = scp.NDDataset([1.1, 2.2, 3.3], coords=[[1, 2, 3]])
-print(ir)
+ir
+
+# %%
 tg = scp.NDDataset([1, 3, 4], coords=[[1, 2, 3]])
-print(tg)
+tg
+
+# %%
+# Add the datasets to the subproject
 proj.A350["IR"] = ir
 proj.A350["TG"] = tg
 
@@ -57,10 +64,8 @@ proj.save()
 # RELOAD the project from disk as newproj
 
 newproj = scp.Project.load("project_1")
-print(newproj)
+newproj
 
-assert str(newproj) == str(proj)
-assert newproj.A350.label == proj.A350.label
 
 # %%
 # Now we add a script to the original proj
@@ -71,8 +76,8 @@ info_('samples contained in the project are:%s'%proj.projects_names)
 """
 
 proj["print_info"] = scp.Script("print_info", script_source)
-print(proj)
-print("*******************************************")
+proj
+
 # %%
 # save but do not change the original data
 
@@ -82,7 +87,7 @@ proj.save(overwrite_data=False)
 # RELOAD it
 
 newproj = scp.Project.load("project_1")
-print(newproj)
+newproj
 
 # %%
 # Execute a script
@@ -98,7 +103,7 @@ newproj.print_info()
 # %%
 # Finally lets use a more useful script
 script_source_2 = """
-proj.A350.TG.plot_scatter(title='my scatter plot')
+proj.A350.TG.plot_scatter(title='my scatter plot');
 #show()
 """
 proj["tgscatter"] = scp.Script("tgscatter", script_source_2)

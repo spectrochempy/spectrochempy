@@ -31,7 +31,6 @@ ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
 # view it...
 
 scp.plot(ndd)
-
 # %%
 # Now load a 2D  dataset
 
@@ -44,3 +43,5 @@ scp.plot(ndd)
 # running the .py script with python
 
 # scp.show()
+
+# %%

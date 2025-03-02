@@ -38,8 +38,7 @@ dataset -= dataset.min()
 
 # %%
 # Plot it for a visual check
-_ = dataset.plot()
-
+dataset.plot()
 # %%
 # Create a NMF object
 # -------------------
@@ -51,8 +50,7 @@ model = scp.NMF(n_components=4, log_level="INFO")
 # %%
 # Fit the model
 # -------------
-_ = model.fit(dataset)
-
+model.fit(dataset)
 # Get the results
 # ---------------
 #
@@ -65,8 +63,7 @@ St = model.components
 # %%
 # Plot results
 # ------------
-_ = C.T.plot(title="Concentration", colormap=None, legend=C.k.labels)
-
+C.T.plot(title="Concentration", colormap=None, legend=C.k.labels)
 # %%
 #
 m = St.ptp()

@@ -14,8 +14,6 @@ In this example, we show how units can be used in SpectroChemPy
 
 # %%
 
-import pint
-
 import spectrochempy as scp
 
 # %%
@@ -50,8 +48,7 @@ ur = scp.ur
 ds = scp.read("wodger.spg")[0]
 prefs = ds.preferences
 prefs.figure.figsize = (7, 3)
-_ = ds.plot()
-
+ds.plot()
 # %%
 # * `wavenumbers` (`x` ) coordinates are here expressed in $cm^{-1}$
 # * and `data` are in absorbance ($a.u.$) units.
@@ -76,8 +73,8 @@ x
 
 try:
     x.to("hour")
-except pint.DimensionalityError as e:
-    print(e)
+except Exception as e:
+    scp.error_(e)
     # scp.error_(pint.DimensionalityError, e)
 
 # %%
@@ -85,36 +82,34 @@ except pint.DimensionalityError as e:
 # Let's try for the `x` coordinate. It is `wavenumber` in $cm^{-1}$ that can be transformed in $Hz$ for instance:
 
 ds.x.ito("terahertz")
-_ = ds.plot()
-
+ds.plot()
 # %%
 # We can also change the wavenumbers (or frequency units), to energy units or wavelength as
 # Spectrochempy (thanks to [pint](https://pint.readthedocs.io)) knows how to make the transformation.
 
 ds.x.ito("eV")
-_ = ds.plot()
-
-""
+ds.plot()
+# %%
 try:
     ds.x.ito("nanometer")
 except Exception as e:
     scp.error_(Exception, e)
 
-""
 ds.x = ds.x.to("nanometer")
-print(ds.x)
-_ = ds.plot()
+ds.x
 
 # %%
-# `absorbance` units (the units of the data) can also be transformed into `transmittance`
-
+ds.plot()
+# %%
+# `absorbance` units (the units of the data)
+# can also be transformed into `transmittance`
 ds.ito("transmittance")
-_ = ds.plot()
-
-""
+ds.plot()
+# %%
+# back into `ansorbance
 ds.ito("absorbance")
 ds.x.ito("cm^-1")
-_ = ds.plot()
+ds.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

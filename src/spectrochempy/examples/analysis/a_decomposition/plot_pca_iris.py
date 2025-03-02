@@ -70,13 +70,13 @@ pca.printev()
 # These figures of merit can also be displayed graphically
 #
 # The ScreePlot
-_ = pca.screeplot()
+pca.screeplot()
 # %%
 # The score plots can be used for classification purposes. The first one - in 2D for the
 # 2 first PC's - shows that the first PC allows distinguishing Iris-setosa (score of
 # PC#1 < -1) from other species (score of PC#1 > -1), while more PC's are required
 # to distinguish versicolor from viginica.
-_ = pca.scoreplot(scores, 1, 2, color_mapping="labels")
+pca.scoreplot(scores, 1, 2, color_mapping="labels")
 # %%
 # The second one - in 3D for the 3 first PC's - indicates that a thid PC won't allow
 # better distinguishing versicolor from viginica.

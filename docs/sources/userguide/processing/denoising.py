@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.10
+#     version: 3.13.2
 # ---
 
 # %% [markdown]
@@ -39,7 +39,7 @@ import spectrochempy as scp
 # e.g., let's take a series of Raman spectra for demonstration: These spectra present both a significant noise and cosmic rays spikes.
 
 # %%
-# Load the data  ( )
+# Load the data
 dataset = scp.read("ramandata/labspec/serie190214-1.txt")
 # select the useful region (in particular spectra are 0 after 6500 s)
 nd = dataset[0.0:6500.0, 70.0:]
@@ -67,7 +67,7 @@ _ = nd2.plot()
 
 # %%
 nd3 = nd1.denoise(ratio=90)
-_ = nd3.plot()
+nd3.plot()
 
 # %% [markdown]
 # This clearly help to increase the signal-to-noise ratio.
@@ -85,7 +85,7 @@ _ = nd3.plot()
 # %%
 filter = scp.Filter(method="median", size=5)
 nd4 = filter(nd1)
-_ = nd4.plot()
+nd4.plot()
 
 # %% [markdown]
 # However, the spike are not fully removed, and are broadened.
@@ -102,7 +102,7 @@ _ = nd4.plot()
 X = nd1[0]
 nd5 = scp.despike(X, size=11, delta=5)
 X.plot()
-_ = nd5.plot(clear=False, ls="-", c="r")
+nd5.plot(clear=False, ls="-", c="r")
 
 # %% [markdown]
 # Getting the desired results require the tuning of size and delta parameters. And sometimes may need to repeat the procedure on a previously filtered spectra.
@@ -119,7 +119,7 @@ _ = nd5b.plot(clear=False, ls="-", c="r")
 
 # %%
 nd6 = scp.despike(nd1, size=11, delta=5)
-_ = nd6.plot()
+nd6.plot()
 
 # %% [markdown]
 # It is however rarely perfect as the setting of size and delta may be depending on the row.
@@ -128,10 +128,10 @@ _ = nd6.plot()
 
 # %%
 nd7 = nd6.denoise(ratio=92)
-_ = nd7.plot()
+nd7.plot()
 
 # %% [markdown]
 # The 'whitaker' method is also available:
 # %%
 nd8 = scp.despike(nd1, size=11, delta=5, method="whitaker")
-_ = nd8.plot()
+nd8.plot()

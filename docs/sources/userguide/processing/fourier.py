@@ -10,7 +10,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 #   language_info:
@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.1
+#     version: 3.13.2
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -63,7 +63,7 @@ fid.dtype
 # %%
 prefs = fid.preferences
 prefs.figure.figsize = (6, 3)
-_ = fid.plot(show_complex=True, xlim=(0, 15000))
+fid.plot(show_complex=True, xlim=(0, 15000))
 print("td = ", fid.size)
 
 # %% [markdown]
@@ -71,7 +71,7 @@ print("td = ", fid.size)
 
 # %%
 spec = scp.fft(fid)
-_ = spec.plot(xlim=(100, -100))
+spec.plot(xlim=(100, -100))
 print("si = ", spec.size)
 spec
 
@@ -81,13 +81,13 @@ spec
 # %%
 k = 1024
 spec = fid.fft(size=32 * k)
-_ = spec.plot(xlim=(100, -100))
+spec.plot(xlim=(100, -100))
 print("si = ", spec.size)
 
 # %%
 newfid = spec.ifft()
 # x coordinate is in second (base units) so lets transform it
-_ = newfid.plot(show_complex=True, xlim=(0, 15000))
+newfid.plot(show_complex=True, xlim=(0, 15000))
 
 # %% [markdown]
 # Let's compare fid and newfid. There differs as a rephasing has been automatically applied after the first FFT (with
@@ -96,7 +96,7 @@ _ = newfid.plot(show_complex=True, xlim=(0, 15000))
 # First point in the time domain of the real part is at the maximum.
 
 # %%
-_ = newfid.real.plot(c="r", label="fft + ifft")
+newfid.real.plot(c="r", label="fft + ifft")
 ax = fid.real.plot(clear=False, xlim=(0, 5000), ls="--", label="original real part")
 _ = ax.legend()
 
@@ -104,7 +104,7 @@ _ = ax.legend()
 # First point in the time domain of the imaginary part is at the minimum.
 
 # %%
-_ = fid.imag.plot(ls="--", label="original imaginary part")
+fid.imag.plot(ls="--", label="original imaginary part")
 ax = newfid.imag.plot(clear=False, xlim=(0, 5000), c="r", label="fft + ifft")
 _ = ax.legend(loc="lower right")
 
@@ -119,8 +119,8 @@ _ = ax.legend(loc="lower right")
 # %%
 fid2 = fid.em(lb="50. Hz")
 spec2 = fid2.fft()
-_ = spec2.plot()
-_ = spec.plot(
+spec2.plot()
+spec.plot(
     clear=False, xlim=(10, -5), c="r"
 )  # superpose the non broadened spectrum in red and show expansion.
 
@@ -137,7 +137,7 @@ print("new td = ", fid3.x.size)
 
 # %%
 spec3 = fid3.fft()
-_ = spec3.plot(xlim=(100, -100))
+spec3.plot(xlim=(100, -100))
 print("si = ", spec3.size)
 
 # %% [markdown]
@@ -149,16 +149,16 @@ print("si = ", spec3.size)
 
 # %%
 ms = spec.mc()
-_ = ms.plot(xlim=(10, -10))
-_ = spec.plot(clear=False, xlim=(10, -10), c="r")
+ms.plot(xlim=(10, -10))
+spec.plot(clear=False, xlim=(10, -10), c="r")
 
 # %% [markdown]
 # ### Power spectrum
 
 # %%
 mp = spec.ps()
-_ = (mp / mp.max()).plot()
-_ = (spec / spec.max()).plot(
+(mp / mp.max()).plot()
+(spec / spec.max()).plot(
     clear=False, xlim=(10, -10), c="r"
 )  # Here we have normalized the spectra at their max value.
 
@@ -172,20 +172,20 @@ _ = (spec / spec.max()).plot(
 
 # %%
 lim = (-20, 20)
-_ = spec3.plot(xlim=lim)
-_ = spec3.imag.plot(xlim=lim)
+spec3.plot(xlim=lim)
+spec3.imag.plot(xlim=lim)
 
 # %%
 Re = fid3.real.astype("complex64")
 fR = Re.fft()
-_ = fR.plot(xlim=lim, show_complex=True)
+fR.plot(xlim=lim, show_complex=True)
 Im = fid3.imag.astype("complex64")
 fI = Im.fft()
-_ = fI.plot(xlim=lim, show_complex=True)
+fI.plot(xlim=lim, show_complex=True)
 
 # %% [markdown]
 # Recombination:
 
 # %%
-_ = (fR - fI.imag).plot(xlim=lim)
-_ = (fR.imag + fI).plot(xlim=lim)
+(fR - fI.imag).plot(xlim=lim)
+(fR.imag + fI).plot(xlim=lim)

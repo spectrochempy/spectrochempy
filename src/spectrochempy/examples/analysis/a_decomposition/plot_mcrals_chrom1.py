@@ -59,8 +59,7 @@ guess = datasets[3]
 # %%
 # Plot of X and of the guess:
 X.plot()
-_ = guess.plot()
-
+guess.plot()
 # %%
 # Create a MCR-ALS object
 # -----------------------
@@ -77,8 +76,7 @@ mcr = scp.MCRALS(log_level="INFO")
 #
 # Then we execute the optimization process using the `fit` method with
 # the ``X`` and ``guess`` dataset as input arguments.
-_ = mcr.fit(X, guess)
-
+mcr.fit(X, guess)
 # %%
 # Plotting the results
 # --------------------
@@ -86,16 +84,15 @@ _ = mcr.fit(X, guess)
 # The optimization has converged. We can get the concentration :math:`C` (C) and
 # pure spectra profiles :math:`S^T` (St) and plot them
 
-_ = mcr.C.T.plot()
-_ = mcr.St.plot()
-
+mcr.C.T.plot()
+mcr.St.plot()
 # %%
 # Finally, plots the reconstructed dataset (:math:`\hat{X} = C.S^T`)
 # *vs.* original dataset
 # (:math:`X`) as well as the residuals (:math:`E`) for few spectra.
 #
 # The fit is good and comparable to the original paper (:cite:t:`jaumot:2005`).
-_ = mcr.plotmerit(nb_traces=5)
+mcr.plotmerit(nb_traces=5)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

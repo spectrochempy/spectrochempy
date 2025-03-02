@@ -33,6 +33,12 @@ class _Axes(maxes.Axes):
             return "_Axes"
         return type == "_Axes"
 
+    def __repr__(self):
+        return "<Matplotlib Axes object>"
+
+    def __str__(self):
+        return self.__repr__()
+
     def _repr_html_(self):
         # Suppress text output in notebooks
         return ""

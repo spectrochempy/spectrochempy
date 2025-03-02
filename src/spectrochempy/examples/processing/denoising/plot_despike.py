@@ -35,8 +35,7 @@ X1 = X.snip()
 
 prefs = X.preferences
 prefs.figure.figsize = (8, 4)
-_ = X1.plot()
-
+X1.plot()
 # %%
 # Now let's use the `~spectrochempy.despike` method.
 # Only two parameters needs to be tuned: the `size` of the filter
@@ -46,17 +45,14 @@ _ = X1.plot()
 # of the difference between the original and the smoothed data.
 
 X2 = scp.despike(X1, size=11, delta=5)
-_ = X1.plot()
-_ = X2.plot(clear=False, ls="-", c="r")
-
+X1.plot()
+X2.plot(clear=False, ls="-", c="r")
 # %%
 # Another method, 'whitaker', is also available (see the documentation for details):
 # %%
 X3 = scp.despike(X1, size=11, delta=5, method="whitaker")
-_ = X1.plot()
-_ = X3.plot(clear=False, ls="-", c="r")
-
-
+X1.plot()
+X3.plot(clear=False, ls="-", c="r")
 # %%
 # Getting the desired results require the tuning of size and delta parameters.
 # And sometimes may need to repeat the procedure on a previously filtered spectra.
@@ -65,8 +61,8 @@ _ = X3.plot(clear=False, ls="-", c="r")
 # So careful inspection of the results is crucial.
 
 X4 = scp.despike(X1, size=21, delta=2)
-_ = X1.plot()
-_ = X4.plot(clear=False, ls="-", c="r")
+X1.plot()
+X4.plot(clear=False, ls="-", c="r")
 
 
 # %%

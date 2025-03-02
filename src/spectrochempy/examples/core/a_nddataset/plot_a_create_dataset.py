@@ -82,17 +82,14 @@ new = mydataset["hot"]
 # To plot a dataset, use the `plot` command (generic plot).
 # As the section NDDataset is 2D, a contour plot is displayed by default.
 new.plot()
-
 # %%
 # But it is possible to display image
 #
 # sphinx_gallery_thumbnail_number = 2
 new.plot(method="image")
-
 # %%
 # or stacked plot
 new.plot(method="stack")
-
 # %%
 # Note that the scp allows one to use this syntax too:
 scp.plot_stack(new)

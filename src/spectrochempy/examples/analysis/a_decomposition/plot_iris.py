@@ -82,7 +82,6 @@ prefs = X.preferences
 prefs.figure.figsize = (7, 3)
 X.plot(colorbar=True)
 X.plot_map(colorbar=True)
-
 # %%
 # To seamlessly work with the second coordinates (pressures), we can change the default
 # coordinate:
@@ -94,9 +93,8 @@ X.y.default
 # Let's now plot the spectral range of interest. The default coordinate is now used:
 X_ = X[:, 2250.0:1950.0]
 print(X_.y.default)
-_ = X_.plot()
-_ = X_.plot_map()
-
+X_.plot()
+X_.plot_map()
 # %%
 # IRIS analysis without regularization
 # ------------------------------------
@@ -120,8 +118,7 @@ iris1.fit(X_, K)
 # %%
 # Plots the results
 iris1.plotdistribution()
-_ = iris1.plotmerit()
-
+iris1.plotmerit()
 # %%
 # With regularization and a manual search
 # ---------------------------------------
@@ -134,8 +131,7 @@ iris2.fit(X_, K)
 
 iris2.plotlcurve(title="L curve, manual search")
 iris2.plotdistribution(-7)
-_ = iris2.plotmerit(-7)
-
+iris2.plotmerit(-7)
 # %%
 # Automatic search
 # ----------------
@@ -145,7 +141,6 @@ _ = iris2.plotmerit(-7)
 iris3 = scp.IRIS(reg_par=[-10, 1])
 iris3.fit(X_, K)
 iris3.plotlcurve(title="L curve, automated search")
-
 # %%
 # The data corresponding to the largest curvature of the L-curve
 # are at the second last position of output data.
@@ -153,7 +148,7 @@ iris3.plotlcurve(title="L curve, automated search")
 # sphinx_gallery_thumbnail_number = 11
 
 iris3.plotdistribution(-2)
-_ = iris3.plotmerit(-2)
+iris3.plotmerit(-2)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -45,8 +45,8 @@ dataset.y.select(3)
 # plot the dataset (zoom on the begining of the fid)
 prefs = dataset.preferences
 prefs.figure.figsize = (9, 4)
-_ = ax = dataset.plot(colorbar=True)
-_ = ax.set_xlim(0, 5000)
+ax = dataset.plot(colorbar=True)
+ax.set_xlim(0, 5000)
 
 # %%
 # Process a fourier transform along the x dimension
@@ -64,16 +64,15 @@ nd3 = scp.pk(nd2, phc0=-118)
 
 # %%
 # plot
-_ = nd3.plot()
-
+nd3.plot()
 # %%
 # ## Baseline correction
 # Here we use the snip algorithm
 nd4 = scp.snip(nd3, snip_width=200)
 
 ax = nd4.plot()
-_ = ax.set_xlim(225, 25)
-_ = ax.set_ylim(-1, 10)
+ax.set_xlim(225, 25)
+ax.set_ylim(-1, 10)
 
 # %%
 # ## Peak peaking
@@ -94,9 +93,9 @@ for key in properties:
 
 # %%
 # plot with peak markers and the left/right-bases indicators
-ax = nd4.plot()  # output the spectrum on ax. ax will receive next plot too
+ax = nd4.plot()  # output the spectrum on ax. ax will receive next plot too;
 pks = peaks + 0.5  # add a small offset on the y position of the markers
-_ = pks.plot_scatter(
+pks.plot_scatter(
     ax=ax,
     marker="v",
     color="black",
@@ -105,10 +104,9 @@ _ = pks.plot_scatter(
     ylim=(-0.1, 13),
     xlim=(225, 25),
 )
-
 for i, p in enumerate(pks):
     x, y = p.x.values, (p + 0.5).values
-    _ = ax.annotate(
+    ax.annotate(
         f"{x.m:0.1f}",
         xy=(x, y),
         xytext=(-5, 5),
@@ -130,7 +128,7 @@ sections = sections.T
 
 # now plot it
 ax = sections.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
-_ = ax.set_xlim(0, 16000)
+ax.set_xlim(0, 16000)
 
 # %%
 # The sections we have taken here represent the maximum heigths of the peaks.
@@ -188,7 +186,7 @@ fitter.script = """
 	$ tis:  800, 1, 10000
 """
 
-_ = fitter.fit(s)
+fitter.fit(s)
 
 spred = fitter.predict()
 
@@ -199,7 +197,7 @@ ax = fitter.plotmerit(
     show_yaxis=True,
     title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",
 )
-_ = ax.set_xlim(0, 16000)
+ax.set_xlim(0, 16000)
 
 # %%
 index = 1
@@ -212,7 +210,7 @@ fitter.script = """
 	$ tis:  800, 1, 10000
 """
 
-_ = fitter.fit(s)
+fitter.fit(s)
 
 spred = fitter.predict()
 
@@ -223,7 +221,7 @@ ax = fitter.plotmerit(
     show_yaxis=True,
     title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",
 )
-_ = ax.set_xlim(0, 16000)
+ax.set_xlim(0, 16000)
 
 # %%
 index = 2
@@ -236,7 +234,7 @@ fitter.script = """
 	$ tis:  800, 1, 10000
 """
 
-_ = fitter.fit(s)
+fitter.fit(s)
 
 spred = fitter.predict()
 
@@ -247,7 +245,7 @@ ax = fitter.plotmerit(
     show_yaxis=True,
     title=f"fitting CP dynamic (peaks at {peaks.x[index].values})",
 )
-_ = ax.set_xlim(0, 16000)
+ax.set_xlim(0, 16000)
 
 # %%
 # The model looks good for the peak at 174 ppm. This peak appears to be composed of a single species,

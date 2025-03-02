@@ -18,7 +18,7 @@ import spectrochempy as scp
 Z = scp.read_opus(
     ["test.0000", "test.0001", "test.0002", "test.0003"], directory="irdata/OPUS"
 )
-print(Z)
+Z
 
 # %%
 # plot it
@@ -28,5 +28,5 @@ Z.plot()
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
 # running the .py script with python
-
-scp.show()
+#
+# scp.show()

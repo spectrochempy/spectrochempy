@@ -36,49 +36,41 @@ dataset
 
 # %%
 # Plot the dataset
-_ = dataset.plot_map()
-
+dataset.plot_map()
 # %%
 # Extract slices along x
 s = dataset[-27.6, :]
 s.plot()
-
 # %%
 # Baseline correction of this slice
 # Note that only the real part is corrected
 sa = s.snip(snip_width=100)
-_ = sa.plot()
-
+sa.plot()
 # %%
 # apply this correction to the whole dataset
 sb = dataset.snip(snip_width=100)
-_ = sb.plot_map()
-
+sb.plot_map()
 # %%
 # Select a region of interest
 sc = sb[
     -40.0:-15.0, 55.0:20.0
 ]  # note the use of float to make selection using coordinates (not point indexes)
-_ = sc.plot_map()
-
+sc.plot_map()
 # %%
 # Extract slices along x
 s1 = sc[-27.6, :]
-_ = s1.plot()
-
+s1.plot()
 # %%
 s2 = sc[-25.7, :]
-_ = s2.plot()
-
+s2.plot()
 # %%
 # plot two slices on the same figure
-_ = s1.plot()
-_ = s2.plot(
+s1.plot()
+s2.plot(
     clear=False,
     color="red",
     linestyle="-",
 )
-
 # %%
 # Now slice along y
 s3 = sc[:, 40.0]
@@ -96,9 +88,8 @@ s4 = s4.squeeze()
 
 # %%
 # plot the two slices on the same figure
-_ = s3.plot(color="violet", ls="-", lw="2")
-_ = s4.plot(clear=False, color="green", ls="-", lw="2")
-
+s3.plot(color="violet", ls="-", lw="2")
+s4.plot(clear=False, color="green", ls="-", lw="2")
 # %%
 # Peak picking
 # ------------
@@ -111,9 +102,9 @@ peaks, _ = s2.find_peaks()
 
 
 def plot_with_pp(s, peaks):
-    ax = s.plot()  # output the spectrum on ax. ax will receive next plot too
+    ax = s.plot()  # output the spectrum on ax. ax will receive next plot too;
     pks = peaks + 0.2  # add a small offset on the y position of the markers
-    _ = pks.plot_scatter(
+    pks.plot_scatter(
         ax=ax,
         marker="v",
         color="black",
@@ -121,10 +112,9 @@ def plot_with_pp(s, peaks):
         data_only=True,  # we don't need to redraw all things like labels, etc...
         ylim=(-0.1, 7),
     )
-
     for p in pks:
         x, y = p.coord(-1).values, (p + 0.2).values
-        _ = ax.annotate(
+        ax.annotate(
             f"{x.m:0.1f}",
             xy=(x, y),
             xytext=(-5, 5),
@@ -133,17 +123,17 @@ def plot_with_pp(s, peaks):
         )
 
 
-_ = plot_with_pp(s2, peaks)
+plot_with_pp(s2, peaks)
 
 # %%
 # Set some parameters to get less but significant peaks
 peaks, _ = s2.find_peaks(height=1.0, distance=1.0)
-_ = plot_with_pp(s2, peaks)
+plot_with_pp(s2, peaks)
 
 # %%
 # Now look in the other dimension using slice s4
 peaks, _ = s4.find_peaks(height=1.0, distance=1.0)
-_ = plot_with_pp(s4, peaks)
+plot_with_pp(s4, peaks)
 
 # %%
 # Peak fitting
@@ -221,7 +211,7 @@ f1.max_iter = 5000
 
 # %%
 # Fit the slice s4p
-_ = f1.fit(s4p)
+f1.fit(s4p)
 
 # %%
 # Show the result
@@ -231,7 +221,7 @@ ax.autoscale(enable=True, axis="y")
 
 # Plotmerit
 som = f1.inverse_transform()
-_ = f1.plotmerit(offset=2)
+f1.plotmerit(offset=2)
 
 # %%
 # This ends the example ! The following line can be removed or commented
