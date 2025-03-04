@@ -18,7 +18,7 @@ Version 0.7
 .. toctree::
     :maxdepth: 1
 
-    latest
+    v0.7.2
     v0.7.1
     v0.7.0
 
