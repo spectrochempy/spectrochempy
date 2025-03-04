@@ -1,0 +1,243 @@
+/*
+  This file contains styles rules for SpectroChemPy documentation,
+  that override styles from the sphinx_rtd_theme.
+
+  This file is based derived from PlasmaPy Css (https://docs.plasmapy.org/en/stable/index.html)
+*/
+
+/* -----------------------------------------------------------------------------
+ * RTD Overrides
+ */
+
+/* Style for toctree in a table */
+td .toctree-wrapper ul {
+    font-size: 16px;
+    line-height: 18px !important;
+    list-style: none !important;
+    margin-bottom: 0 !important;
+}
+
+td .toctree-wrapper ul li {
+    list-style: none !important;
+    margin-left: 0 !important;
+}
+
+/* Unordered list nested in ordered list */
+.section li ul {
+    margin-bottom: 12px !important;
+}
+
+/* Add margin-bottom to inheritance diagrams */
+div.graphviz {
+    margin-bottom: 24px !important;
+}
+
+/*
+ * Remove bottom margin for the autosummary table in a directive:option::
+ * section
+ */
+.rst-content dl.rst table p,
+.rst-content dl.std table p,
+.rst-content dl.py table p {
+    margin-bottom: 0 !important;
+}
+
+.rst-content p a code {
+    overflow-wrap: normal;
+}
+
+/* Remove excess bottom margin for table headings */
+.rst-content table.docutils thead p {
+    margin-bottom: 0;
+}
+
+/* Remove excess bottom margin for for multiline table entries when using line-block */
+.rst-content table.docutils div.line-block {
+    margin-bottom: 0;
+}
+
+/* Allow text wrapping for last column of a table. */
+.rst-content table.docutils td:last-child p {
+    white-space: normal;
+    line-height: 140%;
+}
+
+/* add some space around titles */
+.rst-content h1,
+.rst-content h2,
+.rst-content h3,
+.rst-content h4,
+.rst-content h5,
+.rst-content h6 {
+    margin-bottom: 12px;
+    margin-top: 24px;
+}
+
+/* rubric in API documentation */
+.rst-content p.rubric {
+    margin-bottom: 12px;
+    font-weight: 700;
+    font-size: 20px;
+    color: #074fb3;
+}
+
+/* Reduce top/bottom margin for equations in tables */
+table div.MathJax_Display {
+    margin: 0.5em 0;
+}
+
+/*
+ * Adjustments to the Glossary styling
+ */
+dl.glossary dd ul {
+    margin-bottom: 12px !important;
+}
+
+dl.glossary dd {
+    margin-top: 4px;
+    margin-bottom: 18px;
+}
+
+dl.glossary dt {
+    margin-bottom: 2px;
+}
+
+/* Styles for text in the footer chosen to improve contrast. */
+
+footer p {
+    color: #141414;
+}
+
+/*
+  Styles for hyperlinks. The colors must meet the WCAG AA standard
+  for contrast. Link colors can be tested for accessibility at:
+  https://webaim.org/resources/linkcontrastchecker
+*/
+
+div.wy-nav-content a:link {
+    color: #0069d6;
+}
+
+div.wy-nav-content a:visited {
+    color: #9151b6;
+}
+
+div.wy-nav-content a:hover {
+    text-decoration: underline;
+}
+
+/*
+  The style for generic code literals, in particular text that is
+  enclosed in double back ticks in reST (e.g., ``make -j 32``).
+*/
+
+div.wy-nav-content .rst-content code.literal {
+    background-color: #f6f6f6;
+    color: #273a59;
+}
+
+/*
+  The style for links to Python objects, in particular text enclosed in
+  single back ticks in reST.
+*/
+
+div.wy-nav-content .rst-content code.literal.xref {
+    color: #0069d6;
+    font-weight: bold;
+}
+
+/*
+  The style for literal text that shows the location of a file, in
+  particular when used by the reST role :file:).
+*/
+div.wy-nav-content .rst-content code.literal.file {
+    color: #b84d00;
+    background-color: #F9F1F0;
+}
+
+/* -----------------------------------------------------------------------------
+ * RTD layout styling additions
+ */
+
+/* Style for module/index links in sidebar below the search field. */
+div.pkgnav {
+    color: white;
+    font-size: 1em;
+    margin-top: 12px;
+    text-align: center;
+}
+
+div.pkgnav ul {
+    list-style: none;
+}
+
+div.pkgnav ul li {
+    display: inline;
+}
+
+div.pkgnav ul li a {
+    color: #f9f9f0;
+    margin: 0;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+}
+
+div.pkgnav ul li a:hover {
+    color: #f50404;
+    text-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+/* code cells */
+
+.highlight {
+    background: #f2f7fa;
+}
+
+/* style of the attributes */
+html.writer-html4 .rst-content dl:not(.docutils) dl:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple)>dt,
+html.writer-html5 .rst-content dl[class]:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple) dl:not(.option-list):not(.field-list):not(.footnote):not(.citation):not(.glossary):not(.simple)>dt {
+    margin-bottom: 6px;
+    border: none;
+    /* border-left: 3px solid #ccc; */
+    background: #e7f2fa;
+    color: #555;
+}
+
+/* Style for version selector */
+.wy-side-nav-search>div.switch-menus {
+    position: relative;
+    display: block;
+    margin-top: -1.7em;
+    margin-bottom: .2em;
+    font-weight: 400;
+    color: hsla(0, 0%, 100%, .3);
+}
+
+.version-selector {
+    display: flex;
+    align-items: center;
+    margin: .3em;
+}
+
+.version-selector select {
+    margin-right: 10px;
+    font-size: 11pt;
+}
+
+select {
+    /* background-color: #227fbb; */
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #fffdfd;
+}
+
+/* Hide the breadcrumbs */
+
+.wy-breadcrumbs {
+    display: none !important;
+}
+
+/* Hide the breadcrumb separator as well */
+.wy-breadcrumbs-aside {
+    display: none !important;
+}
