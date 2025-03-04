@@ -34,7 +34,7 @@ ds = scp.read("matlabdata/METING9.MAT")
 # (t=0). The second dataset contains the UV-VIS spectra of the reaction mixture, recorded at different time points.
 # The first column of the matrix contains the wavelength axis and the remaining columns
 # are the measured UV-VIS spectra (wavelengths x timepoints)
-print("\n NDDataset names: " + str([d.name for d in ds]))
+print("NDDataset names: " + str([d.name for d in ds]))
 
 # %%
 # We load the experimental spectra (in `ds[1]`), add the `y` (time) and `x`
@@ -43,8 +43,7 @@ D = scp.NDDataset(ds[1][:, 1:].data.T)
 D.y = scp.Coord(ds[0].data.squeeze(), title="time") / 60
 D.x = scp.Coord(ds[1][:, 0].data.squeeze(), title="wavelength / cm$^{-1}$")
 D = D[::4]
-_ = D.plot()
-
+D.plot()
 # %%
 # A first estimate of the concentrations can be obtained by EFA:
 print("compute EFA...")
@@ -53,17 +52,14 @@ efa.fit(D[:, 300.0:500.0])
 efa.n_components = 3
 C0 = efa.transform()
 C0 = C0 / C0.max(dim="y") * 5.0
-_ = C0.T.plot()
-
+C0.T.plot()
 # %%
 # We can get a better estimate of the concentration (C) and pure spectra profiles (St)
 # by soft MCR-ALS:
 mcr_1 = scp.MCRALS(log_level="INFO")
-_ = mcr_1.fit(D, C0)
-
-_ = mcr_1.C.T.plot()
-_ = mcr_1.St.plot()
-
+mcr_1.fit(D, C0)
+mcr_1.C.T.plot()
+mcr_1.St.plot()
 # %%
 # Kinetic constraints can be added, i.e., imposing that the concentration profiles obey
 # a kinetic model. To do so we first define an ActionMAssKinetics object with
@@ -77,9 +73,8 @@ kin = scp.ActionMassKinetics(reactions, species_concentrations, k0)
 # The concentration profile obtained with this approximate model can be computed and
 # compared with those of the soft MCR-ALS:
 Ckin = kin.integrate(D.y.data)
-_ = mcr_1.C.T.plot(linestyle="-", cmap=None)
-_ = Ckin.T.plot(clear=False, cmap=None)
-
+mcr_1.C.T.plot(linestyle="-", cmap=None)
+Ckin.T.plot(clear=False, cmap=None)
 # %%
 # Even though very approximate, the same values can be used to run a hard-soft MCR-ALS:
 X = D[:, 300.0:500.0]
@@ -99,14 +94,13 @@ mcr_2.fit(X, Ckin)
 
 # sphinx_gallery_thumbnail_number = 6
 
-_ = mcr_2.C.T.plot()
-_ = mcr_2.C_constrained.T.plot(clear=False)
-
+mcr_2.C.T.plot()
+mcr_2.C_constrained.T.plot(clear=False)
 # %%
 # Finally, let's plot some of the pure spectra profiles St, and the
 #  reconstructed dataset  (X_hat = C St) vs original dataset (X) and residuals.
-_ = mcr_2.St.plot()
-_ = mcr_2.plotmerit(nb_traces=10)
+mcr_2.St.plot()
+mcr_2.plotmerit(nb_traces=10)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

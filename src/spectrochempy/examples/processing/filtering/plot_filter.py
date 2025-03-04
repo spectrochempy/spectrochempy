@@ -22,8 +22,7 @@ import spectrochempy as scp
 X = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
 prefs = X.preferences
 prefs.figure.figsize = (8, 4)
-_ = X.plot()
-
+X.plot()
 # %%
 # here `Filter` processor is used to apply a Savitzky-Golay filter to the
 # spectrum.
@@ -34,7 +33,7 @@ filter = scp.Filter(
 
 # plot the result
 Xm = filter(X)
-_ = X.plot(color="b", label="original")
+X.plot(color="b", label="original")
 ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label="SG filter")
 diff = X - Xm
 s = round(diff.std(dim=-1).values, 2)
@@ -50,7 +49,7 @@ filter = scp.Filter(method="whittaker", order=2, lamb=1.5)
 Xm = filter(X)
 # plot the result
 Xm = filter(X)
-_ = X.plot(color="b", label="original")
+X.plot(color="b", label="original")
 ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label="WE filter")
 diff = X - Xm
 s = round(diff.std(dim=-1).values, 2)

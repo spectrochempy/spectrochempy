@@ -52,7 +52,7 @@ GALLERY = GETTINGSTARTED / "examples" / "gallery"
 # Get sphinx pattern
 pattern = os.environ.get("SPHINX_PATTERN")
 single_doc_or_dir = pattern is not None and pattern not in ["noapi", "whatsnew"]
-include_api = pattern is None or pattern == "whatsnew"
+include_api = pattern is None
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
@@ -79,11 +79,11 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinx.ext.todo",
     "sphinx_tabs.tabs",
-    "matplotlib.sphinxext.plot_directive",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "sphinxcontrib.bibtex",
     "nbsphinx",
+    "sphinx_design",
 ]
 if not single_doc_or_dir:
     extensions += [
@@ -196,9 +196,8 @@ if pattern:
                     )
                 )
                 or (
-                    pattern == "whatsnew"
-                    and "generated" not in rel_path.parts
-                    and rel_path.parts[0] != "whatsnew"
+                    pattern == "whatsnew" and "whatsnew" not in rel_path.parts
+                    # and rel_path.parts[0] != "whatsnew"
                 )
                 or (
                     single_doc_or_dir
@@ -228,8 +227,7 @@ html_theme = "sphinx_rtd_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "logo_only": False,
-    "display_version": True,
+    "logo_only": True,
     "collapse_navigation": False,
     "navigation_depth": 5,
     "sticky_navigation": True,
@@ -271,7 +269,7 @@ html_last_updated_fmt = "%b %d, %Y"
 html_use_smartypants = True
 
 # If true, links to the reST sources are added to the pages.
-html_show_sourcelink = True
+html_show_sourcelink = False
 
 # Don't add .txt suffix to source files:
 html_sourcelink_suffix = ""
@@ -430,7 +428,7 @@ nbsphinx_custom_formats = {
 
 # Configure sphinxcontrib-bibtex
 
-bibtex_bibfiles = ["reference/bibliography.bib"]
+bibtex_bibfiles = [str(REFERENCE / "bibliography.bib")]
 bibtex_default_style = "plain"
 bibtex_reference_style = "author_year"
 bibtex_cite_id = "{key}"
@@ -608,5 +606,9 @@ def setup(app):
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)
     app.add_css_file("css/spectrochempy.css")  # also can be a full URL
-    # Add this line to set the content type for RST files
     app.config.rst_mimetype = rst_mimetype
+
+
+# Add jupyter-sphinx configuration at the root level
+jupyter_execute_default_kernel = "python3"
+jupyter_execute_notebooks = "auto"

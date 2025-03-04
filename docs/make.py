@@ -464,7 +464,7 @@ class BuildDocumentation:
         # with error handling for individual files.
 
         print(f"\n{'-' * 80}\nSync *.py and *.ipynb using jupytext\n{'-' * 80}")
-        if self.settings["nosync"]:
+        if self.settings["nosync"] or self.settings["whatsnew"]:
             print("Skipping notebook synchronization as option --no-sync is set")
             return
 
@@ -618,12 +618,13 @@ class BuildDocumentation:
                 f"\n{'-' * 80}"
             )
 
-        print("Loading spectrochempy and downloading test data...")
+        if not self.settings["whatsnew"]:
+            print("Loading spectrochempy and downloading test data...")
 
-        from spectrochempy.utils.file import download_testdata
+            from spectrochempy.utils.file import download_testdata
 
-        # Download the test data
-        download_testdata()
+            # Download the test data
+            download_testdata()
 
         # Determine the version of the documentation to build
         self._version, self._last_release, self._doc_version = self._determine_version()
@@ -876,6 +877,22 @@ class BuildDocumentation:
             self._delnb()  # Erase nb before starting
         self._sync_notebooks()
 
+    def linkcheck(self):
+        """Check the links in the documentation."""
+        from sphinx.cmd.build import build_main
+
+        srcdir = str(DOCS)
+        args = [
+            "-b",
+            "linkcheck",  # Use linkcheck builder
+            "-W",  # Treat warnings as errors
+            "-n",
+            "-q",  # Run in nit-picky mode, quietly
+            str(srcdir),  # Source directory
+            str(BUILDDIR / "linkcheck"),  # Output directory
+        ]
+        return build_main(args)
+
 
 # ======================================================================================
 def main():
@@ -896,6 +913,7 @@ def main():
     - html : Build HTML documentation
     - clean : Remove built documentation
     - sync-nb : Synchronize notebooks
+    - linkcheck : Check the links in the documentation
 
     Use -h/--help to see all available options.
     """

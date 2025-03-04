@@ -528,7 +528,7 @@ baseline/trends for different segments of the data.
                     z = spsolve(C, w * y)
                     w = p * (y > z) + (1 - p) * (y < z)
                     change = np.sum(np.abs(w_old - w)) / N
-                    info_(change)
+                    # info_(change)
                     if change <= self.tol:
                         info_(f"Convergence reached in {iter} iterations")
                         break

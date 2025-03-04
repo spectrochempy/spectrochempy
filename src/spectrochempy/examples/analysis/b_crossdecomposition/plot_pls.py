@@ -34,13 +34,11 @@ X = ds_list[4]
 X.title = "reflectance"
 X.x.title = "Wavelength"
 X.x.units = "nm"
-_ = X.plot(cmap=None)
-
+X.plot(cmap=None)
 # %%
 # The values of the properties we want to predict are in the 4th dattaset named `'propval'` dataset:
 Y = ds_list[3]
-_ = Y.T.plot(cmap=None, legend=Y.x.labels)
-
+Y.T.plot(cmap=None, legend=Y.x.labels)
 # %%
 # We are interested to predict the moisture content:
 y = Y[:, "Moisture"]
@@ -56,19 +54,17 @@ y_test = y[57:]
 # %%
 # Then we create a PLSRegression object and fit the train datasets:
 pls = scp.PLSRegression(n_components=5)
-_ = pls.fit(X_train, y_train)
-
+pls.fit(X_train, y_train)
 # %%
 # Finally we generate a parity plot comparing the predicted and actual values, for
 # both train set and test set.
 
 # sphinx_gallery_thumbnail_number = 3
 ax = pls.parityplot(label="calibration", s=150)
-_ = pls.parityplot(
+pls.parityplot(
     y_test, pls.predict(X_test), s=150, c="red", label="validation", clear=False
 )
-_ = ax.legend(loc="lower right")
-
+ax.legend(loc="lower right")
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
 # running the .py script with python

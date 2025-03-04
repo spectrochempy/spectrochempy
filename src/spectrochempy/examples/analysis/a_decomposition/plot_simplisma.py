@@ -25,8 +25,7 @@ for mat in lnd:
     print("    " + mat.name, str(mat.shape))
 
 ds = lnd[-1]
-_ = ds.plot()
-
+ds.plot()
 # %%
 # Add some metadata for a nicer display
 ds.title = "absorbance"
@@ -45,15 +44,13 @@ simpl.fit(ds)
 
 # %%
 # Plot concentration
-_ = simpl.C.T.plot(title="Concentration")
-
+simpl.C.T.plot(title="Concentration")
 # %%
 # Plot components (St)
 
 # sphinx_gallery_thumbnail_number = 3
 
-_ = simpl.components.plot(title="Pure profiles")
-
+simpl.components.plot(title="Pure profiles")
 # %%
 # Show the plot of merit
 # after reconstruction oto the original data space

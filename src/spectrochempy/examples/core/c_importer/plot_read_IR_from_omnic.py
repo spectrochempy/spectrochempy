@@ -19,11 +19,8 @@ import spectrochempy as scp
 # Loading and stacked plot of the original
 
 datadir = scp.preferences.datadir
-
 dataset = scp.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
-
-_ = dataset.plot_stack(style="paper")
-
+dataset.plot_stack(style="paper")
 # %%
 # change the unit of y-axis, the y origin as well as the title of the axis
 
@@ -31,7 +28,7 @@ dataset.y.to("hour")
 dataset.y -= dataset.y[0]
 dataset.y.title = "acquisition time"
 
-_ = dataset.plot_stack()
+dataset.plot_stack()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

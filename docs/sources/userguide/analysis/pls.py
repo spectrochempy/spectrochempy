@@ -77,24 +77,24 @@ X = A[-3]
 X.title = "absorbance"
 X.x.title = "Wavelength"
 X.x.units = "nm"
-_ = X.plot(cmap=None)
+X.plot(cmap=None)
 
 # %%
 X_ = X.detrend()
-_ = X_.plot(cmap=None)
+X_.plot(cmap=None)
 # %% [markdown]
 # Let's plot the properties of the sample:
 
 # %%
 Y = A[3]
-_ = Y.T.plot(cmap=None, legend=Y.x.labels)
+Y.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
 # Standardization of the values allows better visualization:
 
 # %%
 Y_std = (Y - Y.mean(dim=0)) / Y.std(dim=0)
-_ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
+Y_std.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
 # ## Running PLSRegression
@@ -126,7 +126,7 @@ pls.x_loadings.plot()
 
 # %%
 y_test_hat = pls.predict(X_test)
-_ = y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
+y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
 
 # %% [markdown]
 # We can generate a parity plot to compare the predicted and actual values, for

@@ -296,6 +296,8 @@ class ScpObjectList(list):
 
         objtypes = list({item._implements() for item in self})
         objtypes = "mixed" if len(objtypes) > 1 else objtypes[0]
+        if objtypes == "_Axes":
+            return ""
         html = f"<div class='scp-output'><details><summary>List (len={len(self)}, type={objtypes})</summary><ul>"
         for i, item in enumerate(self):
             html += f"<div class='scp-output section'>{convert_to_html(item, open=False, id=i)}</div>\n"

@@ -54,7 +54,7 @@ prefs = X.preferences
 prefs.figure.figsize = (8, 4)
 
 # and use plot method of the NDDataset
-_ = X.plot()
+X.plot()
 
 # %% [markdown]
 # To have a better view of the filters effect, we will zoom on a smaller region:
@@ -64,14 +64,14 @@ _ = X.plot()
 # select a region by slicing (note the original shape is (1, 1024)
 Xs = X[:, 0.0:400.0]
 info_("shape: ", X.shape)
-_ = Xs.plot()
+Xs.plot()
 
 # %%
 import numpy as np
 
 noise = np.random.normal(0, 100, 215)
 Xn = Xs + noise
-_ = Xn.plot()
+Xn.plot()
 
 # %% [markdown]
 # ## The `Filter` processor

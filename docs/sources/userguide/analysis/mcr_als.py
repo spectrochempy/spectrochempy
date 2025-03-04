@@ -84,7 +84,7 @@ X = A[-1]
 X
 
 # %%
-_ = X.plot()
+X.plot()
 
 # %% [markdown]
 # The original dataset is the 'm1' matrix and does not contain information as to the
@@ -131,7 +131,7 @@ surf = X.plot_surface(linewidth=0.0, figsize=(10, 5), autolayout=False)
 
 # %%
 St0 = A[3]
-_ = St0.plot()
+St0.plot()
 
 # %% [markdown]
 # Note that, again, no information has been given as to the ordinate and abscissa data.
@@ -237,11 +237,11 @@ print("third run with the output of the second")
 # Below we compare the outputs of the initial run (red) and final run (blue).
 
 # %%
-_ = mcr.C.T.plot(cmap=None, color="red")
-_ = mcr1.C.T.plot(clear=False, cmap=None, color="blue")
+mcr.C.T.plot(cmap=None, color="red")
+mcr1.C.T.plot(clear=False, cmap=None, color="blue")
 
-_ = mcr.St.plot(cmap=None, color="red")
-_ = mcr1.St.plot(clear=False, cmap=None, color="blue")
+mcr.St.plot(cmap=None, color="red")
+mcr1.St.plot(clear=False, cmap=None, color="blue")
 
 # %% [markdown]
 # #### Solutions
@@ -267,13 +267,13 @@ mcr1.fit(X, St0)
 # to plot the concentration vs. the elution time.
 
 # %%
-_ = mcr1.C.T.plot()
+mcr1.C.T.plot()
 
 # %% [markdown]
 # On the other hand, the spectra of the pure species can be plotted directly:
 
 # %%
-_ = mcr1.St.plot()
+mcr1.St.plot()
 
 # %% [markdown]
 # #### A basic illustration of the rotational ambiguity
@@ -300,14 +300,14 @@ mcr2.fit(X, St0)
 mcr3 = scp.MCRALS(normSpec="max")
 mcr3.fit(X, St0)
 
-_ = mcr1.St.plot()
-_ = mcr2.St.plot()
-_ = mcr3.St.plot()
+mcr1.St.plot()
+mcr2.St.plot()
+mcr3.St.plot()
 
 # %%
-_ = mcr1.C.T.plot()
-_ = mcr2.C.T.plot()
-_ = mcr3.C.T.plot()
+mcr1.C.T.plot()
+mcr2.C.T.plot()
+mcr3.C.T.plot()
 
 # %% [markdown]
 # It is clear that the normalization affects the relative intensity of the spectra and
@@ -346,8 +346,8 @@ _ = pca.screeplot()
 
 # %%
 scores = pca.transform()
-_ = pca.loadings.plot()
-_ = scores.T.plot()
+pca.loadings.plot()
+scores.T.plot()
 
 # %% [markdown]
 # Examination of the scores and loadings indicate that the 4th component has structured,
@@ -366,7 +366,7 @@ efa = scp.EFA()
 efa.fit(X)
 efa.n_components = 4
 C0 = efa.transform()
-_ = C0.T.plot()
+C0.T.plot()
 
 # %% [markdown]
 # The MCR ALS can then be launched using this new guess:
@@ -376,8 +376,8 @@ mcr4 = scp.MCRALS(max_iter=100, normSpec="euclid")
 mcr4.fit(X, C0)
 
 # %%
-_ = mcr4.C.T.plot()
-_ = mcr4.St.plot()
+mcr4.C.T.plot()
+mcr4.St.plot()
 
 # %% [markdown]
 # ## Augmented datasets
@@ -398,17 +398,17 @@ X2.title = "absorbance"
 X2.set_coordset(None, None)
 X2.set_coordtitles(y="elution time", x="wavelength")
 surf = X2.plot_surface(linewidth=0.0, ccount=100, figsize=(8, 4), autolayout=False)
-_ = X2.plot(method="map")
+X2.plot(method="map")
 
 # %%
 mcr5 = scp.MCRALS(unimodConc=[])
 mcr5.fit(X2, St0)
 
 # %%
-_ = mcr5.C.T.plot()
+mcr5.C.T.plot()
 
 # %%
-_ = mcr5.St.plot()
+mcr5.St.plot()
 
 # %% [markdown]
 # [To be continued...]

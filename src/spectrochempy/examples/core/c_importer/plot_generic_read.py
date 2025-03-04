@@ -25,8 +25,7 @@ dataset = scp.read("irdata/nh4y-activation.spg")
 dataset
 
 # %%
-_ = dataset.plot(style="paper")
-
+dataset.plot(style="paper")
 # %%
 # When using `read`, we can pass filename as a `str` or a `~pathlib.Path` object.
 from pathlib import Path
@@ -72,10 +71,14 @@ for nd in dataset_list:
 dataset_list = scp.read(
     "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip"
 )
-_ = dataset_list[-1].plot()
-_ = dataset_list[-2].plot()
-_ = dataset_list[-3].plot()
-_ = dataset_list[-4].plot()
+dataset_list
+
+# %%
+# Plot each of the datasets
+dataset_list[-1].plot()
+dataset_list[-2].plot()
+dataset_list[-3].plot()
+dataset_list[-4].plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -48,7 +48,7 @@ ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 # %%
 prefs = ir.preferences
 prefs.figure.figsize = (7, 3)
-_ = ir.plot()
+ir.plot()
 print("number of points = ", ir.size)
 
 # %% [markdown]
@@ -58,7 +58,7 @@ print("number of points = ", ir.size)
 # but it will be determined automatically.
 
 # %%
-_ = ir.plot(xlim=(0, 128))
+ir.plot(xlim=(0, 128))
 
 # %% [markdown]
 # The `x` scale of the interferogram can also be displayed as a function of optical
@@ -66,7 +66,7 @@ _ = ir.plot(xlim=(0, 128))
 
 # %%
 ir.x.show_datapoints = False
-_ = ir.plot(xlim=(-0.04, 0.04))
+ir.plot(xlim=(-0.04, 0.04))
 
 # %% [markdown]
 # Note that the `x` scale of the interferogram has been calculated using the laser
@@ -92,7 +92,7 @@ ird = ir.dc()
 ird = ird.zf(size=2 * ird.size)
 irt = ird.fft()
 
-_ = irt.plot(xlim=(3999, 400))
+irt.plot(xlim=(3999, 400))
 
 # %% [markdown]
 # A `Happ-Genzel` (Hamming window) apodization can also be applied prior to the
@@ -103,7 +103,7 @@ ird = ir.dc()
 irdh = ird.hamming()
 irdh.zf(inplace=True, size=2 * ird.size)
 irth = irdh.fft()
-_ = irth.plot(xlim=(3999, 400))
+irth.plot(xlim=(3999, 400))
 
 # %% [markdown]
 # ## Comparison with the OMNIC processing.

@@ -28,6 +28,21 @@ class _Axes(maxes.Axes):
     #    #    # with plt.rc_context({"something": self.xxx}):
     #    return super().draw(renderer)
 
+    def _implements(self, type=None):
+        if type is None:
+            return "_Axes"
+        return type == "_Axes"
+
+    def __repr__(self):
+        return "<Matplotlib Axes object>"
+
+    def __str__(self):
+        return self.__repr__()
+
+    def _repr_html_(self):
+        # Suppress text output in notebooks
+        return ""
+
     @remove_args_units
     def plot(self, *args, **kwargs):
         return super().plot(*args, **kwargs)

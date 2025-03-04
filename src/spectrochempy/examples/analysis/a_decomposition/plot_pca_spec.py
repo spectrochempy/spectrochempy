@@ -20,8 +20,7 @@ import spectrochempy as scp
 # Load a dataset
 dataset = scp.read_omnic("irdata/nh4y-activation.spg")[::5]
 print(dataset)
-_ = dataset.plot()
-
+dataset.plot()
 # %%
 # Create a PCA object and fit the dataset so that the explained variance is greater or
 # equal to 99.9%
@@ -41,27 +40,22 @@ scores
 # %%
 # Finally, display the results graphically
 # ScreePlot
-_ = pca.screeplot()
-
+pca.screeplot()
 # %%
 # Score Plot
-_ = pca.scoreplot(scores, 1, 2)
-
+pca.scoreplot(scores, 1, 2)
 # %%
 # Score Plot for 3 PC's in 3D
-_ = pca.scoreplot(scores, 1, 2, 3)
-
+pca.scoreplot(scores, 1, 2, 3)
 # %%
 # Displays 4 loadings
-_ = pca.loadings[:4].plot(legend=True)
-
+pca.loadings[:4].plot(legend=True)
 # %%
 # Here we do a masking of the saturated region between 882 and 1280 cm^-1
 dataset[
     :, 882.0:1280.0
 ] = scp.MASKED  # remember: use float numbers for slicing (not integer)
-_ = dataset.plot()
-
+dataset.plot()
 # %%
 # Apply the PCA model
 pca = scp.PCA(n_components=0.999)
@@ -71,17 +65,14 @@ pca.n_components
 # %%
 # As seen above, now only 4 components instead of 23 are necessary to 99.9% of
 # explained variance.
-_ = pca.screeplot()
-
+pca.screeplot()
 # %%
 # Displays the loadings
-_ = pca.loadings.plot(legend=True)
-
+pca.loadings.plot(legend=True)
 # %%
 # Let's plot the scores
 scores = pca.transform()
-_ = pca.scoreplot(scores, 1, 2)
-
+pca.scoreplot(scores, 1, 2)
 # %%
 # Labeling scoreplot with spectra labels
 # Our dataset has already two columns of labels for the spectra but there are little
@@ -96,7 +87,7 @@ scores.y.labels = labels  # Note this does not replace previous labels,
 
 # %%
 # now display thse
-_ = pca.scoreplot(scores, 1, 2, show_labels=True, labels_column=2)
+pca.scoreplot(scores, 1, 2, show_labels=True, labels_column=2)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

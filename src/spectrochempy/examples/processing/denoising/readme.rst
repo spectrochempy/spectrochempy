@@ -2,3 +2,5 @@
 
 Denoising
 -----------
+
+This section contains examples of how to denoise NDDatasets.

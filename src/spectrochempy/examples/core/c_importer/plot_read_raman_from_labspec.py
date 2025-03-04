@@ -1,8 +1,3 @@
-# ======================================================================================
-# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory.
-# ======================================================================================
 # ruff: noqa
 """
 Loading RAMAN experimental file
@@ -16,33 +11,28 @@ Here we load experimental LABSPEC spectra and plot them.
 import spectrochempy as scp
 
 # %%
-# define the folder where are the spectra
+# Define the folder where are the spectra:
 datadir = scp.preferences.datadir
 ramandir = datadir / "ramandata/labspec"
 
 # %%
-
+# Read some data:
 A = scp.read_labspec("Activation.txt", directory=ramandir)
-A.plot()
-
-A = scp.read_labspec("532nm-191216-Si_200mu.txt", directory=ramandir)
-A.plot()
-
-A = scp.read_labspec("serie190214-1.txt", directory=ramandir)
-A.plot(colorbar=True)
-A.plot_map(colorbar=True)
-
-A = scp.read_labspec("SMC1-Initial_RT.txt", directory=ramandir)
-_ = A.plot()
+A
 
 # %%
-# Open a dialog - note the presence of the keyword directory
-B = scp.read_labspec(directory=ramandir)
-
+# Now plot them:
+A.plot()
 # %%
-# this pack all spectra of the subdir directory (without dialog - look at the difference above)
+# As it is a 2D dataset, we can plot it as an image:
+A.plot_image()
+# %%
+# or a contour plot:
+A.plot_map()
+# %%
+# We can also read the content of a folder, and merge all spectra:
 B = scp.read_labspec(ramandir / "subdir")
-_ = B.plot()
+B.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

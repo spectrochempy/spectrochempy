@@ -136,7 +136,7 @@ prefs = d2D.preferences
 prefs.colormap = "magma"
 prefs.colorbar = False
 prefs.figure.figsize = (6, 3)
-_ = d2D.plot()
+d2D.plot()
 
 # %% [markdown]
 # Let's select only the first row of the 2D dataset ( the `squeeze` method is used to remove
@@ -144,7 +144,7 @@ _ = d2D.plot()
 
 # %%
 dataset = d2D[0].squeeze()
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # This dataset will be artificially modified already using some mathematical operation (subtraction with a scalar) to
@@ -153,7 +153,7 @@ _ = dataset.plot()
 # %%
 dataset -= 2.0  # add an offset to make that some of the values become negative
 dataset[1290.0:890.0] = scp.MASKED  # additionally we mask some data
-_ = dataset.plot()
+dataset.plot()
 
 # %% [markdown]
 # ### Unary functions
@@ -167,7 +167,7 @@ _ = dataset.plot()
 
 # %%
 out = np.negative(dataset)  # the same results is obtained using out=-dataset
-_ = out.plot(figsize=(6, 2.5), show_mask=True)
+out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %% [markdown]
 # ##### abs
@@ -177,7 +177,7 @@ _ = out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %%
 out = np.abs(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### rint
@@ -185,7 +185,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.rint(dataset)
-_ = out.plot(figsize=(6, 2.5))  # not that title is not modified for this ufunc
+out.plot(figsize=(6, 2.5))  # not that title is not modified for this ufunc
 
 # %% [markdown]
 # ##### floor
@@ -193,7 +193,7 @@ _ = out.plot(figsize=(6, 2.5))  # not that title is not modified for this ufunc
 
 # %%
 out = np.floor(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### ceil
@@ -201,7 +201,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.ceil(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### trunc
@@ -209,7 +209,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.trunc(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Functions affecting magnitudes of the number but also units
@@ -220,7 +220,7 @@ _ = out.plot(figsize=(6, 2.5))
 out = np.sqrt(
     dataset
 )  # as they are some negative elements, return dataset has complex dtype.
-_ = out.plot_1D(show_complex=True, figsize=(6, 2.5))
+out.plot_1D(show_complex=True, figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### square
@@ -228,7 +228,7 @@ _ = out.plot_1D(show_complex=True, figsize=(6, 2.5))
 
 # %%
 out = np.square(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### cbrt
@@ -236,7 +236,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.cbrt(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### reciprocal
@@ -244,7 +244,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.reciprocal(dataset + 3.0)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Functions that require no units or dimensionless units for inputs. Returns dimensionless objects.
@@ -255,7 +255,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.exp(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # Obviously numpy exponential functions applies only to dimensionless array. Else an error is generated.
@@ -273,7 +273,7 @@ except DimensionalityError as e:
 
 # %%
 out = np.exp2(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### expm1
@@ -281,7 +281,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.expm1(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log
@@ -295,7 +295,7 @@ ax = out.plot(figsize=(6, 2.5), show_mask=True)
 
 # %%
 out = np.log(dataset - dataset.min())
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log2
@@ -303,7 +303,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.log2(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log10
@@ -311,7 +311,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.log10(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### log1p
@@ -319,7 +319,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.log1p(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Functions that return numpy arrays (*Work only for NDDataset*)
@@ -376,7 +376,7 @@ np.signbit(dataset)
 
 # %%
 out = np.sin(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### cos
@@ -384,7 +384,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.cos(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### tan
@@ -392,7 +392,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.tan(dataset / np.max(dataset))
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arcsin
@@ -400,7 +400,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.arcsin(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arccos
@@ -408,7 +408,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.arccos(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arctan
@@ -416,7 +416,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.arctan(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Angle units conversion
@@ -435,7 +435,7 @@ _ = out.plot(figsize=(6, 2.5))
 # %%
 out = np.rad2deg(dataset)
 out.title = "data"  # just to avoid a too long title
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### deg2rad
@@ -445,7 +445,7 @@ _ = out.plot(figsize=(6, 2.5))
 # %%
 out = np.deg2rad(out)
 out.title = "data"
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Hyperbolic functions
@@ -456,7 +456,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.sinh(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### cosh
@@ -464,7 +464,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.cosh(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### tanh
@@ -472,7 +472,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.tanh(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arcsinh
@@ -480,7 +480,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.arcsinh(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arccosh
@@ -488,7 +488,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.arccosh(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### arctanh
@@ -496,7 +496,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.arctanh(dataset)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ### Binary functions
@@ -504,8 +504,8 @@ _ = out.plot(figsize=(6, 2.5))
 # %%
 dataset2 = np.reciprocal(dataset + 3)  # create a second dataset
 dataset2[5000.0:4000.0] = MASKED
-_ = dataset.plot(figsize=(6, 2.5))
-_ = dataset2.plot(figsize=(6, 2.5))
+dataset.plot(figsize=(6, 2.5))
+dataset2.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # #### Arithmetic
@@ -516,7 +516,7 @@ _ = dataset2.plot(figsize=(6, 2.5))
 
 # %%
 out = np.add(dataset, dataset2)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### subtract
@@ -524,7 +524,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.subtract(dataset, dataset2)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### multiply
@@ -532,7 +532,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.multiply(dataset, dataset2)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### divide
@@ -542,7 +542,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.divide(dataset, dataset2)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ##### floor_divide
@@ -550,7 +550,7 @@ _ = out.plot(figsize=(6, 2.5))
 
 # %%
 out = np.floor_divide(dataset, dataset2)
-_ = out.plot(figsize=(6, 2.5))
+out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
 # ## Complex or hypercomplex NDDatasets

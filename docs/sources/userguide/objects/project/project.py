@@ -125,7 +125,7 @@ proj
 proj.NMR_1D
 
 # %%
-_ = proj.NMR_1D.plot()
+proj.NMR_1D.plot()
 
 # %% [markdown]
 # However, this work only if the name contains no space, dot, comma, colon, etc.
@@ -162,12 +162,12 @@ proj2 = Project.load("NMR")
 proj2
 
 # %%
-_ = proj2.NMR_1D.plot()
+proj2.NMR_1D.plot()
 
 # %%
 proj2.NMR_2D
 
 # %%
-_ = proj.NMR_2D.plot()
+proj.NMR_2D.plot()
 
 # %%

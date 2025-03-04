@@ -30,6 +30,7 @@ from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.objects import ScpObjectList
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType
 from spectrochempy.utils.traits import NDDatasetType
@@ -914,7 +915,7 @@ class IRIS(DecompositionAnalysis):
             Subplots.
 
         """
-        axeslist = []
+        axeslist = ScpObjectList([])
         if index is None:
             index = range(len(self._lambdas))
         if isinstance(index, int):

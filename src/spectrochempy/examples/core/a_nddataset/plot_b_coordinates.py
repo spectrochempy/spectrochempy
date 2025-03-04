@@ -24,17 +24,15 @@ X = scp.read("irdata/CO@Mo_Al2O3.SPG")
 # `X` has two coordinates:
 # * `wavenumbers` named "x"
 # * and `timestamps` (*i.e.,* the time of recording) named "y".
-print(X.coordset)
+X.coordset
 
 # %%
 # To display them individually use the `x` and `y` attributes of
 # the dataset `X`:
-
 X.x
 
 # %%
-#
-
+# and `y`:
 X.y
 
 # %%
@@ -84,14 +82,14 @@ c_times = X.y.copy()
 
 c_pressures = scp.Coord(pressures, title="pressure", units="torr")
 X.y = c_pressures
-print(X.y)
+X.y
 
 # %%
 # 2. A second way is to affect several coordinates to the corresponding dimension.
 #    To do this, the simplest is to affect a list of coordinates instead of a single one:
 
 X.y = [c_times, c_pressures]
-print(X.y)
+X.y
 
 # %%
 # By default, the current coordinate is the first one (here `c_times` ).
@@ -99,9 +97,8 @@ print(X.y)
 
 prefs = X.preferences
 prefs.figure.figsize = (7, 3)
-_ = X.plot(colorbar=True)
-_ = X.plot_map(colorbar=True)
-
+X.plot(colorbar=True)
+X.plot_map(colorbar=True)
 # %%
 # To seamlessly work with the second coordinates (pressures),
 # we can change the default coordinate:
@@ -113,17 +110,15 @@ X.y.default
 # Let's now plot the spectral range of interest. The default coordinate is now used:
 X_ = X[:, 2250.0:1950.0]
 print(X_.y.default)
-_ = X_.plot()
-_ = X_.plot_map()
-
+X_.plot()
+X_.plot_map()
 # %%
 # The same can be done for the x coordinates.
 #
 # Let's take for instance row with index 10 of the previous dataset
-
 row10 = X_[10].squeeze()
 row10.plot()
-print(row10.coordset)
+row10.coordset
 
 # %%
 # Now we wants to add a coordinate with the wavelength instead of wavenumber.
@@ -133,7 +128,7 @@ c_wavelength = row10.x.to("nanometer")
 print(c_wavenumber, c_wavelength)
 row10.x = [c_wavenumber, c_wavelength]
 row10.x.select(2)
-_ = row10.plot()
+row10.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

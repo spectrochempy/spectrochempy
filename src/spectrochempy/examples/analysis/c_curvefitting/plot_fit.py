@@ -30,8 +30,7 @@ nd = scp.NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 ndOH = nd[54, 3800.0:3300.0]
 # masking
 ndOH[:, 3505.0:3500.0] = scp.MASKED
-_ = ndOH.plot()
-
+ndOH.plot()
 # %%
 # Perform a Fit
 # Fit parameters are defined in a script (a single text as below)
@@ -96,8 +95,7 @@ ax.autoscale(enable=True, axis="y")
 # %%
 # Now perform a fit with maximum 1000 iterations
 f1.max_iter = 1000
-_ = f1.fit(ndOH)
-
+f1.fit(ndOH)
 # %%
 # Show the result
 ndOH.plot()
@@ -107,7 +105,7 @@ ax.autoscale(enable=True, axis="y")
 # %%
 # plotmerit
 som = f1.inverse_transform()
-_ = f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2, lw=2)
+f1.plotmerit(ndOH, som, method="scatter", markevery=5, markersize=2, lw=2)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
