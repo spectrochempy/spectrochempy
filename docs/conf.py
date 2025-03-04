@@ -328,10 +328,6 @@ html_context = {
     "github_repository": github_repository,
 }
 
-# ABlog configuration
-blog_path = "sources/news"
-blog_post_pattern = "news/*"
-
 # Sphinx-gallery ---------------------------------------------------------------
 # Generate the plots for the gallery
 from sphinx_gallery.sorting import FileNameSortKey

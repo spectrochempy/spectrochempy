@@ -51,25 +51,12 @@ requires-python = ">=3.10"
 build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
 cantera = ["cantera"]
 dev = [
-  # various
   "toml",
   "ruff",
-  "pre-commit", # interactive
-  "jupyter",
-  "jupyterlab",
-  "ipykernel",
-  "ipyparallel",
-  "nodejs",
-  "jupyter_server", # test
-  "coverage",
-  "ipywidgets",
-  "pyfakefs",
-  "pytest",
-  "pytest-cov",
-  "pytest-doctestplus",
-  "pytest-ruff",
-  "pytest-mock",
-  "numpydoc",
+  "pre-commit",
+  "spectrochempy[interactive]",
+  "spectrochempy[test]",
+  "spectrochempy[docs]",
 ]
 docs = [
   # "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
@@ -183,6 +170,7 @@ select = [
   "SIM", # flake8-simplify
   "W", # pycodestyle warnings  # "PERF", # perflint
   "PLC", # pylint conventions
+  "TID252", # replace absolufy-imports
 ]
 
 exclude = ["~*", "tests/**"] # Exclude files and directories.
