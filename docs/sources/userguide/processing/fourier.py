@@ -61,7 +61,7 @@ fid.dtype
 # We can represent both real and imaginary parts on the same plot using the `show_complex` parameter.
 
 # %%
-prefs = fid.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (6, 3)
 fid.plot(show_complex=True, xlim=(0, 15000))
 print("td = ", fid.size)

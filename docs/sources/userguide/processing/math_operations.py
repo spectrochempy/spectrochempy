@@ -132,7 +132,7 @@ np.sqrt(dx)
 
 # %%
 d2D = scp.read_omnic("irdata/nh4y-activation.spg")
-prefs = d2D.preferences
+prefs = scp.preferences
 prefs.colormap = "magma"
 prefs.colorbar = False
 prefs.figure.figsize = (6, 3)

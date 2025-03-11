@@ -46,7 +46,7 @@ ur = scp.ur
 # When loading experimental dataset using the `read` method, units are generally attributed to coordinates and data
 
 ds = scp.read("wodger.spg")[0]
-prefs = ds.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 ds.plot()
 # %%

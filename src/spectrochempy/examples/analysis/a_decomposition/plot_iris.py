@@ -78,7 +78,7 @@ X.coordset
 # For example, it will be used by default for
 # plotting:
 
-prefs = X.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 X.plot(colorbar=True)
 X.plot_map(colorbar=True)

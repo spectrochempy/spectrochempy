@@ -44,7 +44,7 @@ import spectrochempy as scp
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "h3po4"
 fid = scp.read_topspin(path, expno=4)
-prefs = fid.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 fid.plot(show_complex=True)
 

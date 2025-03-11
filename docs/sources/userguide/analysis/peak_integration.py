@@ -59,7 +59,7 @@ X.y.title = "acquisition time"
 # We set some plotting preferences and then plot the raw data.
 
 # %%
-prefs = X.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (6, 3)
 prefs.colormap = "Dark2"
 prefs.colorbar = True

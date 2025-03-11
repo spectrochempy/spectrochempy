@@ -50,7 +50,7 @@ X = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
 
 # %%
 # Use preferences to set the figure size for all figures
-prefs = X.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 
 # and use plot method of the NDDataset

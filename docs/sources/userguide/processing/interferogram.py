@@ -46,7 +46,7 @@ ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 # By default, the interferogram is displayed with an axis in points (no units).
 
 # %%
-prefs = ir.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 ir.plot()
 print("number of points = ", ir.size)

@@ -51,7 +51,7 @@ import spectrochempy as scp
 # loading
 X = scp.read("irdata/nh4y-activation.spg")
 # set figsize preference
-prefs = X.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 # plot the spectra
 X.plot()
@@ -309,7 +309,7 @@ A.x.units = "nm"
 # Now plot the original dataset A:
 
 # %%
-prefs = A.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 prefs.colormap = "magma_r"
 A.plot()

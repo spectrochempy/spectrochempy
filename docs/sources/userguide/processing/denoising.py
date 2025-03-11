@@ -46,7 +46,7 @@ nd = dataset[0.0:6500.0, 70.0:]
 # baseline correction the data (for a easier comparison)
 nd1 = nd.snip()
 # plot
-prefs = nd1.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (9, 5)
 nd1.plot()
 

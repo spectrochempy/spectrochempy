@@ -69,7 +69,7 @@ d = scp.NDDataset.fromfunction(
 # Here is a plot of these data-points:
 
 # %%
-prefs = d.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 d.plot_scatter(markersize=7, mfc="red", label="Original data")
 
