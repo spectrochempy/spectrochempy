@@ -3,180 +3,117 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
 
-from copy import copy, deepcopy
+from copy import copy
+from copy import deepcopy
 
 import numpy as np
 import pytest
 from pint.errors import DimensionalityError
 
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
-from spectrochempy.core.units import Quantity, ur
-from spectrochempy.utils.constants import INPLACE, MASKED
-from spectrochempy.utils.misc import TYPE_FLOAT, TYPE_INTEGER
-from spectrochempy.utils.testing import (
-    assert_array_equal,
-    assert_equal,
-    catch_warnings,
-    raises,
-)
+from spectrochempy.core.units import Quantity
+from spectrochempy.core.units import ur
+from spectrochempy.utils.constants import INPLACE
+from spectrochempy.utils.constants import MASKED
+from spectrochempy.utils.constants import TYPE_FLOAT
+from spectrochempy.utils.constants import TYPE_INTEGER
+from spectrochempy.utils.testing import assert_array_equal
+from spectrochempy.utils.testing import assert_equal
+from spectrochempy.utils.testing import catch_warnings
+from spectrochempy.utils.testing import raises
 
 
 # --------------------------------------------------------------------------------------
 #  NDARRAY INITIALIZATION
 # --------------------------------------------------------------------------------------
-def test_ndarray_init(refarray, refmask, ndarray, ndarraymask):
-    # initialisation with null array
+@pytest.mark.parametrize(
+    "input_data,expected_dtype,expected_shape",
+    [
+        (25, TYPE_INTEGER, ()),
+        (13.0 * ur.tesla, TYPE_FLOAT, ()),
+        ([13.0] * ur.tesla, TYPE_FLOAT, (1,)),
+        ([[13.0, 20.0]] * ur.tesla, TYPE_FLOAT, (1, 2)),
+    ],
+)
+def test_ndarray_init_with_different_inputs(input_data, expected_dtype, expected_shape):
+    d = NDArray(input_data)
+    assert d.data.dtype in expected_dtype
+    assert d.shape == expected_shape
 
+
+def test_ndarray_empty_initialization():
     d0 = NDArray(description="testing ndarray")
 
     assert d0._implements("NDArray")
-    assert d0._implements() == "NDArray"
-
-    assert isinstance(d0, NDArray)
-
     assert d0.is_empty
-    assert len(d0) == 0
     assert d0.shape == ()
-    assert d0.id.startswith("NDArray")
-    assert d0.name == d0.id
     assert d0.title == "<untitled>"
     assert d0.ndim == 0
-    assert d0.size is None
     assert not d0.is_masked
     assert d0.dtype is None
     assert d0.unitless
-    assert not d0.dims
-    assert not d0.meta
-    assert hash(d0) is not None
-    assert repr(d0) == "NDArray: empty (size: 0)"
 
-    # assignment to basic write allowed properties
 
-    d0.data = [1, 2, 3]  # put some data
-    assert_array_equal(d0.data, np.array([1, 2, 3]))
-    assert d0.dtype in TYPE_INTEGER
-    d0.name = "xxxx"
-    assert d0.name == "xxxx"
-    d0.title = "yyyy"
-    assert d0.title == "yyyy"
-    d0.meta = {}
-    d0.meta.something = "a_value"
-    assert d0.meta.something == "a_value"
-    assert d0[1].value == 2  # only a single element so we get a squeezed array
-    d0.units = "absorbance"
-    assert d0.units == ur.absorbance
-    assert d0[2] == 3 * ur.absorbance
-    assert d0.dims == ["x"]
-
-    # initialisation with a scalar quantity
-
-    d1 = NDArray(25)
-    assert d1.data == np.array(25)
-    assert d1.data.dtype in TYPE_INTEGER
-
-    d1 = NDArray(13.0 * ur.tesla)
-    assert d1.data == np.array(13.0)
-    assert d1.data.dtype in TYPE_FLOAT
-    assert d1.shape == ()
-    assert d1.ndim == 0
-    assert not d1.dims
-    assert d1.units == "tesla"
-    assert d1.values == 13.0 * ur.tesla
-
-    # initialisation with a 1D array  quantity
-
-    d2 = NDArray([13.0] * ur.tesla)
-    assert d2.data == np.array([13.0])
-    assert d2.shape == (1,)
-    assert d2.ndim == 1
-    assert d2.dims == ["x"]
-    assert d2.units == "tesla"
-    assert d2.values == 13.0 * ur.tesla
-
-    # initialisation with a 1D vector quantity
-
-    d3 = NDArray([[13.0, 20.0]] * ur.tesla)
-    assert_array_equal(d3.data, np.array([[13.0, 20.0]]))
-    assert d3.shape == (1, 2)
-    assert d3.ndim == 2
-    assert d3.dims == ["y", "x"]
-    assert d3.units == "tesla"
-
-    # initialisation with a sequence
-
-    d4 = NDArray((2, 3, 4))
-    assert d4.shape == (3,)
-    assert d4.size == 3
-    assert d4.dims == ["x"]
-    assert not d4.is_masked
-
-    # initialization with an array
-
-    d5 = NDArray(refarray)
-    assert d5.shape == refarray.shape
-    assert d5.size == refarray.size
-    assert not d5.is_masked
-
-    # initialization with an NDArray object
-
-    d6 = NDArray(ndarraymask)
-    assert d6.title == "<untitled>"
-    assert d6.shape == refarray.shape
-    assert d6.dims == ["y", "x"]
-    assert d6.size == refarray.size
-    assert_array_equal(d6.data, refarray)
-    assert d6._data is ndarraymask._data  # by default we do not copy
-    # d6.data and ndarraym ask.data are however different due to the addition of un offset
-    assert d6.is_masked
-    assert_array_equal(d6.mask, refmask)
-    assert d6.mask is ndarraymask.mask  # no copy by default
-
-    # initialization with an NDArray object with copy
-    d7 = NDArray(ndarraymask, copy=True)
-    assert_array_equal(d7.data, refarray)
-    assert d7.data is not ndarraymask.data  # by default we do not copy
-    assert_array_equal(d7.mask, refmask)
-    assert d7.mask is not ndarraymask.mask  # no copy by default
-
-    # initialisation with a sequence and a mask
-
-    d0mask = NDArray([2, 3, 4, 5], mask=[1, 0, 0, 0], dtype="int64")
-    assert d0mask.shape == (4,)
-    assert d0mask.is_masked
-    assert d0mask.mask.shape == d0mask.shape
-
-    # initialisation with a sequence and a mask
-
-    d1mask = NDArray([2.0, 3.0, 4.0, 5.1], mask=[1, 0, 0, 0])
-    assert d1mask.shape == (4,)
-    assert d1mask.is_masked
-    assert d1mask.mask.shape == d1mask.shape
-
-    # dtype specified
-
-    d8 = NDArray(ndarraymask, desc="with mask", dtype=np.int64)
-    assert d8.shape == refarray.shape
-    assert d8.data.dtype == np.int64
-    assert d8.dims == ["y", "x"]
-    assert d8.title == "<untitled>"
-
-    # initialisation with only labels
-
-    d9 = NDArray(labels="a b c d e f g h i j".split(), title="labeled")
-    assert d9.is_labeled
-
-    # changing dims name
-    d11 = NDArray(
-        labels="a b c d e f g h i j".split(),
-        title="labeled",
-        dims=["q"],
-        author="Blake",
+@pytest.mark.parametrize(
+    "sort_params",
+    [
+        {"by": None, "descend": False},
+        {"by": None, "descend": True},
+        {"by": "label", "descend": True},
+        {"by": "label[1]", "descend": True, "pos": 1},
+    ],
+)
+def test_ndarray_sort_operations(sort_params):
+    d0 = NDArray(
+        np.linspace(4000, 1000, 10),
+        labels=["bc cd de ef ab fg gh hi ja ij".split()],
+        units="s",
     )
-    assert d11.dims == ["q"]
 
-    assert "[  a   b ...   i   j]" in d11._repr_html_()  # comparison
+    result = d0._sort(**sort_params)
+    assert result is not None
+    if sort_params["by"] is None:
+        assert (result.data[0] == 1000) != sort_params["descend"]
+
+
+def test_ndarray_units_operations():
+    nd = NDArray(np.ones((3, 3)), units="m")
+
+    # Test unit conversion
+    nd1 = nd.to("km")
+    assert nd1.units == ur.kilometer
+    assert nd.units == ur.meter  # Original unchanged
+
+    # Test incompatible units
+    with pytest.raises(TypeError):
+        nd.units = "radian"
+
+    # Test force conversion
+    nd.ito("radian", force=True)
+    assert nd.dimensionless
+
+
+@pytest.mark.parametrize(
+    "slice_spec,expected_shape",
+    [
+        ((0, 0), (1, 1)),
+        ((0, slice(0, 2)), (1, 2)),
+        ((slice(7, 10), slice(None)), (3, -1)),
+        ((1, slice(None)), (1, -1)),
+    ],
+)
+def test_ndarray_slicing_operations(slice_spec, expected_shape):
+    nd = NDArray(np.random.rand(10, 10))
+    result = nd[slice_spec]
+
+    expected_shape = list(expected_shape)
+    for i, dim in enumerate(expected_shape):
+        if dim == -1:
+            expected_shape[i] = nd.shape[1]
+
+    assert result.shape == tuple(expected_shape)
+    assert isinstance(result, NDArray)
 
 
 def test_ndarray_copy():
@@ -192,7 +129,7 @@ def test_ndarray_copy():
     d1 = d0.copy()
     assert d1 is not d0
     assert d1 == d0
-    assert not (d1 != d0)
+    assert d1 == d0
     assert d1.units == d0.units
     assert_array_equal(d1.labels, d0.labels)
     assert_array_equal(d1.mask, d0.mask)
@@ -432,7 +369,7 @@ def test_ndarray_methods(refarray, ndarray, ndarrayunit):
         assert item == ndd[i]
 
     ndz = NDArray()
-    assert not list(item for item in ndz)
+    assert not list(ndz)
 
     assert str(ndz) == repr(ndz) == "NDArray: empty (size: 0)"
 

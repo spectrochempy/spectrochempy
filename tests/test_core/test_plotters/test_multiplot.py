@@ -7,22 +7,22 @@
 
 import os
 
-from spectrochempy.core import preferences
-from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.application.preferences import preferences
+from spectrochempy import read_omnic
 from spectrochempy.core.plotters.multiplot import (
     multiplot,
     multiplot_map,
     multiplot_stack,
 )
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 
 prefs = preferences
 
 
 def test_multiplot():
-    dataset = NDDataset.read_omnic(
-        os.path.join(prefs.datadir, "irdata", "nh4y-activation.spg")
-    )[:, 0:100]
+    dataset = read_omnic(os.path.join(prefs.datadir, "irdata", "nh4y-activation.spg"))[
+        :, 0:100
+    ]
 
     datasets = [dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
     labels = ["sample {}".format(label) for label in ["1", "2", "3", "4"]]

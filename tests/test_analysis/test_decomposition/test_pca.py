@@ -44,7 +44,7 @@ def test_PCA_docstrings():
 # test pca
 # ---------
 def test_pca():
-    dataset = NDDataset.read("irdata/nh4y-activation.spg")
+    dataset = scp.read("irdata/nh4y-activation.spg")
 
     pca = PCA()
     pca.fit(dataset)

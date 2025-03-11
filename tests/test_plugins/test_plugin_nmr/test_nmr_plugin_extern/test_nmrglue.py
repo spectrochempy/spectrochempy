@@ -1,17 +1,13 @@
-import pytest
 import numpy as np
-from pathlib import Path
+import pytest
 
-from spectrochempy.extern.nmrglue import (
-    unit_conversion,
-    create_blank_udic,
-    guess_shape,
-    read_jcamp,
-    read_binary,
-    complexify_data,
-    # read_pdata,
-    scale_pdata,
-)
+from spectrochempy.plugins.nmr.extern.nmrglue import complexify_data
+from spectrochempy.plugins.nmr.extern.nmrglue import create_blank_udic
+from spectrochempy.plugins.nmr.extern.nmrglue import guess_shape
+from spectrochempy.plugins.nmr.extern.nmrglue import read_binary
+from spectrochempy.plugins.nmr.extern.nmrglue import read_jcamp
+from spectrochempy.plugins.nmr.extern.nmrglue import scale_pdata
+from spectrochempy.plugins.nmr.extern.nmrglue import unit_conversion
 
 
 # Test unit conversion class

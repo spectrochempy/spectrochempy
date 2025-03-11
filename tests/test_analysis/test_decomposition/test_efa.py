@@ -13,7 +13,7 @@ import spectrochempy as scp
 from spectrochempy.analysis.curvefitting._models import asymmetricvoigtmodel
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 
 
 # test docstring

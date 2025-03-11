@@ -7,8 +7,8 @@
 
 import os
 
-from spectrochempy import NDDataset
-from spectrochempy.utils.plots import show
+from spectrochempy import read_omnic, NDDataset
+from spectrochempy.utils.mplutils import show
 
 # TODO: from spectrochempy.utils.testing import figures_dir, same_images
 
@@ -17,7 +17,7 @@ from spectrochempy.utils.plots import show
 
 # @pytest.mark.skip
 def test_plot_1D():
-    dataset = NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
+    dataset = read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
     # get first 1D spectrum
     nd0 = dataset[0, 1550.0:1600.0]

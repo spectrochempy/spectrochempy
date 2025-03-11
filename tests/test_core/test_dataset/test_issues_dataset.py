@@ -10,9 +10,7 @@ import numpy as np
 
 from spectrochempy import read_omnic
 from spectrochempy.core.units import ur
-from spectrochempy.utils.plots import show
-
-typequaternion = np.dtype(np.quaternion)
+from spectrochempy.utils.mplutils import show
 
 
 # ======================================================================================
@@ -102,3 +100,9 @@ def test_issue_668():
     # # returns the expected values of the first line above[    2300     2299     2298     2293     2285]
 
     assert np.all(s[:, [0, 1, 2, 7, 15]].x.data == s.x[[0, 1, 2, 7, 15]].data)
+
+
+if __name__ == "__main__":
+    import pytest
+
+    pytest.main([__file__])

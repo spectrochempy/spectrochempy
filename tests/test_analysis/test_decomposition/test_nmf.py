@@ -21,7 +21,7 @@ from spectrochempy.analysis.decomposition.nmf import NMF
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils.constants import MASKED
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 from spectrochempy.utils.testing import assert_dataset_equal
 
 
@@ -44,9 +44,9 @@ def test_NMF_docstrings():
 
 def test_nmf():
     # Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110))
-    ds = NDDataset.read_matlab(
-        os.path.join("matlabdata", "als2004dataset.MAT"), merge=False
-    )[-1]
+    ds = scp.read_matlab(os.path.join("matlabdata", "als2004dataset.MAT"), merge=False)[
+        -1
+    ]
 
     ds.title = "absorbance"
     ds.units = "absorbance"

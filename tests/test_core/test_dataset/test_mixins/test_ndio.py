@@ -8,70 +8,67 @@
 """Tests for the ndplugin module"""
 
 import pathlib
+import tempfile
 
 import pytest
 
-from spectrochempy.core import preferences as prefs
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.testing import assert_array_equal, assert_dataset_equal
+
 
 irdatadir = pathclean(prefs.datadir) / "irdata"
 nmrdatadir = pathclean(prefs.datadir) / "nmrdata" / "bruker" / "tests" / "nmr"
 cwd = pathlib.Path.cwd()
 
-try:
-    from spectrochempy.core.common import dialogs
-except ImportError:
-    pytest.skip("dialogs not available with act", allow_module_level=True)
-
-
 # Basic
 # --------------------------------------------------------------------------------------
 
 
-def test_ndio_generic(NMR_dataset_1D):
-    nmr = NMR_dataset_1D
-    assert nmr.directory == nmrdatadir
+def test_ndio_generic(IR_dataset_1D):
+    ir = IR_dataset_1D
+    assert ir.directory == irdatadir
 
     # save with the default filename or open a dialog if it doesn't exists
     # ----------------------------------------------------------------------------------
     # save with the default name (equivalent to save_as in this case)
     # as this file (IR_1D.scp)  doesn't yet exist a confirmation dialog is opened
-    f = nmr.save()
-    assert nmr.filename.name == f.name
-    assert nmr.directory == nmrdatadir
+    f = ir.save()
+    assert ir.filename.name == f.name
+    assert ir.directory == irdatadir
 
     # load back this  file : the full path f is given so no dialog is opened
     nd = NDDataset.load(f)
-    assert_dataset_equal(nd, nmr)
+    assert_dataset_equal(nd, ir)
 
-    # as it has been already saved, we should not get dialogs
+    # as it has been already saved,
     f = nd.save()
-    assert nd.filename.name == "NMR_1D.scp"
+    assert nd.filename.name == "IR_1D.scp"
     # return
 
-    # now it opens a dialog and the name can be changed
-    f1 = nmr.save_as()
-    assert nmr.filename.name == f1.name
+    # now save it with a new name
+    f = ir.save_as("essai")
+    assert ir.filename.name == f.name
 
     # remove these files
     f.unlink()
-    f1.unlink()
 
     # save in a specified directory
-    nmr.save_as(irdatadir / "essai")  # save essai.scp
-    assert nmr.directory == irdatadir
-    assert nmr.filename.name == "essai.scp"
-    (irdatadir / nmr.filename.name).unlink()
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        tmpdir = pathlib.Path(tmpdirname)
+        ir.save_as(tmpdir / "essai")  # save essai.scp
+        assert ir.directory == tmpdir
+        assert ir.filename.name == "essai.scp"
+        (tmpdir / ir.filename.name).unlink()
 
     # save in the current directory
-    f = nmr.save_as(cwd / "essai")
+    f = ir.save_as(cwd / "essai")
 
     # try to load without extension specification (will first assume it is scp)
     dl = NDDataset.load("essai")
     # assert dl.directory == cwd
-    assert_array_equal(dl.data, nmr.data)
+    assert_array_equal(dl.data, ir.data)
     f.unlink()
 
 

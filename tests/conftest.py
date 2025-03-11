@@ -4,33 +4,22 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-import os
-import pathlib
-
-import numpy as np
-import pkg_resources
-import pytest
-
 from pathlib import Path
 
-import spectrochempy
+import numpy as np
+import pytest
 
-# try:
-# Work only if spectrochempy is installed
-# except ModuleNotFoundError:  # pragma: no cover
-#     raise ModuleNotFoundError(
-#         "You must install spectrochempy and its dependencies before executing tests!"
-#     )
+import spectrochempy
 
 
 # ----------------------------
 # Cleaning when exiting pytest
 # ----------------------------
 def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
-    """whole test run finishes."""
+    """Whole test run finishes."""
 
     # cleaning
-    cwd = pathlib.Path(__file__).parent.parent
+    cwd = Path(__file__).parent.parent
 
     for f in list(cwd.glob("**/*.?scp")):
         f.unlink()
@@ -51,27 +40,8 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
 # FIXTURES
 # ======================================================================================
 
-from spectrochempy.core import preferences as prefs
-from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
-from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
-from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.coordset import CoordSet
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.project.project import Project
-from spectrochempy.core.script import Script
-from spectrochempy.utils.file import pathclean
-from spectrochempy.utils.testing import RandomSeedContext
 
-# first download missing data
-datadir = pathclean(prefs.datadir)
-print("DATADIR: ", datadir)
-
-
-# from spectrochempy.utils.file import download_testdata
-
-# download_testdata()
-
-
+# --------------------------------------------------------------------------------------
 # initialize a ipython session before calling spectrochempy
 # --------------------------------------------------------------------------------------
 @pytest.fixture(scope="session")
@@ -87,6 +57,40 @@ def session_ip():
 @pytest.fixture(scope="module")
 def ip(session_ip):
     yield session_ip
+
+
+# --------------------------------------------------------------------------------------
+# Path utilities
+# --------------------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="function")
+def mock_cwd(monkeypatch, tmp_path):
+    # Mock the current directory to use a temporary directory."""
+    monkeypatch.setattr(Path, "cwd", lambda: tmp_path)
+    # Mock Path.resolve to ensure predictable path resolution in tests
+    monkeypatch.setattr(Path, "resolve", lambda self: tmp_path)
+    return tmp_path
+
+
+from spectrochempy.application.preferences import preferences as prefs
+from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.coordset import CoordSet
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.project.project import Project
+from spectrochempy.core.script import Script
+from spectrochempy.utils.file import pathclean
+from spectrochempy.utils.testing import RandomSeedContext
+
+# first download missing data
+datadir = pathclean(prefs.datadir)
+
+
+# from spectrochempy.utils.file import download_testdata
+
+# download_testdata()
 
 
 # --------------------------------------------------------------------------------------
@@ -136,8 +140,25 @@ def ndarraymask():
 
 
 # --------------------------------------------------------------------------------------
-# Fixtures: Some NDComplex's array
+# Fixtures: Some NDComplex's and  NDQuaternion array
 # --------------------------------------------------------------------------------------
+@pytest.fixture(scope="session")
+def typequaternion():
+    from spectrochempy.api import plugin_manager as manager
+
+    if (
+        manager.available_plugins.get("quaternion")
+        and manager.available_plugins.get("quaternion").enabled
+    ):
+        try:
+            _typequaternion = np.dtype(np.quaternion)
+        except (ImportError, AttributeError):
+            _typequaternion = None
+    else:
+        _typequaternion = None
+    return _typequaternion
+
+
 @pytest.fixture(scope="function")
 def ndarraycplx():
     # return a complex ndarray
@@ -145,9 +166,18 @@ def ndarraycplx():
 
 
 @pytest.fixture(scope="function")
-def ndarrayquaternion():
+def ndarrayquaternion(typequaternion):
     # return a quaternion ndarray
-    return NDComplexArray(ref_data, units="m/s", dtype=np.quaternion, copy=True).copy()
+    if typequaternion is None:
+        raise ModuleNotFoundError("quaternion plugin not installed")
+
+    from spectrochempy.plugins.quaternion.core.dataset.baseobjects.ndquaternion import (
+        NDQuaternionArray,
+    )
+
+    return NDQuaternionArray(
+        ref_data, units="m/s", dtype=typequaternion, copy=True
+    ).copy()
 
 
 # --------------------------------------------------------------------------------------
@@ -311,14 +341,16 @@ def IR_dataset_1D():
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid"
-    dataset = NDDataset.read_topspin(path, remove_digital_filter=True, name="NMR_1D")
+    dataset = spectrochempy.read_topspin(
+        path, remove_digital_filter=True, name="NMR_1D"
+    )
     return dataset.copy()
 
 
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "ser"
-    dataset = NDDataset.read_topspin(
+    dataset = spectrochempy.read_topspin(
         path, expno=1, remove_digital_filter=True, name="NMR_2D"
     )
     return dataset.copy()
@@ -326,7 +358,7 @@ def NMR_dataset_2D():
 
 @pytest.fixture(scope="function")
 def JDX_2D():
-    jdx = """##TITLE=IR_2D
+    return """##TITLE=IR_2D
     ##JCAMP-DX=5.01
     ##DATA TYPE=LINK
     ##BLOCKS=3
@@ -411,7 +443,6 @@ def JDX_2D():
     ##END=
 
     """
-    return jdx
 
 
 # --------------------------------------------------------------------------------------

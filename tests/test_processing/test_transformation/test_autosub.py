@@ -13,7 +13,7 @@ Tests for the ndplugin module.
 import numpy as np
 
 from spectrochempy.processing.transformation.autosub import autosub
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 
 # autosub
 # ------

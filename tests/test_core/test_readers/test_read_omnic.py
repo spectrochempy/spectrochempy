@@ -8,7 +8,7 @@
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.core import preferences as prefs
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.testing import assert_dataset_equal
 
@@ -22,7 +22,7 @@ IRDATA = DATADIR / "irdata"
 # )
 def test_read_omnic():
     # Class method opening a dialog (but for test it is preset)
-    nd1 = NDDataset.read_omnic(IRDATA / "nh4y-activation.spg")
+    nd1 = scp.read_omnic(IRDATA / "nh4y-activation.spg")
     assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:55, x:5549))"
 
     # API method
@@ -47,7 +47,7 @@ def test_read_omnic():
     nds = scp.read_spa(filename)
     with open(IRDATA / "subdir" / filename, "rb") as fil:
         content = fil.read()
-    nd = NDDataset.read_spa({filename: content})
+    nd = scp.read_spa({filename: content})
     assert_dataset_equal(nd, nds)
 
     nd = scp.read_spa(IRDATA / "subdir" / "20-50" / "7_CZ0-100_Pd_21.SPA")

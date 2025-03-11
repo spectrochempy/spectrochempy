@@ -1,0 +1,48 @@
+import warnings
+
+import numpy as np
+import pytest
+from spectrochempy.application.preferences import preferences as prefs
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
+from spectrochempy.plugins.quaternion.core.dataset.baseobjects.ndquaternion import (
+    NDQuaternionArray,
+)
+from spectrochempy.api import plugin_manager
+
+if IS_QUATERNION := plugin_manager.available_plugins.get("quaternion") is not None:
+    try:
+        typequaternion = np.dtype(np.quaternion)
+    except (ImportError, AttributeError):
+        IS_QUATERNION = False
+        typequaternion = None
+else:
+    typequaternion = None
+
+
+def test_quaternion_inheritance():
+    """Test that NDDataset inherits from NDQuaternionArray when plugin is enabled."""
+
+    if IS_QUATERNION:
+        assert issubclass(NDDataset, NDQuaternionArray)
+    else:
+        warnings.warn("Quaternion plugin is not enabled.")
+        assert issubclass(NDDataset, NDComplexArray)
+
+    # Create a dataset
+    ds = NDDataset([1 + 2j, 3 + 4j])
+
+    # Should have quaternion methods
+    if IS_QUATERNION:
+        assert hasattr(ds, "set_quaternion")
+        assert hasattr(ds, "RR")
+        assert hasattr(ds, "RI")
+    else:
+        assert not hasattr(ds, "set_quaternion")
+        assert not hasattr(ds, "RR")
+        assert not hasattr(ds, "RI")
+        assert not hasattr(ds, "is_quaternion")
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

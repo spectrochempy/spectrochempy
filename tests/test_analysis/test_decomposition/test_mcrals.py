@@ -13,12 +13,12 @@ import traitlets as tr
 
 import spectrochempy as scp
 from spectrochempy.analysis.decomposition.mcrals import MCRALS
-from spectrochempy.core import set_loglevel
+from spectrochempy.application.application import set_loglevel
 from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.processing.transformation.npy import dot
 from spectrochempy.utils import docstrings as chd
 from spectrochempy.utils import testing
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 
 
 # test docstring

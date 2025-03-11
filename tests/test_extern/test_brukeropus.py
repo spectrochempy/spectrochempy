@@ -1,14 +1,16 @@
-from pathlib import Path
 import os  # kept for os.walk
+from pathlib import Path
+
 import pytest
-from spectrochempy.extern.brukeropus.file import read_opus
-from spectrochempy.extern.brukeropus.file import find_opus_files
-from spectrochempy.extern.brukeropus import OPUSFile
+
 from spectrochempy import preferences as prefs
+from spectrochempy.extern.brukeropus import OPUSFile
+from spectrochempy.extern.brukeropus.file import find_opus_files
+from spectrochempy.extern.brukeropus.file import read_opus
 
 
 def get_all_blocks(opusfile: OPUSFile) -> list:
-    """Returns a list of all `FileBlock` in an `OPUSFile` instance."""
+    """Return a list of all `FileBlock` in an `OPUSFile` instance."""
     blocks = (
         [opusfile.directory.block]
         + opusfile.special_blocks
@@ -52,7 +54,7 @@ def opus_data(test_directory):
 
 
 def test_opus_file_detection(test_directory):
-    """Test detection of OPUS files and non-OPUS files"""
+    """Test detection of OPUS files and non-OPUS files."""
     all_files = find_all_files(test_directory)
     opus_files = find_opus_files(test_directory, recursive=True)
 
@@ -62,14 +64,14 @@ def test_opus_file_detection(test_directory):
 
     # Test that files with OPUS extension are valid OPUS files
     opus_data = [read_opus(f) for f in opus_files]
-    invalid_opus = [f for f, d in zip(opus_files, opus_data) if not d]
+    invalid_opus = [f for f, d in zip(opus_files, opus_data, strict=False) if not d]
     assert (
         len(invalid_opus) == 0
     ), f"Found {len(invalid_opus)} files with OPUS extension that are not valid OPUS files"
 
 
 def test_block_consistency(opus_data):
-    """Test that parsed blocks match directory information"""
+    """Test that parsed blocks match directory information."""
     valid_data = [d for d in opus_data if d]
 
     for o in valid_data:
@@ -83,7 +85,7 @@ def test_block_consistency(opus_data):
 
 
 def test_no_redundant_blocks(opus_data):
-    """Test that there are no redundant blocks in directory"""
+    """Test that there are no redundant blocks in directory."""
     valid_data = [d for d in opus_data if d]
 
     for o in valid_data:
@@ -91,7 +93,7 @@ def test_no_redundant_blocks(opus_data):
 
 
 def test_no_unknown_blocks(opus_data):
-    """Test that there are no unknown block types"""
+    """Test that there are no unknown block types."""
     valid_data = [d for d in opus_data if d]
 
     for o in valid_data:
@@ -102,7 +104,7 @@ def test_no_unknown_blocks(opus_data):
 
 
 def test_all_blocks_parsed(opus_data):
-    """Test that all blocks were parsed successfully"""
+    """Test that all blocks were parsed successfully."""
     valid_data = [d for d in opus_data if d]
 
     for o in valid_data:

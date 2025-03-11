@@ -3,22 +3,15 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
 
-
-from spectrochempy.core import INPLACE, preferences
+from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.project.project import Project
-from spectrochempy.core.script import Script, run_script
+from spectrochempy.core.script import Script
+from spectrochempy.core.script import run_script
+from spectrochempy.utils.constants import INPLACE
 
 prefs = preferences
-
-try:
-    from spectrochempy.core.common import dialogs
-except ImportError:
-    import pytest
-
-    pytest.skip("dialogs not available with act", allow_module_level=True)
 
 # Basic
 # --------------------------------------------------------------------------------------

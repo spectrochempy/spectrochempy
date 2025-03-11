@@ -1,6 +1,7 @@
 import pytest
 
-from spectrochempy.utils.objects import Adict, ReadOnlyDict
+from spectrochempy.utils.objects import Adict
+from spectrochempy.utils.objects import ReadOnlyDict
 
 
 class TestAdict:

@@ -8,7 +8,7 @@
 import pytest
 
 from spectrochempy import Optimize
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 from spectrochempy.utils.testing import assert_approx_equal
 
 
