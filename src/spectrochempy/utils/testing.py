@@ -344,7 +344,7 @@ def compare_datasets(this, other, approx=False, decimal=6, data_only=False):
     elif data_only:
         attrs = ["data"]
     else:
-        attrs = this.__dir__()
+        attrs = this._attributes_()
         exclude = (
             "filename",
             "preferences",

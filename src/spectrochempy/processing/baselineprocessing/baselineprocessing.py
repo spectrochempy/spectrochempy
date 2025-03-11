@@ -14,22 +14,22 @@ from scipy.sparse.linalg import spsolve
 from scipy.spatial import ConvexHull
 
 from spectrochempy.analysis._base._analysisbase import AnalysisConfigurable
-from spectrochempy.application import info_
-from spectrochempy.application import warning_
+from spectrochempy.application.application import info_
+from spectrochempy.application.application import warning_
 from spectrochempy.processing.baselineprocessing.baselineutils import lls
 from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
 from spectrochempy.processing.transformation.concatenate import concatenate
+from spectrochempy.utils.colors import NBlue
+from spectrochempy.utils.colors import NGreen
+from spectrochempy.utils.colors import NRed
+from spectrochempy.utils.constants import TYPE_FLOAT
+from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.exceptions import NotFittedError
-from spectrochempy.utils.misc import TYPE_FLOAT
-from spectrochempy.utils.misc import TYPE_INTEGER
-from spectrochempy.utils.plots import NBlue
-from spectrochempy.utils.plots import NGreen
-from spectrochempy.utils.plots import NRed
 from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = [

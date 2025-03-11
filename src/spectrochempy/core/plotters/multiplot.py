@@ -27,9 +27,9 @@ from matplotlib._tight_layout import get_subplotspec_list  # get_renderer,
 from matplotlib._tight_layout import get_tight_layout_figure  # get_renderer,
 
 from spectrochempy.utils.misc import is_sequence
-from spectrochempy.utils.plots import _Axes
+from spectrochempy.utils.mplutils import _Axes
 
-# from spectrochempy.core import preferences, project_preferences
+# from spectrochempy.application.preferences import preferences, project_preferences
 
 
 def multiplot_scatter(datasets, **kwargs):
@@ -394,8 +394,24 @@ def multiplot(
             ax.set_xlim(xlim)
 
     def do_tight_layout(fig, axes, suptitle, **kwargs):
-        # tight_layout
-        renderer = fig.canvas.get_renderer()
+        """Handle tight layout with proper renderer initialization."""
+
+        # Make sure we have a proper renderer
+        if not hasattr(fig.canvas, "get_renderer"):
+            # Force creation of renderer if it doesn't exist
+            fig.canvas.draw()
+
+        # Get renderer (now it should exist)
+        try:
+            renderer = fig.canvas.get_renderer()
+        except Exception:
+            # Fallback for newer matplotlib versions
+            from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+            canvas = FigureCanvasAgg(fig)
+            renderer = canvas.get_renderer()
+
+        # Rest of tight_layout code
         axeslist = list(axes.values())
         subplots_list = list(get_subplotspec_list(axeslist))
         kw = get_tight_layout_figure(
@@ -403,7 +419,6 @@ def multiplot(
             axeslist,
             subplots_list,
             renderer,
-            # pad=1.1,
             h_pad=0,
             w_pad=0,
             rect=None,

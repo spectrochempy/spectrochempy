@@ -9,7 +9,7 @@ import numpy as np
 import traitlets as tr
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
-from spectrochempy.application import info_
+from spectrochempy.application.application import info_
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits

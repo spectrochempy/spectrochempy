@@ -12,7 +12,7 @@ import functools
 
 import numpy as np
 
-from spectrochempy.application import error_
+from spectrochempy.application.application import error_
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
 

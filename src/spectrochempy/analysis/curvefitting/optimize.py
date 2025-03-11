@@ -18,8 +18,8 @@ from scipy import optimize
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis.curvefitting import _models as models_
 from spectrochempy.analysis.curvefitting._parameters import FitParameters
-from spectrochempy.application import info_
-from spectrochempy.application import warning_
+from spectrochempy.application.application import info_
+from spectrochempy.application.application import warning_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring

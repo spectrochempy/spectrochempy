@@ -13,18 +13,18 @@ import numpy as np
 import traitlets as tr
 from sklearn import linear_model
 
-from spectrochempy.application import app
+from spectrochempy.application.application import app
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
+from spectrochempy.utils.colors import NBlue
+from spectrochempy.utils.colors import NGreen
+from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.exceptions import NotFittedError
-from spectrochempy.utils.plots import NBlue
-from spectrochempy.utils.plots import NGreen
-from spectrochempy.utils.plots import NRed
 from spectrochempy.utils.traits import NDDatasetType
 
 

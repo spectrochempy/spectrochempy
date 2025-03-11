@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+# ======================================================================================
+# Copyright (©) 2015-2023 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
+#
+# This file was generated for SpectroChemPy version: {{ version }}
+#
+#    ###################################################################################
+#    #           DO NOT MODIFY THIS FILE BECAUSE IT IS CREATED AUTOMATICALLY.          #
+#    #   ANY MODIFICATION OF THIS FILE WILL BE CANCELLED AFTER THE COMMIT IN GITHUB.   #
+#    ###################################################################################
+#
+#
+# ruff: noqa
+"""
+NDDataset methods from API.
+"""
+
+# --------------------------------------------------------------------------------------
+# API methods that are also NDDataset methods
+# --------------------------------------------------------------------------------------
+_LAZY_DATASETS_IMPORTS = {
+{% for method, module in dataset_methods.items() %}
+    "{{ method }}": "{{ module }}",
+{% endfor %}
+}

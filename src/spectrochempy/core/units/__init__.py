@@ -3,13 +3,14 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# lazy_stub: skip
 """The core interface to the Pint library."""
 
 __all__ = [
     "Unit",
     "Quantity",
     "ur",
-    "set_nmr_context",
+    "set_nmr_context",  # TODO put this in the nmr plugin
     "DimensionalityError",
 ]
 

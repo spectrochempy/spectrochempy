@@ -6,8 +6,26 @@
 """Module implementing the `NDDataset` class."""
 
 __all__ = ["NDDataset"]
+__dataset_methods__ = [  # Methods that can be called as API functions
+    "sort",
+    "squeeze",
+    "swapdims",
+    "transpose",
+    "to_array",
+    "to_xarray",
+    "take",
+    "set_complex",
+    "to",
+    "to_base_units",
+    "to_reduced_units",
+    "ito",
+    "ito_base_units",
+    "ito_reduced_units",
+    "is_units_compatible",
+    "remove_masks",
+]
+
 # import signal
-import sys
 import textwrap
 from contextlib import suppress
 from datetime import datetime
@@ -19,8 +37,8 @@ import numpy as np
 import traitlets as tr
 from tzlocal import get_localzone
 
-from spectrochempy.application import error_
-from spectrochempy.application import warning_
+from spectrochempy.application.application import error_
+from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
@@ -47,7 +65,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     The main N-dimensional dataset class used by  `SpectroChemPy`.
 
     The `NDDataset` is the main object use by SpectroChemPy. Like numpy
-    `~numpy.ndarray`\ 's, `NDDataset` have the capability to be sliced, sorted and
+    `~numpy.ndarray`'s, `NDDataset` have the capability to be sliced, sorted and
     subject to mathematical operations. But, in addition, `NDDataset` may have units,
     can be masked and each dimensions can have coordinates also with units. This make
     `NDDataset` aware of unit compatibility,
@@ -233,7 +251,10 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         coordtitles=None,
         **kwargs,
     ):
-        super().__init__(data, **kwargs)
+        NDComplexArray.__init__(self, data, **kwargs)
+        NDIO.__init__(self, **kwargs)
+        NDMath.__init__(self)
+        NDPlot.__init__(self)
 
         self._created = utcnow()
         self.description = kwargs.pop("description", "")
@@ -294,7 +315,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     # ----------------------------------------------------------------------------------
     # Special methods
     # ----------------------------------------------------------------------------------
-    def __dir__(self):
+    def _attributes_(self):
         # Only these attributes are used for saving dataset
         # WARNING: be careful to keep the present order of the three first elements!
         # Needed for save/load operations
@@ -309,7 +330,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             "mask",
             "units",
             "meta",
-            "preferences",
             "author",
             "description",
             "history",
@@ -325,7 +345,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             # "baselinedata",
             # "state",
             # "ranges",
-        ] + NDIO().__dir__()
+        ] + NDIO()._attributes_()
 
     def __getitem__(self, items, **kwargs):
         saveditems = items
@@ -378,7 +398,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         return new
 
     def __getattr__(self, item):
-        # when the attribute was not found
         if (
             item.startswith("_")
             or item
@@ -393,6 +412,14 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             # raise an error so that traits, ipython operation and more ...
             # will be handled correctly
             raise AttributeError
+
+        # as we are doing lazy_import, we look in the _api module)
+        from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
+
+        if item in _LAZY_IMPORTS:
+            func = tr.import_item(_LAZY_IMPORTS[item] + "." + item)
+            # Create a bound method that calls the imported function with self as first argument
+            return lambda *args, **kwargs: func(self, *args, **kwargs)
 
         # syntax such as ds.x, ds.y, etc...
 
@@ -423,7 +450,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
                 except Exception as err:
                     if item in self.dims:
                         return None
-                    raise err
+                    raise AttributeError from err
+
             elif attribute is not None:
                 if attribute == "size":
                     # we want the size but there is no coords, get it from the data shape
@@ -476,10 +504,9 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             super().__setattr__(key, value)
 
     def __eq__(self, other, attrs=None):
-        attrs = self.__dir__()
+        attrs = self._attributes_()
         for attr in (
             "filename",
-            "preferences",
             "name",
             "author",
             "description",
@@ -1499,43 +1526,57 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
     #     self._referencedata = val
 
 
-# ======================================================================================
-# module function
-# ======================================================================================
-# make some NDDataset operation accessible from the spectrochempy API
-thismodule = sys.modules[__name__]
+# # ======================================================================================
+# # module function
+# # ======================================================================================
+# # make some NDDataset operation accessible from the spectrochempy API
+# thismodule = sys.modules[__name__]
 
-api_funcs = [
-    "sort",
-    "copy",
-    "squeeze",
-    "swapdims",
-    "transpose",
-    "to_array",
-    "to_xarray",
-    "take",
-    "set_complex",
-    "set_quaternion",
-    "set_hypercomplex",
-    "component",
-    "to",
-    "to_base_units",
-    "to_reduced_units",
-    "ito",
-    "ito_base_units",
-    "ito_reduced_units",
-    "is_units_compatible",
-    "remove_masks",
-]
+# api_funcs = [
+#     "sort",
+#     "copy",
+#     "squeeze",
+#     "swapdims",
+#     "transpose",
+#     "to_array",
+#     "to_xarray",
+#     "take",
+#     "set_complex",
+#     "to",
+#     "to_base_units",
+#     "to_reduced_units",
+#     "ito",
+#     "ito_base_units",
+#     "ito_reduced_units",
+#     "is_units_compatible",
+#     "remove_masks",
+# ]
 
-for funcname in api_funcs:
-    setattr(thismodule, funcname, getattr(NDDataset, funcname))
-    __all__.append(funcname)
+# for funcname in api_funcs:
+#     setattr(thismodule, funcname, getattr(NDDataset, funcname))
+#     __all__.append(funcname)
 
-# import also npy functions  # TODO: this will be changed with __array_functions__
-from spectrochempy.processing.transformation.npy import dot
+# # # Add also _lazy_dataset_methods methods to the module
+# # from spectrochempy.lazyimport.dataset_methods import _LAZY_DATASETS_IMPORTS
+# # import importlib
 
-NDDataset.dot = dot
+# # for funcname in _LAZY_DATASETS_IMPORTS:
+# #     module_path = _LAZY_DATASETS_IMPORTS[funcname]
+# #     module = __import__(module_path, fromlist=[funcname])
+# #     attr = getattr(module, funcname)
+# #     setattr(thismodule, funcname, attr)
+# #     __all__.append(funcname)  THIS LEADS TO CIRCULAR IMPORT!
+
+# # import also npy functions  # TODO: this will be changed with __array_functions__
+# from spectrochempy.processing.transformation.npy import dot
+
+# NDDataset.dot = dot
+
+# api_funcs = [
+#     "set_quaternion",
+#     "set_hypercomplex",
+#     "component",
+# ]
 
 # ======================================================================================
 # Set the operators

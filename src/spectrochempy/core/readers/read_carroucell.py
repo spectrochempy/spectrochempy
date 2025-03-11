@@ -17,7 +17,7 @@ import numpy as np
 import scipy.interpolate
 import xlrd
 
-from spectrochempy.application import info_
+from spectrochempy.application.application import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method

@@ -398,9 +398,9 @@ def numpyprintoptions(
     """
 
     def _format_object(x):
-        from spectrochempy.utils.misc import TYPE_COMPLEX
-        from spectrochempy.utils.misc import TYPE_FLOAT
-        from spectrochempy.utils.misc import TYPE_INTEGER
+        from spectrochempy.utils.constants import TYPE_COMPLEX
+        from spectrochempy.utils.constants import TYPE_FLOAT
+        from spectrochempy.utils.constants import TYPE_INTEGER
 
         if isinstance(x, _MaskedPrintOption):
             # a workaround to format masked values

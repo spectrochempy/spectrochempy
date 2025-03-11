@@ -14,8 +14,8 @@ from datetime import datetime
 import numpy as np
 import scipy.io as sio
 
-from spectrochempy.application import info_
-from spectrochempy.application import warning_
+from spectrochempy.application.application import info_
+from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.nddataset import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer

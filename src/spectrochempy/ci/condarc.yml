@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - spectrocat
+  - cantera
+  - cantera/label/dev
+  - defaults
+ssl_verify: true
+anaconda_upload: false
+channel_priority: strict
+always_yes: true
+changeps1: true

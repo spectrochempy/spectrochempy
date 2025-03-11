@@ -16,14 +16,19 @@ from pathlib import Path
 import numpy as np
 import traitlets as tr
 from matplotlib import cycler
+
+# from spectrochempy.core.units import Quantity
+from pint import UnitRegistry
 from traitlets.config import Config
 from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
-from spectrochempy.core.units import Quantity
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docreps import _docstring
 from spectrochempy.utils.objects import Adict
+
+ur = UnitRegistry()
+Quantity = ur.Quantity
 
 
 class MetaConfigurable(Configurable):

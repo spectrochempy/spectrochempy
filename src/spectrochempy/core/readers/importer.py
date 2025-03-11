@@ -21,8 +21,10 @@ from traitlets import List
 from traitlets import Type
 from traitlets import Unicode
 
-from spectrochempy.application import info_
-from spectrochempy.application import warning_
+from spectrochempy.application.application import debug_
+from spectrochempy.application.application import info_
+from spectrochempy.application.application import warning_
+from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.processing.transformation.concatenate import stack
 from spectrochempy.utils.docreps import _docstring
@@ -34,46 +36,6 @@ from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.objects import ScpObjectList
-
-FILETYPES = [
-    ("scp", "SpectroChemPy files (*.scp)"),
-    ("omnic", "Nicolet OMNIC files and series (*.spa *.spg *.srs)"),
-    ("soc", "Surface Optics Corp. (*.ddr *.hdr *.sdr)"),
-    ("labspec", "LABSPEC exported files (*.txt)"),
-    ("opus", "Bruker OPUS files (*.[0-9]*)"),
-    (
-        "topspin",
-        "Bruker TOPSPIN fid or series or processed data files "
-        "(fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
-    ),
-    ("matlab", "MATLAB files (*.mat)"),
-    ("dso", "Data Set Object files (*.dso)"),
-    ("jcamp", "JCAMP-DX files (*.jdx *.dx)"),
-    ("csv", "CSV files (*.csv)"),
-    ("excel", "Microsoft Excel files (*.xls)"),
-    ("zip", "Compressed folder of data files (*.zip)"),
-    ("quadera", "Quadera ascii files (*.asc)"),
-    ("carroucell", "Carroucell files (*spa)"),
-    ("galactic", "GRAMS/Thermo Galactic files (*.spc)"),
-    ("wire", "Renishaw WiRE files (*.wdf)"),
-    #  ('all', 'All files (*.*)')
-]
-ALIAS = [
-    ("spg", "omnic"),
-    ("spa", "omnic"),
-    ("ddr", "soc"),
-    ("hdr", "soc"),
-    ("sdr", "soc"),
-    ("spc", "galactic"),
-    ("srs", "omnic"),
-    ("mat", "matlab"),
-    ("txt", "labspec"),
-    ("jdx", "jcamp"),
-    ("dx", "jcamp"),
-    ("xls", "excel"),
-    ("asc", "quadera"),
-    ("wdf", "wire"),
-]
 
 
 # --------------------------------------------------------------------------------------
@@ -92,14 +54,14 @@ class Importer(HasTraits):
     def __init__(self):
         super().__init__()
 
-        self.filetypes = dict(FILETYPES)
-        temp = list(zip(*FILETYPES, strict=False))
+        self.filetypes = dict(registry.filetypes)
+        temp = list(zip(*registry.filetypes, strict=False))
         temp.reverse()
         self.protocols = dict(zip(*temp, strict=False))
 
         #  add alias
 
-        self.alias = dict(ALIAS)
+        self.alias = dict(registry.aliases)
 
     def __call__(self, *args, **kwargs):
         self.datasets = []
@@ -151,8 +113,8 @@ class Importer(HasTraits):
             elif (
                 key
                 and key[1:]
-                not in list(zip(*FILETYPES, strict=False))[0]
-                + list(zip(*ALIAS, strict=False))[0]
+                not in list(zip(*registry.filetypes, strict=False))[0]
+                + list(zip(*registry.aliases, strict=False))[0]
             ):
                 raise TypeError(f"Filetype `{key}` is unknown in spectrochempy")
             else:
@@ -164,11 +126,11 @@ class Importer(HasTraits):
             if all(self.datasets) is None:
                 return None
 
-            try:
-                prefs = self.datasets[0].preferences
-                prefs.reset()
-            except (FileNotFoundError, AttributeError):
-                pass
+            # try:
+            #     prefs = self.datasets[0].preferences
+            #     prefs.reset()
+            # except (FileNotFoundError, AttributeError):
+            #     pass
         else:
             return None
 
@@ -280,6 +242,7 @@ class Importer(HasTraits):
 # --------------------------------------------------------------------------------------
 def _importer_method(func):
     # Decorator to define a given read function as belonging to Importer
+    debug_(f"defining {func.__name__} as a method of Importer")
     setattr(Importer, func.__name__, staticmethod(func))
     return func
 
@@ -612,7 +575,8 @@ def _read_dir(*args, **kwargs):
     files = get_filenames(directory, **kwargs)
     datasets = []
     valid_extensions = (
-        list(zip(*FILETYPES, strict=False))[0] + list(zip(*ALIAS, strict=False))[0]
+        list(zip(*registry.filetypes, strict=False))[0]
+        + list(zip(*registry.aliases, strict=False))[0]
     )
     for key in [key for key in files if key[1:] in valid_extensions]:
         if key:
@@ -740,7 +704,7 @@ def _get_url_content_and_save(url, dst, replace, read_only=False):
 
 
 def _download_full_testdata_directory():
-    from spectrochempy.core import preferences as prefs
+    from spectrochempy.application.preferences import preferences as prefs
 
     datadir = prefs.datadir
 
@@ -812,7 +776,7 @@ def _relative_to(path, base):
 
 @_importer_method
 def _read_remote(*args, **kwargs):
-    from spectrochempy.core import preferences as prefs
+    from spectrochempy.application.preferences import preferences as prefs
 
     datadir = prefs.datadir
     dataset, path = args

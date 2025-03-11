@@ -43,7 +43,7 @@ dataset.y.select(3)
 
 # %%
 # plot the dataset (zoom on the begining of the fid)
-prefs = dataset.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (9, 4)
 ax = dataset.plot(colorbar=True)
 ax.set_xlim(0, 5000)

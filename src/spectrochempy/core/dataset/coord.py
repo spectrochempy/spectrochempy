@@ -12,7 +12,7 @@ import textwrap
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.application import error_
+from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
@@ -566,7 +566,7 @@ class Coord(NDMath, NDArray):
         res.name = self.name
         return res
 
-    def __dir__(self):
+    def _attributes_(self):
         # remove some methods with respect to the full NDArray
         # as they are not useful for Coord.
         return [
@@ -851,7 +851,7 @@ class Coord(NDMath, NDArray):
             self._data = np.linspace(data[0], data[-1], data.size)
             self._linear = True
         else:
-            # from spectrochempy.application import debug_
+            # from spectrochempy.application.application import debug_
             # debug_(
             #      "The coordinates spacing is not enough uniform to allow linearization."
             #  )

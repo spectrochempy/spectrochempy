@@ -9,7 +9,7 @@
 # import numpy as np
 #
 # from spectrochempy.utils import colorscale
-# from spectrochempy.core import preferences
+# from spectrochempy.application.preferences import preferences
 #
 # # from matplotlib.ticker import MaxNLocator
 #
@@ -92,7 +92,7 @@
 #     # get all plot preferences
 #     # ----------------------------------------------------------------------------------
 #
-#     prefs = dataset.preferences
+#     prefs = scp.preferences
 #
 #     # method of plot
 #     # ------------------------------------------------------------------------

@@ -11,6 +11,7 @@ __dataset_methods__ = __all__
 from traitlets import Any
 from traitlets import HasTraits
 
+from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.utils.file import check_filename_to_save
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.file import patterns
@@ -23,17 +24,7 @@ class Exporter(HasTraits):
     object = Any()
 
     def __init__(self):
-        FILETYPES = [
-            ("scp", "SpectroChemPy files (*.scp)"),
-            ("labspec", "LABSPEC exported files (*.txt)"),
-            ("matlab", "MATLAB files (*.mat)"),
-            ("dso", "Data Set Object files (*.dso)"),
-            ("jcamp", "JCAMP-DX files (*.jdx *dx)"),
-            ("csv", "CSV files (*.csv)"),
-            ("excel", "Microsoft Excel files (*.xls)"),
-        ]
-
-        self.filetypes = dict(FILETYPES)
+        self.filetypes = dict(registry.exporttypes)
         self.protocols = {}
         for protocol, filter in self.filetypes.items():
             for s in patterns(filter, allcase=False):
@@ -142,5 +133,5 @@ def write(dataset, filename=None, **kwargs):
 @exportermethod
 def _write_scp(*args, **kwargs):
     dataset, filename = args
-    dataset.filename = filename
+    dataset.filename = str(filename)
     return dataset.dump(filename, **kwargs)

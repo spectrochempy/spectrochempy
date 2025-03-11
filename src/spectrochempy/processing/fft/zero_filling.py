@@ -11,7 +11,7 @@ import functools
 
 import numpy as np
 
-from spectrochempy.application import error_
+from spectrochempy.application.application import error_
 from spectrochempy.utils.misc import largest_power_of_2
 
 

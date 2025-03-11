@@ -21,6 +21,12 @@ import spectrochempy as scp
 datadir = scp.preferences.datadir
 dataset = scp.read_omnic(datadir / "irdata" / "nh4y-activation.spg")
 dataset.plot_stack(style="paper")
+
+# %%
+c = scp.NDDataset
+scp.sort(dataset)
+scp.write(dataset, overwrite=True)
+
 # %%
 # change the unit of y-axis, the y origin as well as the title of the axis
 
