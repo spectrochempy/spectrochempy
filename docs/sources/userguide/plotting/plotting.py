@@ -9,7 +9,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: Python 3
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 #   language_info:
@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.9.1
+#     version: 3.13.2
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -143,7 +143,7 @@ dataset.plot()
 # (see at the end of this tutorial  for an overview of all the available parameters).
 
 # %%
-prefs = dataset.preferences  # we will use prefs instead of dataset.preference
+prefs = scp.preferences  # we will use prefs instead of dataset.preference
 prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
 prefs.colorbar = True  # This add a color bar on a side
 prefs.colormap = "magma"  # The default colormap is viridis
@@ -457,7 +457,7 @@ scp.plot_multiple(
 prefs
 
 # %% [markdown]
-# **Warning**: Note that with respect to matplotlib,the parameters in the `dataset.preferences` dictionary
+# **Warning**: Note that with respect to matplotlib,the parameters in the `scp.preferences` dictionary
 # have a slightly different name, e.g. `figure_figsize` (SpectroChemPy) instead of `figure.figsize` (matplotlib syntax)
 # (this is because in SpectroChemPy, dot (` .` ) cannot be used in parameter name,
 # and thus it is replaced by an underscore (`_` ))

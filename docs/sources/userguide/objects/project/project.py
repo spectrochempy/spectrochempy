@@ -35,7 +35,6 @@
 # from pathlib import Path
 
 # %%
-from spectrochempy import NDDataset
 from spectrochempy import Project
 from spectrochempy import pathclean
 from spectrochempy import preferences as prefs
@@ -76,10 +75,13 @@ proj
 # %%
 datadir = pathclean(prefs.datadir)
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
-nd1 = NDDataset.read_topspin(
+
+from spectrochempy import read_topspin
+
+nd1 = read_topspin(
     path / "topspin_1d", expno=1, remove_digital_filter=True, name="NMR_1D"
 )
-nd2 = NDDataset.read_topspin(
+nd2 = read_topspin(
     path / "topspin_2d", expno=1, remove_digital_filter=True, name="NMR_2D"
 )
 

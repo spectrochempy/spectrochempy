@@ -42,7 +42,7 @@ dataset.y.title = "time"
 dataset
 
 # %%
-prefs = dataset.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (6, 3)
 prefs.colormap = "Dark2"
 prefs.colorbar = True
