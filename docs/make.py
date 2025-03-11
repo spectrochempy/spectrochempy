@@ -548,7 +548,7 @@ class BuildDocumentation:
         # - last_tag : str - The previous release tag
         # - version_type : str - One of 'latest' or <tag>
 
-        from spectrochempy.api import version
+        from spectrochempy import version
 
         last_tag = self._get_previous_tag() if not self.tagname else None
         if self.tagname is not None:
@@ -651,7 +651,6 @@ class BuildDocumentation:
             self._sync_notebooks()
 
         # Set the environment variables for the Sphinx build
-        environ["DOC_BUILDING"] = "yes"
         environ["PREVIOUS_VERSIONS"] = ",".join(previous_versions)
         environ["LAST_RELEASE"] = self._last_release if self._last_release else ""
 
@@ -799,7 +798,6 @@ class BuildDocumentation:
                 f.write(content)
 
         # Remove the environment variables
-        del environ["DOC_BUILDING"]
         del environ["PREVIOUS_VERSIONS"]
         del environ["SPHINX_NOEXEC"]
         if "SPHINX_PATTERN" in environ:
@@ -895,7 +893,7 @@ class BuildDocumentation:
 
 
 # ======================================================================================
-def main():
+def _main():
     """
     Command-line interface for the documentation builder.
 
@@ -1089,6 +1087,15 @@ def main():
     return res
 
 
+def main():
+    try:
+        environ["DOC_BUILDING"] = 1
+        res = _main()
+    finally:
+        del environ["DOC_BUILDING"]
+    return res
+
+
 # ======================================================================================
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(_main())

@@ -1,15 +1,22 @@
 # DOCUMENTATION Readme
 
-This directory contains the sources ans tools necessary to build the spectrochempy
+This directory contains the sources and tools necessary to build the spectrochempy
 documentation using Sphinx.
 
-To generate the documentation use:
+## Full documentation
 
-  python docs/make.py html
+To generate the full documentation use:
 
-Note that changelogs are updated only if prior to calling make.py, you first
-execute:
+```python
+python docs/make.py html
+```
 
-   python .github/workflows/scripts/update_version_and_release_notes.py
+or use the script:
 
-The html pages are  in build/html/latest.  Just open build/html/latest/index.html in a browser to see this pages.
+```bash
+make_scpy_docs
+```
+
+The html pages are  in build/html.  Just open build/html/index.html in a browser to see this pages.
+
+## Generate single page
