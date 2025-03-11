@@ -59,7 +59,6 @@ dev = [
   "spectrochempy[docs]",
 ]
 docs = [
-  # "cffconvert @ git+https://github.com/citation-file-format/cffconvert@b6045d7",
   "ipykernel == 6.29.5",
   "ipywidgets == 8.1.5",
   "jsonschema == 4.23.0",
@@ -89,6 +88,8 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
+nmr = ["spectrochempy[quaternion]"]
+quaternion = ["numpy-quaternion"]
 test = [
   "coverage",
   "ipywidgets",
@@ -108,13 +109,18 @@ issues = "https://github.com/spectrochempy/spectrochempy/issues"
 repository = "https://github.com/spectrochempy/spectrochempy"
 
 [project.scripts]
-show_versions = "spectrochempy.scripts.show_versions:main"
+make_scpy_docs = "docs.make:main"
+show_versions = "spectrochempy.ci.show_versions:main"
+
+[project.entry-points."spectrochempy.plugins"]
+nmr = "spectrochempy.plugins.nmr:plugin_class"
+quaternion = "spectrochempy.plugins.quaternion:plugin_class"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "docs"]
 
 [tool.setuptools.package-data]
 "spectrochempy.data" = [
@@ -150,6 +156,7 @@ ignore = [
   "D104", # Missing doctring in public package
   "D105", # Missing docstring in magic method
   "D107", # Missing docstring in __init__
+  "D202", # No blank lines allowed after function docstring
   "D203", # Incorrect blank line before class
   "D212", # Docstring should start on first line
   "D413", # Missing blank line after last section
@@ -170,10 +177,10 @@ select = [
   "SIM", # flake8-simplify
   "W", # pycodestyle warnings  # "PERF", # perflint
   "PLC", # pylint conventions
-  "TID252", # replace absolufy-imports
+  "TID252", # absolute imports
 ]
 
-exclude = ["~*", "tests/**"] # Exclude files and directories.
+exclude = ["~*"] # Exclude files and directories. "tests/**"
 
 [tool.ruff.lint.per-file-ignores]
 "docs/sources/gettingstarted/*" = [
@@ -185,6 +192,13 @@ exclude = ["~*", "tests/**"] # Exclude files and directories.
   "N816",
 ] # accept "useless expression", "print", "mixed-case variables" in *.ipynb or py:percent files.
 "src/spectrochempy/extern/brukeropus/**/*" = ["T201", "D"]
+"tests/**/*" = [
+  "S101", # Use of assert detected. The enclosed code will be executed only when the assertion fails.
+  "S603", # subprocess call with shell=True identified, security issue.
+  "T201", # print statement found.
+  "D205", # 1 blank line required between summary line and description.
+  "D401", # First line should be in imperative mood; try rephrasing.
+]
 
 [tool.ruff.lint.isort]
 force-single-line = true
