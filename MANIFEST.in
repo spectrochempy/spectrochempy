@@ -1,0 +1,9 @@
+include MANIFEST.in
+include LICENSE
+include pyproject.toml
+include CITATION.cff
+include README.md
+recursive-include requirements *.txt
+recursive-include environments *.yml
+recursive-include src/spectrochempy *.py *.pyi *.tmpl *.css *.csv *.ttf *.txt *.rst *.md *.mplstyle
+recursive-include LICENCES *.rst
