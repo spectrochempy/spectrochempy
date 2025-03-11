@@ -413,8 +413,8 @@ d3D.v.has_data, d3D.v.is_empty
 # %%
 try:
     d3D.x
-except KeyError as e:
-    scp.error_(KeyError, e)
+except Exception as e:
+    scp.error_(Exception, e)
 
 # %% [markdown]
 # In some case it can also be useful to get a coordinate from its title instead of its
@@ -822,7 +822,7 @@ if datadir.exists():
 
 # %%
 nd = scp.read_omnic(datadir / "irdata/nh4y-activation.spg")
-nd.preferences.reset()
+scp.preferences.reset()
 nd.plot()
 
 # %% [markdown]

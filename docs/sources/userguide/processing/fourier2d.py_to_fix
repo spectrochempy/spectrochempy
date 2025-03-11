@@ -63,7 +63,7 @@ ser
 # Change of some plotting preferences
 
 # %%
-prefs = ser.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 prefs.contour_start = 0.05
 
@@ -174,7 +174,7 @@ spk.plot_map(xlim=(50, 0), ylim=(-40, -15))
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "exam2d_HC"
 ser = scp.read_topspin(path)
-prefs = ser.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 ser.shape
 
@@ -206,7 +206,7 @@ s.plot_map()
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "exam2d_HH"
 ser = scp.read_topspin(path)
-prefs = ser.preferences
+prefs = scp.preferences
 ser.plot_map()
 ser.dtype
 

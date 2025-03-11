@@ -63,7 +63,7 @@ ds.y = ds.y.to("minutes")
 # Let's set some preferences for plotting
 
 # %%
-prefs = ds.preferences
+prefs = scp.preferences
 prefs.method_1D = "scatter+pen"
 prefs.method_2D = "stack"
 prefs.colorbar = True

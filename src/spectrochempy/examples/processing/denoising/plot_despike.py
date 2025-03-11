@@ -33,7 +33,7 @@ X1 = X.snip()
 # %%
 # Plot the data
 
-prefs = X.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 X1.plot()
 # %%

@@ -20,7 +20,7 @@ import spectrochempy as scp
 # Note that read_labspec would be equivalent for this file format.
 
 X = scp.read("ramandata/labspec/SMC1-Initial_RT.txt")
-prefs = X.preferences
+prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 X.plot()
 # %%
