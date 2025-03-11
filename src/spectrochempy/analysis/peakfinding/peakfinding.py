@@ -22,8 +22,8 @@ __dataset_methods__ = ["find_peaks"]
 import numpy as np
 import scipy
 
-from spectrochempy.application import error_
-from spectrochempy.application import warning_
+from spectrochempy.application.application import error_
+from spectrochempy.application.application import warning_
 from spectrochempy.core.units import Quantity
 
 # Todo:
@@ -128,8 +128,7 @@ def find_peaks(
         )
     # TODO: implement for 2D datasets (would be useful e.g., for NMR)
     # be sure that data are real (NMR case for instance)
-    if X.is_complex or X.is_quaternion:
-        X = X.real
+    X = X.real
 
     # Check if we can work with the coordinates
     use_coord = use_coord and X.coordset is not None

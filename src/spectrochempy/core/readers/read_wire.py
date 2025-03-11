@@ -56,9 +56,9 @@ from enum import IntEnum
 
 import numpy as np
 
-from spectrochempy.application import debug_
-from spectrochempy.application import error_
-from spectrochempy.application import warning_
+from spectrochempy.application.application import debug_
+from spectrochempy.application.application import error_
+from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.readers.importer import Importer

@@ -21,8 +21,8 @@ from scipy import sparse
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
-from spectrochempy.application import info_
-from spectrochempy.application import warning_
+from spectrochempy.application.application import info_
+from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset

@@ -9,7 +9,7 @@
 # DEVNOTE:
 # API methods accessible as  scp.method or scp.class must be defined in __all__
 # Configurable class (which requires a configuration file)
-# must be declared in __configurable__
+# must be declared in __configurables__
 
 __all__ = ["MCRALS"]
 __configurables__ = ["MCRALS"]
@@ -27,7 +27,7 @@ from sklearn import decomposition
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
-from spectrochempy.application import info_
+from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits

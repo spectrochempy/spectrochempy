@@ -6,8 +6,7 @@
 __all__ = ["read_zip"]
 __dataset_methods__ = __all__
 
-from spectrochempy.core.readers.importer import ALIAS
-from spectrochempy.core.readers.importer import FILETYPES
+from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
@@ -94,7 +93,9 @@ def _read_zip(*args, **kwargs):
             extension = children.name.split(".")[-1]
             if (
                 extension.lower()
-                not in list(zip(*(ALIAS + FILETYPES), strict=False))[0]
+                not in list(
+                    zip(*(registry.aliases + registry.filetypes), strict=False)
+                )[0]
             ):
                 return None
             origin = kwargs.get("origin", "")

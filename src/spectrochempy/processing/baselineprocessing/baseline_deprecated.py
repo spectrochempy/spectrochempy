@@ -1,6 +1,6 @@
 # DEPRECATED
 
-from spectrochempy.application import warning_
+from spectrochempy.application.application import warning_
 from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
 from spectrochempy.utils.decorators import deprecated
 

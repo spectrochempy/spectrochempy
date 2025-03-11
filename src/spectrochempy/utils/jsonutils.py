@@ -26,9 +26,9 @@ def fromisoformat(s):
 # ======================================================================================
 def json_decoder(dic):
     """Decode a serialized json object."""
-    from spectrochempy.core.dataset.baseobjects.meta import Meta
     from spectrochempy.core.units import Quantity
     from spectrochempy.core.units import Unit
+    from spectrochempy.utils.meta import Meta
 
     if "__class__" in dic:
         klass = dic.pop("__class__")
@@ -69,7 +69,7 @@ def json_decoder(dic):
 
 def json_encoder(byte_obj, encoding=None):
     """Return a serialised json object."""
-    from spectrochempy.core.dataset.arraymixins.ndplot import PreferencesSet
+    from spectrochempy.application.preferences import PreferencesSet
     from spectrochempy.core.units import Quantity
     from spectrochempy.core.units import Unit
 
@@ -77,7 +77,7 @@ def json_encoder(byte_obj, encoding=None):
         return None
 
     if hasattr(byte_obj, "_implements"):
-        objnames = byte_obj.__dir__()
+        objnames = byte_obj._attributes_()
 
         dic = {}
         for name in objnames:

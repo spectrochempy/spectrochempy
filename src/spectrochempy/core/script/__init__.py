@@ -3,6 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
+# lazy_stub: skip
 import ast
 import re
 
@@ -14,7 +15,7 @@ from traitlets import Unicode
 from traitlets import signature_has_traits
 from traitlets import validate
 
-from spectrochempy.application import error_
+from spectrochempy.application.application import error_
 from spectrochempy.core.project.abstractproject import AbstractProject
 
 __all__ = ["Script", "run_script", "run_all_scripts"]
@@ -77,7 +78,7 @@ class Script(HasTraits):
     # ----------------------------------------------------------------------------------
     # special methods
     # ----------------------------------------------------------------------------------
-    def __dir__(self):
+    def _attributes_(self):
         return ["name", "content", "parent"]
 
     def __call__(self, *args):

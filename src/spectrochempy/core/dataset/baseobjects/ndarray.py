@@ -5,11 +5,8 @@
 # ======================================================================================
 """Module that implements the `NDArray` base class."""
 
-__all__ = []
-
 import copy as cpy
 import itertools
-import pathlib
 import re
 import textwrap
 import uuid
@@ -27,9 +24,8 @@ from traitlets import Union
 from traitlets import default
 from traitlets import validate
 
-from spectrochempy.application import error_
-from spectrochempy.application import info_
-from spectrochempy.core.dataset.baseobjects.meta import Meta
+from spectrochempy.application.application import error_
+from spectrochempy.application.application import info_
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import Unit
@@ -39,11 +35,11 @@ from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.constants import NOMASK
+from spectrochempy.utils.constants import TYPE_FLOAT
+from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.constants import MaskedConstant
 from spectrochempy.utils.docreps import _docstring
-from spectrochempy.utils.file import pathclean
-from spectrochempy.utils.misc import TYPE_FLOAT
-from spectrochempy.utils.misc import TYPE_INTEGER
+from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.misc import is_number
 from spectrochempy.utils.misc import is_sequence
 from spectrochempy.utils.misc import make_new_object
@@ -197,7 +193,6 @@ class NDArray(HasTraits):
     # Other settings
     _text_width = Integer(120)
     _html_output = Bool(False)
-    _filename = Union((Instance(pathlib.Path), Unicode()), allow_none=True)
 
     def __init__(self, data=None, **kwargs):
         super().__init__()
@@ -236,16 +231,7 @@ class NDArray(HasTraits):
 
         self.name = kwargs.pop("name", None)
 
-    # ----------------------------------------------------------------------------------
-    # Special methods
-    # ----------------------------------------------------------------------------------
-    def __copy__(self):
-        return self.copy(deep=False)
-
-    def __deepcopy__(self, memo=None):
-        return self.copy(deep=True, memo=memo)
-
-    def __dir__(self):
+    def _attributes_(self):
         return [
             "data",
             "dims",
@@ -258,6 +244,15 @@ class NDArray(HasTraits):
             "roi",
             "transposed",
         ]
+
+    # ----------------------------------------------------------------------------------
+    # Special methods
+    # ----------------------------------------------------------------------------------
+    def __copy__(self):
+        return self.copy(deep=False)
+
+    def __deepcopy__(self, memo=None):
+        return self.copy(deep=True, memo=memo)
 
     def __eq__(self, other, attrs=None):
         eq = True
@@ -282,7 +277,7 @@ class NDArray(HasTraits):
             return eq
 
         if attrs is None:
-            attrs = self.__dir__()
+            attrs = self._attributes_()
 
         for attr in ["name", "linear", "roi"]:
             if attr in attrs:
@@ -461,12 +456,6 @@ class NDArray(HasTraits):
             value.ito(self.units)
             value = np.asarray(value.magnitude)  # , copy=self.copy)
 
-        if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
-            # sometimes do not work directly : here is a work around
-            self._data[keys] = np.full_like(self._data[keys], value).astype(
-                np.dtype(np.quaternion),
-            )
-            return None
         self._data[keys] = value
         return None
 
@@ -505,6 +494,8 @@ class NDArray(HasTraits):
                     p = pattern.search(by)
                     if p is not None:
                         pos = int(p[1])
+                if pos >= self._labels.shape[-1]:
+                    pos = self._labels.shape[-1] - 1  # Adjust pos to be within bounds
                 labels = self._labels[..., pos]
             args = np.argsort(labels)
 
@@ -932,7 +923,7 @@ class NDArray(HasTraits):
             # No need to check the validity of the data
             # because the data must have been already
             # successfully initialized for the passed NDArray.data
-            for attr in self.__dir__():
+            for attr in self._attributes_():
                 try:
                     val = getattr(data, f"_{attr}")
                     if self._copy:
@@ -1162,9 +1153,7 @@ class NDArray(HasTraits):
         do_copy = cpy.deepcopy if deep else cpy.copy
 
         new = make_new_object(self)
-        for attr in (
-            self.__dir__()
-        ):  # do not use  dir(self) as the order in __dir__ list is important
+        for attr in self._attributes_():
             try:
                 _attr = do_copy(getattr(self, f"_{attr}"))
                 setattr(new, f"_{attr}", _attr)
@@ -1264,17 +1253,6 @@ class NDArray(HasTraits):
         if self.is_empty:
             return None
         return self._data.dtype
-
-    @property
-    def filename(self):
-        """Current filename for this dataset (`Pathlib` object)."""
-        if self._filename:
-            return self._filename.stem + self.suffix
-        return None
-
-    @filename.setter
-    def filename(self, val):
-        self._filename = pathclean(val)
 
     def get_axis(self, *args, **kwargs):
         """

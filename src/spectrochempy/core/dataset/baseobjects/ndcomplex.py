@@ -3,27 +3,18 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Module that implements a subclass of `NDArray` with complex/quaternion related attributes."""
-
-__all__ = []
+"""Module that implements a subclass of `NDArray` with complex related attributes."""
 
 import itertools
 import textwrap
 
 import numpy as np
-from quaternion import as_float_array
-from quaternion import as_quat_array
-from traitlets import Bool
 from traitlets import validate
 
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.units import Quantity
-from spectrochempy.utils.constants import NOMASK
-from spectrochempy.utils.misc import TYPE_COMPLEX
-from spectrochempy.utils.misc import TYPE_FLOAT
-from spectrochempy.utils.misc import as_quaternion
-from spectrochempy.utils.misc import get_component
-from spectrochempy.utils.misc import typequaternion
+from spectrochempy.utils.constants import TYPE_COMPLEX
+from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.print import insert_masked_print
 
 
@@ -31,17 +22,15 @@ from spectrochempy.utils.print import insert_masked_print
 # NDComplexArray
 # ======================================================================================
 class NDComplexArray(NDArray):
-    _interleaved = Bool(False)
-
     def __init__(self, data=None, **kwargs):
         r"""
-        Provide the complex/quaternion related functionalities to `NDArray`.
+        Provide the complex related functionalities to `NDArray`.
 
-        It is a subclass bringing complex and quaternion related attributes.
+        It is a subclass bringing complex related attributes.
 
         Parameters
         ----------
-        data : array of complex number or quaternion.
+        data : array of complex number.
             Data array contained in the object. The data can be a list, a tuple, a
             `~numpy.ndarray` , a ndarray-like,
             a  `NDArray` or any subclass of  `NDArray` . Any size or shape of data is
@@ -139,20 +128,17 @@ class NDComplexArray(NDArray):
             if self._dtype == data.dtype:
                 pass  # nothing more to do
 
-            elif self._dtype not in [typequaternion] + list(TYPE_COMPLEX):
+            elif self._dtype not in TYPE_COMPLEX:
                 data = data.astype(np.dtype(self._dtype), copy=False)
 
             elif self._dtype in TYPE_COMPLEX:
                 data = self._make_complex(data)
 
-            elif self._dtype == typequaternion:
-                data = self._make_quaternion(data)
-
-        elif data.dtype not in [typequaternion] + list(TYPE_COMPLEX):
+        elif data.dtype not in TYPE_COMPLEX:
             data = data.astype(
                 np.float64,
                 copy=False,
-            )  # by default dta are float64 if the dtype is not fixed
+            )  # by default data are float64 if the dtype is not fixed
 
         # return the validated data
         if self._copy:
@@ -163,61 +149,9 @@ class NDComplexArray(NDArray):
     # read-only properties / attributes
     # ----------------------------------------------------------------------------------
     @property
-    def has_complex_dims(self):
-        """
-        True if at least one of the `data` array dimension is complex.
-
-        (Readonly property).
-        """
-        if self._data is None:
-            return False
-
-        return (self._data.dtype in TYPE_COMPLEX) or (
-            self._data.dtype == typequaternion
-        )
-
-    @property
     def is_complex(self):
         """True if the 'data' are complex (Readonly property)."""
-        if self._data is None:
-            return False
-        return self._data.dtype in TYPE_COMPLEX
-
-    @property
-    def is_quaternion(self):
-        """
-        True if the `data` array is hypercomplex .
-
-        (Readonly property).
-        """
-        if self._data is None:
-            return False
-        return self._data.dtype == typequaternion
-
-    @property
-    def is_interleaved(self):
-        """
-        True if the `data` array is hypercomplex with interleaved data.
-
-        (Readonly property).
-        """
-        if self._data is None:
-            return False
-        return self._interleaved  # (self._data.dtype == typequaternion)
-
-    @property
-    def is_masked(self):
-        """
-        True if the `data` array has masked values.
-
-        (Readonly property).
-        """
-        try:
-            return super().is_masked
-        except Exception as e:
-            if self._data.dtype == typequaternion:
-                return np.any(self._mask["I"])
-            raise e
+        return self._data is not None and self._data.dtype in TYPE_COMPLEX
 
     @property
     def real(self):
@@ -227,7 +161,7 @@ class NDComplexArray(NDArray):
         (Readonly property).
         """
         new = self.copy()
-        if not new.has_complex_dims:
+        if not new.is_complex:
             return new
         ma = new.masked_data
 
@@ -235,16 +169,14 @@ class NDComplexArray(NDArray):
             new._data = ma
         elif ma.dtype in TYPE_COMPLEX:
             new._data = ma.real
-        elif ma.dtype == typequaternion:
-            # get the scalar component
-            # q = a + bi + cj + dk  ->   qr = a
-            new._data = as_float_array(ma)[..., 0]
         else:
             raise TypeError(f"dtype {ma.dtype!s} not recognized")
 
         if isinstance(ma, np.ma.masked_array):
             new._mask = ma.mask
         return new
+
+    R = real
 
     @property
     def imag(self):
@@ -254,7 +186,7 @@ class NDComplexArray(NDArray):
         (Readonly property).
         """
         new = self.copy()
-        if not new.has_complex_dims:
+        if not new.is_complex:
             return None
 
         ma = new.masked_data
@@ -262,12 +194,6 @@ class NDComplexArray(NDArray):
             new._data = np.zeros_like(ma.data)
         elif ma.dtype in TYPE_COMPLEX:
             new._data = ma.imag.data
-        elif ma.dtype == typequaternion:
-            # this is a more complex situation than for real component
-            # get the imaginary component (vector component)
-            # q = a + bi + cj + dk  ->   qi = bi+cj+dk
-            as_float_array(ma)[..., 0] = 0  # keep only the imaginary component
-            new._data = ma  # .data
         else:
             raise TypeError(f"dtype {ma.dtype!s} not recognized")
 
@@ -275,108 +201,22 @@ class NDComplexArray(NDArray):
             new._mask = ma.mask
         return new
 
-    @property
-    def RR(self):
-        """
-        The array with real component in both dimension of hypercomplex 2D `data` .
-
-        This readonly property is equivalent to the `real` property.
-        """
-        if not self.is_quaternion:
-            raise TypeError("Not an hypercomplex array")
-        return self.real
-
-    @property
-    def RI(self):
-        """
-        The array with real-imaginary component of hypercomplex 2D `data` .
-
-        (Readonly property).
-        """
-        if not self.is_quaternion:
-            raise TypeError("Not an hypercomplex array")
-        return self.component("RI")
-
-    @property
-    def IR(self):
-        """
-        The array with imaginary-real component of hypercomplex 2D `data` .
-
-        (Readonly property).
-        """
-        if not self.is_quaternion:
-            raise TypeError("Not an hypercomplex array")
-        return self.component("IR")
-
-    @property
-    def II(self):
-        """
-        The array with imaginary-imaginary component of hypercomplex 2D data.
-
-        (Readonly property).
-        """
-        if not self.is_quaternion:
-            raise TypeError("Not an hypercomplex array")
-        return self.component("II")
+    I = imag  # noqa: E741
 
     @property
     def limits(self):
         """Range of the data."""
-        if self.data is None:
+        if self._data is None:
             return None
 
-        if self.data.dtype in TYPE_COMPLEX:
-            return [self.data.real.min(), self.data.imag.max()]
-        if self.data.dtype == np.quaternion:
-            data = as_float_array(self.data)[..., 0]
-            return [data.min(), data.max()]
-        return [self.data.min(), self.data.max()]
+        if self.is_complex:
+            return [np.min(self._data.real), np.max(self._data.imag)]
+
+        return [np.min(self._data), np.max(self._data)]
 
     # ----------------------------------------------------------------------------------
     # Public methods
     # ----------------------------------------------------------------------------------
-    def component(self, select="REAL"):
-        """
-        Take selected components of an hypercomplex array (RRR, RIR, ...).
-
-        Parameters
-        ----------
-        select : str, optional, default='REAL'
-            If 'REAL', only real component in all dimensions will be selected.
-            ELse a string must specify which real (R) or imaginary (I) component
-            has to be selected along a specific dimension. For instance,
-            a string such as 'RRI' for a 2D hypercomplex array indicated
-            that we take the real component in each dimension except the last
-            one, for which imaginary component is preferred.
-
-        Returns
-        -------
-        component
-            Component of the complex or hypercomplex array.
-
-        """
-        if not select:
-            # no selection - returns inchanged
-            return self
-
-        new = self.copy()
-
-        ma = self.masked_data
-
-        ma = get_component(ma, select)
-
-        if isinstance(ma, np.ma.masked_array):
-            new._data = ma.data
-            new._mask = ma.mask
-        else:
-            new._data = ma
-
-        if hasattr(ma, "mask"):
-            new._mask = ma.mask
-        else:
-            new._mask = NOMASK
-
-        return new
 
     def set_complex(self, inplace=False):
         """
@@ -398,150 +238,56 @@ class NDComplexArray(NDArray):
 
         Returns
         -------
-        out
+        NDComplexArray
             Same object or a copy depending on the `inplace` flag.
+
+        Raises
+        ------
+        ValueError
+            If data shape is incompatible with complex conversion
 
         See Also
         --------
-        set_quaternion, has_complex_dims, is_complex, is_quaternion
+        is_complex, is_complex
 
         """
         new = self.copy() if not inplace else self  # default is to return a new array
 
-        if new.has_complex_dims:
+        if new.is_complex:
             # not necessary in this case, it is already complex
             return new
 
+        # Validate data shape
+        if new._data is None or new._data.size == 0:
+            raise ValueError("Cannot convert empty array to complex")
+
+        if new._data.shape[-1] % 2 != 0:
+            raise ValueError(
+                f"Last dimension must be even for complex conversion, got {new._data.shape[-1]}"
+            )
+
         new._data = new._make_complex(new._data)
-
-        return new
-
-    def set_quaternion(self, inplace=False):
-        """
-        Set the object data as quaternion.
-
-        Parameters
-        ----------
-        inplace : bool, optional, default=False
-            Flag to say that the method return a new object (default)
-            or not (inplace=True).
-
-        Returns
-        -------
-        out
-            Same object or a copy depending on the `inplace` flag.
-
-        """
-        new = self.copy() if not inplace else self  # default is to return a new array
-
-        if new.dtype != typequaternion:  # not already a quaternion
-            new._data = new._make_quaternion(new.data)
-
-        return new
-
-    set_hypercomplex = set_quaternion
-    set_hypercomplex.__doc__ = "Alias of set_quaternion."
-
-    def transpose(self, *dims, inplace=False):
-        """
-        Transpose the complex array.
-
-        Parameters
-        ----------
-        dims : int, str or tuple of int or str, optional, default=(0,)
-            Dimension names or indexes along which the method should be applied.
-        inplace : bool, optional, default=False
-            Flag to say that the method return a new object (default)
-            or not (inplace=True)
-
-        Returns
-        -------
-        transposed
-            Same object or a copy depending on the `inplace` flag.
-
-        """
-        new = super().transpose(*dims, inplace=inplace)
-
-        if new.is_quaternion:
-            # here if it is hypercomplex quaternion
-            # we should interchange the imaginary component
-            w, x, y, z = as_float_array(new._data).T
-            q = as_quat_array(
-                list(
-                    zip(
-                        w.T.flatten(),
-                        y.T.flatten(),
-                        x.T.flatten(),
-                        z.T.flatten(),
-                        strict=False,
-                    ),
-                ),
-            )
-            new._data = q.reshape(new.shape)
-
-        return new
-
-    def swapdims(self, dim1, dim2, inplace=False):
-        """
-        Swap dimension the complex array.
-
-        swapdims and swapaxes are alias.
-
-        Parameters
-        ----------
-        dims : int, str or tuple of int or str, optional, default=(0,)
-            Dimension names or indexes along which the method should be applied.
-        inplace : bool, optional, default=False
-            Flag to say that the method return a new object (default)
-            or not (inplace=True)
-
-        Returns
-        -------
-        transposed
-            Same object or a copy depending on the `inplace` flag.
-
-        """
-        new = super().swapdims(dim1, dim2, inplace=inplace)
-
-        # we need also to swap the quaternion
-        # WARNING: this work only for 2D - when swapdims is equivalent to a 2D transpose
-        # TODO: implement something for any n-D array (n>2)
-        if self.is_quaternion:
-            # here if it is is_quaternion
-            # we should interchange the imaginary component
-            w, x, y, z = as_float_array(new._data).T
-            q = as_quat_array(
-                list(
-                    zip(
-                        w.T.flatten(),
-                        y.T.flatten(),
-                        x.T.flatten(),
-                        z.T.flatten(),
-                        strict=False,
-                    ),
-                ),
-            )
-            new._data = q.reshape(new.shape)
 
         return new
 
     # ----------------------------------------------------------------------------------
     # private methods
     # ----------------------------------------------------------------------------------
+    def _str_cplx(self):
+        cplx = [False] * self.ndim
+        if self.is_complex:
+            cplx[-1] = True
+        return cplx
+
     def _str_shape(self):
         if self.is_empty:
             return "         size: 0\n"
 
         out = ""
-        cplx = [False] * self.ndim
-        if self.is_quaternion:
-            cplx = [True, True]
-        elif self.is_complex:
-            cplx[-1] = True
+        cplx = self._str_cplx()
 
-        shcplx = (
-            x
-            for x in itertools.chain.from_iterable(
+        shcplx = list(
+            itertools.chain.from_iterable(
                 list(zip(self.dims, self.shape, cplx, strict=False)),
             )
         )
@@ -554,7 +300,7 @@ class NDComplexArray(NDArray):
         )
 
         size = self.size
-        sizecplx = "" if not self.has_complex_dims else " (complex)"
+        sizecplx = "" if not any(cplx) else " (complex)"
 
         out += (
             f"         size: {size}{sizecplx}\n"
@@ -564,14 +310,19 @@ class NDComplexArray(NDArray):
 
         return out
 
-    def _str_value(self, sep="\n", ufmt=" {:~P}", header="       values: ... \n"):
-        prefix = [""]
+    def _str_prefix(self):
+        return "" if not self.is_complex else ["R", "I"]
+
+    def _str_value(
+        self,
+        sep="\n",
+        ufmt=" {:~P}",
+        header="       values: ... \n",
+    ):
         if self.is_empty:
             return header + "{}".format(textwrap.indent("empty", " " * 9))
 
-        if self.has_complex_dims:
-            # we will display the different component separately
-            prefix = ["RR", "RI", "IR", "II"] if self.is_quaternion else ["R", "I"]
+        prefix = self._str_prefix()
 
         units = ufmt.format(self.units) if self.has_units else ""
 
@@ -598,7 +349,7 @@ class NDComplexArray(NDArray):
         else:
             for pref in prefix:
                 if self._data is not None:
-                    data = self.component(pref).umasked_data
+                    data = getattr(self, pref).umasked_data
                     if isinstance(data, Quantity):
                         data = data.magnitude
                     text += mkbody(data, pref, units)
@@ -611,7 +362,7 @@ class NDComplexArray(NDArray):
 
     def _make_complex(self, data):
         if data.dtype in TYPE_COMPLEX:
-            return data.astype(np.complex128)
+            return data.astype(np.complex128, copy=False)
 
         if data.shape[-1] % 2 != 0:
             raise ValueError(
@@ -619,53 +370,19 @@ class NDComplexArray(NDArray):
                 "number of columns!.",
             )
 
-        data = data.astype(np.float64)
-
-        # to work the data must be in C order
+        # Optimize memory usage by avoiding unnecessary copies
         fortran = np.isfortran(data)
+        if not data.flags.c_contiguous and not fortran:
+            data = np.ascontiguousarray(data, dtype=np.float64)
+        else:
+            data = data.astype(np.float64, copy=False)
+
+        # View as complex
+        data_complex = data.view(np.complex128)
+
+        # Restore original memory layout if needed
         if fortran:
-            data = np.ascontiguousarray(data)
+            data_complex = np.asfortranarray(data_complex)
 
-        data.dtype = np.complex128
-
-        # restore the previous order
-        data = np.asfortranarray(data) if fortran else np.ascontiguousarray(data)
-
-        self._dtype = None  # reset dtype
-        return data
-
-    def _make_quaternion(self, data):
-        if data.ndim % 2 != 0:
-            raise ValueError(
-                "An array of data to be transformed to quaternion must be 2D.",
-            )
-
-        if data.dtype not in TYPE_COMPLEX:
-            if data.shape[1] % 2 != 0:
-                raise ValueError(
-                    "An array of real data to be transformed to quaternion must have "
-                    "even number of columns!.",
-                )
-            # convert to double precision complex
-            data = self._make_complex(data)
-
-        if data.shape[0] % 2 != 0:
-            raise ValueError(
-                "An array data to be transformed to quaternion must have even number "
-                "of rows!.",
-            )
-
-        r = data[::2]
-        i = data[1::2]
-        #  _data = as_quat_array(list(zip(r.real.flatten(), r.imag.flatten(),
-        #  i.real.flatten(), i.imag.flatten())))
-        #  _data = _data.reshape(r.shape)
-
-        self._dtype = None  # reset dtyep
-        return as_quaternion(r, i)
-
-    # ----------------------------------------------------------------------------------
-    # special methods
-    # ----------------------------------------------------------------------------------
-    def __setitem__(self, items, value):
-        super().__setitem__(items, value)
+        self._dtype = None
+        return data_complex

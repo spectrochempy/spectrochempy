@@ -13,10 +13,7 @@ from datetime import timedelta
 
 import numpy as np
 
-from spectrochempy.application import debug_
-
-# from spectrochempy.application import warning_
-from spectrochempy.core.dataset.baseobjects.meta import Meta
+from spectrochempy.application.application import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
@@ -26,6 +23,9 @@ from spectrochempy.extern.brukeropus.file.utils import get_block_type_label
 from spectrochempy.extern.brukeropus.file.utils import get_param_label
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docreps import _docstring
+
+# from spectrochempy.application.application import warning_
+from spectrochempy.utils.meta import Meta
 
 # ======================================================================================
 # Public functions
@@ -87,9 +87,8 @@ def read_opus(*paths, **kwargs):
 
     Reading a single OPUS file  (providing a unix/python type filename relative to the
     default `datadir` )
-    Note that here read_opus is called as a classmethod of the NDDataset class
 
-    >>> scp.NDDataset.read_opus('irdata/OPUS/test.0000')
+    >>> scp.read_opus('irdata/OPUS/test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
     Single file specified with pathlib.Path object

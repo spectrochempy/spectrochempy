@@ -5,9 +5,6 @@
 # ======================================================================================
 """Module to perform fitting of 1D or n-D spectral data."""
 
-__all__ = []
-
-
 import re
 import sys
 from collections import UserDict

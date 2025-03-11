@@ -8,10 +8,11 @@
 import getpass
 import platform
 import shlex
-import sys
 from subprocess import PIPE
 from subprocess import STDOUT
 from subprocess import run
+
+from IPython import get_ipython as gi
 
 
 def get_user():
@@ -26,17 +27,45 @@ def get_user_and_node():
     return f"{get_user()}@{get_node()}"
 
 
-def is_kernel():
-    """Check if we are running from IPython."""
-    # from http://stackoverflow.com
-    # /questions/34091701/determine-if-were-in-an-ipython-notebook-session
-    if "IPython" not in sys.modules:
-        # IPython hasn't been imported
-        return False  # pragma: no cover
-    from IPython import get_ipython  # pragma: no cover
+def _get_shell_type():
+    # """Return the type of shell we are running in."""
+    try:
+        shell = gi().__class__.__name__
+        if shell == "ZMQInteractiveShell":  # Jupyter notebook or qtconsole
+            return "NOTEBOOK"
+        if shell == "TerminalInteractiveShell":  # Terminal running IPython
+            return "IPYTHON"
+        return "TERMINAL"
+    except NameError:  # Probably standard Python interpreter
+        return "INTERPRETER"
 
-    # check for `kernel` attribute on the IPython instance
-    return getattr(get_ipython(), "kernel", None) is not None  # pragma: no cover
+
+def get_ipython():
+    return gi()
+
+
+def get_kernel():
+    return getattr(get_ipython(), "kernel", None)
+
+
+def is_notebook():
+    """Check if we are running in a Jupyter notebook."""
+    return _get_shell_type() == "NOTEBOOK"
+
+
+def is_ipython():
+    """Check if we are running in an IPython shell."""
+    return _get_shell_type() == "IPYTHON"
+
+
+def is_terminal():
+    """Check if we are running in a terminal."""
+    return _get_shell_type() == "TERMINAL"
+
+
+def is_interpreter():
+    """Check if we are running in a Python interpreter."""
+    return _get_shell_type() == "INTERPRETER"
 
 
 class _ExecCommand:

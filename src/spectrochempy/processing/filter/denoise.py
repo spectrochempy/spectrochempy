@@ -1,13 +1,13 @@
 import numpy as np
 from scipy.signal import savgol_filter
 
-from spectrochempy.application import error_
-from spectrochempy.application import info_
-from spectrochempy.application import warning_
-from spectrochempy.core import get_loglevel
+from spectrochempy.application.application import error_
+from spectrochempy.application.application import get_loglevel
+from spectrochempy.application.application import info_
+from spectrochempy.application.application import warning_
 
-__dataset_methods__ = ["denoise", "despike"]
-__all__ = __dataset_methods__
+__all__ = ["denoise", "despike"]
+__dataset_methods__ = __all__
 
 
 def denoise(dataset, ratio=99.8, **kwargs):

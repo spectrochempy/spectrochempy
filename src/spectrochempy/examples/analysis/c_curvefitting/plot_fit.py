@@ -23,7 +23,7 @@ import spectrochempy as scp
 # %%
 #  Let's take an IR spectrum
 
-nd = scp.NDDataset.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
+nd = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 
 # %%
 # and select only the OH region:

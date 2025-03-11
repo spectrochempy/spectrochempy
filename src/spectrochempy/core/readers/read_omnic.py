@@ -19,7 +19,7 @@ from datetime import timedelta
 
 import numpy as np
 
-from spectrochempy.application import info_
+from spectrochempy.application.application import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer

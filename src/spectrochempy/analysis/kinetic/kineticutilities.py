@@ -21,8 +21,8 @@ from scipy.optimize import differential_evolution
 from scipy.optimize import least_squares
 from scipy.optimize import minimize
 
-from spectrochempy.application import error_
-from spectrochempy.application import info_
+from spectrochempy.application.application import error_
+from spectrochempy.application.application import info_
 from spectrochempy.core.dataset.nddataset import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import Quantity
@@ -683,7 +683,7 @@ class ActionMassKinetics(tr.HasTraits):
                 # t2 = time.time()
 
             # uncomment for debugging (warning: debug_() multiply the exec time by 4...)
-            # from from spectrochempy.application import debug_
+            # from from spectrochempy.application.application import debug_
             # debug_(bunch.message)
             # t4 = time.time()
 

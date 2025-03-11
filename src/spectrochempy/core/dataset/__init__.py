@@ -3,4 +3,10 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Package related to n-dimensional dataset's creation and handling."""
+
+import lazy_loader as _lazy_loader
+
+# --------------------------------------------------------------------------------------
+# Lazy loading of sub-packages
+# --------------------------------------------------------------------------------------
+__getattr__, __dir__, __all__ = _lazy_loader.attach_stub(__name__, __file__)

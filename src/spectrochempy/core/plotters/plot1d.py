@@ -20,16 +20,17 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import ScalarFormatter
 
+from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.docreps import add_docstring  # , deprecated
 from spectrochempy.utils.misc import is_sequence
-from spectrochempy.utils.plots import make_label
-from spectrochempy.utils.plots import plot_method
+from spectrochempy.utils.mplutils import make_label
+from spectrochempy.utils.mplutils import plot_method
 
 _PLOT1D_DOC = """\
 ax : Axe, optional
     Axe where to plot. If not specified, create a new one.
-style : str, optional, default: `dataset.preferences.style` (scpy)
+style : str, optional, default: `scp.preferences.style` (scpy)
     Matplotlib stylesheet (use `available_style` to get a list of available
     styles for plotting.
 use_plotly : bool, optional, default: `preferences.use_plotly` (False)
@@ -312,7 +313,7 @@ def plot_1D(dataset, method=None, **kwargs):
     """
     # Get preferences
     # ----------------------------------------------------------------------------------
-    prefs = dataset.preferences
+    prefs = preferences
 
     # before going further, check if the style is passed in the parameters
     style = kwargs.pop("style", None)
@@ -480,7 +481,7 @@ def plot_1D(dataset, method=None, **kwargs):
 
     if show_complex and pen:
         # add the imaginary component for pen only plot
-        zimagdata = new.RI.masked_data if new.is_quaternion else new.imag.masked_data
+        zimagdata = new.imag.masked_data
         ax.plot(xdata, zimagdata.T, ls="--")
 
     if kwargs.get("plot_model", False):

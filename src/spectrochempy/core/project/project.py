@@ -13,10 +13,10 @@ from functools import wraps
 import dill  # noqa: F401
 import traitlets as tr
 
-from spectrochempy.core.dataset.baseobjects.meta import Meta
 from spectrochempy.core.dataset.nddataset import NDIO
 from spectrochempy.core.project.abstractproject import AbstractProject
 from spectrochempy.core.script import Script
+from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.traits import NDDatasetType
 
 # from collections import OrderedDict
@@ -225,7 +225,7 @@ class Project(AbstractProject, NDIO):
 
         return _listproj(s, self, 0)
 
-    def __dir__(self):
+    def _attributes_(self):
         return [
             "name",
             "meta",
@@ -237,7 +237,7 @@ class Project(AbstractProject, NDIO):
 
     def __copy__(self):
         new = Project()
-        for item in self.__dir__():
+        for item in self._attributes_():
             item = "_" + item
             data = getattr(self, item)
             setattr(new, item, cpy.copy(data))

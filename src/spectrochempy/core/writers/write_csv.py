@@ -8,7 +8,7 @@
 # import os as os
 import csv
 
-from spectrochempy.core import preferences as prefs
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.writers.exporter import Exporter
 from spectrochempy.core.writers.exporter import exportermethod
 

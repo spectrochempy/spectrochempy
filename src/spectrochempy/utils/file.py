@@ -16,12 +16,62 @@ from pathlib import WindowsPath
 
 import numpy as np
 
+# ======================================================================================
+# API utilities
+# ======================================================================================
+# When a function is in __all__, it is imported in the API
+__all__ = ["pathclean", "download_testdata"]
 
-# ======================================================================================
-# Utility functions
-# ======================================================================================
+
+# region api
+def pathclean(paths):
+    """
+    Clean a path or a series of path.
+
+    The aim is to be compatible with windows and unix-based system.
+
+    Parameters
+    ----------
+    paths :  `str` or a `list` of `str`
+        Path to clean. It may contain Windows or conventional python separators.
+
+    Returns
+    -------
+    pathlib or list of pathlib
+        Cleaned path(s).
+    """
+    import platform
+
+    def is_windows():
+        return "Windows" in platform.platform()
+
+    def _clean(path):
+        if isinstance(path, (Path, PosixPath, WindowsPath)):  # noqa: UP038  (syntax error in pyfakefs with modern union operators)
+            path = path.name
+        if is_windows():
+            path = WindowsPath(path)  # pragma: no cover
+        else:  # some replacement so we can handle window style path on unix
+            path = path.strip()
+            path = path.replace("\\", "/")
+            path = path.replace("\n", "/n")
+            path = path.replace("\t", "/t")
+            path = path.replace("\b", "/b")
+            path = path.replace("\a", "/a")
+            path = PosixPath(path)
+        return Path(path)
+
+    if paths is not None:
+        if isinstance(paths, (str, Path, PosixPath, WindowsPath)):  # noqa: UP038
+            path = str(paths)
+            return _clean(path).expanduser()
+        if isinstance(paths, (list, tuple)):  # noqa: UP038
+            return [_clean(p).expanduser() if isinstance(p, str) else p for p in paths]
+
+    return paths
+
+
 def download_testdata():
-    from spectrochempy.core import preferences
+    from spectrochempy.application.preferences import preferences
     from spectrochempy.core.readers.importer import read
     from spectrochempy.utils.file import pathclean
 
@@ -33,6 +83,15 @@ def download_testdata():
         downloaded.touch(exist_ok=True)
 
 
+# endregion api
+
+
+# ======================================================================================
+# Utility functions
+# ======================================================================================
+
+
+# region utility
 def is_editable_install(package_name):
     """
     Check if a package is installed in editable mode.
@@ -113,52 +172,6 @@ def patterns(filetypes, allcase=True):
     return [_insensitive_case_glob(p) for p in patterns]
 
 
-def pathclean(paths):
-    """
-    Clean a path or a series of path.
-
-    The aim is to be compatible with windows and unix-based system.
-
-    Parameters
-    ----------
-    paths :  `str` or a `list` of `str`
-        Path to clean. It may contain Windows or conventional python separators.
-
-    Returns
-    -------
-    pathlib or list of pathlib
-        Cleaned path(s).
-    """
-    import platform
-
-    def is_windows():
-        return "Windows" in platform.platform()
-
-    def _clean(path):
-        if isinstance(path, (Path, PosixPath, WindowsPath)):  # noqa: UP038  (syntax error in pyfakefs with modern union operators)
-            path = path.name
-        if is_windows():
-            path = WindowsPath(path)  # pragma: no cover
-        else:  # some replacement so we can handle window style path on unix
-            path = path.strip()
-            path = path.replace("\\", "/")
-            path = path.replace("\n", "/n")
-            path = path.replace("\t", "/t")
-            path = path.replace("\b", "/b")
-            path = path.replace("\a", "/a")
-            path = PosixPath(path)
-        return Path(path)
-
-    if paths is not None:
-        if isinstance(paths, (str, Path, PosixPath, WindowsPath)):  # noqa: UP038
-            path = str(paths)
-            return _clean(path).expanduser()
-        if isinstance(paths, (list, tuple)):  # noqa: UP038
-            return [_clean(p).expanduser() if isinstance(p, str) else p for p in paths]
-
-    return paths
-
-
 def _get_file_for_protocol(f, **kwargs):
     protocol = kwargs.get("protocol")
     if protocol is not None:
@@ -206,8 +219,8 @@ def check_filenames(*args, **kwargs):
     check_filename_to_open
     check_filename_to_save
     """
-    # from spectrochempy.application import info_
-    from spectrochempy.core import preferences as prefs
+    # from spectrochempy.application.application import info_
+    from spectrochempy.application.preferences import preferences as prefs
 
     datadir = pathclean(prefs.datadir)
 
@@ -399,12 +412,7 @@ def get_filenames(*filenames, **kwargs):
     if several filenames are provided in the arguments,
     they must all reside in the same directory!
     """
-    from spectrochempy import NO_DIALOG
-    from spectrochempy.core import preferences as prefs
-
-    NODIAL = (
-        (NO_DIALOG or "DOC_BUILDING" in environ) and "KEEP_DIALOGS" not in environ
-    )  # flag to suppress dialog when doc is built or during full testing
+    from spectrochempy.application.preferences import preferences as prefs
 
     # allowed filetypes
     # -----------------
@@ -429,7 +437,6 @@ def get_filenames(*filenames, **kwargs):
             # this specify a directory not a filename
             directory = f
             filenames = None
-            NODIAL = True
     # else:
     #    filenames = pathclean(list(filenames))
 
@@ -456,7 +463,7 @@ def get_filenames(*filenames, **kwargs):
         if len(parents) > 1:
             raise ValueError(
                 "filenames provided have not the same parent directory. "
-                "This is not accepted by the readfilename function.",
+                "This is not accepted by the read function.",
             )
 
         # use get_directory_name to complete eventual missing part of the absolute path
@@ -494,40 +501,15 @@ def get_filenames(*filenames, **kwargs):
 
         if not getdir:
             # we open a dialogue to select one or several files manually
-            if not NODIAL:
-                from spectrochempy.core.common.dialogs import open_dialog
-
-                filenames = open_dialog(
-                    single=False,
-                    directory=directory,
-                    filters=filetypes,
-                    **kwargs,
-                )
-                if not filenames:
-                    # cancel
-                    return None
-
-            elif environ.get("TEST_FILE", None) is not None:
+            if environ.get("TEST_FILE", None) is not None:
                 # happen for testing
                 filenames = [pathclean(environ.get("TEST_FILE"))]
 
         else:
-            if not NODIAL:
-                from spectrochempy.core.common.dialogs import open_dialog
-
-                directory = open_dialog(
-                    directory=directory,
-                    filters="directory",
-                    **kwargs,
-                )
-                if not directory:
-                    # cancel
-                    return None
-
-            elif NODIAL and not directory:
+            if not directory:
                 directory = get_directory_name(environ.get("TEST_FOLDER"))
 
-            elif NODIAL and kwargs.get("protocol") == ["topspin"]:
+            elif kwargs.get("protocol") == ["topspin"]:
                 directory = get_directory_name(environ.get("TEST_NMR_FOLDER"))
 
             if directory is None:
@@ -633,8 +615,8 @@ def get_directory_name(directory, **kwargs):
         valid directory name.
 
     """
-    from spectrochempy import NO_DIALOG
-    from spectrochempy.core import preferences as prefs
+    from spectrochempy.application.application import warning_
+    from spectrochempy.application.preferences import preferences as prefs
 
     data_dir = pathclean(prefs.datadir)
     working_dir = Path.cwd()
@@ -655,69 +637,34 @@ def get_directory_name(directory, **kwargs):
             return data_dir / directory
 
         raise OSError(f'"{directory!s}" is not a valid directory')
-        # warnings.warn(f'"{directory}" is not a valid directory')
-        # return None
 
-    # open a file dialog
-    directory = data_dir
-    if not NO_DIALOG:  # this is for allowing test to continue in the background
-        from spectrochempy.core.common.dialogs import open_dialog
-
-        directory = open_dialog(
-            single=False,
-            directory=working_dir,
-            filters="directory",
-            **kwargs,
-        )
-
-    return pathclean(directory)
+    warning_("No directory provided!")
+    return None
 
 
-def check_filename_to_save(
-    dataset,
-    filename=None,
-    save_as=False,
-    confirm=True,
-    **kwargs,
-):
-    from spectrochempy import NO_DIALOG
-    from spectrochempy.application import info_
-
-    NODIAL = (NO_DIALOG or "DOC_BUILDING" in environ) and "KEEP_DIALOGS" not in environ
+def check_filename_to_save(dataset, filename=None, overwrite=False, **kwargs):
+    from spectrochempy.application.application import info_
 
     filename = pathclean(filename)
 
     if filename and pathclean(filename).parent.resolve() == Path.cwd():
         filename = Path.cwd() / filename
 
-    if not filename or save_as or filename.exists():
-        from spectrochempy.core.common.dialogs import save_dialog
-
+    if not filename or overwrite or filename.exists():
         # no filename provided
-        open_diag = True
-        caption = "Save as ..."
-        if filename is None or (NODIAL and pathclean(filename).is_dir()):
+        if filename is None or pathclean(filename).is_dir():
             filename = dataset.name
-            filename = filename + kwargs.get("suffix", ".scp")
+            filename = pathclean(filename).with_suffix(kwargs.get("suffix", ".scp"))
 
         # existing filename provided
-        elif filename.exists():
-            if confirm:
-                caption = "File exists. Confirm overwrite"
+        if filename.exists():
+            if overwrite:
+                info_(f"A file {filename} is already present and will be overwritten.")
             else:
-                info_(f"A file {filename} was present and has been overwritten.")
-                open_diag = False
-
-        if not NODIAL and open_diag:
-            filename = save_dialog(
-                caption=kwargs.pop("caption", caption),
-                filename=filename,
-                filters=kwargs.pop("filetypes", ["All file types (*.*)"]),
-                **kwargs,
-            )
-            if filename is None:
-                # this is probably due to a cancel action for an open dialog.
-                return None
+                raise FileExistsError(
+                    f"A file {filename} is already present. "
+                    "Please use the `overwrite=True` flag to overwrite it."
+                )
 
     return pathclean(filename)
 
@@ -759,3 +706,6 @@ def check_filename_to_open(*args, **kwargs):
 
     # probably no args (which means that we are coming from a dialog or from a full list of a directory
     return filenames
+
+
+# endregion utility

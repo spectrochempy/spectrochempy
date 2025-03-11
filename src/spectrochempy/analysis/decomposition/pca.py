@@ -13,15 +13,16 @@ from matplotlib.ticker import ScalarFormatter
 from numpy.random import RandomState
 from sklearn import decomposition
 
+from spectrochempy import preferences as prefs
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
-from spectrochempy.application import info_
+from spectrochempy.application.application import info_
+from spectrochempy.utils.colors import NBlue
+from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docreps import _docstring
-from spectrochempy.utils.plots import NBlue
-from spectrochempy.utils.plots import NRed
 
 __all__ = ["PCA"]
 __configurables__ = ["PCA"]
@@ -501,7 +502,6 @@ for reproducible results across multiple function calls.""",
             The matplotlib axes.
 
         """
-        self.prefs = self.X.preferences
 
         # checks args
         if len(args) > 0:
@@ -570,8 +570,8 @@ for reproducible results across multiple function calls.""",
                         color=axsc.to_rgba(colors[idx]),
                     )
 
-            number_x_labels = self.prefs.number_of_x_labels  # get from config
-            number_y_labels = self.prefs.number_of_y_labels
+            number_x_labels = prefs.number_of_x_labels  # get from config
+            number_y_labels = prefs.number_of_y_labels
             # the next two line are to avoid multipliers in axis scale
             y_formatter = ScalarFormatter(useOffset=False)
             ax.yaxis.set_major_formatter(y_formatter)

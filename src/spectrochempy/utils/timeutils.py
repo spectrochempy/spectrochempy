@@ -1,6 +1,8 @@
 import sys
 from time import perf_counter
 
+__all__ = ["timeit"]
+
 
 # ======================================================================================
 # context manager to time a block of code

@@ -752,7 +752,7 @@ class CoordSet(HasTraits):
     # special methods
     # ----------------------------------------------------------------------------------
     # @staticmethod
-    def __dir__(self):
+    def _attributes_(self):
         return ["coords", "references", "is_same_dim", "name"]
 
     def __call__(self, *args, **kwargs):

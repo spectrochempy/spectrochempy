@@ -3,12 +3,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-
-# ======================================================================================
-# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory.
-# ======================================================================================
 """
 Implements the base abstract classes to define models and estimators.
 
@@ -104,8 +98,8 @@ class BaseConfigurable(MetaConfigurable):
         """
         # An empty __doc__ is placed here, else Configurable.__doc__
         # will appear when there is no __init___.doc in subclass
-        from spectrochempy.application import app
-        from spectrochempy.core import set_loglevel
+        from spectrochempy.application.application import app
+        from spectrochempy.application.application import set_loglevel
 
         # Reset default configuration if not warm_start
         reset = not self._warm_start
@@ -293,9 +287,8 @@ class BaseConfigurable(MetaConfigurable):
         # So let's generate the un-squeezed X
         X = X.atleast_2d()  # self._make_unsqueezed_dataset(X)
 
-        # if X is complex or quaternion, we will work on the real part only
-        if X.is_complex or X.is_quaternion:
-            X = X.real
+        # be sure that X is real
+        X = X.real
 
         # as in fit methods we often use np.linalg library, we cannot handle directly
         # masked data (so we remove them here and they will be restored at the end of
@@ -345,6 +338,6 @@ class BaseConfigurable(MetaConfigurable):
         """Return ``log`` output."""
         # A string handler (#1) is defined for the Spectrochempy logger,
         # thus we will return it's content
-        from spectrochempy.application import app
+        from spectrochempy.application.application import app
 
         return app.log.handlers[1].stream.getvalue().rstrip()

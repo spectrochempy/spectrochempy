@@ -17,7 +17,7 @@ from datetime import datetime
 
 import numpy as np
 
-from spectrochempy.core import preferences as prefs
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method

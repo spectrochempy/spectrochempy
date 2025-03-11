@@ -11,7 +11,6 @@ __all__ = [
     "plot_stack",
     "plot_image",
 ]
-
 __dataset_methods__ = __all__
 
 from contextlib import suppress
@@ -23,10 +22,11 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import ScalarFormatter
 
+from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils.docreps import add_docstring
-from spectrochempy.utils.plots import make_label
-from spectrochempy.utils.plots import plot_method
+from spectrochempy.utils.mplutils import make_label
+from spectrochempy.utils.mplutils import plot_method
 
 _PLOT2D_DOC = """
 ax : |Axes| instance. Optional
@@ -133,7 +133,7 @@ def plot_2D(dataset, method=None, **kwargs):
     """
     # Get preferences
     # ----------------------------------------------------------------------------------
-    prefs = dataset.preferences
+    prefs = preferences
 
     # before going further, check if the style is passed in the parameters
     style = kwargs.pop("style", None)
@@ -317,9 +317,7 @@ def plot_2D(dataset, method=None, **kwargs):
     if not kwargs.get("imag", False):
         zdata = new.real.masked_data
     else:
-        zdata = (
-            new.RI.masked_data
-        )  # new.imag.masked_data #TODO: quaternion case (3 imag.components)
+        zdata = new.imag.masked_data  # TODO: quaternion case (3 imag.components)
 
     zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
