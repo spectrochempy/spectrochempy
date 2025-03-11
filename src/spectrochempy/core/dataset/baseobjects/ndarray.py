@@ -38,14 +38,14 @@ from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.constants import MaskedConstant
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.meta import Meta
-from spectrochempy.utils.misc import is_number
-from spectrochempy.utils.misc import is_sequence
-from spectrochempy.utils.misc import make_new_object
+from spectrochempy.utils.objects import make_new_object
 from spectrochempy.utils.print import convert_to_html
 from spectrochempy.utils.print import insert_masked_print
 from spectrochempy.utils.print import numpyprintoptions
+from spectrochempy.utils.typeutils import is_number
+from spectrochempy.utils.typeutils import is_sequence
 
 # ======================================================================================
 # Constants
@@ -456,6 +456,12 @@ class NDArray(HasTraits):
             value.ito(self.units)
             value = np.asarray(value.magnitude)  # , copy=self.copy)
 
+        if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
+            # sometimes do not work directly : here is a work around
+            self._data[keys] = np.full_like(self._data[keys], value).astype(
+                np.dtype(np.quaternion),
+            )
+            return None
         self._data[keys] = value
         return None
 

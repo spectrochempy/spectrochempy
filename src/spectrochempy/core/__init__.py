@@ -3,6 +3,10 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# lazy_stub: skip
 
-# For the exporter to work properly, we need to import the following modules instead of lazy imports
+import lazy_loader as _lazy_loader
+
+# --------------------------------------------------------------------------------------
+# Lazy loading of sub-packages
+# --------------------------------------------------------------------------------------
+__getattr__, __dir__, __all__ = _lazy_loader.attach_stub(__name__, __file__)

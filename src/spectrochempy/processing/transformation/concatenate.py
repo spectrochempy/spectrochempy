@@ -17,7 +17,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.orderedset import OrderedSet
+from spectrochempy.utils.objects import OrderedSet
 
 
 def concatenate(*datasets, **kwargs):

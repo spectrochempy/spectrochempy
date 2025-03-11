@@ -479,4 +479,4 @@ prefs.help("lines_linewidth")
 # To view **all parameters**:
 
 # %%
-prefs.all()
+prefs.list_all()

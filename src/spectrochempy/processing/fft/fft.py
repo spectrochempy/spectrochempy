@@ -7,8 +7,10 @@ __all__ = ["fft", "ifft", "mc", "ps", "ht"]
 
 __dataset_methods__ = __all__
 
+import re
 
 import numpy as np
+from quaternion import as_float_array
 from scipy.signal import hilbert
 
 from spectrochempy.application.application import error_
@@ -16,25 +18,138 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
+from spectrochempy.utils.numutils import largest_power_of_2
+from spectrochempy.utils.quaternion import as_quaternion
+from spectrochempy.utils.quaternion import get_component
+from spectrochempy.utils.quaternion import typequaternion
 
 
 # ======================================================================================
 # Private methods
 # ======================================================================================
 def _fft(data):
-    return np.fft.fftshift(np.fft.fft(data), -1)
+    if data.dtype == typequaternion:
+        dr = get_component(data, "R")
+        fr = np.fft.fftshift(np.fft.fft(dr), -1)
+        di = get_component(data, "I")
+        fi = np.fft.fftshift(np.fft.fft(di), -1)
+
+        # rebuild the quaternion
+        data = as_quaternion(fr, fi)
+
+    else:
+        data = np.fft.fftshift(np.fft.fft(data), -1)
+
+    return data
 
 
 def _ifft(data):
-    return np.fft.ifft(np.fft.ifftshift(data, -1))
+    if data.dtype == typequaternion:
+        fr = get_component(data, "R")
+        dr = np.fft.ifft(np.fft.ifftshift(fr, -1))
+        fi = get_component(data, "I")
+        di = np.fft.ifft(np.fft.ifftshift(fi, -1))
+
+        # rebuild the quaternion
+        data = as_quaternion(dr, di)
+
+    else:
+        data = np.fft.ifft(np.fft.ifftshift(data, -1))
+
+    return data
 
 
 def _fft_positive(data):
-    return np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
+    if data.dtype == typequaternion:
+        dr = get_component(data, "R")
+        fr = np.fft.fftshift(np.fft.ifft(dr).astype(data.dtype)) * data.shape[-1]
+        di = get_component(data, "I")
+        fi = np.fft.fftshift(np.fft.ifft(di).astype(data.dtype)) * data.shape[-1]
+
+        # rebuild the quaternion
+        data = as_quaternion(fr, fi)
+
+    else:
+        data = np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
+
+    return data
 
 
 def _ifft_positive(data):
-    return np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
+    if data.dtype == typequaternion:
+        fr = get_component(data, "R")
+        dr = np.fft.fft(np.fft.ifftshift(fr, -1)) * data.shape[-1]
+        fi = get_component(data, "I")
+        di = np.fft.fft(np.fft.ifftshift(fi, -1)) * data.shape[-1]
+
+        # rebuild the quaternion
+        data = as_quaternion(dr, di)
+
+    else:
+        data = np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
+
+    return data
+
+
+def _states_fft(data, tppi=False):
+    # FFT transform according to STATES encoding
+
+    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
+    wt, yt, xt, zt = as_float_array(
+        data,
+    ).T  # x and y are exchanged due to swapping of dims
+    w, y, x, z = wt.T, yt.T, xt.T, zt.T
+
+    sr = (w - 1j * y) / 2.0
+    si = (x - 1j * z) / 2.0
+
+    if tppi:
+        sr[..., 1::2] = -sr[..., 1::2]
+        si[..., 1::2] = -si[..., 1::2]
+
+    fr = np.fft.fftshift(np.fft.fft(sr), -1)
+    fi = np.fft.fftshift(np.fft.fft(si), -1)
+
+    # rebuild the quaternion
+    return as_quaternion(fr, fi)
+
+
+def _echoanti_fft(data):
+    # FFT transform according to ECHO-ANTIECHO encoding
+
+    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
+    wt, yt, xt, zt = as_float_array(
+        data,
+    ).T  # x and y are exchanged due to swapping of dims
+    w, y, x, z = wt.T, xt.T, yt.T, zt.T
+
+    c = (w + y) + 1j * (w - y)
+    s = (x + z) - 1j * (x - z)
+    fc = np.fft.fftshift(np.fft.fft(c / 2.0), -1)
+    fs = np.fft.fftshift(np.fft.fft(s / 2.0), -1)
+    return as_quaternion(fc, fs)
+
+
+def _tppi_fft(data):
+    # FFT transform according to TPPI encoding
+
+    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
+    wt, yt, xt, zt = as_float_array(
+        data,
+    ).T  # x and y are exchanged due to swapping of dims
+    w, y, x, z = wt.T, xt.T, yt.T, zt.T
+
+    sx = w + 1j * y
+    sy = x + 1j * z
+
+    sx[..., 1::2] = -sx[..., 1::2]
+    sy[..., 1::2] = -sy[..., 1::2]
+
+    fx = np.fft.fftshift(np.fft.fft(sx), -1)  # reverse
+    fy = np.fft.fftshift(np.fft.fft(sy), -1)
+
+    # rebuild the quaternion
+    return as_quaternion(fx, fy)
 
 
 def _qf_fft(data):
@@ -176,6 +291,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
     """
     # datatype
+    is_nmr = dataset.origin.lower() in [
+        "topspin",
+    ]
     is_ir = dataset.meta.interferogram
 
     # On which axis do we want to apply transform (get axis from arguments)
@@ -257,6 +375,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         if size is None or inv:
             size = kwargs.get("si", x.size)
 
+        # we default to the closest power of two larger of the data size
+        if is_nmr:
+            size = largest_power_of_2(size)
+
         # do we have an effective td to apply
         tdeff = sizeff
         if tdeff is None:
@@ -276,10 +398,42 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         if new.is_quaternion or new.is_interleaved:
             iscomplex = True
 
+        # If we are in NMR we have an additional complication due to the mode
+        # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
+        encoding = "undefined"
+        if not inv and "encoding" in new.meta:
+            encoding = new.meta.encoding[-1]
+
+        qsim = encoding in ["QSIM", "DQD"]
+        qseq = "QSEQ" in encoding
+        states = "STATES" in encoding
+        echoanti = "ECHO-ANTIECHO" in encoding
+        tppi = "TPPI" in encoding
+        qf = "QF" in encoding
+
         zf_size(new, size=size, inplace=True)
 
         # Perform the fft
-        if iscomplex and inv:
+        if qsim:  # F2 fourier transform
+            data = _fft(new.data)
+
+        elif qseq:
+            raise NotImplementedError("QSEQ not yet implemented")
+
+        elif states:
+            data = _states_fft(new.data, tppi)
+
+        elif tppi:
+            data = _tppi_fft(new.data)
+
+        elif echoanti:
+            data = _echoanti_fft(new.data)
+
+        elif qf:
+            # we must perform a real fourier transform of a time domain dataset
+            data = _qf_fft(new.data)
+
+        elif iscomplex and inv:
             # We assume no special encoding for inverse complex fft transform
             data = _ifft(new.data)
 
@@ -291,21 +445,43 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             raise NotImplementedError("Inverse FFT for real dimension")
 
         else:
-            raise NotImplementedError()
+            raise NotImplementedError(
+                f"{encoding} not yet implemented. We recommend you to put an issue on "
+                f"Github, so we will not forget to work on this!.",
+            )
 
         # We need here to create a new dataset with new shape and axis
         new._data = data
         new.mask = False
 
-        # create new coordinates for the transformed dataset
-        sfo1 = 0 * ur.Hz
-        bf1 = sfo1
-        dw = x.spacing
-        if isinstance(dw, list):
-            pass  # print()
-        sw = 1 / 2 / dw
-        sf = -sw / 2
-        size = size // 2
+        # create new coordinates for the transformed data
+
+        if is_nmr:
+            sfo1 = new.meta.sfo1[-1]
+            bf1 = new.meta.bf1[-1]
+            sf = new.meta.sf[-1]
+            sw = new.meta.sw_h[-1]
+            if new.meta.nuc1 is not None:
+                nuc1 = new.meta.nuc1[-1]
+                regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
+                m = re.match(regex, nuc1)
+                if m is not None:
+                    mass = m[1]
+                    name = m[2]
+                    nucleus = "^{" + mass + "}" + name
+                else:
+                    nucleus = ""
+            else:
+                nucleus = ""
+        else:
+            sfo1 = 0 * ur.Hz
+            bf1 = sfo1
+            dw = x.spacing
+            if isinstance(dw, list):
+                pass  # print()
+            sw = 1 / 2 / dw
+            sf = -sw / 2
+            size = size // 2
 
         if not inv:
             # time to frequency
@@ -318,7 +494,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             newcoord.show_datapoints = False
             newcoord.name = x.name
             new.title = "intensity"
-            if is_ir:
+            if is_nmr:
+                newcoord.title = f"${nucleus}$ frequency"
+                newcoord.ito("Hz")
+            elif is_ir:
                 new._units = None
                 newcoord.title = "wavenumbers"
                 newcoord.ito("cm^-1")
@@ -337,6 +516,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             newcoord.name = x.name
             newcoord.title = "time"
             newcoord.ito("us")
+
+        if is_nmr and not inv:
+            newcoord.larmor = bf1  # needed for ppm transformation
+            ppm = kwargs.get("ppm", True)
+            if ppm:
+                newcoord.ito("ppm")
+                newcoord.title = rf"$\delta\ {nucleus}$"
 
         new.coordset[dim] = newcoord
 

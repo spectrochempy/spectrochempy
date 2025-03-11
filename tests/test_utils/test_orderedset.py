@@ -4,7 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
-from spectrochempy.utils.orderedset import OrderedSet
+from spectrochempy.utils.objects import OrderedSet
 
 
 def test_orderedset():

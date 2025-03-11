@@ -25,15 +25,8 @@ import numpy as np
 
 # %%
 # As usual, we start by loading the spectrochempy library
-from os import environ
-
-# test_imports()
-from time import time
-
-s = time()
 import spectrochempy as scp
 
-print(time() - s)
 
 # %%
 # We create the data for the coordinates axis and the array of data

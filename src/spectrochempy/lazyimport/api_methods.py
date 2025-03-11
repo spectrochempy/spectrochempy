@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 #
-# This file was generated for SpectroChemPy version: 1.0.0a2.dev6+gac9c0190f.d20250311
+# This file was generated for SpectroChemPy version: 0.7.3.dev10+g6b5d0168b.d20250313
 #
 #    ###################################################################################
 #    #           DO NOT MODIFY THIS FILE BECAUSE IT IS CREATED AUTOMATICALLY.          #
@@ -167,6 +167,7 @@ _LAZY_IMPORTS = {
     "read_sdr": "spectrochempy.core.readers.read_soc",
     "read_hdr": "spectrochempy.core.readers.read_soc",
     "read_spc": "spectrochempy.core.readers.read_spc",
+    "read_topspin": "spectrochempy.core.readers.read_topspin",
     "read_wdf": "spectrochempy.core.readers.read_wire",
     "read_wire": "spectrochempy.core.readers.read_wire",
     "read_zip": "spectrochempy.core.readers.read_zip",
@@ -263,7 +264,7 @@ _LAZY_IMPORTS = {
     "Adict": "spectrochempy.utils.objects",
     "ReadOnlyDict": "spectrochempy.utils.objects",
     "ScpObjectList": "spectrochempy.utils.objects",
-    "OrderedSet": "spectrochempy.utils.orderedset",
+    "OrderedSet": "spectrochempy.utils.objects",
     "show_versions": "spectrochempy.utils.show_versions",
     "timeit": "spectrochempy.utils.timeutils",
 }

@@ -19,7 +19,7 @@ import spectrochempy as scp
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis.decomposition.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 from spectrochempy.utils import testing
 from spectrochempy.utils.constants import MASKED
 

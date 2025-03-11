@@ -24,7 +24,7 @@ from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils.docreps import add_docstring
+from spectrochempy.utils.docutils import add_docstring
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.mplutils import plot_method
 

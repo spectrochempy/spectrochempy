@@ -18,7 +18,7 @@ from spectrochempy.application.application import info_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 
 
 # ======================================================================================

@@ -24,7 +24,7 @@ from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import merge_datasets
 from spectrochempy.core.readers.read_omnic import read_omnic
 from spectrochempy.utils.datetimeutils import UTC
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
 

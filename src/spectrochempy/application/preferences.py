@@ -163,9 +163,21 @@ class PreferencesSet(Meta):
         self._data = {}
 
     def list_all(self):
-        """List all plot parameters with their current and default value."""
+        """
+        List all plot parameters with their current and default value.
+
+        ..versionadded:: 1.0.0
+        """
         for key in app.plot_preferences.trait_names(config=True):
             self.help(key)
+
+    def all(self):
+        """
+        List all plot parameters with their current and default value.
+
+        ..deprecated:: 1.0.0, use `list_all` instead. To be removed in 1.1.0.
+        """
+        self.list_all()
 
     def help(self, key):
         """

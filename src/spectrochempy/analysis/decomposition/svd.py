@@ -10,7 +10,7 @@ import traitlets as tr
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 
 __all__ = ["SVD"]
 __configurables__ = ["SVD"]

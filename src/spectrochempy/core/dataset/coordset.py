@@ -27,9 +27,9 @@ from traitlets import validate
 from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils.misc import is_sequence
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.print import convert_to_html
+from spectrochempy.utils.typeutils import is_sequence
 
 
 # ======================================================================================

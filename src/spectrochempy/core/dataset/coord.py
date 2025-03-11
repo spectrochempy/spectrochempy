@@ -18,15 +18,15 @@ from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
-from spectrochempy.utils.compare import is_iterable
-from spectrochempy.utils.compare import is_number
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.numutils import get_n_decimals
 from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import colored_output
+from spectrochempy.utils.typeutils import is_iterable
+from spectrochempy.utils.typeutils import is_number
 
 
 # ======================================================================================

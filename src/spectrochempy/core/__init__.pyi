@@ -5,7 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
-# ruff: noq
+# ruff: noqa
 
 __all__ = [
     "dataset",
@@ -20,7 +20,6 @@ __all__ = [
 from . import dataset
 from . import plotters
 from . import project
-
 from . import readers
 from . import script
 from . import units

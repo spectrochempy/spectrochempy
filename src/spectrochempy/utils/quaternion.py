@@ -11,6 +11,8 @@ import numpy as np
 from quaternion import as_float_array
 from quaternion import as_quat_array
 
+from spectrochempy.utils.constants import TYPE_COMPLEX
+
 typequaternion = np.dtype(np.quaternion)
 
 
@@ -129,7 +131,7 @@ def get_component(data, select="REAL"):
                 f"something wrong: cannot interpret `{select}` for hypercomplex (quaternion) data!",
             )
 
-    elif new.dtype in (complex, np.complex64, np.complex128):
+    elif new.dtype in TYPE_COMPLEX:
         w, x = new.real, new.imag
         if (select == "R") or (select == "RR"):
             new = w

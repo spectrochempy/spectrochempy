@@ -15,7 +15,7 @@ from numpy.testing import assert_allclose
 
 import spectrochempy as scp
 from spectrochempy.analysis.decomposition.svd import SVD
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 from spectrochempy.utils.constants import MASKED
 
 

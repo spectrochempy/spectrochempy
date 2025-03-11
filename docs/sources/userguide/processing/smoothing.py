@@ -128,7 +128,7 @@ def plot(X, Xm, label=None, xlim=None):
     ax.legend(loc="best", fontsize=10)
     if xlim is not None:
         ax.set_xlim(xlim)
-    scp.show()
+    # scp.show()
 
 
 # %%

@@ -136,7 +136,7 @@ def test_baseline(IR_dataset_2D):
     blc.order = 1
     blc.fit(msT)
     blc.corrected.plot()
-    scp.show()
+    # scp.show()
 
 
 def test_baseline_sequential_asls(IR_dataset_2D):
@@ -169,7 +169,7 @@ def test_baseline_sequential_asls(IR_dataset_2D):
 
     _ = corrected.plot()
 
-    scp.show()
+    # scp.show()
 
     # it works but not very well adapted to a situation where the regularization
     # parameter mu and may be asymmetry should be adapted to each spectra.

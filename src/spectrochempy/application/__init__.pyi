@@ -5,28 +5,28 @@
 # ======================================================================================
 # ruff: noqa: I001
 
-# ruff: noq
+# ruff: noqa
 
 __all__ = [
+    "_preferences",
     "application",
     "check_update",
     "datadir",
     "envsetup",
     "info",
     "jupyter",
-    "_preferences",
     "preferences",
     "start",
     "testdata",
 ]
 
+from . import _preferences
 from . import application
 from . import check_update
 from . import datadir
 from . import envsetup
 from . import info
 from . import jupyter
-from . import _preferences
 from . import preferences
 from . import start
 from . import testdata

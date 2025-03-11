@@ -12,7 +12,7 @@ from spectrochempy.analysis._base._analysisbase import CrossDecompositionAnalysi
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 
 __all__ = ["PLSRegression"]
 __configurables__ = ["PLSRegression"]

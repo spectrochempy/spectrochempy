@@ -19,4 +19,4 @@ def test_read_wire():
     _ = dataset.sum(dim=2).plot_image()
 
     # show spectra if test run as a single pytest test
-    scp.show()
+    # scp.show()
