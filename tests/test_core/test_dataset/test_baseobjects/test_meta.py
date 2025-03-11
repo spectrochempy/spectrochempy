@@ -5,7 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
-from spectrochempy.core.dataset.baseobjects.meta import Meta
+from spectrochempy.utils.meta import Meta
 from spectrochempy.core.units import ur
 from spectrochempy.utils.testing import raises
 from spectrochempy.utils.jsonutils import json_decoder, json_encoder
@@ -301,7 +301,7 @@ def test_json_serialization():
 
 
 # test derived class PreferencesSet
-from spectrochempy.core.dataset.arraymixins.ndplot import PreferencesSet
+from spectrochempy.application.preferences import PreferencesSet
 
 
 def test_preferences_set_getitem():
@@ -326,7 +326,7 @@ def test_preferences_set_reset():
 
 def test_preferences_set_all():
     prefs = PreferencesSet()
-    prefs.all()
+    prefs.list_all()
 
 
 def test_preferences_set_help():

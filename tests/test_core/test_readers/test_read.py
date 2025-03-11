@@ -8,7 +8,7 @@
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.core import preferences as prefs
+from spectrochempy.application.preferences import preferences as prefs
 
 DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
@@ -18,6 +18,9 @@ def test_read():
     filename = IRDATA / "CO@Mo_Al2O3.SPG"
 
     # read normally
+    nd1 = scp.read(filename)
+    assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
+
     nd1 = scp.read_omnic(filename)
     assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
 

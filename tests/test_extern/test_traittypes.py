@@ -1,11 +1,11 @@
-import pytest
 import numpy as np
-from traitlets import HasTraits, TraitError, default
+import pytest
+from traitlets import HasTraits
+from traitlets import TraitError
+from traitlets import default
 
-from spectrochempy.extern.traittypes import (
-    Array,
-    Empty,
-)
+from spectrochempy.extern.traittypes import Array
+from spectrochempy.extern.traittypes import Empty
 
 
 # Test classes that use the trait types
@@ -17,7 +17,7 @@ class HasArray(HasTraits):
 
 # Array trait tests
 def test_array_default():
-    """Test Array trait default values"""
+    """Test Array trait default values."""
     obj = HasArray()
     assert isinstance(obj.arr, np.ndarray)
     assert obj.arr.size == 1
@@ -25,7 +25,7 @@ def test_array_default():
 
 
 def test_array_assignment():
-    """Test Array trait assignment"""
+    """Test Array trait assignment."""
     obj = HasArray()
 
     # Test valid assignments
@@ -49,7 +49,7 @@ def test_array_assignment():
 
 # Test validators
 def test_array_validators():
-    """Test trait validators"""
+    """Test trait validators."""
 
     class ValidatedArray(HasTraits):
         arr = Array().valid(lambda trait, value: value * 2)
@@ -60,7 +60,7 @@ def test_array_validators():
 
 
 def test_empty_sentinel():
-    """Test Empty sentinel behavior"""
+    """Test Empty sentinel behavior."""
 
     class HasEmptyArray(HasTraits):
         arr = Array(Empty)
@@ -72,7 +72,7 @@ def test_empty_sentinel():
 
 
 def test_dynamic_default():
-    """Test dynamic default values and data independence"""
+    """Test dynamic default values and data independence."""
 
     class HasDynamicArray(HasTraits):
         arr = Array()
@@ -82,10 +82,7 @@ def test_dynamic_default():
             return np.array([1, 2, 3])
 
     # Add print statements to debug initialization
-    print("\nDebugging Array trait initialization:")
     obj1 = HasDynamicArray()
-    print(f"obj1.arr initial value: {obj1.arr}")
-    print(f"obj1._trait_values: {obj1._trait_values}")
 
     # Create two instances
     obj1 = HasDynamicArray()

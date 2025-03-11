@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 from scipy import sparse
 
-from spectrochempy.extern.whittaker_smooth import speyediff, whittaker_smooth
+from spectrochempy.extern.whittaker_smooth import speyediff
+from spectrochempy.extern.whittaker_smooth import whittaker_smooth
 
 
 def test_speyediff_basic():

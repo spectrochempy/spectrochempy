@@ -8,7 +8,7 @@
 import numpy as np
 import pytest
 
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 
 pytestmark = pytest.mark.skip("WIP with NMR data")
 

@@ -8,7 +8,7 @@
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.core import preferences as prefs
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 
 DATADIR = prefs.datadir

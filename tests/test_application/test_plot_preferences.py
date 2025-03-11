@@ -10,7 +10,7 @@ import spectrochempy as scp
 
 def test_plotpreferences(IR_dataset_2D):
     dataset = IR_dataset_2D
-    prefs = dataset.preferences  # we will use prefs instead of dataset.preference
+    prefs = scp.preferences  # we will use prefs instead of dataset.preference
     prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
     prefs.colorbar = True  # This add a color bar on a side
     prefs.colormap = "magma"  # The default colormap is viridis

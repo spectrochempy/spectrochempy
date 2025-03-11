@@ -9,7 +9,7 @@ import logging
 import pytest
 from pathlib import Path
 import spectrochempy as scp
-from spectrochempy.application import app
+from spectrochempy.application.application import app
 from unittest.mock import patch
 import subprocess
 
@@ -17,7 +17,6 @@ import subprocess
 def test_app_initialization():
     """Test basic application initialization"""
     assert app.name == "SpectroChemPy"
-    assert app.running is True  # Should be True after import
     assert isinstance(app.config_dir, Path)
     assert app.config_dir.exists()
 
@@ -51,14 +50,12 @@ def test_logging_levels():
 def test_preferences():
     """Test preferences handling"""
     # Test preferences exist
-    assert app.preferences is not None
-
-    # Test plot preferences
-    assert app.plot_preferences is not None
+    assert scp.preferences is not None
 
     # Test resetting preferences
-    app.reset_preferences()
-    assert app.preferences is not None
+    scp.preferences.reset()
+    assert scp.preferences is not None
+    assert not scp.preferences.data
 
 
 def test_config_directory():
@@ -79,8 +76,11 @@ def test_config_directory():
 
 def test_datadir():
     """Test datadir functionality"""
-    assert app.preferences.datadir is not None
-    assert app.preferences.datadir.exists()
+    DATADIR = scp.preferences.datadir
+
+    assert DATADIR.exists()
+    assert DATADIR.is_dir()
+    assert DATADIR.name == "testdata"
 
 
 @pytest.mark.parametrize(
@@ -100,39 +100,11 @@ def test_log_levels(level, expected):
 
 def test_get_release_date_with_git():
     """Test release date retrieval with git available"""
-    from spectrochempy.application.application import _get_release_date
+    from spectrochempy.application.info import release_date
 
-    date = _get_release_date()
+    date = release_date
     assert isinstance(date, str)
     assert date != "unknown"
-
-
-def test_get_release_date_without_git():
-    """Test release date retrieval when git is not available"""
-    from spectrochempy.application.application import _get_release_date
-
-    def mock_run(*args, **kwargs):
-        raise FileNotFoundError("git not found")
-
-    with patch("subprocess.run", side_effect=mock_run):
-        date = _get_release_date()
-        assert date == "unknown"
-
-
-def test_get_release_date_with_error():
-    """Test release date retrieval when git command fails"""
-    from spectrochempy.application.application import _get_release_date
-
-    def mock_run(*args, **kwargs):
-        result = subprocess.CompletedProcess(
-            args=[], returncode=1, stdout="", stderr="error"
-        )
-        result.check = False
-        return result
-
-    with patch("subprocess.run", side_effect=mock_run):
-        date = _get_release_date()
-        assert isinstance(date, str)
 
 
 if __name__ == "__main__":

@@ -1,10 +1,11 @@
 import os
-import pytest
-import numpy as np
 
-from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.core.dataset.coord import Coord
+import numpy as np
+import pytest
+
 from spectrochempy.analysis.peakfinding.peakfinding import find_peaks
+from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
 from spectrochempy.utils import docstrings as chd
 
@@ -30,7 +31,7 @@ def test_findpeaks_docstrings():
 
 @pytest.fixture
 def simple_peaks_dataset():
-    """Dataset with three clear gaussian peaks"""
+    """Dataset with three clear gaussian peaks."""
     x = np.linspace(0, 10, 1000)
     peaks = [
         (2, 1, 0.2),  # (position, height, width)
@@ -47,14 +48,14 @@ def simple_peaks_dataset():
 
 @pytest.fixture
 def noisy_peaks_dataset(simple_peaks_dataset):
-    """Add noise to make peak detection more challenging"""
+    """Add noise to make peak detection more challenging."""
     noise = np.random.normal(0, 0.05, simple_peaks_dataset.size)
     return simple_peaks_dataset + noise
 
 
 @pytest.fixture
 def flat_peaks_dataset():
-    """Dataset with flat-topped peaks"""
+    """Dataset with flat-topped peaks."""
     x = np.linspace(0, 10, 1000)
     y = np.zeros_like(x)
     y[(x > 2) & (x < 2.5)] = 1.0  # flat peak
@@ -66,7 +67,7 @@ def flat_peaks_dataset():
 
 
 def test_basic_peak_finding(simple_peaks_dataset):
-    """Test basic peak finding with clear peaks"""
+    """Test basic peak finding with clear peaks."""
     peaks, properties = find_peaks(simple_peaks_dataset, height=0.5)
 
     assert len(peaks) == 3
@@ -79,7 +80,7 @@ def test_basic_peak_finding(simple_peaks_dataset):
 
 
 def test_noisy_peak_finding(noisy_peaks_dataset):
-    """Test peak finding with noisy data"""
+    """Test peak finding with noisy data."""
     peaks, properties = find_peaks(
         noisy_peaks_dataset, height=0.5, prominence=0.4, width=0.1
     )
@@ -90,7 +91,7 @@ def test_noisy_peak_finding(noisy_peaks_dataset):
 
 
 def test_flat_peak_detection(flat_peaks_dataset):
-    """Test detection of flat-topped peaks"""
+    """Test detection of flat-topped peaks."""
     peaks, properties = find_peaks(flat_peaks_dataset, plateau_size=0.1)
 
     assert len(peaks) == 3
@@ -99,7 +100,7 @@ def test_flat_peak_detection(flat_peaks_dataset):
 
 
 def test_no_peaks_case():
-    """Test case where no peaks should be found"""
+    """Test case where no peaks should be found."""
     x = np.linspace(0, 10, 100)
     y = np.zeros_like(x)  # Flat line
     dataset = NDDataset(y, coordset=[Coord(x, title="x")])
@@ -110,7 +111,7 @@ def test_no_peaks_case():
 
 
 def test_three_point_peak():
-    """Test detection of three-point peaks with explicit properties request"""
+    """Test detection of three-point peaks with explicit properties request."""
     x = np.linspace(0, 10, 100)
     y = np.zeros_like(x)
     # Create a three-point peak
@@ -134,7 +135,7 @@ def test_three_point_peak():
 
 
 def test_minimal_peak_properties():
-    """Test peak finding with minimal configuration"""
+    """Test peak finding with minimal configuration."""
     x = np.linspace(0, 10, 100)
     y = np.zeros_like(x)
     y[49:52] = [0.5, 1.0, 0.5]
@@ -149,7 +150,7 @@ def test_minimal_peak_properties():
 
 
 def test_single_points_peak():
-    """Test behavior with single points for peak detection"""
+    """Test behavior with single points for peak detection."""
     x = np.linspace(0, 10, 100)
     y = np.zeros_like(x)
     y[50] = 1.0  # Single point peak
@@ -161,7 +162,7 @@ def test_single_points_peak():
 
 
 def test_invalid_inputs():
-    """Test error handling for invalid inputs"""
+    """Test error handling for invalid inputs."""
     # Test 2D dataset
     with pytest.raises(ValueError):
         data_2d = NDDataset(np.zeros((10, 10)))
@@ -175,7 +176,7 @@ def test_invalid_inputs():
 
 
 def test_peak_properties(simple_peaks_dataset):
-    """Test various peak properties calculations"""
+    """Test various peak properties calculations."""
     peaks, properties = find_peaks(
         simple_peaks_dataset, height=0.5, width=0.1, prominence=0.4, distance=1.0
     )
@@ -196,7 +197,7 @@ def test_peak_properties(simple_peaks_dataset):
 
 
 def test_window_length_interpolation(simple_peaks_dataset):
-    """Test peak position interpolation with different window lengths"""
+    """Test peak position interpolation with different window lengths."""
     # Test with different window lengths
     for window in [3, 5, 7]:
         peaks, _ = find_peaks(simple_peaks_dataset, window_length=window)
@@ -205,7 +206,7 @@ def test_window_length_interpolation(simple_peaks_dataset):
 
 
 def test_units_handling():
-    """Test handling of units in coordinates and values"""
+    """Test handling of units in coordinates and values."""
     x = np.linspace(0, 10, 1000)
     y = np.sin(x)
     coord = Coord(x, title="x", units="cm⁻¹")
@@ -219,7 +220,7 @@ def test_units_handling():
 
 
 def test_non_linear_coordinates():
-    """Test peak finding with non-linear x coordinates"""
+    """Test peak finding with non-linear x coordinates."""
     x = np.exp(np.linspace(0, 2, 1000))  # Non-linear spacing
     y = np.sin(x)
     coord = Coord(x, title="x", units="cm⁻¹")
@@ -231,7 +232,7 @@ def test_non_linear_coordinates():
 
 
 def test_use_as_a_dataset_method(simple_peaks_dataset):
-    """Test basic peak finding using a dataset method"""
+    """Test basic peak finding using a dataset method."""
     peaks, properties = simple_peaks_dataset.find_peaks(height=0.5)
 
     assert len(peaks) == 3

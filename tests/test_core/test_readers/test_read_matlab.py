@@ -7,7 +7,7 @@
 
 import pytest
 
-from spectrochempy import NDDataset
+from spectrochempy import read_matlab
 from spectrochempy import preferences as prefs
 
 MATLABDATA = prefs.datadir / "matlabdata"
@@ -18,10 +18,10 @@ MATLABDATA = prefs.datadir / "matlabdata"
 #     reason="Experimental data not available for testing",
 # )
 def test_read_matlab():
-    A = NDDataset.read_matlab(MATLABDATA / "als2004dataset.MAT")
+    A = read_matlab(MATLABDATA / "als2004dataset.MAT")
     assert len(A) == 6
     assert A[3].shape == (4, 96)
 
-    A = NDDataset.read_matlab(MATLABDATA / "dso.mat")
+    A = read_matlab(MATLABDATA / "dso.mat")
     assert A.name == "Group sust_base line withoutEQU.SPG"
     assert A.shape == (20, 426)

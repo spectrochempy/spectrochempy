@@ -86,7 +86,7 @@ def test_analysisconfigurable():
 
     # set conf. at init
     foo.reset()  # needed to delete json (in case it was already created)
-    cd = scp.application.app.config_dir
+    cd = scp.get_config_dir()
     assert not (cd / "Foo.json").exists()
     foo = Foo(a=1)
     assert foo.a == 1

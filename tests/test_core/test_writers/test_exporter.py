@@ -7,46 +7,50 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.core import preferences as prefs
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import testing
 from spectrochempy.utils.file import pathclean
 
 irdatadir = pathclean(prefs.datadir) / "irdata"
-cwd = Path.cwd()
-
-try:
-    from spectrochempy.core.common import dialogs
-except ImportError:
-    pytest.skip("dialogs not available with act", allow_module_level=True)
 
 
-def test_write():
+def test_write(mock_cwd):
     nd = scp.read_omnic("irdata/nh4y-activation.spg")
 
     # API write methods needs an instance of a NDDataset as the first argument
-    with pytest.raises(TypeError):
+    with pytest.raises(
+        TypeError, match="missing 1 required positional argument: 'dataset'"
+    ):
         scp.write()
 
     # the simplest way to save a dataset, is to use the function write with a filename as argument
-    if (cwd / "essai.scp").exists():
-        (cwd / "essai.scp").unlink()
-
     filename = nd.write("essai.scp")  # should not open a DIALOG
-    assert filename == cwd / "essai.scp"
+    assert filename == mock_cwd / "essai.scp"
     assert filename.exists()
 
     # try to write it again
-    filename = nd.write("essai.scp")  # should open a DIALOG to confirm
+    with pytest.raises(FileExistsError):
+        nd.write("essai.scp")
 
+    # write it again with overwrite
+    filename = nd.write("essai.scp", overwrite=True)
+
+    # Read the file and compare
     nd2 = NDDataset.load(filename)
     testing.assert_dataset_equal(nd2, nd)
+
+    # we can also use the read method to read it
+    nd3 = scp.read(filename)
+    testing.assert_dataset_equal(nd3, nd)
+
     filename.unlink()
 
-    # if the filename is omitted, a dialog is opened to select a name (and a protocol)
+    # if the filename is omitted, write a file with the dataset name and the extension '.scp'
     filename = nd.write()
     assert filename is not None
     assert filename.stem == nd.name

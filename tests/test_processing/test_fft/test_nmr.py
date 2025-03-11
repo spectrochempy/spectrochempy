@@ -10,10 +10,10 @@ import os
 import numpy as np
 import pytest
 
-from spectrochempy.core import preferences as prefs
+from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 from spectrochempy.utils.testing import (
     assert_array_almost_equal,
     assert_array_equal,
@@ -182,7 +182,7 @@ def test_nmr_auto_1D_phasing():
     path = os.path.join(
         prefs.datadir, "nmrdata", "bruker", "tests", "nmr", "topspin_1d"
     )
-    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
+    ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10.0 * ur.Hz, inplace=True)
     transf = ndd.fft(tdeff=8192, size=2**15)
@@ -214,7 +214,7 @@ def test_nmr_multiple_manual_1D_phasing():
     path = os.path.join(
         prefs.datadir, "nmrdata", "bruker", "tests", "nmr", "topspin_1d"
     )
-    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
+    ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10.0 * ur.Hz)  # inplace broadening
 
@@ -236,7 +236,7 @@ def test_nmr_multiple_auto_1D_phasing():
     path = os.path.join(
         prefs.datadir, "nmrdata", "bruker", "tests", "nmr", "topspin_1d"
     )
-    ndd = NDDataset.read_topspin(path, expno=1, remove_digital_filter=True)
+    ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
     ndd /= ndd.real.data.max()  # normalize
     ndd.em(10.0 * ur.Hz)  # inplace broadening
 

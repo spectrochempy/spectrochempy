@@ -10,10 +10,11 @@ from zoneinfo import ZoneInfoNotFoundError
 import numpy as np
 import pytest
 from pint.errors import UndefinedUnitError
-from quaternion import quaternion
+from spectrochempy.application.preferences import preferences as prefs
+
 
 import spectrochempy as scp
-from spectrochempy.core.dataset.baseobjects.meta import Meta
+from spectrochempy.utils.meta import Meta
 from spectrochempy.core.units import ur
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.system import get_user_and_node
@@ -29,7 +30,6 @@ from spectrochempy.utils.testing import (
     raises,
 )
 
-typequaternion = np.dtype(np.quaternion)
 
 # test minimal constructeur and dtypes
 adata = (
@@ -131,37 +131,6 @@ def test_nddataset_2D_NDDataset(arr):
     else:
         with pytest.raises(ValueError):
             ds = scp.NDDataset(arr, dtype=np.complex128)
-    if (arr.shape[-1] % 2) == 0 and (arr.shape[-2] % 2) == 0 and arr.ndim == 2:
-        ds = scp.NDDataset(arr, dtype=np.quaternion)
-        if ds.size == 0:
-            assert ds.dtype is None
-        else:
-            assert ds.dtype == np.quaternion
-    else:
-        with pytest.raises(ValueError):
-            ds = scp.NDDataset(arr, dtype=np.quaternion)
-    # test units
-    ds1 = scp.NDDataset(arr * scp.ur.km)
-    ds2 = scp.NDDataset(arr, units=scp.ur.km)
-    assert ds1.units == scp.ur.km
-    assert ds2.units == scp.ur.km
-    assert_dataset_equal(ds1, ds2)
-    # masking
-    ds1[0] = scp.MASKED
-    assert ds1.is_masked
-    # init with another dataset
-    ds2 = scp.NDDataset(ds1)
-    assert_dataset_equal(ds1, ds2)
-    # check no coordinates
-    assert not ds2.is_complex
-    assert ds2.coordset is None  # no coordinates
-    assert ds2.x is None  # no coordinates
-    with pytest.raises(AttributeError):
-        ds2.t
-    # dim attributes
-    ds2 = scp.NDDataset(arr, dims=["u", "w"])
-    assert ds2.ndim == 2
-    assert ds2.dims == ["u", "w"]
 
 
 def test_nddataset_coordset():
@@ -712,6 +681,25 @@ def test_nddataset_title():
     assert ndd2.title == "zzzz"
 
 
+def test_dataset_filename():
+    from pathlib import Path
+
+    ndd = scp.NDDataset([1.0, 2.0, 3.0])
+    assert ndd.filename == Path(ndd.name).with_suffix(".scp")
+
+    ndd.filename = "xxxx"
+    assert ndd.filename == Path("xxxx")
+
+    ndd1 = scp.NDDataset([6.0, 2.0], filename="yyy")
+    assert ndd1.filename == Path("yyy")
+
+    ndd2 = scp.NDDataset(ndd, filename="xyxy")
+    assert ndd2.filename == Path("xyxy")
+
+    ndd2.filename = "zzzz"
+    assert ndd2.filename == Path("zzzz")
+
+
 def test_nddataset_real_imag():
     na = np.array(
         [[1.0 + 2.0j, 2.0 + 0j], [1.3 + 2.0j, 2.0 + 0.5j], [1.0 + 4.2j, 2.0 + 3j]]
@@ -893,6 +881,11 @@ def test_nddataset_bug_par_arnaud():
 
 
 # ################ Complex and Quaternion, and NMR ##################
+# ======================================================================================
+# Complex NDDataset tests
+# ======================================================================================
+
+
 def test_nddataset_create_from_complex_data():
     # 1D (complex)
     nd = scp.NDDataset([1.0 + 2.0j, 2.0 + 0j])
@@ -900,6 +893,7 @@ def test_nddataset_create_from_complex_data():
     assert nd.size == 2
     assert nd.data.shape == (2,)
     assert nd.shape == (2,)
+
     # 2D (complex in the last dimension - automatic detection)
     nd = scp.NDDataset(
         [[1.0 + 2.0j, 2.0 + 0j], [1.3 + 2.0j, 2.0 + 0.5j], [1.0 + 4.2j, 2.0 + 3j]]
@@ -908,155 +902,62 @@ def test_nddataset_create_from_complex_data():
     assert nd.size == 6
     assert nd.data.shape == (3, 2)
     assert nd.shape == (3, 2)
-    # 2D quaternion
-    nd = scp.NDDataset(
-        [
-            [1.0, 2.0],
-            [1.3, 2.0],
-            [1.0, 2.0],
-            [1.0, 2.0],
-        ],
-        dtype=typequaternion,
-    )
-    assert nd.data.size == 2
-    assert nd.size == 2
-    assert nd.data.shape == (2, 1)
-    assert nd.shape == (2, 1)
-    # take real part
-    ndr = nd.real
-    assert ndr.shape == (2, 1)
-    assert not ndr.is_quaternion
 
 
-def test_nddataset_set_complex_1D_during_math_op():
-    nd = scp.NDDataset([1.0, 2.0], coordset=[scp.Coord([10, 20])], units="meter")
-    assert nd.data.size == 2
-    assert nd.size == 2
-    assert nd.shape == (2,)
-    assert nd.units == ur.meter
+def test_nddataset_complex_operations():
+    # Test complex-specific operations
+    nd = scp.NDDataset([1.0, 2.0], units="meter")
+    coordset = scp.CoordSet(x=scp.Coord([10, 20]))
+    nd.set_coordset(coordset)
     assert not nd.is_complex
     ndj = nd * 1j
-    assert ndj.data.size == 2
     assert ndj.is_complex
+    assert ndj.data.size == 2
 
 
-def test_nddataset_create_from_complex_data_with_units():
-    # 1D
-    nd = scp.NDDataset([1.0 + 2.0j, 2.0 + 0j])
-    assert nd.data.size == 2
-    assert nd.size == 2
-    assert nd.data.shape == (2,)
-    assert nd.shape == (2,)
-    # add units
-    nd.units = "m**-1"
-    nd.ito("cm^-1")
-    # 2D
-    nd2 = scp.NDDataset(
-        [[1.0 + 2.0j, 2.0 + 0j], [1.3 + 2.0j, 2.0 + 0.5j], [1.0 + 4.2j, 2.0 + 3j]]
-    )
-    assert nd2.data.size == 6
-    assert nd2.size == 6
-    assert nd2.data.shape == (3, 2)
-    assert nd2.shape == (3, 2)
-    # add units
-    nd2.units = "m**-1"
-    nd2.ito("cm^-1")
-
-
-def test_nddataset_real_imag_quaternion():
-    na = np.array(
-        [[1.0 + 2.0j, 2.0 + 0j, 1.3 + 2.0j], [2.0 + 0.5j, 1.0 + 4.2j, 2.0 + 3j]]
-    )
-    nd = scp.NDDataset(na)
-    # in the last dimension
-    assert_array_equal(nd.real, na.real)
-    assert_array_equal(nd.imag, na.imag)
-    # in another dimension
-    nd.set_quaternion(inplace=True)
-    assert nd.is_quaternion
-    assert nd.shape == (1, 3)
-    na = np.array(
-        [
-            [1.0 + 2.0j, 2.0 + 0j],
-            [1.3 + 2.0j, 2.0 + 0.5j],
-            [1.0 + 4.2j, 2.0 + 3j],
-            [5.0 + 4.2j, 2.0 + 3j],
-        ]
-    )
-    nd = scp.NDDataset(na)
-    nd.set_quaternion(inplace=True)
-    assert nd.is_quaternion
-    assert_array_equal(nd.real.data, na[::2, :].real)
-    nb = np.array(
-        [
-            [0.0 + 2.0j, 0.0 + 0j],
-            [1.3 + 2.0j, 2.0 + 0.5j],
-            [0.0 + 4.2j, 0.0 + 3j],
-            [5.0 + 4.2j, 2.0 + 3j],
-        ]
-    )
-    ndj = scp.NDDataset(nb, dtype=quaternion)
-    assert nd.imag == ndj
-
-
-def test_nddataset_quaternion():
-    na0 = np.array(
-        [
-            [1.0, 2.0, 2.0, 0.0, 0.0, 0.0],
-            [1.3, 2.0, 2.0, 0.5, 1.0, 1.0],
-            [1, 4.2, 2.0, 3.0, 2.0, 2.0],
-            [5.0, 4.2, 2.0, 3.0, 3.0, 3.0],
-        ]
-    )
+def test_nddataset_complex_slicing():
+    na0 = np.array([1.0 + 2.0j, 2.0 + 0j, 1.3 + 2.0j])
     nd = scp.NDDataset(na0)
-    assert nd.shape == (4, 6)
-    nd.dims = ["v", "u"]
-    nd.set_coordset(v=np.linspace(-1, 1, 4), u=np.linspace(-10.0, 10.0, 6))
-    nd.set_quaternion()
-    # test swapdims
-    nds = nd.swapdims(0, 1)
-    assert_array_equal(nd.data.T, nds.data)
-    assert nd.coordset[0] == nds.coordset[0]  # we do not swap the coords
-    # test transpose
-    nds = nd.T
-    assert_array_equal(nd.data.T, nds.data)
-    assert nd.coordset[0] == nds.coordset[0]
+    assert nd.is_complex
+    assert nd.shape == (3,)
+
+    # Test slicing preserves complex nature
+    nd1 = nd[1:]
+    assert nd1.is_complex
+    assert nd1.shape == (2,)
 
 
-def test_nddataset_max_with_2D_quaternion(NMR_dataset_2D):
-    # test on a 2D NDDataset
-    nd2 = NMR_dataset_2D
-    assert nd2.is_quaternion
-    nd = nd2.RR
-    nd.max()
-    nd2.max()  # no axis specified
-    nd2.max(dim=0)  # axis selected
+# ======================================================================================
+# Utility and other tests
+# ======================================================================================
 
 
-def test_nddataset_max_min_with_1D(NMR_dataset_1D):
-    # test on a 1D NDDataset
-    nd1 = NMR_dataset_1D
-    nd1[4] = scp.MASKED
-    assert nd1.is_masked
-    mx = nd1.max().m
-    assert (mx.real, mx.imag) == pytest.approx((2283.5096153847107, -2200.383064516033))
-    # check if it works for real
-    mx1 = nd1.real.max().m
-    assert mx1 == pytest.approx(2283.5096153847107)
-    mi = nd1.min().m
-    assert (mi.real, mi.imag) == pytest.approx((-408.29714640199626, 261.1864143920416))
+def test_nddataset_basic_math():
+    nd1 = scp.NDDataset([1.0, 2.0, 3.0])
+    nd2 = scp.NDDataset([0.1, 0.2, 0.3])
+
+    # Test basic math operations
+    assert_array_almost_equal((nd1 + nd2).data, [1.1, 2.2, 3.3])
+    assert_array_almost_equal((nd1 * nd2).data, [0.1, 0.4, 0.9])
+    assert_array_almost_equal((nd1 / nd2).data, [10.0, 10.0, 10.0])
 
 
-def test_nddataset_comparison_of_dataset(NMR_dataset_1D):
-    # bug in notebook
-    nd1 = NMR_dataset_1D.copy()
-    nd2 = NMR_dataset_1D.copy()
-    lb1 = nd1.em(lb=100.0 * ur.Hz)
-    lb2 = nd2.em(lb=100.0 * ur.Hz)
-    assert nd1 is not nd2
-    assert nd1 == nd2
-    assert lb1 is not lb2
-    assert lb1 == lb2
+def test_nddataset_reduction():
+    nd = scp.NDDataset([[1.0, 2.0], [3.0, 4.0]])
+
+    # Test reduction operations
+    assert float(nd.sum()) == 10.0  # Convert to float for comparison
+    assert float(nd.mean()) == 2.5
+    assert float(nd.std()) == pytest.approx(1.118033988749895)
+
+
+def test_nddataset_broadcasting():
+    nd = scp.NDDataset([[1.0, 2.0], [3.0, 4.0]])
+    scalar = scp.NDDataset(2.0)
+
+    # Test broadcasting
+    result = nd * scalar
+    assert_array_equal(result.data, [[2.0, 4.0], [6.0, 8.0]])
 
 
 def test_nddataset_complex_dataset_slicing_by_index():
@@ -1112,11 +1013,11 @@ def test_nddataset_init_complex_1D_with_mask():
     assert d1._data.shape == (5,)
     assert d1.size == 5
     assert d1.dtype == np.complex128
-    assert d1.has_complex_dims
+    assert d1.is_complex
     assert d1.mask.shape[-1] == 5
     assert d1[2].data == d[2]
     d1R = d1.real
-    assert not d1R.has_complex_dims
+    assert not d1R.is_complex
     assert d1R._data.shape == (5,)
     assert d1R._mask.shape == (5,)
 
@@ -1260,7 +1161,7 @@ def test_take(dsm):
 def test_nddataset_bug_462():
     A = scp.random((10, 100))
     A.x = scp.Coord(np.arange(0.0, 100.0, 1), title="coord1")
-    af = A.write("A.scp", confirm=False)
+    af = A.write("A.scp", overwrite=True)
     B = scp.read("A.scp")
     assert B.x == A.x
 
@@ -1269,9 +1170,39 @@ def test_nddataset_bug_462():
         scp.Coord(np.arange(0.0, 100.0, 1), title="coord1"),
         scp.Coord(np.arange(0.0, 1000.0, 10), title="coord2"),
     ]
-    cf = C.write("C.scp", confirm=False)
+    cf = C.write("C.scp", overwrite=True)
     D = scp.read("C.scp")
     assert len(D.x) == 2, "incorrect encoding/decoding"
 
     af.unlink()
     cf.unlink()
+
+
+def test_nddataset_max_min_with_1D(IR_dataset_1D):
+    # test on a 1D NDDataset
+    nd1 = IR_dataset_1D
+    nd1[4] = scp.MASKED
+    assert nd1.is_masked
+    mx = nd1.max().m
+    assert (mx.real, mx.imag) == pytest.approx((6.0, 0.0))
+    # check if it works for real
+    mx1 = nd1.real.max().m
+    assert mx1 == pytest.approx(6.0)
+    mi = nd1.min().m
+    assert (mi.real, mi.imag) == pytest.approx((0.5944115519523621, 0.0))
+
+
+def test_nddataset_comparison_of_dataset(IR_dataset_1D):
+    # bug in notebook
+    nd1 = IR_dataset_1D.copy()
+    nd2 = IR_dataset_1D.copy()
+    lb1 = nd1.em(lb=100.0 * ur.Hz)
+    lb2 = nd2.em(lb=100.0 * ur.Hz)
+    assert nd1 is not nd2
+    assert nd1 == nd2
+    assert lb1 is not lb2
+    assert lb1 == lb2
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

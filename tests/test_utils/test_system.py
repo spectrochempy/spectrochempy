@@ -13,7 +13,6 @@ from spectrochempy.utils.system import (
     get_node,
     get_user,
     get_user_and_node,
-    is_kernel,
     sh,
 )
 
@@ -31,11 +30,6 @@ def test_get_node():
 def test_get_user_and_node():
     res = get_user_and_node()
     assert res is not None
-
-
-def test_is_kernel():
-    res = is_kernel()
-    assert not res
 
 
 @pytest.mark.skipif(

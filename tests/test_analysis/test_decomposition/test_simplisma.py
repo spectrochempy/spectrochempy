@@ -13,7 +13,7 @@ import spectrochempy as scp
 from spectrochempy.analysis.decomposition.simplisma import SIMPLISMA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docstrings as chd
-from spectrochempy.utils.plots import show
+from spectrochempy.utils.mplutils import show
 
 
 # test docstring
@@ -35,7 +35,7 @@ def test_SIMPLISMA_docstrings():
 
 def test_simplisma():
     print("")
-    data = NDDataset.read_matlab(
+    data = scp.read_matlab(
         os.path.join("matlabdata", "als2004dataset.MAT"), merge=False
     )
     print("Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110)):")

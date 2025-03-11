@@ -6,25 +6,19 @@
 
 import os
 import pathlib
+
 import pytest
 
+import spectrochempy as scp
 import spectrochempy.utils.exceptions
 from spectrochempy import NDDataset
-from spectrochempy.core import preferences as prefs
-from spectrochempy.core.readers.importer import (
-    ALIAS,
-    FILETYPES,
-    Importer,
-    _importer_method,
-    read,
-    read_dir,
-)
+from spectrochempy.application.preferences import preferences as prefs
+from spectrochempy.core.readers.filetypes import registry
+from spectrochempy.core.readers.importer import Importer
+from spectrochempy.core.readers.importer import _importer_method
+from spectrochempy.core.readers.importer import read
+from spectrochempy.core.readers.importer import read_dir
 from spectrochempy.utils.file import pathclean
-
-try:
-    from spectrochempy.core.common import dialogs
-except ImportError:
-    pytest.skip("dialogs not available with act", allow_module_level=True)
 
 DATADIR = prefs.datadir
 
@@ -35,12 +29,12 @@ DATADIR = prefs.datadir
 
 def dialog_cancel(*args, **kwargs):
     """Mock a dialog cancel action."""
-    return None
+    return
 
 
 def dialog_open(*args, **kwargs):
     """Mock dialog open with simulated file selection."""
-    directory = kwargs.get("directory", None)
+    directory = kwargs.get("directory")
     if directory is None:
         directory = pathclean(DATADIR / "fakedir")
 
@@ -100,7 +94,7 @@ def _read_fk(*args, **kwargs):
 
 # Register fake reader
 read_fk = read_fake
-setattr(NDDataset, "read_fk", read_fk)
+scp.read_fk = read_fk
 
 # --------------------------------------------------------------------------------------
 # Mock Dataset Factory
@@ -163,8 +157,11 @@ class TestBasicImporter:
         self.fs.create_file(self.test_file, contents=b"fake data")
 
         # Register protocol
-        FILETYPES.append(("fake", "FAKE files (*.fk)"))
-        ALIAS.append(("fk", "fake"))
+        registry.register_filetype(
+            "fake",
+            "FAKE files (*.fk)",
+            aliases=["fk"],
+        )
 
     def test_file_not_found(self, fs):
         """Test behavior when file is not found."""
@@ -186,7 +183,7 @@ class TestBasicImporter:
         # Mock file system access and reader
         monkeypatch.setattr(os.path, "exists", lambda p: True)
         monkeypatch.setattr(
-            NDDataset, "read_fk", MockDatasetFactory.create_reader(origin="opus")
+            scp, "read_fk", MockDatasetFactory.create_reader(origin="opus")
         )
 
         # Test reading
@@ -222,8 +219,12 @@ class TestImporterMerging:
             self.fs.create_file(f)
             self.omnic_files.append(f)
 
-        FILETYPES.append(("fake", "FAKE files (*.fk)"))
-        ALIAS.append(("fk", "fake"))
+        # Register protocol
+        registry.register_filetype(
+            "fake",
+            "FAKE files (*.fk)",
+            aliases=["fk"],
+        )
 
     def test_merge_same_origin(self, monkeypatch, fs):
         """Test merging datasets with same origin."""
@@ -231,7 +232,7 @@ class TestImporterMerging:
 
         monkeypatch.setattr(os.path, "exists", lambda p: True)
         monkeypatch.setattr(
-            NDDataset, "read_fk", MockDatasetFactory.create_reader(origin="opus")
+            scp, "read_fk", MockDatasetFactory.create_reader(origin="opus")
         )
 
         datasets = read(self.opus_files, protocol="fake", local_only=True, merge=True)
@@ -245,7 +246,7 @@ class TestImporterMerging:
 
         monkeypatch.setattr(os.path, "exists", lambda p: True)
         monkeypatch.setattr(
-            NDDataset,
+            scp,
             "read_fk",
             MockDatasetFactory.create_reader(),  # Uses filename-based origin
         )
@@ -267,7 +268,7 @@ class TestImporterMerging:
         self.setup_method()
 
         monkeypatch.setattr(os.path, "exists", lambda p: True)
-        monkeypatch.setattr(NDDataset, "read_fk", MockDatasetFactory.create_reader())
+        monkeypatch.setattr(scp, "read_fk", MockDatasetFactory.create_reader())
 
         datasets = read(
             self.opus_files + self.omnic_files,
@@ -287,8 +288,18 @@ class TestImporterDirectoryReading:
 
     def setup_method(self):
         """Setup common test environment."""
-        FILETYPES.append(("fake", "FAKE files (*.fk)"))
-        ALIAS.append(("fk", "fake"))
+        # Register NMR files types
+        registry.register_filetype(
+            "topspin",
+            "Bruker TOPSPIN files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
+        )
+
+        # Register protocol
+        registry.register_filetype(
+            "fake",
+            "FAKE files (*.fk)",
+            aliases=["fk"],
+        )
 
     def _setup_fake_files(self, fs):
         """Create fake test files in the filesystem."""

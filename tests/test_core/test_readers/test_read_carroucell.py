@@ -13,11 +13,6 @@ import spectrochempy as scp
 from spectrochempy import NDDataset, info_
 from spectrochempy import preferences as prefs
 
-try:
-    from spectrochempy.core.common import dialogs
-except ImportError:
-    pytest.skip("dialogs not available with act", allow_module_level=True)
-
 DATADIR = prefs.datadir
 CARROUCELL_FOLDER = DATADIR / "irdata/carroucell_samp"
 
@@ -45,10 +40,8 @@ def test_read_carroucell(monkeypatch):
     nd = scp.read_carroucell("irdata/carroucell_samp", spectra=(1, 1))
     assert isinstance(nd, NDDataset)
 
-    monkeypatch.setattr(dialogs, "open_dialog", dialog_carroucell)
-    monkeypatch.setenv("KEEP_DIALOGS", "True")
-    nd = scp.read_carroucell(spectra=(1, 3))
+    nd = scp.read_carroucell("irdata/carroucell_samp", spectra=(1, 3))
     assert nd[3].shape == (3, 11098)
 
-    nd = scp.read_carroucell(spectra=(2, 3), discardbg=False)
+    nd = scp.read_carroucell("irdata/carroucell_samp", spectra=(2, 3), discardbg=False)
     assert nd[3].shape == (2, 11098)
