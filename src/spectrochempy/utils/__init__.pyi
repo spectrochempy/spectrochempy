@@ -4,7 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-# ruff: noq
+# ruff: noqa
 
 __all__ = [
     "baseconfigurable",
@@ -14,28 +14,28 @@ __all__ = [
     "coordrange",
     "datetimeutils",
     "decorators",
-    "docreps",
-    "docstrings",
+    "docutils",
     "exceptions",
     "fake",
     "file",
     "jsonutils",
     "meta",
     "metaconfigurable",
-    "misc",
     "mplutils",
     "numutils",
     "objects",
     "optional",
-    "orderedset",
     "packages",
     "print",
+    "quaternion",
     "show_versions",
     "system",
     "testing",
     "timeutils",
     "traits",
+    "typeutils",
     "warnings",
+    "zip",
 ]
 
 from . import baseconfigurable
@@ -45,25 +45,25 @@ from . import constants
 from . import coordrange
 from . import datetimeutils
 from . import decorators
-from . import docreps
-from . import docstrings
+from . import docutils
 from . import exceptions
 from . import fake
 from . import file
 from . import jsonutils
 from . import meta
 from . import metaconfigurable
-from . import misc
 from . import mplutils
 from . import numutils
 from . import objects
 from . import optional
-from . import orderedset
 from . import packages
 from . import print
+from . import quaternion
 from . import show_versions
 from . import system
 from . import testing
 from . import timeutils
 from . import traits
+from . import typeutils
 from . import warnings
+from . import zip

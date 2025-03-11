@@ -15,7 +15,7 @@ from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.constants import MASKED
-from spectrochempy.utils.misc import get_n_decimals
+from spectrochempy.utils.numutils import get_n_decimals
 
 
 def can_merge_or_align(coord1, coord2):
@@ -199,7 +199,7 @@ def align(dataset, *others, **kwargs):
         # prepare a new Coord object to store the final new dimension
         new_coord = ref_coord.copy()
 
-        ndec = get_n_decimals(new_coord.data.max(), 1.0e-5)
+        ndec = get_n_decimals(new_coord.data.max(), 5)
 
         # loop on all object
         for _index, object in _objects.items():

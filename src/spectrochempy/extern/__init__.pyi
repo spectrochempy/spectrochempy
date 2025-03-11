@@ -4,14 +4,16 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-# ruff: noq
+# ruff: noqa
 
 __all__ = [
     "brukeropus",
+    "nmrglue",
     "traittypes",
     "whittaker_smooth",
 ]
 
 from . import brukeropus
+from . import nmrglue
 from . import traittypes
 from . import whittaker_smooth

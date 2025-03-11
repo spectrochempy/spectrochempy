@@ -185,7 +185,7 @@ def generate_init_pyi(package_path):
     content = [
         header.rstrip(),  # Ensure no trailing spaces
         "",  # Add a blank line after the header
-        "# ruff: noq\n",
+        "# ruff: noqa\n",
         "__all__ = [",
     ]
 
@@ -202,6 +202,7 @@ def generate_init_pyi(package_path):
     # Write the file
     with open(init_pyi_path, "w") as f:
         f.write("\n".join(content))
+        f.write("\n")  # add ending new line
 
     print(f"Generated {init_pyi_path} with {len(modules)} modules/packages")
     return True

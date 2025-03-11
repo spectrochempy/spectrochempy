@@ -29,7 +29,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.objects import ScpObjectList
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType

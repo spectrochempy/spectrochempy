@@ -22,7 +22,7 @@ from spectrochempy.utils.colors import NBlue
 from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 
 __all__ = ["PCA"]
 __configurables__ = ["PCA"]

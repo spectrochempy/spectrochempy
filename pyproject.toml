@@ -88,8 +88,7 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
-nmr = ["spectrochempy[quaternion]"]
-quaternion = ["numpy-quaternion"]
+# nmr = ["quaternion"]
 test = [
   "coverage",
   "ipywidgets",
@@ -111,10 +110,6 @@ repository = "https://github.com/spectrochempy/spectrochempy"
 [project.scripts]
 make_scpy_docs = "docs.make:main"
 show_versions = "spectrochempy.ci.show_versions:main"
-
-[project.entry-points."spectrochempy.plugins"]
-nmr = "spectrochempy.plugins.nmr:plugin_class"
-quaternion = "spectrochempy.plugins.quaternion:plugin_class"
 
 [tool.setuptools]
 include-package-data = true

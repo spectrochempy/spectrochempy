@@ -21,7 +21,7 @@ import tempfile
 import textwrap
 import traceback
 
-# import matplotlib
+import docrep
 import matplotlib.pyplot as plt
 import numpy
 from numpydoc.docscrape import get_doc_object
@@ -320,6 +320,68 @@ class DocstringError(Exception):
           %(message)s\n
         """
         print(traceback_template % traceback_details)  # noqa: T201
+
+
+_common_doc = """
+out : `object`
+    Input object or a newly allocated object, depending on the `inplace` flag.
+new : `object`
+    Newly allocated object.
+copy : `bool`, optional, default: `True`
+    Perform a copy of the passed object.
+inplace : `bool`, optional, default: `False`
+    By default, the method returns a newly allocated object.
+    If `inplace` is set to `True`, the input object is returned.
+dataset : `NDDataset` or :term:`array-like` of shape (`n_observations` , `n_features`)
+    Input data, where :term:`n_observations` is the number of observations
+    and :term:`n_features` is the number of features.
+dim : `int` or `str`, optional, default: -1,
+    Dimension along which the method is applied.
+    By default, the method is applied to the last dimension.
+    If `dim` is specified as an integer it is equivalent to the usual `axis` numpy
+    parameter.
+**kwargs : keyword parameters, optional
+    See Other Parameters.
+"""
+
+
+class DocstringProcessor(docrep.DocstringProcessor):
+    param_like_sections = ["See Also"] + docrep.DocstringProcessor.param_like_sections
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        regex = re.compile(r"(?=^[*]{0,2}\b\w+\b\s?:?\s?)", re.MULTILINE | re.DOTALL)
+        plist = regex.split(_common_doc.strip())[1:]
+        params = {
+            k.strip("*"): f"{k.strip()} : {v.strip()}"
+            for k, v in (re.split(r"\s?:\s?", p, maxsplit=1) for p in plist)
+        }
+        self.params.update(params)
+
+    def dedent(self, s, stacklevel=3):
+        s_ = s
+        start = ""
+        end = ""
+        string = True
+        if not isinstance(s, str) and hasattr(s, "__doc__"):
+            string = False
+            s_ = s.__doc__
+        if s_.startswith("\n"):  # restore the first blank line
+            start = "\n"
+        if s_.strip(" ").endswith("\n"):  # restore the last return before quote
+            end = "\n"
+        s_mod = super().dedent(s, stacklevel=stacklevel)
+        if string:
+            s_mod = f"{start}{s_mod}{end}"
+        else:
+            s_mod.__doc__ = f"{start}{s_mod.__doc__}{end}"
+        return s_mod
+
+
+# Docstring substitution (docrep)
+# --------------------------------------------------------------------------------------
+_docstring = DocstringProcessor()
 
 
 # TODO replace this in module where it is used by docrep

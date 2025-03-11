@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 
 
 # test docstring

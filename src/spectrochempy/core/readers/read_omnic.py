@@ -28,7 +28,7 @@ from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.datetimeutils import utcnow
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.file import fromfile
 
 # ======================================================================================

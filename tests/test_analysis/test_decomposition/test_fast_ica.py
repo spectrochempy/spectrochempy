@@ -14,7 +14,7 @@ from sklearn.decomposition import FastICA as skl_ICA
 import spectrochempy as scp
 from spectrochempy.analysis.decomposition.fast_ica import FastICA as scp_ICA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.mplutils import show
 from spectrochempy.utils.testing import assert_dataset_equal

@@ -66,7 +66,7 @@ from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import windows_time_to_dt64
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.file import fromfile
 from spectrochempy.utils.objects import Adict
 

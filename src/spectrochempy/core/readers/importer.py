@@ -27,7 +27,7 @@ from spectrochempy.application.application import warning_
 from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.processing.transformation.concatenate import stack
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 
 # from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 from spectrochempy.utils.exceptions import ProtocolError

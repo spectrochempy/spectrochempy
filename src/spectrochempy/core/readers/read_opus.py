@@ -22,7 +22,7 @@ from spectrochempy.extern.brukeropus import OPUSFile
 from spectrochempy.extern.brukeropus.file.utils import get_block_type_label
 from spectrochempy.extern.brukeropus.file.utils import get_param_label
 from spectrochempy.utils.datetimeutils import UTC
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 
 # from spectrochempy.application.application import warning_
 from spectrochempy.utils.meta import Meta

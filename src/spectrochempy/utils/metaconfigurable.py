@@ -24,7 +24,7 @@ from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.objects import Adict
 
 ur = UnitRegistry()

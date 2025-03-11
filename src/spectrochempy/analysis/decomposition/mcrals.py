@@ -31,7 +31,7 @@ from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 
 
 # DEVNOTE:

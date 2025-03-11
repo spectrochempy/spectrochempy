@@ -4,7 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-# ruff: noq
+# ruff: noqa
 
 __all__ = [
     "peakfinding",

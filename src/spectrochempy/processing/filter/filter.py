@@ -12,7 +12,7 @@ from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 
 __dataset_methods__ = [
     "savgol_filter",

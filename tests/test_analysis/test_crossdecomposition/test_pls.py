@@ -20,7 +20,7 @@ from sklearn.cross_decomposition import PLSRegression as sklPLSRegression
 import spectrochempy as scp
 from spectrochempy.analysis.crossdecomposition.pls import PLSRegression
 from spectrochempy.core.readers.importer import read
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.testing import assert_dataset_equal
 

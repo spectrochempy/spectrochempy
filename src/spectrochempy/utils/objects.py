@@ -10,15 +10,42 @@ This module provides enhanced dictionary and list classes with additional featur
 like attribute access and read-only capabilities.
 """
 
+import collections
+import uuid
+from datetime import datetime
 from typing import Any
 from typing import TypeVar
 from typing import Union
+
+from spectrochempy.utils.datetimeutils import UTC
 
 # Type variables for better type hints
 T = TypeVar("T")
 DictType = Union[dict[str, Any], "Adict", "ReadOnlyDict"]
 
-__all__ = ["Adict", "ReadOnlyDict", "ScpObjectList"]
+__all__ = ["Adict", "ReadOnlyDict", "ScpObjectList", "OrderedSet"]
+
+
+def make_new_object(objtype):
+    """
+    Make a new object of type obj.
+
+    Parameters
+    ----------
+    objtype : the object type
+
+    Returns
+    -------
+    new : the new object of same type
+
+    """
+    new = type(objtype)()
+
+    # new id and date
+    new._id = "{}_{}".format(type(objtype).__name__, str(uuid.uuid1()).split("-")[0])
+    new._date = datetime.now(UTC)
+
+    return new
 
 
 class Adict(dict):
@@ -305,3 +332,65 @@ class ScpObjectList(list):
             html += f"<div class='scp-output section'>{convert_to_html(item, open=False, id=i)}</div>\n"
         html += "</details></div>"
         return html
+
+
+class OrderedSet(collections.abc.MutableSet):
+    # https://code.activestate.com/recipes/576694/
+    # by Raymond Hettinger
+    # license: MIT
+
+    def __init__(self, iterable=None):
+        self.end = end = []
+        end += [None, end, end]  # sentinel node for doubly linked list
+        self.map = {}  # key --> [key, prev, next]
+        if iterable is not None:
+            self |= iterable
+
+    def __len__(self):
+        return len(self.map)
+
+    def __contains__(self, key):
+        return key in self.map
+
+    def add(self, key):
+        if key not in self.map:
+            end = self.end
+            curr = end[1]
+            curr[2] = end[1] = self.map[key] = [key, curr, end]
+
+    def discard(self, key):
+        if key in self.map:
+            key, prev, next = self.map.pop(key)
+            prev[2] = next
+            next[1] = prev
+
+    def __iter__(self):
+        end = self.end
+        curr = end[2]
+        while curr is not end:
+            yield curr[0]
+            curr = curr[2]
+
+    def __reversed__(self):
+        end = self.end
+        curr = end[1]
+        while curr is not end:
+            yield curr[0]
+            curr = curr[1]
+
+    def pop(self, last=True):
+        if not self:
+            raise KeyError("set is empty")
+        key = self.end[1][0] if last else self.end[2][0]
+        self.discard(key)
+        return key
+
+    def __repr__(self):
+        if not self:
+            return f"{self.__class__.__name__}()"
+        return f"{self.__class__.__name__}({list(self)!r})"
+
+    def __eq__(self, other):
+        if isinstance(other, OrderedSet):
+            return len(self) == len(other) and list(self) == list(other)
+        return set(self) == set(other)

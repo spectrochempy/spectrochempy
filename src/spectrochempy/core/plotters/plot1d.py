@@ -22,10 +22,10 @@ from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils.docreps import add_docstring  # , deprecated
-from spectrochempy.utils.misc import is_sequence
+from spectrochempy.utils.docutils import add_docstring  # , deprecated
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.mplutils import plot_method
+from spectrochempy.utils.typeutils import is_sequence
 
 _PLOT1D_DOC = """\
 ax : Axe, optional

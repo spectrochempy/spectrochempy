@@ -21,7 +21,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.10.8
+#     version: 3.13.2
 #   widgets:
 #     application/vnd.jupyter.widget-state+json:
 #       state: {}
@@ -33,24 +33,49 @@
 # # The NDDataset object
 
 # %% [markdown]
-# The NDDataset is the main object use by **SpectroChemPy**.
+# The NDDataset is the main object used by **SpectroChemPy**.
 #
-# Like numpy ndarrays, NDDataset have the capability to be sliced, sorted and subject to
+# Like numpy ndarrays, NDDatasets have the capability to be sliced, sorted and subjected to
 # mathematical operations.
 #
-# But, in addition, NDDataset may have units, can be masked and each dimensions can have
+# But, in addition, NDDatasets may have units, can be masked and each dimension can have
 # coordinates also with units.
-# This make NDDataset aware of units compatibility, *e.g.*, for binary operation such as
-# additions or subtraction or during the application of mathematical operations.
-# In addition or in replacement of numerical data for coordinates,
-# NDDataset can also have labeled coordinates where labels can be different kind of
-# objects (strings, datetime,
-# numpy nd.ndarray or other NDDatasets, etc...).
+# This makes NDDatasets aware of units compatibility, *e.g.*, for binary operations such as
+# addition or subtraction or during the application of mathematical operations.
+# In addition to or in replacement of numerical data for coordinates,
+# NDDatasets can also have labeled coordinates where labels can be different kinds of
+# objects (strings, datetime objects, numpy ndarrays or other NDDatasets, etc.).
 #
-# This offers a lot of flexibility in using NDDatasets that,  we hope, will be useful
+# This offers a lot of flexibility in using NDDatasets that, we hope, will be useful
 # for applications.
-# See the See the [Examples](../../../gettingstarted/examples/gallery/auto_examples_core/index.rst) for
+# See the [Examples](../../../gettingstarted/examples/gallery/auto_examples_core/index.rst) for
 # additional information about such possible applications.
+
+# %% [markdown]
+# ## Table of Contents
+#
+# * [Introduction](#Introduction)
+#   * [1D-Dataset (unidimensional dataset)](#1D-Dataset-(unidimensional-dataset))
+#   * [nD-Dataset (multidimensional dataset)](#nD-Dataset-(multidimensional-dataset))
+# * [Metadata and Attributes](#About-the-dates-and-times)
+#   * [About dates and times](#About-dates-and-times)
+#   * [About the history attribute](#About-the-history-attribute)
+# * [Units](#Units)
+# * [Coordinates](#Coordinates)
+#   * [Labels](#Labels)
+#   * [Sharing coordinates between dimensions](#Sharing-coordinates-between-dimensions)
+#   * [Setting coordinates using set_coordset](#Setting-coordinates-using-set_coordset)
+#   * [Adding several coordinates to a single dimension](#Adding-several-coordinates-to-a-single-dimension)
+#   * [Math operations on coordinates](#Math-operations-on-coordinates)
+#   * [Summary of coordinate setting syntax](#Summary-of-the-coordinate-setting-syntax)
+# * [Methods to create NDDataset](#Methods-to-create-NDDataset)
+#   * [Create a dataset from a function](#Create-a-dataset-from-a-function)
+#   * [Using numpy-like constructors](#Using-numpy-like-constructors-of-NDDatasets)
+#   * [Copying existing NDDataset](#Copying-existing-NDDataset)
+#   * [Importing from external datasets](#Importing-from-external-datasets)
+
+# %% [markdown]
+# ## Introduction
 
 # %% [markdown]
 # **Below (and in the next sections), we try to give an almost complete view of the
@@ -74,26 +99,26 @@ from spectrochempy import NDDataset
 
 # %% [markdown]
 # For a convenient usage of units, we will also directly import
-# **[ur]((#Units)**, the unit registry which contains all available
+# **[ur](#Units)**, the unit registry which contains all available
 # units.
 # %%
 from spectrochempy import ur
 
 # %% [markdown]
-# Multidimensional array are defined in Spectrochempy using the `NDDataset` object.
+# Multidimensional arrays are defined in Spectrochempy using the `NDDataset` object.
 #
-# `NDDataset` objects mostly behave as numpy's `numpy.ndarray`
-# (see for instance __
-# [numpy quickstart tutorial](https://numpy.org/doc/stable/user/quickstart.html)__).
+# `NDDataset` objects mostly behave like numpy's `numpy.ndarray`
+# (see for instance
+# [numpy quickstart tutorial](https://numpy.org/doc/stable/user/quickstart.html)).
 
 # %% [markdown]
-# However, unlike raw numpy's ndarray, the presence of optional properties make
+# However, unlike raw numpy arrays, the presence of optional properties makes
 # them (hopefully) more appropriate for handling spectroscopic information,
-# one of the major objectives of the SpectroChemPy package:
+# which is one of the major objectives of the SpectroChemPy package:
 #
-# *  `mask`: Data can be partially masked at will
-# *  `units`: Data can have units, allowing units-aware operations
-# *  `CoordSet`: Data can have a set of coordinates, one or several by dimensions
+# * `mask`: Data can be partially masked at will
+# * `units`: Data can have units, allowing units-aware operations
+# * `CoordSet`: Data can have a set of coordinates, one or several per dimension
 #
 # Additional metadata can also be added to the instances of this class
 # through the `meta` properties.
@@ -142,20 +167,20 @@ d1D
 # %% [markdown]
 # As seen above, there are some attributes that are automatically added to the dataset:
 #
-# * `id`      : This is a unique identifier for the object.
-# * `name`: A short and unique name for the dataset. It will beequal to the automatic
-# `id` if it is not provided.
-# * `author`  : Author determined from the computer name if not provided.
-# * `created` : Date and time of creation.
+# * `id`: This is a unique identifier for the object.
+# * `name`: A short and unique name for the dataset. It will be equal to the automatic
+#   `id` if it is not provided.
+# * `author`: Author determined from the computer name if not provided.
+# * `created`: Date and time of creation.
 # * `modified`: Date and time of modification.
 #
-# These attributes can be modified by the user, but the `id` , `created` and `modified`
+# These attributes can be modified by the user, but the `id`, `created` and `modified`
 # attributes are read only.
 #
 # Some other attributes are defined to describe the data:
 # * `title`: A long name that will be used in plots or in some other operations.
-# * `history`: history of operation achieved on the object since the object creation.
-# * `description`: A comment or a description of the objects purpose or contents.
+# * `history`: History of operations performed on the object since its creation.
+# * `description`: A comment or a description of the object's purpose or contents.
 # * `origin`: An optional reference to the source of the data.
 
 # %% [markdown]
@@ -230,9 +255,9 @@ d3D = NDDataset(
 d3D
 
 # %% [markdown]
-# Three names are attributed at the creation (if they are not provided with the `dims`
-# attribute, then the name are:
-# 'z','y','x' automatically attributed)
+# Three names are attributed at creation (if they are not provided with the `dims`
+# attribute, then the names
+# 'z','y','x' are automatically attributed)
 
 # %%
 d3D.dims
@@ -244,10 +269,9 @@ d3D.ndim
 d3D.shape
 
 # %% [markdown]
-# ## About the dates and times
+# ## About dates and times
 # The dates and times are stored internally as
-# [UTC (Coordinated_Universal_Time)](https://en.wikipedia.org/wiki/Coordinated_
-# Universal_Time).
+# [UTC (Coordinated Universal Time)](https://en.wikipedia.org/wiki/Coordinated_Universal_Time).
 # Timezone information is stored in the timezone attribute.
 # If not set, the default is to use the local timezone,
 # which is probably the most common case.
@@ -276,18 +300,18 @@ nd.created
 # ## About the `history` attribute
 
 # %% [markdown]
-# The history is saved internally into a list, but its has a different behaviour than
+# The history is saved internally as a list, but it has a different behavior than
 # the usual list.
-# The first time a NDDataset is created, the list is empty
+# The first time a NDDataset is created, the list is empty.
 
 # %%
 nd = NDDataset()
 nd.history
 
 # %% [markdown]
-# Assigning a string to the history attribute has two effects. The first one is that
-# the string is appended automatically to the previous history list, and second it is
-# preceeded by the time it has been added.
+# Assigning a string to the history attribute has two effects. First,
+# the string is appended automatically to the previous history list, and second, it is
+# preceded by the time it was added.
 
 # %%
 nd.history = "some history"
@@ -303,7 +327,7 @@ nd.history = []
 nd.history
 
 # %% [markdown]
-# If you want to replace the full history use bracket around your history line:
+# If you want to replace the full history, use brackets around your history line:
 
 # %%
 nd.history = "Created form scratch"
@@ -315,7 +339,7 @@ nd.history
 # ## Units
 
 # %% [markdown]
-# One interesting possibility for a NDDataset is to have defined units for the internal
+# One interesting feature of NDDataset is the ability to define units for the internal
 # data.
 
 # %%
@@ -348,15 +372,15 @@ d1D.to("K")
 
 # %% [markdown]
 # For more examples on how to use units with NDDataset, see the
-# [gallery example](gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html
+# [gallery example](../../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html)
 
 # %% [markdown]
 # ## Coordinates
 
 # %% [markdown]
-# The above created `d3D` dataset has 3 dimensions, but no coordinate for these
+# The above created `d3D` dataset has 3 dimensions, but no coordinates for these
 # dimensions. Here arises a big difference
-# with simple `numpy`-arrays:
+# with simple `numpy` arrays:
 # * We can add coordinates to each dimension of a NDDataset.
 
 # %% [markdown]
@@ -369,7 +393,7 @@ d3D.coordset  # no coordinates, so it returns nothing (None)
 d3D.t  # the same for coordinate  t, v, u which are not yet set
 
 # %% [markdown]
-# To add coordinates, on way is to set them one by one:
+# To add coordinates, one way is to set them one by one:
 
 # %%
 d3D.t = (
@@ -433,17 +457,13 @@ d3D.time
 # ## Labels
 
 # %% [markdown]
-# It is possible to use labels instead of numerical coordinates. They are sequence of
-# objects .The length of the
-# sequence must be equal to the size of a dimension.
-
-# %% [markdown]
-# The labels can be simple strings, *e.g.,*
+# It is possible to use labels instead of numerical coordinates. Labels are sequences of
+# objects. The length of the sequence must be equal to the size of the dimension.
 
 # %%
 tags = list("ab")
 d3D.u.title = "some tags"
-d3D.u.labels = tags  # TODO: avoid repetition
+d3D.u.labels = tags
 d3D
 
 # %% [markdown]
@@ -475,7 +495,7 @@ d3D.time
 # ## Sharing coordinates between dimensions
 
 # %% [markdown]
-# Sometimes it is not necessary to have different coordinates for each axe. Some can be
+# Sometimes it is not necessary to have different coordinates for each axis. Some can be
 # shared between axes.
 #
 # For example, if we have a square matrix with the same coordinate in the two
@@ -645,13 +665,17 @@ d3D
 # %% [markdown]
 # <div class='alert alert-warning'>
 # <b>WARNING</b>
-#
-# Do not use list for setting multiples coordinates! use tuples
+# <p>
+# Do not use lists for setting multiple coordinates across different dimensions! Use tuples instead.
+# </p>
+# <p>
+# Lists have a special meaning in SpectroChemPy - they're used to set multiple coordinates for the same dimension.
+# </p>
 # </div>
 
 # %% [markdown]
-# This raise an error (list have another signification: it's used to set a "same dim"
-# CoordSet see example A or B)
+# This raises an error (lists have another meaning: they're used to set multiple coordinates
+# for the same dimension, as shown in examples A and B above):
 
 # %%
 try:
@@ -663,7 +687,7 @@ except ValueError:
     )
 
 # %% [markdown]
-# This works : it uses a tuple `()` , not a list `[]`
+# This works: it uses a tuple `()`, not a list `[]`
 
 # %%
 d3D.coordset = (
@@ -700,9 +724,8 @@ d3D
 #
 # There are many ways to create `NDDataset` objects.
 #
-# Let's first create 2 coordinate objects, for which we can define `labels` and `units`!
-# Note the use of the function
-# `linspace`to generate the data.
+# Let's first create 2 coordinate objects, for which we can define `labels` and `units`.
+# Note the use of the function `linspace` to generate the data.
 
 # %%
 c0 = Coord.linspace(
@@ -723,9 +746,9 @@ cs
 
 
 # %% [markdown]
-# Now we will generate the full dataset, using a `fromfunction` method.
-# All needed information are passed as
-# parameter of the NDDataset instance constructor.
+# Now we will generate the full dataset using the `fromfunction` method.
+# All needed information is passed as
+# parameters to the NDDataset constructor.
 
 # %% [markdown]
 # ## Create a dataset from a function
@@ -804,11 +827,11 @@ d3Dduplicate = NDDataset(d3D, name=f"duplicate of {d3D.name}", units="absorbance
 d3Dduplicate
 
 # %% [markdown]
-# ## Importing from external dataset
+# ## Importing from external datasets
 #
-# NDDataset can be created from the importation of external data
+# NDDatasets can be created from the importation of external data.
 #
-# A **test**'s data folder contains some data for experimenting some features of
+# A **test** data folder contains some sample data for experimenting with features of
 # datasets.
 
 # %%
@@ -826,8 +849,8 @@ scp.preferences.reset()
 nd.plot()
 
 # %% [markdown]
-# Even if we do not specify the **datadir**, the application first look in the
-# directory by default.
+# Even if we do not specify the **datadir**, the application first looks in the
+# default directory.
 
 # %% [markdown]
 # Now, lets load a NMR dataset (in the Bruker format).

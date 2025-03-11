@@ -26,8 +26,8 @@ import numpy as np
 from matplotlib._tight_layout import get_subplotspec_list  # get_renderer,
 from matplotlib._tight_layout import get_tight_layout_figure  # get_renderer,
 
-from spectrochempy.utils.misc import is_sequence
 from spectrochempy.utils.mplutils import _Axes
+from spectrochempy.utils.typeutils import is_sequence
 
 # from spectrochempy.application.preferences import preferences, project_preferences
 

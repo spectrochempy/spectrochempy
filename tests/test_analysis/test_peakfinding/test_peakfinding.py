@@ -7,7 +7,7 @@ from spectrochempy.analysis.peakfinding.peakfinding import find_peaks
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 
 
 # test docstring

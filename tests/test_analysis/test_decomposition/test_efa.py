@@ -11,7 +11,7 @@ import pytest
 
 import spectrochempy as scp
 from spectrochempy.analysis.curvefitting._models import asymmetricvoigtmodel
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.mplutils import show
 
@@ -47,7 +47,7 @@ def test_example():
     c = model.transform()
     # Plot the transposed concentration matrix  (2 x N)
     _ = c.T.plot(title="Concentration")
-    scp.show()
+    # scp.show()
 
 
 def test_EFA(IR_dataset_2D):
@@ -135,7 +135,7 @@ def test_EFA(IR_dataset_2D):
     c = efa.transform()
     c.T.plot()
 
-    scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
+    # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
 
     ds = IR_dataset_2D.copy()
     #

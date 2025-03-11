@@ -10,7 +10,7 @@ import traitlets as tr
 from spectrochempy.application.application import app
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.exceptions import NotTransformedError
 
 

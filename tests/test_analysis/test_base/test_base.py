@@ -19,7 +19,7 @@ from spectrochempy.analysis._base._analysisbase import (
     LinearRegressionAnalysis,
     NotFittedError,
 )
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 
 
 # test docstring

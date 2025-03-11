@@ -23,7 +23,7 @@ from spectrochempy.utils.colors import NGreen
 from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.traits import NDDatasetType
 

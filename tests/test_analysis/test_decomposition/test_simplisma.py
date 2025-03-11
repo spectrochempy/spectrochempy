@@ -12,7 +12,7 @@ import pytest
 import spectrochempy as scp
 from spectrochempy.analysis.decomposition.simplisma import SIMPLISMA
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils import docstrings as chd
+from spectrochempy.utils import docutils as chd
 from spectrochempy.utils.mplutils import show
 
 

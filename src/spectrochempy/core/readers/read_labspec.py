@@ -16,7 +16,7 @@ from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.meta import Meta
 
 # ======================================================================================

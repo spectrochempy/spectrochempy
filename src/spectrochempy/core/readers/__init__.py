@@ -20,5 +20,6 @@ from . import read_opus
 from . import read_quadera
 from . import read_soc
 from . import read_spc
+from . import read_topspin
 from . import read_wire
 from . import read_zip

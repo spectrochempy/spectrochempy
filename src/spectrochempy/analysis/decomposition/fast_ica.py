@@ -12,7 +12,7 @@ from sklearn import decomposition
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docreps import _docstring
+from spectrochempy.utils.docutils import _docstring
 from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = ["FastICA"]

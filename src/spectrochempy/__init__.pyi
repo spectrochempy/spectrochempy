@@ -4,7 +4,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-# ruff: noq
+# ruff: noqa
 
 __all__ = [
     "analysis",
@@ -12,7 +12,6 @@ __all__ = [
     "core",
     "extern",
     "ipython",
-    "plugins",
     "processing",
     "utils",
 ]
@@ -22,6 +21,5 @@ from . import application
 from . import core
 from . import extern
 from . import ipython
-from . import plugins
 from . import processing
 from . import utils

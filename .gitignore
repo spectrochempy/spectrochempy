@@ -24,7 +24,7 @@ var/
 sdist/
 .Python
 .pytest_cache/
-.coverage
+.coverage*
 .hypothesis/
 htmlcov/
 coverage.xml
@@ -142,3 +142,4 @@ _sandbox
 *.sample
 *.pptx
 saved_pkglist.txt
+utils_analyses.md
