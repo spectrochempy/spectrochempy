@@ -22,9 +22,10 @@ dill
 docrep
 ipython
 jinja2
+lazy_loader
+matplotlib
 numpy
 numpy-quaternion >= 2024.0.7
-matplotlib
 osqp
 pint
 pyyaml

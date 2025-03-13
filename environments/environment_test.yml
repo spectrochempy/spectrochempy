@@ -30,9 +30,10 @@ dependencies:
     - docrep
     - ipython
     - jinja2
+    - lazy_loader
+    - matplotlib-base
     - numpy
     - quaternion>=2024.0.7
-    - matplotlib-base
     - osqp
     - pint
     - pyyaml
