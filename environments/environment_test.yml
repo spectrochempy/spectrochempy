@@ -46,6 +46,7 @@ dependencies:
 
     # TEST dependencies
     # -----------------
+
     - coverage
     - ipywidgets
     - pyfakefs

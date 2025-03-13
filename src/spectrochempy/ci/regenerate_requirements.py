@@ -148,9 +148,19 @@ def generate_conda_environments(deps, opt_deps):
     # OPTIONAL dependencies
     for opt in opt_deps:
         opt_deps_string = (
-            "\n" + underline(f"{opt.upper()} dependencies", indent=4) + "    - "
+            "\n" + underline(f"{opt.upper()} dependencies", indent=4)  # + "    - "
         )
-        opt_deps_string += "\n    - ".join([pip2conda(dep) for dep in opt_deps[opt]])
+        for dep in opt_deps[opt]:
+            if "spectrochempy[" not in dep:
+                opt_deps_string += f"\n    - {pip2conda(dep)}"
+            else:
+                subopt = dep.split("[")[1].split("]")[0]
+                subopt_string = "\n    - ".join(
+                    [pip2conda(dep) for dep in opt_deps[subopt]]
+                )
+
+                opt_deps_string += f"\n    # {subopt}\n    - {subopt_string}"
+
         out = template.render(
             dependencies=deps_string
             if opt
