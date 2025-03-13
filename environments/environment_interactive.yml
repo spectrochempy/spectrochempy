@@ -46,6 +46,7 @@ dependencies:
 
     # INTERACTIVE dependencies
     # ------------------------
+
     - jupyter
     - jupyterlab
     - ipykernel

@@ -26,6 +26,7 @@ dependencies:
 
     # BUILD dependencies
     # ------------------
+
     - setuptools
     - setuptools_scm
     - toml
