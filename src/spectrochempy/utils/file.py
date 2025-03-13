@@ -490,7 +490,7 @@ def get_filenames(*filenames, **kwargs):
 
     else:
         # no filenames:
-        # open a file dialog
+        # open a file dialog    # TODO: revise this as we have suppressed the dialogs
         # except if a directory is specified or iterdir is True.
 
         getdir = kwargs.get(
@@ -500,10 +500,10 @@ def get_filenames(*filenames, **kwargs):
         )
 
         if not getdir:
-            # we open a dialogue to select one or several files manually
+            # we open a dialog to select one or several files manually
             if environ.get("TEST_FILE", None) is not None:
                 # happen for testing
-                filenames = [pathclean(environ.get("TEST_FILE"))]
+                filenames = [prefs.datadir / environ.get("TEST_FILE")]
 
         else:
             if not directory:
