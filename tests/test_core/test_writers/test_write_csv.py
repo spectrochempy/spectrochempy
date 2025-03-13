@@ -40,5 +40,5 @@ def test_write_csv(mock_cwd, IR_dataset_2D):
     assert mock_cwd.joinpath("myfile.csv").exists()
     f = ds.write_csv("../myfile.csv")
     assert f.name == "myfile.csv"
-    assert scp.pathclean("../myfile.csv").exists()
+    assert scp.pathclean(mock_cwd.joinpath("../myfile.csv")).exists()
     f.unlink()
