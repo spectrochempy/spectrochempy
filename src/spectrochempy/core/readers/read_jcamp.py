@@ -19,15 +19,15 @@ from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_jcamp")
+docprocess.delete_params("Importer.see_also", "read_jcamp")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_jcamp(*paths, **kwargs):
     r"""
     Open Infrared ``JCAMP-DX`` files with extension :file:`.jdx` or :file:`.dx`.

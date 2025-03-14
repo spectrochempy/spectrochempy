@@ -22,7 +22,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 try:
     locale.setlocale(locale.LC_ALL, "en_US")  # to avoid problems with date format
@@ -39,10 +39,10 @@ except Exception:  # pragma: no cover
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_csv")
+docprocess.delete_params("Importer.see_also", "read_csv")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_csv(*paths, **kwargs):
     """
     Open a :file:`.csv` file or a list of :file:`.csv` files.

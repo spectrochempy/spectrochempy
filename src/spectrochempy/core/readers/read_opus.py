@@ -22,7 +22,7 @@ from spectrochempy.extern.brukeropus import OPUSFile
 from spectrochempy.extern.brukeropus.file.utils import get_block_type_label
 from spectrochempy.extern.brukeropus.file.utils import get_param_label
 from spectrochempy.utils.datetimeutils import UTC
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 # from spectrochempy.application.application import warning_
 from spectrochempy.utils.meta import Meta
@@ -30,10 +30,10 @@ from spectrochempy.utils.meta import Meta
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_opus")
+docprocess.delete_params("Importer.see_also", "read_opus")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_opus(*paths, **kwargs):
     r"""
     Open Bruker OPUS file(s).

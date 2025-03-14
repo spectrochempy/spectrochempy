@@ -23,7 +23,7 @@ from spectrochempy.utils.colors import NGreen
 from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -32,7 +32,7 @@ from spectrochempy.utils.traits import NDDatasetType
 # Base class AnalysisConfigurable
 # ======================================================================================
 class AnalysisConfigurable(BaseConfigurable):
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         r"""
     Abstract class to write analysis model estimators.
 
@@ -53,7 +53,7 @@ class AnalysisConfigurable(BaseConfigurable):
     )
 
     # Get doc sections for reuse in subclass
-    _docstring.get_sections(__doc__, base="AnalysisConfigurable")
+    docprocess.get_sections(__doc__, base="AnalysisConfigurable")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -168,13 +168,13 @@ class AnalysisConfigurable(BaseConfigurable):
         return self
 
     # we do not use this method as a decorator as in this case signature of subclasses
-    _docstring.get_sections(
-        _docstring.dedent(fit.__doc__),
+    docprocess.get_sections(
+        docprocess.dedent(fit.__doc__),
         base="analysis_fit",
         sections=["Parameters", "Returns", "See Also"],
     )
     # extract useful individual parameters doc
-    _docstring.keep_params("analysis_fit.parameters", "X")
+    docprocess.keep_params("analysis_fit.parameters", "X")
 
     @property
     def log(self):
@@ -225,8 +225,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # attributes and methods necessary for decomposition model.
 
     # Get doc sections for reuse in subclass
-    _docstring.get_sections(
-        _docstring.dedent(__doc__),
+    docprocess.get_sections(
+        docprocess.dedent(__doc__),
         base="DecompositionAnalysis",
         sections=["See Also"],
     )
@@ -301,7 +301,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Public methods
     # ----------------------------------------------------------------------------------
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
-    @_docstring.dedent
+    @docprocess.dedent
     def transform(self, X=None, **kwargs):
         r"""
         Apply dimensionality reduction to `X`.
@@ -356,15 +356,15 @@ class DecompositionAnalysis(AnalysisConfigurable):
         return X_transform
 
     # Get doc sections for reuse in subclass
-    _docstring.get_sections(
-        _docstring.dedent(transform.__doc__),
+    docprocess.get_sections(
+        docprocess.dedent(transform.__doc__),
         base="analysis_transform",
         sections=["Parameters", "Other Parameters", "Returns"],
     )
-    _docstring.keep_params("analysis_transform.parameters", "X")
+    docprocess.keep_params("analysis_transform.parameters", "X")
 
     @_wrap_ndarray_output_to_nddataset
-    @_docstring.dedent
+    @docprocess.dedent
     def inverse_transform(self, X_transform=None, **kwargs):
         r"""
         Transform data back to its original space.
@@ -424,14 +424,14 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         return self._inverse_transform(X_transform)
 
-    _docstring.get_sections(
-        _docstring.dedent(inverse_transform.__doc__),
+    docprocess.get_sections(
+        docprocess.dedent(inverse_transform.__doc__),
         base="analysis_inverse_transform",
         sections=["Parameters", "Returns"],
     )
     # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
 
-    @_docstring.dedent
+    @docprocess.dedent
     def fit_transform(self, X, Y=None, **kwargs):
         r"""
         Fit the model with `X` and apply the dimensionality reduction on `X`.
@@ -522,7 +522,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
-    @_docstring.dedent
+    @docprocess.dedent
     def plotmerit(self, X=None, X_hat=None, **kwargs):
         r"""
         Plot the input (`X`), reconstructed (`X_hat`) and residuals.
@@ -612,7 +612,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         ax.yaxis.set_visible(kwargs.get("show_yaxis", False))
         return ax
 
-    _docstring.get_sections(_docstring.dedent(plotmerit.__doc__), base="plotmerit")
+    docprocess.get_sections(docprocess.dedent(plotmerit.__doc__), base="plotmerit")
 
     @property
     def Y(self):
@@ -643,8 +643,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # attributes and methods necessary for cross decomposition model.
 
     # Get doc sections for reuse in subclass
-    _docstring.get_sections(
-        _docstring.dedent(__doc__),
+    docprocess.get_sections(
+        docprocess.dedent(__doc__),
         base="CrossDecompositionAnalysis",
         sections=["See Also"],
     )
@@ -661,7 +661,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
 
     @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None)
-    @_docstring.dedent
+    @docprocess.dedent
     def predict(self, X=None):
         r"""
         Predict targets of given observations.
@@ -689,7 +689,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         return self._predict(X)
 
-    @_docstring.dedent
+    @docprocess.dedent
     def score(self, X=None, Y=None, sample_weight=None):
         r"""
         Return the coefficient of determination of the prediction.
@@ -742,7 +742,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         meta_from=("_X", "_Y"),
         typex="components",
     )
-    @_docstring.dedent
+    @docprocess.dedent
     def transform(self, X=None, Y=None, both=False, **kwargs):
         r"""
         Apply dimensionality reduction to `X`and `Y`.
@@ -782,15 +782,15 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         return self._transform(newX, None)
 
     # Get doc sections for reuse in subclass
-    _docstring.get_sections(
-        _docstring.dedent(transform.__doc__),
+    docprocess.get_sections(
+        docprocess.dedent(transform.__doc__),
         base="cross_decomposition_transform",
         sections=["Parameters", "Other Parameters", "Returns"],
     )
-    _docstring.keep_params("cross_decomposition_transform.parameters", "X", "Y", "both")
+    docprocess.keep_params("cross_decomposition_transform.parameters", "X", "Y", "both")
 
     @_wrap_ndarray_output_to_nddataset(meta_from=("_X", "_Y"))
-    @_docstring.dedent
+    @docprocess.dedent
     def inverse_transform(
         self,
         X_transform=None,
@@ -849,14 +849,14 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         X, Y = self._inverse_transform(X_transform, X_transform)
         return X, Y
 
-    _docstring.get_sections(
-        _docstring.dedent(inverse_transform.__doc__),
+    docprocess.get_sections(
+        docprocess.dedent(inverse_transform.__doc__),
         base="analysis_inverse_transform",
         sections=["Parameters", "Returns"],
     )
     # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
 
-    @_docstring.dedent
+    @docprocess.dedent
     def fit_transform(self, X, Y, both=False):
         r"""
         Fit the model with `X` and `Y` and apply the dimensionality reduction on `X` and optionally on `Y`.
@@ -882,7 +882,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
-    @_docstring.dedent
+    @docprocess.dedent
     def parityplot(
         self,
         Y=None,
@@ -1069,7 +1069,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         return ax
 
-    _docstring.get_sections(_docstring.dedent(parityplot.__doc__), base="parityplot")
+    docprocess.get_sections(docprocess.dedent(parityplot.__doc__), base="parityplot")
 
 
 # ======================================================================================

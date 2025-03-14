@@ -22,13 +22,13 @@ from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 
 # ======================================================================================
 @signature_has_configurable_traits
 class Optimize(DecompositionAnalysis):
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         """
     Non-linear Least-Square Optimization and Curve-Fitting.
 
@@ -926,7 +926,7 @@ class Optimize(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
-    @_docstring.dedent
+    @docprocess.dedent
     def fit(self, X):
         """
         Perform a non-linear optimization of the ``X`` dataset.

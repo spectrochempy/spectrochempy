@@ -18,7 +18,7 @@ from spectrochempy.application.application import info_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 
 # ======================================================================================
@@ -26,9 +26,9 @@ from spectrochempy.utils.docutils import _docstring
 # ======================================================================================
 @signature_has_configurable_traits
 class SIMPLISMA(DecompositionAnalysis):
-    _docstring.delete_params("DecompositionAnalysis.see_also", "SIMPLISMA")
+    docprocess.delete_params("DecompositionAnalysis.see_also", "SIMPLISMA")
 
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         r"""
     SIMPLe to use Interactive Self-modeling Mixture Analysis (SIMPLISMA).
 
@@ -512,9 +512,9 @@ class SIMPLISMA(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods and properties
     # ----------------------------------------------------------------------------------
-    _docstring.keep_params("analysis_fit.parameters", "X")
+    docprocess.keep_params("analysis_fit.parameters", "X")
 
-    @_docstring.dedent
+    @docprocess.dedent
     def fit(self, X):
         """
         Fit the SIMPLISMA model on X.

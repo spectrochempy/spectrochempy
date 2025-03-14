@@ -24,14 +24,14 @@ from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import merge_datasets
 from spectrochempy.core.readers.read_omnic import read_omnic
 from spectrochempy.utils.datetimeutils import UTC
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
 
-_docstring.delete_params("Importer.see_also", "read_carroucell")
+docprocess.delete_params("Importer.see_also", "read_carroucell")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_carroucell(directory=None, **kwargs):
     r"""
     Open :file:`.spa` files in a directory after a :term:`carroucell` experiment.

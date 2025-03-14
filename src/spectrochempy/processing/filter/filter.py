@@ -12,7 +12,7 @@ from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 __dataset_methods__ = [
     "savgol_filter",
@@ -32,16 +32,16 @@ savgol : Savitzky-Golay filter.
 savgol_filter : Alias of `savgol`
 whittaker : Whittaker-Eilers filter.
 """
-_docstring.get_sections(
-    _docstring.dedent(_common_see_also),
+docprocess.get_sections(
+    docprocess.dedent(_common_see_also),
     base="Filter",
     sections=["See Also"],
 )
-_docstring.delete_params("Filter.see_also", "Filter")
-_docstring.delete_params("Filter.see_also", "savgol")
-_docstring.delete_params("Filter.see_also", "savgol_filter")
-_docstring.delete_params("Filter.see_also", "whittaker")
-_docstring.delete_params("Filter.see_also", "smooth")
+docprocess.delete_params("Filter.see_also", "Filter")
+docprocess.delete_params("Filter.see_also", "savgol")
+docprocess.delete_params("Filter.see_also", "savgol_filter")
+docprocess.delete_params("Filter.see_also", "whittaker")
+docprocess.delete_params("Filter.see_also", "smooth")
 
 
 # ======================================================================================
@@ -49,7 +49,7 @@ _docstring.delete_params("Filter.see_also", "smooth")
 # ======================================================================================
 @signature_has_configurable_traits
 class Filter(ProcessingConfigurable):
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         r"""
     Filters/smoothers processor.
 
@@ -222,15 +222,15 @@ and ‘nearest’.
         return data
 
 
-_docstring.keep_params("Filter.parameters", "log_level")
-_docstring.keep_params("Filter.parameters", "method")
-_docstring.keep_params("Filter.parameters", "size")
-_docstring.keep_params("Filter.parameters", "order")
-_docstring.keep_params("Filter.parameters", "deriv")
-_docstring.keep_params("Filter.parameters", "lamb")
-_docstring.keep_params("Filter.parameters", "delta")
-_docstring.keep_params("Filter.parameters", "mode")
-_docstring.keep_params("Filter.parameters", "cval")
+docprocess.keep_params("Filter.parameters", "log_level")
+docprocess.keep_params("Filter.parameters", "method")
+docprocess.keep_params("Filter.parameters", "size")
+docprocess.keep_params("Filter.parameters", "order")
+docprocess.keep_params("Filter.parameters", "deriv")
+docprocess.keep_params("Filter.parameters", "lamb")
+docprocess.keep_params("Filter.parameters", "delta")
+docprocess.keep_params("Filter.parameters", "mode")
+docprocess.keep_params("Filter.parameters", "cval")
 
 
 # TODO history
@@ -251,7 +251,7 @@ _docstring.keep_params("Filter.parameters", "cval")
 # --------------------------------------------------------------------------------------
 
 
-@_docstring.dedent
+@docprocess.dedent
 def smooth(dataset, size=5, window="avg", **kwargs):
     """
     Smooth the data using a window with requested size.
@@ -304,7 +304,7 @@ def smooth(dataset, size=5, window="avg", **kwargs):
 
 
 # --------------------------------------------------------------------------------------
-@_docstring.dedent
+@docprocess.dedent
 def savgol(dataset, size=5, order=2, **kwargs):
     """
     Savitzky-Golay filter.
@@ -368,7 +368,7 @@ def savgol_filter(*args, **kwargs):
     return savgol(*args, **kwargs)
 
 
-@_docstring.dedent
+@docprocess.dedent
 def whittaker(dataset, lamb=1.0, order=2, **kwargs):
     """
     Smooth the data using the Whittaker smoothing algorithm.

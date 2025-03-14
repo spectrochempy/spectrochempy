@@ -1089,7 +1089,7 @@ def _main():
 
 def main():
     try:
-        environ["DOC_BUILDING"] = 1
+        environ["DOC_BUILDING"] = "1"
         res = _main()
     finally:
         del environ["DOC_BUILDING"]

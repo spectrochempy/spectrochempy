@@ -21,15 +21,15 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_matlab")
+docprocess.delete_params("Importer.see_also", "read_matlab")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_matlab(*paths, **kwargs):
     """
     Read a matlab file with extension :file:`.mat` and return its content as a list.

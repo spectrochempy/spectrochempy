@@ -21,289 +21,44 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.application.preferences import preferences
+from spectrochempy.core.dataset.arraymixins.ndplot import (
+    NDPlot,  # noqa: F401 # for the docstring to be determined it necessary to import NDPlot
+)
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils.docutils import add_docstring  # , deprecated
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.mplutils import make_label
-from spectrochempy.utils.mplutils import plot_method
 from spectrochempy.utils.typeutils import is_sequence
-
-_PLOT1D_DOC = """\
-ax : Axe, optional
-    Axe where to plot. If not specified, create a new one.
-style : str, optional, default: `scp.preferences.style` (scpy)
-    Matplotlib stylesheet (use `available_style` to get a list of available
-    styles for plotting.
-use_plotly : bool, optional, default: `preferences.use_plotly` (False)
-    Should we use plotly instead of matplotlib for plotting.
-twinx : :class:`~matplotlib.axes.Axes` instance, optional, default: None
-    If this is not None, then a twin axes will be created with a
-    common x dimension.
-clear : bool, optional, default: True
-    If false, hold the current figure and ax until a new plot is performed.
-reverse : bool or None [optional, default=None/False
-    In principle, coordinates run from left to right,
-    except for wavenumbers
-    (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
-    will try to guess. But if reverse is set, then this is the
-    setting which will be taken into account.
-data_only : bool, optional, default: False
-    Only the plot is done. No addition of axes or label specifications.
-imag : bool, optional, default: False
-    Show imaginary component for complex data. By default the real component is
-    displayed.
-show_complex : bool, optional, default: False
-    Show both real and imaginary component for complex data.
-    By default only the real component is displayed.
-figsize : tuple, optional, default is (3.4, 1.7)
-    figure size.
-dpi : int, optional
-    the number of pixel per inches.
-xlim : tuple, optional
-    limit on the horizontal axis.
-zlim or ylim : tuple, optional
-    limit on the vertical axis.
-color or c : color, optional, default: auto
-    color of the line.
-linewidth or lw : float, optional, default: auto
-    line width.
-linestyle or ls : str, optional, default: auto
-    line style definition.
-marker, m: str, optional, default: auto
-    marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
-markeredgecolor or mec: color, optional
-markeredgewidth or mew: float, optional
-markerfacecolor or mfc: color, optional
-markersize or ms: float, optional
-markevery: None or int
-title : str
-    Title of the plot (or subplot) axe.
-plottitle: bool, optional, default: False
-    Use the name of the dataset as title. Works only if title is not defined
-xlabel : str, optional
-    label on the horizontal axis.
-zlabel or ylabel : str, optional
-    label on the vertical axis.
-uselabel_x: bool, optional
-    use x coordinate label as x tick labels
-show_z : bool, optional, default: True
-    should we show the vertical axis.
-show_zero : bool, optional
-    show the zero basis.
-show_mask: bool, optional
-    Should we display the mask using colored area.
-plot_model : Bool,
-    plot model data if available.
-modellinestyle or modls : str
-    line style of the model.
-offset : float
-    offset of the model individual lines.
-commands : str,
-    matplotlib commands to be executed.
-output : str,
-    name of the file to save the figure.
-vshift : float, optional
-    vertically shift the line from its baseline.
-"""
-
-
-@plot_method("1D", _PLOT1D_DOC)
-def plot_scatter(dataset, **kwargs):
-    """
-    Plot a 1D dataset as a scatter plot (points can be added on lines).
-
-    Alias of plot (with `method` argument set to `scatter` .
-    """
-
-
-@plot_method("1D", _PLOT1D_DOC)
-def plot_pen(dataset, **kwargs):
-    """
-    Plot a 1D dataset with solid pen by default.
-
-    Alias of plot (with `method` argument set to `pen` .
-    """
-
-
-@plot_method("1D", _PLOT1D_DOC)
-def plot_scatter_pen(dataset, **kwargs):
-    """
-    Plot a 1D dataset with solid pen by default.
-
-    Alias of plot (with `method` argument set to `scatter_pen` .
-    """
-
-
-@plot_method("1D", _PLOT1D_DOC)
-def plot_bar(dataset, **kwargs):
-    """
-    Plot a 1D dataset with bars.
-
-    Alias of plot (with `method` argument set to `bar` .
-    """
-
-
-def plot_multiple(
-    datasets,
-    method="scatter",
-    pen=True,
-    labels=None,
-    marker="AUTO",
-    color="AUTO",
-    ls="AUTO",
-    lw=1,
-    shift=0,
-    **kwargs,
-):
-    """
-    Plot a series of 1D datasets as a scatter plot with optional lines between markers.
-
-    Parameters
-    ----------
-    datasets : `list` of 1D `NDDataset`
-        NDdatasets to plot.
-    method : `str` among [scatter, pen]
-        Method to use for plotting.
-    pen : bool, optional, default: True
-        If method is scatter, this flag tells to draw also the lines
-        between the marks.
-    labels : a `list` of `str`, optional
-        Labels used for the legend. The length of the list must be equal to the number
-        of datasets to plot.
-    marker : `str`, list` os `str` or `AUTO`, optional, default: 'AUTO'
-        Marker type for scatter plot. If marker is not provided then the scatter type
-        of plot is chosen automatically.
-    color : `str`, list` os `str` or `AUTO`, optional, default: 'AUTO'
-        Color of the lines. If color is not provided then the color of the lines is
-        chosen automatically.
-    ls: `str`, `list` os `str` or `AUTO`, optional, default: 'AUTO'
-        Line style definition. If ls is not provided then the line style is chosen
-        automatically.
-    lw: `float`, `list`of  `floats`, optional, default: 1.0
-        Line width. If lw is not provided then the line width is chosen automatically.
-    shift: `float`, `list`of  `floats`, optional, default: 0.0
-        Vertical shift of the lines.
-    **kwargs
-        Other parameters that will be passed to the plot1D function.
-
-    See Also
-    --------
-    plot_1D
-    plot_pen
-    plot_scatter
-    plot_bar
-    plot_scatter_pen
-
-    """
-    if not is_sequence(datasets):
-        # we need a sequence. Else it is a single plot.
-        return datasets.plot(**kwargs)
-
-    def _valid(x, desc):
-        if is_sequence(x) and len(x) != len(datasets):
-            raise ValueError(
-                f"list of {desc} must be of same length as the datasets list",
-            )
-        if not is_sequence(x) and x != "AUTO":
-            return [x] * len(datasets)
-
-        return x
-
-    labels = _valid(labels, "labels")
-
-    for dataset in datasets:
-        if dataset._squeeze_ndim > 1:
-            raise NotImplementedError(
-                "plot multiple is designed to work on "
-                "1D dataset only. you may achieved "
-                "several plots with "
-                "the `clear=False` parameter as a work "
-                "around "
-                "solution",
-            )
-
-    # do not save during this plots, nor apply any commands
-    # we will make this when all plots will be done
-
-    output = kwargs.get("output")
-    kwargs["output"] = None
-    commands = kwargs.get("commands", [])
-    kwargs["commands"] = []
-    clear = kwargs.pop("clear", True)
-    legend = kwargs.pop(
-        "legend",
-        None,
-    )  # remove 'legend' from kwargs before calling plot
-    # else it will generate a conflict
-
-    marker = _valid(marker, "marker")
-    color = _valid(color, "color")
-    ls = _valid(ls, "ls")
-    lw = _valid(lw, "lw")
-    shift = _valid(shift, "shift")
-
-    # now we can plot
-    sh = 0
-    for i, s in enumerate(datasets):  # , colors, markers):
-        ax = (s + shift[i] + sh).plot(
-            method=method,
-            pen=pen,
-            marker=(marker[i] if marker != "AUTO" else marker),
-            color=color[i] if color != "AUTO" else color,
-            ls=ls[i] if ls != "AUTO" else ls,
-            lw=lw[i] if lw != "AUTO" else lw,
-            clear=clear,
-            **kwargs,
-        )
-        sh += shift[i]
-        clear = False  # clear=False is necessary for the next plot to say
-        # that we will plot on the same figure
-
-    # scale all plots
-    if legend is not None:
-        _ = ax.legend(
-            ax.lines,
-            labels,
-            shadow=True,
-            loc=legend,
-            frameon=True,
-            fontsize="small",
-        )
-
-    # now we can output the final figure
-    kw = {"output": output, "commands": commands}
-    datasets[0]._plot_resume(datasets[-1], **kw)
-
-    return ax
-
 
 # --------------------------------------------------------------------------------------
 # plot_1D
 # --------------------------------------------------------------------------------------
-@add_docstring(_PLOT1D_DOC)
+docprocess.delete_params(
+    "plot.other_parameters", "colorbar", "projections", "transposed", "y_reverse"
+)
+docprocess.delete_params("plot.parameters", "method")
+
+
+@docprocess.dedent
 def plot_1D(dataset, method=None, **kwargs):
     """
     Plot of one-dimensional data.
 
     Parameters
     ----------
-    dataset : :class:`~spectrochempy.ddataset.nddataset.NDDataset`
-        Source of data to plot.
-    method : str, optional, default: dataset.preference.method_1D
-        The method can be one among `pen` , `bar` , `scatter` or `scatter+pen` .
-        Default values is `pen` , i.e., solid lines are drawn. This default can be changed
-        using `dataset.preference.method_1D` .
-        To draw a Bar graph, use method `bar` .
-        For a Scatter plot, use method `scatter` .
-        For pen and scatter simultaneously, use method `scatter+pen` .
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    %(plot.parameters)s
 
     Other Parameters
     ----------------
-    {0}
+    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+
+    Returns
+    -------
+    %(plot.returns)s
 
     See Also
     --------
+    plot
+    plot_1D
     plot_pen
     plot_scatter
     plot_bar
@@ -641,5 +396,250 @@ def plot_1D(dataset, method=None, **kwargs):
             facecolor="#FFEEEE",
             alpha=0.3,
         )
+
+    return ax
+
+
+@docprocess.dedent
+def plot_scatter(dataset, **kwargs):
+    """
+    Plot a 1D dataset as a scatter plot (points can be added on lines).
+
+    Alias of plot (with `method` argument set to `scatter` .
+
+    Parameters
+    ----------
+    %(plot.parameters.no_method)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_1D
+    plot_pen
+    plot_bar
+    plot_scatter_pen
+
+    """
+
+
+@docprocess.dedent
+def plot_pen(dataset, **kwargs):
+    """
+    Plot a 1D dataset with solid pen by default.
+
+    Alias of plot (with `method` argument set to `pen`.
+
+    Parameters
+    ----------
+    %(plot.parameters.no_method)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_1D
+    plot_scatter
+    plot_bar
+    plot_scatter_pen
+
+    """
+
+
+@docprocess.dedent
+def plot_scatter_pen(dataset, **kwargs):
+    """
+    Plot a 1D dataset with solid pen by default.
+
+    Alias of plot (with `method` argument set to `scatter_pen` .
+
+    Parameters
+    ----------
+    %(plot.parameters.no_method)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_1D
+    plot_scatter
+    plot_bar
+    plot_pen
+
+    """
+
+
+@docprocess.dedent
+def plot_bar(dataset, **kwargs):
+    """
+    Plot a 1D dataset with bars.
+
+    Alias of plot (with `method` argument set to `bar`.
+
+    Parameters
+    ----------
+    %(plot.parameters.no_method)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_1D
+    plot_scatter
+    plot_pen
+    plot_scatter_pen
+    """
+
+
+def plot_multiple(
+    datasets,
+    method="scatter",
+    pen=True,
+    labels=None,
+    marker="AUTO",
+    color="AUTO",
+    ls="AUTO",
+    lw=1,
+    shift=0,
+    **kwargs,
+):
+    """
+    Plot a series of 1D datasets as a scatter plot with optional lines between markers.
+
+    Parameters
+    ----------
+    datasets : `list` of 1D `NDDataset`
+        NDdatasets to plot.
+    method : `str` among [scatter, pen]
+        Method to use for plotting.
+    pen : bool, optional, default: True
+        If method is scatter, this flag tells to draw also the lines
+        between the marks.
+    labels : a `list` of `str`, optional
+        Labels used for the legend. The length of the list must be equal to the number
+        of datasets to plot.
+    marker : `str`, list` os `str` or `AUTO`, optional, default: 'AUTO'
+        Marker type for scatter plot. If marker is not provided then the scatter type
+        of plot is chosen automatically.
+    color : `str`, list` os `str` or `AUTO`, optional, default: 'AUTO'
+        Color of the lines. If color is not provided then the color of the lines is
+        chosen automatically.
+    ls: `str`, `list` os `str` or `AUTO`, optional, default: 'AUTO'
+        Line style definition. If ls is not provided then the line style is chosen
+        automatically.
+    lw: `float`, `list`of  `floats`, optional, default: 1.0
+        Line width. If lw is not provided then the line width is chosen automatically.
+    shift: `float`, `list`of  `floats`, optional, default: 0.0
+        Vertical shift of the lines.
+    **kwargs
+        Other parameters that will be passed to the plot1D function.
+
+    """
+    if not is_sequence(datasets):
+        # we need a sequence. Else it is a single plot.
+        return datasets.plot(**kwargs)
+
+    def _valid(x, desc):
+        if is_sequence(x) and len(x) != len(datasets):
+            raise ValueError(
+                f"list of {desc} must be of same length as the datasets list",
+            )
+        if not is_sequence(x) and x != "AUTO":
+            return [x] * len(datasets)
+
+        return x
+
+    labels = _valid(labels, "labels")
+
+    for dataset in datasets:
+        if dataset._squeeze_ndim > 1:
+            raise NotImplementedError(
+                "plot multiple is designed to work on "
+                "1D dataset only. you may achieved "
+                "several plots with "
+                "the `clear=False` parameter as a work "
+                "around "
+                "solution",
+            )
+
+    # do not save during this plots, nor apply any commands
+    # we will make this when all plots will be done
+
+    output = kwargs.get("output")
+    kwargs["output"] = None
+    commands = kwargs.get("commands", [])
+    kwargs["commands"] = []
+    clear = kwargs.pop("clear", True)
+    legend = kwargs.pop(
+        "legend",
+        None,
+    )  # remove 'legend' from kwargs before calling plot
+    # else it will generate a conflict
+
+    marker = _valid(marker, "marker")
+    color = _valid(color, "color")
+    ls = _valid(ls, "ls")
+    lw = _valid(lw, "lw")
+    shift = _valid(shift, "shift")
+
+    # now we can plot
+    sh = 0
+    for i, s in enumerate(datasets):  # , colors, markers):
+        ax = (s + shift[i] + sh).plot(
+            method=method,
+            pen=pen,
+            marker=(marker[i] if marker != "AUTO" else marker),
+            color=color[i] if color != "AUTO" else color,
+            ls=ls[i] if ls != "AUTO" else ls,
+            lw=lw[i] if lw != "AUTO" else lw,
+            clear=clear,
+            **kwargs,
+        )
+        sh += shift[i]
+        clear = False  # clear=False is necessary for the next plot to say
+        # that we will plot on the same figure
+
+    # scale all plots
+    if legend is not None:
+        _ = ax.legend(
+            ax.lines,
+            labels,
+            shadow=True,
+            loc=legend,
+            frameon=True,
+            fontsize="small",
+        )
+
+    # now we can output the final figure
+    kw = {"output": output, "commands": commands}
+    datasets[0]._plot_resume(datasets[-1], **kw)
 
     return ax

@@ -29,7 +29,7 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.objects import ScpObjectList
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType
@@ -315,9 +315,9 @@ class IrisKernel(tr.HasTraits):
 
 @signature_has_configurable_traits
 class IRIS(DecompositionAnalysis):
-    _docstring.delete_params("DecompositionAnalysis.see_also", "IRIS")
+    docprocess.delete_params("DecompositionAnalysis.see_also", "IRIS")
 
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         r"""
     Integral inversion solver for spectroscopic data (IRIS).
 
@@ -850,7 +850,7 @@ class IRIS(DecompositionAnalysis):
             ax.set_yscale("log")
         return ax
 
-    @_docstring.dedent
+    @docprocess.dedent
     def plotmerit(self, index=None, **kwargs):
         r"""
         Plot the input dataset, reconstructed dataset and residuals.

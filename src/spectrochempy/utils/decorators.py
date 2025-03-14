@@ -18,7 +18,7 @@ from warnings import warn
 
 import traitlets as tr
 
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 
 def preserve_signature(f):
@@ -238,9 +238,9 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
         desc = indent(desc, "    ")
         otherpar += desc
 
-    doc = _docstring.dedent(cls.__doc__)
-    _docstring.get_full_description(doc, base=cls.__name__)
-    _docstring.get_sections(
+    doc = docprocess.dedent(cls.__doc__)
+    docprocess.get_full_description(doc, base=cls.__name__)
+    docprocess.get_sections(
         doc,
         base=cls.__name__,
         sections=[
@@ -252,37 +252,37 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
             "References",
         ],
     )
-    _docstring.params[f"{cls.__name__}.parameters"] += f"\n{otherpar.strip()}"
-    doc = "\n" + _docstring.params[f"{cls.__name__}.full_desc"]
+    docprocess.params[f"{cls.__name__}.parameters"] += f"\n{otherpar.strip()}"
+    doc = "\n" + docprocess.params[f"{cls.__name__}.full_desc"]
     doc += "\n\n"
     doc += "Parameters\n"
     doc += "----------\n"
-    doc += _docstring.params[f"{cls.__name__}.parameters"]
+    doc += docprocess.params[f"{cls.__name__}.parameters"]
     doc += "\n"
-    if _docstring.params[f"{cls.__name__}.other_parameters"]:
+    if docprocess.params[f"{cls.__name__}.other_parameters"]:
         doc += "\nOther Parameters\n"
         doc += "----------------\n"
-        doc += _docstring.params[f"{cls.__name__}.other_parameters"]
+        doc += docprocess.params[f"{cls.__name__}.other_parameters"]
         doc += "\n"
-    if _docstring.params[f"{cls.__name__}.see_also"]:
+    if docprocess.params[f"{cls.__name__}.see_also"]:
         doc += "\nSee Also\n"
         doc += "--------\n"
-        doc += _docstring.params[f"{cls.__name__}.see_also"]
+        doc += docprocess.params[f"{cls.__name__}.see_also"]
         doc += "\n"
-    if _docstring.params[f"{cls.__name__}.references"]:
+    if docprocess.params[f"{cls.__name__}.references"]:
         doc += "\nReferences\n"
         doc += "----------\n"
-        doc += _docstring.params[f"{cls.__name__}.references"]
+        doc += docprocess.params[f"{cls.__name__}.references"]
         doc += "\n"
-    if _docstring.params[f"{cls.__name__}.examples"]:
+    if docprocess.params[f"{cls.__name__}.examples"]:
         doc += "\nExamples\n"
         doc += "--------\n"
-        doc += _docstring.params[f"{cls.__name__}.examples"]
+        doc += docprocess.params[f"{cls.__name__}.examples"]
         doc += "\n"
-    if _docstring.params[f"{cls.__name__}.notes"]:
+    if docprocess.params[f"{cls.__name__}.notes"]:
         doc += "\nNotes\n"
         doc += "-----\n"
-        doc += _docstring.params[f"{cls.__name__}.notes"]
+        doc += docprocess.params[f"{cls.__name__}.notes"]
         doc += "\n"
     cls.__doc__ = doc
 

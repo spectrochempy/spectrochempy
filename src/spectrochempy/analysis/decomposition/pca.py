@@ -22,7 +22,7 @@ from spectrochempy.utils.colors import NBlue
 from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 __all__ = ["PCA"]
 __configurables__ = ["PCA"]
@@ -33,9 +33,9 @@ __configurables__ = ["PCA"]
 # ======================================================================================
 @signature_has_configurable_traits
 class PCA(DecompositionAnalysis):
-    _docstring.delete_params("DecompositionAnalysis.see_also", "PCA")
+    docprocess.delete_params("DecompositionAnalysis.see_also", "PCA")
 
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         """
     Principal Component Anamysis (PCA).
 
@@ -295,9 +295,9 @@ for reproducible results across multiple function calls.""",
     # ----------------------------------------------------------------------------------
     # Public methods and properties specific to PCA
     # ----------------------------------------------------------------------------------
-    _docstring.keep_params("analysis_fit.parameters", "X")
+    docprocess.keep_params("analysis_fit.parameters", "X")
 
-    @_docstring.dedent
+    @docprocess.dedent
     def fit(self, X):
         """
         Fit the PCA model on X.

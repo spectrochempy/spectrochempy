@@ -31,7 +31,7 @@ from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 
 # DEVNOTE:
@@ -39,9 +39,9 @@ from spectrochempy.utils.docutils import _docstring
 # derived class
 @signature_has_configurable_traits
 class MCRALS(DecompositionAnalysis):
-    _docstring.delete_params("DecompositionAnalysis.see_also", "MCRALS")
+    docprocess.delete_params("DecompositionAnalysis.see_also", "MCRALS")
 
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         r"""
     Multivariate Curve Resolution Alternating Least Squares (MCRALS).
 
@@ -1108,7 +1108,7 @@ and `St`.
     # ----------------------------------------------------------------------------------
     # Public methods and properties
     # ----------------------------------------------------------------------------------
-    @_docstring.dedent
+    @docprocess.dedent
     def fit(self, X, Y):
         """
         Fit the MCRALS model on an X dataset using initial concentration or spectra.
@@ -1130,7 +1130,7 @@ and `St`.
         """
         return super().fit(X, Y)
 
-    @_docstring.dedent
+    @docprocess.dedent
     def fit_transform(self, X, Y, **kwargs):
         """
         Fit the model with ``X`` and apply the dimensionality reduction on ``X``.
@@ -1153,7 +1153,7 @@ and `St`.
         """
         return super().fit_transform(X, Y, **kwargs)
 
-    @_docstring.dedent
+    @docprocess.dedent
     def inverse_transform(self, X_transform=None, **kwargs):
         r"""
         Transform data back to its original space.

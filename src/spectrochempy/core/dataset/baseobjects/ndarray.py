@@ -38,7 +38,7 @@ from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.constants import MaskedConstant
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.objects import make_new_object
 from spectrochempy.utils.print import convert_to_html
@@ -1176,7 +1176,7 @@ class NDArray(HasTraits):
         return new
 
     @property
-    @_docstring.get_docstring(base="data")
+    @docprocess.get_docstring(base="data")
     def data(self):
         """
         Data array (`~numpy.ndarray`).
@@ -2068,7 +2068,7 @@ class NDArray(HasTraits):
 
         return new
 
-    _docstring.get_docstring(to.__doc__, base="to")
+    docprocess.get_docstring(to.__doc__, base="to")
 
     def to_base_units(self, inplace=False):
         """

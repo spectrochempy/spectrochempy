@@ -28,7 +28,7 @@ from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -59,19 +59,19 @@ autosub: Perform an automatic subtraction of reference.
 detrend : Remove polynomial trend along a dimension from dataset.
 """
 
-_docstring.get_sections(
-    _docstring.dedent(_common_see_also),
+docprocess.get_sections(
+    docprocess.dedent(_common_see_also),
     base="Baseline",
     sections=["See Also"],
 )
-_docstring.delete_params("Baseline.see_also", "Baseline")
-_docstring.delete_params("Baseline.see_also", "get_baseline")
-_docstring.delete_params("Baseline.see_also", "basc")
-_docstring.delete_params("Baseline.see_also", "asls")
-_docstring.delete_params("Baseline.see_also", "snip")
-_docstring.delete_params("Baseline.see_also", "autosub")
-_docstring.delete_params("Baseline.see_also", "detrend")
-_docstring.delete_params("Baseline.see_also", "rubberband")
+docprocess.delete_params("Baseline.see_also", "Baseline")
+docprocess.delete_params("Baseline.see_also", "get_baseline")
+docprocess.delete_params("Baseline.see_also", "basc")
+docprocess.delete_params("Baseline.see_also", "asls")
+docprocess.delete_params("Baseline.see_also", "snip")
+docprocess.delete_params("Baseline.see_also", "autosub")
+docprocess.delete_params("Baseline.see_also", "detrend")
+docprocess.delete_params("Baseline.see_also", "rubberband")
 
 
 # ======================================================================================
@@ -82,7 +82,7 @@ _docstring.delete_params("Baseline.see_also", "rubberband")
 # Configurable traits are added to the signature as keywords
 # if they are not yet present.
 class Baseline(AnalysisConfigurable):
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         """
     Baseline Correction processor.
 
@@ -584,7 +584,7 @@ baseline/trends for different segments of the data.
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
-    @_docstring.dedent
+    @docprocess.dedent
     def fit(self, X):
         """
         Fit a baseline model on a `X` dataset.
@@ -702,7 +702,7 @@ baseline/trends for different segments of the data.
         """Dataset with baseline removed."""
         return self.transform()
 
-    @_docstring.dedent
+    @docprocess.dedent
     def params(self, default=False):
         """%(MetaConfigurable.parameters_doc)s."""
         d = super().params(default)
@@ -735,7 +735,7 @@ baseline/trends for different segments of the data.
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
-    @_docstring.dedent
+    @docprocess.dedent
     def plot(self, **kwargs):
         r"""
         Plot the original, baseline and corrected dataset.
@@ -813,7 +813,7 @@ baseline/trends for different segments of the data.
 # called from the API.
 
 
-@_docstring.dedent
+@docprocess.dedent
 def get_baseline(dataset, *ranges, **kwargs):
     r"""
     Compute a baseline using the Baseline class processor.
@@ -867,7 +867,7 @@ def get_baseline(dataset, *ranges, **kwargs):
     return blc.baseline
 
 
-@_docstring.dedent
+@docprocess.dedent
 def basc(dataset, *ranges, **kwargs):
     r"""
     Compute a baseline corrected dataset using the Baseline class processor.
@@ -903,7 +903,7 @@ def basc(dataset, *ranges, **kwargs):
     return dataset - get_baseline(dataset, *ranges, **kwargs)
 
 
-@_docstring.dedent
+@docprocess.dedent
 def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     r"""
     Remove polynomial trend along a dimension from dataset.
@@ -971,7 +971,7 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     return blc.transform()
 
 
-@_docstring.dedent
+@docprocess.dedent
 def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     r"""
     Asymmetric Least Squares Smoothing baseline correction.
@@ -1014,7 +1014,7 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     return blc.transform()
 
 
-@_docstring.dedent
+@docprocess.dedent
 def snip(dataset, snip_width=50):
     """
     Perform Simple Non-Iterative Peak (SNIP) detection algorithm.
@@ -1046,7 +1046,7 @@ def snip(dataset, snip_width=50):
     return blc.transform()
 
 
-@_docstring.dedent
+@docprocess.dedent
 def rubberband(dataset):
     """
     Rubberband baseline correction.
