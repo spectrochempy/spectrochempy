@@ -20,15 +20,15 @@ from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import Quantity
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_spc")
+docprocess.delete_params("Importer.see_also", "read_spc")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_spc(*paths, **kwargs):
     r"""
     Read GRAMS/Thermo Scientific Galactic files or a list of files with extension :file:`.spc`.

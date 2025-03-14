@@ -12,15 +12,15 @@ __dataset_methods__ = __all__
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.read_omnic import _read_spa
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_soc")
+docprocess.delete_params("Importer.see_also", "read_soc")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_soc(*paths, **kwargs):
     r"""
     Read a Surface Optics Corps. file or a list of files with extension :file:`.ddr`, :file:`.hdr` or :file:`.sdr`.
@@ -52,7 +52,7 @@ def read_soc(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_ddr(*paths, **kwargs):
     r"""
     Open a Surface Optics Corps. file or a list of files with extension :file:`.ddr`.
@@ -84,7 +84,7 @@ def read_ddr(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_hdr(*paths, **kwargs):
     r"""
     Open a Surface Optics Corps. file or a list of files with extension :file:`.hdr`.
@@ -116,7 +116,7 @@ def read_hdr(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_sdr(*paths, **kwargs):
     r"""
     Open a Surface Optics Corps. file or a list of files with extension :file:`.sdr`.

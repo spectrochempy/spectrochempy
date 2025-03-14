@@ -21,7 +21,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.numutils import get_n_decimals
 from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import colored_output
@@ -224,7 +224,7 @@ class Coord(NDMath, NDArray):
         # Return a correct result only if the data are sorted  # return  # bool(self.data[0] > self.data[-1])
 
     @property
-    @_docstring.dedent
+    @docprocess.dedent
     def data(self):
         """
         %(data)s.
@@ -296,7 +296,7 @@ class Coord(NDMath, NDArray):
     # def values(self):
     #    return super().values
 
-    @_docstring.dedent
+    @docprocess.dedent
     def to(self, other, inplace=False, force=False):
         """%(to)s."""
         new = super().to(other, force=force)

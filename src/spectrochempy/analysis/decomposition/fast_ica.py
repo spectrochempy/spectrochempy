@@ -12,7 +12,7 @@ from sklearn import decomposition
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = ["FastICA"]
@@ -24,9 +24,9 @@ __configurables__ = ["FastICA"]
 # ======================================================================================
 @signature_has_configurable_traits
 class FastICA(DecompositionAnalysis):
-    _docstring.delete_params("DecompositionAnalysis.see_also", "FastICA")
+    docprocess.delete_params("DecompositionAnalysis.see_also", "FastICA")
 
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         r"""
     Fast algorithm for Independent Component Analysis (FastICA).
 
@@ -243,9 +243,9 @@ array of values drawn from a normal distribution is used."""
         self._components = self._fast_ica.components_
         return self._components
 
-    _docstring.keep_params("analysis_fit.parameters", "X")
+    docprocess.keep_params("analysis_fit.parameters", "X")
 
-    @_docstring.dedent
+    @docprocess.dedent
     def fit(self, X):
         """
         Fit the FastICA model on X.

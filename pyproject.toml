@@ -109,7 +109,6 @@ issues = "https://github.com/spectrochempy/spectrochempy/issues"
 repository = "https://github.com/spectrochempy/spectrochempy"
 
 [project.scripts]
-make_scpy_docs = "docs.make:main"
 show_versions = "spectrochempy.ci.show_versions:main"
 
 [tool.setuptools]

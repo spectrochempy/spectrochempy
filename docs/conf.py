@@ -110,10 +110,10 @@ master_doc = "index"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-version = spectrochempy.application.version
+version = spectrochempy.version
 release = version.split("+")[0]
 project = f"SpectroChemPy v{version}"
-copyright = spectrochempy.application.copyright
+copyright = spectrochempy.copyright
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

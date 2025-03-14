@@ -19,15 +19,15 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_quadera")
+docprocess.delete_params("Importer.see_also", "read_quadera")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_quadera(*paths, **kwargs):
     r"""
     Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file with extension :file:`.asc`.

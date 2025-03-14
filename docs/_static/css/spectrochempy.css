@@ -39,7 +39,7 @@ div.graphviz {
 .rst-content dl.rst table p,
 .rst-content dl.std table p,
 .rst-content dl.py table p {
-    margin-bottom: 0 !important;
+    margin-bottom: 0px !important;
 }
 
 .rst-content p a code {
@@ -107,6 +107,14 @@ dl.glossary dt {
 footer p {
     color: #141414;
 }
+
+.rst-content dl dt {
+    font-weight: 700;
+    background-color: #e7f2fa;
+    margin-bottom: 12px !important;
+
+}
+
 
 /*
   Styles for hyperlinks. The colors must meet the WCAG AA standard

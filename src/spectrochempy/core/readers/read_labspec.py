@@ -16,16 +16,16 @@ from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.meta import Meta
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_labspec")
+docprocess.delete_params("Importer.see_also", "read_labspec")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_labspec(*paths, **kwargs):
     """
     Read a single Raman spectrum or a series of Raman spectra.

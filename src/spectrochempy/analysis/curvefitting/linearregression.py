@@ -9,7 +9,7 @@ import traitlets as tr
 
 from spectrochempy.analysis._base._analysisbase import LinearRegressionAnalysis
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 __all__ = ["LSTSQ", "NNLS"]
 __configurables__ = ["LSTSQ", "NNLS"]
@@ -20,7 +20,7 @@ __configurables__ = ["LSTSQ", "NNLS"]
 # ======================================================================================
 @signature_has_configurable_traits
 class LSTSQ(LinearRegressionAnalysis):
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         """
     Ordinary least squares Linear Regression (LSTSQ).
 
@@ -48,7 +48,7 @@ class LSTSQ(LinearRegressionAnalysis):
 # ======================================================================================
 @signature_has_configurable_traits
 class NNLS(LinearRegressionAnalysis):
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         """
     Non-Negative least squares Linear Regression (NNLS).
 

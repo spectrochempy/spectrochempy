@@ -10,7 +10,6 @@ Adapted from Pandas (see License in the root directory)
 """
 
 import doctest
-import functools
 import inspect
 import io
 import os
@@ -32,6 +31,9 @@ from numpydoc.validate import validate
 # With template backend, matplotlib plots nothing
 # matplotlib.use("template")
 
+# --------------------------------------------------------------------------------------
+# DOCSTRING VALIDATION
+# --------------------------------------------------------------------------------------
 
 PRIVATE_CLASSES = [
     "HasTraits",
@@ -49,6 +51,8 @@ ERROR_MSGS = {
     "EX04": "Do not import {imported_library}, as it is imported "
     "automatically for the examples (numpy as np, spectrochempy as scp)",
 }
+
+# public function
 
 
 def check_docstrings(module, obj, exclude=None):
@@ -74,13 +78,16 @@ def check_docstrings(module, obj, exclude=None):
             # print(f"{obj.__name__}.{m}")
 
     for member in members:
-        result = spectrochempy_validate(member, exclude=exclude)
+        result = _scpy_numpydoc_validate(member, exclude=exclude)
         if result["errors"]:
             result["member_name"] = member
-            raise DocstringError(result)
+            raise _DocstringError(result)
 
 
-def spectrochempy_error(code, **kwargs):
+# private
+
+
+def _scpy_error(code, **kwargs):
     """
     Copy of the numpydoc error function.
 
@@ -89,7 +96,7 @@ def spectrochempy_error(code, **kwargs):
     return (code, ERROR_MSGS[code].format(**kwargs))
 
 
-class SpectroChemPyDocstring(Validator):
+class _DocstringValidator(Validator):
     def __init__(self, func_name, doc_obj=None):
         self.func_name = func_name
         if doc_obj is None:
@@ -175,7 +182,7 @@ class SpectroChemPyDocstring(Validator):
         return "array_like" in self.raw_doc
 
 
-def remove_errors(errs, errors=None):
+def _remove_errors(errs, errors=None):
     if errors is None:
         errors = []
     dic_errs = dict(errs)
@@ -186,7 +193,7 @@ def remove_errors(errs, errors=None):
     return list(dic_errs.items())
 
 
-def spectrochempy_validate(func_name, exclude=None):
+def _scpy_numpydoc_validate(func_name, exclude=None):
     """
     Call the numpydoc validation, and add the errors specific to spectrochempy.
 
@@ -207,14 +214,14 @@ def spectrochempy_validate(func_name, exclude=None):
         exclude = []
     func_obj = Validator._load_obj(func_name)
     doc_obj = get_doc_object(func_obj)
-    doc = SpectroChemPyDocstring(func_name, doc_obj)
+    doc = _DocstringValidator(func_name, doc_obj)
     result = validate(doc_obj)
     errs = result["errors"]
 
     mentioned_errs = doc.mentioned_private_classes
     if mentioned_errs:
         errs.append(
-            spectrochempy_error(
+            _scpy_error(
                 "GL04",
                 mentioned_private_classes=", ".join(mentioned_errs),
             ),
@@ -222,18 +229,18 @@ def spectrochempy_validate(func_name, exclude=None):
 
     has_kwargs = doc.has_kwargs
     if has_kwargs:
-        errs = remove_errors(errs, "PR02")
+        errs = _remove_errors(errs, "PR02")
         if not doc.doc_other_parameters:
-            errs.append(spectrochempy_error("GL11"))
+            errs.append(_scpy_error("GL11"))
 
     if exclude:
-        errs = remove_errors(errs, exclude)
+        errs = _remove_errors(errs, exclude)
 
     if doc.see_also:
         for rel_name in doc.see_also:
             if rel_name.startswith("spectrochempy."):
                 errs.append(
-                    spectrochempy_error(
+                    _scpy_error(
                         "SA05",
                         reference_name=rel_name,
                         right_reference=rel_name[len("spectrochempy.") :],
@@ -245,13 +252,13 @@ def spectrochempy_validate(func_name, exclude=None):
         result["examples_errs"] = doc.examples_errors
         if result["examples_errs"]:
             errs.append(
-                spectrochempy_error("EX02", doctest_log=result["examples_errs"]),
+                _scpy_error("EX02", doctest_log=result["examples_errs"]),
             )
 
         for error_code, error_message, error_count in doc.validate_pep8():
             times_happening = f" ({error_count} times)" if error_count > 1 else ""
             errs.append(
-                spectrochempy_error(
+                _scpy_error(
                     "EX03",
                     error_code=error_code,
                     error_message=error_message,
@@ -261,20 +268,20 @@ def spectrochempy_validate(func_name, exclude=None):
         examples_source_code = "".join(doc.examples_source_code)
         for wrong_import in ("numpy", "spectrochempy"):
             if f"import {wrong_import}" in examples_source_code:
-                errs.append(spectrochempy_error("EX04", imported_library=wrong_import))
+                errs.append(_scpy_error("EX04", imported_library=wrong_import))
 
     if doc.non_hyphenated_array_like():
-        errs.append(spectrochempy_error("GL05"))
+        errs.append(_scpy_error("GL05"))
 
     # cases where docrep dedent was used
     if error("GL01") in errs and not doc.raw_doc.startswith(""):
-        errs = remove_errors(errs, "GL01")
+        errs = _remove_errors(errs, "GL01")
     if error("GL02") in errs and not doc.raw_doc.startswith(""):
-        errs = remove_errors(errs, "GL02")
+        errs = _remove_errors(errs, "GL02")
 
     # case of properties (we accept a single line summary)
     if hasattr(doc.code_obj, "fget"):
-        errs = remove_errors(errs, "ES01")
+        errs = _remove_errors(errs, "ES01")
 
     result["errors"] = errs
     plt.close("all")
@@ -289,7 +296,7 @@ def spectrochempy_validate(func_name, exclude=None):
     return result
 
 
-class DocstringError(Exception):
+class _DocstringError(Exception):
     def __init__(self, result):
         message = ""
         message += f"{len(result['errors'])} DocstringError(s) found:\n"
@@ -321,6 +328,10 @@ class DocstringError(Exception):
         """
         print(traceback_template % traceback_details)  # noqa: T201
 
+
+# --------------------------------------------------------------------------------------
+# DOCREP PROCESSOR
+# --------------------------------------------------------------------------------------
 
 _common_doc = """
 out : `object`
@@ -380,8 +391,7 @@ class DocstringProcessor(docrep.DocstringProcessor):
 
 
 # Docstring substitution (docrep)
-# --------------------------------------------------------------------------------------
-_docstring = DocstringProcessor()
+docprocess = DocstringProcessor()
 
 
 # TODO replace this in module where it is used by docrep
@@ -398,17 +408,7 @@ def add_docstring(*args):
     return new_doc
 
 
-def getdocfrom(origin):
-    def decorated(func):
-        func.__doc__ = origin.__doc__
-
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorated
+# --------------------------------------------------------------------------------------
 
 
 def htmldoc(text):

@@ -11,15 +11,15 @@ from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.readers.importer import read
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_zip")
+docprocess.delete_params("Importer.see_also", "read_zip")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_zip(*paths, **kwargs):
     """
     Open a zipped list of data files.

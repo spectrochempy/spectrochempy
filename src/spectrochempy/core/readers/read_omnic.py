@@ -28,16 +28,16 @@ from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.datetimeutils import utcnow
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.file import fromfile
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-_docstring.delete_params("Importer.see_also", "read_omnic")
+docprocess.delete_params("Importer.see_also", "read_omnic")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_omnic(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet OMNIC file.
@@ -172,7 +172,7 @@ def read_omnic(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_spg(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.spg``.
@@ -213,7 +213,7 @@ def read_spg(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_spa(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.spa``.
@@ -253,7 +253,7 @@ def read_spa(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_srs(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.srs``.

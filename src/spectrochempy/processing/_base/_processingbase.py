@@ -10,7 +10,7 @@ import traitlets as tr
 from spectrochempy.application.application import app
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.exceptions import NotTransformedError
 
 
@@ -18,7 +18,7 @@ from spectrochempy.utils.exceptions import NotTransformedError
 # Base class ProcessingConfigurable
 # ======================================================================================
 class ProcessingConfigurable(BaseConfigurable):
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         r"""
     Abstract class to write processing models.
 
@@ -34,7 +34,7 @@ class ProcessingConfigurable(BaseConfigurable):
     )
 
     # Get doc sections for reuse in subclass
-    _docstring.get_sections(__doc__, base="ProcessingConfigurable")
+    docprocess.get_sections(__doc__, base="ProcessingConfigurable")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -104,7 +104,7 @@ class ProcessingConfigurable(BaseConfigurable):
     # Public methods and property
     # ----------------------------------------------------------------------------------
     @_wrap_ndarray_output_to_nddataset
-    @_docstring.dedent
+    @docprocess.dedent
     def transform(self, dataset, dim=-1):
         r"""
         Transform the input dataset X using the current model.
@@ -139,8 +139,8 @@ class ProcessingConfigurable(BaseConfigurable):
         self._transformed = True
         return Xt
 
-    _docstring.get_sections(
-        _docstring.dedent(transform.__doc__),
+    docprocess.get_sections(
+        docprocess.dedent(transform.__doc__),
         base="processing_transform",
         sections=["Parameters", "Returns"],
     )

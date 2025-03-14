@@ -38,7 +38,7 @@ from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.units import ur
 from spectrochempy.extern.nmrglue import read_fid
 from spectrochempy.extern.nmrglue import read_pdata
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.meta import Meta
 
 # ======================================================================================
@@ -883,10 +883,10 @@ def _remove_digital_filter(dic, data):
 # Bruker topspin import function
 # ======================================================================================
 
-_docstring.delete_params("Importer.see_also", "read_topspin")
+docprocess.delete_params("Importer.see_also", "read_topspin")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_topspin(*paths, **kwargs):
     r"""
     Open Bruker TOPSPIN (NMR) dataset.

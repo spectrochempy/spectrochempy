@@ -13,7 +13,7 @@ from spectrochempy.application.application import info_
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 __all__ = ["EFA"]
 __configurables__ = ["EFA"]
@@ -21,9 +21,9 @@ __configurables__ = ["EFA"]
 
 @signature_has_configurable_traits
 class EFA(DecompositionAnalysis):
-    _docstring.delete_params("DecompositionAnalysis.see_also", "EFA")
+    docprocess.delete_params("DecompositionAnalysis.see_also", "EFA")
 
-    __doc__ = _docstring.dedent(
+    __doc__ = docprocess.dedent(
         r"""
     Evolving Factor Analysis (EFA).
 
@@ -168,7 +168,7 @@ class EFA(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
-    @_docstring.dedent
+    @docprocess.dedent
     def fit(self, X):
         """
         Fit the `EFA` model on a `X` dataset.
@@ -188,7 +188,7 @@ class EFA(DecompositionAnalysis):
         """
         return super().fit(X, Y=None)
 
-    @_docstring.dedent
+    @docprocess.dedent
     def fit_transform(self, X, **kwargs):
         """
         Fit the model with X and apply the dimensionality reduction on X.

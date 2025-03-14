@@ -27,7 +27,7 @@ from spectrochempy.application.application import warning_
 from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.processing.transformation.concatenate import stack
-from spectrochempy.utils.docutils import _docstring
+from spectrochempy.utils.docutils import docprocess
 
 # from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 from spectrochempy.utils.exceptions import ProtocolError
@@ -251,7 +251,7 @@ def _importer_method(func):
 # Public Generic Read function
 # --------------------------------------------------------------------------------------
 
-_docstring.get_sections(
+docprocess.get_sections(
     r"""
 See Also
 --------
@@ -275,10 +275,10 @@ read_wire : Read REnishaw Wire files (:file:`.wdf`).
     base="Importer",
 )
 
-_docstring.delete_params("Importer.see_also", "read")
+docprocess.delete_params("Importer.see_also", "read")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read(*paths, **kwargs):
     r"""
     Read data from various file formats.
@@ -466,16 +466,16 @@ def read(*paths, **kwargs):
 
 # for some reasons the doctring.getsection modify the signature of the function
 # when used as a decorator, so we use it as a function
-_docstring.get_sections(
+docprocess.get_sections(
     read.__doc__,
     sections=["Parameters", "Other Parameters", "Returns"],
     base="Importer",
 )
 
-_docstring.delete_params("Importer.see_also", "read_dir")
+docprocess.delete_params("Importer.see_also", "read_dir")
 
 
-@_docstring.dedent
+@docprocess.dedent
 def read_dir(directory=None, **kwargs):
     r"""
     Read an entire directory.

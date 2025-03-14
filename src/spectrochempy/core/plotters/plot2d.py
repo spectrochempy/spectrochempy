@@ -29,45 +29,42 @@ from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.mplutils import plot_method
 
 _PLOT2D_DOC = """
+autolayout : `bool` , optional, default=True
+    if True, layout will be set automatically.
 ax : |Axes| instance. Optional
     The axe where to plot. The default is the current axe or to create a new one if is None.
 clear : bool, optional, default=`True`
     Should we plot on the ax previously used or create a new figure?.
+colorbar :
+data_only : `bool` [optional, default=`False`]
+    Only the plot is done. No addition of axes or label specifications
+    (current if any or automatic settings are kept.
+dpi : [ None | scalar > 0]
+    The resolution in dots per inch. If None it will default to the
+    value savefig.dpi in the matplotlibrc file.
 figsize : tuple, optional
     The figure size expressed as a tuple (w,h) in inch.
 fontsize : int, optional
     The font size in pixels, default is 10 (or read from preferences).
-style : str
-autolayout : `bool` , optional, default=True
-    if True, layout will be set automatically.
+method : str [optional among `map` , `stack` , `image`, `surface` or `3D`]
+    The type of plot,
 output : str
     A string containing a path to a filename. The output format is deduced
     from the extension of the filename. If the filename has no extension,
     the value of the rc parameter savefig.format is used.
-dpi : [ None | scalar > 0]
-    The resolution in dots per inch. If None it will default to the
-    value savefig.dpi in the matplotlibrc file.
-colorbar :
-transposed :
-clear :
-ax :
-twinx :
-use_plotly : bool, optional
-    Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
-data_only : `bool` [optional, default=`False`]
-    Only the plot is done. No addition of axes or label specifications
-    (current if any or automatic settings are kept.
-method : str [optional among `map` , `stack` , `image`, `surface` or `3D`]
-    The type of plot,
 projections : `bool` [optional, default=False]
-style : str, optional, default='notebook'
-    Matplotlib stylesheet (use `available_style` to get a list of available
-    styles for plotting
 reverse : `bool` or None [optional, default=None
     In principle, coordinates run from left to right, except for wavenumbers
     (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
     will try to guess. But if reverse is set, then this is the
     setting which will be taken into account.
+style : str, optional, default='notebook'
+    Matplotlib stylesheet (use `available_style` to get a list of available
+    styles for plotting
+transposed :
+twinx :
+use_plotly : bool, optional
+    Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
 x_reverse : `bool` or None [optional, default=None
 """
 
