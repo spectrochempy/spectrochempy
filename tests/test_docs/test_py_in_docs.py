@@ -47,10 +47,6 @@ scripts = [
 ]
 
 
-@pytest.mark.skipif(
-    sys.platform == "darwin",
-    reason="Issue with this run on macOS Github action",
-)
 def nbsphinx_script_run(path):
     # import matplotlib
 
@@ -79,6 +75,10 @@ def nbsphinx_script_run(path):
 @pytest.mark.skipif(
     sys.platform == "win32",
     reason="does not run well on windows - to be investigated",
+)
+@pytest.mark.skipif(
+    sys.platform == "darwin",
+    reason="Issue with this run on macOS Github action",
 )
 @pytest.mark.parametrize(
     "script",
