@@ -22,7 +22,7 @@ class DummyClass:
         pass
 
 
-class TestModel(tr.HasTraits):
+class _A_Model(tr.HasTraits):
     """A model to test traits validation."""
 
     spectro_trait = tr.Instance(klass=object, allow_none=True)
@@ -54,7 +54,7 @@ class TestSpectroChemPyType(unittest.TestCase):
 
     def test_validate(self):
         """Test validation in SpectroChemPyType."""
-        model = TestModel()
+        model = _A_Model()
         trait = SpectroChemPyType(klass=DummyClass)
 
         # Test validation of None
@@ -141,7 +141,7 @@ class TestCoordType(unittest.TestCase):
 class TestPositiveInteger(unittest.TestCase):
     def test_validate(self):
         """Test validation in PositiveInteger."""
-        model = TestModel()
+        model = _A_Model()
 
         trait = PositiveInteger()
 
@@ -167,7 +167,7 @@ class TestPositiveInteger(unittest.TestCase):
 class TestPositiveOddInteger(unittest.TestCase):
     def test_validate(self):
         """Test validation in PositiveOddInteger."""
-        model = TestModel()
+        model = _A_Model()
         trait = PositiveOddInteger()
 
         # Test validation of positive odd integers
