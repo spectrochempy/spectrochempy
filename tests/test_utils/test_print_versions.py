@@ -42,4 +42,3 @@ def test_show_versions() -> None:
 
 if __name__ == "__main__":
     test_show_versions()
-    test_show_versions_script()

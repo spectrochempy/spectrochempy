@@ -1081,7 +1081,10 @@ class PlotPreferences(MetaConfigurable):
         # the spectra path in package data
         from spectrochempy.utils.packages import get_pkg_path
 
-        return get_pkg_path("data/stylesheets", "spectrochempy")
+        value = get_pkg_path("data/stylesheets", "spectrochempy")
+        if hasattr(value, "__fspath__"):  # Check if it's a path-like object
+            value = str(value)
+        return value
 
     @observe("style")
     def _style_changed(self, change):
@@ -1127,7 +1130,12 @@ class PlotPreferences(MetaConfigurable):
     def _apply_style(self, _style):
         from spectrochempy.utils.file import pathclean
 
-        f = (pathclean(self.stylesheets) / _style).with_suffix(".mplstyle")
+        # Convert PosixPath to string if necessary before using it
+        stylesheets_path = self.stylesheets
+        if hasattr(stylesheets_path, "__fspath__"):  # Check if it's a path-like object
+            stylesheets_path = str(stylesheets_path)
+
+        f = (pathclean(stylesheets_path) / _style).with_suffix(".mplstyle")
         if not f.exists():
             # we have to look matplotlib predetermined style.
             f = (

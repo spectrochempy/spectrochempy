@@ -151,7 +151,7 @@ class TestBaseConfigurable:
         result = model._remove_masked_data(X)
         assert result.shape == (2, 2)
         np.testing.assert_array_equal(result.data, np.array([[1, 3], [4, 6]]))
-        assert np.all(result._mask is False)  # Mask should be destroyed
+        assert not np.any(result._mask)  # Mask should be destroyed
 
         # Test with masked rows
         X = NDDataset(

@@ -17,7 +17,6 @@ import pathlib
 import re
 import subprocess
 import tempfile
-import textwrap
 import traceback
 
 import docrep
@@ -392,57 +391,3 @@ class DocstringProcessor(docrep.DocstringProcessor):
 
 # Docstring substitution (docrep)
 docprocess = DocstringProcessor()
-
-
-# TODO replace this in module where it is used by docrep
-def add_docstring(*args):
-    """Add a docstring to the actual function docstring."""
-
-    def new_doc(func):
-        for item in args:
-            item.strip()
-
-        func.__doc__ = textwrap.dedent(func.__doc__).format(*args)
-        return func
-
-    return new_doc
-
-
-# --------------------------------------------------------------------------------------
-
-
-def htmldoc(text):
-    """
-    Format docstring in html for a nice display in IPython.
-
-    Parameters
-    ----------
-    text : str
-        The string to convert to html.
-
-    Returns
-    -------
-    out : str
-        The html string.
-
-    """
-    p = re.compile("^(?P<name>.*:)(.*)", re.MULTILINE)  # To get the keywords
-    html = p.sub(r"<b>\1</b>\2", text)
-    html = html.replace("-", "")
-    html = html.split("\n")
-    while html[0].strip() == "":
-        html = html[1:]  # suppress initial blank lines
-
-    for i in range(len(html)):
-        html[i] = html[i].strip()
-        if i == 0:
-            html[i] = f"<h3>{html[i]}</h3>"
-        html[i] = html[i].replace("Parameters", "<h4>Parameters</h4>")
-        html[i] = html[i].replace("Properties", "<h4>Properties</h4>")
-        html[i] = html[i].replace("Methods", "<h4>Methods</h4>")
-        if html[i] != "":
-            if "</h" not in html[i]:
-                html[i] = html[i] + "<br/>"
-            if not html[i].strip().startswith("<"):
-                html[i] = "&nbsp;&nbsp;&nbsp;&nbsp;" + html[i]
-    return "".join(html)

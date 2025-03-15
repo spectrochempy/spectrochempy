@@ -111,9 +111,14 @@ class MetaConfigurable(Configurable):
 
     docprocess.get_docstring(params.__doc__, base="MetaConfigurable.parameters_doc")
 
-    @deprecated(replace="params", removed="0.7.1")
+    @deprecated(replace="params", removed="0.8.0")
     def parameters(self, default=False):
-        """Alias for `params` method."""
+        """
+        Alias for `params` method.
+
+        .. deprecated:: 0.8.0
+            Use `params` instead.
+        """
         return self.params(default=default)
 
     def reset(self):

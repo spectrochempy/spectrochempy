@@ -51,6 +51,9 @@ def json_decoder(dic):
             if "base64" in dic:
                 return pickle.loads(base64.b64decode(dic["base64"]))  # noqa: S301
             if "tolist" in dic:
+                if dic["dtype"] == "complex":
+                    # Handle Python's built-in complex type
+                    return complex(dic["tolist"][0], dic["tolist"][1])
                 return np.array(dic["tolist"], dtype=dic["dtype"]).data[()]
         elif klass == "META":
             kwargs = {}
@@ -165,12 +168,14 @@ def json_encoder(byte_obj, encoding=None):
 
     if isinstance(byte_obj, np.complex128 | np.complex64 | complex):
         if encoding is None:
+            # Handle both NumPy complex and Python's built-in complex
+            dtype = str(byte_obj.dtype) if hasattr(byte_obj, "dtype") else "complex"
             return {
                 "tolist": json_encoder(
                     [byte_obj.real, byte_obj.imag],
                     encoding=encoding,
                 ),
-                "dtype": str(byte_obj.dtype),
+                "dtype": dtype,
                 "__class__": "COMPLEX",
             }
         return {

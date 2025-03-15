@@ -86,7 +86,9 @@ def difference(x, y):
     from numpy import abs
     from numpy import max
 
-    nonzero = y.data != 0
+    nonzero = (x.data != 0) & (y.data != 0)
     error = abs(x.data - y.data)
-    max_relative_error = max(error[nonzero] / abs(y.data[nonzero]))
+    ax = abs(x.data)[nonzero]
+    ay = abs(y.data)[nonzero]
+    max_relative_error = max((error[nonzero] / ax, error[nonzero] / ay))
     return max(error), max_relative_error
