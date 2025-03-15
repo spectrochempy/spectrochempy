@@ -48,10 +48,18 @@ scripts = [
 
 
 def nbsphinx_script_run(path):
+    import matplotlib
+
+    matplotlib.use("Agg")  # Force non-interactive backend before any other imports
+
     pipe = None
     so = None
     serr = None
     try:
+        import os
+
+        env = os.environ.copy()
+        env["MPLBACKEND"] = "Agg"  # Set backend through environment as well
         pipe = subprocess.Popen(  # noqa: S603
             [sys.executable, str(path), "--nodisplay"],
             stdout=subprocess.PIPE,
