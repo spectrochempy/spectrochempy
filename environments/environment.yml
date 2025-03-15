@@ -33,6 +33,7 @@ dependencies:
     - lazy_loader
     - matplotlib-base
     - numpy
+    - numpydoc
     - quaternion>=2024.0.7
     - osqp
     - pint
