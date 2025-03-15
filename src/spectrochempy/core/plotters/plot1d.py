@@ -32,10 +32,6 @@ from spectrochempy.utils.typeutils import is_sequence
 # --------------------------------------------------------------------------------------
 # plot_1D
 # --------------------------------------------------------------------------------------
-docprocess.delete_params(
-    "plot.other_parameters", "colorbar", "projections", "transposed", "y_reverse"
-)
-docprocess.delete_params("plot.parameters", "method")
 
 
 @docprocess.dedent
@@ -64,6 +60,7 @@ def plot_1D(dataset, method=None, **kwargs):
     plot_bar
     plot_scatter_pen
     plot_multiple
+    multiplot
 
     """
     # Get preferences
@@ -426,7 +423,8 @@ def plot_scatter(dataset, **kwargs):
     plot_pen
     plot_bar
     plot_scatter_pen
-
+    plot_multiple
+    multiplot
     """
 
 
@@ -456,7 +454,8 @@ def plot_pen(dataset, **kwargs):
     plot_scatter
     plot_bar
     plot_scatter_pen
-
+    plot_multiple
+    multiplot
     """
 
 
@@ -486,7 +485,8 @@ def plot_scatter_pen(dataset, **kwargs):
     plot_scatter
     plot_bar
     plot_pen
-
+    plot_multiple
+    multiplot
     """
 
 
@@ -516,6 +516,8 @@ def plot_bar(dataset, **kwargs):
     plot_scatter
     plot_pen
     plot_scatter_pen
+    plot_multiple
+    multiplot
     """
 
 

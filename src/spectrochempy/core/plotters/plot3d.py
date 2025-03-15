@@ -9,92 +9,104 @@ __all__ = ["plot_3D", "plot_surface", "plot_waterfall"]
 
 __dataset_methods__ = __all__
 
-from spectrochempy.utils.docutils import add_docstring
-from spectrochempy.utils.mplutils import plot_method
 
-_PLOT3D_DOC = """
-ax : |Axes| instance. Optional
-    The axe where to plot. The default is the current axe or to create a new one if is None.
-figsize : tuple, optional
-    The figure size expressed as a tuple (w,h) in inch.
-fontsize : int, optional
-    The font size in pixels, default is 10 (or read from preferences).
-autolayout : `bool` , optional, default=True
-    if True, layout will be set automatically.
-dpi : [ None | scalar > 0]
-    The resolution in dots per inch. If None it will default to the
-    value savefig.dpi in the matplotlibrc file.
-colorbar :
-method : str [optional among `surface` , `waterfall` , ...]
-    The type of plot,
-style : str, optional, default='notebook'
-    Matplotlib stylesheet (use `available_style` to get a list of available
-    styles for plotting
-reverse : `bool` or None [optional, default=None
-    In principle, coordinates run from left to right, except for wavenumbers
-    (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
-    will try to guess. But if reverse is set, then this is the
-    setting which will be taken into account.
-x_reverse : `bool` or None [optional, default=None
-y_reverse : `bool` or None [optional, default=None
-"""
+from spectrochempy.core.dataset.arraymixins.ndplot import (
+    NDPlot,  # noqa: F401 # for the docstring to be determined it necessary to import NDPlot
+)
+from spectrochempy.utils.docutils import docprocess
 
 
 # ======================================================================================
 # nddataset plot3D functions
 # ======================================================================================
-@plot_method("2D", _PLOT3D_DOC)
+@docprocess.dedent
 def plot_surface(dataset, **kwargs):
     """
     Plot a 2D dataset as a a 3D-surface.
 
-    Alias of plot_3D (with `method` argument set to `surface` ).
+    Parameters
+    ----------
+    %(plot.parameters.no_method)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_2D
+    plot_3D
+    plot_stack
+    plot_map
+    plot_image
+    plot_waterfall
+
     """
     return
 
 
-@plot_method("2D", _PLOT3D_DOC)
+@docprocess.dedent
 def plot_waterfall(dataset, **kwargs):
     """
     Plot a 2D dataset as a a 3D-waterfall plot.
 
-    Alias of plot_2D (with `method` argument set to `waterfall` ).
+    Parameters
+    ----------
+    %(plot.parameters.no_method)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_2D
+    plot_3D
+    plot_stack
+    plot_map
+    plot_image
+    plot_surface
+
     """
     return
 
 
-@add_docstring(_PLOT3D_DOC)
+@docprocess.dedent
 def plot_3D(dataset, method="surface", **kwargs):
     """
     Plot of 2D array as 3D plot.
 
     Parameters
     ----------
-    dataset : `NDDataset`
-        The dataset to plot.
-    method : ['surface', 'waterfall'] , optional
-        The method of plot of the dataset, which will determine the plotter to use. Default is stack.
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    %(plot.parameters)s
 
     Other Parameters
     ----------------
-    {0}
+    %(plot.other_parameters)s
+
+    Returns
+    -------
+    %(plot.returns)s
 
     See Also
     --------
-    plot_1D
-    plot_pen
-    plot_bar
-    plot_scatter_pen
-    plot_multiple
+    plot
     plot_2D
     plot_stack
     plot_map
     plot_image
     plot_surface
     plot_waterfall
-    multiplot
 
     """
     from spectrochempy.core.plotters.plot2d import plot_2D
