@@ -29,6 +29,7 @@ dependencies = [
   "lazy_loader",
   "matplotlib",
   "numpy",
+  "numpydoc",
   "numpy-quaternion >= 2024.0.7",
   "osqp",
   "pint",
