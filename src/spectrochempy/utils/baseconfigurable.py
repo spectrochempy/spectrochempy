@@ -327,12 +327,12 @@ class BaseConfigurable(MetaConfigurable):
         #  same shape a X.data
 
         # Set a X.data by default
-        self._X_preprocessed = X.data
-        # # Set a X.data by default
-        # if X is not None:
-        #     self._X_preprocessed = X.data
-        # else:
-        #     raise NotTransformedError
+        # self._X_preprocessed = X.data
+        # Set a X.data by default
+        if X is not None:
+            self._X_preprocessed = X.data
+        else:
+            raise NotTransformedError
 
     # ----------------------------------------------------------------------------------
     # Public methods and property

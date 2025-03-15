@@ -5,7 +5,6 @@
 # ======================================================================================
 """Tests for datetime utilities."""
 
-from datetime import UTC
 from datetime import datetime
 
 import numpy as np
@@ -13,6 +12,7 @@ import pytest
 
 from spectrochempy.core.units import ur
 from spectrochempy.utils.datetimeutils import DT64_TO_SCP_UNITS
+from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.datetimeutils import decode_datetime64
 from spectrochempy.utils.datetimeutils import encode_datetime64
 from spectrochempy.utils.datetimeutils import from_dt64_units
