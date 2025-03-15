@@ -145,6 +145,10 @@ def test_IRIS():
 
     # no regularization, ca, 1D, p and q passed as a ndarrays
     X2 = X[:, 2110.0]
+    # K1D = scp.IrisKernel(X2, "ca", p=p, q=iris1.q.data)
+    # assert K1D.kernel is not None
+    # assert K1D.kernel.x is not None
+    # assert K1D.kernel.x.data is not None
     K1D = scp.IrisKernel(X2, "ca", p=p, q=iris1.K.x.data)
     iris1.fit(X2, K1D)
     f1d = iris1.f.copy()

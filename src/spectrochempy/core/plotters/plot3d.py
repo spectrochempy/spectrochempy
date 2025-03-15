@@ -45,9 +45,8 @@ def plot_surface(dataset, **kwargs):
     plot_map
     plot_image
     plot_waterfall
-
     """
-    return
+    return plot_3D(dataset, method="surface", **kwargs)
 
 
 @docprocess.dedent
@@ -78,7 +77,7 @@ def plot_waterfall(dataset, **kwargs):
     plot_surface
 
     """
-    return
+    return plot_3D(dataset, method="waterfall", **kwargs)
 
 
 @docprocess.dedent

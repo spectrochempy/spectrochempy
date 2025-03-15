@@ -19,17 +19,14 @@ class SpectroChemPyType(SciType):
     klass = None
 
     def validate(self, obj, value):
-        if value is None:
-            if not self.allow_none:
-                self.error(obj, value)
+        if value is None and not self.allow_none:
+            self.error(obj, value)
+        if value is None or value is tr.Undefined:
             return super().validate(obj, value)
-        if value is tr.Undefined:
-            return super().validate(obj, value)
-        if not isinstance(value, self.klass):
-            try:
-                value = self.klass(value)
-            except (ValueError, TypeError) as e:
-                raise tr.TraitError(e) from None
+        try:
+            value = self.klass(value)
+        except (ValueError, TypeError) as e:
+            raise tr.TraitError(e) from None
         return super().validate(obj, value)
 
     def set(self, obj, value):
@@ -50,26 +47,10 @@ class SpectroChemPyType(SciType):
             self.klass = klass
         else:
             raise tr.TraitError(f"The klass attribute must be a class not: {klass!r}")
-
-        # Handle default value creation
         if default_value is Empty:
-            try:
-                default_value = klass()
-            except (TypeError, ValueError):
-                # If the class requires arguments, use None as default
-                default_value = None
-                allow_none = allow_none if allow_none else True
-        elif (
-            default_value is not None
-            and default_value is not tr.Undefined
-            and not isinstance(default_value, klass)
-        ):
-            # Don't try to create a new instance if it's already the correct type
-            try:
-                default_value = klass(default_value)
-            except (ValueError, TypeError) as e:
-                raise tr.TraitError(e) from None
-
+            default_value = klass()
+        elif default_value is not None and default_value is not tr.Undefined:
+            default_value = klass(default_value)
         super().__init__(default_value=default_value, allow_none=allow_none, **kwargs)
 
     def make_dynamic_default(self):
@@ -117,12 +98,12 @@ class PositiveInteger(tr.Integer):
     default_value = 0
 
     def validate(self, obj, value):
-        if value is None:
-            if self.allow_none:
-                return None
+        if value is None and not self.allow_none:
             self.error(obj, value)
-        if value is tr.Undefined:
+        if (value is None or value is tr.Undefined) and self.allow_none:
             return value
+        if value is None or value is tr.Undefined:
+            return super().validate(obj, value)
         if value < 0:
             self.error(obj, value)
         return super().validate(obj, value)
@@ -135,12 +116,12 @@ class PositiveOddInteger(tr.Integer):
     default_value = 1
 
     def validate(self, obj, value):
-        if value is None:
-            if self.allow_none:
-                return None
+        if value is None and not self.allow_none:
             self.error(obj, value)
-        if value is tr.Undefined:
+        if (value is None or value is tr.Undefined) and self.allow_none:
             return value
+        if value is None or value is tr.Undefined:
+            return super().validate(obj, value)
         if value < 0 or value % 2 == 0:
             self.error(obj, value)
         return super().validate(obj, value)
