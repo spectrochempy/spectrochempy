@@ -3,19 +3,16 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-import textwrap
 
-import matplotlib as mpl
 import matplotlib.axes as maxes
 import mpl_toolkits.mplot3d.axes3d as maxes3D  # noqa: N812
-import numpy as np
 from matplotlib import pyplot as plt
 
 __all__ = ["show"]
 
 
 @maxes.subplot_class_factory
-class _Axes(maxes.Axes):
+class _Axes(maxes.Axes):  # pragma: no cover
     """Subclass of matplotlib Axes class."""
 
     from spectrochempy.core.units import remove_args_units
@@ -298,7 +295,7 @@ class _Axes(maxes.Axes):
         return super().set_ylim(*args, **kwargs)
 
 
-class _Axes3D(maxes3D.Axes3D):
+class _Axes3D(maxes3D.Axes3D):  # pragma: no cover
     """Subclass of matplotlib Axes3D class."""
 
     from spectrochempy.core.units import remove_args_units
@@ -311,60 +308,6 @@ class _Axes3D(maxes3D.Axes3D):
     def plot_surface(self, *args, **kwargs):
         """Plot a surface."""
         return super().plot_surface(*args, **kwargs)
-
-
-def plot_method(type, doc):
-    """Select a plot method from the function name."""
-
-    def decorator_plot_method(func):
-        method = func.__name__.split("plot_")[-1]
-
-        def wrapper(dataset, *args, **kwargs):
-            if dataset.ndim < 2:
-                from spectrochempy.core.plotters.plot1d import plot_1D
-
-                _ = kwargs.pop("method", None)
-                return plot_1D(dataset, *args, method=method, **kwargs)
-
-            if kwargs.get("use_plotly", False):
-                return dataset.plotly(method=method, **kwargs)
-            return getattr(dataset, f"plot_{type}")(*args, method=method, **kwargs)
-
-        wrapper.__doc__ = f"""
-{textwrap.dedent(func.__doc__).strip()}
-
-Parameters
-----------
-dataset : `NDDataset`
-    The dataset to plot.
-**kwargs
-    Optional keyword parameters (see Other Parameters).
-
-
-Other Parameters
-----------------
-{doc.strip()}
-
-See Also
---------
-plot_1D
-plot_pen
-plot_bar
-plot_scatter_pen
-plot_multiple
-plot_2D
-plot_stack
-plot_map
-plot_image
-plot_3D
-plot_surface
-plot_waterfall
-multiplot
-""".replace(f"\nplot_{method}", "")
-
-        return wrapper
-
-    return decorator_plot_method
 
 
 def figure(preferences=None, **kwargs):
@@ -472,61 +415,25 @@ def get_figure(**kwargs):
     return plt.figure(n[-1])
 
 
-# FOR PLOTLY
+# class colorscale:
+#     def normalize(self, vmin, vmax, cmap="viridis", rev=False, offset=0):
+#         """Normalize the color scale based on the given parameters."""
+#         if rev:
+#             cmap = cmap + "_r"
+#         _colormap = plt.get_cmap(cmap)
+
+#         _norm = mpl.colors.Normalize(vmin=vmin - offset, vmax=vmax - offset)
+#         self.scalarMap = mpl.cm.ScalarMappable(norm=_norm, cmap=_colormap)
+
+#     def rgba(self, z, offset=0):
+#         """Return the rgba color for the given value."""
+#         c = np.array(self.scalarMap.to_rgba(z.squeeze() - offset))
+#         c[0:3] *= 255
+#         c[0:3] = np.round(c[0:3].astype("uint16"), 0)
+#         return f"rgba{tuple(c)}"
 
 
-def get_plotly_figure(clear=True, fig=None, **kwargs):
-    """
-    Get the figure where to plot.
-
-    Parameters
-    ----------
-    clear : bool
-        If False the figure provided in the `fig` parameters is used.
-    fig : plotly figure
-        If provided, and clear is not True, it will be used for plotting
-    kwargs : any
-        Keywords arguments to be passed to the plotly figure constructor.
-
-    Returns
-    -------
-    Plotly figure instance
-
-    """
-    from spectrochempy.utils.optional import import_optional_dependency
-
-    go = import_optional_dependency("plotly.graph_objects", errors="ignore")
-
-    if go is None:
-        raise ImportError("Plotly is not installed. Uee pip or conda to install it")
-
-    if clear or fig is None:
-        # create a figure
-        return go.Figure()
-
-    # a figure already exists - if several we take the last
-    return fig
-
-
-class colorscale:
-    def normalize(self, vmin, vmax, cmap="viridis", rev=False, offset=0):
-        """Normalize the color scale based on the given parameters."""
-        if rev:
-            cmap = cmap + "_r"
-        _colormap = plt.get_cmap(cmap)
-
-        _norm = mpl.colors.Normalize(vmin=vmin - offset, vmax=vmax - offset)
-        self.scalarMap = mpl.cm.ScalarMappable(norm=_norm, cmap=_colormap)
-
-    def rgba(self, z, offset=0):
-        """Return the rgba color for the given value."""
-        c = np.array(self.scalarMap.to_rgba(z.squeeze() - offset))
-        c[0:3] *= 255
-        c[0:3] = np.round(c[0:3].astype("uint16"), 0)
-        return f"rgba{tuple(c)}"
-
-
-colorscale = colorscale()
+# colorscale = colorscale()
 
 
 def make_label(ss, lab="<no_axe_label>", use_mpl=True):
@@ -564,29 +471,38 @@ def make_label(ss, lab="<no_axe_label>", use_mpl=True):
     return label
 
 
-def make_attr(key):
-    from spectrochempy.utils.constants import NBlack
-    from spectrochempy.utils.constants import NBlue
-    from spectrochempy.utils.constants import NRed
+# FOR PLOTLY
+#
 
-    name = f"M_{key[1]}"
-    k = rf"$\mathrm{{{name}}}$"
 
-    if "P" in name:
-        m = "o"
-        c = NBlack
-    elif "A" in name:
-        m = "^"
-        c = NBlue
-    elif "B" in name:
-        m = "s"
-        c = NRed
+def get_plotly_figure(clear=True, fig=None, **kwargs):
+    """
+    Get the figure where to plot.
 
-    if "400" in key:
-        f = "w"
-        s = ":"
-    else:
-        f = c
-        s = "-"
+    Parameters
+    ----------
+    clear : bool
+        If False the figure provided in the `fig` parameters is used.
+    fig : plotly figure
+        If provided, and clear is not True, it will be used for plotting
+    kwargs : any
+        Keywords arguments to be passed to the plotly figure constructor.
 
-    return m, c, k, f, s
+    Returns
+    -------
+    Plotly figure instance
+
+    """
+    from spectrochempy.utils.optional import import_optional_dependency
+
+    go = import_optional_dependency("plotly.graph_objects", errors="ignore")
+
+    if go is None:
+        raise ImportError("Plotly is not installed. Uee pip or conda to install it")
+
+    if clear or fig is None:
+        # create a figure
+        return go.Figure()
+
+    # a figure already exists - if several we take the last
+    return fig
