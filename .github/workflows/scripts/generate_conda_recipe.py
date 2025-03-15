@@ -7,7 +7,7 @@ from setuptools_scm import get_version
 
 # Define paths
 repo_path = Path(__file__).parent.parent.parent.parent
-template_dir = repo_path / ".ci" / "templates"
+template_dir = Path(__file__).parent / "templates"
 
 # Load template
 meta_template_file = template_dir / "meta.tmpl"
