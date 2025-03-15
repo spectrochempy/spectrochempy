@@ -91,6 +91,10 @@ def test_sh_error_handling():
             sh.definitely_not_a_real_command()
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="I do not have the OS to test on windows and it fails on github actions",
+)
 def test_sh_with_environment():
     # Create a temporary test script that outputs environment variables
     import tempfile

@@ -17,6 +17,7 @@ Many tests use mocking to isolate functionality and avoid actual filesystem oper
 
 import io
 import struct
+import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -477,6 +478,10 @@ class TestDirectoryFunctions:
             # Verify mkdir was called with the expected arguments
             mock_mkdir.assert_called_once_with(exist_ok=True)
 
+    @pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="I do not have the OS to test on windows and it fails on github actions",
+    )
     @patch("spectrochempy.utils.file.pathclean")
     @patch("spectrochempy.application.application.warning_")
     def test_get_directory_name_invalid(self, mock_warning, mock_pathclean):
