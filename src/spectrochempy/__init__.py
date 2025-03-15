@@ -58,10 +58,18 @@ import lazy_loader as _lazy_loader
 original_getattr, *_ = _lazy_loader.attach_stub(__name__, __file__)
 
 # Dictionary mapping top-level objects to their module paths
+import threading
+from functools import wraps
+from queue import Queue
+
+from spectrochempy import application
 from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
 from spectrochempy.lazyimport.dataset_methods import _LAZY_DATASETS_IMPORTS
 
-from . import application
+# Create synchronization objects
+_preferences = None
+_preferences_lock = threading.Lock()
+_preferences_queue = Queue()
 
 # --------------------------------------------------------------------------------------
 # Display a loading message
@@ -73,36 +81,36 @@ application.start.display_loading_message(3)
 # --------------------------------------------------------------------------------------
 application.start.set_warnings()
 
-# --------------------------------------------------------------------------------------
-# Getting preferences
-# --------------------------------------------------------------------------------------
-preferences = application.preferences.preferences
+# # --------------------------------------------------------------------------------------
+# # Getting preferences
+# # --------------------------------------------------------------------------------------
+# preferences = application.preferences.preferences
 
-# --------------------------------------------------------------------------------------
-# Check for new release in a separate thread
-# --------------------------------------------------------------------------------------
-import threading
+# # --------------------------------------------------------------------------------------
+# # Check for new release in a separate thread
+# # --------------------------------------------------------------------------------------
+# import threading
 
-check_update = application.check_update.check_update
-version = application.info.version
+# check_update = application.check_update.check_update
+# version = application.info.version
 
-check_update_frequency = preferences.check_update_frequency
-DISPLAY_UPDATE = threading.Thread(
-    target=check_update, args=(version, check_update_frequency)
-)
-if not application.application.NO_DISPLAY:
-    DISPLAY_UPDATE.start()
+# check_update_frequency = preferences.check_update_frequency
+# DISPLAY_UPDATE = threading.Thread(
+#     target=check_update, args=(version, check_update_frequency)
+# )
+# if not application.application.NO_DISPLAY:
+#     DISPLAY_UPDATE.start()
 
-# --------------------------------------------------------------------------------------
-# Download data in a separate thread
-# --------------------------------------------------------------------------------------
-download_full_testdata_directory = application.testdata.download_full_testdata_directory
+# # --------------------------------------------------------------------------------------
+# # Download data in a separate thread
+# # --------------------------------------------------------------------------------------
+# download_full_testdata_directory = application.testdata.download_full_testdata_directory
 
-DOWNLOAD_TESTDATA = threading.Thread(
-    target=download_full_testdata_directory,
-    args=(preferences.datadir,),
-)
-DOWNLOAD_TESTDATA.start()
+# DOWNLOAD_TESTDATA = threading.Thread(
+#     target=download_full_testdata_directory,
+#     args=(preferences.datadir,),
+# )
+# DOWNLOAD_TESTDATA.start()
 
 # --------------------------------------------------------------------------------------
 # Plugin manager
@@ -119,11 +127,71 @@ DOWNLOAD_TESTDATA.start()
 
 # __all__.append("plugin_manager")
 
+
+def get_preferences():
+    """Lazy load preferences only when needed."""
+    global _preferences
+    with _preferences_lock:
+        if _preferences is None:
+            from . import application
+
+            _preferences = application.preferences.preferences
+            _preferences_queue.put(_preferences)
+        return _preferences
+
+
+def requires_preferences(func):
+    """
+    Ensure preferences are loaded before function runs.
+
+    This decorator guarantees that preferences are initialized before the decorated
+    function is executed.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        prefs = get_preferences()
+        return func(prefs, *args, **kwargs)
+
+    return wrapper
+
+
+@requires_preferences
+def check_update_thread(preferences):
+    """Check for updates in a separate thread."""
+    from . import application
+
+    check_update = application.check_update.check_update
+    version = application.info.version
+
+    if not application.application.NO_DISPLAY:
+        check_update(version, preferences.check_update_frequency)
+
+
+@requires_preferences
+def download_testdata_thread(preferences):
+    """Download testdata in a separate thread."""
+    from . import application
+
+    download_full_testdata_directory = (
+        application.testdata.download_full_testdata_directory
+    )
+    download_full_testdata_directory(preferences.datadir)
+
+
+# Start threads
+DISPLAY_UPDATE = threading.Thread(target=check_update_thread)
+DOWNLOAD_TESTDATA = threading.Thread(target=download_testdata_thread)
+
+DISPLAY_UPDATE.start()
+DOWNLOAD_TESTDATA.start()
+
 # ------------------------------------------------------------------------------
 # Display welcome message
 # ------------------------------------------------------------------------------
 import sys
 
+version = application.info.version
 copyright = application.info.copyright
 welcome_string = f"SpectroChemPy's API - v.{version}\n©Copyright {copyright}"
 
@@ -135,72 +203,6 @@ if is_notebook():  # pragma: no cover
 else:
     if "/bin/" not in sys.argv[0]:  # deactivate for console scripts
         print(welcome_string.strip())  # noqa: T201
-
-
-# # ------------------------------------------------------------------------------
-# # Dynamic attribute access to NDDataset methods
-# # ------------------------------------------------------------------------------
-# def __getattr__(name: str) -> Any:
-#     """
-#     Dynamic attribute lookup for NDDataset methods.
-
-#     This function allows direct access to NDDataset methods from the top-level package.
-#     For example, `spectrochempy.method_name` will return the corresponding method
-#     from NDDataset if it exists.
-
-#     Parameters
-#     ----------
-#     name : str
-#         Name of the attribute to look up
-
-#     Returns
-#     -------
-#     Any
-#         The requested NDDataset method or attribute
-
-#     Raises
-#     ------
-#     AttributeError
-#         If the requested attribute doesn't exist in NDDataset
-
-#     """
-#     # if name in api.__all__:
-#     #    return getattr(api, name)
-
-#     # let's try to find the method in the plugin
-#     # from spectrochempy.api import plugin_manager
-
-#     for plugin in plugin_manager.available_plugins.values():  # noqa: F405
-#         if hasattr(plugin, name):
-#             if getattr(plugin, name) is None:
-#                 # try to initialize the plugin
-#                 try:
-#                     plugin.initialize(manager=plugin_manager)  # noqa: F405
-#                 except Exception as e:
-#                     raise e
-
-#             return getattr(plugin, name)
-#             # my need to
-
-#     # # let's try to find the method in the NDDataset class
-#     # from spectrochempy.core.dataset.nddataset import NDDataset
-
-#     # if hasattr(NDDataset, name):
-#     #     return getattr(NDDataset, name)
-
-#     # # if the method is not found, raise an AttributeError
-#     # raise AttributeError(f"module 'spectrochempy' has no attribute '{name}'")
-
-#     if name in api_methods:
-#         return tr.import_item(api_methods[name] + "." + name)
-
-#     # look also NDDataset attribute which can be used as API methods
-#     if name in dataset_methods:
-#         from spectrochempy.core.dataset.nddataset import NDDataset
-
-#         return getattr(NDDataset, name)
-
-#     raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
 # Override __getattr__ to handle both submodules and direct class access
