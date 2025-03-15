@@ -585,5 +585,12 @@ class NDPlot(tr.HasTraits):
         """Matplotlib plot divider."""
         return self._divider
 
+    # prepare docstring for 1D plot and plot_<method> function
+    docprocess.delete_params(
+        "plot.other_parameters", "colorbar", "projections", "transposed", "y_reverse"
+    )
+    docprocess.delete_params("plot.parameters", "method")
 
-plot = NDPlot.plot  # make plot accessible directly from the scp API
+
+# make plot accessible directly from the scp API
+plot = NDPlot.plot

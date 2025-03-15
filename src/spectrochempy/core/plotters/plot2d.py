@@ -13,6 +13,7 @@ __all__ = [
 ]
 __dataset_methods__ = __all__
 
+
 from contextlib import suppress
 from copy import copy as cpy
 
@@ -23,106 +24,124 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.application.preferences import preferences
+from spectrochempy.core.dataset.arraymixins.ndplot import (
+    NDPlot,  # noqa: F401 # for the docstring to be determined it necessary to import NDPlot
+)
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.utils.docutils import add_docstring
+from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.mplutils import make_label
-from spectrochempy.utils.mplutils import plot_method
-
-_PLOT2D_DOC = """
-autolayout : `bool` , optional, default=True
-    if True, layout will be set automatically.
-ax : |Axes| instance. Optional
-    The axe where to plot. The default is the current axe or to create a new one if is None.
-clear : bool, optional, default=`True`
-    Should we plot on the ax previously used or create a new figure?.
-colorbar :
-data_only : `bool` [optional, default=`False`]
-    Only the plot is done. No addition of axes or label specifications
-    (current if any or automatic settings are kept.
-dpi : [ None | scalar > 0]
-    The resolution in dots per inch. If None it will default to the
-    value savefig.dpi in the matplotlibrc file.
-figsize : tuple, optional
-    The figure size expressed as a tuple (w,h) in inch.
-fontsize : int, optional
-    The font size in pixels, default is 10 (or read from preferences).
-method : str [optional among `map` , `stack` , `image`, `surface` or `3D`]
-    The type of plot,
-output : str
-    A string containing a path to a filename. The output format is deduced
-    from the extension of the filename. If the filename has no extension,
-    the value of the rc parameter savefig.format is used.
-projections : `bool` [optional, default=False]
-reverse : `bool` or None [optional, default=None
-    In principle, coordinates run from left to right, except for wavenumbers
-    (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
-    will try to guess. But if reverse is set, then this is the
-    setting which will be taken into account.
-style : str, optional, default='notebook'
-    Matplotlib stylesheet (use `available_style` to get a list of available
-    styles for plotting
-transposed :
-twinx :
-use_plotly : bool, optional
-    Should we use plotly instead of mpl for plotting. Default to `preferences.use_plotly`  (default=False)
-x_reverse : `bool` or None [optional, default=None
-"""
-
 
 # ======================================================================================
 # nddataset plot2D functions
 # ======================================================================================
-@plot_method("2D", _PLOT2D_DOC)
+
+
+@docprocess.dedent
 def plot_stack(dataset, **kwargs):
     """
     Plot a 2D dataset as a stack plot.
 
-    Alias of plot_2D (with `method` argument set to `stack` ).
+    Parameters
+    ----------
+    %(plot.parameters)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_2D
+    plot_map
+    plot_image
+    plot_surface
+    plot_waterfall
     """
 
 
-@plot_method("2D", _PLOT2D_DOC)
+@docprocess.dedent
 def plot_map(dataset, **kwargs):
     """
     Plot a 2D dataset as a contoured map.
 
-    Alias of plot_2D (with `method` argument set to `map` .
+    Parameters
+    ----------
+    %(plot.parameters)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_2D
+    plot_stack
+    plot_image
+    plot_surface
+    plot_waterfall
     """
 
 
-@plot_method("2D", _PLOT2D_DOC)
+@docprocess.dedent
 def plot_image(dataset, **kwargs):
     """
     Plot a 2D dataset as an image plot.
 
-    Alias of plot_2D (with `method` argument set to `image` ).
+    Parameters
+    ----------
+    %(plot.parameters)s
+
+    Other Parameters
+    ----------------
+    %(plot.other_parameters)s
+
+    Returns
+    -------
+    %(plot.returns)s
+
+    See Also
+    --------
+    plot
+    plot_2D
+    plot_stack
+    plot_map
+    plot_surface
+    plot_waterfall
     """
 
 
-@add_docstring(_PLOT2D_DOC)
+@docprocess.dedent
 def plot_2D(dataset, method=None, **kwargs):
     """
     Plot of 2D array.
 
     Parameters
     ----------
-    dataset : `NDDataset`
-        The dataset to plot.
-    method : ['stack', 'map', 'image'] , optional
-        The method of plot of the dataset, which will determine the plotter to use.
-        Default method is given 'stack' but this can be changed using
-        `dataset.preference.method_2D` .
-    **kwargs
-        Optional keyword parameters (see Other Parameters).
+    %(plot.parameters)s
 
     Other Parameters
     ----------------
-    {0}
+    %(plot.other_parameters)s
+
+    Returns
+    -------
+    %(plot.returns)s
 
     See Also
     --------
-    plot_map
+    plot
     plot_stack
+    plot_map
     plot_image
     plot_surface
     plot_waterfall
