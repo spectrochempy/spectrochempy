@@ -38,10 +38,10 @@ class MockParent(Configurable):
         super().__init__()  # Initialize the parent Configurable class
 
 
-class TestConfigurable(MetaConfigurable):
+class _A_Configurable(MetaConfigurable):
     """Test implementation of MetaConfigurable."""
 
-    name = tr.Unicode("TestConfigurable")
+    name = tr.Unicode("_A_Configurable")
     test_param = tr.Int(42, config=True, help="Test parameter")
     another_param = tr.Unicode("default", config=True, help="Another test parameter")
 
@@ -50,18 +50,18 @@ class TestConfigurable(MetaConfigurable):
 def test_configurable():
     """Create a test configurable instance."""
     parent = MockParent()
-    return TestConfigurable(parent=parent)
+    return _A_Configurable(parent=parent)
 
 
 def test_init():
     """Test initialization of MetaConfigurable."""
     parent = MockParent()
-    test_config = {"TestConfigurable": {"test_param": 100}}
+    test_config = {"_A_Configurable": {"test_param": 100}}
     parent.config = Config(test_config)
 
-    tc = TestConfigurable(parent=parent)
+    tc = _A_Configurable(parent=parent)
 
-    assert tc.name == "TestConfigurable"
+    assert tc.name == "_A_Configurable"
     assert tc.test_param == 100  # Should use config value
     assert tc.another_param == "default"  # Should use default value
 
@@ -121,14 +121,14 @@ def test_trait_change_updates_config(test_configurable):
     test_configurable.test_param = 100
 
     # Verify that update was called on config_manager
-    assert "TestConfigurable" in test_configurable.cfg.configs
-    assert "TestConfigurable" in test_configurable.cfg.configs["TestConfigurable"]
+    assert "_A_Configurable" in test_configurable.cfg.configs
+    assert "_A_Configurable" in test_configurable.cfg.configs["_A_Configurable"]
     assert (
         "test_param"
-        in test_configurable.cfg.configs["TestConfigurable"]["TestConfigurable"]
+        in test_configurable.cfg.configs["_A_Configurable"]["_A_Configurable"]
     )
     assert (
-        test_configurable.cfg.configs["TestConfigurable"]["TestConfigurable"][
+        test_configurable.cfg.configs["_A_Configurable"]["_A_Configurable"][
             "test_param"
         ]
         == 100
