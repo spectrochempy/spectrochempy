@@ -62,6 +62,7 @@ def plot_stack(dataset, **kwargs):
     plot_surface
     plot_waterfall
     """
+    return plot_2D(dataset, method="stack", **kwargs)
 
 
 @docprocess.dedent
@@ -90,6 +91,7 @@ def plot_map(dataset, **kwargs):
     plot_surface
     plot_waterfall
     """
+    return plot_2D(dataset, method="map", **kwargs)
 
 
 @docprocess.dedent
@@ -118,6 +120,7 @@ def plot_image(dataset, **kwargs):
     plot_surface
     plot_waterfall
     """
+    return plot_2D(dataset, method="image", **kwargs)
 
 
 @docprocess.dedent

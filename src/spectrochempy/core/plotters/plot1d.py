@@ -426,6 +426,7 @@ def plot_scatter(dataset, **kwargs):
     plot_multiple
     multiplot
     """
+    return plot_1D(dataset, method="scatter", **kwargs)
 
 
 @docprocess.dedent
@@ -457,6 +458,7 @@ def plot_pen(dataset, **kwargs):
     plot_multiple
     multiplot
     """
+    return plot_1D(dataset, method="pen", **kwargs)
 
 
 @docprocess.dedent
@@ -488,6 +490,7 @@ def plot_scatter_pen(dataset, **kwargs):
     plot_multiple
     multiplot
     """
+    return plot_1D(dataset, method="scatter_pen", **kwargs)
 
 
 @docprocess.dedent
@@ -519,6 +522,7 @@ def plot_bar(dataset, **kwargs):
     plot_multiple
     multiplot
     """
+    return plot_1D(dataset, method="bar", **kwargs)
 
 
 def plot_multiple(

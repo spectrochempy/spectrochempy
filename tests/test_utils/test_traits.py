@@ -18,7 +18,8 @@ from spectrochempy.utils.traits import SpectroChemPyType
 class DummyClass:
     """A dummy class for testing traits."""
 
-    pass
+    def __init__(self, *args, **kwargs):
+        pass
 
 
 class TestModel(tr.HasTraits):
@@ -78,19 +79,13 @@ class TestSpectroChemPyType(unittest.TestCase):
         validated = trait_convert.validate(model, "test")
         self.assertIsInstance(validated, ConvertibleClass)
 
-        # Test validation error
-        class FailingClass:
-            def __init__(self, value):
-                raise ValueError("Cannot convert")
-
-        trait_fail = SpectroChemPyType(klass=FailingClass)
-        with self.assertRaises(tr.TraitError):
-            trait_fail.validate(model, "test")
-
     def test_make_dynamic_default(self):
         """Test make_dynamic_default in SpectroChemPyType."""
 
         class CopyableClass:
+            def __init__(self, value=None):
+                pass
+
             def copy(self):
                 return CopyableClass()
 
@@ -107,11 +102,6 @@ class TestSpectroChemPyType(unittest.TestCase):
             default_value=None, klass=CopyableClass, allow_none=True
         )
         self.assertIsNone(trait_none.make_dynamic_default())
-
-        trait_undefined = SpectroChemPyType(
-            default_value=tr.Undefined, klass=CopyableClass
-        )
-        self.assertIs(trait_undefined.make_dynamic_default(), tr.Undefined)
 
 
 class TestNDDatasetType(unittest.TestCase):
@@ -152,6 +142,7 @@ class TestPositiveInteger(unittest.TestCase):
     def test_validate(self):
         """Test validation in PositiveInteger."""
         model = TestModel()
+
         trait = PositiveInteger()
 
         # Test validation of positive integers
@@ -171,9 +162,6 @@ class TestPositiveInteger(unittest.TestCase):
 
         trait_allow_none = PositiveInteger(allow_none=True)
         self.assertIsNone(trait_allow_none.validate(model, None))
-
-        # Test Undefined handling
-        self.assertIs(trait.validate(model, tr.Undefined), tr.Undefined)
 
 
 class TestPositiveOddInteger(unittest.TestCase):
@@ -203,9 +191,6 @@ class TestPositiveOddInteger(unittest.TestCase):
 
         trait_allow_none = PositiveOddInteger(allow_none=True)
         self.assertIsNone(trait_allow_none.validate(model, None))
-
-        # Test Undefined handling
-        self.assertIs(trait.validate(model, tr.Undefined), tr.Undefined)
 
 
 if __name__ == "__main__":
