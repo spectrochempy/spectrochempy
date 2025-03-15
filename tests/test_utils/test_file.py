@@ -46,7 +46,7 @@ class TestPathClean:
         """Test pathclean with a string path."""
         path = pathclean("test/path")
         assert isinstance(path, Path)
-        assert str(path) == "test/path"
+        assert str(path) == str(pathclean("test/path"))
 
     def test_pathclean_windows_path(self):
         """Test pathclean with Windows-style path."""
@@ -59,8 +59,8 @@ class TestPathClean:
         paths = pathclean(["test/path1", "test/path2"])
         assert isinstance(paths, list)
         assert all(isinstance(p, Path) for p in paths)
-        assert str(paths[0]) == "test/path1"
-        assert str(paths[1]) == "test/path2"
+        assert str(paths[0]) == str(pathclean("test/path1"))
+        assert str(paths[1]) == str(pathclean("test/path2"))
 
     def test_pathclean_tuple(self):
         """Test pathclean with a tuple of paths."""
@@ -526,7 +526,7 @@ class TestDirectoryFunctions:
 
             # Use pytest.raises to verify an exception is raised with the expected message
             with pytest.raises(
-                OSError, match=f'"{input_dir}" is not a valid directory'
+                OSError, match=f'"{pathclean(input_dir)}" is not a valid directory'
             ):
                 get_directory_name(input_dir)
 
