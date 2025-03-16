@@ -528,3 +528,31 @@ def get_loglevel() -> int:
     from spectrochempy.application.preferences import preferences
 
     return preferences.log_level
+
+
+# --------------------------------------------------------------------------------------
+# Check for new release in a separate thread
+# --------------------------------------------------------------------------------------
+import threading
+
+if not NO_DISPLAY:
+    from .check_update import check_update
+    from .info import version
+
+    check_update_frequency = app.general_preferences.check_update_frequency
+    DISPLAY_UPDATE = threading.Thread(
+        target=check_update, args=(version, check_update_frequency)
+    )
+
+    DISPLAY_UPDATE.start()
+
+# --------------------------------------------------------------------------------------
+# Download data in a separate thread
+# --------------------------------------------------------------------------------------
+from .testdata import download_full_testdata_directory
+
+DOWNLOAD_TESTDATA = threading.Thread(
+    target=download_full_testdata_directory,
+    args=(app.general_preferences.datadir,),
+)
+DOWNLOAD_TESTDATA.start()
