@@ -8,14 +8,14 @@
 
 __all__ = [
     "arraymixins",
-    "baseobjects",
+    "basearrays",
     "coord",
     "coordset",
     "nddataset",
 ]
 
 from . import arraymixins
-from . import baseobjects
+from . import basearrays
 from . import coord
 from . import coordset
 from . import nddataset

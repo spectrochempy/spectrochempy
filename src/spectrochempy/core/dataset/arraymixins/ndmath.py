@@ -20,7 +20,7 @@ from quaternion import as_float_array
 # Local imports
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import warning_
-from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
@@ -65,7 +65,7 @@ class _from_numpy_method:
         @functools.wraps(self.method)
         def func(*args: Any, **kwargs: Any) -> Any:
             # Delayed import to avoid circular reference
-            from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+            from spectrochempy.core.dataset.basearrays.ndarray import NDArray
             from spectrochempy.core.dataset.coord import Coord
             from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -521,7 +521,7 @@ class NDMath:
         #        # If this reached, data are not complex or hypercomplex
         #        if fname in ['absolute', 'abs']:
         #            f = np.fabs
-        from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+        from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 
         # set history string
         history = f"Ufunc {fname} applied."

@@ -9,7 +9,7 @@ from copy import copy, deepcopy
 
 import numpy as np
 
-from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.units import Quantity, ur
 from spectrochempy.utils.testing import (
     assert_array_equal,

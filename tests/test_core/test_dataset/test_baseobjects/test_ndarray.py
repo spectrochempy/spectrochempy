@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 from pint.errors import DimensionalityError
 
-from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
 from spectrochempy.utils.constants import INPLACE
