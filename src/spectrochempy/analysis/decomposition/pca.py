@@ -450,11 +450,14 @@ for reproducible results across multiple function calls.""",
             color=color1,
             title="Scree plot",
         )
+
+        markersize = prefs.lines.markersize
+
         ax2 = self.ev_cum[:n_components].plot_scatter(
             ylim=ylim2,
             color=color2,
             pen=True,
-            markersize=7.0,
+            markersize=markersize,
             twinx=ax1,
         )
         ax1.set_title("Scree plot")
@@ -495,6 +498,10 @@ for reproducible results across multiple function calls.""",
             used to show labels.
         labels_every : int, optional, default: 1
             Do not label all points, but only every value indicated by this parameter.
+
+        Note
+        ----
+        * the markersize is defined from preferences (prefs) as the square of the `prefs.lines.markersize`.
 
         Returns
         -------
@@ -545,6 +552,7 @@ for reproducible results across multiple function calls.""",
             else:
                 scatterlabels = scores.y.labels[:, labels_column]
 
+        markersize = prefs.lines.markersize**2
         if len(pcs) == 2:
             # bidimensional score plot
 
@@ -556,7 +564,7 @@ for reproducible results across multiple function calls.""",
             ax.set_ylabel(f"PC# {pcs[1] + 1} ({self.ev_ratio.data[pcs[1]]:.3f}%)")
             x = scores.masked_data[:, pcs[0]]
             y = scores.masked_data[:, pcs[1]]
-            axsc = ax.scatter(x, y, s=30, c=colors, cmap=colormap)
+            axsc = ax.scatter(x, y, s=markersize, c=colors, cmap=colormap)
 
             if scatterlabels is not None:
                 for idx, lab in enumerate(scatterlabels):
@@ -593,7 +601,7 @@ for reproducible results across multiple function calls.""",
                 scores.masked_data[:, pcs[1]],
                 scores.masked_data[:, pcs[2]],
                 zdir="z",
-                s=30,
+                s=markersize,
                 c=colors,
                 cmap=colormap,
                 depthshade=True,

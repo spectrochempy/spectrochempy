@@ -39,10 +39,18 @@ scores
 
 # %%
 # Finally, display the results graphically
+
+# first we can set some preferences for the plot
+prefs = scp.preferences
+prefs.lines.markersize = 7
+
 # ScreePlot
 pca.screeplot()
 # %%
 # Score Plot
+# first we can set some preferences for the plot
+prefs.lines.markersize = 10
+
 pca.scoreplot(scores, 1, 2)
 # %%
 # Score Plot for 3 PC's in 3D
