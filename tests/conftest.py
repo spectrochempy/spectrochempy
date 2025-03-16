@@ -74,8 +74,8 @@ def mock_cwd(monkeypatch, tmp_path):
 
 
 from spectrochempy.application.preferences import preferences as prefs
-from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
-from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
@@ -165,19 +165,19 @@ def ndarraycplx():
     return NDComplexArray(ref_data, units="m/s", dtype=np.complex128, copy=True).copy()
 
 
-@pytest.fixture(scope="function")
-def ndarrayquaternion(typequaternion):
-    # return a quaternion ndarray
-    if typequaternion is None:
-        raise ModuleNotFoundError("quaternion plugin not installed")
+# @pytest.fixture(scope="function")
+# def ndarrayquaternion(typequaternion):
+#     # return a quaternion ndarray
+#     if typequaternion is None:
+#         raise ModuleNotFoundError("quaternion plugin not installed")
 
-    from spectrochempy.plugins.quaternion.core.dataset.baseobjects.ndquaternion import (
-        NDQuaternionArray,
-    )
+#     from spectrochempy.plugins.quaternion.core.dataset.baseobjects.ndquaternion import (
+#         NDQuaternionArray,
+#     )
 
-    return NDQuaternionArray(
-        ref_data, units="m/s", dtype=typequaternion, copy=True
-    ).copy()
+#     return NDQuaternionArray(
+#         ref_data, units="m/s", dtype=typequaternion, copy=True
+#     ).copy()
 
 
 # --------------------------------------------------------------------------------------

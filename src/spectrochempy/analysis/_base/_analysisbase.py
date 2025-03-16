@@ -14,7 +14,7 @@ import traitlets as tr
 from sklearn import linear_model
 
 from spectrochempy.application.application import app
-from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable

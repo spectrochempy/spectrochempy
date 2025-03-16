@@ -11,7 +11,7 @@ from warnings import warn
 
 import numpy as np
 
-from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
+from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions

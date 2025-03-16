@@ -14,7 +14,7 @@ from quaternion import as_quat_array
 from traitlets import Bool
 from traitlets import validate
 
-from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import Quantity
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX

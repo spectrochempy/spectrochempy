@@ -43,9 +43,9 @@ from spectrochempy.core.dataset.arraymixins.ndio import NDIO
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
-from spectrochempy.core.dataset.baseobjects.ndarray import DEFAULT_DIM_NAME
-from spectrochempy.core.dataset.baseobjects.ndarray import NDArray
-from spectrochempy.core.dataset.baseobjects.ndcomplex import NDComplexArray
+from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
+from spectrochempy.core.dataset.basearrays.ndarray import NDArray
+from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.traittypes import Array
