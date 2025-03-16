@@ -48,9 +48,9 @@ scripts = [
 
 
 def nbsphinx_script_run(path):
-    # import matplotlib
+    import matplotlib
 
-    # matplotlib.use("Agg")  # Force non-interactive backend before any other imports
+    matplotlib.use("Agg")  # Force non-interactive backend before any other imports
 
     pipe = None
     so = None
@@ -75,10 +75,6 @@ def nbsphinx_script_run(path):
 @pytest.mark.skipif(
     sys.platform == "win32",
     reason="does not run well on windows - to be investigated",
-)
-@pytest.mark.skipif(
-    sys.platform == "darwin",
-    reason="Issue with this run on macOS Github action",
 )
 @pytest.mark.parametrize(
     "script",
