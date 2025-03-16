@@ -116,9 +116,12 @@ show_versions = "spectrochempy.ci.show_versions:main"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ["src", "docs"]
+where = ["src"]
 
 [tool.setuptools.package-data]
+"*" = [
+  "*.pyi",
+]
 "spectrochempy.data" = [
   "fonts/*",
   "stylesheets/*",
