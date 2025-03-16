@@ -14,15 +14,7 @@ import warnings
 from datetime import datetime
 
 import numpy as np
-from traitlets import Bool
-from traitlets import HasTraits
-from traitlets import Instance
-from traitlets import Integer
-from traitlets import List
-from traitlets import Unicode
-from traitlets import Union
-from traitlets import default
-from traitlets import validate
+import traitlets as tr
 
 from spectrochempy.application.application import error_
 from spectrochempy.application.application import info_
@@ -32,6 +24,7 @@ from spectrochempy.core.units import Unit
 from spectrochempy.core.units import set_nmr_context
 from spectrochempy.core.units import ur
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils.constants import DEFAULT_DIM_NAME
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.constants import NOMASK
@@ -47,22 +40,15 @@ from spectrochempy.utils.print import numpyprintoptions
 from spectrochempy.utils.typeutils import is_number
 from spectrochempy.utils.typeutils import is_sequence
 
-# ======================================================================================
-# Constants
-# ======================================================================================
-DEFAULT_DIM_NAME = list("xyzuvwpqrstijklmnoabcdefgh")[::-1]
-"""Default dimension names."""
-
-# ======================================================================================
 # Printing settings
-# ======================================================================================
+# --------------------------------------------------------------------------------------
 numpyprintoptions()
 
 
 # ======================================================================================
 # The basic NDArray class
 # ======================================================================================
-class NDArray(HasTraits):
+class NDArray(tr.HasTraits):
     r"""
     The basic  `NDArray` object.
 
@@ -163,36 +149,36 @@ class NDArray(HasTraits):
     # Hidden properties
 
     # Main array properties
-    _id = Unicode()
-    _name = Unicode()
-    _title = Unicode(allow_none=True)
-    _data = Array(allow_none=True)
-    _dtype = Instance(np.dtype, allow_none=True)
-    _dims = List(Unicode())
-    _mask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
+    _id = tr.Unicode()
+    _name = tr.Unicode()
+    _title = tr.Unicode(allow_none=True)
+    _data = Array(None, allow_none=True)
+    _dtype = tr.Instance(np.dtype, allow_none=True)
+    _dims = tr.List(tr.Unicode())
+    _mask = tr.Union((tr.Bool(), Array(tr.Bool()), tr.Instance(MaskedConstant)))
     _labels = Array(allow_none=True)
-    _units = Instance(Unit, allow_none=True)
-    _meta = Instance(Meta, allow_none=True)
+    _units = tr.Instance(Unit, allow_none=True)
+    _meta = tr.Instance(Meta, allow_none=True)
 
     # Region of interest
-    _roi = List(allow_none=True)
+    _roi = tr.List(allow_none=True)
 
     # Transposition flag
-    _transposed = Bool(False)
+    _transposed = tr.Bool(False)
 
     # Basic NDArray setting.
     # by default, we do shallow copy of the data
     # which means that if the same numpy array is used for too different NDArray,
     # they will share it.
-    _copy = Bool(False)
+    _copy = tr.Bool(False)
 
-    _labels_allowed = Bool(True)
+    _labels_allowed = tr.Bool(True)
     # Labels are allowed for the data, if the data are 1D only
     # they will essentially serve as coordinates labelling.
 
     # Other settings
-    _text_width = Integer(120)
-    _html_output = Bool(False)
+    _text_width = tr.Integer(120)
+    _html_output = tr.Bool(False)
 
     def __init__(self, data=None, **kwargs):
         super().__init__()
@@ -513,11 +499,11 @@ class NDArray(HasTraits):
         out = f"{self._str_value()}\n{self._str_shape()}"
         return out.rstrip()
 
-    @default("_data")
+    @tr.default("_data")
     def _data_default(self):
         return None
 
-    @validate("_data")
+    @tr.validate("_data")
     def _data_validate(self, proposal):
         # validation of the _data attribute
         data = proposal["value"]
@@ -531,7 +517,7 @@ class NDArray(HasTraits):
             return data.copy()
         return data
 
-    @default("_dims")
+    @tr.default("_dims")
     def _dims_default(self):
         return DEFAULT_DIM_NAME[-self.ndim :]
 
@@ -680,12 +666,12 @@ class NDArray(HasTraits):
 
         return slice(start, stop, step)
 
-    @default("_id")
+    @tr.default("_id")
     def _id_default(self):
         # a unique id
         return f"{type(self).__name__}_{str(uuid.uuid1()).split('-')[0]}"
 
-    @default("_labels")
+    @tr.default("_labels")
     def _labels_default(self):
         return None
 
@@ -821,11 +807,11 @@ class NDArray(HasTraits):
             keys.reverse()  # WARNING; assume 2D
         return tuple(keys)
 
-    @default("_mask")
+    @tr.default("_mask")
     def _mask_default(self):
         return NOMASK if self._data is None else np.zeros(self._data.shape).astype(bool)
 
-    @validate("_mask")
+    @tr.validate("_mask")
     def _mask_validate(self, proposal):
         pv = proposal["value"]
         mask = pv
@@ -844,11 +830,11 @@ class NDArray(HasTraits):
             return mask.copy()
         return mask
 
-    @default("_meta")
+    @tr.default("_meta")
     def _meta_default(self):
         return Meta()
 
-    @default("_name")
+    @tr.default("_name")
     def _name_default(self):
         return ""
 
@@ -916,7 +902,7 @@ class NDArray(HasTraits):
         numpyprintoptions()
         return "".join([prefix, body, units, size])
 
-    @default("_roi")
+    @tr.default("_roi")
     def _roi_default(self):
         return None
 
@@ -1067,7 +1053,7 @@ class NDArray(HasTraits):
             out += "\0{}\0".format(textwrap.indent(text, " " * 9))
         return out.rstrip()  # remove the trailing '\n'
 
-    @default("_title")
+    @tr.default("_title")
     def _title_default(self):
         return None
 
