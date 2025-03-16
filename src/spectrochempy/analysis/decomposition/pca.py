@@ -499,14 +499,14 @@ for reproducible results across multiple function calls.""",
         labels_every : int, optional, default: 1
             Do not label all points, but only every value indicated by this parameter.
 
-        Notes
-        -----
-        * the markersize is defined from preferences (prefs) as the square of the `prefs.lines.markersize`.
-
         Returns
         -------
         `~matplotlib.axes.Axes`
             The matplotlib axes.
+
+        Notes
+        -----
+        * the markersize is defined from preferences (prefs) as the square of the `prefs.lines.markersize`.
 
         """
 
