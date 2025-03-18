@@ -27,6 +27,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read  # Required for actions/checkout
+  id-token: write  # Required for certain authentication scenarios
+  actions: read  # Default permissions for actions
+  checks: write  # Required for reporting test results
+  statuses: write  # Required for updating commit statuses
+
 jobs:
   test-package:
     # Skip tests for releases and limit scheduled runs to main repository
