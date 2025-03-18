@@ -69,13 +69,12 @@ jobs:
       - name: Pull Colab image
         run: docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
 
-      # Step 7: Create a dedicated test script
+      # Step 7: Create test script
       - name: Create test script
         run: |
           cat << EOF > test_install.py
           import sys
           import subprocess
-          import spectrochempy as scp
 
           def install_package(path):
               # Install requirements
@@ -86,6 +85,8 @@ jobs:
               print("Installation completed")
 
           def test_functionality():
+              # Only import after installation
+              import spectrochempy as scp
               # Test basic functionality
               ds = scp.NDDataset([1, 2, 3])
               assert ds.shape == (3,), "Dataset shape mismatch"
@@ -102,6 +103,7 @@ jobs:
         run: |
           # Create pip cache directory
           mkdir -p ~/.cache/pip
+          chmod -R 777 ~/.cache/pip  # Ensure proper permissions
 
           # Start the Colab container with pip cache mounted
           docker run --rm -d \
@@ -126,12 +128,11 @@ jobs:
           docker stop colab_container
 
       # Step 9: Save the results
-      # This saves the executed notebook as an artifact
-      # Artifacts can be downloaded from the GitHub Actions interface
-      # This runs even if previous steps fail (if: always)
       - name: Upload notebook results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: notebook-output
-          path: output.ipynb
+          path: |
+            output.ipynb
+            test_install.py
