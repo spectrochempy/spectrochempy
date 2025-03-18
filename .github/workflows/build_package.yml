@@ -18,6 +18,11 @@ on:
 
   workflow_dispatch:  # Allow manual trigger
 
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

@@ -25,6 +25,11 @@ on:
   schedule:
     - cron: "0 0 * * 0"  # At 00:00 on Sunday
 
+permissions:
+  contents: write  # Required for pushing to gh-pages
+  actions: read    # Default permission for actions
+  id-token: none   # Explicitly disable id-token unless needed
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
