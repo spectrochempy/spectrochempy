@@ -17,6 +17,22 @@ New Features
   This approach does not reduce the overall loading time but significantly improves the initial import speed.
   It is particularly beneficial for notebook workflows, where the first execution cell runs much faster.
 
+* Markersize for PCA score and screeplots customizable. (Feature request #841)
+
+  example:
+
+  .. code-block:: python
+    ... rest of the code ...
+
+    # ScreePlot
+    prefs = scp.preferences
+    prefs.lines.markersize = 7
+    pca.screeplot()
+
+    # Score Plot
+    prefs.lines.markersize = 10
+    pca.scoreplot(scores, 1, 2)
+
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 
