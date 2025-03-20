@@ -21,17 +21,18 @@ New Features
 
   example:
 
-  .. code-block:: python
-    ... rest of the code ...
+   .. code-block:: python
 
-    # ScreePlot
-    prefs = scp.preferences
-    prefs.lines.markersize = 7
-    pca.screeplot()
+        ... existing code ...
 
-    # Score Plot
-    prefs.lines.markersize = 10
-    pca.scoreplot(scores, 1, 2)
+        # ScreePlot
+        prefs = scp.preferences
+        prefs.lines.markersize = 7
+        pca.screeplot()
+
+        # Score Plot
+        prefs.lines.markersize = 10
+        pca.scoreplot(scores, 1, 2)
 
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
