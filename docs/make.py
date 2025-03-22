@@ -621,10 +621,15 @@ class BuildDocumentation:
         if not self.settings["whatsnew"]:
             print("Loading spectrochempy and downloading test data...")
 
-            from spectrochempy.utils.file import download_testdata
+            from spectrochempy import preferences as prefs
 
-            # Download the test data
-            download_testdata()
+            datadir = prefs.datadir
+
+            from spectrochempy.application.testdata import (
+                download_full_testdata_directory,
+            )
+
+            download_full_testdata_directory(datadir, force=True)
 
         # Determine the version of the documentation to build
         self._version, self._last_release, self._doc_version = self._determine_version()
