@@ -853,9 +853,9 @@ class _SpcFile:
         ) = struct.unpack(head_format.encode("utf8"), content[: self.head_size])
 
     def _debug_info(self):
-        debug_("Version:", self.version)
-        debug_("format:", self.format)
-        debug_("Number of subfiles:", self.nsub)
+        debug_(f"Version: {self.version}")
+        debug_(f"format: {self.format}")
+        debug_(f"Number of subfiles: {self.nsub}")
         # Flag bits
         if self._tsprec:
             debug_("16-bit y data")
@@ -879,7 +879,7 @@ class _SpcFile:
             if self._Fnsub == 1:
                 debug_("Single file only")
             else:
-                debug_("Multiple subfiles:", self._Fnsub)
+                debug_(f"Multiple subfiles: {self._Fnsub}")
         except AttributeError:
             debug_("Fnsub not defined")
 
@@ -888,23 +888,6 @@ class _SpcFile:
             debug_("Multiple y-values")
         else:
             debug_("Single set of y-values")
-
-        debug_("Number of points:", self.npts)
-        debug_("First point:", self.first)
-        debug_("Last point:", self.last)
-        debug_("Technique:", self.technique)
-        debug_("Endian:", self._endian)
-        debug_("Acquisition date:", self.acqdate)
-        debug_("Timestamp:", self.timestamp)
-        debug_("X title:", self.x_title)
-        debug_("X units:", self.x_units)
-        debug_("Y title:", self.y_title)
-        debug_("Y units:", self.y_units)
-        debug_("Z title:", self.z_title)
-        debug_("Z units:", self.z_units)
-        debug_("Comment:", self.cmnt)
-        debug_("Resolution:", self.res)
-        debug_("Source:", self.source)
 
 
 @_importer_method
@@ -994,6 +977,8 @@ def _read_spc(*args, **kwargs):
             dataset.meta.resolution = spcf.res
         if spcf.source:
             dataset.meta.source = spcf.source
+        dataset.meta.fileformat = spcf.format
+        dataset.meta.scpversion = spcf.version
 
         dataset.history = f"Imported from spc file {filename}."
 
