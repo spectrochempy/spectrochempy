@@ -21,17 +21,17 @@ GALACTICDATA = DATADIR / "galacticdata"
 
 # %%
 # Reading single file
-ex1 = scp.read_spc(GALACTICDATA / "galacticdata/BENZENE.SPC")
+ex1 = scp.read_spc(GALACTICDATA / "BENZENE.SPC")
 ex1.plot()
 
 # %%
 # reading multiple files with same x coordinates (they are merged by default)
-ex2 = scp.read_spc(GALACTICDATA / "galacticdata/CONTOUR.SPC")
+ex2 = scp.read_spc(GALACTICDATA / "CONTOUR.SPC")
 ex2.plot()
 
 # %%
 # Reading multiple files with different x coordinates (they are not merged)
-ex3 = scp.read_spc(GALACTICDATA / "galacticdata/DRUG_SAMPLE_PEAKS.SPC")
+ex3 = scp.read_spc(GALACTICDATA / "DRUG_SAMPLE_PEAKS.SPC")
 for nd in ex3:
     nd.plot_bar(width=0.1, clear=False)
 
