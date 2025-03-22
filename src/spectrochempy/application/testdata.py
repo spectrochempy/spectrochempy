@@ -15,10 +15,10 @@ import requests
 # --------------------------------------------------------------------------------------
 # Testdata
 # --------------------------------------------------------------------------------------
-def download_full_testdata_directory(datadir):
+def download_full_testdata_directory(datadir, force=False):
     # this process is relatively long, so we do not want to do it several time:
     downloaded = datadir / "__downloaded__"
-    if downloaded.exists():
+    if downloaded.exists() and not force:
         return
 
     url = "https://github.com/spectrochempy/spectrochempy_data/archive/refs/heads/master.zip"
