@@ -20,7 +20,7 @@ import numpy as np
 # API utilities
 # ======================================================================================
 # When a function is in __all__, it is imported in the API
-__all__ = ["pathclean", "download_testdata"]
+__all__ = ["pathclean"]
 
 
 # region api
@@ -68,19 +68,6 @@ def pathclean(paths):
             return [_clean(p).expanduser() if isinstance(p, str) else p for p in paths]
 
     return paths
-
-
-def download_testdata():
-    from spectrochempy.application.preferences import preferences
-    from spectrochempy.core.readers.importer import read
-    from spectrochempy.utils.file import pathclean
-
-    datadir = pathclean(preferences.datadir)
-    # this process is relatively long, so we do not want to do it several time:
-    downloaded = datadir / "__downloaded__"
-    if not downloaded.exists():
-        read(datadir, download_only=True)
-        downloaded.touch(exist_ok=True)
 
 
 # endregion api

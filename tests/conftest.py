@@ -88,9 +88,9 @@ from spectrochempy.utils.testing import RandomSeedContext
 datadir = pathclean(prefs.datadir)
 
 
-from spectrochempy.utils.file import download_testdata
+from spectrochempy.application.testdata import download_full_testdata_directory
 
-download_testdata()
+download_full_testdata_directory(datadir, force=True)
 
 
 # --------------------------------------------------------------------------------------

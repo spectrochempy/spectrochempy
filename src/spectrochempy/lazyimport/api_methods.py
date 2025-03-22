@@ -258,7 +258,6 @@ _LAZY_IMPORTS = {
     "TYPE_FLOAT": "spectrochempy.utils.constants",
     "TYPE_INTEGER": "spectrochempy.utils.constants",
     "pathclean": "spectrochempy.utils.file",
-    "download_testdata": "spectrochempy.utils.file",
     "Meta": "spectrochempy.utils.meta",
     "show": "spectrochempy.utils.mplutils",
     "Adict": "spectrochempy.utils.objects",

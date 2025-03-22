@@ -88,4 +88,4 @@ def setup_environment():
     if SCPY_STARTUP_LOGLEVEL is None:
         SCPY_STARTUP_LOGLEVEL = "DEBUG" if is_pytest else "INFO"
 
-    return NO_DISPLAY, SCPY_STARTUP_LOGLEVEL
+    return NO_DISPLAY, SCPY_STARTUP_LOGLEVEL, is_pytest

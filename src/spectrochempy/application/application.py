@@ -472,7 +472,7 @@ class SpectroChemPy(Application):
 # Setup environment
 from .envsetup import setup_environment
 
-NO_DISPLAY, SCPY_STARTUP_LOGLEVEL = setup_environment()
+NO_DISPLAY, SCPY_STARTUP_LOGLEVEL, is_pytest = setup_environment()
 
 # Define an instance of the SpectroChemPy application.
 app = SpectroChemPy(log_level=SCPY_STARTUP_LOGLEVEL)
@@ -549,10 +549,12 @@ if not NO_DISPLAY:
 # --------------------------------------------------------------------------------------
 # Download data in a separate thread
 # --------------------------------------------------------------------------------------
-from .testdata import download_full_testdata_directory
+if not is_pytest:
+    from .testdata import download_full_testdata_directory
 
-DOWNLOAD_TESTDATA = threading.Thread(
-    target=download_full_testdata_directory,
-    args=(app.general_preferences.datadir,),
-)
-DOWNLOAD_TESTDATA.start()
+    DOWNLOAD_TESTDATA = threading.Thread(
+        target=download_full_testdata_directory,
+        args=(app.general_preferences.datadir,),
+    )
+
+    DOWNLOAD_TESTDATA.start()
