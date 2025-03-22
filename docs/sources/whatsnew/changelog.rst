@@ -19,6 +19,8 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+* `read_spc()` now supports reading SPC files with multiple spectra
+* `read_spc()` now supports reading SPC files in old format (Spectra Calc® and Lab Calc®)
 
 .. section
 
@@ -26,6 +28,7 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+* New features listed above fix issues #849 and #771.
 
 .. section
 

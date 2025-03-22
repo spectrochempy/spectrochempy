@@ -223,10 +223,11 @@ def plot_1D(dataset, method=None, **kwargs):
         line = ax.bar(
             xdata,
             zdata.squeeze(),
-            color=color,
+            # color=color,
             edgecolor="k",
             align="center",
             label=label,
+            width=kwargs.get("width", 0.1),
         )  # barwidth = line[0].get_width()
     else:
         raise ValueError("label not valid")
