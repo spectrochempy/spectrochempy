@@ -476,9 +476,9 @@ class _SpcFile:
         else:  # old format
             # /* Year collected (0=no date/time) - MSB 4 bits are Z type */
             year = self._Fyear & 0x0FFF  # Get lower 12 bits for year
-            self._Fztype = (
-                (self._Fyear >> 12) & 0x0F
-            ).to_bytes()  # Get upper 4 bits for Z type
+            self._Fztype = ((self._Fyear >> 12) & 0x0F).to_bytes(
+                1, self._endian
+            )  # Get upper 4 bits for Z type
 
             month = int.from_bytes(self._Fmonth, self._endian)
             day = int.from_bytes(self._Fday, self._endian)
