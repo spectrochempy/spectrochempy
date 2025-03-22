@@ -10,6 +10,9 @@ This example shows reading of 'Galactic Industries’ SPC data file format. (``.
 # First we need to import the spectrochempy API package
 import spectrochempy as scp
 
+DATADIR = scp.preferences.datadir
+GALACTICDATA = DATADIR / "galacticdata"
+
 # %%
 # The SPC format is a proprietary format from Galactic Industries. It is used for
 # storing spectroscopic data. The SPC format is a binary file format that can store
@@ -18,17 +21,17 @@ import spectrochempy as scp
 
 # %%
 # Reading single file
-ex1 = scp.read_spc("galacticdata/BENZENE.SPC")
+ex1 = scp.read_spc(GALACTICDATA / "galacticdata/BENZENE.SPC")
 ex1.plot()
 
 # %%
 # reading multiple files with same x coordinates (they are merged by default)
-ex2 = scp.read_spc("galacticdata/CONTOUR.SPC")
+ex2 = scp.read_spc(GALACTICDATA / "galacticdata/CONTOUR.SPC")
 ex2.plot()
 
 # %%
 # Reading multiple files with different x coordinates (they are not merged)
-ex3 = scp.read_spc("galacticdata/DRUG_SAMPLE_PEAKS.SPC")
+ex3 = scp.read_spc(GALACTICDATA / "galacticdata/DRUG_SAMPLE_PEAKS.SPC")
 for nd in ex3:
     nd.plot_bar(width=0.1, clear=False)
 
