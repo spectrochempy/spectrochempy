@@ -11,37 +11,27 @@ DATADIR = scp.preferences.datadir
 GALACTICDATA = DATADIR / "galacticdata"
 
 
-# @pytest.mark.skipif(
-#     not GALACTICDATA.exists(),
-#     reason="Experimental data not available for testing",
-# )
 def test_read_spc():
     A = scp.read_spc("galacticdata/BARBITUATES.SPC")
-    # "spc reader not implemented yet for multifiles"
-    assert A is None
-
-    B = scp.read_spc("galacticdata/barbsvd.spc")
-    # multi file, can't be read yet
-    assert B is None
+    assert len(A) == 286
+    assert A[90].shape == (1, 17)
 
     C = scp.read_spc("galacticdata/BENZENE.SPC")
     assert C.shape == (1, 1842)
 
     D = scp.read_spc("galacticdata/CONTOUR.SPC")
-    # "The version b'M' is not yet supported"
-    assert D is None
+    assert D.shape == (19, 179)
 
     E = scp.read_spc("galacticdata/DEMO_3D.SPC")
-    # "The version b'M' is not yet supported"
-    assert E is None
+    assert E.shape == (32, 171)
 
     F = scp.read_spc("galacticdata/DRUG_SAMPLE.SPC")
-    # multi file, can't be read yet
-    assert F is None
+    assert len(F) == 400
+    assert F[0].shape == (1, 10)
 
     G = scp.read_spc("galacticdata/DRUG_SAMPLE_PEAKS.SPC")
-    # multi file, can't be read yet
-    assert G is None
+    assert len(G) == 6
+    assert G[0].shape == (1, 124)
 
     H = scp.read_spc("galacticdata/FID.SPC")
     assert H.shape == (1, 8192)
@@ -56,8 +46,7 @@ def test_read_spc():
     assert K.shape == (1, 4096)
 
     L = scp.read_spc("galacticdata/IG_MULTI.SPC")
-    # multi file, can't be read yet
-    assert L is None
+    assert L.shape == (10, 4096)
 
     M = scp.read_spc("galacticdata/IG_SAMP.SPC")
     assert M.shape == (1, 4645)
@@ -65,9 +54,8 @@ def test_read_spc():
     N = scp.read_spc("galacticdata/KKSAM.SPC")
     assert N.shape == (1, 751)
 
-    O = scp.read_spc("galacticdata/LC_DIODE_ARRAY.SPC")
-    # "The version b'M' is not yet supported"
-    assert O is None
+    # O = scp.read_spc("galacticdata/LC_DIODE_ARRAY.SPC")
+    # assert O is None
 
     P = scp.read_spc("galacticdata/POLYR.SPC")
     assert P.shape == (1, 1844)
