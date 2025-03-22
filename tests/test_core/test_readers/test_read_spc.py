@@ -12,72 +12,72 @@ GALACTICDATA = DATADIR / "galacticdata"
 
 
 def test_read_spc():
-    A = scp.read_spc(GALACTICDATA / "galacticdata/BARBITUATES.SPC")
+    A = scp.read_spc(GALACTICDATA / "BARBITUATES.SPC")
     assert len(A) == 286
     assert A[90].shape == (1, 17)
 
-    C = scp.read_spc(GALACTICDATA / "galacticdata/BENZENE.SPC")
+    C = scp.read_spc(GALACTICDATA / "BENZENE.SPC")
     assert C.shape == (1, 1842)
 
-    D = scp.read_spc(GALACTICDATA / "galacticdata/CONTOUR.SPC")
+    D = scp.read_spc(GALACTICDATA / "CONTOUR.SPC")
     assert D.shape == (19, 179)
 
-    E = scp.read_spc(GALACTICDATA / "galacticdata/DEMO_3D.SPC")
+    E = scp.read_spc(GALACTICDATA / "DEMO_3D.SPC")
     assert E.shape == (32, 171)
 
-    F = scp.read_spc(GALACTICDATA / "galacticdata/DRUG_SAMPLE.SPC")
+    F = scp.read_spc(GALACTICDATA / "DRUG_SAMPLE.SPC")
     assert len(F) == 400
     assert F[0].shape == (1, 10)
 
-    G = scp.read_spc(GALACTICDATA / "galacticdata/DRUG_SAMPLE_PEAKS.SPC")
+    G = scp.read_spc(GALACTICDATA / "DRUG_SAMPLE_PEAKS.SPC")
     assert len(G) == 6
     assert G[0].shape == (1, 124)
 
-    H = scp.read_spc(GALACTICDATA / "galacticdata/FID.SPC")
+    H = scp.read_spc(GALACTICDATA / "FID.SPC")
     assert H.shape == (1, 8192)
 
-    I = scp.read_spc(GALACTICDATA / "galacticdata/HCL.SPC")
+    I = scp.read_spc(GALACTICDATA / "HCL.SPC")
     assert I.shape == (1, 8361)
 
-    J = scp.read_spc(GALACTICDATA / "galacticdata/HOLMIUM.SPC")
+    J = scp.read_spc(GALACTICDATA / "HOLMIUM.SPC")
     assert J.shape == (1, 901)
 
-    K = scp.read_spc(GALACTICDATA / "galacticdata/IG_BKGND.SPC")
+    K = scp.read_spc(GALACTICDATA / "IG_BKGND.SPC")
     assert K.shape == (1, 4096)
 
-    L = scp.read_spc(GALACTICDATA / "galacticdata/IG_MULTI.SPC")
+    L = scp.read_spc(GALACTICDATA / "IG_MULTI.SPC")
     assert L.shape == (10, 4096)
 
-    M = scp.read_spc(GALACTICDATA / "galacticdata/IG_SAMP.SPC")
+    M = scp.read_spc(GALACTICDATA / "IG_SAMP.SPC")
     assert M.shape == (1, 4645)
 
-    N = scp.read_spc(GALACTICDATA / "galacticdata/KKSAM.SPC")
+    N = scp.read_spc(GALACTICDATA / "KKSAM.SPC")
     assert N.shape == (1, 751)
 
-    # O = scp.read_spc("galacticdata/LC_DIODE_ARRAY.SPC")
+    # O = scp.read_spc("LC_DIODE_ARRAY.SPC")
     # assert O is None
 
-    P = scp.read_spc(GALACTICDATA / "galacticdata/POLYR.SPC")
+    P = scp.read_spc(GALACTICDATA / "POLYR.SPC")
     assert P.shape == (1, 1844)
 
-    Q = scp.read_spc(GALACTICDATA / "galacticdata/POLYS.SPC")
+    Q = scp.read_spc(GALACTICDATA / "POLYS.SPC")
     assert Q.shape == (1, 1844)
 
-    R = scp.read_spc(GALACTICDATA / "galacticdata/SINGLE_POLYMER_FILM.SPC")
+    R = scp.read_spc(GALACTICDATA / "SINGLE_POLYMER_FILM.SPC")
     assert R.shape == (1, 1844)
 
-    S = scp.read_spc(GALACTICDATA / "galacticdata/SPECTRUM_WITH_BAD_BASELINE.SPC")
+    S = scp.read_spc(GALACTICDATA / "SPECTRUM_WITH_BAD_BASELINE.SPC")
     # no acquisition time
     assert S.shape == (1, 1400)
 
-    T = scp.read_spc(GALACTICDATA / "galacticdata/TOLUENE.SPC")
+    T = scp.read_spc(GALACTICDATA / "TOLUENE.SPC")
     assert T.shape == (1, 801)
 
-    U = scp.read_spc(GALACTICDATA / "galacticdata/TUMIX.SPC")
+    U = scp.read_spc(GALACTICDATA / "TUMIX.SPC")
     assert U.shape == (1, 1775)
 
-    V = scp.read_spc(GALACTICDATA / "galacticdata/TWO_POLYMER_FILMS.SPC")
+    V = scp.read_spc(GALACTICDATA / "TWO_POLYMER_FILMS.SPC")
     assert V.shape == (1, 1844)
 
-    W = scp.read_spc(GALACTICDATA / "galacticdata/XYTRACE.SPC")
+    W = scp.read_spc(GALACTICDATA / "XYTRACE.SPC")
     assert W.shape == (1, 3469)
