@@ -63,7 +63,7 @@ X.plot()
 # %%
 # select a region by slicing (note the original shape is (1, 1024)
 Xs = X[:, 0.0:400.0]
-info_("shape: ", X.shape)
+info_(f"shape: {X.shape}")
 Xs.plot()
 
 # %%
