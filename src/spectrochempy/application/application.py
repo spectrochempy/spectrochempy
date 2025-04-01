@@ -474,6 +474,8 @@ from .envsetup import setup_environment
 
 NO_DISPLAY, SCPY_STARTUP_LOGLEVEL, is_pytest = setup_environment()
 
+# Temporary: remove the debug setup as there is some problems in DEBUG mode.
+SCPY_STARTUP_LOGLEVEL = "INFO"
 # Define an instance of the SpectroChemPy application.
 app = SpectroChemPy(log_level=SCPY_STARTUP_LOGLEVEL)
 
