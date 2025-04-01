@@ -538,6 +538,7 @@ class IRIS(DecompositionAnalysis):
                 q = -2 * np.dot(X.T, K)
                 A = sparse.csc_matrix(np.eye(M))
                 lo = np.zeros(M)
+                up = np.ones(M) * np.inf
             else:
                 # The standard form used by quadprog() was
                 # minimize (1/2) xT P x - qT x ; subject to: A.T x >= b
@@ -576,9 +577,23 @@ class IRIS(DecompositionAnalysis):
                     for j in range(len(channels.data)):
                         P = sparse.csc_matrix(P0 + 2 * lamda * S)
                         qprob = osqp.OSQP()
-                        qprob.setup(P, q[j].squeeze(), A, lo, alpha=1.0, verbose=False)
+                        if osqp.__version__ < "1.0.0":
+                            qprob.setup(
+                                P, q[j].squeeze(), A, lo, alpha=1.0, verbose=False
+                            )
+                            warning_(
+                                f"The version of 'osqp' is outdated ({osqp.__version__}). "
+                                f"Please update osqp to version '1.0.1' or later. Spectrochempy "
+                                f"will not support this version in the future (scpy > 0.9)"
+                            )
+                        else:
+                            qprob.setup(
+                                P, q[j].squeeze(), A, lo, up, alpha=1.0, verbose=False
+                            )
+
                         fi[:, j] = qprob.solve().x
-                else:
+
+                else:  # quadprog solver
                     for j, channel in enumerate(channels.data):
                         try:
                             P = P0 + 2 * lamda * S

@@ -128,27 +128,29 @@ iris2 = scp.IRIS(reg_par=[-10, 1, 12])
 # %%
 # We keep the same kernel object as previously - performs the fit.
 iris2.fit(X_, K)
-
 iris2.plotlcurve(title="L curve, manual search")
-iris2.plotdistribution(-7)
-iris2.plotmerit(-7)
+# %%
+# Visually, the best regularization parameter is at index ~ -6, corresponding to lambda = 1e-4
+
+iris2.plotdistribution(-6)
+iris2.plotmerit(-6)
 # %%
 # Automatic search
 # ----------------
 # %%
-# Now try an automatic search of the regularization parameter:
+# Now try an automatic search of the regularization parameter around the best value found manually:
 
-iris3 = scp.IRIS(reg_par=[-10, 1])
+iris3 = scp.IRIS(log_level="INFO", reg_par=[-6, -2])
 iris3.fit(X_, K)
 iris3.plotlcurve(title="L curve, automated search")
 # %%
 # The data corresponding to the largest curvature of the L-curve
-# are at the second last position of output data.
+# are at index 5 of the output data.
 
 # sphinx_gallery_thumbnail_number = 11
 
-iris3.plotdistribution(-2)
-iris3.plotmerit(-2)
+iris3.plotdistribution(5)
+iris3.plotmerit(5)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

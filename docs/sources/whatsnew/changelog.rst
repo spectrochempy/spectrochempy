@@ -26,6 +26,8 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- fixed issue #856 (osqp dependency, used for IRIS)
+
 
 .. section
 
@@ -33,6 +35,7 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- osqp > 1.0 now allowed (#856). A warning has been added, osqp < 1.0 will not be supported in the future.
 
 .. section
 
