@@ -592,7 +592,8 @@ class IRIS(DecompositionAnalysis):
                             )
 
                         fi[:, j] = qprob.solve().x
-                else:
+
+                else:  # quadprog solver
                     for j, channel in enumerate(channels.data):
                         try:
                             P = P0 + 2 * lamda * S
