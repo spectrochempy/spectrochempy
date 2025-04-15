@@ -271,6 +271,11 @@ def read_srs(*paths, **kwargs):
     ----------------
     return_bg : bool, optional
         Default value is False. When set to 'True' returns the series background
+    reverse_x : bool, optional
+        Specifies whether to reverse the x-axis (wavenumber) data. Default is False.
+        In most srs files, the absorbance/intensity data are recorded from high to low
+        wavenumbers. However, in some cases the data maybe stored in low to high order.
+        If your data appear reversed, set 'reverse_x=True'.
     %(Importer.other_parameters)s
 
     See Also
@@ -735,6 +740,7 @@ def _read_srs(*args, **kwargs):
     frombytes = kwargs.get("frombytes", False)
 
     return_bg = kwargs.get("return_bg", False)
+    reverse_x = kwargs.get("reverse_x", False)
 
     # in this case, filename is actually a byte content
     fid = io.BytesIO(filename) if frombytes else open(filename, "rb")  # noqa: SIM115
@@ -1025,7 +1031,8 @@ def _read_srs(*args, **kwargs):
 
     # Create NDDataset Object for the series
     if not return_bg:
-        dataset = NDDataset(data)
+        dataset = NDDataset(data) if not reverse_x else NDDataset(data[:, ::-1])
+
     else:
         dataset = NDDataset(np.expand_dims(data, axis=0))
 
@@ -1038,6 +1045,7 @@ def _read_srs(*args, **kwargs):
     dataset.filename = filename
 
     # now add coordinates
+
     _x = Coord.linspace(
         info["firstx"],
         info["lastx"],
