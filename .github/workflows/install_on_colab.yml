@@ -10,7 +10,7 @@ on:
       - develop
       - feature/*
       - fix/*
-  pull_request:
+  # pull_request:
   workflow_dispatch:  # Allows manual trigger from GitHub UI
 
 permissions:
