@@ -9,6 +9,7 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Bug Fixes
 ~~~~~~~~~
 
+- fixed issue #858 (omnic series reader)
 - fixed issue #856 (osqp dependency, used for IRIS)
 
 Dependency Updates

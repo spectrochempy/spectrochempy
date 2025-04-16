@@ -26,7 +26,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- fixed issue #858 (omnic series reader)
 - fixed issue #856 (osqp dependency, used for IRIS)
+
 
 
 .. section
