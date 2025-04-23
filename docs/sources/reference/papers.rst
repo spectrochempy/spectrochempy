@@ -15,6 +15,12 @@ Papers citing `SpectroChemPy`
   Nanoparticle Sensor,
   :cite:t:`Rossi:2025`, `DOI: 10.3390/nano15010057 <https://doi.org/10.3390/nano15010057>`__.
 
+- Comprehensive assessment of the role of spectral data pre-processing in spectroscopy-based liquid biopsy,
+  :cite:t:`Vrtelka:2025`, `DOI: 10.1016/j.saa.2025.126261 <https://doi.org/10.1016/j.saa.2025.126261>`__.
+
+- Absorbance Discrimination of Ready-to-Drink Tea Samples By Derivative Spectroscopy and Multivariate Analysis,
+  :cite:t:`hernandez:2025`, `URL: https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf7 <https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf7>`__.
+
 2024
 ====
 
