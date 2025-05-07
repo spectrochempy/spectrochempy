@@ -6,11 +6,17 @@ What's New in Revision 0.8.2.dev
 These are the changes in SpectroChemPy-0.8.2.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+New Features
+~~~~~~~~~~~~
+- omnic_reader pro
+
 Bug Fixes
 ~~~~~~~~~
 
 - fixed issue #858 (omnic series reader)
 - fixed issue #856 (osqp dependency, used for IRIS)
+- fixed MCRALS (list od intermediate spectral matrices)
+- omnic_reader properly reads units for single beam spectra
 
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
