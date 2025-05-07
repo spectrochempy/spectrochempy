@@ -1254,7 +1254,7 @@ and `St`.
 
         Requires `MCRALS.storeIterations` set to True.
         """
-        return self._outfit[9]
+        return self._outfit[8]
 
     @property
     def St_ls_list(self):
@@ -1263,7 +1263,7 @@ and `St`.
 
         Requires `MCRALS.storeIterations` set to True.
         """
-        return self._outfit[10]
+        return self._outfit[9]
 
 
 # --------------------------------------------------------------------------------------
