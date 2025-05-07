@@ -18,7 +18,7 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
-- omnic_reader pro
+
 
 .. section
 
