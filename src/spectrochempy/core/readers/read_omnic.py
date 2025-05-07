@@ -386,7 +386,7 @@ def _read_spg(*args, **kwargs):
         fid.seek(position02[i] + 2)
         pos_header = fromfile(fid, dtype="uint32", count=1)
         # get infos
-        info = _read_header(fid, pos_header)
+        info = _read_header(fid, pos_header, is_first_spectrum=(i == 0))
         nx[i] = info["nx"]
         firstx[i] = info["firstx"]
         lastx[i] = info["lastx"]
@@ -1132,7 +1132,7 @@ def _nextline(pos):
     return 16 * (1 + pos // 16)
 
 
-def _read_header(fid, pos):
+def _read_header(fid, pos, is_first_spectrum=True):
     r"""
     Read spectrum/ifg/series header.
 
@@ -1143,6 +1143,9 @@ def _read_header(fid, pos):
 
     pos : int
         The position of the header (see Notes).
+
+    is_first_spectrum : bool, optional
+            Indicates if this is the first spectrum being read. Default is True.
 
     Returns
     -------
@@ -1166,12 +1169,13 @@ def _read_header(fid, pos):
         - data units (UInt8): 12 bytes behind. So far, we have the following
           correspondence:
 
-            * `x\11` : absorbance
-            * `x\10` : transmittance (%)
             * `x\0B` : reflectance (%)
             * `x\0C` : Kubelka_Munk
-            * `x\16` :  Volts (interferogram)
-            * `x\1A` :  photoacoustic
+            * `x\0F` : single beam
+            * `x\11` : absorbance
+            * `x\10` : transmittance (%)
+            * `x\16` : Volts (interferogram)
+            * `x\1A` : photoacoustic
             * `x\1F` : Raman intensity
 
         - first x value (float32), 16 bytes behind
@@ -1255,6 +1259,9 @@ def _read_header(fid, pos):
     elif key == 12:  # pragma: no cover
         out["units"] = None
         out["title"] = "log(1/R)"
+    elif key == 15:  # pragma: no cover
+        out["units"] = None
+        out["title"] = "single beam"
     elif key == 20:  # pragma: no cover
         out["units"] = "Kubelka_Munk"
         out["title"] = "Kubelka-Munk"
@@ -1273,7 +1280,10 @@ def _read_header(fid, pos):
     else:  # pragma: no cover
         out["units"] = None
         out["title"] = "intensity"
-        info_("The nature of data is not recognized, title set to 'Intensity'")
+        if is_first_spectrum:
+            info_(
+                f"The nature of data is not recognized (key == {key}), title set to 'Intensity'"
+            )
 
     # firstx, lastx
     fid.seek(pos + 16)

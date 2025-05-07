@@ -28,7 +28,8 @@ Bug Fixes
 
 - fixed issue #858 (omnic series reader)
 - fixed issue #856 (osqp dependency, used for IRIS)
-
+- fixed MCRALS (list od intermediate spectral matrices)
+- omnic_reader properly reads units for single beam spectra
 
 
 .. section

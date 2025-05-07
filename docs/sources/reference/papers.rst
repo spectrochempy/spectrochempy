@@ -5,9 +5,12 @@ Papers citing `SpectroChemPy`
 ****************************************
 
 2025
-====
+====https://doi.org/
 
-- Tracking solid electrolyte interphase dynamics using operando fibre-optic infra-red spectroscopy and multivariate
+- External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
+  :cite:t:`Rejman:2025`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
+
+- Tracking solid electrolyte interphase dynamics using operando fibre-optic infrared spectroscopy and multivariate
   curve regression
   :cite:t:`Leau:2025`, `DOI: 10.1038/s41467-024-55339-y <https://doi.org/10.1038/s41467-024-55339-y>`__.
 
@@ -19,7 +22,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`Vrtelka:2025`, `DOI: 10.1016/j.saa.2025.126261 <https://doi.org/10.1016/j.saa.2025.126261>`__.
 
 - Absorbance Discrimination of Ready-to-Drink Tea Samples By Derivative Spectroscopy and Multivariate Analysis,
-  :cite:t:`hernandez:2025`, `URL: https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf7 <https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf>`__.
+  :cite:t:`hernandez:2025`, `URL: https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf <https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf>`__.
 
 2024
 ====
@@ -30,9 +33,6 @@ Papers citing `SpectroChemPy`
 - Investigating nalidixic acid adsorption onto ferrihydrite and maghemite surfaces: molecular-level insights via
   continuous-flow ATR-FTIR spectroscopy,
   :cite:t:`Schuh-Frantz:2024`, `DOI: 10.1039/D4NJ03440F <http://dx.doi.org/10.1039/D4NJ03440F>`__.
-
-- External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
-  :cite:t:`Rejman:2024`, `DOI: 10.26434/chemrxiv-2024-4fq4v <https://doi.org/10.26434/chemrxiv-2024-4fq4v>`__.
 
 - Deriving kinetic insights from mechanochemically synthesized compounds using multivariate analysis (MCR-ALS) of powder
   X-ray diffraction data,

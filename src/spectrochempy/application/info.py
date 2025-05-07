@@ -44,7 +44,8 @@ class SCPInfo(tr.HasTraits):
         "C. Fernandez & A. Travert", help="Initial authors of this package"
     )
     contributors = tr.Unicode(
-        "A. Ait Blal, W. Guérin, M. Mailänder", help="contributor(s) to this package"
+        "A. Ait Blal, W. Guérin, M. Mailänder, S. Rejman",
+        help="contributor(s) to this package",
     )
     # TODO: retrieve this automatically from a file
     license = tr.Unicode("CeCILL-B license", help="License of this package")
