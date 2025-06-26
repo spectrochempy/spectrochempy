@@ -10,7 +10,7 @@ from sklearn import cross_decomposition
 
 from spectrochempy.analysis._base._analysisbase import CrossDecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
-from spectrochempy.application import warning_
+from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docutils import docprocess
