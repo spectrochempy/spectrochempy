@@ -28,7 +28,7 @@ from spectrochempy.utils.testing import assert_dataset_equal
 # test docstring
 
 
-@pytest.mark.skip("Skipping test because iot raises an error in  github test")
+@pytest.mark.skip("Skipping test because it raises an error in  github test")
 def test_PLS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
     module = "spectrochempy.analysis.crossdecomposition.pls"

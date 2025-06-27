@@ -13,7 +13,7 @@ import spectrochempy as scp
 from spectrochempy.utils import docutils as chd
 
 
-@pytest.mark.skip("Skipping test because iot raises an error in  github test")
+@pytest.mark.skip("Skipping test because it raises an error in  github test")
 def test_IRIS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
     module = "spectrochempy.analysis.decomposition.iris"
