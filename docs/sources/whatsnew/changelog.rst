@@ -26,6 +26,7 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- fixed scikitlearn PLSRegression compatibility with scikit-learn >= 1.5
 - fixed issue #858 (omnic series reader)
 - fixed issue #856 (osqp dependency, used for IRIS)
 - fixed MCRALS (list od intermediate spectral matrices)

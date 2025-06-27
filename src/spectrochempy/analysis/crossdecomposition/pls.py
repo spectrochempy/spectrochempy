@@ -10,12 +10,23 @@ from sklearn import cross_decomposition
 
 from spectrochempy.analysis._base._analysisbase import CrossDecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
+from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docutils import docprocess
 
 __all__ = ["PLSRegression"]
 __configurables__ = ["PLSRegression"]
+
+# get scikitkearn version
+from sklearn import __version__ as sklearn_version
+
+if sklearn_version < "1.5":
+    # raise a deprecation warning if the version is less than 1.5 (added in scpy 0.8.2)
+    warning_(
+        f"Your version of scikit-learn ({sklearn_version}) is < 1.5 and will "
+        "soon be deprecated in SpectroChemPy. Please upgrade to at least 1.5."
+    )
 
 
 # ======================================================================================
@@ -107,10 +118,10 @@ class PLSRegression(CrossDecompositionAnalysis):
     # Private methods (overloading abstract classes)
     # ----------------------------------------------------------------------------------
 
-    def _fit(self, X, Y):
+    def _fit(self, X, y):
         # this method is called by the abstract class fit.
         # Input X and Y are np.ndarray
-        self._plsregression.fit(X, Y)
+        self._plsregression.fit(X, y)
         self._x_weights = self._plsregression.x_weights_.T
         self._y_weights = self._plsregression.y_weights_.T
         self._x_loadings = self._plsregression.x_loadings_.T
@@ -130,18 +141,32 @@ class PLSRegression(CrossDecompositionAnalysis):
         # for compatibility with superclass methods
         self._n_components = self.n_components
 
-    def _fit_transform(self, X, Y=None):
+    def _fit_transform(self, X, y=None):
         # Learn and apply the dimension reduction on the train data.
         #
-        return self._plsregression.fit_transform(X, Y)
+        return self._plsregression.fit_transform(X, y)
 
-    def _inverse_transform(self, X_transform, Y_transform=None):
-        # Transform data back to its original space.
-        return self._plsregression.inverse_transform(X_transform, Y=Y_transform)
+    if sklearn_version < "1.5":
 
-    def _transform(self, X, Y=None):
-        # Apply the dimension reduction.
-        return self._plsregression.transform(X, Y)
+        def _inverse_transform(self, X, Y_transform=None):
+            # Transform data back to its original space.
+            return self._plsregression.inverse_transform(X, Y=Y_transform)
+    else:
+
+        def _inverse_transform(self, X, y=None):
+            # Transform data back to its original space.
+            return self._plsregression.inverse_transform(X, y=y)
+
+    if sklearn_version < "1.5":
+
+        def _transform(self, X, Y=None):
+            # Apply the dimension reduction.
+            return self._plsregression.transform(X, Y)
+    else:
+
+        def _transform(self, X, y=None, copy=True):
+            # Apply the dimension reduction.
+            return self._plsregression.transform(X, y=y, copy=copy)
 
     def _predict(self, X):
         # Predict targets of given samples.

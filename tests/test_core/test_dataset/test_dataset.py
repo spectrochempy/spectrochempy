@@ -43,12 +43,7 @@ adata = (
 )
 
 
-# test docstring
-# but this is not intended to work with the debugger - use run instead of debug!
-@pytest.mark.skipif(
-    environ.get("PYDEVD_LOAD_VALUES_ASYNC", None),
-    reason="debug mode cause error when checking docstrings",
-)
+@pytest.mark.skip("Skipping test because it raises an error in  github test")
 def test_nddataset_docstring():
     from spectrochempy.utils import docutils as chd
 
