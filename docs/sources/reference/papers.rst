@@ -5,7 +5,17 @@ Papers citing `SpectroChemPy`
 ****************************************
 
 2025
-====https://doi.org/
+====
+
+- AutoSDT: Scaling Data-Driven Discovery Tasks Toward Open Co-Scientists
+  :cite:t:`Li:2025`, `DOI: 10.48550/arXiv.2506.08140 <https://doi.org/10.48550/arXiv.2506.08140>`__.
+
+- Unveiling Capacity Limitations of MnO2 in Rechargeable Zn Chemistry,
+  :cite:t:`Liu:2025`, `DOI: 10.26434/chemrxiv-2025-f5j9d <https://doi.org/10.26434/chemrxiv-2025-f5j9d>`__.
+
+- Characterising the Interfacial Bonding in Organic-Inorganic Hybrid Materials from Their Thermal Stability
+  :cite:t:`Schade:2025,`URL: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151>`__.
+  title={},
 
 - External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
   :cite:t:`Rejman:2025`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
@@ -26,6 +36,10 @@ Papers citing `SpectroChemPy`
 
 2024
 ====
+
+- Assessment of Chemometric Analysis Utilizing Multivariate Curve Resolution Alternating Least Squares (MCRALS)
+  for Examination of Thermal and Photodegradation of Fern Extracts
+  :cite:t:`Oviedo:2024`, `DOI: 10.1109/BIP63158.2024.10885392 <https://doi.org/10.1109/BIP63158.2024.10885392>`__.
 
 - Metal-organic frameworks based on pyrazolates for the selective and efficient capture of formaldehyde
   :cite:t:`Sadovnik:2024`, `DOI: 10.1038/s41467-024-53572-z <https://doi.org/10.1038/s41467-024-53572-z>`__.
