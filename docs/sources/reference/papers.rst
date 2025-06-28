@@ -14,7 +14,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`Liu:2025`, `DOI: 10.26434/chemrxiv-2025-f5j9d <https://doi.org/10.26434/chemrxiv-2025-f5j9d>`__.
 
 - Characterising the Interfacial Bonding in Organic-Inorganic Hybrid Materials from Their Thermal Stability
-  :cite:t:`Schade:2025`,`URL: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151 <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151>`__.
+  :cite:t:`Schade:2025`, `URL: papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151 <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151>`__.
 
 - External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
   :cite:t:`Rejman:2025`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
@@ -31,7 +31,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`Vrtelka:2025`, `DOI: 10.1016/j.saa.2025.126261 <https://doi.org/10.1016/j.saa.2025.126261>`__.
 
 - Absorbance Discrimination of Ready-to-Drink Tea Samples By Derivative Spectroscopy and Multivariate Analysis,
-  :cite:t:`hernandez:2025`, `URL: https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf <https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf>`__.
+  :cite:t:`hernandez:2025`, `URL: www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf <https://www.westmont.edu/sites/default/files/2025-02/Elmer-Rico%20Mojica_final_tea_1.pdf>`__.
 
 2024
 ====
