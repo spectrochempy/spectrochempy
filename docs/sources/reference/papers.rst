@@ -14,8 +14,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`Liu:2025`, `DOI: 10.26434/chemrxiv-2025-f5j9d <https://doi.org/10.26434/chemrxiv-2025-f5j9d>`__.
 
 - Characterising the Interfacial Bonding in Organic-Inorganic Hybrid Materials from Their Thermal Stability
-  :cite:t:`Schade:2025,`URL: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151>`__.
-  title={},
+  :cite:t:`Schade:2025`,`URL: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151 <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151>`__.
 
 - External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
   :cite:t:`Rejman:2025`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
