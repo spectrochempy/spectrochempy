@@ -7,24 +7,22 @@ Papers citing `SpectroChemPy`
 2025
 ====
 
-- AutoSDT: Scaling Data-Driven Discovery Tasks Toward Open Co-Scientists
+- AutoSDT: Scaling Data-Driven Discovery Tasks Toward Open Co-Scientists,
   :cite:t:`Li:2025`, `DOI: 10.48550/arXiv.2506.08140 <https://doi.org/10.48550/arXiv.2506.08140>`__.
 
 - Unveiling Capacity Limitations of MnO2 in Rechargeable Zn Chemistry,
   :cite:t:`Liu:2025`, `DOI: 10.26434/chemrxiv-2025-f5j9d <https://doi.org/10.26434/chemrxiv-2025-f5j9d>`__.
 
-- Characterising the Interfacial Bonding in Organic-Inorganic Hybrid Materials from Their Thermal Stability
+- Characterising the Interfacial Bonding in Organic-Inorganic Hybrid Materials from Their Thermal Stability,
   :cite:t:`Schade:2025`, `URL: papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151 <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151>`__.
 
 - External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
   :cite:t:`Rejman:2025`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
 
-- Tracking solid electrolyte interphase dynamics using operando fibre-optic infrared spectroscopy and multivariate
-  curve regression
+- Tracking solid electrolyte interphase dynamics using operando fibre-optic infrared spectroscopy and multivariate curve regression,
   :cite:t:`Leau:2025`, `DOI: 10.1038/s41467-024-55339-y <https://doi.org/10.1038/s41467-024-55339-y>`__.
 
-- Discriminating Analysis of Metal Ions via Multivariate Curve Resolution–Alternating Least Squares Applied to Silver
-  Nanoparticle Sensor,
+- Discriminating Analysis of Metal Ions via Multivariate Curve Resolution–Alternating Least Squares Applied to Silver Nanoparticle Sensor,
   :cite:t:`Rossi:2025`, `DOI: 10.3390/nano15010057 <https://doi.org/10.3390/nano15010057>`__.
 
 - Comprehensive assessment of the role of spectral data pre-processing in spectroscopy-based liquid biopsy,
@@ -36,11 +34,10 @@ Papers citing `SpectroChemPy`
 2024
 ====
 
-- Assessment of Chemometric Analysis Utilizing Multivariate Curve Resolution Alternating Least Squares (MCRALS)
-  for Examination of Thermal and Photodegradation of Fern Extracts
+- Assessment of Chemometric Analysis Utilizing Multivariate Curve Resolution Alternating Least Squares (MCRALS) for Examination of Thermal and Photodegradation of Fern Extracts,
   :cite:t:`Oviedo:2024`, `DOI: 10.1109/BIP63158.2024.10885392 <https://doi.org/10.1109/BIP63158.2024.10885392>`__.
 
-- Metal-organic frameworks based on pyrazolates for the selective and efficient capture of formaldehyde
+- Metal-organic frameworks based on pyrazolates for the selective and efficient capture of formaldehyde,
   :cite:t:`Sadovnik:2024`, `DOI: 10.1038/s41467-024-53572-z <https://doi.org/10.1038/s41467-024-53572-z>`__.
 
 - Investigating nalidixic acid adsorption onto ferrihydrite and maghemite surfaces: molecular-level insights via
@@ -54,8 +51,7 @@ Papers citing `SpectroChemPy`
 - An intuitive approach for spike removal in Raman spectra based on peaks’ prominence and width,
   :cite:t:`coca-lopez:2024`, `DOI: 10.1016/j.aca.2024.342312 <https://doi.org/10.1016/j.aca.2024.342312>`__.
 
-- Développement d’outils de traitement de données de spectroscopie massives dans le contexte de la dépollution
-  automobile,
+- Adsοrptiοn de l'isοbutanοl dans les zeοlithes : appοrt des analyses multivariées,
   :cite:t:`aboulayt:2024`, `HAL: tel-04934402 <https://theses.hal.science/tel-04934402>`__.
 
 2023
