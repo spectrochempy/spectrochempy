@@ -54,6 +54,10 @@ Papers citing `SpectroChemPy`
 - An intuitive approach for spike removal in Raman spectra based on peaks’ prominence and width,
   :cite:t:`coca-lopez:2024`, `DOI: 10.1016/j.aca.2024.342312 <https://doi.org/10.1016/j.aca.2024.342312>`__.
 
+- Développement d’outils de traitement de données de spectroscopie massives dans le contexte de la dépollution
+  automobile,
+  :cite:t:`aboulayt:2024`, `HAL: tel-04934402 <https://theses.hal.science/tel-04934402>`__.
+
 2023
 ====
 
@@ -71,6 +75,9 @@ Papers citing `SpectroChemPy`
 
 - Understanding the patterns that neural networks learn from chemical spectra,
   :cite:t:`rieger:2023`, `DOI: 10.26434/chemrxiv-2023-8pfk5 <https://dx.doi.org/10.26434/chemrxiv-2023-8pfk5>`__.
+
+- Electronic Communication in Bridged Ruthenium Acetylide Complexes,
+  :cite:`naik2023`, `DOI: 10.26190/unsworks/25240 <https://dx.doi.org/10.26190/unsworks/25240>`__.
 
 2022
 ====
