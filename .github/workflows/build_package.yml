@@ -122,7 +122,7 @@ jobs:
 
       # Step 4: Build conda package
       - name: Build conda package
-        uses: prefix-dev/rattler-build-action@v0.2.33
+        uses: prefix-dev/rattler-build-action@v0.2.34
         env:
           CONDA_BLD_PATH: ../output
         with:
