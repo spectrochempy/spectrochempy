@@ -7,6 +7,12 @@ Papers citing `SpectroChemPy`
 2025
 ====
 
+- Whole brain resting-state EEG dynamic: A mixture of linear aperiodic and nonlinear resonant stochastic processes,
+  :cite:t:`wang:2025`, `DOI: 10.1101/2025.06.27.661950 <https://doi.org/10.1101/2025.06.27.661950>`__.
+
+- On the Influence of Catalyst Pore Structure in the Catalytic Cracking of Polypropylene,
+  :cite:t:`rejman:2025b`, `DOI: 10.26434/chemrxiv-2025-hw10r <https://doi.org/10.26434/chemrxiv-2025-hw10r>`__.
+
 - AutoSDT: Scaling Data-Driven Discovery Tasks Toward Open Co-Scientists,
   :cite:t:`Li:2025`, `DOI: 10.48550/arXiv.2506.08140 <https://doi.org/10.48550/arXiv.2506.08140>`__.
 
@@ -17,7 +23,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`Schade:2025`, `URL: papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151 <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151>`__.
 
 - External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
-  :cite:t:`Rejman:2025`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
+  :cite:t:`Rejman:2025a`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
 
 - Tracking solid electrolyte interphase dynamics using operando fibre-optic infrared spectroscopy and multivariate curve regression,
   :cite:t:`Leau:2025`, `DOI: 10.1038/s41467-024-55339-y <https://doi.org/10.1038/s41467-024-55339-y>`__.
@@ -73,7 +79,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`rieger:2023`, `DOI: 10.26434/chemrxiv-2023-8pfk5 <https://dx.doi.org/10.26434/chemrxiv-2023-8pfk5>`__.
 
 - Electronic Communication in Bridged Ruthenium Acetylide Complexes,
-  :cite:`naik2023`, `DOI: 10.26190/unsworks/25240 <https://dx.doi.org/10.26190/unsworks/25240>`__.
+  :cite:`naik:2023`, `DOI: 10.26190/unsworks/25240 <https://dx.doi.org/10.26190/unsworks/25240>`__.
 
 2022
 ====
