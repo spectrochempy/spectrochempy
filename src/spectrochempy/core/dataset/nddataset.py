@@ -25,15 +25,10 @@ __dataset_methods__ = [  # Methods that can be called as API functions
     "remove_masks",
 ]
 
-# import signal
-import datetime
+
 import textwrap
 from contextlib import suppress
-
-try:
-    UTC = datetime.UTC
-except AttributeError:  # for python 3.10
-    UTC = datetime.UTC
+from datetime import UTC
 from datetime import datetime
 from datetime import tzinfo
 from zoneinfo import ZoneInfo
