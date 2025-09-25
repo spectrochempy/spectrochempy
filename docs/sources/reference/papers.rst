@@ -7,6 +7,18 @@ Papers citing `SpectroChemPy`
 2025
 ====
 
+- Cellulose–TBPH interactions from diffusion NMR, rheology and SAXS studies.
+  :cite:t:`quillard:2025`, `DOI: 10.21203/rs.3.rs-6993367/v1} <https://doi.org/10.21203/rs.3.rs-6993367/v1}>`__.
+
+- Single--Cell Raman Imaging Reveals Fructose Impairs Brown Adipocyte Differentiation
+  :cite:t:`gupta:2025`, `DOI: 10.1016/j.bios.2025.117994 <https://doi.org/10.1016/j.bios.2025.117994>`__.
+
+- High-temperature CO2 capture by Li4SiO4: IR spectroscopic evidence for the double shell model
+  :cite:t:`alassaad:2025`, `DOI: 10.26434/chemrxiv-2025-p1k9g <https://doi.org/10.26434/chemrxiv-2025-p1k9g>`__.
+
+- La programmacion Como Herramienta Esencial Para El Ingeniero Quimico Del Siglo XXI
+    :cite:t:`flores:2025`, `URL: http://rd.buap.mx/ojs-rdicuap/index.php/rdicuap/article/view/1598/1571 <http://rd.buap.mx/ojs-rdicuap/index.php/rdicuap/article/view/1598/1571>`__.
+
 - Whole brain resting-state EEG dynamic: A mixture of linear aperiodic and nonlinear resonant stochastic processes,
   :cite:t:`wang:2025`, `DOI: 10.1101/2025.06.27.661950 <https://doi.org/10.1101/2025.06.27.661950>`__.
 
