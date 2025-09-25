@@ -31,6 +31,7 @@ Bug Fixes
 - fixed issue #856 (osqp dependency, used for IRIS)
 - fixed MCRALS (list od intermediate spectral matrices)
 - omnic_reader properly reads units for single beam spectra
+- fixed issue #875 (can't subtract offset-naive and offset-aware datetimes)
 
 
 .. section
