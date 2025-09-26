@@ -1,0 +1,32 @@
+:orphan:
+
+What's new in revision 0.6.10
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.6.10.
+See :ref:`release` for a full changelog including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+* MCRALS now allows storing the C and St generated at each iteration (storeIteration parameter)
+* add a despike method ('whitaker') and improves speed of execution of the default ('katsumoto') method
+* read_srs now accepts TGA and GC filetypes (issue #769)
+
+Bug fixes
+~~~~~~~~~
+
+* google colab compatibility (issue #784)
+* compatibility with pint>0.24 (issue #765)
+* loading of dataset for MCR-ALS with kinetic constraints.
+* update title in cdot
+
+Breaking changes
+~~~~~~~~~~~~~~~~
+
+* jupyter lab and widget related dependencies are not installed by default anymore
+
+Deprecations
+~~~~~~~~~~~~
+
+* FileSelector and BaseFileSelector are deprecated. They will be removed in version 0.8.
