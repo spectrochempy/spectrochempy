@@ -12,12 +12,12 @@ This guide covers different methods for installing SpectroChemPy on MacOS or Lin
 Requirements
 ------------
 
-* Python 3.10 or newer
+* Python 3.11 or newer
 
 .. code-block:: bash
 
     # Check python version
-    python --version  # Should be 3.10 or newer
+    python --version  # Should be 3.11 or newer
 
 Environment Setup
 -----------------
@@ -45,7 +45,7 @@ Environment Setup
         .. code-block:: bash
 
             # Create new environment
-            mamba create -n scpy python=3.10
+            mamba create -n scpy python=3.13
 
             # Activate it
             mamba activate scpy

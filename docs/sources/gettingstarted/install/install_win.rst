@@ -12,12 +12,12 @@ This guide covers different methods for installing SpectroChemPy on Windows.
 Requirements
 ------------
 
-* Python 3.10 or newer
+* Python 3.11 or newer
 
 .. code-block:: bash
 
     # Check python version
-    python --version  # Should be 3.10 or newer
+    python --version  # Should be 3.11 or newer
 
 Environment Setup
 -----------------
@@ -39,7 +39,7 @@ Environment Setup
 
          .. code-block:: bat
 
-            mamba create --name scpy python=3.10
+            mamba create --name scpy python=3.13
             mamba activate scpy
 
    .. tab:: Using pip and venv

@@ -87,13 +87,13 @@ Alternative Installation Methods
       .. code-block:: bash
 
          sudo apt update
-         sudo apt install python3.10
+         sudo apt install python3.13
 
       **Fedora:**
 
       .. code-block:: bash
 
-         sudo dnf install python3.10
+         sudo dnf install python3.13
 
 Installing SpectroChemPy
 ------------------------
@@ -106,7 +106,7 @@ First, create and activate a dedicated environment:
 .. code-block:: bash
 
    # Using conda/mamba
-   mamba create -n scpy python=3.10
+   mamba create -n scpy python=3.13
    mamba activate scpy
 
    # OR using venv (if not using conda/mamba)
