@@ -28,7 +28,6 @@ __dataset_methods__ = [  # Methods that can be called as API functions
 
 import textwrap
 from contextlib import suppress
-from datetime import UTC
 from datetime import datetime
 from datetime import timezone
 from datetime import tzinfo
