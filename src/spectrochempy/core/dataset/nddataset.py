@@ -30,6 +30,7 @@ import textwrap
 from contextlib import suppress
 from datetime import UTC
 from datetime import datetime
+from datetime import timezone
 from datetime import tzinfo
 from zoneinfo import ZoneInfo
 from zoneinfo import ZoneInfoNotFoundError
@@ -617,7 +618,7 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         out += f"      created: {self.created}\n"
         out += (
             f"     modified: {self.modified}\n"
-            if (self._modified - self._created.replace(tzinfo=UTC)).seconds > 30
+            if (self._modified - self._created.replace(tzinfo=timezone.utc)).seconds > 30
             else ""
         )
 
