@@ -54,7 +54,7 @@ jobs:
     steps:
       # Step 1: Get the code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: ${{ github.repository }}
           ref: ${{ github.ref }}

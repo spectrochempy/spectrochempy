@@ -39,7 +39,7 @@ jobs:
 
       # Step 2: Get our code
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Step 3: Set up Docker build system with caching support
       - name: Set up Docker Buildx
