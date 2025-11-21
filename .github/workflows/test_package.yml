@@ -60,11 +60,11 @@ jobs:
       fail-fast: false  # Continue testing even if one combination fails
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        pythonVersion: ["3.10", "3.13"]
+        pythonVersion: ["3.11", "3.13"]
         include:
           # Full testing on Ubuntu with all Python versions
           - os: ubuntu-latest
-            pythonVersion: "3.10"
+            pythonVersion: "3.11"
             full_test: true
           - os: ubuntu-latest
             pythonVersion: "3.13"
@@ -81,9 +81,9 @@ jobs:
         exclude:
           # Exclude other combinations
           - os: macos-latest
-            pythonVersion: "3.10"
+            pythonVersion: "3.11"
           - os: windows-latest
-            pythonVersion: "3.10"
+            pythonVersion: "3.11"
 
     steps:
       # Print debug information about the current run
@@ -106,7 +106,7 @@ jobs:
       - name: Set up Python ${{ matrix.pythonVersion }}
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
         id: setup_python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.pythonVersion }}
           cache: "pip"

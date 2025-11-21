@@ -25,9 +25,10 @@ __dataset_methods__ = [  # Methods that can be called as API functions
     "remove_masks",
 ]
 
-# import signal
+
 import textwrap
 from contextlib import suppress
+from datetime import UTC
 from datetime import datetime
 from datetime import tzinfo
 from zoneinfo import ZoneInfo
@@ -614,11 +615,8 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         out += f"         name: {self.name}\n"
         out += f"       author: {self.author}\n"
         out += f"      created: {self.created}\n"
-        out += (
-            f"     modified: {self.modified}\n"
-            if (self._modified - self._created).seconds > 30
-            else ""
-        )
+        if (self._modified - self._created.replace(tzinfo=UTC)).seconds > 30:
+            out += f"     modified: {self.modified}\n"
 
         wrapper1 = textwrap.TextWrapper(
             initial_indent="",
