@@ -146,4 +146,6 @@ jobs:
         if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.13' && matrix.os == 'ubuntu-latest' }}
         uses: codecov/codecov-action@v5
         with:
+          files: coverage.xml
+          fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
