@@ -4,8 +4,20 @@
 Papers citing `SpectroChemPy`
 ****************************************
 
+2026
+====
+
+- Multivariate analysis coupled to infrared spectroscopy unravels the diversity of adsorption sites and strengths of a zeolite surface
+    :cite:t:`aboulayt:2026`, `DOI: 10.26434/chemrxiv.10001501/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.10001501>`__.
+
 2025
 ====
+
+- Structure and Sulfur: Tuning the Viscoelastic and Surface Properties of Natural Keratin Fibers
+  :cite:t:`czibula:2025`, `DOI: 10.1021/acsmaterialsau.5c00130 <https://doi.org/10.1021/acsmaterialsau.5c00130>`__.
+
+- Rapid, clean and quantitative analysis of Cu2+ in copper refining electrolyte via chemometrics-driven Vis–SWNIR absorption spectroscopy
+  :cite:t:`yuan:2055`, `DOI: 10.1039/D5AY01465D <http://dx.doi.org/10.1039/D5AY01465D>`__.
 
 - Cellulose–TBPH interactions from diffusion NMR, rheology and SAXS studies.
   :cite:t:`quillard:2025`, `DOI: 10.21203/rs.3.rs-6993367/v1 <https://doi.org/10.21203/rs.3.rs-6993367/v1>`__.
@@ -14,7 +26,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`gupta:2025`, `DOI: 10.1016/j.bios.2025.117994 <https://doi.org/10.1016/j.bios.2025.117994>`__.
 
 - High-temperature CO2 capture by Li4SiO4: IR spectroscopic evidence for the double shell model
-  :cite:t:`alassaad:2025`, `DOI: 10.26434/chemrxiv-2025-p1k9g <https://doi.org/10.26434/chemrxiv-2025-p1k9g>`__.
+  :cite:t:`alassaad:2025`, `DOI: 10.1039/D5CP02957K <https://doi.org/10.1039/D5CP02957K>`__.
 
 - La programmacion Como Herramienta Esencial Para El Ingeniero Quimico Del Siglo XXI
   :cite:t:`flores:2025`, `URL: http://rd.buap.mx/ojs-rdicuap/index.php/rdicuap/article/view/1598/1571 <http://rd.buap.mx/ojs-rdicuap/index.php/rdicuap/article/view/1598/1571>`__.
@@ -22,8 +34,8 @@ Papers citing `SpectroChemPy`
 - Whole brain resting-state EEG dynamic: A mixture of linear aperiodic and nonlinear resonant stochastic processes,
   :cite:t:`wang:2025`, `DOI: 10.1101/2025.06.27.661950 <https://doi.org/10.1101/2025.06.27.661950>`__.
 
-- On the Influence of Catalyst Pore Structure in the Catalytic Cracking of Polypropylene,
-  :cite:t:`rejman:2025b`, `DOI: 10.26434/chemrxiv-2025-hw10r <https://doi.org/10.26434/chemrxiv-2025-hw10r>`__.
+- On the Influence of Catalyst Mesopore Structure in the Catalytic Cracking of Polypropylene,
+  :cite:t:`rejman:2025b`, `DOI: 10.1002/ceur.202500317 <https://doi.org/10.1002/ceur.202500317>`__.
 
 - AutoSDT: Scaling Data-Driven Discovery Tasks Toward Open Co-Scientists,
   :cite:t:`Li:2025`, `DOI: 10.48550/arXiv.2506.08140 <https://doi.org/10.48550/arXiv.2506.08140>`__.
@@ -32,7 +44,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`Liu:2025`, `DOI: 10.26434/chemrxiv-2025-f5j9d <https://doi.org/10.26434/chemrxiv-2025-f5j9d>`__.
 
 - Characterising the Interfacial Bonding in Organic-Inorganic Hybrid Materials from Their Thermal Stability,
-  :cite:t:`Schade:2025`, `URL: papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151 <https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5314151>`__.
+  :cite:t:`Schade:2025`, `DOI: 10.1016/j.ctta.2025.100221 <https://doi.org/10.1016/j.ctta.2025.100221>`__.
 
 - External Acidity as Performance Descriptor in Polyolefin Cracking using Zeolite-Based Materials,
   :cite:t:`Rejman:2025a`, `DOI: 10.1038/s41467-025-57158-110.1038/s41467-025-57158-1 <https://doi.org/10.1038/s41467-025-57158-1>`__.
