@@ -99,7 +99,7 @@ def _apodize_method(**units):
                 # now call the method with unitless parameters
                 if is_ir:
                     # we must apodize at the top of the interferogram.
-                    zpd = int(np.argmax(new.data, -1))
+                    zpd = int(np.argmax(new.data, -1).item())
                     dist2end = x.size - zpd
                     apod_arr = method(np.empty(2 * dist2end), **kwargs)
                     apod_arr = apod_arr[-x.size :]

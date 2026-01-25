@@ -163,9 +163,9 @@ def _interferogram_fft(data):
 
     def _get_zpd(data, mode="max"):
         if mode == "max":
-            return np.argmax(data, -1)
+            return np.argmax(data, -1).item()
         if mode == "abs":
-            return int(np.argmax(np.abs(data), -1))
+            return int(np.argmax(np.abs(data), -1).item())
         return None
 
     zpd = _get_zpd(data, mode="abs")
