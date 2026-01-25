@@ -41,6 +41,7 @@ Dependency Updates
 .. Add here new dependency updates (do not delete this comment)
 
 * Major Python compatibility updates:
+    - Maximum Python version increased to 3.14
     - Minimum Python version increased to 3.11
     - Dropped support for Python 3.10 and below
 - osqp > 1.0 now allowed (#856). A warning has been added, osqp < 1.0 will not be supported in the future.
