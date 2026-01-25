@@ -98,13 +98,13 @@ jobs:
           echo "os: ${{ matrix.os }}"
 
       - name: Checkout spectrochempy repository
-        if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.13') }}
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up Python ${{ matrix.pythonVersion }}
-        if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.13') }}
         id: setup_python
         uses: actions/setup-python@v6
         with:
@@ -118,14 +118,14 @@ jobs:
           echo "PYTHONUTF8=1" >> $GITHUB_ENV
 
       - name: Install spectrochempy
-        if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.13') }}
         run: |
           python -m pip install ".[test]"
           # check the MPL setup
           python src/spectrochempy/data/setup.py
 
       - name: Test with coverage
-        if: ${{ !(env.ACT && matrix.pythonVersion == '3.12') }}
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.13') }}
         run: |
           coverage run -m pytest tests -s --durations=10
 
@@ -138,12 +138,12 @@ jobs:
           echo "Current branch: ${{ github.ref }}"
 
       - name: Coverage report to xml
-        if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.13' && matrix.os == 'ubuntu-latest' }}
         run: |
           coverage xml
 
       - name: Upload coverage reports to Codecov
-        if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.12' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.13' && matrix.os == 'ubuntu-latest' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
