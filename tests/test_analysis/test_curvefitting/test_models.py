@@ -71,7 +71,7 @@ def test_models():
     pos = 0.5
     array = model.f(x3, ampl, pos, width, ratio, asym)
     assert hasattr(array, "units")
-    assert_approx_equal(array[500].m, max, significant=4)
+    assert_approx_equal(array[500].value.m, max, significant=4)
 
     # do the same for various models
     kwargs = dict(
