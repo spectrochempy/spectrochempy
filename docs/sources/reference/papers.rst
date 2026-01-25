@@ -8,7 +8,7 @@ Papers citing `SpectroChemPy`
 ====
 
 - Multivariate analysis coupled to infrared spectroscopy unravels the diversity of adsorption sites and strengths of a zeolite surface
-    :cite:t:`aboulayt:2026`, `DOI: 10.26434/chemrxiv.10001501} <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.10001501>`__.
+    :cite:t:`aboulayt:2026`, `DOI: 10.26434/chemrxiv.10001501/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.10001501>`__.
 
 2025
 ====
