@@ -5,6 +5,7 @@ SpectroChemPy
 </h1>
 
 [![Tests Actions Status](https://github.com/spectrochempy/spectrochempy/actions/workflows/test_package.yml/badge.svg)](https://github.com/spectrochempy/spectrochempy/actions)
+[![codecov](https://codecov.io/gh/spectrochempy/spectrochempy/branch/main/graph/badge.svg)](https://codecov.io/gh/spectrochempy/spectrochempy)
 ![Conda](https://img.shields.io/conda/v/spectrocat/spectrochempy)
 [![PyPI version](https://badge.fury.io/py/spectrochempy.svg)](https://badge.fury.io/py/spectrochempy)
 [![Docs](https://readthedocs.org/projects/docs/badge/?version=latest)](https://www.spectrochempy.fr/latest)
