@@ -1,5 +1,5 @@
 # ======================================================================================
-# Copyright (©) 2015-2025 LCS
+# Copyright (©) 2015-2026 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # Authors:
