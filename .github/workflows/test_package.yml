@@ -127,10 +127,13 @@ jobs:
       - name: Test with coverage
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.13') }}
         run: |
-          coverage run -m pytest tests -s --durations=10
+          coverage run --source=spectrochempy -m pytest tests -s --durations=10
 
-      # Add debug info about workflow completion
-      - name: Debug workflow completion
+      - name: Debug info coverage content
+        run: |
+          coverage report -m
+
+      - name: Debug info workflow completion
         run: |
           echo "Tests completed successfully"
           echo "Workflow name: ${{ github.workflow }}"
