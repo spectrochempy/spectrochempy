@@ -17,7 +17,7 @@ Papers citing `SpectroChemPy`
   :cite:t:`czibula:2025`, `DOI: 10.1021/acsmaterialsau.5c00130 <https://doi.org/10.1021/acsmaterialsau.5c00130>`__.
 
 - Rapid, clean and quantitative analysis of Cu2+ in copper refining electrolyte via chemometrics-driven Vis–SWNIR absorption spectroscopy
-  :cite:t:`yuan:2055`, `DOI: 10.1039/D5AY01465D <http://dx.doi.org/10.1039/D5AY01465D>`__.,
+  :cite:t:`yuan:2055`, `DOI: 10.1039/D5AY01465D <http://dx.doi.org/10.1039/D5AY01465D>`__.
 
 - Cellulose–TBPH interactions from diffusion NMR, rheology and SAXS studies.
   :cite:t:`quillard:2025`, `DOI: 10.21203/rs.3.rs-6993367/v1 <https://doi.org/10.21203/rs.3.rs-6993367/v1>`__.
