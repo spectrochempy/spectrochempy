@@ -96,8 +96,7 @@ application.start.set_warnings()
 import sys
 
 version = application.info.version
-copyright = application.info.copyright
-welcome_string = f"SpectroChemPy's API - v.{version}\n©Copyright {copyright}"
+welcome_string = f"SpectroChemPy {version} — CeCILL-B"
 
 from .utils.system import is_notebook
 
