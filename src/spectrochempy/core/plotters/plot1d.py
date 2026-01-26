@@ -17,8 +17,6 @@ __all__ = [
 __dataset_methods__ = __all__
 
 import numpy as np
-from matplotlib.ticker import MaxNLocator
-from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.arraymixins.ndplot import (
@@ -63,6 +61,13 @@ def plot_1D(dataset, method=None, **kwargs):
     multiplot
 
     """
+    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+
+    ensure_mpl_setup()
+
+    from matplotlib.ticker import MaxNLocator
+    from matplotlib.ticker import ScalarFormatter
+
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = preferences

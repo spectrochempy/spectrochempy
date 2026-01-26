@@ -17,11 +17,7 @@ __dataset_methods__ = __all__
 from contextlib import suppress
 from copy import copy as cpy
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import MaxNLocator
-from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.arraymixins.ndplot import (
@@ -150,6 +146,16 @@ def plot_2D(dataset, method=None, **kwargs):
     plot_waterfall
 
     """
+
+    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+
+    ensure_mpl_setup()
+
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
+    from matplotlib.ticker import ScalarFormatter
+
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = preferences
@@ -627,6 +633,13 @@ def plot_2D(dataset, method=None, **kwargs):
 # Waterfall
 # ======================================================================================
 def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs):
+    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+
+    ensure_mpl_setup()
+
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
     degazim = kwargs.get("azim", 10)
     degelev = kwargs.get("elev", 30)
 
