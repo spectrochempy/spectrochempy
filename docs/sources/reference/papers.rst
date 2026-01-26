@@ -7,7 +7,7 @@ Papers citing `SpectroChemPy`
 2026
 ====
 
-- Multivariate analysis coupled to infrared spectroscopy unravels the diversity of adsorption sites and strengths of a zeolite surface*
+- Multivariate analysis coupled to infrared spectroscopy unravels the diversity of adsorption sites and strengths of a zeolite surface
   :cite:t:`aboulayt:2026`, `DOI: 10.26434/chemrxiv.10001501/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.10001501>`__.
 
 2025
@@ -94,6 +94,9 @@ Papers citing `SpectroChemPy`
 - Study of the diffusion properties of zeolite mixtures by combined gravimetric
   analysis, IR spectroscopy and inversion methods (IRIS),
   :cite:t:`ait-blal:2023`, `DOI: 10.1039/D3CP01585H <http://dx.doi.org/10.1039/D3CP01585H>`__.
+
+- Determining the Mechanism Behind Ultrasound Induced Cell Enlargement in Water-Blown Polyurethane Foam
+  :cite:t:`blackwell:2023`, `DOI: 10.2139/ssrn.4479369 <https://dx.doi.org/10.2139/ssrn.4479369>`__.
 
 - FTIR dataset from the article "Resistance to
   Degradation of Silk Fibroin Hydrogels Exposed to Neuroinflammatory Environments",
