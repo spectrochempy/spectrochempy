@@ -62,12 +62,7 @@ original_getattr, *_ = _lazy_loader.attach_stub(__name__, __file__)
 from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
 from spectrochempy.lazyimport.dataset_methods import _LAZY_DATASETS_IMPORTS
 
-# --------------------------------------------------------------------------------------
-# Display a loading message
-# --------------------------------------------------------------------------------------
 from . import application
-
-application.start.display_loading_message(3)
 
 # --------------------------------------------------------------------------------------
 # Warning configurations
@@ -89,23 +84,6 @@ application.start.set_warnings()
 #         plugin.initialize(manager=plugin_manager)
 
 # __all__.append("plugin_manager")
-
-# ------------------------------------------------------------------------------
-# Display welcome message
-# ------------------------------------------------------------------------------
-# import sys
-
-# version = application.info.version
-# welcome_string = f"SpectroChemPy {version} — CeCILL-B"
-
-# from .utils.system import is_notebook
-
-# if is_notebook():  # pragma: no cover
-# Only in Jupyter notebook.
-#     application.info.display_info_string(message=welcome_string.strip())
-# else:
-#     if "/bin/" not in sys.argv[0]:  # deactivate for console scripts
-#         print(welcome_string.strip())  # noqa: T201
 
 
 # Override __getattr__ to handle both submodules and direct class access

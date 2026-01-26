@@ -19,6 +19,7 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- the welcome message display functionality has been removed
 
 .. section
 
