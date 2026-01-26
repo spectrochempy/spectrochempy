@@ -1,5 +1,5 @@
 # ======================================================================================
-# Copyright (©) 2015-2026 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -57,7 +57,7 @@ def check_and_update_init_py(package_path):
     header = extract_copyright_header(init_py_path)
     if not header:
         header = """# ======================================================================================
-# Copyright (©) 2015-2026 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -175,7 +175,7 @@ def generate_init_pyi(package_path):
     # If still no header, use the standard copyright header
     if not header:
         header = """# ======================================================================================
-# Copyright (©) 2015-2026 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
