@@ -18,13 +18,8 @@ __all__ = [
 
 __dataset_methods__ = []
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import numpy as np
 
-# TODO: tight_layout module is deprecated
-from matplotlib._tight_layout import get_subplotspec_list  # get_renderer,
-from matplotlib._tight_layout import get_tight_layout_figure  # get_renderer,
+import numpy as np
 
 from spectrochempy.utils.mplutils import _Axes
 from spectrochempy.utils.typeutils import is_sequence
@@ -177,6 +172,17 @@ def multiplot(
         Color of the subtitles
 
     """
+
+    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+
+    ensure_mpl_setup()
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    # todo:_tight_layout deprecated
+    from matplotlib._tight_layout import get_subplotspec_list
+    from matplotlib._tight_layout import get_tight_layout_figure
+
     # some basic checking
     # ------------------------------------------------------------------------
     if labels is None:
