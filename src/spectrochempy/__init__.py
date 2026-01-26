@@ -1,5 +1,5 @@
 # ======================================================================================
-# Copyright (©) 2015-2025 LCS
+# Copyright (©) 2015-2026 LCS
 # Laboratoire Catalyse et Spectrochimie, Caen, France.
 #
 # Authors:
@@ -93,20 +93,19 @@ application.start.set_warnings()
 # ------------------------------------------------------------------------------
 # Display welcome message
 # ------------------------------------------------------------------------------
-import sys
+# import sys
 
-version = application.info.version
-copyright = application.info.copyright
-welcome_string = f"SpectroChemPy's API - v.{version}\n©Copyright {copyright}"
+# version = application.info.version
+# welcome_string = f"SpectroChemPy {version} — CeCILL-B"
 
-from .utils.system import is_notebook
+# from .utils.system import is_notebook
 
-if is_notebook():  # pragma: no cover
-    # Only in Jupyter notebook.
-    application.info.display_info_string(message=welcome_string.strip())
-else:
-    if "/bin/" not in sys.argv[0]:  # deactivate for console scripts
-        print(welcome_string.strip())  # noqa: T201
+# if is_notebook():  # pragma: no cover
+# Only in Jupyter notebook.
+#     application.info.display_info_string(message=welcome_string.strip())
+# else:
+#     if "/bin/" not in sys.argv[0]:  # deactivate for console scripts
+#         print(welcome_string.strip())  # noqa: T201
 
 
 # Override __getattr__ to handle both submodules and direct class access
