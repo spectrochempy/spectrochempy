@@ -37,26 +37,23 @@ def ensure_mpl_setup():
     """
     global _MPL_INITIALIZED, _MPL_ORIGINAL_RCPARAMS
 
-    if environ.get("SCPY_DISABLE_MPL_SETUP"):
-        debug_("Matplotlib setup disabled via SCPY_DISABLE_MPL_SETUP")
-        return
-
     with _LOCK:
         if _MPL_INITIALIZED:
             return
 
         try:
             import matplotlib as mpl
-
-            # Ensure backend base classes are available as matplotlib.backend_bases
-            # (some Matplotlib versions do not expose it via lazy __getattr__).
-            try:
-                import matplotlib.backend_bases  # noqa: F401
-            except Exception:
-                debug_("Could not import matplotlib.backend_bases")
-                pass
+            import matplotlib.backend_bases
         except ImportError:
-            debug_("Matplotlib not available; skipping plotting setup")
+            debug_(debug_("Matplotlib not available; skipping plotting setup"))
+            return
+
+        # If disable: we stop there (but matplotlib is imported)
+        if environ.get("SCPY_DISABLE_MPL_SETUP"):
+            debug_(
+                "Matplotlib setup disabled via SCPY_DISABLE_MPL_SETUP (imports done)"
+            )
+            _MPL_INITIALIZED = True
             return
 
         debug_("Initializing Matplotlib for SpectroChemPy")
