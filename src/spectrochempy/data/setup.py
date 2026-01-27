@@ -72,7 +72,7 @@ def setup_mpl():
         return
 
     # Setup paths for stylesheets
-    stylesheets = Path(__file__).parent / "stylesheets"
+    stylesheets = Path(__file__).parent.parent / "core" / "plotters" / "stylesheets"
     if not stylesheets.exists():
         raise OSError(
             f"Can't find the stylesheets from SpectroChemPy {stylesheets!s}.\n"
