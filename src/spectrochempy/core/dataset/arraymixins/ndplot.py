@@ -32,15 +32,12 @@ __all__ = ["plot"]
 
 from typing import Any
 
-import matplotlib as mpl
 import traitlets as tr
-from cycler import cycler
-from matplotlib import pyplot as plt
-from matplotlib.colors import to_rgba
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from spectrochempy.application.application import debug_
 from spectrochempy.application.application import error_
 from spectrochempy.application.preferences import preferences as prefs
+from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
 from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.mplutils import _Axes
 from spectrochempy.utils.mplutils import _Axes3D
@@ -77,11 +74,7 @@ class NDPlot(tr.HasTraits):
 
     # Trait definitions
     _ax = tr.Instance(_Axes, allow_none=True)
-    _fig = (
-        tr.Union((tr.Instance(plt.Figure), tr.Instance(go.Figure)), allow_none=True)
-        if HAS_PLOTLY
-        else tr.Instance(plt.Figure, allow_none=True)
-    )
+    _fig = tr.Any(allow_none=True)
     _ndaxes = tr.Dict(tr.Instance(_Axes))
 
     @docprocess.get_sections(
@@ -253,76 +246,50 @@ class NDPlot(tr.HasTraits):
         return ax
 
     def close_figure(self):
-        """Close a Matplotlib figure associated to this dataset."""
-        if self._fig is not None:
-            plt.close(self._fig)
+        ensure_mpl_setup()
+        if self._fig is None:
+            return
+        try:
+            import matplotlib.figure
 
-    def _figure_setup(
-        self,
-        ndim: int = 1,
-        method: str | None = None,
-        **kwargs: Any,
-    ) -> str:
-        # Set up figure and axes for plotting
-        # Args:
-        #    ndim: Number of dimensions to plot
-        #    method: Plot method to use
-        #    **kwargs: Additional options
-        # Returns:
-        #    Method name to use for plotting
-        if not method:
-            method = prefs.method_2D if ndim == 2 else prefs.method_1D
+            if isinstance(self._fig, matplotlib.figure.Figure):
+                self._fig.clf()
+                self._fig.canvas.manager = None  # optional; often unnecessary
+        except Exception:
+            debug_("Could not import the figure before closing.")
+            pass
 
-        ax3d = method in ["surface"]
+    def _figure_setup(self, ndim=1, method=None, **kwargs):
+        ensure_mpl_setup()
 
-        # Get current figure information
-        # ------------------------------
-        # should we use the previous figure?
+        from matplotlib.axes import Axes
+
         clear = kwargs.get("clear", True)
-
-        # is ax in the keywords ?
         ax = kwargs.pop("ax", None)
 
-        # is it a twin figure? In such case if ax and hold are also provided,
-        # they will be ignored
-        tax = kwargs.get("twinx")
-        if tax is not None:
-            if issubclass(type(tax), mpl.axes.Axes):
-                clear = False
-                ax = tax.twinx()
-                # warning : this currently returns a normal Axes (so units-naive)
-                # TODO: try to solve this
-                ax.name = "main"
-                tax.name = "twin"  # the previous main is renamed!
-                self.ndaxes["main"] = ax
-                self.ndaxes["twin"] = tax
-            else:
-                raise ValueError(f"{tax} is not recognized as a valid Axe")
-
-        self._fig = get_figure(preferences=prefs, **kwargs)
+        self._fig = get_figure(
+            preferences=prefs,
+            style=kwargs.get("style"),
+            figsize=kwargs.get("figsize"),
+            dpi=kwargs.get("dpi"),
+        )
 
         if clear:
-            self._ndaxes = {}  # reset ndaxes
+            self._ndaxes = {}
             self._divider = None
 
         if ax is not None:
-            # ax given in the plot parameters,
-            # in this case we will plot on this ax
-            if issubclass(type(ax), mpl.axes.Axes):
+            if isinstance(ax, Axes):
                 ax.name = "main"
                 self.ndaxes["main"] = ax
             else:
-                raise ValueError(f"{ax} is not recognized as a valid Axe")
+                raise ValueError(f"{ax} is not a valid Matplotlib Axes")
 
         elif self._fig.get_axes():
-            # no ax parameters in keywords, so we need to get those existing
-            # We assume that the existing axes have a name
             self.ndaxes = self._fig.get_axes()
+
         else:
-            # or create a new subplot
-            # ax = self._fig.gca(projection=ax3d) :: passing parameters DEPRECATED in matplotlib 3.4
-            # ---
-            if not ax3d:
+            if ndim < 3:
                 ax = _Axes(self._fig, 1, 1, 1)
                 ax = self._fig.add_subplot(ax)
             else:
@@ -332,122 +299,8 @@ class NDPlot(tr.HasTraits):
             ax.name = "main"
             self.ndaxes["main"] = ax
 
-        # set the prop_cycle according to preference
-        prop_cycle = eval(prefs.axes.prop_cycle)  # noqa: S307
-        if isinstance(prop_cycle, str):
-            # not yet evaluated
-            prop_cycle = eval(prop_cycle)  # noqa: S307
-
-        colors = prop_cycle.by_key()["color"]
-        for i, c in enumerate(colors):
-            try:
-                c = to_rgba(c)
-                colors[i] = c
-            except ValueError:
-                try:
-                    c = to_rgba(f"#{c}")
-                    colors[i] = c
-                except ValueError as e:
-                    raise e
-
-        linestyles = ["-", "--", ":", "-."]
-        markers = ["o", "s", "^"]
-        if ax is not None and "scatter" in method:
-            ax.set_prop_cycle(
-                cycler("color", colors * len(linestyles) * len(markers))
-                + cycler("linestyle", linestyles * len(colors) * len(markers))
-                + cycler("marker", markers * len(colors) * len(linestyles)),
-            )
-        elif ax is not None and "scatter" not in method:
-            ax.set_prop_cycle(
-                cycler("color", colors * len(linestyles))
-                + cycler("linestyle", linestyles * len(colors)),
-            )
-
-        # Get the number of the present figure
-        self._fignum = self._fig.number
-
-        # for generic plot, we assume only a single axe
-        # with possible projections
-        # and an optional colobar.
-        # other plot class may take care of other needs
-
-        ax = self.ndaxes["main"]
-
-        if ndim == 2:
-            # TODO: also the case of 3D
-
-            # show projections (only useful for map or image)
-            # ------------------------------------------------
-            self.colorbar = colorbar = kwargs.get("colorbar", prefs.colorbar)
-
-            proj = kwargs.get("proj", prefs.show_projections)
-            # TODO: tell the axis by title.
-
-            xproj = kwargs.get("xproj", prefs.show_projection_x)
-
-            yproj = kwargs.get("yproj", prefs.show_projection_y)
-
-            SHOWXPROJ = (proj or xproj) and method in ["map", "image"]
-            SHOWYPROJ = (proj or yproj) and method in ["map", "image"]
-
-            # Create the various axes
-            # -------------------------
-            # create new axes on the right and on the top of the current axes
-            # The first argument of the new_vertical(new_horizontal) method is
-            # the height (width) of the axes to be created in inches.
-            #
-            # This is necessary for projections and colorbar
-
-            self._divider = None
-            if (SHOWXPROJ or SHOWYPROJ or colorbar) and self._divider is None:
-                self._divider = make_axes_locatable(ax)
-
-            divider = self._divider
-
-            if SHOWXPROJ:
-                axex = divider.append_axes(
-                    "top",
-                    1.01,
-                    pad=0.01,
-                    sharex=ax,
-                    frameon=0,
-                    yticks=[],
-                )
-                axex.tick_params(bottom="off", top="off")
-                plt.setp(axex.get_xticklabels() + axex.get_yticklabels(), visible=False)
-                axex.name = "xproj"
-                self.ndaxes["xproj"] = axex
-
-            if SHOWYPROJ:
-                axey = divider.append_axes(
-                    "right",
-                    1.01,
-                    pad=0.01,
-                    sharey=ax,
-                    frameon=0,
-                    xticks=[],
-                )
-                axey.tick_params(right="off", left="off")
-                plt.setp(axey.get_xticklabels() + axey.get_yticklabels(), visible=False)
-                axey.name = "yproj"
-                self.ndaxes["yproj"] = axey
-
-            if colorbar and not ax3d:
-                axec = divider.append_axes(
-                    "right",
-                    0.15,
-                    pad=0.1,
-                    frameon=0,
-                    xticks=[],
-                    yticks=[],
-                )
-                axec.tick_params(right="off", left="off")
-                # plt.setp(axec.get_xticklabels(), visible=False)
-                axec.name = "colorbar"
-                self.ndaxes["colorbar"] = axec
-
-        return method
+        self._fignum = None
+        return method or ""
 
     def _plot_resume(self, origin: Any, **kwargs: Any) -> None:
         # Clean up after plotting and handle plot output

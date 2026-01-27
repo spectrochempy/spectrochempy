@@ -47,6 +47,14 @@ def ensure_mpl_setup():
 
         try:
             import matplotlib as mpl
+
+            # Ensure backend base classes are available as matplotlib.backend_bases
+            # (some Matplotlib versions do not expose it via lazy __getattr__).
+            try:
+                import matplotlib.backend_bases  # noqa: F401
+            except Exception:
+                debug_("Could not import matplotlib.backend_bases")
+                pass
         except ImportError:
             debug_("Matplotlib not available; skipping plotting setup")
             return
@@ -79,7 +87,7 @@ def _apply_scpy_style():
     import matplotlib.pyplot as plt
 
     try:
-        plt.style.use("spectrochempy")
+        plt.style.use("scpy")
         debug_("SpectroChemPy matplotlib style applied")
     except OSError as exc:
         error_(
@@ -87,7 +95,7 @@ def _apply_scpy_style():
             "The style installation may have failed."
         )
         raise RuntimeError(
-            "SpectroChemPy matplotlib style is unavailable. "
+            "scpy matplotlib style is unavailable. "
             "Please reinstall SpectroChemPy or install the styles manually."
         ) from exc
 

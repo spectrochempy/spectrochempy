@@ -1,4 +1,4 @@
-# ======================================================================================
+## ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
@@ -65,6 +65,8 @@ def plot_1D(dataset, method=None, **kwargs):
 
     ensure_mpl_setup()
 
+    import matplotlib.backend_bases  # noqa: F401
+    import matplotlib.pyplot as plt
     from matplotlib.ticker import MaxNLocator
     from matplotlib.ticker import ScalarFormatter
 
@@ -72,14 +74,19 @@ def plot_1D(dataset, method=None, **kwargs):
     # ----------------------------------------------------------------------------------
     prefs = preferences
 
-    # before going further, check if the style is passed in the parameters
+    # Resolve plotting style(s) locally (no global rcParams / no prefs.style mutation)
     style = kwargs.pop("style", None)
-    if style is not None:
-        prefs.style = style
-    # else we assume this has been set before calling plot()
+    if style is None:
+        style = getattr(prefs, "style", None) or ["scpy"]
+    if isinstance(style, str):
+        style = [style]
 
+    # Apply styles only within this plotting call
+    with plt.style.context(style):
+        prefs.set_latex_font(prefs.font.family)  # reset latex settings
+
+    # style handled at figure creation (get_figure)
     prefs.set_latex_font(prefs.font.family)  # reset latex settings
-
     # Redirections ?
     # ------------------------------------------------------------------------
     # should we redirect the plotting to another method
@@ -121,9 +128,14 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # Figure setup
     # ------------------------------------------------------------------------
-    method = new._figure_setup(ndim=1, method=method, **kwargs)
+    method = new._figure_setup(
+        ndim=1,
+        method=method,
+        style=style,
+        **kwargs,
+    )
 
-    pen = "pen" in method or kwargs.pop("pen", False)
+    pen = "pen" in (method or "") or kwargs.pop("pen", False)
     scatter = "scatter" in method or marker != "auto"
     bar = "bar" in method
 
@@ -235,7 +247,12 @@ def plot_1D(dataset, method=None, **kwargs):
             width=kwargs.get("width", 0.1),
         )  # barwidth = line[0].get_width()
     else:
-        raise ValueError("label not valid")
+        # Default line plot
+        (line,) = ax.plot(
+            xdata,
+            zdata.T,
+            label=label,
+        )
 
     if show_complex and pen:
         # add the imaginary component for pen only plot

@@ -3,7 +3,6 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-from contextlib import suppress
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -1105,18 +1104,30 @@ class PlotPreferences(MetaConfigurable):
 
     @staticmethod
     def _get_fontsize(fontsize):
+        # Ensure Matplotlib is initialized (lazy & backend-safe)
+        from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+
+        ensure_mpl_setup()
+
+        from contextlib import suppress
+
+        import matplotlib
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        from matplotlib.figure import Figure
+
         if fontsize == "None":
-            return float(mpl.rcParams["font.size"])
-        plt.ioff()
-        fig, ax = plt.subplots()
+            return float(matplotlib.rcParams["font.size"])
+
+        # Create a backend-safe, non-pyplot figure
+        fig = Figure()
+        FigureCanvasAgg(fig)
+        ax = fig.add_subplot(111)
+
         t = ax.text(0.5, 0.5, "Text")
-        plt.ion()
+
         with suppress(Exception):
             t.set_fontsize(fontsize)
-            fontsize = str(round(t.get_fontsize(), 2))
-        plt.close(fig)
-        plt.ion()
-        return fontsize
+            return str(round(t.get_fontsize(), 2))
 
     @staticmethod
     def _get_color(color):

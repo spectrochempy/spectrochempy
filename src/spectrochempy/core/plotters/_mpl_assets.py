@@ -47,23 +47,33 @@ def _install_stylesheets():
         debug_("No SpectroChemPy matplotlib stylesheets directory found")
         return
 
-    cfgdir = Path(mpl.get_configdir())
-    stylelib = cfgdir / "stylelib"
-    stylelib.mkdir(parents=True, exist_ok=True)
-
-    styles = list(stylesheets_src.glob("*.mplstyle"))
-    missing = [s for s in styles if not (stylelib / s.name).exists()]
-
-    if not missing:
-        debug_("SpectroChemPy matplotlib stylesheets already installed")
+    style_files = list(stylesheets_src.glob("*.mplstyle"))
+    if not style_files:
+        debug_("No SpectroChemPy stylesheets to install")
         return
 
-    debug_("Installing %d matplotlib stylesheet(s)", len(missing))
-    for src in missing:
-        shutil.copy(src, stylelib / src.name)
-        debug_("Installed stylesheet: %s", src.name)
+    # User stylelib (used by plt.style.use)
+    user_stylelib = Path(mpl.get_configdir()) / "stylelib"
+    user_stylelib.mkdir(parents=True, exist_ok=True)
 
-    plt.style.reload_library()
+    # System stylelib (used by SpectroChemPy preferences)
+    system_stylelib = Path(mpl.get_data_path()) / "stylelib"
+    system_stylelib.mkdir(parents=True, exist_ok=True)
+
+    installed = False
+
+    for src in style_files:
+        for dest_dir in (user_stylelib, system_stylelib):
+            dest = dest_dir / src.name
+            if not dest.exists():
+                shutil.copy(src, dest)
+                debug_("Installed stylesheet %s → %s", src.name, dest_dir)
+                installed = True
+
+    if installed:
+        plt.style.reload_library()
+    else:
+        debug_("SpectroChemPy matplotlib stylesheets already installed")
 
 
 def _install_fonts():
