@@ -109,7 +109,7 @@ def setup_mpl():
             print("\n".join(f"- {style}" for style in plt.style.available))  # noqa: T201
 
     # Setup paths for fonts
-    dir_source = Path(__file__).parent / "core" / "plotters" / "fonts"
+    dir_source = Path(__file__).parent.parent / "core" / "plotters" / "fonts"
     if not dir_source.exists():
         raise OSError(f"Fonts directory not found: {dir_source}")
 
