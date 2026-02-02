@@ -14,6 +14,10 @@ New Features
 Bug Fixes
 ~~~~~~~~~
 
+- Refactored SpectroChemPy initialization and plotting setup to reduce Matplotlib side effects (issue #877).
+- Improved handling of Matplotlib styles, separating logical styles (e.g. `default`) from file-based `.mplstyle` styles.
+- Added `restore_rcparams()` to restore Matplotlib `rcParams` after SpectroChemPy plotting (issue #877).
+- Stabilized plot preferences reset and style application across tests, docs, and CI environments.
 - fixed scikitlearn PLSRegression compatibility with scikit-learn >= 1.5
 - fixed issue #858 (omnic series reader)
 - fixed issue #856 (osqp dependency, used for IRIS)
@@ -24,7 +28,7 @@ Bug Fixes
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 
-* Major Python compatibility updates:
+- Major Python compatibility updates:
     - Maximum Python version increased to 3.14
     - Minimum Python version increased to 3.11
     - Dropped support for Python 3.10 and below

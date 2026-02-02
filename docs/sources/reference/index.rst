@@ -248,6 +248,7 @@ Plotting
     multiplot_scatter
     multiplot_stack
     multiplot_with_transposed
+    restore_rcparams
     show
 
 
@@ -375,7 +376,7 @@ Logic functions
     any
 
 
-Sums, integal, difference
+Sums, integral, difference
 ==========================
 
 .. autosummary::
