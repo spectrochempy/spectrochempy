@@ -70,16 +70,6 @@ def _canonical_cmap_name(name: str) -> str:
 class PlotPreferences(MetaConfigurable):
     """Port of matplotlib.rcParams to our configuration system (traitlets)."""
 
-    def _apply_style(self, _style):
-        import matplotlib.pyplot as plt
-
-        # --------------------------------------------------
-        # Matplotlib "default" is NOT a file-based style
-        # --------------------------------------------------
-        if _style == "default":
-            plt.rcdefaults()
-            return
-
     name = Unicode("PlotPreferences")
     description = Unicode("Options for Matplotlib")
     updated = Bool(False)
@@ -1175,76 +1165,73 @@ class PlotPreferences(MetaConfigurable):
             return f"{colors[c.index(color)]}"
         return f"{color}"
 
+    # IMPORTANT:
+    # _apply_style must handle logical styles (e.g. "default")
+    # BEFORE any filesystem access. Matplotlib does not ship
+    # a default.mplstyle file.
     def _apply_style(self, _style):
+        import matplotlib.pyplot as plt
+
         from spectrochempy.utils.file import pathclean
 
-        # Convert PosixPath to string if necessary before using it
+        # --------------------------------------------------
+        # Logical (non-file) Matplotlib styles
+        # --------------------------------------------------
+        if _style in (None, "", "none"):
+            return
+
+        # NOTE:
+        # "default" is a logical Matplotlib style, NOT a .mplstyle file.
+        # It must always be handled explicitly via rcdefaults(), including
+        # when encountered inside other style sheets (e.g. scpy.mplstyle).
+        if _style == "default":
+            plt.rcdefaults()
+            return
+
+        # --------------------------------------------------
+        # File-based styles (.mplstyle)
+        # --------------------------------------------------
         stylesheets_path = self.stylesheets
-        if hasattr(stylesheets_path, "__fspath__"):  # Check if it's a path-like object
+        if hasattr(stylesheets_path, "__fspath__"):
             stylesheets_path = str(stylesheets_path)
 
         f = (pathclean(stylesheets_path) / _style).with_suffix(".mplstyle")
+
         if not f.exists():
-            # we have to look matplotlib predetermined style.
             f = (
-                pathclean(mpl.__file__).parent / "mpl-data" / "stylelib" / _style
-            ).with_suffix(".mplstyle")
-            # if not f.exists() and _style=='scpy':
-            #     warning_(TypeError(f"The style `{_style}` doesn't exists"))
-            #     f = f.parent / 'classic.mplstyle'
-            #     if not f.exists:
-            #         raise TypeError
+                pathclean(mpl.__file__).parent
+                / "mpl-data"
+                / "stylelib"
+                / f"{_style}.mplstyle"
+            )
+
+        if not f.exists():
+            raise FileNotFoundError(f"Matplotlib style '{_style}' not found")
+
         txt = f.read_text()
         pars = txt.split("\n")
+
         for line in pars:
             if line.strip() and not line.strip().startswith("#"):
                 name, value = line.split(":", maxsplit=1)
                 name_ = name.strip().replace(".", "_")
                 value = value.split(" # ")[0].strip()
-                if "size" in name and "figsize" not in name and "papersize" not in name:
+
+                if "size" in name and "figsize" not in name:
                     value = self._get_fontsize(value)
                 elif name.endswith("color") and "force_" not in name:
                     value = self._get_color(value)
-                # debug_(f'{name_} = {value}')
-                if value == "true":
-                    value = "True"
-                elif value == "false":
-                    value = "False"
-                try:
-                    setattr(self, name_, value)
-                except ValueError:
-                    if name.endswith("color") and len(value) == 6:
-                        value = "#" + value.replace("'", "")
-                except TraitError:
-                    if hasattr(self.traits()[name_], "default_args"):
-                        try:
-                            value = type(self.traits()[name_].default_args)(
-                                map(float, value.split(",")),
-                            )
-                        except Exception:
-                            value = type(self.traits()[name_].default_args)(
-                                value.split(","),
-                            )
-                            value = tuple(map(str.strip, value))
-                    else:
-                        val = eval(value) if value else 0  # noqa: S307
-                        value = type(self.traits()[name_].default_value)(val)
-                except Exception as e:
-                    raise e
-                try:
-                    setattr(self, name_, value)
-                except Exception as e:
-                    raise e
 
-            if line.strip() and line.strip().startswith("##@"):
-                # SPECTROCHEMPY Parameters
+                if value.lower() == "true":
+                    value = True
+                elif value.lower() == "false":
+                    value = False
+
+                setattr(self, name_, value)
+
+            elif line.strip().startswith("##@"):
                 name, value = line[3:].split(":", maxsplit=1)
-                name = name.strip()
-                value = value.strip()
-                try:
-                    setattr(self, name, value)
-                except TraitError:
-                    setattr(self, name, eval(value))  # noqa: S307
+                setattr(self, name.strip(), eval(value.strip()))  # noqa: S307
 
     def to_rc_key(self, key):
         rckey = ""
