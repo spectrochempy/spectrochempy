@@ -20,6 +20,7 @@ from traitlets import Unicode
 from traitlets import Union
 from traitlets import default
 from traitlets import observe
+from traitlets import validate
 
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
@@ -771,11 +772,12 @@ class PlotPreferences(MetaConfigurable):
         "antialiased",
         help=r"""see help(imshow) for options""",
     ).tag(config=True, kind="")
-    image_cmap = Enum(
-        plt.colormaps(),
-        default_value="viridis",
-        help=r"""A colormap name, gray etc...""",
+
+    image_cmap = Unicode(
+        "viridis",
+        help="A matplotlib colormap name (case-insensitive)",
     ).tag(config=True, kind="")
+
     image_lut = Integer(256, help=r"""the size of the colormap lookup table""").tag(
         config=True,
         kind="",
@@ -944,11 +946,29 @@ class PlotPreferences(MetaConfigurable):
     show_projections = Bool(False, help="Show all projections").tag(config=True)
     show_projection_x = Bool(False, help="Show projection along x").tag(config=True)
     show_projection_y = Bool(False, help="Show projection along y").tag(config=True)
-    colormap = Enum(
-        plt.colormaps(),
-        default_value="viridis",
-        help=r"""A colormap name, gray etc...  (equivalent to image_cmap""",
+
+    colormap = Unicode(
+        "viridis",
+        help="A matplotlib colormap name (case-insensitive) -- see also image-cmap",
     ).tag(config=True)
+
+    @validate("colormap", "image_cmap")
+    def _validate_colormap(self, proposal):
+        value = proposal["value"]
+
+        if not isinstance(value, str):
+            raise TraitError("Colormap must be a string")
+
+        value = value.lower()
+
+        if value not in plt.colormaps():
+            raise TraitError(
+                f"Invalid colormap '{proposal['value']}'. "
+                f"Available colormaps include: {', '.join(plt.colormaps()[:10])}..."
+            )
+
+        return value
+
     max_lines_in_stack = Integer(
         1000,
         min=1,
