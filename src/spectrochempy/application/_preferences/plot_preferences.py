@@ -51,6 +51,24 @@ def available_styles():
     return list(set(styles))  # in order to remove possible duplicates
 
 
+def _canonical_cmap_name(name: str) -> str:
+    """Return Matplotlib's canonical colormap name, case-insensitively."""
+    if not isinstance(name, str):
+        raise TraitError("colormap must be a string")
+
+    # Build a case-insensitive map from available colormaps
+    cmaps = plt.colormaps()
+    cmap_map = {c.lower(): c for c in cmaps}
+
+    key = name.lower()
+    if key not in cmap_map:
+        raise TraitError(
+            f"Invalid colormap '{name}'. "
+            f"Available colormaps include: {', '.join(cmaps[:10])}..."
+        )
+    return cmap_map[key]
+
+
 class PlotPreferences(MetaConfigurable):
     """Port of matplotlib.rcParams to our configuration system (traitlets)."""
 
@@ -775,8 +793,12 @@ class PlotPreferences(MetaConfigurable):
 
     image_cmap = Unicode(
         "viridis",
-        help="A matplotlib colormap name (case-insensitive)",
+        help="Colormap for image plots (case-insensitive)",
     ).tag(config=True, kind="")
+
+    @validate("image_cmap")
+    def _validate_image_cmap(self, proposal):
+        return _canonical_cmap_name(proposal["value"])
 
     image_lut = Integer(256, help=r"""the size of the colormap lookup table""").tag(
         config=True,
@@ -949,25 +971,12 @@ class PlotPreferences(MetaConfigurable):
 
     colormap = Unicode(
         "viridis",
-        help="A matplotlib colormap name (case-insensitive) -- see also image-cmap",
+        help="A matplotlib colormap name (case-insensitive)",
     ).tag(config=True)
 
-    @validate("colormap", "image_cmap")
+    @validate("colormap")
     def _validate_colormap(self, proposal):
-        value = proposal["value"]
-
-        if not isinstance(value, str):
-            raise TraitError("Colormap must be a string")
-
-        value = value.lower()
-
-        if value not in plt.colormaps():
-            raise TraitError(
-                f"Invalid colormap '{proposal['value']}'. "
-                f"Available colormaps include: {', '.join(plt.colormaps()[:10])}..."
-            )
-
-        return value
+        return _canonical_cmap_name(proposal["value"])
 
     max_lines_in_stack = Integer(
         1000,
