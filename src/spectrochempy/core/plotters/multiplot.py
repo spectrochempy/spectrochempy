@@ -176,6 +176,7 @@ def multiplot(
     from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
 
     ensure_mpl_setup()
+
     import matplotlib
     import matplotlib.backend_bases  # noqa: F401
     import matplotlib.pyplot as plt

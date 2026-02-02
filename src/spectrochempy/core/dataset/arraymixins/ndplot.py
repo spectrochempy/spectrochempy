@@ -38,10 +38,12 @@ from spectrochempy.application.application import debug_
 from spectrochempy.application.application import error_
 from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.mplutils import _Axes
 from spectrochempy.utils.mplutils import _Axes3D
 from spectrochempy.utils.mplutils import get_figure
+from spectrochempy.utils.mplutils import show as mpl_show
 from spectrochempy.utils.optional import import_optional_dependency
 
 go = import_optional_dependency("plotly.graph_objects", errors="ignore")
@@ -163,6 +165,8 @@ class NDPlot(tr.HasTraits):
             (*e.g.*, FTIR spectra) or ppm (*e.g.*, NMR), that spectrochempy
             will try to guess. But if reverse is set, then this is the
             setting which will be taken into account.
+        show : bool, optional, default: True
+            call `matplotlib.pyplot.show()` at the end of the plot.
         show_complex : bool, optional, default: False
             Show both real and imaginary component for complex data.
             By default only the real component is displayed.
@@ -205,20 +209,42 @@ class NDPlot(tr.HasTraits):
             The matplotlib axes containing the plot if successful, None otherwise.
 
         """
-        # Select appropriate plotting method
-        if method:
-            _plotter = getattr(self, f"plot_{method.replace('+', '_')}", None)
-            if _plotter is None:
-                error_(
-                    NameError,
-                    f"The specified plotter for method `{method}` was not found!",
-                )
-                raise OSError
-        else:
-            _plotter = self._plot_generic
 
-        return _plotter(**kwargs)
+        from spectrochempy.core.plotters.plot_setup import (
+            ensure_spectrochempy_plot_style,
+        )
 
+        ensure_spectrochempy_plot_style()
+
+        show = kwargs.pop("show", True)
+
+        # --- Default plotting method ---
+        if method is None:
+            if self._squeeze_ndim == 1:
+                method = "pen"
+            elif self._squeeze_ndim == 2:
+                method = "stack"
+            elif self._squeeze_ndim == 3:
+                method = "surface"
+
+        _plotter = getattr(self, f"plot_{method.replace('+', '_')}", None)
+        if _plotter is None:
+            error_(
+                NameError,
+                f"The specified plotter for method `{method}` was not found!",
+            )
+            raise OSError
+
+        ax = _plotter(**kwargs)
+
+        if show:
+            mpl_show()
+
+        return ax
+
+    @deprecated(
+        removed="0.8",
+    )
     def _plot_generic(self, **kwargs: Any) -> _Axes | None:
         # Choose plotting method based on dataset dimensionality
         # Args:

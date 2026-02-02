@@ -13,6 +13,7 @@ __all__ = [
     "plot1d",
     "plot2d",
     "plot3d",
+    "plot_setup",
     "plotly",
 ]
 
@@ -22,4 +23,5 @@ from . import multiplot
 from . import plot1d
 from . import plot2d
 from . import plot3d
+from . import plot_setup
 from . import plotly

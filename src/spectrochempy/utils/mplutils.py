@@ -1,14 +1,15 @@
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory.
 # ======================================================================================
 
 """
 Matplotlib utilities used across SpectroChemPy.
 
+Responsibilities:
 - Custom Axes classes supporting pint quantities
-- get_figure helper with lazy Matplotlib initialization
+- Figure factory (headless-safe)
+- Explicit, non-invasive figure display helper
 """
 
 from contextlib import suppress
@@ -16,23 +17,24 @@ from contextlib import suppress
 import matplotlib.axes as maxes
 import mpl_toolkits.mplot3d.axes3d as maxes3D  # noqa: N812
 
-from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
-
 __all__ = [
     "show",
     "get_figure",
+    "figure",  # backward compatibility
     "make_label",
     "get_plotly_figure",
     "_Axes",
     "_Axes3D",
 ]
 
-plt = None  # will be initialized lazily
+# -----------------------------------------------------------------------------
+# Custom Axes classes
+# -----------------------------------------------------------------------------
 
 
 @maxes.subplot_class_factory
 class _Axes(maxes.Axes):  # pragma: no cover
-    """Subclass of matplotlib Axes class."""
+    """Subclass of matplotlib Axes class supporting pint quantities."""
 
     from spectrochempy.core.units import remove_args_units
 
@@ -124,7 +126,7 @@ class _Axes(maxes.Axes):  # pragma: no cover
 
 
 class _Axes3D(maxes3D.Axes3D):  # pragma: no cover
-    """Subclass of matplotlib Axes3D class."""
+    """Subclass of matplotlib Axes3D supporting pint quantities."""
 
     from spectrochempy.core.units import remove_args_units
 
@@ -133,35 +135,20 @@ class _Axes3D(maxes3D.Axes3D):  # pragma: no cover
         return super().plot_surface(*args, **kwargs)
 
 
-def show():
-    """Force the matplotlib figure display."""
-    ensure_mpl_setup()
-
-    global plt
-    if plt is None:
-        import matplotlib.pyplot as plt  # noqa: F401
-
-        globals()["plt"] = plt
-
-    from spectrochempy import NO_DISPLAY
-    from spectrochempy.utils.mplutils import get_figure
-
-    if NO_DISPLAY:
-        plt.close("all")
-        return
-
-    fig = get_figure(clear=False)
-    if fig:
-        plt.show(block=True)
+# -----------------------------------------------------------------------------
+# Figure handling
+# -----------------------------------------------------------------------------
 
 
 def get_figure(**kwargs):
-    """Return a Matplotlib figure for plotting (pyplot-free)."""
-    ensure_mpl_setup()
+    """
+    Return a Matplotlib figure.
 
-    from matplotlib.backends.backend_agg import FigureCanvasAgg
-    from matplotlib.figure import Figure
-
+    - Uses pyplot in interactive mode
+    - Uses Agg backend in NO_DISPLAY / test environments
+    - Does NOT trigger application initialization
+    """
+    from spectrochempy import NO_DISPLAY
     from spectrochempy.application.preferences import preferences as _global_prefs
 
     prefs = kwargs.pop("preferences", None) or _global_prefs
@@ -179,11 +166,22 @@ def get_figure(**kwargs):
     frameon = kwargs.get("frameon", getattr(prefs, "figure_frameon", True))
     tight_layout = kwargs.get("autolayout", getattr(prefs, "figure_autolayout", False))
 
-    fig = Figure(figsize=figsize, dpi=dpi, frameon=frameon)
-    FigureCanvasAgg(fig)
+    if NO_DISPLAY:
+        # Headless / tests / CI
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        from matplotlib.figure import Figure
+
+        fig = Figure(figsize=figsize, dpi=dpi, frameon=frameon)
+        FigureCanvasAgg(fig)
+
+    else:
+        # Interactive
+        import matplotlib.pyplot as plt
+
+        fig = plt.figure(figsize=figsize, dpi=dpi, frameon=frameon)
 
     with suppress(Exception):
-        fig.set_edgecolor(facecolor)
+        fig.set_facecolor(facecolor)
 
     with suppress(Exception):
         fig.set_edgecolor(edgecolor)
@@ -194,9 +192,38 @@ def get_figure(**kwargs):
     return fig
 
 
-def figure(*args, **kwargs):
-    """Backward-compatible alias for get_figure."""
-    return get_figure(*args, **kwargs)
+# -----------------------------------------------------------------------------
+# Backward compatibility
+# -----------------------------------------------------------------------------
+
+figure = get_figure
+
+# -----------------------------------------------------------------------------
+# Backward compatibility
+# -----------------------------------------------------------------------------
+
+
+def show():
+    """
+    Force display of existing Matplotlib figures.
+
+    - Never creates figures
+    - Safe in scripts, IDEs, and notebooks
+    """
+    from spectrochempy import NO_DISPLAY
+
+    if NO_DISPLAY:
+        return
+
+    import matplotlib.pyplot as plt
+
+    if plt.get_fignums():
+        plt.show(block=True)
+
+
+# -----------------------------------------------------------------------------
+# Misc helpers
+# -----------------------------------------------------------------------------
 
 
 def make_label(ss, lab="<no_axe_label>", use_mpl=True):
