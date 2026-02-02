@@ -1,5 +1,3 @@
-import copy
-
 import matplotlib as mpl
 import pytest
 
@@ -26,18 +24,17 @@ def test_scpy_style_application_changes_rcparams_when_forced():
     ), "Forcing SpectroChemPy style did not modify matplotlib rcParams"
 
 
-@pytest.mark.mpl
-def test_rcparams_restore_is_idempotent_and_safe():
-    """
-    scp.restore_rcparams() must restore matplotlib rcParams
-    exactly to the state that existed before any SpectroChemPy plotting,
-    regardless of whether rcParams were modified or not.
-    """
+import pytest
 
-    # ------------------------------------------------------------------
-    # 1. Snapshot initial user rcParams
-    # ------------------------------------------------------------------
-    rc_before = copy.deepcopy(mpl.rcParams)
+from spectrochempy.core.plotters.plot_setup import get_import_time_rcparams
+
+
+@pytest.mark.mpl
+def test_rcparams_restore_restores_import_time_state():
+    """
+    scp.restore_rcparams() must restore matplotlib rcParams exactly
+    to the state that existed when SpectroChemPy was imported.
+    """
 
     keys_to_check = [
         "axes.facecolor",
@@ -47,24 +44,17 @@ def test_rcparams_restore_is_idempotent_and_safe():
         "font.size",
     ]
 
-    subset_before = {k: rc_before[k] for k in keys_to_check}
+    # Reference = import-time snapshot
+    import_time = get_import_time_rcparams()
+    reference = {k: import_time[k] for k in keys_to_check}
 
-    # ------------------------------------------------------------------
-    # 2. Trigger SpectroChemPy plotting (may or may not modify rcParams)
-    # ------------------------------------------------------------------
+    # Trigger SCP plotting
     X = scp.random((10, 10))
     X.plot()
 
-    # ------------------------------------------------------------------
-    # 3. Restore user rcParams
-    # ------------------------------------------------------------------
+    # Restore
     scp.restore_rcparams()
 
-    subset_after_restore = {k: mpl.rcParams[k] for k in keys_to_check}
+    restored = {k: mpl.rcParams[k] for k in keys_to_check}
 
-    # ------------------------------------------------------------------
-    # 4. MUST restore exactly
-    # ------------------------------------------------------------------
-    assert (
-        subset_after_restore == subset_before
-    ), "scp.restore_rcparams() did not restore the original matplotlib rcParams"
+    assert restored == reference
