@@ -24,8 +24,6 @@ from traitlets import validate
 
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
-# from spectrochempy.core import warning_
-
 
 # --------------------------------------------------------------------------------------
 # available matplotlib styles (equivalent of plt.style.available)
@@ -71,6 +69,16 @@ def _canonical_cmap_name(name: str) -> str:
 
 class PlotPreferences(MetaConfigurable):
     """Port of matplotlib.rcParams to our configuration system (traitlets)."""
+
+    def _apply_style(self, _style):
+        import matplotlib.pyplot as plt
+
+        # --------------------------------------------------
+        # Matplotlib "default" is NOT a file-based style
+        # --------------------------------------------------
+        if _style == "default":
+            plt.rcdefaults()
+            return
 
     name = Unicode("PlotPreferences")
     description = Unicode("Options for Matplotlib")
