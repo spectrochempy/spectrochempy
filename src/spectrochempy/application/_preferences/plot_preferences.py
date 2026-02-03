@@ -1229,24 +1229,31 @@ class PlotPreferences(MetaConfigurable):
 
                 trait = self.traits().get(name_)
 
-                if trait is not None:
-                    # Float
-                    if isinstance(trait, Float) and isinstance(value, str):
-                        value = float(value)
+                if trait is None:
+                    return  # unknown trait, skip silently
 
-                    # Integer
-                    elif isinstance(trait, Integer) and isinstance(value, str):
-                        value = int(float(value))  # mpl styles sometimes use "2.0"
+                # Normalize value
+                raw = value.strip()
 
-                    # Bool
-                    elif isinstance(trait, Bool) and isinstance(value, str):
-                        value = value.lower() in ("true", "1", "yes")
+                # Bool
+                if isinstance(trait, Bool):
+                    value = raw.lower() in ("true", "1", "yes", "on")
 
-                    # Tuple
-                    elif isinstance(trait, Tuple) and isinstance(value, str):
-                        value = tuple(float(v) for v in value.split(","))
+                # Integer
+                elif isinstance(trait, Integer):
+                    value = int(float(raw))
 
-                    # Enum / Unicode stay strings
+                # Float
+                elif isinstance(trait, Float):
+                    value = float(raw)
+
+                # Tuple
+                elif isinstance(trait, Tuple):
+                    value = tuple(float(v.strip()) for v in raw.split(","))
+
+                # Enum / Unicode / List → keep as string
+                else:
+                    value = raw
 
                 setattr(self, name_, value)
 
