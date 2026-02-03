@@ -45,7 +45,7 @@ from traitlets import Set
 from traitlets import TraitError
 from traitlets import Tuple
 from traitlets import Unicode
-from traitlets import Union
+from traitlets import Union as TraitUnion
 from traitlets import default
 from traitlets import observe
 from traitlets import validate
@@ -744,10 +744,11 @@ class PlotPreferences(MetaConfigurable):
     # 9. LEGEND
     # ----------
 
-    legend_framealpha = Union(
-        (Float(0.8), Unicode("None")),
-        help=r"""legend patch transparency""",
-    ).tag(config=True, kind="", default=0.0)
+    legend_framealpha = TraitUnion(
+        trait_types=[Float(), Unicode()],
+        default_value=0.8,
+        help="Legend patch transparency (float or 'None')",
+    ).tag(config=True)
     legend_facecolor = Unicode(
         "inherit",
         help=r"""inherit from axes.facecolor; or color spec""",
@@ -929,12 +930,11 @@ class PlotPreferences(MetaConfigurable):
     #
     # HIST
     #
-    hist_bins = Union(
-        (Unicode("auto"), Integer(10)),
-        help=r"""The default number of histogram bins.
-     If Numpy 1.11 or later is
-     installed, may also be `auto`""",
-    ).tag(config=True, kind="", default="auto")
+    hist_bins = TraitUnion(
+        trait_types=[Integer(), Unicode()],
+        default_value="auto",
+        help=("The default number of histogram bins. " "May be an integer or 'auto'."),
+    ).tag(config=True)
 
     # -----------
     # 13. SCATTER
@@ -1039,10 +1039,11 @@ class PlotPreferences(MetaConfigurable):
     # These values are consumed by SpectroChemPy plotters,
     # not by Matplotlib itself.
 
-    style = Union(
-        (Unicode(), List(), Tuple()),
-        help="Basic matplotlib style to use",
-    ).tag(config=True, default_="scpy")
+    style = TraitUnion(
+        trait_types=[Unicode(), List(), Tuple()],
+        default_value="scpy",
+        help="Matplotlib style(s) to apply",
+    ).tag(config=True)
 
     stylesheets = Unicode(
         help="Directory where to look for local defined matplotlib styles when they are not in the "
@@ -1323,64 +1324,114 @@ class PlotPreferences(MetaConfigurable):
         raw = value.strip()
         low = raw.lower()
 
+        trait_name = name.replace(".", "_")
+        trait = self.traits().get(trait_name)
+
         # --------------------------------------------------
-        # Booleans / None
+        # Booleans
         # --------------------------------------------------
         if low == "true":
             return True
         if low == "false":
             return False
+
+        # --------------------------------------------------
+        # None handling (trait-aware)
+        # --------------------------------------------------
         if low in ("none", "null"):
+            # Enum traits always expect strings
+            if isinstance(trait, Enum):
+                return raw
+
+            # Union or Unicode → keep string "None"
+            if isinstance(trait, (TraitUnion, Unicode)):
+                return raw
+
+            # Otherwise allow real None
             return None
-
-        # --------------------------------------------------
-        # Trait-aware coercion
-        # --------------------------------------------------
-        trait_name = name.replace(".", "_")
-        trait = self.traits().get(trait_name)
-
-        # --------------------------------------------------
-        # Unicode trait → always keep string
-        # --------------------------------------------------
-        if trait is not None and isinstance(trait, Unicode):
-            return raw
 
         # --------------------------------------------------
         # Tuple trait → parse comma-separated values
         # --------------------------------------------------
-        if trait is not None and isinstance(trait, Tuple):
+        if isinstance(trait, Tuple):
             try:
-                parts = [float(p.strip()) for p in raw.split(",")]
-                return tuple(parts)
+                return tuple(float(p.strip()) for p in raw.split(","))
             except Exception:
-                return raw  # let traitlets raise clean error
+                return raw  # let traitlets raise a clean error
 
         # --------------------------------------------------
-        # Numbers
+        # Numeric parsing (trait-aware)
         # --------------------------------------------------
-        # numbers
         try:
-            # Integer first (most mplstyle numeric params are ints)
-            if raw.isdigit():
-                return int(raw)
-
-            # Float (including scientific notation)
-            return float(raw)
+            num = float(raw)
         except ValueError:
-            pass
+            return raw  # not a number → keep string
+
+        # ---- Integer trait
+        if isinstance(trait, Integer):
+            if num.is_integer():
+                return int(num)
+            return num  # let traitlets complain
+
+        # ---- Union(Int, Unicode)
+        if isinstance(trait, TraitUnion):
+            # If an int is allowed, prefer it
+            for t in trait.trait_types:
+                if isinstance(t, Integer) and num.is_integer():
+                    return int(num)
+            # Otherwise fall back to string
+            return raw
+
+        # ---- Float trait
+        if isinstance(trait, Float):
+            return num
 
         # --------------------------------------------------
-        # Explicit tuple/list syntax
+        # Unicode trait → always string
         # --------------------------------------------------
-        if (raw.startswith("(") and raw.endswith(")")) or (
-            raw.startswith("[") and raw.endswith("]")
-        ):
-            return eval(raw)  # noqa: S307 (controlled mplstyle input)
+        if isinstance(trait, Unicode):
+            return raw
 
         # --------------------------------------------------
-        # Fallback --> return raw string
+        # Fallback
         # --------------------------------------------------
         return raw
+
+    def _coerce_for_trait(self, trait, raw, parsed):
+        """
+        Cast a parsed value to match a given trait.
+
+        raw    = original string (e.g. "20000.0", "5.5, 3.5")
+        parsed = output of _coerce_style_value (e.g. 20000.0)
+        """
+        # Unicode: always keep the original raw string
+        if trait is not None and isinstance(trait, Unicode):
+            return raw.strip()
+
+        # Integer: accept floats that are really integers
+        if trait is not None and isinstance(trait, Integer):
+            if isinstance(parsed, float) and parsed.is_integer():
+                return int(parsed)
+            if isinstance(parsed, int):
+                return parsed
+            # if it's something else, let traitlets raise
+            return parsed
+
+        # Tuple: accept "5.5, 3.5" (common in mplstyle files)
+        if trait is not None and isinstance(trait, Tuple):
+            s = raw.strip()
+
+            # allow either "(5.5, 3.5)" or "5.5, 3.5"
+            if s.startswith("(") and s.endswith(")"):
+                s = s[1:-1]
+
+            try:
+                parts = [float(p.strip()) for p in s.split(",")]
+                return tuple(parts)
+            except Exception:
+                return parsed  # let traitlets raise cleanly
+
+        return parsed
 
     def _apply_style(self, _style):
         """
@@ -1457,14 +1508,15 @@ class PlotPreferences(MetaConfigurable):
                     value = self._get_color(value)
 
                 # 🔑 SINGLE coercion point
-                value = self._coerce_style_value(name, value)
+                trait_name = name.replace(".", "_")
 
-                try:
-                    # Convert rcParams key (axes.facecolor)
-                    # → trait name (axes_facecolor)
-                    setattr(self, name.replace(".", "_"), value)
-                except Exception as e:
-                    raise e
+                raw_value = value  # keep original string BEFORE parsing
+                parsed = self._coerce_style_value(name, raw_value)
+
+                trait = self.traits().get(trait_name)
+                coerced = self._coerce_for_trait(trait, raw_value, parsed)
+
+                setattr(self, trait_name, coerced)
 
             # SpectroChemPy-only parameters
             if line.strip().startswith("##@"):
