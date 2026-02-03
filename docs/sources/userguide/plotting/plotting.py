@@ -174,8 +174,12 @@ dataset.plot()
 
 # %%
 print(f"font before reset: {prefs.font.family}")
+
+# Reset restores the SpectroChemPy default plotting style
 prefs.reset()
-print(f"font after reset: {prefs.font.family}")
+
+print(f"font after reset (SpectroChemPy default): {prefs.font.family}")
+
 
 # %% [markdown]
 # It is also possible to change a parameter for a single plot without changing the `preferences` attribute by passing
