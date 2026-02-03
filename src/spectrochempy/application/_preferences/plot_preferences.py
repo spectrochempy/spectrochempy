@@ -1358,10 +1358,14 @@ class PlotPreferences(MetaConfigurable):
         # --------------------------------------------------
         # Numbers
         # --------------------------------------------------
+        # numbers
         try:
-            if "." in raw:
-                return float(raw)
-            return int(raw)
+            # Integer first (most mplstyle numeric params are ints)
+            if raw.isdigit():
+                return int(raw)
+
+            # Float (including scientific notation)
+            return float(raw)
         except ValueError:
             pass
 
