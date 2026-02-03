@@ -1323,6 +1323,7 @@ class PlotPreferences(MetaConfigurable):
         - Strings are parsed ONCE
         - No eval on bare identifiers (e.g. 'pen')
         - Comma-separated numbers → tuple
+        - Never coerce numerics for Unicode traits
         """
         # SECURITY NOTE:
         # ---------------
@@ -1337,6 +1338,9 @@ class PlotPreferences(MetaConfigurable):
         raw = value.strip()
         low = raw.lower()
 
+        # --------------------------------------------------
+        # Boolean or None literals
+        # --------------------------------------------------
         if low == "true":
             return True
         if low == "false":
@@ -1344,23 +1348,27 @@ class PlotPreferences(MetaConfigurable):
         if low in ("none", "null"):
             return None
 
+        # --------------------------------------------------
+        # Trait-aware conversion
+        # --------------------------------------------------
+        trait_name = name.replace(".", "_")
+        trait = self.traits().get(trait_name)
+
+        # If the target trait is Unicode → KEEP STRING
+        if trait is not None and isinstance(trait, Unicode):
+            return raw
+
+        # --------------------------------------------------
         # tuple or list literal
+        # --------------------------------------------------
         if (raw.startswith("(") and raw.endswith(")")) or (
             raw.startswith("[") and raw.endswith("]")
         ):
             return eval(raw)  # noqa: S307 — controlled mplstyle input
 
-        # Comma-separated values (mplstyle tuple syntax)
-        if "," in raw:
-            parts = [p.strip() for p in raw.split(",")]
-            try:
-                nums = [float(p) if "." in p else int(p) for p in parts]
-                return tuple(nums)
-            except ValueError:
-                # Not numeric → keep as string
-                return raw
-
-        # Single number
+        # --------------------------------------------------
+        # Numbers (only if trait allows it)
+        # --------------------------------------------------
         try:
             if "." in raw:
                 return float(raw)
@@ -1368,13 +1376,19 @@ class PlotPreferences(MetaConfigurable):
         except ValueError:
             pass
 
+        # --------------------------------------------------
+        # Tuple / list literals
+        # --------------------------------------------------
+        if (raw.startswith("(") and raw.endswith(")")) or (
+            raw.startswith("[") and raw.endswith("]")
+        ):
+            return eval(raw)  # noqa: S307 — controlled mplstyle input
+
+        # --------------------------------------------------
         # Everything else stays a string (e.g. 'pen', 'viridis')
+        # --------------------------------------------------
         return raw
 
-    # IMPORTANT:
-    # _apply_style must handle logical styles (e.g. "default")
-    # BEFORE any filesystem access. Matplotlib does not ship
-    # a default.mplstyle file. # Attempting to load it from disk will fail
     def _apply_style(self, _style):
         """
         Apply a single style to PlotPreferences.
@@ -1385,6 +1399,11 @@ class PlotPreferences(MetaConfigurable):
         - parses them safely
         - updates traitlets (NOT rcParams directly)
         """
+        # IMPORTANT:
+        # _apply_style must handle logical styles (e.g. "default")
+        # BEFORE any filesystem access. Matplotlib does not ship
+        # a default.mplstyle file. # Attempting to load it from disk will fail
+
         import matplotlib.pyplot as plt
 
         from spectrochempy.utils.file import pathclean
