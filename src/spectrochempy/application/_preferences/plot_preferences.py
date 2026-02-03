@@ -1165,6 +1165,45 @@ class PlotPreferences(MetaConfigurable):
             return f"{colors[c.index(color)]}"
         return f"{color}"
 
+    def _coerce_style_value(self, name, value):
+        """
+        Convert mplstyle values to proper Python types.
+
+        Rules:
+        - Non-strings are returned unchanged
+        - Strings are parsed ONCE
+        - No eval on bare identifiers (e.g. 'pen')
+        """
+        if not isinstance(value, str):
+            return value
+
+        raw = value.strip()
+        low = raw.lower()
+
+        if low == "true":
+            return True
+        if low == "false":
+            return False
+        if low in ("none", "null"):
+            return None
+
+        # numbers
+        try:
+            if "." in raw:
+                return float(raw)
+            return int(raw)
+        except ValueError:
+            pass
+
+        # tuple or list literal
+        if (raw.startswith("(") and raw.endswith(")")) or (
+            raw.startswith("[") and raw.endswith("]")
+        ):
+            return eval(raw)  # noqa: S307 — controlled mplstyle input
+
+        # everything else stays a string (e.g. 'pen', 'viridis')
+        return raw
+
     # IMPORTANT:
     # _apply_style must handle logical styles (e.g. "default")
     # BEFORE any filesystem access. Matplotlib does not ship
@@ -1214,52 +1253,33 @@ class PlotPreferences(MetaConfigurable):
         for line in pars:
             if line.strip() and not line.strip().startswith("#"):
                 name, value = line.split(":", maxsplit=1)
-                name_ = name.strip().replace(".", "_")
+
+                name = name.strip()
                 value = value.split(" # ")[0].strip()
 
-                if "size" in name and "figsize" not in name:
+                # Font size handling
+                if "size" in name and "figsize" not in name and "papersize" not in name:
                     value = self._get_fontsize(value)
+
+                # Color normalization
                 elif name.endswith("color") and "force_" not in name:
                     value = self._get_color(value)
 
-                if value.lower() == "true":
-                    value = True
-                elif value.lower() == "false":
-                    value = False
+                # 🔑 SINGLE coercion point
+                value = self._coerce_style_value(name, value)
 
-                trait = self.traits().get(name_)
+                try:
+                    setattr(self, name.replace(".", "_"), value)
+                except Exception as e:
+                    raise e
 
-                if trait is None:
-                    return  # unknown trait, skip silently
-
-                # Normalize value
-                raw = value.strip()
-
-                # Bool
-                if isinstance(trait, Bool):
-                    value = raw.lower() in ("true", "1", "yes", "on")
-
-                # Integer
-                elif isinstance(trait, Integer):
-                    value = int(float(raw))
-
-                # Float
-                elif isinstance(trait, Float):
-                    value = float(raw)
-
-                # Tuple
-                elif isinstance(trait, Tuple):
-                    value = tuple(float(v.strip()) for v in raw.split(","))
-
-                # Enum / Unicode / List → keep as string
-                else:
-                    value = raw
-
-                setattr(self, name_, value)
-
-            elif line.strip().startswith("##@"):
+            # SpectroChemPy-only parameters
+            if line.strip().startswith("##@"):
                 name, value = line[3:].split(":", maxsplit=1)
-                setattr(self, name.strip(), eval(value.strip()))  # noqa: S307
+                name = name.strip()
+                value = value.strip()
+                value = self._coerce_style_value(name, value)
+                setattr(self, name, value)
 
     def to_rc_key(self, key):
         rckey = ""
