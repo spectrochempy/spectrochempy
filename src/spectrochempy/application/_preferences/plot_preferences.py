@@ -4,9 +4,37 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+"""
+PlotPreferences.
+
+This module implements SpectroChemPy’s plotting configuration system.
+
+It provides a *typed, observable, reversible* interface to Matplotlib’s
+global rcParams, using traitlets as the configuration backbone.
+
+Key ideas
+---------
+- Matplotlib uses a global dict (rcParams) with side effects
+- SpectroChemPy exposes plotting options as traitlets
+- Trait changes are propagated to rcParams in a controlled way
+- Matplotlib style sheets are *parsed*, not blindly applied
+
+This file is intentionally verbose and explicit to avoid hidden plotting
+side effects and make rcParams restoration possible.
+"""
+
+
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
+
+# traitlets below are used to:
+# - provide type validation (Float, Bool, Enum, etc.)
+# - allow observation of changes (@observe)
+# - synchronize preferences → rcParams
+#
+# This is very different from NumPy/Pandas, but closer to Jupyter/IPython,
+# where configuration is dynamic and user-facing.
 from traitlets import All
 from traitlets import Bool
 from traitlets import Enum
@@ -24,10 +52,17 @@ from traitlets import validate
 
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 
-
 # --------------------------------------------------------------------------------------
 # available matplotlib styles (equivalent of plt.style.available)
 # --------------------------------------------------------------------------------------
+# This function extends matplotlib's own style discovery by also
+# checking the user's matplotlib config directory.
+#
+# It is *not* cached on purpose:
+# - users may add styles at runtime
+# - styles are filesystem-based
+
+
 def available_styles():
     """
     All matplotlib `styles <https://matplotlib.org/users/style_sheets.html>`_ which are available in  `SpectroChemPy`.
@@ -51,6 +86,17 @@ def available_styles():
 
 def _canonical_cmap_name(name: str) -> str:
     """Return Matplotlib's canonical colormap name, case-insensitively."""
+
+    # Normalize colormap names in a case-insensitive way.
+    #
+    # Matplotlib itself is case-sensitive in many places, which leads
+    # to confusing user errors. This helper ensures:
+    #
+    #   "Viridis" → "viridis"
+    #   "VIRIDIS" → "viridis"
+    #
+    # while still rejecting invalid names early.
+
     if not isinstance(name, str):
         raise TraitError("colormap must be a string")
 
@@ -68,7 +114,18 @@ def _canonical_cmap_name(name: str) -> str:
 
 
 class PlotPreferences(MetaConfigurable):
-    """Port of matplotlib.rcParams to our configuration system (traitlets)."""
+    """
+    Typed representation of Matplotlib rcParams + SpectroChemPy extensions.
+
+    This class mirrors most matplotlib.rcParams entries as traitlets.
+    Changing a trait updates rcParams automatically via observers.
+
+    Important:
+    ---------
+    - rcParams are NOT the source of truth
+    - traitlets are the source of truth
+    - rcParams are a projection of the current PlotPreferences state
+    """
 
     name = Unicode("PlotPreferences")
     description = Unicode("Options for Matplotlib")
@@ -76,11 +133,31 @@ class PlotPreferences(MetaConfigurable):
     _groups = Set(Unicode())
     _subgroups = Set(Unicode())
     _members = Set(Unicode())
+
     # ----------------------------------------------------------------------------------
-    # Configuration entries based on the classic matplotlib style
+    # Matplotlib rcParams mirrored as traitlets
     # ----------------------------------------------------------------------------------
     #
-    # LINES
+    # Naming convention:
+    #   rcParams key:      "lines.linewidth"
+    #   trait name:        lines_linewidth
+    #
+    # The dot is replaced by an underscore.
+    # Mapping back to rcParams is handled by to_rc_key().
+    #
+    # Most defaults here match Matplotlib defaults or SpectroChemPy style defaults.
+
+    # NOTE:
+    # Some defaults differ from Matplotlib's defaults.
+    # This is intentional and reflects SpectroChemPy's
+    # "scpy" visual identity.
+    #
+    # These defaults are applied ONLY when the scpy style
+    # is selected, not at import time.
+
+    # ---------
+    # 1. LINES
+    # ---------
     # See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
     # information on line properties.
     #
@@ -180,8 +257,10 @@ class PlotPreferences(MetaConfigurable):
         default_value="full",
         help=r"""full|left|right|bottom|top|none""",
     ).tag(config=True, kind="")
-    #
-    # PATCHES
+
+    # ----------
+    # 2. PATCHES
+    # ----------
     # Patches are graphical objects that fill 2D space, like polygons or
     # circles.  See
     # http://matplotlib.org/api/artist_api.html#module-matplotlib.patches
@@ -206,9 +285,10 @@ class PlotPreferences(MetaConfigurable):
     ).tag(config=True, kind="")
     hatch_color = Unicode("black", help=r"""""").tag(config=True, kind="color")
     hatch_linewidth = Float(1.0, help=r"""""").tag(config=True, kind="")
-    #
-    # FONT
-    #
+
+    # --------
+    # 3. FONTS
+    # --------
     # font properties used by text.Text.  See
     # http://matplotlib.org/api/font_manager_api.html for more
     # information on font properties.  The 6 font properties used for font
@@ -242,7 +322,7 @@ class PlotPreferences(MetaConfigurable):
     #
     # The font.size property is the default font size for text, given in pts.
     # 12pt is the standard value.
-    #
+
     font_family = Enum(
         ["sans-serif", "serif", "cursive", "monospace", "fantasy"],
         default_value="sans-serif",
@@ -290,7 +370,9 @@ class PlotPreferences(MetaConfigurable):
                       larger, or smaller""",
     ).tag(config=True, kind="")
 
-    # TEXT
+    # --------
+    # 4. TEXT
+    # --------
     # text properties used by text.Text.  See
     # http://matplotlib.org/api/artist_api.html#module-matplotlib.text for more
     # information on text properties
@@ -379,12 +461,15 @@ class PlotPreferences(MetaConfigurable):
         help=r"""The default font to use for math. Can be any of the LaTeX font
     names, including the special name "regular" for the same font used in regular text.""",
     ).tag(config=True, kind="")
-    #
-    # AXES
+
+    # -------
+    # 5. AXES
+    # -------
+    # Axes are the area on which data is plotted, including
     # default face and edge color, default tick sizes,
     # default fontsizes for ticklabels, and so on.  See
     # http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
-    #
+
     axes_facecolor = Unicode("F0F0F0", help=r"""axes background color""").tag(
         config=True,
         kind="color",
@@ -492,9 +577,9 @@ class PlotPreferences(MetaConfigurable):
         config=True,
         kind="",
     )
-    #
-    # DATE
-    #
+    # -------
+    # 6. DATE
+    # -------
     timezone = Unicode(
         "UTC",
         help=r"""a IANA timezone string, e.g., US/Central or Europe/Paris""",
@@ -506,8 +591,10 @@ class PlotPreferences(MetaConfigurable):
     date_autoformatter_minute = Unicode("%H:%M:%S.%f").tag(config=True, kind="")
     date_autoformatter_second = Unicode("%H:%M:%S.%f").tag(config=True, kind="")
     date_autoformatter_microsecond = Unicode("%H:%M:%S.%f").tag(config=True, kind="")
-    #
-    # TICKS
+
+    # -------
+    # 7 TICKS
+    # -------
     # see http://matplotlib.org/api/axis_api.html#matplotlib.axis.Tick
     #
     xtick_top = Bool(False, help=r"""draw ticks on the top side""").tag(
@@ -633,7 +720,9 @@ class PlotPreferences(MetaConfigurable):
         kind="",
     )
     #
-    # GRIDS
+    # --------
+    # 8. GRIDS
+    # --------
     #
     grid_color = Unicode(".85", help=r"""grid color""").tag(config=True, kind="color")
     grid_linestyle = Enum(
@@ -651,9 +740,11 @@ class PlotPreferences(MetaConfigurable):
         False,
         help=r"""if True, draw the legend on a background patch""",
     ).tag(config=True, kind="")
-    #
-    # LEGEND
-    #
+
+    # ---------
+    # 9. LEGEND
+    # ----------
+
     legend_framealpha = Union(
         (Float(0.8), Unicode("None")),
         help=r"""legend patch transparency""",
@@ -741,8 +832,10 @@ class PlotPreferences(MetaConfigurable):
         help=r"""When True, automatically adjust subplot parameters to make the plot fit the
                              figure""",
     ).tag(config=True, kind="")
-    #
-    # FIGURE
+
+    # ----------
+    # 10. FIGURE
+    # ----------
     # See http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
     #
     figure_max_open_warning = Integer(
@@ -811,9 +904,11 @@ class PlotPreferences(MetaConfigurable):
      saving a figure as a vector graphics file,
      such as a PDF.""",
     ).tag(config=True, kind="")
-    #
-    # CONTOUR PLOTS
-    #
+
+    # -----------------
+    # 11. CONTOUR PLOTS
+    # -----------------
+
     contour_negative_linestyle = Enum(
         ["dashed", "solid"],
         default_value="dashed",
@@ -824,9 +919,10 @@ class PlotPreferences(MetaConfigurable):
         default_value=True,
         help=r"""True | False | legacy""",
     ).tag(config=True, kind="")
-    #
-    # ERRORBAR
-    #
+
+    # ------------
+    # 12. ERRORBAR
+    # -------------
     errorbar_capsize = Float(
         1.0,
         help=r"""length of end cap on error bars in pixels""",
@@ -840,9 +936,10 @@ class PlotPreferences(MetaConfigurable):
      If Numpy 1.11 or later is
      installed, may also be `auto`""",
     ).tag(config=True, kind="", default="auto")
-    #
-    # SCATTER
-    #
+
+    # -----------
+    # 13. SCATTER
+    # -----------
     scatter_marker = Enum(
         list(Line2D.markers.keys()),
         default_value="o",
@@ -893,9 +990,10 @@ class PlotPreferences(MetaConfigurable):
         help=r"""setting that controls whether figures are saved with a transparent
                                background by default""",
     ).tag(config=True, kind="")
-    #
-    # Agg rendering
-    #
+
+    # -----------------
+    # 13. Agg rendering
+    # -----------------
     agg_path_chunksize = Integer(
         20000,
         help=r"""0 to disable; values in the range 10000 to 100000 can improve speed
@@ -931,29 +1029,48 @@ class PlotPreferences(MetaConfigurable):
     # ==================================================================================
     # NON MATPLOTLIB OPTIONS
     # ==================================================================================
+    #
+    # The options below do NOT map to matplotlib.rcParams.
+    #
+    # They control:
+    # - which plotting backend to use (matplotlib vs plotly)
+    # - which plotting *method* to use for datasets (pen, image, stack, etc.)
+    # - SpectroChemPy-specific plot behaviors
+    #
+    # These values are consumed by SpectroChemPy plotters,
+    # not by Matplotlib itself.
+
     style = Union(
         (Unicode(), List(), Tuple()),
         help="Basic matplotlib style to use",
     ).tag(config=True, default_="scpy")
+
     stylesheets = Unicode(
         help="Directory where to look for local defined matplotlib styles when they are not in the "
         " standard location",
     ).tag(config=True, type="folder")
+
     use_plotly = Bool(
         False,
         help="Use Plotly instead of MatPlotLib for plotting (mode Matplotlib more suitable for "
         "printing publication ready figures)",
     ).tag(config=True)
+
     method_1D = Enum(  # noqa: N815
         ["pen", "scatter", "scatter+pen", "bar"],
         default_value="pen",
         help="Default plot methods for 1D datasets",
+        # NOTE:
+        # "pen" is a SpectroChemPy concept, NOT a Matplotlib concept.
+        # It must NEVER be passed through eval() or treated as Python code.
     ).tag(config=True)
+
     method_2D = Enum(  # noqa: N815
         ["map", "image", "stack", "surface", "3D"],
         default_value="stack",
         help="Default plot methods for 2D datasets",
     ).tag(config=True)
+
     method_3D = Enum(  # noqa: N815
         ["surface"],
         default_value="surface",
@@ -974,6 +1091,8 @@ class PlotPreferences(MetaConfigurable):
 
     @validate("colormap")
     def _validate_colormap(self, proposal):
+        # Validate and normalize colormap names early.
+        # This avoids hard-to-debug errors deep inside Matplotlib.
         return _canonical_cmap_name(proposal["value"])
 
     max_lines_in_stack = Integer(
@@ -1015,6 +1134,15 @@ class PlotPreferences(MetaConfigurable):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # Build internal maps of rcParams structure:
+        # - groups:     e.g. "axes", "lines", "font"
+        # - subgroups:  rarely used second-level keys
+        # - members:    terminal rcParams names
+
+        # This allows automatic mapping:
+        #   lines_linewidth → lines.linewidth
+
         for key in plt.rcParams:
             lis = key.split(".")
             if len(lis) > 1:
@@ -1042,6 +1170,14 @@ class PlotPreferences(MetaConfigurable):
         return self._subgroups
 
     def set_latex_font(self, family=None):
+        # WARNING:
+        # This method mutates rcParams directly.
+        # It exists for historical reasons and LaTeX compatibility.
+        #
+        # Any refactor should aim to:
+        # - move this logic into trait observers
+        # - reduce direct rcParams writes
+
         def update_rcParams():
             mpl.rcParams["text.usetex"] = self.text_usetex
             mpl.rcParams["mathtext.fontset"] = self.mathtext_fontset
@@ -1099,6 +1235,9 @@ class PlotPreferences(MetaConfigurable):
 
     @observe("simplify")
     def _simplify_changed(self, change):
+        # This observer updates rcParams immediately.
+        # It bypasses the generic _anytrait_changed logic
+        # because path.simplify has special semantics.
         plt.rcParams["path.simplify"] = change.new
         plt.rcParams["path.simplify_threshold"] = 1.0
 
@@ -1114,6 +1253,16 @@ class PlotPreferences(MetaConfigurable):
 
     @observe("style")
     def _style_changed(self, change):
+        """
+        Apply one or more matplotlib styles.
+
+        The style trait may be:
+        - a single string
+        - a list / tuple of styles (applied in order)
+
+        Each style is processed by _apply_style(),
+        which parses mplstyle files and sets trait values.
+        """
         changes = change.new
         if not isinstance(changes, list):
             changes = [changes]
@@ -1173,7 +1322,15 @@ class PlotPreferences(MetaConfigurable):
         - Non-strings are returned unchanged
         - Strings are parsed ONCE
         - No eval on bare identifiers (e.g. 'pen')
+        - Comma-separated numbers → tuple
         """
+        # SECURITY NOTE:
+        # ---------------
+        # eval() is used ONLY for tuple/list literals coming from trusted
+        # mplstyle files shipped with SpectroChemPy or Matplotlib.
+        #
+        # Bare identifiers (e.g. "pen") MUST NEVER be eval'ed.
+
         if not isinstance(value, str):
             return value
 
@@ -1187,7 +1344,23 @@ class PlotPreferences(MetaConfigurable):
         if low in ("none", "null"):
             return None
 
-        # numbers
+        # tuple or list literal
+        if (raw.startswith("(") and raw.endswith(")")) or (
+            raw.startswith("[") and raw.endswith("]")
+        ):
+            return eval(raw)  # noqa: S307 — controlled mplstyle input
+
+        # Comma-separated values (mplstyle tuple syntax)
+        if "," in raw:
+            parts = [p.strip() for p in raw.split(",")]
+            try:
+                nums = [float(p) if "." in p else int(p) for p in parts]
+                return tuple(nums)
+            except ValueError:
+                # Not numeric → keep as string
+                return raw
+
+        # Single number
         try:
             if "." in raw:
                 return float(raw)
@@ -1195,20 +1368,23 @@ class PlotPreferences(MetaConfigurable):
         except ValueError:
             pass
 
-        # tuple or list literal
-        if (raw.startswith("(") and raw.endswith(")")) or (
-            raw.startswith("[") and raw.endswith("]")
-        ):
-            return eval(raw)  # noqa: S307 — controlled mplstyle input
-
-        # everything else stays a string (e.g. 'pen', 'viridis')
+        # Everything else stays a string (e.g. 'pen', 'viridis')
         return raw
 
     # IMPORTANT:
     # _apply_style must handle logical styles (e.g. "default")
     # BEFORE any filesystem access. Matplotlib does not ship
-    # a default.mplstyle file.
+    # a default.mplstyle file. # Attempting to load it from disk will fail
     def _apply_style(self, _style):
+        """
+        Apply a single style to PlotPreferences.
+
+        This method:
+        - handles logical styles like "default"
+        - resolves .mplstyle files
+        - parses them safely
+        - updates traitlets (NOT rcParams directly)
+        """
         import matplotlib.pyplot as plt
 
         from spectrochempy.utils.file import pathclean
@@ -1251,6 +1427,9 @@ class PlotPreferences(MetaConfigurable):
         pars = txt.split("\n")
 
         for line in pars:
+            # mplstyle files are line-based key:value pairs.
+            # Comments start with '#'.
+            # Values are strings and must be converted
             if line.strip() and not line.strip().startswith("#"):
                 name, value = line.split(":", maxsplit=1)
 
@@ -1269,6 +1448,8 @@ class PlotPreferences(MetaConfigurable):
                 value = self._coerce_style_value(name, value)
 
                 try:
+                    # Convert rcParams key (axes.facecolor)
+                    # → trait name (axes_facecolor)
                     setattr(self, name.replace(".", "_"), value)
                 except Exception as e:
                     raise e
@@ -1282,6 +1463,13 @@ class PlotPreferences(MetaConfigurable):
                 setattr(self, name, value)
 
     def to_rc_key(self, key):
+        """
+        Convert a trait name back to a matplotlib rcParams key.
+
+        Example:
+        -------
+                axes_facecolor → axes.facecolor
+        """
         rckey = ""
         lis = key.split("_")
         if len(lis) > 1 and lis[0] in self.groups:
@@ -1295,6 +1483,15 @@ class PlotPreferences(MetaConfigurable):
 
     @observe(All)
     def _anytrait_changed(self, change):
+        """
+        Synchronize trait changes → matplotlib.rcParams.
+
+        This is the ONLY generic place where rcParams are updated.
+        """
+        # WARNING:
+        # If you add direct rcParams writes elsewhere,
+        # you risk breaking rcParams restoration and tests.
+
         # ex: change {
         #   'owner': object, # The HasTraits instance
         #   'new': 6, # The new value
@@ -1323,3 +1520,16 @@ class PlotPreferences(MetaConfigurable):
                     change.new,
                 )  # @observe('use_latex')  # def _use_latex_changed(self, change):  #     mpl.rc(  # 'text', usetex=change.new)  #  # @observe('latex_preamble')  # def _set_latex_preamble(self,  # change):  #     mpl.rcParams[  #    #  #  #  'text.latex.preamble'] = change.new.split('\n')
         super()._anytrait_changed(change)
+
+
+# =============================================================================
+# Summary for contributors
+# =============================================================================
+#
+# - PlotPreferences is the authoritative source of plotting state
+# - Matplotlib rcParams are derived, not authoritative
+# - Styles are parsed, not blindly applied
+# - Traitlets provide validation, observation, and reversibility
+#
+# This file is complex because it protects users from subtle,
+# global plotting side effects.
