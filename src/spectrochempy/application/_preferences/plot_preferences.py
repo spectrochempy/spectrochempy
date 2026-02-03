@@ -1227,6 +1227,27 @@ class PlotPreferences(MetaConfigurable):
                 elif value.lower() == "false":
                     value = False
 
+                trait = self.traits().get(name_)
+
+                if trait is not None:
+                    # Float
+                    if isinstance(trait, Float) and isinstance(value, str):
+                        value = float(value)
+
+                    # Integer
+                    elif isinstance(trait, Integer) and isinstance(value, str):
+                        value = int(float(value))  # mpl styles sometimes use "2.0"
+
+                    # Bool
+                    elif isinstance(trait, Bool) and isinstance(value, str):
+                        value = value.lower() in ("true", "1", "yes")
+
+                    # Tuple
+                    elif isinstance(trait, Tuple) and isinstance(value, str):
+                        value = tuple(float(v) for v in value.split(","))
+
+                    # Enum / Unicode stay strings
+
                 setattr(self, name_, value)
 
             elif line.strip().startswith("##@"):
