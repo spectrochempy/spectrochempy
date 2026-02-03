@@ -465,10 +465,9 @@ class PlotPreferences(MetaConfigurable):
     # -------
     # 5. AXES
     # -------
-    # Axes are the area on which data is plotted, including
-    # default face and edge color, default tick sizes,
-    # default fontsizes for ticklabels, and so on.  See
-    # http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
+    # Axes are the area on which data is plotted, including default face and edge color, default tick sizes,
+    # default fontsizes for ticklabels, and so on.
+    # See http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
 
     axes_facecolor = Unicode("F0F0F0", help=r"""axes background color""").tag(
         config=True,
@@ -1315,23 +1314,9 @@ class PlotPreferences(MetaConfigurable):
         return f"{color}"
 
     def _coerce_style_value(self, name, value):
-        """
-        Convert mplstyle values to proper Python types.
+        """Convert mplstyle values to proper Python types, based on the *target trait type*."""
 
-        Rules:
-        - Non-strings are returned unchanged
-        - Strings are parsed ONCE
-        - No eval on bare identifiers (e.g. 'pen')
-        - Comma-separated numbers → tuple
-        - Never coerce numerics for Unicode traits
-        """
-        # SECURITY NOTE:
-        # ---------------
-        # eval() is used ONLY for tuple/list literals coming from trusted
-        # mplstyle files shipped with SpectroChemPy or Matplotlib.
-        #
-        # Bare identifiers (e.g. "pen") MUST NEVER be eval'ed.
-
+        # Already parsed
         if not isinstance(value, str):
             return value
 
@@ -1339,7 +1324,7 @@ class PlotPreferences(MetaConfigurable):
         low = raw.lower()
 
         # --------------------------------------------------
-        # Boolean or None literals
+        # Booleans / None
         # --------------------------------------------------
         if low == "true":
             return True
@@ -1349,25 +1334,29 @@ class PlotPreferences(MetaConfigurable):
             return None
 
         # --------------------------------------------------
-        # Trait-aware conversion
+        # Trait-aware coercion
         # --------------------------------------------------
         trait_name = name.replace(".", "_")
         trait = self.traits().get(trait_name)
 
-        # If the target trait is Unicode → KEEP STRING
+        # --------------------------------------------------
+        # Unicode trait → always keep string
+        # --------------------------------------------------
         if trait is not None and isinstance(trait, Unicode):
             return raw
 
         # --------------------------------------------------
-        # tuple or list literal
+        # Tuple trait → parse comma-separated values
         # --------------------------------------------------
-        if (raw.startswith("(") and raw.endswith(")")) or (
-            raw.startswith("[") and raw.endswith("]")
-        ):
-            return eval(raw)  # noqa: S307 — controlled mplstyle input
+        if trait is not None and isinstance(trait, Tuple):
+            try:
+                parts = [float(p.strip()) for p in raw.split(",")]
+                return tuple(parts)
+            except Exception:
+                return raw  # let traitlets raise clean error
 
         # --------------------------------------------------
-        # Numbers (only if trait allows it)
+        # Numbers
         # --------------------------------------------------
         try:
             if "." in raw:
@@ -1377,15 +1366,15 @@ class PlotPreferences(MetaConfigurable):
             pass
 
         # --------------------------------------------------
-        # Tuple / list literals
+        # Explicit tuple/list syntax
         # --------------------------------------------------
         if (raw.startswith("(") and raw.endswith(")")) or (
             raw.startswith("[") and raw.endswith("]")
         ):
-            return eval(raw)  # noqa: S307 — controlled mplstyle input
+            return eval(raw)  # noqa: S307 (controlled mplstyle input)
 
         # --------------------------------------------------
-        # Everything else stays a string (e.g. 'pen', 'viridis')
+        # Fallback --> return raw string
         # --------------------------------------------------
         return raw
 
