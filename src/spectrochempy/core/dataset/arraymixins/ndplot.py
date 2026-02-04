@@ -283,7 +283,6 @@ class NDPlot(tr.HasTraits):
                 self._fig.canvas.manager = None  # optional; often unnecessary
         except Exception:
             debug_("Could not import the figure before closing.")
-            pass
 
     def _figure_setup(self, ndim=1, method=None, **kwargs):
         ensure_mpl_setup()

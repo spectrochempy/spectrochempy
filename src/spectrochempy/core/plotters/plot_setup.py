@@ -39,7 +39,8 @@ import matplotlib as mpl
 # This snapshot is taken ONCE, lazily, just before SpectroChemPy modifies
 # matplotlib global state.
 # -----------------------------------------------------------------------------
-_USER_RCPARAMS = copy.deepcopy(mpl.rcParams)
+
+_USER_RCPARAMS = None
 
 
 def _snapshot_user_rcparams() -> None:

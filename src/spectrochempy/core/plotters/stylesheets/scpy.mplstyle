@@ -6,7 +6,8 @@
 # -----------------------------------------------------------------------------
 # General behavior
 # -----------------------------------------------------------------------------
-style: default
+# Matplotlib defaults are applied programmatically by SpectroChemPy.
+# This stylesheet only refines a few parameters to improve aesthetics.
 
 # -----------------------------------------------------------------------------
 # Lines (slightly cleaner than mpl default)

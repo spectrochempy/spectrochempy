@@ -24,8 +24,6 @@ def test_scpy_style_application_changes_rcparams_when_forced():
     ), "Forcing SpectroChemPy style did not modify matplotlib rcParams"
 
 
-import pytest
-
 from spectrochempy.core.plotters.plot_setup import _USER_RCPARAMS
 
 

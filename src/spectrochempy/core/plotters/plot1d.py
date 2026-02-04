@@ -18,6 +18,7 @@ __dataset_methods__ = __all__
 
 import numpy as np
 
+from spectrochempy.application.application import warning_
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.arraymixins.ndplot import (
     NDPlot,  # noqa: F401 # for the docstring to be determined it necessary to import NDPlot
@@ -247,7 +248,16 @@ def plot_1D(dataset, method=None, **kwargs):
             width=kwargs.get("width", 0.1),
         )  # barwidth = line[0].get_width()
     else:
-        # Default line plot
+        # NOTE:
+        # We intentionally allow a silent fallback to a line plot for robustness.
+        # A warning is emitted to avoid masking configuration errors.
+        warning_(
+            "No explicit plot method matched (pen/scatter/bar). "
+            "Falling back to a default line plot. "
+            "This behavior is allowed but may indicate a missing or misspelled "
+            "`method` argument."
+        )
+
         (line,) = ax.plot(
             xdata,
             zdata.T,

@@ -1292,9 +1292,8 @@ class PlotPreferences(MetaConfigurable):
         from matplotlib.figure import Figure
 
         if fontsize == "None":
-            return float(matplotlib.rcParams["font.size"])
+            return str(matplotlib.rcParams["font.size"])
 
-        # Create a backend-safe, non-pyplot figure
         fig = Figure()
         FigureCanvasAgg(fig)
         ax = fig.add_subplot(111)
@@ -1304,6 +1303,12 @@ class PlotPreferences(MetaConfigurable):
         with suppress(Exception):
             t.set_fontsize(fontsize)
             return str(round(t.get_fontsize(), 2))
+
+        # 🔒 Fallback: ALWAYS return a non-None value
+        try:
+            return str(round(float(fontsize), 2))
+        except (TypeError, ValueError):
+            return str(fontsize)
 
     @staticmethod
     def _get_color(color):
@@ -1548,34 +1553,45 @@ class PlotPreferences(MetaConfigurable):
         txt = f.read_text()
         pars = txt.split("\n")
 
-        for line in pars:
+        for lineno, line in enumerate(pars, start=1):
             # mplstyle files are line-based key:value pairs.
             # Comments start with '#'.
             # Values are strings and must be converted
-            if line.strip() and not line.strip().startswith("#"):
-                name, value = line.split(":", maxsplit=1)
 
-                name = name.strip()
-                value = value.split(" # ")[0].strip()
+            stripped = line.strip()
 
-                # Font size handling
-                if "size" in name and "figsize" not in name and "papersize" not in name:
-                    value = self._get_fontsize(value)
+            if not stripped or stripped.startswith("#"):
+                continue
 
-                # Color normalization
-                elif name.endswith("color") and "force_" not in name:
-                    value = self._get_color(value)
+            if ":" not in line:
+                raise ValueError(
+                    f"Invalid mplstyle syntax in '{f}', line {lineno}:\n"
+                    f"  {line}\n"
+                    "Expected format: key: value"
+                )
 
-                # 🔑 SINGLE coercion point
-                trait_name = name.replace(".", "_")
+            name, value = line.split(":", maxsplit=1)
 
-                raw_value = value  # keep original string BEFORE parsing
-                parsed = self._coerce_style_value(name, raw_value)
+            name = name.strip()
+            value = value.split(" # ")[0].strip()
 
-                trait = self.traits().get(trait_name)
-                coerced = self._coerce_for_trait(trait, raw_value, parsed)
+            # Font size handling
+            if "size" in name and "figsize" not in name and "papersize" not in name:
+                value = self._get_fontsize(value)
 
-                setattr(self, trait_name, coerced)
+            # Color normalization
+            elif name.endswith("color") and "force_" not in name:
+                value = self._get_color(value)
+
+            trait_name = name.replace(".", "_")
+
+            raw_value = value
+            parsed = self._coerce_style_value(name, raw_value)
+
+            trait = self.traits().get(trait_name)
+            coerced = self._coerce_for_trait(trait, raw_value, parsed)
+
+            setattr(self, trait_name, coerced)
 
             # SpectroChemPy-only parameters
             if line.strip().startswith("##@"):
