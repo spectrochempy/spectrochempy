@@ -25,6 +25,7 @@ def test_scpy_style_application_changes_rcparams_when_forced():
 
 
 import spectrochempy.core.plotters.plot_setup as plot_setup
+from spectrochempy.application._preferences.plot_preferences import PlotPreferences
 
 
 @pytest.mark.mpl
@@ -50,7 +51,7 @@ def test_rcparams_restore_restores_import_time_state():
     reference = {k: plot_setup._USER_RCPARAMS[k] for k in keys_to_check}
 
     # Force SpectroChemPy style
-    scp.preferences.PlotPreferences.style = "scpy"
+    PlotPreferences.style = "scpy"
 
     # Restore
     scp.restore_rcparams()
