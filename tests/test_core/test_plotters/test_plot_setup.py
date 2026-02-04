@@ -24,8 +24,7 @@ def test_scpy_style_application_changes_rcparams_when_forced():
     ), "Forcing SpectroChemPy style did not modify matplotlib rcParams"
 
 
-from spectrochempy.core.plotters.plot_setup import _USER_RCPARAMS
-from spectrochempy.core.plotters.plot_setup import _snapshot_user_rcparams
+import spectrochempy.core.plotters.plot_setup as plot_setup
 
 
 @pytest.mark.mpl
@@ -35,11 +34,10 @@ def test_rcparams_restore_restores_import_time_state():
     to the state captured BEFORE SpectroChemPy modifies them.
     """
 
-    # Start from a known matplotlib baseline
     mpl.rcdefaults()
 
-    # 🔑 Explicitly trigger the lazy snapshot
-    _snapshot_user_rcparams()
+    # Explicitly trigger the lazy snapshot
+    plot_setup._snapshot_user_rcparams()
 
     keys_to_check = [
         "axes.facecolor",
@@ -49,7 +47,7 @@ def test_rcparams_restore_restores_import_time_state():
         "font.size",
     ]
 
-    reference = {k: _USER_RCPARAMS[k] for k in keys_to_check}
+    reference = {k: plot_setup._USER_RCPARAMS[k] for k in keys_to_check}
 
     # Force SpectroChemPy style
     scp.preferences.plot_preferences.style = "scpy"
