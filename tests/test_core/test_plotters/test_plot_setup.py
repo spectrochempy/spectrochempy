@@ -50,7 +50,7 @@ def test_rcparams_restore_restores_import_time_state():
     reference = {k: plot_setup._USER_RCPARAMS[k] for k in keys_to_check}
 
     # Force SpectroChemPy style
-    scp.preferences.plot_preferences.style = "scpy"
+    scp.preferences.PlotPreferences.style = "scpy"
 
     # Restore
     scp.restore_rcparams()
