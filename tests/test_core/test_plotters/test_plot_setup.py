@@ -25,14 +25,21 @@ def test_scpy_style_application_changes_rcparams_when_forced():
 
 
 from spectrochempy.core.plotters.plot_setup import _USER_RCPARAMS
+from spectrochempy.core.plotters.plot_setup import _snapshot_user_rcparams
 
 
 @pytest.mark.mpl
 def test_rcparams_restore_restores_import_time_state():
     """
     scp.restore_rcparams() must restore matplotlib rcParams
-    to the state captured at SpectroChemPy import time.
+    to the state captured BEFORE SpectroChemPy modifies them.
     """
+
+    # Start from a known matplotlib baseline
+    mpl.rcdefaults()
+
+    # 🔑 Explicitly trigger the lazy snapshot
+    _snapshot_user_rcparams()
 
     keys_to_check = [
         "axes.facecolor",
@@ -44,13 +51,11 @@ def test_rcparams_restore_restores_import_time_state():
 
     reference = {k: _USER_RCPARAMS[k] for k in keys_to_check}
 
-    # Trigger plotting
-    X = scp.random((10, 10))
-    X.plot()
+    # Force SpectroChemPy style
+    scp.preferences.plot_preferences.style = "scpy"
 
     # Restore
     scp.restore_rcparams()
 
-    restored = {k: mpl.rcParams[k] for k in keys_to_check}
-
-    assert restored == reference
+    for k, v in reference.items():
+        assert mpl.rcParams[k] == v

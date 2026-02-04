@@ -47,25 +47,11 @@ def _snapshot_user_rcparams() -> None:
     """
     Snapshot the current matplotlib rcParams exactly once.
 
-    This function must be called immediately BEFORE SpectroChemPy applies
-    any matplotlib style or modifies rcParams.
-
-    Why lazy?
-    ---------
-    - Matplotlib rcParams may already be modified at import time by:
-        * the environment (Jupyter, pytest-mpl, IDEs)
-        * user code
-        * other libraries
-
-    - Capturing rcParams at import time would freeze an *unknown* state
-
-    - Capturing them just-in-time ensures we restore exactly what the user
-      was seeing before the first SpectroChemPy plot.
+    Must be called immediately BEFORE SpectroChemPy modifies rcParams.
     """
     global _USER_RCPARAMS
 
     if _USER_RCPARAMS is None:
-        # Deepcopy is required: rcParams values contain mutable objects
         _USER_RCPARAMS = copy.deepcopy(mpl.rcParams)
 
 
@@ -146,8 +132,12 @@ def restore_rcparams() -> None:
     - This is intentional and unavoidable due to matplotlib global state
     """
 
+    if _USER_RCPARAMS is None:
+        # Nothing to restore → no-op
+        return
+
     mpl.rcParams.clear()
-    mpl.rcParams.update(_USER_RCPARAMS)
+    mpl.rcParams.update(copy.deepcopy(_USER_RCPARAMS))
 
 
 def get_import_time_rcparams():
