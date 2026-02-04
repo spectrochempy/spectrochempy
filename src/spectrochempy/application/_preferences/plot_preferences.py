@@ -1375,22 +1375,11 @@ class PlotPreferences(MetaConfigurable):
 
         # ---- Union(Int, Unicode)
         if isinstance(trait, TraitUnion):
-            # If an int is allowed, prefer it
-            for t in trait.trait_types:
-                if isinstance(t, Integer) and num.is_integer():
-                    return int(num)
-            # Otherwise fall back to string
             return raw
 
         # ---- Float trait
         if isinstance(trait, Float):
             return num
-
-        # --------------------------------------------------
-        # Unicode trait → always string
-        # --------------------------------------------------
-        if isinstance(trait, Unicode):
-            return raw
 
         # --------------------------------------------------
         # Fallback
@@ -1399,25 +1388,87 @@ class PlotPreferences(MetaConfigurable):
 
     def _coerce_for_trait(self, trait, raw, parsed):
         """
-        Cast a parsed value to match a given trait.
+        Perform final coercion of style values for traitlets.
 
-        raw    = original string (e.g. "20000.0", "5.5, 3.5")
-        parsed = output of _coerce_style_value (e.g. 20000.0)
+        This method exists to resolve the mismatch between:
+        - how values are written in .mplstyle files (always strings)
+        - how traitlets expect values (typed and validated)
+
+        Design principles
+        -----------------
+        - `_coerce_style_value()` performs *semantic parsing*
+          (numbers, booleans, tuples, "None", etc.)
+        - `_coerce_for_trait()` performs *trait normalization*
+
+        This separation is intentional and avoids:
+        - double parsing
+        - fragile isinstance chains
+        - silent traitlets failures
+
+        Parameters
+        ----------
+        trait : TraitType or None
+            The target trait instance (e.g. Integer(), Unicode(), Tuple()).
+            May be None if the style key does not map to a trait.
+        raw : str
+            Original string from the mplstyle file (unmodified).
+        parsed : Any
+            Output of `_coerce_style_value()`.
+
+        Returns
+        -------
+        Any
+            Value coerced to best match the target trait.
+            Final validation is delegated to traitlets.
         """
-        # Unicode: always keep the original raw string
+
+        # --------------------------------------------------
+        # Unicode traits
+        # --------------------------------------------------
+        # Intent:
+        # Matplotlib rcParams frequently use sentinel *strings*
+        # such as "None", "auto", "inherit", etc.
+        #
+        # Even if `_coerce_style_value()` parsed something numeric,
+        # Unicode traits must *always* receive the original string.
+        #
+        # This guarantees:
+        # - faithful round-tripping of mplstyle files
+        # - compatibility with Matplotlib's string-based semantics
         if trait is not None and isinstance(trait, Unicode):
             return raw.strip()
 
-        # Integer: accept floats that are really integers
+        # --------------------------------------------------
+        # Integer traits
+        # --------------------------------------------------
+        # Intent:
+        # mplstyle files often contain floats for integer-valued rcParams
+        # (e.g. "20000.0").
+        #
+        # If the parsed value is a float that represents an integer,
+        # promote it to int explicitly.
+        #
+        # Otherwise, let traitlets raise a clean validation error.
         if trait is not None and isinstance(trait, Integer):
             if isinstance(parsed, float) and parsed.is_integer():
                 return int(parsed)
             if isinstance(parsed, int):
                 return parsed
-            # if it's something else, let traitlets raise
-            return parsed
+            return parsed  # let traitlets complain
 
-        # Tuple: accept "5.5, 3.5" (common in mplstyle files)
+        # --------------------------------------------------
+        # Tuple traits
+        # --------------------------------------------------
+        # Intent:
+        # mplstyle syntax commonly encodes tuples as:
+        #   "5.5, 3.5"
+        # or
+        #   "(5.5, 3.5)"
+        #
+        # This block normalizes both forms into a real Python tuple.
+        #
+        # If parsing fails, return the parsed value and let traitlets
+        # produce an informative error.
         if trait is not None and isinstance(trait, Tuple):
             s = raw.strip()
 
@@ -1431,6 +1482,14 @@ class PlotPreferences(MetaConfigurable):
             except Exception:
                 return parsed  # let traitlets raise cleanly
 
+        # --------------------------------------------------
+        # Default fallback
+        # --------------------------------------------------
+        # Intent:
+        # For all other trait types (Float, Bool, Enum, TraitUnion, etc.),
+        # return the parsed value and let traitlets handle validation.
+        #
+        # This keeps coercion logic centralized and predictable.
         return parsed
 
     def _apply_style(self, _style):
