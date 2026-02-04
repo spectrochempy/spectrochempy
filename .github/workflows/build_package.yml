@@ -64,7 +64,7 @@ jobs:
       # Step 5: Upload PyPI build artifacts
       - name: Upload PyPI build artifacts
         if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: pypi-package
           path: |
@@ -134,7 +134,7 @@ jobs:
       # Step 5: Upload build artifacts
       - name: Upload build artifacts
         if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: conda-package
           path: |
