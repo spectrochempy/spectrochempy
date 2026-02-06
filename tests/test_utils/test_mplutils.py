@@ -31,28 +31,21 @@ class TestMplutils:
         assert fig.get_dpi() == 100
         plt.close(fig)
 
-    @patch("spectrochempy.NO_DISPLAY", False)  # Ensure NO_DISPLAY is False
-    @patch("spectrochempy.utils.mplutils.get_figure")
+    @patch("spectrochempy.NO_DISPLAY", False)
+    @patch("matplotlib.pyplot.get_fignums", return_value=[1])
     @patch("matplotlib.pyplot.show")
-    def test_show(self, mock_show, mock_get_figure):
-        """Test the show function behavior."""
-        # Setup the mock to return a truthy value
-        mock_fig = MagicMock()
-        mock_get_figure.return_value = (
-            mock_fig  # This needs to be truthy for the condition
-        )
-
-        # Test show function
+    def test_show_displays_figures(self, mock_show, mock_get_fignums):
         show()
-        mock_get_figure.assert_called_once_with(clear=False)
+
+        mock_get_fignums.assert_called_once()
         mock_show.assert_called_once_with(block=True)
 
     @patch("spectrochempy.NO_DISPLAY", True)
-    @patch("spectrochempy.utils.mplutils.plt.close")
-    def test_show_no_display(self, mock_close):
-        """Test the show function when NO_DISPLAY is True."""
+    @patch("matplotlib.pyplot.show")
+    def test_show_no_display(self, mock_show):
         show()
-        mock_close.assert_called_once_with("all")
+
+        mock_show.assert_not_called()
 
     def test_get_figure(self):
         """Test get_figure function."""

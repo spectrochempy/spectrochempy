@@ -160,6 +160,7 @@ ignore = [
   "D212", # Docstring should start on first line
   "D413", # Missing blank line after last section
   "D417", # Missing argument descriptions in the docstring
+  "UP038", # This rule has been removed from
 ]
 select = [
   "D", # pydocstyle

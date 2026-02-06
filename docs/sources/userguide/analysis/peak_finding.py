@@ -99,12 +99,14 @@ maximas.plot(marker="s", ls="--", color="blue")
 
 # %%
 ax = reg.plot()
+
 x = pos.max()
 y = maximas.max()
+
 ax.set_ylim(-0.01, 0.3)
 _ = ax.annotate(
     f"{x: ~0.2fP} {y: ~.3fP}",
-    xy=(2115.5, maximas.max()),
+    xy=(x.m, y.m),  # ← CRITICAL
     xytext=(30, -20),
     textcoords="offset points",
     bbox={"boxstyle": "round4,pad=.7", "fc": "0.9"},
@@ -162,12 +164,11 @@ for p in pks:
     x, y = p.x.values, p.values + 0.02
     _ = ax.annotate(
         f"{x.m: 0.0f}",
-        xy=(x, y),
+        xy=(x.m, y.m),
         xytext=(-5, 0),
         rotation=90,
         textcoords="offset points",
     )
-
 # %% [markdown]
 # Now we will do a peak-finding for the whole dataset:
 
@@ -403,7 +404,7 @@ wl, wr = properties["left_bases"][0], properties["right_bases"][0]
 
 # wavenumbers of left and right bases
 for w in (wl, wr):
-    ax.axvline(w, linestyle="--")  # add vertical line at the bases
+    ax.axvline(w.m, linestyle="--")  # add vertical line at the bases
     ax.plot(w, s[w].data, "v", color="red")
     # and a red mark  #TODO: add function to plot this easily
 
@@ -492,8 +493,8 @@ _ = peaks.plot_scatter(
 )
 _ = ax.axhline(height, linestyle="--", color="blue")
 _ = ax.axhline(width_height, linestyle="--", color="red")
-_ = ax.axvline(wl, linestyle="--", color="green")
-_ = ax.axvline(wr, linestyle="--", color="green")
+_ = ax.axvline(wl.m, linestyle="--", color="green")
+_ = ax.axvline(wr.m, linestyle="--", color="green")
 
 # %% [markdown]
 # As stressed above, we see here that the peak width is very approximate and probably
@@ -559,7 +560,7 @@ for i in range(len(peaks)):
     for w in (properties["left_bases"][i], properties["right_bases"][i]):
         ax.plot(w, s[0, w].data.T, "v", color="red")
     for w in (properties["left_ips"][i], properties["right_ips"][i]):
-        ax.axvline(w, linestyle="--", color="green")
+        ax.axvline(w.m, linestyle="--", color="green")
 
 # %% [markdown]
 # -- this is the end of this tutorial --

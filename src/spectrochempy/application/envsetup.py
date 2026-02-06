@@ -11,7 +11,6 @@ import matplotlib as mpl
 from traitlets import import_item
 
 from spectrochempy.application.jupyter import setup_jupyter_css
-from spectrochempy.data.setup import setup_mpl
 from spectrochempy.utils.system import get_ipython
 from spectrochempy.utils.system import is_notebook
 from spectrochempy.utils.system import is_terminal
@@ -78,10 +77,6 @@ def setup_environment():
         # Jupyter integration
         # -------------------
         setup_jupyter_css()
-
-    # Initialize matplotlib styles and fonts
-    # --------------------------------------
-    setup_mpl()
 
     SCPY_STARTUP_LOGLEVEL = environ.get("SCPY_STARTUP_LOGLEVEL", None)
 

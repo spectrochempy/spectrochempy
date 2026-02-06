@@ -69,6 +69,9 @@ from . import application
 # --------------------------------------------------------------------------------------
 application.start.set_warnings()
 
+# --------------------------------------------------------------------------------------
+# Plugin manager
+# --------------------------------------------------------------------------------------
 
 # --------------------------------------------------------------------------------------
 # Plugin manager
@@ -114,9 +117,15 @@ def __getattr__(name):
         ) from err
 
 
-# we don't use __all__ and __dir__ returned _lazy_loader.attach_stub
+# --------------------------------------------------------------------------------------
+# Public plotting helpers
+# --------------------------------------------------------------------------------------
+from spectrochempy.core.plotters.plot_setup import restore_rcparams
 
-__all__ = list(_LAZY_IMPORTS.keys())
+# we don't use __all__ and __dir__ returned _lazy_loader.attach_stub
+__all__ = list(_LAZY_IMPORTS.keys()) + [
+    "restore_rcparams",
+]
 
 
 def __dir__() -> list[str]:
