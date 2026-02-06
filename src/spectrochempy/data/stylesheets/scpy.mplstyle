@@ -1,0 +1,318 @@
+
+_internal.classic_mode                   : True
+
+agg.path.chunksize                       : 20000
+animation.bitrate                        : -1
+animation.codec                          : mpeg4
+animation.convert_args                   :
+animation.convert_path                   : convert
+animation.embed_limit                    : 20.0
+animation.ffmpeg_args                    :
+animation.ffmpeg_path                    : ffmpeg
+animation.frame_format                   : png
+animation.html                           : none
+animation.writer                         : ffmpeg
+axes.autolimit_mode                      : data
+axes.axisbelow                           : True
+axes.edgecolor                           : k
+axes.facecolor                           : F0F0F0
+axes.formatter.limits                    : -7, 7
+axes.formatter.min_exponent              : 0
+axes.formatter.offset_threshold          : 4
+axes.formatter.use_locale                : False
+axes.formatter.use_mathtext              : False
+axes.formatter.useoffset                 : False
+axes.grid                                : False
+axes.grid.axis                           : both
+axes.grid.which                          : major
+axes.labelcolor                          : k
+axes.labelpad                            : 5.0
+axes.labelsize                           : 10.0
+axes.labelweight                         : normal
+axes.linewidth                           : 1.0
+axes.prop_cycle                          : cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
+axes.spines.bottom                       : True
+axes.spines.left                         : True
+axes.spines.right                        : True
+axes.spines.top                          : True
+axes.titlecolor                          : auto
+axes.titlelocation                       : center
+axes.titlepad                            : 5.0
+axes.titlesize                           : 14.0
+axes.titleweight                         : normal
+axes.titley                              : 1.0
+axes.unicode_minus                       : True
+axes.xmargin                             : 0.0
+axes.ymargin                             : 0.0
+axes3d.grid                              : True
+
+boxplot.bootstrap                        : None
+boxplot.boxprops.color                   : b
+boxplot.boxprops.linestyle               : -
+boxplot.boxprops.linewidth               : 1.0
+boxplot.capprops.color                   : k
+boxplot.capprops.linestyle               : -
+boxplot.capprops.linewidth               : 1.0
+boxplot.flierprops.color                 : b
+boxplot.flierprops.linestyle             : none
+boxplot.flierprops.linewidth             : 1.0
+boxplot.flierprops.marker                : +
+boxplot.flierprops.markeredgecolor       : k
+boxplot.flierprops.markeredgewidth       : 1.0
+boxplot.flierprops.markerfacecolor       : auto
+boxplot.flierprops.markersize            : 6.0
+boxplot.meanline                         : False
+boxplot.meanprops.color                  : r
+boxplot.meanprops.linestyle              : -
+boxplot.meanprops.linewidth              : 1.0
+boxplot.meanprops.marker                 : s
+boxplot.meanprops.markeredgecolor        : k
+boxplot.meanprops.markerfacecolor        : r
+boxplot.meanprops.markersize             : 6.0
+boxplot.medianprops.color                : r
+boxplot.medianprops.linestyle            : -
+boxplot.medianprops.linewidth            : 1.0
+boxplot.notch                            : False
+boxplot.patchartist                      : False
+boxplot.showbox                          : True
+boxplot.showcaps                         : True
+boxplot.showfliers                       : True
+boxplot.showmeans                        : False
+boxplot.vertical                         : True
+boxplot.whiskerprops.color               : b
+boxplot.whiskerprops.linestyle           : --
+boxplot.whiskerprops.linewidth           : 1.0
+boxplot.whiskers                         : 1.5
+
+contour.corner_mask                      : True
+contour.linewidth                        : None
+contour.negative_linestyle               : dashed
+
+date.autoformatter.day                   : %b %d %Y
+date.autoformatter.hour                  : %H:%M:%S
+date.autoformatter.microsecond           : %H:%M:%S.%f
+date.autoformatter.minute                : %H:%M:%S.%f
+date.autoformatter.month                 : %b %Y
+date.autoformatter.second                : %H:%M:%S.%f
+date.autoformatter.year                  : %Y
+
+errorbar.capsize                         : 3.0
+
+figure.autolayout                        : True
+figure.constrained_layout.h_pad          : 0.04167
+figure.constrained_layout.hspace         : 0.02
+figure.constrained_layout.use            : False
+figure.constrained_layout.w_pad          : 0.04167
+figure.constrained_layout.wspace         : 0.02
+figure.dpi                               : 96.0
+figure.edgecolor                         : white
+figure.facecolor                         : white
+figure.figsize                           : 5.5, 3.5
+figure.frameon                           : True
+figure.subplot.bottom                    : 0.12
+figure.subplot.hspace                    : 0.0
+figure.subplot.left                      : 0.15
+figure.subplot.right                     : 0.95
+figure.subplot.top                       : 0.98
+figure.subplot.wspace                    : 0.0
+figure.titlesize                         : 12.0
+figure.titleweight                       : normal
+font.family                              : sans-serif
+font.size                                : 10.0
+font.stretch                             : normal
+font.style                               : normal
+font.variant                             : normal
+font.weight                              : normal
+
+grid.alpha                               : 1.0
+grid.color                               : .85
+grid.linestyle                           : -
+grid.linewidth                           : 0.85
+
+hatch.color                              : k
+hatch.linewidth                          : 1.0
+hist.bins                                : 10
+
+image.aspect                             : equal
+image.cmap                               : viridis
+image.composite_image                    : True
+image.interpolation                      : bilinear
+image.lut                                : 256
+image.origin                             : upper
+image.resample                           : False
+
+keymap.back                              : left, c, backspace
+keymap.copy                              : ctrl+c, cmd+c
+keymap.forward                           : right, v
+keymap.fullscreen                        : f, ctrl+f
+keymap.grid                              : g
+keymap.grid_minor                        : G
+keymap.help                              : f1
+keymap.home                              : h, r, home
+keymap.pan                               : p
+keymap.quit                              : ctrl+w, cmd+w
+keymap.quit_all                          :
+keymap.save                              : s, ctrl+s
+keymap.xscale                            : k, L
+keymap.yscale                            : l
+keymap.zoom                              : o
+
+legend.borderaxespad                     : 0.5
+legend.borderpad                         : 0.4
+legend.columnspacing                     : 0.5
+legend.edgecolor                         : inherit
+legend.facecolor                         : inherit
+legend.fancybox                          : False
+legend.fontsize                          : 9.0
+legend.framealpha                        : None
+legend.frameon                           : False
+legend.handleheight                      : 0.7
+legend.handlelength                      : 2.0
+legend.handletextpad                     : 0.1
+legend.labelspacing                      : 0.2
+legend.loc                               : upper right
+legend.markerscale                       : 1.0
+legend.numpoints                         : 1
+legend.scatterpoints                     : 1
+legend.shadow                            : False
+legend.title_fontsize                    : None
+lines.antialiased                        : True
+lines.color                              : b
+lines.dash_capstyle                      : butt
+lines.dash_joinstyle                     : round
+lines.dashdot_pattern                    : 3.0, 5.0, 1.0, 5.0
+lines.dashed_pattern                     : 6.0, 6.0
+lines.dotted_pattern                     : 1.0, 3.0
+lines.linestyle                          : -
+lines.linewidth                          : 0.75
+lines.marker                             : None
+lines.markeredgecolor                    : auto
+lines.markeredgewidth                    : 0.0
+lines.markerfacecolor                    : auto
+lines.markersize                         : 7.0
+lines.scale_dashes                       : False
+lines.solid_capstyle                     : round
+lines.solid_joinstyle                    : round
+
+markers.fillstyle                        : full
+mathtext.bf                              : dejavusans:bold
+mathtext.cal                             : cursive
+mathtext.default                         : regular
+mathtext.fallback                        : cm
+mathtext.fontset                         : dejavusans
+mathtext.it                              : dejavusans:italic
+mathtext.rm                              : dejavusans
+mathtext.sf                              : sans\-serif
+mathtext.tt                              : monospace
+
+patch.antialiased                        : True
+patch.edgecolor                          : k
+patch.facecolor                          : 4C72B0
+patch.force_edgecolor                    : False
+patch.linewidth                          : 0.3
+path.effects                             :
+path.simplify                            : True
+path.simplify_threshold                  : 0.111111111111
+path.sketch                              : None
+path.snap                                : True
+pcolor.shading                           : flat
+pdf.compression                          : 6
+pdf.fonttype                             : 3
+pdf.inheritcolor                         : False
+pdf.use14corefonts                       : False
+pgf.preamble                             :
+pgf.rcfonts                              : True
+pgf.texsystem                            : xelatex
+polaraxes.grid                           : True
+ps.distiller.res                         : 6000
+ps.fonttype                              : 3
+ps.papersize                             : letter
+ps.useafm                                : False
+ps.usedistiller                          : None
+
+savefig.bbox                             : standard
+savefig.dpi                              : 100.0
+savefig.edgecolor                        : white
+savefig.facecolor                        : white
+savefig.format                           : png
+savefig.orientation                      : portrait
+savefig.pad_inches                       : 0.1
+savefig.transparent                      : False
+scatter.edgecolors                       : face
+scatter.marker                           : o
+svg.fonttype                             : path
+svg.hashsalt                             : None
+svg.image_inline                         : True
+
+text.antialiased                         : True
+text.color                               : .15
+text.hinting                             : auto
+text.hinting_factor                      : 8
+text.kerning_factor                      : 0
+text.latex.preamble                      :
+text.usetex                              : False
+
+xaxis.labellocation                      : center
+xtick.alignment                          : center
+xtick.bottom                             : True
+xtick.color                              : .15
+xtick.direction                          : out
+xtick.labelbottom                        : True
+xtick.labelsize                          : 10.0
+xtick.labeltop                           : False
+xtick.major.bottom                       : True
+xtick.major.pad                          : 4.0
+xtick.major.size                         : 4.0
+xtick.major.top                          : True
+xtick.major.width                        : 0.5
+xtick.minor.bottom                       : True
+xtick.minor.pad                          : 4.0
+xtick.minor.size                         : 2.0
+xtick.minor.top                          : True
+xtick.minor.visible                      : False
+xtick.minor.width                        : 0.5
+xtick.top                                : True
+
+yaxis.labellocation                      : center
+ytick.alignment                          : center
+ytick.color                              : .15
+ytick.direction                          : out
+ytick.labelleft                          : True
+ytick.labelright                         : False
+ytick.labelsize                          : 10.0
+ytick.left                               : True
+ytick.major.left                         : True
+ytick.major.pad                          : 4.0
+ytick.major.right                        : True
+ytick.major.size                         : 4.0
+ytick.major.width                        : 0.5
+ytick.minor.left                         : True
+ytick.minor.pad                          : 4.0
+ytick.minor.right                        : True
+ytick.minor.size                         : 2.0
+ytick.minor.visible                      : False
+ytick.minor.width                        : 0.5
+ytick.right                              : True
+
+##
+## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
+##
+##@method_1D                             : pen
+##@method_2D                             : stack
+##@method_3D                             : surface
+##@colorbar                              : True
+##@show_projections                      : False
+##@show_projection_x                     : False
+##@show_projection_y                     : False
+##@colormap                              : viridis
+##@max_lines_in_stack                    : 1000
+##@simplify                              : False
+##@number_of_x_labels                    : 5
+##@number_of_y_labels                    : 5
+##@number_of_z_labels                    : 5
+##@number_of_contours                    : 50
+##@contour_alpha                         : 1.0
+##@contour_start                         : 0.05
+##@antialiased                           : True
+##@rcount                                : 50
+##@ccount                                : 50

@@ -31,7 +31,7 @@ class TestGetPkgPath:
     @pytest.mark.parametrize(
         "data_name, expected_suffix",
         [
-            ("core/plotters/stylesheets", "stylesheets"),
+            ("data/stylesheets", "stylesheets"),
             ("file.txt", ""),  # Will return parent since file.txt doesn't exist
             (".", "spectrochempy"),  # Current directory
         ],

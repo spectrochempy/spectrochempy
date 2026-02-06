@@ -169,18 +169,13 @@ prefs.font.family = "monospace"
 dataset.plot()
 
 # %% [markdown]
-# Once changed, the preferences attributes will be used for subsequent plots.
-# Calling `prefs.reset()` restores the **SpectroChemPy default plotting style**
-# (`scpy`), including fonts, colors, and layout parameters.
-
+# Once changed, the `NDDataset.preferences` attributes will be used for the subsequent plots, but can be reset to the
+# initial defaults anytime using the `NDDataset.preferences.reset()` method. For instance:
 
 # %%
-print(f"font before reset (user override): {prefs.font.family}")
-
-# Reset restores the SpectroChemPy default style ("scpy")
+print(f"font before reset: {prefs.font.family}")
 prefs.reset()
-
-print(f"font after reset (SpectroChemPy default): {prefs.font.family}")
+print(f"font after reset: {prefs.font.family}")
 
 # %% [markdown]
 # It is also possible to change a parameter for a single plot without changing the `preferences` attribute by passing

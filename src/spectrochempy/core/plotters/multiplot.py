@@ -18,8 +18,13 @@ __all__ = [
 
 __dataset_methods__ = []
 
-
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
+
+# TODO: tight_layout module is deprecated
+from matplotlib._tight_layout import get_subplotspec_list  # get_renderer,
+from matplotlib._tight_layout import get_tight_layout_figure  # get_renderer,
 
 from spectrochempy.utils.mplutils import _Axes
 from spectrochempy.utils.typeutils import is_sequence
@@ -172,316 +177,284 @@ def multiplot(
         Color of the subtitles
 
     """
+    # some basic checking
+    # ------------------------------------------------------------------------
+    if labels is None:
+        labels = []
+    if datasets is None:
+        datasets = []
+    show_transposed = False
+    if method in "with_transposed":
+        show_transposed = True
+        method = "stack"
+        nrow = 2
+        ncol = 1
+        datasets = [datasets, datasets]  # we need to datasets
+        sharez = True
 
-    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+    single = False
+    if not is_sequence(datasets):
+        single = True
+        datasets = [datasets]  # make a list
 
-    ensure_mpl_setup()
+    if len(datasets) < nrow * ncol and not show_transposed:
+        # not enough datasets given in this list.
+        raise ValueError("Not enough datasets given in this list")
 
-    import matplotlib
-    import matplotlib.backend_bases  # noqa: F401
-    import matplotlib.pyplot as plt
+    # if labels and len(labels) != len(datasets):
+    #     # not enough labels given in this list.
+    #     raise ValueError('Not enough labels given in this list')
 
-    from spectrochempy.application.preferences import preferences as prefs
-    from spectrochempy.utils.mplutils import get_figure
-
-    # Resolve plotting style(s) locally (do not mutate global rcParams)
-    style = kwargs.pop("style", None)
-    if style is None:
-        style = ["scpy"]
-    if isinstance(style, str):
-        style = [style]
-
-    with plt.style.context(style):
-        # todo:_tight_layout deprecated
-        from matplotlib._tight_layout import get_subplotspec_list
-        from matplotlib._tight_layout import get_tight_layout_figure
-
-        # some basic checking
-        # ------------------------------------------------------------------------
-        if labels is None:
-            labels = []
-        if datasets is None:
-            datasets = []
-        show_transposed = False
-        if method in "with_transposed":
-            show_transposed = True
-            method = "stack"
-            nrow = 2
-            ncol = 1
-            datasets = [datasets, datasets]  # we need to datasets
-            sharez = True
-
-        single = False
-        if not is_sequence(datasets):
-            single = True
-            datasets = [datasets]  # make a list
-
-        if len(datasets) < nrow * ncol and not show_transposed:
-            # not enough datasets given in this list.
-            raise ValueError("Not enough datasets given in this list")
-
-        # if labels and len(labels) != len(datasets):
-        #     # not enough labels given in this list.
-        #     raise ValueError('Not enough labels given in this list')
-
-        if nrow == ncol and nrow == 1 and not show_transposed and single:
-            # obviously a single plot, return it
-            return datasets[0].plot(**kwargs)
+    if nrow == ncol and nrow == 1 and not show_transposed and single:
+        # obviously a single plot, return it
+        return datasets[0].plot(**kwargs)
+    if nrow * ncol < len(datasets):
+        nrow = ncol = len(datasets) // 2
         if nrow * ncol < len(datasets):
-            nrow = ncol = len(datasets) // 2
-            if nrow * ncol < len(datasets):
-                ncol += 1
+            ncol += 1
 
-        ndims = {dataset.ndim for dataset in datasets}
-        if len(ndims) > 1:
-            raise NotImplementedError("mixed dataset shape.")
-        ndim = list(ndims)[0]
+    ndims = {dataset.ndim for dataset in datasets}
+    if len(ndims) > 1:
+        raise NotImplementedError("mixed dataset shape.")
+    ndim = list(ndims)[0]
 
-        # create the subplots and plot the ndarrays
-        # ------------------------------------------------------------------------
-        matplotlib.rcParams["figure.autolayout"] = False
+    # create the subplots and plot the ndarrays
+    # ------------------------------------------------------------------------
+    mpl.rcParams["figure.autolayout"] = False
 
-        figsize = kwargs.pop("figsize", None)
-        dpi = kwargs.pop("dpi", 150)
+    figsize = kwargs.pop("figsize", None)
+    dpi = kwargs.pop("dpi", 150)
 
-        fig = kwargs.pop("fig", None)
-        if fig is None:
-            fig = get_figure(
-                preferences=prefs,
-                figsize=figsize,
-                dpi=dpi,
-                clear=True,
-            )
-        else:
-            fig.clf()
-            fig.set_size_inches(*figsize)
+    fig = kwargs.pop("fig", None)
+    if fig is None:
+        fig = plt.figure(figsize=figsize, dpi=dpi)
+    else:
+        fig.clf()
+        fig.set_size_inches(*figsize)
 
-        fig.rcParams = plt.rcParams.copy()  # save params used for this figure
+    fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
-        if suptitle is not None:
-            fig.suptitle(suptitle, color=suptitle_color)
+    if suptitle is not None:
+        fig.suptitle(suptitle, color=suptitle_color)
 
-        # axes is dictionary with keys such as 'axe12', where  the fist number
-        # is the row and the second the column
-        axes = {}
+    # axes is dictionary with keys such as 'axe12', where  the fist number
+    # is the row and the second the column
+    axes = {}
 
-        # limits
-        xlims = []
-        ylims = []
-        zlims = []
+    # limits
+    xlims = []
+    ylims = []
+    zlims = []
 
-        if sharex not in [None, True, False, "all", "col"]:
-            raise ValueError(
-                "invalid option for sharex. Should be"
-                " among (None, False, True, 'all' or 'col')",
-            )
+    if sharex not in [None, True, False, "all", "col"]:
+        raise ValueError(
+            "invalid option for sharex. Should be"
+            " among (None, False, True, 'all' or 'col')",
+        )
 
-        if sharex:
-            sharex = "all"
+    if sharex:
+        sharex = "all"
 
-        if ndim == 1:
-            sharez = False
+    if ndim == 1:
+        sharez = False
 
-        textsharey = "sharey"
-        textsharez = "sharez"
-        if method in ["stack"]:
-            sharez, sharey = sharey, sharez  # we echange them
-            zlims, ylims = ylims, zlims
-            # for our internal needs as only sharex and sharey are recognized by
-            # matplotlib subplots
-            textsharey = "sharez"
-            textsharez = "sharey"
+    textsharey = "sharey"
+    textsharez = "sharez"
+    if method in ["stack"]:
+        sharez, sharey = sharey, sharez  # we echange them
+        zlims, ylims = ylims, zlims
+        # for our internal needs as only sharex and sharey are recognized by
+        # matplotlib subplots
+        textsharey = "sharez"
+        textsharez = "sharey"
 
-        if sharey not in [None, False, True, "all", "col"]:
-            raise ValueError(
-                f"invalid option for {textsharey}. Should be"
-                " among (None, False, True, 'all' or 'row')",
-            )
+    if sharey not in [None, False, True, "all", "col"]:
+        raise ValueError(
+            f"invalid option for {textsharey}. Should be"
+            " among (None, False, True, 'all' or 'row')",
+        )
 
-        if sharez not in [None, False, True, "all", "col", "row"]:
-            raise ValueError(
-                f"invalid option for {textsharez}. Should be"
-                " among (None, False, True, "
-                "'all', 'row' or 'col')",
-            )
+    if sharez not in [None, False, True, "all", "col", "row"]:
+        raise ValueError(
+            f"invalid option for {textsharez}. Should be"
+            " among (None, False, True, "
+            "'all', 'row' or 'col')",
+        )
 
-        if sharey:
-            sharey = "all"
-        if sharez:
-            sharez = "all"
+    if sharey:
+        sharey = "all"
+    if sharez:
+        sharez = "all"
 
-        for irow in range(nrow):
-            for icol in range(ncol):
-                idx = irow * ncol + icol
-                dataset = datasets[idx]
-                try:
-                    label = labels[idx]
-                except Exception:
-                    label = ""
-
-                _sharex = None
-                _sharey = None
-                _sharez = None
-                # on the type of the plot and
-                if (
-                    (irow == icol and irow == 0)
-                    or (sharex == "col" and irow == 0)
-                    or (sharey == "row" and icol == 0)
-                ):
-                    ax = _Axes(fig, nrow, ncol, irow * ncol + icol + 1)
-                    ax = fig.add_subplot(ax)
-
-                else:
-                    if sharex == "all":
-                        _sharex = axes["axe11"]
-                    elif sharex == "col":
-                        _sharex = axes[f"axe1{icol + 1}"]
-
-                    if sharey == "all":
-                        _sharey = axes["axe11"]
-                    elif sharey == "row":
-                        _sharey = axes[f"axe{irow + 1}1"]
-
-                    # in the last dimension
-                    if sharez == "all":
-                        _sharez = axes["axe11"]
-                    elif sharez == "row":
-                        _sharez = axes[f"axe{irow + 1}1"]
-                    elif sharez == "col":
-                        _sharez = axes[f"axe1{icol + 1}"]
-
-                    ax = _Axes(fig, nrow, ncol, idx + 1, sharex=_sharex, sharey=_sharey)
-                    ax = fig.add_subplot(ax)
-
-                ax._sharez = _sharez  # we add a new share info to the ax.
-                # which will be useful for the interactive masks
-
-                ax.name = f"axe{irow + 1}{icol + 1}"
-                axes[ax.name] = ax
-                if icol > 0 and sharey:
-                    # hide the redondant ticklabels on left side of interior figures
-                    plt.setp(axes[ax.name].get_yticklabels(), visible=False)
-                    axes[ax.name].yaxis.set_tick_params(
-                        which="both",
-                        labelleft=False,
-                        labelright=False,
-                    )
-                    axes[ax.name].yaxis.offsetText.set_visible(False)
-                if irow < nrow - 1 and sharex:
-                    # hide the bottom ticklabels of interior rows
-                    plt.setp(axes[ax.name].get_xticklabels(), visible=False)
-                    axes[ax.name].xaxis.set_tick_params(
-                        which="both",
-                        labelbottom=False,
-                        labeltop=False,
-                    )
-                    axes[ax.name].xaxis.offsetText.set_visible(False)
-
-                transposed = bool(show_transposed and irow == 1)
-
-                dataset.plot(
-                    method=method,
-                    ax=ax,
-                    clear=False,
-                    autolayout=False,
-                    colorbar=colorbar,
-                    data_transposed=transposed,
-                    **kwargs,
-                )
-
-                ax.set_title(label, fontsize=8)
-                if sharex and irow < nrow - 1:
-                    ax.xaxis.label.set_visible(False)
-                if sharey and icol > 0:
-                    ax.yaxis.label.set_visible(False)
-
-                xlims.append(ax.get_xlim())
-                ylims.append(ax.get_ylim())
-                xrev = (ax.get_xlim()[1] - ax.get_xlim()[0]) < 0
-                # yrev = (ax.get_ylim()[1] - ax.get_ylim()[0]) < 0
-
-        # TODO: add a common color bar (set vmin and vmax using zlims)
-
-        amp = np.ptp(np.array(ylims))
-        ylim = [
-            np.min(np.array(ylims) - amp * 0.01),
-            np.max(np.array(ylims)) + amp * 0.01,
-        ]
-        for ax in axes.values():
-            ax.set_ylim(ylim)
-        # if yrev:
-        #    ylim = ylim[::-1]
-        # amp = np.ptp(np.array(xlims))
-
-        if not show_transposed:
-            xlim = [np.min(np.array(xlims)), np.max(np.array(xlims))]
-            if xrev:
-                xlim = xlim[::-1]
-            for ax in axes.values():
-                ax.set_xlim(xlim)
-
-        def do_tight_layout(fig, axes, suptitle, **kwargs):
-            """Handle tight layout with proper renderer initialization."""
-
-            # Make sure we have a proper renderer
-            if not hasattr(fig.canvas, "get_renderer"):
-                # Force creation of renderer if it doesn't exist
-                fig.canvas.draw()
-
-            # Get renderer (now it should exist)
+    for irow in range(nrow):
+        for icol in range(ncol):
+            idx = irow * ncol + icol
+            dataset = datasets[idx]
             try:
-                renderer = fig.canvas.get_renderer()
+                label = labels[idx]
             except Exception:
-                # Fallback for newer matplotlib versions
-                from matplotlib.backends.backend_agg import FigureCanvasAgg
+                label = ""
 
-                canvas = FigureCanvasAgg(fig)
-                renderer = canvas.get_renderer()
+            _sharex = None
+            _sharey = None
+            _sharez = None
+            # on the type of the plot and
+            if (
+                (irow == icol and irow == 0)
+                or (sharex == "col" and irow == 0)
+                or (sharey == "row" and icol == 0)
+            ):
+                ax = _Axes(fig, nrow, ncol, irow * ncol + icol + 1)
+                ax = fig.add_subplot(ax)
 
-            # Rest of tight_layout code
-            axeslist = list(axes.values())
-            subplots_list = list(get_subplotspec_list(axeslist))
-            kw = get_tight_layout_figure(
-                fig,
-                axeslist,
-                subplots_list,
-                renderer,
-                h_pad=0,
-                w_pad=0,
-                rect=None,
+            else:
+                if sharex == "all":
+                    _sharex = axes["axe11"]
+                elif sharex == "col":
+                    _sharex = axes[f"axe1{icol + 1}"]
+
+                if sharey == "all":
+                    _sharey = axes["axe11"]
+                elif sharey == "row":
+                    _sharey = axes[f"axe{irow + 1}1"]
+
+                # in the last dimension
+                if sharez == "all":
+                    _sharez = axes["axe11"]
+                elif sharez == "row":
+                    _sharez = axes[f"axe{irow + 1}1"]
+                elif sharez == "col":
+                    _sharez = axes[f"axe1{icol + 1}"]
+
+                ax = _Axes(fig, nrow, ncol, idx + 1, sharex=_sharex, sharey=_sharey)
+                ax = fig.add_subplot(ax)
+
+            ax._sharez = _sharez  # we add a new share info to the ax.
+            # which will be useful for the interactive masks
+
+            ax.name = f"axe{irow + 1}{icol + 1}"
+            axes[ax.name] = ax
+            if icol > 0 and sharey:
+                # hide the redondant ticklabels on left side of interior figures
+                plt.setp(axes[ax.name].get_yticklabels(), visible=False)
+                axes[ax.name].yaxis.set_tick_params(
+                    which="both",
+                    labelleft=False,
+                    labelright=False,
+                )
+                axes[ax.name].yaxis.offsetText.set_visible(False)
+            if irow < nrow - 1 and sharex:
+                # hide the bottom ticklabels of interior rows
+                plt.setp(axes[ax.name].get_xticklabels(), visible=False)
+                axes[ax.name].xaxis.set_tick_params(
+                    which="both",
+                    labelbottom=False,
+                    labeltop=False,
+                )
+                axes[ax.name].xaxis.offsetText.set_visible(False)
+
+            transposed = bool(show_transposed and irow == 1)
+
+            dataset.plot(
+                method=method,
+                ax=ax,
+                clear=False,
+                autolayout=False,
+                colorbar=colorbar,
+                data_transposed=transposed,
+                **kwargs,
             )
 
-            left = kwargs.get("left", kw["left"])
-            bottom = kwargs.get("bottom", kw["bottom"])
-            right = kwargs.get("right", kw["right"])
-            top = kw["top"]
-            if suptitle:
-                top = top * 0.95
-            top = kwargs.get("top", top)
-            ws = kwargs.get("wspace", kw.get("wspace", 0) * 1.1)
-            hs = kwargs.get("hspace", kw.get("hspace", 0) * 1.1)
+            ax.set_title(label, fontsize=8)
+            if sharex and irow < nrow - 1:
+                ax.xaxis.label.set_visible(False)
+            if sharey and icol > 0:
+                ax.yaxis.label.set_visible(False)
 
-            fig.subplots_adjust(
-                left=left,
-                bottom=bottom,
-                right=right,
-                top=top,
-                wspace=ws,
-                hspace=hs,
-            )
+            xlims.append(ax.get_xlim())
+            ylims.append(ax.get_ylim())
+            xrev = (ax.get_xlim()[1] - ax.get_xlim()[0]) < 0
+            # yrev = (ax.get_ylim()[1] - ax.get_ylim()[0]) < 0
 
-        do_tight_layout(fig, axes, suptitle, **kwargs)
+    # TODO: add a common color bar (set vmin and vmax using zlims)
 
-        if mpl_event:
-            # make an event that will trigger subplot adjust each time the mouse leave
-            # or enter the axes or figure
-            def _onenter(event):
-                do_tight_layout(fig, axes, suptitle, **kwargs)
-                fig.canvas.draw()
+    amp = np.ptp(np.array(ylims))
+    ylim = [np.min(np.array(ylims) - amp * 0.01), np.max(np.array(ylims)) + amp * 0.01]
+    for ax in axes.values():
+        ax.set_ylim(ylim)
+    # if yrev:
+    #    ylim = ylim[::-1]
+    # amp = np.ptp(np.array(xlims))
 
-            fig.canvas.mpl_connect("axes_enter_event", _onenter)
-            fig.canvas.mpl_connect("axes_leave_event", _onenter)
-            fig.canvas.mpl_connect("figure_enter_event", _onenter)
-            fig.canvas.mpl_connect("figure_leave_event", _onenter)
+    if not show_transposed:
+        xlim = [np.min(np.array(xlims)), np.max(np.array(xlims))]
+        if xrev:
+            xlim = xlim[::-1]
+        for ax in axes.values():
+            ax.set_xlim(xlim)
 
-        return axes
+    def do_tight_layout(fig, axes, suptitle, **kwargs):
+        """Handle tight layout with proper renderer initialization."""
+
+        # Make sure we have a proper renderer
+        if not hasattr(fig.canvas, "get_renderer"):
+            # Force creation of renderer if it doesn't exist
+            fig.canvas.draw()
+
+        # Get renderer (now it should exist)
+        try:
+            renderer = fig.canvas.get_renderer()
+        except Exception:
+            # Fallback for newer matplotlib versions
+            from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+            canvas = FigureCanvasAgg(fig)
+            renderer = canvas.get_renderer()
+
+        # Rest of tight_layout code
+        axeslist = list(axes.values())
+        subplots_list = list(get_subplotspec_list(axeslist))
+        kw = get_tight_layout_figure(
+            fig,
+            axeslist,
+            subplots_list,
+            renderer,
+            h_pad=0,
+            w_pad=0,
+            rect=None,
+        )
+
+        left = kwargs.get("left", kw["left"])
+        bottom = kwargs.get("bottom", kw["bottom"])
+        right = kwargs.get("right", kw["right"])
+        top = kw["top"]
+        if suptitle:
+            top = top * 0.95
+        top = kwargs.get("top", top)
+        ws = kwargs.get("wspace", kw.get("wspace", 0) * 1.1)
+        hs = kwargs.get("hspace", kw.get("hspace", 0) * 1.1)
+
+        plt.subplots_adjust(
+            left=left,
+            bottom=bottom,
+            right=right,
+            top=top,
+            wspace=ws,
+            hspace=hs,
+        )
+
+    do_tight_layout(fig, axes, suptitle, **kwargs)
+
+    if mpl_event:
+        # make an event that will trigger subplot adjust each time the mouse leave
+        # or enter the axes or figure
+        def _onenter(event):
+            do_tight_layout(fig, axes, suptitle, **kwargs)
+            fig.canvas.draw()
+
+        fig.canvas.mpl_connect("axes_enter_event", _onenter)
+        fig.canvas.mpl_connect("axes_leave_event", _onenter)
+        fig.canvas.mpl_connect("figure_enter_event", _onenter)
+        fig.canvas.mpl_connect("figure_leave_event", _onenter)
+
+    return axes

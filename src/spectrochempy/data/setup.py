@@ -29,23 +29,6 @@ def is_on_github_actions():
     return all(var in environ and environ.get(var) for var in required_vars)
 
 
-def is_building_docs():
-    """
-    Detect whether we are running inside a documentation build.
-
-    (Sphinx / nbsphinx / ReadTheDocs / GitHub Actions docs job).
-    """
-    return any(
-        key in environ
-        for key in (
-            "READTHEDOCS",
-            "SPHINX_BUILD",
-            "DOCS_BUILDING",
-            "NBSPHINX_EXECUTE",
-        )
-    )
-
-
 def setup_mpl():
     """
     Install matplotlib styles and fonts for SpectroChemPy.
@@ -67,9 +50,7 @@ def setup_mpl():
     """
     # Check execution environment
     GITHUB = is_on_github_actions()
-    DOCS = is_building_docs()
-
-    if GITHUB and not DOCS:
+    if GITHUB:
         print("Running on GitHub Actions")  # noqa: T201
 
     # Verify matplotlib installation
@@ -91,7 +72,7 @@ def setup_mpl():
         return
 
     # Setup paths for stylesheets
-    stylesheets = Path(__file__).parent.parent / "core" / "plotters" / "stylesheets"
+    stylesheets = Path(__file__).parent / "stylesheets"
     if not stylesheets.exists():
         raise OSError(
             f"Can't find the stylesheets from SpectroChemPy {stylesheets!s}.\n"
@@ -104,7 +85,7 @@ def setup_mpl():
     if not stylelib.exists():
         stylelib.mkdir()
 
-    if GITHUB and not DOCS:
+    if GITHUB:
         print(f"MPL Configuration directory: {cfgdir}")  # noqa: T201
         print(f"Stylelib directory: {stylelib}")  # noqa: T201
 
@@ -128,7 +109,7 @@ def setup_mpl():
             print("\n".join(f"- {style}" for style in plt.style.available))  # noqa: T201
 
     # Setup paths for fonts
-    dir_source = Path(__file__).parent.parent / "core" / "plotters" / "fonts"
+    dir_source = Path(__file__).parent / "fonts"
     if not dir_source.exists():
         raise OSError(f"Fonts directory not found: {dir_source}")
 

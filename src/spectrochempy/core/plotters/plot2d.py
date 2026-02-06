@@ -17,7 +17,11 @@ __dataset_methods__ = __all__
 from contextlib import suppress
 from copy import copy as cpy
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import ScalarFormatter
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.arraymixins.ndplot import (
@@ -146,33 +150,17 @@ def plot_2D(dataset, method=None, **kwargs):
     plot_waterfall
 
     """
-
-    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
-
-    ensure_mpl_setup()
-
-    import matplotlib as mpl
-    import matplotlib.backend_bases  # noqa: F401
-    import matplotlib.pyplot as plt
-    from matplotlib.cm import ScalarMappable
-    from matplotlib.colors import Normalize
-    from matplotlib.lines import Line2D
-    from matplotlib.ticker import MaxNLocator
-    from matplotlib.ticker import ScalarFormatter
-
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = preferences
 
-    # Resolve plotting style(s) locally (no global rcParams / no prefs.style mutation)
+    # before going further, check if the style is passed in the parameters
     style = kwargs.pop("style", None)
-    if style is None:
-        style = getattr(prefs, "style", None) or ["scpy"]
-    if isinstance(style, str):
-        style = [style]
+    if style is not None:
+        prefs.style = style
+    # else we assume this has been set before calling plot()
 
-    # style handled at figure creation (get_figure)
-    prefs.set_latex_font(prefs.font.family)
+    prefs.set_latex_font(prefs.font.family)  # reset latex settings
 
     # Redirections ?
     # ----------------------------------------------------------------------------------
@@ -207,12 +195,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # Figure setup
     # ------------------------------------------------------------------------
-    method = new._figure_setup(
-        ndim=2,
-        method=method,
-        style=style,
-        **kwargs,
-    )
+    method = new._figure_setup(ndim=2, method=method, **kwargs)
 
     ax = new.ndaxes["main"]
     ax.name += nameadd
@@ -412,16 +395,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
     if method in ["map", "image", "surface"] and norm is None:
         zmin, zmax = zlim
-        norm = Normalize(vmin=zmin, vmax=zmax)
+        norm = mpl.colors.Normalize(vmin=zmin, vmax=zmax)
 
     if method in ["surface"]:
-        # Ensure 3D axes
-        if not hasattr(ax, "plot_surface"):
-            fig = ax.figure
-            fig.delaxes(ax)
-            ax = fig.add_subplot(111, projection="3d")
-            new.ndaxes["main"] = ax
-
         X, Y = np.meshgrid(xdata, ydata)
         Z = zdata.copy()
 
@@ -466,7 +442,7 @@ def plot_2D(dataset, method=None, **kwargs):
     elif method in ["map"]:
         if discrete_data:
             _colormap = plt.get_cmap(cmap)
-            scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
+            scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
             # marker = kwargs.get('marker', kwargs.get('m', None))
             markersize = kwargs.get("markersize", kwargs.get("ms", 5.0))
@@ -495,7 +471,7 @@ def plot_2D(dataset, method=None, **kwargs):
         if norm is None:
             vmin, vmax = ylim
             # we normalize to the max time
-            norm = Normalize(vmin=vmin, vmax=vmax)
+            norm = mpl.colors.Normalize(vmin=vmin, vmax=vmax)
 
         if cmap is None:
             color = kwargs.get("color")
@@ -505,7 +481,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 colors = [color]
         else:
             _colormap = plt.get_cmap(cmap)
-            scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
+            scalarMap = mpl.cm.ScalarMappable(norm=norm, cmap=_colormap)
 
         # we display the line in the reverse order, so that the last
         # are behind the first.
@@ -515,7 +491,7 @@ def plot_2D(dataset, method=None, **kwargs):
         if not clear and not transposed:
             lines.extend(ax.lines)  # keep the old lines
 
-        line0 = Line2D(
+        line0 = mpl.lines.Line2D(
             xdata,
             zdata[0],
             lw=lw,
@@ -646,19 +622,11 @@ def plot_2D(dataset, method=None, **kwargs):
 
     return ax
 
-    # ======================================================================================
-    # Waterfall
-    # ======================================================================================
 
-
+# ======================================================================================
+# Waterfall
+# ======================================================================================
 def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs):
-    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
-
-    ensure_mpl_setup()
-
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
-
     degazim = kwargs.get("azim", 10)
     degelev = kwargs.get("elev", 30)
 

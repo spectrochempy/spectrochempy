@@ -17,4 +17,3 @@ Developer's Guide
     contributing_codebase
     contributing_codespecifics
     contributing_documentation
-    contributing_plotting

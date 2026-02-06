@@ -1,4 +1,4 @@
-## ======================================================================================
+# ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
@@ -17,8 +17,9 @@ __all__ = [
 __dataset_methods__ = __all__
 
 import numpy as np
+from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import ScalarFormatter
 
-from spectrochempy.application.application import warning_
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.arraymixins.ndplot import (
     NDPlot,  # noqa: F401 # for the docstring to be determined it necessary to import NDPlot
@@ -62,32 +63,18 @@ def plot_1D(dataset, method=None, **kwargs):
     multiplot
 
     """
-    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
-
-    ensure_mpl_setup()
-
-    import matplotlib.backend_bases  # noqa: F401
-    import matplotlib.pyplot as plt
-    from matplotlib.ticker import MaxNLocator
-    from matplotlib.ticker import ScalarFormatter
-
     # Get preferences
     # ----------------------------------------------------------------------------------
     prefs = preferences
 
-    # Resolve plotting style(s) locally (no global rcParams / no prefs.style mutation)
+    # before going further, check if the style is passed in the parameters
     style = kwargs.pop("style", None)
-    if style is None:
-        style = getattr(prefs, "style", None) or ["scpy"]
-    if isinstance(style, str):
-        style = [style]
+    if style is not None:
+        prefs.style = style
+    # else we assume this has been set before calling plot()
 
-    # Apply styles only within this plotting call
-    with plt.style.context(style):
-        prefs.set_latex_font(prefs.font.family)  # reset latex settings
-
-    # style handled at figure creation (get_figure)
     prefs.set_latex_font(prefs.font.family)  # reset latex settings
+
     # Redirections ?
     # ------------------------------------------------------------------------
     # should we redirect the plotting to another method
@@ -129,14 +116,9 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # Figure setup
     # ------------------------------------------------------------------------
-    method = new._figure_setup(
-        ndim=1,
-        method=method,
-        style=style,
-        **kwargs,
-    )
+    method = new._figure_setup(ndim=1, method=method, **kwargs)
 
-    pen = "pen" in (method or "") or kwargs.pop("pen", False)
+    pen = "pen" in method or kwargs.pop("pen", False)
     scatter = "scatter" in method or marker != "auto"
     bar = "bar" in method
 
@@ -248,21 +230,7 @@ def plot_1D(dataset, method=None, **kwargs):
             width=kwargs.get("width", 0.1),
         )  # barwidth = line[0].get_width()
     else:
-        # NOTE:
-        # We intentionally allow a silent fallback to a line plot for robustness.
-        # A warning is emitted to avoid masking configuration errors.
-        warning_(
-            "No explicit plot method matched (pen/scatter/bar). "
-            "Falling back to a default line plot. "
-            "This behavior is allowed but may indicate a missing or misspelled "
-            "`method` argument."
-        )
-
-        (line,) = ax.plot(
-            xdata,
-            zdata.T,
-            label=label,
-        )
+        raise ValueError("label not valid")
 
     if show_complex and pen:
         # add the imaginary component for pen only plot

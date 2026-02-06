@@ -10,25 +10,21 @@ New Features
 ~~~~~~~~~~~~
 
 - the welcome message display functionality has been removed
-- added `restore_rcparams()` to restore Matplotlib `rcParams` after SpectroChemPy plotting (issue #877).
 
 Bug Fixes
 ~~~~~~~~~
 
-- Refactored SpectroChemPy initialization and plotting setup to reduce Matplotlib side effects (issue #877).
-- Improved handling of Matplotlib styles, separating logical styles (e.g. `default`) from file-based `.mplstyle` styles.
-- Stabilized plot preferences reset and style application across tests, docs, and CI environments.
 - fixed scikitlearn PLSRegression compatibility with scikit-learn >= 1.5
 - fixed issue #858 (omnic series reader)
 - fixed issue #856 (osqp dependency, used for IRIS)
-- fixed MCRALS (list of intermediate spectral matrices)
+- fixed MCRALS (list od intermediate spectral matrices)
 - omnic_reader properly reads units for single beam spectra
 - fixed issue #875 (can't subtract offset-naive and offset-aware datetimes)
 
 Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 
-- Major Python compatibility updates:
+* Major Python compatibility updates:
     - Maximum Python version increased to 3.14
     - Minimum Python version increased to 3.11
     - Dropped support for Python 3.10 and below
