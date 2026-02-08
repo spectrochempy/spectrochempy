@@ -173,9 +173,9 @@ def multiplot(
 
     """
 
-    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+    from spectrochempy.core.plotters.plot_setup import lazy_ensure_mpl_config
 
-    ensure_mpl_setup()
+    lazy_ensure_mpl_config()
 
     import matplotlib
     import matplotlib.backend_bases  # noqa: F401
@@ -328,8 +328,7 @@ def multiplot(
                     or (sharex == "col" and irow == 0)
                     or (sharey == "row" and icol == 0)
                 ):
-                    ax = _Axes(fig, nrow, ncol, irow * ncol + icol + 1)
-                    ax = fig.add_subplot(ax)
+                    ax = fig.add_subplot(nrow, ncol, irow * ncol + icol + 1)
 
                 else:
                     if sharex == "all":

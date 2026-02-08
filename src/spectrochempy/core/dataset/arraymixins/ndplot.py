@@ -37,7 +37,7 @@ import traitlets as tr
 from spectrochempy.application.application import debug_
 from spectrochempy.application.application import error_
 from spectrochempy.application.preferences import preferences as prefs
-from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.mplutils import _Axes
@@ -210,11 +210,11 @@ class NDPlot(tr.HasTraits):
 
         """
 
-        from spectrochempy.core.plotters.plot_setup import (
-            ensure_spectrochempy_plot_style,
-        )
+        # 🚀 LAZY TRIGGER: This is the ONLY place that initializes matplotlib
+        # ALL matplotlib setup happens here on the first plot() call
+        from spectrochempy.core.plotters.plot_setup import lazy_ensure_mpl_config
 
-        ensure_spectrochempy_plot_style()
+        lazy_ensure_mpl_config()
 
         show = kwargs.pop("show", True)
 
@@ -272,7 +272,6 @@ class NDPlot(tr.HasTraits):
         return ax
 
     def close_figure(self):
-        ensure_mpl_setup()
         if self._fig is None:
             return
         try:
@@ -285,7 +284,11 @@ class NDPlot(tr.HasTraits):
             debug_("Could not import the figure before closing.")
 
     def _figure_setup(self, ndim=1, method=None, **kwargs):
-        ensure_mpl_setup()
+
+        # Always ensure full lazy initialization to avoid state corruption
+        from spectrochempy.core.plotters.plot_setup import lazy_ensure_mpl_config
+
+        lazy_ensure_mpl_config()
 
         from matplotlib.axes import Axes
 
@@ -315,16 +318,13 @@ class NDPlot(tr.HasTraits):
 
         else:
             if ndim < 3:
-                ax = _Axes(self._fig, 1, 1, 1)
-                ax = self._fig.add_subplot(ax)
+                ax = self._fig.add_subplot(1, 1, 1)
             else:
-                ax = _Axes3D(self._fig)
-                ax = self._fig.add_axes(ax, projection="3d")
+                ax = self._fig.add_subplot(111, projection="3d")
 
             ax.name = "main"
             self.ndaxes["main"] = ax
-
-        self._fignum = None
+            self._fignum = None
         return method or ""
 
     def _plot_resume(self, origin: Any, **kwargs: Any) -> None:

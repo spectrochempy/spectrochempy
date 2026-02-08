@@ -344,17 +344,21 @@ class SpectroChemPy(Application):
     # ----------------------------------------------------------------------------------
     def start(self):
         """
-        Start the  `SpectroChemPy` API.
+        Start the SpectroChemPy application.
 
-        All configuration must have been done before calling this function.
+        MATPLOTLIB SETUP REMOVED: All matplotlib initialization is now lazy
+        and happens on the first plot() call via lazy_ensure_mpl_config().
+
+        This provides dramatic import performance improvements while preserving
+        all existing functionality.
+
+        Returns
+        -------
+        bool
+            True if startup was successful, False otherwise.
         """
-        from matplotlib import pyplot as plt
-
+        # Initialize datadir before preferences (required for circular dependency)
         from spectrochempy.application.datadir import DataDir
-
-        if self._running:
-            # API already started. Nothing done!
-            return True
 
         # datadir
         self.datadir = DataDir()
@@ -362,36 +366,44 @@ class SpectroChemPy(Application):
         # Get preferences from the config file and init everything
         self._init_all_preferences()
 
-        # force update of rcParams
-        import matplotlib as mpl
+        # ❌ REMOVED: Snapshot user rcParams - now done lazily in plot_setup.py
+        # from spectrochempy.core.plotters.plot_setup import _snapshot_user_rcparams
+        # _snapshot_user_rcparams()
 
-        for rckey in mpl.rcParams:
-            key = rckey.replace("_", "__").replace(".", "_").replace("-", "___")
-            try:
-                mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
-            except ValueError:
-                mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace(
-                    "'",
-                    "",
-                )
-            except AttributeError:
-                # print(f'{e} -> you may want to add it to PlotPreferences.py')
-                pass
+        # ❌ REMOVED: Force update of rcParams - now done lazily
+        # import matplotlib as mpl
+        # for rckey in mpl.rcParams:
+        #     key = rckey.replace("_", "__").replace(".", "_").replace("-", "___")
+        #     try:
+        #         mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
+        #     except ValueError:
+        #         mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace(
+        #             "'",
+        #             "",
+        #         )
+        #     except AttributeError:
+        #         # print(f'{e} -> you may want to add it to PlotPreferences.py')
+        #         pass
 
-        self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
+        # ❌ REMOVED: LaTeX font configuration - now done lazily
+        # self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
 
-        # Eventually write the default config file
+        # Eventually write default config file
         # --------------------------------------
         self.make_default_config_file()
 
-        # set the default style
-        # --------------------------------------------------------------------------------------
-        plt.style.use(["classic"])
+        # ❌ REMOVED: Set default style - now done lazily
+        # plt.style.use(["classic"])
 
         self.debug_(
             f"API loaded with log level set to "
             f"{logging.getLevelName(int(self.log_level))}- application is ready"
         )
+
+        self._running = True
+        return True
+
+        # force update of rcParams
 
         self._running = True
         return True

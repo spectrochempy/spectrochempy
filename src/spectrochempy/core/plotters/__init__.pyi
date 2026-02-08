@@ -8,7 +8,6 @@
 
 __all__ = [
     "_mpl_assets",
-    "_mpl_setup",
     "multiplot",
     "plot1d",
     "plot2d",
@@ -18,7 +17,6 @@ __all__ = [
 ]
 
 from . import _mpl_assets
-from . import _mpl_setup
 from . import multiplot
 from . import plot1d
 from . import plot2d

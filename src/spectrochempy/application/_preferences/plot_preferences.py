@@ -23,7 +23,6 @@ This file is intentionally verbose and explicit to avoid hidden plotting
 side effects and make rcParams restoration possible.
 """
 
-
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
@@ -51,6 +50,20 @@ from traitlets import observe
 from traitlets import validate
 
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
+
+
+# Helper function for lazy preference management
+def _is_mpl_initialized():
+    """Check if matplotlib has been initialized by SpectroChemPy."""
+    try:
+        from spectrochempy.core.plotters.plot_setup import (
+            _is_mpl_initialized as _is_initialized,
+        )
+
+        return _is_initialized()
+    except ImportError:
+        return False
+
 
 # --------------------------------------------------------------------------------------
 # available matplotlib styles (equivalent of plt.style.available)
@@ -933,7 +946,7 @@ class PlotPreferences(MetaConfigurable):
     hist_bins = TraitUnion(
         trait_types=[Integer(), Unicode()],
         default_value="auto",
-        help=("The default number of histogram bins. " "May be an integer or 'auto'."),
+        help=("The default number of histogram bins. May be an integer or 'auto'."),
     ).tag(config=True)
 
     # -----------
@@ -1281,9 +1294,9 @@ class PlotPreferences(MetaConfigurable):
     @staticmethod
     def _get_fontsize(fontsize):
         # Ensure Matplotlib is initialized (lazy & backend-safe)
-        from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+        from spectrochempy.core.plotters.plot_setup import lazy_ensure_mpl_config
 
-        ensure_mpl_setup()
+        lazy_ensure_mpl_config()
 
         from contextlib import suppress
 
@@ -1623,10 +1636,21 @@ class PlotPreferences(MetaConfigurable):
     @observe(All)
     def _anytrait_changed(self, change):
         """
-        Synchronize trait changes → matplotlib.rcParams.
+        Synchronize trait changes → matplotlib.rcParams with LAZY deferral.
 
-        This is the ONLY generic place where rcParams are updated.
+        This method now handles both immediate and deferred preference changes
+        depending on whether matplotlib has been initialized.
         """
+        # Queue the change if matplotlib not yet initialized
+        if not _is_mpl_initialized():
+            # Import here to avoid circular dependency
+            from spectrochempy.core.plotters.plot_setup import _defer_preference_change
+
+            # Don't apply to rcParams yet, just queue for later
+            _defer_preference_change(change)
+            return
+
+        # Apply immediately if matplotlib is already initialized
         # WARNING:
         # If you add direct rcParams writes elsewhere,
         # you risk breaking rcParams restoration and tests.

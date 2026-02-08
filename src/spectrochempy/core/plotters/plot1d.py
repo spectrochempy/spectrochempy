@@ -62,9 +62,9 @@ def plot_1D(dataset, method=None, **kwargs):
     multiplot
 
     """
-    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+    from spectrochempy.core.plotters.plot_setup import lazy_ensure_mpl_config
 
-    ensure_mpl_setup()
+    lazy_ensure_mpl_config()
 
     import matplotlib.backend_bases  # noqa: F401
     import matplotlib.pyplot as plt

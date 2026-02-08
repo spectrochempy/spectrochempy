@@ -147,9 +147,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
     """
 
-    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+    from spectrochempy.core.plotters.plot_setup import lazy_ensure_mpl_config
 
-    ensure_mpl_setup()
+    lazy_ensure_mpl_config()
 
     import matplotlib as mpl
     import matplotlib.backend_bases  # noqa: F401
@@ -640,7 +640,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # do we display the zero line
     if kwargs.get("show_zero", False):
-        ax.haxlines()
+        ax.axhline(y=0, color="k", linestyle="--", alpha=0.5)
 
     new._plot_resume(dataset, **kwargs)
 
@@ -652,9 +652,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
 
 def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs):
-    from spectrochempy.core.plotters._mpl_setup import ensure_mpl_setup
+    from spectrochempy.core.plotters.plot_setup import lazy_ensure_mpl_config
 
-    ensure_mpl_setup()
+    lazy_ensure_mpl_config()
 
     import matplotlib as mpl
     import matplotlib.pyplot as plt
