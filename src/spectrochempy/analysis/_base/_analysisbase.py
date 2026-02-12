@@ -1011,8 +1011,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Y = Y.squeeze()
             Y_hat = Y_hat.squeeze()
 
-        plt.style.use(["default"])
-        plt.rcParams.update({"font.size": 14})
+        # plt.style.use(["default"])  # DISABLED: No global style mutation
+        # plt.rcParams.update({"font.size": 14})  # DISABLED: No global rcParams mutation
         if clear:
             fig = plt.figure()
             ax = fig.add_subplot(111)

@@ -1192,13 +1192,15 @@ class PlotPreferences(MetaConfigurable):
         # - reduce direct rcParams writes
 
         def update_rcParams():
-            mpl.rcParams["text.usetex"] = self.text_usetex
-            mpl.rcParams["mathtext.fontset"] = self.mathtext_fontset
-            mpl.rcParams["mathtext.bf"] = self.mathtext_bf
-            mpl.rcParams["mathtext.cal"] = self.mathtext_cal
-            mpl.rcParams["mathtext.default"] = self.mathtext_default
-            mpl.rcParams["mathtext.rm"] = self.mathtext_rm
-            mpl.rcParams["mathtext.it"] = self.mathtext_it
+            # DISABLED: No longer apply global rcParams directly
+            # mpl.rcParams["text.usetex"] = self.text_usetex
+            # mpl.rcParams["mathtext.fontset"] = self.mathtext_fontset
+            # mpl.rcParams["mathtext.bf"] = self.mathtext_bf
+            # mpl.rcParams["mathtext.cal"] = self.mathtext_cal
+            # mpl.rcParams["mathtext.default"] = self.mathtext_default
+            # mpl.rcParams["mathtext.rm"] = self.mathtext_rm
+            # mpl.rcParams["mathtext.it"] = self.mathtext_it
+            pass
 
         if family is None:
             family = self.font_family  # take the current one
@@ -1210,7 +1212,7 @@ class PlotPreferences(MetaConfigurable):
             self.mathtext_default = "regular"
             self.mathtext_rm = "dejavusans"
             self.mathtext_it = "dejavusans:italic"
-            update_rcParams()
+            # update_rcParams()  # DISABLED: No longer apply global rcParams
         elif family == "serif":
             self.text_usetex = False
             self.mathtext_fontset = "dejavuserif"
@@ -1219,7 +1221,7 @@ class PlotPreferences(MetaConfigurable):
             self.mathtext_default = "regular"
             self.mathtext_rm = "dejavuserif"
             self.mathtext_it = "dejavuserif:italic"
-            update_rcParams()
+            # update_rcParams()  # DISABLED: No longer apply global rcParams
         elif family == "cursive":
             self.text_usetex = False
             self.mathtext_fontset = "custom"
@@ -1228,7 +1230,7 @@ class PlotPreferences(MetaConfigurable):
             self.mathtext_default = "regular"
             self.mathtext_rm = "cursive"
             self.mathtext_it = "cursive:italic"
-            update_rcParams()
+            # update_rcParams()  # DISABLED: No longer apply global rcParams
         elif family == "monospace":
             self.text_usetex = False
             mpl.rcParams["mathtext.fontset"] = "custom"
@@ -1246,13 +1248,14 @@ class PlotPreferences(MetaConfigurable):
             mpl.rcParams["mathtext.rm"] = "Comic Sans MS"
             mpl.rcParams["mathtext.it"] = "Humor Sans:italic"
 
-    @observe("simplify")
+    # @observe("simplify")  # DISABLED: Remove automatic global rcParams mutation
     def _simplify_changed(self, change):
-        # This observer updates rcParams immediately.
+        # DISABLED: This observer updates rcParams immediately.
         # It bypasses the generic _anytrait_changed logic
         # because path.simplify has special semantics.
-        plt.rcParams["path.simplify"] = change.new
-        plt.rcParams["path.simplify_threshold"] = 1.0
+        # plt.rcParams["path.simplify"] = change.new
+        # plt.rcParams["path.simplify_threshold"] = 1.0
+        pass
 
     @default("stylesheets")
     def _get_stylesheets_default(self):
@@ -1540,7 +1543,7 @@ class PlotPreferences(MetaConfigurable):
         # It must always be handled explicitly via rcdefaults(), including
         # when encountered inside other style sheets (e.g. scpy.mplstyle).
         if _style == "default":
-            plt.rcdefaults()
+            # plt.rcdefaults()  # DISABLED: No global rcParams mutation
             return
 
         # --------------------------------------------------
@@ -1633,7 +1636,7 @@ class PlotPreferences(MetaConfigurable):
         rckey += "_".join(lis)
         return rckey
 
-    @observe(All)
+    # @observe(All)  # DISABLED: Remove automatic global rcParams mutation
     def _anytrait_changed(self, change):
         """
         Synchronize trait changes → matplotlib.rcParams with LAZY deferral.
@@ -1651,6 +1654,7 @@ class PlotPreferences(MetaConfigurable):
             return
 
         # Apply immediately if matplotlib is already initialized
+        # DISABLED: No longer apply global rcParams automatically
         # WARNING:
         # If you add direct rcParams writes elsewhere,
         # you risk breaking rcParams restoration and tests.
@@ -1662,22 +1666,22 @@ class PlotPreferences(MetaConfigurable):
         #   'name': "foo", # The name of the changed trait
         #   'type': 'change', # The event type of the notification, usually 'change'
         # }
-        if change.name in self.trait_names(config=True):
-            key = self.to_rc_key(change.name)
-            if key in mpl.rcParams:
-                # if key.startswith("font"):
-                #     print()
-                try:
-                    mpl.rcParams[key] = change.new
-                except ValueError:  # pragma: no cover
-                    mpl.rcParams[key] = change.new.replace("'", "")
-            else:
-                pass  # debug_(f'no such parameter in rcParams: {key} - skipped')
-            if key == "font.size":
-                mpl.rcParams["legend.fontsize"] = int(change.new * 0.8)
-                mpl.rcParams["xtick.labelsize"] = int(change.new)
-                mpl.rcParams["ytick.labelsize"] = int(change.new)
-                mpl.rcParams["axes.labelsize"] = int(change.new)
+        # if change.name in self.trait_names(config=True):
+        #     key = self.to_rc_key(change.name)
+        #     if key in mpl.rcParams:
+        #         # if key.startswith("font"):
+        #         #     print()
+        #         try:
+        #             mpl.rcParams[key] = change.new
+        #         except ValueError:  # pragma: no cover
+        #             mpl.rcParams[key] = change.new.replace("'", "")
+        #     else:
+        #         pass  # debug_(f'no such parameter in rcParams: {key} - skipped')
+        #     if key == "font.size":
+        #         mpl.rcParams["legend.fontsize"] = int(change.new * 0.8)
+        #         mpl.rcParams["xtick.labelsize"] = int(change.new)
+        #         mpl.rcParams["ytick.labelsize"] = int(change.new)
+        #         mpl.rcParams["axes.labelsize"] = int(change.new)
             if key == "font.family":
                 self.set_latex_font(
                     change.new,

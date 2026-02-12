@@ -127,21 +127,23 @@ def _apply_deferred_preferences() -> None:
 
     plot_prefs = app.plot_preferences
 
-    if plot_prefs:
+    # DISABLED: No longer apply global rcParams
+    # if plot_prefs:
         import matplotlib as mpl
 
-        for change_key, change in _PENDING_PREFERENCE_CHANGES.items():
-            try:
-                # Apply the change directly to rcParams
-                # Convert trait name to rcParams key
-                rc_key = plot_prefs.to_rc_key(change.name)
-                if rc_key in mpl.rcParams:
-                    mpl.rcParams[rc_key] = change.new
-                    debug_(f"Applied {rc_key} = {change.new}")
-                else:
-                    warning_(f"Unknown rcParams key: {rc_key}")
-            except Exception as e:
-                warning_(f"Failed to apply deferred preference {change_key}: {e}")
+        # DISABLED: No longer apply global rcParams from deferred changes
+        # for change_key, change in _PENDING_PREFERENCE_CHANGES.items():
+        #     try:
+        #         # Apply the change directly to rcParams
+        #         # Convert trait name to rcParams key
+        #         rc_key = plot_prefs.to_rc_key(change.name)
+        #         if rc_key in mpl.rcParams:
+        #             mpl.rcParams[rc_key] = change.new
+        #             debug_(f"Applied {rc_key} = {change.new}")
+        #     else:
+        #         warning_(f"Unknown rcParams key: {rc_key}")
+        #     except Exception as e:
+        #         warning_(f"Failed to apply deferred preference {change_key}: {e}")
 
     # Clear the queue
     _PENDING_PREFERENCE_CHANGES.clear()
@@ -348,7 +350,7 @@ def _perform_lazy_mpl_initialization() -> None:
     # ------------------------------------------------------------------
     # 5. Synchronize current preferences to rcParams
     # ------------------------------------------------------------------
-    _synchronize_preferences_to_rcparams()
+    # _synchronize_preferences_to_rcparams()  # DISABLED: No longer apply global rcParams
 
     # ------------------------------------------------------------------
     # 6. LaTeX font configuration
@@ -362,19 +364,18 @@ def _perform_lazy_mpl_initialization() -> None:
     # ------------------------------------------------------------------
     # 7. Apply default style (classic + configured style)
     # ------------------------------------------------------------------
-    plt.style.use(["classic"])
+    # plt.style.use(["classic"])  # DISABLED: No longer apply global style
 
     if plot_prefs and plot_prefs.style:
-        if isinstance(plot_prefs.style, str):
-            plt.style.use([plot_prefs.style])
-        else:
-            plt.style.use(plot_prefs.style)
+        # DISABLE global style application
+        # Note: Styles now applied only via local context in plotting functions
+        pass
 
     # ------------------------------------------------------------------
     # 8. Apply all deferred preference changes LAST
     # ------------------------------------------------------------------
     # This must be last to override any other settings
-    _apply_deferred_preferences()
+    # _apply_deferred_preferences()  # DISABLED: No longer apply global rcParams
 
 
 def ensure_spectrochempy_plot_style() -> None:
