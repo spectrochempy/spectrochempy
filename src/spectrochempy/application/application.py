@@ -481,21 +481,79 @@ class SpectroChemPy(Application):
 
 
 # --------------------------------------------------------------------------------------
-# Setup environment
-from .envsetup import setup_environment
+# Setup environment - lazy initialization
+# We defer calling setup_environment() until it's actually needed
+# to avoid importing matplotlib at module load time
 
-NO_DISPLAY, SCPY_STARTUP_LOGLEVEL, is_pytest = setup_environment()
+_no_display = None
+_scpy_startup_loglevel = None
+_is_pytest = None
+
+
+def _get_environment():
+    """Lazy initialization of environment settings."""
+    global _no_display, _scpy_startup_loglevel, _is_pytest
+    if _no_display is None:
+        from .envsetup import setup_environment
+
+        _no_display, _scpy_startup_loglevel, _is_pytest = setup_environment()
+
+    # Also ensure app is fully started if not already
+    global _app_started
+    if not _app_started:
+        app.start()
+        _app_started = True
+
+    return _no_display, _scpy_startup_loglevel, _is_pytest
+
+
+_app_started = False
+
+
+def _get_no_display():
+    """Lazy accessor for NO_DISPLAY."""
+    return _get_environment()[0]
+
+
+class _NO_DISPLAY:
+    """Lazy proxy for NO_DISPLAY that defers initialization."""
+
+    def __bool__(self):
+        return _get_no_display()
+
+    def __repr__(self):
+        return repr(_get_no_display())
+
+
+# Module-level lazy variable
+NO_DISPLAY = _NO_DISPLAY()
+
 
 # Define an instance of the SpectroChemPy application.
-app = SpectroChemPy(log_level=SCPY_STARTUP_LOGLEVEL)
+# We defer full initialization until needed
+app = SpectroChemPy(log_level=logging.WARNING)
 
-# Start the application
-app.start()
 
-error_ = app.error_
-info_ = app.info_
-debug_ = app.debug_
-warning_ = app.warning_
+# Lazily initialize app methods
+def _get_error_():
+    _get_environment()  # Ensure environment is set up
+    return app.error_
+
+
+def _get_info_():
+    _get_environment()
+    return app.info_
+
+
+def _get_debug_():
+    _get_environment()
+    return app.debug_
+
+
+def _get_warning_():
+    _get_environment()
+    return app.warning_
+
 
 # Log levels
 # ----------
@@ -547,26 +605,47 @@ def get_loglevel() -> int:
 # --------------------------------------------------------------------------------------
 import threading
 
-if not NO_DISPLAY:
+
+def _start_update_check():
+    """Lazily start the update check thread."""
     from .check_update import check_update
     from .info import version
 
+    _get_environment()  # Ensure environment is set up
     check_update_frequency = app.general_preferences.check_update_frequency
     DISPLAY_UPDATE = threading.Thread(
         target=check_update, args=(version, check_update_frequency)
     )
-
     DISPLAY_UPDATE.start()
 
-# --------------------------------------------------------------------------------------
-# Download data in a separate thread
-# --------------------------------------------------------------------------------------
-if not is_pytest:
+
+def _start_testdata_download():
+    """Lazily start the test data download thread."""
     from .testdata import download_full_testdata_directory
 
+    _get_environment()  # Ensure environment is set up
     DOWNLOAD_TESTDATA = threading.Thread(
         target=download_full_testdata_directory,
         args=(app.general_preferences.datadir,),
     )
-
     DOWNLOAD_TESTDATA.start()
+
+
+# Background threads are started lazily on first access
+# _maybe_start_background_threads() - called when needed
+
+
+# --------------------------------------------------------------------------------------
+# Lazy module-level exports
+# --------------------------------------------------------------------------------------
+def __getattr__(name):
+    """Lazy module-level attribute access."""
+    if name == "error_":
+        return _get_error_()
+    elif name == "info_":
+        return _get_info_()
+    elif name == "debug_":
+        return _get_debug_()
+    elif name == "warning_":
+        return _get_warning_()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

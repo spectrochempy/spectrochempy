@@ -16,8 +16,6 @@ from datetime import datetime
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import info_
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import Unit
@@ -39,6 +37,8 @@ from spectrochempy.utils.print import insert_masked_print
 from spectrochempy.utils.print import numpyprintoptions
 from spectrochempy.utils.typeutils import is_number
 from spectrochempy.utils.typeutils import is_sequence
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import info_
 
 # Printing settings
 # --------------------------------------------------------------------------------------

@@ -23,8 +23,8 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 import spectrochempy as scp
 from spectrochempy.core.plotters.plot_setup import (
     lazy_ensure_mpl_config,
-    MPLInitState,
     _is_mpl_initialized,
+    _set_mpl_state,
 )
 
 
@@ -60,7 +60,7 @@ class TestLazyInitializationPerformance:
 
         # Reset initialization state
         with _MPL_INIT_LOCK:
-            _set_mpl_state(MPLInitState.NOT_INITIALIZED)
+            _set_mpl_state(False)
 
         # Initially matplotlib should not be initialized by SpectroChemPy
         assert _is_mpl_initialized() is False
@@ -96,7 +96,7 @@ class TestLazyInitializationPerformance:
 
         # Reset matplotlib state
         with _MPL_INIT_LOCK:
-            _set_mpl_state(MPLInitState.NOT_INITIALIZED)
+            _set_mpl_state(False)
 
         # Test lazy initialization timing without full plotting
         # Focus on initialization overhead, not plotting functionality
@@ -120,20 +120,18 @@ class TestLazyInitializationStateManagement:
         """Test proper state transitions."""
         import spectrochempy.core.plotters.plot_setup as plot_setup
         from spectrochempy.core.plotters.plot_setup import (
-            _MPL_INIT_LOCK,
             _set_mpl_state,
         )
 
         # Reset to NOT_INITIALIZED first
-        with _MPL_INIT_LOCK:
-            _set_mpl_state(MPLInitState.NOT_INITIALIZED)
+        _set_mpl_state(False)
 
         # Start in NOT_INITIALIZED
-        assert plot_setup._MPL_INIT_STATE == MPLInitState.NOT_INITIALIZED
+        assert plot_setup._MPL_READY == False
 
         # Should transition to INITIALIZED
         lazy_ensure_mpl_config()
-        assert plot_setup._MPL_INIT_STATE == MPLInitState.INITIALIZED
+        assert plot_setup._MPL_READY == True
 
     def test_thread_safety(self):
         """Test thread safety of lazy initialization."""
@@ -159,7 +157,7 @@ class TestLazyInitializationStateManagement:
         # Should complete successfully with no errors
         assert len(errors) == 0
         assert len(results) == 5
-        assert plot_setup._MPL_INIT_STATE == MPLInitState.INITIALIZED
+        assert plot_setup._MPL_READY == True
 
     def test_idempotent_initialization(self):
         """Test that multiple calls are safe."""
@@ -173,8 +171,8 @@ class TestLazyInitializationStateManagement:
         lazy_ensure_mpl_config()
         second_state = plot_setup._MPL_INIT_STATE
 
-        assert first_state == MPLInitState.INITIALIZED
-        assert second_state == MPLInitState.INITIALIZED
+        assert first_state == True
+        assert second_state == True
 
 
 class TestLazyPreferenceSystem:
@@ -191,7 +189,7 @@ class TestLazyPreferenceSystem:
 
         # Clear existing pending changes
         with _MPL_INIT_LOCK:
-            _set_mpl_state(MPLInitState.NOT_INITIALIZED)
+            _set_mpl_state(False)
             _PENDING_PREFERENCE_CHANGES.clear()
 
         # Manually trigger preference change to simulate trait notification
@@ -305,7 +303,7 @@ class TestLazyInitializationEdgeCases:
         )
 
         with _MPL_INIT_LOCK:
-            _set_mpl_state(MPLInitState.NOT_INITIALIZED)
+            _set_mpl_state(False)
 
         # Mock the initialization function to raise an exception
         # Note: This tests the error handling path since matplotlib is already imported
@@ -324,7 +322,7 @@ class TestLazyInitializationEdgeCases:
         with patch.dict("os.environ", {"DISPLAY": ""}, clear=True):
             # Should not fail in headless environment
             lazy_ensure_mpl_config()
-            assert plot_setup._MPL_INIT_STATE == MPLInitState.INITIALIZED
+            assert plot_setup._MPL_READY == True
 
     def test_concurrent_plot_calls(self):
         """Test concurrent plot calls."""

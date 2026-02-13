@@ -9,7 +9,6 @@ import textwrap
 from traitlets import TraitError
 
 from spectrochempy.application.application import app
-from spectrochempy.application.application import error_
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.meta import Meta
 
@@ -22,7 +21,23 @@ __all__ = ["preferences"]
 class PreferencesSet(Meta):
     """Preferences setting."""
 
+    def _ensure_app_ready(self):
+        """Ensure the application is initialized before accessing preferences."""
+        from spectrochempy.application.application import app as _app
+
+        # Check if app has plot_preferences, if not trigger lazy init
+        if not hasattr(_app, "plot_preferences"):
+            from spectrochempy.application.application import _get_environment
+
+            _get_environment()
+
     def __getitem__(self, key):
+        # Lazy import to avoid triggering matplotlib at module load time
+        from spectrochempy.application.application import error_
+
+        # Ensure app is ready BEFORE accessing preferences
+        self._ensure_app_ready()
+
         # search on the preferences
         if self.parent is not None:
             res = getattr(self.parent, f"{self.name}_{key}")
@@ -52,6 +67,12 @@ class PreferencesSet(Meta):
         return res
 
     def __setitem__(self, key, value):
+        # Lazy import to avoid triggering matplotlib at module load time
+        from spectrochempy.application.application import error_
+
+        # Ensure app is ready before accessing preferences
+        self._ensure_app_ready()
+
         # also change the corresponding preferences
         if hasattr(app.plot_preferences, key):
             try:
@@ -226,6 +247,9 @@ class PreferencesSet(Meta):
             Name of the style
 
         """
+        # Lazy import to avoid triggering matplotlib at module load time
+        from spectrochempy.application.application import error_
+
         import matplotlib as mpl
 
         if stylename.startswith("scpy"):

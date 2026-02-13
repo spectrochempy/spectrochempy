@@ -113,9 +113,8 @@ import spectrochempy
 import_time = time.time() - start
 
 # Check lazy initialization state
-from spectrochempy.core.plotters.plot_setup import _get_mpl_state, MPLInitState
-state = _get_mpl_state()
-initial_state = state.name
+from spectrochempy.core.plotters.plot_setup import _get_mpl_state
+initial_state = "initialized" if _get_mpl_state() else "not_initialized"
 
 # Create dataset and plot (should trigger lazy init)
 start = time.time()
@@ -127,7 +126,7 @@ ax = dataset.plot(show=False)
 first_plot_time = time.time() - start
 
 # Check state after first plot
-final_state = _get_mpl_state().name
+final_state = "initialized" if _get_mpl_state() else "not_initialized"
 
 print(f"INITIAL_STATE:{initial_state}")
 print(f"FINAL_STATE:{final_state}")

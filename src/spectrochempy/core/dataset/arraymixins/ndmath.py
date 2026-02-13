@@ -18,8 +18,6 @@ import numpy as np
 from quaternion import as_float_array
 
 # Local imports
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
@@ -31,6 +29,8 @@ from spectrochempy.utils.objects import OrderedSet
 from spectrochempy.utils.quaternion import as_quaternion
 from spectrochempy.utils.quaternion import quat_as_complex_array
 from spectrochempy.utils.testing import assert_coord_almost_equal
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import warning_
 
 __all__ = []
 __dataset_methods__ = []

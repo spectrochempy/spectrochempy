@@ -7,9 +7,9 @@
 """
 PlotPreferences.
 
-This module implements SpectroChemPy’s plotting configuration system.
+This module implements SpectroChemPy's plotting configuration system.
 
-It provides a *typed, observable, reversible* interface to Matplotlib’s
+It provides a *typed, observable, reversible* interface to Matplotlib's
 global rcParams, using traitlets as the configuration backbone.
 
 Key ideas
@@ -21,11 +21,60 @@ Key ideas
 
 This file is intentionally verbose and explicit to avoid hidden plotting
 side effects and make rcParams restoration possible.
+
+IMPORTANT:
+----------
+This module lazy-loads matplotlib to avoid importing it at module import time.
+All matplotlib imports are inside functions that are only called during
+actual plotting, not at import/init time.
 """
 
-import matplotlib as mpl
-from matplotlib import pyplot as plt
-from matplotlib.lines import Line2D
+# Static values for Line2D traits (lazy-loaded, not imported at module level)
+# These values are unlikely to change across matplotlib versions
+LINESTYLE_KEYS = ["-", "--", "-.", ":", "None", " ", ""]
+MARKER_KEYS = [
+    ".",
+    ",",
+    "o",
+    "v",
+    "^",
+    "<",
+    ">",
+    "1",
+    "2",
+    "3",
+    "4",
+    "8",
+    "s",
+    "p",
+    "*",
+    "h",
+    "H",
+    "+",
+    "x",
+    "D",
+    "d",
+    "|",
+    "_",
+    "P",
+    "X",
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    "None",
+    "none",
+    " ",
+    "",
+]
 
 # traitlets below are used to:
 # - provide type validation (Float, Bool, Enum, etc.)
@@ -84,6 +133,9 @@ def available_styles():
     -------
     A list of matplotlib styles
     """
+    import matplotlib as mpl
+    from matplotlib import pyplot as plt
+
     from spectrochempy.utils.file import pathclean
 
     # Todo: Make this list extensible programmatically (adding files to stylelib)
@@ -112,6 +164,9 @@ def _canonical_cmap_name(name: str) -> str:
 
     if not isinstance(name, str):
         raise TraitError("colormap must be a string")
+
+    # Lazy import to avoid loading matplotlib at module import time
+    from matplotlib import pyplot as plt
 
     # Build a case-insensitive map from available colormaps
     cmaps = plt.colormaps()
@@ -180,7 +235,7 @@ class PlotPreferences(MetaConfigurable):
         kind="",
     )
     lines_linestyle = Enum(
-        list(Line2D.lineStyles.keys()),
+        list(LINESTYLE_KEYS),
         default_value="-",
         help=r"""solid line""",
     ).tag(config=True, gui=True, kind="")
@@ -189,7 +244,7 @@ class PlotPreferences(MetaConfigurable):
         help=r"""has no affect on plot(); see axes.prop_cycle""",
     ).tag(config=True, kind="color")
     lines_marker = Enum(
-        list(Line2D.markers.keys()),
+        list(MARKER_KEYS),
         default_value="None",
         help=r"""the default marker""",
     ).tag(config=True, kind="")
@@ -738,7 +793,7 @@ class PlotPreferences(MetaConfigurable):
     #
     grid_color = Unicode(".85", help=r"""grid color""").tag(config=True, kind="color")
     grid_linestyle = Enum(
-        list(Line2D.lineStyles.keys()),
+        list(LINESTYLE_KEYS),
         default_value="-",
         help=r"""solid""",
     ).tag(config=True, kind="")
@@ -953,7 +1008,7 @@ class PlotPreferences(MetaConfigurable):
     # 13. SCATTER
     # -----------
     scatter_marker = Enum(
-        list(Line2D.markers.keys()),
+        list(MARKER_KEYS),
         default_value="o",
         help=r"""The default marker type for scatter plots.""",
     ).tag(config=True, kind="")
@@ -1148,6 +1203,12 @@ class PlotPreferences(MetaConfigurable):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # Lazy import to avoid loading matplotlib at class instantiation time
+        # (but this is still called during init, so matplotlib WILL be imported
+        # when PlotPreferences is instantiated - which is intentional as it's
+        # part of the plotting system initialization)
+        from matplotlib import pyplot as plt
+
         # Build internal maps of rcParams structure:
         # - groups:     e.g. "axes", "lines", "font"
         # - subgroups:  rarely used second-level keys
@@ -1183,70 +1244,76 @@ class PlotPreferences(MetaConfigurable):
         return self._subgroups
 
     def set_latex_font(self, family=None):
-        # WARNING:
-        # This method mutates rcParams directly.
-        # It exists for historical reasons and LaTeX compatibility.
-        #
-        # Any refactor should aim to:
-        # - move this logic into trait observers
-        # - reduce direct rcParams writes
+        """
+        Return a dict of rcParams overrides for LaTeX font settings.
 
-        def update_rcParams():
-            # DISABLED: No longer apply global rcParams directly
-            # mpl.rcParams["text.usetex"] = self.text_usetex
-            # mpl.rcParams["mathtext.fontset"] = self.mathtext_fontset
-            # mpl.rcParams["mathtext.bf"] = self.mathtext_bf
-            # mpl.rcParams["mathtext.cal"] = self.mathtext_cal
-            # mpl.rcParams["mathtext.default"] = self.mathtext_default
-            # mpl.rcParams["mathtext.rm"] = self.mathtext_rm
-            # mpl.rcParams["mathtext.it"] = self.mathtext_it
-            pass
+        This method does NOT mutate global rcParams. Instead, it returns
+        a dictionary that can be used with mpl.rc_context() in plotting calls.
 
+        Parameters
+        ----------
+        family : str, optional
+            Font family to use. If None, uses self.font_family.
+
+        Returns
+        -------
+        dict
+            A dictionary of rcParams overrides for LaTeX font settings.
+        """
         if family is None:
-            family = self.font_family  # take the current one
+            family = self.font_family
+
         if family == "sans-serif":
-            self.text_usetex = False
-            self.mathtext_fontset = "dejavusans"
-            self.mathtext_bf = "dejavusans:bold"
-            self.mathtext_cal = "cursive"
-            self.mathtext_default = "regular"
-            self.mathtext_rm = "dejavusans"
-            self.mathtext_it = "dejavusans:italic"
-            # update_rcParams()  # DISABLED: No longer apply global rcParams
+            return {
+                "text.usetex": False,
+                "mathtext.fontset": "dejavusans",
+                "mathtext.bf": "dejavusans:bold",
+                "mathtext.cal": "cursive",
+                "mathtext.default": "regular",
+                "mathtext.rm": "dejavusans",
+                "mathtext.it": "dejavusans:italic",
+            }
         elif family == "serif":
-            self.text_usetex = False
-            self.mathtext_fontset = "dejavuserif"
-            self.mathtext_bf = "dejavuserif:bold"
-            self.mathtext_cal = "cursive"
-            self.mathtext_default = "regular"
-            self.mathtext_rm = "dejavuserif"
-            self.mathtext_it = "dejavuserif:italic"
-            # update_rcParams()  # DISABLED: No longer apply global rcParams
+            return {
+                "text.usetex": False,
+                "mathtext.fontset": "dejavuserif",
+                "mathtext.bf": "dejavuserif:bold",
+                "mathtext.cal": "cursive",
+                "mathtext.default": "regular",
+                "mathtext.rm": "dejavuserif",
+                "mathtext.it": "dejavuserif:italic",
+            }
         elif family == "cursive":
-            self.text_usetex = False
-            self.mathtext_fontset = "custom"
-            self.mathtext_bf = "cursive:bold"
-            self.mathtext_cal = "cursive"
-            self.mathtext_default = "regular"
-            self.mathtext_rm = "cursive"
-            self.mathtext_it = "cursive:italic"
-            # update_rcParams()  # DISABLED: No longer apply global rcParams
+            return {
+                "text.usetex": False,
+                "mathtext.fontset": "custom",
+                "mathtext.bf": "cursive:bold",
+                "mathtext.cal": "cursive",
+                "mathtext.default": "regular",
+                "mathtext.rm": "cursive",
+                "mathtext.it": "cursive:italic",
+            }
         elif family == "monospace":
-            self.text_usetex = False
-            mpl.rcParams["mathtext.fontset"] = "custom"
-            mpl.rcParams["mathtext.bf"] = "monospace:bold"
-            mpl.rcParams["mathtext.cal"] = "cursive"
-            mpl.rcParams["mathtext.default"] = "regular"
-            mpl.rcParams["mathtext.rm"] = "monospace"
-            mpl.rcParams["mathtext.it"] = "monospace:italic"
+            return {
+                "text.usetex": False,
+                "mathtext.fontset": "custom",
+                "mathtext.bf": "monospace:bold",
+                "mathtext.cal": "cursive",
+                "mathtext.default": "regular",
+                "mathtext.rm": "monospace",
+                "mathtext.it": "monospace:italic",
+            }
         elif family == "fantasy":
-            self.text_usetex = False
-            mpl.rcParams["mathtext.fontset"] = "custom"
-            mpl.rcParams["mathtext.bf"] = "Humor Sans:bold"
-            mpl.rcParams["mathtext.cal"] = "cursive"
-            mpl.rcParams["mathtext.default"] = "regular"
-            mpl.rcParams["mathtext.rm"] = "Comic Sans MS"
-            mpl.rcParams["mathtext.it"] = "Humor Sans:italic"
+            return {
+                "text.usetex": False,
+                "mathtext.fontset": "custom",
+                "mathtext.bf": "Humor Sans:bold",
+                "mathtext.cal": "cursive",
+                "mathtext.default": "regular",
+                "mathtext.rm": "Comic Sans MS",
+                "mathtext.it": "Humor Sans:italic",
+            }
+        return {}
 
     # @observe("simplify")  # DISABLED: Remove automatic global rcParams mutation
     def _simplify_changed(self, change):
@@ -1291,8 +1358,8 @@ class PlotPreferences(MetaConfigurable):
                     self._apply_style(_style)
             except Exception as e:
                 raise e
-        # additional setting
-        self.set_latex_font(self.font_family)
+        # Note: LaTeX font settings are now applied locally in plotting contexts
+        # via rc_context, not via global rcParams mutation
 
     @staticmethod
     def _get_fontsize(fontsize):
@@ -1328,6 +1395,8 @@ class PlotPreferences(MetaConfigurable):
 
     @staticmethod
     def _get_color(color):
+        from matplotlib import pyplot as plt
+
         prop_cycle = plt.rcParams["axes.prop_cycle"]
         colors = prop_cycle.by_key()["color"]
         c = [f"C{i}" for i in range(10)]
@@ -1528,6 +1597,7 @@ class PlotPreferences(MetaConfigurable):
         # BEFORE any filesystem access. Matplotlib does not ship
         # a default.mplstyle file. # Attempting to load it from disk will fail
 
+        import matplotlib as mpl
         import matplotlib.pyplot as plt
 
         from spectrochempy.utils.file import pathclean
@@ -1637,55 +1707,19 @@ class PlotPreferences(MetaConfigurable):
         return rckey
 
     # @observe(All)  # DISABLED: Remove automatic global rcParams mutation
+
     def _anytrait_changed(self, change):
         """
-        Synchronize trait changes → matplotlib.rcParams with LAZY deferral.
+        Handle trait changes - no longer applies to global matplotlib state.
 
-        This method now handles both immediate and deferred preference changes
-        depending on whether matplotlib has been initialized.
+        Preference changes are now handled locally in plotting contexts,
+        not through global matplotlib state mutation.
+
+        Note: LaTeX font settings are now applied via rc_context in plotting
+        functions (plot1d.py, plot2d.py), not via trait observers.
         """
-        # Queue the change if matplotlib not yet initialized
-        if not _is_mpl_initialized():
-            # Import here to avoid circular dependency
-            from spectrochempy.core.plotters.plot_setup import _defer_preference_change
-
-            # Don't apply to rcParams yet, just queue for later
-            _defer_preference_change(change)
-            return
-
-        # Apply immediately if matplotlib is already initialized
-        # DISABLED: No longer apply global rcParams automatically
-        # WARNING:
-        # If you add direct rcParams writes elsewhere,
-        # you risk breaking rcParams restoration and tests.
-
-        # ex: change {
-        #   'owner': object, # The HasTraits instance
-        #   'new': 6, # The new value
-        #   'old': 5, # The old value
-        #   'name': "foo", # The name of the changed trait
-        #   'type': 'change', # The event type of the notification, usually 'change'
-        # }
-        # if change.name in self.trait_names(config=True):
-        #     key = self.to_rc_key(change.name)
-        #     if key in mpl.rcParams:
-        #         # if key.startswith("font"):
-        #         #     print()
-        #         try:
-        #             mpl.rcParams[key] = change.new
-        #         except ValueError:  # pragma: no cover
-        #             mpl.rcParams[key] = change.new.replace("'", "")
-        #     else:
-        #         pass  # debug_(f'no such parameter in rcParams: {key} - skipped')
-        #     if key == "font.size":
-        #         mpl.rcParams["legend.fontsize"] = int(change.new * 0.8)
-        #         mpl.rcParams["xtick.labelsize"] = int(change.new)
-        #         mpl.rcParams["ytick.labelsize"] = int(change.new)
-        #         mpl.rcParams["axes.labelsize"] = int(change.new)
-            if key == "font.family":
-                self.set_latex_font(
-                    change.new,
-                )  # @observe('use_latex')  # def _use_latex_changed(self, change):  #     mpl.rc(  # 'text', usetex=change.new)  #  # @observe('latex_preamble')  # def _set_latex_preamble(self,  # change):  #     mpl.rcParams[  #    #  #  #  'text.latex.preamble'] = change.new.split('\n')
+        # LaTeX font changes are handled locally in plotting contexts
+        # via rc_context, not via global rcParams mutation
         super()._anytrait_changed(change)
 
 

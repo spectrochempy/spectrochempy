@@ -15,8 +15,8 @@ from traitlets import Unicode
 from traitlets import signature_has_traits
 from traitlets import validate
 
-from spectrochempy.application.application import error_
 from spectrochempy.core.project.abstractproject import AbstractProject
+from spectrochempy.utils._logging import error_
 
 __all__ = ["Script", "run_script", "run_all_scripts"]
 

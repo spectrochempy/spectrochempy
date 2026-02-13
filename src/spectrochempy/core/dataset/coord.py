@@ -12,7 +12,6 @@ import textwrap
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
@@ -27,6 +26,7 @@ from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.typeutils import is_iterable
 from spectrochempy.utils.typeutils import is_number
+from spectrochempy.utils._logging import error_
 
 
 # ======================================================================================

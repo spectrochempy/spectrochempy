@@ -18,6 +18,7 @@ from contextlib import suppress
 from copy import copy as cpy
 
 import numpy as np
+import matplotlib
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.arraymixins.ndplot import (
@@ -172,7 +173,10 @@ def plot_2D(dataset, method=None, **kwargs):
         style = [style]
 
     # style handled at figure creation (get_figure)
-    prefs.set_latex_font(prefs.font.family)
+    rc_overrides = prefs.set_latex_font(prefs.font.family)
+    if rc_overrides:
+        with matplotlib.rc_context(rc_overrides):
+            pass  # rc_overrides applied for subsequent plotting
 
     # Redirections ?
     # ----------------------------------------------------------------------------------

@@ -27,6 +27,12 @@ __dataset_methods__ = [  # Methods that can be called as API functions
 
 
 import textwrap
+
+import numpy as np
+import traitlets as tr
+from tzlocal import get_localzone
+
+# Lazy import to avoid triggering matplotlib at module load time
 from contextlib import suppress
 from datetime import UTC
 from datetime import datetime
@@ -34,12 +40,6 @@ from datetime import tzinfo
 from zoneinfo import ZoneInfo
 from zoneinfo import ZoneInfoNotFoundError
 
-import numpy as np
-import traitlets as tr
-from tzlocal import get_localzone
-
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
@@ -55,6 +55,7 @@ from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
+from spectrochempy.utils._logging import warning_
 
 
 # ======================================================================================
@@ -852,6 +853,9 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             Coordinates along the given axis.
 
         """
+        # Lazy import to avoid triggering matplotlib at module load time
+        from spectrochempy.application.application import error_
+
         idx = self._get_dims_index(dim)[0]  # should generate an error if the
         # dimension name is not recognized
         if idx is None:

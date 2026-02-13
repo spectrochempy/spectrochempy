@@ -239,24 +239,24 @@ def multiplot(
 
         # create the subplots and plot the ndarrays
         # ------------------------------------------------------------------------
-        matplotlib.rcParams["figure.autolayout"] = False
+        # Use local rc_context instead of global rcParams mutation
+        with matplotlib.rc_context({"figure.autolayout": False}):
+            figsize = kwargs.pop("figsize", None)
+            dpi = kwargs.pop("dpi", 150)
 
-        figsize = kwargs.pop("figsize", None)
-        dpi = kwargs.pop("dpi", 150)
+            fig = kwargs.pop("fig", None)
+            if fig is None:
+                fig = get_figure(
+                    preferences=prefs,
+                    figsize=figsize,
+                    dpi=dpi,
+                    clear=True,
+                )
+            else:
+                fig.clf()
+                fig.set_size_inches(*figsize)
 
-        fig = kwargs.pop("fig", None)
-        if fig is None:
-            fig = get_figure(
-                preferences=prefs,
-                figsize=figsize,
-                dpi=dpi,
-                clear=True,
-            )
-        else:
-            fig.clf()
-            fig.set_size_inches(*figsize)
-
-        fig.rcParams = plt.rcParams.copy()  # save params used for this figure
+            fig.rcParams = plt.rcParams.copy()  # save params used for this figure
 
         if suptitle is not None:
             fig.suptitle(suptitle, color=suptitle_color)

@@ -18,8 +18,8 @@ This module:
 import shutil
 from pathlib import Path
 
-from spectrochempy.application.application import debug_
-from spectrochempy.application.application import warning_
+from spectrochempy.utils._logging import debug_
+from spectrochempy.utils._logging import warning_
 
 
 def ensure_mpl_assets_installed():

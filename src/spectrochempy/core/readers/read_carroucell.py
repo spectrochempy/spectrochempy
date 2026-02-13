@@ -17,12 +17,12 @@ import numpy as np
 import scipy.interpolate
 import xlrd
 
-from spectrochempy.application.application import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import merge_datasets
 from spectrochempy.core.readers.read_omnic import read_omnic
+from spectrochempy.utils._logging import info_
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.file import get_directory_name

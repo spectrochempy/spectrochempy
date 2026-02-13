@@ -2,6 +2,10 @@
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # ======================================================================================
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
+# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
+# See full LICENSE agreement in the root directory.
+# ======================================================================================
 
 """
 Matplotlib utilities used across SpectroChemPy.
@@ -14,9 +18,6 @@ Responsibilities:
 
 from contextlib import suppress
 
-import matplotlib.axes as maxes
-import mpl_toolkits.mplot3d.axes3d as maxes3D  # noqa: N812
-
 __all__ = [
     "show",
     "get_figure",
@@ -27,112 +28,126 @@ __all__ = [
     "_Axes3D",
 ]
 
-# -----------------------------------------------------------------------------
-# Custom Axes classes
-# -----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+# Lazy loading: matplotlib is only imported when plotting functions are called
+# ----------------------------------------------------------------------
 
 
-@maxes.subplot_class_factory
-class _Axes(maxes.Axes):  # pragma: no cover
-    """Subclass of matplotlib Axes class supporting pint quantities."""
+def __getattr__(name):
+    """Lazily import matplotlib classes when first accessed."""
+    if name == "_Axes":
+        import matplotlib.axes as maxes
 
-    from spectrochempy.core.units import remove_args_units
+        @maxes.subplot_class_factory
+        class _Axes(maxes.Axes):  # pragma: no cover
+            """Subclass of matplotlib Axes class supporting pint quantities."""
 
-    def _implements(self, type=None):
-        if type is None:
-            return "_Axes"
-        return type == "_Axes"
+            from spectrochempy.core.units import remove_args_units
 
-    def __repr__(self):
-        return "<Matplotlib Axes object>"
+            def _implements(self, type=None):
+                if type is None:
+                    return "_Axes"
+                return type == "_Axes"
 
-    def __str__(self):
-        return self.__repr__()
+            def __repr__(self):
+                return "<Matplotlib Axes object>"
 
-    def _repr_html_(self):
-        return ""
+            def __str__(self):
+                return self.__repr__()
 
-    @remove_args_units
-    def plot(self, *args, **kwargs):
-        return super().plot(*args, **kwargs)
+            def _repr_html_(self):
+                return ""
 
-    @remove_args_units
-    def errorbar(self, *args, **kwargs):
-        return super().errorbar(*args, **kwargs)
+            @remove_args_units
+            def plot(self, *args, **kwargs):
+                return super().plot(*args, **kwargs)
 
-    @remove_args_units
-    def scatter(self, *args, **kwargs):
-        return super().scatter(*args, **kwargs)
+            @remove_args_units
+            def errorbar(self, *args, **kwargs):
+                return super().errorbar(*args, **kwargs)
 
-    @remove_args_units
-    def plot_date(self, *args, **kwargs):
-        return super().plot_date(*args, **kwargs)
+            @remove_args_units
+            def scatter(self, *args, **kwargs):
+                return super().scatter(*args, **kwargs)
 
-    @remove_args_units
-    def step(self, *args, **kwargs):
-        return super().step(*args, **kwargs)
+            @remove_args_units
+            def plot_date(self, *args, **kwargs):
+                return super().plot_date(*args, **kwargs)
 
-    @remove_args_units
-    def loglog(self, *args, **kwargs):
-        return super().loglog(*args, **kwargs)
+            @remove_args_units
+            def step(self, *args, **kwargs):
+                return super().step(*args, **kwargs)
 
-    @remove_args_units
-    def semilogx(self, *args, **kwargs):
-        return super().semilogx(*args, **kwargs)
+            @remove_args_units
+            def loglog(self, *args, **kwargs):
+                return super().loglog(*args, **kwargs)
 
-    @remove_args_units
-    def semilogy(self, *args, **kwargs):
-        return super().semilogy(*args, **kwargs)
+            @remove_args_units
+            def semilogx(self, *args, **kwargs):
+                return super().semilogx(*args, **kwargs)
 
-    @remove_args_units
-    def fill_between(self, *args, **kwargs):
-        return super().fill_between(*args, **kwargs)
+            @remove_args_units
+            def semilogy(self, *args, **kwargs):
+                return super().semilogy(*args, **kwargs)
 
-    @remove_args_units
-    def fill_betweenx(self, *args, **kwargs):
-        return super().fill_betweenx(*args, **kwargs)
+            @remove_args_units
+            def fill_between(self, *args, **kwargs):
+                return super().fill_between(*args, **kwargs)
 
-    @remove_args_units
-    def bar(self, *args, **kwargs):
-        return super().bar(*args, **kwargs)
+            @remove_args_units
+            def fill_betweenx(self, *args, **kwargs):
+                return super().fill_betweenx(*args, **kwargs)
 
-    @remove_args_units
-    def barh(self, *args, **kwargs):
-        return super().barh(*args, **kwargs)
+            @remove_args_units
+            def bar(self, *args, **kwargs):
+                return super().bar(*args, **kwargs)
 
-    @remove_args_units
-    def bar_label(self, *args, **kwargs):
-        return super().bar_label(*args, **kwargs)
+            @remove_args_units
+            def barh(self, *args, **kwargs):
+                return super().barh(*args, **kwargs)
 
-    @remove_args_units
-    def contour(self, *args, **kwargs):
-        return super().contour(*args, **kwargs)
+            @remove_args_units
+            def bar_label(self, *args, **kwargs):
+                return super().bar_label(*args, **kwargs)
 
-    @remove_args_units
-    def contourf(self, *args, **kwargs):
-        return super().contourf(*args, **kwargs)
+            @remove_args_units
+            def contour(self, *args, **kwargs):
+                return super().contour(*args, **kwargs)
 
-    @remove_args_units
-    def imshow(self, *args, **kwargs):
-        return super().imshow(*args, **kwargs)
+            @remove_args_units
+            def contourf(self, *args, **kwargs):
+                return super().contourf(*args, **kwargs)
 
-    @remove_args_units
-    def set_xlim(self, *args, **kwargs):
-        return super().set_xlim(*args, **kwargs)
+            @remove_args_units
+            def imshow(self, *args, **kwargs):
+                return super().imshow(*args, **kwargs)
 
-    @remove_args_units
-    def set_ylim(self, *args, **kwargs):
-        return super().set_ylim(*args, **kwargs)
+            @remove_args_units
+            def set_xlim(self, *args, **kwargs):
+                return super().set_xlim(*args, **kwargs)
 
+            @remove_args_units
+            def set_ylim(self, *args, **kwargs):
+                return super().set_ylim(*args, **kwargs)
 
-class _Axes3D(maxes3D.Axes3D):  # pragma: no cover
-    """Subclass of matplotlib Axes3D supporting pint quantities."""
+        return _Axes
 
-    from spectrochempy.core.units import remove_args_units
+    elif name == "_Axes3D":
+        import mpl_toolkits.mplot3d.axes3d as maxes3D
 
-    @remove_args_units
-    def plot_surface(self, *args, **kwargs):
-        return super().plot_surface(*args, **kwargs)
+        class _Axes3D(maxes3D.Axes3D):  # pragma: no cover
+            """Subclass of matplotlib Axes3D supporting pint quantities."""
+
+            from spectrochempy.core.units import remove_args_units
+
+            @remove_args_units
+            def plot_surface(self, *args, **kwargs):
+                return super().plot_surface(*args, **kwargs)
+
+        return _Axes3D
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 # -----------------------------------------------------------------------------

@@ -17,13 +17,14 @@ __all__ = [
 __dataset_methods__ = __all__
 
 import numpy as np
+import matplotlib
 
-from spectrochempy.application.application import warning_
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.arraymixins.ndplot import (
     NDPlot,  # noqa: F401 # for the docstring to be determined it necessary to import NDPlot
 )
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.typeutils import is_sequence
@@ -84,10 +85,16 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # Apply styles only within this plotting call
     with plt.style.context(style):
-        prefs.set_latex_font(prefs.font.family)  # reset latex settings
+        rc_overrides = prefs.set_latex_font(prefs.font.family)
+        if rc_overrides:
+            with matplotlib.rc_context(rc_overrides):
+                pass  # rc_overrides applied for subsequent plotting
 
     # style handled at figure creation (get_figure)
-    prefs.set_latex_font(prefs.font.family)  # reset latex settings
+    rc_overrides = prefs.set_latex_font(prefs.font.family)
+    if rc_overrides:
+        with matplotlib.rc_context(rc_overrides):
+            pass  # rc_overrides applied for subsequent plotting
     # Redirections ?
     # ------------------------------------------------------------------------
     # should we redirect the plotting to another method

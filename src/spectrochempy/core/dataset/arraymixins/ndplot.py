@@ -30,21 +30,33 @@ Handles units and coordinates from NDDatasets automatically.
 
 __all__ = ["plot"]
 
+from typing import TYPE_CHECKING
 from typing import Any
 
 import traitlets as tr
 
-from spectrochempy.application.application import debug_
-from spectrochempy.application.application import error_
 from spectrochempy.application.preferences import preferences as prefs
 
+from spectrochempy.utils._logging import debug_
+from spectrochempy.utils._logging import error_
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docutils import docprocess
-from spectrochempy.utils.mplutils import _Axes
-from spectrochempy.utils.mplutils import _Axes3D
 from spectrochempy.utils.mplutils import get_figure
 from spectrochempy.utils.mplutils import show as mpl_show
 from spectrochempy.utils.optional import import_optional_dependency
+
+# Lazy import _Axes and _Axes3D only when needed (to avoid loading matplotlib at module import time)
+if TYPE_CHECKING:
+    from spectrochempy.utils.mplutils import _Axes
+    from spectrochempy.utils.mplutils import _Axes3D
+
+
+def _get_axes_class():
+    """Lazily import _Axes class."""
+    from spectrochempy.utils.mplutils import _Axes
+
+    return _Axes
+
 
 go = import_optional_dependency("plotly.graph_objects", errors="ignore")
 HAS_PLOTLY = go is not None
@@ -74,17 +86,20 @@ class NDPlot(tr.HasTraits):
         Close the current figure
     """
 
-    # Trait definitions
-    _ax = tr.Instance(_Axes, allow_none=True)
+    # Trait definitions - use Any to avoid triggering matplotlib import at instantiation
+    # Runtime type validation happens inside plotting methods
+    _ax = tr.Any(allow_none=True)
     _fig = tr.Any(allow_none=True)
-    _ndaxes = tr.Dict(tr.Instance(_Axes))
+    _ndaxes = tr.Dict(tr.Any())
 
     @docprocess.get_sections(
         base="plot",
         sections=["Parameters", "Other Parameters", "Returns"],
     )
     @docprocess.dedent
-    def plot(self, method: str | None = None, **kwargs: Any) -> _Axes | None:
+    def plot(
+        self, method: str | None = None, **kwargs: Any
+    ) -> "spectrochempy.utils.mplutils._Axes | None":
         """
         Plot the dataset using the specified method.
 
@@ -245,7 +260,9 @@ class NDPlot(tr.HasTraits):
     @deprecated(
         removed="0.8",
     )
-    def _plot_generic(self, **kwargs: Any) -> _Axes | None:
+    def _plot_generic(
+        self, **kwargs: Any
+    ) -> "spectrochempy.utils.mplutils._Axes | None":
         # Choose plotting method based on dataset dimensionality
         # Args:
         #    **kwargs: Plot options
@@ -424,9 +441,12 @@ class NDPlot(tr.HasTraits):
                 self._ndaxes[ax.name] = ax
         elif isinstance(axes, dict):
             self._ndaxes.update(axes)
-        elif isinstance(axes, _Axes):
-            # it's an axe! add it to our list
-            self._ndaxes[axes.name] = axes
+        else:
+            # Lazy import to check instance type
+            _Axes = _get_axes_class()
+            if isinstance(axes, _Axes):
+                # it's an axe! add it to our list
+                self._ndaxes[axes.name] = axes
 
     @property
     def ax(self):
