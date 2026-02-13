@@ -6,27 +6,39 @@
 """
 NDPlot Module.
 
-This module implements plotting capabilities for NDDataset objects, providing:
-- 1D, 2D and 3D plotting methods
-- Figure and axes management
-- Interactive visualization tools
+.. deprecated::
+    This module is deprecated. Plotting functionality has been moved to
+    spectrochempy.plot package. The NDDataset class no longer inherits from
+    NDPlot. Use spectrochempy.plot functions instead:
 
-The module defines the NDPlot base class which handles all plotting functionality
-through a unified interface.
+    - spectrochempy.plot.plot1d.plot_pen() for 1D plots
+    - spectrochempy.plot.plot2d.plot_map() for 2D maps
+    - spectrochempy.plot.plot3d.plot_surface() for 3D surfaces
+    - Or use dataset.plot() method which delegates to spectrochempy.plot
+
+This module previously implemented plotting capabilities for NDDataset objects.
 
 Classes
 -------
 NDPlot
-    Main class providing plotting methods and figure management
+    Deprecated: Main class providing plotting methods and figure management
 
 Notes
 -----
-Currently supports:
-- Matplotlib backend (primary)
-- Plotly backend (experimental)
-
-Handles units and coordinates from NDDatasets automatically.
+The plotting functionality has been completely refactored. The new architecture
+uses stateless plotting functions in spectrochempy.plot instead of mixing
+plotting logic into the dataset class.
 """
+
+import warnings
+
+warnings.warn(
+    "The 'spectrochempy.core.dataset.arraymixins.ndplot' module is deprecated. "
+    "Use 'spectrochempy.plot' functions instead. "
+    "The NDDataset.plot() method now delegates to spectrochempy.plot.dispatcher.plot_dataset.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 __all__ = ["plot"]
 

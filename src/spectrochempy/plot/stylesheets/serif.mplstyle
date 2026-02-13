@@ -1,0 +1,85 @@
+# serif
+# ----------------------------------------------------------------------------------------------------------------------
+
+axes.prop_cycle: cycler('color', ['0072B2', '009E73', 'D55E00', 'CC79A7', 'F0E442', '56B4E9'])
+
+axes.titlesize: 14
+
+figure.facecolor: white
+figure.edgecolor: white
+figure.figsize: 6.8, 4.4
+figure.dpi: 96
+figure.autolayout: True
+
+# savefig.dpi      : 600
+savefig.facecolor: white
+savefig.edgecolor: white
+
+font.family      : serif
+font.size        : 11
+font.style       : normal
+font.weight      : normal
+
+grid.color: .85
+grid.linestyle: -
+grid.linewidth: .85
+
+image.cmap: viridis
+
+legend.fontsize: 9
+legend.frameon: False
+legend.numpoints: 1
+legend.scatterpoints: 1
+legend.labelspacing : 0.2
+legend.handletextpad: 0.1
+legend.columnspacing: .5
+
+lines.linewidth: 0.75
+lines.markeredgewidth: 0
+lines.markersize: 7
+lines.solid_capstyle: round
+
+patch.facecolor: 4C72B0
+patch.linewidth: .3
+
+text.color: .15
+
+xtick.color: .15
+xtick.direction: out
+xtick.labelsize: 10
+
+ytick.color: .15
+ytick.direction: out
+ytick.labelsize: 10
+
+mathtext.fontset : stix
+mathtext.bf      : serif:bold
+mathtext.cal     : cursive
+mathtext.default : rm
+mathtext.rm      : serif
+mathtext.it      : serif:italic
+
+text.usetex      : False
+
+##
+## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
+##
+##@method_1D                             : pen
+##@method_2D                             : stack
+##@method_3D                             : surface
+##@colorbar                              : True
+##@show_projections                      : False
+##@show_projection_x                     : False
+##@show_projection_y                     : False
+##@colormap                              : viridis
+##@max_lines_in_stack                    : 1000
+##@simplify                              : False
+##@number_of_x_labels                    : 5
+##@number_of_y_labels                    : 5
+##@number_of_z_labels                    : 5
+##@number_of_contours                    : 50
+##@contour_alpha                         : 1.0
+##@contour_start                         : 0.05
+##@antialiased                           : True
+##@rcount                                : 50
+##@ccount                                : 50
