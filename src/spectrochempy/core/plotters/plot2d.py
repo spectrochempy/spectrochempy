@@ -7,7 +7,7 @@
 2D plotting functions.
 
 DEPRECATED: This module is now a re-export wrapper.
-The implementation has moved to spectrochempy.plot.plot2d.
+The implementation has moved to spectrochempy.plotting.plot2d.
 """
 
 __all__ = [
@@ -20,7 +20,7 @@ __all__ = [
 __dataset_methods__ = __all__
 
 # Re-export from new location for backward compatibility
-from spectrochempy.plot.plot2d import (
+from spectrochempy.plotting.plot2d import (
     plot_2D,
     plot_map,
     plot_stack,

@@ -7,12 +7,12 @@
 Matplotlib backend for SpectroChemPy.
 
 This module provides the matplotlib implementation of plotting functions,
-wrapping the plotting functions from the spectrochempy.plot module.
+wrapping the plotting functions from the spectrochempy.plotting module.
 """
 
 from typing import Any, Optional
 
-from spectrochempy.plot.plot_setup import lazy_ensure_mpl_config
+from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
 from spectrochempy.utils.mplutils import show as mpl_show
 
 # Mapping of method names to standalone plot functions
@@ -23,7 +23,7 @@ def _get_plot_function(method: str):
     """Lazily get the plot function for a given method."""
     if method not in _PLOT_FUNCTIONS:
         # Import all plot modules to populate the mapping
-        from spectrochempy.plot import plot1d, plot2d, plot3d
+        from spectrochempy.plotting import plot1d, plot2d, plot3d
 
         _PLOT_FUNCTIONS.update(
             {

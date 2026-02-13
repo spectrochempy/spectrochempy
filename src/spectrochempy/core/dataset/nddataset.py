@@ -1464,14 +1464,14 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         return new
 
     # ======================================================================================
-    # Plotting (thin delegation to spectrochempy.plot)
+    # Plotting (thin delegation to spectrochempy.plotting)
     # ======================================================================================
 
     def plot(self, method=None, **kwargs):
         """
         Plot the dataset.
 
-        This is a thin delegator that calls spectrochempy.plot.dispatcher.plot_dataset.
+        This is a thin delegator that calls spectrochempy.plotting.dispatcher.plot_dataset.
 
         Parameters
         ----------
@@ -1488,11 +1488,11 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         See Also
         --------
-        spectrochempy.plot.plot1d : 1D plotting functions.
-        spectrochempy.plot.plot2d : 2D plotting functions.
-        spectrochempy.plot.plot3d : 3D plotting functions.
+        spectrochempy.plotting.plot1d : 1D plotting functions.
+        spectrochempy.plotting.plot2d : 2D plotting functions.
+        spectrochempy.plotting.plot3d : 3D plotting functions.
         """
-        from spectrochempy.plot.dispatcher import plot_dataset
+        from spectrochempy.plotting.dispatcher import plot_dataset
 
         return plot_dataset(self, method=method, **kwargs)
 
@@ -1500,17 +1500,17 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     # Deprecated plot-related stubs (no-op for backward compatibility)
     # ======================================================================================
     # These stubs exist for backward compatibility but do NOT store any state on the dataset.
-    # The plotting functions in spectrochempy.plot now use local variables instead.
+    # The plotting functions in spectrochempy.plotting now use local variables instead.
 
     def _figure_setup(self, ndim=1, method=None, **kwargs):
         """
-        Deprecated: Figure setup is now handled by spectrochempy.plot functions.
+        Deprecated: Figure setup is now handled by spectrochempy.plotting functions.
 
         This method exists for backward compatibility.
         For internal use by plot functions only - creates figure and returns axes.
         """
         from spectrochempy.application.preferences import preferences as prefs
-        from spectrochempy.plot.plot_setup import lazy_ensure_mpl_config
+        from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
         from spectrochempy.utils.mplutils import get_figure
 
         lazy_ensure_mpl_config()
@@ -1558,7 +1558,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     def _plot_resume(self, origin: Any, **kwargs: Any) -> None:
         """
-        Deprecated: Plot cleanup is now handled by spectrochempy.plot functions.
+        Deprecated: Plot cleanup is now handled by spectrochempy.plotting functions.
 
         This method exists for backward compatibility but does nothing.
         The plot functions now handle cleanup internally.
@@ -1567,7 +1567,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     def close_figure(self):
         """
-        Deprecated: Figure management is now handled by spectrochempy.plot functions.
+        Deprecated: Figure management is now handled by spectrochempy.plotting functions.
 
         This method exists for backward compatibility but does nothing.
         """
@@ -1581,7 +1581,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     def fig(self):
         """Matplotlib figure (deprecated).
 
-        Figure management is now handled by spectrochempy.plot functions.
+        Figure management is now handled by spectrochempy.plotting functions.
         The returned axes from plot() has a .figure attribute.
         """
         raise AttributeError(

@@ -7,7 +7,7 @@
 Multiplot functions.
 
 DEPRECATED: This module is now a re-export wrapper.
-The implementation has moved to spectrochempy.plot.multiplot.
+The implementation has moved to spectrochempy.plotting.multiplot.
 """
 
 __all__ = [
@@ -24,7 +24,7 @@ __all__ = [
 __dataset_methods__ = __all__
 
 # Re-export from new location for backward compatibility
-from spectrochempy.plot.multiplot import (
+from spectrochempy.plotting.multiplot import (
     multiplot,
     multiplot_map,
     multiplot_stack,

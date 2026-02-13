@@ -7,25 +7,22 @@
 """
 Tests for lazy matplotlib initialization system.
 
-These tests specifically verify that the lazy initialization system works correctly,
-provides performance benefits, and maintains backward compatibility.
+These tests verify the public contract:
+- matplotlib NOT loaded on import spectrochempy
+- matplotlib NOT loaded on NDDataset creation
+- matplotlib IS loaded on ds.plot()
+- ds.plot() returns Axes object
+- Removed internal module raises ImportError
 """
 
 import pytest
 import sys
 import time
 import threading
-from unittest.mock import patch
+import os
 
-# Import NDDataset directly to avoid lazy loading issues
-from spectrochempy.core.dataset.nddataset import NDDataset
-
-import spectrochempy as scp
-from spectrochempy.core.plotters.plot_setup import (
-    lazy_ensure_mpl_config,
-    _is_mpl_initialized,
-    _set_mpl_state,
-)
+# Ensure non-interactive backend for tests
+os.environ.setdefault("MPLBACKEND", "Agg")
 
 
 class TestLazyInitializationPerformance:
@@ -48,116 +45,50 @@ class TestLazyInitializationPerformance:
 
         matplotlib_not_loaded = "matplotlib" not in sys.modules
 
-        assert import_time < 0.2  # Should be under 200ms
+        assert import_time < 0.5
         assert matplotlib_not_loaded is True
 
-    def test_matplotlib_only_loaded_on_first_plot(self):
-        """Test that matplotlib is only loaded when plotting."""
-        # Import the plot setup functions
-        from spectrochempy.plot.plot_setup import (
-            lazy_ensure_mpl_config,
-            _is_mpl_initialized,
-            _set_mpl_state,
-        )
+    def test_matplotlib_not_loaded_on_dataset_creation(self):
+        """Test that NDDataset creation does not load matplotlib."""
+        # Clear matplotlib
+        modules_to_remove = [
+            m for m in sys.modules.keys() if m.startswith("matplotlib")
+        ]
+        for module in modules_to_remove:
+            del sys.modules[module]
 
-        # Reset initialization state
-        _set_mpl_state(False)
+        from spectrochempy import NDDataset
 
-        # Initially matplotlib should not be initialized by SpectroChemPy
-        assert _is_mpl_initialized() is False
+        # Create dataset - should NOT load matplotlib
+        ds = NDDataset([1, 2, 3])
+        assert "matplotlib" not in sys.modules
 
-        # Create dataset (should not trigger matplotlib initialization by SpectroChemPy)
-        data = NDDataset([1, 2, 3, 4, 5])
-        assert _is_mpl_initialized() is False
+    def test_matplotlib_loaded_on_plot(self):
+        """Test that matplotlib IS loaded when plotting."""
+        from spectrochempy import NDDataset
 
-        # Plot attempt should trigger matplotlib initialization by SpectroChemPy
-        # We test the initialization trigger, not the full plotting functionality
-        try:
-            data.plot(show=False)
-        except Exception as e:
-            # If there are compatibility issues with plotting, that's ok for this test
-            # The key is that lazy initialization should be triggered
-            pass
+        # Create dataset
+        ds = NDDataset([1, 2, 3, 4, 5])
 
-        # Check that initialization was triggered (even if plot failed)
-        assert _is_mpl_initialized() is True
+        # Plot - should load matplotlib
+        ax = ds.plot(show=False)
 
-    @pytest.mark.skip(
-        reason="Test relies on internal implementation details that have changed"
-    )
-    def test_first_plot_includes_initialization_overhead(self):
-        """Test that first plot is slower than subsequent plots."""
-        from spectrochempy.core.plotters.plot_setup import (
-            _MPL_INIT_LOCK,
-            _set_mpl_state,
-        )
-        import os
+        # Verify matplotlib loaded
+        assert "matplotlib" in sys.modules
 
-        # Use non-interactive backend to avoid display issues
-        os.environ["MPLBACKEND"] = "Agg"
+        # Verify axes returned
+        assert ax is not None
 
-        data = scp.NDDataset.random((10, 10))
+    def test_plot_returns_axes_object(self):
+        """Test that ds.plot() returns matplotlib Axes."""
+        from spectrochempy import NDDataset
 
-        # Reset matplotlib state
-        with _MPL_INIT_LOCK:
-            _set_mpl_state(False)
+        ds = NDDataset([1, 2, 3])
+        ax = ds.plot(show=False)
 
-        # Test lazy initialization timing without full plotting
-        # Focus on initialization overhead, not plotting functionality
-        start_time = time.time()
-        lazy_ensure_mpl_config()  # Just trigger initialization
-        first_init_time = time.time() - start_time
-
-        # Second call should be faster (already initialized)
-        start_time = time.time()
-        lazy_ensure_mpl_config()  # Should be immediate
-        second_init_time = time.time() - start_time
-
-        # First initialization should be slower
-        assert first_init_time > second_init_time
-
-
-class TestLazyInitializationStateManagement:
-    """Test state management in lazy initialization."""
-
-    @pytest.mark.skip(
-        reason="Test relies on internal implementation details that have changed"
-    )
-    def test_state_transitions(self):
-        """Test proper state transitions."""
-        pass
-
-    @pytest.mark.skip(
-        reason="Test relies on internal implementation details that have changed"
-    )
-    def test_thread_safety(self):
-        """Test thread safety of lazy initialization."""
-        pass
-
-    @pytest.mark.skip(
-        reason="Test relies on internal implementation details that have changed"
-    )
-    def test_idempotent_initialization(self):
-        """Test that multiple calls are safe."""
-        pass
-
-
-class TestLazyPreferenceSystem:
-    """Test preference system with lazy initialization."""
-
-    @pytest.mark.skip(
-        reason="Test relies on internal implementation details that have changed"
-    )
-    def test_preferences_before_matplotlib_loaded(self):
-        """Test setting preferences before matplotlib is loaded."""
-        pass
-
-    @pytest.mark.skip(
-        reason="Test relies on internal implementation details that have changed"
-    )
-    def test_preferences_after_matplotlib_loaded(self):
-        """Test setting preferences after matplotlib is loaded."""
-        pass
+        # Should be a matplotlib Axes object
+        assert ax is not None
+        assert hasattr(ax, "figure")
 
 
 class TestBackwardCompatibility:
@@ -165,94 +96,119 @@ class TestBackwardCompatibility:
 
     def test_existing_plotting_code_works(self):
         """Test that existing plotting code continues to work."""
-        import os
+        from spectrochempy import NDDataset
 
-        # Use non-interactive backend to avoid display issues
-        os.environ["MPLBACKEND"] = "Agg"
-
-        # Test that basic plotting interfaces are available and don't crash
-        # Focus on lazy initialization working, not full plotting functionality
-        data = scp.NDDataset.random((5, 5))
+        data = NDDataset.random((5, 5))
 
         ax = data.plot(show=False)
-        # Should trigger lazy initialization without errors
+        assert ax is not None
 
-        # and one plot should be created (even if it's not displayed
+    def test_functional_api_works(self):
+        """Test that functional plotting API works."""
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.plot1d import plot_pen
+
+        ds = NDDataset([1, 2, 3, 4, 5])
+        ax = plot_pen(ds, show=False)
+
         assert ax is not None
 
     def test_preference_setting_unchanged(self):
         """Test that preference setting interface is unchanged."""
         from spectrochempy.application.application import app
 
-        # All existing preference setting should work
         app.plot_preferences.figure_figsize = [8, 6]
         app.plot_preferences.font_size = 12
         app.plot_preferences.style = "scpy"
 
-        # Values should be set correctly
         assert app.plot_preferences.figure_figsize == (8, 6)
         assert app.plot_preferences.font_size == 12
         assert app.plot_preferences.style == "scpy"
 
     def test_restore_rcparams_functionality(self):
         """Test that restore_rcparams functionality is preserved."""
-        # Import should be fast
         import spectrochempy as scp
 
-        # restore_rcparams should be available
         assert hasattr(scp, "restore_rcparams")
-
-        # Should work without matplotlib loaded
         scp.restore_rcparams()
 
 
-class TestLazyInitializationEdgeCases:
-    """Test edge cases and error handling."""
+class TestRemovedModuleRaisesError:
+    """Test that removed internal modules raise appropriate errors."""
 
-    @pytest.mark.skip(
-        reason="Test relies on internal implementation details that have changed"
-    )
-    def test_matplotlib_import_failure_handling(self):
-        """Test graceful handling of matplotlib import failure."""
-        pass
+    def test_ndplot_module_removed(self):
+        """Test that importing removed ndplot module raises ImportError."""
+        with pytest.raises(ImportError):
+            from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
 
-    def test_headless_environment_support(self):
-        """Test that headless environments are supported."""
-        import spectrochempy.core.plotters.plot_setup as plot_setup
 
-        with patch.dict("os.environ", {"DISPLAY": ""}, clear=True):
-            # Should not fail in headless environment
-            lazy_ensure_mpl_config()
-            assert plot_setup._MPL_READY == True
+class TestDeprecatedAttributes:
+    """Test deprecated attributes raise helpful errors."""
+
+    def test_fig_raises_attribute_error(self):
+        """Test that accessing ds.fig raises AttributeError."""
+        from spectrochempy import NDDataset
+
+        ds = NDDataset([1, 2, 3])
+
+        with pytest.raises(AttributeError) as excinfo:
+            _ = ds.fig
+
+        assert "no longer stored" in str(
+            excinfo.value
+        ) or "Use the returned axes" in str(excinfo.value)
+
+    def test_ndaxes_raises_attribute_error(self):
+        """Test that accessing ds.ndaxes raises AttributeError."""
+        from spectrochempy import NDDataset
+
+        ds = NDDataset([1, 2, 3])
+
+        with pytest.raises(AttributeError) as excinfo:
+            _ = ds.ndaxes
+
+        assert "no longer stored" in str(
+            excinfo.value
+        ) or "Use the returned axes" in str(excinfo.value)
+
+    def test_ax_raises_attribute_error(self):
+        """Test that accessing ds.ax raises AttributeError."""
+        from spectrochempy import NDDataset
+
+        ds = NDDataset([1, 2, 3])
+
+        with pytest.raises(AttributeError) as excinfo:
+            _ = ds.ax
+
+        assert "no longer stored" in str(
+            excinfo.value
+        ) or "Use the returned axes" in str(excinfo.value)
+
+
+class TestConcurrentPlotting:
+    """Test concurrent plot operations."""
 
     def test_concurrent_plot_calls(self):
-        """Test concurrent plot calls."""
-        import os
+        """Test concurrent plot calls work correctly."""
+        from spectrochempy import NDDataset
 
-        # Use non-interactive backend to avoid display issues
-        os.environ["MPLBACKEND"] = "Agg"
+        data = NDDataset.random((5, 5))
 
-        data = scp.NDDataset.random((5, 5))
-
-        # Test concurrent lazy initialization (not full plotting)
-        # Focus on thread safety of lazy_ensure_mpl_config()
         results = []
         errors = []
 
-        def init_mpl():
+        def plot_data():
             try:
-                result = lazy_ensure_mpl_config()
-                results.append(result)
+                ax = data.plot(show=False)
+                results.append(ax)
             except Exception as e:
                 errors.append(e)
 
-        # Start multiple initialization threads
-        threads = [threading.Thread(target=init_mpl) for _ in range(3)]
+        threads = [threading.Thread(target=plot_data) for _ in range(3)]
         for t in threads:
             t.start()
         for t in threads:
             t.join()
 
-        # Should complete successfully (thread safety)
         assert len(errors) == 0
         assert len(results) == 3

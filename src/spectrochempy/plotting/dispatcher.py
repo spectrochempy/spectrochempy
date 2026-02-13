@@ -63,4 +63,6 @@ def plot_dataset(
     return backend_module.plot_dataset_impl(dataset, method, **kwargs)
 
 
-_register_backend("matplotlib", "spectrochempy.plot.backends.matplotlib_backend")
+_register_backend("matplotlib", "spectrochempy.plotting.backends.matplotlib_backend")
+
+plot = plot_dataset

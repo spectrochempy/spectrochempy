@@ -7,7 +7,7 @@
 3D plotting functions.
 
 DEPRECATED: This module is now a re-export wrapper.
-The implementation has moved to spectrochempy.plot.plot3d.
+The implementation has moved to spectrochempy.plotting.plot3d.
 """
 
 __all__ = ["plot_3D", "plot_surface", "plot_waterfall"]
@@ -15,7 +15,7 @@ __all__ = ["plot_3D", "plot_surface", "plot_waterfall"]
 __dataset_methods__ = __all__
 
 # Re-export from new location for backward compatibility
-from spectrochempy.plot.plot3d import (
+from spectrochempy.plotting.plot3d import (
     plot_3D,
     plot_surface,
     plot_waterfall,

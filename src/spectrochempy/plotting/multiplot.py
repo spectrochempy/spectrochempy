@@ -173,7 +173,7 @@ def multiplot(
 
     """
 
-    from spectrochempy.plot.plot_setup import lazy_ensure_mpl_config
+    from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
 
     lazy_ensure_mpl_config()
 

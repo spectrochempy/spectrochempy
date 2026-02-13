@@ -7,7 +7,7 @@
 Module containing 1D plotting function(s).
 
 DEPRECATED: This module is now a re-export wrapper.
-The implementation has moved to spectrochempy.plot.plot1d.
+The implementation has moved to spectrochempy.plotting.plot1d.
 """
 
 __all__ = [
@@ -22,7 +22,7 @@ __all__ = [
 __dataset_methods__ = __all__
 
 # Re-export from new location for backward compatibility
-from spectrochempy.plot.plot1d import (
+from spectrochempy.plotting.plot1d import (
     plot_1D,
     plot_pen,
     plot_scatter,

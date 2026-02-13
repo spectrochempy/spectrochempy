@@ -20,12 +20,8 @@ import numpy as np
 import matplotlib
 
 from spectrochempy.application.preferences import preferences
-from spectrochempy.core.dataset.arraymixins.ndplot import (
-    NDPlot,  # noqa: F401 # for the docstring to be determined it necessary to import NDPlot
-)
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.utils._logging import warning_
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.typeutils import is_sequence
 
@@ -34,22 +30,113 @@ from spectrochempy.utils.typeutils import is_sequence
 # --------------------------------------------------------------------------------------
 
 
-@docprocess.dedent
 def plot_1D(dataset, method=None, **kwargs):
     """
     Plot of one-dimensional data.
 
     Parameters
     ----------
-    %(plot.parameters)s
+    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+        Source of data to plot.
+    method : str, optional, default: preference.method_1D or preference.method_2D
+        Name of plotting method to use. If None, method is chosen based on data
+        dimensionality.
+
+        1D plotting methods:
+
+        - `pen` : Solid line plot
+        - `bar` : Bar graph
+        - `scatter` : Scatter plot
+        - `scatter+pen` : Scatter plot with solid line
+
+
+    **kwargs
+        Additional matplotlib / plotting keyword arguments.
 
     Other Parameters
     ----------------
-    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+    ax : Axe, optional
+        Axe where to plot. If not specified, create a new one.
+    clear : bool, optional, default: True
+        If false, hold the current figure and ax until a new plot is performed.
+    color or c : color, optional, default: auto
+        color of the line.
+    commands : str,
+        matplotlib commands to be executed.
+    data_only : bool, optional, default: False
+        Only the plot is done. No addition of axes or label specifications.
+    dpi : int, optional
+        the number of pixel per inches.
+    figsize : tuple, optional, default is (3.4, 1.7)
+        figure size.
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences).
+    imag : bool, optional, default: False
+        Show imaginary component for complex data. By default the real component is
+        displayed.
+    linestyle or ls : str, optional, default: auto
+        line style definition.
+    linewidth or lw : float, optional, default: auto
+        line width.
+    marker, m: str, optional, default: auto
+        marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    markeredgecolor or mec: color, optional
+    markeredgewidth or mew: float, optional
+    markerfacecolor or mfc: color, optional
+    markersize or ms: float, optional
+    markevery: None or int
+    modellinestyle or modls : str
+        line style of the model.
+    offset : float
+        offset of the model individual lines.
+    output : str,
+        name of the file to save the figure.
+    plot_model : Bool,
+        plot model data if available.
+    plottitle: bool, optional, default: False
+        Use the name of the dataset as title. Works only if title is not defined
+    reverse : bool or None [optional, default=None/False
+        In principle, coordinates run from left to right,
+        except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
+    show_complex : bool, optional, default: False
+        Show both real and imaginary component for complex data.
+        By default only the real component is displayed.
+    show_mask: bool, optional
+        Should we display the mask using colored area.
+    show_z : bool, optional, default: True
+        should we show the vertical axis.
+    show_zero : bool, optional
+        show the zero basis.
+    style : str, optional, default: scp.preferences.style (scpy)
+        Matplotlib stylesheet (use available_style to get a list of available
+        styles for plotting.
+    title : str
+        Title of the plot (or subplot) axe.
+    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
+    uselabel_x: bool, optional
+        use x coordinate label as x tick labels
+    vshift : float, optional
+        vertically shift the line from its baseline.
+    xlim : tuple, optional
+        limit on the horizontal axis.
+    xlabel : str, optional
+        label on the horizontal axis.
+    x_reverse : bool, optional, default: False
+        reverse the x axis. Equivalent to reverse.
+    ylabel or zlabel : str, optional
+        label on the vertical axis.
+    ylim or zlim : tuple, optional
+        limit on the vertical axis.
 
     Returns
     -------
-    %(plot.returns)s
+    Matplolib Axes or None
+        The matplotlib axes containing the plot if successful, None otherwise.
 
     See Also
     --------
@@ -63,7 +150,7 @@ def plot_1D(dataset, method=None, **kwargs):
     multiplot
 
     """
-    from spectrochempy.plot.plot_setup import lazy_ensure_mpl_config
+    from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
 
     lazy_ensure_mpl_config()
 
@@ -455,7 +542,6 @@ def plot_1D(dataset, method=None, **kwargs):
     return ax
 
 
-@docprocess.dedent
 def plot_scatter(dataset, **kwargs):
     """
     Plot a 1D dataset as a scatter plot (points can be added on lines).
@@ -464,15 +550,96 @@ def plot_scatter(dataset, **kwargs):
 
     Parameters
     ----------
-    %(plot.parameters.no_method)s
+    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+        Source of data to plot.
+
+    **kwargs
+        Additional matplotlib / plotting keyword arguments.
 
     Other Parameters
     ----------------
-    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+    ax : Axe, optional
+        Axe where to plot. If not specified, create a new one.
+    clear : bool, optional, default: True
+        If false, hold the current figure and ax until a new plot is performed.
+    color or c : color, optional, default: auto
+        color of the line.
+    commands : str,
+        matplotlib commands to be executed.
+    data_only : bool, optional, default: False
+        Only the plot is done. No addition of axes or label specifications.
+    dpi : int, optional
+        the number of pixel per inches.
+    figsize : tuple, optional, default is (3.4, 1.7)
+        figure size.
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences).
+    imag : bool, optional, default: False
+        Show imaginary component for complex data. By default the real component is
+        displayed.
+    linestyle or ls : str, optional, default: auto
+        line style definition.
+    linewidth or lw : float, optional, default: auto
+        line width.
+    marker, m: str, optional, default: auto
+        marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    markeredgecolor or mec: color, optional
+    markeredgewidth or mew: float, optional
+    markerfacecolor or mfc: color, optional
+    markersize or ms: float, optional
+    markevery: None or int
+    modellinestyle or modls : str
+        line style of the model.
+    offset : float
+        offset of the model individual lines.
+    output : str,
+        name of the file to save the figure.
+    plot_model : Bool,
+        plot model data if available.
+    plottitle: bool, optional, default: False
+        Use the name of the dataset as title. Works only if title is not defined
+    reverse : bool or None [optional, default=None/False
+        In principle, coordinates run from left to right,
+        except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
+    show_complex : bool, optional, default: False
+        Show both real and imaginary component for complex data.
+        By default only the real component is displayed.
+    show_mask: bool, optional
+        Should we display the mask using colored area.
+    show_z : bool, optional, default: True
+        should we show the vertical axis.
+    show_zero : bool, optional
+        show the zero basis.
+    style : str, optional, default: scp.preferences.style (scpy)
+        Matplotlib stylesheet (use available_style to get a list of available
+        styles for plotting.
+    title : str
+        Title of the plot (or subplot) axe.
+    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
+    uselabel_x: bool, optional
+        use x coordinate label as x tick labels
+    vshift : float, optional
+        vertically shift the line from its baseline.
+    xlim : tuple, optional
+        limit on the horizontal axis.
+    xlabel : str, optional
+        label on the horizontal axis.
+    x_reverse : bool, optional, default: False
+        reverse the x axis. Equivalent to reverse.
+    ylabel or zlabel : str, optional
+        label on the vertical axis.
+    ylim or zlim : tuple, optional
+        limit on the vertical axis.
 
     Returns
     -------
-    %(plot.returns)s
+    Matplolib Axes or None
+        The matplotlib axes containing the plot if successful, None otherwise.
 
     See Also
     --------
@@ -487,7 +654,6 @@ def plot_scatter(dataset, **kwargs):
     return plot_1D(dataset, method="scatter", **kwargs)
 
 
-@docprocess.dedent
 def plot_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
@@ -496,15 +662,96 @@ def plot_pen(dataset, **kwargs):
 
     Parameters
     ----------
-    %(plot.parameters.no_method)s
+    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+        Source of data to plot.
+
+    **kwargs
+        Additional matplotlib / plotting keyword arguments.
 
     Other Parameters
     ----------------
-    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+    ax : Axe, optional
+        Axe where to plot. If not specified, create a new one.
+    clear : bool, optional, default: True
+        If false, hold the current figure and ax until a new plot is performed.
+    color or c : color, optional, default: auto
+        color of the line.
+    commands : str,
+        matplotlib commands to be executed.
+    data_only : bool, optional, default: False
+        Only the plot is done. No addition of axes or label specifications.
+    dpi : int, optional
+        the number of pixel per inches.
+    figsize : tuple, optional, default is (3.4, 1.7)
+        figure size.
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences).
+    imag : bool, optional, default: False
+        Show imaginary component for complex data. By default the real component is
+        displayed.
+    linestyle or ls : str, optional, default: auto
+        line style definition.
+    linewidth or lw : float, optional, default: auto
+        line width.
+    marker, m: str, optional, default: auto
+        marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    markeredgecolor or mec: color, optional
+    markeredgewidth or mew: float, optional
+    markerfacecolor or mfc: color, optional
+    markersize or ms: float, optional
+    markevery: None or int
+    modellinestyle or modls : str
+        line style of the model.
+    offset : float
+        offset of the model individual lines.
+    output : str,
+        name of the file to save the figure.
+    plot_model : Bool,
+        plot model data if available.
+    plottitle: bool, optional, default: False
+        Use the name of the dataset as title. Works only if title is not defined
+    reverse : bool or None [optional, default=None/False
+        In principle, coordinates run from left to right,
+        except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
+    show_complex : bool, optional, default: False
+        Show both real and imaginary component for complex data.
+        By default only the real component is displayed.
+    show_mask: bool, optional
+        Should we display the mask using colored area.
+    show_z : bool, optional, default: True
+        should we show the vertical axis.
+    show_zero : bool, optional
+        show the zero basis.
+    style : str, optional, default: scp.preferences.style (scpy)
+        Matplotlib stylesheet (use available_style to get a list of available
+        styles for plotting.
+    title : str
+        Title of the plot (or subplot) axe.
+    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
+    uselabel_x: bool, optional
+        use x coordinate label as x tick labels
+    vshift : float, optional
+        vertically shift the line from its baseline.
+    xlim : tuple, optional
+        limit on the horizontal axis.
+    xlabel : str, optional
+        label on the horizontal axis.
+    x_reverse : bool, optional, default: False
+        reverse the x axis. Equivalent to reverse.
+    ylabel or zlabel : str, optional
+        label on the vertical axis.
+    ylim or zlim : tuple, optional
+        limit on the vertical axis.
 
     Returns
     -------
-    %(plot.returns)s
+    Matplolib Axes or None
+        The matplotlib axes containing the plot if successful, None otherwise.
 
     See Also
     --------
@@ -519,7 +766,6 @@ def plot_pen(dataset, **kwargs):
     return plot_1D(dataset, method="pen", **kwargs)
 
 
-@docprocess.dedent
 def plot_scatter_pen(dataset, **kwargs):
     """
     Plot a 1D dataset with solid pen by default.
@@ -528,30 +774,110 @@ def plot_scatter_pen(dataset, **kwargs):
 
     Parameters
     ----------
-    %(plot.parameters.no_method)s
+    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+        Source of data to plot.
+
+    **kwargs
+        Additional matplotlib / plotting keyword arguments.
 
     Other Parameters
     ----------------
-    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+    ax : Axe, optional
+        Axe where to plot. If not specified, create a new one.
+    clear : bool, optional, default: True
+        If false, hold the current figure and ax until a new plot is performed.
+    color or c : color, optional, default: auto
+        color of the line.
+    commands : str,
+        matplotlib commands to be executed.
+    data_only : bool, optional, default: False
+        Only the plot is done. No addition of axes or label specifications.
+    dpi : int, optional
+        the number of pixel per inches.
+    figsize : tuple, optional, default is (3.4, 1.7)
+        figure size.
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences).
+    imag : bool, optional, default: False
+        Show imaginary component for complex data. By default the real component is
+        displayed.
+    linestyle or ls : str, optional, default: auto
+        line style definition.
+    linewidth or lw : float, optional, default: auto
+        line width.
+    marker, m: str, optional, default: auto
+        marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    markeredgecolor or mec: color, optional
+    markeredgewidth or mew: float, optional
+    markerfacecolor or mfc: color, optional
+    markersize or ms: float, optional
+    markevery: None or int
+    modellinestyle or modls : str
+        line style of the model.
+    offset : float
+        offset of the model individual lines.
+    output : str,
+        name of the file to save the figure.
+    plot_model : Bool,
+        plot model data if available.
+    plottitle: bool, optional, default: False
+        Use the name of the dataset as title. Works only if title is not defined
+    reverse : bool or None [optional, default=None/False
+        In principle, coordinates run from left to right,
+        except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
+    show_complex : bool, optional, default: False
+        Show both real and imaginary component for complex data.
+        By default only the real component is displayed.
+    show_mask: bool, optional
+        Should we display the mask using colored area.
+    show_z : bool, optional, default: True
+        should we show the vertical axis.
+    show_zero : bool, optional
+        show the zero basis.
+    style : str, optional, default: scp.preferences.style (scpy)
+        Matplotlib stylesheet (use available_style to get a list of available
+        styles for plotting.
+    title : str
+        Title of the plot (or subplot) axe.
+    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
+    uselabel_x: bool, optional
+        use x coordinate label as x tick labels
+    vshift : float, optional
+        vertically shift the line from its baseline.
+    xlim : tuple, optional
+        limit on the horizontal axis.
+    xlabel : str, optional
+        label on the horizontal axis.
+    x_reverse : bool, optional, default: False
+        reverse the x axis. Equivalent to reverse.
+    ylabel or zlabel : str, optional
+        label on the vertical axis.
+    ylim or zlim : tuple, optional
+        limit on the vertical axis.
 
     Returns
     -------
-    %(plot.returns)s
+    Matplolib Axes or None
+        The matplotlib axes containing the plot if successful, None otherwise.
 
     See Also
     --------
     plot
     plot_1D
+    plot_pen
     plot_scatter
     plot_bar
-    plot_pen
     plot_multiple
     multiplot
     """
     return plot_1D(dataset, method="scatter_pen", **kwargs)
 
 
-@docprocess.dedent
 def plot_bar(dataset, **kwargs):
     """
     Plot a 1D dataset with bars.
@@ -560,15 +886,96 @@ def plot_bar(dataset, **kwargs):
 
     Parameters
     ----------
-    %(plot.parameters.no_method)s
+    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+        Source of data to plot.
+
+    **kwargs
+        Additional matplotlib / plotting keyword arguments.
 
     Other Parameters
     ----------------
-    %(plot.other_parameters.no_colorbar|projections|transposed|y_reverse)s
+    ax : Axe, optional
+        Axe where to plot. If not specified, create a new one.
+    clear : bool, optional, default: True
+        If false, hold the current figure and ax until a new plot is performed.
+    color or c : color, optional, default: auto
+        color of the line.
+    commands : str,
+        matplotlib commands to be executed.
+    data_only : bool, optional, default: False
+        Only the plot is done. No addition of axes or label specifications.
+    dpi : int, optional
+        the number of pixel per inches.
+    figsize : tuple, optional, default is (3.4, 1.7)
+        figure size.
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences).
+    imag : bool, optional, default: False
+        Show imaginary component for complex data. By default the real component is
+        displayed.
+    linestyle or ls : str, optional, default: auto
+        line style definition.
+    linewidth or lw : float, optional, default: auto
+        line width.
+    marker, m: str, optional, default: auto
+        marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    markeredgecolor or mec: color, optional
+    markeredgewidth or mew: float, optional
+    markerfacecolor or mfc: color, optional
+    markersize or ms: float, optional
+    markevery: None or int
+    modellinestyle or modls : str
+        line style of the model.
+    offset : float
+        offset of the model individual lines.
+    output : str,
+        name of the file to save the figure.
+    plot_model : Bool,
+        plot model data if available.
+    plottitle: bool, optional, default: False
+        Use the name of the dataset as title. Works only if title is not defined
+    reverse : bool or None [optional, default=None/False
+        In principle, coordinates run from left to right,
+        except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
+    show_complex : bool, optional, default: False
+        Show both real and imaginary component for complex data.
+        By default only the real component is displayed.
+    show_mask: bool, optional
+        Should we display the mask using colored area.
+    show_z : bool, optional, default: True
+        should we show the vertical axis.
+    show_zero : bool, optional
+        show the zero basis.
+    style : str, optional, default: scp.preferences.style (scpy)
+        Matplotlib stylesheet (use available_style to get a list of available
+        styles for plotting.
+    title : str
+        Title of the plot (or subplot) axe.
+    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
+    uselabel_x: bool, optional
+        use x coordinate label as x tick labels
+    vshift : float, optional
+        vertically shift the line from its baseline.
+    xlim : tuple, optional
+        limit on the horizontal axis.
+    xlabel : str, optional
+        label on the horizontal axis.
+    x_reverse : bool, optional, default: False
+        reverse the x axis. Equivalent to reverse.
+    ylabel or zlabel : str, optional
+        label on the vertical axis.
+    ylim or zlim : tuple, optional
+        limit on the vertical axis.
 
     Returns
     -------
-    %(plot.returns)s
+    Matplolib Axes or None
+        The matplotlib axes containing the plot if successful, None otherwise.
 
     See Also
     --------
