@@ -479,6 +479,25 @@ class SpectroChemPy(Application):
         warnings.warn(msg, *args, **kwargs, stacklevel=2)
         self._from_warning_ = False
 
+    def close_handlers(self):
+        """
+        Override to handle shutdown gracefully.
+
+        During Python shutdown, traitlets' __del__ may try to access self.log
+        after some internal state has been cleaned up, causing AttributeError.
+        This override adds proper exception handling to prevent such errors.
+        """
+        try:
+            if getattr(self, "_logging_configured", False):
+                for handler in self.log.handlers:
+                    try:
+                        handler.close()
+                    except Exception:
+                        pass
+                self._logging_configured = False
+        except Exception:
+            pass
+
 
 # --------------------------------------------------------------------------------------
 # Setup environment - lazy initialization

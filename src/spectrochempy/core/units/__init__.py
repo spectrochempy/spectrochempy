@@ -16,6 +16,17 @@ __all__ = [
 
 import warnings
 
+# Suppress pint warnings about unit redefinitions.
+# These redefinitions are intentional (e.g., adding aliases like "count" -> "point",
+# or defining common spectroscopic units like "%", "ppm" with custom symbols).
+# The warnings are not useful and clutter output.
+warnings.filterwarnings(
+    "ignore",
+    message=r"Redefining.*",
+    category=UserWarning,
+    module=r"pint\.util",
+)
+
 from pint import __version__
 
 # check pint version

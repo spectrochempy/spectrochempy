@@ -10,7 +10,6 @@ import subprocess
 
 import numpy as np
 import traitlets as tr
-from setuptools_scm import get_version
 
 __all__ = [
     "name",
@@ -28,6 +27,39 @@ __all__ = [
     "cite",
     "long_description",
 ]
+
+
+def _get_version():
+    """
+    Get the version of spectrochempy.
+
+    Resolution order:
+        1. Try importlib.metadata (installed package)
+        2. Fallback to setuptools_scm (git checkout / dev mode)
+        3. Fallback to "0+unknown" if neither works
+
+    This ensures setuptools-scm is only a build-time dependency,
+    not a runtime dependency.
+    """
+    # Try importlib.metadata first (works for installed packages)
+    try:
+        from importlib.metadata import PackageNotFoundError
+        from importlib.metadata import version
+
+        return version("spectrochempy")
+    except Exception:
+        pass
+
+    # Fallback to setuptools_scm (for git checkout / dev mode)
+    try:
+        from setuptools_scm import get_version
+
+        return get_version(root="..", relative_to=__file__)
+    except Exception:
+        pass
+
+    # Final fallback
+    return "0+unknown"
 
 
 class SCPInfo(tr.HasTraits):
@@ -62,20 +94,17 @@ class SCPInfo(tr.HasTraits):
     @tr.default("release")
     def _release_default(self):
         try:
-            release = importlib.metadata.version("spectrochempy").split("+")[0]
-            "Release version string of this package"
+            release = _get_version().split("+")[0]
         except Exception:  # pragma: no cover
-            # package is not installed
             release = "--not set--"
         return release
 
     @tr.default("version")
     def _version_default(self):
         try:
-            version = get_version(root="..", relative_to=__file__)
-            "Version string of this package"
-        except LookupError:  # pragma: no cover
-            version = self.release
+            version = _get_version()
+        except Exception:  # pragma: no cover
+            version = "0+unknown"
         return version
 
     @tr.default("copyright")
