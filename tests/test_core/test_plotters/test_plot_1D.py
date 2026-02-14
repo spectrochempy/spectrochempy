@@ -118,3 +118,35 @@ def test_issue_375():
     #     os.remove('multiple_IR_dataset_1D_scatter.png')
     #     raise AssertionError('comparison fails')
     # os.remove('multiple_IR_dataset_1D_scatter.png')
+
+
+def test_plot_multiple_single_axes():
+    """Regression test: plot_multiple should produce exactly one axes with multiple lines."""
+    import matplotlib.pyplot as plt
+    from spectrochempy import NDDataset
+    from spectrochempy.plotting.plot1d import plot_multiple
+
+    # Create test datasets
+    d1 = NDDataset([1, 2, 3, 4, 5], name="A")
+    d2 = NDDataset([2, 3, 4, 5, 6], name="B")
+    d3 = NDDataset([3, 4, 5, 6, 7], name="C")
+
+    datasets = [d1, d2, d3]
+
+    # Call plot_multiple
+    ax = plot_multiple(
+        datasets,
+        method="pen",
+        legend="best",
+        labels=["A", "B", "C"],
+        shift=1,
+    )
+
+    # Verify: exactly one figure with one axes
+    fig = ax.figure
+    assert len(fig.get_axes()) == 1, f"Expected 1 axes, got {len(fig.get_axes())}"
+
+    # Verify: three lines (one per dataset)
+    assert len(ax.lines) == 3, f"Expected 3 lines, got {len(ax.lines)}"
+
+    plt.close("all")

@@ -84,20 +84,20 @@ new = mydataset["hot"]
 
 # %%
 # To plot a dataset, use the `plot` command (generic plot).
-# As the section NDDataset is 2D, a contour plot is displayed by default.
-new.plot()
+# As the section NDDataset is 2D, a stack plot is displayed by default.
+_ = new.plot()
 # %%
 # But it is possible to display image
 #
 # sphinx_gallery_thumbnail_number = 2
-new.plot(method="image")
+
+_ = new.plot(method="image")
 # %%
-# or stacked plot
-new.plot(method="stack")
+# or contour plot
+_ = new.plot(method="map")
 # %%
 # Note that the scp allows one to use this syntax too:
-scp.plot_stack(new)
-scp.Coord
+_ = scp.plot_map(new)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -1520,31 +1520,49 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         clear = kwargs.get("clear", True)
         ax = kwargs.pop("ax", None)
 
-        fig = get_figure(
-            preferences=prefs,
-            style=kwargs.get("style"),
-            figsize=kwargs.get("figsize"),
-            dpi=kwargs.get("dpi"),
-        )
-
         ndaxes = {}
 
-        if clear:
-            pass
-
+        # Design principle: Explicit ax > clear > implicit figure state
+        # When ax is provided, it fully owns the figure - clear is ignored
         if ax is not None:
+            # Explicit ax provided: reuse its figure, ignore clear entirely
             if isinstance(ax, Axes):
+                fig = ax.figure
                 ax.name = "main"
                 ndaxes["main"] = ax
             else:
                 raise ValueError(f"{ax} is not a valid Matplotlib Axes")
 
-        elif fig.get_axes():
-            for i, a in enumerate(fig.get_axes()):
-                a.name = a.name or f"ax{i}"
-                ndaxes[a.name] = a
+        # When no explicit ax is provided, clear determines figure creation
+        elif not clear:
+            # clear=False: reuse current figure from pyplot
+            import matplotlib.pyplot as plt
+
+            fig = plt.gcf()
+
+            if not fig.get_axes():
+                # No existing axes, create one
+                if ndim < 3:
+                    ax = fig.add_subplot(1, 1, 1)
+                else:
+                    ax = fig.add_subplot(111, projection="3d")
+                ax.name = "main"
+                ndaxes["main"] = ax
+            else:
+                # Reuse existing axes from current figure
+                for i, a in enumerate(fig.get_axes()):
+                    a.name = a.name or f"ax{i}"
+                    ndaxes[a.name] = a
 
         else:
+            # clear=True (default): create new figure
+            fig = get_figure(
+                preferences=prefs,
+                style=kwargs.get("style"),
+                figsize=kwargs.get("figsize"),
+                dpi=kwargs.get("dpi"),
+            )
+
             if ndim < 3:
                 ax = fig.add_subplot(1, 1, 1)
             else:

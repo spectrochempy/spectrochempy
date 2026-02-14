@@ -64,7 +64,7 @@ nd3 = scp.pk(nd2, phc0=-118)
 
 # %%
 # plot
-nd3.plot()
+_ = nd3.plot()
 # %%
 # ## Baseline correction
 # Here we use the snip algorithm
@@ -147,7 +147,7 @@ area = scp.NDDataset(
     units=a.units,
     title="area",
 )
-area.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
+_ = area.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
 area
 
 # %%

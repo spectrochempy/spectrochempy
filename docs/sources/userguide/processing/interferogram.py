@@ -48,7 +48,7 @@ ir = scp.read_spa("irdata/interferogram/interfero.SPA")
 # %%
 prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
-ir.plot()
+_ = ir.plot()
 print("number of points = ", ir.size)
 
 # %% [markdown]
@@ -58,7 +58,7 @@ print("number of points = ", ir.size)
 # but it will be determined automatically.
 
 # %%
-ir.plot(xlim=(0, 128))
+_ = ir.plot(xlim=(0, 128))
 
 # %% [markdown]
 # The `x` scale of the interferogram can also be displayed as a function of optical
@@ -66,7 +66,7 @@ ir.plot(xlim=(0, 128))
 
 # %%
 ir.x.show_datapoints = False
-ir.plot(xlim=(-0.04, 0.04))
+_ = ir.plot(xlim=(-0.04, 0.04))
 
 # %% [markdown]
 # Note that the `x` scale of the interferogram has been calculated using the laser
@@ -92,7 +92,7 @@ ird = ir.dc()
 ird = ird.zf(size=2 * ird.size)
 irt = ird.fft()
 
-irt.plot(xlim=(3999, 400))
+_ = irt.plot(xlim=(3999, 400))
 
 # %% [markdown]
 # A `Happ-Genzel` (Hamming window) apodization can also be applied prior to the
@@ -103,7 +103,7 @@ ird = ir.dc()
 irdh = ird.hamming()
 irdh.zf(inplace=True, size=2 * ird.size)
 irth = irdh.fft()
-irth.plot(xlim=(3999, 400))
+_ = irth.plot(xlim=(3999, 400))
 
 # %% [markdown]
 # ## Comparison with the OMNIC processing.
@@ -115,8 +115,8 @@ irth.plot(xlim=(3999, 400))
 irs = scp.read_spa("irdata/interferogram/spectre.SPA")
 prefs.figure.figsize = (7, 6)
 ax = irs.plot(label="omnic")
-(irt + 0.4).plot(c="red", linestyle="solid", clear=False, label="no hamming")
-(irth + 0.2).plot(c="green", linestyle="solid", clear=False, label="hamming")
+_ = (irt + 0.4).plot(c="red", linestyle="solid", clear=False, label="no hamming")
+_ = (irth + 0.2).plot(c="green", linestyle="solid", clear=False, label="hamming")
 ax.set_xlim(4000.0, 400.0)
 ax.set_ylim(0.0, 3.1)
 _ = ax.legend()

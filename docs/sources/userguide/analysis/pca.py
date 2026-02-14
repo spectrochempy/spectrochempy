@@ -76,7 +76,7 @@ X = A[-1]
 X
 
 # %%
-X.plot()
+_ = X.plot()
 
 # %% [markdown]
 # This original matrix ('m1') does not contain information as to the actual elution time, wavelength,
@@ -150,8 +150,8 @@ _ = pca.screeplot()
 # Scores and Loadings can be plotted using the usual plot() method, with prior transpositon
 # for the scores:
 # %%
-pca.scores.T.plot()
-pca.loadings.plot()
+_ = pca.scores.T.plot()
+_ = pca.loadings.plot()
 
 # %% [markdown]
 # Examination of the plots above indicate that the 4th component has a structured,

@@ -158,7 +158,7 @@ ds.y
 # spectroscopy-specific features:
 
 # %%
-ds.plot()
+_ = ds.plot()
 
 # %% [markdown]
 # ### Data Selection and Manipulation
@@ -168,7 +168,7 @@ ds.plot()
 
 # %%
 region = ds[:, 4000.0:2000.0]
-region.plot()
+_ = region.plot()
 
 # %% [markdown]
 # ### Mathematical Operations
@@ -192,7 +192,7 @@ region -= region[-1]
 # Plot with colorbar to show intensity changes
 
 # %%
-region.plot(colorbar=True)
+_ = region.plot(colorbar=True)
 
 # %% [markdown]
 # ### Other Operations
@@ -221,7 +221,7 @@ region.plot(colorbar=True)
 
 # %%
 smoothed = region.smooth(size=51, window="hanning")
-smoothed.plot(colormap="magma")
+_ = smoothed.plot(colormap="magma")
 
 # %% [markdown]
 # ### Baseline Correction
@@ -251,7 +251,7 @@ blc.n_components = 5
 
 # %%
 blc.fit(smoothed)
-blc.corrected.plot()
+_ = blc.corrected.plot()
 
 # %% [markdown]
 # SpectroChemPy provides many other processing techniques, such as:
@@ -307,7 +307,7 @@ ds.y = scp.Coord(pressure, title="Pressure", units="torr")
 # Plot the dataset
 
 # %%
-ds.plot(colormap="magma")
+_ = ds.plot(colormap="magma")
 
 # %% [markdown]
 # Perform IRIS analysis

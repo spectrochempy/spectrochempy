@@ -1068,7 +1068,6 @@ def plot_multiple(
     kwargs["output"] = None
     commands = kwargs.get("commands", [])
     kwargs["commands"] = []
-    clear = kwargs.pop("clear", True)
     legend = kwargs.pop(
         "legend",
         None,
@@ -1081,9 +1080,34 @@ def plot_multiple(
     lw = _valid(lw, "lw")
     shift = _valid(shift, "shift")
 
-    # now we can plot
+    # Explicitly create figure and axes once
+    # This ensures deterministic behavior without relying on clear=False
+    from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
+
+    lazy_ensure_mpl_config()
+
+    from spectrochempy.utils.mplutils import get_figure
+
+    fig = get_figure(
+        preferences=kwargs.get("preferences"),
+        style=kwargs.get("style"),
+        figsize=kwargs.get("figsize"),
+        dpi=kwargs.get("dpi"),
+    )
+
+    # Create a single axes for all datasets
+    ax = fig.add_subplot(1, 1, 1)
+    ax.name = "main"
+
+    # Save user's show preference, but suppress during loop
+    user_show = kwargs.get("show", True)
+    kwargs["show"] = False  # Suppress display during loop
+
+    # Now plot all datasets on the explicit axes
     sh = 0
-    for i, s in enumerate(datasets):  # , colors, markers):
+    for i, s in enumerate(datasets):
+        # Apply shift and plot on explicit axes
+        # Note: ax is explicitly provided, so clear parameter is ignored
         ax = (s + shift[i] + sh).plot(
             method=method,
             pen=pen,
@@ -1091,12 +1115,13 @@ def plot_multiple(
             color=color[i] if color != "AUTO" else color,
             ls=ls[i] if ls != "AUTO" else ls,
             lw=lw[i] if lw != "AUTO" else lw,
-            clear=clear,
+            ax=ax,  # Explicit axes reuse - clear is ignored when ax is provided
             **kwargs,
         )
         sh += shift[i]
-        clear = False  # clear=False is necessary for the next plot to say
-        # that we will plot on the same figure
+
+    # Restore user's show preference for final display
+    kwargs["show"] = user_show
 
     # scale all plots
     if legend is not None:
@@ -1110,7 +1135,7 @@ def plot_multiple(
         )
 
     # now we can output the final figure
-    kw = {"output": output, "commands": commands}
+    kw = {"output": output, "commands": commands, "show": user_show}
     datasets[0]._plot_resume(datasets[-1], **kw)
 
     return ax

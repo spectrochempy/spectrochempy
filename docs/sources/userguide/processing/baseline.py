@@ -54,7 +54,7 @@ X = scp.read("irdata/nh4y-activation.spg")
 prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 # plot the spectra
-X.plot()
+_ = X.plot()
 
 # %% [markdown]
 # ## The `Baseline` processor
@@ -92,7 +92,7 @@ blc.fit(X[0])
 # get the new dataset with the baseline subtracted
 X1 = blc.transform()
 # plot X, X1 and the baseline using the processor plot method
-blc.plot()
+_ = blc.plot()
 
 # %% [markdown]
 # One can also use the property `corrected` instead of the method `transform()`,
@@ -110,7 +110,7 @@ blc.fit(X)
 # get the new dataset with the baseline subtracted
 X2 = blc.transform()
 # plot the baseline corrected series of spectra
-X2.plot()
+_ = X2.plot()
 
 # %% [markdown]
 # The baseline models implemented in SpectroChemPy are able to handle missing data.
@@ -119,7 +119,7 @@ X2.plot()
 
 # %%
 X[:, 891.0:1234.0] = scp.MASKED
-X.plot()
+_ = X.plot()
 
 # %% [markdown]
 # Fitting the baseline is done transparently
@@ -127,7 +127,7 @@ X.plot()
 # %%
 blc.fit(X)
 X3 = blc.transform()
-X3.plot()
+_ = X3.plot()
 
 # %% [markdown]
 # ### Overview of the other model
@@ -220,7 +220,7 @@ blc.order = "pchip"
 blc.fit(X[0])
 # get and plot the corrected dataset
 X5 = blc.transform()
-blc.plot()
+_ = blc.plot()
 
 # %% [markdown]
 # **AsLS :  Asymmetric Least Squares Smoothing baseline correction**
@@ -233,7 +233,7 @@ blc.lamb = 10**9
 blc.asymmetry = 0.002
 blc.fit(X)
 X6 = blc.transform()
-X6.plot()
+_ = X6.plot()
 
 # %% [markdown]
 # **SNIP : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm**
@@ -245,7 +245,7 @@ blc.model = "snip"
 blc.snip_width = 200
 blc.fit(X)
 X7 = blc.transform()
-X7.plot()
+_ = X7.plot()
 
 # %% [markdown]
 # ### Multivariate approach
@@ -273,7 +273,7 @@ blc.fit(X)
 # get the corrected dataset
 X8 = blc.transform()
 # plot the result
-X8.plot()
+_ = X8.plot()
 
 # %% [markdown]
 # Finally, for all the example shown above, we have used the same instance of Baseline. It may be a problem to remember which setting has been done, and may impact new output. To know the actual status, one can use the `params` method. This will list all actual parameters.
@@ -312,7 +312,7 @@ A.x.units = "nm"
 prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
 prefs.colormap = "magma_r"
-A.plot()
+_ = A.plot()
 
 # %% [markdown]
 # ### Detrending
@@ -330,7 +330,7 @@ A.plot()
 
 # %%
 A1 = A.detrend(order="constant")  # Here we use a NDDataset method
-A1.plot()
+_ = A1.plot()
 
 # %% [markdown]
 # #### Linear trend
@@ -341,7 +341,7 @@ A1.plot()
 A2 = scp.detrend(
     A
 )  # Here we use the API method (this is fully equivalent to the NDDataset method)
-A2.plot()
+_ = A2.plot()
 
 # %% [markdown]
 # #### Polynomial trend
@@ -351,7 +351,7 @@ A2.plot()
 
 # %%
 A3 = A.detrend(order="quadratic")  # one can also use `order=2`
-A3.plot()
+_ = A3.plot()
 
 # %% [markdown]
 # #### Detrend independently on several data segment
@@ -367,8 +367,8 @@ R = A[0]
 R1 = R.detrend()
 
 # plots
-R.plot(label="original")
-R1.plot(label="detrended", clear=False)
+_ = R.plot(label="original")
+_ = R1.plot(label="detrended", clear=False)
 ax = (R - R1).plot(label="trend", clear=False, cmap=None, color="red", ls=":")
 ax.legend(loc="upper left")
 _ = ax.set_ylim([-0.3, 0.8])
@@ -385,8 +385,8 @@ _ = ax.set_ylim([-0.3, 0.8])
 # with breakpoints
 bp = [1300.0, 1856.0]  # warning must be float to set location, in int for indices
 R2 = R.detrend(breakpoints=bp)
-R.plot()
-R2.plot(clear=False)
+_ = R.plot()
+_ = R2.plot(clear=False)
 ax = (R - R2).plot(clear=False, cmap=None, color="red", ls=":")
 _ = ax.set_ylim([-0.3, 0.8])
 
@@ -407,7 +407,7 @@ _ = ax.set_ylim([-0.3, 0.8])
 
 # %%
 Aa = A.basc()
-Aa.plot()  # range are automatically set to the start and end of the spectra, model='polynomial', order='linear'
+_ = Aa.plot()  # range are automatically set to the start and end of the spectra, model='polynomial', order='linear'
 
 # %% [markdown]
 # All parameters of `Baseline` can be used in basc. It is thus probably quite conveninent if one wants to write shorter code.
@@ -422,7 +422,7 @@ Aa.plot()  # range are automatically set to the start and end of the spectra, mo
 
 # %%
 Ab = scp.rubberband(A)
-Ab.plot()
+_ = Ab.plot()
 
 # %% [markdown]
 # ### Code snippet for 'advanced' baseline correction

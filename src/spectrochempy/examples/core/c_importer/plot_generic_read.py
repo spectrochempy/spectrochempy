@@ -25,7 +25,7 @@ dataset = scp.read("irdata/nh4y-activation.spg")
 dataset
 
 # %%
-dataset.plot(style="paper")
+_ = dataset.plot(style="paper")
 # %%
 # When using `read`, we can pass filename as a `str` or a `~pathlib.Path` object.
 from pathlib import Path

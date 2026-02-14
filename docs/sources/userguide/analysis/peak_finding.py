@@ -74,7 +74,7 @@ prefs.colormap = "Dark2"
 
 # %%
 reg = ds[:, 2300.0:1900.0]
-reg.plot()
+_ = reg.plot()
 
 # %% [markdown]
 # ## Find maxima by manual inspection of the plot
@@ -95,7 +95,7 @@ pos
 
 # %%
 maximas = reg[:, pos].squeeze()
-maximas.plot(marker="s", ls="--", color="blue")
+_ = maximas.plot(marker="s", ls="--", color="blue")
 
 # %%
 ax = reg.plot()
@@ -210,7 +210,7 @@ evol.x = scp.Coord(
 evol.preferences.method_1D = "scatter+pen"
 
 # plot it
-evol.plot(ls=":")
+_ = evol.plot(ls=":")
 
 # %% [markdown]
 # ###  Options of `find_peaks()` <a id='options'></a>
@@ -405,7 +405,7 @@ wl, wr = properties["left_bases"][0], properties["right_bases"][0]
 # wavenumbers of left and right bases
 for w in (wl, wr):
     ax.axvline(w.m, linestyle="--")  # add vertical line at the bases
-    ax.plot(w, s[w].data, "v", color="red")
+    _ = ax.plot(w, s[w].data, "v", color="red")
     # and a red mark  #TODO: add function to plot this easily
 
 ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
@@ -558,7 +558,7 @@ peaks.plot_scatter(
 
 for i in range(len(peaks)):
     for w in (properties["left_bases"][i], properties["right_bases"][i]):
-        ax.plot(w, s[0, w].data.T, "v", color="red")
+        _ = ax.plot(w, s[0, w].data.T, "v", color="red")
     for w in (properties["left_ips"][i], properties["right_ips"][i]):
         ax.axvline(w.m, linestyle="--", color="green")
 

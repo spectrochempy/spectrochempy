@@ -128,7 +128,7 @@ dataset[:, 1290.0:920.0] = scp.MASKED
 # As the current NDDataset is 2D, a **stack plot** is displayed by default, with a **viridis** colormap.
 
 # %%
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # Note that the `plot()` method uses some of NDDataset attributes: the `NDDataset.x` coordinate `data` (here the
@@ -150,7 +150,7 @@ prefs.colormap = "magma"  # The default colormap is viridis
 prefs.axes.facecolor = ".95"  # Make the graph background colored in a light gray
 prefs.axes.grid = True
 
-dataset.plot()
+_ = dataset.plot()
 
 
 # %% [markdown]
@@ -158,7 +158,7 @@ dataset.plot()
 # If you prefer not using colormap, `cmap=None` should be used. For instance:
 
 # %%
-dataset.plot(cmap=None, colorbar=False)
+_ = dataset.plot(cmap=None, colorbar=False)
 
 # %% [markdown]
 # Note that, by default, **sans-serif** font are used for all text in the figure.
@@ -166,7 +166,7 @@ dataset.plot(cmap=None, colorbar=False)
 
 # %%
 prefs.font.family = "monospace"
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # Once changed, the preferences attributes will be used for subsequent plots.
@@ -193,7 +193,7 @@ prefs.colormap
 # but 'magma' can be passed to the `plot()` method:
 
 # %%
-dataset.plot(colormap="magma")
+_ = dataset.plot(colormap="magma")
 
 # %% [markdown]
 # while the `preferences.colormap` is still set to `viridis':
@@ -205,7 +205,7 @@ prefs.colormap
 # and will be used by default for the next plots:
 
 # %%
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # ## Adding titles and annotations
@@ -264,11 +264,11 @@ _ = ax.annotate(
 
 # %%
 prefs.style = "grayscale"
-dataset.plot()
+_ = dataset.plot()
 
 # %%
 prefs.style = "ggplot"
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # Other styles are :
@@ -283,7 +283,7 @@ dataset.plot()
 # %%
 prefs.reset()
 prefs.style = "grayscale", "paper"
-dataset.plot(colorbar=True)
+_ = dataset.plot(colorbar=True)
 
 # %% [markdown]
 # As previously, style specification can also be done directly in the plot method without
@@ -291,7 +291,7 @@ dataset.plot(colorbar=True)
 
 # %%
 prefs.colormap = "magma"
-dataset.plot(style=["scpy", "paper"])
+_ = dataset.plot(style=["scpy", "paper"])
 
 # %% [markdown]
 # To get a list of all available styles :
@@ -304,7 +304,7 @@ prefs.available_styles
 
 # %%
 prefs.reset()
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # ## Create your own style
@@ -335,17 +335,17 @@ prefs.axes.labelcolor = "blue"
 prefs.axes.grid = True
 prefs.axes.grid_axis = "x"
 
-dataset.plot()
+_ = dataset.plot()
 
 prefs.makestyle()
 
 # %%
 prefs.reset()
-dataset.plot()  # plot with the default scpy style
+_ = dataset.plot()  # plot with the default scpy style
 
 # %%
 prefs.style = "mydefault"
-dataset.plot()  # plot with our own style
+_ = dataset.plot()  # plot with our own style
 
 # %% [markdown]
 # ## Changing the type of plot
@@ -363,7 +363,7 @@ prefs.reset()
 prefs.method_2D = "map"  # this will change permanently the type of 2D plot
 prefs.colormap = "magma"
 prefs.figure_figsize = (5, 3)
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # You can also, for an individual plot use specialised plot commands, such as `plot_stack()` , `plot_map()` ,
@@ -379,7 +379,7 @@ dataset.plot_image(colorbar=True)  # will use image_cmap preference!
 # Here we use the generic `plot()` with the `method' argument and we change the image_cmap:
 
 # %%
-dataset.plot(method="image", image_cmap="jet", colorbar=True)
+_ = dataset.plot(method="image", image_cmap="jet", colorbar=True)
 
 # %% [markdown]
 # The colormap normalization can be changed using the `norm` parameter, as illustrated below,
@@ -389,7 +389,7 @@ dataset.plot(method="image", image_cmap="jet", colorbar=True)
 import matplotlib as mpl
 
 norm = mpl.colors.CenteredNorm()
-dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
+_ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
 
 # %% [markdown]
 # or below for a log scale (more information about colormap normalization can be found
@@ -397,7 +397,7 @@ dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
 
 # %%
 norm = mpl.colors.LogNorm(vmin=0.1, vmax=4.0)
-dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
+_ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
 
 # %% [markdown]
 # Below an example of a waterfall plot:
@@ -418,11 +418,11 @@ dataset.plot_surface(figsize=(7, 7), linewidth=0, y_reverse=True, autolayout=Fal
 # %%
 prefs.reset()
 d1D = dataset[-1]  # select the last row of the previous 2D dataset
-d1D.plot(color="r")
+_ = d1D.plot(color="r")
 
 # %%
 prefs.style = "seaborn-v0_8-paper"
-dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
+_ = dataset[3].plot(scatter=True, pen=False, me=30, ms=5)
 
 # %% [markdown]
 # ## Plotting several dataset on the same figure

@@ -54,7 +54,7 @@ prefs = scp.preferences
 prefs.figure.figsize = (8, 4)
 
 # and use plot method of the NDDataset
-X.plot()
+_ = X.plot()
 
 # %% [markdown]
 # To have a better view of the filters effect, we will zoom on a smaller region:
@@ -64,14 +64,14 @@ X.plot()
 # select a region by slicing (note the original shape is (1, 1024)
 Xs = X[:, 0.0:400.0]
 info_(f"shape: {X.shape}")
-Xs.plot()
+_ = Xs.plot()
 
 # %%
 import numpy as np
 
 noise = np.random.normal(0, 100, 215)
 Xn = Xs + noise
-Xn.plot()
+_ = Xn.plot()
 
 # %% [markdown]
 # ## The `Filter` processor
@@ -120,7 +120,7 @@ Xsm = filter(Xn)
 
 # %%
 def plot(X, Xm, label=None, xlim=None):
-    X.plot(color="b", label="original")
+    _ = X.plot(color="b", label="original")
     ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label=label)
     diff = X - Xm
     s = round(diff.std(dim=-1).values, 2)

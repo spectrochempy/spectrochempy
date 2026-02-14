@@ -30,7 +30,7 @@ nd = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 ndOH = nd[54, 3800.0:3300.0]
 # masking
 ndOH[:, 3505.0:3500.0] = scp.MASKED
-ndOH.plot()
+_ = ndOH.plot()
 # %%
 # Perform a Fit
 # Fit parameters are defined in a script (a single text as below)
@@ -88,7 +88,7 @@ f1.fit(ndOH)
 
 # get some information
 scp.info_(f"numbers of components: {f1.n_components}")
-ndOH.plot()
+_ = ndOH.plot()
 ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
@@ -98,7 +98,7 @@ f1.max_iter = 1000
 f1.fit(ndOH)
 # %%
 # Show the result
-ndOH.plot()
+_ = ndOH.plot()
 ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 

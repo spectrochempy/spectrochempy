@@ -45,13 +45,13 @@ prefs = scp.preferences
 prefs.lines.markersize = 7
 
 # ScreePlot
-pca.screeplot()
+_ = pca.screeplot()
 # %%
 # Score Plot
 # first we can set some preferences for the plot
 prefs.lines.markersize = 10
 
-pca.scoreplot(scores, 1, 2)
+_ = pca.scoreplot(scores, 1, 2)
 # %%
 # Score Plot for 3 PC's in 3D
 pca.scoreplot(scores, 1, 2, 3)
@@ -63,7 +63,7 @@ pca.loadings[:4].plot(legend=True)
 dataset[
     :, 882.0:1280.0
 ] = scp.MASKED  # remember: use float numbers for slicing (not integer)
-dataset.plot()
+_ = dataset.plot()
 # %%
 # Apply the PCA model
 pca = scp.PCA(n_components=0.999)
@@ -73,14 +73,14 @@ pca.n_components
 # %%
 # As seen above, now only 4 components instead of 23 are necessary to 99.9% of
 # explained variance.
-pca.screeplot()
+_ = pca.screeplot()
 # %%
 # Displays the loadings
-pca.loadings.plot(legend=True)
+_ = pca.loadings.plot(legend=True)
 # %%
 # Let's plot the scores
 scores = pca.transform()
-pca.scoreplot(scores, 1, 2)
+_ = pca.scoreplot(scores, 1, 2)
 # %%
 # Labeling scoreplot with spectra labels
 # Our dataset has already two columns of labels for the spectra but there are little
@@ -95,7 +95,7 @@ scores.y.labels = labels  # Note this does not replace previous labels,
 
 # %%
 # now display thse
-pca.scoreplot(scores, 1, 2, show_labels=True, labels_column=2)
+_ = pca.scoreplot(scores, 1, 2, show_labels=True, labels_column=2)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

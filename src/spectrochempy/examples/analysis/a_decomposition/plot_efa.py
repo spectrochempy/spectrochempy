@@ -84,10 +84,10 @@ pca = scp.PCA(n_components=3)
 C3 = pca.fit_transform(dataset)
 
 # %%
-C3.T.plot(title="PCA scores")
+_ = C3.T.plot(title="PCA scores")
 # %%
 LT = pca.loadings
-LT.plot(title="PCA components", legend=LT.k.labels)
+_ = LT.plot(title="PCA components", legend=LT.k.labels)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
