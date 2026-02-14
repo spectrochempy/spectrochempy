@@ -27,6 +27,7 @@ __dataset_methods__ = [  # Methods that can be called as API functions
 
 
 import textwrap
+from typing import Any
 
 import numpy as np
 import traitlets as tr

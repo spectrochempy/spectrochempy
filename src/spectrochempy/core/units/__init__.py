@@ -22,9 +22,8 @@ import warnings
 # The warnings are not useful and clutter output.
 warnings.filterwarnings(
     "ignore",
-    message=r"Redefining.*",
+    message=r"Redefining",
     category=UserWarning,
-    module=r"pint\.util",
 )
 
 from pint import __version__
