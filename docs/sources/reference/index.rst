@@ -471,7 +471,6 @@ Baseline correction
     :toctree: generated/
 
     Baseline
-    BaselineCorrector
     autosub
     get_baseline
     basc
@@ -795,5 +794,4 @@ File
     :nosignatures:
     :toctree: generated/
 
-    FileSelector
     pathclean

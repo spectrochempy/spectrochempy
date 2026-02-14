@@ -29,6 +29,353 @@ from spectrochempy.utils.mplutils import make_label
 # ======================================================================================
 
 
+def _resolve_stack_colors(dataset, palette=None, n=None):
+    """
+    Resolve colors for stack plot with auto-detection.
+
+    Parameters
+    ----------
+    dataset : NDDataset
+        The 2D dataset being plotted.
+    palette : str or list, optional
+        If None: auto-detect based on dataset characteristics.
+        If str:
+            - "continuous": force continuous colormap (viridis)
+            - "categorical": force categorical colors
+            - colormap name: use that colormap
+        If list: use as explicit categorical colors.
+    n : int, optional
+        Number of colors needed. If None, derived from dataset shape.
+
+    Returns
+    -------
+    tuple
+        (colors, is_categorical) where colors is a list of color values
+        and is_categorical indicates whether to use discrete color cycling.
+    """
+    import matplotlib.pyplot as plt
+
+    if n is None:
+        n = dataset.shape[-2]
+
+    # If palette is explicitly provided, use it
+    if palette is not None:
+        if palette == "continuous":
+            cmap = plt.get_cmap("viridis")
+            return cmap(np.linspace(0, 1, n)), False
+        elif palette == "categorical":
+            default_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+            colors = list(default_cycle)
+            # Cycle if needed
+            while len(colors) < n:
+                colors.extend(default_cycle)
+            return colors[:n], True
+        elif isinstance(palette, (list, tuple)):
+            # Explicit list of colors
+            colors = list(palette)
+            while len(colors) < n:
+                colors.extend(palette)
+            return colors[:n], True
+        else:
+            # Assume it's a colormap name
+            cmap = plt.get_cmap(palette)
+            return cmap(np.linspace(0, 1, n)), False
+
+    # Auto-detection: determine if continuous or categorical
+    # Use continuous colormap ONLY if ALL conditions are met:
+    # - dataset has a y coordinate
+    # - y is numeric
+    # - y values are strictly monotonic
+
+    use_continuous = False
+
+    # Get y coordinate (second to last dimension)
+    if dataset._squeeze_ndim >= 2:
+        dimy = dataset.dims[-2]
+        y = getattr(dataset, dimy)
+        if y is not None:
+            # Check if y is numeric
+            if hasattr(y, "data") and y.data is not None:
+                y_data = np.asarray(y.data)
+                if np.issubdtype(y_data.dtype, np.number):
+                    # Check if strictly monotonic
+                    if len(y_data) > 1:
+                        diffs = np.diff(y_data)
+                        if np.all(diffs > 0) or np.all(diffs < 0):
+                            # Strictly monotonic
+                            use_continuous = True
+
+    if use_continuous:
+        cmap = plt.get_cmap("viridis")
+        return cmap(np.linspace(0, 1, n)), False
+    else:
+        # Use categorical color cycle
+        default_cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        colors = list(default_cycle)
+        # Cycle if needed
+        while len(colors) < n:
+            colors.extend(default_cycle)
+        return colors[:n], True
+
+
+def _relative_luminance(rgb):
+    """
+    Compute relative luminance of an sRGB color.
+
+    Implements WCAG 2.1 relative luminance formula:
+    L = 0.2126 * R + 0.7152 * G + 0.0722 * B
+
+    where R, G, B are linearized (gamma-corrected) sRGB values.
+
+    Parameters
+    ----------
+    rgb : tuple
+        RGB color tuple (r, g, b) with values in [0, 1].
+
+    Returns
+    -------
+    float
+        Relative luminance in [0, 1].
+    """
+    r, g, b = rgb[:3]
+
+    def linearize(c):
+        if c <= 0.04045:
+            return c / 12.92
+        return ((c + 0.055) / 1.055) ** 2.4
+
+    r_lin = linearize(r)
+    g_lin = linearize(g)
+    b_lin = linearize(b)
+
+    return 0.2126 * r_lin + 0.7152 * g_lin + 0.0722 * b_lin
+
+
+def _contrast_ratio(rgb1, rgb2):
+    """
+    Compute WCAG 2.1 contrast ratio between two colors.
+
+    Contrast ratio = (L1 + 0.05) / (L2 + 0.05)
+    where L1 is the lighter color's luminance.
+
+    Parameters
+    ----------
+    rgb1, rgb2 : tuple
+        RGB color tuples (r, g, b) with values in [0, 1].
+
+    Returns
+    -------
+    float
+        Contrast ratio (>= 1).
+    """
+    l1 = _relative_luminance(rgb1)
+    l2 = _relative_luminance(rgb2)
+
+    lighter = max(l1, l2)
+    darker = min(l1, l2)
+
+    return (lighter + 0.05) / (darker + 0.05)
+
+
+def _ensure_min_contrast(cmap, background_rgb, min_contrast=2.5, samples=256):
+    """
+    Trim colormap to ensure minimum contrast with background.
+
+    Samples the colormap and finds the smallest interval [start, end]
+    where all colors meet the minimum contrast threshold with the background.
+
+    Parameters
+    ----------
+    cmap : matplotlib.colors.Colormap
+        The colormap to potentially trim.
+    background_rgb : tuple
+        RGB tuple (r, g, b) of background color, values in [0, 1].
+    min_contrast : float, optional, default: 2.5
+        Minimum WCAG contrast ratio required (default 2.5 = AA large text).
+    samples : int, optional, default: 256
+        Number of samples to check across the colormap.
+
+    Returns
+    -------
+    matplotlib.colors.Colormap
+        Original colormap if no valid interval exists, otherwise
+        a truncated colormap using LinearSegmentedColormap.from_list.
+    """
+    import matplotlib.colors as mcolors
+
+    x = np.linspace(0, 1, samples)
+    colors = cmap(x)
+
+    contrasts = np.array([_contrast_ratio(c[:3], background_rgb) for c in colors])
+
+    valid_mask = contrasts >= min_contrast
+
+    if not np.any(valid_mask):
+        return cmap
+
+    valid_indices = np.where(valid_mask)[0]
+    start_idx = valid_indices[0]
+    end_idx = valid_indices[-1]
+
+    if start_idx == 0 and end_idx == samples - 1:
+        return cmap
+
+    start_frac = x[start_idx]
+    end_frac = x[end_idx]
+
+    truncated_colors = cmap(np.linspace(start_frac, end_frac, 256))
+    truncated_cmap = mcolors.LinearSegmentedColormap.from_list(
+        "truncated", truncated_colors, N=256
+    )
+
+    return truncated_cmap
+
+
+def _resolve_2d_colormap(
+    data,
+    cmap=None,
+    cmap_mode="auto",
+    center=None,
+    norm=None,
+    contrast_safe=True,
+    min_contrast=2.5,
+    background_rgb=None,
+):
+    """
+    Resolve colormap and normalization for 2D plots with auto-detection.
+
+    This function implements a consistent colormap API for all 2D plotting functions
+    (plot_image, plot_contour, plot_surface). It provides:
+    - Auto-detection of sequential vs diverging colormaps based on data
+    - Centered normalization for bipolar data
+    - Explicit overrides via parameters
+    - Optional contrast safety to ensure visibility on background
+
+    Priority order (strict):
+        1. norm (if explicitly provided) -> use as-is, no auto-detection
+        2. cmap (if explicitly provided) -> use as-is
+        3. cmap_mode (if not "auto") -> force sequential or diverging
+        4. auto-detection -> sequential if all positive, diverging if bipolar
+        5. contrast_safe -> trim colormap ends for visibility (if enabled)
+
+    Parameters
+    ----------
+    data : array-like
+        The 2D data array to be plotted.
+    cmap : str, optional
+        Colormap name. If None, will be determined based on cmap_mode.
+    cmap_mode : str, optional, default: "auto"
+        "auto", "sequential", or "diverging".
+        - "auto": auto-detect based on data range
+        - "sequential": force sequential colormap (viridis)
+        - "diverging": force diverging colormap (RdBu_r)
+    center : numeric or str, optional
+        Center value for diverging colormaps.
+        - None: use 0 for diverging mode
+        - "auto": auto-detect center (0 if data crosses zero, else midpoint)
+        - numeric: use this value as center
+    norm : matplotlib.colors.Normalize, optional
+        Explicit normalization. If provided, overrides all other normalization.
+    contrast_safe : bool, optional, default: True
+        If True, trim colormap ends to ensure minimum contrast with background.
+    min_contrast : float, optional, default: 2.5
+        Minimum WCAG contrast ratio (2.5 = AA large text, 3.0 = AA normal text).
+    background_rgb : tuple, optional
+        RGB tuple (r, g, b) of background color. If None, defaults to white (1,1,1).
+
+    Returns
+    -------
+    tuple
+        (cmap, norm) resolved values for plotting.
+
+    Scientific Rationale
+    -------------------
+    - Sequential colormaps (e.g., viridis): appropriate for unipolar data
+      where magnitude represents intensity (e.g., temperature, concentration).
+    - Diverging colormaps (e.g., RdBu_r): appropriate for bipolar data
+      where sign matters (e.g., deviation from reference, positive/negative signals).
+    - Centered normalization: ensures meaningful zero reference for
+      comparing positive and negative deviations.
+    - Contrast safety: ensures colors are visible against the plot background.
+    """
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import TwoSlopeNorm, Normalize
+
+    if background_rgb is None:
+        background_rgb = (1.0, 1.0, 1.0)
+
+    norm_explicitly_provided = norm is not None
+
+    # Priority 1: if norm is explicitly provided, use it as-is
+    if norm is not None:
+        # norm is explicitly provided - use it, cmap still applies
+        if cmap is None:
+            cmap = plt.get_cmap("viridis")
+        elif isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
+
+        # Apply contrast safety only if norm is not explicitly provided by user
+        if contrast_safe and not norm_explicitly_provided:
+            cmap = _ensure_min_contrast(cmap, background_rgb, min_contrast)
+
+        return cmap, norm
+
+    # Get data range for auto-detection
+    vmin = np.nanmin(data)
+    vmax = np.nanmax(data)
+
+    # Determine mode: sequential vs diverging
+    use_diverging = False
+
+    if cmap_mode == "diverging":
+        use_diverging = True
+    elif cmap_mode == "sequential":
+        use_diverging = False
+    else:  # cmap_mode == "auto"
+        # Auto-detect: diverging if data crosses zero
+        use_diverging = vmin < 0 < vmax
+
+    # Resolve colormap
+    if cmap is not None:
+        # User explicitly provided cmap - use it
+        if isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
+    elif use_diverging:
+        # Diverging default: RdBu_r (red-blue, reversed)
+        cmap = plt.get_cmap("RdBu_r")
+    else:
+        # Sequential default: viridis
+        cmap = plt.get_cmap("viridis")
+
+    # Resolve normalization
+    if use_diverging:
+        # Diverging mode: use TwoSlopeNorm for centered colormap
+        if center is None:
+            center_value = 0
+        elif center == "auto":
+            center_value = 0 if vmin < 0 < vmax else (vmin + vmax) / 2
+        else:
+            center_value = center
+
+        # Ensure vmin < vcenter < vmax for TwoSlopeNorm
+        # If data doesn't span across center, adjust
+        if center_value <= vmin:
+            center_value = vmin + (vmax - vmin) / 2
+        if center_value >= vmax:
+            center_value = vmin + (vmax - vmin) / 2
+
+        norm = TwoSlopeNorm(vmin=vmin, vcenter=center_value, vmax=vmax)
+    else:
+        # Sequential mode: simple linear normalization
+        norm = Normalize(vmin=vmin, vmax=vmax)
+
+    # Apply contrast safety if enabled and norm was auto-generated
+    if contrast_safe and not norm_explicitly_provided:
+        cmap = _ensure_min_contrast(cmap, background_rgb, min_contrast)
+
+    return cmap, norm
+
+
 def plot_stack(dataset, **kwargs):
     """
     Plot a 2D dataset as a stack plot.
@@ -92,6 +439,14 @@ def plot_stack(dataset, **kwargs):
         offset of the model individual lines.
     output : str,
         name of the file to save the figure.
+    palette : str or list, optional, default: None
+        Color palette for stack plot. If None, auto-detect based on dataset.
+        If "continuous": use continuous colormap (viridis).
+        If "categorical": use matplotlib default color cycle.
+        If colormap name: use that colormap.
+        If list/tuple of colors: use as explicit categorical colors.
+        Auto-detection uses continuous colormap only when y coordinate is numeric,
+        strictly monotonic, and number of spectra > 6.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
@@ -839,16 +1194,47 @@ def plot_2D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     ax.grid(prefs.axes_grid)
 
-    # matplotlib.colors.Normalize object
+    # Resolve colormap and normalization using unified helper
+    # Priority: norm > cmap > cmap_mode > auto-detection > contrast_safe
+    cmap = kwargs.get("cmap")
+    cmap_mode = kwargs.get("cmap_mode", "auto")
+    center = kwargs.get("center")
     norm = kwargs.get("norm")
+    contrast_safe = kwargs.get("contrast_safe", True)
+    min_contrast = kwargs.get("min_contrast", 2.5)
 
-    cmap = kwargs.get("colormap", "Undefined")
-    if cmap == "Undefined":
-        cmap = kwargs.get("cmap", prefs.colormap)
+    # Get background color from axes
+    try:
+        facecolor = ax.get_facecolor()
+        if facecolor and len(facecolor) > 0:
+            bg_rgba = facecolor[0]
+            background_rgb = (bg_rgba[0], bg_rgba[1], bg_rgba[2])
+        else:
+            background_rgb = (1.0, 1.0, 1.0)
+    except Exception:
+        background_rgb = (1.0, 1.0, 1.0)
 
-    if method in ["map", "image", "surface"] and norm is None:
-        zmin, zmax = zlim
-        norm = Normalize(vmin=zmin, vmax=zmax)
+    # For image, map, surface methods, use the unified colormap resolution
+    if method in ["map", "image", "surface"]:
+        cmap, norm = _resolve_2d_colormap(
+            zdata,
+            cmap=cmap,
+            cmap_mode=cmap_mode,
+            center=center,
+            norm=norm,
+            contrast_safe=contrast_safe,
+            min_contrast=min_contrast,
+            background_rgb=background_rgb,
+        )
+    else:
+        # For non-image methods, use simple normalization
+        if norm is None:
+            zmin, zmax = zlim
+            norm = Normalize(vmin=zmin, vmax=zmax)
+        if cmap is None:
+            cmap = prefs.colormap
+        elif isinstance(cmap, str):
+            cmap = plt.get_cmap(cmap)
 
     if method in ["surface"]:
         # Ensure 3D axes
@@ -887,7 +1273,11 @@ def plot_2D(dataset, method=None, **kwargs):
         _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs)
 
     elif method in ["image"]:
-        cmap = kwargs.get("cmap", kwargs.get("image_cmap", prefs.image_cmap))
+        # Support both new cmap parameter and legacy image_cmap parameter
+        # cmap is already resolved by _resolve_2d_colormap above
+        # For image method, also check for legacy image_cmap parameter
+        if cmap is None:
+            cmap = kwargs.get("image_cmap", prefs.image_cmap)
         if discrete_data:
             method = "map"
 
@@ -927,21 +1317,40 @@ def plot_2D(dataset, method=None, **kwargs):
         # stack plot
         # ----------
         # now plot the collection of lines
-        # map colors
-        if norm is None:
-            vmin, vmax = ylim
-            # we normalize to the max time
-            norm = Normalize(vmin=vmin, vmax=vmax)
+        # map colors - always use y-coordinate range (not data intensity)
+        vmin, vmax = ylim
+        norm = Normalize(vmin=vmin, vmax=vmax)
 
-        if cmap is None:
-            color = kwargs.get("color")
-            if color is None:
-                colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-            else:
-                colors = [color]
-        else:
-            _colormap = plt.get_cmap(cmap)
+        # Get palette parameter for auto-detection
+        palette = kwargs.pop("palette", None)
+
+        # Check if user explicitly provided color or cmap (backward compatibility)
+        explicit_color = kwargs.get("color")
+        explicit_cmap = kwargs.get("colormap") or kwargs.get("cmap")
+
+        if explicit_color is not None:
+            # User explicitly passed color - use single color
+            colors = [explicit_color]
+            scalarMap = None
+        elif explicit_cmap is not None:
+            # User explicitly passed colormap - use continuous mapping
+            _colormap = plt.get_cmap(
+                explicit_cmap if explicit_cmap != "Undefined" else "viridis"
+            )
             scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
+            colors = None
+        else:
+            # Use auto-detection helper
+            colors, is_categorical = _resolve_stack_colors(
+                new, palette=palette, n=ysize
+            )
+            if is_categorical:
+                scalarMap = None
+            else:
+                # Continuous - create scalarMap
+                _colormap = plt.get_cmap("viridis")
+                scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
+                colors = None
 
         # we display the line in the reverse order, so that the last
         # are behind the first.
@@ -965,7 +1374,7 @@ def plot_2D(dataset, method=None, **kwargs):
             li = cpy(line0)
             li.set_ydata(zdata[i])
             lines.append(li)
-            if cmap is not None:
+            if scalarMap is not None:
                 li.set_color(scalarMap.to_rgba(ydata[i]))
             else:
                 li.set_color(colors[i % len(colors)])

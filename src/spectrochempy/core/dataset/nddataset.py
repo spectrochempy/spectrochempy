@@ -1476,10 +1476,42 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         Parameters
         ----------
         method : str, optional
-            Plotting method (e.g., "pen", "stack", "map", "surface").
+            Plotting method (e.g., "pen", "stack", "map", "image", "surface").
             If None, method is chosen based on data dimensionality.
         **kwargs
             Additional arguments passed to the plotting function.
+
+            For method="stack", the following specific kwargs are supported:
+            - palette : str or list, optional
+                Color palette. If None, auto-detect based on dataset.
+                If "continuous": use continuous colormap (viridis).
+                If "categorical": use matplotlib default color cycle.
+                If colormap name: use that colormap.
+                If list/tuple of colors: use as explicit categorical colors.
+
+            For method="image", "map", "surface" (2D plots), the following kwargs are supported:
+            - cmap : str, optional
+                Colormap name. If None, auto-detected based on data.
+                Defaults to "viridis" (sequential) or "RdBu_r" (diverging).
+            - cmap_mode : str, optional, default: "auto"
+                Colormap mode for 2D plots.
+                - "auto": automatically choose sequential or diverging based on data.
+                - "sequential": force sequential colormap (viridis).
+                - "diverging": force diverging colormap (RdBu_r).
+            - center : numeric or str, optional
+                Center value for diverging colormaps.
+                - None: use 0 for diverging mode.
+                - "auto": auto-detect center (0 if data crosses zero, else midpoint).
+                - numeric: use this value as center.
+            - norm : matplotlib.colors.Normalize, optional
+                Explicit normalization object. If provided, overrides cmap and center.
+            - contrast_safe : bool, optional, default: True
+                If True, trim colormap ends to ensure minimum contrast with background.
+                Prevents low-luminance colors (e.g., yellow in viridis) from blending
+                with white backgrounds.
+            - min_contrast : float, optional, default: 2.5
+                Minimum WCAG contrast ratio for contrast-safe colormaps.
+                2.5 = AA large text, 3.0 = AA normal text, 4.5 = AAA.
 
         Returns
         -------
