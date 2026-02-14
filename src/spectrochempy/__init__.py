@@ -38,16 +38,6 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 # ======================================================================================
 
-import warnings
-
-# Suppress pint warnings about unit redefinitions.
-# These redefinitions are intentional and not useful.
-warnings.filterwarnings(
-    "ignore",
-    message=r"Redefining",
-    category=UserWarning,
-)
-
 # ======================================================================================
 """
 SpectroChemPy API Module.
