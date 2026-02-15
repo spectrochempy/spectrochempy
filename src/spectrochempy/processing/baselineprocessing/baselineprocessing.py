@@ -19,9 +19,6 @@ from spectrochempy.application.application import warning_
 from spectrochempy.processing.baselineprocessing.baselineutils import lls
 from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
 from spectrochempy.processing.transformation.concatenate import concatenate
-from spectrochempy.utils.colors import NBlue
-from spectrochempy.utils.colors import NGreen
-from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.coordrange import trim_ranges
@@ -765,7 +762,12 @@ baseline/trends for different segments of the data.
             Parameters passed to the internal `plot` method of the datasets.
 
         """
-        colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
+        import matplotlib.pyplot as plt
+
+        tab10 = plt.get_cmap("tab10")
+        colX = tab10(0.0)[:3]
+        colXhat = colX
+        colBaseline = (0.1, 0.1, 0.1)
 
         X = self.X  # we need to use self.X here not self._X because the mask
         # are restored automatically
@@ -798,7 +800,9 @@ baseline/trends for different segments of the data.
             cmap=None,
             color=colXhat,
         )
-        ax = (bas - X.min()).plot(clear=False, cmap=None, color=colRes)
+        ax = (bas - X.min()).plot(
+            clear=False, cmap=None, color=colBaseline, ls="dashed"
+        )
         ax.autoscale(enable=True, axis="y")
         ax.set_title(f"{self.name} plot")
         ax.yaxis.set_visible(False)

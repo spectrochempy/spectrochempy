@@ -466,7 +466,7 @@ for reproducible results across multiple function calls.""",
     def scoreplot(
         self,
         *args,
-        colormap="viridis",
+        colormap=None,
         color_mapping="index",
         show_labels=False,
         labels_column=0,
@@ -485,12 +485,12 @@ for reproducible results across multiple function calls.""",
             The `NDDataset` contains the sores to plot. If not provided `PCA.scores`
             is used. The 2 or 3 int are the PC on which the projection is shown. If not
             provided, default to [1,2], i.e. bidimensional plot on PCs #1 and #2.
-        colormap : str
-            A matplotlib colormap.
-        color_mapping : 'index' or 'labels'
-            If 'index', then the colors of each n_scores is mapped sequentially
-            on the colormap. If labels, the labels of the n_observations are
-            used for color mapping.
+        colormap : str, optional
+            A matplotlib colormap. If None, auto-determined based on color_mapping.
+        color_mapping : 'index' or 'labels' or 'continuous'
+            If 'index', then the colors are mapped using categorical colors (tab10/tab20).
+            If 'labels', the labels of the n_observations are used for color mapping.
+            If 'continuous', colors are mapped using a continuous colormap based on y values.
         show_labels : bool, optional, default: False
             If True each observation will be annotated with its label.
         labels_column : int, optional, default:0
@@ -509,6 +509,17 @@ for reproducible results across multiple function calls.""",
         * the markersize is defined from preferences (prefs) as the square of the `prefs.lines.markersize`.
 
         """
+        import matplotlib.pyplot as plt
+        from spectrochempy.plotting.plot2d import _detect_diverging
+
+        # Resolve colormap based on color_mapping
+        if colormap is None:
+            if color_mapping == "labels":
+                colormap = "tab10"
+            elif color_mapping == "index":
+                colormap = "tab10"
+            else:
+                colormap = "viridis"
 
         # checks args
         if len(args) > 0:
@@ -530,17 +541,49 @@ for reproducible results across multiple function calls.""",
 
         # colors
         if color_mapping == "index":
-            if np.any(scores.y.data):
-                colors = scores.y.data
+            n_scores = scores.shape[0]
+            if n_scores <= 10:
+                cmap = plt.get_cmap("tab10")
+            elif n_scores <= 20:
+                cmap = plt.get_cmap("tab20")
             else:
-                colors = np.array(range(scores.shape[0]))
+                import matplotlib.colors as mcolors
+
+                tab20 = plt.get_cmap("tab20")
+                tab20_colors = tab20(np.linspace(0, 1, 20))
+                cmap = mcolors.LinearSegmentedColormap.from_list(
+                    "tab20_cycled",
+                    np.tile(tab20_colors, (n_scores // 20 + 1, 1))[:n_scores],
+                    N=n_scores,
+                )
+            colors = cmap(np.linspace(0, 1, n_scores))
 
         elif color_mapping == "labels" and scores.y.labels is not None:
             if scores.y.labels.ndim == 1:
                 labels = list(set(scores.y.labels))
             else:
                 labels = list(set(scores.y.labels[:, labels_column]))
+            n_labels = len(labels)
+            if n_labels <= 10:
+                cmap = plt.get_cmap("tab10")
+            elif n_labels <= 20:
+                cmap = plt.get_cmap("tab20")
+            else:
+                cmap = plt.get_cmap("tab20")
             colors = [labels.index(lab) for lab in scores.y.labels]
+
+        elif color_mapping == "continuous":
+            if np.any(scores.y.data):
+                colors = scores.y.data
+                if _detect_diverging(colors):
+                    colormap = "RdBu_r"
+            else:
+                colors = np.array(range(scores.shape[0]))
+                colormap = "tab10"
+        else:
+            n_scores = scores.shape[0]
+            cmap = plt.get_cmap("tab10")
+            colors = cmap(np.linspace(0, 1, n_scores))
 
         # labels
         scatterlabels = None
@@ -613,7 +656,7 @@ for reproducible results across multiple function calls.""",
             leg = []
             for lab in labels:
                 i = labels.index(lab)
-                c = axsc.get_cmap().colors[int(255 / (len(labels) - 1) * i)]
+                c = cmap(i / max(1, len(labels) - 1))
                 leg.append(mpatches.Patch(color=c, label=lab))
 
             ax.legend(handles=leg, loc="best")

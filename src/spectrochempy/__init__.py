@@ -91,6 +91,19 @@ application.start.set_warnings()
 # __all__.append("plugin_manager")
 
 
+# --------------------------------------------------------------------------------------
+# Plot profile API (lazy loaded)
+# --------------------------------------------------------------------------------------
+# These are exposed at top-level for convenience
+_PLOT_PROFILE_FUNCTIONS = {
+    "set_plot_profile": "spectrochempy.plotting.profile",
+    "get_plot_profile": "spectrochempy.plotting.profile",
+    "list_plot_profiles": "spectrochempy.plotting.profile",
+    "save_plot_profile": "spectrochempy.plotting.profile",
+    "delete_plot_profile": "spectrochempy.plotting.profile",
+}
+
+
 # Override __getattr__ to handle both submodules and direct class access
 def __getattr__(name):
     """
@@ -99,6 +112,11 @@ def __getattr__(name):
     This function enables direct access to classes like `scp.Coord`
     without importing them until they are actually used.
     """
+    # Check plot profile functions first
+    if name in _PLOT_PROFILE_FUNCTIONS:
+        from spectrochempy.plotting import profile as _profile_module
+        return getattr(_profile_module, name)
+
     if name in _LAZY_IMPORTS:
         module_path = _LAZY_IMPORTS[name]
         module = __import__(module_path, fromlist=[name])
@@ -117,25 +135,3 @@ def __getattr__(name):
         raise AttributeError(
             f"module 'spectrochempy' has no attribute '{name}'"
         ) from err
-
-
-# --------------------------------------------------------------------------------------
-# Public plotting helpers
-# --------------------------------------------------------------------------------------
-from spectrochempy.core.plotters.plot_setup import restore_rcparams
-
-# we don't use __all__ and __dir__ returned _lazy_loader.attach_stub
-__all__ = list(_LAZY_IMPORTS.keys()) + [
-    "restore_rcparams",
-]
-
-
-def __dir__() -> list[str]:
-    # displays the list of available attributes in the top-level package
-    return __all__
-
-
-# ------------------------------------------------------------------------------
-
-if __name__ == "main":
-    pass

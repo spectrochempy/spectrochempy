@@ -21,6 +21,7 @@ import matplotlib
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.typeutils import is_sequence
@@ -210,16 +211,23 @@ def plot_1D(dataset, method=None, **kwargs):
     # with the imaginary component
     show_complex = kwargs.pop("show_complex", False)
 
-    # some pen or scatter property
-    color = kwargs.get("color", kwargs.get("c", "auto"))
-    lw = kwargs.get("linewidth", kwargs.get("lw", "auto"))
-    ls = kwargs.get("linestyle", kwargs.get("ls", "auto"))
+    # Resolve line/marker styles using centralized L1 function
+    style_kwargs = resolve_line_style(
+        dataset=new,
+        geometry="line",
+        kwargs=kwargs,
+        prefs=prefs,
+    )
 
-    marker = kwargs.get("marker", kwargs.get("m", "auto"))
-    markersize = kwargs.get("markersize", kwargs.get("ms", prefs.lines_markersize))
+    color = style_kwargs["color"]
+    lw = style_kwargs["linewidth"]
+    ls = style_kwargs["linestyle"]
+    marker = style_kwargs["marker"]
+    markersize = style_kwargs["markersize"]
+    markerfacecolor = style_kwargs["markerfacecolor"]
+    markeredgecolor = style_kwargs["markeredgecolor"]
+
     markevery = kwargs.get("markevery", kwargs.get("me", 1))
-    markerfacecolor = kwargs.get("markerfacecolor", kwargs.get("mfc", "auto"))
-    markeredgecolor = kwargs.get("markeredgecolor", kwargs.get("mec", "k"))
 
     # Figure setup
     # ------------------------------------------------------------------------

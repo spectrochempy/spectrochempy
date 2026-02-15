@@ -13,6 +13,7 @@ wrapping the plotting functions from the spectrochempy.plotting module.
 from typing import Any, Optional
 
 from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
+from spectrochempy.plotting.profile import ensure_plot_profile_loaded
 from spectrochempy.utils.mplutils import show as mpl_show
 
 # Mapping of method names to standalone plot functions
@@ -70,6 +71,9 @@ def plot_dataset_impl(
     """
     # Initialize matplotlib lazily
     lazy_ensure_mpl_config()
+
+    # Initialize plot profile lazily (loads defaults into PlotPreferences)
+    ensure_plot_profile_loaded()
 
     # Determine default method based on dimensionality
     if method is None:
