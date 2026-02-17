@@ -17,9 +17,11 @@ __dataset_methods__ = __all__
 from contextlib import suppress
 
 import numpy as np
+from matplotlib.ticker import MaxNLocator
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
+from spectrochempy.plotting._colorbar_utils import _apply_colorbar_tick_policy
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
@@ -580,7 +582,6 @@ def plot_2D(dataset, method=None, **kwargs):
     import matplotlib.pyplot as plt
     from matplotlib.cm import ScalarMappable
     from matplotlib.colors import Normalize
-    from matplotlib.ticker import MaxNLocator
     from matplotlib.ticker import ScalarFormatter
 
     # Get preferences
@@ -615,6 +616,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
     # often we do need to plot only data when plotting on top of a previous plot
     data_only = kwargs.get("data_only", False)
+
+    # Extract colorbar kwarg - default to False, do not pass to rendering
+    colorbar = kwargs.pop("colorbar", False)
 
     # Get the data to plot
     # ---------------------------------------------------------------
@@ -866,6 +870,8 @@ def plot_2D(dataset, method=None, **kwargs):
     cmap_mode = kwargs.get("cmap_mode", "auto")
     center = kwargs.get("center")
     norm = kwargs.get("norm")
+    vmin = kwargs.get("vmin")
+    vmax = kwargs.get("vmax")
     contrast_safe = kwargs.get("contrast_safe", True)
     min_contrast = kwargs.get("min_contrast", 1.5)
     diverging_margin = kwargs.get("diverging_margin", 0.05)
@@ -892,6 +898,8 @@ def plot_2D(dataset, method=None, **kwargs):
             cmap_mode=cmap_mode,
             center=center,
             norm=norm,
+            vmin=vmin,
+            vmax=vmax,
             contrast_safe=contrast_safe,
             min_contrast=min_contrast,
             background_rgb=background_rgb,
@@ -907,6 +915,9 @@ def plot_2D(dataset, method=None, **kwargs):
             cmap = prefs.colormap
         elif isinstance(cmap, str):
             cmap = plt.get_cmap(cmap)
+
+    # Initialize mappable tracker for colorbar
+    mappable = None
 
     if method in ["surface"]:
         # Ensure 3D axes
@@ -928,7 +939,7 @@ def plot_2D(dataset, method=None, **kwargs):
         rcount = kwargs.get("rcount", prefs.rcount)
         ccount = kwargs.get("ccount", prefs.ccount)
         ax.set_facecolor("w")
-        ax.plot_surface(
+        mappable = ax.plot_surface(
             X,
             Y,
             Z,
@@ -957,14 +968,19 @@ def plot_2D(dataset, method=None, **kwargs):
             kwargs["nlevels"] = 500
             if not hasattr(new, "clevels") or new.clevels is None:
                 new.clevels = _get_clevels(zdata, prefs, **kwargs)
-            c = ax.contourf(xdata, ydata, zdata, new.clevels, alpha=alpha)
-            c.set_cmap(cmap)
-            c.set_norm(norm)
+            mappable = ax.contourf(xdata, ydata, zdata, new.clevels, alpha=alpha)
+            mappable.set_cmap(cmap)
+            mappable.set_norm(norm)
+
+            # For colorbar, create a ScalarMappable with the resolved norm
+            colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
+            colorbar_mappable.set_array(zdata)
 
     elif method in ["map"]:
         if discrete_data:
             _colormap = plt.get_cmap(cmap)
             scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
+            mappable = scalarMap
 
             # marker = kwargs.get('marker', kwargs.get('m', None))
             markersize = kwargs.get("markersize", kwargs.get("ms", 5.0))
@@ -981,9 +997,15 @@ def plot_2D(dataset, method=None, **kwargs):
             if not hasattr(new, "clevels") or new.clevels is None:
                 new.clevels = _get_clevels(zdata, prefs, **kwargs)
 
-            c = ax.contour(xdata, ydata, zdata, new.clevels, linewidths=lw, alpha=alpha)
-            c.set_cmap(cmap)
-            c.set_norm(norm)
+            mappable = ax.contour(
+                xdata, ydata, zdata, new.clevels, linewidths=lw, alpha=alpha
+            )
+            mappable.set_cmap(cmap)
+            mappable.set_norm(norm)
+
+            # For continuous colorbar, create a ScalarMappable with the resolved norm
+            colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
+            colorbar_mappable.set_array(zdata)
 
     elif method in ["stack"]:
         # stack plot
@@ -992,6 +1014,9 @@ def plot_2D(dataset, method=None, **kwargs):
         # map colors - always use y-coordinate range (not data intensity)
         vmin, vmax = ylim
         norm = Normalize(vmin=vmin, vmax=vmax)
+
+        # Initialize is_categorical (default True - no colorbar unless proven continuous)
+        is_categorical = True
 
         # Get palette parameter for auto-detection
         palette = kwargs.pop("palette", None)
@@ -1028,6 +1053,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 # Single color value (string, number, etc.)
                 colors = [explicit_color]
             scalarMap = None
+            is_categorical = True  # Explicit colors are categorical
         elif explicit_cmap is not None:
             # User explicitly passed colormap - use continuous mapping
             _colormap = plt.get_cmap(
@@ -1035,11 +1061,13 @@ def plot_2D(dataset, method=None, **kwargs):
             )
             scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
             colors = None
+            mappable = scalarMap
+            is_categorical = False
         else:
-            # Use auto-detection helper
+            # Use auto-detection helper (L1)
             contrast_safe = kwargs.get("contrast_safe", True)
             min_contrast = kwargs.get("min_contrast", 1.5)
-            colors, is_categorical = resolve_stack_colors(
+            colors, is_categorical, mappable = resolve_stack_colors(
                 new,
                 palette=palette,
                 n=ysize,
@@ -1048,15 +1076,19 @@ def plot_2D(dataset, method=None, **kwargs):
                 min_contrast=min_contrast,
             )
             if is_categorical:
+                # Categorical: use colors directly, no mappable
                 scalarMap = None
             else:
-                # Continuous - create scalarMap using resolved colors
+                # Continuous: use the mappable from L1, build ScalarMappable with colors
                 from matplotlib.colors import LinearSegmentedColormap
 
                 _colormap = LinearSegmentedColormap.from_list(
                     "stack_cmap", colors, N=256
                 )
                 scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
+                # Update mappable with the new colormap
+                mappable = ScalarMappable(norm=norm, cmap=_colormap)
+                mappable.set_array(np.arange(ysize))
                 colors = None
 
         # we display the line in the reverse order, so that the last
@@ -1181,19 +1213,45 @@ def plot_2D(dataset, method=None, **kwargs):
     else:
         ax.set_yticks([])
 
-    _axcb = None
-    if "colorbar" in ndaxes:  # noqa: SIM102
-        if "surface" not in method:
-            axec = ndaxes["colorbar"]
-            axec.name += nameadd
-            _axcb = mpl.colorbar.ColorbarBase(
-                axec,
-                cmap=plt.get_cmap(cmap),
-                norm=norm,
-            )
-            _axcb.set_label(zlabel)
-    #        else:
-    #            new._fig.colorbar(surf, shrink=0.5, aspect=10)
+    # Create colorbar if requested (L3 responsibility)
+    # For map/image/surface: always show colorbar if requested
+    # For stack: only show if continuous colormap (not categorical)
+    if colorbar and mappable is not None:
+        fig = ax.figure
+        if method == "stack":
+            # Stack: only show colorbar for continuous, not categorical
+            # In stack mode, color represents y-coordinate (not intensity)
+            if not is_categorical:
+                if not hasattr(ax, "_scp_colorbar"):
+                    # Semantic label: color represents y coordinate
+                    y_coord_label = make_label(y, new.dims[-2])
+                    cb = fig.colorbar(
+                        mappable,
+                        ax=ax,
+                        location="right",
+                        pad=0.02,
+                        fraction=0.05,
+                        aspect=30,
+                    )
+                    cb.set_label(y_coord_label)
+                    _apply_colorbar_tick_policy(cb, norm, vmin=vmin, vmax=vmax)
+                    ax._scp_colorbar = cb
+        elif method in ["map", "image", "surface"]:
+            # 2D plots: show colorbar (intensity)
+            if not hasattr(ax, "_scp_colorbar"):
+                # Use continuous colorbar mappable if available (for contour plots)
+                cb_mappable = locals().get("colorbar_mappable", mappable)
+                cb = fig.colorbar(
+                    cb_mappable,
+                    ax=ax,
+                    location="right",
+                    pad=0.02,
+                    fraction=0.05,
+                    aspect=30,
+                )
+                cb.set_label(zlabel)
+                _apply_colorbar_tick_policy(cb, norm, vmin=vmin, vmax=vmax)
+                ax._scp_colorbar = cb
 
     # do we display the zero line
     if kwargs.get("show_zero", False):
@@ -1407,8 +1465,7 @@ def _get_clevels(data, prefs, **kwargs):
 
     # contours
     maximum = data.max()
-
-    # minimum = -maximum
+    minimum = data.min()
 
     nlevels = kwargs.get("nlevels", kwargs.get("nc", prefs.number_of_contours))
     start = kwargs.get("start", prefs.contour_start) * maximum
@@ -1419,9 +1476,12 @@ def _get_clevels(data, prefs, **kwargs):
     c = np.arange(nlevels)
     cl = np.log(c + 1.0)
     clevel = cl * (maximum - start) / cl.max() + start
-    clevelneg = -clevel
-    clevelc = clevel
-    if negative:
-        clevelc = sorted(np.concatenate((clevel, clevelneg)))
+
+    # Only create negative levels if data actually contains negative values
+    if negative and minimum < 0:
+        clevelneg = -clevel
+        clevelc = sorted(np.concatenate((clevelneg, clevel)))
+    else:
+        clevelc = clevel
 
     return clevelc

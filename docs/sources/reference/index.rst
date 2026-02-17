@@ -26,6 +26,7 @@ To use the API, you must import it using one of the following syntax:
 
 .. ipython:: python
 
+    from spectrochempy import NDDataset
     from spectrochempy import *  # strongly discouraged
     nd = NDDataset()
 
@@ -134,7 +135,6 @@ Creation from existing data
     :nosignatures:
     :toctree: generated/
 
-    copy
     fromfunction
     fromiter
 
@@ -398,11 +398,6 @@ Complex
 
     real
     imag
-    RR
-    RI
-    IR
-    II
-    component
     conj
     conjugate
     abs

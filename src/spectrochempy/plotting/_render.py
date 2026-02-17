@@ -235,9 +235,17 @@ def render_contour(
         The contour set.
     """
     if filled:
-        c = ax.contourf(x, y, Z, levels, alpha=alpha, **kwargs)
+        if levels is None:
+            c = ax.contourf(x, y, Z, alpha=alpha, **kwargs)
+        else:
+            c = ax.contourf(x, y, Z, levels, alpha=alpha, **kwargs)
     else:
-        c = ax.contour(x, y, Z, levels, linewidths=linewidths, alpha=alpha, **kwargs)
+        if levels is None:
+            c = ax.contour(x, y, Z, linewidths=linewidths, alpha=alpha, **kwargs)
+        else:
+            c = ax.contour(
+                x, y, Z, levels, linewidths=linewidths, alpha=alpha, **kwargs
+            )
 
     if cmap is not None:
         c.set_cmap(cmap)
@@ -245,6 +253,68 @@ def render_contour(
         c.set_norm(norm)
 
     return c
+
+
+def render_scatter(
+    ax,
+    x,
+    y,
+    *,
+    colors=None,
+    marker=None,
+    markersizes=None,
+    alpha=None,
+    zorder=None,
+    **kwargs,
+):
+    """
+    Pure rendering function for scatter plots.
+
+    This function MUST:
+        - Call ax.scatter()
+        - Accept already-resolved style values
+        - NOT compute any style
+        - NOT modify rcParams
+        - NOT clear axes
+        - NOT set labels
+        - NOT call show
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The axes to draw on.
+    x : array-like
+        X coordinates.
+    y : array-like
+        Y coordinates.
+    colors : color or list of colors, optional
+        Already-resolved colors.
+    marker : str, optional
+        Marker style.
+    markersizes : float or list of floats, optional
+        Marker sizes.
+    alpha : float, optional
+        Alpha (transparency).
+    zorder : int, optional
+        Z-order for layering.
+    **kwargs
+        Additional parameters passed to ax.scatter.
+
+    Returns
+    -------
+    matplotlib.collections.PathCollection
+        The scatter plot object.
+    """
+    return ax.scatter(
+        x,
+        y,
+        c=colors,
+        marker=marker,
+        s=markersizes,
+        alpha=alpha,
+        zorder=zorder,
+        **kwargs,
+    )
 
 
 def render_surface(

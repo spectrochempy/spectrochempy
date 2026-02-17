@@ -111,7 +111,7 @@ class SCPInfo(tr.HasTraits):
     def _copyright_default(self):
         current_year = np.datetime64("now", "Y")
         right = f"2014-{current_year}"
-        right += " Laboratoire Catalyse et Spectrochimie (LCS) — CeCILL-B license."
+        right += " Laboratoire Catalyse et Spectrochimie (LCS) — CeCILL-B license"
         return right
 
     @tr.default("release_date")

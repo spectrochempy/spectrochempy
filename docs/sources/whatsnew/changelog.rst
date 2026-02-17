@@ -21,7 +21,7 @@ New Features
 
 - the welcome message display functionality has been removed
 - added `restore_rcparams()` to restore Matplotlib `rcParams` after SpectroChemPy plotting (issue #877).
-- **Implemented lazy matplotlib initialization**: SpectroChemPy now loads matplotlib only when plotting is actually used, providing dramatic performance improvements for non-plotting workflows (46% faster import times).
+- implemented lazy matplotlib initialization: SpectroChemPy now loads matplotlib only when plotting is actually used, providing dramatic performance improvements for non-plotting workflows (46% faster import times).
 
 .. section
 
@@ -29,7 +29,7 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
-- **Major performance improvement**: Implemented comprehensive lazy initialization system for matplotlib, eliminating import-time overhead while maintaining full functionality. Import time reduced from 232ms to 126ms (46% faster) with complete matplotlib isolation until first plot call.
+- Performance improvement Implemented comprehensive lazy initialization system for matplotlib, eliminating import-time overhead while maintaining full functionality. Import time reduced from 232ms to 126ms (46% faster) with complete matplotlib isolation until first plot call.
 - Refactored SpectroChemPy initialization and plotting setup to reduce Matplotlib side effects (issue #877).
 - Improved handling of Matplotlib styles, separating logical styles (e.g. `default`) from file-based `.mplstyle` styles.
 - Stabilized plot preferences reset and style application across tests, docs, and CI environments.
@@ -60,10 +60,12 @@ Breaking Changes
 .. Add here new breaking changes (do not delete this comment)
 
 - python 3.10 osqp > 1.0 now allowed (#856). A warning has been added, osqp < 1.0 will not be supported in the future.
-- **No breaking changes**: The lazy matplotlib initialization is fully backward compatible. All existing code continues to work without modification while benefiting from the performance improvements.
+- No breaking changes on plotting: The lazy matplotlib initialization is fully backward compatible. All existing code continues to work without modification while benefiting from the performance improvements.
 
 .. section
 
 Deprecations
 ~~~~~~~~~~~~
 .. Add here new deprecations (do not delete this comment)
+
+- IRIS.plotdistribution(index) is now deprecated.  Usee IRIS.f[index].plot() instead. A deprecation notice has been added.

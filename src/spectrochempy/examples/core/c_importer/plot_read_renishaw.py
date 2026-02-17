@@ -28,7 +28,24 @@ _ = dataset.plot()
 # %%
 # Now read a series of spectra (measurement type : series) from a Z-depth scan.
 dataset = scp.read_wdf("ramandata/wire/depth.wdf")
-_ = dataset.plot_image()
+_ = dataset.plot(method='image')
+
+# %%
+# In this example, the diverging colormap is triggered because the dataset
+# contains a small fraction of negative values. If the proportion of negative
+# values exceeds the default threshold (5%), a diverging colormap is used.
+#
+# To avoid this behavior, you can explicitly enforce a sequential colormap,
+# for example "viridis":
+
+_ = dataset.plot_image(colormap="viridis")
+
+# %%
+# Alternatively, you can adjust the threshold that determines when a
+# diverging colormap is applied:
+
+_ = dataset.plot(method="image", margin=0.1)
+
 # %%
 # filter blank spectra
 import numpy as np

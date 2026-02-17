@@ -201,7 +201,10 @@ class Script(HasTraits):
         try:
             exec(code, globals(), localvars)  # noqa: S102
         except NameError as e:
-            error_(e + ". pass the variable `locals()` : this may solve this problem! ")
+            error_(
+                str(e)
+                + ". pass the variable `locals()` : this may solve this problem! "
+            )
 
 
 def run_script(script, localvars=None):

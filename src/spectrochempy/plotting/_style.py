@@ -34,7 +34,6 @@ __all__ = [
 
 import numpy as np
 
-
 # ======================================================================================
 # Utility functions (copied from plot2d.py - no changes)
 # ======================================================================================
@@ -110,21 +109,20 @@ def _get_categorical_cmap(n):
 
     Returns
     -------
-    Colormap
-        tab10 (n <= 10), tab20 (10 < n <= 20), or cycled tab20 (n > 20).
+     Returns a ListedColormap with deterministic cycling behavior.
     """
-    import matplotlib.colors as mcolors
     import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
 
     if n <= 10:
-        return plt.get_cmap("tab10")
-    elif n <= 20:
-        return plt.get_cmap("tab20")
+        base = plt.get_cmap("tab10").colors
     else:
-        tab20 = plt.get_cmap("tab20")
-        colors = tab20(np.linspace(0, 1, 20))
-        repeated = np.tile(colors, (n // 20 + 1, 1))[:n]
-        return mcolors.LinearSegmentedColormap.from_list("tab20_cycled", repeated, N=n)
+        base = plt.get_cmap("tab20").colors
+
+    # Deterministic cycling
+    colors = [base[i % len(base)] for i in range(n)]
+
+    return ListedColormap(colors, name="categorical_cycled")
 
 
 def _ensure_min_contrast(cmap, background_rgb, min_contrast=1.5, samples=256):
@@ -226,9 +224,12 @@ def detect_stack_semantics(dataset):
     """
     Detect semantic type for stack plots.
 
-    If y coordinate exists AND is numeric AND consists of strictly consecutive
-    integers (or integer-valued floats) with step=1 starting at 0 or 1,
-    then categorical. Otherwise sequential.
+    Returns "categorical" if and only if:
+    - dataset has no valid y coordinate
+    - OR y coordinate is numeric, integer dtype, strictly consecutive,
+      has no duplicates, and starts at 0 or 1
+
+    Otherwise returns "sequential".
 
     Parameters
     ----------
@@ -254,20 +255,23 @@ def detect_stack_semantics(dataset):
     if not np.issubdtype(y_data.dtype, np.number):
         return "categorical"
 
+    if not np.issubdtype(y_data.dtype, np.integer):
+        return "sequential"
+
     if len(y_data) < 2:
         return "categorical"
 
-    y_values = y_data.astype(float)
-    unique_sorted = np.unique(y_values)
+    unique_sorted = np.unique(y_data)
 
-    if len(unique_sorted) != len(y_values):
+    if len(unique_sorted) != len(y_data):
         return "sequential"
 
     diffs = np.diff(unique_sorted)
-    if not np.all(diffs == 1.0):
+
+    if not np.all(diffs == 1):
         return "sequential"
 
-    if unique_sorted[0] not in (0.0, 1.0):
+    if unique_sorted[0] not in (0, 1):
         return "sequential"
 
     return "categorical"
@@ -379,10 +383,13 @@ def resolve_stack_colors(
     Returns
     -------
     tuple
-        (colors, is_categorical) where colors is a list of color values
-        and is_categorical indicates whether to use discrete color cycling.
+        (colors, is_categorical, mappable) where:
+        - colors: list of color values (RGB tuples) or None
+        - is_categorical: bool indicating discrete color cycling
+        - mappable: ScalarMappable for continuous colormaps, None for categorical
     """
     import matplotlib.pyplot as plt
+    from matplotlib.cm import ScalarMappable
     from matplotlib.colors import Normalize
 
     if n is None:
@@ -396,24 +403,31 @@ def resolve_stack_colors(
                 background_rgb = (1.0, 1.0, 1.0)
                 cmap = _ensure_min_contrast(cmap, background_rgb, min_contrast)
                 colors_data = cmap(np.linspace(0, 1, n))
-            return colors_data, False
-        elif palette == "categorical":
+            # Return colors and mappable for continuous
+            norm = Normalize(vmin=0, vmax=n - 1)
+            mappable = ScalarMappable(norm=norm, cmap=cmap)
+            mappable.set_array(np.arange(n))
+            return colors_data, False, mappable
+        if palette == "categorical":
             cmap = _get_categorical_cmap(n)
-            return cmap(np.linspace(0, 1, n)), True
-        elif isinstance(palette, (list, tuple)):
+            return list(cmap.colors), True, None
+
+        if isinstance(palette, (list, tuple)):
             colors = list(palette)
             while len(colors) < n:
                 colors.extend(palette)
-            return colors[:n], True
-        else:
-            cmap = plt.get_cmap(palette)
-            return cmap(np.linspace(0, 1, n)), False
+            return colors[:n], True, None
+        cmap = plt.get_cmap(palette)
+        norm = Normalize(vmin=0, vmax=n - 1)
+        mappable = ScalarMappable(norm=norm, cmap=cmap)
+        mappable.set_array(np.arange(n))
+        return cmap(np.linspace(0, 1, n)), False, mappable
 
     semantic = detect_stack_semantics(dataset)
 
     if semantic == "categorical":
         cmap = _get_categorical_cmap(n)
-        return cmap(np.linspace(0, 1, n)), True
+        return list(cmap.colors), True, None
 
     cmap = plt.get_cmap("viridis")
     colors_data = cmap(np.linspace(0, 1, n))
@@ -423,7 +437,11 @@ def resolve_stack_colors(
         cmap = _ensure_min_contrast(cmap, background_rgb, min_contrast)
         colors_data = cmap(np.linspace(0, 1, n))
 
-    return colors_data, False
+    # Return colors and mappable for continuous
+    norm = Normalize(vmin=0, vmax=n - 1)
+    mappable = ScalarMappable(norm=norm, cmap=cmap)
+    mappable.set_array(np.arange(n))
+    return colors_data, False, mappable
 
 
 def resolve_colormap(
@@ -490,7 +508,8 @@ def resolve_colormap(
         (cmap, norm) resolved values.
     """
     import matplotlib.pyplot as plt
-    from matplotlib.colors import TwoSlopeNorm, Normalize
+    from matplotlib.colors import Normalize
+    from matplotlib.colors import TwoSlopeNorm
 
     if background_rgb is None:
         background_rgb = (1.0, 1.0, 1.0)
@@ -592,6 +611,8 @@ def resolve_2d_colormap(
     cmap_mode="auto",
     center=None,
     norm=None,
+    vmin=None,
+    vmax=None,
     contrast_safe=True,
     min_contrast=1.5,
     background_rgb=None,
@@ -610,10 +631,11 @@ def resolve_2d_colormap(
 
     Priority order (strict):
         1. norm (if explicitly provided) -> use as-is, no auto-detection
-        2. cmap (if explicitly provided) -> use as-is
-        3. cmap_mode (if not "auto") -> force sequential or diverging
-        4. auto-detection -> sequential if all positive, diverging if bipolar with margin
-        5. contrast_safe -> trim colormap ends for visibility (geometry-aware)
+        2. vmin/vmax (if explicitly provided) -> override data range
+        3. cmap (if explicitly provided) -> use as-is
+        4. cmap_mode (if not "auto") -> force sequential or diverging
+        5. auto-detection -> sequential if all positive, diverging if bipolar with margin
+        6. contrast_safe -> trim colormap ends for visibility (geometry-aware)
 
     Parameters
     ----------
@@ -627,6 +649,10 @@ def resolve_2d_colormap(
         Center value for diverging colormaps.
     norm : matplotlib.colors.Normalize, optional
         Explicit normalization. If provided, overrides all other normalization.
+    vmin : float, optional
+        Minimum value for normalization. If provided, overrides data-derived minimum.
+    vmax : float, optional
+        Maximum value for normalization. If provided, overrides data-derived maximum.
     contrast_safe : bool, optional, default: True
         If True, trim colormap ends to ensure minimum contrast with background.
     min_contrast : float, optional, default: 1.5
@@ -644,7 +670,8 @@ def resolve_2d_colormap(
         (cmap, norm) resolved values for plotting.
     """
     import matplotlib.pyplot as plt
-    from matplotlib.colors import TwoSlopeNorm, Normalize
+    from matplotlib.colors import Normalize
+    from matplotlib.colors import TwoSlopeNorm
 
     if background_rgb is None:
         background_rgb = (1.0, 1.0, 1.0)
@@ -656,14 +683,19 @@ def resolve_2d_colormap(
             cmap = plt.get_cmap(cmap)
         return cmap, norm
 
-    vmin = np.nanmin(data)
-    vmax = np.nanmax(data)
+    data_min = np.nanmin(data)
+    data_max = np.nanmax(data)
+
+    if vmin is not None:
+        data_min = vmin
+    if vmax is not None:
+        data_max = vmax
 
     if cmap is not None:
         if isinstance(cmap, str):
             cmap = plt.get_cmap(cmap)
         if norm is None:
-            norm = Normalize(vmin=vmin, vmax=vmax)
+            norm = Normalize(vmin=data_min, vmax=data_max)
         return cmap, norm
 
     if cmap_mode == "diverging":
@@ -685,19 +717,19 @@ def resolve_2d_colormap(
         if center is None:
             center_value = 0
         elif center == "auto":
-            center_value = 0 if vmin < 0 < vmax else (vmin + vmax) / 2
+            center_value = 0 if data_min < 0 < data_max else (data_min + data_max) / 2
         else:
             center_value = center
 
-        if center_value <= vmin:
-            center_value = vmin + (vmax - vmin) / 2
-        if center_value >= vmax:
-            center_value = vmin + (vmax - vmin) / 2
+        if center_value <= data_min:
+            center_value = data_min + (data_max - data_min) / 2
+        if center_value >= data_max:
+            center_value = data_min + (data_max - data_min) / 2
 
-        norm = TwoSlopeNorm(vmin=vmin, vcenter=center_value, vmax=vmax)
+        norm = TwoSlopeNorm(vmin=data_min, vcenter=center_value, vmax=data_max)
     else:
         cmap = plt.get_cmap("viridis")
-        norm = Normalize(vmin=vmin, vmax=vmax)
+        norm = Normalize(vmin=data_min, vmax=data_max)
 
     should_trim = contrast_safe and geometry in ("line", "contour")
 

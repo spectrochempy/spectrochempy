@@ -12,93 +12,13 @@ L1 (style resolution) and L2 (rendering primitives) layers.
 
 __all__ = ["plotmerit"]
 
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import colormaps
 
 from spectrochempy.plotting._render import render_lines
-from spectrochempy.plotting._style import resolve_2d_colormap
-
-
-def _resolve_exp_colors(data, exp_c, n, min_contrast=1.5):
-    """Resolve experimental colors based on user input."""
-    is_2d = data.ndim == 2
-
-    if exp_c is None:
-        if is_2d:
-            cmap, _ = resolve_2d_colormap(
-                data=data,
-                cmap=None,
-                cmap_mode="auto",
-                center=None,
-                norm=None,
-                contrast_safe=True,
-                min_contrast=min_contrast,
-                background_rgb=(1.0, 1.0, 1.0),
-                geometry="line",
-                diverging_margin=0.05,
-            )
-            rgba_colors = cmap(np.linspace(0, 1, n))
-            colors = [tuple(c[:3]) for c in rgba_colors]
-            return colors, False
-        return [tuple(mcolors.to_rgba("tab10")[:3])], False
-    if isinstance(exp_c, str):
-        try:
-            cmap = plt.get_cmap(exp_c)
-            rgba_colors = cmap(np.linspace(0, 1, n))
-            colors = [tuple(c[:3]) for c in rgba_colors]
-            return colors, False
-        except ValueError:
-            return [tuple(mcolors.to_rgba(exp_c)[:3])], False
-    elif hasattr(exp_c, "colors") or hasattr(exp_c, "N"):
-        cmap = exp_c if hasattr(exp_c, "N") else plt.get_cmap(exp_c)
-        rgba_colors = cmap(np.linspace(0, 1, n))
-        colors = [tuple(c[:3]) for c in rgba_colors]
-        return colors, False
-    elif isinstance(exp_c, (list, tuple)):
-        colors = []
-        for c in exp_c:
-            if isinstance(c, str):
-                try:
-                    cmap = plt.get_cmap(c)
-                    rgba_colors = cmap(np.linspace(0, 1, n))
-                    colors.extend([tuple(rgba[:3]) for rgba in rgba_colors])
-                except ValueError:
-                    colors.append(c)
-            else:
-                rgba = mcolors.to_rgba(c)
-                colors.append(tuple(rgba[:3]))
-        while len(colors) < n:
-            colors.extend(colors[:n])
-        return colors[:n], True
-    else:
-        return [tuple(mcolors.to_rgba(exp_c)[:3])], False
-
-
-def _resolve_other_colors(colorspec, n, default):
-    """Resolve calc_c or resid_c colors."""
-    if colorspec is None:
-        rgba = mcolors.to_rgba(default)
-        return [tuple(rgba[:3])]
-    if isinstance(colorspec, str):
-        try:
-            cmap = plt.get_cmap(colorspec)
-            rgba_colors = cmap(np.linspace(0, 1, n))
-            return [tuple(c[:3]) for c in rgba_colors]
-        except ValueError:
-            rgba = mcolors.to_rgba(colorspec)
-            return [tuple(rgba[:3])]
-    if hasattr(colorspec, "colors") or hasattr(colorspec, "N"):
-        cmap = colorspec if hasattr(colorspec, "N") else plt.get_cmap(colorspec)
-        rgba_colors = cmap(np.linspace(0, 1, n))
-        return [tuple(c[:3]) for c in rgba_colors]
-    if isinstance(colorspec, (list, tuple)):
-        colors = list(colorspec)
-        while len(colors) < n:
-            colors.extend(colorspec)
-        return colors[:n]
-    rgba = mcolors.to_rgba(colorspec)
-    return [tuple(rgba[:3])]
+from spectrochempy.plotting._style import resolve_stack_colors
+from spectrochempy.utils.mplutils import show as mpl_show
 
 
 def plotmerit(
@@ -108,24 +28,26 @@ def plotmerit(
     *,
     ax=None,
     clear=True,
-    exp_c=None,
-    calc_c=None,
+    orig_c=None,
+    recon_c=None,
     resid_c=None,
-    exp_linestyle="-",
-    calc_linestyle="--",
+    orig_linestyle="-",
+    recon_linestyle="-",
     resid_linestyle="-",
-    exp_linewidth=1.2,
-    calc_linewidth=1.0,
-    resid_linewidth=1.0,
+    orig_linewidth=1.2,
+    recon_linewidth=1.0,
+    resid_linewidth=0.8,
+    recon_alpha=0.65,
     offset=0,
     min_contrast=1.5,
     title=None,
     show_yaxis=False,
     nb_traces="all",
+    show=True,
     **kwargs,
 ):
     r"""
-    Plot the input (X), reconstructed (X_hat) and residuals.
+    Plot the original, reconstructed, and residual spectra.
 
     Parameters
     ----------
@@ -140,26 +62,29 @@ def plotmerit(
         Matplotlib axes to plot on. If None, create new figure.
     clear : bool, optional
         Whether to clear the axes before plotting. Default: True.
-    exp_c : color, colormap, or list of colors, optional
-        Color(s) for experimental spectra.
-    calc_c : color, colormap, or list of colors, optional
-        Color(s) for calculated spectra.
-    resid_c : color, colormap, or list of colors, optional
-        Color(s) for residual spectra.
-    exp_linestyle : str, optional
-        Line style for experimental spectra. Default: "-".
-    calc_linestyle : str, optional
-        Line style for calculated spectra. Default: "--".
+    orig_c : color, colormap, or list of colors, optional
+        Color(s) for original spectra.
+    recon_c : color, colormap, or list of colors, optional
+        Color(s) for reconstructed spectra. If None, uses same colors as original
+        with transparency applied via recon_alpha.
+    resid_c : color, optional
+        Color for residual spectra. Default: neutral gray ("0.4").
+    orig_linestyle : str, optional
+        Line style for original spectra. Default: "-".
+    recon_linestyle : str, optional
+        Line style for reconstructed spectra. Default: "-".
     resid_linestyle : str, optional
         Line style for residual spectra. Default: "-".
-    exp_linewidth : float, optional
-        Line width for experimental spectra. Default: 1.2.
-    calc_linewidth : float, optional
-        Line width for calculated spectra. Default: 1.0.
+    orig_linewidth : float, optional
+        Line width for original spectra. Default: 1.2.
+    recon_linewidth : float, optional
+        Line width for reconstructed spectra. Default: 1.0.
     resid_linewidth : float, optional
-        Line width for residual spectra. Default: 1.0.
+        Line width for residual spectra. Default: 0.8.
+    recon_alpha : float, optional
+        Transparency for reconstructed spectra (0-1). Default: 0.65.
     offset : float, optional
-        Separation (in percent) between X, X_hat and E. Default: 0.
+        Separation (in percent) between original, reconstructed, and residual. Default: 0.
     min_contrast : float, optional
         Minimum contrast ratio for sequential colormaps. Default: 1.5.
     title : str, optional
@@ -168,6 +93,8 @@ def plotmerit(
         Whether to show y-axis. Default: False.
     nb_traces : int or 'all', optional
         Number of lines to display. Default: 'all'.
+    show : bool, optional
+        Whether to display the figure. Default: True.
     **kwargs
         Additional keyword arguments.
 
@@ -216,17 +143,77 @@ def plotmerit(
     is_2d = X.ndim == 2
     n_traces = X.shape[0] if is_2d else 1
 
-    # Resolve colors using L1-style helpers
-    exp_colors, exp_is_categorical = _resolve_exp_colors(
-        X, exp_c, n_traces, min_contrast
+    # Color resolution helpers
+    def _normalize_colors(colors_raw, n):
+        """Normalize colors to list of tuples (RGB)."""
+        colors = []
+        for c in colors_raw:
+            if hasattr(c, "__iter__") and not isinstance(c, str):
+                colors.append(tuple(float(x) for x in c[:3]))
+            else:
+                colors.append(c)
+        return colors
+
+    def _is_colormap_name(s):
+        """Check if string looks like a colormap name (not a color name)."""
+        if not isinstance(s, str):
+            return False
+        if s.endswith("_r"):
+            return True
+        if s in ("continuous", "categorical"):
+            return False
+        return s in colormaps
+
+    # Resolve original colors using L1
+    orig_colors_raw, orig_is_categorical, _ = resolve_stack_colors(
+        dataset=X,
+        palette=orig_c,
+        n=n_traces,
+        geometry="line",
+        min_contrast=min_contrast,
     )
-    calc_colors = _resolve_other_colors(calc_c, n_traces, "#2a6fbb")
-    resid_colors = _resolve_other_colors(resid_c, n_traces, "0.4")
+    orig_colors = _normalize_colors(orig_colors_raw, n_traces)
+
+    # Resolve reconstructed colors
+    # If recon_c is None, use original colors with transparency
+    # If recon_c is explicit, resolve similarly to original
+    if recon_c is None:
+        recon_colors = orig_colors
+    elif isinstance(recon_c, str) and not _is_colormap_name(recon_c):
+        recon_colors = [recon_c]
+    else:
+        recon_colors_raw, _, _ = resolve_stack_colors(
+            dataset=X,
+            palette=recon_c,
+            n=1 if n_traces == 1 else n_traces,
+            geometry="line",
+            min_contrast=min_contrast,
+        )
+        recon_colors = _normalize_colors(recon_colors_raw, n_traces)
+        if n_traces > 1 and len(recon_colors) == 1:
+            recon_colors = recon_colors * n_traces
+
+    # Resolve residual colors (default: neutral gray)
+    if resid_c is None:
+        resid_colors = ["0.4"]
+    elif isinstance(resid_c, str) and not _is_colormap_name(resid_c):
+        resid_colors = [resid_c]
+    else:
+        resid_colors_raw, _, _ = resolve_stack_colors(
+            dataset=X,
+            palette=resid_c,
+            n=1 if n_traces == 1 else n_traces,
+            geometry="line",
+            min_contrast=min_contrast,
+        )
+        resid_colors = _normalize_colors(resid_colors_raw, n_traces)
+        if n_traces > 1 and len(resid_colors) == 1:
+            resid_colors = resid_colors * n_traces
 
     # Prepare data with offsets
     res_offset = res - mad
-    calc_offset = X_hat - mao
-    exp_offset = X
+    recon_offset = X_hat - mao
+    orig_offset = X
 
     # Get x coordinates
     if is_2d:
@@ -256,44 +243,38 @@ def plotmerit(
     xdata = np.asarray(xdata)
     if is_2d:
         res_data = np.asarray(res_offset.masked_data)
-        calc_data = np.asarray(calc_offset.masked_data)
-        exp_data = np.asarray(exp_offset.masked_data)
+        recon_data = np.asarray(recon_offset.masked_data)
+        orig_data = np.asarray(orig_offset.masked_data)
     else:
         res_data = np.atleast_2d(np.asarray(res_offset.masked_data))
-        calc_data = np.atleast_2d(np.asarray(calc_offset.masked_data))
-        exp_data = np.atleast_2d(np.asarray(exp_offset.masked_data))
+        recon_data = np.atleast_2d(np.asarray(recon_offset.masked_data))
+        orig_data = np.atleast_2d(np.asarray(orig_offset.masked_data))
 
     # Prepare style parameters
     if is_2d:
-        if exp_is_categorical:
-            exp_color_list = exp_colors
-            calc_color_list = calc_colors[0] if len(calc_colors) == 1 else calc_colors
-            resid_color_list = (
-                resid_colors[0] if len(resid_colors) == 1 else resid_colors
-            )
-        else:
-            exp_color_list = exp_colors
-            calc_color_list = calc_colors[0] if len(calc_colors) == 1 else calc_colors
-            resid_color_list = (
-                resid_colors[0] if len(resid_colors) == 1 else resid_colors
-            )
+        orig_color_list = orig_colors
+        recon_color_list = recon_colors[0] if len(recon_colors) == 1 else recon_colors
+        resid_color_list = resid_colors[0] if len(resid_colors) == 1 else resid_colors
     else:
-        exp_color_list = [exp_colors[0]]
-        calc_color_list = [calc_colors[0]]
+        orig_color_list = [orig_colors[0]]
+        recon_color_list = [recon_colors[0]]
         resid_color_list = [resid_colors[0]]
 
-    # Compute zorders: residual (bottom), calculated (middle), experimental (top)
+    # Zorder policy:
+    # residual (1) - bottom, gray, thin
+    # original (2) - middle, solid
+    # reconstructed (3) - top, semi-transparent (alpha applied)
     if is_2d:
         n = res_data.shape[0]
         resid_zorders = [1] * n
-        calc_zorders = [2] * n
-        exp_zorders = [3] * n
+        orig_zorders = [2] * n
+        recon_zorders = [3] * n
     else:
         resid_zorders = [1]
-        calc_zorders = [2]
-        exp_zorders = [3]
+        orig_zorders = [2]
+        recon_zorders = [3]
 
-    # Render residual (bottom layer)
+    # Render residual (bottom layer - zorder 1)
     render_lines(
         ax,
         xdata,
@@ -305,28 +286,29 @@ def plotmerit(
         reverse=False,
     )
 
-    # Render calculated (middle layer)
+    # Render original (middle layer - zorder 2)
     render_lines(
         ax,
         xdata,
-        calc_data,
-        colors=calc_color_list,
-        linestyles=[calc_linestyle] * len(calc_zorders),
-        linewidths=[calc_linewidth] * len(calc_zorders),
-        zorders=calc_zorders,
+        orig_data,
+        colors=orig_color_list,
+        linestyles=[orig_linestyle] * len(orig_zorders),
+        linewidths=[orig_linewidth] * len(orig_zorders),
+        zorders=orig_zorders,
         reverse=False,
     )
 
-    # Render experimental (top layer)
+    # Render reconstructed (top layer - zorder 3, with alpha)
     render_lines(
         ax,
         xdata,
-        exp_data,
-        colors=exp_color_list,
-        linestyles=[exp_linestyle] * len(exp_zorders),
-        linewidths=[exp_linewidth] * len(exp_zorders),
-        zorders=exp_zorders,
+        recon_data,
+        colors=recon_color_list,
+        linestyles=[recon_linestyle] * len(recon_zorders),
+        linewidths=[recon_linewidth] * len(recon_zorders),
+        zorders=recon_zorders,
         reverse=False,
+        alpha=recon_alpha,
     )
 
     # Let matplotlib compute y-limits from actual plotted lines
@@ -338,5 +320,8 @@ def plotmerit(
         title = f"{analysis_object.name} plot of merit"
     ax.set_title(title)
     ax.yaxis.set_visible(show_yaxis)
+
+    if show:
+        mpl_show()
 
     return ax
