@@ -15,7 +15,7 @@ import numpy as np
 # QP solvers import
 import osqp
 import traitlets as tr
-from matplotlib import pyplot as plt
+
 from scipy import optimize
 from scipy import sparse
 
@@ -886,57 +886,6 @@ class IRIS(DecompositionAnalysis):
             marker=marker,
             color=color,
             markersize=markersize,
-            **kwargs,
-        )
-
-    @docprocess.dedent
-    def plotmerit(
-        self,
-        index=None,
-        ax=None,
-        clear=True,
-        show=True,
-        title=None,
-        **kwargs,
-    ):
-        r"""
-        Plot the input dataset, reconstructed dataset and residuals.
-
-        Parameters
-        ----------
-        index : `int`, `list` or `tuple` of `int`, optional, default: `None`
-            Index(es) of the inversions (*i.e.,* of the lambda values) to consider.
-            If `None` plots for all indices.
-        ax : matplotlib.axes.Axes, optional
-            Axes to plot on. If provided, used for single index only.
-        clear : bool, optional
-            Whether to clear the axes before plotting. Default: True.
-        show : bool, optional
-            Whether to display the figure. Default: True.
-        title : str, optional
-            Plot title. If None, default lambda-aware title is used.
-        %(kwargs)s
-
-        Returns
-        -------
-        `~matplotlib.axes.Axes` or `list` of `~matplotlib.axes.Axes`
-            The matplotlib axes. Returns a list for multiple indices,
-            single Axes for single index.
-
-        Other Parameters
-        ----------------
-        %(plotmerit.other_parameters)s
-
-        """
-        from spectrochempy.plotting.composite.iris import plot_iris_merit
-
-        return plot_iris_merit(
-            self,
-            index=index,
-            ax=ax,
-            clear=clear,
-            show=show,
-            title=title,
             **kwargs,
         )
 

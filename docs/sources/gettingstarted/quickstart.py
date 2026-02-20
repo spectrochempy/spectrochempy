@@ -314,7 +314,7 @@ _ = ds.plot()
 iris = scp.IRIS(reg_par=[-10, 1, 12])
 K = scp.IrisKernel(ds, "langmuir", q=[-7, -1, 50])
 iris.fit(ds, K)
-_ = iris.f[-7].plot(method='map', colorbar=True)
+_ = iris.f[-7].plot_contour(colorbar=True)
 
 # %%
 # %% [markdown]

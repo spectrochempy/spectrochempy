@@ -217,6 +217,7 @@ def plot_1D(dataset, method=None, **kwargs):
         geometry="line",
         kwargs=kwargs,
         prefs=prefs,
+        method=method,
     )
 
     color = style_kwargs["color"]
@@ -330,59 +331,48 @@ def plot_1D(dataset, method=None, **kwargs):
     # plot_lines
     # ------------------------------------------------------------------------
     label = kwargs.get("label")
-    if scatter and pen:
-        (line,) = ax.plot(
-            xdata,
-            zdata.T,  # marker = marker,
-            markersize=markersize,
-            markevery=markevery,
-            markeredgewidth=1.0,
-            # markerfacecolor = markerfacecolor,
-            markeredgecolor=markeredgecolor,
-            label=label,
-        )
-    elif scatter:
-        (line,) = ax.plot(
-            xdata,
-            zdata.T,
-            ls="",  # marker = marker,
-            markersize=markersize,
-            markeredgewidth=1.0,
-            markevery=markevery,
-            markerfacecolor=markerfacecolor,
-            markeredgecolor=markeredgecolor,
-            label=label,
-        )
-    elif pen:
-        (line,) = ax.plot(xdata, zdata.T, marker="", label=label)
 
-    elif bar:
+    # Determine effective linestyle
+    if scatter and not pen:
+        effective_linestyle = "None"
+    elif pen:
+        effective_linestyle = ls if ls.upper() != "AUTO" else "-"
+    else:
+        effective_linestyle = "None"
+
+    # Determine effective marker
+    effective_marker = marker if marker.upper() != "AUTO" else None
+
+    if bar:
         # bar only
         line = ax.bar(
             xdata,
             zdata.squeeze(),
-            # color=color,
             edgecolor="k",
             align="center",
             label=label,
             width=kwargs.get("width", 0.1),
-        )  # barwidth = line[0].get_width()
-    else:
-        # NOTE:
-        # We intentionally allow a silent fallback to a line plot for robustness.
-        # A warning is emitted to avoid masking configuration errors.
-        warning_(
-            "No explicit plot method matched (pen/scatter/bar). "
-            "Falling back to a default line plot. "
-            "This behavior is allowed but may indicate a missing or misspelled "
-            "`method` argument."
         )
-
+    else:
+        # Unified Line2D path for pen, scatter, and scatter_pen
         (line,) = ax.plot(
             xdata,
             zdata.T,
+            linestyle=effective_linestyle,
+            marker=effective_marker,
+            markersize=markersize,
+            markeredgewidth=1.0,
+            markerfacecolor=markerfacecolor,
+            markeredgecolor=markeredgecolor,
+            markevery=markevery,
             label=label,
         )
+
+        # Set color and linewidth if not auto
+        if not (isinstance(color, str) and color.upper() == "AUTO"):
+            line.set_color(color)
+        if not (isinstance(lw, str) and lw.upper() == "AUTO"):
+            line.set_linewidth(lw)
 
     if show_complex and pen:
         # add the imaginary component for pen only plot
@@ -399,23 +389,8 @@ def plot_1D(dataset, method=None, **kwargs):
             label=label,
         )  # TODO: improve this!!!
 
-    # line attributes
-    if pen and not (isinstance(color, str) and color.upper() == "AUTO"):
-        # set the color if defined in the preferences or options
-        line.set_color(color)
-
-    if pen and not (isinstance(lw, str) and lw.upper() == "AUTO"):
-        # set the line width if defined in the preferences or options
-        line.set_linewidth(lw)
-
-    if pen and ls.upper() != "AUTO":
-        # set the line style if defined in the preferences or options
-        line.set_linestyle(ls)
-
-    if scatter and marker.upper() != "AUTO":
-        # set the line style if defined in the preferences or options
-        line.set_marker(marker)
-
+    # ----------------------------------------------------------------------------------
+    # axis
     # ----------------------------------------------------------------------------------
     # axis
     # ----------------------------------------------------------------------------------

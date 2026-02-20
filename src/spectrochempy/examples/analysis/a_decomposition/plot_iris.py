@@ -78,10 +78,8 @@ X.coordset
 # For example, it will be used by default for
 # plotting:
 
-prefs = scp.preferences
-prefs.figure.figsize = (7, 3)
 _ = X.plot(colorbar=True)
-_ = X.plot_map(colorbar=True)
+_ = X.plot_contourf(colorbar=True)
 # %%
 # To seamlessly work with the second coordinates (pressures), we can change the default
 # coordinate:
@@ -94,7 +92,7 @@ X.y.default
 X_ = X[:, 2250.0:1950.0]
 print(X_.y.default)
 _ = X_.plot()
-_ = X_.plot_map()
+_ = X_.plot_contourf()
 # %%
 # IRIS analysis without regularization
 # ------------------------------------
@@ -117,7 +115,9 @@ iris1.fit(X_, K)
 
 # %%
 # Plots the results
-_ = iris1.plotdistribution()
+_ = iris1.f.plot_contour()
+
+# %%
 _ = iris1.plotmerit()
 # %%
 # With regularization and a manual search
@@ -132,7 +132,7 @@ _ = iris2.plotlcurve(title="L curve, manual search")
 # %%
 # Visually, the best regularization parameter is at index ~ -6, corresponding to lambda = 1e-4
 
-_ = iris2.plotdistribution(-6)
+_ = iris2.f[-6].plot_contour()
 _ = iris2.plotmerit(-6)
 # %%
 # Automatic search
@@ -149,7 +149,7 @@ _ = iris3.plotlcurve(title="L curve, automated search")
 
 # sphinx_gallery_thumbnail_number = 11
 
-_ = iris3.plotdistribution(5)
+_ = iris3.f[5].plot_contour()
 _ = iris3.plotmerit(5)
 
 # %%

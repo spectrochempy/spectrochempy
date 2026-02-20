@@ -5,6 +5,8 @@
 # ======================================================================================
 """Implementation of Principal Component Analysis (using scikit-learn library)."""
 
+import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
 import traitlets as tr
@@ -18,8 +20,6 @@ from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.application.application import info_
-from spectrochempy.utils.colors import NBlue
-from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docutils import docprocess
@@ -408,257 +408,216 @@ for reproducible results across multiple function calls.""",
     # ----------------------------------------------------------------------------------
     # Plot methods specific to PCA
     # ----------------------------------------------------------------------------------
-    def screeplot(self, n_components=None, **kwargs):
-        r"""
+    def plot_scree(self, n_components=None, **kwargs):
+        """
         Scree plot of explained variance + cumulative variance by PCA.
 
-        Explained variance by each PC is plot as a bar graph (left y axis)
-        and cumulative explained variance is plot as a scatter plot with lines
+        Explained variance by each PC is plotted as a bar graph (left y axis)
+        and cumulative explained variance is plotted as a line with markers
         (right y axis).
 
         Parameters
         ----------
-        n_components : int
-            Number of components to plot.
+        n_components : int, optional
+            Number of components to plot. If None, plots all components.
         **kwargs
-            Extra arguments: `colors` (default: ``[NBlue, NRed]`` ) to set the colors
-            of the bar plot and scatter plot; ``ylims`` (default ``[(0, 100), "auto"]``).
+            Additional keyword arguments passed to :func:`plot_scree`.
+            See :func:`~spectrochempy.plotting.composite.plotscree.plot_scree`
+            for available options (e.g., ``bar_color``, ``line_color``,
+            ``title``, ``ax``, ``show``).
 
         Returns
         -------
-        `list` of `~matplotlib.axes.Axes`
-            The list of axes.
+        matplotlib.axes.Axes
+            The primary axes (left y-axis with bars).
 
+        See Also
+        --------
+        plot_scree : Standalone scree plot function.
+
+        Examples
+        --------
+        >>> import spectrochempy as scp
+        >>> X = scp.read("irdata/nh4y-activation.spg")
+        >>> pca = scp.PCA(n_components=5)
+        >>> pca.fit(X)
+        >>> ax = pca.plot_scree(show=False)  # doctest: +SKIP
         """
-        # get n_components
+        from spectrochempy.plotting.composite import plot_scree
+
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before using this method",
+            )
+
         if n_components is None:
             n_components = self.n_components
         else:
             n_components = min(self.n_components, n_components)
 
-        color1, color2 = kwargs.get("colors", [NBlue, NRed])
-        # pen = kwargs.get('pen', True)
-        ylim1, ylim2 = kwargs.get("ylims", [(0, 100), "auto"])
-
-        if ylim2 == "auto":
-            y1 = np.around(self.ev_ratio.data[0] * 0.95, -1)
-            y2 = 101.0
-            ylim2 = (y1, y2)
-
-        ax1 = self.ev_ratio[:n_components].plot_bar(
-            ylim=ylim1,
-            color=color1,
-            title="Scree plot",
+        return plot_scree(
+            self.ev_ratio.data[:n_components],
+            cumulative=self.ev_cum.data[:n_components],
+            **kwargs,
         )
 
-        markersize = prefs.lines.markersize
+    def screeplot(self, n_components=None, **kwargs):
+        """
+        Scree plot of explained variance + cumulative variance by PCA.
 
-        ax2 = self.ev_cum[:n_components].plot_scatter(
-            ylim=ylim2,
-            color=color2,
-            pen=True,
-            markersize=markersize,
-            twinx=ax1,
+        .. deprecated:: 0.7.4
+            Use :meth:`plot_scree` instead.
+
+        Parameters
+        ----------
+        n_components : int, optional
+            Number of components to plot.
+        **kwargs
+            Additional keyword arguments (ignored, for backward compatibility).
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+            The primary axes.
+        """
+        warnings.warn(
+            "PCA.screeplot() is deprecated; use PCA.plot_scree() instead.",
+            DeprecationWarning,
+            stacklevel=2,
         )
-        ax1.set_title("Scree plot")
-        return ax1, ax2
+        return self.plot_scree(n_components=n_components, **kwargs)
+
+    def plot_score(self, scores=None, components=(1, 2), **kwargs):
+        """
+        2D or 3D score plot of observations.
+
+        Plots the projection of each observation/spectrum onto the span of
+        two or three selected principal components.
+
+        Parameters
+        ----------
+        scores : NDDataset or tuple, optional
+            Scores dataset to plot. If None, uses `self.scores`.
+            Pass a modified scores dataset (e.g., with custom labels)
+            to use those labels in the plot.
+
+            Note: If a tuple or list is passed as the first positional
+            argument, it is interpreted as `components` for backward
+            compatibility.
+        components : tuple of int, optional
+            Principal components to plot (1-based indexing).
+            Length 2 for 2D plot, length 3 for 3D plot.
+            Default: (1, 2).
+        **kwargs
+            Additional keyword arguments passed to :func:`plot_score`.
+            See :func:`~spectrochempy.plotting.composite.plotscore.plot_score`
+            for available options:
+
+            - ``cmap`` : Colormap for coloring points.
+            - ``color`` : Fixed color or color values for each point.
+            - ``color_mapping`` : "index" (default) or "labels" - how to map colors.
+            - ``show_labels`` : If True, annotate points with labels.
+            - ``labels_column`` : Column index in scores.y.labels (0-based).
+            - ``ax`` : Axes to plot on.
+            - ``show`` : Whether to display the figure.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+            The matplotlib axes.
+
+        See Also
+        --------
+        plot_score : Standalone score plot function.
+
+        Examples
+        --------
+        >>> import spectrochempy as scp
+        >>> X = scp.read("irdata/nh4y-activation.spg")
+        >>> pca = scp.PCA(n_components=5)
+        >>> pca.fit(X)
+        >>> ax = pca.plot_score((1, 2), show=False)  # doctest: +SKIP
+
+        With custom labels:
+
+        >>> scores = pca.transform()  # doctest: +SKIP
+        >>> scores.y.labels = custom_labels  # doctest: +SKIP
+        >>> ax = pca.plot_score(scores=scores, show_labels=True)  # doctest: +SKIP
+        """
+        from spectrochempy.plotting.composite import plot_score
+
+        if not self._fitted:
+            raise NotFittedError(
+                "The fit method must be used before using this method",
+            )
+
+        if isinstance(scores, tuple | list) and all(isinstance(x, int) for x in scores):
+            components = tuple(scores)
+            scores = None
+
+        if scores is None:
+            scores = self.scores
+
+        return plot_score(
+            scores,
+            components=components,
+            **kwargs,
+        )
 
     def scoreplot(
         self,
         *args,
-        colormap=None,
-        color_mapping="index",
-        show_labels=False,
-        labels_column=0,
-        labels_every=1,
         **kwargs,
     ):
         """
         2D or 3D scoreplot of observations.
 
-        Plots the projection of each observation/spectrum onto the span of two or
-        three selected principal components.
+        .. deprecated:: 0.7.4
+            Use :meth:`plot_score` instead.
 
         Parameters
         ----------
-        *args : `NDDataset` and/or series of 2 or 3 ints or iterabble of 2 or 3 int, optional
-            The `NDDataset` contains the sores to plot. If not provided `PCA.scores`
-            is used. The 2 or 3 int are the PC on which the projection is shown. If not
-            provided, default to [1,2], i.e. bidimensional plot on PCs #1 and #2.
-        colormap : str, optional
-            A matplotlib colormap. If None, auto-determined based on color_mapping.
-        color_mapping : 'index' or 'labels' or 'continuous'
-            If 'index', then the colors are mapped using categorical colors (tab10/tab20).
-            If 'labels', the labels of the n_observations are used for color mapping.
-            If 'continuous', colors are mapped using a continuous colormap based on y values.
-        show_labels : bool, optional, default: False
-            If True each observation will be annotated with its label.
-        labels_column : int, optional, default:0
-            If several columns of labels are present indicates which column has to be
-            used to show labels.
-        labels_every : int, optional, default: 1
-            Do not label all points, but only every value indicated by this parameter.
+        *args
+            Positional arguments. Accepts:
+            - (i, j) or (i, j, k): component indices (1-based)
+            - (scores, i, j): NDDataset and component indices
+        **kwargs
+            Additional keyword arguments passed to :meth:`plot_score`.
 
         Returns
         -------
-        `~matplotlib.axes.Axes`
+        matplotlib.axes.Axes
             The matplotlib axes.
-
-        Notes
-        -----
-        * the markersize is defined from preferences (prefs) as the square of the `prefs.lines.markersize`.
-
         """
-        import matplotlib.pyplot as plt
-        from spectrochempy.plotting.plot2d import _detect_diverging
+        warnings.warn(
+            "PCA.scoreplot() is deprecated; use PCA.plot_score() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
-        # Resolve colormap based on color_mapping
-        if colormap is None:
-            if color_mapping == "labels":
-                colormap = "tab10"
-            elif color_mapping == "index":
-                colormap = "tab10"
+        scores = None
+        components = (1, 2)
+
+        if len(args) == 0:
+            pass
+        elif len(args) == 1:
+            if isinstance(args[0], (tuple, list)):
+                components = tuple(args[0])
+            elif hasattr(args[0], "_implements") and args[0]._implements("NDDataset"):
+                scores = args[0]
+        elif len(args) == 2:
+            if hasattr(args[0], "_implements") and args[0]._implements("NDDataset"):
+                scores = args[0]
+                components = (args[1],)
             else:
-                colormap = "viridis"
-
-        # checks args
-        if len(args) > 0:
-            scores = args[0]
-            if hasattr(scores, "_implements") and scores._implements("NDDataset"):
-                pcs = args[1:] if len(args) > 1 else (1, 2)
+                components = (args[0], args[1])
+        elif len(args) >= 3:
+            if hasattr(args[0], "_implements") and args[0]._implements("NDDataset"):
+                scores = args[0]
+                components = (args[1], args[2])
+                if len(args) > 3:
+                    components = (args[1], args[2], args[3])
             else:
-                scores = self.scores
-                pcs = args
-        else:
-            scores = self.scores
-            pcs = 1, 2
+                components = tuple(args[:3])
 
-        if isinstance(pcs[0], list | tuple | set):
-            pcs = pcs[0]
-
-        # transform to internal index of component's index (1->0 etc...)
-        pcs = np.array(pcs) - 1
-
-        # colors
-        if color_mapping == "index":
-            n_scores = scores.shape[0]
-            if n_scores <= 10:
-                cmap = plt.get_cmap("tab10")
-            elif n_scores <= 20:
-                cmap = plt.get_cmap("tab20")
-            else:
-                import matplotlib.colors as mcolors
-
-                tab20 = plt.get_cmap("tab20")
-                tab20_colors = tab20(np.linspace(0, 1, 20))
-                cmap = mcolors.LinearSegmentedColormap.from_list(
-                    "tab20_cycled",
-                    np.tile(tab20_colors, (n_scores // 20 + 1, 1))[:n_scores],
-                    N=n_scores,
-                )
-            colors = cmap(np.linspace(0, 1, n_scores))
-
-        elif color_mapping == "labels" and scores.y.labels is not None:
-            if scores.y.labels.ndim == 1:
-                labels = list(set(scores.y.labels))
-            else:
-                labels = list(set(scores.y.labels[:, labels_column]))
-            n_labels = len(labels)
-            if n_labels <= 10:
-                cmap = plt.get_cmap("tab10")
-            elif n_labels <= 20:
-                cmap = plt.get_cmap("tab20")
-            else:
-                cmap = plt.get_cmap("tab20")
-            colors = [labels.index(lab) for lab in scores.y.labels]
-
-        elif color_mapping == "continuous":
-            if np.any(scores.y.data):
-                colors = scores.y.data
-                if _detect_diverging(colors):
-                    colormap = "RdBu_r"
-            else:
-                colors = np.array(range(scores.shape[0]))
-                colormap = "tab10"
-        else:
-            n_scores = scores.shape[0]
-            cmap = plt.get_cmap("tab10")
-            colors = cmap(np.linspace(0, 1, n_scores))
-
-        # labels
-        scatterlabels = None
-        if show_labels:
-            if scores.y.labels is None:
-                raise ValueError("You set show_label to true but score.y has no label")
-            if scores.y.labels.ndim == 1:
-                scatterlabels = scores.y.labels
-            else:
-                scatterlabels = scores.y.labels[:, labels_column]
-
-        markersize = prefs.lines.markersize**2
-        if len(pcs) == 2:
-            # bidimensional score plot
-
-            fig = plt.figure(**kwargs)
-            ax = fig.add_subplot(111)
-            ax.set_title("Score plot")
-
-            ax.set_xlabel(f"PC# {pcs[0] + 1} ({self.ev_ratio.data[pcs[0]]:.3f}%)")
-            ax.set_ylabel(f"PC# {pcs[1] + 1} ({self.ev_ratio.data[pcs[1]]:.3f}%)")
-            x = scores.masked_data[:, pcs[0]]
-            y = scores.masked_data[:, pcs[1]]
-            axsc = ax.scatter(x, y, s=markersize, c=colors, cmap=colormap)
-
-            if scatterlabels is not None:
-                for idx, lab in enumerate(scatterlabels):
-                    if idx % labels_every != 0:
-                        continue
-                    ax.annotate(
-                        lab,
-                        xy=(x[idx], y[idx]),
-                        xytext=(-20, 20),
-                        textcoords="offset pixels",
-                        color=axsc.to_rgba(colors[idx]),
-                    )
-
-            number_x_labels = prefs.number_of_x_labels  # get from config
-            number_y_labels = prefs.number_of_y_labels
-            # the next two line are to avoid multipliers in axis scale
-            y_formatter = ScalarFormatter(useOffset=False)
-            ax.yaxis.set_major_formatter(y_formatter)
-            ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
-            ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
-            ax.xaxis.set_ticks_position("bottom")
-            ax.yaxis.set_ticks_position("left")
-
-        if len(pcs) == 3:
-            # tridimensional score plot
-            plt.figure(**kwargs)
-            ax = plt.axes(projection="3d")
-            ax.set_title("Score plot")
-            ax.set_xlabel(f"PC# {pcs[0] + 1} ({self.ev_ratio.data[pcs[0]]:.3f}%)")
-            ax.set_ylabel(f"PC# {pcs[1] + 1} ({self.ev_ratio.data[pcs[1]]:.3f}%)")
-            ax.set_zlabel(f"PC# {pcs[2] + 1} ({self.ev_ratio.data[pcs[2]]:.3f}%)")
-            axsc = ax.scatter(
-                scores.masked_data[:, pcs[0]],
-                scores.masked_data[:, pcs[1]],
-                scores.masked_data[:, pcs[2]],
-                zdir="z",
-                s=markersize,
-                c=colors,
-                cmap=colormap,
-                depthshade=True,
-            )
-
-        if color_mapping == "labels" and scores.y.labels is not None:
-            import matplotlib.patches as mpatches
-
-            leg = []
-            for lab in labels:
-                i = labels.index(lab)
-                c = cmap(i / max(1, len(labels) - 1))
-                leg.append(mpatches.Patch(color=c, label=lab))
-
-            ax.legend(handles=leg, loc="best")
-
-        return ax
+        return self.plot_score(scores=scores, components=components, **kwargs)

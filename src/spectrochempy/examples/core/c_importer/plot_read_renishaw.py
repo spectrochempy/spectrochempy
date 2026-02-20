@@ -32,19 +32,21 @@ _ = dataset.plot(method='image')
 
 # %%
 # In this example, the diverging colormap is triggered because the dataset
-# contains a small fraction of negative values. If the proportion of negative
-# values exceeds the default threshold (5%), a diverging colormap is used.
+# contains few, but some negative values. If the smaller lobe is at larger than `diverging_margin` (default 5%) of
+# the total # range, i.e. if the following condition is satisfied:
+#       min(|vmin|, |vmax|) / (vmax - vmin) > margin
+#  Then a diverging colormap is used.
 #
 # To avoid this behavior, you can explicitly enforce a sequential colormap,
 # for example "viridis":
 
-_ = dataset.plot_image(colormap="viridis")
+_ = dataset.plot_image(cmap="cividis")
 
 # %%
-# Alternatively, you can adjust the threshold that determines when a
-# diverging colormap is applied:
+# Alternatively, you can increase the `diverging_margin` that determines when the
+# diverging colormap is applied. Then the default sequential colormap (`viridis') will be used:
 
-_ = dataset.plot(method="image", margin=0.1)
+_ = dataset.plot(method="image", diverging_margin=0.1)
 
 # %%
 # filter blank spectra
@@ -61,9 +63,9 @@ _ = dataset.plot_image()
 # finally extract grid scan data from a StreamLine HR measurement
 dataset = scp.read_wdf("ramandata/wire/mapping.wdf")
 # plot the dataset as an image (summming all wavenumbers)
-_ = dataset.sum(dim=2).plot_image()
+_ = dataset.sum(dim=2).plot_image(equal_aspect=True)
 # plot the image taken at 1529cm-1
-_ = dataset[..., 1529.0].plot_image()
+_ = dataset[..., 1529.0].plot_image(equal_aspect=True)
 
 
 # %%

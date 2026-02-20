@@ -282,7 +282,9 @@ def detect_stack_semantics(dataset):
 # ======================================================================================
 
 
-def resolve_line_style(dataset=None, geometry="line", kwargs=None, prefs=None):
+def resolve_line_style(
+    dataset=None, geometry="line", kwargs=None, prefs=None, method=None
+):
     """
     Resolve line/marker styles with priority: kwargs > preferences > mpl_style > matplotlib defaults.
 
@@ -303,6 +305,9 @@ def resolve_line_style(dataset=None, geometry="line", kwargs=None, prefs=None):
         Explicit keyword arguments from caller.
     prefs : PlotPreferences, optional
         Preferences object. If None, will be fetched from spectrochempy.
+    method : str, optional
+        Plotting method name (e.g., "scatter", "scatter_pen", "pen").
+        Used to determine marker fallback for scatter plots.
 
     Returns
     -------
@@ -336,6 +341,10 @@ def resolve_line_style(dataset=None, geometry="line", kwargs=None, prefs=None):
     result["linestyle"] = kwargs.get("linestyle", kwargs.get("ls", "auto"))
 
     result["marker"] = kwargs.get("marker", kwargs.get("m", "auto"))
+
+    # Deterministic fallback for scatter methods
+    if result["marker"] == "auto" and method in ("scatter", "scatter_pen"):
+        result["marker"] = getattr(prefs, "scatter_marker", "o")
 
     # For 2D plotting (stack), marker should default to None, not "auto"
     # The caller (plot2d.py) will handle None appropriately

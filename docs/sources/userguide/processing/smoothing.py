@@ -62,15 +62,9 @@ _ = X.plot()
 
 # %%
 # select a region by slicing (note the original shape is (1, 1024)
-Xs = X[:, 0.0:400.0]
-info_(f"shape: {X.shape}")
-_ = Xs.plot()
-
-# %%
-import numpy as np
-
-noise = np.random.normal(0, 100, 215)
-Xn = Xs + noise
+Xn = X[:, :400.0]
+Xn += 200 * scp.random(Xn.shape)  # add some noise
+Xn.name = "initial"
 _ = Xn.plot()
 
 # %% [markdown]
@@ -92,7 +86,6 @@ _ = Xn.plot()
 # spectra, the extremities of the spectrum are mirrored beyond the initial limits to
 # minimize boundary effects.
 #
-#
 # Let's create a filter processor with a moving average (method `avg`) of 3 points
 # (default size is 5).
 
@@ -112,28 +105,10 @@ Xsm = filter.transform(Xn)
 Xsm = filter(Xn)
 
 # %% [markdown]
-# Now, let's plot the result.
+# Now, let's plot the result. The `plot_compare' method can be used to plot the original, smoothed spectra and
+# difference on the same figure.
 #
-# However, as this will be repeated along the tutorial, we first make a function to plot
-# both original and transformed spectra on the same figure, with a legend.
-
-
-# %%
-def plot(X, Xm, label=None, xlim=None):
-    _ = X.plot(color="b", label="original")
-    ax = Xm.plot(clear=False, color="r", ls="-", lw=1.5, label=label)
-    diff = X - Xm
-    s = round(diff.std(dim=-1).values, 2)
-    ax = diff.plot(clear=False, ls="-", lw=1, label=f"difference (std={s})")
-    ax.legend(loc="best", fontsize=10)
-    if xlim is not None:
-        ax.set_xlim(xlim)
-    # scp.show()
-
-
-# %%
-plot(Xn, Xsm, label="Moving average (5 points)")
-
+# scp.plot_compare(Xn, Xsm, title='Moving average (5 points)')
 
 # %% [markdown]
 # ### Convolution with window filters
@@ -148,7 +123,7 @@ filter = scp.Filter(
     method="han", size=7
 )  # can also be one of 'hamming', 'bartlett', # 'blackman'.
 Xhan = filter(Xn)
-plot(Xn, Xhan, label="Hanning filter (7 points)")
+scp.plot_compare(Xsm, Xn,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           title="Hanning filter (7 points)")
 
 # %% [markdown]
 # ### Savitzky-Golay filter
@@ -178,7 +153,7 @@ filter = scp.Filter(
     method="savgol", size=5, order=0
 )  # default is size=5, order=2, deriv=0
 Xsgs = filter(Xn)
-plot(Xn, Xsgs, label="Savitzky-Golay (5 points, order=0)")
+scp.plot_compare(Xsm, Xn, title="Savitzky-Golay (5 points, order=0)")
 
 # %% [markdown]
 # As the `order` is set to 0, there is no much difference compared to a simple moving
@@ -194,7 +169,7 @@ plot(Xn, Xsgs, label="Savitzky-Golay (5 points, order=0)")
 filter.order = 2
 filter.size = 7
 Xsm2 = filter(Xn)
-plot(Xn, Xsm2, label="Savitzky-Golay (7 points, order=2)")
+scp.plot_compare(Xsm, Xn, title="Savitzky-Golay (7 points, order=2)")
 
 
 # %% [markdown]
@@ -212,7 +187,7 @@ plot(Xn, Xsm2, label="Savitzky-Golay (7 points, order=2)")
 # %%
 filter = scp.Filter(method="whittaker", order=2, lamb=1.5)
 Xwhit = filter(Xn)
-plot(Xn, Xwhit, label="Whittaker-Eilers (order=2, lamb=1.5)")
+scp.plot_compare(Xsm, Xn, title="Whittaker-Eilers (order=2, lamb=1.5)")
 
 
 # %% [markdown]
@@ -249,9 +224,9 @@ Xsm = scp.smooth(Xn)  # SpectroChemPy API function
 # the `Xn` NDDataset.
 
 # %%
-for size in [3, 5, 7, 9, 11]:
+for size in [3, 7, 11]:
     Xsm = Xn.smooth(size)
-    plot(Xn, Xsm, label=f"smooth `avg` size={size}")
+    scp.plot_compare(Xsm, Xn, title=f"smooth `avg` size={size}")
 
 
 # %% [markdown]
@@ -279,7 +254,7 @@ for size in [3, 5, 7, 9, 11]:
 size = 7
 for window in ["flat", "bartlett", "han", "hamming", "blackman"]:
     Xsm = Xn.smooth(size=size, window=window)
-    plot(Xn, Xsm, label=f"window=`{window}` size={size}")
+    scp.plot_compare(Xsm, Xn, title=f"window=`{window}` size={size}")
 
 # %% [markdown]
 # Close examination of the spectra shows that the flat window leads to the stronger

@@ -7,9 +7,12 @@
 
 __all__ = [
     "plot_2D",
+    "plot_contour",
+    "plot_contourf",
+    "plot_image",
+    "plot_lines",
     "plot_map",
     "plot_stack",
-    "plot_image",
 ]
 __dataset_methods__ = __all__
 
@@ -28,8 +31,560 @@ from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.utils.mplutils import make_label
 
+
 # ======================================================================================
-# nddataset plot2D functions
+# Helper functions for aspect ratio control
+# ======================================================================================
+
+
+def _can_enforce_equal_aspect(dataset):
+    """
+    Check if equal aspect ratio can be enforced for a 2D dataset.
+
+    Returns True if both plotted dimensions have compatible units
+    (identical units or both have no units).
+    """
+    if dataset is None:
+        return False
+
+    try:
+        dims = dataset.dims
+        if dims is None or len(dims) < 2:
+            return False
+
+        dim_y = dims[-2]
+        dim_x = dims[-1]
+
+        y_coord = dataset.coord(dim_y)
+        x_coord = dataset.coord(dim_x)
+
+        if x_coord is None or y_coord is None:
+            return False
+
+        x_units = getattr(x_coord, "units", None)
+        y_units = getattr(y_coord, "units", None)
+
+        if x_units is None and y_units is None:
+            return True
+
+        if x_units is None or y_units is None:
+            return False
+
+        if x_units == y_units:
+            return True
+
+        return False
+    except Exception:
+        return False
+
+
+def _handle_3d_aspect(ax, dataset, **kwargs):
+    """
+    Handle aspect ratio for 3D surface plots.
+
+    Parameters
+    ----------
+    ax : matplotlib Axes
+        The 3D axes.
+    dataset : NDDataset
+        The dataset being plotted.
+    **kwargs
+        Additional keyword arguments including equal_aspect.
+    """
+    import warnings as _warn_module
+
+    equal_aspect = kwargs.get("equal_aspect", "xy")
+
+    if not equal_aspect:
+        return
+
+    try:
+        x_coord = getattr(dataset, "x", None)
+        y_coord = getattr(dataset, "y", None)
+        z_data = dataset.masked_data
+
+        if x_coord is None or y_coord is None or z_data is None:
+            _warn_module.warn(
+                "equal_aspect: Cannot determine axis ranges. Using default aspect.",
+                UserWarning,
+                stacklevel=2,
+            )
+            return
+
+        x_data = x_coord.data
+        y_data = y_coord.data
+
+        x_range = float(np.nanmax(x_data) - np.nanmin(x_data))
+        y_range = float(np.nanmax(y_data) - np.nanmin(y_data))
+        z_range = float(np.nanmax(z_data) - np.nanmin(z_data))
+
+        x_units = getattr(x_coord, "units", None)
+        y_units = getattr(y_coord, "units", None)
+
+        max_range = max(x_range, y_range)
+
+        if equal_aspect == "xy":
+            if x_units is not None and y_units is not None and x_units != y_units:
+                _warn_module.warn(
+                    "equal_aspect='xy' ignored: X and Y units are incompatible.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                return
+
+            if max_range > 0:
+                ax.set_box_aspect(
+                    (x_range / max_range, y_range / max_range, z_range / max_range)
+                )
+
+        elif equal_aspect == "xyz":
+            if x_units is not None and y_units is not None:
+                has_same_units = x_units == y_units
+            else:
+                has_same_units = x_units is None and y_units is None
+
+            if not has_same_units:
+                _warn_module.warn(
+                    "equal_aspect='xyz' ignored: X, Y, Z units are not all compatible. "
+                    "Falling back to 'xy'.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                if max_range > 0:
+                    ax.set_box_aspect(
+                        (
+                            x_range / max_range,
+                            y_range / max_range,
+                            z_range / max_range,
+                        )
+                    )
+                return
+
+            ax.set_box_aspect((1, 1, 1))
+
+    except Exception as e:
+        _warn_module.warn(
+            f"equal_aspect: Could not set aspect ratio ({e}). Using default.",
+            UserWarning,
+            stacklevel=2,
+        )
+
+
+# ======================================================================================
+# nddataset plot2D functions - Canonical API
+# ======================================================================================
+
+
+def plot_lines(dataset, **kwargs):
+    """
+    Plot a 2D dataset as a stack plot with lines.
+
+    This is the canonical geometry-based name for stack plots.
+
+    Parameters
+    ----------
+    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+        Source of data to plot.
+    method : str, optional, default: preference.method_1D or preference.method_2D
+        Name of plotting method to use. If None, method is chosen based on data
+        dimensionality.
+
+        2D plotting methods:
+
+        - `lines` : Stacked plot (canonical)
+        - `contour` : Contour plot
+        - `contourf` : Filled contour (image-like) plot
+        - `surface` : Surface plot
+        - `waterfall` : Waterfall plot
+
+    **kwargs
+        Additional matplotlib / plotting keyword arguments.
+
+    Other Parameters
+    ----------------
+    ax : Axe, optional
+        Axe where to plot. If not specified, create a new one.
+    clear : bool, optional, default: True
+        If false, hold the current figure and ax until a new plot is performed.
+    color or c : color, optional, default: auto
+        color of the line.
+    colorbar : bool, optional, default: True
+        Show colorbar (2D plots only).
+    commands : str,
+        matplotlib commands to be executed.
+    data_only : bool, optional, default: False
+        Only the plot is done. No addition of axes or label specifications.
+    dpi : int, optional
+        the number of pixel per inches.
+    figsize : tuple, optional, default is (3.4, 1.7)
+        figure size.
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences).
+    imag : bool, optional, default: False
+        Show imaginary component for complex data. By default the real component is
+        displayed.
+    linestyle or ls : str, optional, default: auto
+        line style definition.
+    linewidth or lw : float, optional, default: auto
+        line width.
+    marker, m: str, optional, default: auto
+        marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    markeredgecolor or mec: color, optional
+    markeredgewidth or mew: float, optional
+    markerfacecolor or mfc: color, optional
+    markersize or ms: float, optional
+    markevery: None or int
+    modellinestyle or modls : str
+        line style of the model.
+    offset : float
+        offset of the model individual lines.
+    output : str,
+        name of the file to save the figure.
+    palette : str or list, optional, default: None
+        Color palette for stack plot. If None, auto-detect based on dataset.
+        If "continuous": use continuous colormap (viridis).
+        If "categorical": use matplotlib default color cycle.
+        If colormap name: use that colormap.
+        If list/tuple of colors: use as explicit categorical colors.
+        Auto-detection uses continuous colormap only when y coordinate is numeric,
+        strictly monotonic, and number of spectra > 6.
+    plot_model : Bool,
+        plot model data if available.
+    plottitle: bool, optional, default: False
+        Use the name of the dataset as title. Works only if title is not defined
+    projections : bool, optional, default: False
+        Show projections on the axes (2D plots only).
+    reverse : bool or None [optional, default=None/False
+        In principle, coordinates run from left to right,
+        except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
+    show_complex : bool, optional, default: False
+        Show both real and imaginary component for complex data.
+        By default only the real component is displayed.
+    show_mask: bool, optional
+        Should we display the mask using colored area.
+    show_z : bool, optional, default: True
+        should we show the vertical axis.
+    show_zero : bool, optional
+        show the zero basis.
+    style : str, optional, default: scp.preferences.style (scpy)
+        Matplotlib stylesheet (use available_style to get a list of available
+        styles for plotting.
+    title : str
+        Title of the plot (or subplot) axe.
+    transposed : bool, optional, default: False
+        Transpose the data before plotting (2D plots only).
+    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
+    uselabel_x: bool, optional
+        use x coordinate label as x tick labels
+    vshift : float, optional
+        vertically shift the line from its baseline.
+    xlim : tuple, optional
+        limit on the horizontal axis.
+    xlabel : str, optional
+        label on the horizontal axis.
+    x_reverse : bool, optional, default: False
+        reverse the x axis. Equivalent to reverse.
+    ylabel or zlabel : str, optional
+        label on the vertical axis.
+    ylim or zlim : tuple, optional
+        limit on the vertical axis.
+    y_reverse : bool, optional, default: False
+        reverse the y axis (2D plot only).
+
+    Returns
+    -------
+    Matplolib Axes or None
+        The matplotlib axes containing the plot if successful, None otherwise.
+
+    See Also
+    --------
+    plot
+    plot_2D
+    plot_contour
+    plot_contourf
+    plot_surface
+    plot_waterfall
+    plot_stack
+    """
+    return plot_2D(dataset, method="lines", **kwargs)
+
+
+def plot_contour(dataset, **kwargs):
+    """
+    Plot a 2D dataset as a contour plot.
+
+    This is the canonical geometry-based name for map (contour) plots.
+
+    Parameters
+    ----------
+    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+        Source of data to plot.
+    method : str, optional, default: preference.method_1D or preference.method_2D
+        Name of plotting method to use. If None, method is chosen based on data
+        dimensionality.
+
+        2D plotting methods:
+
+        - `lines` : Stacked plot
+        - `contour` : Contour plot (canonical)
+        - `contourf` : Filled contour (image-like) plot
+        - `surface` : Surface plot
+        - `waterfall` : Waterfall plot
+
+    **kwargs
+        Additional matplotlib / plotting keyword arguments.
+
+    Other Parameters
+    ----------------
+    ax : Axe, optional
+        Axe where to plot. If not specified, create a new one.
+    clear : bool, optional, default: True
+        If false, hold the current figure and ax until a new plot is performed.
+    color or c : color, optional, default: auto
+        color of the line.
+    colorbar : bool, optional, default: True
+        Show colorbar (2D plots only).
+    commands : str,
+        matplotlib commands to be executed.
+    data_only : bool, optional, default: False
+        Only the plot is done. No addition of axes or label specifications.
+    dpi : int, optional
+        the number of pixel per inches.
+    figsize : tuple, optional, default is (3.4, 1.7)
+        figure size.
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences).
+    imag : bool, optional, default: False
+        Show imaginary component for complex data. By default the real component is
+        displayed.
+    linestyle or ls : str, optional, default: auto
+        line style definition.
+    linewidth or lw : float, optional, default: auto
+        line width.
+    marker, m: str, optional, default: auto
+        marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    markeredgecolor or mec: color, optional
+    markeredgewidth or mew: float, optional
+    markerfacecolor or mfc: color, optional
+    markersize or ms: float, optional
+    markevery: None or int
+    modellinestyle or modls : str
+        line style of the model.
+    offset : float
+        offset of the model individual lines.
+    output : str,
+        name of the file to save the figure.
+    plot_model : Bool,
+        plot model data if available.
+    plottitle: bool, optional, default: False
+        Use the name of the dataset as title. Works only if title is not defined
+    projections : bool, optional, default: False
+        Show projections on the axes (2D plots only).
+    reverse : bool or None [optional, default=None/False
+        In principle, coordinates run from left to right,
+        except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
+    show_complex : bool, optional, default: False
+        Show both real and imaginary component for complex data.
+        By default only the real component is displayed.
+    show_mask: bool, optional
+        Should we display the mask using colored area.
+    show_z : bool, optional, default: True
+        should we show the vertical axis.
+    show_zero : bool, optional
+        show the zero basis.
+    style : str, optional, default: scp.preferences.style (scpy)
+        Matplotlib stylesheet (use available_style to get a list of available
+        styles for plotting.
+    title : str
+        Title of the plot (or subplot) axe.
+    transposed : bool, optional, default: False
+        Transpose the data before plotting (2D plots only).
+    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
+    uselabel_x: bool, optional
+        use x coordinate label as x tick labels
+    vshift : float, optional
+        vertically shift the line from its baseline.
+    xlim : tuple, optional
+        limit on the horizontal axis.
+    xlabel : str, optional
+        label on the horizontal axis.
+    x_reverse : bool, optional, default: False
+        reverse the x axis. Equivalent to reverse.
+    ylabel or zlabel : str, optional
+        label on the vertical axis.
+    ylim or zlim : tuple, optional
+        limit on the vertical axis.
+    y_reverse : bool, optional, default: False
+        reverse the y axis (2D plot only).
+    equal_aspect : bool, optional, default: False
+        If True and X/Y units are compatible, enforce metric scaling
+        (square pixels). This ensures 1 unit in X equals 1 unit in Y.
+
+    Returns
+    -------
+    Matplolib Axes or None
+        The matplotlib axes containing the plot if successful, None otherwise.
+
+    See Also
+    --------
+    plot
+    plot_2D
+    plot_lines
+    plot_contourf
+    plot_surface
+    plot_waterfall
+    plot_map
+    """
+    return plot_2D(dataset, method="contour", **kwargs)
+
+
+def plot_contourf(dataset, **kwargs):
+    """
+    Plot a 2D dataset as a filled contour (image-like) plot.
+
+    This is the canonical geometry-based name for image plots.
+    Uses high-resolution filled contours (500 levels by default).
+
+    Parameters
+    ----------
+    dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
+        Source of data to plot.
+    method : str, optional, default: preference.method_1D or preference.method_2D
+        Name of plotting method to use. If None, method is chosen based on data
+        dimensionality.
+
+        2D plotting methods:
+
+        - `lines` : Stacked plot
+        - `contour` : Contour plot
+        - `contourf` : Filled contour (image-like) plot (canonical)
+        - `surface` : Surface plot
+        - `waterfall` : Waterfall plot
+
+    **kwargs
+        Additional matplotlib / plotting keyword arguments.
+
+    Other Parameters
+    ----------------
+    ax : Axe, optional
+        Axe where to plot. If not specified, create a new one.
+    clear : bool, optional, default: True
+        If false, hold the current figure and ax until a new plot is performed.
+    color or c : color, optional, default: auto
+        color of the line.
+    colorbar : bool, optional, default: True
+        Show colorbar (2D plots only).
+    commands : str,
+        matplotlib commands to be executed.
+    data_only : bool, optional, default: False
+        Only the plot is done. No addition of axes or label specifications.
+    dpi : int, optional
+        the number of pixel per inches.
+    figsize : tuple, optional, default is (3.4, 1.7)
+        figure size.
+    fontsize : int, optional
+        The font size in pixels, default is 10 (or read from preferences).
+    imag : bool, optional, default: False
+        Show imaginary component for complex data. By default the real component is
+        displayed.
+    linestyle or ls : str, optional, default: auto
+        line style definition.
+    linewidth or lw : float, optional, default: auto
+        line width.
+    marker, m: str, optional, default: auto
+        marker type for scatter plot. If marker != "" then the scatter type of plot is chosen automatically.
+    markeredgecolor or mec: color, optional
+    markeredgewidth or mew: float, optional
+    markerfacecolor or mfc: color, optional
+    markersize or ms: float, optional
+    markevery: None or int
+    modellinestyle or modls : str
+        line style of the model.
+    offset : float
+        offset of the model individual lines.
+    output : str,
+        name of the file to save the figure.
+    plot_model : Bool,
+        plot model data if available.
+    plottitle: bool, optional, default: False
+        Use the name of the dataset as title. Works only if title is not defined
+    projections : bool, optional, default: False
+        Show projections on the axes (2D plots only).
+    reverse : bool or None [optional, default=None/False
+        In principle, coordinates run from left to right,
+        except for wavenumbers
+        (e.g., FTIR spectra) or ppm (e.g., NMR), that spectrochempy
+        will try to guess. But if reverse is set, then this is the
+        setting which will be taken into account.
+    show_complex : bool, optional, default: False
+        Show both real and imaginary component for complex data.
+        By default only the real component is displayed.
+    show_mask: bool, optional
+        Should we display the mask using colored area.
+    show_z : bool, optional, default: True
+        should we show the vertical axis.
+    show_zero : bool, optional
+        show the zero basis.
+    style : str, optional, default: scp.preferences.style (scpy)
+        Matplotlib stylesheet (use available_style to get a list of available
+        styles for plotting.
+    title : str
+        Title of the plot (or subplot) axe.
+    transposed : bool, optional, default: False
+        Transpose the data before plotting (2D plots only).
+    twinx : :class:~matplotlib.axes.Axes instance, optional, default: None
+        If this is not None, then a twin axes will be created with a
+        common x dimension.
+    uselabel_x: bool, optional
+        use x coordinate label as x tick labels
+    vshift : float, optional
+        vertically shift the line from its baseline.
+    xlim : tuple, optional
+        limit on the horizontal axis.
+    xlabel : str, optional
+        label on the horizontal axis.
+    x_reverse : bool, optional, default: False
+        reverse the x axis. Equivalent to reverse.
+    ylabel or zlabel : str, optional
+        label on the vertical axis.
+    ylim or zlim : tuple, optional
+        limit on the vertical axis.
+    y_reverse : bool, optional, default: False
+        reverse the y axis (2D plot only).
+    equal_aspect : bool, optional, default: False
+        If True and X/Y units are compatible, enforce metric scaling
+        (square pixels). This ensures 1 unit in X equals 1 unit in Y.
+
+    Returns
+    -------
+    Matplolib Axes or None
+        The matplotlib axes containing the plot if successful, None otherwise.
+
+    See Also
+    --------
+    plot
+    plot_2D
+    plot_lines
+    plot_contour
+    plot_surface
+    plot_waterfall
+    plot_image
+    """
+    return plot_2D(dataset, method="contourf", **kwargs)
+
+
+# ======================================================================================
+# nddataset plot2D functions - Legacy wrappers (deprecated)
 # ======================================================================================
 
 
@@ -694,7 +1249,7 @@ def plot_2D(dataset, method=None, **kwargs):
     if method in ["waterfall"]:
         nxl = number_x_labels * 2
         nyl = number_z_labels * 2
-    elif method in ["stack"]:
+    elif method in ["stack", "lines"]:
         nxl = number_x_labels
         nyl = number_z_labels
     else:
@@ -818,7 +1373,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
     zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
-    if method in ["stack", "waterfall"]:
+    if method in ["stack", "lines", "waterfall"]:
         # the z axis info
         # ---------------
         # zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
@@ -888,7 +1443,7 @@ def plot_2D(dataset, method=None, **kwargs):
         background_rgb = (1.0, 1.0, 1.0)
 
     # For image, map, surface methods, use the unified colormap resolution
-    if method in ["map", "image", "surface"]:
+    if method in ["map", "image", "contour", "contourf", "surface"]:
         geometry = (
             method  # "map" -> "contour", "image" -> "image", "surface" -> "surface"
         )
@@ -955,7 +1510,7 @@ def plot_2D(dataset, method=None, **kwargs):
     if method in ["waterfall"]:
         _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs)
 
-    elif method in ["image"]:
+    elif method in ["image", "contourf"]:
         # Support both new cmap parameter and legacy image_cmap parameter
         # cmap is already resolved by _resolve_2d_colormap above
         # For image method, also check for legacy image_cmap parameter
@@ -976,7 +1531,7 @@ def plot_2D(dataset, method=None, **kwargs):
             colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
             colorbar_mappable.set_array(zdata)
 
-    elif method in ["map"]:
+    elif method in ["map", "contour"]:
         if discrete_data:
             _colormap = plt.get_cmap(cmap)
             scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
@@ -1007,7 +1562,7 @@ def plot_2D(dataset, method=None, **kwargs):
             colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
             colorbar_mappable.set_array(zdata)
 
-    elif method in ["stack"]:
+    elif method in ["stack", "lines"]:
         # stack plot
         # ----------
         # now plot the collection of lines
@@ -1178,7 +1733,7 @@ def plot_2D(dataset, method=None, **kwargs):
     if show_y_points:
         ylabel = "data points"
     if not ylabel:
-        if method in ["stack"]:
+        if method in ["stack", "lines"]:
             ylabel = make_label(new, "values")
 
         else:
@@ -1199,7 +1754,7 @@ def plot_2D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     zlabel = kwargs.get("zlabel")
     if not zlabel:
-        if method in ["stack"]:
+        if method in ["stack", "lines"]:
             zlabel = make_label(y, new.dims[-2])
         elif method in ["surface"]:
             zlabel = make_label(new, "values")
@@ -1236,7 +1791,7 @@ def plot_2D(dataset, method=None, **kwargs):
                     cb.set_label(y_coord_label)
                     _apply_colorbar_tick_policy(cb, norm, vmin=vmin, vmax=vmax)
                     ax._scp_colorbar = cb
-        elif method in ["map", "image", "surface"]:
+        elif method in ["map", "image", "contour", "contourf", "surface"]:
             # 2D plots: show colorbar (intensity)
             if not hasattr(ax, "_scp_colorbar"):
                 # Use continuous colorbar mappable if available (for contour plots)
@@ -1256,6 +1811,24 @@ def plot_2D(dataset, method=None, **kwargs):
     # do we display the zero line
     if kwargs.get("show_zero", False):
         ax.axhline(y=0, color="k", linestyle="--", alpha=0.5)
+
+    # Handle equal_aspect for 2D plots (contour, contourf, image, map)
+    equal_aspect = kwargs.get("equal_aspect", False)
+    if equal_aspect and method in ["contour", "contourf", "image", "map"]:
+        if _can_enforce_equal_aspect(new):
+            ax.set_aspect("equal", adjustable="box")
+        else:
+            import warnings as _warn_module
+
+            _warn_module.warn(
+                "equal_aspect=True ignored: X and Y units are incompatible or missing.",
+                UserWarning,
+                stacklevel=2,
+            )
+
+    # Handle equal_aspect for 3D surface plots
+    if method == "surface":
+        _handle_3d_aspect(ax, new, **kwargs)
 
     new._plot_resume(dataset, **kwargs)
 

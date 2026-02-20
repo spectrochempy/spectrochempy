@@ -234,14 +234,19 @@ Plotting
     plot_with_transposed
     plot_bar
     plot_2D
+    plot_contour
+    plot_contourf
+    plot_image
+    plot_lines
     plot_map
     plot_stack
-    plot_image
     plot_3D
     plot_surface
     plot_waterfall
     plot_multiple
     multiplot
+    multiplot_contour
+    multiplot_contourf
     multiplot_image
     multiplot_lines
     multiplot_map
