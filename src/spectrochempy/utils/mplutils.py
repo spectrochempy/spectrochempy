@@ -159,11 +159,10 @@ def get_figure(**kwargs):
     """
     Return a Matplotlib figure.
 
-    - Uses pyplot in interactive mode
-    - Uses Agg backend in NO_DISPLAY / test environments
+    - Uses pyplot in all modes (figures are tracked by pyplot.gcf())
+    - Agg backend is set by matplotlib.use() in test environments
     - Does NOT trigger application initialization
     """
-    from spectrochempy import NO_DISPLAY
     from spectrochempy.application.preferences import preferences as _global_prefs
 
     prefs = kwargs.pop("preferences", None) or _global_prefs
@@ -181,19 +180,9 @@ def get_figure(**kwargs):
     frameon = kwargs.get("frameon", getattr(prefs, "figure_frameon", True))
     tight_layout = kwargs.get("autolayout", getattr(prefs, "figure_autolayout", False))
 
-    if NO_DISPLAY:
-        # Headless / tests / CI
-        from matplotlib.backends.backend_agg import FigureCanvasAgg
-        from matplotlib.figure import Figure
+    import matplotlib.pyplot as plt
 
-        fig = Figure(figsize=figsize, dpi=dpi, frameon=frameon)
-        FigureCanvasAgg(fig)
-
-    else:
-        # Interactive
-        import matplotlib.pyplot as plt
-
-        fig = plt.figure(figsize=figsize, dpi=dpi, frameon=frameon)
+    fig = plt.figure(figsize=figsize, dpi=dpi, frameon=frameon)
 
     with suppress(Exception):
         fig.set_facecolor(facecolor)
@@ -204,7 +193,31 @@ def get_figure(**kwargs):
     with suppress(Exception):
         fig.set_tight_layout(tight_layout)
 
+    _apply_window_position(fig, prefs)
+
     return fig
+
+
+def _apply_window_position(fig, prefs):
+    """Apply window position preference for TkAgg backend."""
+    import matplotlib
+
+    backend = matplotlib.get_backend().lower()
+    if "tkagg" not in backend:
+        return
+
+    window_position = getattr(prefs, "figure_window_position", None)
+    if window_position is None:
+        return
+
+    try:
+        import matplotlib.pyplot as plt
+
+        manager = plt.get_current_fig_manager()
+        x, y = window_position
+        manager.window.wm_geometry(f"+{x}+{y}")
+    except Exception:
+        pass
 
 
 # -----------------------------------------------------------------------------
@@ -224,10 +237,19 @@ def show():
 
     - Never creates figures
     - Safe in scripts, IDEs, and notebooks
+    - Respects non-interactive backends (Agg, template)
+    - In interactive mode, figures display automatically - no show() needed
     """
+    import matplotlib
+
     from spectrochempy import NO_DISPLAY
 
     if NO_DISPLAY:
+        return
+
+    if matplotlib.is_interactive():
+        # In interactive mode, figures display automatically
+        # Calling plt.show(block=True) would clear figure tracking
         return
 
     import matplotlib.pyplot as plt

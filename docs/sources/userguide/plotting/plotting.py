@@ -140,10 +140,10 @@ _ = dataset.plot()
 # %% [markdown]
 # ### Change the `NDDataset.preferences`
 # We can change the default plot configuration for this dataset by changing its `preferences' attributes
-# (see at the end of this tutorial  for an overview of all the available parameters).
+# (see at the end of this tutorial for an overview of all the available parameters).
 
 # %%
-prefs = scp.preferences  # we will use prefs instead of dataset.preference
+prefs = scp.preferences  # we will use prefs instead of scp.preference
 prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
 prefs.colorbar = True  # This add a color bar on a side
 prefs.colormap = "magma"  # The default colormap is viridis
@@ -158,7 +158,7 @@ _ = dataset.plot()
 # If you prefer not using colormap, `cmap=None` should be used. For instance:
 
 # %%
-_ = dataset.plot(cmap=None, colorbar=False)
+_ = dataset.plot(cmap='tab20')
 
 # %% [markdown]
 # Note that, by default, **sans-serif** font are used for all text in the figure.
@@ -193,7 +193,7 @@ prefs.colormap
 # but 'magma' can be passed to the `plot()` method:
 
 # %%
-_ = dataset.plot(colormap="magma")
+_ = dataset.plot(colormap="cividis")
 
 # %% [markdown]
 # while the `preferences.colormap` is still set to `viridis':
@@ -467,6 +467,23 @@ prefs
 # (this is because in SpectroChemPy, dot (` .` ) cannot be used in parameter name,
 # and thus it is replaced by an underscore (`_` ))
 #
+
+# %% [markdown]
+# ### TkAgg window position
+# When using the TkAgg backend (the default for desktop use), you can control the screen position
+# of new figure windows:
+#
+# ```python
+# # Fix window position at screen coordinates (100, 100)
+# prefs.figure_window_position = (100, 100)
+#
+# # Reset to default behavior (let window manager decide)
+# prefs.figure_window_position = None
+# ```
+#
+# This preference only affects the TkAgg backend and has no effect with Agg, inline, nbAgg, or QtAgg backends.
+# Coordinates are in screen pixels, with the origin at the top-left of the primary screen.
+# Negative values are allowed for multi-monitor setups.
 
 # %% [markdown]
 # To display the current values of **all parameters** corresponding to one group, e.g. `lines` , type:

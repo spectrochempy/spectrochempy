@@ -938,6 +938,14 @@ class PlotPreferences(MetaConfigurable):
                                   expressed as a fraction of the average axis height""",
     ).tag(config=True, kind="")
     figure_frameon = Bool(True, help="Show figure frame").tag(config=True)
+    figure_window_position = Tuple(
+        Integer(),
+        Integer(),
+        default_value=None,
+        allow_none=True,
+        help="Position of figure window (x, y) in screen pixels for TkAgg backend. "
+        "None = let window manager decide. Negative values allowed for multi-monitor.",
+    ).tag(config=True)
     #
     # IMAGES
     #

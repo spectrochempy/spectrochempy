@@ -5,6 +5,8 @@
 # ======================================================================================
 """Module implementing the `Baseline` class for baseline corrections and related methods."""
 
+import warnings
+
 import numpy as np
 import scipy.interpolate
 import scipy.signal
@@ -720,14 +722,40 @@ baseline/trends for different segments of the data.
         return self._ranges
 
     def show_regions(self, ax):
+        """
+        Display the regions used for baseline fitting.
+
+        .. deprecated:: 0.8
+            Use `Baseline.plot(show_regions=True)` instead.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes or tuple
+            Axes to display regions on. Can be a single Axes or tuple from plot().
+
+        Warns
+        -----
+        DeprecationWarning
+            This method is deprecated. Use `plot(show_regions=True)` instead.
+        """
+        warnings.warn(
+            "Baseline.show_regions() is deprecated. "
+            "Use Baseline.plot(show_regions=True) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        if isinstance(ax, (tuple, list)):
+            if len(ax) == 0:
+                raise ValueError("Empty axes container passed to show_regions().")
+            ax = ax[0]
         if hasattr(self, "_sps") and self._sps:
             for sp in self._sps:
                 sp.remove()
-        # self._sps = []
         for range in self._ranges:
-            range.sort()
-            sp = ax.axvspan(range[0], range[1], facecolor="#2ca02c", alpha=0.5)
-            # self._sps.append(sp)
+            x0, x1 = range
+            xmin, xmax = sorted([x0, x1])
+            sp = ax.axvspan(xmin, xmax, facecolor="#2ca02c", alpha=0.5, zorder=0)
 
     # ----------------------------------------------------------------------------------
     # Plot methods
@@ -739,74 +767,34 @@ baseline/trends for different segments of the data.
 
         Parameters
         ----------
+        show_regions : bool, optional
+            If True, display the regions used for baseline fitting.
+            Default is False.
         %(kwargs)s
 
         Returns
         -------
-        `~matplotlib.axes.Axes`
-            Matplotlib subplot axe.
-
-        Other Parameters
-        ----------------
-        colors : `tuple` or `~numpy.ndarray` of 3 colors, optional
-            Colors for original , baseline and corrected data.
-            in the case of 2D, The default colormap is used for the original data.
-            By default, the three colors are :const:`NBlue` , :const:`NGreen`
-            and :const:`NRed`  (which are colorblind friendly).
-        offset : `float`, optional, default: `None`
-            Specify the separation (in percent) between the
-            original and corrected data.
-        nb_traces : `int` or ``'all'``, optional
-            Number of lines to display. Default is ``'all'``.
-        **others : Other keywords parameters
-            Parameters passed to the internal `plot` method of the datasets.
+        tuple
+            (ax_top, ax_bottom) matplotlib axes.
 
         """
-        import matplotlib.pyplot as plt
+        from spectrochempy.plotting.composite import plot_baseline
 
-        tab10 = plt.get_cmap("tab10")
-        colX = tab10(0.0)[:3]
-        colXhat = colX
-        colBaseline = (0.1, 0.1, 0.1)
+        original = self.X
+        baseline = self.baseline
+        corrected = self.corrected
 
-        X = self.X  # we need to use self.X here not self._X because the mask
-        # are restored automatically
-        Xc = self.transform()
-        bas = self.baseline
+        regions = getattr(self, "_ranges", None)
+        show_regions_flag = kwargs.pop("show_regions", False)
 
-        if X._squeeze_ndim == 1:
-            X = X.squeeze()
-            Xc = Xc.squeeze()
-            bas = bas.squeeze()
-
-        # Number of traces to keep
-        nb_traces = kwargs.pop("nb_traces", "all")
-        if X.ndim == 2 and nb_traces != "all":
-            inc = int(X.shape[0] / nb_traces)
-            X = X[::inc]
-            Xc = Xc[::inc]
-            bas = bas[::inc]
-
-        # separation between traces
-        offset = kwargs.pop("offset", None)
-        if offset is None:
-            offset = 0
-        ma = max(X.max(), Xc.max())
-        mao = ma * offset / 100
-        _ = (X - X.min()).plot(color=colX, **kwargs)
-        _ = (Xc - Xc.min() - mao).plot(
-            clear=False,
-            ls="dashed",
-            cmap=None,
-            color=colXhat,
+        return plot_baseline(
+            original=original,
+            baseline=baseline,
+            corrected=corrected,
+            regions=regions,
+            show_regions=show_regions_flag,
+            **kwargs,
         )
-        ax = (bas - X.min()).plot(
-            clear=False, cmap=None, color=colBaseline, ls="dashed"
-        )
-        ax.autoscale(enable=True, axis="y")
-        ax.set_title(f"{self.name} plot")
-        ax.yaxis.set_visible(False)
-        return ax
 
 
 # ======================================================================================

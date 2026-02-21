@@ -1571,7 +1571,17 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             # clear=False: reuse current figure from pyplot
             import matplotlib.pyplot as plt
 
-            fig = plt.gcf()
+            if plt.get_fignums():
+                # Existing figures - use the current one
+                fig = plt.gcf()
+            else:
+                # No existing figures - create a new one
+                fig = get_figure(
+                    preferences=prefs,
+                    style=kwargs.get("style"),
+                    figsize=kwargs.get("figsize"),
+                    dpi=kwargs.get("dpi"),
+                )
 
             if not fig.get_axes():
                 # No existing axes, create one

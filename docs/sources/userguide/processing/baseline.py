@@ -45,14 +45,11 @@
 import spectrochempy as scp
 
 # %% [markdown]
-# Then we load a FTIR series of spectra on which we will demonstrate theprocessor capabilities
+# Then we load a FTIR series of spectra on which we will demonstrate the processor capabilities
 
 # %%
 # loading
 X = scp.read("irdata/nh4y-activation.spg")
-# set figsize preference
-prefs = scp.preferences
-prefs.figure.figsize = (8, 4)
 # plot the spectra
 _ = X.plot()
 
@@ -110,7 +107,6 @@ blc.fit(X)
 # get the new dataset with the baseline subtracted
 X2 = blc.transform()
 # plot the baseline corrected series of spectra
-_ = X2.plot()
 
 # %% [markdown]
 # The baseline models implemented in SpectroChemPy are able to handle missing data.
@@ -127,7 +123,7 @@ _ = X.plot()
 # %%
 blc.fit(X)
 X3 = blc.transform()
-_ = X3.plot()
+_ = blc.plot()
 
 # %% [markdown]
 # ### Overview of the other model
@@ -185,19 +181,9 @@ blc.order = 7
 blc.ranges = ranges
 # fit the model on the first spectra X[0]
 blc.fit(X[0])
-# get and plot the corrected dataset
+# get and plot the corrected dataset with regions displayed
 X4 = blc.transform()
-ax = blc.plot()
-
-# %% [markdown]
-# The method `show_regions` can be used to display the regions used for the baseline
-
-# %%
-blc.show_regions(ax)
-
-# %% [markdown]
-# To examine which ranges has been used, use the `used_ranges` attribute. Note, the
-# extrema have been automatically added.
+_ = blc.plot(show_regions=True)
 
 # %%
 blc.used_ranges
@@ -311,7 +297,7 @@ A.x.units = "nm"
 # %%
 prefs = scp.preferences
 prefs.figure.figsize = (7, 3)
-prefs.colormap = "magma_r"
+prefs.colormap = "tab20"
 _ = A.plot()
 
 # %% [markdown]
@@ -338,9 +324,7 @@ _ = A1.plot()
 # with `A.detrend(order="linear")` or simply `A.detrend()` as "linear" is the default.
 
 # %%
-A2 = scp.detrend(
-    A
-)  # Here we use the API method (this is fully equivalent to the NDDataset method)
+A2 = scp.detrend(A)  # Here we use the API method (this is fully equivalent to the NDDataset method)
 _ = A2.plot()
 
 # %% [markdown]

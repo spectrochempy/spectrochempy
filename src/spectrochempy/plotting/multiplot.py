@@ -573,7 +573,8 @@ def multiplot(
 
         do_tight_layout(fig, axes, suptitle, **kwargs)
 
-        if mpl_event:
+        # Only connect event handlers in interactive mode
+        if mpl_event and matplotlib.is_interactive():
             # make an event that will trigger subplot adjust each time the mouse leave
             # or enter the axes or figure
             def _onenter(event):
