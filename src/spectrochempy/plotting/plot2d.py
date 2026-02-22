@@ -185,7 +185,7 @@ def plot_lines(dataset, **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
@@ -324,7 +324,7 @@ def plot_contour(dataset, **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
@@ -459,7 +459,7 @@ def plot_contourf(dataset, **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
@@ -596,7 +596,7 @@ def plot_stack(dataset, **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
@@ -732,7 +732,7 @@ def plot_map(dataset, **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
@@ -867,7 +867,7 @@ def plot_image(dataset, **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
@@ -1002,7 +1002,7 @@ def plot_2D(dataset, method=None, **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
@@ -1242,9 +1242,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
     alpha = kwargs.get("calpha", prefs.contour_alpha)
 
-    number_x_labels = prefs.number_of_x_labels
-    number_y_labels = prefs.number_of_y_labels
-    number_z_labels = prefs.number_of_z_labels
+    number_x_labels = kwargs.get("n_x_labels", prefs.number_of_x_labels)
+    number_y_labels = kwargs.get("n_y_labels", prefs.number_of_y_labels)
+    number_z_labels = kwargs.get("n_z_labels", prefs.number_of_z_labels)
 
     if method in ["waterfall"]:
         nxl = number_x_labels * 2
@@ -1417,7 +1417,8 @@ def plot_2D(dataset, method=None, **kwargs):
     # ------------------------------------------------------------------------
     # plot the dataset
     # ------------------------------------------------------------------------
-    ax.grid(prefs.axes_grid)
+    grid = kwargs.get("grid", prefs.axes_grid)
+    ax.grid(grid)
 
     # Resolve colormap and normalization using unified helper
     # Priority: norm > cmap > cmap_mode > auto-detection > contrast_safe
@@ -1511,11 +1512,6 @@ def plot_2D(dataset, method=None, **kwargs):
         _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs)
 
     elif method in ["image", "contourf"]:
-        # Support both new cmap parameter and legacy image_cmap parameter
-        # cmap is already resolved by _resolve_2d_colormap above
-        # For image method, also check for legacy image_cmap parameter
-        if cmap is None:
-            cmap = kwargs.get("image_cmap", prefs.image_cmap)
         if discrete_data:
             method = "map"
 
@@ -1813,7 +1809,12 @@ def plot_2D(dataset, method=None, **kwargs):
         ax.axhline(y=0, color="k", linestyle="--", alpha=0.5)
 
     # Handle equal_aspect for 2D plots (contour, contourf, image, map)
-    equal_aspect = kwargs.get("equal_aspect", False)
+    # Hierarchy: explicit kwarg > preference > default (False)
+    if "equal_aspect" in kwargs:
+        equal_aspect = kwargs["equal_aspect"]
+    else:
+        equal_aspect = prefs.image_equal_aspect
+
     if equal_aspect and method in ["contour", "contourf", "image", "map"]:
         if _can_enforce_equal_aspect(new):
             ax.set_aspect("equal", adjustable="box")
@@ -1847,8 +1848,8 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
     import matplotlib as mpl
     import matplotlib.pyplot as plt
 
-    degazim = kwargs.get("azim", 10)
-    degelev = kwargs.get("elev", 30)
+    degazim = kwargs.get("azim", prefs.axes3d_azim)
+    degelev = kwargs.get("elev", prefs.axes3d_elev)
 
     azim = np.deg2rad(degazim)
     elev = np.deg2rad(degelev)

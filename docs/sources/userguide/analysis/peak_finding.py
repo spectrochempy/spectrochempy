@@ -64,8 +64,6 @@ ds.y = ds.y.to("minutes")
 
 # %%
 prefs = scp.preferences
-prefs.method_1D = "scatter+pen"
-prefs.method_2D = "stack"
 prefs.colorbar = True
 prefs.colormap = "Dark2"
 
@@ -207,7 +205,6 @@ evol = scp.NDDataset(positions, title="wavenumber at the maximum")
 evol.x = scp.Coord(
     reg.y, title="acquisition time"
 )  # the x coordinate is st to the acquisition time for each spectra
-evol.preferences.method_1D = "scatter+pen"
 
 # plot it
 _ = evol.plot(ls=":")
@@ -516,7 +513,6 @@ _ = ax.axvline(wr.m, linestyle="--", color="green")
 # user defined parameters ------------------------------
 
 s = reg[-1]  # define a single-row NDDataset
-s.preferences.method_1D = "pen"
 
 # peak selection parameters; should be set to return a single peak
 

@@ -260,7 +260,7 @@ def plot_3D(dataset, method="surface", **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 

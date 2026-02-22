@@ -26,11 +26,8 @@ def test_plot_1D():
     nd0.plot()
     nd0.plot_scatter(plottitle=True)
     nd0.plot_scatter(marker="^", markevery=10, title="scatter+marker")
-    prefs = nd0.preferences
-    prefs.method_1D = "scatter+pen"
 
     nd0.plot(title="xxxx")
-    prefs.method_1D = "pen"
     nd0.plot(marker="o", markevery=10, title="with marker")
 
     # plot 1D column

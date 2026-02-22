@@ -39,7 +39,7 @@ def plot_1D(dataset, method=None, **kwargs):
     ----------
     dataset : :class:~spectrochempy.ddataset.nddataset.NDDataset
         Source of data to plot.
-    method : str, optional, default: preference.method_1D or preference.method_2D
+    method : str, optional, default: auto-detected from data dimensionality
         Name of plotting method to use. If None, method is chosen based on data
         dimensionality.
 
@@ -265,8 +265,8 @@ def plot_1D(dataset, method=None, **kwargs):
 
     # Other ax properties that can be passed as arguments
     # ------------------------------------------------------------------------
-    number_x_labels = prefs.number_of_x_labels
-    number_y_labels = prefs.number_of_y_labels
+    number_x_labels = kwargs.get("n_x_labels", prefs.number_of_x_labels)
+    number_y_labels = kwargs.get("n_y_labels", prefs.number_of_y_labels)
     ax.xaxis.set_major_locator(MaxNLocator(number_x_labels))
     ax.yaxis.set_major_locator(MaxNLocator(number_y_labels))
     ax.xaxis.set_ticks_position("bottom")
@@ -285,7 +285,8 @@ def plot_1D(dataset, method=None, **kwargs):
     ax.set_xscale(xscale)
     ax.set_yscale(yscale)
 
-    ax.grid(prefs.axes_grid)
+    grid = kwargs.get("grid", prefs.axes_grid)
+    ax.grid(grid)
 
     # ----------------------------------------------------------------------------------
     # plot the dataset

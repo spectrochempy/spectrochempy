@@ -25,11 +25,13 @@ def plot_score(
     *,
     ax=None,
     clear=True,
-    cmap="viridis",
+    cmap=None,
     color=None,
     color_mapping="index",
     show_labels=False,
     labels_column=None,
+    elev=None,
+    azim=None,
     show=True,
 ):
     """
@@ -67,6 +69,10 @@ def plot_score(
     labels_column : int, optional
         Column index in scores.y.labels to use (0-based).
         If None, uses column 0 for color_mapping, or last column for show_labels.
+    elev : float, optional
+        Elevation angle (degrees) for 3D plots. If None, uses preferences.axes3d_elev.
+    azim : float, optional
+        Azimuth angle (degrees) for 3D plots. If None, uses preferences.axes3d_azim.
     show : bool, optional
         Whether to display the figure. Default: True.
 
@@ -96,6 +102,11 @@ def plot_score(
     """
     if color_mapping not in ("index", "labels"):
         raise ValueError("color_mapping must be 'index' or 'labels'")
+
+    from spectrochempy.application.preferences import preferences as prefs
+
+    if cmap is None:
+        cmap = prefs.colormap
 
     if hasattr(scores, "masked_data"):
         data = scores.masked_data
@@ -243,6 +254,12 @@ def plot_score(
         ax.set_xlabel(f"PC{components[0]}")
         ax.set_ylabel(f"PC{components[1]}")
         ax.set_zlabel(f"PC{components[2]}")
+
+        from spectrochempy.application.preferences import preferences as prefs
+
+        _elev = elev if elev is not None else prefs.axes3d_elev
+        _azim = azim if azim is not None else prefs.axes3d_azim
+        ax.view_init(elev=_elev, azim=_azim)
 
         if legend_needed and unique_categories is not None:
             handles = []

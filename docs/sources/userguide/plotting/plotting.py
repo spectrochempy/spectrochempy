@@ -158,7 +158,7 @@ _ = dataset.plot()
 # If you prefer not using colormap, `cmap=None` should be used. For instance:
 
 # %%
-_ = dataset.plot(cmap='tab20')
+_ = dataset.plot(cmap=None)
 
 # %% [markdown]
 # Note that, by default, **sans-serif** font are used for all text in the figure.
@@ -354,32 +354,21 @@ _ = dataset.plot()  # plot with our own style
 # By default, plots of 2D datasets are done in 'stack' mode. Other available modes are 'map', 'image', 'surface' and
 # 'waterfall'.
 #
-# The default can be changed permanently by setting the variable `pref.method_2D` to one of these alternative modes,
-# for instance if you like to have contour plot, you can use:
-
-# %%
-prefs.reset()
-
-prefs.method_2D = "map"  # this will change permanently the type of 2D plot
-prefs.colormap = "magma"
-prefs.figure_figsize = (5, 3)
-_ = dataset.plot()
-
-# %% [markdown]
-# You can also, for an individual plot use specialised plot commands, such as `plot_stack()` , `plot_map()` ,
+# You can use specialised plot commands, such as `plot_stack()` , `plot_map()` ,
 # `plot_waterfall()` , `plot_surface()` or `plot_image()` , or equivalently the generic `plot` function with
 # the `method` parameter, i.e., `plot(method='stack')` , `plot(method='map')` , etc...
 #
 # These modes are illustrated below:
 # %%
+prefs.reset()
 prefs.axes_facecolor = "white"
-dataset.plot_image(colorbar=True)  # will use image_cmap preference!
+dataset.plot_image(colorbar=True)  # will use colormap preference!
 
 # %% [markdown]
-# Here we use the generic `plot()` with the `method' argument and we change the image_cmap:
+# Here we use the generic `plot()` with the `method` argument and we change the colormap:
 
 # %%
-_ = dataset.plot(method="image", image_cmap="jet", colorbar=True)
+_ = dataset.plot(method="image", cmap="jet", colorbar=True)
 
 # %% [markdown]
 # The colormap normalization can be changed using the `norm` parameter, as illustrated below,
@@ -389,7 +378,7 @@ _ = dataset.plot(method="image", image_cmap="jet", colorbar=True)
 import matplotlib as mpl
 
 norm = mpl.colors.CenteredNorm()
-_ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
+_ = dataset.plot(method="image", cmap="jet", colorbar=True, norm=norm)
 
 # %% [markdown]
 # or below for a log scale (more information about colormap normalization can be found
@@ -397,7 +386,7 @@ _ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
 
 # %%
 norm = mpl.colors.LogNorm(vmin=0.1, vmax=4.0)
-_ = dataset.plot(method="image", image_cmap="jet", colorbar=True, norm=norm)
+_ = dataset.plot(method="image", cmap="jet", colorbar=True, norm=norm)
 
 # %% [markdown]
 # Below an example of a waterfall plot:

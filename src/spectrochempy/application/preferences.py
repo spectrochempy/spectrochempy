@@ -158,16 +158,13 @@ class PreferencesSet(Meta):
 
         # reset also non-matplolib preferences
         nonmplpars = [
-            "method_1D",
-            "method_2D",
-            "method_3D",
+            # Active non-matplotlib preferences:
             "colorbar",
             "show_projections",
             "show_projection_x",
             "show_projection_y",
             "colormap",
             "max_lines_in_stack",
-            "simplify",
             "number_of_x_labels",
             "number_of_y_labels",
             "number_of_z_labels",
@@ -177,6 +174,12 @@ class PreferencesSet(Meta):
             "antialiased",
             "rcount",
             "ccount",
+            # New preferences (v1.0+):
+            "axes3d_elev",
+            "axes3d_azim",
+            "baseline_region_color",
+            "baseline_region_alpha",
+            "image_equal_aspect",
         ]
         for par in nonmplpars:
             setattr(self, par, app.plot_preferences.traits()[par].default_value)
@@ -317,16 +320,12 @@ class PreferencesSet(Meta):
         # some parameters are not saved in matplotlib style sheets so we willa dd them
         # here
         nonmplpars = [
-            "method_1D",
-            "method_2D",
-            "method_3D",
             "colorbar",
             "show_projections",
             "show_projection_x",
             "show_projection_y",
             "colormap",
             "max_lines_in_stack",
-            "simplify",
             "number_of_x_labels",
             "number_of_y_labels",
             "number_of_z_labels",

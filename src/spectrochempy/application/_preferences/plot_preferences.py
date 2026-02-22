@@ -239,10 +239,6 @@ class PlotPreferences(MetaConfigurable):
         default_value="-",
         help=r"""solid line""",
     ).tag(config=True, gui=True, kind="")
-    lines_color = Unicode(
-        "b",
-        help=r"""has no affect on plot(); see axes.prop_cycle""",
-    ).tag(config=True, kind="color")
     lines_marker = Enum(
         list(MARKER_KEYS),
         default_value="None",
@@ -949,23 +945,10 @@ class PlotPreferences(MetaConfigurable):
     #
     # IMAGES
     #
-    image_aspect = Unicode("equal", help=r"""equal | auto | a number""").tag(
-        config=True,
-        kind="",
-    )
     image_interpolation = Unicode(
         "antialiased",
         help=r"""see help(imshow) for options""",
     ).tag(config=True, kind="")
-
-    image_cmap = Unicode(
-        "viridis",
-        help="Colormap for image plots (case-insensitive)",
-    ).tag(config=True, kind="")
-
-    @validate("image_cmap")
-    def _validate_image_cmap(self, proposal):
-        return _canonical_cmap_name(proposal["value"])
 
     image_lut = Integer(256, help=r"""the size of the colormap lookup table""").tag(
         config=True,
@@ -1132,27 +1115,6 @@ class PlotPreferences(MetaConfigurable):
         "printing publication ready figures)",
     ).tag(config=True)
 
-    method_1D = Enum(  # noqa: N815
-        ["pen", "scatter", "scatter+pen", "bar"],
-        default_value="pen",
-        help="Default plot methods for 1D datasets",
-        # NOTE:
-        # "pen" is a SpectroChemPy concept, NOT a Matplotlib concept.
-        # It must NEVER be passed through eval() or treated as Python code.
-    ).tag(config=True)
-
-    method_2D = Enum(  # noqa: N815
-        ["map", "image", "stack", "surface", "3D"],
-        default_value="stack",
-        help="Default plot methods for 2D datasets",
-    ).tag(config=True)
-
-    method_3D = Enum(  # noqa: N815
-        ["surface"],
-        default_value="surface",
-        help="Default plot methods for 3D datasets",
-    ).tag(config=True)
-
     # - 2d
     # ------
     colorbar = Bool(False, help="Show color bar for 2D plots").tag(config=True)
@@ -1176,10 +1138,6 @@ class PlotPreferences(MetaConfigurable):
         min=1,
         help="Maximum number of lines to plot in stack plots",
     ).tag(config=True)
-    simplify = Bool(
-        help="Matplotlib path simplification for improving performance",
-    ).tag(config=True, group="mpl")
-
     # -1d
     # ---_
     # antialias = Bool(True, help='Antialiasing')
@@ -1207,6 +1165,36 @@ class PlotPreferences(MetaConfigurable):
     ccount = Integer(50, help="ccount (steps in the column mode) for surface plot").tag(
         config=True,
     )
+
+    # 3D view defaults
+    axes3d_elev = Float(
+        30.0,
+        help="Default elevation angle (degrees) for 3D plots",
+    ).tag(config=True)
+
+    axes3d_azim = Float(
+        45.0,
+        help="Default azimuth angle (degrees) for 3D plots",
+    ).tag(config=True)
+
+    # Baseline region preferences
+    baseline_region_color = Unicode(
+        "#2ca02c",
+        help="Color for baseline fitting region spans",
+    ).tag(config=True)
+
+    baseline_region_alpha = Float(
+        0.5,
+        min=0.0,
+        max=1.0,
+        help="Transparency for baseline region spans",
+    ).tag(config=True)
+
+    # Image aspect preference
+    image_equal_aspect = Bool(
+        True,
+        help="Enforce equal physical aspect ratio for 2D image data when units are compatible",
+    ).tag(config=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

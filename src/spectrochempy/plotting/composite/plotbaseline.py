@@ -31,8 +31,8 @@ def plot_baseline(
     *,
     regions=None,
     show_regions=False,
-    region_color="#2ca02c",
-    region_alpha=0.5,
+    region_color=None,
+    region_alpha=None,
     ax=None,
     clear=True,
     show=True,
@@ -60,9 +60,9 @@ def plot_baseline(
         If True and regions provided, display region spans on the top axis.
         Default is False.
     region_color : str, optional
-        Face color for region spans. Default is "#2ca02c" (green).
+        Face color for region spans. If None, uses preferences.baseline_region_color.
     region_alpha : float, optional
-        Transparency for region spans (0-1). Default is 0.5.
+        Transparency for region spans (0-1). If None, uses preferences.baseline_region_alpha.
     ax : None
         Must be None. This function creates its own two-axes figure.
     clear : bool, optional
@@ -97,6 +97,13 @@ def plot_baseline(
             "plot_baseline creates its own two-axes figure. "
             "The 'ax' parameter must be None."
         )
+
+    from spectrochempy.application.preferences import preferences as prefs
+
+    if region_color is None:
+        region_color = prefs.baseline_region_color
+    if region_alpha is None:
+        region_alpha = prefs.baseline_region_alpha
 
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 
