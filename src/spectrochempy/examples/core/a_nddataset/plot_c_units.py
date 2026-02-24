@@ -46,8 +46,6 @@ ur = scp.ur
 # When loading experimental dataset using the `read` method, units are generally attributed to coordinates and data
 
 ds = scp.read("wodger.spg")[0]
-prefs = scp.preferences
-prefs.figure.figsize = (7, 3)
 _ = ds.plot()
 # %%
 # * `wavenumbers` (`x` ) coordinates are here expressed in $cm^{-1}$

@@ -1117,20 +1117,67 @@ class PlotPreferences(MetaConfigurable):
 
     # - 2d
     # ------
-    colorbar = Bool(False, help="Show color bar for 2D plots").tag(config=True)
+    colorbar = Bool(
+        None,
+        allow_none=True,
+        help="Colorbar policy: None=auto, True=always, False=never",
+    ).tag(config=True)
     show_projections = Bool(False, help="Show all projections").tag(config=True)
     show_projection_x = Bool(False, help="Show projection along x").tag(config=True)
     show_projection_y = Bool(False, help="Show projection along y").tag(config=True)
 
     colormap = Unicode(
+        "auto",
+        help="Colormap name or 'auto' for automatic selection based on data",
+    ).tag(config=True)
+
+    colormap_sequential = Unicode(
         "viridis",
-        help="A matplotlib colormap name (case-insensitive)",
+        help="Default colormap for sequential data (all positive or all negative)",
+    ).tag(config=True)
+
+    colormap_diverging = Unicode(
+        "RdBu_r",
+        help="Default colormap for diverging data (mixed positive and negative)",
+    ).tag(config=True)
+
+    colormap_categorical_small = Unicode(
+        "tab10",
+        help="Default colormap for categorical data with <= threshold categories",
+    ).tag(config=True)
+
+    colormap_categorical_large = Unicode(
+        "tab20",
+        help="Default colormap for categorical data with > threshold categories",
+    ).tag(config=True)
+
+    colormap_categorical_threshold = Integer(
+        10,
+        min=1,
+        help="Threshold for switching between small and large categorical colormaps",
     ).tag(config=True)
 
     @validate("colormap")
     def _validate_colormap(self, proposal):
-        # Validate and normalize colormap names early.
-        # This avoids hard-to-debug errors deep inside Matplotlib.
+        value = proposal["value"]
+        if value == "auto":
+            return value
+        return _canonical_cmap_name(value)
+
+    @validate("colormap_sequential")
+    def _validate_colormap_sequential(self, proposal):
+        return _canonical_cmap_name(proposal["value"])
+
+    @validate("colormap_diverging")
+    def _validate_colormap_diverging(self, proposal):
+        return _canonical_cmap_name(proposal["value"])
+
+    @validate("colormap_categorical_small")
+    def _validate_colormap_categorical_small(self, proposal):
+        return _canonical_cmap_name(proposal["value"])
+
+    @validate("colormap_categorical_large")
+    def _validate_colormap_categorical_large(self, proposal):
         return _canonical_cmap_name(proposal["value"])
 
     max_lines_in_stack = Integer(
@@ -1264,7 +1311,6 @@ class PlotPreferences(MetaConfigurable):
                 "text.usetex": False,
                 "mathtext.fontset": "dejavusans",
                 "mathtext.bf": "dejavusans:bold",
-                "mathtext.cal": "cursive",
                 "mathtext.default": "regular",
                 "mathtext.rm": "dejavusans",
                 "mathtext.it": "dejavusans:italic",
@@ -1274,41 +1320,20 @@ class PlotPreferences(MetaConfigurable):
                 "text.usetex": False,
                 "mathtext.fontset": "dejavuserif",
                 "mathtext.bf": "dejavuserif:bold",
-                "mathtext.cal": "cursive",
                 "mathtext.default": "regular",
                 "mathtext.rm": "dejavuserif",
                 "mathtext.it": "dejavuserif:italic",
             }
-        elif family == "cursive":
+        elif family in ("cursive", "monospace", "fantasy"):
             return {
                 "text.usetex": False,
-                "mathtext.fontset": "custom",
-                "mathtext.bf": "cursive:bold",
-                "mathtext.cal": "cursive",
+                "mathtext.fontset": "dejavusaPlons",
+                "mathtext.bf": "sans:bold",
                 "mathtext.default": "regular",
-                "mathtext.rm": "cursive",
-                "mathtext.it": "cursive:italic",
+                "mathtext.rm": "sans",
+                "mathtext.it": "sans:italic",
             }
-        elif family == "monospace":
-            return {
-                "text.usetex": False,
-                "mathtext.fontset": "custom",
-                "mathtext.bf": "monospace:bold",
-                "mathtext.cal": "cursive",
-                "mathtext.default": "regular",
-                "mathtext.rm": "monospace",
-                "mathtext.it": "monospace:italic",
-            }
-        elif family == "fantasy":
-            return {
-                "text.usetex": False,
-                "mathtext.fontset": "custom",
-                "mathtext.bf": "Humor Sans:bold",
-                "mathtext.cal": "cursive",
-                "mathtext.default": "regular",
-                "mathtext.rm": "Comic Sans MS",
-                "mathtext.it": "Humor Sans:italic",
-            }
+
         return {}
 
     # @observe("simplify")  # DISABLED: Remove automatic global rcParams mutation
@@ -1322,11 +1347,10 @@ class PlotPreferences(MetaConfigurable):
 
     @default("stylesheets")
     def _get_stylesheets_default(self):
-        # the spectra path in package data
         from spectrochempy.utils.packages import get_pkg_path
 
-        value = get_pkg_path("data/stylesheets", "spectrochempy")
-        if hasattr(value, "__fspath__"):  # Check if it's a path-like object
+        value = get_pkg_path("plotting/stylesheets", "spectrochempy")
+        if hasattr(value, "__fspath__"):
             value = str(value)
         return value
 
@@ -1642,7 +1666,9 @@ class PlotPreferences(MetaConfigurable):
 
             stripped = line.strip()
 
-            if not stripped or stripped.startswith("#"):
+            if not stripped or (
+                stripped.startswith("#") and not stripped.startswith("##@")
+            ):
                 continue
 
             if ":" not in line:

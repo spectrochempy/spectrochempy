@@ -106,7 +106,10 @@ def plot_score(
     from spectrochempy.application.preferences import preferences as prefs
 
     if cmap is None:
-        cmap = prefs.colormap
+        if prefs.colormap != "auto":
+            cmap = prefs.colormap
+        else:
+            cmap = prefs.colormap_sequential
 
     if hasattr(scores, "masked_data"):
         data = scores.masked_data

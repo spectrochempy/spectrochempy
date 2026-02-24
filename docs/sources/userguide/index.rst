@@ -11,10 +11,11 @@ A comprehensive guide to using SCPY.
    :maxdepth: 2
    :caption: Contents:
 
-   introduction/introduction
-   api/api
-   objects/index
-   importexport/index
-   processing/index
-   analysis/index
-   plotting/plotting
+    introduction/introduction
+    importexport/index
+    plotting/index
+    processing/index
+    analysis/index
+    api/api
+    objects/index
+

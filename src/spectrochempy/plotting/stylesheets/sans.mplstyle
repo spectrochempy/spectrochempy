@@ -1,1 +1,5 @@
-axes.titlesize: 10
+# SpectroChemPy sans-serif style
+# Typography-focused style with sans-serif fonts.
+
+font.family: sans-serif
+font.sans-serif: DejaVu Sans, Arial, Helvetica

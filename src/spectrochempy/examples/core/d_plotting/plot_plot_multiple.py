@@ -25,8 +25,6 @@ B1 = scp.read("ramandata/labspec/serie190214-1.txt")
 # display the spectra with rotating colors. cmap can be of course set to any other
 # available matplotlib colormap. The second parameter `lw` is used to set the line
 # width. In addition, we fix the figsize to have a better view of the spectra.
-prefs = scp.preferences
-prefs.figure.figsize = (8, 4)
 _ = B1.plot(cmap=None, lw=1)
 # %%
 # We will limit the x range to the region of interest

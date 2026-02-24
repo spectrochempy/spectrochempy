@@ -6,34 +6,36 @@
 # ======================================================================================
 
 """
-Silent installation of SpectroChemPy Matplotlib assets (stylesheets and fonts).
+Silent installation of SpectroChemPy Matplotlib assets (stylesheets only).
 
-This module:
-- Performs filesystem operations only if needed
-- Is idempotent
-- Never raises on failure (best-effort)
-- Reports issues via SpectroChemPy logging helpers
+Note: Font installation has been removed. SpectroChemPy now relies on
+Matplotlib's built-in fonts (DejaVu Sans, DejaVu Serif, etc.) for all
+rendering. This simplifies the codebase and eliminates font-related warnings.
+
+Users who need specific fonts should install them system-wide or use
+text.usetex=True with a LaTeX installation.
 """
 
-import shutil
 from pathlib import Path
 
 from spectrochempy.utils._logging import debug_
-from spectrochempy.utils._logging import warning_
 
 
 def ensure_mpl_assets_installed():
     """
-    Ensure SpectroChemPy Matplotlib stylesheets and fonts are installed.
+    Ensure SpectroChemPy Matplotlib stylesheets are installed.
+
+    Note: Font installation has been removed. Only stylesheets are managed.
 
     Failures are reported via warning_(), but never raise exceptions.
     """
     try:
         _install_stylesheets()
-        _install_fonts()
     except Exception as exc:  # defensive: never crash plotting init
+        from spectrochempy.utils._logging import warning_
+
         warning_(
-            "Failed to install SpectroChemPy matplotlib assets "
+            "Failed to install SpectroChemPy matplotlib stylesheets "
             f"({exc.__class__.__name__}: {exc})"
         )
 
@@ -66,6 +68,8 @@ def _install_stylesheets():
         for dest_dir in (user_stylelib, system_stylelib):
             dest = dest_dir / src.name
             if not dest.exists():
+                import shutil
+
                 shutil.copy(src, dest)
                 debug_("Installed stylesheet %s → %s", src.name, dest_dir)
                 installed = True
@@ -74,35 +78,3 @@ def _install_stylesheets():
         plt.style.reload_library()
     else:
         debug_("SpectroChemPy matplotlib stylesheets already installed")
-
-
-def _install_fonts():
-    import matplotlib as mpl
-    from matplotlib import get_cachedir
-
-    fonts_src = Path(__file__).parent / "fonts"
-    if not fonts_src.exists():
-        debug_("No SpectroChemPy fonts directory found")
-        return
-
-    fonts_dest = Path(mpl.get_data_path()) / "fonts" / "ttf"
-    fonts_dest.mkdir(parents=True, exist_ok=True)
-
-    fonts = list(fonts_src.glob("*.[ot]tf"))
-    missing = [f for f in fonts if not (fonts_dest / f.name).exists()]
-
-    if not missing:
-        debug_("SpectroChemPy fonts already installed")
-        return
-
-    debug_("Installing %d matplotlib font(s)", len(missing))
-    for src in missing:
-        shutil.copy(src, fonts_dest / src.name)
-        debug_("Installed font: %s", src.name)
-
-    # Clear font cache only if new fonts were installed
-    cache_dir = Path(get_cachedir())
-    for cache_file in cache_dir.glob("*.cache"):
-        if cache_file.is_file():
-            cache_file.unlink()
-            debug_("Cleared font cache: %s", cache_file.name)

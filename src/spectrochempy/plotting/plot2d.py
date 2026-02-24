@@ -1312,10 +1312,33 @@ def plot_2D(dataset, method=None, **kwargs):
     xlim[-1] = min(xlim[-1], xl[-1])
     xlim[0] = max(xlim[0], xl[0])
 
-    if kwargs.get("x_reverse", kwargs.get("reverse", x.reversed if x else False)):
+    x_reverse_explicit = kwargs.get("x_reverse")
+    reverse_explicit = kwargs.get("reverse")
+
+    # Check if user explicitly passed x_reverse or reverse
+    # If explicitly passed, use that value; otherwise use x.reversed
+    if x_reverse_explicit is not None:
+        x_reverse = x_reverse_explicit
+    elif reverse_explicit is not None:
+        x_reverse = reverse_explicit
+    else:
+        x_reverse = x.reversed if x else False
+
+    # For x_reverse=True, don't reverse xlim - just invert axis after setting limits
+    # For x_reverse=False (from x.reversed=False), reverse xlim and let matplotlib auto-handle
+    # For x_reverse=False when x.reversed=True, we should NOT invert (user wants normal order)
+    if x_reverse:
+        # User wants inverted axis - don't reverse xlim, invert after
+        pass
+    elif x is not None and x.reversed:
+        # x.reversed is True but user didn't explicitly override - auto-handle
         xlim.reverse()
 
     ax.set_xlim(xlim)
+
+    # If x_reverse is True, explicitly invert the axis
+    if x_reverse:
+        ax.invert_xaxis()
 
     xscale = kwargs.get("xscale", "linear")
     ax.set_xscale(xscale)  # , nonpositive='mask')
@@ -1406,13 +1429,24 @@ def plot_2D(dataset, method=None, **kwargs):
 
         ylim = list(kwargs.get("ylim", ylim))
         ylim.sort()
-        y_reverse = kwargs.get("y_reverse", y.reversed if y else False)
-        if y_reverse:
+        y_reverse_explicit = kwargs.get("y_reverse", False)
+        y_reverse_auto = y.reversed if y else False
+
+        # For explicit y_reverse, don't reverse ylim - just invert axis after setting limits
+        # For auto y.reversed, reverse ylim and let matplotlib auto-handle the inversion
+        if y_reverse_explicit:
+            ylim_original = list(ylim)  # Keep original order
+        elif y_reverse_auto:
             ylim.reverse()
 
         # set the limits
         # ----------------
         ax.set_ylim(ylim)
+
+        # For explicit y_reverse kwarg, explicitly invert the axis
+        # For auto y.reversed, matplotlib already handles inversion when ylim[0] > ylim[1]
+        if y_reverse_explicit:
+            ax.invert_yaxis()
 
     # ------------------------------------------------------------------------
     # plot the dataset
@@ -1482,6 +1516,24 @@ def plot_2D(dataset, method=None, **kwargs):
             fig.delaxes(ax)
             ax = fig.add_subplot(111, projection="3d")
             ndaxes["main"] = ax
+
+            # Re-apply axis inversions after recreating 3D axes
+            # (the inversions were set on the old 2D axes which was deleted)
+            x_reverse_explicit = kwargs.get("x_reverse")
+            reverse_explicit = kwargs.get("reverse")
+            if x_reverse_explicit is not None:
+                x_reverse = x_reverse_explicit
+            elif reverse_explicit is not None:
+                x_reverse = reverse_explicit
+            else:
+                x_reverse = x.reversed if x else False
+
+            if x_reverse:
+                ax.invert_xaxis()
+
+            y_reverse_explicit = kwargs.get("y_reverse", False)
+            if y_reverse_explicit:
+                ax.invert_yaxis()
 
         X, Y = np.meshgrid(xdata, ydata)
         Z = zdata.copy()

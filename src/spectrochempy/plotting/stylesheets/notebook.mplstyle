@@ -64,7 +64,6 @@ mathtext.fontset : dejavusans
 mathtext.rm      : dejavusans
 mathtext.it      : dejavusans:italic
 mathtext.bf      : dejavusans:bold
-mathtext.cal     : cursive
 mathtext.default : rm
 
 text.usetex      : False

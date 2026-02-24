@@ -3,7 +3,7 @@
 
 
 lines.color: black
-patch.facecolor: gray
+patch.facecolor: white
 patch.edgecolor: black
 
 text.color: black

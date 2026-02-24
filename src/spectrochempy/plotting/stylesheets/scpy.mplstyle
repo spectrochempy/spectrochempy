@@ -1,1 +1,35 @@
-axes.titlesize: 10
+# SpectroChemPy default style
+# This style defines the canonical SCP identity for plotting.
+
+# Figure
+figure.figsize: 6.0, 4.0
+figure.dpi: 100
+figure.facecolor: white
+
+# Axes
+axes.titlesize: 12
+axes.labelsize: 11
+axes.linewidth: 0.8
+axes.grid: False
+axes.facecolor: white
+
+# Lines
+lines.linewidth: 1.2
+lines.markersize: 5.5
+
+# Font
+font.size: 11
+font.family: sans-serif
+
+# Ticks
+xtick.labelsize: 10
+ytick.labelsize: 10
+xtick.direction: out
+ytick.direction: out
+
+# Legend
+legend.fontsize: 10
+legend.frameon: False
+
+# Images
+image.cmap: viridis

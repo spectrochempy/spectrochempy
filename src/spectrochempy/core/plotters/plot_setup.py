@@ -54,12 +54,6 @@ def _is_mpl_initialized() -> bool:
     return plot_setup._MPL_READY
 
 
-def _is_mpl_initializing() -> bool:
-    """Check if matplotlib is currently being initialized."""
-    # No longer needed with simplified approach
-    return False
-
-
 def _set_mpl_state(ready: bool) -> None:
     """Set matplotlib ready state."""
     import spectrochempy.core.plotters.plot_setup
@@ -77,28 +71,6 @@ def _get_mpl_state() -> bool:
 # -----------------------------------------------------------------------------
 # Lazy preference deferral system
 # -----------------------------------------------------------------------------
-
-
-def _defer_preference_change(change) -> None:
-    """Queue a preference change until matplotlib is initialized."""
-    # No-op - preference deferral system removed
-    pass
-
-
-def _apply_deferred_preferences() -> None:
-    """Apply all queued preference changes after matplotlib initialization."""
-    # No-op - preference deferral system removed
-    pass
-
-
-def _snapshot_user_rcparams() -> None:
-    """
-    Snapshot the current matplotlib rcParams - no-op in stateless mode.
-
-    No longer needed since we don't modify global matplotlib state.
-    """
-    # No-op - no longer needed in stateless mode
-    pass
 
 
 def lazy_ensure_mpl_config() -> None:

@@ -54,7 +54,6 @@ ytick.labelsize: 10
 
 mathtext.fontset : stix
 mathtext.bf      : serif:bold
-mathtext.cal     : cursive
 mathtext.default : rm
 mathtext.rm      : serif
 mathtext.it      : serif:italic

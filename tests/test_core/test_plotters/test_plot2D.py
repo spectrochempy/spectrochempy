@@ -24,6 +24,7 @@ objects where applicable.
 
 import pytest
 import numpy as np
+import matplotlib.colors
 
 from spectrochempy import NDDataset, read_omnic, preferences as prefs, show
 
@@ -60,6 +61,19 @@ def test_plot_stack_transposed(ds2d):
 def test_plot_stack_with_kwargs(ds2d):
     ds2d.plot_stack(offset=0.5, lw=0.5, color="k")
     show()
+
+
+def test_plot_stack_grayscale_style(ds2d):
+    ax = ds2d.plot(style="grayscale")
+    lines = ax.get_lines()
+    assert len(lines) > 0
+    for line in lines:
+        color = line.get_color()
+        if isinstance(color, str):
+            rgb = matplotlib.colors.to_rgb(color)
+        else:
+            rgb = color[:3]
+        assert abs(rgb[0] - rgb[1]) < 0.01 and abs(rgb[1] - rgb[2]) < 0.01
 
 
 # -----------------------------------------------------------------------------

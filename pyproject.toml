@@ -122,11 +122,12 @@ where = ["src"]
   "*.pyi",
 ]
 "spectrochempy.data" = [
-  "fonts/*",
-  "stylesheets/*",
   "databases/*",
   "*.json",
   "*.cff",
+]
+"spectrochempy.plotting" = [
+  "stylesheets/*.mplstyle",
 ]
 
 [tool.setuptools_scm]

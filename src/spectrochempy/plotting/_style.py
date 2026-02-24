@@ -30,9 +30,14 @@ __all__ = [
     "_contrast_ratio",
     "_get_categorical_cmap",
     "_ensure_min_contrast",
+    "build_font_rc_overrides",
 ]
 
 import numpy as np
+
+import matplotlib as mpl
+
+_MPL_DEFAULT_IMAGE_CMAP = mpl.rcParamsDefault["image.cmap"]
 
 # ======================================================================================
 # Utility functions (copied from plot2d.py - no changes)
@@ -98,7 +103,77 @@ def _contrast_ratio(rgb1, rgb2):
     return (lighter + 0.05) / (darker + 0.05)
 
 
-def _get_categorical_cmap(n):
+def build_font_rc_overrides(prefs):
+    """
+    Build a dictionary of matplotlib rcParams overrides from font preferences.
+
+    This function is L1-safe: it does NOT mutate global rcParams.
+    It returns a dictionary that can be used with mpl.rc_context().
+
+    Parameters
+    ----------
+    prefs : PlotPreferences
+        The plot preferences object containing font settings.
+
+    Returns
+    -------
+    dict
+        A dictionary of matplotlib rcParams overrides for font settings.
+        Only includes keys that have non-default values in prefs.
+
+    Notes
+    -----
+    Priority order: plot kwargs > prefs.font.* > style sheet > matplotlib defaults
+
+    This function only handles the prefs.font.* level. Higher precedence
+    (plot kwargs) should be handled separately in L3.
+    """
+    overrides = {}
+
+    # Font family
+    if hasattr(prefs, "font_family"):
+        family = prefs.font_family
+        if family is not None:
+            overrides["font.family"] = family
+
+    # Font size
+    if hasattr(prefs, "font_size"):
+        size = prefs.font_size
+        if size is not None and size != 10.0:  # 10.0 is matplotlib default
+            overrides["font.size"] = float(size)
+
+    # Font style
+    if hasattr(prefs, "font_style"):
+        style = prefs.font_style
+        if style is not None and style != "normal":
+            overrides["font.style"] = style
+
+    # Font weight
+    if hasattr(prefs, "font_weight"):
+        weight = prefs.font_weight
+        if weight is not None and weight != "normal":
+            overrides["font.weight"] = (
+                str(weight) if isinstance(weight, int) else weight
+            )
+
+    # Font variant
+    if hasattr(prefs, "font_variant"):
+        variant = prefs.font_variant
+        if variant is not None and variant != "normal":
+            overrides["font.variant"] = variant
+
+    # Font stretch (if implemented in prefs)
+    if hasattr(prefs, "font_stretch"):
+        stretch = prefs.font_stretch
+        if stretch is not None and stretch != "normal":
+            overrides["font.stretch"] = stretch
+
+    return overrides
+
+
+def _get_categorical_cmap(
+    n, default_small="tab10", default_large="tab20", threshold=10
+):
     """
     Get categorical colormap based on number of categories.
 
@@ -106,20 +181,26 @@ def _get_categorical_cmap(n):
     ----------
     n : int
         Number of categories.
+    default_small : str, optional
+        Colormap for n <= threshold. Default: "tab10".
+    default_large : str, optional
+        Colormap for n > threshold. Default: "tab20".
+    threshold : int, optional
+        Threshold for switching between small and large. Default: 10.
 
     Returns
     -------
-     Returns a ListedColormap with deterministic cycling behavior.
+    ListedColormap
+        A ListedColormap with deterministic cycling behavior.
     """
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
 
-    if n <= 10:
-        base = plt.get_cmap("tab10").colors
+    if n <= threshold:
+        base = plt.get_cmap(default_small).colors
     else:
-        base = plt.get_cmap("tab20").colors
+        base = plt.get_cmap(default_large).colors
 
-    # Deterministic cycling
     colors = [base[i % len(base)] for i in range(n)]
 
     return ListedColormap(colors, name="categorical_cycled")
@@ -364,7 +445,16 @@ def resolve_line_style(
 
 
 def resolve_stack_colors(
-    dataset, palette=None, n=None, geometry="line", contrast_safe=True, min_contrast=1.5
+    dataset,
+    palette=None,
+    n=None,
+    geometry="line",
+    contrast_safe=True,
+    min_contrast=1.5,
+    default_sequential="viridis",
+    default_categorical_small="tab10",
+    default_categorical_large="tab20",
+    categorical_threshold=10,
 ):
     """
     Resolve colors for stack plot with auto-detection.
@@ -376,7 +466,7 @@ def resolve_stack_colors(
     palette : str or list, optional
         If None: auto-detect based on dataset characteristics.
         If str:
-            - "continuous": force continuous colormap (viridis)
+            - "continuous": force continuous colormap
             - "categorical": force categorical colors
             - colormap name: use that colormap
         If list: use as explicit categorical colors.
@@ -388,6 +478,14 @@ def resolve_stack_colors(
         Whether to apply contrast trimming.
     min_contrast : float, optional, default: 1.5
         Minimum contrast ratio for trimming.
+    default_sequential : str, optional
+        Default colormap for sequential data. Default: "viridis".
+    default_categorical_small : str, optional
+        Default colormap for categorical with n <= threshold. Default: "tab10".
+    default_categorical_large : str, optional
+        Default colormap for categorical with n > threshold. Default: "tab20".
+    categorical_threshold : int, optional
+        Threshold for small vs large categorical. Default: 10.
 
     Returns
     -------
@@ -397,6 +495,7 @@ def resolve_stack_colors(
         - is_categorical: bool indicating discrete color cycling
         - mappable: ScalarMappable for continuous colormaps, None for categorical
     """
+    import matplotlib as mpl
     import matplotlib.pyplot as plt
     from matplotlib.cm import ScalarMappable
     from matplotlib.colors import Normalize
@@ -404,21 +503,31 @@ def resolve_stack_colors(
     if n is None:
         n = dataset.shape[-2]
 
+    # Check for mpl style prop_cycle as fallback (must be read inside style context)
+    # This provides colors when no explicit palette is provided
+    _MPL_DEFAULT_PROP_CYCLE = mpl.rcParamsDefault["axes.prop_cycle"]
+    current_cycle = mpl.rcParams["axes.prop_cycle"]
+    mpl_style_has_custom_cycle = current_cycle != _MPL_DEFAULT_PROP_CYCLE
+
     if palette is not None:
         if palette == "continuous":
-            cmap = plt.get_cmap("viridis")
+            cmap = plt.get_cmap(default_sequential)
             colors_data = cmap(np.linspace(0, 1, n))
             if contrast_safe and geometry in ("line", "contour"):
                 background_rgb = (1.0, 1.0, 1.0)
                 cmap = _ensure_min_contrast(cmap, background_rgb, min_contrast)
                 colors_data = cmap(np.linspace(0, 1, n))
-            # Return colors and mappable for continuous
             norm = Normalize(vmin=0, vmax=n - 1)
             mappable = ScalarMappable(norm=norm, cmap=cmap)
             mappable.set_array(np.arange(n))
             return colors_data, False, mappable
         if palette == "categorical":
-            cmap = _get_categorical_cmap(n)
+            cmap = _get_categorical_cmap(
+                n,
+                default_small=default_categorical_small,
+                default_large=default_categorical_large,
+                threshold=categorical_threshold,
+            )
             return list(cmap.colors), True, None
 
         if isinstance(palette, (list, tuple)):
@@ -435,10 +544,35 @@ def resolve_stack_colors(
     semantic = detect_stack_semantics(dataset)
 
     if semantic == "categorical":
-        cmap = _get_categorical_cmap(n)
+        # Use mpl style prop_cycle if available, otherwise use categorical colormap
+        if mpl_style_has_custom_cycle:
+            # Extract colors from the prop_cycle
+            cycle_colors = [c["color"] for c in current_cycle]
+            colors = []
+            for i in range(n):
+                colors.append(cycle_colors[i % len(cycle_colors)])
+            return colors, True, None
+
+        cmap = _get_categorical_cmap(
+            n,
+            default_small=default_categorical_small,
+            default_large=default_categorical_large,
+            threshold=categorical_threshold,
+        )
         return list(cmap.colors), True, None
 
-    cmap = plt.get_cmap("viridis")
+    # For continuous, check if mpl style prop_cycle should be used
+    if mpl_style_has_custom_cycle:
+        # Extract colors from the prop_cycle for continuous line coloring
+        cycle_colors = [c["color"] for c in current_cycle]
+        colors = []
+        for i in range(n):
+            colors.append(cycle_colors[i % len(cycle_colors)])
+        # Return as continuous colors (not categorical)
+        norm = Normalize(vmin=0, vmax=n - 1)
+        return colors, False, None
+
+    cmap = plt.get_cmap(default_sequential)
     colors_data = cmap(np.linspace(0, 1, n))
 
     if contrast_safe and geometry in ("line", "contour"):
@@ -446,7 +580,6 @@ def resolve_stack_colors(
         cmap = _ensure_min_contrast(cmap, background_rgb, min_contrast)
         colors_data = cmap(np.linspace(0, 1, n))
 
-    # Return colors and mappable for continuous
     norm = Normalize(vmin=0, vmax=n - 1)
     mappable = ScalarMappable(norm=norm, cmap=cmap)
     mappable.set_array(np.arange(n))
@@ -466,6 +599,11 @@ def resolve_colormap(
     n=None,
     geometry=None,
     dataset=None,
+    default_sequential="viridis",
+    default_diverging="RdBu_r",
+    default_categorical_small="tab10",
+    default_categorical_large="tab20",
+    categorical_threshold=10,
 ):
     """
     Unified colormap resolver with semantic color system.
@@ -510,6 +648,16 @@ def resolve_colormap(
         Plot geometry: "line", "contour", "image", "surface".
     dataset : NDDataset, optional
         Dataset for stack semantic detection.
+    default_sequential : str, optional
+        Default colormap for sequential data. Default: "viridis".
+    default_diverging : str, optional
+        Default colormap for diverging data. Default: "RdBu_r".
+    default_categorical_small : str, optional
+        Default colormap for categorical with n <= threshold. Default: "tab10".
+    default_categorical_large : str, optional
+        Default colormap for categorical with n > threshold. Default: "tab20".
+    categorical_threshold : int, optional
+        Threshold for small vs large categorical. Default: 10.
 
     Returns
     -------
@@ -525,7 +673,7 @@ def resolve_colormap(
 
     if norm is not None:
         if cmap is None:
-            cmap = plt.get_cmap("viridis")
+            cmap = plt.get_cmap(default_sequential)
         elif isinstance(cmap, str):
             cmap = plt.get_cmap(cmap)
         return cmap, norm
@@ -545,7 +693,12 @@ def resolve_colormap(
     if semantic == "categorical":
         if n is None:
             n = 10
-        cmap = _get_categorical_cmap(n)
+        cmap = _get_categorical_cmap(
+            n,
+            default_small=default_categorical_small,
+            default_large=default_categorical_large,
+            threshold=categorical_threshold,
+        )
         if data is not None:
             vmin = np.nanmin(data)
             vmax = np.nanmax(data)
@@ -564,7 +717,12 @@ def resolve_colormap(
             if semantic == "categorical":
                 if n is None:
                     n = dataset.shape[-2] if dataset._squeeze_ndim >= 2 else 10
-                cmap = _get_categorical_cmap(n)
+                cmap = _get_categorical_cmap(
+                    n,
+                    default_small=default_categorical_small,
+                    default_large=default_categorical_large,
+                    threshold=categorical_threshold,
+                )
                 vmin = np.nanmin(data) if data is not None else 0
                 vmax = np.nanmax(data) if data is not None else n - 1
                 norm = Normalize(vmin=vmin, vmax=vmax)
@@ -576,7 +734,7 @@ def resolve_colormap(
             use_diverging = False
 
     if use_diverging:
-        cmap = plt.get_cmap("RdBu_r")
+        cmap = plt.get_cmap(default_diverging)
         if data is not None:
             vmin = np.nanmin(data)
             vmax = np.nanmax(data)
@@ -596,7 +754,7 @@ def resolve_colormap(
         else:
             norm = Normalize(vmin=-1, vmax=1)
     else:
-        cmap = plt.get_cmap("viridis")
+        cmap = plt.get_cmap(default_sequential)
         if data is not None:
             vmin = np.nanmin(data)
             vmax = np.nanmax(data)
@@ -617,6 +775,7 @@ def resolve_colormap(
 def resolve_2d_colormap(
     data,
     cmap=None,
+    cmap_explicit=False,
     cmap_mode="auto",
     center=None,
     norm=None,
@@ -627,6 +786,9 @@ def resolve_2d_colormap(
     background_rgb=None,
     geometry=None,
     diverging_margin=0.05,
+    default_sequential="viridis",
+    default_diverging="RdBu_r",
+    prefs=None,
 ):
     """
     Resolve colormap and normalization for 2D plots with auto-detection.
@@ -637,21 +799,27 @@ def resolve_2d_colormap(
     - Centered normalization for bipolar data
     - Explicit overrides via parameters
     - Geometry-aware contrast safety to ensure visibility on background
+    - Categorical colormap support when cmap=None is explicitly passed
 
     Priority order (strict):
         1. norm (if explicitly provided) -> use as-is, no auto-detection
         2. vmin/vmax (if explicitly provided) -> override data range
-        3. cmap (if explicitly provided) -> use as-is
-        4. cmap_mode (if not "auto") -> force sequential or diverging
-        5. auto-detection -> sequential if all positive, diverging if bipolar with margin
-        6. contrast_safe -> trim colormap ends for visibility (geometry-aware)
+        3. cmap_explicit=True, cmap=None -> categorical colormap (discrete)
+        4. cmap_explicit=True, cmap=string -> use as-is
+        5. cmap_explicit=False, prefs.colormap != "auto" -> use prefs.colormap
+        6. cmap_mode (if not "auto") -> force sequential or diverging
+        7. auto-detection -> sequential if all positive, diverging if bipolar with margin
+        8. contrast_safe -> trim colormap ends for visibility (geometry-aware)
 
     Parameters
     ----------
     data : array-like
         The 2D data array to be plotted.
     cmap : str, optional
-        Colormap name. If None, will be determined based on cmap_mode.
+        Colormap name. If None, will be determined based on cmap_explicit and cmap_mode.
+    cmap_explicit : bool, optional, default: False
+        If True, cmap was explicitly provided by user (including None).
+        If False, cmap was not provided at all.
     cmap_mode : str, optional, default: "auto"
         "auto", "sequential", or "diverging".
     center : numeric or str, optional
@@ -672,6 +840,13 @@ def resolve_2d_colormap(
         Plot geometry: "line", "contour", "image", "surface".
     diverging_margin : float, optional, default: 0.05
         Minimum ratio threshold for diverging auto-detection.
+    default_sequential : str, optional
+        Default colormap for sequential data. Default: "viridis".
+    default_diverging : str, optional
+        Default colormap for diverging data. Default: "RdBu_r".
+    prefs : object, optional
+        Preferences object with colormap_categorical_small, colormap_categorical_large,
+        and colormap_categorical_threshold attributes.
 
     Returns
     -------
@@ -687,7 +862,7 @@ def resolve_2d_colormap(
 
     if norm is not None:
         if cmap is None:
-            cmap = plt.get_cmap("viridis")
+            cmap = plt.get_cmap(default_sequential)
         elif isinstance(cmap, str):
             cmap = plt.get_cmap(cmap)
         return cmap, norm
@@ -700,11 +875,61 @@ def resolve_2d_colormap(
     if vmax is not None:
         data_max = vmax
 
+    # Handle explicit categorical request (cmap_explicit=True, cmap=None)
+    if cmap_explicit and cmap is None:
+        # User explicitly passed cmap=None -> categorical colormap request
+        # Get number of unique finite values in data
+        finite_data = data[np.isfinite(data)]
+        unique_values = np.unique(finite_data)
+        n_unique = len(unique_values)
+
+        # Get categorical preferences
+        if prefs is not None:
+            small_map = getattr(prefs, "colormap_categorical_small", "tab10")
+            large_map = getattr(prefs, "colormap_categorical_large", "tab20")
+            threshold = getattr(prefs, "colormap_categorical_threshold", 10)
+        else:
+            small_map = "tab10"
+            large_map = "tab20"
+            threshold = 10
+
+        # Select base map based on threshold
+        if n_unique <= threshold:
+            base = small_map
+        else:
+            base = large_map
+
+        # Build categorical colormap with exact number of colors
+        cmap = _get_categorical_cmap(n_unique, base, threshold=threshold)
+
+        # Create discrete-compatible normalization (no interpolation)
+        norm = Normalize(vmin=0, vmax=n_unique - 1, clip=False)
+
+        return cmap, norm
+
     if cmap is not None:
         if isinstance(cmap, str):
             cmap = plt.get_cmap(cmap)
         if norm is None:
             norm = Normalize(vmin=data_min, vmax=data_max)
+        return cmap, norm
+
+    # Handle implicit cmap (not provided) with prefs.colormap
+    if cmap_explicit is False and prefs is not None:
+        prefs_colormap = getattr(prefs, "colormap", "auto")
+        if prefs_colormap != "auto":
+            # Use fixed colormap from preferences
+            cmap = plt.get_cmap(prefs_colormap)
+            norm = Normalize(vmin=data_min, vmax=data_max)
+            return cmap, norm
+
+    # Check matplotlib style override - read rcParams dynamically at call time
+    # This ensures we pick up any style-driven rcParams changes when called
+    # within a plt.style.context() block
+    current_cmap = mpl.rcParams.get("image.cmap", None)
+    if current_cmap is not None and current_cmap != _MPL_DEFAULT_IMAGE_CMAP:
+        cmap = plt.get_cmap(current_cmap)
+        norm = Normalize(vmin=data_min, vmax=data_max)
         return cmap, norm
 
     if cmap_mode == "diverging":
@@ -722,7 +947,7 @@ def resolve_2d_colormap(
         use_diverging = detect_diverging(data, diverging_margin)
 
     if use_diverging:
-        cmap = plt.get_cmap("RdBu_r")
+        cmap = plt.get_cmap(default_diverging)
         if center is None:
             center_value = 0
         elif center == "auto":
@@ -737,7 +962,7 @@ def resolve_2d_colormap(
 
         norm = TwoSlopeNorm(vmin=data_min, vcenter=center_value, vmax=data_max)
     else:
-        cmap = plt.get_cmap("viridis")
+        cmap = plt.get_cmap(default_sequential)
         norm = Normalize(vmin=data_min, vmax=data_max)
 
     should_trim = contrast_safe and geometry in ("line", "contour")
