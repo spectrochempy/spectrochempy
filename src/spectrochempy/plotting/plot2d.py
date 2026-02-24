@@ -1482,20 +1482,23 @@ def plot_2D(dataset, method=None, **kwargs):
         geometry = (
             method  # "map" -> "contour", "image" -> "image", "surface" -> "surface"
         )
-        cmap, norm = resolve_2d_colormap(
-            zdata,
-            cmap=cmap,
-            cmap_mode=cmap_mode,
-            center=center,
-            norm=norm,
-            vmin=vmin,
-            vmax=vmax,
-            contrast_safe=contrast_safe,
-            min_contrast=min_contrast,
-            background_rgb=background_rgb,
-            geometry=geometry,
-            diverging_margin=diverging_margin,
-        )
+        # Apply style context around colormap resolution to ensure rcParams reflect the style
+        with plt.style.context(style):
+            cmap, norm = resolve_2d_colormap(
+                zdata,
+                cmap=cmap,
+                cmap_mode=cmap_mode,
+                center=center,
+                norm=norm,
+                vmin=vmin,
+                vmax=vmax,
+                contrast_safe=contrast_safe,
+                min_contrast=min_contrast,
+                background_rgb=background_rgb,
+                geometry=geometry,
+                diverging_margin=diverging_margin,
+                prefs=prefs,
+            )
     else:
         # For non-image methods, use simple normalization
         if norm is None:
