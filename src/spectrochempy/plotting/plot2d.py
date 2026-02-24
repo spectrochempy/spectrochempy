@@ -1150,340 +1150,343 @@ def plot_2D(dataset, method=None, **kwargs):
     if isinstance(style, str):
         style = [style]
 
-    # style handled at figure creation (get_figure)
+    # Resolve rc_overrides for font settings (will be applied in the style context)
     rc_overrides = prefs.set_latex_font(prefs.font.family)
-    if rc_overrides:
-        with mpl.rc_context(rc_overrides):
-            pass  # rc_overrides applied for subsequent plotting
+    if rc_overrides is None:
+        rc_overrides = {}
 
-    # Redirections ?
-    # ----------------------------------------------------------------------------------
-    # should we redirect the plotting to another method
-    if dataset._squeeze_ndim < 2:
-        return dataset.plot_1D(**kwargs)
-
-    # if plotly execute plotly routine not this one
-    if kwargs.get("use_plotly", prefs.use_plotly):
-        return dataset.plotly(**kwargs)
-
-    # do not display colorbar if it's not a surface plot
-    # except if we have asked to d so
-
-    # often we do need to plot only data when plotting on top of a previous plot
-    data_only = kwargs.get("data_only", False)
-
-    # Extract colorbar kwarg - default to False, do not pass to rendering
-    colorbar = kwargs.pop("colorbar", False)
-
-    # Get the data to plot
-    # ---------------------------------------------------------------
-    # if we want to plot the transposed dataset
-    transposed = kwargs.get("transposed", False)
-    if transposed:
-        new = dataset.copy().T  # transpose dataset
-        nameadd = ".T"
-    else:
-        new = dataset  # .copy()
-        nameadd = ""
-    new = new.squeeze()
-
-    if kwargs.get("y_reverse", False):
-        new = new[::-1]
-
-    # Figure setup
-    # ------------------------------------------------------------------------
-    _figure_result = new._figure_setup(
-        ndim=2,
-        method=method,
-        style=style,
-        **kwargs,
-    )
-    # Handle both old (method string) and new (method, fig, ndaxes) return values
-    if isinstance(_figure_result, tuple):
-        method, fig, ndaxes = _figure_result
-    else:
-        # Fallback for any code that still uses old behavior
-        method = _figure_result
-        ndaxes = {}
-
-    # Use ndaxes from figure_setup if available, otherwise try to get from figure
-    if "main" in ndaxes:
-        ax = ndaxes["main"]
-    else:
-        # Try to get axes from the figure
-        if fig.get_axes():
-            ax = fig.get_axes()[0]
-            ax.name = "main"
-        else:
-            # This shouldn't happen if _figure_setup worked correctly
-            ax = fig.add_subplot(1, 1, 1)
-            ax.name = "main"
-
-    ax.name += nameadd
-
-    # Resolve line/marker styles using centralized L1 function
-    style_kwargs = resolve_line_style(
-        dataset=new,
-        geometry="line",
-        kwargs=kwargs,
-        prefs=prefs,
-    )
-
-    lw = style_kwargs["linewidth"]
-    if lw == "auto":
-        lw = prefs.lines_linewidth
-    ls = style_kwargs["linestyle"]
-    if ls == "auto":
-        ls = prefs.lines_linestyle
-    marker = style_kwargs["marker"]
-    if marker == "auto":
-        marker = None
-    markersize = style_kwargs["markersize"]
-
-    alpha = kwargs.get("calpha", prefs.contour_alpha)
-
-    number_x_labels = kwargs.get("n_x_labels", prefs.number_of_x_labels)
-    number_y_labels = kwargs.get("n_y_labels", prefs.number_of_y_labels)
-    number_z_labels = kwargs.get("n_z_labels", prefs.number_of_z_labels)
-
-    if method in ["waterfall"]:
-        nxl = number_x_labels * 2
-        nyl = number_z_labels * 2
-    elif method in ["stack", "lines"]:
-        nxl = number_x_labels
-        nyl = number_z_labels
-    else:
-        nxl = number_x_labels
-        nyl = number_y_labels
-
-    ax.xaxis.set_major_locator(MaxNLocator(nbins=nxl))
-    ax.yaxis.set_major_locator(MaxNLocator(nbins=nyl))
-    if method not in ["surface"]:
-        ax.xaxis.set_ticks_position("bottom")
-        ax.yaxis.set_ticks_position("left")
-
-    # the next lines are to avoid multipliers in axis scale
-    formatter = ScalarFormatter(useOffset=False)
-    ax.xaxis.set_major_formatter(formatter)
-    ax.yaxis.set_major_formatter(formatter)
-
-    # ------------------------------------------------------------------------
-    # Set axis
-    # ------------------------------------------------------------------------
-    # set the abscissa axis
-    # the actual dimension name is the last in the new.dims list
-    dimx = new.dims[-1]
-    x = getattr(new, dimx)
-    if x is not None and x._implements("CoordSet"):
-        # if several coords, take the default ones:
-        x = x.default
-    xsize = new.shape[-1]
-    show_x_points = False
-    if x is not None and hasattr(x, "show_datapoints"):
-        show_x_points = x.show_datapoints
-    if show_x_points:
-        # remove data and units for display
-        x = Coord.arange(xsize)
-
-    discrete_data = False
-
-    if x is not None and (not x.is_empty or x.is_labeled):
-        xdata = x.data
-        if not np.any(xdata) and x.is_labeled:
-            discrete_data = True
-            # take into account the fact that sometimes axis have just labels
-            xdata = range(1, len(x.labels) + 1)
-    else:
-        xdata = range(xsize)
-
-    xl = [xdata[0], xdata[-1]]
-    xl.sort()
-
-    if xsize < number_x_labels + 1:
-        # extend the axis so that the labels are not too close to the limits
-        inc = abs(xdata[1] - xdata[0]) * 0.5
-        xl = [xl[0] - inc, xl[1] + inc]
-
-    if data_only:
-        xl = ax.get_xlim()
-
-    xlim = list(kwargs.get("xlim", xl))
-    xlim.sort()
-    xlim[-1] = min(xlim[-1], xl[-1])
-    xlim[0] = max(xlim[0], xl[0])
-
-    x_reverse_explicit = kwargs.get("x_reverse")
-    reverse_explicit = kwargs.get("reverse")
-
-    # Check if user explicitly passed x_reverse or reverse
-    # If explicitly passed, use that value; otherwise use x.reversed
-    if x_reverse_explicit is not None:
-        x_reverse = x_reverse_explicit
-    elif reverse_explicit is not None:
-        x_reverse = reverse_explicit
-    else:
-        x_reverse = x.reversed if x else False
-
-    # For x_reverse=True, don't reverse xlim - just invert axis after setting limits
-    # For x_reverse=False (from x.reversed=False), reverse xlim and let matplotlib auto-handle
-    # For x_reverse=False when x.reversed=True, we should NOT invert (user wants normal order)
-    if x_reverse:
-        # User wants inverted axis - don't reverse xlim, invert after
-        pass
-    elif x is not None and x.reversed:
-        # x.reversed is True but user didn't explicitly override - auto-handle
-        xlim.reverse()
-
-    ax.set_xlim(xlim)
-
-    # If x_reverse is True, explicitly invert the axis
-    if x_reverse:
-        ax.invert_xaxis()
-
-    xscale = kwargs.get("xscale", "linear")
-    ax.set_xscale(xscale)  # , nonpositive='mask')
-
-    # set the ordinates axis
-    # ------------------------------------------------------------------------
-    # the actual dimension name is the second in the new.dims list
-    dimy = new.dims[-2]
-    y = getattr(new, dimy)
-    if y is not None and y._implements("CoordSet"):
-        # if several coords, take the default ones:
-        y = y.default
-    ysize = new.shape[-2]
-
-    show_y_points = False
-    if y is not None and hasattr(y, "show_datapoints"):
-        show_y_points = y.show_datapoints
-    if show_y_points:
-        # remove data and units for display
-        y = Coord.arange(ysize)
-
-    if y is not None and (not y.is_empty or y.is_labeled):
-        ydata = y.data
-
-        if not np.any(ydata) and y.is_labeled:
-            ydata = range(1, len(y.labels) + 1)
-    else:
-        ydata = range(ysize)
-
-    yl = [ydata[0], ydata[-1]]
-    yl.sort()
-
-    if ysize < number_y_labels + 1:
-        # extend the axis so that the labels are not too close to the limits
-        inc = abs(ydata[1] - ydata[0]) * 0.5
-        yl = [yl[0] - inc, yl[1] + inc]
-
-    if data_only:
-        yl = ax.get_ylim()
-
-    ylim = list(kwargs.get("ylim", yl))
-    ylim.sort()
-    ylim[-1] = min(ylim[-1], yl[-1])
-    ylim[0] = max(ylim[0], yl[0])
-
-    yscale = kwargs.get("yscale", "linear")
-    ax.set_yscale(yscale)
-
-    # z intensity (by default we plot real component of the data)
-    # ------------------------------------------------------------------------
-    if not kwargs.get("imag", False):
-        zdata = new.real.masked_data
-    else:
-        zdata = new.imag.masked_data  # TODO: quaternion case (3 imag.components)
-
-    zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
-
-    if method in ["stack", "lines", "waterfall"]:
-        # the z axis info
-        # ---------------
-        # zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
-        amp = 0  # np.ma.ptp(zdata) / 50.
-        zl = (np.min(np.ma.min(zdata) - amp), np.max(np.ma.max(zdata)) + amp)
-        zlim = list(kwargs.get("zlim", zl))
-        zlim.sort()
-        z_reverse = kwargs.get("z_reverse", False)
-        if z_reverse:
-            zlim.reverse()
-
-        # set the limits
-        # ---------------
-        if yscale == "log" and min(zlim) <= 0:
-            # set the limits wrt smallest and largest strictly positive values
-            mi = np.amin(np.abs(zdata))
-            ma = np.amax(np.abs(zdata))
-            ax.set_ylim(
-                10 ** (int(np.log10(mi + (ma - mi) * 0.001)) - 1),
-                10 ** (int(np.log10(ma)) + 1),
-            )
-        else:
-            ax.set_ylim(zlim)
-
-    else:
-        # the y axis info
-        # ----------------
-        if data_only:
-            ylim = ax.get_ylim()
-
-        ylim = list(kwargs.get("ylim", ylim))
-        ylim.sort()
-        y_reverse_explicit = kwargs.get("y_reverse", False)
-        y_reverse_auto = y.reversed if y else False
-
-        # For explicit y_reverse, don't reverse ylim - just invert axis after setting limits
-        # For auto y.reversed, reverse ylim and let matplotlib auto-handle the inversion
-        if y_reverse_explicit:
-            ylim_original = list(ylim)  # Keep original order
-        elif y_reverse_auto:
-            ylim.reverse()
-
-        # set the limits
-        # ----------------
-        ax.set_ylim(ylim)
-
-        # For explicit y_reverse kwarg, explicitly invert the axis
-        # For auto y.reversed, matplotlib already handles inversion when ylim[0] > ylim[1]
-        if y_reverse_explicit:
-            ax.invert_yaxis()
-
-    # ------------------------------------------------------------------------
-    # plot the dataset
-    # ------------------------------------------------------------------------
-    grid = kwargs.get("grid", prefs.axes_grid)
-    ax.grid(grid)
-
-    # Resolve colormap and normalization using unified helper
-    # Priority: norm > cmap > cmap_mode > auto-detection > contrast_safe
-    cmap = kwargs.get("cmap")
-    cmap_mode = kwargs.get("cmap_mode", "auto")
-    center = kwargs.get("center")
-    norm = kwargs.get("norm")
-    vmin = kwargs.get("vmin")
-    vmax = kwargs.get("vmax")
-    contrast_safe = kwargs.get("contrast_safe", True)
-    min_contrast = kwargs.get("min_contrast", 1.5)
-    diverging_margin = kwargs.get("diverging_margin", 0.05)
-
-    # Get background color from axes
-    try:
-        facecolor = ax.get_facecolor()
-        if facecolor and len(facecolor) > 0:
-            bg_rgba = facecolor[0]
-            background_rgb = (bg_rgba[0], bg_rgba[1], bg_rgba[2])
-        else:
-            background_rgb = (1.0, 1.0, 1.0)
-    except Exception:
-        background_rgb = (1.0, 1.0, 1.0)
-
-    # For image, map, surface methods, use the unified colormap resolution
-    if method in ["map", "image", "contour", "contourf", "surface"]:
-        geometry = (
-            method  # "map" -> "contour", "image" -> "image", "surface" -> "surface"
-        )
-        # Apply style context around colormap resolution to ensure rcParams reflect the style
+    # Apply unified style context for entire plotting operation
+    # This includes: figure creation, colormap resolution, line style resolution, and rendering
+    # Style context must wrap everything for matplotlib prop_cycle and image.cmap to work correctly
+    with mpl.rc_context(rc_overrides):
         with plt.style.context(style):
+            # Redirections ?
+            # ----------------------------------------------------------------------------------
+            # should we redirect the plotting to another method
+            if dataset._squeeze_ndim < 2:
+                return dataset.plot_1D(**kwargs)
+
+            # if plotly execute plotly routine not this one
+            if kwargs.get("use_plotly", prefs.use_plotly):
+                return dataset.plotly(**kwargs)
+
+        # do not display colorbar if it's not a surface plot
+        # except if we have asked to d so
+
+        # often we do need to plot only data when plotting on top of a previous plot
+        data_only = kwargs.get("data_only", False)
+
+        # Extract colorbar kwarg - default to False, do not pass to rendering
+        colorbar = kwargs.pop("colorbar", False)
+
+        # Get the data to plot
+        # ---------------------------------------------------------------
+        # if we want to plot the transposed dataset
+        transposed = kwargs.get("transposed", False)
+        if transposed:
+            new = dataset.copy().T  # transpose dataset
+            nameadd = ".T"
+        else:
+            new = dataset  # .copy()
+            nameadd = ""
+        new = new.squeeze()
+
+        if kwargs.get("y_reverse", False):
+            new = new[::-1]
+
+        # Figure setup
+        # ------------------------------------------------------------------------
+        _figure_result = new._figure_setup(
+            ndim=2,
+            method=method,
+            style=style,
+            **kwargs,
+        )
+        # Handle both old (method string) and new (method, fig, ndaxes) return values
+        if isinstance(_figure_result, tuple):
+            method, fig, ndaxes = _figure_result
+        else:
+            # Fallback for any code that still uses old behavior
+            method = _figure_result
+            ndaxes = {}
+
+        # Use ndaxes from figure_setup if available, otherwise try to get from figure
+        if "main" in ndaxes:
+            ax = ndaxes["main"]
+        else:
+            # Try to get axes from the figure
+            if fig.get_axes():
+                ax = fig.get_axes()[0]
+                ax.name = "main"
+            else:
+                # This shouldn't happen if _figure_setup worked correctly
+                ax = fig.add_subplot(1, 1, 1)
+                ax.name = "main"
+
+        ax.name += nameadd
+
+        # Resolve line/marker styles using centralized L1 function
+        style_kwargs = resolve_line_style(
+            dataset=new,
+            geometry="line",
+            kwargs=kwargs,
+            prefs=prefs,
+        )
+
+        lw = style_kwargs["linewidth"]
+        if lw == "auto":
+            lw = prefs.lines_linewidth
+        ls = style_kwargs["linestyle"]
+        if ls == "auto":
+            ls = prefs.lines_linestyle
+        marker = style_kwargs["marker"]
+        if marker == "auto":
+            marker = None
+        markersize = style_kwargs["markersize"]
+
+        alpha = kwargs.get("calpha", prefs.contour_alpha)
+
+        number_x_labels = kwargs.get("n_x_labels", prefs.number_of_x_labels)
+        number_y_labels = kwargs.get("n_y_labels", prefs.number_of_y_labels)
+        number_z_labels = kwargs.get("n_z_labels", prefs.number_of_z_labels)
+
+        if method in ["waterfall"]:
+            nxl = number_x_labels * 2
+            nyl = number_z_labels * 2
+        elif method in ["stack", "lines"]:
+            nxl = number_x_labels
+            nyl = number_z_labels
+        else:
+            nxl = number_x_labels
+            nyl = number_y_labels
+
+        ax.xaxis.set_major_locator(MaxNLocator(nbins=nxl))
+        ax.yaxis.set_major_locator(MaxNLocator(nbins=nyl))
+        if method not in ["surface"]:
+            ax.xaxis.set_ticks_position("bottom")
+            ax.yaxis.set_ticks_position("left")
+
+        # the next lines are to avoid multipliers in axis scale
+        formatter = ScalarFormatter(useOffset=False)
+        ax.xaxis.set_major_formatter(formatter)
+        ax.yaxis.set_major_formatter(formatter)
+
+        # ------------------------------------------------------------------------
+        # Set axis
+        # ------------------------------------------------------------------------
+        # set the abscissa axis
+        # the actual dimension name is the last in the new.dims list
+        dimx = new.dims[-1]
+        x = getattr(new, dimx)
+        if x is not None and x._implements("CoordSet"):
+            # if several coords, take the default ones:
+            x = x.default
+        xsize = new.shape[-1]
+        show_x_points = False
+        if x is not None and hasattr(x, "show_datapoints"):
+            show_x_points = x.show_datapoints
+        if show_x_points:
+            # remove data and units for display
+            x = Coord.arange(xsize)
+
+        discrete_data = False
+
+        if x is not None and (not x.is_empty or x.is_labeled):
+            xdata = x.data
+            if not np.any(xdata) and x.is_labeled:
+                discrete_data = True
+                # take into account the fact that sometimes axis have just labels
+                xdata = range(1, len(x.labels) + 1)
+        else:
+            xdata = range(xsize)
+
+        xl = [xdata[0], xdata[-1]]
+        xl.sort()
+
+        if xsize < number_x_labels + 1:
+            # extend the axis so that the labels are not too close to the limits
+            inc = abs(xdata[1] - xdata[0]) * 0.5
+            xl = [xl[0] - inc, xl[1] + inc]
+
+        if data_only:
+            xl = ax.get_xlim()
+
+        xlim = list(kwargs.get("xlim", xl))
+        xlim.sort()
+        xlim[-1] = min(xlim[-1], xl[-1])
+        xlim[0] = max(xlim[0], xl[0])
+
+        x_reverse_explicit = kwargs.get("x_reverse")
+        reverse_explicit = kwargs.get("reverse")
+
+        # Check if user explicitly passed x_reverse or reverse
+        # If explicitly passed, use that value; otherwise use x.reversed
+        if x_reverse_explicit is not None:
+            x_reverse = x_reverse_explicit
+        elif reverse_explicit is not None:
+            x_reverse = reverse_explicit
+        else:
+            x_reverse = x.reversed if x else False
+
+        # For x_reverse=True, don't reverse xlim - just invert axis after setting limits
+        # For x_reverse=False (from x.reversed=False), reverse xlim and let matplotlib auto-handle
+        # For x_reverse=False when x.reversed=True, we should NOT invert (user wants normal order)
+        if x_reverse:
+            # User wants inverted axis - don't reverse xlim, invert after
+            pass
+        elif x is not None and x.reversed:
+            # x.reversed is True but user didn't explicitly override - auto-handle
+            xlim.reverse()
+
+        ax.set_xlim(xlim)
+
+        # If x_reverse is True, explicitly invert the axis
+        if x_reverse:
+            ax.invert_xaxis()
+
+        xscale = kwargs.get("xscale", "linear")
+        ax.set_xscale(xscale)  # , nonpositive='mask')
+
+        # set the ordinates axis
+        # ------------------------------------------------------------------------
+        # the actual dimension name is the second in the new.dims list
+        dimy = new.dims[-2]
+        y = getattr(new, dimy)
+        if y is not None and y._implements("CoordSet"):
+            # if several coords, take the default ones:
+            y = y.default
+        ysize = new.shape[-2]
+
+        show_y_points = False
+        if y is not None and hasattr(y, "show_datapoints"):
+            show_y_points = y.show_datapoints
+        if show_y_points:
+            # remove data and units for display
+            y = Coord.arange(ysize)
+
+        if y is not None and (not y.is_empty or y.is_labeled):
+            ydata = y.data
+
+            if not np.any(ydata) and y.is_labeled:
+                ydata = range(1, len(y.labels) + 1)
+        else:
+            ydata = range(ysize)
+
+        yl = [ydata[0], ydata[-1]]
+        yl.sort()
+
+        if ysize < number_y_labels + 1:
+            # extend the axis so that the labels are not too close to the limits
+            inc = abs(ydata[1] - ydata[0]) * 0.5
+            yl = [yl[0] - inc, yl[1] + inc]
+
+        if data_only:
+            yl = ax.get_ylim()
+
+        ylim = list(kwargs.get("ylim", yl))
+        ylim.sort()
+        ylim[-1] = min(ylim[-1], yl[-1])
+        ylim[0] = max(ylim[0], yl[0])
+
+        yscale = kwargs.get("yscale", "linear")
+        ax.set_yscale(yscale)
+
+        # z intensity (by default we plot real component of the data)
+        # ------------------------------------------------------------------------
+        if not kwargs.get("imag", False):
+            zdata = new.real.masked_data
+        else:
+            zdata = new.imag.masked_data  # TODO: quaternion case (3 imag.components)
+
+        zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
+
+        if method in ["stack", "lines", "waterfall"]:
+            # the z axis info
+            # ---------------
+            # zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
+            amp = 0  # np.ma.ptp(zdata) / 50.
+            zl = (np.min(np.ma.min(zdata) - amp), np.max(np.ma.max(zdata)) + amp)
+            zlim = list(kwargs.get("zlim", zl))
+            zlim.sort()
+            z_reverse = kwargs.get("z_reverse", False)
+            if z_reverse:
+                zlim.reverse()
+
+            # set the limits
+            # ---------------
+            if yscale == "log" and min(zlim) <= 0:
+                # set the limits wrt smallest and largest strictly positive values
+                mi = np.amin(np.abs(zdata))
+                ma = np.amax(np.abs(zdata))
+                ax.set_ylim(
+                    10 ** (int(np.log10(mi + (ma - mi) * 0.001)) - 1),
+                    10 ** (int(np.log10(ma)) + 1),
+                )
+            else:
+                ax.set_ylim(zlim)
+
+        else:
+            # the y axis info
+            # ----------------
+            if data_only:
+                ylim = ax.get_ylim()
+
+            ylim = list(kwargs.get("ylim", ylim))
+            ylim.sort()
+            y_reverse_explicit = kwargs.get("y_reverse", False)
+            y_reverse_auto = y.reversed if y else False
+
+            # For explicit y_reverse, don't reverse ylim - just invert axis after setting limits
+            # For auto y.reversed, reverse ylim and let matplotlib auto-handle the inversion
+            if y_reverse_explicit:
+                ylim_original = list(ylim)  # Keep original order
+            elif y_reverse_auto:
+                ylim.reverse()
+
+            # set the limits
+            # ----------------
+            ax.set_ylim(ylim)
+
+            # For explicit y_reverse kwarg, explicitly invert the axis
+            # For auto y.reversed, matplotlib already handles inversion when ylim[0] > ylim[1]
+            if y_reverse_explicit:
+                ax.invert_yaxis()
+
+        # ------------------------------------------------------------------------
+        # plot the dataset
+        # ------------------------------------------------------------------------
+        grid = kwargs.get("grid", prefs.axes_grid)
+        ax.grid(grid)
+
+        # Resolve colormap and normalization using unified helper
+        # Priority: norm > cmap > cmap_mode > auto-detection > contrast_safe
+        cmap = kwargs.get("cmap")
+        cmap_mode = kwargs.get("cmap_mode", "auto")
+        center = kwargs.get("center")
+        norm = kwargs.get("norm")
+        vmin = kwargs.get("vmin")
+        vmax = kwargs.get("vmax")
+        contrast_safe = kwargs.get("contrast_safe", True)
+        min_contrast = kwargs.get("min_contrast", 1.5)
+        diverging_margin = kwargs.get("diverging_margin", 0.05)
+
+        # Get background color from axes
+        try:
+            facecolor = ax.get_facecolor()
+            if facecolor and len(facecolor) > 0:
+                bg_rgba = facecolor[0]
+                background_rgb = (bg_rgba[0], bg_rgba[1], bg_rgba[2])
+            else:
+                background_rgb = (1.0, 1.0, 1.0)
+        except Exception:
+            background_rgb = (1.0, 1.0, 1.0)
+
+        # For image, map, surface methods, use the unified colormap resolution
+        if method in ["map", "image", "contour", "contourf", "surface"]:
+            geometry = (
+                method  # "map" -> "contour", "image" -> "image", "surface" -> "surface"
+            )
+            # Style context is already active from the outer wrapper - no need for nested context
             cmap, norm = resolve_2d_colormap(
                 zdata,
                 cmap=cmap,
@@ -1499,396 +1502,400 @@ def plot_2D(dataset, method=None, **kwargs):
                 diverging_margin=diverging_margin,
                 prefs=prefs,
             )
-    else:
-        # For non-image methods, use simple normalization
-        if norm is None:
-            zmin, zmax = zlim
-            norm = Normalize(vmin=zmin, vmax=zmax)
-        if cmap is None:
-            cmap = prefs.colormap
-        elif isinstance(cmap, str):
-            cmap = plt.get_cmap(cmap)
-
-    # Initialize mappable tracker for colorbar
-    mappable = None
-
-    if method in ["surface"]:
-        # Ensure 3D axes
-        if not hasattr(ax, "plot_surface"):
-            fig = ax.figure
-            fig.delaxes(ax)
-            ax = fig.add_subplot(111, projection="3d")
-            ndaxes["main"] = ax
-
-            # Re-apply axis inversions after recreating 3D axes
-            # (the inversions were set on the old 2D axes which was deleted)
-            x_reverse_explicit = kwargs.get("x_reverse")
-            reverse_explicit = kwargs.get("reverse")
-            if x_reverse_explicit is not None:
-                x_reverse = x_reverse_explicit
-            elif reverse_explicit is not None:
-                x_reverse = reverse_explicit
-            else:
-                x_reverse = x.reversed if x else False
-
-            if x_reverse:
-                ax.invert_xaxis()
-
-            y_reverse_explicit = kwargs.get("y_reverse", False)
-            if y_reverse_explicit:
-                ax.invert_yaxis()
-
-        X, Y = np.meshgrid(xdata, ydata)
-        Z = zdata.copy()
-
-        # masker data not taken into account in surface plot
-        Z[dataset.mask] = np.nan
-
-        # Plot the surface.  #TODO : improve this (or remove it)
-
-        antialiased = kwargs.get("antialiased", prefs.antialiased)
-        rcount = kwargs.get("rcount", prefs.rcount)
-        ccount = kwargs.get("ccount", prefs.ccount)
-        ax.set_facecolor("w")
-        mappable = ax.plot_surface(
-            X,
-            Y,
-            Z,
-            cmap=cmap,
-            linewidth=lw,
-            antialiased=antialiased,
-            rcount=rcount,
-            ccount=ccount,
-            edgecolor="k",
-            norm=norm,
-        )
-
-    if method in ["waterfall"]:
-        _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs)
-
-    elif method in ["image", "contourf"]:
-        if discrete_data:
-            method = "map"
-
         else:
-            kwargs["nlevels"] = 500
-            if not hasattr(new, "clevels") or new.clevels is None:
-                new.clevels = _get_clevels(zdata, prefs, **kwargs)
-            mappable = ax.contourf(xdata, ydata, zdata, new.clevels, alpha=alpha)
-            mappable.set_cmap(cmap)
-            mappable.set_norm(norm)
+            # For non-image methods, use simple normalization
+            if norm is None:
+                zmin, zmax = zlim
+                norm = Normalize(vmin=zmin, vmax=zmax)
+            if cmap is None:
+                cmap = prefs.colormap
+            elif isinstance(cmap, str):
+                cmap = plt.get_cmap(cmap)
 
-            # For colorbar, create a ScalarMappable with the resolved norm
-            colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
-            colorbar_mappable.set_array(zdata)
+        # Initialize mappable tracker for colorbar
+        mappable = None
 
-    elif method in ["map", "contour"]:
-        if discrete_data:
-            _colormap = plt.get_cmap(cmap)
-            scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
-            mappable = scalarMap
+        if method in ["surface"]:
+            # Ensure 3D axes
+            if not hasattr(ax, "plot_surface"):
+                fig = ax.figure
+                fig.delaxes(ax)
+                ax = fig.add_subplot(111, projection="3d")
+                ndaxes["main"] = ax
 
-            # marker = kwargs.get('marker', kwargs.get('m', None))
-            markersize = kwargs.get("markersize", kwargs.get("ms", 5.0))
-            # markevery = kwargs.get('markevery', kwargs.get('me', 1))
-
-            for i in ydata:
-                for j in xdata:
-                    (li,) = ax.plot(j, i, lw=lw, marker="o", markersize=markersize)
-                    li.set_color(scalarMap.to_rgba(zdata[i - 1, j - 1]))
-
-        else:
-            # contour plot
-            # -------------
-            if not hasattr(new, "clevels") or new.clevels is None:
-                new.clevels = _get_clevels(zdata, prefs, **kwargs)
-
-            mappable = ax.contour(
-                xdata, ydata, zdata, new.clevels, linewidths=lw, alpha=alpha
-            )
-            mappable.set_cmap(cmap)
-            mappable.set_norm(norm)
-
-            # For continuous colorbar, create a ScalarMappable with the resolved norm
-            colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
-            colorbar_mappable.set_array(zdata)
-
-    elif method in ["stack", "lines"]:
-        # stack plot
-        # ----------
-        # now plot the collection of lines
-        # map colors - always use y-coordinate range (not data intensity)
-        vmin, vmax = ylim
-        norm = Normalize(vmin=vmin, vmax=vmax)
-
-        # Initialize is_categorical (default True - no colorbar unless proven continuous)
-        is_categorical = True
-
-        # Get palette parameter for auto-detection
-        palette = kwargs.pop("palette", None)
-
-        # Check if user explicitly provided color or cmap (backward compatibility)
-        explicit_color = kwargs.get("color")
-        explicit_cmap = kwargs.get("colormap") or kwargs.get("cmap")
-
-        if explicit_color is not None:
-            # User explicitly passed color - could be a single color or a list
-            if isinstance(explicit_color, (list)):
-                # Check if it's a list of colors or a single color wrapped in a list
-                # A list of colors would have color-like elements (strings, tuples)
-                if len(explicit_color) > 0:
-                    first_elem = explicit_color[0]
-                    if isinstance(first_elem, (list, tuple)) and len(first_elem) in (
-                        3,
-                        4,
-                    ):
-                        # It's a list of color tuples - use as-is
-                        colors = list(explicit_color)
-                    elif len(explicit_color) == 1:
-                        # Single color wrapped in list - treat as single color
-                        colors = [explicit_color[0]]
-                    else:
-                        # Multiple color strings - use as-is for cycling
-                        colors = list(explicit_color)
+                # Re-apply axis inversions after recreating 3D axes
+                # (the inversions were set on the old 2D axes which was deleted)
+                x_reverse_explicit = kwargs.get("x_reverse")
+                reverse_explicit = kwargs.get("reverse")
+                if x_reverse_explicit is not None:
+                    x_reverse = x_reverse_explicit
+                elif reverse_explicit is not None:
+                    x_reverse = reverse_explicit
                 else:
-                    colors = [explicit_color]
-            elif isinstance(explicit_color, tuple):
-                # Tuple - could be RGB/RGBA or just a single item - treat as single color
-                colors = [explicit_color]
-            else:
-                # Single color value (string, number, etc.)
-                colors = [explicit_color]
-            scalarMap = None
-            is_categorical = True  # Explicit colors are categorical
-        elif explicit_cmap is not None:
-            # User explicitly passed colormap - use continuous mapping
-            _colormap = plt.get_cmap(
-                explicit_cmap if explicit_cmap != "Undefined" else "viridis"
-            )
-            scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
-            colors = None
-            mappable = scalarMap
-            is_categorical = False
-        else:
-            # Use auto-detection helper (L1)
-            contrast_safe = kwargs.get("contrast_safe", True)
-            min_contrast = kwargs.get("min_contrast", 1.5)
-            colors, is_categorical, mappable = resolve_stack_colors(
-                new,
-                palette=palette,
-                n=ysize,
-                geometry="line",
-                contrast_safe=contrast_safe,
-                min_contrast=min_contrast,
-            )
-            if is_categorical:
-                # Categorical: use colors directly, no mappable
-                scalarMap = None
-            else:
-                # Continuous: use the mappable from L1, build ScalarMappable with colors
-                from matplotlib.colors import LinearSegmentedColormap
+                    x_reverse = x.reversed if x else False
 
-                _colormap = LinearSegmentedColormap.from_list(
-                    "stack_cmap", colors, N=256
+                if x_reverse:
+                    ax.invert_xaxis()
+
+                y_reverse_explicit = kwargs.get("y_reverse", False)
+                if y_reverse_explicit:
+                    ax.invert_yaxis()
+
+            X, Y = np.meshgrid(xdata, ydata)
+            Z = zdata.copy()
+
+            # masker data not taken into account in surface plot
+            Z[dataset.mask] = np.nan
+
+            # Plot the surface.  #TODO : improve this (or remove it)
+
+            antialiased = kwargs.get("antialiased", prefs.antialiased)
+            rcount = kwargs.get("rcount", prefs.rcount)
+            ccount = kwargs.get("ccount", prefs.ccount)
+            ax.set_facecolor("w")
+            mappable = ax.plot_surface(
+                X,
+                Y,
+                Z,
+                cmap=cmap,
+                linewidth=lw,
+                antialiased=antialiased,
+                rcount=rcount,
+                ccount=ccount,
+                edgecolor="k",
+                norm=norm,
+            )
+
+        if method in ["waterfall"]:
+            _plot_waterfall(
+                ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs
+            )
+
+        elif method in ["image", "contourf"]:
+            if discrete_data:
+                method = "map"
+
+            else:
+                kwargs["nlevels"] = 500
+                if not hasattr(new, "clevels") or new.clevels is None:
+                    new.clevels = _get_clevels(zdata, prefs, **kwargs)
+                mappable = ax.contourf(xdata, ydata, zdata, new.clevels, alpha=alpha)
+                mappable.set_cmap(cmap)
+                mappable.set_norm(norm)
+
+                # For colorbar, create a ScalarMappable with the resolved norm
+                colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
+                colorbar_mappable.set_array(zdata)
+
+        elif method in ["map", "contour"]:
+            if discrete_data:
+                _colormap = plt.get_cmap(cmap)
+                scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
+                mappable = scalarMap
+
+                # marker = kwargs.get('marker', kwargs.get('m', None))
+                markersize = kwargs.get("markersize", kwargs.get("ms", 5.0))
+                # markevery = kwargs.get('markevery', kwargs.get('me', 1))
+
+                for i in ydata:
+                    for j in xdata:
+                        (li,) = ax.plot(j, i, lw=lw, marker="o", markersize=markersize)
+                        li.set_color(scalarMap.to_rgba(zdata[i - 1, j - 1]))
+
+            else:
+                # contour plot
+                # -------------
+                if not hasattr(new, "clevels") or new.clevels is None:
+                    new.clevels = _get_clevels(zdata, prefs, **kwargs)
+
+                mappable = ax.contour(
+                    xdata, ydata, zdata, new.clevels, linewidths=lw, alpha=alpha
+                )
+                mappable.set_cmap(cmap)
+                mappable.set_norm(norm)
+
+                # For continuous colorbar, create a ScalarMappable with the resolved norm
+                colorbar_mappable = ScalarMappable(norm=norm, cmap=cmap)
+                colorbar_mappable.set_array(zdata)
+
+        elif method in ["stack", "lines"]:
+            # stack plot
+            # ----------
+            # now plot the collection of lines
+            # map colors - always use y-coordinate range (not data intensity)
+            vmin, vmax = ylim
+            norm = Normalize(vmin=vmin, vmax=vmax)
+
+            # Initialize is_categorical (default True - no colorbar unless proven continuous)
+            is_categorical = True
+
+            # Get palette parameter for auto-detection
+            palette = kwargs.pop("palette", None)
+
+            # Check if user explicitly provided color or cmap (backward compatibility)
+            explicit_color = kwargs.get("color")
+            explicit_cmap = kwargs.get("colormap") or kwargs.get("cmap")
+
+            if explicit_color is not None:
+                # User explicitly passed color - could be a single color or a list
+                if isinstance(explicit_color, (list)):
+                    # Check if it's a list of colors or a single color wrapped in a list
+                    # A list of colors would have color-like elements (strings, tuples)
+                    if len(explicit_color) > 0:
+                        first_elem = explicit_color[0]
+                        if isinstance(first_elem, (list, tuple)) and len(
+                            first_elem
+                        ) in (
+                            3,
+                            4,
+                        ):
+                            # It's a list of color tuples - use as-is
+                            colors = list(explicit_color)
+                        elif len(explicit_color) == 1:
+                            # Single color wrapped in list - treat as single color
+                            colors = [explicit_color[0]]
+                        else:
+                            # Multiple color strings - use as-is for cycling
+                            colors = list(explicit_color)
+                    else:
+                        colors = [explicit_color]
+                elif isinstance(explicit_color, tuple):
+                    # Tuple - could be RGB/RGBA or just a single item - treat as single color
+                    colors = [explicit_color]
+                else:
+                    # Single color value (string, number, etc.)
+                    colors = [explicit_color]
+                scalarMap = None
+                is_categorical = True  # Explicit colors are categorical
+            elif explicit_cmap is not None:
+                # User explicitly passed colormap - use continuous mapping
+                _colormap = plt.get_cmap(
+                    explicit_cmap if explicit_cmap != "Undefined" else "viridis"
                 )
                 scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
-                # Update mappable with the new colormap
-                mappable = ScalarMappable(norm=norm, cmap=_colormap)
-                mappable.set_array(np.arange(ysize))
                 colors = None
-
-        # we display the line in the reverse order, so that the last
-        # are behind the first.
-
-        clear = kwargs.get("clear", True)
-        existing_lines = []
-        if not clear and not transposed:
-            existing_lines.extend(ax.lines)  # keep the old lines
-
-        # Pre-compute zorders (policy: later lines have lower zorder)
-        n_lines = zdata.shape[0]
-        zorders = [n_lines + 1 - i for i in range(n_lines)]
-
-        # Pre-compute colors for each line
-        fmt = kwargs.get("label_fmt", "{:.5f}")
-        line_colors = []
-        line_labels = []
-        has_colors = colors is not None and len(colors) > 0
-        for i in range(n_lines):
-            if scalarMap is not None:
-                line_colors.append(scalarMap.to_rgba(ydata[i]))
-            elif has_colors:
-                line_colors.append(colors[i % len(colors)])
+                mappable = scalarMap
+                is_categorical = False
             else:
-                line_colors.append(None)
-            line_labels.append(fmt.format(ydata[i]))
+                # Use auto-detection helper (L1)
+                contrast_safe = kwargs.get("contrast_safe", True)
+                min_contrast = kwargs.get("min_contrast", 1.5)
+                colors, is_categorical, mappable = resolve_stack_colors(
+                    new,
+                    palette=palette,
+                    n=ysize,
+                    geometry="line",
+                    contrast_safe=contrast_safe,
+                    min_contrast=min_contrast,
+                )
+                if is_categorical:
+                    # Categorical: use colors directly, no mappable
+                    scalarMap = None
+                else:
+                    # Continuous: use the mappable from L1, build ScalarMappable with colors
+                    from matplotlib.colors import LinearSegmentedColormap
 
-        # Use render_lines for drawing
-        new_lines = render_lines(
-            ax,
-            xdata,
-            zdata,
-            colors=line_colors,
-            linestyles=[ls] * n_lines,
-            linewidths=[lw] * n_lines,
-            markers=[marker] * n_lines,
-            markersizes=[markersize] * n_lines,
-            zorders=zorders,
-            labels=line_labels,
-            reverse=True,
-            picker=True,
-        )
+                    _colormap = LinearSegmentedColormap.from_list(
+                        "stack_cmap", colors, N=256
+                    )
+                    scalarMap = ScalarMappable(norm=norm, cmap=_colormap)
+                    # Update mappable with the new colormap
+                    mappable = ScalarMappable(norm=norm, cmap=_colormap)
+                    mappable.set_array(np.arange(ysize))
+                    colors = None
 
-        # store the full set of lines (render_lines already added them to ax)
-        new._ax_lines = existing_lines + new_lines
+            # we display the line in the reverse order, so that the last
+            # are behind the first.
 
-    if data_only or method in ["waterfall"]:
-        # if data only (we will not set axes and labels
-        # it was probably done already in a previous plot
-        new._plot_resume(dataset, **kwargs)
-        return ax
+            clear = kwargs.get("clear", True)
+            existing_lines = []
+            if not clear and not transposed:
+                existing_lines.extend(ax.lines)  # keep the old lines
 
-    # display a title
-    # ------------------------------------------------------------------------
-    title = kwargs.get("title")
-    if title:
-        ax.set_title(title)
-    elif kwargs.get("plottitle", False):
-        ax.set_title(new.name)
+            # Pre-compute zorders (policy: later lines have lower zorder)
+            n_lines = zdata.shape[0]
+            zorders = [n_lines + 1 - i for i in range(n_lines)]
 
-    # ----------------------------------------------------------------------------------
-    # labels
-    # ----------------------------------------------------------------------------------
-    # x label
-    xlabel = kwargs.get("xlabel")
-    if show_x_points:
-        xlabel = "data points"
-    if not xlabel:
-        xlabel = make_label(x, new.dims[-1])
-    ax.set_xlabel(xlabel)
+            # Pre-compute colors for each line
+            fmt = kwargs.get("label_fmt", "{:.5f}")
+            line_colors = []
+            line_labels = []
+            has_colors = colors is not None and len(colors) > 0
+            for i in range(n_lines):
+                if scalarMap is not None:
+                    line_colors.append(scalarMap.to_rgba(ydata[i]))
+                elif has_colors:
+                    line_colors.append(colors[i % len(colors)])
+                else:
+                    line_colors.append(None)
+                line_labels.append(fmt.format(ydata[i]))
 
-    uselabelx = kwargs.get("uselabel_x", False)
-    if (
-        x
-        and x.is_labeled
-        and (uselabelx or not np.any(x.data))
-        and len(x.labels) < number_x_labels + 1
-    ):
-        # TODO refine this to use different orders of labels
-        ax.set_xticks(xdata)
-        ax.set_xticklabels(x.labels)
+            # Use render_lines for drawing
+            new_lines = render_lines(
+                ax,
+                xdata,
+                zdata,
+                colors=line_colors,
+                linestyles=[ls] * n_lines,
+                linewidths=[lw] * n_lines,
+                markers=[marker] * n_lines,
+                markersizes=[markersize] * n_lines,
+                zorders=zorders,
+                labels=line_labels,
+                reverse=True,
+                picker=True,
+            )
 
-    # y label
-    # ------------------------------------------------------------------------
-    ylabel = kwargs.get("ylabel")
-    if show_y_points:
-        ylabel = "data points"
-    if not ylabel:
-        if method in ["stack", "lines"]:
-            ylabel = make_label(new, "values")
+            # store the full set of lines (render_lines already added them to ax)
+            new._ax_lines = existing_lines + new_lines
 
+        if data_only or method in ["waterfall"]:
+            # if data only (we will not set axes and labels
+            # it was probably done already in a previous plot
+            new._plot_resume(dataset, **kwargs)
+            return ax
+
+        # display a title
+        # ------------------------------------------------------------------------
+        title = kwargs.get("title")
+        if title:
+            ax.set_title(title)
+        elif kwargs.get("plottitle", False):
+            ax.set_title(new.name)
+
+        # ----------------------------------------------------------------------------------
+        # labels
+        # ----------------------------------------------------------------------------------
+        # x label
+        xlabel = kwargs.get("xlabel")
+        if show_x_points:
+            xlabel = "data points"
+        if not xlabel:
+            xlabel = make_label(x, new.dims[-1])
+        ax.set_xlabel(xlabel)
+
+        uselabelx = kwargs.get("uselabel_x", False)
+        if (
+            x
+            and x.is_labeled
+            and (uselabelx or not np.any(x.data))
+            and len(x.labels) < number_x_labels + 1
+        ):
+            # TODO refine this to use different orders of labels
+            ax.set_xticks(xdata)
+            ax.set_xticklabels(x.labels)
+
+        # y label
+        # ------------------------------------------------------------------------
+        ylabel = kwargs.get("ylabel")
+        if show_y_points:
+            ylabel = "data points"
+        if not ylabel:
+            if method in ["stack", "lines"]:
+                ylabel = make_label(new, "values")
+
+            else:
+                ylabel = make_label(y, new.dims[-2])
+                # y tick labels
+                uselabely = kwargs.get("uselabel_y", False)
+                if (
+                    y
+                    and y.is_labeled
+                    and (uselabely or not np.any(y.data))
+                    and len(y.labels) < number_y_labels
+                ):
+                    # TODO refine this to use different orders of labels
+                    ax.set_yticks(ydata)
+                    ax.set_yticklabels(y.labels)
+
+        # z label
+        # ------------------------------------------------------------------------
+        zlabel = kwargs.get("zlabel")
+        if not zlabel:
+            if method in ["stack", "lines"]:
+                zlabel = make_label(y, new.dims[-2])
+            elif method in ["surface"]:
+                zlabel = make_label(new, "values")
+                ax.set_zlabel(zlabel)
+            else:
+                zlabel = make_label(new, "z")
+
+        # do we display the ordinate axis?
+        if kwargs.get("show_y", True):
+            ax.set_ylabel(ylabel)
         else:
-            ylabel = make_label(y, new.dims[-2])
-            # y tick labels
-            uselabely = kwargs.get("uselabel_y", False)
-            if (
-                y
-                and y.is_labeled
-                and (uselabely or not np.any(y.data))
-                and len(y.labels) < number_y_labels
-            ):
-                # TODO refine this to use different orders of labels
-                ax.set_yticks(ydata)
-                ax.set_yticklabels(y.labels)
+            ax.set_yticks([])
 
-    # z label
-    # ------------------------------------------------------------------------
-    zlabel = kwargs.get("zlabel")
-    if not zlabel:
-        if method in ["stack", "lines"]:
-            zlabel = make_label(y, new.dims[-2])
-        elif method in ["surface"]:
-            zlabel = make_label(new, "values")
-            ax.set_zlabel(zlabel)
-        else:
-            zlabel = make_label(new, "z")
-
-    # do we display the ordinate axis?
-    if kwargs.get("show_y", True):
-        ax.set_ylabel(ylabel)
-    else:
-        ax.set_yticks([])
-
-    # Create colorbar if requested (L3 responsibility)
-    # For map/image/surface: always show colorbar if requested
-    # For stack: only show if continuous colormap (not categorical)
-    if colorbar and mappable is not None:
-        fig = ax.figure
-        if method == "stack":
-            # Stack: only show colorbar for continuous, not categorical
-            # In stack mode, color represents y-coordinate (not intensity)
-            if not is_categorical:
+        # Create colorbar if requested (L3 responsibility)
+        # For map/image/surface: always show colorbar if requested
+        # For stack: only show if continuous colormap (not categorical)
+        if colorbar and mappable is not None:
+            fig = ax.figure
+            if method == "stack":
+                # Stack: only show colorbar for continuous, not categorical
+                # In stack mode, color represents y-coordinate (not intensity)
+                if not is_categorical:
+                    if not hasattr(ax, "_scp_colorbar"):
+                        # Semantic label: color represents y coordinate
+                        y_coord_label = make_label(y, new.dims[-2])
+                        cb = fig.colorbar(
+                            mappable,
+                            ax=ax,
+                            location="right",
+                            pad=0.02,
+                            fraction=0.05,
+                            aspect=30,
+                        )
+                        cb.set_label(y_coord_label)
+                        _apply_colorbar_tick_policy(cb, norm, vmin=vmin, vmax=vmax)
+                        ax._scp_colorbar = cb
+            elif method in ["map", "image", "contour", "contourf", "surface"]:
+                # 2D plots: show colorbar (intensity)
                 if not hasattr(ax, "_scp_colorbar"):
-                    # Semantic label: color represents y coordinate
-                    y_coord_label = make_label(y, new.dims[-2])
+                    # Use continuous colorbar mappable if available (for contour plots)
+                    cb_mappable = locals().get("colorbar_mappable", mappable)
                     cb = fig.colorbar(
-                        mappable,
+                        cb_mappable,
                         ax=ax,
                         location="right",
                         pad=0.02,
                         fraction=0.05,
                         aspect=30,
                     )
-                    cb.set_label(y_coord_label)
+                    cb.set_label(zlabel)
                     _apply_colorbar_tick_policy(cb, norm, vmin=vmin, vmax=vmax)
                     ax._scp_colorbar = cb
-        elif method in ["map", "image", "contour", "contourf", "surface"]:
-            # 2D plots: show colorbar (intensity)
-            if not hasattr(ax, "_scp_colorbar"):
-                # Use continuous colorbar mappable if available (for contour plots)
-                cb_mappable = locals().get("colorbar_mappable", mappable)
-                cb = fig.colorbar(
-                    cb_mappable,
-                    ax=ax,
-                    location="right",
-                    pad=0.02,
-                    fraction=0.05,
-                    aspect=30,
-                )
-                cb.set_label(zlabel)
-                _apply_colorbar_tick_policy(cb, norm, vmin=vmin, vmax=vmax)
-                ax._scp_colorbar = cb
 
-    # do we display the zero line
-    if kwargs.get("show_zero", False):
-        ax.axhline(y=0, color="k", linestyle="--", alpha=0.5)
+        # do we display the zero line
+        if kwargs.get("show_zero", False):
+            ax.axhline(y=0, color="k", linestyle="--", alpha=0.5)
 
-    # Handle equal_aspect for 2D plots (contour, contourf, image, map)
-    # Hierarchy: explicit kwarg > preference > default (False)
-    if "equal_aspect" in kwargs:
-        equal_aspect = kwargs["equal_aspect"]
-    else:
-        equal_aspect = prefs.image_equal_aspect
-
-    if equal_aspect and method in ["contour", "contourf", "image", "map"]:
-        if _can_enforce_equal_aspect(new):
-            ax.set_aspect("equal", adjustable="box")
+        # Handle equal_aspect for 2D plots (contour, contourf, image, map)
+        # Hierarchy: explicit kwarg > preference > default (False)
+        if "equal_aspect" in kwargs:
+            equal_aspect = kwargs["equal_aspect"]
         else:
-            import warnings as _warn_module
+            equal_aspect = prefs.image_equal_aspect
 
-            _warn_module.warn(
-                "equal_aspect=True ignored: X and Y units are incompatible or missing.",
-                UserWarning,
-                stacklevel=2,
-            )
+        if equal_aspect and method in ["contour", "contourf", "image", "map"]:
+            if _can_enforce_equal_aspect(new):
+                ax.set_aspect("equal", adjustable="box")
+            else:
+                import warnings as _warn_module
 
-    # Handle equal_aspect for 3D surface plots
-    if method == "surface":
-        _handle_3d_aspect(ax, new, **kwargs)
+                _warn_module.warn(
+                    "equal_aspect=True ignored: X and Y units are incompatible or missing.",
+                    UserWarning,
+                    stacklevel=2,
+                )
 
-    new._plot_resume(dataset, **kwargs)
+        # Handle equal_aspect for 3D surface plots
+        if method == "surface":
+            _handle_3d_aspect(ax, new, **kwargs)
 
-    return ax
+        new._plot_resume(dataset, **kwargs)
+
+        return ax
 
     # ======================================================================================
     # Waterfall
