@@ -446,34 +446,35 @@ def resolve_line_style(
 
 def resolve_stack_colors(
     dataset,
-    palette=None,
+    palette="auto",
     n=None,
     geometry="line",
     contrast_safe=True,
     min_contrast=1.5,
     default_categorical_small="tab10",
     default_categorical_large="tab20",
-    categorical_threshold=10,
     prefs=None,
 ):
     """
-    Resolve colors for stack plot based on semantic detection.
+    Resolve colors for stack plot based on palette parameter.
 
-    This function delegates ALL detection logic to detect_stack_semantics().
-    No local heuristics for monotonicity, integer sequences, or style inspection.
+    This function implements a deterministic palette API for stack plots.
+    All semantic detection is delegated to detect_stack_semantics().
 
     Parameters
     ----------
     dataset : NDDataset
         The 2D dataset being plotted.
-    palette : str or list, optional
-        If provided: use explicitly (respects user choice).
-        If None: auto-detect using detect_stack_semantics().
-        If str:
-            - "continuous": force continuous colormap
-            - "categorical": force categorical colors
-            - colormap name: use that colormap
-        If list: use as explicit categorical colors.
+    palette : {"auto", "categorical", "continuous"} or str or list, optional
+        Controls how multiple curves are colored in stack plots.
+
+        - "auto" (default): detect from dataset semantics using detect_stack_semantics().
+        - "categorical": force categorical mode, use matplotlib color cycle.
+        - "continuous": force continuous mode, use sequential colormap.
+        - colormap name string: force continuous mode using that colormap.
+        - list of colors: explicit categorical colors.
+
+        This parameter applies only to plot_lines.
     n : int, optional
         Number of colors needed. If None, derived from dataset shape.
     geometry : str, optional, default: "line"
@@ -483,11 +484,9 @@ def resolve_stack_colors(
     min_contrast : float, optional, default: 1.5
         Minimum contrast ratio for trimming.
     default_categorical_small : str, optional
-        Default colormap for categorical with n <= threshold. Default: "tab10".
+        Default colormap for categorical with <=10 categories. Default: "tab10".
     default_categorical_large : str, optional
-        Default colormap for categorical with n > threshold. Default: "tab20".
-    categorical_threshold : int, optional
-        Threshold for small vs large categorical. Default: 10.
+        Default colormap for categorical with >10 categories. Default: "tab20".
     prefs : object, optional
         Preferences object. If None, will be fetched from spectrochempy.
 
@@ -512,45 +511,42 @@ def resolve_stack_colors(
     if n is None:
         n = dataset.shape[-2]
 
-    if palette is not None:
-        if palette == "continuous":
-            style_cmap = mpl.rcParams.get("image.cmap")
-            if style_cmap is not None and style_cmap != _MPL_DEFAULT_IMAGE_CMAP:
-                cmap = plt.get_cmap(style_cmap)
-            else:
-                cmap = plt.get_cmap(prefs.colormap_sequential)
-            colors_data = cmap(np.linspace(0, 1, n))
-            if contrast_safe and geometry in ("line", "contour"):
-                background_rgb = (1.0, 1.0, 1.0)
-                cmap = _ensure_min_contrast(cmap, background_rgb, min_contrast)
-                colors_data = cmap(np.linspace(0, 1, n))
-            norm = Normalize(vmin=0, vmax=n - 1)
-            mappable = ScalarMappable(norm=norm, cmap=cmap)
-            mappable.set_array(np.arange(n))
-            return colors_data, False, mappable
-        if palette == "categorical":
-            cmap = _get_categorical_cmap(
-                n,
-                default_small=default_categorical_small,
-                default_large=default_categorical_large,
-                threshold=categorical_threshold,
-            )
-            return list(cmap.colors), True, None
+    # Determine mode based on palette value
+    mode = None
+    explicit_cmap = None
+    explicit_colors = None
 
-        if isinstance(palette, (list, tuple)):
-            colors = list(palette)
+    if palette is None or palette == "auto":
+        mode = detect_stack_semantics(dataset)
+
+    elif palette == "categorical":
+        mode = "categorical"
+
+    elif palette == "continuous":
+        mode = "continuous"
+
+    elif isinstance(palette, str):
+        mode = "continuous"
+        explicit_cmap = palette
+
+    elif isinstance(palette, (list, tuple)):
+        mode = "categorical"
+        explicit_colors = list(palette)
+
+    else:
+        raise ValueError(
+            f"Invalid palette value: {palette!r}. "
+            "Expected 'auto', 'categorical', 'continuous', colormap name, or list of colors."
+        )
+
+    # Execute based on mode
+    if mode == "categorical":
+        if explicit_colors is not None:
+            colors = list(explicit_colors)
             while len(colors) < n:
-                colors.extend(palette)
+                colors.extend(explicit_colors)
             return colors[:n], True, None
-        cmap = plt.get_cmap(palette)
-        norm = Normalize(vmin=0, vmax=n - 1)
-        mappable = ScalarMappable(norm=norm, cmap=cmap)
-        mappable.set_array(np.arange(n))
-        return cmap(np.linspace(0, 1, n)), False, mappable
 
-    semantic = detect_stack_semantics(dataset)
-
-    if semantic == "categorical":
         _MPL_DEFAULT_PROP_CYCLE = mpl.rcParamsDefault["axes.prop_cycle"]
         current_cycle = mpl.rcParams["axes.prop_cycle"]
         if current_cycle != _MPL_DEFAULT_PROP_CYCLE:
@@ -558,19 +554,23 @@ def resolve_stack_colors(
             colors = [cycle_colors[i % len(cycle_colors)] for i in range(n)]
             return colors, True, None
 
-        cmap = _get_categorical_cmap(
-            n,
-            default_small=default_categorical_small,
-            default_large=default_categorical_large,
-            threshold=categorical_threshold,
-        )
-        return list(cmap.colors), True, None
+        if n <= 10:
+            cmap = plt.get_cmap(default_categorical_small)
+        else:
+            cmap = plt.get_cmap(default_categorical_large)
+        colors = [cmap(i) for i in np.linspace(0, 1, cmap.N)[:n]]
+        return colors, True, None
 
-    style_cmap = mpl.rcParams.get("image.cmap")
-    if style_cmap is not None and style_cmap != _MPL_DEFAULT_IMAGE_CMAP:
-        cmap = plt.get_cmap(style_cmap)
+    # mode == "continuous"
+    if explicit_cmap is not None:
+        cmap = plt.get_cmap(explicit_cmap)
     else:
-        cmap = plt.get_cmap(prefs.colormap_sequential)
+        style_cmap = mpl.rcParams.get("image.cmap")
+        if style_cmap is not None and style_cmap != _MPL_DEFAULT_IMAGE_CMAP:
+            cmap = plt.get_cmap(style_cmap)
+        else:
+            cmap = plt.get_cmap(prefs.colormap_sequential)
+
     colors_data = cmap(np.linspace(0, 1, n))
 
     if contrast_safe and geometry in ("line", "contour"):

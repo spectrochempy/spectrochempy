@@ -74,19 +74,45 @@ _ = ds.plot_image()
 # SpectroChemPy chooses colors intelligently:
 #
 # - for lines:
-#   - Sequential data → sequential colormap for lines
-#   - Categorical stacks → distinct categorical colors
+#   - Sequential data → sequential palette lines (default viridis, defined by `prefs.colormap_sequential`)
+#   - Categorical stacks → distinct categorical colors (default tab10 or tab20 depending on number of lines)
 # - for contours and images:
-#   - Data with positive and negative values → diverging colormap
-#   - Data with only positive or only negative values → sequential colormap
+#   - Data with both positive and negative values → diverging colormap (default RdBu_r, defined by `prefs.colormap_diverging`)
+#   - Data with only positive or only negative values → sequential colormap (default viridis, defined by
+#   `prefs.colormap_sequential`)
 #
 # This behavior works automatically — no configuration required.
 
 # %% [markdown]
-# For line plots, however, you can disable continuous colormaps and use categorical colors:
+# For line plots, however, you can disable continuous colormaps and force use categorical colors:
 
 # %%
-_ = ds.plot_lines(cmap=None)
+_ = ds.plot_lines(palette='categorical')
+
+# %% [markdown]
+# For images and contours, you can also override the default sequential/diverging colormap behavior. Lets first have a
+# a dataset with both positive and negative values:
+ds_neg = ds - ds.mean()
+ds_neg.plot_image()
+
+# %% [markdown]
+# As expected,the default diverging colormap has been chosen behavior. But this can be overriden using:
+
+ds_neg.plot_image(cmap_mode='sequential')   # forces sequential colormap even for data with negative values
+
+# %% [markdown]
+# The switch between sequential and diverging colormaps is based on the actual data values, with a `diverging_margin`
+# which fixes the minimum ratio threshold for diverging auto-detection. If the data contains negative values, but they
+# are small compared to the overall data range (i.e. they are less than `diverging_margin` of the data range), then a
+# sequential colormap will be used instead of a diverging one. This prevents the use of diverging colormaps when the
+# negative (resp. positive) values are negligible compared to the positive (resp. negative) values, which would not
+# provide meaningful color differentiation. The default value for `diverging_margin` is 0.05, meaning that if the
+# negative values are less than 5% of the data range, a sequential colormap will be used even if there are negative
+# values present.
+# You can adjust this threshold as needed. For example, in the above example, setting `diverging_margin=0.5` will
+# allows for a much larger proportion of negative values (up to 50% of the data range) before switching to a diverging
+# colormap, which is why the sequential colormap is used in this case:
+ds_neg.plot_image(diverging_margin=0.5)
 
 # %% [markdown]
 # ## Colorbars
@@ -95,7 +121,7 @@ _ = ds.plot_lines(cmap=None)
 # a sequential or diverging colormap is used/
 
 # %%
-_ = ds.plot(colorbar="auto")  # shows colorbar whenever applicable
+_ = ds.plot(colorbar='auto')  # shows colorbar whenever applicable
 
 # %% [markdown]
 # ## Changing the Colormap

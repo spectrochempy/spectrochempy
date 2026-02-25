@@ -240,14 +240,14 @@ def plot_lines(dataset, **kwargs):
         offset of the model individual lines.
     output : str,
         name of the file to save the figure.
-    palette : str or list, optional, default: None
-        Color palette for stack plot. If None, auto-detect based on dataset.
-        If "continuous": use continuous colormap (viridis).
-        If "categorical": use matplotlib default color cycle.
-        If colormap name: use that colormap.
-        If list/tuple of colors: use as explicit categorical colors.
-        Auto-detection uses continuous colormap only when y coordinate is numeric,
-        strictly monotonic, and number of spectra > 6.
+    palette : {"auto", "categorical", "continuous"} or str or list, optional
+        Color palette for stack plot (plot_lines only).
+
+        - "auto" (default): detect from dataset semantics.
+        - "categorical": use matplotlib color cycle.
+        - "continuous": use sequential colormap.
+        - colormap name: continuous mapping using that colormap.
+        - list of colors: explicit categorical colors.
     plot_model : Bool,
         plot model data if available.
     plottitle: bool, optional, default: False
