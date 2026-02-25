@@ -94,7 +94,7 @@ prefs.reset()
 
 # %%
 prefs.font.family = "serif"
-prefs.colormap_sequantial = "plasma"
+prefs.colormap_sequential = "plasma"
 _ = ds.plot()
 
 # %%

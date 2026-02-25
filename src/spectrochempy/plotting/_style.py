@@ -514,7 +514,11 @@ def resolve_stack_colors(
 
     if palette is not None:
         if palette == "continuous":
-            cmap = plt.get_cmap(prefs.colormap_sequential)
+            style_cmap = mpl.rcParams.get("image.cmap")
+            if style_cmap is not None and style_cmap != _MPL_DEFAULT_IMAGE_CMAP:
+                cmap = plt.get_cmap(style_cmap)
+            else:
+                cmap = plt.get_cmap(prefs.colormap_sequential)
             colors_data = cmap(np.linspace(0, 1, n))
             if contrast_safe and geometry in ("line", "contour"):
                 background_rgb = (1.0, 1.0, 1.0)
@@ -562,7 +566,11 @@ def resolve_stack_colors(
         )
         return list(cmap.colors), True, None
 
-    cmap = plt.get_cmap(prefs.colormap_sequential)
+    style_cmap = mpl.rcParams.get("image.cmap")
+    if style_cmap is not None and style_cmap != _MPL_DEFAULT_IMAGE_CMAP:
+        cmap = plt.get_cmap(style_cmap)
+    else:
+        cmap = plt.get_cmap(prefs.colormap_sequential)
     colors_data = cmap(np.linspace(0, 1, n))
 
     if contrast_safe and geometry in ("line", "contour"):
