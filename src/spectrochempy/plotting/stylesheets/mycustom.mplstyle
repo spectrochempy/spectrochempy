@@ -115,7 +115,7 @@ figure.constrained_layout.hspace         : 0.02
 figure.constrained_layout.use            : False
 figure.constrained_layout.w_pad          : 0.04167
 figure.constrained_layout.wspace         : 0.02
-figure.dpi                               : 100.0
+figure.dpi                               : 96.0
 figure.edgecolor                         : white
 figure.facecolor                         : white
 figure.figsize                           : 6.4, 4.8
@@ -328,11 +328,11 @@ ytick.right                              : False
 ##
 ## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
 ##
-##@colorbar                              : True
+##@colorbar                              : None
 ##@show_projections                      : False
 ##@show_projection_x                     : False
 ##@show_projection_y                     : False
-##@colormap                              : gray
+##@colormap                              : auto
 ##@max_lines_in_stack                    : 1000
 ##@number_of_x_labels                    : 5
 ##@number_of_y_labels                    : 5

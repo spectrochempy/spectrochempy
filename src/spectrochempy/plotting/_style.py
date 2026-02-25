@@ -451,20 +451,24 @@ def resolve_stack_colors(
     geometry="line",
     contrast_safe=True,
     min_contrast=1.5,
-    default_sequential="viridis",
     default_categorical_small="tab10",
     default_categorical_large="tab20",
     categorical_threshold=10,
+    prefs=None,
 ):
     """
-    Resolve colors for stack plot with auto-detection.
+    Resolve colors for stack plot based on semantic detection.
+
+    This function delegates ALL detection logic to detect_stack_semantics().
+    No local heuristics for monotonicity, integer sequences, or style inspection.
 
     Parameters
     ----------
     dataset : NDDataset
         The 2D dataset being plotted.
     palette : str or list, optional
-        If None: auto-detect based on dataset characteristics.
+        If provided: use explicitly (respects user choice).
+        If None: auto-detect using detect_stack_semantics().
         If str:
             - "continuous": force continuous colormap
             - "categorical": force categorical colors
@@ -478,14 +482,14 @@ def resolve_stack_colors(
         Whether to apply contrast trimming.
     min_contrast : float, optional, default: 1.5
         Minimum contrast ratio for trimming.
-    default_sequential : str, optional
-        Default colormap for sequential data. Default: "viridis".
     default_categorical_small : str, optional
         Default colormap for categorical with n <= threshold. Default: "tab10".
     default_categorical_large : str, optional
         Default colormap for categorical with n > threshold. Default: "tab20".
     categorical_threshold : int, optional
         Threshold for small vs large categorical. Default: 10.
+    prefs : object, optional
+        Preferences object. If None, will be fetched from spectrochempy.
 
     Returns
     -------
@@ -500,18 +504,17 @@ def resolve_stack_colors(
     from matplotlib.cm import ScalarMappable
     from matplotlib.colors import Normalize
 
+    if prefs is None:
+        from spectrochempy.application.preferences import preferences
+
+        prefs = preferences
+
     if n is None:
         n = dataset.shape[-2]
 
-    # Check for mpl style prop_cycle as fallback (must be read inside style context)
-    # This provides colors when no explicit palette is provided
-    _MPL_DEFAULT_PROP_CYCLE = mpl.rcParamsDefault["axes.prop_cycle"]
-    current_cycle = mpl.rcParams["axes.prop_cycle"]
-    mpl_style_has_custom_cycle = current_cycle != _MPL_DEFAULT_PROP_CYCLE
-
     if palette is not None:
         if palette == "continuous":
-            cmap = plt.get_cmap(default_sequential)
+            cmap = plt.get_cmap(prefs.colormap_sequential)
             colors_data = cmap(np.linspace(0, 1, n))
             if contrast_safe and geometry in ("line", "contour"):
                 background_rgb = (1.0, 1.0, 1.0)
@@ -544,13 +547,11 @@ def resolve_stack_colors(
     semantic = detect_stack_semantics(dataset)
 
     if semantic == "categorical":
-        # Use mpl style prop_cycle if available, otherwise use categorical colormap
-        if mpl_style_has_custom_cycle:
-            # Extract colors from the prop_cycle
+        _MPL_DEFAULT_PROP_CYCLE = mpl.rcParamsDefault["axes.prop_cycle"]
+        current_cycle = mpl.rcParams["axes.prop_cycle"]
+        if current_cycle != _MPL_DEFAULT_PROP_CYCLE:
             cycle_colors = [c["color"] for c in current_cycle]
-            colors = []
-            for i in range(n):
-                colors.append(cycle_colors[i % len(cycle_colors)])
+            colors = [cycle_colors[i % len(cycle_colors)] for i in range(n)]
             return colors, True, None
 
         cmap = _get_categorical_cmap(
@@ -561,18 +562,7 @@ def resolve_stack_colors(
         )
         return list(cmap.colors), True, None
 
-    # For continuous, check if mpl style prop_cycle should be used
-    if mpl_style_has_custom_cycle:
-        # Extract colors from the prop_cycle for continuous line coloring
-        cycle_colors = [c["color"] for c in current_cycle]
-        colors = []
-        for i in range(n):
-            colors.append(cycle_colors[i % len(cycle_colors)])
-        # Return as continuous colors (not categorical)
-        norm = Normalize(vmin=0, vmax=n - 1)
-        return colors, False, None
-
-    cmap = plt.get_cmap(default_sequential)
+    cmap = plt.get_cmap(prefs.colormap_sequential)
     colors_data = cmap(np.linspace(0, 1, n))
 
     if contrast_safe and geometry in ("line", "contour"):
@@ -599,11 +589,10 @@ def resolve_colormap(
     n=None,
     geometry=None,
     dataset=None,
-    default_sequential="viridis",
-    default_diverging="RdBu_r",
     default_categorical_small="tab10",
     default_categorical_large="tab20",
     categorical_threshold=10,
+    prefs=None,
 ):
     """
     Unified colormap resolver with semantic color system.
@@ -648,16 +637,14 @@ def resolve_colormap(
         Plot geometry: "line", "contour", "image", "surface".
     dataset : NDDataset, optional
         Dataset for stack semantic detection.
-    default_sequential : str, optional
-        Default colormap for sequential data. Default: "viridis".
-    default_diverging : str, optional
-        Default colormap for diverging data. Default: "RdBu_r".
     default_categorical_small : str, optional
         Default colormap for categorical with n <= threshold. Default: "tab10".
     default_categorical_large : str, optional
         Default colormap for categorical with n > threshold. Default: "tab20".
     categorical_threshold : int, optional
         Threshold for small vs large categorical. Default: 10.
+    prefs : object, optional
+        Preferences object. If None, will be fetched from spectrochempy.
 
     Returns
     -------
@@ -668,12 +655,17 @@ def resolve_colormap(
     from matplotlib.colors import Normalize
     from matplotlib.colors import TwoSlopeNorm
 
+    if prefs is None:
+        from spectrochempy.application.preferences import preferences
+
+        prefs = preferences
+
     if background_rgb is None:
         background_rgb = (1.0, 1.0, 1.0)
 
     if norm is not None:
         if cmap is None:
-            cmap = plt.get_cmap(default_sequential)
+            cmap = plt.get_cmap(prefs.colormap_sequential)
         elif isinstance(cmap, str):
             cmap = plt.get_cmap(cmap)
         return cmap, norm
@@ -734,7 +726,7 @@ def resolve_colormap(
             use_diverging = False
 
     if use_diverging:
-        cmap = plt.get_cmap(default_diverging)
+        cmap = plt.get_cmap(prefs.colormap_diverging)
         if data is not None:
             vmin = np.nanmin(data)
             vmax = np.nanmax(data)
@@ -754,7 +746,7 @@ def resolve_colormap(
         else:
             norm = Normalize(vmin=-1, vmax=1)
     else:
-        cmap = plt.get_cmap(default_sequential)
+        cmap = plt.get_cmap(prefs.colormap_sequential)
         if data is not None:
             vmin = np.nanmin(data)
             vmax = np.nanmax(data)
@@ -786,8 +778,6 @@ def resolve_2d_colormap(
     background_rgb=None,
     geometry=None,
     diverging_margin=0.05,
-    default_sequential="viridis",
-    default_diverging="RdBu_r",
     prefs=None,
 ):
     """
@@ -840,13 +830,11 @@ def resolve_2d_colormap(
         Plot geometry: "line", "contour", "image", "surface".
     diverging_margin : float, optional, default: 0.05
         Minimum ratio threshold for diverging auto-detection.
-    default_sequential : str, optional
-        Default colormap for sequential data. Default: "viridis".
-    default_diverging : str, optional
-        Default colormap for diverging data. Default: "RdBu_r".
     prefs : object, optional
-        Preferences object with colormap_categorical_small, colormap_categorical_large,
-        and colormap_categorical_threshold attributes.
+        Preferences object with colormap, colormap_sequential, colormap_diverging,
+        colormap_categorical_small, colormap_categorical_large, and
+        colormap_categorical_threshold attributes. If None, will be fetched from
+        spectrochempy.application.preferences.
 
     Returns
     -------
@@ -857,12 +845,17 @@ def resolve_2d_colormap(
     from matplotlib.colors import Normalize
     from matplotlib.colors import TwoSlopeNorm
 
+    if prefs is None:
+        from spectrochempy.application.preferences import preferences
+
+        prefs = preferences
+
     if background_rgb is None:
         background_rgb = (1.0, 1.0, 1.0)
 
     if norm is not None:
         if cmap is None:
-            cmap = plt.get_cmap(default_sequential)
+            cmap = plt.get_cmap(prefs.colormap_sequential)
         elif isinstance(cmap, str):
             cmap = plt.get_cmap(cmap)
         return cmap, norm
@@ -947,7 +940,7 @@ def resolve_2d_colormap(
         use_diverging = detect_diverging(data, diverging_margin)
 
     if use_diverging:
-        cmap = plt.get_cmap(default_diverging)
+        cmap = plt.get_cmap(prefs.colormap_diverging)
         if center is None:
             center_value = 0
         elif center == "auto":
@@ -962,7 +955,7 @@ def resolve_2d_colormap(
 
         norm = TwoSlopeNorm(vmin=data_min, vcenter=center_value, vmax=data_max)
     else:
-        cmap = plt.get_cmap(default_sequential)
+        cmap = plt.get_cmap(prefs.colormap_sequential)
         norm = Normalize(vmin=data_min, vmax=data_max)
 
     should_trim = contrast_safe and geometry in ("line", "contour")

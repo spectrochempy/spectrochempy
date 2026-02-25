@@ -127,7 +127,8 @@ _ = ds.plot(cmap="plasma")
 # You can change the visual appearance using styles:
 
 # %%
-_ = ds.plot(style="grayscale")
+scp.preferences.style = "grayscale"
+_ = ds.plot()
 
 # %% [markdown]
 # Styles affect fonts, grid appearance, backgrounds, and (in auto mode) colormap defaults.

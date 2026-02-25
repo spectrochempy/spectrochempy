@@ -1396,7 +1396,9 @@ def plot_2D(dataset, method=None, **kwargs):
             if not kwargs.get("imag", False):
                 zdata = new.real.masked_data
             else:
-                zdata = new.imag.masked_data  # TODO: quaternion case (3 imag.components)
+                zdata = (
+                    new.imag.masked_data
+                )  # TODO: quaternion case (3 imag.components)
 
             zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
@@ -1483,9 +1485,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
             # For image, map, surface methods, use the unified colormap resolution
             if method in ["map", "image", "contour", "contourf", "surface"]:
-                geometry = (
-                    method  # "map" -> "contour", "image" -> "image", "surface" -> "surface"
-                )
+                geometry = method  # "map" -> "contour", "image" -> "image", "surface" -> "surface"
                 # Style context is already active from the outer wrapper - no need for nested context
                 cmap, norm = resolve_2d_colormap(
                     zdata,
@@ -1579,7 +1579,9 @@ def plot_2D(dataset, method=None, **kwargs):
                     kwargs["nlevels"] = 500
                     if not hasattr(new, "clevels") or new.clevels is None:
                         new.clevels = _get_clevels(zdata, prefs, **kwargs)
-                    mappable = ax.contourf(xdata, ydata, zdata, new.clevels, alpha=alpha)
+                    mappable = ax.contourf(
+                        xdata, ydata, zdata, new.clevels, alpha=alpha
+                    )
                     mappable.set_cmap(cmap)
                     mappable.set_norm(norm)
 
@@ -1599,7 +1601,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
                     for i in ydata:
                         for j in xdata:
-                            (li,) = ax.plot(j, i, lw=lw, marker="o", markersize=markersize)
+                            (li,) = ax.plot(
+                                j, i, lw=lw, marker="o", markersize=markersize
+                            )
                             li.set_color(scalarMap.to_rgba(zdata[i - 1, j - 1]))
 
                 else:
@@ -1687,6 +1691,7 @@ def plot_2D(dataset, method=None, **kwargs):
                         geometry="line",
                         contrast_safe=contrast_safe,
                         min_contrast=min_contrast,
+                        prefs=prefs,
                     )
                     if is_categorical:
                         # Categorical: use colors directly, no mappable

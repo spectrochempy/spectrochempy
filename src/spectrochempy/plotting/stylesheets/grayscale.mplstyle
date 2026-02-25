@@ -33,11 +33,13 @@ font.family: sans-serif
 ##
 ## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
 ##
-##@colorbar                              : True
+##@colorbar                              : auto
+##@colormap                              : auto
+##@colormap_sequential                   : gray
+##@colormap_diverging                    : gray
 ##@show_projections                      : False
 ##@show_projection_x                     : False
 ##@show_projection_y                     : False
-##@colormap                              : gray
 ##@max_lines_in_stack                    : 1000
 ##@number_of_x_labels                    : 5
 ##@number_of_y_labels                    : 5
