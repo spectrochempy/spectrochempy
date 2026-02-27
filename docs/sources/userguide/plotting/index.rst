@@ -78,7 +78,6 @@ The following pages introduce plotting progressively:
    :maxdepth: 2
 
    overview
-   plotting
    customization
    preferences
    plot_types

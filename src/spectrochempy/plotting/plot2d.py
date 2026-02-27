@@ -30,6 +30,7 @@ from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.utils.mplutils import make_label
+from spectrochempy.application.application import info_
 
 
 # ======================================================================================
@@ -91,7 +92,6 @@ def _handle_3d_aspect(ax, dataset, **kwargs):
     **kwargs
         Additional keyword arguments including equal_aspect.
     """
-    import warnings as _warn_module
 
     equal_aspect = kwargs.get("equal_aspect", "xy")
 
@@ -104,11 +104,7 @@ def _handle_3d_aspect(ax, dataset, **kwargs):
         z_data = dataset.masked_data
 
         if x_coord is None or y_coord is None or z_data is None:
-            _warn_module.warn(
-                "equal_aspect: Cannot determine axis ranges. Using default aspect.",
-                UserWarning,
-                stacklevel=2,
-            )
+            info_("equal_aspect: Cannot determine axis ranges. Using default aspect.")
             return
 
         x_data = x_coord.data
@@ -125,11 +121,7 @@ def _handle_3d_aspect(ax, dataset, **kwargs):
 
         if equal_aspect == "xy":
             if x_units is not None and y_units is not None and x_units != y_units:
-                _warn_module.warn(
-                    "equal_aspect='xy' ignored: X and Y units are incompatible.",
-                    UserWarning,
-                    stacklevel=2,
-                )
+                info_("equal_aspect='xy' ignored: X and Y units are incompatible.")
                 return
 
             if max_range > 0:
@@ -144,11 +136,9 @@ def _handle_3d_aspect(ax, dataset, **kwargs):
                 has_same_units = x_units is None and y_units is None
 
             if not has_same_units:
-                _warn_module.warn(
+                info_(
                     "equal_aspect='xyz' ignored: X, Y, Z units are not all compatible. "
-                    "Falling back to 'xy'.",
-                    UserWarning,
-                    stacklevel=2,
+                    "Falling back to 'xy'."
                 )
                 if max_range > 0:
                     ax.set_box_aspect(
@@ -163,11 +153,7 @@ def _handle_3d_aspect(ax, dataset, **kwargs):
             ax.set_box_aspect((1, 1, 1))
 
     except Exception as e:
-        _warn_module.warn(
-            f"equal_aspect: Could not set aspect ratio ({e}). Using default.",
-            UserWarning,
-            stacklevel=2,
-        )
+        info_(f"equal_aspect: Could not set aspect ratio ({e}). Using default.")
 
 
 # ======================================================================================
@@ -1176,8 +1162,10 @@ def plot_2D(dataset, method=None, **kwargs):
             # often we do need to plot only data when plotting on top of a previous plot
             data_only = kwargs.get("data_only", False)
 
-            # Extract colorbar kwarg - default to False, do not pass to rendering
-            colorbar = kwargs.pop("colorbar", False)
+            # Extract colorbar kwarg - default to None (auto), use preferences
+            colorbar = kwargs.pop("colorbar", None)
+            if colorbar is None:
+                colorbar = prefs.colorbar
 
             # Get the data to plot
             # ---------------------------------------------------------------
@@ -1832,30 +1820,40 @@ def plot_2D(dataset, method=None, **kwargs):
                 ax.set_yticks([])
 
             # Create colorbar if requested (L3 responsibility)
-            # For map/image/surface: always show colorbar if requested
-            # For stack: only show if continuous colormap (not categorical)
-            if colorbar and mappable is not None:
-                fig = ax.figure
-                if method == "stack":
-                    # Stack: only show colorbar for continuous, not categorical
-                    # In stack mode, color represents y-coordinate (not intensity)
+            # Colorbar policy:
+            # - True: always show
+            # - False: never show
+            # - None (auto): show for continuous, not for categorical
+            _show_colorbar = False
+            if colorbar is True:
+                _show_colorbar = True
+            elif colorbar is None:  # auto
+                if method in ["map", "image", "contour", "contourf", "surface"]:
+                    _show_colorbar = True
+                elif method in ["stack", "lines"]:
                     if not is_categorical:
-                        if not hasattr(ax, "_scp_colorbar"):
-                            # Semantic label: color represents y coordinate
-                            y_coord_label = make_label(y, new.dims[-2])
-                            cb = fig.colorbar(
-                                mappable,
-                                ax=ax,
-                                location="right",
-                                pad=0.02,
-                                fraction=0.05,
-                                aspect=30,
-                            )
-                            cb.set_label(y_coord_label)
-                            _apply_colorbar_tick_policy(cb, norm, vmin=vmin, vmax=vmax)
-                            ax._scp_colorbar = cb
+                        _show_colorbar = True
+
+            if _show_colorbar and mappable is not None:
+                fig = ax.figure
+                if method in ["stack", "lines"]:
+                    # Stack: color represents y-coordinate (not intensity)
+                    if not hasattr(ax, "_scp_colorbar"):
+                        # Semantic label: color represents y coordinate
+                        y_coord_label = make_label(y, new.dims[-2])
+                        cb = fig.colorbar(
+                            mappable,
+                            ax=ax,
+                            location="right",
+                            pad=0.02,
+                            fraction=0.05,
+                            aspect=30,
+                        )
+                        cb.set_label(y_coord_label)
+                        _apply_colorbar_tick_policy(cb, norm, vmin=vmin, vmax=vmax)
+                        ax._scp_colorbar = cb
                 elif method in ["map", "image", "contour", "contourf", "surface"]:
-                    # 2D plots: show colorbar (intensity)
+                    # 2D plots: color represents intensity (z)
                     if not hasattr(ax, "_scp_colorbar"):
                         # Use continuous colorbar mappable if available (for contour plots)
                         cb_mappable = locals().get("colorbar_mappable", mappable)
@@ -1886,12 +1884,8 @@ def plot_2D(dataset, method=None, **kwargs):
                 if _can_enforce_equal_aspect(new):
                     ax.set_aspect("equal", adjustable="box")
                 else:
-                    import warnings as _warn_module
-
-                    _warn_module.warn(
-                        "equal_aspect=True ignored: X and Y units are incompatible or missing.",
-                        UserWarning,
-                        stacklevel=2,
+                    info_(
+                        "equal_aspect=True ignored: X and Y units are incompatible or missing."
                     )
 
             # Handle equal_aspect for 3D surface plots

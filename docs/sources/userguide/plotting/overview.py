@@ -96,7 +96,7 @@ ds_neg = ds - ds.mean()
 ds_neg.plot_image()
 
 # %% [markdown]
-# As expected,the default diverging colormap has been chosen behavior. But this can be overriden using:
+# As expected,the default diverging colormap has been chosen . But this can be overriden using:
 
 ds_neg.plot_image(cmap_mode='sequential')   # forces sequential colormap even for data with negative values
 
@@ -121,7 +121,7 @@ ds_neg.plot_image(diverging_margin=0.5)
 # a sequential or diverging colormap is used/
 
 # %%
-_ = ds.plot(colorbar='auto')  # shows colorbar whenever applicable
+_ = ds.plot_contour(colorbar='auto')  # shows colorbar whenever applicable
 
 # %% [markdown]
 # ## Changing the Colormap
@@ -129,14 +129,14 @@ _ = ds.plot(colorbar='auto')  # shows colorbar whenever applicable
 # You can change colors per plot:
 
 # %%
-_ = ds.plot(cmap="plasma")
+_ = ds.plot(cmap="plasma")  # note that palette="plasma" would also work for line plots
 
 # %% [markdown]
 # ## Colormap Precedence
 #
 # When choosing a colormap, SpectroChemPy follows this priority order:
 #
-# 1. **Explicit `cmap` kwarg** (i.e. `cmap=XXX` passed in plot()— highest priority
+# 1. **Explicit `cmap` kwarg** (i.e. `cmap=XXX` passed in plot() — highest priority
 # 2. **Preferences colormap** — if set and not "auto" (see preferences documentation)
 # 3. **Matplotlib style** — if the style sets `image.cmap` and prefs.colormap is "auto" (see styles documentation)
 # 4. **Default preferences** — `prefs.colormap_sequential` or `prefs.colormap_diverging` (see preferences documentation)
@@ -153,11 +153,12 @@ _ = ds.plot(cmap="plasma")
 # You can change the visual appearance using styles:
 
 # %%
-scp.preferences.style = "grayscale"
-_ = ds.plot()
+_ = ds.plot(style='grayscale')
 
 # %% [markdown]
-# Styles affect fonts, grid appearance, backgrounds, and (in auto mode) colormap defaults.
+# Styles can affect fonts, grid appearance, backgrounds, and (in auto mode) colormap defaults. When passes in a
+# `plot()` function the change is on a ped-plot basis. You can also set a style globally and persistently using
+# `scp.preferences.style`, which will affect all subsequent plots.
 
 # %% [markdown]
 # ## The Mental Model
@@ -165,7 +166,7 @@ _ = ds.plot()
 # In practice:
 #
 # - `ds.plot()` just works.
-# - `cmap=` changes colors.
+# - `cmap=` (or `palette=` for lines) changes colors.
 # - `colorbar=` controls the colorbar.
 # - `style=` changes the overall appearance.
 # - `scp.preferences` changes defaults persistently.
