@@ -949,19 +949,9 @@ def resolve_2d_colormap(
 
     if use_diverging:
         cmap = plt.get_cmap(prefs.colormap_diverging)
-        if center is None:
-            center_value = 0
-        elif center == "auto":
-            center_value = 0 if data_min < 0 < data_max else (data_min + data_max) / 2
-        else:
-            center_value = center
-
-        if center_value <= data_min:
-            center_value = data_min + (data_max - data_min) / 2
-        if center_value >= data_max:
-            center_value = data_min + (data_max - data_min) / 2
-
-        norm = TwoSlopeNorm(vmin=data_min, vcenter=center_value, vmax=data_max)
+        # Use symmetric normalization around 0 for scientific standard
+        maxabs = max(abs(data_min), abs(data_max))
+        norm = TwoSlopeNorm(vmin=-maxabs, vcenter=0.0, vmax=+maxabs)
     else:
         cmap = plt.get_cmap(prefs.colormap_sequential)
         norm = Normalize(vmin=data_min, vmax=data_max)

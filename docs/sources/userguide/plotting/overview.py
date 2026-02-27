@@ -92,13 +92,13 @@ _ = ds.plot_lines(palette='categorical')
 # %% [markdown]
 # For images and contours, you can also override the default sequential/diverging colormap behavior. Lets first have a
 # a dataset with both positive and negative values:
-ds_neg = ds - ds.mean()
-ds_neg.plot_image(colorbar=True)
+# ds_neg = ds - ds.mean()
+# ds_neg.plot_image(colorbar=True)
 
 # %% [markdown]
 # As expected,the default diverging colormap has been chosen . But this can be overriden using:
-
-ds_neg.plot_image(cmap_mode='sequential')   # forces sequential colormap even for data with negative values
+#
+# ds_neg.plot_image(cmap_mode='sequential')   # forces sequential colormap even for data with negative values
 
 # %% [markdown]
 # The switch between sequential and diverging colormaps is based on the actual data values, with a `diverging_margin`
@@ -112,7 +112,7 @@ ds_neg.plot_image(cmap_mode='sequential')   # forces sequential colormap even fo
 # You can adjust this threshold as needed. For example, in the above example, setting `diverging_margin=0.5` will
 # allows for a much larger proportion of negative values (up to 50% of the data range) before switching to a diverging
 # colormap, which is why the sequential colormap is used in this case:
-ds_neg.plot_image(diverging_margin=0.5)
+# ds_neg.plot_image(diverging_margin=0.5)
 
 # %% [markdown]
 # ## Colorbars

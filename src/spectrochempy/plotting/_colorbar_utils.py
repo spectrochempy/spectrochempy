@@ -51,9 +51,7 @@ def _apply_colorbar_tick_policy(cbar, norm, vmin=None, vmax=None):
     """
     Apply deterministic tick policy based on norm and data range.
 
-    This function enforces a publication-grade tick strategy:
-    - Diverging norms (TwoSlopeNorm): symmetric ticks around 0
-    - Sequential norms (vmin >= 0): evenly spaced ticks
+    This function lets Matplotlib's locator handle tick generation.
 
     Parameters
     ----------
@@ -68,55 +66,31 @@ def _apply_colorbar_tick_policy(cbar, norm, vmin=None, vmax=None):
 
     Notes
     -----
-    This function uses FixedLocator with deterministic nice ticks.
-    No MaxNLocator, AutoLocator, or update_ticks() are used.
+    This function uses MaxNLocator for automatic tick selection.
     """
-    if vmin is None:
-        vmin = norm.vmin
-    if vmax is None:
-        vmax = norm.vmax
+    from matplotlib.ticker import MaxNLocator, ScalarFormatter
 
-    # Force canvas draw to get accurate geometry
-    fig = cbar.ax.figure
-    fig.canvas.draw()
+    # Get actual normalization limits from the mappable
+    actual_vmin = cbar.mappable.norm.vmin
+    actual_vmax = cbar.mappable.norm.vmax
 
-    # Compute colorbar height in pixels
-    bbox = cbar.ax.get_window_extent()
-    height_px = bbox.height
+    # Override with explicit vmin/vmax if provided
+    if vmin is not None:
+        actual_vmin = vmin
+    if vmax is not None:
+        actual_vmax = vmax
 
-    # Define minimum pixel spacing per tick label
-    MIN_LABEL_SPACING = 22  # px
+    # Set the y-axis limits to match the data range
+    cbar.ax.set_ylim(actual_vmin, actual_vmax)
 
-    # Compute maximum allowed ticks based on height
-    max_ticks = max(3, int(height_px / MIN_LABEL_SPACING))
-    max_ticks = min(max_ticks, 9)
+    # Use MaxNLocator for automatic tick selection
+    locator = MaxNLocator(nbins=9)
+    cbar.ax.yaxis.set_major_locator(locator)
 
-    is_diverging = isinstance(norm, TwoSlopeNorm)
+    # Update ticks to reflect the new locator
+    cbar.update_ticks()
 
-    if is_diverging:
-        maxabs = max(abs(vmin), abs(vmax))
-        raw_step = (2 * maxabs) / (max_ticks - 1)
-        step = _nice_step(raw_step)
-        maxabs_rounded = np.ceil(maxabs / step) * step
-
-        ticks = np.arange(-maxabs_rounded, maxabs_rounded + step * 0.5, step)
-        ticks = np.unique(np.round(ticks, decimals=10))
-    else:
-        if vmin == vmax:
-            ticks = np.array([vmin])
-        else:
-            raw_step = (vmax - vmin) / (max_ticks - 1)
-            step = _nice_step(raw_step)
-
-            start = np.floor(vmin / step) * step
-            end = np.ceil(vmax / step) * step
-
-            ticks = np.arange(start, end + step * 0.5, step)
-            ticks = np.unique(np.round(ticks, decimals=10))
-            ticks = ticks[(ticks >= vmin) & (ticks <= vmax)]
-
-    cbar.locator = FixedLocator(ticks)
-
+    # Set formatter for nice scientific notation
     formatter = ScalarFormatter(useMathText=True)
     formatter.set_powerlimits((-3, 4))
     formatter.set_scientific(False)
