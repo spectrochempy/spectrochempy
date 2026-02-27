@@ -1614,7 +1614,13 @@ def plot_2D(dataset, method=None, **kwargs):
                 # ----------
                 # now plot the collection of lines
                 # map colors - always use y-coordinate range (not data intensity)
-                vmin, vmax = ylim
+                # Compute normalization from y-coordinate data, not axis limits
+                # Ensure vmin <= vmax regardless of ylim order or axis reversal
+                y_coord_data = y.data if y is not None else np.arange(ysize)
+                y_coord_min = np.nanmin(y_coord_data)
+                y_coord_max = np.nanmax(y_coord_data)
+                vmin = min(y_coord_min, y_coord_max)
+                vmax = max(y_coord_min, y_coord_max)
                 norm = Normalize(vmin=vmin, vmax=vmax)
 
                 # Initialize is_categorical (default True - no colorbar unless proven continuous)
