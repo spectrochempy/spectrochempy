@@ -1897,6 +1897,15 @@ def plot_2D(dataset, method=None, **kwargs):
             if method == "surface":
                 _handle_3d_aspect(ax, new, **kwargs)
 
+            # Apply final axis limits (user overrides)
+            # This must be after all rendering and colorbar creation
+            user_xlim = kwargs.get("xlim")
+            user_ylim = kwargs.get("ylim")
+            if user_xlim is not None:
+                ax.set_xlim(user_xlim)
+            if user_ylim is not None:
+                ax.set_ylim(user_ylim)
+
             new._plot_resume(dataset, **kwargs)
 
             return ax
