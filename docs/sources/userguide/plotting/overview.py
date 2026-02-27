@@ -93,7 +93,7 @@ _ = ds.plot_lines(palette='categorical')
 # For images and contours, you can also override the default sequential/diverging colormap behavior. Lets first have a
 # a dataset with both positive and negative values:
 ds_neg = ds - ds.mean()
-ds_neg.plot_image()
+ds_neg.plot_image(colorbar=True)
 
 # %% [markdown]
 # As expected,the default diverging colormap has been chosen . But this can be overriden using:

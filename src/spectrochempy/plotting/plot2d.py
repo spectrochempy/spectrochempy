@@ -1162,10 +1162,9 @@ def plot_2D(dataset, method=None, **kwargs):
             # often we do need to plot only data when plotting on top of a previous plot
             data_only = kwargs.get("data_only", False)
 
-            # Extract colorbar kwarg - default to None (auto), use preferences
-            colorbar = kwargs.pop("colorbar", None)
-            if colorbar is None:
-                colorbar = prefs.colorbar
+            # Extract colorbar kwarg - default to False
+            # "auto" triggers auto-detection based on method and data type
+            colorbar = kwargs.pop("colorbar", False)
 
             # Get the data to plot
             # ---------------------------------------------------------------
@@ -1823,11 +1822,11 @@ def plot_2D(dataset, method=None, **kwargs):
             # Colorbar policy:
             # - True: always show
             # - False: never show
-            # - None (auto): show for continuous, not for categorical
+            # - "auto": show for continuous, not for categorical
             _show_colorbar = False
             if colorbar is True:
                 _show_colorbar = True
-            elif colorbar is None:  # auto
+            elif colorbar == "auto":
                 if method in ["map", "image", "contour", "contourf", "surface"]:
                     _show_colorbar = True
                 elif method in ["stack", "lines"]:
