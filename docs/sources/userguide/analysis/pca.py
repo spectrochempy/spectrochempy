@@ -87,14 +87,14 @@ _ = X.plot()
 # coordinates:
 # %%
 X.title = "absorbance"
-X.y = scp.Coord.arange(51, title="elution time", labels=[str(i) for i in range(51)])
-X.x = scp.Coord.arange(96, title="wavelength")
+X.set_coordset(None, None)
+X.set_coordtitles(y="elution time", x="wavelength")
 
 # %% [markdown]
 # From now on, these names will be taken into account by Scpy in the plots as well as
 # in the analysis treatments (PCA, EFA, MCR-ALS ...). For instance to plot X as a surface:
 # %%
-surf = X.plot_surface(linewidth=0.0, ccount=100, figsize=(10, 5), autolayout=False)
+surf = X.plot_surface(linewidth=0.0)
 
 # %% [markdown]
 # ## Running a PCA
@@ -136,7 +136,7 @@ pca.fit(X)
 # The data of the two last columns are stored in the `PCA.explained_variance_ratio' and
 # `PCA.cumulative_explained_variance' attributes. They can be plotted directly as a scree plot:
 # %%
-_ = pca.screeplot()
+_ = pca.plot_scree()
 
 # %% [markdown]
 # The number of significant PC's is clearly larger or equal to 2. It is, however,
@@ -159,26 +159,18 @@ _ = pca.loadings.plot()
 # reasonably assume that 4 PC are enough to correctly account of the dataset.
 #
 # Another possibility can be a visual comparison of the modeled dataset $\hat{X} = S L^T $,
-# the original dataset $X$ and the resitua,s $E = X - \hat{X}$. This can be done using
-# the `plotmerit()` method which plots both $X$, $\hat{X}$ (in dotted lines) and the residuals (in red):
+# the original dataset $X$ and the residuals $E = X - \hat{X}$. This can be done using
+# the `plotmerit()` method which plots both $X$, $\hat{X}$ (in orange) and the residuals (in grey):
 # %%
 pca = scp.PCA(n_components=4)
 pca.fit(X)
-pca.plotmerit()
+pca.plot_merit()
 
-# %% [markdown]
-# The number of spectra can be limited by the `nb_traces` attributes:
-# %%
-pca.plotmerit(nb_traces=5)
 
-# %% [markdown]
-# and if needed both datasets can be shifted using the `offset` attribute (in percet of the fullscale):
-# %%
-pca.plotmerit(nb_traces=5, offset=100.0)
 
 # %% [markdown]
 # Score plots can be used to see the projection of each observation/spectrum
 # onto the span of the principal components:
 # %%
-_ = pca.scoreplot(1, 2, show_labels=True, labels_every=5)
-_ = pca.scoreplot(1, 2, 3)
+_ = pca.plot_score()
+_ = pca.plot_score(components=(1, 2, 3))

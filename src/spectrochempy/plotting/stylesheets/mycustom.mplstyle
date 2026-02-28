@@ -115,7 +115,7 @@ figure.constrained_layout.hspace         : 0.02
 figure.constrained_layout.use            : False
 figure.constrained_layout.w_pad          : 0.04167
 figure.constrained_layout.wspace         : 0.02
-figure.dpi                               : 100.0
+figure.dpi                               : 96.0
 figure.edgecolor                         : white
 figure.facecolor                         : white
 figure.figsize                           : 6.4, 4.8

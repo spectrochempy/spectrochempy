@@ -14,7 +14,7 @@ plotmerit:
     including multi-parameter reconstructions.
 """
 
-__all__ = ["plotmerit", "plot_compare"]
+__all__ = ["plot_merit", "plot_compare"]
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -232,7 +232,7 @@ def plot_compare(
 # ======================================================================================
 
 
-def plotmerit(
+def plot_merit(
     analysis_object,
     X=None,
     X_hat=None,

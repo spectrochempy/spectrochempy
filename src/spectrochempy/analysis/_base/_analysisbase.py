@@ -520,7 +520,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Plot methods
     # ----------------------------------------------------------------------------------
     @docprocess.dedent
-    def plotmerit(self, X=None, X_hat=None, **kwargs):
+    def plot_merit(self, X=None, X_hat=None, **kwargs):
         r"""
         Plot the input (`X`), reconstructed (`X_hat`) and residuals.
 
@@ -585,16 +585,16 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Parameters passed to the internal `plot` method of the `X` dataset.
 
         """
-        from spectrochempy.plotting.composite import plotmerit
+        from spectrochempy.plotting.composite import plot_merit
 
-        return plotmerit(
+        return plot_merit(
             analysis_object=self,
             X=X,
             X_hat=X_hat,
             **kwargs,
         )
 
-    docprocess.get_sections(docprocess.dedent(plotmerit.__doc__), base="plotmerit")
+    docprocess.get_sections(docprocess.dedent(plot_merit.__doc__), base="plot_merit")
 
     @property
     def Y(self):

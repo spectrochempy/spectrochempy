@@ -143,272 +143,6 @@ def _apply_y_axis_policy(ax, coord, default_ylim, kwargs):
     return y_reverse_explicit or y_reverse_auto
 
 
-def _plot_waterfall_3d(new, prefs, **kwargs):
-    """
-    Plot a 2D dataset as a true 3D waterfall plot.
-
-    Parameters
-    ----------
-    new : NDDataset
-        The 2D dataset to plot.
-    prefs : Preferences
-        Plot preferences.
-    **kwargs
-        Additional keyword arguments:
-        - ax: Axes object (optional)
-        - fill_mode: None | "white" | "match" | "alpha" | "uniform"
-          Default: None (lines only, recommended scientific default)
-        - fill_alpha: float (default 0.6)
-        - azim: float (default 25.0)
-        - elev: float (default -60.0)
-        - palette: color palette
-        - linewidth: float
-        - alpha: float
-        - x_reverse: bool
-        - y_reverse: bool
-        - zlim: tuple
-        - title: str
-        - xlabel: str
-        - ylabel: str
-        - zlabel: str
-
-    Returns
-    -------
-    ax : Axes3D
-        The 3D axes containing the plot.
-    """
-    from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
-
-    lazy_ensure_mpl_config()
-
-    # Handle colorbar kwarg - not supported for waterfall
-    colorbar = kwargs.get("colorbar")
-    if colorbar is not None and colorbar is not False:
-        import warnings
-
-        warnings.warn("colorbar ignored for waterfall")
-
-    # Extract data
-    dimx = new.dims[-1]
-    x = getattr(new, dimx)
-    if x is not None and x._implements("CoordSet"):
-        x = x.default
-    xdata = x.data if x is not None and not x.is_empty else np.arange(new.shape[-1])
-
-    dimy = new.dims[-2]
-    y = getattr(new, dimy)
-    if y is not None and y._implements("CoordSet"):
-        y = y.default
-    ydata = y.data if y is not None and not y.is_empty else np.arange(new.shape[-2])
-
-    zdata = new.real.masked_data
-    n_spectra = zdata.shape[0]
-
-    # Get kwargs
-    fill_mode = kwargs.get("fill_mode", None)
-    fill_alpha = kwargs.get("fill_alpha", 0.6)
-
-    # Waterfall-specific camera defaults (independent of other 3D plots)
-    DEFAULT_WATERFALL_ELEV = 25
-    DEFAULT_WATERFALL_AZIM = -60
-
-    azim = kwargs.get("azim", DEFAULT_WATERFALL_AZIM)
-    elev = kwargs.get("elev", DEFAULT_WATERFALL_ELEV)
-
-    linewidth = kwargs.get("linewidth", prefs.lines_linewidth)
-    alpha = kwargs.get("alpha", None)
-
-    # Create figure and axes using unified get_figure infrastructure
-    from spectrochempy.utils.mplutils import get_figure
-
-    user_ax = kwargs.get("ax")
-    if user_ax is not None:
-        if hasattr(user_ax, "plot3D") or user_ax.name == "3d":
-            fig = user_ax.figure
-            ax = user_ax
-        else:
-            fig = user_ax.figure
-            fig.delaxes(user_ax)
-            ax = fig.add_subplot(111, projection="3d")
-    else:
-        # Filter out waterfall-specific kwargs that get_figure doesn't understand
-        fig_kwargs = {
-            k: v
-            for k, v in kwargs.items()
-            if k in ("figsize", "dpi", "facecolor", "edgecolor", "frameon")
-        }
-        fig = get_figure(**fig_kwargs)
-        ax = fig.add_subplot(111, projection="3d")
-
-    # Resolve colors using stack semantics
-    palette = kwargs.get("palette", None)
-    colors, is_categorical, mappable = resolve_stack_colors(
-        new,
-        palette=palette,
-        n=n_spectra,
-        geometry="line",
-        prefs=prefs,
-    )
-
-    # Get z limit - handle masked arrays properly
-    zlim = kwargs.get("zlim")
-    if zlim is None:
-        zmin = np.nanmin(zdata)
-        zmax = np.nanmax(zdata)
-        # Handle case where all values are masked (all NaN)
-        if np.isnan(zmin) or np.isnan(zmax):
-            zlim = (0.0, 1.0)
-        else:
-            zlim = (zmin, zmax)
-
-    baseline = np.nanmin(zdata)
-    if np.isnan(baseline):
-        baseline = 0.0
-
-    # Plot each spectrum
-    for i in range(n_spectra):
-        # Get color for this spectrum - use proper color resolution
-        if is_categorical:
-            if not colors:
-                raise ValueError("Categorical palette resolved to empty color list.")
-            line_color = colors[i % len(colors)]
-        else:
-            if mappable is not None:
-                # For continuous, get full RGBA tuple
-                line_color = mappable.to_rgba(i)
-            else:
-                line_color = "k"
-
-        # Enforce strict RGBA normalization to prevent silent fallback to prop_cycle
-        from matplotlib.colors import to_rgba, is_color_like
-
-        if not is_color_like(line_color):
-            raise ValueError(
-                f"Invalid color resolved for waterfall line {i}: {line_color}"
-            )
-
-        line_color = to_rgba(line_color)
-
-        y_val = ydata[i]
-        z_vals = zdata[i, :]
-
-        # Handle masked arrays - convert to nan
-        if np.ma.isMaskedArray(z_vals):
-            z_vals = z_vals.filled(np.nan)
-        else:
-            z_vals = np.asarray(z_vals)
-
-        # Detect contiguous finite segments
-        finite = np.isfinite(z_vals)
-        segments = []
-        start = None
-        for j, ok in enumerate(finite):
-            if ok and start is None:
-                start = j
-            elif not ok and start is not None:
-                segments.append((start, j))
-                start = None
-        if start is not None:
-            segments.append((start, len(z_vals)))
-
-        # If no valid segments, skip this spectrum
-        if not segments:
-            continue
-
-        line_alpha = alpha if alpha is not None else 1.0
-
-        # Process each segment
-        for seg_start, seg_end in segments:
-            x_seg = xdata[seg_start:seg_end]
-            z_seg = z_vals[seg_start:seg_end]
-            y_seg = np.full_like(x_seg, y_val)
-
-            # Create vertices for fill-under polygon
-            if fill_mode is not None:
-                verts = [(x_seg[0], y_val, baseline)]
-                for j in range(len(x_seg)):
-                    verts.append((x_seg[j], y_val, z_seg[j]))
-                verts.append((x_seg[-1], y_val, baseline))
-
-                poly = Poly3DCollection([verts])
-                poly._depthshade = False
-                poly.set_zsort("average")
-
-                if fill_mode == "white":
-                    poly.set_facecolor("white")
-                    poly.set_alpha(fill_alpha)
-                    poly.set_edgecolor("none")
-                elif fill_mode == "match":
-                    poly.set_facecolor(line_color)
-                    poly.set_alpha(fill_alpha)
-                    poly.set_edgecolor("none")
-                elif fill_mode == "alpha":
-                    from matplotlib.colors import to_rgba
-
-                    fc = to_rgba(line_color, fill_alpha)
-                    poly.set_facecolor(fc)
-                    poly.set_edgecolor("none")
-                elif fill_mode == "uniform":
-                    poly.set_facecolor("0.9")
-                    poly.set_alpha(fill_alpha)
-                    poly.set_edgecolor("none")
-
-                ax.add_collection3d(poly)
-
-            # Plot line for this segment
-            lines = ax.plot(
-                x_seg,
-                y_seg,
-                z_seg,
-                color=line_color,
-                linewidth=linewidth,
-                alpha=line_alpha,
-            )
-            for line in lines:
-                line._depthshade = False
-
-    # Set axis limits
-    ax.set_xlim(np.min(xdata), np.max(xdata))
-    ax.set_ylim(np.min(ydata), np.max(ydata))
-    ax.set_zlim(zlim)
-
-    # Set view
-    ax.view_init(elev=elev, azim=azim)
-
-    # Apply axis reversal policies using shared helpers
-    default_xlim = [np.min(xdata), np.max(xdata)]
-    _apply_x_axis_policy(ax, x, default_xlim, kwargs)
-
-    default_ylim = [np.min(ydata), np.max(ydata)]
-    _apply_y_axis_policy(ax, y, default_ylim, kwargs)
-
-    # Set labels
-    xlabel = kwargs.get("xlabel")
-    if not xlabel:
-        xlabel = make_label(x, "x")
-    ax.set_xlabel(xlabel)
-
-    ylabel = kwargs.get("ylabel")
-    if not ylabel:
-        ylabel = make_label(y, "y")
-    ax.set_ylabel(ylabel)
-
-    zlabel = kwargs.get("zlabel")
-    if not zlabel:
-        zlabel = make_label(new, "value")
-    ax.set_zlabel(zlabel)
-
-    # Set title
-    title = kwargs.get("title")
-    if title:
-        ax.set_title(title)
-
-    # Grid
-    ax.grid(False)
-
-    return ax
-
-
 def _handle_3d_aspect(ax, dataset, **kwargs):
     """
     Handle aspect ratio for 3D surface plots.
@@ -1896,8 +1630,23 @@ def plot_2D(dataset, method=None, **kwargs):
                 # Compute normalization from y-coordinate data, not axis limits
                 # Ensure vmin <= vmax regardless of ylim order or axis reversal
                 y_coord_data = y.data if y is not None else np.arange(ysize)
-                y_coord_min = np.nanmin(y_coord_data)
-                y_coord_max = np.nanmax(y_coord_data)
+
+                # Guard against non-numeric y-coordinates (e.g., PCA component labels)
+                y_coord_array = np.asarray(y_coord_data)
+                use_index_fallback = False
+
+                if y_coord_data is None:
+                    use_index_fallback = True
+                elif y_coord_array.dtype == object:
+                    use_index_fallback = True
+                elif not np.issubdtype(y_coord_array.dtype, np.number):
+                    use_index_fallback = True
+
+                if use_index_fallback:
+                    y_coord_array = np.arange(ysize)
+
+                y_coord_min = np.nanmin(y_coord_array)
+                y_coord_max = np.nanmax(y_coord_array)
                 vmin = min(y_coord_min, y_coord_max)
                 vmax = max(y_coord_min, y_coord_max)
                 norm = Normalize(vmin=vmin, vmax=vmax)
@@ -2189,9 +1938,271 @@ def plot_2D(dataset, method=None, **kwargs):
 
             return ax
 
-        # ======================================================================================
-        # Waterfall
-        # ======================================================================================
+
+def _plot_waterfall_3d(new, prefs, **kwargs):
+    """
+    Plot a 2D dataset as a true 3D waterfall plot.
+
+    Parameters
+    ----------
+    new : NDDataset
+        The 2D dataset to plot.
+    prefs : Preferences
+        Plot preferences.
+    **kwargs
+        Additional keyword arguments:
+        - ax: Axes object (optional)
+        - fill_mode: None | "white" | "match" | "alpha" | "uniform"
+          Default: None (lines only, recommended scientific default)
+        - fill_alpha: float (default 0.6)
+        - azim: float (default 25.0)
+        - elev: float (default -60.0)
+        - palette: color palette
+        - linewidth: float
+        - alpha: float
+        - x_reverse: bool
+        - y_reverse: bool
+        - zlim: tuple
+        - title: str
+        - xlabel: str
+        - ylabel: str
+        - zlabel: str
+
+    Returns
+    -------
+    ax : Axes3D
+        The 3D axes containing the plot.
+    """
+    from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
+
+    lazy_ensure_mpl_config()
+
+    # Handle colorbar kwarg - not supported for waterfall
+    colorbar = kwargs.get("colorbar")
+    if colorbar is not None and colorbar is not False:
+        import warnings
+
+        warnings.warn("colorbar ignored for waterfall")
+
+    # Extract data
+    dimx = new.dims[-1]
+    x = getattr(new, dimx)
+    if x is not None and x._implements("CoordSet"):
+        x = x.default
+    xdata = x.data if x is not None and not x.is_empty else np.arange(new.shape[-1])
+
+    dimy = new.dims[-2]
+    y = getattr(new, dimy)
+    if y is not None and y._implements("CoordSet"):
+        y = y.default
+    ydata = y.data if y is not None and not y.is_empty else np.arange(new.shape[-2])
+
+    zdata = new.real.masked_data
+    n_spectra = zdata.shape[0]
+
+    # Get kwargs
+    fill_mode = kwargs.get("fill_mode", None)
+    fill_alpha = kwargs.get("fill_alpha", 0.6)
+
+    # Waterfall-specific camera defaults (independent of other 3D plots)
+    DEFAULT_WATERFALL_ELEV = 25
+    DEFAULT_WATERFALL_AZIM = -60
+
+    azim = kwargs.get("azim", DEFAULT_WATERFALL_AZIM)
+    elev = kwargs.get("elev", DEFAULT_WATERFALL_ELEV)
+
+    linewidth = kwargs.get("linewidth", prefs.lines_linewidth)
+    alpha = kwargs.get("alpha", None)
+
+    # Create figure and axes using unified get_figure infrastructure
+    from spectrochempy.utils.mplutils import get_figure
+
+    user_ax = kwargs.get("ax")
+    if user_ax is not None:
+        if hasattr(user_ax, "plot3D") or user_ax.name == "3d":
+            fig = user_ax.figure
+            ax = user_ax
+        else:
+            fig = user_ax.figure
+            fig.delaxes(user_ax)
+            ax = fig.add_subplot(111, projection="3d")
+    else:
+        # Filter out waterfall-specific kwargs that get_figure doesn't understand
+        fig_kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if k in ("figsize", "dpi", "facecolor", "edgecolor", "frameon")
+        }
+        fig = get_figure(**fig_kwargs)
+        ax = fig.add_subplot(111, projection="3d")
+
+    # Resolve colors using stack semantics
+    palette = kwargs.get("palette", None)
+    colors, is_categorical, mappable = resolve_stack_colors(
+        new,
+        palette=palette,
+        n=n_spectra,
+        geometry="line",
+        prefs=prefs,
+    )
+
+    # Get z limit - handle masked arrays properly
+    zlim = kwargs.get("zlim")
+    if zlim is None:
+        zmin = np.nanmin(zdata)
+        zmax = np.nanmax(zdata)
+        # Handle case where all values are masked (all NaN)
+        if np.isnan(zmin) or np.isnan(zmax):
+            zlim = (0.0, 1.0)
+        else:
+            zlim = (zmin, zmax)
+
+    baseline = np.nanmin(zdata)
+    if np.isnan(baseline):
+        baseline = 0.0
+
+    # Plot each spectrum
+    for i in range(n_spectra):
+        # Get color for this spectrum - use proper color resolution
+        if is_categorical:
+            if not colors:
+                raise ValueError("Categorical palette resolved to empty color list.")
+            line_color = colors[i % len(colors)]
+        else:
+            if mappable is not None:
+                # For continuous, get full RGBA tuple
+                line_color = mappable.to_rgba(i)
+            else:
+                line_color = "k"
+
+        # Enforce strict RGBA normalization to prevent silent fallback to prop_cycle
+        from matplotlib.colors import to_rgba, is_color_like
+
+        if not is_color_like(line_color):
+            raise ValueError(
+                f"Invalid color resolved for waterfall line {i}: {line_color}"
+            )
+
+        line_color = to_rgba(line_color)
+
+        y_val = ydata[i]
+        z_vals = zdata[i, :]
+
+        # Handle masked arrays - convert to nan
+        if np.ma.isMaskedArray(z_vals):
+            z_vals = z_vals.filled(np.nan)
+        else:
+            z_vals = np.asarray(z_vals)
+
+        # Detect contiguous finite segments
+        finite = np.isfinite(z_vals)
+        segments = []
+        start = None
+        for j, ok in enumerate(finite):
+            if ok and start is None:
+                start = j
+            elif not ok and start is not None:
+                segments.append((start, j))
+                start = None
+        if start is not None:
+            segments.append((start, len(z_vals)))
+
+        # If no valid segments, skip this spectrum
+        if not segments:
+            continue
+
+        line_alpha = alpha if alpha is not None else 1.0
+
+        # Process each segment
+        for seg_start, seg_end in segments:
+            x_seg = xdata[seg_start:seg_end]
+            z_seg = z_vals[seg_start:seg_end]
+            y_seg = np.full_like(x_seg, y_val)
+
+            # Create vertices for fill-under polygon
+            if fill_mode is not None:
+                verts = [(x_seg[0], y_val, baseline)]
+                for j in range(len(x_seg)):
+                    verts.append((x_seg[j], y_val, z_seg[j]))
+                verts.append((x_seg[-1], y_val, baseline))
+
+                poly = Poly3DCollection([verts])
+                poly._depthshade = False
+                poly.set_zsort("average")
+
+                if fill_mode == "white":
+                    poly.set_facecolor("white")
+                    poly.set_alpha(fill_alpha)
+                    poly.set_edgecolor("none")
+                elif fill_mode == "match":
+                    poly.set_facecolor(line_color)
+                    poly.set_alpha(fill_alpha)
+                    poly.set_edgecolor("none")
+                elif fill_mode == "alpha":
+                    from matplotlib.colors import to_rgba
+
+                    fc = to_rgba(line_color, fill_alpha)
+                    poly.set_facecolor(fc)
+                    poly.set_edgecolor("none")
+                elif fill_mode == "uniform":
+                    poly.set_facecolor("0.9")
+                    poly.set_alpha(fill_alpha)
+                    poly.set_edgecolor("none")
+
+                ax.add_collection3d(poly)
+
+            # Plot line for this segment
+            lines = ax.plot(
+                x_seg,
+                y_seg,
+                z_seg,
+                color=line_color,
+                linewidth=linewidth,
+                alpha=line_alpha,
+            )
+            for line in lines:
+                line._depthshade = False
+
+    # Set axis limits
+    ax.set_xlim(np.min(xdata), np.max(xdata))
+    ax.set_ylim(np.min(ydata), np.max(ydata))
+    ax.set_zlim(zlim)
+
+    # Set view
+    ax.view_init(elev=elev, azim=azim)
+
+    # Apply axis reversal policies using shared helpers
+    default_xlim = [np.min(xdata), np.max(xdata)]
+    _apply_x_axis_policy(ax, x, default_xlim, kwargs)
+
+    default_ylim = [np.min(ydata), np.max(ydata)]
+    _apply_y_axis_policy(ax, y, default_ylim, kwargs)
+
+    # Set labels
+    xlabel = kwargs.get("xlabel")
+    if not xlabel:
+        xlabel = make_label(x, "x")
+    ax.set_xlabel(xlabel)
+
+    ylabel = kwargs.get("ylabel")
+    if not ylabel:
+        ylabel = make_label(y, "y")
+    ax.set_ylabel(ylabel)
+
+    zlabel = kwargs.get("zlabel")
+    if not zlabel:
+        zlabel = make_label(new, "value")
+    ax.set_zlabel(zlabel)
+
+    # Set title
+    title = kwargs.get("title")
+    if title:
+        ax.set_title(title)
+
+    # Grid
+    ax.grid(False)
+
+    return ax
 
 
 # ======================================================================================
