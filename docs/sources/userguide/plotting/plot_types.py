@@ -107,7 +107,7 @@ ds = scp.read("irdata/nh4y-activation.spg")
 ds.y -= ds.y[0]  # Set y coordinates as relative time  for better visualization
 ds.y.ito('hour')
 ds.y.title = "Time on stream"  # Update y-axis title accordingly
-# ds[:, 1290.0:920.0] = scp.MASKED  # We also mask a region that we do not want to display
+ds[:, 1290.0:920.0] = scp.MASKED  # We also mask a region that we do not want to display
 _ = ds.plot_waterfall(y_reverse=True)
 
 # %% [markdown]

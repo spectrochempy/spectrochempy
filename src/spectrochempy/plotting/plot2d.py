@@ -50,6 +50,99 @@ def _can_enforce_equal_aspect(dataset):
         return False
 
 
+def _apply_x_axis_policy(ax, coord, default_xlim, kwargs):
+    """
+    Apply X axis policy (limits, reversal) for both 2D and 3D plots.
+
+    Parameters
+    ----------
+    ax : matplotlib Axes
+        The axes to configure.
+    coord : Coord or None
+        The X coordinate (used for auto-detection of reversed).
+    default_xlim : list
+        Default [min, max] limits.
+    kwargs : dict
+        Keyword arguments containing x_reverse, reverse, xlim.
+
+    Returns
+    -------
+    x_reverse : bool
+        Whether X axis was reversed.
+    """
+    xlim = list(kwargs.get("xlim", default_xlim))
+    xlim.sort()
+
+    x_reverse_explicit = kwargs.get("x_reverse")
+    reverse_explicit = kwargs.get("reverse")
+
+    # Priority: x_reverse > reverse > coord.reversed
+    if x_reverse_explicit is not None:
+        x_reverse = x_reverse_explicit
+    elif reverse_explicit is not None:
+        x_reverse = reverse_explicit
+    else:
+        x_reverse = coord.reversed if coord else False
+
+    # For explicit True: don't reverse xlim, just invert axis after
+    # For auto (coord.reversed=True): reverse xlim, matplotlib handles
+    # For explicit False: set xlim, no inversion
+    if x_reverse:
+        pass  # Don't reverse xlim, will invert after
+    elif coord is not None and coord.reversed:
+        xlim.reverse()
+
+    ax.set_xlim(xlim)
+
+    if x_reverse:
+        ax.invert_xaxis()
+
+    return x_reverse
+
+
+def _apply_y_axis_policy(ax, coord, default_ylim, kwargs):
+    """
+    Apply Y axis policy (limits, reversal) for both 2D and 3D plots.
+
+    Parameters
+    ----------
+    ax : matplotlib Axes
+        The axes to configure.
+    coord : Coord or None
+        The Y coordinate (used for auto-detection of reversed).
+    default_ylim : list
+        Default [min, max] limits.
+    kwargs : dict
+        Keyword arguments containing y_reverse, ylim.
+
+    Returns
+    -------
+    y_reverse : bool
+        Whether Y axis was reversed.
+    """
+    ylim = list(kwargs.get("ylim", default_ylim))
+    ylim.sort()
+
+    y_reverse_explicit = kwargs.get("y_reverse", False)
+    y_reverse_auto = coord.reversed if coord else False
+
+    # Priority: explicit y_reverse > auto coord.reversed
+    if y_reverse_explicit:
+        # Keep original order, will invert after
+        pass
+    elif y_reverse_auto:
+        ylim.reverse()
+
+    ax.set_ylim(ylim)
+
+    # For explicit y_reverse, explicitly invert the axis
+    # For auto y.reversed, matplotlib already handles when ylim[0] > ylim[1]
+    if y_reverse_explicit:
+        ax.invert_yaxis()
+
+    return y_reverse_explicit or y_reverse_auto
+
+
 def _plot_waterfall_3d(new, prefs, **kwargs):
     """
     Plot a 2D dataset as a true 3D waterfall plot.
@@ -153,8 +246,17 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     # Get z limit - handle masked arrays properly
     zlim = kwargs.get("zlim")
     if zlim is None:
-        finite = np.isfinite(zdata)
-        zlim = (np.nanmin(zdata), np.nanmax(zdata))
+        zmin = np.nanmin(zdata)
+        zmax = np.nanmax(zdata)
+        # Handle case where all values are masked (all NaN)
+        if np.isnan(zmin) or np.isnan(zmax):
+            zlim = (0.0, 1.0)
+        else:
+            zlim = (zmin, zmax)
+
+    baseline = np.nanmin(zdata)
+    if np.isnan(baseline):
+        baseline = 0.0
 
     # Plot each spectrum
     for i in range(n_spectra):
@@ -174,7 +276,6 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
         elif hasattr(line_color, "__iter__") and not isinstance(line_color, str):
             line_color = tuple(line_color)
 
-        x_vals = xdata
         y_val = ydata[i]
         z_vals = zdata[i, :]
 
@@ -184,44 +285,67 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
         else:
             z_vals = np.asarray(z_vals)
 
-        # Create vertices for fill-under polygon
-        if fill_mode is not None:
-            z_min = zlim[0]
-            verts = [(x_vals[0], y_val, z_min)]
-            for j in range(len(x_vals)):
-                verts.append((x_vals[j], y_val, z_vals[j]))
-            verts.append((x_vals[-1], y_val, z_min))
+        # Detect contiguous finite segments
+        finite = np.isfinite(z_vals)
+        segments = []
+        start = None
+        for j, ok in enumerate(finite):
+            if ok and start is None:
+                start = j
+            elif not ok and start is not None:
+                segments.append((start, j))
+                start = None
+        if start is not None:
+            segments.append((start, len(z_vals)))
 
-            poly = Poly3DCollection([verts])
+        # If no valid segments, skip this spectrum
+        if not segments:
+            continue
 
-            if fill_mode == "white":
-                poly.set_facecolor("white")
-                poly.set_edgecolor("k")
-            elif fill_mode == "match":
-                poly.set_facecolor(line_color)
-                poly.set_edgecolor(line_color)
-            elif fill_mode == "alpha":
-                from matplotlib.colors import to_rgba
-
-                fc = to_rgba(line_color, fill_alpha)
-                poly.set_facecolor(fc)
-                poly.set_edgecolor(line_color)
-            elif fill_mode == "uniform":
-                poly.set_facecolor("0.9")
-                poly.set_edgecolor("k")
-
-            ax.add_collection3d(poly)
-
-        # Plot line
         line_alpha = alpha if alpha is not None else 1.0
-        ax.plot(
-            x_vals,
-            np.full_like(x_vals, y_val),
-            z_vals,
-            color=line_color,
-            linewidth=linewidth,
-            alpha=line_alpha,
-        )
+
+        # Process each segment
+        for seg_start, seg_end in segments:
+            x_seg = xdata[seg_start:seg_end]
+            z_seg = z_vals[seg_start:seg_end]
+            y_seg = np.full_like(x_seg, y_val)
+
+            # Create vertices for fill-under polygon
+            if fill_mode is not None:
+                verts = [(x_seg[0], y_val, baseline)]
+                for j in range(len(x_seg)):
+                    verts.append((x_seg[j], y_val, z_seg[j]))
+                verts.append((x_seg[-1], y_val, baseline))
+
+                poly = Poly3DCollection([verts])
+
+                if fill_mode == "white":
+                    poly.set_facecolor("white")
+                    poly.set_edgecolor("k")
+                elif fill_mode == "match":
+                    poly.set_facecolor(line_color)
+                    poly.set_edgecolor(line_color)
+                elif fill_mode == "alpha":
+                    from matplotlib.colors import to_rgba
+
+                    fc = to_rgba(line_color, fill_alpha)
+                    poly.set_facecolor(fc)
+                    poly.set_edgecolor(line_color)
+                elif fill_mode == "uniform":
+                    poly.set_facecolor("0.9")
+                    poly.set_edgecolor("k")
+
+                ax.add_collection3d(poly)
+
+            # Plot line for this segment
+            ax.plot(
+                x_seg,
+                y_seg,
+                z_seg,
+                color=line_color,
+                linewidth=linewidth,
+                alpha=line_alpha,
+            )
 
     # Set axis limits
     ax.set_xlim(np.min(xdata), np.max(xdata))
@@ -231,19 +355,12 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     # Set view
     ax.view_init(elev=elev, azim=azim)
 
-    # Handle axis reversal
-    x_reverse = kwargs.get("x_reverse")
-    reverse = kwargs.get("reverse")
-    if x_reverse is not None:
-        if x_reverse:
-            ax.invert_xaxis()
-    elif reverse is not None:
-        if reverse:
-            ax.invert_xaxis()
+    # Apply axis reversal policies using shared helpers
+    default_xlim = [np.min(xdata), np.max(xdata)]
+    _apply_x_axis_policy(ax, x, default_xlim, kwargs)
 
-    y_reverse = kwargs.get("y_reverse", False)
-    if y_reverse:
-        ax.invert_yaxis()
+    default_ylim = [np.min(ydata), np.max(ydata)]
+    _apply_y_axis_policy(ax, y, default_ylim, kwargs)
 
     # Set labels
     xlabel = kwargs.get("xlabel")
@@ -1540,33 +1657,8 @@ def plot_2D(dataset, method=None, **kwargs):
             xlim[-1] = min(xlim[-1], xl[-1])
             xlim[0] = max(xlim[0], xl[0])
 
-            x_reverse_explicit = kwargs.get("x_reverse")
-            reverse_explicit = kwargs.get("reverse")
-
-            # Check if user explicitly passed x_reverse or reverse
-            # If explicitly passed, use that value; otherwise use x.reversed
-            if x_reverse_explicit is not None:
-                x_reverse = x_reverse_explicit
-            elif reverse_explicit is not None:
-                x_reverse = reverse_explicit
-            else:
-                x_reverse = x.reversed if x else False
-
-            # For x_reverse=True, don't reverse xlim - just invert axis after setting limits
-            # For x_reverse=False (from x.reversed=False), reverse xlim and let matplotlib auto-handle
-            # For x_reverse=False when x.reversed=True, we should NOT invert (user wants normal order)
-            if x_reverse:
-                # User wants inverted axis - don't reverse xlim, invert after
-                pass
-            elif x is not None and x.reversed:
-                # x.reversed is True but user didn't explicitly override - auto-handle
-                xlim.reverse()
-
-            ax.set_xlim(xlim)
-
-            # If x_reverse is True, explicitly invert the axis
-            if x_reverse:
-                ax.invert_xaxis()
+            # Apply X axis policy using shared helper
+            _apply_x_axis_policy(ax, x, xlim, kwargs)
 
             xscale = kwargs.get("xscale", "linear")
             ax.set_xscale(xscale)  # , nonpositive='mask')
@@ -1659,24 +1751,9 @@ def plot_2D(dataset, method=None, **kwargs):
 
                 ylim = list(kwargs.get("ylim", ylim))
                 ylim.sort()
-                y_reverse_explicit = kwargs.get("y_reverse", False)
-                y_reverse_auto = y.reversed if y else False
 
-                # For explicit y_reverse, don't reverse ylim - just invert axis after setting limits
-                # For auto y.reversed, reverse ylim and let matplotlib auto-handle the inversion
-                if y_reverse_explicit:
-                    ylim_original = list(ylim)  # Keep original order
-                elif y_reverse_auto:
-                    ylim.reverse()
-
-                # set the limits
-                # ----------------
-                ax.set_ylim(ylim)
-
-                # For explicit y_reverse kwarg, explicitly invert the axis
-                # For auto y.reversed, matplotlib already handles inversion when ylim[0] > ylim[1]
-                if y_reverse_explicit:
-                    ax.invert_yaxis()
+                # Apply Y axis policy using shared helper
+                _apply_y_axis_policy(ax, y, ylim, kwargs)
 
             # ------------------------------------------------------------------------
             # plot the dataset
@@ -1747,23 +1824,9 @@ def plot_2D(dataset, method=None, **kwargs):
                     ax = fig.add_subplot(111, projection="3d")
                     ndaxes["main"] = ax
 
-                    # Re-apply axis inversions after recreating 3D axes
-                    # (the inversions were set on the old 2D axes which was deleted)
-                    x_reverse_explicit = kwargs.get("x_reverse")
-                    reverse_explicit = kwargs.get("reverse")
-                    if x_reverse_explicit is not None:
-                        x_reverse = x_reverse_explicit
-                    elif reverse_explicit is not None:
-                        x_reverse = reverse_explicit
-                    else:
-                        x_reverse = x.reversed if x else False
-
-                    if x_reverse:
-                        ax.invert_xaxis()
-
-                    y_reverse_explicit = kwargs.get("y_reverse", False)
-                    if y_reverse_explicit:
-                        ax.invert_yaxis()
+                    # Re-apply axis inversions after recreating 3D axes using shared helpers
+                    _apply_x_axis_policy(ax, x, [np.min(xdata), np.max(xdata)], kwargs)
+                    _apply_y_axis_policy(ax, y, [np.min(ydata), np.max(ydata)], kwargs)
 
                 X, Y = np.meshgrid(xdata, ydata)
                 Z = zdata.copy()
