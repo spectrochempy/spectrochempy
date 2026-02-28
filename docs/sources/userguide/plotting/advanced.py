@@ -59,22 +59,11 @@ _ = ds.plot(ax=ax1)
 ax1.set_title("Full Spectrum")
 
 # Plot 2: subset
-_ = ds.plot(ax=ax2, xlim=(2000, 1500))
-ax2.set_title("Fingerprint Region")
+_ = ds[:,1800.:1500.].plot(ax=ax2)
+ax2.set_title("Water bending Region")
 
 plt.tight_layout()
 
-# %% [markdown]
-# ## 3D Surface Plot
-
-# %%
-_ = ds.plot_surface()
-
-# %% [markdown]
-# ## Waterfall Plot
-
-# %%
-_ = ds.plot_waterfall()
 
 # %% [markdown]
 # ## Colormap Normalization
@@ -85,8 +74,8 @@ _ = ds.plot_waterfall()
 import matplotlib as mpl
 
 # CenteredNorm - centers the colormap around a specific value
-norm = mpl.colors.CenteredNorm(vcenter=0.5)
-_ = ds.plot_image(cmap="RdBu_r", norm=norm)
+norm = mpl.colors.CenteredNorm(vcenter=1.0)
+_ = ds.plot_image(cmap="RdBu_r", norm=norm, colorbar=True)
 
 # %% [markdown]
 # ## LaTeX-like Math in Labels

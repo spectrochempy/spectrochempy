@@ -55,19 +55,13 @@ _ = ds.plot(linestyle="--")
 # %%
 _ = ds.plot(marker="o")
 
-# %% [markdown]
-# ### Transparency
-
-# %%
-_ = ds.plot(alpha=0.7)
 
 # %% [markdown]
 # ## Axis Limits
 #
 # Restrict the displayed range:
-
 # %%
-_ = ds.plot(xlim=(1000, 2000))
+_ = ds.plot(xlim=(2000, 1000)) # NB: slicing is also possible here, ds[:,2000.:1000.].plot() would give the same result
 
 # %%
 _ = ds.plot(ylim=(0, 0.5))

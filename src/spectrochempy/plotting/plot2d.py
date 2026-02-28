@@ -388,39 +388,6 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
 
     return ax
 
-    # ======================================================================================
-
-    try:
-        dims = dataset.dims
-        if dims is None or len(dims) < 2:
-            return False
-
-        dim_y = dims[-2]
-        dim_x = dims[-1]
-
-        y_coord = dataset.coord(dim_y)
-        x_coord = dataset.coord(dim_x)
-
-        if x_coord is None or y_coord is None:
-            return False
-
-        x_units = getattr(x_coord, "units", None)
-        y_units = getattr(y_coord, "units", None)
-
-        if x_units is None and y_units is None:
-            return True
-
-        if x_units is None or y_units is None:
-            return False
-
-        if x_units == y_units:
-            return True
-
-        return False
-    except Exception:
-        return False
-
-
 def _handle_3d_aspect(ax, dataset, **kwargs):
     """
     Handle aspect ratio for 3D surface plots.

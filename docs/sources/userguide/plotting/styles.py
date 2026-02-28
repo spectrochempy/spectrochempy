@@ -47,33 +47,25 @@ for f in sorted(styles_dir.glob("*.mplstyle")):
 _ = ds.plot(style="grayscale")
 
 # %% [markdown]
-# ## Styles Affect Colormaps
-#
-# The `grayscale` style changes the default colormap:
-
-# %%
-_ = ds.plot(style="grayscale", cmap="viridis")  # Override style's cmap
-
-# %% [markdown]
 # ## Combining Style with Options
 #
 # Styles work with all other plot options:
 
 # %%
-_ = ds.plot(
-    style="grayscale",
-    xlim=(2000, 1500),
-    grid=True,
-)
+_ = ds.plot(style="grayscale", xlim=(1800, 1500), ylim=(0, 2.5), grid=True)
 
 # %% [markdown]
 # ## Setting a Default Style
 #
-# Make a style persistent across your session:
+# Make a style persistent across your session and future sessions by setting it in preferences:
 
 # %%
 original_style = scp.preferences.style
 scp.preferences.style = "grayscale"
+_ = ds.plot()
+
+# %%
+scp.preferences.style = "ggplot"
 _ = ds.plot()
 
 # %% [markdown]

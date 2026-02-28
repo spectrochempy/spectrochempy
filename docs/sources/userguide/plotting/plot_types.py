@@ -104,7 +104,7 @@ _ = ds.plot_surface(y_reverse=True, linewidth=0)
 # For a waterfall-style representation:
 
 # %%
-_ = ds.plot_waterfall(y_reverse=True, figsize=(7,4))
+_ = ds.plot_waterfall(y_reverse=True, figsize=(7,7))
 
 # %% [markdown]
 # ## Combining with Options
