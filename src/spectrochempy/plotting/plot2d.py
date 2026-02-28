@@ -156,10 +156,11 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     **kwargs
         Additional keyword arguments:
         - ax: Axes object (optional)
-        - fill_mode: "white" | "match" | "alpha" | "uniform" | None
+        - fill_mode: None | "white" | "match" | "alpha" | "uniform"
+          Default: None (lines only, recommended scientific default)
         - fill_alpha: float (default 0.6)
-        - azim: float (default 10.0)
-        - elev: float (default 30.0)
+        - azim: float (default 25.0)
+        - elev: float (default -60.0)
         - palette: color palette
         - linewidth: float
         - alpha: float
@@ -204,7 +205,7 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     n_spectra = zdata.shape[0]
 
     # Get kwargs
-    fill_mode = kwargs.get("fill_mode", "white")
+    fill_mode = kwargs.get("fill_mode", None)
     fill_alpha = kwargs.get("fill_alpha", 0.6)
 
     # Waterfall-specific camera defaults (independent of other 3D plots)
@@ -268,7 +269,9 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     for i in range(n_spectra):
         # Get color for this spectrum - use proper color resolution
         if is_categorical:
-            line_color = colors[i] if i < len(colors) else "k"
+            if not colors:
+                raise ValueError("Categorical palette resolved to empty color list.")
+            line_color = colors[i % len(colors)]
         else:
             if mappable is not None:
                 # For continuous, get full RGBA tuple
@@ -276,11 +279,15 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
             else:
                 line_color = "k"
 
-        # Ensure color is valid tuple/list/string, not scalar
-        if isinstance(line_color, np.ndarray):
-            line_color = tuple(line_color.tolist())
-        elif hasattr(line_color, "__iter__") and not isinstance(line_color, str):
-            line_color = tuple(line_color)
+        # Enforce strict RGBA normalization to prevent silent fallback to prop_cycle
+        from matplotlib.colors import to_rgba, is_color_like
+
+        if not is_color_like(line_color):
+            raise ValueError(
+                f"Invalid color resolved for waterfall line {i}: {line_color}"
+            )
+
+        line_color = to_rgba(line_color)
 
         y_val = ydata[i]
         z_vals = zdata[i, :]
@@ -324,26 +331,32 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
                 verts.append((x_seg[-1], y_val, baseline))
 
                 poly = Poly3DCollection([verts])
+                poly._depthshade = False
+                poly.set_zsort("average")
 
                 if fill_mode == "white":
                     poly.set_facecolor("white")
-                    poly.set_edgecolor("k")
+                    poly.set_alpha(fill_alpha)
+                    poly.set_edgecolor("none")
                 elif fill_mode == "match":
                     poly.set_facecolor(line_color)
-                    poly.set_edgecolor(line_color)
+                    poly.set_alpha(fill_alpha)
+                    poly.set_edgecolor("none")
                 elif fill_mode == "alpha":
                     from matplotlib.colors import to_rgba
+
                     fc = to_rgba(line_color, fill_alpha)
                     poly.set_facecolor(fc)
-                    poly.set_edgecolor(line_color)
+                    poly.set_edgecolor("none")
                 elif fill_mode == "uniform":
                     poly.set_facecolor("0.9")
-                    poly.set_edgecolor("k")
+                    poly.set_alpha(fill_alpha)
+                    poly.set_edgecolor("none")
 
                 ax.add_collection3d(poly)
 
             # Plot line for this segment
-            ax.plot(
+            lines = ax.plot(
                 x_seg,
                 y_seg,
                 z_seg,
@@ -351,6 +364,8 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
                 linewidth=linewidth,
                 alpha=line_alpha,
             )
+            for line in lines:
+                line._depthshade = False
 
     # Set axis limits
     ax.set_xlim(np.min(xdata), np.max(xdata))
