@@ -1205,11 +1205,44 @@ def plot_2D(dataset, method=None, **kwargs):
     if rc_overrides is None:
         rc_overrides = {}
 
+    # Inject font.family as a list (Matplotlib requires list format)
+    # This ensures prefs.font.family actually changes the rendered font
+    if prefs.font.family is not None:
+        rc_overrides["font.family"] = [prefs.font.family]
+
+    # Filter rc_overrides to only include valid Matplotlib rcParams
+    # and handle mathtext.fontset safely
+    import warnings
+
+    valid_mathtext_fontsets = {
+        "dejavusans",
+        "dejavuserif",
+        "cm",
+        "stix",
+        "stixsans",
+        "custom",
+    }
+
+    safe_rc = {}
+    for key, value in rc_overrides.items():
+        if key in mpl.rcParams:
+            # Special handling for mathtext.fontset
+            if key == "mathtext.fontset":
+                if value in valid_mathtext_fontsets:
+                    safe_rc[key] = value
+                else:
+                    warnings.warn(f"Ignoring invalid mathtext.fontset: {value}")
+            else:
+                safe_rc[key] = value
+        else:
+            warnings.warn(f"Ignoring unknown rcParam: {key}")
+
     # Apply unified style context for entire plotting operation
     # This includes: figure creation, colormap resolution, line style resolution, and rendering
     # Style context must wrap everything for matplotlib prop_cycle and image.cmap to work correctly
-    with mpl.rc_context(rc_overrides):
-        with plt.style.context(style):
+    # IMPORTANT: rc_context must be OUTSIDE style context so user preferences override style
+    with plt.style.context(style):
+        with mpl.rc_context(safe_rc):
             # Redirections ?
             # ----------------------------------------------------------------------------------
             # should we redirect the plotting to another method

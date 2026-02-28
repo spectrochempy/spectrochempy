@@ -124,12 +124,6 @@ prefs.font
 prefs.help("colormap")
 
 # %% [markdown]
-# List all preferences:
-
-# %%
-# prefs.list_all()  # Uncomment to see all preferences
-
-# %% [markdown]
 # ## The Mental Model
 #
 # - **Keyword arguments** (`ds.plot(cmap="red")`) → single plot
@@ -137,3 +131,9 @@ prefs.help("colormap")
 # - **Style** (`ds.plot(style="grayscale")`) → appearance theme
 #
 # Use preferences for session-long defaults; kwargs for one-off changes.
+
+# %% [markdown]
+# Below ios the list of all available preferences:
+
+# %%
+prefs.list_all()  # Uncomment to see all preferences

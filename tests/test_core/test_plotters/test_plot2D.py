@@ -256,3 +256,21 @@ def test_plot_image_with_projections_and_limits(ds2d):
         xlim=(ds2d.x.data.min(), ds2d.x.data.mean()),
     )
     assert fig is not None
+
+
+# -----------------------------------------------------------------------------
+# Font family preference regression test
+# -----------------------------------------------------------------------------
+def test_plot_respects_font_family_preference():
+    import matplotlib as mpl
+
+    original_family = prefs.font.family
+    try:
+        prefs.font.family = "monospace"
+        ds = _simple_2d_dataset()
+        ax = ds.plot_stack()
+        text_obj = ax.xaxis.label
+        font_name = text_obj.get_fontproperties().get_name()
+        assert "Mono" in font_name, f"Expected Mono in font name, got: {font_name}"
+    finally:
+        prefs.font.family = original_family

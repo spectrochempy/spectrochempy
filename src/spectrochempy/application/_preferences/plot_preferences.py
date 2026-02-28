@@ -1327,7 +1327,7 @@ class PlotPreferences(MetaConfigurable):
         elif family in ("cursive", "monospace", "fantasy"):
             return {
                 "text.usetex": False,
-                "mathtext.fontset": "dejavusaPlons",
+                "mathtext.fontset": "dejavusans",
                 "mathtext.bf": "sans:bold",
                 "mathtext.default": "regular",
                 "mathtext.rm": "sans",
