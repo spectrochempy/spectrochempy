@@ -1220,7 +1220,7 @@ class PlotPreferences(MetaConfigurable):
     ).tag(config=True)
 
     axes3d_azim = Float(
-        45.0,
+        10.0,
         help="Default azimuth angle (degrees) for 3D plots",
     ).tag(config=True)
 

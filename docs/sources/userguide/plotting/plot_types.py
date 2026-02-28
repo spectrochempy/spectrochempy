@@ -103,6 +103,11 @@ _ = ds.plot_surface(y_reverse=True, linewidth=0)
 # For a waterfall-style representation:
 
 # %%
+ds = scp.read("irdata/nh4y-activation.spg")
+ds.y -= ds.y[0]  # Set y coordinates as relative time  for better visualization
+ds.y.ito('hour')
+ds.y.title = "Time on stream"  # Update y-axis title accordingly
+ds[:, 1290.0:920.0] = scp.MASKED  # We also mask a region that we do not want to display
 _ = ds.plot_waterfall(y_reverse=True)
 
 # %% [markdown]
@@ -113,8 +118,8 @@ _ = ds.plot_waterfall(y_reverse=True)
 # %%
 _ = ds.plot_image(
     cmap="plasma",
-    xlim=(2000, 1000),
-    ylim=(0, 30),
+    xlim=(2000, 1300),
+    ylim=(1, 5),
 )
 
 # %% [markdown]

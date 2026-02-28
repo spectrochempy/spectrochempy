@@ -21,6 +21,7 @@ from contextlib import suppress
 
 import numpy as np
 from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
@@ -47,6 +48,224 @@ def _can_enforce_equal_aspect(dataset):
     """
     if dataset is None:
         return False
+
+
+def _plot_waterfall_3d(new, prefs, **kwargs):
+    """
+    Plot a 2D dataset as a true 3D waterfall plot.
+
+    Parameters
+    ----------
+    new : NDDataset
+        The 2D dataset to plot.
+    prefs : Preferences
+        Plot preferences.
+    **kwargs
+        Additional keyword arguments:
+        - ax: Axes object (optional)
+        - fill_mode: "white" | "match" | "alpha" | "uniform" | None
+        - fill_alpha: float (default 0.6)
+        - azim: float (default 10.0)
+        - elev: float (default 30.0)
+        - palette: color palette
+        - linewidth: float
+        - alpha: float
+        - x_reverse: bool
+        - y_reverse: bool
+        - zlim: tuple
+        - title: str
+        - xlabel: str
+        - ylabel: str
+        - zlabel: str
+
+    Returns
+    -------
+    ax : Axes3D
+        The 3D axes containing the plot.
+    """
+    import matplotlib.pyplot as plt
+
+    from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
+
+    lazy_ensure_mpl_config()
+
+    # Handle colorbar kwarg - not supported for waterfall
+    colorbar = kwargs.get("colorbar")
+    if colorbar is not None and colorbar is not False:
+        import warnings
+
+        warnings.warn("colorbar ignored for waterfall")
+
+    # Extract data
+    dimx = new.dims[-1]
+    x = getattr(new, dimx)
+    if x is not None and x._implements("CoordSet"):
+        x = x.default
+    xdata = x.data if x is not None and not x.is_empty else np.arange(new.shape[-1])
+
+    dimy = new.dims[-2]
+    y = getattr(new, dimy)
+    if y is not None and y._implements("CoordSet"):
+        y = y.default
+    ydata = y.data if y is not None and not y.is_empty else np.arange(new.shape[-2])
+
+    zdata = new.real.masked_data
+    n_spectra = zdata.shape[0]
+
+    # Get kwargs
+    fill_mode = kwargs.get("fill_mode", "white")
+    fill_alpha = kwargs.get("fill_alpha", 0.6)
+    azim = kwargs.get("azim", 10.0)
+    elev = kwargs.get("elev", 30.0)
+    linewidth = kwargs.get("linewidth", prefs.lines_linewidth)
+    alpha = kwargs.get("alpha", None)
+
+    # Create figure and axes
+    user_ax = kwargs.get("ax")
+    if user_ax is not None:
+        if hasattr(user_ax, "plot3D") or user_ax.name == "3d":
+            fig = user_ax.figure
+            ax = user_ax
+        else:
+            fig = user_ax.figure
+            fig.delaxes(user_ax)
+            ax = fig.add_subplot(111, projection="3d")
+    else:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+
+    # Resolve colors using stack semantics
+    palette = kwargs.get("palette", None)
+    colors, is_categorical, mappable = resolve_stack_colors(
+        new,
+        palette=palette,
+        n=n_spectra,
+        geometry="line",
+        prefs=prefs,
+    )
+
+    # Get z limit - handle masked arrays properly
+    zlim = kwargs.get("zlim")
+    if zlim is None:
+        finite = np.isfinite(zdata)
+        zlim = (np.nanmin(zdata), np.nanmax(zdata))
+
+    # Plot each spectrum
+    for i in range(n_spectra):
+        # Get color for this spectrum - use proper color resolution
+        if is_categorical:
+            line_color = colors[i] if i < len(colors) else "k"
+        else:
+            if mappable is not None:
+                # For continuous, get full RGBA tuple
+                line_color = mappable.to_rgba(i)
+            else:
+                line_color = "k"
+
+        # Ensure color is valid tuple/list/string, not scalar
+        if isinstance(line_color, np.ndarray):
+            line_color = tuple(line_color.tolist())
+        elif hasattr(line_color, "__iter__") and not isinstance(line_color, str):
+            line_color = tuple(line_color)
+
+        x_vals = xdata
+        y_val = ydata[i]
+        z_vals = zdata[i, :]
+
+        # Handle masked arrays - convert to nan
+        if np.ma.isMaskedArray(z_vals):
+            z_vals = z_vals.filled(np.nan)
+        else:
+            z_vals = np.asarray(z_vals)
+
+        # Create vertices for fill-under polygon
+        if fill_mode is not None:
+            z_min = zlim[0]
+            verts = [(x_vals[0], y_val, z_min)]
+            for j in range(len(x_vals)):
+                verts.append((x_vals[j], y_val, z_vals[j]))
+            verts.append((x_vals[-1], y_val, z_min))
+
+            poly = Poly3DCollection([verts])
+
+            if fill_mode == "white":
+                poly.set_facecolor("white")
+                poly.set_edgecolor("k")
+            elif fill_mode == "match":
+                poly.set_facecolor(line_color)
+                poly.set_edgecolor(line_color)
+            elif fill_mode == "alpha":
+                from matplotlib.colors import to_rgba
+
+                fc = to_rgba(line_color, fill_alpha)
+                poly.set_facecolor(fc)
+                poly.set_edgecolor(line_color)
+            elif fill_mode == "uniform":
+                poly.set_facecolor("0.9")
+                poly.set_edgecolor("k")
+
+            ax.add_collection3d(poly)
+
+        # Plot line
+        line_alpha = alpha if alpha is not None else 1.0
+        ax.plot(
+            x_vals,
+            np.full_like(x_vals, y_val),
+            z_vals,
+            color=line_color,
+            linewidth=linewidth,
+            alpha=line_alpha,
+        )
+
+    # Set axis limits
+    ax.set_xlim(np.min(xdata), np.max(xdata))
+    ax.set_ylim(np.min(ydata), np.max(ydata))
+    ax.set_zlim(zlim)
+
+    # Set view
+    ax.view_init(elev=elev, azim=azim)
+
+    # Handle axis reversal
+    x_reverse = kwargs.get("x_reverse")
+    reverse = kwargs.get("reverse")
+    if x_reverse is not None:
+        if x_reverse:
+            ax.invert_xaxis()
+    elif reverse is not None:
+        if reverse:
+            ax.invert_xaxis()
+
+    y_reverse = kwargs.get("y_reverse", False)
+    if y_reverse:
+        ax.invert_yaxis()
+
+    # Set labels
+    xlabel = kwargs.get("xlabel")
+    if not xlabel:
+        xlabel = make_label(x, "x")
+    ax.set_xlabel(xlabel)
+
+    ylabel = kwargs.get("ylabel")
+    if not ylabel:
+        ylabel = make_label(y, "y")
+    ax.set_ylabel(ylabel)
+
+    zlabel = kwargs.get("zlabel")
+    if not zlabel:
+        zlabel = make_label(new, "value")
+    ax.set_zlabel(zlabel)
+
+    # Set title
+    title = kwargs.get("title")
+    if title:
+        ax.set_title(title)
+
+    # Grid
+    ax.grid(False)
+
+    return ax
+
+    # ======================================================================================
 
     try:
         dims = dataset.dims
@@ -1166,6 +1385,11 @@ def plot_2D(dataset, method=None, **kwargs):
             # "auto" triggers auto-detection based on method and data type
             colorbar = kwargs.pop("colorbar", False)
 
+            # For waterfall method, we need to pass colorbar to _plot_waterfall_3d
+            # but colorbar was already popped, so we add it back for waterfall
+            if method == "waterfall":
+                kwargs["colorbar"] = colorbar
+
             # Get the data to plot
             # ---------------------------------------------------------------
             # if we want to plot the transposed dataset
@@ -1211,6 +1435,13 @@ def plot_2D(dataset, method=None, **kwargs):
                     ax.name = "main"
 
             ax.name += nameadd
+
+            # SPECIAL HANDLING FOR WATERFALL - use true 3D implementation
+            if method == "waterfall":
+                # Call the 3D waterfall function
+                ax = _plot_waterfall_3d(new, prefs=prefs, **kwargs)
+                # Return immediately - do NOT run generic plot_2D post-processing
+                return ax
 
             # Resolve line/marker styles using centralized L1 function
             style_kwargs = resolve_line_style(
@@ -1554,6 +1785,19 @@ def plot_2D(dataset, method=None, **kwargs):
                 )
 
             if method in ["waterfall"]:
+                # Force canvas draw to ensure transforms are valid before waterfall computation
+                # This is required because _plot_waterfall uses transA2D which depends on
+                # valid axis transforms (transData/transAxes)
+                fig = ax.figure
+                # Disable constrained layout for waterfall to preserve geometry
+                try:
+                    fig.set_constrained_layout(False)
+                except Exception:
+                    pass
+                # Mark this as a waterfall plot to prevent later layout changes
+                ax._scp_plot_method = "waterfall"
+                fig.canvas.draw_idle()
+                fig.canvas.draw()
                 _plot_waterfall(
                     ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs
                 )
@@ -1899,12 +2143,14 @@ def plot_2D(dataset, method=None, **kwargs):
 
             # Apply final axis limits (user overrides)
             # This must be after all rendering and colorbar creation
-            user_xlim = kwargs.get("xlim")
-            user_ylim = kwargs.get("ylim")
-            if user_xlim is not None:
-                ax.set_xlim(user_xlim)
-            if user_ylim is not None:
-                ax.set_ylim(user_ylim)
+            # Skip for waterfall - it manages its own limits internally
+            if method != "waterfall":
+                user_xlim = kwargs.get("xlim")
+                user_ylim = kwargs.get("ylim")
+                if user_xlim is not None:
+                    ax.set_xlim(user_xlim)
+                if user_ylim is not None:
+                    ax.set_ylim(user_ylim)
 
             new._plot_resume(dataset, **kwargs)
 
@@ -1915,16 +2161,12 @@ def plot_2D(dataset, method=None, **kwargs):
         # ======================================================================================
 
 
+# ======================================================================================
+# Waterfall
+# ======================================================================================
 def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs):
-    from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
-
-    lazy_ensure_mpl_config()
-
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
-
-    degazim = kwargs.get("azim", prefs.axes3d_azim)
-    degelev = kwargs.get("elev", prefs.axes3d_elev)
+    degazim = kwargs.get("azim", 10)
+    degelev = kwargs.get("elev", 30)
 
     azim = np.deg2rad(degazim)
     elev = np.deg2rad(degelev)
@@ -1946,6 +2188,8 @@ def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwa
 
     zs = incz * 0.05
     base = zdata.min() - zs
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
 
     for i, row in enumerate(zdata):
         y = ydata[i]

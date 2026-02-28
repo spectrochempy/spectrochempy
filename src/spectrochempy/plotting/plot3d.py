@@ -249,7 +249,9 @@ def plot_waterfall(dataset, **kwargs):
     plot_surface
 
     """
-    return plot_3D(dataset, method="waterfall", **kwargs)
+    from spectrochempy.plotting.plot2d import plot_2D
+
+    return plot_2D(dataset, method="waterfall", **kwargs)
 
 
 def plot_3D(dataset, method="surface", **kwargs):
