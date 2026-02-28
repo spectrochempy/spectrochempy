@@ -16,7 +16,6 @@ __all__ = [
     "plot_iris_merit",
 ]
 
-import numpy as np
 
 from spectrochempy.plotting._render import render_contour
 from spectrochempy.plotting._render import render_scatter

@@ -26,7 +26,7 @@ Usage:
 import json
 import warnings
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # ======================================================================================
 # Module-level state
@@ -196,7 +196,7 @@ class PlotProfileManager:
 
         self._known_profiles_cache = None
 
-    def reset_plot_profile(self, name: Optional[str] = None) -> None:
+    def reset_plot_profile(self, name: str | None = None) -> None:
         """Reset a profile to its default values."""
         self.ensure_initialized()
 
@@ -236,7 +236,7 @@ class PlotProfileManager:
 
             if hasattr(prefs, "style"):
                 try:
-                    setattr(prefs, "style", mpl_style)
+                    prefs.style = mpl_style
                 except Exception:
                     pass
 
@@ -268,8 +268,8 @@ class PlotProfileManager:
 
     def _get_plot_preferences(self):
         """Get the PlotPreferences instance."""
-        from spectrochempy.application.application import app
         from spectrochempy.application.application import _get_environment
+        from spectrochempy.application.application import app
 
         if not hasattr(app, "plot_preferences"):
             _get_environment()
@@ -308,7 +308,7 @@ class PlotProfileManager:
 
         raise ValueError(f"Profile '{name}' not found")
 
-    def _load_builtin_profile(self, name: str) -> Optional[dict]:
+    def _load_builtin_profile(self, name: str) -> dict | None:
         """Load a built-in profile from the package."""
         from spectrochempy import __file__ as scp_file
 

@@ -167,7 +167,6 @@ pca.fit(X)
 pca.plot_merit()
 
 
-
 # %% [markdown]
 # Score plots can be used to see the projection of each observation/spectrum
 # onto the span of the principal components:

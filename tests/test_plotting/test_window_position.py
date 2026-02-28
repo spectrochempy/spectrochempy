@@ -56,11 +56,13 @@ class TestWindowPosition:
 
     def test_window_position_invalid_type_raises(self):
         """Test that invalid type raises TraitError."""
-        from traitlets import Tuple
         from traitlets import Integer
+        from traitlets import Tuple
 
         class MockPrefs:
-            window_position = Tuple(Integer(), Integer(), default_value=None, allow_none=True)
+            window_position = Tuple(
+                Integer(), Integer(), default_value=None, allow_none=True
+            )
 
         prefs = MockPrefs()
         with pytest.raises(TraitError):
@@ -68,12 +70,14 @@ class TestWindowPosition:
 
     def test_window_position_invalid_tuple_length_raises(self):
         """Test that tuple with wrong length raises TraitError."""
-        from traitlets import Tuple
-        from traitlets import Integer
         from traitlets import HasTraits
+        from traitlets import Integer
+        from traitlets import Tuple
 
         class MockPrefs(HasTraits):
-            window_position = Tuple(Integer(), Integer(), default_value=None, allow_none=True)
+            window_position = Tuple(
+                Integer(), Integer(), default_value=None, allow_none=True
+            )
 
         prefs = MockPrefs()
         with pytest.raises(TraitError):

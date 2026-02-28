@@ -11,8 +11,7 @@ in a deterministic, architecture-compliant way.
 """
 
 import numpy as np
-from matplotlib.colors import TwoSlopeNorm
-from matplotlib.ticker import FixedLocator, ScalarFormatter, NullLocator
+from matplotlib.ticker import NullLocator
 
 
 def _nice_step(raw_step):
@@ -68,7 +67,7 @@ def _apply_colorbar_tick_policy(cbar, norm, vmin=None, vmax=None):
     -----
     This function uses MaxNLocator for automatic tick selection.
     """
-    from matplotlib.ticker import MaxNLocator, ScalarFormatter
+    from matplotlib.ticker import MaxNLocator
 
     # Get actual normalization limits from the mappable
     actual_vmin = cbar.mappable.norm.vmin

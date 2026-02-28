@@ -22,6 +22,8 @@ from spectrochempy.core.units import Unit
 from spectrochempy.core.units import set_nmr_context
 from spectrochempy.core.units import ur
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import info_
 from spectrochempy.utils.constants import DEFAULT_DIM_NAME
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import MASKED
@@ -37,8 +39,6 @@ from spectrochempy.utils.print import insert_masked_print
 from spectrochempy.utils.print import numpyprintoptions
 from spectrochempy.utils.typeutils import is_number
 from spectrochempy.utils.typeutils import is_sequence
-from spectrochempy.utils._logging import error_
-from spectrochempy.utils._logging import info_
 
 # Printing settings
 # --------------------------------------------------------------------------------------

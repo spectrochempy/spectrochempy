@@ -16,11 +16,12 @@ Run with:
 import numpy as np
 import pytest
 from matplotlib import rcParams
-from matplotlib.colors import ListedColormap, Normalize, TwoSlopeNorm
+from matplotlib.colors import ListedColormap
+from matplotlib.colors import Normalize
+from matplotlib.colors import TwoSlopeNorm
 
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences
-
 
 # ======================================================================================
 # Test Fixtures and Helpers
@@ -817,9 +818,9 @@ def test_colorbar_ticks_monotonic(sample_dataset, clean_preferences, clean_rcpar
     ax = sample_dataset.plot_contour(colorbar=True)
     ticks = get_colorbar_ticks(ax)
     assert ticks is not None, "Should have colorbar ticks"
-    assert all(ticks[i] < ticks[i + 1] for i in range(len(ticks) - 1)), (
-        "Ticks should be monotonic"
-    )
+    assert all(
+        ticks[i] < ticks[i + 1] for i in range(len(ticks) - 1)
+    ), "Ticks should be monotonic"
 
 
 def test_colorbar_continuous_mapping(sample_dataset, clean_preferences, clean_rcparams):
@@ -828,9 +829,9 @@ def test_colorbar_continuous_mapping(sample_dataset, clean_preferences, clean_rc
     mappable = get_mappable_from_ax(ax)
     assert mappable is not None
     # Should NOT be ListedColormap (categorical)
-    assert not isinstance(mappable.get_cmap(), ListedColormap), (
-        "Should use continuous colormap"
-    )
+    assert not isinstance(
+        mappable.get_cmap(), ListedColormap
+    ), "Should use continuous colormap"
 
 
 def test_colorbar_cmap_name_consistent(

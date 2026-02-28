@@ -7,12 +7,9 @@ This module tests core 1D plotting capabilities that were previously
 broken but are now working after the critical bug fixes.
 """
 
-import pytest
 import matplotlib.pyplot as plt
-import numpy as np
+import pytest
 from matplotlib.axes import Axes
-
-from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 class Test1DPlotting:

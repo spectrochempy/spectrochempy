@@ -36,7 +36,6 @@
 
 # %%
 import spectrochempy as scp
-from spectrochempy import info_
 
 # %% [markdown]
 # First, we import a sample raman spectrum:
@@ -123,7 +122,7 @@ filter = scp.Filter(
     method="han", size=7
 )  # can also be one of 'hamming', 'bartlett', # 'blackman'.
 Xhan = filter(Xn)
-scp.plot_compare(Xsm, Xn,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           title="Hanning filter (7 points)")
+scp.plot_compare(Xsm, Xn, title="Hanning filter (7 points)")
 
 # %% [markdown]
 # ### Savitzky-Golay filter

@@ -61,7 +61,9 @@ _ = ds.plot(marker="o")
 #
 # Restrict the displayed range:
 # %%
-_ = ds.plot(xlim=(2000, 1000)) # NB: slicing is also possible here, ds[:,2000.:1000.].plot() would give the same result
+_ = ds.plot(
+    xlim=(2000, 1000)
+)  # NB: slicing is also possible here, ds[:,2000.:1000.].plot() would give the same result
 
 # %%
 _ = ds.plot(ylim=(0, 0.5))

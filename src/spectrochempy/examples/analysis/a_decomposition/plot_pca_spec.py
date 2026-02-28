@@ -60,9 +60,9 @@ pca.plot_score(components=(1, 2, 3))
 pca.loadings[:4].plot(legend=True)
 # %%
 # Here we do a masking of the saturated region between 882 and 1280 cm^-1
-dataset[:, 882.0:1280.0] = (
-    scp.MASKED
-)  # remember: use float numbers for slicing (not integer)
+dataset[
+    :, 882.0:1280.0
+] = scp.MASKED  # remember: use float numbers for slicing (not integer)
 _ = dataset.plot()
 # %%
 # Apply the PCA model

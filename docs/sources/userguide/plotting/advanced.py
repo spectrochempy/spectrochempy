@@ -59,7 +59,7 @@ _ = ds.plot(ax=ax1)
 ax1.set_title("Full Spectrum")
 
 # Plot 2: subset
-_ = ds[:,1800.:1500.].plot(ax=ax2)
+_ = ds[:, 1800.0:1500.0].plot(ax=ax2)
 ax2.set_title("Water bending Region")
 
 plt.tight_layout()

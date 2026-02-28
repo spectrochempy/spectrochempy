@@ -5,7 +5,6 @@
 # ======================================================================================
 """Display the info string at API startup."""
 
-import importlib
 import subprocess
 
 import numpy as np
@@ -43,7 +42,6 @@ def _get_version():
     """
     # Try importlib.metadata first (works for installed packages)
     try:
-        from importlib.metadata import PackageNotFoundError
         from importlib.metadata import version
 
         return version("spectrochempy")

@@ -15,11 +15,9 @@ __all__ = ["plot_3D", "plot_surface", "plot_waterfall"]
 __dataset_methods__ = __all__
 
 # Re-export from new location for backward compatibility
-from spectrochempy.plotting.plot3d import (
-    plot_3D,
-    plot_surface,
-    plot_waterfall,
-)
+from spectrochempy.plotting.plot3d import plot_3D
+from spectrochempy.plotting.plot3d import plot_surface
+from spectrochempy.plotting.plot3d import plot_waterfall
 
 plot_3D = plot_3D
 plot_surface = plot_surface

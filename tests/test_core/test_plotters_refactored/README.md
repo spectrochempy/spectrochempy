@@ -20,7 +20,7 @@ Test Suite Structure
 tests/test_core/test_plotters_refactored/
 ├── conftest.py                    # Shared fixtures and utilities
 ├── test_plot_1d.py              # 1D plotting tests
-├── test_plot_2d.py              # 2D plotting tests  
+├── test_plot_2d.py              # 2D plotting tests
 ├── test_plot_3d.py              # 3D plotting tests
 ├── test_multiplot.py             # Multiplot tests
 ├── test_lazy_init.py             # Lazy initialization tests

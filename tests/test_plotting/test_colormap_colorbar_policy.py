@@ -291,9 +291,9 @@ class TestStackColorbarRegression:
         y_coord = scp.Coord(np.linspace(100, 200, 10), title="wavelength")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
         ax = ds.plot_2D(method="lines")
-        assert hasattr(ax, "_scp_colorbar"), (
-            "Continuous stack should have colorbar in auto mode"
-        )
+        assert hasattr(
+            ax, "_scp_colorbar"
+        ), "Continuous stack should have colorbar in auto mode"
 
     def test_stack_auto_colorbar_categorical(self):
         """Categorical stack should NOT show colorbar in auto mode."""
@@ -304,9 +304,9 @@ class TestStackColorbarRegression:
         y_coord = scp.Coord(labels=["A", "B", "C", "D", "E"], title="sample")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
         ax = ds.plot_2D(method="lines")
-        assert not hasattr(ax, "_scp_colorbar"), (
-            "Categorical stack should not have colorbar in auto mode"
-        )
+        assert not hasattr(
+            ax, "_scp_colorbar"
+        ), "Categorical stack should not have colorbar in auto mode"
 
     def test_stack_colorbar_true_continuous(self):
         """colorbar=True for continuous stack should show colorbar."""
@@ -317,9 +317,9 @@ class TestStackColorbarRegression:
         y_coord = scp.Coord(np.linspace(100, 200, 10), title="wavelength")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
         ax = ds.plot_2D(method="lines", colorbar=True)
-        assert hasattr(ax, "_scp_colorbar"), (
-            "Continuous stack with colorbar=True should have colorbar"
-        )
+        assert hasattr(
+            ax, "_scp_colorbar"
+        ), "Continuous stack with colorbar=True should have colorbar"
 
     def test_stack_colorbar_false_continuous(self):
         """colorbar=False for continuous stack should NOT show colorbar."""
@@ -330,9 +330,9 @@ class TestStackColorbarRegression:
         y_coord = scp.Coord(np.linspace(100, 200, 10), title="wavelength")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
         ax = ds.plot_2D(method="lines", colorbar=False)
-        assert not hasattr(ax, "_scp_colorbar"), (
-            "Continuous stack with colorbar=False should not have colorbar"
-        )
+        assert not hasattr(
+            ax, "_scp_colorbar"
+        ), "Continuous stack with colorbar=False should not have colorbar"
 
     def test_stack_colorbar_true_categorical(self):
         """colorbar=True for categorical stack should NOT show colorbar (no mappable)."""
@@ -343,9 +343,9 @@ class TestStackColorbarRegression:
         y_coord = scp.Coord(labels=["A", "B", "C", "D", "E"], title="sample")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
         ax = ds.plot_2D(method="lines", colorbar=True)
-        assert not hasattr(ax, "_scp_colorbar"), (
-            "Categorical stack has no mappable, so colorbar=True should not create one"
-        )
+        assert not hasattr(
+            ax, "_scp_colorbar"
+        ), "Categorical stack has no mappable, so colorbar=True should not create one"
 
     def test_stack_method_alias(self):
         """Both 'stack' and 'lines' methods should behave identically."""
@@ -364,9 +364,9 @@ class TestStackColorbarRegression:
         ax2 = ds.plot_2D(method="stack")
         has_colorbar_stack = hasattr(ax2, "_scp_colorbar")
 
-        assert has_colorbar_lines == has_colorbar_stack, (
-            "Both 'lines' and 'stack' methods should have same colorbar behavior"
-        )
+        assert (
+            has_colorbar_lines == has_colorbar_stack
+        ), "Both 'lines' and 'stack' methods should have same colorbar behavior"
 
 
 class TestStyleIntegration:
@@ -401,7 +401,8 @@ class TestStyleIntegration:
             scp.preferences.colormap = orig_colormap
 
     def test_style_grayscale_affects_diverging(self):
-        """Grayscale style should affect diverging colormap in auto mode.
+        """
+        Grayscale style should affect diverging colormap in auto mode.
 
         Diverging under grayscale MUST remain grayscale (difference only via norm).
         """
@@ -445,9 +446,9 @@ class TestStyleIntegration:
                 if isinstance(color, tuple) and len(color) >= 3:
                     r, g, b = color[:3]
                     # Allow small tolerance for grayscale
-                    assert abs(r - g) < 0.1 and abs(g - b) < 0.1, (
-                        f"Line color {color} is not grayscale"
-                    )
+                    assert (
+                        abs(r - g) < 0.1 and abs(g - b) < 0.1
+                    ), f"Line color {color} is not grayscale"
         finally:
             scp.preferences.style = orig_style
             scp.preferences.colormap = orig_colormap
@@ -498,6 +499,7 @@ class TestStyleIntegration:
     def test_style_context_active_during_resolution(self):
         """Verify that matplotlib rcParams reflect style during colormap resolution."""
         import matplotlib as mpl
+
         import spectrochempy as scp
 
         orig_style = scp.preferences.style
@@ -557,7 +559,8 @@ class TestStyleIntegration:
             scp.preferences.colormap = orig_colormap
 
     def test_style_context_active_during_resolution(self):
-        """Verify that grayscale style produces grayscale colormap in auto mode.
+        """
+        Verify that grayscale style produces grayscale colormap in auto mode.
 
         This is a functional test - if the style context is active during resolution,
         the resulting colormap will be grayscale.
@@ -576,9 +579,9 @@ class TestStyleIntegration:
             cmap_name = self._get_cmap_name(ax)
 
             # If style context was active, colormap should be gray
-            assert cmap_name == "gray", (
-                f"Expected 'gray' colormap from grayscale style, got '{cmap_name}'"
-            )
+            assert (
+                cmap_name == "gray"
+            ), f"Expected 'gray' colormap from grayscale style, got '{cmap_name}'"
         finally:
             scp.preferences.style = orig_style
             scp.preferences.colormap = orig_colormap

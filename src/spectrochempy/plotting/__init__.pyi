@@ -7,8 +7,11 @@
 # ruff: noqa
 
 __all__ = [
+    "_colorbar_utils",
     "_mpl_assets",
-    "backends",
+    "_render",
+    "_style",
+    "composite",
     "dispatcher",
     "multiplot",
     "plot1d",
@@ -18,8 +21,11 @@ __all__ = [
     "profile",
 ]
 
+from . import _colorbar_utils
 from . import _mpl_assets
-from . import backends
+from . import _render
+from . import _style
+from . import composite
 from . import dispatcher
 from . import multiplot
 from . import plot1d

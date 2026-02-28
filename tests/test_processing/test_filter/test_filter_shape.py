@@ -41,9 +41,9 @@ class TestFilterShapePreservation:
         result = scp.Filter(method="savgol", size=5, order=2).transform(
             dataset_2d_single_row
         )
-        assert result.ndim == 2, (
-            f"Expected 2D output for 2D (1, N) input, got {result.ndim}D"
-        )
+        assert (
+            result.ndim == 2
+        ), f"Expected 2D output for 2D (1, N) input, got {result.ndim}D"
         assert result.shape == (
             1,
             100,

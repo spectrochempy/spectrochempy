@@ -9,7 +9,7 @@ This guide helps agentic coding agents work effectively with the SpectroChemPy c
 # Install with development dependencies
 python -m pip install ".[dev]"
 
-# Install with test dependencies  
+# Install with test dependencies
 python -m pip install ".[test]"
 
 # Install all optional dependencies
@@ -199,4 +199,3 @@ from spectrochempy.utils.testing import (
 - `src/spectrochempy/utils/exceptions.py` - Exception hierarchy
 - `src/spectrochempy/core/dataset/nddataset.py` - Main data container
 - `src/spectrochempy/core/plotters/_mpl_setup.py` - Matplotlib configuration
-

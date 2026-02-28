@@ -112,17 +112,11 @@ def plot_baseline(
         ax2.cla()
 
     if original.ndim not in (1, 2):
-        raise ValueError(
-            f"original must be 1D or 2D, got ndim={original.ndim}"
-        )
+        raise ValueError(f"original must be 1D or 2D, got ndim={original.ndim}")
     if baseline.ndim not in (1, 2):
-        raise ValueError(
-            f"baseline must be 1D or 2D, got ndim={baseline.ndim}"
-        )
+        raise ValueError(f"baseline must be 1D or 2D, got ndim={baseline.ndim}")
     if corrected.ndim not in (1, 2):
-        raise ValueError(
-            f"corrected must be 1D or 2D, got ndim={corrected.ndim}"
-        )
+        raise ValueError(f"corrected must be 1D or 2D, got ndim={corrected.ndim}")
 
     if original.ndim == 1:
         orig_data = np.asarray(original.masked_data).reshape(1, -1)

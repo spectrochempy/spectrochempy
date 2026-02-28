@@ -27,19 +27,19 @@ __dataset_methods__ = [  # Methods that can be called as API functions
 
 
 import textwrap
-from typing import Any
-
-import numpy as np
-import traitlets as tr
-from tzlocal import get_localzone
 
 # Lazy import to avoid triggering matplotlib at module load time
 from contextlib import suppress
 from datetime import UTC
 from datetime import datetime
 from datetime import tzinfo
+from typing import Any
 from zoneinfo import ZoneInfo
 from zoneinfo import ZoneInfoNotFoundError
+
+import numpy as np
+import traitlets as tr
+from tzlocal import get_localzone
 
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
@@ -50,12 +50,12 @@ from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
-from spectrochempy.utils._logging import warning_
 
 
 # ======================================================================================
@@ -1640,7 +1640,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     @property
     def fig(self):
-        """Matplotlib figure (deprecated).
+        """
+        Matplotlib figure (deprecated).
 
         Figure management is now handled by spectrochempy.plotting functions.
         The returned axes from plot() has a .figure attribute.
@@ -1652,7 +1653,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     @property
     def ndaxes(self):
-        """Matplotlib axes dictionary (deprecated).
+        """
+        Matplotlib axes dictionary (deprecated).
 
         Axes are no longer stored on NDDataset.
         Use the returned axes from plot() instead.
@@ -1664,7 +1666,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     @property
     def ax(self):
-        """Main matplotlib axes (deprecated).
+        """
+        Main matplotlib axes (deprecated).
 
         Axes are no longer stored on NDDataset.
         Use the returned axes from plot() instead.

@@ -22,6 +22,8 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
@@ -29,8 +31,6 @@ from spectrochempy.utils.objects import OrderedSet
 from spectrochempy.utils.quaternion import as_quaternion
 from spectrochempy.utils.quaternion import quat_as_complex_array
 from spectrochempy.utils.testing import assert_coord_almost_equal
-from spectrochempy.utils._logging import error_
-from spectrochempy.utils._logging import warning_
 
 __all__ = []
 __dataset_methods__ = []

@@ -47,9 +47,9 @@ class TestPlotScoreLabelsWorkflow:
             scores=scores, show_labels=True, labels_column=2, show=False
         )
 
-        assert len(ax.texts) == scores.shape[0], (
-            f"Expected {scores.shape[0]} label texts, got {len(ax.texts)}"
-        )
+        assert (
+            len(ax.texts) == scores.shape[0]
+        ), f"Expected {scores.shape[0]} label texts, got {len(ax.texts)}"
         plt.close()
 
     def test_plot_score_uses_modified_scores(self):
@@ -83,12 +83,12 @@ class TestPlotScoreLabelsWorkflow:
         )
 
         text_labels = [t.get_text() for t in ax.texts]
-        assert "Sample_0" in text_labels, (
-            f"Expected 'Sample_0' in labels, got {text_labels}"
-        )
-        assert "Sample_5" in text_labels, (
-            f"Expected 'Sample_5' in labels, got {text_labels}"
-        )
+        assert (
+            "Sample_0" in text_labels
+        ), f"Expected 'Sample_0' in labels, got {text_labels}"
+        assert (
+            "Sample_5" in text_labels
+        ), f"Expected 'Sample_5' in labels, got {text_labels}"
         plt.close()
 
     def test_plot_score_without_scores_argument(self):

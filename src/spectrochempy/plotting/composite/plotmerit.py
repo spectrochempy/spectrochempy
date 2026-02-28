@@ -18,13 +18,11 @@ __all__ = ["plot_merit", "plot_compare"]
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib.lines import Line2D
 
 from spectrochempy.plotting._render import render_lines
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.mplutils import show as mpl_show
-
 
 # ======================================================================================
 # Generic comparison function

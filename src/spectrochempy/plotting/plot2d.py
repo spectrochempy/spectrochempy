@@ -17,12 +17,11 @@ __all__ = [
 __dataset_methods__ = __all__
 
 
-from contextlib import suppress
-
 import numpy as np
 from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
+from spectrochempy.application.application import info_
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.plotting._colorbar_utils import _apply_colorbar_tick_policy
@@ -31,8 +30,6 @@ from spectrochempy.plotting._style import resolve_2d_colormap
 from spectrochempy.plotting._style import resolve_line_style
 from spectrochempy.plotting._style import resolve_stack_colors
 from spectrochempy.utils.mplutils import make_label
-from spectrochempy.application.application import info_
-
 
 # ======================================================================================
 # Helper functions for aspect ratio control
@@ -1668,11 +1665,11 @@ def plot_2D(dataset, method=None, **kwargs):
                 y_coord_array = np.asarray(y_coord_data)
                 use_index_fallback = False
 
-                if y_coord_data is None:
-                    use_index_fallback = True
-                elif y_coord_array.dtype == object:
-                    use_index_fallback = True
-                elif not np.issubdtype(y_coord_array.dtype, np.number):
+                if (
+                    y_coord_data is None
+                    or y_coord_array.dtype == object
+                    or not np.issubdtype(y_coord_array.dtype, np.number)
+                ):
                     use_index_fallback = True
 
                 if use_index_fallback:
@@ -2109,7 +2106,8 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
                 line_color = "k"
 
         # Enforce strict RGBA normalization to prevent silent fallback to prop_cycle
-        from matplotlib.colors import to_rgba, is_color_like
+        from matplotlib.colors import is_color_like
+        from matplotlib.colors import to_rgba
 
         if not is_color_like(line_color):
             raise ValueError(

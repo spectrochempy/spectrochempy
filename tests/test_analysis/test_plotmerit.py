@@ -86,8 +86,9 @@ def test_plotmerit_single_index():
     import matplotlib
 
     matplotlib.use("Agg")
-    import spectrochempy as scp
     import matplotlib.pyplot as plt
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -135,8 +136,9 @@ def test_plotmerit_multi_index():
     import matplotlib
 
     matplotlib.use("Agg")
-    import spectrochempy as scp
     import matplotlib.pyplot as plt
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -185,8 +187,9 @@ def test_plotmerit_all_regularizations():
     import matplotlib
 
     matplotlib.use("Agg")
-    import spectrochempy as scp
     import matplotlib.pyplot as plt
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -235,9 +238,10 @@ def test_plotmerit_y_limits():
     import matplotlib
 
     matplotlib.use("Agg")
-    import spectrochempy as scp
     import matplotlib.pyplot as plt
     import numpy as np
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -302,7 +306,7 @@ def test_plotmerit_y_limits():
     else:
         expected_pad = 0.02 * max(1.0, abs(main_max), abs(res_min))
 
-    assert y_max <= main_max + expected_pad * 1.1, f"y_max has too much padding"
+    assert y_max <= main_max + expected_pad * 1.1, "y_max has too much padding"
 
     plt.close()
 
@@ -312,8 +316,9 @@ def test_plotmerit_zorder():
     import matplotlib
 
     matplotlib.use("Agg")
-    import spectrochempy as scp
     import matplotlib.pyplot as plt
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -361,11 +366,11 @@ def test_plotmerit_zorder():
     assert all(z == 1 for z in recon_zorders), "All reconstructed zorders should be 1"
     assert all(z == 2 for z in exp_zorders), "All experimental zorders should be 2"
 
-    assert max(res_zorders) < min(recon_zorders), (
-        "Residuals should be behind reconstructed"
-    )
-    assert max(recon_zorders) < min(exp_zorders), (
-        "Reconstructed should be behind experimental"
-    )
+    assert max(res_zorders) < min(
+        recon_zorders
+    ), "Residuals should be behind reconstructed"
+    assert max(recon_zorders) < min(
+        exp_zorders
+    ), "Reconstructed should be behind experimental"
 
     plt.close()

@@ -18,7 +18,9 @@ import pytest
 matplotlib.use("Agg", force=True)
 
 import matplotlib.pyplot as plt
-from spectrochempy import NDDataset, Coord
+
+from spectrochempy import Coord
+from spectrochempy import NDDataset
 
 
 @pytest.fixture
@@ -92,22 +94,22 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
         before_dict = dataset_before.__dict__
 
     # Dataset dictionary must be identical
-    assert before_dict == dataset_after.__dict__, (
-        "Dataset object was mutated by plotting - violates stateless architecture"
-    )
+    assert (
+        before_dict == dataset_after.__dict__
+    ), "Dataset object was mutated by plotting - violates stateless architecture"
 
     # No plotting attributes should exist
-    assert not hasattr(dataset_after, "fig"), (
-        "Dataset should not have 'fig' attribute after plotting"
-    )
-    assert not hasattr(dataset_after, "ndaxes"), (
-        "Dataset should not have 'ndaxes' attribute after plotting"
-    )
+    assert not hasattr(
+        dataset_after, "fig"
+    ), "Dataset should not have 'fig' attribute after plotting"
+    assert not hasattr(
+        dataset_after, "ndaxes"
+    ), "Dataset should not have 'ndaxes' attribute after plotting"
 
     # No plotting attributes should exist
-    assert not hasattr(dataset_after, "fig"), (
-        "Dataset should not have 'fig' attribute after plotting"
-    )
-    assert not hasattr(dataset_after, "ndaxes"), (
-        "Dataset should not have 'ndaxes' attribute after plotting"
-    )
+    assert not hasattr(
+        dataset_after, "fig"
+    ), "Dataset should not have 'fig' attribute after plotting"
+    assert not hasattr(
+        dataset_after, "ndaxes"
+    ), "Dataset should not have 'ndaxes' attribute after plotting"

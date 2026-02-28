@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
+import numpy as np
+
 from spectrochempy import NDDataset
 from spectrochempy.core.dataset.coord import Coord
-import numpy as np
 
 # Create a simple 1D dataset
 x = np.linspace(200, 300, 100)

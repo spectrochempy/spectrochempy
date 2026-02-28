@@ -30,10 +30,6 @@ This achieves the performance goal: 2.5+ second import time improvement.
 """
 
 import contextlib
-import copy
-import threading
-from enum import Enum
-from typing import Any, Dict, Optional
 
 # NO matplotlib imports at module level!
 # These will be imported lazily when needed.
@@ -89,7 +85,6 @@ def lazy_ensure_mpl_config() -> None:
         return
 
     # Import matplotlib (this is the lazy part)
-    import matplotlib.pyplot as plt
 
     # Install assets once per process
     global _ASSETS_INSTALLED
@@ -156,4 +151,4 @@ def get_import_time_rcparams():
         DeprecationWarning,
         stacklevel=2,
     )
-    return None
+    return

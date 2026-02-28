@@ -251,9 +251,9 @@ class PreferencesSet(Meta):
 
         """
         # Lazy import to avoid triggering matplotlib at module load time
-        from spectrochempy.application.application import error_
-
         import matplotlib as mpl
+
+        from spectrochempy.application.application import error_
 
         if stylename.startswith("scpy"):
             error_(

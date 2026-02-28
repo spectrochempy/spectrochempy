@@ -14,12 +14,10 @@ Tests ensure that:
 5. sans style changes font.family
 """
 
-import importlib.resources
 from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import pytest
 
 
 class TestStylesheetPresence:
@@ -30,9 +28,9 @@ class TestStylesheetPresence:
         from spectrochempy.utils.packages import get_pkg_path
 
         stylesheets_path = get_pkg_path("plotting/stylesheets", "spectrochempy")
-        assert stylesheets_path.exists(), (
-            f"Stylesheets directory not found: {stylesheets_path}"
-        )
+        assert (
+            stylesheets_path.exists()
+        ), f"Stylesheets directory not found: {stylesheets_path}"
 
     def test_scpy_stylesheet_exists(self):
         """Verify scpy.mplstyle exists."""
@@ -71,9 +69,9 @@ class TestScpyStyleContent:
         content = scpy_path.read_text()
 
         lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")]
-        assert len(lines) >= 5, (
-            f"scpy.mplstyle should have at least 5 non-comment lines, got {len(lines)}"
-        )
+        assert (
+            len(lines) >= 5
+        ), f"scpy.mplstyle should have at least 5 non-comment lines, got {len(lines)}"
 
     def test_scpy_modifies_rcparams(self):
         """Verify scpy style modifies rcParams meaningfully within context."""
@@ -108,9 +106,9 @@ class TestScpyStyleContent:
 
         with plt.style.context(str(scpy_path)):
             facecolor = mpl.rcParams["figure.facecolor"]
-            assert facecolor == "white", (
-                f"scpy should set figure.facecolor to white, even after dark_background. Got: {facecolor}"
-            )
+            assert (
+                facecolor == "white"
+            ), f"scpy should set figure.facecolor to white, even after dark_background. Got: {facecolor}"
 
         plt.style.use("default")
 
@@ -127,9 +125,9 @@ class TestPaperStyleContent:
         content = paper_path.read_text()
 
         lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")]
-        assert len(lines) >= 3, (
-            f"paper.mplstyle should have at least 3 non-comment lines, got {len(lines)}"
-        )
+        assert (
+            len(lines) >= 3
+        ), f"paper.mplstyle should have at least 3 non-comment lines, got {len(lines)}"
 
     def test_paper_changes_dpi(self):
         """Verify paper style changes DPI from default."""
@@ -145,9 +143,9 @@ class TestPaperStyleContent:
         with plt.style.context("paper"):
             paper_figsize = mpl.rcParams["figure.figsize"]
 
-        assert paper_figsize != default_figsize, (
-            f"paper style should change figsize from default {default_figsize}"
-        )
+        assert (
+            paper_figsize != default_figsize
+        ), f"paper style should change figsize from default {default_figsize}"
 
 
 class TestSansStyleContent:
@@ -162,9 +160,9 @@ class TestSansStyleContent:
         content = sans_path.read_text()
 
         lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")]
-        assert len(lines) >= 1, (
-            f"sans.mplstyle should have at least 1 non-comment line, got {len(lines)}"
-        )
+        assert (
+            len(lines) >= 1
+        ), f"sans.mplstyle should have at least 1 non-comment line, got {len(lines)}"
 
     def test_sans_changes_font_family(self):
         """Verify sans style sets font.family to sans-serif."""
@@ -177,13 +175,13 @@ class TestSansStyleContent:
             family = mpl.rcParams["font.family"]
 
         if isinstance(family, list):
-            assert "sans-serif" in family, (
-                f"sans style should include 'sans-serif' in font.family, got {family}"
-            )
+            assert (
+                "sans-serif" in family
+            ), f"sans style should include 'sans-serif' in font.family, got {family}"
         else:
-            assert family == "sans-serif", (
-                f"sans style should set font.family to 'sans-serif', got {family}"
-            )
+            assert (
+                family == "sans-serif"
+            ), f"sans style should set font.family to 'sans-serif', got {family}"
 
 
 class TestPrefsStylesheetsDefault:

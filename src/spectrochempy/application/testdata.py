@@ -5,12 +5,6 @@
 # ======================================================================================
 """Testdata downloading."""
 
-import io
-from pathlib import Path
-from zipfile import ZipFile
-
-import requests
-
 
 # --------------------------------------------------------------------------------------
 # Testdata
@@ -41,9 +35,9 @@ def download_full_testdata_directory(datadir, force=False):
     )
 
     import tempfile
-    import requests
     from zipfile import ZipFile
-    from pathlib import Path
+
+    import requests
 
     # ------------------------------------------------------------------
     # Perform HTTP request
@@ -97,7 +91,6 @@ def download_full_testdata_directory(datadir, force=False):
     # ------------------------------------------------------------------
     with ZipFile(tmp_path) as zipfile:
         for name in zipfile.namelist():
-
             # Skip directories and non-testdata files
             if name.endswith("/") or "testdata/" not in name:
                 continue
@@ -123,4 +116,3 @@ def download_full_testdata_directory(datadir, force=False):
     # unless force=True is explicitly passed.
     # ------------------------------------------------------------------
     downloaded.touch(exist_ok=True)
-

@@ -83,4 +83,3 @@ The following pages introduce plotting progressively:
    plot_types
    styles
    advanced
-

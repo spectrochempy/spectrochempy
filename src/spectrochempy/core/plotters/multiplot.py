@@ -24,16 +24,14 @@ __all__ = [
 __dataset_methods__ = __all__
 
 # Re-export from new location for backward compatibility
-from spectrochempy.plotting.multiplot import (
-    multiplot,
-    multiplot_map,
-    multiplot_stack,
-    multiplot_image,
-    multiplot_lines,
-    multiplot_scatter,
-    multiplot_with_transposed,
-    plot_with_transposed,
-)
+from spectrochempy.plotting.multiplot import multiplot
+from spectrochempy.plotting.multiplot import multiplot_image
+from spectrochempy.plotting.multiplot import multiplot_lines
+from spectrochempy.plotting.multiplot import multiplot_map
+from spectrochempy.plotting.multiplot import multiplot_scatter
+from spectrochempy.plotting.multiplot import multiplot_stack
+from spectrochempy.plotting.multiplot import multiplot_with_transposed
+from spectrochempy.plotting.multiplot import plot_with_transposed
 
 multiplot = multiplot
 multiplot_map = multiplot_map

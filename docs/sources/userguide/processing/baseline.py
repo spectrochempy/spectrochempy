@@ -324,7 +324,9 @@ _ = A1.plot()
 # with `A.detrend(order="linear")` or simply `A.detrend()` as "linear" is the default.
 
 # %%
-A2 = scp.detrend(A)  # Here we use the API method (this is fully equivalent to the NDDataset method)
+A2 = scp.detrend(
+    A
+)  # Here we use the API method (this is fully equivalent to the NDDataset method)
 _ = A2.plot()
 
 # %% [markdown]

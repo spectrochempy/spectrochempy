@@ -33,9 +33,8 @@ __all__ = [
     "build_font_rc_overrides",
 ]
 
-import numpy as np
-
 import matplotlib as mpl
+import numpy as np
 
 _MPL_DEFAULT_IMAGE_CMAP = mpl.rcParamsDefault["image.cmap"]
 

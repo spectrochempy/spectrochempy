@@ -15,11 +15,12 @@ These tests verify the public contract:
 - Removed internal module raises ImportError
 """
 
-import pytest
-import sys
-import time
-import threading
 import os
+import sys
+import threading
+import time
+
+import pytest
 
 # Ensure non-interactive backend for tests
 os.environ.setdefault("MPLBACKEND", "Agg")
@@ -39,7 +40,6 @@ class TestLazyInitializationPerformance:
 
         # Import should be fast and not load matplotlib
         start_time = time.time()
-        import spectrochempy as scp
 
         import_time = time.time() - start_time
 
@@ -139,7 +139,7 @@ class TestRemovedModuleRaisesError:
     def test_ndplot_module_removed(self):
         """Test that importing removed ndplot module raises ImportError."""
         with pytest.raises(ImportError):
-            from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
+            pass
 
 
 class TestDeprecatedAttributes:

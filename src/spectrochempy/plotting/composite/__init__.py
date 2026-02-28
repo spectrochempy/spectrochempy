@@ -1,24 +1,8 @@
-## ======================================================================================
-# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Composite plotting module."""
 
-__all__ = [
-    "plot_merit",
-    "plot_baseline",
-    "plot_iris_lcurve",
-    "plot_iris_distribution",
-    "plot_iris_merit",
-    "plot_scree",
-    "plot_score",
-]
+import lazy_loader as _lazy_loader
 
-from spectrochempy.plotting.composite.iris import plot_iris_distribution
-from spectrochempy.plotting.composite.iris import plot_iris_lcurve
-from spectrochempy.plotting.composite.iris import plot_iris_merit
-from spectrochempy.plotting.composite.plotbaseline import plot_baseline
-from spectrochempy.plotting.composite.plotmerit import plot_merit
-from spectrochempy.plotting.composite.plotscree import plot_scree
-from spectrochempy.plotting.composite.plotscore import plot_score
+# --------------------------------------------------------------------------------------
+# Lazy loading of sub-packages
+# --------------------------------------------------------------------------------------
+__getattr__, __dir__, __all__ = _lazy_loader.attach_stub(__name__, __file__)

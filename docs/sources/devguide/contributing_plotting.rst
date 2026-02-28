@@ -155,7 +155,7 @@ lazy awareness:
         if not _is_mpl_initialized():
             _defer_preference_change(change)
             return
-        
+
         # Apply immediately if matplotlib is ready
         _apply_preference_change(change)
 
@@ -412,11 +412,11 @@ Example of safe matplotlib usage:
 
     def some_plotting_function():
         from spectrochempy.core.plotters.plot_setup import _is_mpl_initialized
-        
+
         if not _is_mpl_initialized():
             # Queue operation or trigger lazy init
             lazy_ensure_mpl_config()
-        
+
         # Now safe to use matplotlib
         import matplotlib.pyplot as plt
         plt.plot([...])

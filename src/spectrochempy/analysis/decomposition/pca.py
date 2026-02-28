@@ -7,15 +7,11 @@
 
 import warnings
 
-import matplotlib.pyplot as plt
 import numpy as np
 import traitlets as tr
-from matplotlib.ticker import MaxNLocator
-from matplotlib.ticker import ScalarFormatter
 from numpy.random import RandomState
 from sklearn import decomposition
 
-from spectrochempy import preferences as prefs
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset

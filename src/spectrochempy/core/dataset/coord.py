@@ -17,6 +17,7 @@ from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
+from spectrochempy.utils._logging import error_
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.decorators import deprecated
@@ -26,7 +27,6 @@ from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.typeutils import is_iterable
 from spectrochempy.utils.typeutils import is_number
-from spectrochempy.utils._logging import error_
 
 
 # ======================================================================================

@@ -10,7 +10,7 @@ This module routes plotting calls to the appropriate backend based on
 the specified backend name. Currently supports matplotlib.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 _BACKEND_REGISTRY = {}
 
@@ -27,7 +27,7 @@ def get_available_backends() -> list[str]:
 
 def plot_dataset(
     dataset: Any,
-    method: Optional[str] = None,
+    method: str | None = None,
     backend: str = "matplotlib",
     **kwargs: Any,
 ) -> Any:

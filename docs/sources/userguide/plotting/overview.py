@@ -87,7 +87,7 @@ _ = ds.plot_image()
 # For line plots, however, you can disable continuous colormaps and force use categorical colors:
 
 # %%
-_ = ds.plot_lines(palette='categorical')
+_ = ds.plot_lines(palette="categorical")
 
 # %% [markdown]
 # For images and contours, you can also override the default sequential/diverging colormap behavior. Lets first have a
@@ -121,7 +121,7 @@ _ = ds.plot_lines(palette='categorical')
 # a sequential or diverging colormap is used/
 
 # %%
-_ = ds.plot_contour(colorbar='auto')  # shows colorbar whenever applicable
+_ = ds.plot_contour(colorbar="auto")  # shows colorbar whenever applicable
 
 # %% [markdown]
 # ## Changing the Colormap
@@ -153,7 +153,7 @@ _ = ds.plot(cmap="plasma")  # note that palette="plasma" would also work for lin
 # You can change the visual appearance using styles:
 
 # %%
-_ = ds.plot(style='grayscale')
+_ = ds.plot(style="grayscale")
 
 # %% [markdown]
 # Styles can affect fonts, grid appearance, backgrounds, and (in auto mode) colormap defaults. When passes in a

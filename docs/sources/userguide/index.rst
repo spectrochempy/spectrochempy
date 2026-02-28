@@ -18,4 +18,3 @@ A comprehensive guide to using SCPY.
     analysis/index
     api/api
     objects/index
-

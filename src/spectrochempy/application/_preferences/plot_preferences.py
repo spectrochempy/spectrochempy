@@ -22,8 +22,8 @@ Key ideas
 This file is intentionally verbose and explicit to avoid hidden plotting
 side effects and make rcParams restoration possible.
 
-IMPORTANT:
-----------
+Important:
+---------
 This module lazy-loads matplotlib to avoid importing it at module import time.
 All matplotlib imports are inside functions that are only called during
 actual plotting, not at import/init time.
@@ -83,7 +83,6 @@ MARKER_KEYS = [
 #
 # This is very different from NumPy/Pandas, but closer to Jupyter/IPython,
 # where configuration is dynamic and user-facing.
-from traitlets import All
 from traitlets import Bool
 from traitlets import Enum
 from traitlets import Float
@@ -1618,7 +1617,6 @@ class PlotPreferences(MetaConfigurable):
         # a default.mplstyle file. # Attempting to load it from disk will fail
 
         import matplotlib as mpl
-        import matplotlib.pyplot as plt
 
         from spectrochempy.utils.file import pathclean
 

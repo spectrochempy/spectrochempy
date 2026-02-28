@@ -99,7 +99,7 @@ _ = new.plot(method="image", colorbar=True)
 
 _ = np.abs(new).plot(method="image", colorbar=True)
 
-#%% Contour plots are also available, with the same default colormap as for the image method:
+# %% Contour plots are also available, with the same default colormap as for the image method:
 _ = new.plot(method="map")
 _ = np.abs(new).plot(method="map")
 # %%

@@ -108,7 +108,7 @@ _ = new.plot(colorbar=True)
 # color map would have been chosen. The default behavior can be overriden by explictly passing a colomap. For instance,
 # if we want to use a categorical colormap instead of a sequential one, we can do:
 
-_ = new[:, 0:20].plot(cmap='tab20')
+_ = new[:, 0:20].plot(cmap="tab20")
 
 # %%
 # But it is possible to display image plot instead (note that the x-axis is in wavenumber and

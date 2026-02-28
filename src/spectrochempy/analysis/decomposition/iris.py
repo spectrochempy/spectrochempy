@@ -15,7 +15,6 @@ import numpy as np
 # QP solvers import
 import osqp
 import traitlets as tr
-
 from scipy import optimize
 from scipy import sparse
 
@@ -28,7 +27,8 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
-from spectrochempy.utils.decorators import signature_has_configurable_traits, deprecated
+from spectrochempy.utils.decorators import deprecated
+from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType

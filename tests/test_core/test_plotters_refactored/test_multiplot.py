@@ -7,12 +7,8 @@ This module tests the multiplot capabilities, focusing on the
 functionality that was previously broken due to transform errors but is now working.
 """
 
-import pytest
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.figure import Figure
-
-from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 class TestMultiplot:

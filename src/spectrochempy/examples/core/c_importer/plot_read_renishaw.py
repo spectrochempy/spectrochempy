@@ -28,7 +28,7 @@ _ = dataset.plot()
 # %%
 # Now read a series of spectra (measurement type : series) from a Z-depth scan.
 dataset = scp.read_wdf("ramandata/wire/depth.wdf")
-_ = dataset.plot(method='image')
+_ = dataset.plot(method="image")
 
 # %%
 # In this example, the diverging colormap is triggered because the dataset

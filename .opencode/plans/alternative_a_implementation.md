@@ -11,7 +11,7 @@ Achieve maximum import performance (900-2550ms savings) by deferring ALL matplot
 ```python
 class MPLInitState(Enum):
     NOT_INITIALIZED = "not_initialized"
-    INITIALIZING = "initializing" 
+    INITIALIZING = "initializing"
     INITIALIZED = "initialized"
     FAILED = "failed"
 
@@ -27,10 +27,10 @@ _MPL_INIT_ERROR = None
 def lazy_ensure_mpl_config() -> None:
     """
     LAZY initialization of ALL matplotlib functionality.
-    
+
     This is the single entry point that replaces ALL matplotlib setup
     currently scattered across app.start() and other initialization points.
-    
+
     Responsibilities:
     - Ensure matplotlib is safely initialized (backend-safe)
     - Snapshot user rcParams BEFORE any modifications
@@ -51,7 +51,7 @@ def lazy_ensure_mpl_config() -> None:
 def _anytrait_changed(self, change):
     """
     Synchronize trait changes → matplotlib.rcParams with LAZY deferral.
-    
+
     If matplotlib not yet initialized, queue the change for later application.
     If matplotlib initialized, apply immediately.
     """
@@ -65,10 +65,10 @@ def _anytrait_changed(self, change):
 ```python
 def _defer_preference_change(change: Dict[str, Any]) -> None:
     """Queue a preference change until matplotlib is initialized."""
-    
+
 def _apply_deferred_preferences() -> None:
     """Apply all queued preference changes after matplotlib initialization."""
-    
+
 def _synchronize_preferences_to_rcparams() -> None:
     """Synchronize all PlotPreferences to matplotlib rcParams."""
 ```
@@ -82,7 +82,7 @@ def plot(self, method: str | None = None, **kwargs: Any) -> _Axes | None:
     # LAZY TRIGGER: This is the ONLY place that initializes matplotlib
     from spectrochempy.core.plotters.plot_setup import lazy_ensure_mpl_config
     lazy_ensure_mpl_config()
-    
+
     # ... rest of existing plot logic
 ```
 
@@ -91,7 +91,7 @@ def plot(self, method: str | None = None, **kwargs: Any) -> _Axes | None:
 def ensure_spectrochempy_plot_style() -> None:
     """
     Legacy compatibility wrapper.
-    
+
     Now just calls lazy_ensure_mpl_config() for backward compatibility.
     """
     lazy_ensure_mpl_config()
@@ -163,10 +163,10 @@ dataset.plot() → lazy_ensure_mpl_config() → FULL matplotlib setup:
 ```python
 def test_import_performance():
     """Verify 2.5+ second import time improvement."""
-    
+
 def test_first_plot_performance():
     """Verify first plot time is acceptable (<3s)."""
-    
+
 def test_subsequent_plot_performance():
     """Verify subsequent plots are fast (<100ms)."""
 ```
@@ -175,13 +175,13 @@ def test_subsequent_plot_performance():
 ```python
 def test_lazy_initialization():
     """Verify matplotlib not modified before first plot."""
-    
+
 def test_preference_deferral():
     """Verify preference changes before init are applied correctly."""
-    
+
 def test_thread_safety():
     """Verify lazy init works in multi-threaded context."""
-    
+
 def test_backward_compatibility():
     """Ensure existing code continues to work."""
 ```
@@ -190,7 +190,7 @@ def test_backward_compatibility():
 ```python
 def test_restoration_accuracy():
     """Verify restore_rcparams() works with new timing."""
-    
+
 def test_visual_identicality():
     """Ensure plots look identical to current implementation."""
 ```
@@ -209,20 +209,20 @@ def test_visual_identicality():
 ### **Implementation Risks**
 1. **Complex State Management**
    - **Mitigation**: Clear enum states, comprehensive logging
-   
+
 2. **Preference Synchronization Issues**
    - **Mitigation**: Extensive testing, fallback mechanisms
-   
+
 3. **Thread Safety Problems**
    - **Mitigation**: Proper locking, idempotent design
-   
+
 4. **Backward Compatibility Issues**
    - **Mitigation**: Wrapper functions, thorough testing
 
 ### **Operational Risks**
 1. **Error Handling Complexity**
    - **Mitigation**: Try-catch blocks, graceful degradation
-   
+
 2. **Debugging Difficulty**
    - **Mitigation**: Detailed debug logging, state inspection
 
@@ -256,7 +256,7 @@ def test_visual_identicality():
 ## 🎯 **Success Criteria**
 
 ✅ **Import time reduced from 900-2550ms to 0ms**
-✅ **All existing tests pass**  
+✅ **All existing tests pass**
 ✅ **Restoration works perfectly**
 ✅ **No visual changes to plots**
 ✅ **Thread-safe initialization**

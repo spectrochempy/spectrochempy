@@ -7,11 +7,10 @@ This module tests core 3D plotting capabilities, focusing on the
 functionality that was previously broken due to transform errors but is now working.
 """
 
-import pytest
 import matplotlib.pyplot as plt
-import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
+import pytest
 from matplotlib.axes import Axes
+from mpl_toolkits.mplot3d import Axes3D
 
 from spectrochempy.core.dataset.nddataset import NDDataset
 
@@ -120,9 +119,9 @@ class Test3DPlotting:
 
         except Exception as e:
             # Expected failure due to known limitation
-            assert "artist" in str(e).lower() or "collection" in str(e).lower(), (
-                f"Expected artist reuse error, got: {e}"
-            )
+            assert (
+                "artist" in str(e).lower() or "collection" in str(e).lower()
+            ), f"Expected artist reuse error, got: {e}"
 
     def test_3d_waterfall_simple_case(self, sample_3d_dataset, clean_figures):
         """

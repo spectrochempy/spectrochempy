@@ -17,12 +17,10 @@ __all__ = [
 __dataset_methods__ = __all__
 
 import numpy as np
-import matplotlib
 
 from spectrochempy.application.preferences import preferences
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.plotting._style import resolve_line_style
-from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.mplutils import make_label
 from spectrochempy.utils.typeutils import is_sequence
 
@@ -414,7 +412,10 @@ def plot_1D(dataset, method=None, **kwargs):
 
                     # ordinates limits?
                     amp = np.ma.ptp(z.masked_data) / 50.0
-                    zl = [np.ma.min(z.masked_data) - amp, np.ma.max(z.masked_data) + amp]
+                    zl = [
+                        np.ma.min(z.masked_data) - amp,
+                        np.ma.max(z.masked_data) + amp,
+                    ]
 
                     # check if some data are not already present on the graph
                     # and take care of their limits
@@ -437,7 +438,9 @@ def plot_1D(dataset, method=None, **kwargs):
                 xlim.sort()
 
                 # reversed axis?
-                if kwargs.get("x_reverse", kwargs.get("reverse", x.reversed if x else False)):
+                if kwargs.get(
+                    "x_reverse", kwargs.get("reverse", x.reversed if x else False)
+                ):
                     xlim.reverse()
 
                 if data_only or len(xdata) == 1:
@@ -529,6 +532,7 @@ def plot_1D(dataset, method=None, **kwargs):
                     )
 
                 return ax
+
 
 def plot_scatter(dataset, **kwargs):
     """

@@ -115,6 +115,7 @@ def __getattr__(name):
     # Check plot profile functions first
     if name in _PLOT_PROFILE_FUNCTIONS:
         from spectrochempy.plotting import profile as _profile_module
+
         return getattr(_profile_module, name)
 
     if name in _LAZY_IMPORTS:

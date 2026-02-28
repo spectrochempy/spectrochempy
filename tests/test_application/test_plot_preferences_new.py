@@ -1,6 +1,5 @@
 """Tests for new plotting preferences."""
 import numpy as np
-import pytest
 
 
 class TestNewPreferences:
@@ -58,9 +57,9 @@ class Test3DViewOverrides:
 
     def test_plot_score_3d_uses_preferences(self):
         """plot_score 3D uses preference defaults."""
-        from spectrochempy.plotting.composite.plotscore import plot_score
-        from spectrochempy.application.preferences import preferences
         import matplotlib.pyplot as plt
+
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(20, 5)
 
@@ -71,9 +70,9 @@ class Test3DViewOverrides:
 
     def test_plot_score_3d_explicit_kwargs_override(self):
         """Explicit elev/azim kwargs override preferences."""
-        from spectrochempy.plotting.composite.plotscore import plot_score
-        from spectrochempy.application.preferences import preferences
         import matplotlib.pyplot as plt
+
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(20, 5)
 
@@ -88,10 +87,11 @@ class TestBaselineRegionPreferences:
 
     def test_plot_baseline_uses_preferences(self):
         """plot_baseline uses preference defaults for region color/alpha."""
-        from spectrochempy.plotting.composite.plotbaseline import plot_baseline
-        from spectrochempy.application.preferences import preferences
-        from spectrochempy import NDDataset, Coord
         import matplotlib.pyplot as plt
+
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
+        from spectrochempy.plotting.composite.plotbaseline import plot_baseline
 
         x = Coord(np.linspace(0, 100, 50), title="x")
         original = NDDataset(np.random.randn(3, 50), coords=[Coord(range(3)), x])
@@ -123,8 +123,10 @@ class TestImageEqualAspectPreference:
 
     def test_explicit_equal_aspect_overrides_preference(self):
         """Explicit equal_aspect kwarg overrides preference."""
-        from spectrochempy import NDDataset, Coord
         import matplotlib.pyplot as plt
+
+        from spectrochempy import Coord
+        from spectrochempy import NDDataset
 
         x = Coord(np.linspace(0, 100, 50), title="x", units="cm")
         y = Coord(np.linspace(0, 50, 30), title="y", units="cm")

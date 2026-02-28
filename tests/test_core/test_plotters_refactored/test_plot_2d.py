@@ -7,13 +7,11 @@ This module tests core 2D plotting capabilities, focusing on the
 functionality that was previously broken but is now working.
 """
 
-import pytest
 import matplotlib.pyplot as plt
 import numpy as np
+import pytest
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection
-
-from spectrochempy.core.dataset.nddataset import NDDataset
 
 
 class Test2DPlotting:
