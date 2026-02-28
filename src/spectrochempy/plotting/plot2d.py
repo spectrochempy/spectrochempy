@@ -115,8 +115,14 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     # Get kwargs
     fill_mode = kwargs.get("fill_mode", "white")
     fill_alpha = kwargs.get("fill_alpha", 0.6)
-    azim = kwargs.get("azim", 10.0)
-    elev = kwargs.get("elev", 30.0)
+
+    # Waterfall-specific camera defaults (independent of other 3D plots)
+    DEFAULT_WATERFALL_ELEV = 25
+    DEFAULT_WATERFALL_AZIM = -60
+
+    azim = kwargs.get("azim", DEFAULT_WATERFALL_AZIM)
+    elev = kwargs.get("elev", DEFAULT_WATERFALL_ELEV)
+
     linewidth = kwargs.get("linewidth", prefs.lines_linewidth)
     alpha = kwargs.get("alpha", None)
 
