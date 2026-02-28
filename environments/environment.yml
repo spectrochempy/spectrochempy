@@ -41,6 +41,5 @@ dependencies:
     - requests
     - scikit-learn
     - scipy
-    - setuptools-scm
     - tzlocal
     - xlrd

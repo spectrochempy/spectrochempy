@@ -95,10 +95,8 @@ X.y
 # By default, the current coordinate is the first one (here `c_times` ).
 # For example, it will be used for plotting:
 
-prefs = scp.preferences
-prefs.figure.figsize = (7, 3)
-X.plot(colorbar=True)
-X.plot_map(colorbar=True)
+_ = X.plot(colorbar=True)
+_ = X.plot_map(colorbar=True)
 # %%
 # To seamlessly work with the second coordinates (pressures),
 # we can change the default coordinate:
@@ -110,15 +108,15 @@ X.y.default
 # Let's now plot the spectral range of interest. The default coordinate is now used:
 X_ = X[:, 2250.0:1950.0]
 print(X_.y.default)
-X_.plot()
-X_.plot_map()
+_ = X_.plot()
+_ = X_.plot_map()
 # %%
 # The same can be done for the x coordinates.
 #
 # Let's take for instance row with index 10 of the previous dataset
 row10 = X_[10].squeeze()
-row10.plot()
-row10.coordset
+_ = row10.plot()
+_ = row10.coordset
 
 # %%
 # Now we wants to add a coordinate with the wavelength instead of wavenumber.
@@ -128,7 +126,7 @@ c_wavelength = row10.x.to("nanometer")
 print(c_wavenumber, c_wavelength)
 row10.x = [c_wavenumber, c_wavelength]
 row10.x.select(2)
-row10.plot()
+_ = row10.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

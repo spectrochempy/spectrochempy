@@ -18,9 +18,6 @@ from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
-from spectrochempy.utils.colors import NBlue
-from spectrochempy.utils.colors import NGreen
-from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.docutils import docprocess
@@ -523,7 +520,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Plot methods
     # ----------------------------------------------------------------------------------
     @docprocess.dedent
-    def plotmerit(self, X=None, X_hat=None, **kwargs):
+    def plot_merit(self, X=None, X_hat=None, **kwargs):
         r"""
         Plot the input (`X`), reconstructed (`X_hat`) and residuals.
 
@@ -539,7 +536,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
         X_hat : `NDDataset`, optional
             Inverse transformed dataset. if `X` is provided, `X_hat`
             must also be provided as compuyed externally.
-        %(kwargs)s
 
         Returns
         -------
@@ -548,11 +544,38 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Other Parameters
         ----------------
-        colors : `tuple` or `~numpy.ndarray` of 3 colors, optional
-            Colors for `X` , `X_hat` and residuals ``E`` .
-            in the case of 2D, The default colormap is used for `X` .
-            By default, the three colors are :const:`NBlue` , :const:`NGreen`
-            and :const:`NRed`  (which are colorblind friendly).
+        exp_c : color, colormap, or list of colors, optional
+            Color(s) for experimental spectra.
+            - None: use unified semantic resolver (auto-detect categorical/sequential)
+            - Single color: use for all experimental spectra
+            - Colormap name/object: sample colors from colormap
+            - List/tuple: use as explicit color cycle
+        calc_c : color, colormap, or list of colors, optional
+            Color(s) for calculated spectra.
+            - None: use default blue "#2a6fbb"
+            - Single color: use for all calculated spectra
+            - Colormap name/object: sample colors from colormap
+            - List/tuple: use as explicit color cycle
+        resid_c : color, colormap, or list of colors, optional
+            Color(s) for residual spectra.
+            - None: use default grey "0.4"
+            - Single color: use for all residual spectra
+            - Colormap name/object: sample colors from colormap
+            - List/tuple: use as explicit color cycle
+        exp_linestyle : str, optional
+            Line style for experimental spectra. Default: "-".
+        calc_linestyle : str, optional
+            Line style for calculated spectra. Default: "--".
+        resid_linestyle : str, optional
+            Line style for residual spectra. Default: "-".
+        exp_linewidth : float, optional
+            Line width for experimental spectra. Default: 1.2.
+        calc_linewidth : float, optional
+            Line width for calculated spectra. Default: 1.0.
+        resid_linewidth : float, optional
+            Line width for residual spectra. Default: 1.0.
+        min_contrast : float, optional
+            Minimum contrast ratio for sequential colormaps. Default: 1.5.
         offset : `float`, optional, default: `None`
             Specify the separation (in percent) between the
             :math:`X` , :math:`X_hat` and :math:`E`.
@@ -562,57 +585,16 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Parameters passed to the internal `plot` method of the `X` dataset.
 
         """
-        colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
+        from spectrochempy.plotting.composite import plot_merit
 
-        if X is None:
-            X = self.X  # we need to use self.X here not self._X because the mask
-            # are restored automatically
-            if X_hat is None:
-                # compute the inverse transform (this check that the model
-                # is already fitted and handle eventual masking)
-                X_hat = self.inverse_transform()
-        elif X_hat is None:
-            raise ValueError(
-                "If X is provided, An externally computed X_hat dataset "
-                "must be also provided.",
-            )
-
-        if X._squeeze_ndim == 1:
-            # normally this was done before, but if needed.
-            X = X.squeeze()
-            X_hat = X_hat.squeeze()
-
-        # Number of traces to keep
-        nb_traces = kwargs.pop("nb_traces", "all")
-        if X.ndim == 2 and nb_traces != "all":
-            inc = int(X.shape[0] / nb_traces)
-            X = X[::inc]
-            X_hat = X_hat[::inc]
-
-        res = X - X_hat
-
-        # separation between traces
-        offset = kwargs.pop("offset", None)
-        if offset is None:
-            offset = 0
-        ma = max(X.max(), X_hat.max())
-        mao = ma * offset / 100
-        mad = ma * offset / 100 + ma / 10
-        X.plot(color=colX, **kwargs)  # - X.min()
-        _ = (X_hat - mao).plot(  # - X_hat.min()
-            clear=False,
-            ls="dashed",
-            cmap=None,
-            color=colXhat,
+        return plot_merit(
+            analysis_object=self,
+            X=X,
+            X_hat=X_hat,
+            **kwargs,
         )
-        ax = (res - mad).plot(clear=False, cmap=None, color=colRes)  # -res.min()
-        ax.autoscale(enable=True, axis="y")
-        title = kwargs.get("title", f"{self.name} plot of merit")
-        ax.set_title(title)
-        ax.yaxis.set_visible(kwargs.get("show_yaxis", False))
-        return ax
 
-    docprocess.get_sections(docprocess.dedent(plotmerit.__doc__), base="plotmerit")
+    docprocess.get_sections(docprocess.dedent(plot_merit.__doc__), base="plot_merit")
 
     @property
     def Y(self):
@@ -1011,8 +993,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Y = Y.squeeze()
             Y_hat = Y_hat.squeeze()
 
-        plt.style.use(["default"])
-        plt.rcParams.update({"font.size": 14})
+        # plt.style.use(["default"])  # DISABLED: No global style mutation
+        # plt.rcParams.update({"font.size": 14})  # DISABLED: No global rcParams mutation
         if clear:
             fig = plt.figure()
             ax = fig.add_subplot(111)

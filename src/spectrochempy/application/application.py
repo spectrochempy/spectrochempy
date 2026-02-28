@@ -344,17 +344,21 @@ class SpectroChemPy(Application):
     # ----------------------------------------------------------------------------------
     def start(self):
         """
-        Start the  `SpectroChemPy` API.
+        Start the SpectroChemPy application.
 
-        All configuration must have been done before calling this function.
+        MATPLOTLIB SETUP REMOVED: All matplotlib initialization is now lazy
+        and happens on the first plot() call via lazy_ensure_mpl_config().
+
+        This provides dramatic import performance improvements while preserving
+        all existing functionality.
+
+        Returns
+        -------
+        bool
+            True if startup was successful, False otherwise.
         """
-        from matplotlib import pyplot as plt
-
+        # Initialize datadir before preferences (required for circular dependency)
         from spectrochempy.application.datadir import DataDir
-
-        if self._running:
-            # API already started. Nothing done!
-            return True
 
         # datadir
         self.datadir = DataDir()
@@ -362,36 +366,44 @@ class SpectroChemPy(Application):
         # Get preferences from the config file and init everything
         self._init_all_preferences()
 
-        # force update of rcParams
-        import matplotlib as mpl
+        # ❌ REMOVED: Snapshot user rcParams - now done lazily in plot_setup.py
+        # from spectrochempy.core.plotters.plot_setup import _snapshot_user_rcparams
+        # _snapshot_user_rcparams()
 
-        for rckey in mpl.rcParams:
-            key = rckey.replace("_", "__").replace(".", "_").replace("-", "___")
-            try:
-                mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
-            except ValueError:
-                mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace(
-                    "'",
-                    "",
-                )
-            except AttributeError:
-                # print(f'{e} -> you may want to add it to PlotPreferences.py')
-                pass
+        # ❌ REMOVED: Force update of rcParams - now done lazily
+        # import matplotlib as mpl
+        # for rckey in mpl.rcParams:
+        #     key = rckey.replace("_", "__").replace(".", "_").replace("-", "___")
+        #     try:
+        #         mpl.rcParams[rckey] = getattr(self.plot_preferences, key)
+        #     except ValueError:
+        #         mpl.rcParams[rckey] = getattr(self.plot_preferences, key).replace(
+        #             "'",
+        #             "",
+        #         )
+        #     except AttributeError:
+        #         # print(f'{e} -> you may want to add it to PlotPreferences.py')
+        #         pass
 
-        self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
+        # ❌ REMOVED: LaTeX font configuration - now done lazily
+        # self.plot_preferences.set_latex_font(self.plot_preferences.font_family)
 
-        # Eventually write the default config file
+        # Eventually write default config file
         # --------------------------------------
         self.make_default_config_file()
 
-        # set the default style
-        # --------------------------------------------------------------------------------------
-        plt.style.use(["classic"])
+        # ❌ REMOVED: Set default style - now done lazily
+        # plt.style.use(["classic"])
 
         self.debug_(
             f"API loaded with log level set to "
             f"{logging.getLevelName(int(self.log_level))}- application is ready"
         )
+
+        self._running = True
+        return True
+
+        # force update of rcParams
 
         self._running = True
         return True
@@ -467,23 +479,98 @@ class SpectroChemPy(Application):
         warnings.warn(msg, *args, **kwargs, stacklevel=2)
         self._from_warning_ = False
 
+    def close_handlers(self):
+        """
+        Override to handle shutdown gracefully.
+
+        During Python shutdown, traitlets' __del__ may try to access self.log
+        after some internal state has been cleaned up, causing AttributeError.
+        This override adds proper exception handling to prevent such errors.
+        """
+        from contextlib import suppress
+
+        with suppress(Exception):
+            if getattr(self, "_logging_configured", False):
+                for handler in self.log.handlers:
+                    with suppress(Exception):
+                        handler.close()
+                self._logging_configured = False
+
 
 # --------------------------------------------------------------------------------------
-# Setup environment
-from .envsetup import setup_environment
+# Setup environment - lazy initialization
+# We defer calling setup_environment() until it's actually needed
+# to avoid importing matplotlib at module load time
 
-NO_DISPLAY, SCPY_STARTUP_LOGLEVEL, is_pytest = setup_environment()
+_no_display = None
+_scpy_startup_loglevel = None
+_is_pytest = None
+
+
+def _get_environment():
+    """Lazy initialization of environment settings."""
+    global _no_display, _scpy_startup_loglevel, _is_pytest
+    if _no_display is None:
+        from .envsetup import setup_environment
+
+        _no_display, _scpy_startup_loglevel, _is_pytest = setup_environment()
+
+    # Also ensure app is fully started if not already
+    global _app_started
+    if not _app_started:
+        app.start()
+        _app_started = True
+
+    return _no_display, _scpy_startup_loglevel, _is_pytest
+
+
+_app_started = False
+
+
+def _get_no_display():
+    """Lazy accessor for NO_DISPLAY."""
+    return _get_environment()[0]
+
+
+class _NO_DISPLAY:
+    """Lazy proxy for NO_DISPLAY that defers initialization."""
+
+    def __bool__(self):
+        return _get_no_display()
+
+    def __repr__(self):
+        return repr(_get_no_display())
+
+
+# Module-level lazy variable
+NO_DISPLAY = _NO_DISPLAY()
+
 
 # Define an instance of the SpectroChemPy application.
-app = SpectroChemPy(log_level=SCPY_STARTUP_LOGLEVEL)
+# We defer full initialization until needed
+app = SpectroChemPy(log_level=logging.WARNING)
 
-# Start the application
-app.start()
 
-error_ = app.error_
-info_ = app.info_
-debug_ = app.debug_
-warning_ = app.warning_
+# Lazily initialize app methods
+def _get_error_():
+    _get_environment()  # Ensure environment is set up
+    return app.error_
+
+
+def _get_info_():
+    _get_environment()
+    return app.info_
+
+
+def _get_debug_():
+    _get_environment()
+    return app.debug_
+
+
+def _get_warning_():
+    _get_environment()
+    return app.warning_
+
 
 # Log levels
 # ----------
@@ -535,26 +622,58 @@ def get_loglevel() -> int:
 # --------------------------------------------------------------------------------------
 import threading
 
-if not NO_DISPLAY:
+
+def _start_update_check():
+    """Lazily start the update check thread."""
     from .check_update import check_update
     from .info import version
 
+    _get_environment()  # Ensure environment is set up
     check_update_frequency = app.general_preferences.check_update_frequency
     DISPLAY_UPDATE = threading.Thread(
         target=check_update, args=(version, check_update_frequency)
     )
-
     DISPLAY_UPDATE.start()
 
-# --------------------------------------------------------------------------------------
-# Download data in a separate thread
-# --------------------------------------------------------------------------------------
-if not is_pytest:
+
+def _start_testdata_download():
+    """Lazily start the test data download thread."""
     from .testdata import download_full_testdata_directory
 
+    _get_environment()  # Ensure environment is set up
     DOWNLOAD_TESTDATA = threading.Thread(
         target=download_full_testdata_directory,
         args=(app.general_preferences.datadir,),
     )
-
     DOWNLOAD_TESTDATA.start()
+
+
+# Background threads are started lazily on first access
+# _maybe_start_background_threads() - called when needed
+
+
+# --------------------------------------------------------------------------------------
+# Module-level lazy callable proxies
+# These are module-level names so they satisfy static analysis (F822).
+# They delegate to the app instance methods which are initialized lazily.
+# --------------------------------------------------------------------------------------
+
+
+def error_(*args, **kwargs):
+    """Forward to app.error_."""
+    return _get_error_()(*args, **kwargs)
+
+
+def info_(*args, **kwargs):
+    """Forward to app.info_."""
+    return _get_info_()(*args, **kwargs)
+
+
+def debug_(*args, **kwargs):
+    """Forward to app.debug_."""
+    return _get_debug_()(*args, **kwargs)
+
+
+def warning_(*args, **kwargs):
+    """Forward to app.warning_."""
+    return _get_warning_()(*args, **kwargs)

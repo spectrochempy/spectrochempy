@@ -78,10 +78,8 @@ X.coordset
 # For example, it will be used by default for
 # plotting:
 
-prefs = scp.preferences
-prefs.figure.figsize = (7, 3)
-X.plot(colorbar=True)
-X.plot_map(colorbar=True)
+_ = X.plot(colorbar=True)
+_ = X.plot_contourf(colorbar=True)
 # %%
 # To seamlessly work with the second coordinates (pressures), we can change the default
 # coordinate:
@@ -93,8 +91,8 @@ X.y.default
 # Let's now plot the spectral range of interest. The default coordinate is now used:
 X_ = X[:, 2250.0:1950.0]
 print(X_.y.default)
-X_.plot()
-X_.plot_map()
+_ = X_.plot()
+_ = X_.plot_contourf()
 # %%
 # IRIS analysis without regularization
 # ------------------------------------
@@ -117,8 +115,10 @@ iris1.fit(X_, K)
 
 # %%
 # Plots the results
-iris1.plotdistribution()
-iris1.plotmerit()
+_ = iris1.f.plot_contour()
+
+# %%
+_ = iris1.plotmerit()
 # %%
 # With regularization and a manual search
 # ---------------------------------------
@@ -128,12 +128,12 @@ iris2 = scp.IRIS(reg_par=[-10, 1, 12])
 # %%
 # We keep the same kernel object as previously - performs the fit.
 iris2.fit(X_, K)
-iris2.plotlcurve(title="L curve, manual search")
+_ = iris2.plotlcurve(title="L curve, manual search")
 # %%
 # Visually, the best regularization parameter is at index ~ -6, corresponding to lambda = 1e-4
 
-iris2.plotdistribution(-6)
-iris2.plotmerit(-6)
+_ = iris2.f[-6].plot_contour()
+_ = iris2.plotmerit(-6)
 # %%
 # Automatic search
 # ----------------
@@ -142,15 +142,15 @@ iris2.plotmerit(-6)
 
 iris3 = scp.IRIS(log_level="INFO", reg_par=[-6, -2])
 iris3.fit(X_, K)
-iris3.plotlcurve(title="L curve, automated search")
+_ = iris3.plotlcurve(title="L curve, automated search")
 # %%
 # The data corresponding to the largest curvature of the L-curve
 # are at index 5 of the output data.
 
 # sphinx_gallery_thumbnail_number = 11
 
-iris3.plotdistribution(5)
-iris3.plotmerit(5)
+_ = iris3.f[5].plot_contour()
+_ = iris3.plotmerit(5)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

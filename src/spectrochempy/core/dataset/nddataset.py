@@ -27,10 +27,13 @@ __dataset_methods__ = [  # Methods that can be called as API functions
 
 
 import textwrap
+
+# Lazy import to avoid triggering matplotlib at module load time
 from contextlib import suppress
 from datetime import UTC
 from datetime import datetime
 from datetime import tzinfo
+from typing import Any
 from zoneinfo import ZoneInfo
 from zoneinfo import ZoneInfoNotFoundError
 
@@ -38,18 +41,16 @@ import numpy as np
 import traitlets as tr
 from tzlocal import get_localzone
 
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.arraymixins.ndio import NDIO
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath  # _set_ufuncs,
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
-from spectrochempy.core.dataset.arraymixins.ndplot import NDPlot
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.dataset.basearrays.ndcomplex import NDComplexArray
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
@@ -61,7 +62,7 @@ from spectrochempy.utils.system import get_user_and_node
 # NDDataset class definition
 # ======================================================================================
 @tr.signature_has_traits
-class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
+class NDDataset(NDMath, NDIO, NDComplexArray):
     r"""
     The main N-dimensional dataset class used by  `SpectroChemPy`.
 
@@ -255,7 +256,6 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         NDComplexArray.__init__(self, data, **kwargs)
         NDIO.__init__(self, **kwargs)
         NDMath.__init__(self)
-        NDPlot.__init__(self)
 
         self._created = utcnow()
         self.description = kwargs.pop("description", "")
@@ -399,6 +399,14 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         return new
 
     def __getattr__(self, item):
+        # Handle deprecated plot-related attributes that are now properties
+        # These need to be checked here because traitlets intercepts attribute access
+        if item in ("fig", "ndaxes", "ax", "axT", "axec", "axecT", "axex", "axey"):
+            raise AttributeError(
+                f"The '{item}' attribute is no longer stored on NDDataset. "
+                "Use the returned axes from plot() instead, e.g.: ax = dataset.plot()"
+            )
+
         if (
             item.startswith("_")
             or item
@@ -852,6 +860,9 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
             Coordinates along the given axis.
 
         """
+        # Lazy import to avoid triggering matplotlib at module load time
+        from spectrochempy.application.application import error_
+
         idx = self._get_dims_index(dim)[0]  # should generate an error if the
         # dimension name is not recognized
         if idx is None:
@@ -1452,6 +1463,259 @@ class NDDataset(NDMath, NDIO, NDPlot, NDComplexArray):
         )
 
         return new
+
+    # ======================================================================================
+    # Plotting (thin delegation to spectrochempy.plotting)
+    # ======================================================================================
+
+    def plot(self, method=None, **kwargs):
+        """
+        Plot the dataset.
+
+        This is a thin delegator that calls spectrochempy.plotting.dispatcher.plot_dataset.
+
+        Parameters
+        ----------
+        method : str, optional
+            Plotting method (e.g., "pen", "stack", "map", "image", "surface").
+            If None, method is chosen based on data dimensionality.
+        **kwargs
+            Additional arguments passed to the plotting function.
+
+            For method="stack", the following specific kwargs are supported:
+            - palette : str or list, optional
+                Color palette. If None, auto-detect based on dataset.
+                If "continuous": use continuous colormap (viridis).
+                If "categorical": use matplotlib default color cycle.
+                If colormap name: use that colormap.
+                If list/tuple of colors: use as explicit categorical colors.
+
+            For method="image", "map", "surface" (2D plots), the following kwargs are supported:
+            - cmap : str, optional
+                Colormap name. If None, auto-detected based on data.
+                Defaults to "viridis" (sequential) or "RdBu_r" (diverging).
+            - cmap_mode : str, optional, default: "auto"
+                Colormap mode for 2D plots.
+                - "auto": automatically choose sequential or diverging based on data.
+                - "sequential": force sequential colormap (viridis).
+                - "diverging": force diverging colormap (RdBu_r).
+            - center : numeric or str, optional
+                Center value for diverging colormaps.
+                - None: use 0 for diverging mode.
+                - "auto": auto-detect center (0 if data crosses zero, else midpoint).
+                - numeric: use this value as center.
+            - norm : matplotlib.colors.Normalize, optional
+                Explicit normalization object. If provided, overrides cmap and center.
+            - contrast_safe : bool, optional, default: True
+                If True, trim colormap ends to ensure minimum contrast with background.
+                Prevents low-luminance colors (e.g., yellow in viridis) from blending
+                with white backgrounds.
+            - min_contrast : float, optional, default: 2.5
+                Minimum WCAG contrast ratio for contrast-safe colormaps.
+                2.5 = AA large text, 3.0 = AA normal text, 4.5 = AAA.
+
+        Returns
+        -------
+        matplotlib.axes.Axes
+            The matplotlib axes.
+
+        See Also
+        --------
+        spectrochempy.plotting.plot1d : 1D plotting functions.
+        spectrochempy.plotting.plot2d : 2D plotting functions.
+        spectrochempy.plotting.plot3d : 3D plotting functions.
+        """
+        from spectrochempy.plotting.dispatcher import plot_dataset
+
+        return plot_dataset(self, method=method, **kwargs)
+
+    # ======================================================================================
+    # Deprecated plot-related stubs (no-op for backward compatibility)
+    # ======================================================================================
+    # These stubs exist for backward compatibility but do NOT store any state on the dataset.
+    # The plotting functions in spectrochempy.plotting now use local variables instead.
+
+    def _figure_setup(self, ndim=1, method=None, **kwargs):
+        """
+        Set up figure and axes (deprecated; now handled by spectrochempy.plotting functions).
+
+        This method exists for backward compatibility.
+        For internal use by plot functions only - creates figure and returns axes.
+        """
+        from spectrochempy.application.preferences import preferences as prefs
+        from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
+        from spectrochempy.utils.mplutils import get_figure
+
+        lazy_ensure_mpl_config()
+
+        from matplotlib.axes import Axes
+
+        clear = kwargs.get("clear", True)
+        ax = kwargs.pop("ax", None)
+
+        ndaxes = {}
+
+        # Design principle: Explicit ax > clear > implicit figure state
+        # When ax is provided, it fully owns the figure - clear is ignored
+        if ax is not None:
+            # Explicit ax provided: reuse its figure, ignore clear entirely
+            if isinstance(ax, Axes):
+                fig = ax.figure
+                ax.name = "main"
+                ndaxes["main"] = ax
+            else:
+                raise ValueError(f"{ax} is not a valid Matplotlib Axes")
+
+        # When no explicit ax is provided, clear determines figure creation
+        elif not clear:
+            # clear=False: reuse current figure from pyplot
+            import matplotlib.pyplot as plt
+
+            if plt.get_fignums():
+                # Existing figures - use the current one
+                fig = plt.gcf()
+            else:
+                # No existing figures - create a new one
+                fig = get_figure(
+                    preferences=prefs,
+                    style=kwargs.get("style"),
+                    figsize=kwargs.get("figsize"),
+                    dpi=kwargs.get("dpi"),
+                )
+
+            if not fig.get_axes():
+                # No existing axes, create one
+                if ndim < 3:
+                    ax = fig.add_subplot(1, 1, 1)
+                else:
+                    ax = fig.add_subplot(111, projection="3d")
+                ax.name = "main"
+                ndaxes["main"] = ax
+            else:
+                # Reuse existing axes from current figure
+                for i, a in enumerate(fig.get_axes()):
+                    a.name = a.name or f"ax{i}"
+                    ndaxes[a.name] = a
+
+        else:
+            # clear=True (default): create new figure
+            fig = get_figure(
+                preferences=prefs,
+                style=kwargs.get("style"),
+                figsize=kwargs.get("figsize"),
+                dpi=kwargs.get("dpi"),
+            )
+
+            if ndim < 3:
+                ax = fig.add_subplot(1, 1, 1)
+            else:
+                ax = fig.add_subplot(111, projection="3d")
+
+            ax.name = "main"
+            ndaxes["main"] = ax
+
+        # Return method string and the created axes for use by plot functions
+        return method or "", fig, ndaxes
+
+    def _plot_resume(self, origin: Any, **kwargs: Any) -> None:
+        """
+        Resume plot cleanup (deprecated; now handled by spectrochempy.plotting functions).
+
+        This method exists for backward compatibility but does nothing.
+        The plot functions now handle cleanup internally.
+        """
+        pass
+
+    def close_figure(self):
+        """
+        Close figure (deprecated; now handled by spectrochempy.plotting functions).
+
+        This method exists for backward compatibility but does nothing.
+        """
+        pass
+
+    # ======================================================================================
+    # Stub properties that raise informative errors
+    # ======================================================================================
+
+    @property
+    def fig(self):
+        """
+        Matplotlib figure (deprecated).
+
+        Figure management is now handled by spectrochempy.plotting functions.
+        The returned axes from plot() has a .figure attribute.
+        """
+        raise AttributeError(
+            "The 'fig' attribute is no longer stored on NDDataset. "
+            "Use the returned axes from plot() instead, e.g.: ax = dataset.plot(); ax.figure"
+        )
+
+    @property
+    def ndaxes(self):
+        """
+        Matplotlib axes dictionary (deprecated).
+
+        Axes are no longer stored on NDDataset.
+        Use the returned axes from plot() instead.
+        """
+        raise AttributeError(
+            "The 'ndaxes' attribute is no longer stored on NDDataset. "
+            "Use the returned axes from plot() instead, e.g.: ax = dataset.plot()"
+        )
+
+    @property
+    def ax(self):
+        """
+        Main matplotlib axes (deprecated).
+
+        Axes are no longer stored on NDDataset.
+        Use the returned axes from plot() instead.
+        """
+        raise AttributeError(
+            "The 'ax' attribute is no longer stored on NDDataset. "
+            "Use the returned axes from plot() instead, e.g.: ax = dataset.plot()"
+        )
+
+    @property
+    def axT(self):
+        """Transposed matplotlib axes (deprecated)."""
+        raise AttributeError(
+            "The 'axT' attribute is no longer stored on NDDataset. "
+            "Use the returned axes from plot() instead."
+        )
+
+    @property
+    def axec(self):
+        """Colorbar matplotlib axes (deprecated)."""
+        raise AttributeError(
+            "The 'axec' attribute is no longer stored on NDDataset. "
+            "Use the returned axes from plot() instead."
+        )
+
+    @property
+    def axecT(self):
+        """Transposed colorbar matplotlib axes (deprecated)."""
+        raise AttributeError(
+            "The 'axecT' attribute is no longer stored on NDDataset. "
+            "Use the returned axes from plot() instead."
+        )
+
+    @property
+    def axex(self):
+        """Projection x matplotlib axes (deprecated)."""
+        raise AttributeError(
+            "The 'axex' attribute is no longer stored on NDDataset. "
+            "Use the returned axes from plot() instead."
+        )
+
+    @property
+    def axey(self):
+        """Projection y matplotlib axes (deprecated)."""
+        raise AttributeError(
+            "The 'axey' attribute is no longer stored on NDDataset. "
+            "Use the returned axes from plot() instead."
+        )
 
     # # ----------------------------------------------------------------------------------
     # # DASH GUI options  (Work in Progress - not used for now)

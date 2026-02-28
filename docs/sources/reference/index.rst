@@ -26,6 +26,7 @@ To use the API, you must import it using one of the following syntax:
 
 .. ipython:: python
 
+    from spectrochempy import NDDataset
     from spectrochempy import *  # strongly discouraged
     nd = NDDataset()
 
@@ -134,7 +135,6 @@ Creation from existing data
     :nosignatures:
     :toctree: generated/
 
-    copy
     fromfunction
     fromiter
 
@@ -234,20 +234,26 @@ Plotting
     plot_with_transposed
     plot_bar
     plot_2D
+    plot_contour
+    plot_contourf
+    plot_image
+    plot_lines
     plot_map
     plot_stack
-    plot_image
     plot_3D
     plot_surface
     plot_waterfall
     plot_multiple
     multiplot
+    multiplot_contour
+    multiplot_contourf
     multiplot_image
     multiplot_lines
     multiplot_map
     multiplot_scatter
     multiplot_stack
     multiplot_with_transposed
+    restore_rcparams
     show
 
 
@@ -375,7 +381,7 @@ Logic functions
     any
 
 
-Sums, integal, difference
+Sums, integral, difference
 ==========================
 
 .. autosummary::
@@ -397,11 +403,6 @@ Complex
 
     real
     imag
-    RR
-    RI
-    IR
-    II
-    component
     conj
     conjugate
     abs
@@ -470,7 +471,6 @@ Baseline correction
     :toctree: generated/
 
     Baseline
-    BaselineCorrector
     autosub
     get_baseline
     basc
@@ -794,5 +794,4 @@ File
     :nosignatures:
     :toctree: generated/
 
-    FileSelector
     pathclean

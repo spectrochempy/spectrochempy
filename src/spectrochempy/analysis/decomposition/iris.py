@@ -15,7 +15,6 @@ import numpy as np
 # QP solvers import
 import osqp
 import traitlets as tr
-from matplotlib import pyplot as plt
 from scipy import optimize
 from scipy import sparse
 
@@ -28,9 +27,9 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.docutils import docprocess
-from spectrochempy.utils.objects import ScpObjectList
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType
 from spectrochempy.utils.traits import NDDatasetType
@@ -832,7 +831,18 @@ class IRIS(DecompositionAnalysis):
         X_hat.name = "2D-IRIS Reconstructed datasets"
         return X_hat
 
-    def plotlcurve(self, scale="ll", title="L curve"):
+    def plotlcurve(
+        self,
+        scale="ll",
+        title="L curve",
+        ax=None,
+        clear=True,
+        show=True,
+        marker="o",
+        color=None,
+        markersize=None,
+        **kwargs,
+    ):
         r"""
         Plot the ``L-Curve``.
 
@@ -843,73 +853,59 @@ class IRIS(DecompositionAnalysis):
             whether the ``y`` and ``x`` axes should be log scales.
         title : `str`, optional, default: ``'L-curve'``
             Plot title.
+        ax : matplotlib.axes.Axes, optional
+            Axes to plot on. If None, create new figure.
+        clear : bool, optional
+            Whether to clear the axes before plotting. Default: True.
+        show : bool, optional
+            Whether to display the figure. Default: True.
+        marker : str, optional
+            Marker style. Default: "o".
+        color : color, optional
+            Color for the scatter points.
+        markersize : float, optional
+            Marker size.
+        **kwargs
+            Additional keyword arguments passed to style resolution.
 
         Returns
         -------
         `~matplotlib.axes.Axes`
-                The matplotlib axe.
+            The matplotlib axes.
 
         """
-        if not self._fitted:
-            raise NotFittedError("The fit method must be used before using this method")
+        from spectrochempy.plotting.composite.iris import plot_iris_lcurve
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.set_title(title)
-        plt.plot(self.RSS, self.SM, "o")
-        ax.set_xlabel("Residuals")
-        ax.set_ylabel("Curvature")
-        if scale[1] == "l":
-            ax.set_xscale("log")
-        if scale[0] == "l":
-            ax.set_yscale("log")
-        return ax
+        return plot_iris_lcurve(
+            self,
+            ax=ax,
+            clear=clear,
+            show=show,
+            scale=scale,
+            title=title,
+            marker=marker,
+            color=color,
+            markersize=markersize,
+            **kwargs,
+        )
 
-    @docprocess.dedent
-    def plotmerit(self, index=None, **kwargs):
-        r"""
-        Plot the input dataset, reconstructed dataset and residuals.
-
-        Parameters
-        ----------
-        index : `int`, `list` or `tuple` of `int`, optional, default: `None`
-            Index(es) of the inversions (*i.e.,* of the lambda values) to consider.
-            If `None` plots for all indices.
-        %(kwargs)s
-
-        Returns
-        -------
-        `list` of `~matplotlib.axes.Axes`
-            Subplots.
-
-        Other Parameters
-        ----------------
-        %(plotmerit.other_parameters)s
-
-        """
-        X = self.X
-        X_hat = self.inverse_transform()
-        axeslist = []
-        if index is None:
-            index = range(len(self._lambdas))
-        if isinstance(index, int):
-            index = [index]
-
-        for i in index:
-            X_hat_ = (
-                X_hat[i].squeeze() if X_hat.ndim == 3 else X_hat
-            )  # if several lambda or single lambda/no regularization
-
-            ax = super().plotmerit(X, X_hat_, **kwargs)
-
-            ax.set_title(
-                rf"2D IRIS merit plot, $\lambda$ = {self._lambdas.data[i]:.2e}",
-            )
-            axeslist.append(ax)
-
-        return axeslist
-
-    def plotdistribution(self, index=None, **kwargs):
+    @deprecated(
+        replace="IRIS.f[index].plot",
+        removed="0.9.0",
+        extra_msg='Use the plot method of the distribution function instead: IRIS.f[index].plot(methos="map")',
+    )
+    def plotdistribution(
+        self,
+        index=None,
+        ax=None,
+        clear=True,
+        show=True,
+        title=None,
+        cmap=None,
+        cmap_mode="auto",
+        center=None,
+        **kwargs,
+    ):
         """
         Plot the distribution function.
 
@@ -920,28 +916,43 @@ class IRIS(DecompositionAnalysis):
         index : `int` , `list` or `tuple` of `int`, optional, default: `None`
             Index(es) of the inversions (i.e. of the :term:`regularization` parameter)
             to consider.
-            If `None`, plots for all indices.
+            If `None`, plots all indices.
+        ax : matplotlib.axes.Axes, optional
+            Axes to plot on. If provided, used for single index only.
+        clear : bool, optional
+            Whether to clear the axes before plotting. Default: True.
+        show : bool, optional
+            Whether to display the figure. Default: True.
+        title : str, optional
+            Plot title. If None, default lambda-aware title is used.
+        cmap : str or Colormap, optional
+            Colormap name or object.
+        cmap_mode : str, optional
+            Colormap mode ("auto", "sequential", "diverging").
+            Default: "auto".
+        center : float, optional
+            Center value for diverging colormaps.
         **kwargs
-            Other optional arguments are passed in the plots.
+            Other optional arguments passed to the plots.
 
         Returns
         -------
-        `list` of `~matplotlib.axes.Axes`
-            Subplots.
+        `~matplotlib.axes.Axes` or `list` of `~matplotlib.axes.Axes`
+            The matplotlib axes. Returns a list for multiple indices,
+            single Axes for single index.
 
         """
-        axeslist = ScpObjectList([])
-        if index is None:
-            index = range(len(self._lambdas))
-        if isinstance(index, int):
-            index = [index]
-        for i in index:
-            ax = self.f[i].plot(method="map", **kwargs)
-            ax.set_title(
-                rf"2D IRIS distribution, $\lambda$ = {self._lambdas.data[i]:.2e}",
-            )
-            axeslist.append(ax)
-        return axeslist
+        from spectrochempy.plotting.plot2d import plot_map
+        from spectrochempy.utils.mplutils import show as mpl_show
+
+        show = kwargs.pop("show", True)
+
+        ax = plot_map(self.f[index], show=False, **kwargs)
+
+        if show:
+            mpl_show()
+
+        return ax
 
 
 # --------------------------------------------------------------------------------------

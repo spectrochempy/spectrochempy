@@ -9,7 +9,6 @@ import textwrap
 from traitlets import TraitError
 
 from spectrochempy.application.application import app
-from spectrochempy.application.application import error_
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.meta import Meta
 
@@ -22,7 +21,23 @@ __all__ = ["preferences"]
 class PreferencesSet(Meta):
     """Preferences setting."""
 
+    def _ensure_app_ready(self):
+        """Ensure the application is initialized before accessing preferences."""
+        from spectrochempy.application.application import app as _app
+
+        # Check if app has plot_preferences, if not trigger lazy init
+        if not hasattr(_app, "plot_preferences"):
+            from spectrochempy.application.application import _get_environment
+
+            _get_environment()
+
     def __getitem__(self, key):
+        # Lazy import to avoid triggering matplotlib at module load time
+        from spectrochempy.application.application import error_
+
+        # Ensure app is ready BEFORE accessing preferences
+        self._ensure_app_ready()
+
         # search on the preferences
         if self.parent is not None:
             res = getattr(self.parent, f"{self.name}_{key}")
@@ -52,6 +67,12 @@ class PreferencesSet(Meta):
         return res
 
     def __setitem__(self, key, value):
+        # Lazy import to avoid triggering matplotlib at module load time
+        from spectrochempy.application.application import error_
+
+        # Ensure app is ready before accessing preferences
+        self._ensure_app_ready()
+
         # also change the corresponding preferences
         if hasattr(app.plot_preferences, key):
             try:
@@ -137,16 +158,13 @@ class PreferencesSet(Meta):
 
         # reset also non-matplolib preferences
         nonmplpars = [
-            "method_1D",
-            "method_2D",
-            "method_3D",
+            # Active non-matplotlib preferences:
             "colorbar",
             "show_projections",
             "show_projection_x",
             "show_projection_y",
             "colormap",
             "max_lines_in_stack",
-            "simplify",
             "number_of_x_labels",
             "number_of_y_labels",
             "number_of_z_labels",
@@ -156,6 +174,12 @@ class PreferencesSet(Meta):
             "antialiased",
             "rcount",
             "ccount",
+            # New preferences (v1.0+):
+            "axes3d_elev",
+            "axes3d_azim",
+            "baseline_region_color",
+            "baseline_region_alpha",
+            "image_equal_aspect",
         ]
         for par in nonmplpars:
             setattr(self, par, app.plot_preferences.traits()[par].default_value)
@@ -226,7 +250,10 @@ class PreferencesSet(Meta):
             Name of the style
 
         """
+        # Lazy import to avoid triggering matplotlib at module load time
         import matplotlib as mpl
+
+        from spectrochempy.application.application import error_
 
         if stylename.startswith("scpy"):
             error_(
@@ -293,16 +320,12 @@ class PreferencesSet(Meta):
         # some parameters are not saved in matplotlib style sheets so we willa dd them
         # here
         nonmplpars = [
-            "method_1D",
-            "method_2D",
-            "method_3D",
             "colorbar",
             "show_projections",
             "show_projection_x",
             "show_projection_y",
             "colormap",
             "max_lines_in_stack",
-            "simplify",
             "number_of_x_labels",
             "number_of_y_labels",
             "number_of_z_labels",

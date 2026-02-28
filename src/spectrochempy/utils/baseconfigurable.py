@@ -60,6 +60,9 @@ class BaseConfigurable(MetaConfigurable):
     _X_shape = tr.Tuple(
         help="Original shape of the input X data, before any transformation",
     )
+    _X_original_ndim = tr.Integer(
+        help="Original number of dimensions of input X data, before any transformation",
+    )
     _X_coordset = tr.Instance(CoordSet, allow_none=True)
     _is_dataset = tr.Bool(help="True if the input X data is a NDDataset")
     _warm_start = tr.Bool(False)
@@ -282,6 +285,10 @@ class BaseConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         # validation fired when self._X is assigned
         X = proposal.value
+
+        # store the original number of dimensions BEFORE any transformation
+        # this is used to determine if we should squeeze the output
+        self._X_original_ndim = X.ndim
 
         # for the following we need X with two dimensions
         # So let's generate the un-squeezed X

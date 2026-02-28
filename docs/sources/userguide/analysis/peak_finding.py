@@ -64,8 +64,6 @@ ds.y = ds.y.to("minutes")
 
 # %%
 prefs = scp.preferences
-prefs.method_1D = "scatter+pen"
-prefs.method_2D = "stack"
 prefs.colorbar = True
 prefs.colormap = "Dark2"
 
@@ -74,7 +72,7 @@ prefs.colormap = "Dark2"
 
 # %%
 reg = ds[:, 2300.0:1900.0]
-reg.plot()
+_ = reg.plot()
 
 # %% [markdown]
 # ## Find maxima by manual inspection of the plot
@@ -95,16 +93,18 @@ pos
 
 # %%
 maximas = reg[:, pos].squeeze()
-maximas.plot(marker="s", ls="--", color="blue")
+_ = maximas.plot(marker="s", ls="--", color="blue")
 
 # %%
 ax = reg.plot()
+
 x = pos.max()
 y = maximas.max()
+
 ax.set_ylim(-0.01, 0.3)
 _ = ax.annotate(
     f"{x: ~0.2fP} {y: ~.3fP}",
-    xy=(2115.5, maximas.max()),
+    xy=(x.m, y.m),  # ← CRITICAL
     xytext=(30, -20),
     textcoords="offset points",
     bbox={"boxstyle": "round4,pad=.7", "fc": "0.9"},
@@ -162,12 +162,11 @@ for p in pks:
     x, y = p.x.values, p.values + 0.02
     _ = ax.annotate(
         f"{x.m: 0.0f}",
-        xy=(x, y),
+        xy=(x.m, y.m),
         xytext=(-5, 0),
         rotation=90,
         textcoords="offset points",
     )
-
 # %% [markdown]
 # Now we will do a peak-finding for the whole dataset:
 
@@ -206,10 +205,9 @@ evol = scp.NDDataset(positions, title="wavenumber at the maximum")
 evol.x = scp.Coord(
     reg.y, title="acquisition time"
 )  # the x coordinate is st to the acquisition time for each spectra
-evol.preferences.method_1D = "scatter+pen"
 
 # plot it
-evol.plot(ls=":")
+_ = evol.plot(ls=":")
 
 # %% [markdown]
 # ###  Options of `find_peaks()` <a id='options'></a>
@@ -403,8 +401,8 @@ wl, wr = properties["left_bases"][0], properties["right_bases"][0]
 
 # wavenumbers of left and right bases
 for w in (wl, wr):
-    ax.axvline(w, linestyle="--")  # add vertical line at the bases
-    ax.plot(w, s[w].data, "v", color="red")
+    ax.axvline(w.m, linestyle="--")  # add vertical line at the bases
+    _ = ax.plot(w, s[w].data, "v", color="red")
     # and a red mark  #TODO: add function to plot this easily
 
 ax = ax.set_xlim(2310.0, 1900.0)  # change x limits to better see the 'left_base'
@@ -492,8 +490,8 @@ _ = peaks.plot_scatter(
 )
 _ = ax.axhline(height, linestyle="--", color="blue")
 _ = ax.axhline(width_height, linestyle="--", color="red")
-_ = ax.axvline(wl, linestyle="--", color="green")
-_ = ax.axvline(wr, linestyle="--", color="green")
+_ = ax.axvline(wl.m, linestyle="--", color="green")
+_ = ax.axvline(wr.m, linestyle="--", color="green")
 
 # %% [markdown]
 # As stressed above, we see here that the peak width is very approximate and probably
@@ -515,7 +513,6 @@ _ = ax.axvline(wr, linestyle="--", color="green")
 # user defined parameters ------------------------------
 
 s = reg[-1]  # define a single-row NDDataset
-s.preferences.method_1D = "pen"
 
 # peak selection parameters; should be set to return a single peak
 
@@ -557,9 +554,9 @@ peaks.plot_scatter(
 
 for i in range(len(peaks)):
     for w in (properties["left_bases"][i], properties["right_bases"][i]):
-        ax.plot(w, s[0, w].data.T, "v", color="red")
+        _ = ax.plot(w, s[0, w].data.T, "v", color="red")
     for w in (properties["left_ips"][i], properties["right_ips"][i]):
-        ax.axvline(w, linestyle="--", color="green")
+        ax.axvline(w.m, linestyle="--", color="green")
 
 # %% [markdown]
 # -- this is the end of this tutorial --

@@ -22,17 +22,17 @@ A
 
 # %%
 # Now plot them:
-A.plot()
+_ = A.plot()
 # %%
 # As it is a 2D dataset, we can plot it as an image:
-A.plot_image()
+_ = A.plot_image()
 # %%
 # or a contour plot:
-A.plot_map()
+_ = A.plot_map()
 # %%
 # We can also read the content of a folder, and merge all spectra:
 B = scp.read_labspec(ramandir / "subdir")
-B.plot()
+_ = B.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

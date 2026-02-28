@@ -13,7 +13,6 @@ from datetime import timedelta
 
 import numpy as np
 
-from spectrochempy.application.application import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
@@ -21,10 +20,9 @@ from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.extern.brukeropus import OPUSFile
 from spectrochempy.extern.brukeropus.file.utils import get_block_type_label
 from spectrochempy.extern.brukeropus.file.utils import get_param_label
+from spectrochempy.utils._logging import debug_
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.docutils import docprocess
-
-# from spectrochempy.application.application import warning_
 from spectrochempy.utils.meta import Meta
 
 # ======================================================================================

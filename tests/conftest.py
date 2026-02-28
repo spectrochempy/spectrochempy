@@ -473,3 +473,24 @@ def simple_project():
 
     proj["print_info"] = Script("print_info", script_source)
     return proj
+
+
+# --------------------------------------------------------------------------------------
+# fixture mpl dirs
+# --------------------------------------------------------------------------------------
+@pytest.fixture
+def fake_mpl_dirs(tmp_path, monkeypatch):
+    """Fake Matplotlib configdir, datadir and cachedir."""
+    configdir = tmp_path / "config"
+    datadir = tmp_path / "data"
+    cachedir = tmp_path / "cache"
+
+    configdir.mkdir()
+    datadir.mkdir()
+    cachedir.mkdir()
+
+    monkeypatch.setattr("matplotlib.get_configdir", lambda: str(configdir))
+    monkeypatch.setattr("matplotlib.get_data_path", lambda: str(datadir))
+    monkeypatch.setattr("matplotlib.get_cachedir", lambda: str(cachedir))
+
+    return configdir, datadir, cachedir

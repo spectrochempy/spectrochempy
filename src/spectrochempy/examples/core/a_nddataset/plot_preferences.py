@@ -28,13 +28,6 @@ import numpy as np
 import spectrochempy as scp
 
 # %%
-scp.__version__
-
-# %%
-print(scp.preferences)
-
-
-# %%
 # We create the data for the coordinates axis and the array of data
 c0 = np.linspace(200.0, 300.0, 3)
 c1 = np.linspace(0.0, 60.0, 100)
@@ -87,21 +80,31 @@ new = mydataset["hot"]
 
 # %%
 # To plot a dataset, use the `plot` command (generic plot).
-# As the section NDDataset is 2D, a contour plot is displayed by default.
-new.plot()
-scp.plot(new)
+# As the section NDDataset is 2D, a stack plot is displayed by default. As you can see, the x-axis is in wavenumber
+# and the ordinate axis is in absorbance units (au). The y dimension of the dataset is the time-on-stream (in minutes).
+# Because the time-on-stream values are floats, this triggers the default sequential colormap ('viridis'). The
+# corresponding values can be seen if `colorbar' is passed as `True`:
+_ = new.plot(colorbar=True)
+
 # %%
-# But it is possible to display image
+# It is also possible to display this dataset as an image (actually a filled contour plot).
+# The x is the same as before, but the ordinates are now the time-on-stream values. The color of the pixels is now
+# related to the value of the absorbance. As the dataset contains both negative and positive values, the default
+# colormap is diverging (`RdBu').
 #
 # sphinx_gallery_thumbnail_number = 2
-new.plot_image()
-new.plot(method="image")
+_ = new.plot(method="image", colorbar=True)
 # %%
-# or stacked plot
-new.plot(method="stack")
+# If a dataset contains only positive values, the default colormap is sequential (`:
+
+_ = np.abs(new).plot(method="image", colorbar=True)
+
+# %% Contour plots are also available, with the same default colormap as for the image method:
+_ = new.plot(method="map")
+_ = np.abs(new).plot(method="map")
 # %%
 # Note that the scp allows one to use this syntax too:
-scp.plot_stack(new)
+_ = scp.plot_map(new)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when
