@@ -252,11 +252,9 @@ def _ensure_min_contrast(cmap, background_rgb, min_contrast=1.5, samples=256):
     end_frac = x[end_idx]
 
     truncated_colors = cmap(np.linspace(start_frac, end_frac, 256))
-    truncated_cmap = mcolors.LinearSegmentedColormap.from_list(
+    return mcolors.LinearSegmentedColormap.from_list(
         "truncated", truncated_colors, N=256
     )
-
-    return truncated_cmap
 
 
 # ======================================================================================
@@ -894,10 +892,7 @@ def resolve_2d_colormap(
             threshold = 10
 
         # Select base map based on threshold
-        if n_unique <= threshold:
-            base = small_map
-        else:
-            base = large_map
+        base = small_map if n_unique <= threshold else large_map
 
         # Build categorical colormap with exact number of colors
         cmap = _get_categorical_cmap(n_unique, base, threshold=threshold)

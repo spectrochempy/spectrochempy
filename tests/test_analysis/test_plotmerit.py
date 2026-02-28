@@ -279,8 +279,8 @@ def test_plotmerit_y_limits():
     ylim = ax.get_ylim()
     y_min, y_max = ylim
 
-    n_traces = X.shape[0]
-    n_points = X.shape[1]
+    _n_traces = X.shape[0]
+    _n_points = X.shape[1]
 
     X_hat = iris.inverse_transform()
     X_hat_0 = X_hat[0].squeeze()

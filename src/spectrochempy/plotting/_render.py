@@ -24,7 +24,7 @@ from matplotlib.lines import Line2D
 
 
 def _expand_to_list(value, n, name="value"):
-    """Helper to expand a scalar or list to a list of length n."""
+    """Expand a scalar or list to a list of length n."""
     if value is None:
         return [None] * n
     if not isinstance(value, list):

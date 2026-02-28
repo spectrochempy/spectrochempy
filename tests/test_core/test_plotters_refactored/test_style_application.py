@@ -9,10 +9,26 @@ Style application tests for stateless plotting.
 Tests style parameter handling, validation, and local context application.
 """
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pytest
 
 from spectrochempy.application._preferences.plot_preferences import available_styles
+
+
+def assert_dataset_state_unchanged(dataset_before, dataset_after):
+    """Verify dataset was not mutated by plotting."""
+    before_dict = (
+        dataset_before if isinstance(dataset_before, dict) else dataset_before.__dict__
+    )
+    assert before_dict == dataset_after.__dict__, "Dataset mutated by plotting"
+    assert not hasattr(dataset_after, "fig")
+    assert not hasattr(dataset_after, "ndaxes")
+
+
+def get_rcparams_snapshot():
+    """Return a copy of current matplotlib rcParams."""
+    return dict(mpl.rcParams)
 
 
 class TestStyleApplication:
@@ -25,12 +41,6 @@ class TestStyleApplication:
         # Test with different styles
         ax1 = sample_1d_dataset.plot(style="paper")
         ax2 = sample_1d_dataset.plot(style="grayscale")
-
-        # Verify styles applied (check some basic properties)
-        # Different styles should have different appearances
-        # We can check basic properties that are likely to differ
-        fig1 = ax1.figure
-        fig2 = ax2.figure
 
         # At minimum, verify plots were created successfully
         assert (
@@ -75,17 +85,6 @@ class TestStyleApplication:
             isinstance(style, str) for style in styles
         ), "All styles should be strings"
 
-        # Check for common matplotlib styles
-        common_styles = ["default", "classic", "seaborn"]
-        found_common = any(style in styles for style in common_styles)
-        # Note: This might fail if seaborn not available, which is fine
-
-        # Check for SpectroChemPy styles (if they exist)
-        scpy_styles = [
-            s
-            for s in styles
-            if "scpy" in s or s in ["paper", "grayscale", "talk", "poster"]
-        ]
         # Note: This depends on actual style installation
 
     def test_local_style_context_only(self, sample_1d_dataset):
@@ -94,7 +93,7 @@ class TestStyleApplication:
         rcparams_before = get_rcparams_snapshot()
 
         # Create plot with SCP style
-        ax1 = sample_1d_dataset.plot(style="paper")
+        sample_1d_dataset.plot(style="paper")
 
         # Create separate matplotlib plot
         fig2, ax2 = plt.subplots()

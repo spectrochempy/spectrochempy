@@ -1314,7 +1314,7 @@ class PlotPreferences(MetaConfigurable):
                 "mathtext.rm": "dejavusans",
                 "mathtext.it": "dejavusans:italic",
             }
-        elif family == "serif":
+        if family == "serif":
             return {
                 "text.usetex": False,
                 "mathtext.fontset": "dejavuserif",
@@ -1323,7 +1323,7 @@ class PlotPreferences(MetaConfigurable):
                 "mathtext.rm": "dejavuserif",
                 "mathtext.it": "dejavuserif:italic",
             }
-        elif family in ("cursive", "monospace", "fantasy"):
+        if family in ("cursive", "monospace", "fantasy"):
             return {
                 "text.usetex": False,
                 "mathtext.fontset": "dejavusans",

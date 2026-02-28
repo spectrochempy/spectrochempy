@@ -1,5 +1,5 @@
 """
-Lazy Initialization Tests - Refactored
+Lazy Initialization Tests - Refactored.
 
 Tests for lazy matplotlib initialization system.
 
@@ -54,10 +54,10 @@ class TestLazyInitialization:
         data = NDDataset(x, dims=["x"])
 
         # Act - initialize multiple times
-        ax1 = data.plot(show=False)
+        data.plot(show=False)
         initial_fig_count = len(plt.get_fignums())
 
-        ax2 = data.plot(show=False)
+        data.plot(show=False)
         final_fig_count = len(plt.get_fignums())
 
         # Assert - should not create extra figures
@@ -126,12 +126,12 @@ class TestLazyInitialization:
 
         # Measure first plot time (includes initialization)
         start_time = time.time()
-        ax1 = data.plot(show=False)
+        data.plot(show=False)
         first_plot_time = time.time() - start_time
 
         # Measure second plot time (should be faster)
         start_time = time.time()
-        ax2 = data.plot(show=False)
+        data.plot(show=False)
         second_plot_time = time.time() - start_time
 
         # Assert - first plot may be slower due to initialization

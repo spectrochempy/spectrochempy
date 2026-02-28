@@ -24,8 +24,6 @@ __all__ = [
     "figure",  # backward compatibility
     "make_label",
     "get_plotly_figure",
-    "_Axes",
-    "_Axes3D",
 ]
 
 
@@ -133,10 +131,10 @@ def __getattr__(name):
 
         return _Axes
 
-    elif name == "_Axes3D":
-        import mpl_toolkits.mplot3d.axes3d as maxes3D
+    if name == "_Axes3D":
+        import mpl_toolkits.mplot3d.axes3d as maxes3d
 
-        class _Axes3D(maxes3D.Axes3D):  # pragma: no cover
+        class _Axes3D(maxes3d.Axes3D):  # pragma: no cover
             """Subclass of matplotlib Axes3D supporting pint quantities."""
 
             from spectrochempy.core.units import remove_args_units
@@ -210,14 +208,12 @@ def _apply_window_position(fig, prefs):
     if window_position is None:
         return
 
-    try:
+    with suppress(Exception):
         import matplotlib.pyplot as plt
 
         manager = plt.get_current_fig_manager()
         x, y = window_position
         manager.window.wm_geometry(f"+{x}+{y}")
-    except Exception:
-        pass
 
 
 # -----------------------------------------------------------------------------

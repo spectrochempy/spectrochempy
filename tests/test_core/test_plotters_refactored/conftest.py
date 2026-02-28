@@ -31,8 +31,7 @@ def sample_1d_dataset():
     y = np.sin(x_data) + np.random.random(50) * 0.1
 
     x = Coord(data=x_data, title="Wavenumber", units="cm^-1")
-    dataset = NDDataset(y, title="Intensity", units="a.u.", coordset=[x])
-    return dataset
+    return NDDataset(y, title="Intensity", units="a.u.", coordset=[x])
 
 
 @pytest.fixture
@@ -45,10 +44,7 @@ def sample_2d_dataset():
 
     x = Coord(data=x_data, title="Time", units="s")
     z = Coord(data=z_data, title="Frequency", units="Hz")
-    dataset = NDDataset(
-        data, title="Absorbance", units="dimensionless", coordset=[x, z]
-    )
-    return dataset
+    return NDDataset(data, title="Absorbance", units="dimensionless", coordset=[x, z])
 
 
 @pytest.fixture
@@ -63,8 +59,7 @@ def sample_3d_dataset():
     x = Coord(data=x_data, title="X", units="nm")
     y = Coord(data=y_data, title="Y", units="µm")
     z = Coord(data=z_data, title="Z", units="ps")
-    dataset = NDDataset(data, title="Intensity", units="kJ/mol", coordset=[x, y, z])
-    return dataset
+    return NDDataset(data, title="Intensity", units="kJ/mol", coordset=[x, y, z])
 
 
 @pytest.fixture(autouse=True)

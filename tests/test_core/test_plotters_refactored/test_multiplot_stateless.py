@@ -16,6 +16,16 @@ import numpy as np
 from spectrochempy.core.plotters.multiplot import multiplot
 
 
+def assert_dataset_state_unchanged(dataset_before, dataset_after):
+    """Verify dataset was not mutated by plotting."""
+    before_dict = (
+        dataset_before if isinstance(dataset_before, dict) else dataset_before.__dict__
+    )
+    assert before_dict == dataset_after.__dict__, "Dataset mutated by plotting"
+    assert not hasattr(dataset_after, "fig")
+    assert not hasattr(dataset_after, "ndaxes")
+
+
 class TestMultiplotStateless:
     """Test multiplot functionality in stateless architecture."""
 
@@ -42,9 +52,7 @@ class TestMultiplotStateless:
         assert len(fig.axes) >= 4, "Figure should have at least 4 subplot axes"
 
         # Verify datasets unchanged
-        for i, (orig_state, dataset) in enumerate(
-            zip(original_states, datasets, strict=False)
-        ):
+        for orig_state, dataset in zip(original_states, datasets, strict=False):
             assert_dataset_state_unchanged(orig_state, dataset)
 
     def test_multiplot_single_dataset(self, sample_1d_dataset):
@@ -108,7 +116,6 @@ class TestMultiplotStateless:
 
         # Verify suptitle applied
         fig = axes[0].figure
-        suptitle_obj = fig._suptitle if hasattr(fig, "_suptitle") else None
 
         # Check if title exists somewhere in figure
         found_title = False

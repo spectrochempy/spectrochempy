@@ -11,6 +11,18 @@ method defaults, and stateless behavior.
 """
 
 
+def assert_dataset_state_unchanged(dataset_before, dataset_after):
+    """Verify dataset was not mutated by plotting."""
+    before_dict = (
+        dataset_before if isinstance(dataset_before, dict) else dataset_before.__dict__
+    )
+    assert (
+        before_dict == dataset_after.__dict__
+    ), "Dataset object was mutated by plotting"
+    assert not hasattr(dataset_after, "fig")
+    assert not hasattr(dataset_after, "ndaxes")
+
+
 class Test3DStateless:
     """Test 3D plotting in stateless architecture."""
 

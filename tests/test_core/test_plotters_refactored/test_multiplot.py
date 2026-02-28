@@ -1,5 +1,5 @@
 """
-Multiplot Tests - Refactored
+Multiplot Tests - Refactored.
 
 Tests for multiplot functionality.
 
@@ -59,7 +59,7 @@ class TestMultiplot:
             {"nrow": 4, "ncol": 1},  # 4x1 column
         ]
 
-        for i, layout in enumerate(layouts):
+        for layout in layouts:
             # Act
             fig, axes = plt.multiplot(*datasets, show=False, **layout)
 

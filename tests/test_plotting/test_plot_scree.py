@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Tests for plot_scree composite function.
-"""
+"""Tests for plot_scree composite function."""
 
 import warnings
 

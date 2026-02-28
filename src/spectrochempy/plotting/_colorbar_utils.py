@@ -68,6 +68,7 @@ def _apply_colorbar_tick_policy(cbar, norm, vmin=None, vmax=None):
     This function uses MaxNLocator for automatic tick selection.
     """
     from matplotlib.ticker import MaxNLocator
+    from matplotlib.ticker import ScalarFormatter
 
     # Get actual normalization limits from the mappable
     actual_vmin = cbar.mappable.norm.vmin

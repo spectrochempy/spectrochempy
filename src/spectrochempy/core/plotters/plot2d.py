@@ -30,11 +30,3 @@ from spectrochempy.plotting.plot2d import plot_image
 from spectrochempy.plotting.plot2d import plot_lines
 from spectrochempy.plotting.plot2d import plot_map
 from spectrochempy.plotting.plot2d import plot_stack
-
-plot_2D = plot_2D
-plot_contour = plot_contour
-plot_contourf = plot_contourf
-plot_image = plot_image
-plot_lines = plot_lines
-plot_map = plot_map
-plot_stack = plot_stack

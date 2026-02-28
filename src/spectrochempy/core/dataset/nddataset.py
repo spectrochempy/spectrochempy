@@ -1537,7 +1537,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     def _figure_setup(self, ndim=1, method=None, **kwargs):
         """
-        Deprecated: Figure setup is now handled by spectrochempy.plotting functions.
+        Set up figure and axes (deprecated; now handled by spectrochempy.plotting functions).
 
         This method exists for backward compatibility.
         For internal use by plot functions only - creates figure and returns axes.
@@ -1619,7 +1619,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     def _plot_resume(self, origin: Any, **kwargs: Any) -> None:
         """
-        Deprecated: Plot cleanup is now handled by spectrochempy.plotting functions.
+        Resume plot cleanup (deprecated; now handled by spectrochempy.plotting functions).
 
         This method exists for backward compatibility but does nothing.
         The plot functions now handle cleanup internally.
@@ -1628,7 +1628,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
     def close_figure(self):
         """
-        Deprecated: Figure management is now handled by spectrochempy.plotting functions.
+        Close figure (deprecated; now handled by spectrochempy.plotting functions).
 
         This method exists for backward compatibility but does nothing.
         """

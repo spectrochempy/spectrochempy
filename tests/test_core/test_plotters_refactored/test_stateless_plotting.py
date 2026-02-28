@@ -177,47 +177,6 @@ class TestScatterMarkerBehavior:
 
     def test_scatter_explicit_marker(self, sample_1d_dataset):
         """Test that explicit marker overrides default."""
-        ax = sample_1d_dataset.plot_scatter(marker="s")
-
-        assert len(ax.lines) > 0, "Scatter plot should have line objects"
-        line = ax.lines[0]
-        assert line.get_marker() == "s", f"Expected marker 's', got {line.get_marker()}"
-        assert (
-            line.get_linestyle() == "None"
-        ), "Scatter plot should have no connecting line"
-
-    def test_scatter_pen_has_line_and_marker(self, sample_1d_dataset):
-        """Test that plot_scatter_pen shows both line and marker."""
-        ax = sample_1d_dataset.plot_scatter_pen()
-
-        assert len(ax.lines) > 0, "Scatter-pen plot should have line objects"
-        assert len(ax.collections) == 0, "Scatter-pen plot should not use collections"
-
-        line = ax.lines[0]
-        # Should have both marker and line
-        assert line.get_marker() not in (
-            None,
-            "None",
-            "",
-        ), "Scatter-pen should have markers"
-        assert line.get_linestyle() not in (
-            None,
-            "None",
-            "",
-        ), "Scatter-pen should have a line"
-
-    def test_scatter_no_collections(self, sample_1d_dataset):
-        """Test that scatter plot does not create PathCollection."""
-        ax = sample_1d_dataset.plot_scatter()
-
-        # Must use Line2D, not PathCollection
-        assert (
-            len(ax.collections) == 0
-        ), "Scatter plot should not create collections (PathCollection)"
-        assert len(ax.lines) > 0, "Scatter plot must create Line2D objects"
-
-    def test_scatter_explicit_marker(self, sample_1d_dataset):
-        """Test that explicit marker overrides default."""
         ds_before = sample_1d_dataset.__dict__.copy()
 
         ax = sample_1d_dataset.plot_scatter(marker="s")

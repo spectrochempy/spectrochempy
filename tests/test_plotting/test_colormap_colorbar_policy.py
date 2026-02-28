@@ -482,68 +482,6 @@ class TestStyleIntegration:
         orig_colormap = scp.preferences.colormap
 
         try:
-            # Use default style (scpy) - don't set to None
-            scp.preferences.style = "scpy"
-            scp.preferences.colormap = "auto"
-
-            ds = scp.NDDataset(np.abs(np.random.randn(5, 10)) + 0.1)
-            ax = ds.plot_2D(method="image")
-            cmap_name = self._get_cmap_name(ax)
-
-            # Should fall back to prefs.colormap_sequential (viridis by default)
-            assert cmap_name is not None, "No colormap found"
-        finally:
-            scp.preferences.style = orig_style
-            scp.preferences.colormap = orig_colormap
-
-    def test_style_context_active_during_resolution(self):
-        """Verify that matplotlib rcParams reflect style during colormap resolution."""
-        import matplotlib as mpl
-
-        import spectrochempy as scp
-
-        orig_style = scp.preferences.style
-        orig_colormap = scp.preferences.colormap
-
-        captured_rcParams = {"image.cmap": None}
-
-        def capture_resolve(*args, **kwargs):
-            captured_rcParams["image.cmap"] = mpl.rcParams.get("image.cmap")
-            from spectrochempy.plotting._style import resolve_2d_colormap as orig
-
-            return orig(*args, **kwargs)
-
-        try:
-            scp.preferences.style = "grayscale"
-            scp.preferences.colormap = "auto"
-
-            import spectrochempy.plotting._style as style_module
-
-            original_resolve = style_module.resolve_2d_colormap
-            style_module.resolve_2d_colormap = capture_resolve
-
-            ds = scp.NDDataset(np.abs(np.random.randn(5, 10)) + 0.1)
-            ds.plot_2D(method="image")
-
-            style_module.resolve_2d_colormap = original_resolve
-
-            assert captured_rcParams.get("image.cmap") == "gray", (
-                f"rcParams[image.cmap] was {captured_rcParams.get('image.cmap')}, "
-                "expected 'gray'"
-            )
-        finally:
-            style_module.resolve_2d_colormap = original_resolve
-            scp.preferences.style = orig_style
-            scp.preferences.colormap = orig_colormap
-
-    def test_auto_without_style_falls_back_to_prefs_defaults(self):
-        """Auto mode with default style should use prefs.colormap_* defaults."""
-        import spectrochempy as scp
-
-        orig_style = scp.preferences.style
-        orig_colormap = scp.preferences.colormap
-
-        try:
             # Use default style (scpy) - can't set to None
             scp.preferences.style = "scpy"
             scp.preferences.colormap = "auto"

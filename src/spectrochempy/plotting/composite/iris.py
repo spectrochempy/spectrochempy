@@ -110,12 +110,10 @@ def plot_iris_lcurve(
     ax.set_xlabel("Residuals")
     ax.set_ylabel("Curvature")
 
-    if len(scale) >= 1:
-        if scale[0] == "l":
-            ax.set_yscale("log")
-    if len(scale) >= 2:
-        if scale[1] == "l":
-            ax.set_xscale("log")
+    if len(scale) >= 1 and scale[0] == "l":
+        ax.set_yscale("log")
+    if len(scale) >= 2 and scale[1] == "l":
+        ax.set_xscale("log")
 
     if show:
         mpl_show()

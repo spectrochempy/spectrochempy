@@ -105,7 +105,7 @@ def plot_dataset_impl(
     **kwargs: Any,
 ) -> Any:
     """
-    Implementation of dataset plotting using matplotlib.
+    Implement dataset plotting using matplotlib.
 
     Parameters
     ----------

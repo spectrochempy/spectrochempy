@@ -1,5 +1,5 @@
 """
-1D Plotting Tests - Refactored
+1D Plotting Tests - Refactored.
 
 Tests for 1D plotting functionality (line plots, scatter plots, etc.).
 
@@ -91,7 +91,7 @@ class Test1DPlotting:
         - No premature initialization occurs
         """
         # Act
-        ax = sample_1d_dataset.plot(show=False)
+        sample_1d_dataset.plot(show=False)
 
         # Assert - matplotlib should be available now
         assert plt.get_fignums()  # Figures exist = matplotlib initialized
@@ -106,7 +106,7 @@ class Test1DPlotting:
         initial_count = len(plt.get_fignums())
 
         # Act - create a plot
-        ax = sample_1d_dataset.plot(show=False)
+        sample_1d_dataset.plot(show=False)
         final_count = len(plt.get_fignums())
 
         # Assert

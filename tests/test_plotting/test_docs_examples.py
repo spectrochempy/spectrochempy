@@ -31,15 +31,13 @@ from spectrochempy.application.preferences import preferences
 @pytest.fixture(scope="module")
 def sample_dataset():
     """Load a sample dataset for testing."""
-    ds = scp.read("irdata/nh4y-activation.spg")
-    return ds
+    return scp.read("irdata/nh4y-activation.spg")
 
 
 @pytest.fixture(scope="module")
 def sample_1d():
     """Load a sample 1D dataset for testing."""
-    ds = scp.read("irdata/nh4y-activation.spg")
-    return ds[0]
+    return scp.read("irdata/nh4y-activation.spg")[0]
 
 
 @pytest.fixture
@@ -635,10 +633,7 @@ def is_grayscale_color(color, tolerance=0.01):
     """Check if a color is grayscale (R≈G≈B)."""
     import matplotlib.colors as mpl_colors
 
-    if isinstance(color, str):
-        rgb = mpl_colors.to_rgb(color)
-    else:
-        rgb = color[:3]
+    rgb = mpl_colors.to_rgb(color) if isinstance(color, str) else color[:3]
     return abs(rgb[0] - rgb[1]) < tolerance and abs(rgb[1] - rgb[2]) < tolerance
 
 

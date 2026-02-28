@@ -487,16 +487,14 @@ class SpectroChemPy(Application):
         after some internal state has been cleaned up, causing AttributeError.
         This override adds proper exception handling to prevent such errors.
         """
-        try:
+        from contextlib import suppress
+
+        with suppress(Exception):
             if getattr(self, "_logging_configured", False):
                 for handler in self.log.handlers:
-                    try:
+                    with suppress(Exception):
                         handler.close()
-                    except Exception:
-                        pass
                 self._logging_configured = False
-        except Exception:
-            pass
 
 
 # --------------------------------------------------------------------------------------
@@ -655,16 +653,27 @@ def _start_testdata_download():
 
 
 # --------------------------------------------------------------------------------------
-# Lazy module-level exports
+# Module-level lazy callable proxies
+# These are module-level names so they satisfy static analysis (F822).
+# They delegate to the app instance methods which are initialized lazily.
 # --------------------------------------------------------------------------------------
-def __getattr__(name):
-    """Lazy module-level attribute access."""
-    if name == "error_":
-        return _get_error_()
-    elif name == "info_":
-        return _get_info_()
-    elif name == "debug_":
-        return _get_debug_()
-    elif name == "warning_":
-        return _get_warning_()
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def error_(*args, **kwargs):
+    """Forward to app.error_."""
+    return _get_error_()(*args, **kwargs)
+
+
+def info_(*args, **kwargs):
+    """Forward to app.info_."""
+    return _get_info_()(*args, **kwargs)
+
+
+def debug_(*args, **kwargs):
+    """Forward to app.debug_."""
+    return _get_debug_()(*args, **kwargs)
+
+
+def warning_(*args, **kwargs):
+    """Forward to app.warning_."""
+    return _get_warning_()(*args, **kwargs)

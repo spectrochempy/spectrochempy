@@ -1,5 +1,5 @@
 """
-3D Plotting Tests - Refactored
+3D Plotting Tests - Refactored.
 
 Tests for 3D plotting functionality (surface, waterfall, etc.).
 
@@ -66,7 +66,7 @@ class Test3DPlotting:
         initial_count = len(plt.get_fignums())
 
         # Act - create a plot
-        ax = sample_3d_dataset.plot(show=False)
+        sample_3d_dataset.plot(show=False)
         final_count = len(plt.get_fignums())
 
         # Assert

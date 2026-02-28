@@ -254,10 +254,7 @@ def plot_baseline(
 
     top_range = top_max - top_min
 
-    if top_range > 0:
-        pad = 0.02 * top_range
-    else:
-        pad = 0.02 * max(abs(top_max), 1.0)
+    pad = 0.02 * top_range if top_range > 0 else 0.02 * max(abs(top_max), 1.0)
 
     ax1.set_ylim(top_min - pad, top_max + pad)
 
@@ -266,10 +263,7 @@ def plot_baseline(
 
     bot_range = bot_max - bot_min
 
-    if bot_range > 0:
-        pad = 0.02 * bot_range
-    else:
-        pad = 0.02 * max(abs(bot_max), 1.0)
+    pad = 0.02 * bot_range if bot_range > 0 else 0.02 * max(abs(bot_max), 1.0)
 
     ax2.set_ylim(bot_min - pad, bot_max + pad)
 

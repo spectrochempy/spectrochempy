@@ -1,5 +1,5 @@
 """
-2D Plotting Tests - Refactored
+2D Plotting Tests - Refactored.
 
 Tests for 2D plotting functionality (image, stack, map, etc.).
 
@@ -121,7 +121,7 @@ class Test2DPlotting:
         - No premature initialization occurs
         """
         # Act
-        ax = sample_2d_dataset.plot(show=False)
+        sample_2d_dataset.plot(show=False)
 
         # Assert - matplotlib should be available now
         assert plt.get_fignums()  # Figures exist = matplotlib initialized
@@ -136,7 +136,7 @@ class Test2DPlotting:
         initial_count = len(plt.get_fignums())
 
         # Act - create a plot
-        ax = sample_2d_dataset.plot(show=False)
+        sample_2d_dataset.plot(show=False)
         final_count = len(plt.get_fignums())
 
         # Assert

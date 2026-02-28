@@ -83,10 +83,7 @@ def plot_compare(
     orig_data = np.asarray(X.masked_data)
     ref_data = np.asarray(X_ref.masked_data)
 
-    if residual:
-        res_data = np.asarray((X - X_ref).masked_data)
-    else:
-        res_data = None
+    res_data = np.asarray((X - X_ref).masked_data) if residual else None
 
     # ----------------------------
     # X coordinate extraction
@@ -338,7 +335,7 @@ def plot_merit(
     # ----------------------------
     # Single reconstruction
     # ----------------------------
-    elif X_hat_ndim == X_ndim:
+    if X_hat_ndim == X_ndim:
         return plot_compare(
             X,
             X_hat,
@@ -350,8 +347,7 @@ def plot_merit(
             show=show,
         )
 
-    else:
-        raise ValueError(
-            f"Unexpected dimensionality: X_hat has {X_hat_ndim} dimensions, "
-            f"expected {X_ndim} or {X_ndim + 1}"
-        )
+    raise ValueError(
+        f"Unexpected dimensionality: X_hat has {X_hat_ndim} dimensions, "
+        f"expected {X_ndim} or {X_ndim + 1}"
+    )

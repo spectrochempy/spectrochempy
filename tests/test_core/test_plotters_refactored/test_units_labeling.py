@@ -11,6 +11,16 @@ unit formatting, and unitless coordinate handling.
 """
 
 
+def assert_dataset_state_unchanged(dataset_before, dataset_after):
+    """Verify dataset was not mutated by plotting."""
+    before_dict = (
+        dataset_before if isinstance(dataset_before, dict) else dataset_before.__dict__
+    )
+    assert before_dict == dataset_after.__dict__, "Dataset mutated by plotting"
+    assert not hasattr(dataset_after, "fig")
+    assert not hasattr(dataset_after, "ndaxes")
+
+
 class TestUnitsLabeling:
     """Test units and axis labeling in stateless architecture."""
 

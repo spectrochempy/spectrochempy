@@ -68,7 +68,11 @@ class TestScpyStyleContent:
         scpy_path = Path(stylesheets_path) / "scpy.mplstyle"
         content = scpy_path.read_text()
 
-        lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")]
+        lines = [
+            line
+            for line in content.split("\n")
+            if line.strip() and not line.startswith("#")
+        ]
         assert (
             len(lines) >= 5
         ), f"scpy.mplstyle should have at least 5 non-comment lines, got {len(lines)}"
@@ -124,7 +128,11 @@ class TestPaperStyleContent:
         paper_path = Path(stylesheets_path) / "paper.mplstyle"
         content = paper_path.read_text()
 
-        lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")]
+        lines = [
+            line
+            for line in content.split("\n")
+            if line.strip() and not line.startswith("#")
+        ]
         assert (
             len(lines) >= 3
         ), f"paper.mplstyle should have at least 3 non-comment lines, got {len(lines)}"
@@ -159,7 +167,11 @@ class TestSansStyleContent:
         sans_path = Path(stylesheets_path) / "sans.mplstyle"
         content = sans_path.read_text()
 
-        lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")]
+        lines = [
+            line
+            for line in content.split("\n")
+            if line.strip() and not line.startswith("#")
+        ]
         assert (
             len(lines) >= 1
         ), f"sans.mplstyle should have at least 1 non-comment line, got {len(lines)}"

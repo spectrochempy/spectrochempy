@@ -25,6 +25,7 @@ Usage:
 
 import json
 import warnings
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -163,12 +164,10 @@ class PlotProfileManager:
         for trait_name in prefs.traits():
             if trait_name.startswith("_"):
                 continue
-            try:
+            with suppress(Exception):
                 value = getattr(prefs, trait_name)
                 if self._is_serializable(value):
                     profile_data[trait_name] = value
-            except Exception:
-                pass
 
         self.profiles_dir.mkdir(parents=True, exist_ok=True)
         profile_file = self.profiles_dir / f"{name}.json"
@@ -229,16 +228,12 @@ class PlotProfileManager:
                     continue
 
                 if hasattr(prefs, key):
-                    try:
+                    with suppress(Exception):
                         setattr(prefs, key, value)
-                    except Exception:
-                        pass
 
             if hasattr(prefs, "style"):
-                try:
+                with suppress(Exception):
                     prefs.style = mpl_style
-                except Exception:
-                    pass
 
         finally:
             prefs._auto_save = original_autosave
@@ -380,7 +375,9 @@ class PlotProfileManager:
                 shutil.move(str(legacy_file), str(backup_file))
 
             except (json.JSONDecodeError, OSError) as e:
-                warnings.warn(f"Failed to migrate legacy preferences: {e}")
+                warnings.warn(
+                    f"Failed to migrate legacy preferences: {e}", stacklevel=2
+                )
 
     def _is_serializable(self, value: Any) -> bool:
         """Check if a value is JSON serializable."""

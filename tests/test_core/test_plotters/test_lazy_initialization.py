@@ -32,9 +32,7 @@ class TestLazyInitializationPerformance:
     def test_import_performance_without_matplotlib(self):
         """Test that import is fast and matplotlib not loaded."""
         # Clear matplotlib from modules if present
-        modules_to_remove = [
-            m for m in sys.modules.keys() if m.startswith("matplotlib")
-        ]
+        modules_to_remove = [m for m in sys.modules if m.startswith("matplotlib")]
         for module in modules_to_remove:
             del sys.modules[module]
 
@@ -51,16 +49,14 @@ class TestLazyInitializationPerformance:
     def test_matplotlib_not_loaded_on_dataset_creation(self):
         """Test that NDDataset creation does not load matplotlib."""
         # Clear matplotlib
-        modules_to_remove = [
-            m for m in sys.modules.keys() if m.startswith("matplotlib")
-        ]
+        modules_to_remove = [m for m in sys.modules if m.startswith("matplotlib")]
         for module in modules_to_remove:
             del sys.modules[module]
 
         from spectrochempy import NDDataset
 
         # Create dataset - should NOT load matplotlib
-        ds = NDDataset([1, 2, 3])
+        NDDataset([1, 2, 3])
         assert "matplotlib" not in sys.modules
 
     def test_matplotlib_loaded_on_plot(self):

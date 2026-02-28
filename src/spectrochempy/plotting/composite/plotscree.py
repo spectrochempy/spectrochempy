@@ -71,10 +71,7 @@ def plot_scree(
     >>> ax = plot_scree(explained, show=False)
     """
     explained = np.asarray(explained)
-    if cumulative is None:
-        cumulative = np.cumsum(explained)
-    else:
-        cumulative = np.asarray(cumulative)
+    cumulative = np.cumsum(explained) if cumulative is None else np.asarray(cumulative)
 
     n = len(explained)
     x = np.arange(1, n + 1)
@@ -98,10 +95,7 @@ def plot_scree(
     raw_min = first_explained - 2.0
     raw_min = max(0, raw_min)
 
-    if raw_min >= 10:
-        nice_min = 5 * int(raw_min / 5)
-    else:
-        nice_min = float(int(raw_min))
+    nice_min = 5 * int(raw_min / 5) if raw_min >= 10 else float(int(raw_min))
 
     if nice_min >= first_explained:
         if first_explained >= 10:

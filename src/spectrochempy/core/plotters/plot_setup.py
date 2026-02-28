@@ -89,7 +89,7 @@ def lazy_ensure_mpl_config() -> None:
     # Install assets once per process
     global _ASSETS_INSTALLED
     if not _ASSETS_INSTALLED:
-        try:
+        with contextlib.suppress(Exception):
             from spectrochempy.core.plotters._mpl_assets import (
                 ensure_mpl_assets_installed,
             )
@@ -97,9 +97,6 @@ def lazy_ensure_mpl_config() -> None:
             with contextlib.suppress(Exception):
                 ensure_mpl_assets_installed()
             _ASSETS_INSTALLED = True
-        except Exception:
-            # Continue even if asset installation fails
-            pass
 
     # Mark as ready
     _MPL_READY = True

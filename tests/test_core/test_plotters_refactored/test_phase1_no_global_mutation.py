@@ -46,7 +46,7 @@ class TestPhase1NoGlobalMutation:
             unchanged_ratio = unchanged_keys / total_keys
             assert (
                 unchanged_ratio >= 0.9
-            ), f"Only {unchened_ratio:.2%} of rcParams unchanged after import"
+            ), f"Only {unchanged_ratio:.2%} of rcParams unchanged after import"
 
     def test_preferences_change_no_global_mutation(self):
         """Test that preference changes don't affect global rcParams."""
@@ -86,7 +86,7 @@ class TestPhase1NoGlobalMutation:
         unchanged_ratio = unchanged_keys / total_keys
         assert (
             unchanged_ratio >= 0.9
-        ), f"Only {unchened_ratio:.2%} of rcParams unchanged after preference change"
+        ), f"Only {unchanged_ratio:.2%} of rcParams unchanged after preference change"
 
     def test_style_context_isolation(self):
         """Test that style context managers work correctly."""
@@ -111,7 +111,7 @@ class TestPhase1NoGlobalMutation:
                     "mathtext.fontset",
                 ]:  # These may legitimately change
                     continue
-                assert False, f"rcParams['{key}'] changed after style context"
+                raise AssertionError(f"rcParams['{key}'] changed after style context")
 
         # Quick check on a key that should definitely be restored
         if "lines.linewidth" in rcparams_before:

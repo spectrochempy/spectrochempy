@@ -1,4 +1,5 @@
 """Tests for new plotting preferences."""
+
 import numpy as np
 
 
@@ -33,7 +34,7 @@ class TestNewPreferences:
         """image_equal_aspect default is True."""
         from spectrochempy.application.preferences import preferences
 
-        assert preferences.image_equal_aspect == True
+        assert preferences.image_equal_aspect is True
 
     def test_3d_preferences_modifiable(self):
         """3D preferences can be modified."""
@@ -117,7 +118,7 @@ class TestImageEqualAspectPreference:
         original = preferences.image_equal_aspect
 
         preferences.image_equal_aspect = False
-        assert preferences.image_equal_aspect == False
+        assert preferences.image_equal_aspect is False
 
         preferences.image_equal_aspect = original
 

@@ -28,11 +28,3 @@ from spectrochempy.plotting.plot1d import plot_multiple
 from spectrochempy.plotting.plot1d import plot_pen
 from spectrochempy.plotting.plot1d import plot_scatter
 from spectrochempy.plotting.plot1d import plot_scatter_pen
-
-# Also re-export for lazy imports
-plot_1D = plot_1D
-plot_pen = plot_pen
-plot_scatter = plot_scatter
-plot_bar = plot_bar
-plot_multiple = plot_multiple
-plot_scatter_pen = plot_scatter_pen

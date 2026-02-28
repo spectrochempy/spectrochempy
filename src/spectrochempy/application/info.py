@@ -40,21 +40,19 @@ def _get_version():
     This ensures setuptools-scm is only a build-time dependency,
     not a runtime dependency.
     """
+    from contextlib import suppress
+
     # Try importlib.metadata first (works for installed packages)
-    try:
+    with suppress(Exception):
         from importlib.metadata import version
 
         return version("spectrochempy")
-    except Exception:
-        pass
 
     # Fallback to setuptools_scm (for git checkout / dev mode)
-    try:
+    with suppress(Exception):
         from setuptools_scm import get_version
 
         return get_version(root="..", relative_to=__file__)
-    except Exception:
-        pass
 
     # Final fallback
     return "0+unknown"

@@ -41,7 +41,7 @@ ax.annotate(
     "NH stretch",
     xy=(3250, 0.6),
     xytext=(3400, 0.7),
-    arrowprops=dict(arrowstyle="->", color="gray"),
+    arrowprops={"arrowstyle": "->", "color": "gray"},
 )
 
 # %% [markdown]

@@ -3,9 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""
-Tests for plot_baseline composite function.
-"""
+"""Tests for plot_baseline composite function."""
 
 import matplotlib
 
@@ -22,8 +20,7 @@ from spectrochempy.utils.exceptions import NotFittedError
 def _make_synthetic_dataset_1d():
     x = scp.Coord(np.linspace(4000, 1000, 100), title="wavenumber", units="cm^-1")
     y = np.sin(np.linspace(0, 4 * np.pi, 100)) + 0.5
-    data = scp.NDDataset(y, coordset=[x])
-    return data
+    return scp.NDDataset(y, coordset=[x])
 
 
 def _make_synthetic_dataset_2d(n_traces=3):
@@ -32,8 +29,7 @@ def _make_synthetic_dataset_2d(n_traces=3):
     data_arr = np.zeros((n_traces, 100))
     for i in range(n_traces):
         data_arr[i] = np.sin(np.linspace(0, 4 * np.pi, 100)) + 0.5 + i * 0.1
-    data = scp.NDDataset(data_arr, coordset=[y, x])
-    return data
+    return scp.NDDataset(data_arr, coordset=[y, x])
 
 
 class TestPlotBaseline:
