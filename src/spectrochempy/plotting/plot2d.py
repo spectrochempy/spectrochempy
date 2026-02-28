@@ -176,8 +176,6 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     ax : Axes3D
         The 3D axes containing the plot.
     """
-    import matplotlib.pyplot as plt
-
     from spectrochempy.plotting.plot_setup import lazy_ensure_mpl_config
 
     lazy_ensure_mpl_config()
@@ -219,7 +217,9 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     linewidth = kwargs.get("linewidth", prefs.lines_linewidth)
     alpha = kwargs.get("alpha", None)
 
-    # Create figure and axes
+    # Create figure and axes using unified get_figure infrastructure
+    from spectrochempy.utils.mplutils import get_figure
+
     user_ax = kwargs.get("ax")
     if user_ax is not None:
         if hasattr(user_ax, "plot3D") or user_ax.name == "3d":
@@ -230,7 +230,13 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
             fig.delaxes(user_ax)
             ax = fig.add_subplot(111, projection="3d")
     else:
-        fig = plt.figure()
+        # Filter out waterfall-specific kwargs that get_figure doesn't understand
+        fig_kwargs = {
+            k: v
+            for k, v in kwargs.items()
+            if k in ("figsize", "dpi", "facecolor", "edgecolor", "frameon")
+        }
+        fig = get_figure(**fig_kwargs)
         ax = fig.add_subplot(111, projection="3d")
 
     # Resolve colors using stack semantics
@@ -327,7 +333,6 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
                     poly.set_edgecolor(line_color)
                 elif fill_mode == "alpha":
                     from matplotlib.colors import to_rgba
-
                     fc = to_rgba(line_color, fill_alpha)
                     poly.set_facecolor(fc)
                     poly.set_edgecolor(line_color)
@@ -387,6 +392,7 @@ def _plot_waterfall_3d(new, prefs, **kwargs):
     ax.grid(False)
 
     return ax
+
 
 def _handle_3d_aspect(ax, dataset, **kwargs):
     """
