@@ -1528,6 +1528,12 @@ def plot_2D(dataset, method=None, **kwargs):
             if kwargs.get("y_reverse", False):
                 new = new[::-1]
 
+            # EARLY RETURN FOR WATERFALL - before any figure creation
+            # Waterfall uses its own 3D rendering and must not go through _figure_setup
+            if method == "waterfall":
+                # Call the 3D waterfall function directly
+                return _plot_waterfall_3d(new, prefs=prefs, **kwargs)
+
             # Figure setup
             # ------------------------------------------------------------------------
             _figure_result = new._figure_setup(
@@ -1559,13 +1565,6 @@ def plot_2D(dataset, method=None, **kwargs):
 
             ax.name += nameadd
 
-            # SPECIAL HANDLING FOR WATERFALL - use true 3D implementation
-            if method == "waterfall":
-                # Call the 3D waterfall function
-                ax = _plot_waterfall_3d(new, prefs=prefs, **kwargs)
-                # Return immediately - do NOT run generic plot_2D post-processing
-                return ax
-
             # Resolve line/marker styles using centralized L1 function
             style_kwargs = resolve_line_style(
                 dataset=new,
@@ -1591,10 +1590,7 @@ def plot_2D(dataset, method=None, **kwargs):
             number_y_labels = kwargs.get("n_y_labels", prefs.number_of_y_labels)
             number_z_labels = kwargs.get("n_z_labels", prefs.number_of_z_labels)
 
-            if method in ["waterfall"]:
-                nxl = number_x_labels * 2
-                nyl = number_z_labels * 2
-            elif method in ["stack", "lines"]:
+            if method in ["stack", "lines"]:
                 nxl = number_x_labels
                 nyl = number_z_labels
             else:
@@ -1718,7 +1714,7 @@ def plot_2D(dataset, method=None, **kwargs):
 
             zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
-            if method in ["stack", "lines", "waterfall"]:
+            if method in ["stack", "lines"]:
                 # the z axis info
                 # ---------------
                 # zl = (np.min(np.ma.min(ys)), np.max(np.ma.max(ys)))
@@ -1851,24 +1847,6 @@ def plot_2D(dataset, method=None, **kwargs):
                     ccount=ccount,
                     edgecolor="k",
                     norm=norm,
-                )
-
-            if method in ["waterfall"]:
-                # Force canvas draw to ensure transforms are valid before waterfall computation
-                # This is required because _plot_waterfall uses transA2D which depends on
-                # valid axis transforms (transData/transAxes)
-                fig = ax.figure
-                # Disable constrained layout for waterfall to preserve geometry
-                try:
-                    fig.set_constrained_layout(False)
-                except Exception:
-                    pass
-                # Mark this as a waterfall plot to prevent later layout changes
-                ax._scp_plot_method = "waterfall"
-                fig.canvas.draw_idle()
-                fig.canvas.draw()
-                _plot_waterfall(
-                    ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs
                 )
 
             elif method in ["image", "contourf"]:
@@ -2060,7 +2038,7 @@ def plot_2D(dataset, method=None, **kwargs):
                 # store the full set of lines (render_lines already added them to ax)
                 new._ax_lines = existing_lines + new_lines
 
-            if data_only or method in ["waterfall"]:
+            if data_only:
                 # if data only (we will not set axes and labels
                 # it was probably done already in a previous plot
                 new._plot_resume(dataset, **kwargs)
@@ -2212,14 +2190,12 @@ def plot_2D(dataset, method=None, **kwargs):
 
             # Apply final axis limits (user overrides)
             # This must be after all rendering and colorbar creation
-            # Skip for waterfall - it manages its own limits internally
-            if method != "waterfall":
-                user_xlim = kwargs.get("xlim")
-                user_ylim = kwargs.get("ylim")
-                if user_xlim is not None:
-                    ax.set_xlim(user_xlim)
-                if user_ylim is not None:
-                    ax.set_ylim(user_ylim)
+            user_xlim = kwargs.get("xlim")
+            user_ylim = kwargs.get("ylim")
+            if user_xlim is not None:
+                ax.set_xlim(user_xlim)
+            if user_ylim is not None:
+                ax.set_ylim(user_ylim)
 
             new._plot_resume(dataset, **kwargs)
 
@@ -2228,195 +2204,6 @@ def plot_2D(dataset, method=None, **kwargs):
         # ======================================================================================
         # Waterfall
         # ======================================================================================
-
-
-# ======================================================================================
-# Waterfall
-# ======================================================================================
-def _plot_waterfall(ax, new, xdata, ydata, zdata, prefs, xlim, ylim, zlim, **kwargs):
-    degazim = kwargs.get("azim", 10)
-    degelev = kwargs.get("elev", 30)
-
-    azim = np.deg2rad(degazim)
-    elev = np.deg2rad(degelev)
-
-    # transformation function Axes coordinates to Data coordinates
-    def transA2D(x_, y_):
-        return ax.transData.inverted().transform(ax.transAxes.transform((x_, y_)))
-
-    # expansion in Axes coordinates
-    xe, ze = np.sin(azim), np.sin(elev)
-
-    incx, incz = transA2D(1 + xe, 1 + ze) - np.array((xlim[-1], zlim[-1]))
-
-    def fx(y_):
-        return (y_ - ydata[0]) * incx / (ydata[-1] - ydata[0])
-
-    def fz(y_):
-        return (y_ - ydata[0]) * incz / (ydata[-1] - ydata[0])
-
-    zs = incz * 0.05
-    base = zdata.min() - zs
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
-
-    for i, row in enumerate(zdata):
-        y = ydata[i]
-        x = xdata + fx(y)
-        z = row + fz(y)  # row.masked_data[0]
-        ma = z.max()
-        z2 = base + fz(y)
-        line = mpl.lines.Line2D(x, z, color="k")
-        line.set_label(f"{ydata[i]}")
-        line.set_zorder(row.size + 1 - i)
-        poly = plt.fill_between(
-            x,
-            z,
-            z2,
-            alpha=1,
-            facecolors="w",
-            edgecolors="0.85" if 0 < i < ydata.size - 1 else "k",
-        )
-        poly.set_zorder(row.size + 1 - i)
-        with suppress(ValueError):
-            ax.add_collection(poly)
-
-        ax.add_line(line)
-
-    (x0, y0), (x1, _) = transA2D(0, 0), transA2D(1 + xe + 0.15, 1 + ze)
-    ax.set_xlim((x0, x1))
-    ax.set_ylim((y0 - zs - 0.05, ma * 1.1))
-
-    ax.set_facecolor("w")
-    ax.vlines(
-        x=xdata[-1] + incx,
-        ymin=zdata.min() - zs + incz,
-        ymax=ax.get_ylim()[-1],
-        color="k",
-    )
-    ax.vlines(
-        x=xdata[0] + incx,
-        ymin=zdata.min() - zs + incz,
-        ymax=ax.get_ylim()[-1],
-        color="k",
-    )
-    ax.vlines(
-        x=xdata[0],
-        ymin=y0 - zs,
-        ymax=ax.get_ylim()[-1] - incz,
-        color="k",
-        zorder=5000,
-    )
-    ax.vlines(
-        x=xdata[0],
-        ymin=y0 - zs,
-        ymax=ax.get_ylim()[-1] - incz,
-        color="k",
-        zorder=5000,
-    )
-
-    x = [xdata[0], xdata[0] + incx, xdata[-1] + incx]
-    z = [ax.get_ylim()[-1] - incz, ax.get_ylim()[-1], ax.get_ylim()[-1]]
-    x2 = [xdata[0], xdata[-1], xdata[-1] + incx]
-    z2 = [y0 - zs, y0 - zs, y0 - zs + incz]
-    poly = plt.fill_between(x, z, z2, alpha=1, facecolors=".95", edgecolors="w")
-    with suppress(ValueError):
-        ax.add_collection(poly)
-    poly = plt.fill_between(x2, z, z2, alpha=1, facecolors=".95", edgecolors="w")
-    with suppress(ValueError):
-        ax.add_collection(poly)
-    line = mpl.lines.Line2D(x, np.array(z), color="k", zorder=50000)
-    ax.add_line(line)
-    line = mpl.lines.Line2D(x2, np.array(z2), color="k", zorder=50000)
-    ax.add_line(line)
-
-    ax.spines["right"].set_visible(False)
-    ax.spines["top"].set_visible(False)
-    ax.spines["left"].set_visible(False)
-    ax.spines["bottom"].set_visible(False)
-
-    # xticks (xaxis)
-    ticks = ax.get_xticks()
-    newticks = []
-    xt = sorted(xlim)
-    for tick in ticks:
-        if xt[0] <= tick <= xt[1]:
-            newticks.append(tick)
-    ax.set_xticks(newticks)
-
-    # yticks (zaxis)
-    ticks = ax.get_yticks()
-    newticks = []
-    zt = [y0, ax.get_ylim()[-1] - incz]
-    for tick in ticks:
-        if zt[0] <= tick <= zt[1]:
-            newticks.append(tick)
-    _ = ax.set_yticks(newticks)
-
-    # make yaxis
-    def ctx(x_):
-        return (
-            ax.transData.inverted().transform((x_, 0))
-            - ax.transData.inverted().transform((0, 0))
-        )[0]
-
-    yt = list(np.linspace(ylim[0], ylim[-1], 5))
-    for y in yt:
-        xmin = xdata[-1] + fx(y)
-        xmax = xdata[-1] + fx(y) + ctx(3.5)
-        pos = y0 - zs + fz(y)
-        ax.hlines(pos, xmin, xmax, zorder=50000)
-        lab = ax.text(xmax + ctx(8), pos, f"{y:.0f}", va="center")
-
-    # display a title
-    # ------------------------------------------------------------------------
-    title = kwargs.get("title")
-    if title:
-        ax.set_title(title)
-
-    # ------------------------------------------------------------------------
-    # labels
-    # ------------------------------------------------------------------------
-    # x label
-    xlabel = kwargs.get("xlabel")
-    if not xlabel:
-        xlabel = make_label(new.x, "x")
-    ax.set_xlabel(xlabel, x=(ax.bbox._bbox.x0 + ax.bbox._bbox.x1) / 2 - xe)
-
-    # y label
-    # ------------------------------------------------------------------------
-    ylabel = kwargs.get("ylabel")
-    if not ylabel:
-        ylabel = make_label(new.y, "y")
-    ym = (ylim[0] + ylim[1]) / 2
-    x = xdata[-1] + fx(ym)
-    z = y0 - zs + fz(ym)
-    offset = prefs.font.size * (len(lab._text)) + 30
-    iz = ax.transData.transform((0, incz + z))[1] - ax.transData.transform((0, z))[1]
-    ix = ax.transData.transform((incx + x, 0))[0] - ax.transData.transform((x, 0))[0]
-    angle = np.rad2deg(np.arctan(iz / ix))
-    ax.annotate(
-        ylabel,
-        (x, z),
-        xytext=(offset, 0),
-        xycoords="data",
-        textcoords="offset pixels",
-        ha="center",
-        va="center",
-        rotation=angle,
-    )
-
-    # z label
-    # ------------------------------------------------------------------------
-    zlabel = kwargs.get("zlabel")
-    if not zlabel:
-        zlabel = make_label(new, "value")
-
-    # do we display the z axis?
-    if kwargs.get("show_z", True):
-        ax.set_ylabel(zlabel, y=(ax.bbox._bbox.y0 + 1 - ze) / 2)
-    else:
-        ax.set_yticks([])
 
 
 # ======================================================================================

@@ -29,6 +29,7 @@
 import spectrochempy as scp
 
 ds = scp.read("irdata/nh4y-activation.spg")
+ds = ds[:, 4000.0:650.0]  # We keep only the region that we want to display
 ds.y -= ds.y[0]  # Set y coordinates as relative time  for better visualization
 ds.y.ito('hour')
 ds.y.title = "Time on stream"  # Update y-axis title accordingly
@@ -103,12 +104,7 @@ _ = ds.plot_surface(y_reverse=True, linewidth=0)
 # For a waterfall-style representation:
 
 # %%
-ds = scp.read("irdata/nh4y-activation.spg")
-ds.y -= ds.y[0]  # Set y coordinates as relative time  for better visualization
-ds.y.ito('hour')
-ds.y.title = "Time on stream"  # Update y-axis title accordingly
-ds[:, 1290.0:920.0] = scp.MASKED  # We also mask a region that we do not want to display
-_ = ds.plot_waterfall(y_reverse=True)
+_ = ds.plot_waterfall(y_reverse=True, figsize=(7,4))
 
 # %% [markdown]
 # ## Combining with Options
