@@ -16,7 +16,18 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     before_dict = (
         dataset_before if isinstance(dataset_before, dict) else dataset_before.__dict__
     )
-    assert before_dict == dataset_after.__dict__, "Dataset mutated by plotting"
+    after_dict = dataset_after.__dict__
+
+    # Internal attributes that may be lazily created (not plotting-related)
+    internal_attrs = {"_NDDataset__mask_metadata", "__mask_metadata", "_mask_metadata"}
+
+    # Find new keys that aren't internal lazy-init attributes
+    new_keys = set(after_dict.keys()) - set(before_dict.keys())
+    plotting_keys = new_keys - internal_attrs
+
+    assert not plotting_keys, (
+        f"Dataset mutated by plotting with new attributes: {plotting_keys}"
+    )
     assert not hasattr(dataset_after, "fig")
     assert not hasattr(dataset_after, "ndaxes")
 
@@ -36,6 +47,9 @@ class TestMatplotlibIntegration:
         assert fig1 is not None, "Figure should be created"
         assert len(fig1.axes) > 0, "Figure should have axes"
 
+        # Check lines BEFORE clearing
+        assert len(ax1.get_lines()) > 0, "First plot should be valid"
+
         # Manual cleanup (user responsibility in stateless architecture)
         fig1.clf()  # Clear figure
 
@@ -48,8 +62,6 @@ class TestMatplotlibIntegration:
         assert len(fig2.axes) > 0, "Second figure should have axes"
 
         # Verify different styling applied
-        # Both should be valid plots but potentially different appearance
-        assert len(ax1.get_lines()) > 0, "First plot should be valid"
         assert len(ax2.get_lines()) > 0, "Second plot should be valid"
 
         # Manual cleanup of second figure

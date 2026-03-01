@@ -208,6 +208,7 @@ def multiplot(
     suptitle=None,
     suptitle_color="k",
     mpl_event=True,
+    return_dict=False,
     **kwargs,
 ):
     """
@@ -305,7 +306,7 @@ def multiplot(
         if datasets is None:
             datasets = []
         show_transposed = False
-        if method in "with_transposed":
+        if method == "with_transposed":
             show_transposed = True
             method = "stack"
             nrow = 2
@@ -314,9 +315,20 @@ def multiplot(
             sharez = True
 
         single = False
-        if not is_sequence(datasets):
+        # Check if single dataset (not a list/tuple of datasets)
+        # NDDataset has ndim but should not be treated as a list of datasets
+        from spectrochempy import NDDataset
+
+        if isinstance(datasets, NDDataset) or not is_sequence(datasets):
             single = True
             datasets = [datasets]  # make a list
+
+        # Validate datasets
+        for i, dataset in enumerate(datasets):
+            if dataset is None:
+                raise ValueError(f"Dataset at index {i} is None")
+            if not hasattr(dataset, "plot"):
+                raise ValueError(f"Dataset at index {i} has no plot method")
 
         if len(datasets) < nrow * ncol and not show_transposed:
             # not enough datasets given in this list.
@@ -412,10 +424,25 @@ def multiplot(
         if sharez:
             sharez = "all"
 
+        # Handle method parameter - can be string or list
+        method_is_list = is_sequence(method) and not isinstance(method, str)
+        if method_is_list:
+            if len(method) != len(datasets):
+                raise ValueError(
+                    f"method list length ({len(method)}) must match "
+                    f"number of datasets ({len(datasets)})"
+                )
+
         for irow in range(nrow):
             for icol in range(ncol):
                 idx = irow * ncol + icol
                 dataset = datasets[idx]
+
+                # Determine method for this dataset
+                if method_is_list:
+                    current_method = method[idx]
+                else:
+                    current_method = method
                 try:
                     label = labels[idx]
                 except Exception:
@@ -481,7 +508,7 @@ def multiplot(
                 transposed = bool(show_transposed and irow == 1)
 
                 dataset.plot(
-                    method=method,
+                    method=current_method,
                     ax=ax,
                     clear=False,
                     autolayout=False,
@@ -586,4 +613,12 @@ def multiplot(
             fig.canvas.mpl_connect("figure_enter_event", _onenter)
             fig.canvas.mpl_connect("figure_leave_event", _onenter)
 
-        return axes
+        # Return based on contract
+        if return_dict:
+            return {
+                "fig": fig,
+                "axes": np.array(list(axes.values())),
+                "axes_dict": axes,
+            }
+        else:
+            return np.array(list(axes.values()))

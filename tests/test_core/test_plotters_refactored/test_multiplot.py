@@ -8,7 +8,10 @@ functionality that was previously broken due to transform errors but is now work
 """
 
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.figure import Figure
+
+from spectrochempy import multiplot
 
 
 class TestMultiplot:
@@ -29,12 +32,12 @@ class TestMultiplot:
             sample_1d_dataset,  # Duplicate for testing
         ]
 
-        # Act
-        fig, axes = plt.multiplot(*datasets, show=False)
+        # Act - use spectrochempy.multiplot with list (not unpacking)
+        axes = multiplot(datasets, show=False)
 
         # Assert
-        assert fig is not None
-        assert isinstance(fig, Figure)
+        assert axes is not None
+        assert isinstance(axes, np.ndarray)
         assert len(axes) == len(datasets)
 
         # Verify axes are properly created
@@ -61,10 +64,10 @@ class TestMultiplot:
 
         for layout in layouts:
             # Act
-            fig, axes = plt.multiplot(*datasets, show=False, **layout)
+            axes = multiplot(datasets, show=False, **layout)
 
             # Assert
-            assert fig is not None
+            assert axes is not None
             assert len(axes) == len(datasets)
 
             # Verify layout matches expected
@@ -86,10 +89,10 @@ class TestMultiplot:
         datasets = [sample_2d_dataset, sample_2d_dataset]
 
         # Act
-        fig, axes = plt.multiplot(*datasets, show=False)
+        axes = multiplot(datasets, show=False)
 
         # Assert
-        assert fig is not None
+        assert axes is not None
         assert len(axes) == len(datasets)
 
         # Verify axes have proper structure
@@ -104,15 +107,14 @@ class TestMultiplot:
         - matplotlib is initialized when multiplot is called
         - No premature initialization occurs
         """
-        # Act
-        fig, axes = plt.multiplot(sample_1d_dataset, show=False)
+        # Act - single dataset should return Axes
+        axes = multiplot(sample_1d_dataset, show=False)
 
         # Assert - matplotlib should be available now
         assert plt.get_fignums()  # Figures exist = matplotlib initialized
 
-        # Verify multiplot results
-        assert fig is not None
-        assert len(axes) >= 1
+        # Verify multiplot results - single dataset returns single Axes
+        assert axes is not None
 
     def test_multiplot_figure_cleanup(self, sample_1d_dataset, clean_figures):
         """
@@ -123,8 +125,8 @@ class TestMultiplot:
         # Get initial figure count
         initial_count = len(plt.get_fignums())
 
-        # Act - create multiplot
-        fig, axes = plt.multiplot(sample_1d_dataset, show=False)
+        # Act - create multiplot with single dataset
+        axes = multiplot(sample_1d_dataset, show=False)
         final_count = len(plt.get_fignums())
 
         # Assert
@@ -138,14 +140,13 @@ class TestMultiplot:
         - Parameters are passed correctly
         - No errors occur with different parameter combinations
         """
-        # Act
-        fig, axes = plt.multiplot(
+        # Act - single dataset
+        axes = multiplot(
             sample_1d_dataset, show=False, sharex=True, sharey=True, figsize=(8, 6)
         )
 
         # Assert
-        assert fig is not None
-        assert len(axes) >= 1
+        assert axes is not None
 
     def test_multiplot_transform_bug_fix(self, sample_1d_dataset, clean_figures):
         """
@@ -159,10 +160,10 @@ class TestMultiplot:
         datasets = [sample_1d_dataset]
 
         # Act
-        fig, axes = plt.multiplot(*datasets, show=False)
+        axes = multiplot(datasets, show=False)
 
         # Assert - this should work without transform errors
-        assert fig is not None, "Multiplot should succeed"
+        assert axes is not None, "Multiplot should succeed"
         assert len(axes) == 1, "Should create one set of axes"
 
         # The key validation: if we got here without transform errors,

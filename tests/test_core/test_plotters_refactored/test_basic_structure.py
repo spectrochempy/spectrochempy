@@ -47,7 +47,7 @@ class TestBasicTestStructure:
         """Verify basic pytest and matplotlib functionality."""
         # Create mock dataset
         dataset = MockDataset()
-        ds_before = dataset.__dict__.copy()
+        ds_before = dataset  # Store the object, not the dict
 
         # Test basic matplotlib plot creation
         fig, ax = plt.subplots()

@@ -594,6 +594,9 @@ class DecompositionAnalysis(AnalysisConfigurable):
             **kwargs,
         )
 
+    # Backward compatibility alias
+    plotmerit = plot_merit
+
     docprocess.get_sections(docprocess.dedent(plot_merit.__doc__), base="plot_merit")
 
     @property

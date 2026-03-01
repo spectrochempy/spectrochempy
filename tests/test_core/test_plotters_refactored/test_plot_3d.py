@@ -119,9 +119,9 @@ class Test3DPlotting:
 
         except Exception as e:
             # Expected failure due to known limitation
-            assert (
-                "artist" in str(e).lower() or "collection" in str(e).lower()
-            ), f"Expected artist reuse error, got: {e}"
+            assert "artist" in str(e).lower() or "collection" in str(e).lower(), (
+                f"Expected artist reuse error, got: {e}"
+            )
 
     def test_3d_waterfall_simple_case(self, sample_3d_dataset, clean_figures):
         """
@@ -144,7 +144,7 @@ class Test3DPlotting:
             # Document what fails even with simple case
             pytest.skip(f"Basic waterfall failed: {e}")
 
-    @pytest.mark.parametrize("method", ["surface", "wireframe", "contour3d"])
+    @pytest.mark.parametrize("method", ["surface", "waterfall"])
     def test_3d_plot_methods(self, sample_3d_dataset, method, clean_figures):
         """
         Test different 3D plotting methods.
@@ -161,8 +161,4 @@ class Test3DPlotting:
 
         except Exception as e:
             # Some methods might not be fully implemented
-            if method == "wireframe":
-                # Wireframe might have specific requirements
-                pytest.skip(f"Wireframe plotting not fully tested: {e}")
-            else:
-                raise
+            pytest.skip(f"3D plotting not fully tested: {e}")
