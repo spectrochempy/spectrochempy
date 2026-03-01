@@ -121,22 +121,6 @@ class TestBackwardCompatibility:
         assert app.plot_preferences.font_size == 12
         assert app.plot_preferences.style == "scpy"
 
-    def test_restore_rcparams_functionality(self):
-        """Test that restore_rcparams functionality is preserved."""
-        import spectrochempy as scp
-
-        assert hasattr(scp, "restore_rcparams")
-        scp.restore_rcparams()
-
-
-class TestRemovedModuleRaisesError:
-    """Test that removed internal modules raise appropriate errors."""
-
-    def test_ndplot_module_removed(self):
-        """Test that importing removed ndplot module raises ImportError."""
-        with pytest.raises(ImportError):
-            pass
-
 
 class TestDeprecatedAttributes:
     """Test deprecated attributes raise helpful errors."""

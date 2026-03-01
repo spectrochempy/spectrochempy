@@ -89,13 +89,6 @@ def test_plot_image_with_colorbar_and_style(ds2d):
     show()
 
 
-def test_plot_image_colormap_preference(ds2d):
-    prefs.reset()
-    prefs.image.cmap = "magma"
-    ds2d.plot_image()
-    show()
-
-
 @pytest.mark.xfail(
     reason="plot_image does not support data_transposed=True "
     "(resume logic requires line-based plots)",

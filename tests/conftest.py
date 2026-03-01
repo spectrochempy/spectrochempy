@@ -4,12 +4,60 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+# Force Agg backend BEFORE any other imports to prevent interactive backend initialization
+import matplotlib
+
+matplotlib.use("Agg", force=True)
+
 from pathlib import Path
 
 import numpy as np
 import pytest
 
 import spectrochempy
+
+
+# ======================================================================================
+# ISOLATION FIXTURES - Run before/after EVERY test
+# ======================================================================================
+
+
+@pytest.fixture(autouse=True)
+def isolate_matplotlib_state():
+    """Ensure matplotlib state is clean before and after each test."""
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    # Save original state
+    original_rc = mpl.rcParams.copy()
+    original_figs = plt.get_fignums()
+
+    yield
+
+    # Restore rcParams
+    mpl.rcParams.update(original_rc)
+
+    # Close all figures created during test
+    plt.close("all")
+
+    # Also close any figures that weren't in the original set
+    for fig_num in plt.get_fignums():
+        if fig_num not in original_figs:
+            plt.close(fig_num)
+
+
+@pytest.fixture(autouse=True)
+def isolate_scp_preferences():
+    """Ensure SpectroChemPy preferences are restored after each test."""
+    from spectrochempy.application.preferences import preferences as prefs
+
+    # Take a snapshot of preferences
+    snapshot = prefs.to_dict()
+
+    yield
+
+    # Restore preferences from snapshot
+    prefs.update(snapshot)
 
 
 # ----------------------------

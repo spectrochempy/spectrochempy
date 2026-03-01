@@ -9,7 +9,6 @@ import numpy as np
 import pytest
 
 
-
 def test_plotmerit_single_index():
     """Test plotmerit with a single index works correctly."""
     import matplotlib
@@ -285,21 +284,21 @@ def test_plotmerit_zorder():
 
     n_traces = X.shape[0]
 
+    # Note: lines are added in order: residual (z=0), reconstructed (z=1), experimental (z=2)
+    # So ax.lines indices are: 0:n = residual, n:2n = reconstructed, 2n:3n = experimental
     res_zorders = [ax.lines[i].get_zorder() for i in range(n_traces)]
-    exp_zorders = [ax.lines[i].get_zorder() for i in range(n_traces, 2 * n_traces)]
-    recon_zorders = [
-        ax.lines[i].get_zorder() for i in range(2 * n_traces, 3 * n_traces)
-    ]
+    recon_zorders = [ax.lines[i].get_zorder() for i in range(n_traces, 2 * n_traces)]
+    exp_zorders = [ax.lines[i].get_zorder() for i in range(2 * n_traces, 3 * n_traces)]
 
     assert all(z == 0 for z in res_zorders), "All residual zorders should be 0"
     assert all(z == 1 for z in recon_zorders), "All reconstructed zorders should be 1"
     assert all(z == 2 for z in exp_zorders), "All experimental zorders should be 2"
 
-    assert max(res_zorders) < min(
-        recon_zorders
-    ), "Residuals should be behind reconstructed"
-    assert max(recon_zorders) < min(
-        exp_zorders
-    ), "Reconstructed should be behind experimental"
+    assert max(res_zorders) < min(recon_zorders), (
+        "Residuals should be behind reconstructed"
+    )
+    assert max(recon_zorders) < min(exp_zorders), (
+        "Reconstructed should be behind experimental"
+    )
 
     plt.close()
