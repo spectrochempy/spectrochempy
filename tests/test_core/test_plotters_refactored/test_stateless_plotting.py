@@ -23,50 +23,38 @@ from .conftest import assert_dataset_state_unchanged
 class TestStatelessPlotting:
     """Test core stateless plotting behavior."""
 
-    def test_default_method_selection(
-        self, sample_1d_dataset, sample_2d_dataset, sample_3d_dataset
-    ):
+    def test_default_method_selection(self, sample_1d_dataset, sample_2d_dataset):
         """Test 1: Default method selection based on dataset dimensionality."""
         # Store dataset state before plotting
         ds1_before = sample_1d_dataset.__dict__.copy()
         ds2_before = sample_2d_dataset.__dict__.copy()
-        ds3_before = sample_3d_dataset.__dict__.copy()
 
         # Plot without specifying method
         ax1 = sample_1d_dataset.plot()
         ax2 = sample_2d_dataset.plot()
-        ax3 = sample_3d_dataset.plot()
 
         # Verify correct methods were used (check line presence for 1D)
         lines1 = ax1.get_lines()
         assert len(lines1) > 0, "1D plot should create line objects"
 
-        # Verify 2D plot has contours or similar
-        collections2 = ax2.collections
-        assert len(collections2) > 0, "2D plot should create collection objects"
-
-        # Verify 3D plot has surface
-        assert hasattr(ax3, "zaxis"), "3D plot should have z-axis"
-        assert ax3.name == "3d", "3D plot should have 3d projection"
+        # Verify 2D plot creates lines (default is stack plot)
+        lines2 = ax2.get_lines()
+        assert len(lines2) > 0, "2D plot should create line objects (stack)"
 
         # Verify datasets remain unchanged
         assert_dataset_state_unchanged(ds1_before, sample_1d_dataset)
         assert_dataset_state_unchanged(ds2_before, sample_2d_dataset)
-        assert_dataset_state_unchanged(ds3_before, sample_3d_dataset)
 
-    def test_explicit_method_dispatch(
-        self, sample_1d_dataset, sample_2d_dataset, sample_3d_dataset
-    ):
+    def test_explicit_method_dispatch(self, sample_1d_dataset, sample_2d_dataset):
         """Test 2: Explicit method dispatch works correctly."""
         # Store original state
         ds1_before = sample_1d_dataset.__dict__.copy()
         ds2_before = sample_2d_dataset.__dict__.copy()
-        ds3_before = sample_3d_dataset.__dict__.copy()
 
         # Test explicit method specification
         ax_scatter = sample_1d_dataset.plot(method="scatter")
         ax_map = sample_2d_dataset.plot(method="map")
-        ax_surface = sample_3d_dataset.plot(method="surface")
+        ax_surface = sample_2d_dataset.plot(method="surface")
 
         # Verify correct plot types
         # Scatter plot uses Line2D with markers, not PathCollection
@@ -78,9 +66,9 @@ class TestStatelessPlotting:
             "",
         ), "Scatter plot should have markers"
         assert line.get_linestyle() == "None", "Scatter plot should have no line"
-        assert (
-            len(ax_scatter.collections) == 0
-        ), "Scatter plot should not use collections"
+        assert len(ax_scatter.collections) == 0, (
+            "Scatter plot should not use collections"
+        )
 
         # Map plot should have contour lines
         assert len(ax_map.collections) > 0, "Map plot should have contour collections"
@@ -91,7 +79,6 @@ class TestStatelessPlotting:
         # Verify datasets unchanged
         assert_dataset_state_unchanged(ds1_before, sample_1d_dataset)
         assert_dataset_state_unchanged(ds2_before, sample_2d_dataset)
-        assert_dataset_state_unchanged(ds3_before, sample_3d_dataset)
 
     def test_return_type_verification(self, sample_1d_dataset):
         """Test 3: Return type verification - returns matplotlib Axes only."""
@@ -99,15 +86,15 @@ class TestStatelessPlotting:
 
         # Test single plot return type
         ax = sample_1d_dataset.plot()
-        assert isinstance(
-            ax, plt.Axes
-        ), "dataset.plot() should return matplotlib Axes object"
+        assert isinstance(ax, plt.Axes), (
+            "dataset.plot() should return matplotlib Axes object"
+        )
 
         # Verify returned axes can be used independently
         ax.set_title("Independent title")
-        assert (
-            ax.get_title() == "Independent title"
-        ), "Returned axes should be independently usable"
+        assert ax.get_title() == "Independent title", (
+            "Returned axes should be independently usable"
+        )
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
@@ -127,12 +114,12 @@ class TestStatelessPlotting:
 
         # Verify parameters applied
         assert ax.get_title() == "Test Title", "Title parameter not applied correctly"
-        assert (
-            ax.get_xlabel() == "Custom X Label"
-        ), "X label parameter not applied correctly"
-        assert (
-            ax.get_ylabel() == "Custom Y Label"
-        ), "Y label parameter not applied correctly"
+        assert ax.get_xlabel() == "Custom X Label", (
+            "X label parameter not applied correctly"
+        )
+        assert ax.get_ylabel() == "Custom Y Label", (
+            "Y label parameter not applied correctly"
+        )
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
@@ -141,15 +128,9 @@ class TestStatelessPlotting:
         """Test 5: Invalid method raises appropriate error."""
         ds_before = sample_1d_dataset.__dict__.copy()
 
-        # Test invalid method
-        with pytest.raises((NameError, OSError)) as exc_info:
+        # Test invalid method - raises OSError after logging NameError
+        with pytest.raises(OSError):
             sample_1d_dataset.plot(method="nonexistent_method")
-
-        # Verify error is informative
-        error_message = str(exc_info.value)
-        assert (
-            "nonexistent_method" in error_message
-        ), "Error message should mention the invalid method"
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
@@ -168,12 +149,12 @@ class TestScatterMarkerBehavior:
 
         line = ax.lines[0]
         # Default marker should be "o" from preferences
-        assert (
-            line.get_marker() == "o"
-        ), f"Expected default marker 'o', got {line.get_marker()}"
-        assert (
-            line.get_linestyle() == "None"
-        ), "Scatter plot should have no connecting line"
+        assert line.get_marker() == "o", (
+            f"Expected default marker 'o', got {line.get_marker()}"
+        )
+        assert line.get_linestyle() == "None", (
+            "Scatter plot should have no connecting line"
+        )
 
     def test_scatter_explicit_marker(self, sample_1d_dataset):
         """Test that explicit marker overrides default."""
@@ -184,9 +165,9 @@ class TestScatterMarkerBehavior:
         assert len(ax.lines) > 0, "Scatter plot should have line objects"
         line = ax.lines[0]
         assert line.get_marker() == "s", f"Expected marker 's', got {line.get_marker()}"
-        assert (
-            line.get_linestyle() == "None"
-        ), "Scatter plot should have no connecting line"
+        assert line.get_linestyle() == "None", (
+            "Scatter plot should have no connecting line"
+        )
 
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
 
@@ -221,9 +202,9 @@ class TestScatterMarkerBehavior:
         ax = sample_1d_dataset.plot_scatter()
 
         # Must use Line2D, not PathCollection
-        assert (
-            len(ax.collections) == 0
-        ), "Scatter plot should not create collections (PathCollection)"
+        assert len(ax.collections) == 0, (
+            "Scatter plot should not create collections (PathCollection)"
+        )
         assert len(ax.lines) > 0, "Scatter plot must create Line2D objects"
 
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)

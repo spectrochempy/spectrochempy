@@ -778,7 +778,7 @@ baseline/trends for different segments of the data.
             (ax_top, ax_bottom) matplotlib axes.
 
         """
-        from spectrochempy.plotting.composite import plot_baseline
+        from spectrochempy.plotting.composite.plotbaseline import plot_baseline
 
         original = self.X
         baseline = self.baseline

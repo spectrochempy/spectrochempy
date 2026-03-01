@@ -248,10 +248,14 @@ class SpectroChemPy(Application):
         formatter = logging.Formatter(
             f"<%(asctime)s:{module}/{func}::{line}> %(message)s"
         )
-        self.log.handlers[1].setFormatter(formatter)
+        if len(self.log.handlers) > 1:
+            self.log.handlers[1].setFormatter(formatter)
 
     @contextmanager
     def _fmtcontext(self):
+        if len(self.log.handlers) < 2:
+            yield (self.log_format, None)
+            return
         fmt = self.log_format, self.log.handlers[1].formatter
         try:
             yield fmt

@@ -20,7 +20,7 @@ class TestPlotScree:
 
     def test_plot_scree_basic(self):
         """Test basic plot_scree functionality."""
-        from spectrochempy.plotting.composite import plot_scree
+        from spectrochempy.plotting.composite.plotscree import plot_scree
 
         explained = np.array([40.0, 25.0, 15.0, 10.0, 5.0, 3.0, 2.0])
 
@@ -35,7 +35,7 @@ class TestPlotScree:
 
     def test_plot_scree_with_cumulative(self):
         """Test plot_scree with pre-computed cumulative."""
-        from spectrochempy.plotting.composite import plot_scree
+        from spectrochempy.plotting.composite.plotscree import plot_scree
 
         explained = np.array([40.0, 25.0, 15.0, 10.0, 5.0])
         cumulative = np.cumsum(explained)
@@ -85,7 +85,7 @@ class TestPlotScree:
 
     def test_plot_scree_deterministic_limits(self):
         """Test that axis limits are deterministic."""
-        from spectrochempy.plotting.composite import plot_scree
+        from spectrochempy.plotting.composite.plotscree import plot_scree
 
         explained = np.array([30.0, 20.0, 15.0, 10.0])
         n = len(explained)
@@ -110,7 +110,7 @@ class TestPlotScree:
 
     def test_plot_scree_custom_colors(self):
         """Test plot_scree with custom colors."""
-        from spectrochempy.plotting.composite import plot_scree
+        from spectrochempy.plotting.composite.plotscree import plot_scree
 
         explained = np.array([40.0, 25.0, 15.0])
 
@@ -123,7 +123,7 @@ class TestPlotScree:
 
     def test_plot_scree_with_ax(self):
         """Test plot_scree with provided axes."""
-        from spectrochempy.plotting.composite import plot_scree
+        from spectrochempy.plotting.composite.plotscree import plot_scree
 
         explained = np.array([40.0, 25.0, 15.0])
 
@@ -136,7 +136,7 @@ class TestPlotScree:
 
     def test_plot_scree_no_title(self):
         """Test plot_scree with title=None."""
-        from spectrochempy.plotting.composite import plot_scree
+        from spectrochempy.plotting.composite.plotscree import plot_scree
 
         explained = np.array([40.0, 25.0, 15.0])
 

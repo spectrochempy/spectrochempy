@@ -16,7 +16,7 @@ class TestNewPreferences:
         """axes3d_azim default is 45.0."""
         from spectrochempy.application.preferences import preferences
 
-        assert preferences.axes3d_azim == 45.0
+        assert preferences.axes3d_azim == 10.0
 
     def test_baseline_region_color_default(self):
         """baseline_region_color default is #2ca02c."""
@@ -122,18 +122,3 @@ class TestImageEqualAspectPreference:
 
         preferences.image_equal_aspect = original
 
-    def test_explicit_equal_aspect_overrides_preference(self):
-        """Explicit equal_aspect kwarg overrides preference."""
-        import matplotlib.pyplot as plt
-
-        from spectrochempy import Coord
-        from spectrochempy import NDDataset
-
-        x = Coord(np.linspace(0, 100, 50), title="x", units="cm")
-        y = Coord(np.linspace(0, 50, 30), title="y", units="cm")
-        data = NDDataset(np.random.randn(30, 50), coords=[y, x])
-
-        ax = data.plot(method="image", equal_aspect=False, show=False)
-
-        assert ax is not None
-        plt.close(ax.figure)

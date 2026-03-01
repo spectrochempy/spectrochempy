@@ -20,7 +20,7 @@ class TestPlotScore:
 
     def test_plot_score_2d_basic(self):
         """Test basic 2D score plot functionality."""
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(50, 5)
 
@@ -37,7 +37,7 @@ class TestPlotScore:
 
     def test_plot_score_3d_basic(self):
         """Test basic 3D score plot functionality."""
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(50, 5)
 
@@ -86,7 +86,7 @@ class TestPlotScore:
 
     def test_invalid_components_length(self):
         """Test that invalid components length raises ValueError."""
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(50, 5)
 
@@ -98,7 +98,7 @@ class TestPlotScore:
 
     def test_component_out_of_range(self):
         """Test that out-of-range components raise ValueError."""
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(50, 5)
 
@@ -110,7 +110,7 @@ class TestPlotScore:
 
     def test_plot_score_with_custom_color(self):
         """Test plot_score with fixed color."""
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(50, 5)
 
@@ -122,7 +122,7 @@ class TestPlotScore:
 
     def test_plot_score_with_ax(self):
         """Test plot_score with provided axes."""
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(50, 5)
 
@@ -136,13 +136,13 @@ class TestPlotScore:
     def test_plot_score_labels_2d(self):
         """Test plot_score with labels in 2D."""
         import spectrochempy as scp
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores_data = np.random.randn(10, 5)
         scores = scp.NDDataset(scores_data)
 
         labels = np.array([f"S{i}" for i in range(10)])
-        scores.y = scp.Coord(labels=labels.reshape(-1, 1))
+        scores.y = scp.Coord(data=np.arange(10), labels=labels.reshape(-1, 1))
 
         ax = plot_score(scores, components=(1, 2), show_labels=True, show=False)
 
@@ -157,13 +157,30 @@ class TestPlotScore:
     def test_plot_score_labels_3d(self):
         """Test plot_score with labels in 3D."""
         import spectrochempy as scp
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores_data = np.random.randn(10, 5)
         scores = scp.NDDataset(scores_data)
 
         labels = np.array([f"S{i}" for i in range(10)])
-        scores.y = scp.Coord(labels=labels.reshape(-1, 1))
+        scores.y = scp.Coord(data=np.arange(10), labels=labels.reshape(-1, 1))
+
+        ax = plot_score(scores, components=(1, 2, 3), show_labels=True, show=False)
+
+        assert ax is not None
+
+        plt.close()
+
+    def test_plot_score_labels_3d(self):
+        """Test plot_score with labels in 3D."""
+        import spectrochempy as scp
+        from spectrochempy.plotting.composite.plotscore import plot_score
+
+        scores_data = np.random.randn(10, 5)
+        scores = scp.NDDataset(scores_data)
+
+        labels = np.array([f"S{i}" for i in range(10)])
+        scores.y = scp.Coord(data=np.arange(10), labels=labels.reshape(-1, 1))
 
         ax = plot_score(scores, components=(1, 2, 3), show_labels=True, show=False)
 
@@ -174,7 +191,7 @@ class TestPlotScore:
     def test_plot_score_labels_column(self):
         """Test plot_score with labels_column selection."""
         import spectrochempy as scp
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores_data = np.random.randn(10, 5)
         scores = scp.NDDataset(scores_data)
@@ -182,7 +199,7 @@ class TestPlotScore:
         labels_col0 = np.array([f"A{i}" for i in range(10)])
         labels_col1 = np.array([f"B{i}" for i in range(10)])
         labels = np.column_stack([labels_col0, labels_col1])
-        scores.y = scp.Coord(labels=labels)
+        scores.y = scp.Coord(data=np.arange(10), labels=labels)
 
         ax = plot_score(
             scores, components=(1, 2), show_labels=True, labels_column=1, show=False
@@ -195,13 +212,13 @@ class TestPlotScore:
     def test_plot_score_invalid_labels_column(self):
         """Test that invalid labels_column raises ValueError."""
         import spectrochempy as scp
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores_data = np.random.randn(10, 5)
         scores = scp.NDDataset(scores_data)
 
         labels = np.array([f"S{i}" for i in range(10)])
-        scores.y = scp.Coord(labels=labels.reshape(-1, 1))
+        scores.y = scp.Coord(data=np.arange(10), labels=labels.reshape(-1, 1))
 
         with pytest.raises(ValueError, match="labels_column"):
             plot_score(
@@ -217,7 +234,7 @@ class TestPlotScore:
     def test_plot_score_no_labels(self):
         """Test that show_labels=True without labels raises ValueError."""
         import spectrochempy as scp
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores_data = np.random.randn(10, 5)
         scores = scp.NDDataset(scores_data)
@@ -229,7 +246,7 @@ class TestPlotScore:
 
     def test_plot_score_no_labels_attribute(self):
         """Test that show_labels=True with empty labels raises ValueError."""
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         scores = np.random.randn(10, 5)
 

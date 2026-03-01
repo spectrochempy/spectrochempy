@@ -439,7 +439,7 @@ for reproducible results across multiple function calls.""",
         >>> pca.fit(X)
         >>> ax = pca.plot_scree(show=False)  # doctest: +SKIP
         """
-        from spectrochempy.plotting.composite import plot_scree
+        from spectrochempy.plotting.composite.plotscree import plot_scree
 
         if not self._fitted:
             raise NotFittedError(
@@ -540,7 +540,7 @@ for reproducible results across multiple function calls.""",
         >>> scores.y.labels = custom_labels  # doctest: +SKIP
         >>> ax = pca.plot_score(scores=scores, show_labels=True)  # doctest: +SKIP
         """
-        from spectrochempy.plotting.composite import plot_score
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
         if not self._fitted:
             raise NotFittedError(

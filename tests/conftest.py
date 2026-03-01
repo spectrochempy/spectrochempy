@@ -90,7 +90,7 @@ datadir = pathclean(prefs.datadir)
 
 from spectrochempy.application.testdata import download_full_testdata_directory
 
-download_full_testdata_directory(datadir, force=True)
+download_full_testdata_directory(datadir, force=False)
 
 
 # --------------------------------------------------------------------------------------

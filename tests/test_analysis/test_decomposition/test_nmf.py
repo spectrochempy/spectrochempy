@@ -84,7 +84,7 @@ def test_nmf():
     # test plots
     U.T.plot(title="nmf.transform() ")
     nmf.components.plot(title="components")
-    nmf.plotmerit(offset=0, nb_traces=10)
+    nmf.plot_merit(offset=0, nb_traces=10)
 
     # Test masked data, x axis
     nmf2 = NMF(n_components=4)

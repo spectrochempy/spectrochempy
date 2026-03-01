@@ -13,7 +13,7 @@ import numpy as np
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.plotting.composite import plot_baseline
+from spectrochempy.plotting.composite.plotbaseline import plot_baseline
 from spectrochempy.utils.exceptions import NotFittedError
 
 

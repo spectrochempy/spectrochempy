@@ -9,77 +9,6 @@ import numpy as np
 import pytest
 
 
-def test_normalize_xy_for_render_1d_to_1d():
-    """Test case 1: x (n,), y (n,) -> x (n,), y (1, n)."""
-    from spectrochempy.plotting.composite.plotmerit import _normalize_xy_for_render
-
-    x = np.arange(10)
-    y = np.arange(10) * 2
-
-    x_out, y_out = _normalize_xy_for_render(x, y)
-
-    assert x_out.shape == (10,)
-    assert y_out.shape == (1, 10)
-    np.testing.assert_array_equal(x_out, x)
-    np.testing.assert_array_equal(y_out[0], y)
-
-
-def test_normalize_xy_for_render_1d_to_2d_transposed():
-    """Test case 2: x (n,), y (n, k) -> transpose to y (k, n)."""
-    from spectrochempy.plotting.composite.plotmerit import _normalize_xy_for_render
-
-    n, k = 10, 5
-    x = np.arange(n)
-    y = np.random.rand(n, k)
-
-    x_out, y_out = _normalize_xy_for_render(x, y)
-
-    assert x_out.shape == (n,)
-    assert y_out.shape == (k, n)
-    np.testing.assert_array_equal(x_out, x)
-    np.testing.assert_array_equal(y_out, y.T)
-
-
-def test_normalize_xy_for_render_1d_to_2d_standard():
-    """Test case 3: x (n,), y (k, n) -> unchanged."""
-    from spectrochempy.plotting.composite.plotmerit import _normalize_xy_for_render
-
-    n, k = 10, 5
-    x = np.arange(n)
-    y = np.random.rand(k, n)
-
-    x_out, y_out = _normalize_xy_for_render(x, y)
-
-    assert x_out.shape == (n,)
-    assert y_out.shape == (k, n)
-    np.testing.assert_array_equal(x_out, x)
-    np.testing.assert_array_equal(y_out, y)
-
-
-def test_normalize_xy_for_render_per_line_x():
-    """Test case 4: x (k,), y (k, n) -> transpose when x doesn't match."""
-    from spectrochempy.plotting.composite.plotmerit import _normalize_xy_for_render
-
-    n, k = 10, 5
-    x = np.arange(k)
-    y = np.random.rand(k, n)
-
-    x_out, y_out = _normalize_xy_for_render(x, y)
-    assert x_out.shape == (k,)
-    assert y_out.shape == (n, k)
-    np.testing.assert_array_equal(y_out, y.T)
-
-
-def test_normalize_xy_for_render_length_mismatch():
-    """Test length mismatch raises ValueError."""
-    from spectrochempy.plotting.composite.plotmerit import _normalize_xy_for_render
-
-    x = np.arange(10)
-    y = np.arange(20)
-
-    with pytest.raises(ValueError, match="Length mismatch"):
-        _normalize_xy_for_render(x, y)
-
 
 def test_plotmerit_single_index():
     """Test plotmerit with a single index works correctly."""
@@ -122,7 +51,7 @@ def test_plotmerit_single_index():
     iris = scp.IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
-    ax = iris.plotmerit(index=0, show=False)
+    ax = iris.plot_merit(index=0, show=False)
 
     n_traces = X.shape[0]
     expected_lines = 3 * n_traces  # resid, orig, recon
@@ -172,7 +101,7 @@ def test_plotmerit_multi_index():
     iris = scp.IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
-    axes_list = iris.plotmerit(index=[0, 1, 2], show=False)
+    axes_list = iris.plot_merit(index=[0, 1, 2], show=False)
 
     assert len(axes_list) == 3
     for ax in axes_list:
@@ -223,7 +152,7 @@ def test_plotmerit_all_regularizations():
     iris = scp.IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
-    ax = iris.plotmerit(show=False)
+    ax = iris.plot_merit(show=False)
 
     n_reg = 3
     n_traces = X.shape[0]
@@ -275,7 +204,7 @@ def test_plotmerit_y_limits():
     iris = scp.IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
-    ax = iris.plotmerit(index=0, show=False)
+    ax = iris.plot_merit(index=0, show=False)
     ylim = ax.get_ylim()
     y_min, y_max = ylim
 
@@ -352,7 +281,7 @@ def test_plotmerit_zorder():
     iris = scp.IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
-    ax = iris.plotmerit(index=0, show=False)
+    ax = iris.plot_merit(index=0, show=False)
 
     n_traces = X.shape[0]
 

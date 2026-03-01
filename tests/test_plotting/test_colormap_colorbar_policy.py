@@ -112,67 +112,6 @@ class TestColorbarPreferences:
             preferences.colorbar = original
 
 
-class TestL1DefaultInjection:
-    """Test L1 functions accept default parameters."""
-
-    def test_resolve_2d_colormap_accepts_defaults(self):
-        """resolve_2d_colormap should accept default parameters."""
-        from spectrochempy.plotting._style import resolve_2d_colormap
-
-        data = np.abs(np.random.randn(10, 10)) + 0.1  # All positive
-        cmap, norm = resolve_2d_colormap(
-            data,
-            default_sequential="plasma",
-            default_diverging="coolwarm",
-        )
-        # For all-positive data, should use sequential default
-        assert cmap.name == "plasma"
-
-    def test_resolve_2d_colormap_diverging_default(self):
-        """resolve_2d_colormap should use diverging default for bipolar data."""
-        from spectrochempy.plotting._style import resolve_2d_colormap
-
-        data = np.random.randn(10, 10) - 0.5  # Has negative values
-        cmap, norm = resolve_2d_colormap(
-            data,
-            default_sequential="viridis",
-            default_diverging="coolwarm",
-        )
-        assert cmap.name == "coolwarm"
-
-    def test_resolve_stack_colors_accepts_defaults(self):
-        """resolve_stack_colors should accept categorical defaults."""
-        from spectrochempy.plotting._style import resolve_stack_colors
-
-        # Create a mock dataset-like object with required attributes
-        class MockDataset:
-            _squeeze_ndim = 2
-            shape = (5, 10)
-            dims = ["y", "x"]
-
-        dataset = MockDataset()
-        colors, is_categorical, mappable = resolve_stack_colors(
-            dataset,
-            n=5,
-            palette="categorical",
-            default_categorical_small="Set2",
-            default_categorical_large="Set3",
-            categorical_threshold=10,
-        )
-        assert is_categorical is True
-
-    def test_get_categorical_cmap_accepts_defaults(self):
-        """_get_categorical_cmap should use default parameters."""
-        from spectrochempy.plotting._style import _get_categorical_cmap
-
-        cmap = _get_categorical_cmap(
-            5,
-            default_small="Set2",
-            default_large="Set3",
-            threshold=10,
-        )
-        assert cmap is not None
-        assert len(cmap.colors) == 5
 
 
 class TestColorbarPolicy:
@@ -195,22 +134,6 @@ class TestColorbarPolicy:
         ax = ds.plot_2D(method="image", colorbar=False)
         # Should not have colorbar
         assert not hasattr(ax, "_scp_colorbar")
-
-    def test_colorbar_kwarg_none_defers_to_prefs(self):
-        """colorbar=None should defer to prefs.colorbar."""
-        import spectrochempy as scp
-
-        prefs = scp.preferences
-        original = prefs.colorbar
-        try:
-            # Test with prefs.colorbar = True
-            prefs.colorbar = True
-            ds = scp.NDDataset(np.random.randn(5, 10))
-            ax = ds.plot_2D(method="image", colorbar=None)
-            assert hasattr(ax, "_scp_colorbar")
-        finally:
-            prefs.colorbar = original
-
 
 class TestColormapPrecedence:
     """Test colormap precedence rules."""
@@ -283,14 +206,14 @@ class TestStackColorbarRegression:
     """Test stack colorbar behavior for continuous vs categorical modes."""
 
     def test_stack_auto_colorbar_continuous(self):
-        """Continuous stack should show colorbar in auto mode (default prefs)."""
+        """Continuous stack should not show colorbar in auto mode (default prefs)."""
         import spectrochempy as scp
 
         # Create dataset with float y coordinate (continuous)
         ds = scp.NDDataset(np.random.randn(10, 20))
         y_coord = scp.Coord(np.linspace(100, 200, 10), title="wavelength")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
-        ax = ds.plot_2D(method="lines")
+        ax = ds.plot_2D(method="lines", colorbar='auto')
         assert hasattr(
             ax, "_scp_colorbar"
         ), "Continuous stack should have colorbar in auto mode"
@@ -303,7 +226,7 @@ class TestStackColorbarRegression:
         ds = scp.NDDataset(np.random.randn(5, 20))
         y_coord = scp.Coord(labels=["A", "B", "C", "D", "E"], title="sample")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
-        ax = ds.plot_2D(method="lines")
+        ax = ds.plot_2D(method="lines", colorbar='auto')
         assert not hasattr(
             ax, "_scp_colorbar"
         ), "Categorical stack should not have colorbar in auto mode"

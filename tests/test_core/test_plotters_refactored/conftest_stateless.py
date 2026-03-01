@@ -50,22 +50,24 @@ def sample_2d_dataset():
 
 @pytest.fixture
 def sample_3d_dataset():
-    """Create a deterministic 3D dataset with coordinates and units."""
+    """Create a deterministic 2D dataset for 3D visualization (surface, waterfall).
+
+    Note: Despite the name, this creates 2D data for 3D visualization.
+    Surface and waterfall plots require 2D height fields, not 3D volumes.
+    """
     np.random.seed(42)  # Deterministic data
-    x = np.linspace(0, 2, 10)
+    x = np.linspace(0, 2, 20)
     y = np.linspace(0, 1, 15)
-    z = np.linspace(0, 1, 20)
-    data = np.random.random((10, 15, 20)) + 0.1
+    data = np.random.random((15, 20)) + np.sin(x[np.newaxis, :]) * 0.5
 
     dataset = NDDataset(data, title="Intensity", units="kJ/mol")
-    dataset.set_coordset(x, title="X", units="nm")
-    dataset.set_coordset(y, dim=1, title="Y", units="µm")
-    dataset.set_coordset(z, dim=2, title="Z", units="ps")
+    dataset.set_coordset(y, title="Y", units="µm")
+    dataset.set_coordset(x, dim=1, title="X", units="nm")
     return dataset
 
 
 @pytest.fixture(autouse=True)
-def cleanup_figures():
+def clean_figures():
     """Auto-cleanup fixture to ensure test independence."""
     yield
     plt.close("all")
@@ -78,17 +80,17 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     This is critical for stateless architecture - datasets must remain pure data containers.
     """
     # Dataset dictionary must be identical
-    assert (
-        dataset_before.__dict__ == dataset_after.__dict__
-    ), "Dataset object was mutated by plotting - violates stateless architecture"
+    assert dataset_before.__dict__ == dataset_after.__dict__, (
+        "Dataset object was mutated by plotting - violates stateless architecture"
+    )
 
     # No plotting attributes should exist
-    assert not hasattr(
-        dataset_after, "fig"
-    ), "Dataset should not have 'fig' attribute after plotting"
-    assert not hasattr(
-        dataset_after, "ndaxes"
-    ), "Dataset should not have 'ndaxes' attribute after plotting"
+    assert not hasattr(dataset_after, "fig"), (
+        "Dataset should not have 'fig' attribute after plotting"
+    )
+    assert not hasattr(dataset_after, "ndaxes"), (
+        "Dataset should not have 'ndaxes' attribute after plotting"
+    )
 
 
 def get_rcparams_snapshot():
