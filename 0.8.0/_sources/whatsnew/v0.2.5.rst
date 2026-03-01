@@ -1,0 +1,20 @@
+What's new in revision 0.2.5
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.5. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  Docker image building.
+-  Instructions to use it added in the documentation.
+-  Cantera installation optional.
+-  Use of pyqt for matplotlib optional.
+
+
+Bug fixes
+~~~~~~~~~
+
+-  Added fonts in order to solve missing fonts problems on Linux and
+   windows.

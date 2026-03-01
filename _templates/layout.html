@@ -1,0 +1,96 @@
+{% extends "!layout.html" %}
+
+{%- block sidebartitle %}
+
+{# the logo helper function was removed in Sphinx 6 and deprecated since Sphinx 4 #}
+{# the master_doc variable was renamed to root_doc in Sphinx 4 (master_doc still exists in later Sphinx versions) #}
+{%- set _logo_url = logo_url|default(pathto('_static/' + (logo or ""), 1)) %}
+{%- set _root_doc = root_doc|default(master_doc) %}
+<a href="{{ pathto(_root_doc) }}">
+    {% if not theme_logo_only %}{{ project }}{% endif %}
+    {%- if logo or logo_url %}
+    <img src="{{ _logo_url }}" class="logo" alt="{{ _('Logo') }}" />
+    {%- endif %}
+</a>
+
+<div class="switch-menus">
+    <select id="versions-dropdown"></select>
+</div>
+
+{%- include "searchbox.html" %}
+
+{%- endblock %}
+{% block menu %}
+
+{{ super() }}
+{% endblock %}
+
+{% block document %}
+{% if current_version == 'latest' %}
+<div id="version-popup" class="popup-warning">
+    <span class="close-btn" onclick="closePopup()">×</span>
+    ⚠️ You are reading the development version documentation.<br />
+    <a href="{{release}}">Read here the documentation of the last stable release</a>.
+</div>
+<script>
+    function showPopup() {
+        document.getElementById('version-popup').style.display = 'block';
+        setTimeout(function () {
+            closePopup();
+        }, 5000); // Hide after 5 seconds
+    }
+
+    function closePopup() {
+        const popup = document.getElementById('version-popup');
+        popup.style.opacity = '0';
+        popup.style.transition = 'opacity 0.5s';
+        setTimeout(function () {
+            popup.style.display = 'none';
+        }, 500);
+    }
+
+    // Afficher le popup au chargement de la page
+    document.addEventListener('DOMContentLoaded', showPopup);
+</script>
+{% endif %}
+{{ super() }}
+{% endblock %}
+
+{% block extrahead %}
+{{ super() }}
+<style>
+    .popup-warning {
+        display: none;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: #d8d7d5;
+        border: 1px solid #2c2c2b;
+        border-radius: 4px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.5s ease-out;
+        font-size: smaller;
+    }
+
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .popup-warning .close-btn {
+        float: right;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+</style>
+<html data-versions="{{ previous_versions|join(',') if previous_versions else '' }}">
+<script src="{{ pathto('_static/js/versions.js', 1) }}"></script>
+{% endblock %}

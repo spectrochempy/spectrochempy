@@ -1,0 +1,11 @@
+What's new in revision 0.2.22 [2022-01-10]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.22. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+Bug fixes
+~~~~~~~~~
+
+-  QT save_dialog.
+-  Plot_multiple bug.
