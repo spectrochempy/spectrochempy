@@ -30,9 +30,9 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     new_keys = set(after_dict.keys()) - set(before_dict.keys())
     plotting_keys = new_keys - internal_attrs
 
-    assert not plotting_keys, (
-        f"Dataset mutated by plotting with new attributes: {plotting_keys}"
-    )
+    assert (
+        not plotting_keys
+    ), f"Dataset mutated by plotting with new attributes: {plotting_keys}"
     assert not hasattr(dataset_after, "fig")
     assert not hasattr(dataset_after, "ndaxes")
 
@@ -54,9 +54,9 @@ class TestMultiplotStateless:
         # Verify return type and structure
         assert isinstance(axes, np.ndarray), "multiplot should return numpy array"
         assert axes.shape == (4,), "Should return array of 4 axes"
-        assert all(isinstance(ax, plt.Axes) for ax in axes), (
-            "All elements should be Axes objects"
-        )
+        assert all(
+            isinstance(ax, plt.Axes) for ax in axes
+        ), "All elements should be Axes objects"
 
         # Verify grid layout (check positions)
         fig = axes[0].figure
@@ -74,17 +74,17 @@ class TestMultiplotStateless:
         axes = multiplot(sample_1d_dataset, nrows=1, ncols=1)
 
         # Verify return type for single dataset
-        assert isinstance(axes, plt.Axes), (
-            "Single dataset multiplot should return single Axes"
-        )
+        assert isinstance(
+            axes, plt.Axes
+        ), "Single dataset multiplot should return single Axes"
 
         # Compare with direct plot
         ax_direct = sample_1d_dataset.plot()
 
         # Should have similar basic properties (both should be line plots)
-        assert len(axes.get_lines()) == len(ax_direct.get_lines()), (
-            "Both should have same number of line objects"
-        )
+        assert len(axes.get_lines()) == len(
+            ax_direct.get_lines()
+        ), "Both should have same number of line objects"
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)

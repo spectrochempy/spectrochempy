@@ -30,9 +30,9 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     new_keys = set(after_dict.keys()) - set(before_dict.keys())
     plotting_keys = new_keys - internal_attrs
 
-    assert not plotting_keys, (
-        f"Dataset mutated by plotting with new attributes: {plotting_keys}"
-    )
+    assert (
+        not plotting_keys
+    ), f"Dataset mutated by plotting with new attributes: {plotting_keys}"
     assert not hasattr(dataset_after, "fig")
     assert not hasattr(dataset_after, "ndaxes")
 
@@ -54,12 +54,12 @@ class TestStyleApplication:
         ax2 = sample_1d_dataset.plot(style="grayscale")
 
         # At minimum, verify plots were created successfully
-        assert ax1.get_title() != "" or len(ax1.lines) > 0, (
-            "Paper style plot should be valid"
-        )
-        assert ax2.get_title() != "" or len(ax2.lines) > 0, (
-            "Grayscale style plot should be valid"
-        )
+        assert (
+            ax1.get_title() != "" or len(ax1.lines) > 0
+        ), "Paper style plot should be valid"
+        assert (
+            ax2.get_title() != "" or len(ax2.lines) > 0
+        ), "Grayscale style plot should be valid"
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
@@ -88,13 +88,13 @@ class TestStyleApplication:
         styles = available_styles()
 
         # Basic validation
-        assert isinstance(styles, (list, tuple)), (
-            "Should return list or tuple of styles"
-        )
+        assert isinstance(
+            styles, (list, tuple)
+        ), "Should return list or tuple of styles"
         assert len(styles) > 0, "Should have at least some styles available"
-        assert all(isinstance(style, str) for style in styles), (
-            "All styles should be strings"
-        )
+        assert all(
+            isinstance(style, str) for style in styles
+        ), "All styles should be strings"
 
         # Note: This depends on actual style installation
 
@@ -113,9 +113,9 @@ class TestStyleApplication:
 
         # Verify matplotlib plot has default styling
         # Check some basic style properties that should differ from paper style
-        assert ax2.get_title() == "Matplotlib Direct Plot", (
-            "Direct matplotlib plot should work"
-        )
+        assert (
+            ax2.get_title() == "Matplotlib Direct Plot"
+        ), "Direct matplotlib plot should work"
 
         # Verify global rcParams haven't been permanently changed
         rcparams_after = get_rcparams_snapshot()

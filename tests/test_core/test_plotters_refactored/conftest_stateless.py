@@ -50,7 +50,8 @@ def sample_2d_dataset():
 
 @pytest.fixture
 def sample_3d_dataset():
-    """Create a deterministic 2D dataset for 3D visualization (surface, waterfall).
+    """
+    Create a deterministic 2D dataset for 3D visualization (surface, waterfall).
 
     Note: Despite the name, this creates 2D data for 3D visualization.
     Surface and waterfall plots require 2D height fields, not 3D volumes.
@@ -80,17 +81,17 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     This is critical for stateless architecture - datasets must remain pure data containers.
     """
     # Dataset dictionary must be identical
-    assert dataset_before.__dict__ == dataset_after.__dict__, (
-        "Dataset object was mutated by plotting - violates stateless architecture"
-    )
+    assert (
+        dataset_before.__dict__ == dataset_after.__dict__
+    ), "Dataset object was mutated by plotting - violates stateless architecture"
 
     # No plotting attributes should exist
-    assert not hasattr(dataset_after, "fig"), (
-        "Dataset should not have 'fig' attribute after plotting"
-    )
-    assert not hasattr(dataset_after, "ndaxes"), (
-        "Dataset should not have 'ndaxes' attribute after plotting"
-    )
+    assert not hasattr(
+        dataset_after, "fig"
+    ), "Dataset should not have 'fig' attribute after plotting"
+    assert not hasattr(
+        dataset_after, "ndaxes"
+    ), "Dataset should not have 'ndaxes' attribute after plotting"
 
 
 def get_rcparams_snapshot():

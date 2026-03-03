@@ -25,9 +25,9 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     new_keys = set(after_dict.keys()) - set(before_dict.keys())
     plotting_keys = new_keys - internal_attrs
 
-    assert not plotting_keys, (
-        f"Dataset mutated by plotting with new attributes: {plotting_keys}"
-    )
+    assert (
+        not plotting_keys
+    ), f"Dataset mutated by plotting with new attributes: {plotting_keys}"
     assert not hasattr(dataset_after, "fig")
     assert not hasattr(dataset_after, "ndaxes")
 

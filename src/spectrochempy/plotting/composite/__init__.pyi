@@ -4,15 +4,14 @@
 
 __all__ = [
     "iris",
-    "plot_baseline",
-    "plot_compare",
-    "plot_merit",
-    "plot_score",
-    "plot_scree",
+    "plotbaseline",
+    "plotmerit",
+    "plotscore",
+    "plotscree",
 ]
 
 from . import iris
-from .plotbaseline import plot_baseline
-from .plotmerit import plot_compare, plot_merit
-from .plotscore import plot_score
-from .plotscree import plot_scree
+from . import plotbaseline
+from . import plotmerit
+from . import plotscore
+from . import plotscree

@@ -9,7 +9,6 @@ functionality that was previously broken due to transform errors but is now work
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.figure import Figure
 
 from spectrochempy import multiplot
 

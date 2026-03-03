@@ -112,8 +112,6 @@ class TestColorbarPreferences:
             preferences.colorbar = original
 
 
-
-
 class TestColorbarPolicy:
     """Test colorbar policy resolution."""
 
@@ -134,6 +132,7 @@ class TestColorbarPolicy:
         ax = ds.plot_2D(method="image", colorbar=False)
         # Should not have colorbar
         assert not hasattr(ax, "_scp_colorbar")
+
 
 class TestColormapPrecedence:
     """Test colormap precedence rules."""
@@ -213,7 +212,7 @@ class TestStackColorbarRegression:
         ds = scp.NDDataset(np.random.randn(10, 20))
         y_coord = scp.Coord(np.linspace(100, 200, 10), title="wavelength")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
-        ax = ds.plot_2D(method="lines", colorbar='auto')
+        ax = ds.plot_2D(method="lines", colorbar="auto")
         assert hasattr(
             ax, "_scp_colorbar"
         ), "Continuous stack should have colorbar in auto mode"
@@ -226,7 +225,7 @@ class TestStackColorbarRegression:
         ds = scp.NDDataset(np.random.randn(5, 20))
         y_coord = scp.Coord(labels=["A", "B", "C", "D", "E"], title="sample")
         ds.set_coordset(y=y_coord, x=scp.Coord(np.arange(20)))
-        ax = ds.plot_2D(method="lines", colorbar='auto')
+        ax = ds.plot_2D(method="lines", colorbar="auto")
         assert not hasattr(
             ax, "_scp_colorbar"
         ), "Categorical stack should not have colorbar in auto mode"

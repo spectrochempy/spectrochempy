@@ -65,9 +65,9 @@ class TestLazyInitialization:
         final_fig_count = len(plt.get_fignums())
 
         # Assert - with clear=True, should not create extra figures
-        assert final_fig_count == initial_fig_count, (
-            "Multiple initializations should be idempotent"
-        )
+        assert (
+            final_fig_count == initial_fig_count
+        ), "Multiple initializations should be idempotent"
 
     @pytest.mark.skipif(
         "not sys.platform.startswith('linux')",
@@ -143,9 +143,9 @@ class TestLazyInitialization:
         assert second_plot_time >= 0, "Second plot should also take time"
 
         # First plot might be slower but shouldn't be dramatically slower
-        assert first_plot_time < second_plot_time * 10, (
-            "First plot shouldn't be dramatically slower than subsequent plots"
-        )
+        assert (
+            first_plot_time < second_plot_time * 10
+        ), "First plot shouldn't be dramatically slower than subsequent plots"
 
     def test_lazy_initialization_preferences(self, backend_checker):
         """

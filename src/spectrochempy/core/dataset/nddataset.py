@@ -30,13 +30,13 @@ import textwrap
 
 # Lazy import to avoid triggering matplotlib at module load time
 from contextlib import suppress
+from datetime import UTC
 from datetime import datetime
-from datetime import timezone
 from datetime import tzinfo
 from typing import Any
 
 # Python 3.10 compatibility: UTC was added in 3.11
-UTC = timezone.utc
+UTC = UTC
 from zoneinfo import ZoneInfo
 from zoneinfo import ZoneInfoNotFoundError
 

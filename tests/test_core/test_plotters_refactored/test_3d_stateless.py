@@ -25,9 +25,9 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     new_keys = set(after_dict.keys()) - set(before_dict.keys())
     plotting_keys = new_keys - internal_attrs
 
-    assert not plotting_keys, (
-        f"Dataset mutated by plotting with new attributes: {plotting_keys}"
-    )
+    assert (
+        not plotting_keys
+    ), f"Dataset mutated by plotting with new attributes: {plotting_keys}"
     assert not hasattr(dataset_after, "fig")
     assert not hasattr(dataset_after, "ndaxes")
 
@@ -51,9 +51,9 @@ class Test3DStateless:
         # Note: The exact attribute name depends on matplotlib version
         # Common attributes to check
         ax_name = ax.name if hasattr(ax, "name") else ""
-        assert "3d" in ax_name.lower() or hasattr(ax, "zaxis"), (
-            "Should have 3D projection"
-        )
+        assert "3d" in ax_name.lower() or hasattr(
+            ax, "zaxis"
+        ), "Should have 3D projection"
 
         # Verify surface mesh was created (check collections)
         has_surface = False
@@ -65,9 +65,9 @@ class Test3DStateless:
 
         # Also check if any surface-like objects exist
         # This is a basic check - actual implementation may vary
-        assert has_surface or len(ax.collections) > 0, (
-            "Surface plot should create surface mesh"
-        )
+        assert (
+            has_surface or len(ax.collections) > 0
+        ), "Surface plot should create surface mesh"
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_3d_dataset)

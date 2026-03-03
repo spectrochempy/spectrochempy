@@ -16,9 +16,9 @@ These tests verify the public contract:
 """
 
 import os
+import subprocess
 import sys
 import threading
-import time
 
 import pytest
 
@@ -26,38 +26,110 @@ import pytest
 os.environ.setdefault("MPLBACKEND", "Agg")
 
 
+def _run_in_subprocess(code: str, timeout: int = 30) -> subprocess.CompletedProcess:
+    """
+    Run code in a fresh Python subprocess to avoid polluting the main process.
+
+    Parameters
+    ----------
+    code : str
+        Python code to execute in subprocess.
+    timeout : int
+        Timeout in seconds.
+
+    Returns
+    -------
+    subprocess.CompletedProcess
+        Completed process with stdout, stderr, and returncode.
+    """
+    env = os.environ.copy()
+    env["PYTHONPATH"] = "src"
+    env["MPLBACKEND"] = "Agg"
+
+    return subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        env=env,
+        timeout=timeout,
+        check=False,
+    )
+
+
 class TestLazyInitializationPerformance:
     """Test performance benefits of lazy initialization."""
 
     def test_import_performance_without_matplotlib(self):
         """Test that import is fast and matplotlib not loaded."""
-        # Clear matplotlib from modules if present
-        modules_to_remove = [m for m in sys.modules if m.startswith("matplotlib")]
-        for module in modules_to_remove:
-            del sys.modules[module]
+        code = """
+import sys
+import time
 
-        # Import should be fast and not load matplotlib
-        start_time = time.time()
+start_time = time.time()
 
-        import_time = time.time() - start_time
+# Import spectrochempy - this should be fast and not load matplotlib
+import spectrochempy
 
-        matplotlib_not_loaded = "matplotlib" not in sys.modules
+import_time = time.time() - start_time
 
-        assert import_time < 0.5
-        assert matplotlib_not_loaded is True
+# Check if matplotlib was loaded
+matplotlib_loaded = "matplotlib" in sys.modules
+
+# Print results for assertion
+print(f"IMPORT_TIME:{import_time}")
+print(f"MATPLOTLIB_LOADED:{matplotlib_loaded}")
+
+if matplotlib_loaded:
+    # Find which matplotlib modules were loaded
+    mpl_modules = [m for m in sys.modules if m.startswith("matplotlib")]
+    print(f"MPL_MODULES:{mpl_modules[:10]}")
+
+sys.exit(0 if not matplotlib_loaded else 1)
+"""
+        result = _run_in_subprocess(code)
+
+        assert result.returncode == 0, (
+            f"matplotlib was loaded during import spectrochempy!\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+
+        # Also verify import was fast (informational)
+        for line in result.stdout.split("\n"):
+            if line.startswith("IMPORT_TIME:"):
+                import_time = float(line.split(":")[1])
+                assert import_time < 0.5, f"Import took {import_time}s, expected < 0.5s"
+                break
 
     def test_matplotlib_not_loaded_on_dataset_creation(self):
         """Test that NDDataset creation does not load matplotlib."""
-        # Clear matplotlib
-        modules_to_remove = [m for m in sys.modules if m.startswith("matplotlib")]
-        for module in modules_to_remove:
-            del sys.modules[module]
+        code = """
+import sys
 
-        from spectrochempy import NDDataset
+# Import spectrochempy and create NDDataset - should NOT load matplotlib
+from spectrochempy import NDDataset
 
-        # Create dataset - should NOT load matplotlib
-        NDDataset([1, 2, 3])
-        assert "matplotlib" not in sys.modules
+# Create dataset - should NOT load matplotlib
+ds = NDDataset([1, 2, 3])
+
+# Check if matplotlib was loaded
+matplotlib_loaded = "matplotlib" in sys.modules
+
+print(f"MATPLOTLIB_LOADED:{matplotlib_loaded}")
+
+if matplotlib_loaded:
+    mpl_modules = [m for m in sys.modules if m.startswith("matplotlib")]
+    print(f"MPL_MODULES:{mpl_modules}")
+
+sys.exit(0 if not matplotlib_loaded else 1)
+"""
+        result = _run_in_subprocess(code)
+
+        assert result.returncode == 0, (
+            f"matplotlib was loaded during NDDataset creation!\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
 
     def test_matplotlib_loaded_on_plot(self):
         """Test that matplotlib IS loaded when plotting."""

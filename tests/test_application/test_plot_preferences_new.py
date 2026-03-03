@@ -121,4 +121,3 @@ class TestImageEqualAspectPreference:
         assert preferences.image_equal_aspect is False
 
         preferences.image_equal_aspect = original
-

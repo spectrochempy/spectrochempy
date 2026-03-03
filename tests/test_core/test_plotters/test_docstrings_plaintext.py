@@ -12,8 +12,6 @@ This test module ensures:
 2. No SyntaxWarning from docrep are emitted when importing plot modules
 """
 
-import warnings
-
 
 class TestDocstringsPlaintext:
     """Test that docstrings contain no template placeholders."""
@@ -58,66 +56,164 @@ class TestNoSyntaxWarnings:
 
     def test_no_syntax_warning_on_import_plot1d(self):
         """Test that importing plot1d doesn't emit SyntaxWarning."""
-        # Clear any cached modules
+        # Use subprocess to avoid polluting sys.modules in main process
+        import os
+        import subprocess
         import sys
 
-        mods_to_remove = [
-            k for k in sys.modules if k.startswith("spectrochempy.plotting")
-        ]
-        for mod in mods_to_remove:
-            del sys.modules[mod]
+        code = """
+import warnings
+import sys
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            from spectrochempy.plotting import plot1d  # noqa: F401
+with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("always")
+    from spectrochempy.plotting import plot1d
 
-            syntax_warnings = [x for x in w if issubclass(x.category, SyntaxWarning)]
-            assert len(syntax_warnings) == 0, f"Found SyntaxWarning: {syntax_warnings}"
+    syntax_warnings = [x for x in w if issubclass(x.category, SyntaxWarning)]
+    if syntax_warnings:
+        print(f"FAIL: Found SyntaxWarning: {syntax_warnings}")
+        sys.exit(1)
+    print("OK: No SyntaxWarning")
+    sys.exit(0)
+"""
+
+        env = os.environ.copy()
+        env["PYTHONPATH"] = "src"
+        env["MPLBACKEND"] = "Agg"
+
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30,
+        )
+
+        assert result.returncode == 0, (
+            f"SyntaxWarning detected in subprocess!\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
 
     def test_no_syntax_warning_on_import_plot2d(self):
         """Test that importing plot2d doesn't emit SyntaxWarning."""
+        # Use subprocess to avoid polluting sys.modules in main process
+        import os
+        import subprocess
         import sys
 
-        mods_to_remove = [
-            k for k in sys.modules if k.startswith("spectrochempy.plotting")
-        ]
-        for mod in mods_to_remove:
-            del sys.modules[mod]
+        code = """
+import warnings
+import sys
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            from spectrochempy.plotting import plot2d  # noqa: F401
+with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("always")
+    from spectrochempy.plotting import plot2d
 
-            syntax_warnings = [x for x in w if issubclass(x.category, SyntaxWarning)]
-            assert len(syntax_warnings) == 0, f"Found SyntaxWarning: {syntax_warnings}"
+    syntax_warnings = [x for x in w if issubclass(x.category, SyntaxWarning)]
+    if syntax_warnings:
+        print(f"FAIL: Found SyntaxWarning: {syntax_warnings}")
+        sys.exit(1)
+    print("OK: No SyntaxWarning")
+    sys.exit(0)
+"""
+
+        env = os.environ.copy()
+        env["PYTHONPATH"] = "src"
+        env["MPLBACKEND"] = "Agg"
+
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30,
+        )
+
+        assert result.returncode == 0, (
+            f"SyntaxWarning detected in subprocess!\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
 
     def test_no_syntax_warning_on_import_plot3d(self):
         """Test that importing plot3d doesn't emit SyntaxWarning."""
+        # Use subprocess to avoid polluting sys.modules in main process
+        import os
+        import subprocess
         import sys
 
-        mods_to_remove = [
-            k for k in sys.modules if k.startswith("spectrochempy.plotting")
-        ]
-        for mod in mods_to_remove:
-            del sys.modules[mod]
+        code = """
+import warnings
+import sys
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            from spectrochempy.plotting import plot3d  # noqa: F401
+with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("always")
+    from spectrochempy.plotting import plot3d
 
-            syntax_warnings = [x for x in w if issubclass(x.category, SyntaxWarning)]
-            assert len(syntax_warnings) == 0, f"Found SyntaxWarning: {syntax_warnings}"
+    syntax_warnings = [x for x in w if issubclass(x.category, SyntaxWarning)]
+    if syntax_warnings:
+        print(f"FAIL: Found SyntaxWarning: {syntax_warnings}")
+        sys.exit(1)
+    print("OK: No SyntaxWarning")
+    sys.exit(0)
+"""
+
+        env = os.environ.copy()
+        env["PYTHONPATH"] = "src"
+        env["MPLBACKEND"] = "Agg"
+
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30,
+        )
+
+        assert result.returncode == 0, (
+            f"SyntaxWarning detected in subprocess!\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
 
     def test_no_syntax_warning_on_import_spectrochempy_plotting(self):
         """Test that importing spectrochempy.plotting doesn't emit SyntaxWarning."""
+        # Use subprocess to avoid polluting sys.modules in main process
+        import os
+        import subprocess
         import sys
 
-        mods_to_remove = [k for k in sys.modules if k.startswith("spectrochempy")]
-        for mod in mods_to_remove:
-            del sys.modules[mod]
+        code = """
+import warnings
+import sys
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("always")
+    from spectrochempy.plotting import plot1d, plot2d, plot3d
 
-            syntax_warnings = [x for x in w if issubclass(x.category, SyntaxWarning)]
-            assert len(syntax_warnings) == 0, f"Found SyntaxWarning: {syntax_warnings}"
+    syntax_warnings = [x for x in w if issubclass(x.category, SyntaxWarning)]
+    if syntax_warnings:
+        print(f"FAIL: Found SyntaxWarning: {syntax_warnings}")
+        sys.exit(1)
+    print("OK: No SyntaxWarning")
+    sys.exit(0)
+"""
+
+        env = os.environ.copy()
+        env["PYTHONPATH"] = "src"
+        env["MPLBACKEND"] = "Agg"
+
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30,
+        )
+
+        assert result.returncode == 0, (
+            f"SyntaxWarning detected in subprocess!\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )

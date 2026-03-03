@@ -78,7 +78,14 @@ class PreferencesSet(Meta):
             try:
                 setattr(app.plot_preferences, key, value)
             except TraitError:
-                value = type(app.plot_preferences.traits()[key].default_value)(value)
+                # Handle tuple -> list conversion for style traits
+                # to avoid converting to string representation
+                if isinstance(value, (tuple, list)):
+                    value = list(value)
+                else:
+                    value = type(app.plot_preferences.traits()[key].default_value)(
+                        value
+                    )
                 setattr(app.plot_preferences, key, value)
         elif hasattr(app.general_preferences, key):
             setattr(app.general_preferences, key, value)

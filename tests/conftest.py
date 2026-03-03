@@ -16,6 +16,121 @@ import pytest
 
 import spectrochempy
 
+# ======================================================================================
+# LIGHTWEIGHT STATE GUARDS - Detect mutations without fixing them
+# ======================================================================================
+
+
+@pytest.fixture(autouse=True)
+def _matplotlib_state_guard(request):
+    """Detect matplotlib state mutations (diagnostic only, no fixing)."""
+
+    import sys
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    test_name = request.node.name
+    print(f"\n=== GUARD START: {test_name} ===", file=sys.stderr)
+
+    backend_before = mpl.get_backend()
+    rc_before = dict(mpl.rcParams)
+    interactive_before = plt.isinteractive()
+    fignums_before = list(plt.get_fignums())
+    print(f"=== {test_name} initial fignums: {fignums_before} ===", file=sys.stderr)
+
+    yield  # test runs here
+
+    # Check for mutations (after test, before isolation fixture restores)
+    backend_after = mpl.get_backend()
+    interactive_after = plt.isinteractive()
+    rc_after = dict(mpl.rcParams)
+    fignums_after = list(plt.get_fignums())
+    print(f"=== {test_name} final fignums: {fignums_after} ===", file=sys.stderr)
+
+    # Report leaked figures (cleanup only)
+    if fignums_after != fignums_before:
+        print(
+            f"\n\n===== [STATE GUARD] {test_name}: Leaked figures: {fignums_after} (was: {fignums_before}) =====",
+            file=sys.stderr,
+        )
+        plt.close("all")
+
+    if backend_after != backend_before:
+        print(
+            f"\n\n===== [STATE GUARD] {test_name}: Backend changed: {backend_before} -> {backend_after} =====",
+            file=sys.stderr,
+        )
+
+    if interactive_after != interactive_before:
+        print(
+            f"\n\n===== [STATE GUARD] {test_name}: Interactive mode changed: {interactive_before} -> {interactive_after} =====",
+            file=sys.stderr,
+        )
+
+    mutated = [k for k in rc_before if rc_before[k] != rc_after.get(k)]
+    if mutated:
+        print(
+            f"\n\n===== [STATE GUARD] {test_name}: rcParams mutated (first 10): {mutated[:10]} =====",
+            file=sys.stderr,
+        )
+    print(f"=== GUARD END: {test_name} ===\n", file=sys.stderr)
+
+
+@pytest.fixture(autouse=True)
+def guard_environment():
+    """Guard against environment mutations (cwd, os.environ)."""
+    import os
+    from pathlib import Path
+
+    old_env = dict(os.environ)
+    old_cwd = Path.cwd()
+
+    yield
+
+    # Check for cwd change
+    if Path.cwd() != old_cwd:
+        print(
+            f"\n\n===== [ENV GUARD] Working directory changed: {old_cwd} -> {Path.cwd()} ====="
+        )
+
+    # Check for environ changes
+    new_env = dict(os.environ)
+    added = set(new_env.keys()) - set(old_env.keys())
+    removed = set(old_env.keys()) - set(new_env.keys())
+    changed = {k for k in old_env if k in new_env and old_env[k] != new_env[k]}
+
+    if added:
+        print(f"\n\n===== [ENV GUARD] Added env vars: {added} =====")
+    if removed:
+        print(f"\n\n===== [ENV GUARD] Removed env vars: {removed} =====")
+    if changed:
+        print(
+            f"\n\n===== [ENV GUARD] Changed env vars (first 5): {list(changed)[:5]} ====="
+        )
+
+
+@pytest.fixture(autouse=True)
+def _prefs_guard():
+    """Detect SpectroChemPy preferences mutations (diagnostic only)."""
+    from spectrochempy.application.preferences import preferences as prefs
+
+    style_before = prefs.style
+    type_before = type(prefs.style)
+
+    yield
+
+    style_after = prefs.style
+    type_after = type(prefs.style)
+
+    if style_before != style_after:
+        print(
+            f"\n[STATE GUARD] prefs.style changed: {style_before!r} -> {style_after!r}"
+        )
+    if type_before != type_after:
+        print(
+            f"\n[STATE GUARD] prefs.style type changed: {type_before} -> {type_after}"
+        )
+
 
 # ======================================================================================
 # ISOLATION FIXTURES - Run before/after EVERY test

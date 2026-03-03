@@ -119,9 +119,9 @@ class Test3DPlotting:
 
         except Exception as e:
             # Expected failure due to known limitation
-            assert "artist" in str(e).lower() or "collection" in str(e).lower(), (
-                f"Expected artist reuse error, got: {e}"
-            )
+            assert (
+                "artist" in str(e).lower() or "collection" in str(e).lower()
+            ), f"Expected artist reuse error, got: {e}"
 
     def test_3d_waterfall_simple_case(self, sample_3d_dataset, clean_figures):
         """
