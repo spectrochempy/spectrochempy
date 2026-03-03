@@ -323,13 +323,34 @@ class ScpObjectList(list):
         """
         from spectrochempy.utils.print import convert_to_html
 
-        objtypes = list({item._implements() for item in self})
+        # Handle empty list
+        if not self:
+            return "<div class='scp-output'><details><summary>List (len=0, type=empty)</summary></details></div>"
+
+        # Robust handling: don't assume all items are SpectroChemPy objects
+        objtypes = set()
+        for item in self:
+            if hasattr(item, "_implements") and callable(item._implements):
+                try:
+                    objtypes.add(item._implements())
+                except Exception:
+                    objtypes.add(type(item).__name__)
+            else:
+                objtypes.add(type(item).__name__)
+
+        objtypes = list(objtypes)
         objtypes = "mixed" if len(objtypes) > 1 else objtypes[0]
         if objtypes == "_Axes":
             return ""
         html = f"<div class='scp-output'><details><summary>List (len={len(self)}, type={objtypes})</summary><ul>"
         for i, item in enumerate(self):
-            html += f"<div class='scp-output section'>{convert_to_html(item, open=False, id=i)}</div>\n"
+            try:
+                html += f"<div class='scp-output section'>{convert_to_html(item, open=False, id=i)}</div>\n"
+            except Exception:
+                # Fallback for objects that can't be converted to HTML
+                html += (
+                    f"<div class='scp-output section'><pre>{repr(item)}</pre></div>\n"
+                )
         html += "</details></div>"
         return html
 

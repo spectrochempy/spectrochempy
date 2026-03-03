@@ -470,7 +470,12 @@ class _set_output:
 
             # eventually restore masks
             X_transf = obj._restore_masked_data(X_transf, axis=axis)
-            out.append(X_transf.squeeze())
+            # Only squeeze if the input was originally 1D (expanded to 2D)
+            # This preserves intentionally 2D datasets with shape (1, N)
+            if getattr(obj, "_X_original_ndim", 2) == 1:
+                out.append(X_transf.squeeze())
+            else:
+                out.append(X_transf)
 
         if len(out) == 1:
             return out[0]

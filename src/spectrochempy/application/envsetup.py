@@ -7,11 +7,11 @@ import importlib.util
 import sys
 from os import environ
 
-import matplotlib as mpl
+# Lazy import: matplotlib is imported inside setup_environment(), not at module level
+# This prevents matplotlib from being loaded when just importing spectrochempy
 from traitlets import import_item
 
 from spectrochempy.application.jupyter import setup_jupyter_css
-from spectrochempy.data.setup import setup_mpl
 from spectrochempy.utils.system import get_ipython
 from spectrochempy.utils.system import is_notebook
 from spectrochempy.utils.system import is_terminal
@@ -19,6 +19,9 @@ from spectrochempy.utils.system import is_terminal
 
 # --------------------------------------------------------------------------------------
 def setup_environment():
+    # Lazy import matplotlib here to avoid loading it at module import time
+    import matplotlib as mpl
+
     NO_DISPLAY = False
 
     is_docs = environ.get("DOC_BUILDING") is not None
@@ -78,10 +81,6 @@ def setup_environment():
         # Jupyter integration
         # -------------------
         setup_jupyter_css()
-
-    # Initialize matplotlib styles and fonts
-    # --------------------------------------
-    setup_mpl()
 
     SCPY_STARTUP_LOGLEVEL = environ.get("SCPY_STARTUP_LOGLEVEL", None)
 

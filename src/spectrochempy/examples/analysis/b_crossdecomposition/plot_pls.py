@@ -34,11 +34,11 @@ X = ds_list[4]
 X.title = "reflectance"
 X.x.title = "Wavelength"
 X.x.units = "nm"
-X.plot(cmap=None)
+_ = X.plot(cmap=None)
 # %%
 # The values of the properties we want to predict are in the 4th dattaset named `'propval'` dataset:
 Y = ds_list[3]
-Y.T.plot(cmap=None, legend=Y.x.labels)
+_ = Y.T.plot(cmap=None, legend=Y.x.labels)
 # %%
 # We are interested to predict the moisture content:
 y = Y[:, "Moisture"]
@@ -61,7 +61,7 @@ pls.fit(X_train, y_train)
 
 # sphinx_gallery_thumbnail_number = 3
 ax = pls.parityplot(label="calibration", s=150)
-pls.parityplot(
+_ = pls.parityplot(
     y_test, pls.predict(X_test), s=150, c="red", label="validation", clear=False
 )
 ax.legend(loc="lower right")

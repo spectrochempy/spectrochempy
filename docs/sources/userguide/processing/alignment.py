@@ -62,7 +62,7 @@ nd1 = dataset[0:30, 0:4000]
 nd2 = dataset[0:30, 2000:5549]
 nd3 = dataset[10:55, 0:4000]
 nd4 = dataset[10:55, 2000:5549]
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd1, nd2, nd3, nd4],
     colormap="viridis",
     nrow=2,
@@ -109,7 +109,7 @@ ndadd.shape
 # array, as the mathematical operation are aware of the masks.
 
 # %%
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd2a, nd4a, ndadd],
     colormap="viridis",
     sharey=True,
@@ -131,7 +131,7 @@ except Exception as e:
 # %%
 nd1a, nd2a = scp.align(nd1, nd2, dim="x", method="outer")
 ndadd = nd1a + nd2a
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd1a, nd2a, ndadd],
     colormap="viridis",
     sharey=True,
@@ -164,7 +164,7 @@ ndadd = nd2a + nd4a
 ndadd.shape  # note the difference with the outer method above (the shape correspond to the intersection)
 
 # %%
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd2a, nd4a, ndadd],
     colormap="viridis",
     sharey=True,
@@ -184,7 +184,7 @@ ndadd = nd2a + nd4a
 ndadd.shape  # note the difference with the outer method above
 
 # %%
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd2a, nd4a, ndadd],
     colormap="viridis",
     sharey=True,
@@ -204,7 +204,7 @@ ndadd = nd2a + nd4a
 ndadd.shape  # note the difference with the outer method above
 
 # %%
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd2a, nd4a, ndadd],
     colormap="viridis",
     sharey=True,
@@ -221,7 +221,7 @@ _ = scp.multiplot_map(
 nd1a, nd4a = scp.align(nd1, nd4, dims=["y", "x"])  # by default the outer method is used
 ndadd = nd1a + nd4a
 # Comparison of the result array with the original (only the common region is visible, due to the masks)
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd1a, nd4a, ndadd],
     colormap="viridis",
     sharex=0,
@@ -239,7 +239,7 @@ nd1a, nd4a = scp.align(
 )  # by default the outer method is used
 ndadd = nd1a + nd4a
 # Comparison of the result array with the original (only the common region is visible, due to the masks)
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd1a, nd4a, ndadd],
     colormap="viridis",
     sharex=0,
@@ -256,7 +256,7 @@ nd1a, nd4a = scp.align(
 )  # by default the outer method is used
 ndadd = nd1a + nd4a
 # Comparison of the result array with the original (only the common region is visible, due to the masks)
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd1a, nd4a, ndadd],
     colormap="viridis",
     sharex=0,
@@ -273,7 +273,7 @@ nd1a, nd4a = scp.align(
 )  # by default the outer method is used
 ndadd = nd1a + nd4a
 # Comparison of the result array with the original (only the common region is visible, due to the masks)
-_ = scp.multiplot_map(
+_ = scp.multiplot_contour(
     datasets=[nd1a, nd4a, ndadd],
     colormap="viridis",
     sharex=0,

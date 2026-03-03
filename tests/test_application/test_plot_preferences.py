@@ -11,36 +11,45 @@ import spectrochempy as scp
 def test_plotpreferences(IR_dataset_2D):
     dataset = IR_dataset_2D
     prefs = scp.preferences  # we will use prefs instead of dataset.preference
-    prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
-    prefs.colorbar = True  # This add a color bar on a side
-    prefs.colormap = "magma"  # The default colormap is viridis
-    prefs.axes.facecolor = ".95"  # Make the graph background colored in a light gray
-    prefs.axes.grid = True
-    print(f"font before reset: {prefs.font.family}")
-    prefs.reset()
-    print(f"font after reset: {prefs.font.family}")
-    prefs.style = "grayscale"
-    prefs.style = "ggplot"
-    prefs.reset()
-    prefs.style = "grayscale", "paper"
 
-    prefs.colormap = "magma"
+    # Save original style to restore after test
+    original_style = prefs.style
+    try:
+        prefs.figure.figsize = (6, 3)  # The default figsize is (6.8,4.4)
+        prefs.colorbar = True  # This add a color bar on a side
+        prefs.colormap = "magma"  # The default colormap is viridis
+        prefs.axes.facecolor = (
+            ".95"  # Make the graph background colored in a light gray
+        )
+        prefs.axes.grid = True
+        print(f"font before reset: {prefs.font.family}")
+        prefs.reset()
+        print(f"font after reset: {prefs.font.family}")
+        prefs.style = "grayscale"
+        prefs.style = "ggplot"
+        prefs.reset()
+        prefs.style = "grayscale", "paper"  # This intentionally creates a tuple
 
-    prefs.available_styles
+        prefs.colormap = "magma"
 
-    prefs.makestyle("scpy")
-    prefs.makestyle()
+        prefs.available_styles
 
-    # %% [markdown]
-    # **Example:**
-    #
+        prefs.makestyle("scpy")
+        prefs.makestyle()
 
-    # %%
-    prefs.reset()
-    prefs.colorbar = True
-    prefs.colormap = "jet"
-    prefs.font.family = "monospace"
-    prefs.font.size = 14
-    prefs.axes.labelcolor = "blue"
-    prefs.axes.grid = True
-    prefs.axes.grid_axis = "x"
+        # %% [markdown]
+        # **Example:**
+        #
+
+        # %%
+        prefs.reset()
+        prefs.colorbar = True
+        prefs.colormap = "jet"
+        prefs.font.family = "monospace"
+        prefs.font.size = 14
+        prefs.axes.labelcolor = "blue"
+        prefs.axes.grid = True
+        prefs.axes.grid_axis = "x"
+    finally:
+        # Always restore original style to prevent pollution
+        prefs.style = original_style

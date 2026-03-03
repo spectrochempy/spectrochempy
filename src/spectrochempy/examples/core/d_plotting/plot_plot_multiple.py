@@ -25,9 +25,7 @@ B1 = scp.read("ramandata/labspec/serie190214-1.txt")
 # display the spectra with rotating colors. cmap can be of course set to any other
 # available matplotlib colormap. The second parameter `lw` is used to set the line
 # width. In addition, we fix the figsize to have a better view of the spectra.
-prefs = scp.preferences
-prefs.figure.figsize = (8, 4)
-B1.plot(cmap=None, lw=1)
+_ = B1.plot(cmap=None, lw=1)
 # %%
 # We will limit the x range to the region of interest
 # note the float number to specify that we use coordinates and not indices
@@ -36,7 +34,7 @@ B2 = B1[:, 60.0:]
 # %%
 # As there is obviously a drift in these spectra, we will use detrend to remove it.
 B3 = scp.detrend(B2)
-B3.plot(cmap=None)
+_ = B3.plot(cmap=None)
 # %%
 # To demonstrate the use of `plot_multiple` we will take only a few spectra.
 # For instance the 5 first spectra:
@@ -44,7 +42,7 @@ B4 = B3[:5]
 
 # %%
 # plot it to see what we have selected
-B4.plot(cmap=None)
+_ = B4.plot(cmap=None)
 # %%
 # Now we will use `plot_multiple` to plot all the spectra of the dataset B4.
 # we need to use `offset` to separate the traces and we set some labels to identify
@@ -52,7 +50,7 @@ B4.plot(cmap=None)
 # Note that we can use the `legend` option to place the legend at the best location.
 # We can also use the `shift` option to shift the traces vertically.
 datasets = list(B4)
-scp.plot_multiple(
+_ = scp.plot_multiple(
     datasets,
     method="pen",
     legend="best",

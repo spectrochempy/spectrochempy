@@ -12,11 +12,11 @@ from pathlib import Path
 
 import requests
 
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import info_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.read_jcamp import read_jcamp
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import info_
 from spectrochempy.utils.typeutils import is_iterable
 
 

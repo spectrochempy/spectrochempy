@@ -20,7 +20,6 @@ import tempfile
 import traceback
 
 import docrep
-import matplotlib.pyplot as plt
 import numpy
 from numpydoc.docscrape import get_doc_object
 from numpydoc.validate import Validator
@@ -283,6 +282,9 @@ def _scpy_numpydoc_validate(func_name, exclude=None):
         errs = _remove_errors(errs, "ES01")
 
     result["errors"] = errs
+    # Lazy import to avoid loading matplotlib at module import time
+    import matplotlib.pyplot as plt
+
     plt.close("all")
     if result["file"] is None and hasattr(doc.code_obj, "fget"):
         # sometimes it is because the code_obj is a property

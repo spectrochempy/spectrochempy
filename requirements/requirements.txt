@@ -33,6 +33,5 @@ pyyaml
 requests
 scikit-learn
 scipy
-setuptools-scm
 tzlocal
 xlrd

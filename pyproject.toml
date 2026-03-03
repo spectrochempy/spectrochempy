@@ -37,7 +37,6 @@ dependencies = [
   "requests",
   "scikit-learn",
   "scipy",
-  "setuptools-scm",
   "tzlocal",
   "xlrd",
 ]
@@ -73,6 +72,7 @@ docs = [
   "numpydoc == 1.8.0",
   "pickleshare",
   "pypandoc == 1.15",
+  "setuptools_scm",
   "sphinx == 7.4.7",
   "sphinx-tabs == 3.4.7",
   "sphinx-copybutton == 0.5.2",
@@ -123,11 +123,12 @@ where = ["src"]
   "*.pyi",
 ]
 "spectrochempy.data" = [
-  "fonts/*",
-  "stylesheets/*",
   "databases/*",
   "*.json",
   "*.cff",
+]
+"spectrochempy.plotting" = [
+  "stylesheets/*.mplstyle",
 ]
 
 [tool.setuptools_scm]
@@ -160,6 +161,7 @@ ignore = [
   "D212", # Docstring should start on first line
   "D413", # Missing blank line after last section
   "D417", # Missing argument descriptions in the docstring
+  "UP038", # This rule has been removed from
 ]
 select = [
   "D", # pydocstyle
