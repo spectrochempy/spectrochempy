@@ -585,7 +585,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Parameters passed to the internal `plot` method of the `X` dataset.
 
         """
-        from spectrochempy.plotting.composite import plot_merit
+        from spectrochempy.plotting.composite.plotmerit import plot_merit
 
         return plot_merit(
             analysis_object=self,

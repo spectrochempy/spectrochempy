@@ -5,6 +5,8 @@
 # ======================================================================================
 """Tests for plotmerit functionality including multi-regularization support."""
 
+import numpy as np
+
 
 def test_plotmerit_single_index():
     """Test plotmerit with a single index works correctly."""
@@ -290,11 +292,11 @@ def test_plotmerit_zorder():
     assert all(z == 1 for z in recon_zorders), "All reconstructed zorders should be 1"
     assert all(z == 2 for z in exp_zorders), "All experimental zorders should be 2"
 
-    assert max(res_zorders) < min(
-        recon_zorders
-    ), "Residuals should be behind reconstructed"
-    assert max(recon_zorders) < min(
-        exp_zorders
-    ), "Reconstructed should be behind experimental"
+    assert max(res_zorders) < min(recon_zorders), (
+        "Residuals should be behind reconstructed"
+    )
+    assert max(recon_zorders) < min(exp_zorders), (
+        "Reconstructed should be behind experimental"
+    )
 
     plt.close()
