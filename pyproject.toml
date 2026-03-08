@@ -244,6 +244,7 @@ doctest_optionflags = [
 doctest_plus = "enabled"
 markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
 testpaths = ["tests"]
+doctest_norecursedirs = ["tests/test_plotting"]
 
 [tool.coverage.run]
 source = ["src/spectrochempy/"]

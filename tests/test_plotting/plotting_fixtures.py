@@ -10,6 +10,9 @@ Minimal conftest that forces Agg backend and provides basic fixtures
 without depending on full spectrochempy functionality.
 """
 
+# Skip doctest collection for this file
+__doctest_skip__ = ["*"]
+
 import matplotlib
 import numpy as np
 import pytest
@@ -65,10 +68,53 @@ def sample_3d_dataset():
     return NDDataset(data, title="Intensity", units="kJ/mol", coordset=[y, x])
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def clean_figures():
-    """Auto-cleanup fixture to ensure test independence."""
+    """Explicit fixture for tests that need figure cleanup (backward compatibility)."""
     yield
+    plt.close("all")
+
+
+@pytest.fixture(autouse=True)
+def clean_figures_and_plotting_prefs():
+    """Auto-cleanup fixture to ensure test independence for plotting tests."""
+    from spectrochempy.application.preferences import preferences
+
+    # Reset to defaults BEFORE each plotting test to ensure clean state
+    # This prevents pollution from non-plotting tests that ran earlier
+    preferences.reset()
+
+    # Snapshot the now-clean state
+    snapshot = {
+        "colormap": preferences.colormap,
+        "colorbar": preferences.colorbar,
+        "style": preferences.style,
+        "colormap_sequential": preferences.colormap_sequential,
+        "colormap_diverging": preferences.colormap_diverging,
+        "colormap_categorical_small": preferences.colormap_categorical_small,
+        "colormap_categorical_large": preferences.colormap_categorical_large,
+        "figure.figsize": preferences.figure.figsize,
+        "font.family": preferences.font.family,
+        "font.size": preferences.font.size,
+        "axes.grid": preferences.axes.grid,
+    }
+
+    yield
+
+    # Restore preferences after test (in case test modified them)
+    try:
+        preferences.reset()
+        for key, value in snapshot.items():
+            if "." in key:
+                group, attr = key.split(".", 1)
+                setattr(getattr(preferences, group), attr, value)
+            else:
+                setattr(preferences, key, value)
+    except Exception:
+        # If restore fails, at least reset to defaults
+        preferences.reset()
+
+    # Close all figures
     plt.close("all")
 
 
@@ -118,14 +164,21 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     new_keys = set(after_dict.keys()) - set(before_dict.keys())
     plotting_keys = new_keys - internal_attrs
 
-    assert (
-        not plotting_keys
-    ), f"Dataset object was mutated by plotting with new attributes: {plotting_keys}"
+    assert not plotting_keys, (
+        f"Dataset object was mutated by plotting with new attributes: {plotting_keys}"
+    )
 
     # No plotting attributes should exist
-    assert not hasattr(
-        dataset_after, "fig"
-    ), "Dataset should not have 'fig' attribute after plotting"
-    assert not hasattr(
-        dataset_after, "ndaxes"
-    ), "Dataset should not have 'ndaxes' attribute after plotting"
+    assert not hasattr(dataset_after, "fig"), (
+        "Dataset should not have 'fig' attribute after plotting"
+    )
+    assert not hasattr(dataset_after, "ndaxes"), (
+        "Dataset should not have 'ndaxes' attribute after plotting"
+    )
+
+
+def get_rcparams_snapshot():
+    """Get current matplotlib rcParams as a dictionary for comparison."""
+    import matplotlib as mpl
+
+    return dict(mpl.rcParams)

@@ -4,6 +4,9 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+# Import plotting fixtures from reorganized test_plotting directory
+pytest_plugins = ["tests.test_plotting.plotting_fixtures"]
+
 # Force Agg backend BEFORE any other imports to prevent interactive backend initialization
 import matplotlib
 

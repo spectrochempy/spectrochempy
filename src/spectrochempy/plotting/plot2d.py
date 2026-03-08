@@ -45,7 +45,27 @@ def _can_enforce_equal_aspect(dataset):
     """
     if dataset is None:
         return False
-    return False
+
+    dims = dataset.dims
+    if len(dims) < 2:
+        return False
+
+    dimx, dimy = dims[-1], dims[-2]
+
+    coord_x = getattr(dataset, dimx, None)
+    coord_y = getattr(dataset, dimy, None)
+
+    if coord_x is None or coord_y is None:
+        return False
+
+    units_x = getattr(coord_x, "units", None)
+    units_y = getattr(coord_y, "units", None)
+
+    if units_x is None and units_y is None:
+        return True
+    if units_x is None or units_y is None:
+        return False
+    return units_x == units_y
 
 
 def _apply_x_axis_policy(ax, coord, default_xlim, kwargs):
