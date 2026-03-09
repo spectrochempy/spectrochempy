@@ -9,9 +9,6 @@ Minimal tests for composite plotting modules to improve coverage.
 These tests ensure the modules can be imported and basic functions are callable.
 """
 
-import numpy as np
-import pytest
-
 
 class TestPlotMeritImports:
     """Test that plotmerit module can be imported and has expected functions."""

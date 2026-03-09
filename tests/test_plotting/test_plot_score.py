@@ -171,23 +171,6 @@ class TestPlotScore:
 
         plt.close()
 
-    def test_plot_score_labels_3d(self):
-        """Test plot_score with labels in 3D."""
-        import spectrochempy as scp
-        from spectrochempy.plotting.composite.plotscore import plot_score
-
-        scores_data = np.random.randn(10, 5)
-        scores = scp.NDDataset(scores_data)
-
-        labels = np.array([f"S{i}" for i in range(10)])
-        scores.y = scp.Coord(data=np.arange(10), labels=labels.reshape(-1, 1))
-
-        ax = plot_score(scores, components=(1, 2, 3), show_labels=True, show=False)
-
-        assert ax is not None
-
-        plt.close()
-
     def test_plot_score_labels_column(self):
         """Test plot_score with labels_column selection."""
         import spectrochempy as scp

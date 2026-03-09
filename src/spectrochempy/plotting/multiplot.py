@@ -426,12 +426,11 @@ def multiplot(
 
         # Handle method parameter - can be string or list
         method_is_list = is_sequence(method) and not isinstance(method, str)
-        if method_is_list:
-            if len(method) != len(datasets):
-                raise ValueError(
-                    f"method list length ({len(method)}) must match "
-                    f"number of datasets ({len(datasets)})"
-                )
+        if method_is_list and len(method) != len(datasets):
+            raise ValueError(
+                f"method list length ({len(method)}) must match "
+                f"number of datasets ({len(datasets)})"
+            )
 
         for irow in range(nrow):
             for icol in range(ncol):
@@ -439,10 +438,7 @@ def multiplot(
                 dataset = datasets[idx]
 
                 # Determine method for this dataset
-                if method_is_list:
-                    current_method = method[idx]
-                else:
-                    current_method = method
+                current_method = method[idx] if method_is_list else method
                 try:
                     label = labels[idx]
                 except Exception:
@@ -620,5 +616,4 @@ def multiplot(
                 "axes": np.array(list(axes.values())),
                 "axes_dict": axes,
             }
-        else:
-            return np.array(list(axes.values()))
+        return np.array(list(axes.values()))

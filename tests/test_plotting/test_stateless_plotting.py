@@ -14,11 +14,11 @@ Tests fundamental dataset.plot() functionality ensuring:
 - Error handling
 """
 
-import matplotlib.pyplot as plt
-import pytest
-
 import sys
 from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
 from plotting_fixtures import assert_dataset_state_unchanged
@@ -70,9 +70,9 @@ class TestStatelessPlotting:
             "",
         ), "Scatter plot should have markers"
         assert line.get_linestyle() == "None", "Scatter plot should have no line"
-        assert len(ax_scatter.collections) == 0, (
-            "Scatter plot should not use collections"
-        )
+        assert (
+            len(ax_scatter.collections) == 0
+        ), "Scatter plot should not use collections"
 
         # Map plot should have contour lines
         assert len(ax_map.collections) > 0, "Map plot should have contour collections"
@@ -90,15 +90,15 @@ class TestStatelessPlotting:
 
         # Test single plot return type
         ax = sample_1d_dataset.plot()
-        assert isinstance(ax, plt.Axes), (
-            "dataset.plot() should return matplotlib Axes object"
-        )
+        assert isinstance(
+            ax, plt.Axes
+        ), "dataset.plot() should return matplotlib Axes object"
 
         # Verify returned axes can be used independently
         ax.set_title("Independent title")
-        assert ax.get_title() == "Independent title", (
-            "Returned axes should be independently usable"
-        )
+        assert (
+            ax.get_title() == "Independent title"
+        ), "Returned axes should be independently usable"
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
@@ -118,12 +118,12 @@ class TestStatelessPlotting:
 
         # Verify parameters applied
         assert ax.get_title() == "Test Title", "Title parameter not applied correctly"
-        assert ax.get_xlabel() == "Custom X Label", (
-            "X label parameter not applied correctly"
-        )
-        assert ax.get_ylabel() == "Custom Y Label", (
-            "Y label parameter not applied correctly"
-        )
+        assert (
+            ax.get_xlabel() == "Custom X Label"
+        ), "X label parameter not applied correctly"
+        assert (
+            ax.get_ylabel() == "Custom Y Label"
+        ), "Y label parameter not applied correctly"
 
         # Verify dataset unchanged
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
@@ -153,12 +153,12 @@ class TestScatterMarkerBehavior:
 
         line = ax.lines[0]
         # Default marker should be "o" from preferences
-        assert line.get_marker() == "o", (
-            f"Expected default marker 'o', got {line.get_marker()}"
-        )
-        assert line.get_linestyle() == "None", (
-            "Scatter plot should have no connecting line"
-        )
+        assert (
+            line.get_marker() == "o"
+        ), f"Expected default marker 'o', got {line.get_marker()}"
+        assert (
+            line.get_linestyle() == "None"
+        ), "Scatter plot should have no connecting line"
 
     def test_scatter_explicit_marker(self, sample_1d_dataset):
         """Test that explicit marker overrides default."""
@@ -169,9 +169,9 @@ class TestScatterMarkerBehavior:
         assert len(ax.lines) > 0, "Scatter plot should have line objects"
         line = ax.lines[0]
         assert line.get_marker() == "s", f"Expected marker 's', got {line.get_marker()}"
-        assert line.get_linestyle() == "None", (
-            "Scatter plot should have no connecting line"
-        )
+        assert (
+            line.get_linestyle() == "None"
+        ), "Scatter plot should have no connecting line"
 
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)
 
@@ -206,9 +206,9 @@ class TestScatterMarkerBehavior:
         ax = sample_1d_dataset.plot_scatter()
 
         # Must use Line2D, not PathCollection
-        assert len(ax.collections) == 0, (
-            "Scatter plot should not create collections (PathCollection)"
-        )
+        assert (
+            len(ax.collections) == 0
+        ), "Scatter plot should not create collections (PathCollection)"
         assert len(ax.lines) > 0, "Scatter plot must create Line2D objects"
 
         assert_dataset_state_unchanged(ds_before, sample_1d_dataset)

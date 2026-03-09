@@ -441,17 +441,7 @@ basc.n_components = 3  # only used for 'multivariate'
 # ---------------------------------------------------------------
 _ = basc.fit(X)
 Xc = basc.corrected
-
-axs = scp.multiplot(
-    [X, Xc],
-    labels=["Original", "Baseline corrected"],
-    sharex=True,
-    nrow=2,
-    ncol=1,
-    figsize=(7, 6),
-    dpi=96,
-)
-basc.show_regions(axs["axe21"])
+ax = basc.plot(show_regions=True)
 
 
 # %% [markdown]

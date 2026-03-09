@@ -125,7 +125,7 @@ class TestMultiplot:
         initial_count = len(plt.get_fignums())
 
         # Act - create multiplot with single dataset
-        axes = multiplot(sample_1d_dataset, show=False)
+        multiplot(sample_1d_dataset, show=False)
         final_count = len(plt.get_fignums())
 
         # Assert

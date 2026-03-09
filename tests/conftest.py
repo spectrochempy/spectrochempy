@@ -29,6 +29,7 @@ def _matplotlib_state_guard(request):
     """Detect matplotlib state mutations (diagnostic only, no fixing)."""
 
     import sys
+
     import matplotlib as mpl
     import matplotlib.pyplot as plt
 

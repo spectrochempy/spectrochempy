@@ -164,17 +164,17 @@ def assert_dataset_state_unchanged(dataset_before, dataset_after):
     new_keys = set(after_dict.keys()) - set(before_dict.keys())
     plotting_keys = new_keys - internal_attrs
 
-    assert not plotting_keys, (
-        f"Dataset object was mutated by plotting with new attributes: {plotting_keys}"
-    )
+    assert (
+        not plotting_keys
+    ), f"Dataset object was mutated by plotting with new attributes: {plotting_keys}"
 
     # No plotting attributes should exist
-    assert not hasattr(dataset_after, "fig"), (
-        "Dataset should not have 'fig' attribute after plotting"
-    )
-    assert not hasattr(dataset_after, "ndaxes"), (
-        "Dataset should not have 'ndaxes' attribute after plotting"
-    )
+    assert not hasattr(
+        dataset_after, "fig"
+    ), "Dataset should not have 'fig' attribute after plotting"
+    assert not hasattr(
+        dataset_after, "ndaxes"
+    ), "Dataset should not have 'ndaxes' attribute after plotting"
 
 
 def get_rcparams_snapshot():

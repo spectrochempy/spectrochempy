@@ -10,8 +10,8 @@ This module exercises dispatch and style branches in plot1d.py using
 parametrized tests with synthetic datasets.
 """
 
-import pytest
 import numpy as np
+import pytest
 
 
 @pytest.fixture
