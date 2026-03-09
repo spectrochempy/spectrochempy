@@ -44,9 +44,9 @@ v, d0, rsquare
 # (we need to import the matplotlib library)
 import matplotlib.pyplot as plt
 
-plt.plot(time, distance, "o", label="Original data", markersize=5)
+_ = plt.plot(time, distance, "o", label="Original data", markersize=5)
 distance_fitted = lstsq.predict()
-plt.plot(time, distance_fitted, ":r", label="Linear regression output")
+_ = plt.plot(time, distance_fitted, ":r", label="Linear regression output")
 plt.xlabel("time / h")
 plt.ylabel("distance / km")
 plt.title(f"Linear regression, $R^2={rsquare:.3f}$")
@@ -105,7 +105,7 @@ print(f"speed : {v:.2f~C},  d0 : {d0:.2f~C},  r^2={rsquare:.3f}")
 
 # %%
 # Final plot
-distance.plot_scatter(
+_ = distance.plot_scatter(
     markersize=10,
     mfc="red",
     mec="black",
@@ -113,7 +113,7 @@ distance.plot_scatter(
     title=f"Least-square regression, $r^2={rsquare:.3f}$",
 )
 distance_fitted3 = lstsq.predict()
-distance_fitted3.plot_pen(clear=False, color="g", label="Fitted line", legend=True)
+_ = distance_fitted3.plot_pen(clear=False, color="g", label="Fitted line", legend=True)
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -1,0 +1,35 @@
+# SpectroChemPy paper style
+# Publication-oriented style with smaller fonts and higher DPI.
+
+# Figure
+figure.figsize: 3.5, 2.5
+figure.dpi: 300
+figure.facecolor: white
+
+# Axes
+axes.titlesize: 10
+axes.labelsize: 9
+axes.linewidth: 0.8
+axes.grid: False
+axes.facecolor: white
+
+# Lines
+lines.linewidth: 1.0
+lines.markersize: 5.0
+
+# Font
+font.size: 9
+font.family: sans-serif
+
+# Ticks
+xtick.labelsize: 8
+ytick.labelsize: 8
+xtick.direction: out
+ytick.direction: out
+
+# Legend
+legend.fontsize: 8
+legend.frameon: False
+
+# Images
+image.cmap: viridis

@@ -113,6 +113,6 @@ For plots, use the plot directive:
         :context: close-figs
 
         >>> ds = scp.read("myfile.spg")
-        >>> ds.plot()
+        >>> _ = ds.plot()
 
 See the `numpydoc guide <https://numpydoc.readthedocs.io/>`_ for more details.

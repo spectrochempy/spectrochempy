@@ -87,7 +87,7 @@ def test_pls():
     #
     assert_almost_equal(pls1.x_loadings.data, pls1_.x_loadings_.T)
     assert pls1.x_loadings.x == Xc.x
-    assert_almost_equal(pls1.y_loadings.data, pls1_.y_loadings_.squeeze().T)
+    assert_almost_equal(pls1.y_loadings.data.squeeze(), pls1_.y_loadings_.squeeze().T)
     assert_almost_equal(pls1.x_scores.data, pls1_.x_scores_)
     assert pls1.x_scores.y == Xc.y
     assert_almost_equal(pls1.y_scores.data, pls1_.y_scores_)
@@ -101,7 +101,7 @@ def test_pls():
     # check predict()
     y_hat = pls1.predict(Xv)
     y_hat_ = pls1_.predict(Xv_array)
-    assert_almost_equal(y_hat.data, y_hat_.squeeze())
+    assert_almost_equal(y_hat.data.squeeze(), y_hat_.squeeze())
 
     # check transform() with calibration data
     x_scores = pls1.transform()  # this is equivalent to pls1.transform(Xc)
@@ -116,12 +116,12 @@ def test_pls():
     # check transform() with X and y calibration data
     x_scores, y_scores = pls1.transform(both=True)
     x_scores_, y_scores_ = pls1_.transform(Xc_array, yc_array)
-    assert_almost_equal(y_scores.data, y_scores_)
+    assert_almost_equal(y_scores.data.squeeze(), y_scores_)
 
     # check transform() with X and y validation data
     x_scores, y_scores = pls1.transform(Xv, yv)
     x_scores_, y_scores_ = pls1_.transform(Xv_array, yv_array)
-    assert_almost_equal(y_scores.data, y_scores_)
+    assert_almost_equal(y_scores.data.squeeze(), y_scores_)
 
     # check fit_transform() with calibration data
     x_scores = pls1.fit_transform(Xc, yc)
@@ -133,15 +133,15 @@ def test_pls():
         x_scores
     )  # this is equivalent to pls1.transform(x_scores)
     x_hat_ = pls1_.inverse_transform(x_scores_)
-    assert_almost_equal(x_hat.data, x_hat_)
+    assert_almost_equal(x_hat.data.squeeze(), x_hat_)
 
     # check inverse_transform() with validation data
     x_scores, y_scores = pls1.transform(Xv, yv)
     xv_hat, yv_hat = pls1.inverse_transform(x_scores, y_scores)
     x_scores_, y_scores_ = pls1_.transform(Xv_array, yv_array)
     xv_hat_, yv_hat_ = pls1_.inverse_transform(x_scores_, y_scores_)
-    assert_almost_equal(xv_hat.data, xv_hat_.squeeze())
-    assert_almost_equal(yv_hat.data, yv_hat_.squeeze(), 3)
+    assert_almost_equal(xv_hat.data.squeeze(), xv_hat_.squeeze())
+    assert_almost_equal(yv_hat.data.squeeze(), yv_hat_.squeeze(), 3)
     # todo: check why only 3 decimals
 
     # Test masked data, x axis

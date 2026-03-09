@@ -18,12 +18,12 @@ import numpy as np
 from quaternion import as_float_array
 
 # Local imports
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
@@ -2889,20 +2889,32 @@ class NDMath:
                         )
                         xotc = (
                             None
-                            if otc is None or otc[obj.dims[-1]].is_empty
-                            else otc[obj.dims[-1]]
+                            if otc is None or otc[other.dims[-1]].is_empty
+                            else otc[other.dims[-1]]
                         )
-                        if xobc is None and xotc is None:
+                        # Permissive: allow operation if either coordset is None
+                        if xobc is None or xotc is None:
                             pass
                         else:
                             raise CoordinatesMismatchError(
-                                obc[obj.dims[-1]].data,
-                                otc[other.dims[-1]].data,
+                                xobc.data,
+                                xotc.data,
                             ) from err
                     except AssertionError as err:
+                        # Coordinates exist but don't match
+                        xobc = (
+                            None
+                            if obc is None or obc[obj.dims[-1]].is_empty
+                            else obc[obj.dims[-1]]
+                        )
+                        xotc = (
+                            None
+                            if otc is None or otc[other.dims[-1]].is_empty
+                            else otc[other.dims[-1]]
+                        )
                         raise CoordinatesMismatchError(
-                            obc[obj.dims[-1]].data,
-                            otc[other.dims[-1]].data,
+                            xobc.data if xobc is not None else None,
+                            xotc.data if xotc is not None else None,
                         ) from err
 
                 # if other is multidimensional and as we are talking about element wise

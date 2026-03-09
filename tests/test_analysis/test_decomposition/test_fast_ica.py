@@ -91,7 +91,7 @@ def test_fastICA():
     ica.components.plot(title="Components / W / unmixing matrix")
     ica.mixing.plot(title="ica.mixing")
     ica.whitening.plot(title="ica.whitening")
-    ica.plotmerit(offset=0, nb_traces=10)
+    ica.plot_merit(offset=0, nb_traces=10)
 
     # Test masked data, x axis
     ica2 = scp.FastICA(n_components=4)

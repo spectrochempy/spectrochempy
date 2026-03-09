@@ -14,13 +14,13 @@ from datetime import datetime
 import numpy as np
 import scipy.io as sio
 
-from spectrochempy.application.application import info_
-from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.nddataset import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
+from spectrochempy.utils._logging import info_
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.docutils import docprocess
 
 # ======================================================================================

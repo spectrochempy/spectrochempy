@@ -15,8 +15,8 @@ from traitlets import Unicode
 from traitlets import signature_has_traits
 from traitlets import validate
 
-from spectrochempy.application.application import error_
 from spectrochempy.core.project.abstractproject import AbstractProject
+from spectrochempy.utils._logging import error_
 
 __all__ = ["Script", "run_script", "run_all_scripts"]
 
@@ -201,7 +201,10 @@ class Script(HasTraits):
         try:
             exec(code, globals(), localvars)  # noqa: S102
         except NameError as e:
-            error_(e + ". pass the variable `locals()` : this may solve this problem! ")
+            error_(
+                str(e)
+                + ". pass the variable `locals()` : this may solve this problem! "
+            )
 
 
 def run_script(script, localvars=None):

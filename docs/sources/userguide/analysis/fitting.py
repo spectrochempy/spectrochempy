@@ -225,7 +225,7 @@ nd = nd[-1].squeeze()
 
 # %%
 ndOH = nd[3700.0:3300.0]
-ndOH.plot()
+_ = ndOH.plot()
 
 # %% [markdown]
 # ### Baseline correction
@@ -238,7 +238,7 @@ ndOH.plot()
 
 # %%
 ndOHcorr = scp.basc(ndOH)
-ndOHcorr.plot()
+_ = ndOHcorr.plot()
 
 # %% [markdown]
 # ### Peak finding
@@ -443,7 +443,7 @@ f1.max_iter = 2000
 f1.fit(ndOHcorr)
 
 # Show the result
-ndOHcorr.plot()
+_ = ndOHcorr.plot()
 ax = (f1.components[:]).plot(clear=False)
 ax.autoscale(enable=True, axis="y")
 
