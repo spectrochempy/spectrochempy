@@ -56,15 +56,15 @@ from enum import IntEnum
 
 import numpy as np
 
-from spectrochempy.application.application import debug_
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.readers.importer import _openfid
 from spectrochempy.core.units import ur
+from spectrochempy.utils._logging import debug_
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.datetimeutils import windows_time_to_dt64
 from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.file import fromfile

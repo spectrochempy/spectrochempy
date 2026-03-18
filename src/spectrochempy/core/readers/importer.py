@@ -21,12 +21,12 @@ from traitlets import List
 from traitlets import Type
 from traitlets import Unicode
 
-from spectrochempy.application.application import debug_
-from spectrochempy.application.application import info_
-from spectrochempy.application.application import warning_
 from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.processing.transformation.concatenate import concatenate
 from spectrochempy.processing.transformation.concatenate import stack
+from spectrochempy.utils._logging import debug_
+from spectrochempy.utils._logging import info_
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.docutils import docprocess
 
 # from spectrochempy.utils.exceptions import DimensionsCompatibilityError

@@ -144,7 +144,7 @@ d1D
 print(d1D)
 
 # %%
-d1D.plot(figsize=(3, 2))
+_ = d1D.plot(figsize=(3, 2))
 
 # %% [markdown]
 # Except few additional metadata such `author` , `created` ..., there is not much
@@ -846,7 +846,7 @@ if datadir.exists():
 # %%
 nd = scp.read_omnic(datadir / "irdata/nh4y-activation.spg")
 scp.preferences.reset()
-nd.plot()
+_ = nd.plot()
 
 # %% [markdown]
 # Even if we do not specify the **datadir**, the application first looks in the

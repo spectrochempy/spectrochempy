@@ -48,14 +48,14 @@ nd1 = nd.snip()
 # plot
 prefs = scp.preferences
 prefs.figure.figsize = (9, 5)
-nd1.plot()
+_ = nd1.plot()
 
 # %% [markdown]
 # We can apply a Savgol filter to denoise the spectra
 
 # %%
 nd2 = nd1.savgol(size=7, order=2)
-nd2.plot()
+_ = nd2.plot()
 
 # %% [markdown]
 # The problem is that, not only the spikes are not removed, but they are also broadened.
@@ -67,7 +67,7 @@ nd2.plot()
 
 # %%
 nd3 = nd1.denoise(ratio=90)
-nd3.plot()
+_ = nd3.plot()
 
 # %% [markdown]
 # This clearly help to increase the signal-to-noise ratio.
@@ -85,7 +85,7 @@ nd3.plot()
 # %%
 filter = scp.Filter(method="median", size=5)
 nd4 = filter(nd1)
-nd4.plot()
+_ = nd4.plot()
 
 # %% [markdown]
 # However, the spike are not fully removed, and are broadened.
@@ -101,8 +101,8 @@ nd4.plot()
 # %%
 X = nd1[0]
 nd5 = scp.despike(X, size=11, delta=5)
-X.plot()
-nd5.plot(clear=False, ls="-", c="r")
+_ = X.plot()
+_ = nd5.plot(clear=False, ls="-", c="r")
 
 # %% [markdown]
 # Getting the desired results require the tuning of size and delta parameters. And sometimes may need to repeat the procedure on a previously filtered spectra.
@@ -111,15 +111,15 @@ nd5.plot(clear=False, ls="-", c="r")
 
 # %%
 nd5b = scp.despike(X, size=21, delta=2)
-X.plot()
-nd5b.plot(clear=False, ls="-", c="r")
+_ = X.plot()
+_ = nd5b.plot(clear=False, ls="-", c="r")
 
 # %% [markdown]
 # Last we can apply it to the full 2D dataset
 
 # %%
 nd6 = scp.despike(nd1, size=11, delta=5)
-nd6.plot()
+_ = nd6.plot()
 
 # %% [markdown]
 # It is however rarely perfect as the setting of size and delta may be depending on the row.
@@ -128,10 +128,10 @@ nd6.plot()
 
 # %%
 nd7 = nd6.denoise(ratio=92)
-nd7.plot()
+_ = nd7.plot()
 
 # %% [markdown]
 # The 'whitaker' method is also available:
 # %%
 nd8 = scp.despike(nd1, size=11, delta=5, method="whitaker")
-nd8.plot()
+_ = nd8.plot()

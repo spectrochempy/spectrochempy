@@ -59,7 +59,7 @@ def test_simplisma():
 
     sma.C.T.plot(title="Concentration")
     sma.St.plot(title="Components")
-    sma.plotmerit(offset=0, nb_traces=10)
+    sma.plot_merit(offset=0, nb_traces=10)
 
     # assert "3     29      29.0     0.0072     0.9981" in pure.logs
 

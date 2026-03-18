@@ -4,12 +4,197 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+# Import plotting fixtures from reorganized test_plotting directory
+pytest_plugins = ["tests.test_plotting.plotting_fixtures"]
+
+# Force Agg backend BEFORE any other imports to prevent interactive backend initialization
+import matplotlib
+
+matplotlib.use("Agg", force=True)
+
+import os
 from pathlib import Path
 
 import numpy as np
 import pytest
 
 import spectrochempy
+
+# ======================================================================================
+# OPTIONAL DIAGNOSTIC STATE GUARDS
+# ======================================================================================
+# These fixtures detect state leaks (env vars, rcParams, preferences).
+# They are DISABLED by default (set RUN_STATE_GUARDS=1 to enable).
+# Actual test isolation is handled by isolate_matplotlib_state fixture below.
+
+RUN_STATE_GUARDS = os.environ.get("SCP_TEST_GUARDS", "0") == "1"
+
+
+@pytest.fixture(autouse=True)
+def _matplotlib_state_guard(request):
+    """Detect matplotlib state mutations (diagnostic only, no fixing)."""
+    if not RUN_STATE_GUARDS:
+        yield
+        return
+
+    import sys
+
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    test_name = request.node.name
+    print(f"\n=== GUARD START: {test_name} ===", file=sys.stderr)
+
+    backend_before = mpl.get_backend()
+    rc_before = dict(mpl.rcParams)
+    interactive_before = plt.isinteractive()
+    fignums_before = list(plt.get_fignums())
+
+    yield  # test runs here
+
+    # Check for mutations (after test, before isolation fixture restores)
+    backend_after = mpl.get_backend()
+    interactive_after = plt.isinteractive()
+    rc_after = dict(mpl.rcParams)
+    fignums_after = list(plt.get_fignums())
+
+    # Report only if changes detected
+    leaked = fignums_after != fignums_before
+    backend_changed = backend_after != backend_before
+    interactive_changed = interactive_after != interactive_before
+    mutated = [k for k in rc_before if rc_before[k] != rc_after.get(k)]
+
+    if leaked:
+        print(
+            f"\n\n===== [STATE GUARD] {test_name}: Leaked figures: {fignums_after} (was: {fignums_before}) =====",
+            file=sys.stderr,
+        )
+        plt.close("all")
+
+    if backend_changed:
+        print(
+            f"\n\n===== [STATE GUARD] {test_name}: Backend changed: {backend_before} -> {backend_after} =====",
+            file=sys.stderr,
+        )
+
+    if interactive_changed:
+        print(
+            f"\n\n===== [STATE GUARD] {test_name}: Interactive mode changed: {interactive_before} -> {interactive_after} =====",
+            file=sys.stderr,
+        )
+
+    if mutated:
+        print(
+            f"\n\n===== [STATE GUARD] {test_name}: rcParams mutated (first 10): {mutated[:10]} =====",
+            file=sys.stderr,
+        )
+
+
+@pytest.fixture(autouse=True)
+def guard_environment():
+    """Guard against environment mutations (cwd, os.environ)."""
+    if not RUN_STATE_GUARDS:
+        yield
+        return
+
+    old_env = dict(os.environ)
+    old_cwd = Path.cwd()
+
+    yield
+
+    # Check for cwd change
+    cwd_changed = Path.cwd() != old_cwd
+
+    # Check for environ changes
+    new_env = dict(os.environ)
+    added = set(new_env.keys()) - set(old_env.keys())
+    removed = set(old_env.keys()) - set(new_env.keys())
+    changed = {k for k in old_env if k in new_env and old_env[k] != new_env[k]}
+
+    # Print only if changes detected
+    if cwd_changed:
+        print(
+            f"\n\n===== [ENV GUARD] Working directory changed: {old_cwd} -> {Path.cwd()} ====="
+        )
+    if added:
+        print(f"\n\n===== [ENV GUARD] Added env vars: {added} =====")
+    if removed:
+        print(f"\n\n===== [ENV GUARD] Removed env vars: {removed} =====")
+    if changed:
+        print(
+            f"\n\n===== [ENV GUARD] Changed env vars (first 5): {list(changed)[:5]} ====="
+        )
+
+
+@pytest.fixture(autouse=True)
+def _prefs_guard():
+    """Detect SpectroChemPy preferences mutations (diagnostic only)."""
+    if not RUN_STATE_GUARDS:
+        yield
+        return
+
+    from spectrochempy.application.preferences import preferences as prefs
+
+    style_before = prefs.style
+    type_before = type(prefs.style)
+
+    yield
+
+    style_after = prefs.style
+    type_after = type(prefs.style)
+
+    # Print only if changes detected
+    if style_before != style_after:
+        print(
+            f"\n[STATE GUARD] prefs.style changed: {style_before!r} -> {style_after!r}"
+        )
+    if type_before != type_after:
+        print(
+            f"\n[STATE GUARD] prefs.style type changed: {type_before} -> {type_after}"
+        )
+
+
+# ======================================================================================
+# ISOLATION FIXTURES - Run before/after EVERY test
+# ======================================================================================
+
+
+@pytest.fixture(autouse=True)
+def isolate_matplotlib_state():
+    """Ensure matplotlib state is clean before and after each test."""
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    # Save original state
+    original_rc = mpl.rcParams.copy()
+    original_figs = plt.get_fignums()
+
+    yield
+
+    # Restore rcParams
+    mpl.rcParams.update(original_rc)
+
+    # Close all figures created during test
+    plt.close("all")
+
+    # Also close any figures that weren't in the original set
+    for fig_num in plt.get_fignums():
+        if fig_num not in original_figs:
+            plt.close(fig_num)
+
+
+@pytest.fixture(autouse=True)
+def isolate_scp_preferences():
+    """Ensure SpectroChemPy preferences are restored after each test."""
+    from spectrochempy.application.preferences import preferences as prefs
+
+    # Take a snapshot of preferences
+    snapshot = prefs.to_dict()
+
+    yield
+
+    # Restore preferences from snapshot
+    prefs.update(snapshot)
 
 
 # ----------------------------
@@ -90,7 +275,7 @@ datadir = pathclean(prefs.datadir)
 
 from spectrochempy.application.testdata import download_full_testdata_directory
 
-download_full_testdata_directory(datadir, force=True)
+download_full_testdata_directory(datadir, force=False)
 
 
 # --------------------------------------------------------------------------------------
@@ -473,3 +658,24 @@ def simple_project():
 
     proj["print_info"] = Script("print_info", script_source)
     return proj
+
+
+# --------------------------------------------------------------------------------------
+# fixture mpl dirs
+# --------------------------------------------------------------------------------------
+@pytest.fixture
+def fake_mpl_dirs(tmp_path, monkeypatch):
+    """Fake Matplotlib configdir, datadir and cachedir."""
+    configdir = tmp_path / "config"
+    datadir = tmp_path / "data"
+    cachedir = tmp_path / "cache"
+
+    configdir.mkdir()
+    datadir.mkdir()
+    cachedir.mkdir()
+
+    monkeypatch.setattr("matplotlib.get_configdir", lambda: str(configdir))
+    monkeypatch.setattr("matplotlib.get_data_path", lambda: str(datadir))
+    monkeypatch.setattr("matplotlib.get_cachedir", lambda: str(cachedir))
+
+    return configdir, datadir, cachedir

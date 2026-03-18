@@ -60,16 +60,16 @@ nd
 # ### Plot of the Real and Imaginary original data
 
 # %%
-nd.plot(xlim=(0.0, 15000.0))
-nd.plot(imag=True, data_only=True, clear=False, color="r")
+_ = nd.plot(xlim=(0.0, 15000.0))
+_ = nd.plot(imag=True, data_only=True, clear=False, color="r")
 
 # %% [markdown]
 # ### Exponential multiplication
 
 # %%
-nd.plot(xlim=(0.0, 15000.0))
+_ = nd.plot(xlim=(0.0, 15000.0))
 _ = nd.em(lb=300.0 * ur.Hz)
-nd.plot(data_only=True, clear=False, color="g")
+_ = nd.plot(data_only=True, clear=False, color="g")
 
 # %% [markdown]
 # **Warning:** processing function are most of the time applied inplace. Use
@@ -78,42 +78,42 @@ nd.plot(data_only=True, clear=False, color="g")
 
 # %%
 nd = dataset.copy()  # to go back to the original data
-nd.plot(xlim=(0.0, 5000.0))
+_ = nd.plot(xlim=(0.0, 5000.0))
 ndlb = nd.em(lb=300.0 * ur.Hz, inplace=False)  # ndlb contain the processed data
-nd.plot(data_only=True, clear=False, color="g")  # nd dataset remain unchanged
-ndlb.plot(data_only=True, clear=False, color="b")
+_ = nd.plot(data_only=True, clear=False, color="g")  # nd dataset remain unchanged
+_ = ndlb.plot(data_only=True, clear=False, color="b")
 
 # %% [markdown]
 # Of course, imaginary data are also transformed at the same time
 
 # %%
-nd.plot(imag=True, xlim=(0, 5000), color="r")
-ndlb.plot(imag=True, data_only=True, clear=False, color="b")
+_ = nd.plot(imag=True, xlim=(0, 5000), color="r")
+_ = ndlb.plot(imag=True, data_only=True, clear=False, color="b")
 
 # %% [markdown]
 # If we want to display the apodization function, we can use the `retapod=True` parameter.
 
 # %%
 nd = dataset.copy()
-nd.plot(xlim=(0.0, 5000.0))
+_ = nd.plot(xlim=(0.0, 5000.0))
 ndlb, apod = nd.em(
     lb=300.0 * ur.Hz, inplace=False, retapod=True
 )  # ndlb contain the processed data and apod the
 # apodization function
-ndlb.plot(data_only=True, clear=False, color="b")
-apod.plot(data_only=True, clear=False, color="m", linestyle="--")
+_ = ndlb.plot(data_only=True, clear=False, color="b")
+_ = apod.plot(data_only=True, clear=False, color="m", linestyle="--")
 
 # %% [markdown]
 # #### Shifted apodization
 
 # %%
 nd = dataset.copy()
-nd.plot(xlim=(0.0, 5000.0))
+_ = nd.plot(xlim=(0.0, 5000.0))
 ndlb, apod = nd.em(
     lb=300.0 * ur.Hz, shifted=1000 * ur.us, inplace=False, retapod=True
 )  # ndlb contain the processed data and apod the apodization function
-ndlb.plot(data_only=True, clear=False, color="b")
-apod.plot(data_only=True, clear=False, color="m", linestyle="--")
+_ = ndlb.plot(data_only=True, clear=False, color="b")
+_ = apod.plot(data_only=True, clear=False, color="m", linestyle="--")
 
 # %% [markdown]
 # ### Other apodization functions
@@ -126,9 +126,9 @@ nd = dataset.copy()
 lb = 10.0
 gb = 200.0
 ndlg, apod = nd.gm(lb=lb, gb=gb, inplace=False, retapod=True)
-nd.plot(xlim=(0.0, 5000.0))
-ndlg.plot(data_only=True, clear=False, color="b")
-apod.plot(data_only=True, clear=False, color="m", linestyle="--")
+_ = nd.plot(xlim=(0.0, 5000.0))
+_ = ndlg.plot(data_only=True, clear=False, color="b")
+_ = apod.plot(data_only=True, clear=False, color="m", linestyle="--")
 
 # %% [markdown]
 # #### Shifted Gaussian-Lorentzian apodization
@@ -138,9 +138,9 @@ nd = dataset.copy()
 lb = 10.0
 gb = 200.0
 ndlg, apod = nd.gm(lb=lb, gb=gb, shifted=2000 * ur.us, inplace=False, retapod=True)
-nd.plot(xlim=(0.0, 5000.0))
-ndlg.plot(data_only=True, clear=False, color="b")
-apod.plot(data_only=True, clear=False, color="m", linestyle="--")
+_ = nd.plot(xlim=(0.0, 5000.0))
+_ = ndlg.plot(data_only=True, clear=False, color="b")
+_ = apod.plot(data_only=True, clear=False, color="m", linestyle="--")
 
 # %% [markdown]
 # #### Apodization using sine window multiplication
@@ -173,40 +173,40 @@ apod.plot(data_only=True, clear=False, color="m", linestyle="--")
 
 # %%
 nd = dataset.copy()
-nd.plot()
+_ = nd.plot()
 
 new, curve = nd.qsin(ssb=3, retapod=True)
-curve.plot(color="r", clear=False)
-new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="r", clear=False)
+_ = curve.plot(color="r", clear=False)
+_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="r", clear=False)
 
 # %%
 nd = dataset.copy()
-nd.plot()
+_ = nd.plot()
 
 new, curve = nd.sinm(ssb=1, retapod=True)
-curve.plot(color="b", clear=False)
-new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="b", clear=False)
+_ = curve.plot(color="b", clear=False)
+_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="b", clear=False)
 
 # %%
 nd = dataset.copy()
-nd.plot()
+_ = nd.plot()
 
 new, curve = nd.sinm(ssb=3, retapod=True)
-curve.plot(color="b", ls="--", clear=False)
-new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="b", clear=False)
+_ = curve.plot(color="b", ls="--", clear=False)
+_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="b", clear=False)
 
 # %%
 nd = dataset.copy()
-nd.plot()
+_ = nd.plot()
 
 new, curve = nd.qsin(ssb=2, retapod=True)
-curve.plot(color="m", clear=False)
-new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="m", clear=False)
+_ = curve.plot(color="m", clear=False)
+_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="m", clear=False)
 
 # %%
 nd = dataset.copy()
-nd.plot()
+_ = nd.plot()
 
 new, curve = nd.qsin(ssb=1, retapod=True)
-curve.plot(color="g", clear=False)
-new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="g", clear=False)
+_ = curve.plot(color="g", clear=False)
+_ = new.plot(xlim=(0, 25000), zlim=(-2, 2), data_only=True, color="g", clear=False)

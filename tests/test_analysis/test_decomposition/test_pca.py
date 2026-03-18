@@ -152,7 +152,7 @@ def test_pca():
     plt.show()
 
     X_hat = pca.inverse_transform()
-    pca.plotmerit(dataset, X_hat, offset=0, nb_traces=10)
+    pca.plot_merit(dataset, X_hat, offset=0, nb_traces=10)
     plt.show()
 
     # printev

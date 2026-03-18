@@ -85,7 +85,7 @@ dataset.max()
 
 # %%
 dataset.remove_masks()
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # ## Transposition
@@ -107,7 +107,7 @@ t_dataset
 # Let's visualize the result:
 
 # %%
-t_dataset.plot()
+_ = t_dataset.plot()
 
 # %% [markdown]
 # ## Changing units
@@ -121,7 +121,7 @@ t_dataset.plot()
 dataset.units = "radian"
 
 # %%
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # Trying to change it in 'meter' for instance, will generate an error!
@@ -146,7 +146,7 @@ d.units
 
 # %%
 dataset.y.ito("hours")
-dataset.plot()
+_ = dataset.plot()
 
 # %% [markdown]
 # See [Units](../objects/dataset/dataset.ipynb#Units) for more details on these units operations

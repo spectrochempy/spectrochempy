@@ -30,13 +30,13 @@ ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
 # %%
 # view it...
 
-scp.plot(ndd)
+_ = ndd.plot()
 # %%
 # Now load a 2D  dataset
 
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
 ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
-scp.plot(ndd)
+_ = ndd.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

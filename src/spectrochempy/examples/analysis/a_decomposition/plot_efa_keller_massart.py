@@ -35,7 +35,7 @@ data[0, 3:8] = [1, 3, 6, 3, 1]  # compound 1
 data[1, 5:11] = [1, 3, 5, 3, 1, 0.5]  # compound 2
 
 dsc = scp.NDDataset(data=data, coords=[c, t])
-dsc.plot(title="concentration")
+_ = dsc.plot(title="concentration")
 # %%
 # 2) absorption spectra
 # **********************
@@ -44,7 +44,7 @@ spec = np.array([[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]])
 w = scp.Coord(np.arange(1, 5, 1), units="nm", title="wavelength")
 
 dss = scp.NDDataset(data=spec, coords=[c, w])
-dss.plot(title="spectra")
+_ = dss.plot(title="spectra")
 # %%
 # 3) simulated data matrix
 # ************************
@@ -53,7 +53,7 @@ dataset = scp.dot(dsc.T, dss)
 dataset.data = np.random.normal(dataset.data, 0.1)
 dataset.title = "intensity"
 
-dataset.plot(title="calculated dataset")
+_ = dataset.plot(title="calculated dataset")
 # %%
 # 4) evolving factor analysis (EFA)
 # *********************************
@@ -81,12 +81,12 @@ b2 = efa.b_ev[:, :n_pc]
 # %%
 # we concatenate the datasets to plot them in a single figure
 both = scp.concatenate(f2, b2)
-both.T.plot(yscale="log")
+_ = both.T.plot(yscale="log")
 # %%
 # Get the abstract concentration profile based on the FIFO EFA analysis
 #
 C = efa.transform()
-C.T.plot(title="EFA concentration")
+_ = C.T.plot(title="EFA concentration")
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

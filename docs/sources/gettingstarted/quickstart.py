@@ -158,7 +158,7 @@ ds.y
 # spectroscopy-specific features:
 
 # %%
-ds.plot()
+_ = ds.plot()
 
 # %% [markdown]
 # ### Data Selection and Manipulation
@@ -168,18 +168,20 @@ ds.plot()
 
 # %%
 region = ds[:, 4000.0:2000.0]
-region.plot()
+_ = region.plot()
 
 # %% [markdown]
 # ### Mathematical Operations
 #
-# NDDataset supports various mathematical operations. Here's an example of baseline correction:
+# NDDataset supports various mathematical operations. Here's an example of basic operations on coordinates and data:
 
 # %% [markdown]
-# Make y coordinate relative to the first point
+# Make y coordinate (time) relative to the first spectrum, convert to hours (default are seconds), and update the title
+# to reflect the new meaning of the y-axis.
 
 # %%
 region.y -= region.y[0]
+region.y.ito("hour")
 region.y.title = "Dehydration time"
 
 # %% [markdown]
@@ -192,7 +194,7 @@ region -= region[-1]
 # Plot with colorbar to show intensity changes
 
 # %%
-region.plot(colorbar=True)
+_ = region.plot(colorbar=True)
 
 # %% [markdown]
 # ### Other Operations
@@ -221,19 +223,13 @@ region.plot(colorbar=True)
 
 # %%
 smoothed = region.smooth(size=51, window="hanning")
-smoothed.plot(colormap="magma")
+_ = smoothed.plot(colormap="magma")
 
 # %% [markdown]
 # ### Baseline Correction
 #
-# Remove baseline artifacts using various algorithms:
-
-# %% [markdown]
-# Prepare data
-
-# %%
-region = ds[:, 4000.0:2000.0]
-smoothed = region.smooth(size=51, window="hanning")
+# Various algorithms are available for baseline correction, including polynomial fitting, rubberband, and more. Here an
+# example of multivariate polynomial baseline correction using PCHIP interpolation is shown:
 
 # %% [markdown]
 # Configure baseline correction
@@ -251,7 +247,7 @@ blc.n_components = 5
 
 # %%
 blc.fit(smoothed)
-blc.corrected.plot()
+_ = blc.corrected.plot()
 
 # %% [markdown]
 # SpectroChemPy provides many other processing techniques, such as:
@@ -265,10 +261,11 @@ blc.corrected.plot()
 # %% [markdown]
 # ## Advanced Analysis
 #
-# ### IRIS Processing example
+# ### 2D-IRIS Processing example
 #
-# IRIS (Iterative Regularized Inverse Solver) is an advanced technique for analyzing
-# spectroscopic data. Here's an example with CO adsorption data:
+# Two-Dimensional Integral Regularized Inversion for Spectroscopy (2D-IRIS) is an advanced technique for analyzing
+# spectroscopic data. In the following example, spectra of CO adsorption on a sulfide catalyst at various pressures
+# are used to extract the distribution of adsorption energies using 2D-IRIS analysis.
 
 # %% [markdown]
 # Load and prepare CO adsorption data
@@ -281,25 +278,25 @@ ds = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
 
 # %%
 pressure = [
-    0.00300,
-    0.00400,
-    0.00900,
-    0.01400,
-    0.02100,
-    0.02600,
-    0.03600,
-    0.05100,
-    0.09300,
-    0.15000,
-    0.20300,
-    0.30000,
-    0.40400,
-    0.50300,
-    0.60200,
-    0.70200,
-    0.80100,
-    0.90500,
-    1.00400,
+    0.003,
+    0.004,
+    0.009,
+    0.014,
+    0.021,
+    0.026,
+    0.036,
+    0.051,
+    0.093,
+    0.150,
+    0.203,
+    0.300,
+    0.404,
+    0.503,
+    0.602,
+    0.702,
+    0.801,
+    0.905,
+    1.004,
 ]
 ds.y = scp.Coord(pressure, title="Pressure", units="torr")
 
@@ -307,17 +304,19 @@ ds.y = scp.Coord(pressure, title="Pressure", units="torr")
 # Plot the dataset
 
 # %%
-ds.plot(colormap="magma")
+_ = ds.plot()
 
 # %% [markdown]
-# Perform IRIS analysis
+# Perform IRIS analysis assuming a local Langmuir isotherms and plot the distribution of adsorption energies at a
+# specific regularization parameter.
 
 # %%
 iris = scp.IRIS(reg_par=[-10, 1, 12])
-K = scp.IrisKernel(ds, "langmuir", q=[-8, -1, 50])
+K = scp.IrisKernel(ds, "langmuir", q=[-7, -1, 50])
 iris.fit(ds, K)
-iris.plotdistribution(-7, colormap="magma")
+_ = iris.f[-7].plot_contour(colorbar=True)
 
+# %%
 # %% [markdown]
 # ### Other Advanced Analysis Techniques
 # SpectroChemPy includes many other advanced analysis techniques, such as:

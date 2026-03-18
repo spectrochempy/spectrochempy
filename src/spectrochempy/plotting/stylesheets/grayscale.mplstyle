@@ -1,0 +1,52 @@
+# Set all colors to grayscale
+# Note: strings of float values are interpreted by matplotlib as gray values.
+
+
+lines.color: black
+patch.facecolor: white
+patch.edgecolor: black
+
+text.color: black
+
+axes.facecolor: white
+axes.edgecolor: black
+axes.labelcolor: black
+# black to light gray
+axes.prop_cycle: cycler('color', ['0.00', '0.40', '0.60', '0.70'])
+
+xtick.color: black
+ytick.color: black
+
+grid.color: black
+
+figure.facecolor: white
+figure.edgecolor: white
+
+image.cmap: gray
+
+savefig.facecolor: white
+savefig.edgecolor: white
+
+font.family: sans-serif
+
+
+##
+## ADDITIONAL PARAMETERS FOR SPECTROCHEMPY
+##
+##@colorbar                              : auto
+##@colormap                              : auto
+##@colormap_sequential                   : gray
+##@colormap_diverging                    : gray
+##@show_projections                      : False
+##@show_projection_x                     : False
+##@show_projection_y                     : False
+##@max_lines_in_stack                    : 1000
+##@number_of_x_labels                    : 5
+##@number_of_y_labels                    : 5
+##@number_of_z_labels                    : 5
+##@number_of_contours                    : 50
+##@contour_alpha                         : 1.0
+##@contour_start                         : 0.05
+##@antialiased                           : True
+##@rcount                                : 50
+##@ccount                                : 50
