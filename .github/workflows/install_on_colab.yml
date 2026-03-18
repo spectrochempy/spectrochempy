@@ -43,11 +43,11 @@ jobs:
 
       # Step 3: Set up Docker build system with caching support
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Step 4: Cache Docker images to speed up subsequent runs
       - name: Cache Docker images
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -56,7 +56,7 @@ jobs:
 
       # Step 5: Cache pip packages to speed up installation
       - name: Cache pip packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements/requirements.txt') }}
@@ -129,7 +129,7 @@ jobs:
       # Step 9: Save the results
       - name: Upload notebook results
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: notebook-output
           path: |
