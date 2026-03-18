@@ -133,7 +133,7 @@ prefs.help("colormap")
 # Use preferences for session-long defaults; kwargs for one-off changes.
 
 # %% [markdown]
-# Below ios the list of all available preferences:
+# Below is the list of all available preferences:
 
 # %%
 prefs.list_all()  # Uncomment to see all preferences
