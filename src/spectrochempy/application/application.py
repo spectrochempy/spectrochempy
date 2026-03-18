@@ -407,11 +407,6 @@ class SpectroChemPy(Application):
         self._running = True
         return True
 
-        # force update of rcParams
-
-        self._running = True
-        return True
-
     def make_default_config_file(self, configurables=None):
         """Auto generate default config file."""
         # remove old configuration file spectrochempy_cfg.py

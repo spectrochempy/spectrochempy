@@ -201,6 +201,10 @@ class Script(HasTraits):
                 ):
                     namespace[name] = self.parent
                     exec(code, namespace)  # noqa: S102
+                else:
+                    raise
+            else:
+                raise
 
         if localvars is not None:
             localvars.update(namespace)

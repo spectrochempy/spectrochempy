@@ -1,5 +1,5 @@
 # ======================================================================================
-# Copyright (©) 2014-2026 Laboratoire Catalse et Spectrochimie (LCS), Caen, France.
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -90,7 +90,7 @@ def _apply_colorbar_tick_policy(cbar, norm, vmin=None, vmax=None):
     # Update ticks to reflect the new locator
     cbar.update_ticks()
 
-    # Set formatter for nice scientific notation
+    # Set formatter to avoid scientific notation on colorbar
     formatter = ScalarFormatter(useMathText=True)
     formatter.set_powerlimits((-3, 4))
     formatter.set_scientific(False)

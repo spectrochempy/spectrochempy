@@ -19,6 +19,7 @@ text.usetex=True with a LaTeX installation.
 from pathlib import Path
 
 from spectrochempy.utils._logging import debug_
+from spectrochempy.utils._logging import warning_
 
 
 def ensure_mpl_assets_installed():
@@ -56,23 +57,44 @@ def _install_stylesheets():
 
     # User stylelib (used by plt.style.use)
     user_stylelib = Path(mpl.get_configdir()) / "stylelib"
-    user_stylelib.mkdir(parents=True, exist_ok=True)
+    try:
+        user_stylelib.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        warning_(f"Failed to create user stylelib directory: {exc}")
 
     # System stylelib (used by SpectroChemPy preferences)
     system_stylelib = Path(mpl.get_data_path()) / "stylelib"
-    system_stylelib.mkdir(parents=True, exist_ok=True)
+    try:
+        system_stylelib.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        warning_(f"Failed to create system stylelib directory: {exc}")
 
     installed = False
 
     for src in style_files:
-        for dest_dir in (user_stylelib, system_stylelib):
-            dest = dest_dir / src.name
+        # Try user stylelib first
+        try:
+            dest = user_stylelib / src.name
             if not dest.exists():
                 import shutil
 
                 shutil.copy(src, dest)
-                debug_("Installed stylesheet %s → %s", src.name, dest_dir)
+                debug_("Installed stylesheet %s → %s", src.name, user_stylelib)
                 installed = True
+        except Exception as exc:
+            warning_(f"Failed to install stylesheet to user directory: {exc}")
+
+        # Try system stylelib separately
+        try:
+            dest = system_stylelib / src.name
+            if not dest.exists():
+                import shutil
+
+                shutil.copy(src, dest)
+                debug_("Installed stylesheet %s → %s", src.name, system_stylelib)
+                installed = True
+        except Exception as exc:
+            warning_(f"Failed to install stylesheet to system directory: {exc}")
 
     if installed:
         plt.style.reload_library()
