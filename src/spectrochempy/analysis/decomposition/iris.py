@@ -892,7 +892,7 @@ class IRIS(DecompositionAnalysis):
     @deprecated(
         replace="IRIS.f[index].plot",
         removed="0.9.0",
-        extra_msg='Use the plot method of the distribution function instead: IRIS.f[index].plot(methos="map")',
+        extra_msg='Use the plot method of the distribution function instead: IRIS.f[index].plot(method="map")',
     )
     def plotdistribution(
         self,
@@ -937,17 +937,27 @@ class IRIS(DecompositionAnalysis):
 
         Returns
         -------
-        `~matplotlib.axes.Axes` or `list` of `~matplotlib.axes.Axes`
-            The matplotlib axes. Returns a list for multiple indices,
-            single Axes for single index.
+        `~matplotlib.axes.Axes`
+            The matplotlib axes.
 
         """
         from spectrochempy.plotting.plot2d import plot_map
         from spectrochempy.utils.mplutils import show as mpl_show
 
-        show = kwargs.pop("show", True)
+        target = self.f if index is None else self.f[index]
 
-        ax = plot_map(self.f[index], show=False, **kwargs)
+        plot_kwargs = {
+            "show": False,
+            "clear": clear,
+            "ax": ax,
+            "title": title,
+            "cmap": cmap,
+            "cmap_mode": cmap_mode,
+            "center": center,
+        }
+        plot_kwargs.update(kwargs)
+
+        ax = plot_map(target, **plot_kwargs)
 
         if show:
             mpl_show()

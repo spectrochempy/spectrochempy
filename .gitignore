@@ -76,6 +76,9 @@ savefig
 .spyderproject
 .spyproject
 
+# Open code
+.opencode/
+
 ###############################
 # Operating System           #
 ###############################

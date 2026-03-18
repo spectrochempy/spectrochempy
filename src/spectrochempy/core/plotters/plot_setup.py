@@ -29,8 +29,6 @@ lazy_ensure_mpl_config() which happens on the first dataset.plot().
 This achieves the performance goal: 2.5+ second import time improvement.
 """
 
-import contextlib
-
 # NO matplotlib imports at module level!
 # These will be imported lazily when needed.
 
@@ -80,25 +78,31 @@ def lazy_ensure_mpl_config() -> None:
     """
     global _MPL_READY
 
-    # Fast path: already initialized
     if _MPL_READY:
         return
 
-    # Import matplotlib (this is the lazy part)
+    try:
+        import matplotlib  # noqa: F401
+    except Exception as exc:
+        raise ImportError(
+            "matplotlib is required for plotting but could not be imported. "
+            f"Original error: {exc}"
+        ) from exc
 
-    # Install assets once per process
     global _ASSETS_INSTALLED
     if not _ASSETS_INSTALLED:
-        with contextlib.suppress(Exception):
+        try:
             from spectrochempy.core.plotters._mpl_assets import (
                 ensure_mpl_assets_installed,
             )
 
-            with contextlib.suppress(Exception):
-                ensure_mpl_assets_installed()
-            _ASSETS_INSTALLED = True
+            ensure_mpl_assets_installed()
+        except Exception as exc:
+            raise RuntimeError(
+                "Failed to initialize matplotlib assets for SpectroChemPy plotting."
+            ) from exc
+        _ASSETS_INSTALLED = True
 
-    # Mark as ready
     _MPL_READY = True
 
 

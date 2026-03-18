@@ -91,25 +91,28 @@ def download_full_testdata_directory(datadir, force=False):
     #
     # Then recreate the internal structure inside `datadir`.
     # ------------------------------------------------------------------
-    with ZipFile(tmp_path) as zipfile:
-        for name in zipfile.namelist():
-            # Skip directories and non-testdata files
-            if name.endswith("/") or "testdata/" not in name:
-                continue
+    try:
+        with ZipFile(tmp_path) as zipfile:
+            for name in zipfile.namelist():
+                # Skip directories and non-testdata files
+                if name.endswith("/") or "testdata/" not in name:
+                    continue
 
-            # Read file contents from archive
-            uncompressed = zipfile.read(name)
+                # Read file contents from archive
+                uncompressed = zipfile.read(name)
 
-            # Remove first two path components:
-            # spectrochempy_data-master/<something>/...
-            p = list(Path(name).parts)[2:]
-            dst = datadir.joinpath("/".join(p))
+                # Remove first two path components:
+                # spectrochempy_data-master/<something>/...
+                p = list(Path(name).parts)[2:]
+                dst = datadir.joinpath("/".join(p))
 
-            # Ensure target directory exists
-            dst.parent.mkdir(parents=True, exist_ok=True)
+                # Ensure target directory exists
+                dst.parent.mkdir(parents=True, exist_ok=True)
 
-            # Write extracted file
-            dst.write_bytes(uncompressed)
+                # Write extracted file
+                dst.write_bytes(uncompressed)
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
 
     # ------------------------------------------------------------------
     # Mark download as completed
