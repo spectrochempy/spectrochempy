@@ -107,13 +107,6 @@ Verifying Installation
 
       In [1]: from spectrochempy import *
 
-   You should see:
-
-   .. code-block:: text
-
-      SpectroChemPy's API - v.0.6.10
-      © Copyright 2014-2025 - A.Travert & C.Fernandez @ LCS
-
 Next Steps
 ----------
 

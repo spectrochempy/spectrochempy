@@ -1,5 +1,5 @@
 # ======================================================================================
-# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -163,9 +163,9 @@ def _interferogram_fft(data):
 
     def _get_zpd(data, mode="max"):
         if mode == "max":
-            return np.argmax(data, -1)
+            return np.argmax(data, -1).item()
         if mode == "abs":
-            return int(np.argmax(np.abs(data), -1))
+            return int(np.argmax(np.abs(data), -1).item())
         return None
 
     zpd = _get_zpd(data, mode="abs")

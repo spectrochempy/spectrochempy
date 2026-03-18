@@ -1,5 +1,5 @@
 # ======================================================================================
-# Copyright (©) 2015-2025 LCS - Laboratoire Catalyse et Spectrochimie, Caen, France.
+# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
@@ -71,7 +71,7 @@ def test_models():
     pos = 0.5
     array = model.f(x3, ampl, pos, width, ratio, asym)
     assert hasattr(array, "units")
-    assert_approx_equal(array[500].m, max, significant=4)
+    assert_approx_equal(array[500].value.m, max, significant=4)
 
     # do the same for various models
     kwargs = dict(
