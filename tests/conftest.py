@@ -12,6 +12,7 @@ import matplotlib
 
 matplotlib.use("Agg", force=True)
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -20,13 +21,21 @@ import pytest
 import spectrochempy
 
 # ======================================================================================
-# LIGHTWEIGHT STATE GUARDS - Detect mutations without fixing them
+# OPTIONAL DIAGNOSTIC STATE GUARDS
 # ======================================================================================
+# These fixtures detect state leaks (env vars, rcParams, preferences).
+# They are DISABLED by default (set RUN_STATE_GUARDS=1 to enable).
+# Actual test isolation is handled by isolate_matplotlib_state fixture below.
+
+RUN_STATE_GUARDS = os.environ.get("SCP_TEST_GUARDS", "0") == "1"
 
 
 @pytest.fixture(autouse=True)
 def _matplotlib_state_guard(request):
     """Detect matplotlib state mutations (diagnostic only, no fixing)."""
+    if not RUN_STATE_GUARDS:
+        yield
+        return
 
     import sys
 
@@ -40,7 +49,6 @@ def _matplotlib_state_guard(request):
     rc_before = dict(mpl.rcParams)
     interactive_before = plt.isinteractive()
     fignums_before = list(plt.get_fignums())
-    print(f"=== {test_name} initial fignums: {fignums_before} ===", file=sys.stderr)
 
     yield  # test runs here
 
@@ -49,42 +57,45 @@ def _matplotlib_state_guard(request):
     interactive_after = plt.isinteractive()
     rc_after = dict(mpl.rcParams)
     fignums_after = list(plt.get_fignums())
-    print(f"=== {test_name} final fignums: {fignums_after} ===", file=sys.stderr)
 
-    # Report leaked figures (cleanup only)
-    if fignums_after != fignums_before:
+    # Report only if changes detected
+    leaked = fignums_after != fignums_before
+    backend_changed = backend_after != backend_before
+    interactive_changed = interactive_after != interactive_before
+    mutated = [k for k in rc_before if rc_before[k] != rc_after.get(k)]
+
+    if leaked:
         print(
             f"\n\n===== [STATE GUARD] {test_name}: Leaked figures: {fignums_after} (was: {fignums_before}) =====",
             file=sys.stderr,
         )
         plt.close("all")
 
-    if backend_after != backend_before:
+    if backend_changed:
         print(
             f"\n\n===== [STATE GUARD] {test_name}: Backend changed: {backend_before} -> {backend_after} =====",
             file=sys.stderr,
         )
 
-    if interactive_after != interactive_before:
+    if interactive_changed:
         print(
             f"\n\n===== [STATE GUARD] {test_name}: Interactive mode changed: {interactive_before} -> {interactive_after} =====",
             file=sys.stderr,
         )
 
-    mutated = [k for k in rc_before if rc_before[k] != rc_after.get(k)]
     if mutated:
         print(
             f"\n\n===== [STATE GUARD] {test_name}: rcParams mutated (first 10): {mutated[:10]} =====",
             file=sys.stderr,
         )
-    print(f"=== GUARD END: {test_name} ===\n", file=sys.stderr)
 
 
 @pytest.fixture(autouse=True)
 def guard_environment():
     """Guard against environment mutations (cwd, os.environ)."""
-    import os
-    from pathlib import Path
+    if not RUN_STATE_GUARDS:
+        yield
+        return
 
     old_env = dict(os.environ)
     old_cwd = Path.cwd()
@@ -92,10 +103,7 @@ def guard_environment():
     yield
 
     # Check for cwd change
-    if Path.cwd() != old_cwd:
-        print(
-            f"\n\n===== [ENV GUARD] Working directory changed: {old_cwd} -> {Path.cwd()} ====="
-        )
+    cwd_changed = Path.cwd() != old_cwd
 
     # Check for environ changes
     new_env = dict(os.environ)
@@ -103,6 +111,11 @@ def guard_environment():
     removed = set(old_env.keys()) - set(new_env.keys())
     changed = {k for k in old_env if k in new_env and old_env[k] != new_env[k]}
 
+    # Print only if changes detected
+    if cwd_changed:
+        print(
+            f"\n\n===== [ENV GUARD] Working directory changed: {old_cwd} -> {Path.cwd()} ====="
+        )
     if added:
         print(f"\n\n===== [ENV GUARD] Added env vars: {added} =====")
     if removed:
@@ -116,6 +129,10 @@ def guard_environment():
 @pytest.fixture(autouse=True)
 def _prefs_guard():
     """Detect SpectroChemPy preferences mutations (diagnostic only)."""
+    if not RUN_STATE_GUARDS:
+        yield
+        return
+
     from spectrochempy.application.preferences import preferences as prefs
 
     style_before = prefs.style
@@ -126,6 +143,7 @@ def _prefs_guard():
     style_after = prefs.style
     type_after = type(prefs.style)
 
+    # Print only if changes detected
     if style_before != style_after:
         print(
             f"\n[STATE GUARD] prefs.style changed: {style_before!r} -> {style_after!r}"
