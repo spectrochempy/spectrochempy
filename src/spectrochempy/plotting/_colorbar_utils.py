@@ -70,9 +70,16 @@ def _apply_colorbar_tick_policy(cbar, norm, vmin=None, vmax=None):
     from matplotlib.ticker import MaxNLocator
     from matplotlib.ticker import ScalarFormatter
 
-    # Get actual normalization limits from the mappable
-    actual_vmin = cbar.mappable.norm.vmin
-    actual_vmax = cbar.mappable.norm.vmax
+    # Get actual normalization limits - prefer passed norm, fall back to mappable's norm
+    if norm is not None and norm.vmin is not None:
+        actual_vmin = norm.vmin
+    else:
+        actual_vmin = cbar.mappable.norm.vmin
+
+    if norm is not None and norm.vmax is not None:
+        actual_vmax = norm.vmax
+    else:
+        actual_vmax = cbar.mappable.norm.vmax
 
     # Override with explicit vmin/vmax if provided
     if vmin is not None:

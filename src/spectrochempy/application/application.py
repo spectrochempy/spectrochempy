@@ -647,8 +647,13 @@ def _start_testdata_download():
     DOWNLOAD_TESTDATA.start()
 
 
-# Background threads are started lazily on first access
-# _maybe_start_background_threads() - called when needed
+# Start background threads based on environment conditions
+# (restore original behavior that was accidentally removed during refactor)
+_no_display, _, _is_pytest = _get_environment()
+if not _no_display:
+    _start_update_check()
+if not _is_pytest:
+    _start_testdata_download()
 
 
 # --------------------------------------------------------------------------------------

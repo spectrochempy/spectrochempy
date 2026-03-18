@@ -59,7 +59,9 @@ def plot_dataset(
     module_path = _BACKEND_REGISTRY[backend]
 
     # Lazy import of the backend module
-    backend_module = __import__(module_path, fromlist=["plot_dataset_impl"])
+    import importlib
+
+    backend_module = importlib.import_module(module_path)
     return backend_module.plot_dataset_impl(dataset, method, **kwargs)
 
 

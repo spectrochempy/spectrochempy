@@ -122,7 +122,7 @@ filter = scp.Filter(
     method="han", size=7
 )  # can also be one of 'hamming', 'bartlett', # 'blackman'.
 Xhan = filter(Xn)
-scp.plot_compare(Xn, Xsm, title="Hanning filter (7 points)")
+scp.plot_compare(Xn, Xhan, title="Hanning filter (7 points)")
 
 # %% [markdown]
 # ### Savitzky-Golay filter
@@ -152,7 +152,7 @@ filter = scp.Filter(
     method="savgol", size=5, order=0
 )  # default is size=5, order=2, deriv=0
 Xsgs = filter(Xn)
-scp.plot_compare(Xn, Xsm, title="Savitzky-Golay (5 points, order=0)")
+scp.plot_compare(Xn, Xsgs, title="Savitzky-Golay (5 points, order=0)")
 
 # %% [markdown]
 # As the `order` is set to 0, there is no much difference compared to a simple moving
@@ -168,7 +168,7 @@ scp.plot_compare(Xn, Xsm, title="Savitzky-Golay (5 points, order=0)")
 filter.order = 2
 filter.size = 7
 Xsm2 = filter(Xn)
-scp.plot_compare(Xn, Xsm, title="Savitzky-Golay (7 points, order=2)")
+scp.plot_compare(Xn, Xsm2, title="Savitzky-Golay (7 points, order=2)")
 
 
 # %% [markdown]
@@ -186,7 +186,7 @@ scp.plot_compare(Xn, Xsm, title="Savitzky-Golay (7 points, order=2)")
 # %%
 filter = scp.Filter(method="whittaker", order=2, lamb=1.5)
 Xwhit = filter(Xn)
-scp.plot_compare(Xn, Xsm, title="Whittaker-Eilers (order=2, lamb=1.5)")
+scp.plot_compare(Xn, Xwhit, title="Whittaker-Eilers (order=2, lamb=1.5)")
 
 
 # %% [markdown]

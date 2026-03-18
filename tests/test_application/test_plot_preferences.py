@@ -22,9 +22,7 @@ def test_plotpreferences(IR_dataset_2D):
             ".95"  # Make the graph background colored in a light gray
         )
         prefs.axes.grid = True
-        print(f"font before reset: {prefs.font.family}")
         prefs.reset()
-        print(f"font after reset: {prefs.font.family}")
         prefs.style = "grayscale"
         prefs.style = "ggplot"
         prefs.reset()

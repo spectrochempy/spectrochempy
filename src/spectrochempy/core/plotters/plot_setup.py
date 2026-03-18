@@ -50,9 +50,8 @@ def _is_mpl_initialized() -> bool:
 
 def _set_mpl_state(ready: bool) -> None:
     """Set matplotlib ready state."""
-    import spectrochempy.core.plotters.plot_setup
-
-    spectrochempy.core.plotters.plot_setup._MPL_READY = ready
+    global _MPL_READY
+    _MPL_READY = ready
 
 
 def _get_mpl_state() -> bool:
