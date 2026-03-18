@@ -16,7 +16,6 @@ from traitlets import signature_has_traits
 from traitlets import validate
 
 from spectrochempy.core.project.abstractproject import AbstractProject
-from spectrochempy.utils._logging import error_
 
 __all__ = ["Script", "run_script", "run_all_scripts"]
 
@@ -174,37 +173,37 @@ class Script(HasTraits):
 
     def execute(self, localvars=None):
         co = (
-            "from spectrochempy import *\nimport spectrochempy as scp\n" + self._content
+            "from spectrochempy import (\n"
+            "    DEBUG, INFO, WARNING, ERROR, CRITICAL,\n"
+            "    error_, info_, debug_, warning_,\n"
+            "    set_loglevel, get_loglevel, NO_DISPLAY, get_config_dir,\n"
+            ")\n"
+            "import spectrochempy as scp\n" + self._content
         )
         code = compile(co, "<string>", "exec")
-        if localvars is None:
-            # locals was not passed, try to avoid missing values for name
-            # such as 'project', 'proj', 'newproj'...
-            # other missing name if they correspond to the parent project
-            # will be subtitued latter upon exception
-            localvars = locals()
-            # localvars['proj']=self.parent
-            # localvars['project']=self.parent
+
+        namespace = globals().copy()
+        if localvars:
+            namespace.update(localvars)
 
         try:
-            exec(code, globals(), localvars)  # noqa: S102
-            return
-
+            exec(code, namespace)  # noqa: S102
         except NameError as e:
-            # most of the time, a script apply to a project
-            # let's try to substitute the parent to the missing name
             regex = re.compile(r"'(\w+)'")
-            s = regex.search(e.args[0]).group(1)
-            localvars[s] = self.parent  # lgtm[py/modification-of-locals]
-            # TODO: check if this a real error or not  (need to come
-            #  back on this later)
-        try:
-            exec(code, globals(), localvars)  # noqa: S102
-        except NameError as e:
-            error_(
-                str(e)
-                + ". pass the variable `locals()` : this may solve this problem! "
-            )
+            match = regex.search(e.args[0])
+            if match:
+                name = match.group(1)
+                if self.parent is not None and name in (
+                    "proj",
+                    "project",
+                    "newproj",
+                    "p",
+                ):
+                    namespace[name] = self.parent
+                    exec(code, namespace)  # noqa: S102
+
+        if localvars is not None:
+            localvars.update(namespace)
 
 
 def run_script(script, localvars=None):
