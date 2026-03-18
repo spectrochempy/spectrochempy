@@ -647,13 +647,9 @@ def _start_testdata_download():
     DOWNLOAD_TESTDATA.start()
 
 
-# Start background threads based on environment conditions
-# (restore original behavior that was accidentally removed during refactor)
-_no_display, _, _is_pytest = _get_environment()
-if not _no_display:
-    _start_update_check()
-if not _is_pytest:
-    _start_testdata_download()
+# Background threads were previously started at module level but have been
+# removed to avoid loading matplotlib at import time (lazy loading goal).
+# The functions are kept for potential future use but are not called.
 
 
 # --------------------------------------------------------------------------------------
