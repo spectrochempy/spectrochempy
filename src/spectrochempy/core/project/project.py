@@ -143,12 +143,12 @@ class Project(AbstractProject, NDIO):
 
         if "/" in key:
             # Case of composed name (we assume not more than one level subproject
-            parent = key.split("/")[0]
+            parent, child = key.split("/")[0], key.split("/")[1]
             if parent in self.projects_names:
-                if key in self._projects[parent].datasets_names:
-                    return self._projects[parent]._datasets[key]
-                if key in self._projects[parent].scripts_names:
-                    return self._projects[parent]._scripts[key]
+                if child in self._projects[parent].datasets_names:
+                    return self._projects[parent]._datasets[child]
+                if child in self._projects[parent].scripts_names:
+                    return self._projects[parent]._scripts[child]
         if key in self.datasets_names:
             return self._datasets[key]
         if key in self.projects_names:
