@@ -211,26 +211,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         allow_none=True,
     )
 
-    # For the GUI interface
-
-    # parameters state
-    # _state = Dict()
-
-    # processed data (for GUI)
-    # _processeddata = Array(Float(), allow_none=True)
-
-    # processed mask (for GUI)
-    # _processedmask = Union((Bool(), Array(Bool()), Instance(MaskedConstant)))
-
-    # baseline data (for GUI)
-    # _baselinedata = Array(Float(), allow_none=True)
-
-    # reference data (for GUI)
-    # _referencedata = Array(Float(), allow_none=True)
-
-    # ranges
-    # _ranges = Instance(Meta)
-
     # history
     _history = tr.List(tr.Tuple(), allow_none=True)
 
@@ -528,11 +508,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "origin",
             "roi",
             "modeldata",
-            "processeddata",
-            "baselinedata",
-            "referencedata",
-            "state",
-            "ranges",
         ):
             # These attributes are not used for comparison (comparison based on data and units!)
             with suppress(ValueError):
@@ -554,25 +529,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
     @tr.default("_modeldata")
     def _modeldata_default(self):
         return None
-
-    # @tr.default("_processeddata")
-    # def _processeddata_default(self):
-    #     return None
-    #
-    # @tr.default("_baselinedata")
-    # def _baselinedata_default(self):
-    #     return None
-    #
-    # @tr.default("_referencedata")
-    # def _referencedata_default(self):
-    #     return None
-    #
-    # @tr.default("_ranges")
-    # def _ranges_default(self):
-    #     ranges = Meta()
-    #     for dim in self.dims:
-    #         ranges[dim] = dict(masks={}, baselines={}, integrals={}, others={})
-    #     return ranges
 
     @tr.default("_timezone")
     def _timezone_default(self):
@@ -1720,128 +1676,6 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             "Use the returned axes from plot() instead."
         )
 
-    # # ----------------------------------------------------------------------------------
-    # # DASH GUI options  (Work in Progress - not used for now)
-    # # ----------------------------------------------------------------------------------
-    # #
-    # # TODO: refactor the spectrochempy preference system to have a common basis
-    #
-    #
-    # @property
-    # def ranges(self):
-    #     return self._ranges
-    #
-    # @ranges.setter
-    # def ranges(self, value):
-    #     self._ranges = value
-    #
-    # @property
-    # def state(self):
-    #     """
-    #     State of the controller window for this dataset.
-    #     """
-    #     return self._state
-    #
-    # @state.setter
-    # def state(self, val):
-    #     self._state = val
-    #
-    # @property
-    # def processeddata(self):
-    #     """
-    #     Data after processing (optionaly used).
-    #     """
-    #     return self._processeddata
-    #
-    # @processeddata.setter
-    # def processeddata(self, val):
-    #     self._processeddata = val
-    #
-    # @property
-    # def processedmask(self):
-    #     """
-    #     Mask for the optional processed data.
-    #     """
-    #     return self._processedmask
-    #
-    # @processedmask.setter
-    # def processedmask(self, val):
-    #     self._processedmask = val
-    #
-    # @property
-    # def baselinedata(self):
-    #     """
-    #     Data for an optional baseline.
-    #     """
-    #     return self._baselinedata
-    #
-    # @baselinedata.setter
-    # def baselinedata(self, val):
-    #     self._baselinedata = val
-    #
-    # @property
-    # def referencedata(self):
-    #     """
-    #     Data for an optional reference spectra.
-    #     """
-    #     return self._referencedata
-    #
-    # @referencedata.setter
-    # def referencedata(self, val):
-    #     self._referencedata = val
-
-
-# # ======================================================================================
-# # module function
-# # ======================================================================================
-# # make some NDDataset operation accessible from the spectrochempy API
-# thismodule = sys.modules[__name__]
-
-# api_funcs = [
-#     "sort",
-#     "copy",
-#     "squeeze",
-#     "swapdims",
-#     "transpose",
-#     "to_array",
-#     "to_xarray",
-#     "take",
-#     "set_complex",
-#     "to",
-#     "to_base_units",
-#     "to_reduced_units",
-#     "ito",
-#     "ito_base_units",
-#     "ito_reduced_units",
-#     "is_units_compatible",
-#     "remove_masks",
-# ]
-
-# for funcname in api_funcs:
-#     setattr(thismodule, funcname, getattr(NDDataset, funcname))
-#     __all__.append(funcname)
-
-# # # Add also _lazy_dataset_methods methods to the module
-# # from spectrochempy.lazyimport.dataset_methods import _LAZY_DATASETS_IMPORTS
-# # import importlib
-
-# # for funcname in _LAZY_DATASETS_IMPORTS:
-# #     module_path = _LAZY_DATASETS_IMPORTS[funcname]
-# #     module = __import__(module_path, fromlist=[funcname])
-# #     attr = getattr(module, funcname)
-# #     setattr(thismodule, funcname, attr)
-# #     __all__.append(funcname)  THIS LEADS TO CIRCULAR IMPORT!
-
-# # import also npy functions  # TODO: this will be changed with __array_functions__
-# from spectrochempy.processing.transformation.npy import dot
-
-# NDDataset.dot = dot
-
-# api_funcs = [
-#     "set_quaternion",
-#     "set_hypercomplex",
-#     "component",
-# ]
 
 # ======================================================================================
 # Set the operators
