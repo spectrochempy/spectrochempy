@@ -11,6 +11,7 @@ New Features
 
 - The welcome message display functionality has been removed.
 - Implemented lazy matplotlib initialization: SpectroChemPy now loads matplotlib only when plotting is actually used, reducing import-time overhead for non-plotting workflows.
+- Full interpolation feature for NDDataset (issue #673)
 
 Bug Fixes
 ~~~~~~~~~
