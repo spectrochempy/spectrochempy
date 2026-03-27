@@ -685,7 +685,7 @@ class NDMath:
         "Evenly round to the given number of decimals.\n\nEquivalent to around."
     )
     round_ = around
-    round.__doc__ = (
+    round_.__doc__ = (
         "Evenly round to the given number of decimals.\n\nEquivalent to around."
     )
 
@@ -3240,64 +3240,7 @@ def _get_op(name):
     return getattr(operator, _op_str(name))
 
 
-class _ufunc:
-    def __init__(self, name):
-        self.name = name
-        self.ufunc = getattr(np, name)
-
-    def __call__(self, *args, **kwargs):
-        return self.ufunc(*args, **kwargs)
-
-    @property
-    def __doc__(self):
-        return f"""
-            {_unary_ufuncs()[self.name].split("->")[-1].strip()}
-
-            Wrapper of the numpy.ufunc function `np.{self.name}(dataset)`.
-
-            Parameters
-            ----------
-            dataset : array-like
-                Object to pass to the numpy function.
-
-            Returns
-            -------
-            out
-                `NDDataset`
-
-            See Also
-            --------
-            numpy.{self.name} : Corresponding numpy Ufunc.
-
-            Notes
-            -----
-            Numpy Ufuncs referenced in our documentation can be directly applied to
-            `NDDataset` or `Coord` type of SpectroChemPy objects.
-            Most of these Ufuncs, however, instead of returning a numpy array, will
-            return the same type of object.
-
-            Examples
-            --------
-
-            >>> ds = scp.read('wodger.spg')
-            >>> ds_transformed = scp.{self.name}(ds)
-
-            Numpy Ufuncs can also be transparently applied directly to SpectroChemPy
-            object
-
-            >>> ds_transformed = np.{self.name}(ds)
-            """
-
-
 thismodule = sys.modules[__name__]
-
-
-# def _set_ufuncs(cls):
-#     for func in _unary_ufuncs():
-#         # setattr(cls, func, _ufunc(func))
-#         setattr(thismodule, func, _ufunc(func))
-#         thismodule.__all__ += [func]
-# TODO: make NDDataset method instead
 
 
 def _set_operators(cls, priority=50):
