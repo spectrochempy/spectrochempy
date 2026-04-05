@@ -1,0 +1,19 @@
+What's new in revision 0.2.14 [2021-02-25]
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.2.14. See :ref:`release` for a full changelog
+including other versions of SpectroChemPy.
+
+New features
+~~~~~~~~~~~~
+
+-  A default coordinate can now be selected for multiple coordinates
+   dimensions.
+
+
+Bug fixes
+~~~~~~~~~
+
+-  Alignment along several dimensions (issue #248)
+-  to() and ito() methods to work correctly (issue #255)
+-  Baseline correction works on all dimensions
