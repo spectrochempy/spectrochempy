@@ -381,12 +381,70 @@ class TestPSD:
         assert np.all(phase.data <= 2.0 * np.pi + 1e-6)
         assert phase.units == "radian"
 
-        # ----------------------------------------------------------------------------------
-        # Average cycles tests
-        # ----------------------------------------------------------------------------------
-        ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
+    # ----------------------------------------------------------------------------------
+    # Time coordinate handling tests
+    # ----------------------------------------------------------------------------------
+    def test_psd_raw_2d_time_coord(self):
+        """Test raw 2D input with explicit time coordinate."""
+        n_cycles = 4
+        n_spectra = 30
+        n_wavenumbers = 100
+
+        # Create time coordinate for all cycles
+        # Each cycle: 0.0, 0.1, 0.2, ..., 2.9 (total 3.0 per cycle)
+        cycle_time = np.linspace(0.0, 2.9, n_spectra)
+        full_time = np.concatenate([cycle_time + i * 3.0 for i in range(n_cycles)])
+
+        data = np.random.rand(n_cycles * n_spectra, n_wavenumbers)
+        ds = NDDataset(data)
+        ds.set_coordset(
+            y=Coord(full_time, title="time", units="s"),
+            x=Coord(np.arange(n_wavenumbers), title="wavenumber", units="cm^-1"),
+        )
 
         psd = PSD(
-            input_mode="grouped",
-            method="matrix",
+            n_spectra_per_cycle=n_spectra,
+            input_mode="raw",
         )
+        psd.fit(ds)
+
+        # T should have time axis length = n_spectra
+        assert psd.T.shape[1] == n_spectra
+
+        # T time coordinate should equal averaged relative time
+        # Expected: cycle_time (0.0 to 2.9)
+        expected_time = cycle_time
+        actual_time = psd.T.coordset.x.data
+        np.testing.assert_allclose(actual_time, expected_time, rtol=1e-5)
+
+        # Verify psd output is correct shape
+        assert psd.psd.shape[0] == len(psd._get_phi())
+        assert psd.psd.shape[1] == n_wavenumbers
+
+    def test_psd_grouped_3d_time_coord(self, grouped_3d):
+        """Test grouped 3D input preserves time coordinate."""
+        ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
+
+        psd = PSD(input_mode="grouped")
+        psd.fit(ds)
+
+        # T should have time axis length = n_spectra
+        assert psd.T.shape[1] == n_spectra
+
+        # Time coord should match the input time coord (from grouped_3d fixture)
+        input_time = ds.coordset.y.data  # y is time axis in grouped_3d fixture
+        actual_time = psd.T.coordset.x.data
+        np.testing.assert_allclose(actual_time, input_time)
+
+    def test_psd_averaged_2d_time_coord(self, averaged_2d):
+        """Test averaged 2D input preserves time coordinate."""
+        ds, n_spectra, n_wavenumbers = averaged_2d
+
+        psd = PSD(
+            n_spectra_per_cycle=n_spectra,
+            input_mode="averaged",
+        )
+        psd.fit(ds)
+
+        # T should have time axis length = n_spectra
+        assert psd.T.shape[1] == n_spectra

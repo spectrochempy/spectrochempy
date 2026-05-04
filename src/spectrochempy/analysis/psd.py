@@ -398,10 +398,24 @@ class PSD(AnalysisConfigurable):
             elif ndim == 2:
                 dim_names = X.dims
                 if len(dim_names) >= 2:
-                    # First dim is either cycle or time depending on input_mode
                     if input_mode == "raw":
-                        # Create time coord from the first dim
-                        time_coord = X.coordset[dim_names[0]].copy()
+                        # For raw input, extract time coord from first dim
+                        # and compute averaged relative time across cycles
+                        full_time_coord = X.coordset[dim_names[0]]
+                        # Reshape to (n_cycles, n_spectra_per_cycle)
+                        full_time_data = full_time_coord.data.reshape(
+                            n_cycles, n_spectra_per_cycle
+                        )
+                        # Convert to relative time (subtract first time in each cycle)
+                        times_rel = full_time_data - full_time_data[:, [0]]
+                        # Average over cycles
+                        ave_rel_times = np.mean(times_rel, axis=0)
+                        # Create new time coordinate
+                        time_coord = Coord(
+                            ave_rel_times,
+                            title=full_time_coord.title or "time",
+                            units=full_time_coord.units,
+                        )
                         spectral_coord = X.coordset[dim_names[1]].copy()
                     else:  # averaged
                         time_coord = X.coordset[dim_names[0]].copy()
@@ -409,8 +423,9 @@ class PSD(AnalysisConfigurable):
 
         # Create time coordinate if not available
         if time_coord is None:
+            # Prefer linspace(0, 1, n_spectra) to include both 0 and 1
             time_coord = Coord(
-                np.arange(n_spectra) / n_spectra,
+                np.linspace(0.0, 1.0, n_spectra),
                 title="time",
                 units=None,
             )
