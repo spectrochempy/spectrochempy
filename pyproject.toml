@@ -51,6 +51,7 @@ requires-python = ">=3.10"
 [project.optional-dependencies]
 build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
 cantera = ["cantera"]
+cp = ["tensorly"]
 dev = [
   "toml",
   "ruff",

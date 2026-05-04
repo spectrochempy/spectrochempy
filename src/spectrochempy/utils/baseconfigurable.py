@@ -126,7 +126,12 @@ class BaseConfigurable(MetaConfigurable):
         # if an item k is not in the config parameters, an error is raised.
         for k, v in configkw.items():
             if hasattr(self, k) and k in defaults:
-                if getattr(self, k) != v:
+                current = getattr(self, k)
+                # Handle array comparison
+                if isinstance(current, np.ndarray) or isinstance(v, np.ndarray):
+                    if not np.array_equal(current, v):
+                        setattr(self, k, v)
+                elif current != v:
                     setattr(self, k, v)
             else:
                 raise KeyError(
