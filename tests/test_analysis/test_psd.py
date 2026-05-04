@@ -110,7 +110,7 @@ class TestPSD:
         )
         psd.fit(ds)
 
-        assert psd.psd is not None
+        assert psd.prs is not None
         assert psd._n_cycles == n_cycles
         assert psd._n_spectra == n_spectra
         assert psd._n_wavenumbers == n_wavenumbers
@@ -122,7 +122,7 @@ class TestPSD:
         psd = PSD(input_mode="grouped")
         psd.fit(ds)
 
-        assert psd.psd is not None
+        assert psd.prs is not None
         assert psd._n_cycles == n_cycles
         assert psd._n_spectra == n_spectra
         assert psd._n_wavenumbers == n_wavenumbers
@@ -137,7 +137,7 @@ class TestPSD:
         )
         psd.fit(ds)
 
-        assert psd.psd is not None
+        assert psd.prs is not None
         assert psd._n_cycles == 1
         assert psd._n_spectra == n_spectra
         assert psd._n_wavenumbers == n_wavenumbers
@@ -248,8 +248,8 @@ class TestPSD:
         )
         psd.fit(ds)
 
-        assert psd.psd.shape[0] == len(psd._get_phi())
-        assert psd.psd.shape[1] == n_wavenumbers
+        assert psd.prs.shape[0] == len(psd._get_phi())
+        assert psd.prs.shape[1] == n_wavenumbers
 
     def test_psd_integration_method_output(self, grouped_3d):
         """Test integration method output shape and coords."""
@@ -261,8 +261,8 @@ class TestPSD:
         )
         psd.fit(ds)
 
-        assert psd.psd.shape[0] == len(psd._get_phi())
-        assert psd.psd.shape[1] == n_wavenumbers
+        assert psd.prs.shape[0] == len(psd._get_phi())
+        assert psd.prs.shape[1] == n_wavenumbers
 
     def test_psd_matrix_vs_integration(self, grouped_3d):
         """Test matrix method approximately matches integration method."""
@@ -289,8 +289,8 @@ class TestPSD:
         # The two methods use slightly different numerical approaches,
         # so we allow a small absolute tolerance
         np.testing.assert_allclose(
-            psd_matrix.psd.data,
-            psd_int.psd.data,
+            psd_matrix.prs.data,
+            psd_int.prs.data,
             atol=1e-3,  # Absolute tolerance for numerical method differences
             err_msg="Matrix and integration methods give different results",
         )
@@ -418,8 +418,8 @@ class TestPSD:
         np.testing.assert_allclose(actual_time, expected_time, rtol=1e-5)
 
         # Verify psd output is correct shape
-        assert psd.psd.shape[0] == len(psd._get_phi())
-        assert psd.psd.shape[1] == n_wavenumbers
+        assert psd.prs.shape[0] == len(psd._get_phi())
+        assert psd.prs.shape[1] == n_wavenumbers
 
     def test_psd_grouped_3d_time_coord(self, grouped_3d):
         """Test grouped 3D input preserves time coordinate."""
@@ -472,7 +472,7 @@ class TestPSD:
         psd.fit(ds)
 
         # Check that spectral coordinate is preserved in all outputs
-        np.testing.assert_allclose(psd.psd.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.prs.coordset.x.data, spectral_values)
         np.testing.assert_allclose(psd.in_phase.coordset.x.data, spectral_values)
         np.testing.assert_allclose(psd.quadrature.coordset.x.data, spectral_values)
         np.testing.assert_allclose(psd.amplitude.coordset.x.data, spectral_values)
@@ -494,7 +494,7 @@ class TestPSD:
         psd.fit(ds)
 
         # Check that spectral coordinate is preserved in all outputs
-        np.testing.assert_allclose(psd.psd.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.prs.coordset.x.data, spectral_values)
         np.testing.assert_allclose(psd.in_phase.coordset.x.data, spectral_values)
         np.testing.assert_allclose(psd.quadrature.coordset.x.data, spectral_values)
         np.testing.assert_allclose(psd.amplitude.coordset.x.data, spectral_values)

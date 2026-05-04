@@ -62,8 +62,8 @@ class PSD(AnalysisConfigurable):
         Dims: ["y", "x"] where y=phi angles, x=time/spectra.
     period : float
         Modulation period (from time coordinate).
-    psd : NDDataset
-        Main PSD result with shape (n_phi, n_wavenumbers) and dims ["y", "x"].
+    prs : NDDataset
+        Phase-resolved spectra (PRS) with shape (n_phi, n_wavenumbers) and dims ["y", "x"].
     in_phase : NDDataset
         In-phase component (phi=0°) with shape (n_wavenumbers,).
     quadrature : NDDataset
@@ -200,7 +200,7 @@ class PSD(AnalysisConfigurable):
     # Runtime Parameters
     # ----------------------------------------------------------------------------------
     _T = tr.Instance(NDDataset, allow_none=True, help="Transform matrix.")
-    _psd = tr.Instance(NDDataset, allow_none=True, help="Demodulated spectra.")
+    _prs = tr.Instance(NDDataset, allow_none=True, help="Phase-resolved spectra.")
     _in_phase = tr.Instance(NDDataset, allow_none=True, help="In-phase component.")
     _quadrature = tr.Instance(NDDataset, allow_none=True, help="Quadrature component.")
     _amplitude = tr.Instance(NDDataset, allow_none=True, help="Amplitude.")
@@ -570,7 +570,7 @@ class PSD(AnalysisConfigurable):
         Returns
         -------
         np.ndarray
-            PSD result.
+            Phase-resolved spectra (PRS) result.
         """
         n = self._n_spectra
         phi = self._get_phi()
@@ -648,7 +648,7 @@ class PSD(AnalysisConfigurable):
         Parameters
         ----------
         X : NDDataset or array-like
-            Input data for PSD.
+            Input data for PRS.
         Y : None
             Ignored, present for API compatibility.
 
@@ -706,7 +706,7 @@ class PSD(AnalysisConfigurable):
         psd.title = f"PSD of {X.title if hasattr(X, 'title') else 'data'}"
         psd.history = "Created by SpectroChemPy PSD"
 
-        self._psd = psd
+        self._prs = psd
 
         # Extract in_phase (phi=0°), quadrature (phi=90°), amplitude, phase
         self._extract_components()
@@ -734,21 +734,21 @@ class PSD(AnalysisConfigurable):
         idx_90 = idx_90[0]
 
         # psd shape: (n_phi, n_wavenumbers)
-        in_phase_data = self._psd.data[idx_0, :]
-        quadrature_data = self._psd.data[idx_90, :]
+        in_phase_data = self._prs.data[idx_0, :]
+        quadrature_data = self._prs.data[idx_90, :]
 
         # Create NDDatasets
         in_phase = NDDataset(in_phase_data)
         in_phase.dims = ["x"]
-        in_phase.set_coordset(x=self._psd.coordset["x"].copy())
-        in_phase.units = self._psd.units
+        in_phase.set_coordset(x=self._prs.coordset["x"].copy())
+        in_phase.units = self._prs.units
         in_phase.title = "In-phase component (0°)"
         in_phase.history = "Created by SpectroChemPy PSD"
 
         quadrature = NDDataset(quadrature_data)
         quadrature.dims = ["x"]
-        quadrature.set_coordset(x=self._psd.coordset["x"].copy())
-        quadrature.units = self._psd.units
+        quadrature.set_coordset(x=self._prs.coordset["x"].copy())
+        quadrature.units = self._prs.units
         quadrature.title = "Quadrature component (90°)"
         quadrature.history = "Created by SpectroChemPy PSD"
 
@@ -787,7 +787,7 @@ class PSD(AnalysisConfigurable):
         Parameters
         ----------
         X : NDDataset or array-like
-            Input data for PSD.
+            Input data for PRS.
         Y : None
             Ignored, present for API compatibility.
 
@@ -814,23 +814,23 @@ class PSD(AnalysisConfigurable):
         Parameters
         ----------
         X : NDDataset or array-like
-            Input data for PSD.
+            Input data for PRS.
 
         Returns
         -------
-        NDDataset
-            PSD result.
+        np.ndarray
+            Phase-resolved spectra (PRS) result.
         """
         if not self._fitted:
             raise NotFittedError("The fit method must be used before using transform()")
 
-        # For PSD, transform essentially re-computes with same parameters
+        # For PRS, transform re-computes with same parameters
         # but on new data
         old_X = self._X
         self._X = X
         self._fit(X, None)
         # Return the psd from this new fit
-        result = self._psd
+        result = self._prs
         # Restore original data
         self._X = old_X
         return result
@@ -849,10 +849,10 @@ class PSD(AnalysisConfigurable):
         Returns
         -------
         NDDataset
-            PSD result.
+            Phase-resolved spectra (PRS).
         """
         self.fit(X)
-        return self.psd
+        return self.prs
 
     def inverse_transform(self, X_transform=None, **kwargs):
         """
@@ -861,10 +861,10 @@ class PSD(AnalysisConfigurable):
         Raises
         ------
         NotImplementedError
-            Always raised as PSD is not invertible.
+            Always raised as PRS is not invertible.
         """
         raise NotImplementedError(
-            "PSD is not invertible. inverse_transform() is not supported."
+            "PRS is not invertible. inverse_transform() is not supported."
         )
 
     # ----------------------------------------------------------------------------------
@@ -878,11 +878,11 @@ class PSD(AnalysisConfigurable):
         return self._T
 
     @property
-    def psd(self):
-        """Return the demodulated spectra."""
+    def prs(self):
+        """Return the phase-resolved spectra (PRS)."""
         if not self._fitted:
-            raise NotFittedError("The fit method must be used to get psd")
-        return self._psd
+            raise NotFittedError("The fit method must be used to get prs")
+        return self._prs
 
     @property
     def in_phase(self):
