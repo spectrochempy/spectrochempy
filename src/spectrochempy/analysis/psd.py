@@ -691,11 +691,15 @@ class PSD(AnalysisConfigurable):
         psd = NDDataset(psd_data, dims=["y", "x"])
         # Create fresh coords to avoid dimension mismatch
         y_coord = Coord(self._get_phi(), title="y", units="degrees")
-        x_coord = Coord(
-            np.arange(self._n_wavenumbers),
-            title=spectral_coord.title if spectral_coord else "wavenumber",
-            units=spectral_coord.units if spectral_coord else None,
-        )
+        # Preserve spectral coordinate from input
+        if spectral_coord is not None:
+            x_coord = spectral_coord.copy()
+        else:
+            x_coord = Coord(
+                np.arange(self._n_wavenumbers),
+                title="wavenumber",
+                units=None,
+            )
         psd.set_coordset(y=y_coord, x=x_coord)
 
         psd.units = X.units if hasattr(X, "units") else None

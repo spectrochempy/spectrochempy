@@ -448,3 +448,54 @@ class TestPSD:
 
         # T should have time axis length = n_spectra
         assert psd.T.shape[1] == n_spectra
+
+    def test_psd_spectral_coord_preservation_raw_2d(self):
+        """Test spectral coordinate is preserved for raw 2D input."""
+        n_cycles = 4
+        n_spectra = 30
+        n_wavenumbers = 100
+
+        # Create spectral coordinate with non-trivial values (7000-8200)
+        spectral_values = np.linspace(7000, 8200, n_wavenumbers)
+
+        data = np.random.rand(n_cycles * n_spectra, n_wavenumbers)
+        ds = NDDataset(data)
+        ds.set_coordset(
+            y=Coord(np.arange(n_cycles * n_spectra), title="time", units="s"),
+            x=Coord(spectral_values, title="wavenumber", units="cm^-1"),
+        )
+
+        psd = PSD(
+            n_spectra_per_cycle=n_spectra,
+            input_mode="raw",
+        )
+        psd.fit(ds)
+
+        # Check that spectral coordinate is preserved in all outputs
+        np.testing.assert_allclose(psd.psd.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.in_phase.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.quadrature.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.amplitude.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.phase.coordset.x.data, spectral_values)
+
+    def test_psd_spectral_coord_preservation_grouped_3d(self, grouped_3d):
+        """Test spectral coordinate is preserved for grouped 3D input."""
+        ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
+
+        # Add non-trivial spectral coordinate
+        spectral_values = np.linspace(7000, 8200, n_wavenumbers)
+        ds.set_coordset(
+            z=ds.coordset.z,
+            y=ds.coordset.y,
+            x=Coord(spectral_values, title="wavenumber", units="cm^-1"),
+        )
+
+        psd = PSD(input_mode="grouped")
+        psd.fit(ds)
+
+        # Check that spectral coordinate is preserved in all outputs
+        np.testing.assert_allclose(psd.psd.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.in_phase.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.quadrature.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.amplitude.coordset.x.data, spectral_values)
+        np.testing.assert_allclose(psd.phase.coordset.x.data, spectral_values)
