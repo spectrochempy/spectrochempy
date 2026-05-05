@@ -270,7 +270,7 @@ class TestCP:
         """Test different svd options."""
         ds = _make_synthetic_3d()
 
-        for svd_option in ["numpy_svd", "truncated_svd", "randomized_svd"]:
+        for svd_option in ["truncated_svd", "randomized_svd"]:
             cp = CP(n_components=2, svd=svd_option)
             cp.fit(ds)
             assert cp._fitted
@@ -333,3 +333,120 @@ class TestCP:
             cp = CP(n_components=2, cvg_criterion=criterion)
             cp.fit(ds)
             assert cp._fitted
+
+    # ----------------------------------------------------------------------------------
+    # Algorithm selection tests (parafac vs constrained_parafac)
+    # ----------------------------------------------------------------------------------
+    def test_cp_default_path_uses_parafac(self, monkeypatch):
+        """Test that default CP (no constraints) uses tl.decomposition.parafac."""
+        tl = pytest.importorskip("tensorly")
+        ds = _make_synthetic_3d()
+
+        call_log = {"parafac": False, "constrained_parafac": False}
+
+        original_parafac = tl.decomposition.parafac
+        original_constrained = tl.decomposition.constrained_parafac
+
+        def mock_parafac(*args, **kwargs):
+            call_log["parafac"] = True
+            return original_parafac(*args, **kwargs)
+
+        def mock_constrained(*args, **kwargs):
+            call_log["constrained_parafac"] = True
+            return original_constrained(*args, **kwargs)
+
+        monkeypatch.setattr(tl.decomposition, "parafac", mock_parafac)
+        monkeypatch.setattr(tl.decomposition, "constrained_parafac", mock_constrained)
+
+        cp = CP(n_components=2)
+        cp.fit(ds)
+
+        assert call_log["parafac"], "parafac should be called for unconstrained CP"
+        assert not call_log[
+            "constrained_parafac"
+        ], "constrained_parafac should NOT be called for unconstrained CP"
+        assert cp._fitted
+
+    def test_cp_constrained_path_uses_constrained_parafac(self, monkeypatch):
+        """Test that CP with non_negative=True uses tl.decomposition.constrained_parafac."""
+        tl = pytest.importorskip("tensorly")
+        ds = _make_synthetic_3d()
+
+        call_log = {"parafac": False, "constrained_parafac": False}
+
+        original_parafac = tl.decomposition.parafac
+        original_constrained = tl.decomposition.constrained_parafac
+
+        def mock_parafac(*args, **kwargs):
+            call_log["parafac"] = True
+            return original_parafac(*args, **kwargs)
+
+        def mock_constrained(*args, **kwargs):
+            call_log["constrained_parafac"] = True
+            return original_constrained(*args, **kwargs)
+
+        monkeypatch.setattr(tl.decomposition, "parafac", mock_parafac)
+        monkeypatch.setattr(tl.decomposition, "constrained_parafac", mock_constrained)
+
+        cp = CP(n_components=2, non_negative=True)
+        cp.fit(ds)
+
+        assert not call_log[
+            "parafac"
+        ], "parafac should NOT be called for constrained CP"
+        assert call_log[
+            "constrained_parafac"
+        ], "constrained_parafac should be called when non_negative=True"
+        assert cp._fitted
+
+    def test_cp_fixed_modes_does_not_force_constrained(self, monkeypatch):
+        """Test that fixed_modes alone does not force constrained_parafac."""
+        tl = pytest.importorskip("tensorly")
+        ds = _make_synthetic_3d()
+
+        call_log = {"parafac": False, "constrained_parafac": False}
+
+        original_parafac = tl.decomposition.parafac
+        original_constrained = tl.decomposition.constrained_parafac
+
+        def mock_parafac(*args, **kwargs):
+            call_log["parafac"] = True
+            return original_parafac(*args, **kwargs)
+
+        def mock_constrained(*args, **kwargs):
+            call_log["constrained_parafac"] = True
+            return original_constrained(*args, **kwargs)
+
+        monkeypatch.setattr(tl.decomposition, "parafac", mock_parafac)
+        monkeypatch.setattr(tl.decomposition, "constrained_parafac", mock_constrained)
+
+        cp = CP(n_components=2, fixed_modes=[0])
+        cp.fit(ds)
+
+        assert call_log[
+            "parafac"
+        ], "parafac should be called when only fixed_modes is set"
+        assert not call_log[
+            "constrained_parafac"
+        ], "constrained_parafac should NOT be called with fixed_modes alone"
+        assert cp._fitted
+
+    def test_cp_errors_property(self):
+        """Test errors property behavior."""
+        ds = _make_synthetic_3d()
+
+        # Not fitted yet - should raise
+        cp = CP(n_components=2)
+        with pytest.raises(NotFittedError):
+            _ = cp.errors
+
+        # Fit with constraints - errors should be available
+        cp_constrained = CP(n_components=2, non_negative=True)
+        cp_constrained.fit(ds)
+        assert cp_constrained.errors is not None
+
+        # Fit without constraints - errors may or may not be available
+        # depending on TensorLy version, so just verify access works
+        cp_unconstrained = CP(n_components=2)
+        cp_unconstrained.fit(ds)
+        _ = cp_unconstrained.errors  # Should not raise

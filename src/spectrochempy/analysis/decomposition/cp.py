@@ -58,8 +58,13 @@ class CP(DecompositionAnalysis):
     CP/PARAFAC decomposition of 3D datasets using TensorLy.
 
     CP (Canonical Polyadic) decomposition, also known as PARAFAC, factorizes a 3D tensor
-    into a sum of rank-1 tensors. This implementation uses TensorLy's `constrained_parafac`
-    function and supports various constraints and regularization options for the factor matrices.
+    into a sum of rank-1 tensors. By default, this implementation uses TensorLy's
+    `parafac` function. When constraints or penalties are active (e.g., `non_negative`,
+    `l1_reg`, `smoothness`, etc.), it automatically switches to TensorLy's
+    `constrained_parafac` function with AO-ADMM optimization.
+
+    Note: `fixed_modes` is supported by both `parafac` and `constrained_parafac`,
+    so using `fixed_modes` alone does not trigger the constrained path.
 
     Only 3D datasets are supported. For 2D data, use PCA, NMF, or SVD instead.
 
@@ -84,7 +89,9 @@ class CP(DecompositionAnalysis):
     verbose : int, default=0
         Level of verbosity for iteration logging.
     return_errors : bool, default=False
-        Whether to return iteration errors during fitting.
+        Whether to store iteration errors after fitting. Errors are only
+        available when using constrained_parafac (i.e., when constraints
+        are active). For unconstrained parafac, errors will be None.
     non_negative : bool or dict, default=False
         If True, applies non-negative constraint to all modes. Can also be a dict
         specifying constraints per mode.
@@ -130,7 +137,9 @@ class CP(DecompositionAnalysis):
     weights : ndarray
         Weights from CP decomposition.
     errors : list or None
-        Iteration errors if return_errors was True, otherwise None.
+        Iteration errors during fitting. Available when TensorLy returns them
+        (typically with constrained_parafac). Returns None if unavailable
+        or if not fitted yet.
     SSE : float
         Sum of Squared Errors of the reconstruction.
     explained_variance : float
@@ -419,47 +428,83 @@ class CP(DecompositionAnalysis):
         self._X_preprocessed = X.data
 
     # ----------------------------------------------------------------------------------
+    # Constraint detection
+    # ----------------------------------------------------------------------------------
+    def _has_constraints(self):
+        """Return True if AO-ADMM constraints/penalties are active."""
+        return (
+            self.non_negative is not False
+            or self.l1_reg is not None
+            or self.l2_reg is not None
+            or self.l2_square_reg is not None
+            or self.unimodality is not None
+            or self.normalize is not None
+            or self.simplex is not None
+            or self.normalized_sparsity is not None
+            or self.soft_sparsity is not None
+            or self.smoothness is not None
+            or self.monotonicity is not None
+            or self.hard_sparsity is not None
+        )
+
+    # ----------------------------------------------------------------------------------
     # Private methods (overloading abstract classes)
     # ----------------------------------------------------------------------------------
     def _fit(self, X, Y=None):
         """Fit the CP model to X (np.ndarray)."""
         tl = _import_tensorly()
 
-        # Call TensorLy constrained_parafac
-        # Returns (CPTensor, errors) when return_errors=True
-        # Note: svd parameter in TensorLy 0.9+ uses svd_interface
-        result = tl.decomposition.constrained_parafac(
-            X,
-            rank=self.n_components,
-            n_iter_max=self.n_iter_max,
-            n_iter_max_inner=self.n_iter_max_inner,
-            init=self.init,
-            tol_outer=self.tol_outer,
-            tol_inner=self.tol_inner,
-            random_state=self.random_state,
-            verbose=self.verbose,
-            cvg_criterion=self.cvg_criterion,
-            fixed_modes=self.fixed_modes,
-            non_negative=self.non_negative,
-            l1_reg=self.l1_reg,
-            l2_reg=self.l2_reg,
-            l2_square_reg=self.l2_square_reg,
-            unimodality=self.unimodality,
-            normalize=self.normalize,
-            simplex=self.simplex,
-            normalized_sparsity=self.normalized_sparsity,
-            soft_sparsity=self.soft_sparsity,
-            smoothness=self.smoothness,
-            monotonicity=self.monotonicity,
-            hard_sparsity=self.hard_sparsity,
-            return_errors=True,
-        )
+        if self._has_constraints():
+            result = tl.decomposition.constrained_parafac(
+                X,
+                rank=self.n_components,
+                n_iter_max=self.n_iter_max,
+                n_iter_max_inner=self.n_iter_max_inner,
+                init=self.init,
+                svd=self.svd,
+                tol_outer=self.tol_outer,
+                tol_inner=self.tol_inner,
+                random_state=self.random_state,
+                verbose=self.verbose,
+                cvg_criterion=self.cvg_criterion,
+                fixed_modes=self.fixed_modes if self.fixed_modes else [],
+                non_negative=self.non_negative,
+                l1_reg=self.l1_reg,
+                l2_reg=self.l2_reg,
+                l2_square_reg=self.l2_square_reg,
+                unimodality=self.unimodality,
+                normalize=self.normalize,
+                simplex=self.simplex,
+                normalized_sparsity=self.normalized_sparsity,
+                soft_sparsity=self.soft_sparsity,
+                smoothness=self.smoothness,
+                monotonicity=self.monotonicity,
+                hard_sparsity=self.hard_sparsity,
+                return_errors=True,
+            )
+        else:
+            result = tl.decomposition.parafac(
+                X,
+                rank=self.n_components,
+                n_iter_max=self.n_iter_max,
+                init=self.init,
+                svd=self.svd,
+                tol=self.tol_outer,
+                random_state=self.random_state,
+                verbose=self.verbose,
+                fixed_modes=self.fixed_modes if self.fixed_modes else [],
+                return_errors=True,
+            )
 
-        # Unpack result: (CPTensor, errors)
-        cp_tensor, errors = result
+        # Unpack result robustly: may be (cp_tensor, errors) or cp_tensor
+        if isinstance(result, tuple):
+            cp_tensor, errors = result
+        else:
+            cp_tensor = result
+            errors = None
         self._weights = cp_tensor.weights
         self._loadings = cp_tensor.factors  # List of factor matrices
-        self._errors = errors
+        self._errors = errors if errors else None
 
         # Create NDDataset objects for factors
         self._get_A()
