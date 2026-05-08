@@ -14,12 +14,9 @@ import inspect
 import io
 import os
 import pathlib
-import re
 import subprocess
 import tempfile
-import traceback
 
-import docrep
 import numpy
 from numpydoc.docscrape import get_doc_object
 from numpydoc.validate import Validator
@@ -83,6 +80,23 @@ def check_docstrings(module, obj, exclude=None):
 
 
 # private
+
+
+class _DocstringError(Exception):
+    def __init__(self, result):
+        message = ""
+        message += f"{len(result['errors'])} DocstringError(s) found:\n"
+        message += f"{' ' * 10}{'-' * 26}\n"
+        for err_code, err_desc in result["errors"]:
+            if err_code == "EX02":  # Failing examples are printed at the end
+                message += f"{' ' * 2}Examples do not pass tests\n"
+                continue
+            message += f"{' ' * 10}* {err_code}: {err_desc}\n"
+        if result["examples_errs"]:
+            message += "\n\nDoctests:\n---------\n"
+            message += result["examples_errs"]
+
+        super().__init__(message)
 
 
 def _scpy_error(code, **kwargs):
@@ -271,7 +285,7 @@ def _scpy_numpydoc_validate(func_name, exclude=None):
     if doc.non_hyphenated_array_like():
         errs.append(_scpy_error("GL05"))
 
-    # cases where docrep dedent was used
+    # Handle docstrings that may not start with standard indentation
     if error("GL01") in errs and not doc.raw_doc.startswith(""):
         errs = _remove_errors(errs, "GL01")
     if error("GL02") in errs and not doc.raw_doc.startswith(""):
@@ -295,101 +309,3 @@ def _scpy_numpydoc_validate(func_name, exclude=None):
             pass
 
     return result
-
-
-class _DocstringError(Exception):
-    def __init__(self, result):
-        message = ""
-        message += f"{len(result['errors'])} DocstringError(s) found:\n"
-        message += f"{' ' * 10}{'-' * 26}\n"
-        for err_code, err_desc in result["errors"]:
-            if err_code == "EX02":  # Failing examples are printed at the end
-                message += f"{' ' * 2}Examples do not pass tests\n"
-                continue
-            message += f"{' ' * 10}* {err_code}: {err_desc}\n"
-        if result["examples_errs"]:
-            message += "\n\nDoctests:\n---------\n"
-            message += result["examples_errs"]
-
-        traceback_details = {
-            "filename": result["file"],
-            "lineno": result["file_line"],
-            "name": result["member_name"],
-            "type": "DocstringError",
-            "message": message,
-        }
-
-        traceback.format_exc()  # cannot be used with pytest in debug mode
-
-        traceback_template = """
-        Docstring format error:
-          File "%(filename)s", line %(lineno)s,
-          in %(name)s.
-          %(message)s\n
-        """
-        print(traceback_template % traceback_details)  # noqa: T201
-
-
-# --------------------------------------------------------------------------------------
-# DOCREP PROCESSOR
-# --------------------------------------------------------------------------------------
-
-_common_doc = """
-out : `object`
-    Input object or a newly allocated object, depending on the `inplace` flag.
-new : `object`
-    Newly allocated object.
-copy : `bool`, optional, default: `True`
-    Perform a copy of the passed object.
-inplace : `bool`, optional, default: `False`
-    By default, the method returns a newly allocated object.
-    If `inplace` is set to `True`, the input object is returned.
-dataset : `NDDataset` or :term:`array-like` of shape (`n_observations` , `n_features`)
-    Input data, where :term:`n_observations` is the number of observations
-    and :term:`n_features` is the number of features.
-dim : `int` or `str`, optional, default: -1,
-    Dimension along which the method is applied.
-    By default, the method is applied to the last dimension.
-    If `dim` is specified as an integer it is equivalent to the usual `axis` numpy
-    parameter.
-**kwargs : keyword parameters, optional
-    See Other Parameters.
-"""
-
-
-class DocstringProcessor(docrep.DocstringProcessor):
-    param_like_sections = ["See Also"] + docrep.DocstringProcessor.param_like_sections
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        regex = re.compile(r"(?=^[*]{0,2}\b\w+\b\s?:?\s?)", re.MULTILINE | re.DOTALL)
-        plist = regex.split(_common_doc.strip())[1:]
-        params = {
-            k.strip("*"): f"{k.strip()} : {v.strip()}"
-            for k, v in (re.split(r"\s?:\s?", p, maxsplit=1) for p in plist)
-        }
-        self.params.update(params)
-
-    def dedent(self, s, stacklevel=3):
-        s_ = s
-        start = ""
-        end = ""
-        string = True
-        if not isinstance(s, str) and hasattr(s, "__doc__"):
-            string = False
-            s_ = s.__doc__
-        if s_.startswith("\n"):  # restore the first blank line
-            start = "\n"
-        if s_.strip(" ").endswith("\n"):  # restore the last return before quote
-            end = "\n"
-        s_mod = super().dedent(s, stacklevel=stacklevel)
-        if string:
-            s_mod = f"{start}{s_mod}{end}"
-        else:
-            s_mod.__doc__ = f"{start}{s_mod.__doc__}{end}"
-        return s_mod
-
-
-# Docstring substitution (docrep)
-docprocess = DocstringProcessor()

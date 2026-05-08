@@ -12,13 +12,10 @@ from functools import update_wrapper
 from inspect import Parameter
 from inspect import Signature
 from inspect import signature
-from textwrap import indent
 from typing import TypeVar
 from warnings import warn
 
 import traitlets as tr
-
-from spectrochempy.utils.docutils import docprocess
 
 
 def preserve_signature(f):
@@ -205,85 +202,99 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
 
     cls.__signature__ = Signature(new_parameters)  # type:ignore[attr-defined]
 
-    # add the corresponding doctrings
-    otherpar = ""
+    # Build docstring from traits and existing docstring
+    # -------------------------------------------------
+    # Start with the existing docstring (summary + extended summary)
+    existing_doc = cls.__doc__ or ""
+
+    # Split existing doc into summary/extended summary and sections
+    # We look for the first section header (Parameters, Returns, etc.)
+    import re
+
+    section_pattern = re.compile(
+        r"^(Parameters|Returns|Other Parameters|Raises|See Also|Notes|Examples|References)\n-+\n",
+        re.MULTILINE,
+    )
+
+    match = section_pattern.search(existing_doc)
+    if match:
+        intro = existing_doc[: match.start()].rstrip()
+        sections = existing_doc[match.start() :]
+    else:
+        intro = existing_doc.rstrip()
+        sections = ""
+
+    # Build the Parameters section from traits
+    trait_params = ""
     for name, value in traits:
-        # try to infer the parameter type
+        # Determine type string
         type_ = type(value).__name__
         if type_ in ["Enum", "CaselessStrEnum"]:
-            values = ""
-            for val in value.values:
-                values += f" ``'{val}'`` ,"
-            type_ = f"any value of [{values.rstrip(',')}]"
+            values = ", ".join(f"``'{val}'``" for val in value.values)
+            type_str = f"any value of [{values}]"
         elif type_ == "Unicode":
-            type_ = "`str`"
+            type_str = "`str`"
         elif type_ == "Any":
-            type_ = "any value"
+            type_str = "any value"
         elif type_ == "Union":
-            type_ = value.info_text
+            type_str = value.info_text
         else:
-            # print(name, value, type_)
-            type_ = f"`{type_.lower()}`"
+            type_str = f"`{type_.lower()}`"
 
+        # Determine default
         default = value.default_value
         if isinstance(default, type(tr.Undefined)) or default is None:
-            if type(value).__name__.lower() in ["tuple", "dict", "list"]:
-                default = __builtins__[type(value).__name__.lower()]()
+            if type_.lower() in ["tuple", "dict", "list"]:
+                default = repr(__builtins__[type_.lower()]())
             else:
                 default = "`None`"
         elif isinstance(default, str):
             default = f"``'{default}'``"
-        otherpar += f"{name} : {type_}, optional, default: {default}\n"
-        desc = f"{value.help}\n"
-        desc = indent(desc, "    ")
-        otherpar += desc
+        elif isinstance(default, bool):
+            default = f"``{default}``"
+        else:
+            default = f"``{default!r}``"
 
-    doc = docprocess.dedent(cls.__doc__)
-    docprocess.get_full_description(doc, base=cls.__name__)
-    docprocess.get_sections(
-        doc,
-        base=cls.__name__,
-        sections=[
-            "Parameters",
-            "Other Parameters",
-            "See Also",
-            "Examples",
-            "Notes",
-            "References",
-        ],
-    )
-    docprocess.params[f"{cls.__name__}.parameters"] += f"\n{otherpar.strip()}"
-    doc = "\n" + docprocess.params[f"{cls.__name__}.full_desc"]
-    doc += "\n\n"
-    doc += "Parameters\n"
-    doc += "----------\n"
-    doc += docprocess.params[f"{cls.__name__}.parameters"]
-    doc += "\n"
-    if docprocess.params[f"{cls.__name__}.other_parameters"]:
-        doc += "\nOther Parameters\n"
-        doc += "----------------\n"
-        doc += docprocess.params[f"{cls.__name__}.other_parameters"]
-        doc += "\n"
-    if docprocess.params[f"{cls.__name__}.see_also"]:
-        doc += "\nSee Also\n"
-        doc += "--------\n"
-        doc += docprocess.params[f"{cls.__name__}.see_also"]
-        doc += "\n"
-    if docprocess.params[f"{cls.__name__}.references"]:
-        doc += "\nReferences\n"
-        doc += "----------\n"
-        doc += docprocess.params[f"{cls.__name__}.references"]
-        doc += "\n"
-    if docprocess.params[f"{cls.__name__}.examples"]:
-        doc += "\nExamples\n"
-        doc += "--------\n"
-        doc += docprocess.params[f"{cls.__name__}.examples"]
-        doc += "\n"
-    if docprocess.params[f"{cls.__name__}.notes"]:
-        doc += "\nNotes\n"
-        doc += "-----\n"
-        doc += docprocess.params[f"{cls.__name__}.notes"]
-        doc += "\n"
+        trait_params += f"{name} : {type_str}, optional, default: {default}\n"
+        desc = value.help or ""
+        if desc:
+            for line in desc.splitlines():
+                trait_params += f"    {line}\n"
+        else:
+            trait_params += "\n"
+
+    # Combine: intro + Parameters + other sections
+    doc = intro
+    if trait_params or "Parameters\n----------" in sections:
+        doc += "\n\nParameters\n----------\n"
+        doc += trait_params
+        # Add any existing parameter docs that aren't traits
+        if sections:
+            # Extract existing Parameters section content
+            params_match = re.search(
+                r"Parameters\n-+\n(.*?)(?=\n\S|\Z)", sections, re.DOTALL
+            )
+            if params_match:
+                existing_params = params_match.group(1)
+                # Only add non-trait params
+                for line in existing_params.splitlines():
+                    if line.strip() and not any(
+                        line.startswith(trait_name) for trait_name, _ in traits
+                    ):
+                        doc += f"{line}\n"
+
+    # Add remaining sections (Other Parameters, Returns, See Also, etc.)
+    if sections:
+        # Remove Parameters section from sections (already handled)
+        remaining = re.sub(
+            r"Parameters\n-+\n.*?(?=\n\S+\n-+|\Z)",
+            "",
+            sections,
+            flags=re.DOTALL,
+        ).strip()
+        if remaining:
+            doc += "\n" + remaining
+
     cls.__doc__ = doc
 
     # some attribute doc

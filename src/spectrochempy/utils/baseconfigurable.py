@@ -21,7 +21,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.constants import NOMASK
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.exceptions import NotTransformedError
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 from spectrochempy.utils.traits import NDDatasetType
@@ -31,23 +30,17 @@ from spectrochempy.utils.traits import NDDatasetType
 # Base class BaseConfigurable
 # ======================================================================================
 class BaseConfigurable(MetaConfigurable):
-    __doc__ = docprocess.dedent(
-        r"""
+    """
     Abstract class to write configurable models (analysis, preprocessing, ...).
 
     Model class must subclass this to get a minimal structure
 
     Parameters
     ----------
-    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``\ ], optional, default: ``"WARNING"``
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
-    """,
-    )
-
-    # Get doc sections for reuse in subclass
-    docprocess.get_sections(__doc__, base="BaseConfigurable")
-    docprocess.keep_params("BaseConfigurable.parameters", "log_level")
+    """
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters

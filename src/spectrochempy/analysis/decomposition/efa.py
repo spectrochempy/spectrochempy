@@ -13,7 +13,6 @@ from spectrochempy.application.application import info_
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import docprocess
 
 __all__ = ["EFA"]
 __configurables__ = ["EFA"]
@@ -21,10 +20,7 @@ __configurables__ = ["EFA"]
 
 @signature_has_configurable_traits
 class EFA(DecompositionAnalysis):
-    docprocess.delete_params("DecompositionAnalysis.see_also", "EFA")
-
-    __doc__ = docprocess.dedent(
-        r"""
+    """
     Evolving Factor Analysis (EFA).
 
     Evolving factor analysis (`EFA`) is a method that allows model-free resolution of
@@ -39,11 +35,24 @@ class EFA(DecompositionAnalysis):
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters)s
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+    warm_start : `bool`, optional, default: `False`
+        When fitting repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        reuse the solution of the previous call to fit and add more components
+        (if available) in a sequential manner.
+
+        When `warm_start` is `True`, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to `fit`.
 
     See Also
     --------
-    %(DecompositionAnalysis.see_also.no_EFA)s
+    fit : Fit the EFA model on X.
+    transform : Apply dimensionality reduction.
+    fit_transform : Fit the model and apply dimensionality reduction.
+    inverse_transform : Transform data back to its original space.
 
     Examples
     --------
@@ -61,8 +70,8 @@ class EFA(DecompositionAnalysis):
     >>> # Plot the transposed concentration matrix  (2 x N)
     >>> _ = c.T.plot(title="Concentration")
     >>> scp.show()
-    """,
-    )
+
+    """
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
@@ -168,7 +177,6 @@ class EFA(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
-    @docprocess.dedent
     def fit(self, X):
         """
         Fit the `EFA` model on a `X` dataset.
@@ -188,7 +196,6 @@ class EFA(DecompositionAnalysis):
         """
         return super().fit(X, Y=None)
 
-    @docprocess.dedent
     def fit_transform(self, X, **kwargs):
         """
         Fit the model with X and apply the dimensionality reduction on X.

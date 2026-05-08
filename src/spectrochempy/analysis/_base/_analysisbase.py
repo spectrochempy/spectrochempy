@@ -20,7 +20,6 @@ from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -29,28 +28,28 @@ from spectrochempy.utils.traits import NDDatasetType
 # Base class AnalysisConfigurable
 # ======================================================================================
 class AnalysisConfigurable(BaseConfigurable):
-    __doc__ = docprocess.dedent(
-        r"""
+    """
     Abstract class to write analysis model estimators.
 
-    Analysis model class must subclass this to get a minimal structure
+    Analysis model class must subclass this to get a minimal structure.
 
     Parameters
     ----------
-    %(BaseConfigurable.parameters.log_level)s
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
     warm_start : `bool`, optional, default: `False`
         When fitting repeatedly on the same dataset, but for multiple
         parameter values (such as to find the value maximizing performance),
-        it may be possible to reuse previous model learned from the previous parameter
-        value, saving time.
+        reuse the solution of the previous call to fit and add more components
+        (if available) in a sequential manner.
 
         When `warm_start` is `True`, the existing fitted model attributes is used to
         initialize the new model in a subsequent call to `fit`.
-    """,
-    )
+
+    """
 
     # Get doc sections for reuse in subclass
-    docprocess.get_sections(__doc__, base="AnalysisConfigurable")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -165,13 +164,7 @@ class AnalysisConfigurable(BaseConfigurable):
         return self
 
     # we do not use this method as a decorator as in this case signature of subclasses
-    docprocess.get_sections(
-        docprocess.dedent(fit.__doc__),
-        base="analysis_fit",
-        sections=["Parameters", "Returns", "See Also"],
-    )
     # extract useful individual parameters doc
-    docprocess.keep_params("analysis_fit.parameters", "X")
 
     @property
     def log(self):
@@ -222,11 +215,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # attributes and methods necessary for decomposition model.
 
     # Get doc sections for reuse in subclass
-    docprocess.get_sections(
-        docprocess.dedent(__doc__),
-        base="DecompositionAnalysis",
-        sections=["See Also"],
-    )
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters (in addition to those of AnalysisConfigurable)
@@ -298,7 +286,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Public methods
     # ----------------------------------------------------------------------------------
     @_wrap_ndarray_output_to_nddataset(units=None, title=None, typex="components")
-    @docprocess.dedent
     def transform(self, X=None, **kwargs):
         r"""
         Apply dimensionality reduction to `X`.
@@ -309,7 +296,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
             New data, where :term:`n_observations` is the number of observations
             and :term:`n_features` is the number of features.
             if not provided, the input dataset of the `fit` method will be used.
-        %(kwargs)s
+        **kwargs : keyword parameters, optional
+            See Other Parameters.
 
         Returns
         -------
@@ -353,15 +341,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
         return X_transform
 
     # Get doc sections for reuse in subclass
-    docprocess.get_sections(
-        docprocess.dedent(transform.__doc__),
-        base="analysis_transform",
-        sections=["Parameters", "Other Parameters", "Returns"],
-    )
-    docprocess.keep_params("analysis_transform.parameters", "X")
 
     @_wrap_ndarray_output_to_nddataset
-    @docprocess.dedent
     def inverse_transform(self, X_transform=None, **kwargs):
         r"""
         Transform data back to its original space.
@@ -375,7 +356,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
             Reduced `X` data, where `n_observations` is the number of observations
             and `n_components` is the number of components. If `X_transform` is not
             provided, a transform of `X` provided in `fit` is performed first.
-        %(kwargs)s
+        **kwargs : keyword parameters, optional
+            See Other Parameters.
 
         Returns
         -------
@@ -384,7 +366,8 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         Other Parameters
         ----------------
-        %(analysis_transform.other_parameters)s
+        n_components : `int`, optional
+            The number of components to use for the reconstruction.
 
         See Also
         --------
@@ -421,32 +404,29 @@ class DecompositionAnalysis(AnalysisConfigurable):
 
         return self._inverse_transform(X_transform)
 
-    docprocess.get_sections(
-        docprocess.dedent(inverse_transform.__doc__),
-        base="analysis_inverse_transform",
-        sections=["Parameters", "Returns"],
-    )
     # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
-
-    @docprocess.dedent
     def fit_transform(self, X, Y=None, **kwargs):
         r"""
         Fit the model with `X` and apply the dimensionality reduction on `X`.
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
         Y : any
             Depends on the model.
-        %(kwargs)s
+        **kwargs : keyword arguments, optional
+            Additional keyword arguments passed to the underlying implementation.
 
         Returns
         -------
-        %(analysis_transform.returns)s
+        `NDDataset`
+            Dataset with shape (:term:`n_observations`, :term:`n_components`).
 
         Other Parameters
         ----------------
-        %(analysis_transform.other_parameters)s
+        n_components : `int`, optional
+            The number of components to use for the reduction.
 
         """
         try:
@@ -519,7 +499,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
-    @docprocess.dedent
     def plot_merit(self, X=None, X_hat=None, **kwargs):
         r"""
         Plot the input (`X`), reconstructed (`X_hat`) and residuals.
@@ -597,8 +576,6 @@ class DecompositionAnalysis(AnalysisConfigurable):
     # Backward compatibility alias
     plotmerit = plot_merit
 
-    docprocess.get_sections(docprocess.dedent(plot_merit.__doc__), base="plot_merit")
-
     @property
     def Y(self):
         r"""The `Y` input."""
@@ -628,11 +605,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # attributes and methods necessary for cross decomposition model.
 
     # Get doc sections for reuse in subclass
-    docprocess.get_sections(
-        docprocess.dedent(__doc__),
-        base="CrossDecompositionAnalysis",
-        sections=["See Also"],
-    )
 
     # ----------------------------------------------------------------------------------
     # Private methods that should be most of the time overloaded in subclass
@@ -646,7 +618,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
 
     @_wrap_ndarray_output_to_nddataset(meta_from="_Y", title=None)
-    @docprocess.dedent
     def predict(self, X=None):
         r"""
         Predict targets of given observations.
@@ -674,7 +645,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         return self._predict(X)
 
-    @docprocess.dedent
     def score(self, X=None, Y=None, sample_weight=None):
         r"""
         Return the coefficient of determination of the prediction.
@@ -727,7 +697,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         meta_from=("_X", "_Y"),
         typex="components",
     )
-    @docprocess.dedent
     def transform(self, X=None, Y=None, both=False, **kwargs):
         r"""
         Apply dimensionality reduction to `X`and `Y`.
@@ -741,9 +710,10 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_targets`), optional
             New data, where :term:`n_targets` is the number of variables to predict.
             if not provided, the input dataset of the `fit` method will be used.
-        both : `bool`, default: `False`
+            both : `bool`, default: `False`
             Whether to also apply the dimensionality reduction to Y when neither X nor Y are provided.
-        %(kwargs)s
+        **kwargs : keyword parameters, optional
+            See Other Parameters.
 
         Returns
         -------
@@ -767,15 +737,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         return self._transform(newX, None)
 
     # Get doc sections for reuse in subclass
-    docprocess.get_sections(
-        docprocess.dedent(transform.__doc__),
-        base="cross_decomposition_transform",
-        sections=["Parameters", "Other Parameters", "Returns"],
-    )
-    docprocess.keep_params("cross_decomposition_transform.parameters", "X", "Y", "both")
 
     @_wrap_ndarray_output_to_nddataset(meta_from=("_X", "_Y"))
-    @docprocess.dedent
     def inverse_transform(
         self,
         X_transform=None,
@@ -798,16 +761,18 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Y_transform : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, `n_components`), optional
             New data, where :term:`n_targets` is the number of variables to predict. If `Y_transform` is not
             provided, a transform of `Y` provided in `fit` is performed first.
-        %(kwargs)s
+        **kwargs : keyword parameters, optional
+            See Other Parameters.
 
         Returns
         -------
         `NDDataset`
-            Dataset with shape (:term:`n_observations`, :term:`n_features`).
+            Dataset with shape (:term:`n_observations`, :term:`n_components`).
 
         Other Parameters
         ----------------
-        %(analysis_transform.other_parameters)s
+        n_components : `int`, optional
+            The number of components to use for the reduction.
 
         See Also
         --------
@@ -834,40 +799,34 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         X, Y = self._inverse_transform(X_transform, X_transform)
         return X, Y
 
-    docprocess.get_sections(
-        docprocess.dedent(inverse_transform.__doc__),
-        base="analysis_inverse_transform",
-        sections=["Parameters", "Returns"],
-    )
     # _docstring.keep_params("analysis_inverse_transform.parameters", "X_transform")
-
-    @docprocess.dedent
     def fit_transform(self, X, Y, both=False):
         r"""
         Fit the model with `X` and `Y` and apply the dimensionality reduction on `X` and optionally on `Y`.
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
         Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
             Training data.
         both : `bool`, optional
-            Whether to apply the dimensionality reduction on `X` and `Y` .
+            Whether to also apply the dimensionality reduction to Y when neither X nor Y are provided.
+        **kwargs : keyword arguments, optional
+            Additional keyword arguments passed to the underlying implementation.
 
         Returns
         -------
-        %(analysis_transform.returns)s
+        `NDDataset` or tuple of `NDDataset`
+            Transformed data.
 
         """
-        self.fit(X, Y)
-        if both:
-            return self.transform(X, Y)
-        return self.transform(X)
+        try:
+            return self.fit(X, Y).transform(X, Y, both=both)
+        except NotFittedError:
+            # If transform failed, return None
+            return None
 
-    # ----------------------------------------------------------------------------------
-    # Plot methods
-    # ----------------------------------------------------------------------------------
-    @docprocess.dedent
     def parityplot(
         self,
         Y=None,
@@ -879,7 +838,7 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Plot the predicted (:math:`\hat{Y}`) vs measured (:math:`Y`) values.
 
         :math:`Y` and :math:`\hat{Y}` can be passed as arguments. If not,
-        the `Y` attribute is used for :math:`Y`and :math:`\hat{Y}`is computed by
+        the `Y` attribute is used for :math:`Y` and :math:`\hat{Y}` is computed by
         the `inverse_transform` method.
 
         Parameters
@@ -892,7 +851,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             computed externally.
         clear : `bool`, optional
             Whether to plot on a new axes. Default is True.
-        %(kwargs)s
+        **kwargs : keyword arguments, optional
+            Additional keyword arguments passed to `~matplotlib.pyplot.scatter`.
 
         Returns
         -------
@@ -1053,8 +1013,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         plt.tight_layout()
 
         return ax
-
-    docprocess.get_sections(docprocess.dedent(parityplot.__doc__), base="parityplot")
 
 
 # ======================================================================================

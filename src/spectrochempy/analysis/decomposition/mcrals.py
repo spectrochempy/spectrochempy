@@ -31,7 +31,6 @@ from spectrochempy.application.application import info_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import docprocess
 
 
 # DEVNOTE:
@@ -39,10 +38,7 @@ from spectrochempy.utils.docutils import docprocess
 # derived class
 @signature_has_configurable_traits
 class MCRALS(DecompositionAnalysis):
-    docprocess.delete_params("DecompositionAnalysis.see_also", "MCRALS")
-
-    __doc__ = docprocess.dedent(
-        r"""
+    """
     Multivariate Curve Resolution Alternating Least Squares (MCRALS).
 
     :term:`MCR-ALS` ( ``Multivariate Curve Resolution Alternating Least Squares`` )
@@ -58,13 +54,25 @@ class MCRALS(DecompositionAnalysis):
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters)s
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+    warm_start : `bool`, optional, default: `False`
+        When fitting repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        reuse the solution of the previous call to fit and add more components
+        (if available) in a sequential manner.
+
+        When `warm_start` is `True`, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to `fit`.
 
     See Also
     --------
-    %(DecompositionAnalysis.see_also.no_MCRALS)s
-    """,
-    )
+    fit : Fit the MCRALS model on X.
+    transform : Apply dimensionality reduction.
+    fit_transform : Fit the model and apply dimensionality reduction.
+
+    """
 
     # Developer notes
     # ----------------
@@ -1108,7 +1116,6 @@ and `St`.
     # ----------------------------------------------------------------------------------
     # Public methods and properties
     # ----------------------------------------------------------------------------------
-    @docprocess.dedent
     def fit(self, X, Y):
         """
         Fit the MCRALS model on an X dataset using initial concentration or spectra.
@@ -1130,7 +1137,6 @@ and `St`.
         """
         return super().fit(X, Y)
 
-    @docprocess.dedent
     def fit_transform(self, X, Y, **kwargs):
         """
         Fit the model with ``X`` and apply the dimensionality reduction on ``X``.
@@ -1153,7 +1159,6 @@ and `St`.
         """
         return super().fit_transform(X, Y, **kwargs)
 
-    @docprocess.dedent
     def inverse_transform(self, X_transform=None, **kwargs):
         r"""
         Transform data back to its original space.

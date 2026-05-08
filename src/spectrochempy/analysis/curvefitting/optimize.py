@@ -22,14 +22,12 @@ from spectrochempy.application.application import info_
 from spectrochempy.application.application import warning_
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import docprocess
 
 
 # ======================================================================================
 @signature_has_configurable_traits
 class Optimize(DecompositionAnalysis):
-    __doc__ = docprocess.dedent(
-        """
+    """
     Non-linear Least-Square Optimization and Curve-Fitting.
 
     Works on a 1D or 2D dataset.
@@ -38,9 +36,19 @@ class Optimize(DecompositionAnalysis):
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters)s
-    """,
-    )
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+    warm_start : `bool`, optional, default: `False`
+        When fitting repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        reuse the solution of the previous call to fit and add more components
+        (if available) in a sequential manner.
+
+        When `warm_start` is `True`, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to `fit`.
+
+    """
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters (mostly defined in subclass
@@ -926,22 +934,24 @@ class Optimize(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
-    @docprocess.dedent
     def fit(self, X):
         """
         Perform a non-linear optimization of the ``X`` dataset.
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
 
         Returns
         -------
-        %(analysis_fit.returns)s
+        self
+            The fitted instance itself.
 
         See Also
         --------
-        %(analysis_fit.see_also)s
+        fit_transform :  Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``.
+        fit_reduce : Alias of `fit_transform` (Deprecated).
 
         """
         return super().fit(X, Y=None)

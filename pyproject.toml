@@ -23,7 +23,6 @@ classifiers = [
 dependencies = [
   "colorama",
   "dill",
-  "docrep",
   "ipython",
   "jinja2",
   "lazy_loader",

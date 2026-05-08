@@ -12,7 +12,6 @@ from sklearn import decomposition
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.traits import NDDatasetType
 
 __all__ = ["FastICA"]
@@ -24,10 +23,7 @@ __configurables__ = ["FastICA"]
 # ======================================================================================
 @signature_has_configurable_traits
 class FastICA(DecompositionAnalysis):
-    docprocess.delete_params("DecompositionAnalysis.see_also", "FastICA")
-
-    __doc__ = docprocess.dedent(
-        r"""
+    r"""
     Fast algorithm for Independent Component Analysis (FastICA).
 
     A wrapper of `sklearn.decomposition.FastICA`.
@@ -38,20 +34,32 @@ class FastICA(DecompositionAnalysis):
 
     In terms of matrix equation:
 
-    .. math:: X = \bar{X} + A \cdot S^t + E
+    .. math:: X = \bar{X} + A \\cdot S^t + E
 
     where :math:`\bar{X}` is the mean of the dataset and :math:`E` is the matrix of
     residuals.
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters)s
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+    warm_start : `bool`, optional, default: `False`
+        When fitting repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        reuse the solution of the previous call to fit and add more components
+        (if available) in a sequential manner.
+
+        When `warm_start` is `True`, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to `fit`.
 
     See Also
     --------
-    %(DecompositionAnalysis.see_also.no_FastICA)s
-    """,
-    )
+    fit : Fit the FastICA model on X.
+    transform : Apply dimensionality reduction.
+    fit_transform : Fit the model and apply dimensionality reduction.
+
+    """
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
@@ -243,9 +251,6 @@ array of values drawn from a normal distribution is used."""
         self._components = self._fast_ica.components_
         return self._components
 
-    docprocess.keep_params("analysis_fit.parameters", "X")
-
-    @docprocess.dedent
     def fit(self, X):
         """
         Fit the FastICA model on X.
