@@ -226,6 +226,8 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
 
     # Build the Parameters section from traits
     trait_params = ""
+    trait_names = {name for name, _ in traits}
+
     for name, value in traits:
         # Determine type string
         type_ = type(value).__name__
@@ -263,44 +265,63 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
         else:
             trait_params += "\n"
 
+    # Extract existing Parameters section content if present
+    existing_params_content = ""
+    remaining_sections = sections
+
+    if sections and "Parameters\n----------" in sections:
+        # Extract existing Parameters section content
+        # Build pattern piece by piece to avoid multi-line raw strings
+        params_pt1 = r"Parameters\n-+"
+        params_pt2 = r"\n(.*?)"
+        params_pt3 = r"(?:(?=\n[A-Za-z][A-Za-z0-9_ ]*\n-+)|\Z)"
+        params_pattern = params_pt1 + params_pt2 + params_pt3
+        params_match = re.search(params_pattern, sections, re.DOTALL)
+        if params_match:
+            existing_params_content = params_match.group(1)
+            # Remove the entire Parameters section from remaining sections
+            remove_pt1 = r"Parameters\n-+"
+            remove_pt2 = r"\n.*?(?:(?=\n[A-Za-z][A-Za-z0-9_ ]*\n-+)|\Z)"
+            remove_pattern = remove_pt1 + remove_pt2
+            remaining_sections = re.sub(
+                remove_pattern, "", sections, flags=re.DOTALL
+            ).strip()
+
     # Combine: intro + Parameters + other sections
-    doc = intro
-    if trait_params or "Parameters\n----------" in sections:
-        doc += "\n\nParameters\n----------\n"
-        # Add any existing parameter docs that aren't traits (e.g., log_level, warm_start)
-        # These come first to match the signature order
-        if sections:
-            # Extract existing Parameters section content
-            # Pattern matches everything until the next section header (word chars followed by \n-+)
-            params_match = re.search(
-                r"Parameters\n-+\n(.*?)((?=\n[A-Za-z][A-Za-z0-9_ ]*\n-+)|$)",
-                sections,
-                re.DOTALL,
-            )
-            if params_match:
-                existing_params = params_match.group(1)
-                # Only add non-trait params
-                for line in existing_params.splitlines():
-                    if line.strip() and not any(
-                        line.startswith(trait_name) for trait_name, _ in traits
-                    ):
-                        doc += f"{line}\n"
-        # Add trait params after existing params
-        doc += trait_params
+    doc_parts = []
+    if intro:
+        doc_parts.append(intro)
 
-    # Add remaining sections (Other Parameters, Returns, See Also, etc.)
-    if sections:
-        # Remove Parameters section from sections (already handled)
-        # Pattern matches everything until the next section header (word chars followed by \n-+)
-        remaining = re.sub(
-            r"Parameters\n-+\n(.*?)(?=\n[A-Za-z][A-Za-z0-9_ ]*\n-+|$)",
-            "",
-            sections,
-            flags=re.DOTALL,
-        ).strip()
-        if remaining:
-            doc += "\n" + remaining
+    # Add Parameters section if we have any params
+    if trait_params or existing_params_content:
+        params_section = "Parameters\n----------\n"
 
+        # Add existing params that are not trait params (e.g., log_level, warm_start)
+        if existing_params_content:
+            for line in existing_params_content.splitlines():
+                # Check if this line starts a parameter definition
+                stripped = line.strip()
+                if stripped:
+                    # Check if it's a parameter name (starts with word chars followed by ' :')
+                    param_match = re.match(r"^(\w+)\s*:", stripped)
+                    if param_match:
+                        param_name = param_match.group(1)
+                        if param_name not in trait_names:
+                            params_section += line + "\n"
+                    else:
+                        # It's a continuation line
+                        params_section += line + "\n"
+
+        # Add trait params
+        params_section += trait_params
+        doc_parts.append(params_section)
+
+    # Add remaining sections
+    if remaining_sections:
+        doc_parts.append(remaining_sections)
+
+    # Join all parts with proper spacing
+    doc = "\n\n".join(doc_parts)
     cls.__doc__ = doc
 
     # some attribute doc
