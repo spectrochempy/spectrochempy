@@ -207,23 +207,6 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
     # Start with the existing docstring (summary + extended summary)
     existing_doc = cls.__doc__ or ""
 
-    # Split existing doc into summary/extended summary and sections
-    # We look for the first section header (Parameters, Returns, etc.)
-    import re
-
-    section_pattern = re.compile(
-        r"^(Parameters|Returns|Other Parameters|Raises|See Also|Notes|Examples|References)\n-+",
-        re.MULTILINE,
-    )
-
-    match = section_pattern.search(existing_doc)
-    if match:
-        intro = existing_doc[: match.start()].rstrip()
-        sections = existing_doc[match.start() :]
-    else:
-        intro = existing_doc.rstrip()
-        sections = ""
-
     # Build the Parameters section from traits
     trait_params = ""
     trait_names = {name for name, _ in traits}
@@ -265,64 +248,137 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
         else:
             trait_params += "\n"
 
-    # Extract existing Parameters section content if present
-    existing_params_content = ""
-    remaining_sections = sections
+    # Parse docstring into sections using a robust line-by-line approach
+    # Known numpydoc section names
+    KNOWN_SECTIONS = {
+        "Parameters",
+        "Returns",
+        "Yields",
+        "Other Parameters",
+        "Raises",
+        "Warns",
+        "Warnings",
+        "See Also",
+        "Notes",
+        "References",
+        "Examples",
+        "Attributes",
+        "Methods",
+    }
 
-    if sections and "Parameters\n----------" in sections:
-        # Extract existing Parameters section content
-        # Build pattern piece by piece to avoid multi-line raw strings
-        params_pt1 = r"Parameters\n-+"
-        params_pt2 = r"\n(.*?)"
-        params_pt3 = r"(?:(?=\n[A-Za-z][A-Za-z0-9_ ]*\n-+)|\Z)"
-        params_pattern = params_pt1 + params_pt2 + params_pt3
-        params_match = re.search(params_pattern, sections, re.DOTALL)
-        if params_match:
-            existing_params_content = params_match.group(1)
-            # Remove the entire Parameters section from remaining sections
-            remove_pt1 = r"Parameters\n-+"
-            remove_pt2 = r"\n.*?(?:(?=\n[A-Za-z][A-Za-z0-9_ ]*\n-+)|\Z)"
-            remove_pattern = remove_pt1 + remove_pt2
-            remaining_sections = re.sub(
-                remove_pattern, "", sections, flags=re.DOTALL
-            ).strip()
+    lines = existing_doc.split("\n")
+    sections_dict = {}
+    current_section = "__summary__"
+    current_content = []
+    i = 0
 
-    # Combine: intro + Parameters + other sections
-    doc_parts = []
-    if intro:
-        doc_parts.append(intro)
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
 
-    # Add Parameters section if we have any params
-    if trait_params or existing_params_content:
-        params_section = "Parameters\n----------\n"
-
-        # Add existing params that are not trait params (e.g., log_level, warm_start)
-        if existing_params_content:
-            for line in existing_params_content.splitlines():
-                # Check if this line starts a parameter definition
-                stripped = line.strip()
-                if stripped:
-                    # Check if it's a parameter name (starts with word chars followed by ' :')
-                    param_match = re.match(r"^(\w+)\s*:", stripped)
-                    if param_match:
-                        param_name = param_match.group(1)
-                        if param_name not in trait_names:
-                            params_section += line + "\n"
+        # Check if this is a section header
+        if stripped in KNOWN_SECTIONS and i + 1 < len(lines):
+            next_line = lines[i + 1]
+            # Check if next line is all dashes (allowing whitespace)
+            if next_line.strip() and all(c == "-" for c in next_line.strip()):
+                # Save current section
+                if current_content:
+                    content = "\n".join(current_content).rstrip()
+                    if current_section in sections_dict:
+                        sections_dict[current_section] += "\n" + content
                     else:
-                        # It's a continuation line
-                        params_section += line + "\n"
+                        sections_dict[current_section] = content
 
-        # Add trait params
-        params_section += trait_params
+                # Start new section
+                current_section = stripped
+                current_content = []
+                i += 2  # Skip header and underline
+                continue
+
+        current_content.append(line)
+        i += 1
+
+    # Save final section
+    if current_content:
+        content = "\n".join(current_content).rstrip()
+        if current_section in sections_dict:
+            sections_dict[current_section] += "\n" + content
+        else:
+            sections_dict[current_section] = content
+
+    # Extract summary
+    summary = sections_dict.pop("__summary__", "").strip()
+
+    # Extract all Parameters content and merge
+    params_content = ""
+    if "Parameters" in sections_dict:
+        params_content = sections_dict.pop("Parameters").strip()
+
+    # Build merged Parameters section
+    merged_params = []
+
+    # Add existing non-trait params
+    if params_content:
+        for line in params_content.split("\n"):
+            stripped = line.strip()
+            if stripped:
+                # Check if it's a parameter definition (param_name : ...)
+                import re
+
+                param_match = re.match(r"^(\w+)\s*:", stripped)
+                if param_match:
+                    param_name = param_match.group(1)
+                    if param_name not in trait_names:
+                        merged_params.append(line)
+                else:
+                    # It's a continuation line
+                    merged_params.append(line)
+            else:
+                merged_params.append(line)
+
+    # Add trait params
+    if trait_params:
+        merged_params.append(trait_params.rstrip())
+
+    # Build final docstring with proper section order
+    doc_parts = []
+
+    # Add summary
+    if summary:
+        doc_parts.append(summary)
+
+    # Add merged Parameters section
+    if merged_params:
+        params_section = "Parameters\n----------\n" + "\n".join(merged_params)
         doc_parts.append(params_section)
 
-    # Add remaining sections
-    if remaining_sections:
-        doc_parts.append(remaining_sections)
+    # Add remaining sections in preferred order
+    section_order = [
+        "Returns",
+        "Yields",
+        "Other Parameters",
+        "Raises",
+        "Warns",
+        "Warnings",
+        "See Also",
+        "Notes",
+        "References",
+        "Examples",
+        "Attributes",
+        "Methods",
+    ]
 
-    # Join all parts with proper spacing
+    for section_name in section_order:
+        if section_name in sections_dict:
+            content = sections_dict[section_name]
+            underline = "-" * len(section_name)
+            doc_parts.append(f"{section_name}\n{underline}\n{content}")
+
+    # Join with double newlines
     doc = "\n\n".join(doc_parts)
-    cls.__doc__ = doc
+    # Add leading newline to satisfy numpydoc GL01 (expects 1 blank line at start)
+    # and trailing newline for GL02 (expects 1 blank line at end)
+    cls.__doc__ = "\n" + doc + "\n"
 
     # some attribute doc
     if hasattr(cls, "config"):
