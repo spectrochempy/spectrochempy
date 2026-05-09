@@ -212,7 +212,7 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
     import re
 
     section_pattern = re.compile(
-        r"^(Parameters|Returns|Other Parameters|Raises|See Also|Notes|Examples|References)\n-+\n",
+        r"^(Parameters|Returns|Other Parameters|Raises|See Also|Notes|Examples|References)\n-+",
         re.MULTILINE,
     )
 
@@ -267,12 +267,15 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
     doc = intro
     if trait_params or "Parameters\n----------" in sections:
         doc += "\n\nParameters\n----------\n"
-        doc += trait_params
-        # Add any existing parameter docs that aren't traits
+        # Add any existing parameter docs that aren't traits (e.g., log_level, warm_start)
+        # These come first to match the signature order
         if sections:
             # Extract existing Parameters section content
+            # Pattern matches everything until the next section header (word chars followed by \n-+)
             params_match = re.search(
-                r"Parameters\n-+\n(.*?)(?=\n\S|\Z)", sections, re.DOTALL
+                r"Parameters\n-+\n(.*?)((?=\n[A-Za-z][A-Za-z0-9_ ]*\n-+)|$)",
+                sections,
+                re.DOTALL,
             )
             if params_match:
                 existing_params = params_match.group(1)
@@ -282,12 +285,15 @@ def signature_has_configurable_traits(cls: type[T]) -> type[T]:
                         line.startswith(trait_name) for trait_name, _ in traits
                     ):
                         doc += f"{line}\n"
+        # Add trait params after existing params
+        doc += trait_params
 
     # Add remaining sections (Other Parameters, Returns, See Also, etc.)
     if sections:
         # Remove Parameters section from sections (already handled)
+        # Pattern matches everything until the next section header (word chars followed by \n-+)
         remaining = re.sub(
-            r"Parameters\n-+\n.*?(?=\n\S+\n-+|\Z)",
+            r"Parameters\n-+\n(.*?)(?=\n[A-Za-z][A-Za-z0-9_ ]*\n-+|$)",
             "",
             sections,
             flags=re.DOTALL,

@@ -257,15 +257,18 @@ array of values drawn from a normal distribution is used."""
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
 
         Returns
         -------
-        %(analysis_fit.returns)s
+        self
+            The fitted instance itself.
 
         See Also
         --------
-        %(analysis_fit.see_also)s
+        transform : Apply dimensionality reduction.
+        fit_transform : Fit the model and apply dimensionality reduction.
 
         """
         return super().fit(X, Y=None)

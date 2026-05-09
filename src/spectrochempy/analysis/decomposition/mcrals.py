@@ -1122,17 +1122,20 @@ and `St`.
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
         Y : :term:`array-like` or list of :term:`array-like`
             Initial concentration or spectra.
 
         Returns
         -------
-        %(analysis_fit.returns)s
+        self
+            The fitted instance itself.
 
         See Also
         --------
-        %(analysis_fit.see_also)s
+        transform : Apply dimensionality reduction.
+        fit_transform : Fit the model and apply dimensionality reduction.
 
         """
         return super().fit(X, Y)
@@ -1143,18 +1146,20 @@ and `St`.
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
         Y : :term:`array-like` or list of :term:`array-like`
             Initial concentration or spectra.
-        %(kwargs)s
 
         Returns
         -------
-        %(analysis_transform.returns)s
+        `NDDataset`
+            Transformed data with shape (:term:`n_observations`, :term:`n_components`).
 
         Other Parameters
         ----------------
-        %(analysis_transform.other_parameters)s
+        n_components : `int`, optional
+            The number of components to use for the reduction.
 
         """
         return super().fit_transform(X, Y, **kwargs)
@@ -1167,7 +1172,8 @@ and `St`.
 
         Parameters
         ----------
-        %(analysis_inverse_transform.parameters)s
+        X_transform : array-like of shape (:term:`n_observations`, :term:`n_components`), optional
+            Reduced `X` data. If not provided, the transform of the fitted X is used.
 
         Returns
         -------
@@ -1176,7 +1182,8 @@ and `St`.
 
         Other Parameters
         ----------------
-        %(analysis_transform.other_parameters)s
+        n_components : `int`, optional
+            The number of components to use for the reconstruction.
 
         """
         return super().inverse_transform(X_transform, **kwargs)

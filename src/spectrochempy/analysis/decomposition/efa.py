@@ -183,15 +183,18 @@ class EFA(DecompositionAnalysis):
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
 
         Returns
         -------
-        %(analysis_fit.returns)s
+        self
+            The fitted instance itself.
 
         See Also
         --------
-        %(analysis_fit.see_also)s
+        transform : Apply dimensionality reduction.
+        fit_transform : Fit the model and apply dimensionality reduction.
 
         """
         return super().fit(X, Y=None)
@@ -202,16 +205,18 @@ class EFA(DecompositionAnalysis):
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
-        %(kwargs)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
 
         Returns
         -------
-        %(analysis_transform.returns)s
+        `NDDataset`
+            Transformed data with shape (:term:`n_observations`, :term:`n_components`).
 
         Other Parameters
         ----------------
-        %(analysis_transform.other_parameters)s
+        n_components : `int`, optional
+            The number of components to use for the reduction.
 
         """
         return super().fit_transform(X, **kwargs)

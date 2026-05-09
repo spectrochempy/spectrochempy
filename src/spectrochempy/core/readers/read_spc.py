@@ -134,6 +134,10 @@ def read_spc(*paths, **kwargs):
     """
     kwargs["filetypes"] = ["Galactic files (*.spc)"]
     kwargs["protocol"] = ["spc"]
+    # For SPC files with multiple subfiles, don't merge them by default
+    # Each subfile should be a separate dataset
+    if "merge" not in kwargs:
+        kwargs["merge"] = False
     importer = Importer()
     return importer(*paths, **kwargs)
 

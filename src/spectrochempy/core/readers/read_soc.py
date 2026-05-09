@@ -60,11 +60,12 @@ def read_soc(*paths, **kwargs):
     download_only: `bool`, optional, default: `False`
         Used only when url are specified.  If True, only downloading and saving of the
         files is performed, with no attempt to read their content.
-    merge : `bool`, optional, default: `True`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged dataset (stacked along the first
-        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
-        then several NDDatasets can be returned for different groups of compatible datasets.
+    merge : `bool`, optional, default: `False`
+        If `False` (default), individual datasets are preserved and returned as a list.
+        If `True` and several filenames have been provided with compatible dimensions,
+        they are merged into a single `NDDataset` (stacked along the first dimension).
+        When datasets have incompatible dimensions or origins, they may be grouped into
+        multiple merged datasets.
     origin : str, optional
         If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
@@ -105,6 +106,10 @@ def read_soc(*paths, **kwargs):
     """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.ddr *.hdr *.sdr)"]
     kwargs["protocol"] = ["soc", "ddr", "hdr", "sdr"]
+    # For SOC files with multiple subfiles, don't merge them by default
+    # Each subfile should be a separate dataset
+    if "merge" not in kwargs:
+        kwargs["merge"] = False
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -152,11 +157,12 @@ def read_ddr(*paths, **kwargs):
     download_only: `bool`, optional, default: `False`
         Used only when url are specified.  If True, only downloading and saving of the
         files is performed, with no attempt to read their content.
-    merge : `bool`, optional, default: `True`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged dataset (stacked along the first
-        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
-        then several NDDatasets can be returned for different groups of compatible datasets.
+    merge : `bool`, optional, default: `False`
+        If `False` (default), individual datasets are preserved and returned as a list.
+        If `True` and several filenames have been provided with compatible dimensions,
+        they are merged into a single `NDDataset` (stacked along the first dimension).
+        When datasets have incompatible dimensions or origins, they may be grouped into
+        multiple merged datasets.
     origin : str, optional
         If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
@@ -198,6 +204,9 @@ def read_ddr(*paths, **kwargs):
     """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.ddr)"]
     kwargs["protocol"] = ["ddr"]
+    # Don't merge files by default - preserve individual datasets
+    if "merge" not in kwargs:
+        kwargs["merge"] = False
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -245,11 +254,12 @@ def read_hdr(*paths, **kwargs):
     download_only: `bool`, optional, default: `False`
         Used only when url are specified.  If True, only downloading and saving of the
         files is performed, with no attempt to read their content.
-    merge : `bool`, optional, default: `True`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged dataset (stacked along the first
-        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
-        then several NDDatasets can be returned for different groups of compatible datasets.
+    merge : `bool`, optional, default: `False`
+        If `False` (default), individual datasets are preserved and returned as a list.
+        If `True` and several filenames have been provided with compatible dimensions,
+        they are merged into a single `NDDataset` (stacked along the first dimension).
+        When datasets have incompatible dimensions or origins, they may be grouped into
+        multiple merged datasets.
     origin : str, optional
         If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
@@ -291,6 +301,9 @@ def read_hdr(*paths, **kwargs):
     """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.hdr)"]
     kwargs["protocol"] = ["hdr"]
+    # Don't merge files by default - preserve individual datasets
+    if "merge" not in kwargs:
+        kwargs["merge"] = False
     importer = Importer()
     return importer(*paths, **kwargs)
 
@@ -338,11 +351,12 @@ def read_sdr(*paths, **kwargs):
     download_only: `bool`, optional, default: `False`
         Used only when url are specified.  If True, only downloading and saving of the
         files is performed, with no attempt to read their content.
-    merge : `bool`, optional, default: `True`
-        If `True` and several filenames or a ``directory`` have been provided as
-        arguments, then a single `NDDataset` with merged dataset (stacked along the first
-        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
-        then several NDDatasets can be returned for different groups of compatible datasets.
+    merge : `bool`, optional, default: `False`
+        If `False` (default), individual datasets are preserved and returned as a list.
+        If `True` and several filenames have been provided with compatible dimensions,
+        they are merged into a single `NDDataset` (stacked along the first dimension).
+        When datasets have incompatible dimensions or origins, they may be grouped into
+        multiple merged datasets.
     origin : str, optional
         If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
         or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
@@ -384,6 +398,9 @@ def read_sdr(*paths, **kwargs):
     """
     kwargs["filetypes"] = ["Surface Optics Corp. (*.sdr)"]
     kwargs["protocol"] = ["sdr"]
+    # Don't merge files by default - preserve individual datasets
+    if "merge" not in kwargs:
+        kwargs["merge"] = False
     importer = Importer()
     return importer(*paths, **kwargs)
 

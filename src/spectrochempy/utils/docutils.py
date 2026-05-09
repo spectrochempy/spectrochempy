@@ -245,9 +245,6 @@ def _scpy_numpydoc_validate(func_name, exclude=None):
         if not doc.doc_other_parameters:
             errs.append(_scpy_error("GL11"))
 
-    if exclude:
-        errs = _remove_errors(errs, exclude)
-
     if doc.see_also:
         for rel_name in doc.see_also:
             if rel_name.startswith("spectrochempy."):
@@ -294,6 +291,10 @@ def _scpy_numpydoc_validate(func_name, exclude=None):
     # case of properties (we accept a single line summary)
     if hasattr(doc.code_obj, "fget"):
         errs = _remove_errors(errs, "ES01")
+
+    # Apply exclude filter at the end
+    if exclude:
+        errs = _remove_errors(errs, exclude)
 
     result["errors"] = errs
     # Lazy import to avoid loading matplotlib at module import time

@@ -710,10 +710,8 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
         Y : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_targets`), optional
             New data, where :term:`n_targets` is the number of variables to predict.
             if not provided, the input dataset of the `fit` method will be used.
-            both : `bool`, default: `False`
+        both : `bool`, default: `False`
             Whether to also apply the dimensionality reduction to Y when neither X nor Y are provided.
-        **kwargs : keyword parameters, optional
-            See Other Parameters.
 
         Returns
         -------
@@ -812,8 +810,6 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
             Training data.
         both : `bool`, optional
             Whether to also apply the dimensionality reduction to Y when neither X nor Y are provided.
-        **kwargs : keyword arguments, optional
-            Additional keyword arguments passed to the underlying implementation.
 
         Returns
         -------
@@ -822,7 +818,14 @@ class CrossDecompositionAnalysis(DecompositionAnalysis):
 
         """
         try:
-            return self.fit(X, Y).transform(X, Y, both=both)
+            result = self.fit(X, Y).transform(X, Y, both=both)
+            # fit_transform should return only x_scores by default (not a tuple)
+            if both:
+                return result
+            # result could be a tuple from _transform - return only x_scores
+            if isinstance(result, tuple):
+                return result[0]
+            return result
         except NotFittedError:
             # If transform failed, return None
             return None
