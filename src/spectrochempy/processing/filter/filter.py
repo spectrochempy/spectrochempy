@@ -12,7 +12,6 @@ from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import docprocess
 
 __dataset_methods__ = [
     "savgol_filter",
@@ -32,16 +31,6 @@ savgol : Savitzky-Golay filter.
 savgol_filter : Alias of `savgol`
 whittaker : Whittaker-Eilers filter.
 """
-docprocess.get_sections(
-    docprocess.dedent(_common_see_also),
-    base="Filter",
-    sections=["See Also"],
-)
-docprocess.delete_params("Filter.see_also", "Filter")
-docprocess.delete_params("Filter.see_also", "savgol")
-docprocess.delete_params("Filter.see_also", "savgol_filter")
-docprocess.delete_params("Filter.see_also", "whittaker")
-docprocess.delete_params("Filter.see_also", "smooth")
 
 
 # ======================================================================================
@@ -49,8 +38,7 @@ docprocess.delete_params("Filter.see_also", "smooth")
 # ======================================================================================
 @signature_has_configurable_traits
 class Filter(ProcessingConfigurable):
-    __doc__ = docprocess.dedent(
-        r"""
+    """
     Filters/smoothers processor.
 
     The filters can be applied to 1D datasets consisting in a single row
@@ -67,13 +55,30 @@ class Filter(ProcessingConfigurable):
 
     Parameters
     ----------
-    %(ProcessingConfigurable.parameters)s
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+    method : any of [``"avg"``, ``"han"``, ``"hamming"``, ``"bartlett"``, ``"blackman"``, ``"median"``, ``"savgol"``, ``"whittaker"``], optional, default: ``"savgol"``
+        The filter method to be applied. By default, the Savitzky-Golay (savgol) filter is applied.
+    size : `int`, optional, default: 5
+        The size of the filter window. size must be a positive odd integer.
+    order : `int`, optional, default: 2
+        The order of the polynomial used to fit the data.
+    deriv : `int`, optional, default: 0
+        The order of the derivative to compute.
+    lamb : `float`, optional, default: 10.0
+        The smoothing parameter for the Whittaker-Eilers filter.
+    cval : `float`, optional, default: 0.0
+        The value to fill past the edges of the input if `mode` is ``'constant'``.
 
     See Also
     --------
-    %(Filter.see_also.no_Filter)s
-    """,
-    )
+    smooth : Function to smooth data using various window filters.
+    savgol : Savitzky-Golay filter.
+    savgol_filter : Alias of `savgol`
+    whittaker : Whittaker-Eilers filter.
+    """
+
     method = tr.Enum(
         [
             "avg",
@@ -222,17 +227,6 @@ and ‘nearest’.
         return data
 
 
-docprocess.keep_params("Filter.parameters", "log_level")
-docprocess.keep_params("Filter.parameters", "method")
-docprocess.keep_params("Filter.parameters", "size")
-docprocess.keep_params("Filter.parameters", "order")
-docprocess.keep_params("Filter.parameters", "deriv")
-docprocess.keep_params("Filter.parameters", "lamb")
-docprocess.keep_params("Filter.parameters", "delta")
-docprocess.keep_params("Filter.parameters", "mode")
-docprocess.keep_params("Filter.parameters", "cval")
-
-
 # TODO history
 #     new.history = (
 #         f"savgol_filter applied (window_length={window_length}, "
@@ -251,7 +245,6 @@ docprocess.keep_params("Filter.parameters", "cval")
 # --------------------------------------------------------------------------------------
 
 
-@docprocess.dedent
 def smooth(dataset, size=5, window="avg", **kwargs):
     """
     Smooth the data using a window with requested size.
@@ -260,13 +253,16 @@ def smooth(dataset, size=5, window="avg", **kwargs):
 
     Parameters
     ----------
-    %(dataset)s
-    %(Filter.parameters.size)s
+    dataset : `NDDataset`
+        Input dataset to smooth.
+    size : `int`, optional, default: 5
+        The size of the smoothing window.
     window : `str`, optional, default:'flat'
         The type of window from 'flat' or 'avg', 'han' or 'hanning', 'hamming',
         'bartlett', 'blackman'.
         `avg` window will produce a moving average smoothing.
-    %(kwargs)s
+    **kwargs : keyword arguments, optional
+        Additional keyword arguments passed to the filter.
 
     Returns
     -------
@@ -275,14 +271,18 @@ def smooth(dataset, size=5, window="avg", **kwargs):
 
     Other Parameters
     ----------------
-    %(dim)s
-    %(Filter.parameters.mode)s
-    %(Filter.parameters.cval)s
-    %(Filter.parameters.log_level)s
+    dim : `int`, optional, default: -1
+        Axis along which to apply the filter.
+    mode : `str`, optional, default: 'nearest'
+        The mode parameter determines how the array borders are handled.
+    cval : `float`, optional, default: 0.0
+        Value to fill past edges of input if mode is 'constant'.
+    log_level : `str`, optional, default: 'WARNING'
+        The log level for the filter.
 
     See Also
     --------
-    %(Filter.see_also.no_smooth)s
+    Filter : Filter processing.
 
     """
     if window in ["flat", "avg", "han", "hanning", "hamming", "bartlett", "blackman"]:
@@ -304,7 +304,6 @@ def smooth(dataset, size=5, window="avg", **kwargs):
 
 
 # --------------------------------------------------------------------------------------
-@docprocess.dedent
 def savgol(dataset, size=5, order=2, **kwargs):
     """
     Savitzky-Golay filter.
@@ -314,12 +313,15 @@ def savgol(dataset, size=5, order=2, **kwargs):
 
     Parameters
     ----------
-    %(dataset)s
-    %(Filter.parameters.size)s
-    order : `int`, optional, default=2
+    dataset : `NDDataset`
+        Input dataset to filter.
+    size : `int`, optional, default: 5
+        The size of the smoothing window.
+    order : `int`, optional, default: 2
         The order of the polynomial used to fit the data. `order` must be less
         than size.
-    %(kwargs)s
+    **kwargs : keyword arguments, optional
+        Additional keyword arguments passed to the filter.
 
     Returns
     -------
@@ -328,16 +330,22 @@ def savgol(dataset, size=5, order=2, **kwargs):
 
     Other Parameters
     ----------------
-    %(dim)s
-    %(Filter.parameters.deriv)s
-    %(Filter.parameters.delta)s
-    %(Filter.parameters.mode)s
-    %(Filter.parameters.cval)s
-    %(Filter.parameters.log_level)s
+    dim : `int`, optional, default: -1
+        Axis along which to apply the filter.
+    deriv : `int`, optional, default: 0
+        The order of the derivative to compute.
+    delta : `float`, optional, default: 1.0
+        The spacing of the samples to which the filter will be applied.
+    mode : `str`, optional, default: 'nearest'
+        The mode parameter determines how the array borders are handled.
+    cval : `float`, optional, default: 0.0
+        Value to fill past edges of input if mode is 'constant'.
+    log_level : `str`, optional, default: 'WARNING'
+        The log level for the filter.
 
     See Also
     --------
-    %(Filter.see_also.no_savgol)s
+    Filter : Filter processing.
 
     Notes
     -----
@@ -368,7 +376,6 @@ def savgol_filter(*args, **kwargs):
     return savgol(*args, **kwargs)
 
 
-@docprocess.dedent
 def whittaker(dataset, lamb=1.0, order=2, **kwargs):
     """
     Smooth the data using the Whittaker smoothing algorithm.
@@ -380,11 +387,14 @@ def whittaker(dataset, lamb=1.0, order=2, **kwargs):
 
     Parameters
     ----------
-    %(dataset)s
-    %(Filter.parameters.lamb)s
-    order : `int`, optional, default=2
+    dataset : `NDDataset`
+        Input dataset to smooth.
+    lamb : `float`, optional, default: 1.0
+        The smoothing parameter. Larger values make the result smoother.
+    order : `int`, optional, default: 2
         The difference order of the penalized least-squares.
-    %(kwargs)s
+    **kwargs : keyword arguments, optional
+        Additional keyword arguments passed to the filter.
 
     Returns
     -------
@@ -393,12 +403,14 @@ def whittaker(dataset, lamb=1.0, order=2, **kwargs):
 
     Other Parameters
     ----------------
-    %(dim)s
-    %(Filter.parameters.log_level)s
+    dim : `int`, optional, default: -1
+        Axis along which to apply the filter.
+    log_level : `str`, optional, default: 'WARNING'
+        The log level for the filter.
 
     See Also
     --------
-    %(Filter.see_also.no_whittaker)s
+    Filter : Filter processing.
 
     """
     return Filter(method="whittaker", lamb=lamb, order=order, **kwargs).transform(

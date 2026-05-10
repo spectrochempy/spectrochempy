@@ -24,14 +24,10 @@ from spectrochempy.core.readers.importer import merge_datasets
 from spectrochempy.core.readers.read_omnic import read_omnic
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils.datetimeutils import UTC
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.file import get_directory_name
 from spectrochempy.utils.file import get_filenames
 
-docprocess.delete_params("Importer.see_also", "read_carroucell")
 
-
-@docprocess.dedent
 def read_carroucell(directory=None, **kwargs):
     r"""
     Open :file:`.spa` files in a directory after a :term:`carroucell` experiment.
@@ -46,11 +42,13 @@ def read_carroucell(directory=None, **kwargs):
     ----------
     directory : `str`, optional
         If not specified, opens a dialog box.
-    %(kwargs)s
+    **kwargs : keyword arguments, optional
+        Additional keyword arguments passed to the importer.
 
     Returns
     -------
-    %(Importer.returns)s
+    list of `NDDataset`
+        List of datasets read from the carroucell files.
 
     Other Parameters
     ----------------
@@ -65,7 +63,7 @@ def read_carroucell(directory=None, **kwargs):
 
     See Also
     --------
-    %(Importer.see_also.no_read_carroucell)s
+    read : Generic read function.
 
     Notes
     -----

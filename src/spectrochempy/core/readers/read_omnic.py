@@ -28,16 +28,12 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils.datetimeutils import UTC
 from spectrochempy.utils.datetimeutils import utcnow
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.file import fromfile
+
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-docprocess.delete_params("Importer.see_also", "read_omnic")
-
-
-@docprocess.dedent
 def read_omnic(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet OMNIC file.
@@ -60,33 +56,111 @@ def read_omnic(*paths, **kwargs):
 
     Parameters
     ----------
-    %(Importer.parameters)s
+    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
+        The data source(s) can be specified by the name or a list of name for the
+        file(s) to be loaded:
+
+        - e.g., ( filename1, filename2, ...,  kwargs )
+
+        If the list of filenames are enclosed into brackets:
+
+        - e.g., ( [filename1, filename2, ...], kwargs )
+
+        The returned datasets are merged to form a single dataset,
+        except if ``merge`` is set to `False`.
+    **kwargs : keyword parameters, optional
+        See Other Parameters.
 
     Returns
     -------
-    %(Importer.returns)s
+    object : `NDDataset` or list of `NDDataset`
+        The returned dataset(s).
 
     Other Parameters
     ----------------
-    %(Importer.other_parameters)s
+    content : `bytes` object, optional
+        Instead of passing a filename for further reading, a bytes content can be
+        directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly
+        useful for a GUI Dash application to handle drag and drop of files into a
+        Browser.
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
+        Set the column delimiter in CSV file.
+    description : `str`, optional
+        A Custom description.
+    directory : `~pathlib.Path` object objects or valid urls, optional
+        From where to read the files.
+    download_only: `bool`, optional, default: `False`
+        Used only when url are specified.  If True, only downloading and saving of the
+        files is performed, with no attempt to read their content.
+    merge : `bool`, optional, default: `False`
+        If `True` and several filenames or a ``directory`` have been provided as
+        arguments, then a single `NDDataset` with merged dataset (stacked along the first
+        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+        then several NDDatasets can be returned for different groups of compatible datasets.
+    origin : str, optional
+        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+        automatically, but can be set manually.
+
+        It is used for instance whn reading directory with different types of files, for merging
+        the datasets with compatible dimensions and different origin into different groups.
+
+        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+        have been implemented.
+    pattern : `str`, optional
+        A pattern to filter the files to read.
+
+        .. versionadded:: 0.7.2
+    protocol : `str`, optional
+        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'excel'``}. If not provided, the correct protocol
+        is inferred (whenever it is possible) from the filename extension.
+    read_only: `bool`, optional, default: `True`
+        Used only when url are specified.  If True, saving of the
+        files is performed in the current directory, or in the directory specified by
+        the directory parameter.
+    recursive : `bool`, optional, default: `False`
+        Read also in subfolders.
+    replace_existing: `bool`, optional, default: `False`
+        Used only when url are specified. By default, existing files are not replaced
+        so not downloaded.
+    sortbydate : `bool`, optional, default: `True`
+        Sort multiple filename by acquisition date.
 
     See Also
     --------
-    read_spg : Read grouped Omnic spectra.
-    read_spa : Read single Omnic spectra.
-    read_srs : Read series Omnic spectra.
-    %(Importer.see_also.no_read_omnic)s
+    read : Generic reader inferring protocol from the filename extension.
+    read_zip : Read Zip archives (containing spectrochempy readable files)
+    read_dir : Read an entire directory.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
+    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_galactic : Read Galactic files (:file:`.spc`).
+    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_csv : Read CSV files (:file:`.csv`).
+    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    read_carroucell : Read files in a directory after a carroucell experiment.
+    read_wire : Read Renishaw Wire files (:file:`.wdf`).
+    read_spg : Alias of `read_omnic`.
+    read_spa : Alias of `read_omnic`.
+    read_srs : Alias of `read_omnic`.
 
     Examples
     --------
     Reading a single OMNIC file  (providing a windows type filename relative
-    to the default `datadir` )
+    to the default ``datadir`` )
 
     >>> scp.read_omnic('irdata\\nh4y-activation.spg')
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
-    Reading a single OMNIC file  (providing a unix/python type filename
-    relative to the default `datadir` )
+    Reading a single OMNIC file  (providing a unix/python type filename relative
+    to the default ``datadir`` )
+
     Note that here read_omnic is called as a classmethod of the NDDataset class
 
     >>> scp.read_omnic('irdata/nh4y-activation.spg')
@@ -100,13 +174,8 @@ def read_omnic(*paths, **kwargs):
     >>> scp.read_omnic(p)
     NDDataset: [float64] a.u. (shape: (y:55, x:5549))
 
-    The directory can also be specified independently, either as a string or
-    a pathlib object
-
-    >>> scp.read_omnic('nh4y-activation.spg', directory=folder)
-    NDDataset: [float64] a.u. (shape: (y:55, x:5549))
-
-    Multiple files not merged (return a list of datasets)
+    Multiple files not merged (return a list of datasets).
+    Note that a directory is specified
 
     >>> le = scp.read_omnic('irdata/nh4y-activation.spg', 'wodger.spg')
     >>> len(le)
@@ -119,51 +188,34 @@ def read_omnic(*paths, **kwargs):
     >>> scp.read_omnic('irdata/nh4y-activation.spg', 'wodger.spg', merge=True)
     NDDataset: [float64] a.u. (shape: (y:57, x:5549))
 
-    Multiple files to merge : they are passed as a list (note the brakets)
-    instead of using the keyword `merge`
+    Multiple files to merge : they are passed as a list instead of using the keyword
+    `merge`
 
     >>> scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'])
     NDDataset: [float64] a.u. (shape: (y:57, x:5549))
 
-    Multiple files not merged : they are passed as a list but `merge` is set
-    to false
+    Multiple files not merged : they are passed as a list but `merge` is set to false
 
     >>> l2 = scp.read_omnic(['irdata/nh4y-activation.spg', 'wodger.spg'], merge=False)
     >>> len(l2)
     2
 
-    Read without a filename. This has the effect of opening a dialog for
-    file(s) selection
+    Read without a filename. This has the effect of opening a dialog for file(s)
+    selection
 
     >>> nd = scp.read_omnic()
 
-    Read in a directory (assume that only OPUS files are present in the
-    directory
+    Read in a directory (assume that only OMNIC files are present in the directory
     (else we must use the generic `read` function instead)
 
-    >>> l3 = scp.read_omnic(directory='irdata/subdir/1-20')
+    >>> l3 = scp.read_omnic(directory='irdata/OMNIC/1-20')
     >>> len(l3)
     3
 
-    Again we can use merge to stack all 4 spectra if thet have compatible
-    dimensions.
+    Again we can use merge to stack all 4 spectra if they have compatible dimensions.
 
-    >>> scp.read_omnic(directory='irdata/subdir', merge=True)
-    NDDataset: [float64] a.u. (shape: (y:4, x:5549))
-
-    An example, where bytes contents are passed directly to the read_omnic
-    method.
-
-    >>> datadir = scp.preferences.datadir
-    >>> filename1 = datadir / 'irdata' / 'subdir' / '7_CZ0-100 Pd_101.SPA'
-    >>> content1 = filename1.read_bytes()
-    >>> filename2 = datadir / 'wodger.spg'
-    >>> content2 = filename2.read_bytes()
-    >>> listnd = scp.read_omnic({filename1.name: content1, filename2.name: content2})
-    >>> len(listnd)
-    2
-    >>> scp.read_omnic({filename1.name: content1, filename2.name: content2}, merge=True)
-    NDDataset: [float64] a.u. (shape: (y:3, x:5549))
+    >>> scp.read_omnic(directory='irdata/OMNIC/1-20', merge=True)
+    [NDDataset: [float64] a.u. (shape: (y:1, x:5549)), NDDataset: [float64] a.u. (shape: (y:4, x:5549))]
 
     """
     kwargs["filetypes"] = ["OMNIC files (*.spa *.spg)", "OMNIC series (*.srs)"]
@@ -172,29 +224,105 @@ def read_omnic(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@docprocess.dedent
 def read_spg(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.spg``.
 
     Parameters
     ----------
-    %(Importer.parameters)s
+    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
+    The data source(s) can be specified by the name or a list of name for the
+    file(s) to be loaded:
+
+        - e.g., ( filename1, filename2, ...,  kwargs )
+
+        If the list of filenames are enclosed into brackets:
+
+        - e.g., ( [filename1, filename2, ...], kwargs )
+
+        The returned datasets are merged to form a single dataset,
+        except if ``merge`` is set to `False`.
+    **kwargs : keyword parameters, optional
+        See Other Parameters.
 
     Returns
     -------
-    %(Importer.returns)s
+    object : `NDDataset` or list of `NDDataset`
+    The returned dataset(s).
 
     Other Parameters
     ----------------
-    %(Importer.other_parameters)s
+    content : `bytes` object, optional
+    Instead of passing a filename for further reading, a bytes content can be
+    directly provided as bytes objects.
+    The most convenient way is to use a dictionary. This feature is particularly
+    useful for a GUI Dash application to handle drag and drop of files into a
+    Browser.
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
+    Set the column delimiter in CSV file.
+    description : `str`, optional
+    A Custom description.
+    directory : `~pathlib.Path` object objects or valid urls, optional
+    From where to read the files.
+    download_only: `bool`, optional, default: `False`
+    Used only when url are specified.  If True, only downloading and saving of the
+    files is performed, with no attempt to read their content.
+    merge : `bool`, optional, default: `False`
+    If `True` and several filenames or a ``directory`` have been provided as
+    arguments, then a single `NDDataset` with merged dataset (stacked along the first
+    dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+    then several NDDatasets can be returned for different groups of compatible datasets.
+    origin : str, optional
+    If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+    or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+    automatically, but can be set manually.
+
+    It is used for instance whn reading directory with different types of files, for merging
+    the datasets with compatible dimensions and different origin into different groups.
+
+    It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+    it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+    have been implemented.
+    pattern : `str`, optional
+    A pattern to filter the files to read.
+
+    .. versionadded:: 0.7.2
+    protocol : `str`, optional
+    ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+    ``'csv'``, ``'excel'``}. If not provided, the correct protocol
+    is inferred (whenever it is possible) from the filename extension.
+    read_only: `bool`, optional, default: `True`
+    Used only when url are specified.  If True, saving of the
+    files is performed in the current directory, or in the directory specified by
+    the directory parameter.
+    recursive : `bool`, optional, default: `False`
+    Read also in subfolders.
+    replace_existing: `bool`, optional, default: `False`
+    Used only when url are specified. By default, existing files are not replaced
+    so not downloaded.
+    sortbydate : `bool`, optional, default: `True`
+    Sort multiple filename by acquisition date.
 
     See Also
     --------
     read_spg : Read grouped Omnic spectra.
     read_spa : Read single Omnic spectra.
     read_srs : Read series Omnic spectra.
-    %(Importer.see_also.no_read_omnic)s
+    read : Generic reader inferring protocol from the filename extension.
+    read_zip : Read Zip archives (containing spectrochempy readable files)
+    read_dir : Read an entire directory.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
+    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_galactic : Read Galactic files (:file:`.spc`).
+    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_csv : Read CSV files (:file:`.csv`).
+    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    read_carroucell : Read files in a directory after a carroucell experiment.
+    read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes
     -----
@@ -213,26 +341,102 @@ def read_spg(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@docprocess.dedent
 def read_spa(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.spa``.
 
     Parameters
     ----------
-    %(Importer.parameters)s
+    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
+    The data source(s) can be specified by the name or a list of name for the
+    file(s) to be loaded:
+
+        - e.g., ( filename1, filename2, ...,  kwargs )
+
+        If the list of filenames are enclosed into brackets:
+
+        - e.g., ( [filename1, filename2, ...], kwargs )
+
+        The returned datasets are merged to form a single dataset,
+        except if ``merge`` is set to `False`.
+    **kwargs : keyword parameters, optional
+        See Other Parameters.
 
     Returns
     -------
-    %(Importer.returns)s
+    object : `NDDataset` or list of `NDDataset`
+    The returned dataset(s).
 
     Other Parameters
     ----------------
-    %(Importer.other_parameters)s
+    content : `bytes` object, optional
+    Instead of passing a filename for further reading, a bytes content can be
+    directly provided as bytes objects.
+    The most convenient way is to use a dictionary. This feature is particularly
+    useful for a GUI Dash application to handle drag and drop of files into a
+    Browser.
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
+    Set the column delimiter in CSV file.
+    description : `str`, optional
+    A Custom description.
+    directory : `~pathlib.Path` object objects or valid urls, optional
+    From where to read the files.
+    download_only: `bool`, optional, default: `False`
+    Used only when url are specified.  If True, only downloading and saving of the
+    files is performed, with no attempt to read their content.
+    merge : `bool`, optional, default: `False`
+    If `True` and several filenames or a ``directory`` have been provided as
+    arguments, then a single `NDDataset` with merged dataset (stacked along the first
+    dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+    then several NDDatasets can be returned for different groups of compatible datasets.
+    origin : str, optional
+    If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+    or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+    automatically, but can be set manually.
+
+    It is used for instance whn reading directory with different types of files, for merging
+    the datasets with compatible dimensions and different origin into different groups.
+
+    It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+    it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+    have been implemented.
+    pattern : `str`, optional
+    A pattern to filter the files to read.
+
+    .. versionadded:: 0.7.2
+    protocol : `str`, optional
+    ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+    ``'csv'``, ``'excel'``}. If not provided, the correct protocol
+    is inferred (whenever it is possible) from the filename extension.
+    read_only: `bool`, optional, default: `True`
+    Used only when url are specified.  If True, saving of the
+    files is performed in the current directory, or in the directory specified by
+    the directory parameter.
+    recursive : `bool`, optional, default: `False`
+    Read also in subfolders.
+    replace_existing: `bool`, optional, default: `False`
+    Used only when url are specified. By default, existing files are not replaced
+    so not downloaded.
+    sortbydate : `bool`, optional, default: `True`
+    Sort multiple filename by acquisition date.
 
     See Also
     --------
-    %(Importer.see_also)s
+    read : Generic reader inferring protocol from the filename extension.
+    read_zip : Read Zip archives (containing spectrochempy readable files)
+    read_dir : Read an entire directory.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
+    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_galactic : Read Galactic files (:file:`.spc`).
+    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_csv : Read CSV files (:file:`.csv`).
+    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    read_carroucell : Read files in a directory after a carroucell experiment.
+    read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes
     -----
@@ -253,18 +457,31 @@ def read_spa(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@docprocess.dedent
 def read_srs(*paths, **kwargs):
     r"""
     Open a Thermo Nicolet file or a list of files with extension ``.srs``.
 
     Parameters
     ----------
-    %(Importer.parameters)s
+    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
+    The data source(s) can be specified by the name or a list of name for the
+    file(s) to be loaded:
+
+        - e.g., ( filename1, filename2, ...,  kwargs )
+
+        If the list of filenames are enclosed into brackets:
+
+        - e.g., ( [filename1, filename2, ...], kwargs )
+
+        The returned datasets are merged to form a single dataset,
+        except if ``merge`` is set to `False`.
+    **kwargs : keyword parameters, optional
+        See Other Parameters.
 
     Returns
     -------
-    %(Importer.returns)s
+    object : `NDDataset` or list of `NDDataset`
+    The returned dataset(s).
         When return_bg is set to 'True', the series background is returned.
 
     Other Parameters
@@ -276,11 +493,74 @@ def read_srs(*paths, **kwargs):
         In most srs files, the absorbance/intensity data are recorded from high to low
         wavenumbers. However, in some cases the data maybe stored in low to high order.
         If your data appear reversed, set 'reverse_x=True'.
-    %(Importer.other_parameters)s
+    content : `bytes` object, optional
+    Instead of passing a filename for further reading, a bytes content can be
+    directly provided as bytes objects.
+    The most convenient way is to use a dictionary. This feature is particularly
+    useful for a GUI Dash application to handle drag and drop of files into a
+    Browser.
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
+    Set the column delimiter in CSV file.
+    description : `str`, optional
+    A Custom description.
+    directory : `~pathlib.Path` object objects or valid urls, optional
+    From where to read the files.
+    download_only: `bool`, optional, default: `False`
+    Used only when url are specified.  If True, only downloading and saving of the
+    files is performed, with no attempt to read their content.
+    merge : `bool`, optional, default: `False`
+    If `True` and several filenames or a ``directory`` have been provided as
+    arguments, then a single `NDDataset` with merged dataset (stacked along the first
+    dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+    then several NDDatasets can be returned for different groups of compatible datasets.
+    origin : str, optional
+    If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+    or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+    automatically, but can be set manually.
+
+    It is used for instance whn reading directory with different types of files, for merging
+    the datasets with compatible dimensions and different origin into different groups.
+
+    It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+    it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+    have been implemented.
+    pattern : `str`, optional
+    A pattern to filter the files to read.
+
+    .. versionadded:: 0.7.2
+    protocol : `str`, optional
+    ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
+    ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+    ``'csv'``, ``'excel'``}. If not provided, the correct protocol
+    is inferred (whenever it is possible) from the filename extension.
+    read_only: `bool`, optional, default: `True`
+    Used only when url are specified.  If True, saving of the
+    files is performed in the current directory, or in the directory specified by
+    the directory parameter.
+    recursive : `bool`, optional, default: `False`
+    Read also in subfolders.
+    replace_existing: `bool`, optional, default: `False`
+    Used only when url are specified. By default, existing files are not replaced
+    so not downloaded.
+    sortbydate : `bool`, optional, default: `True`
+    Sort multiple filename by acquisition date.
 
     See Also
     --------
-    %(Importer.see_also)s
+    read : Generic reader inferring protocol from the filename extension.
+    read_zip : Read Zip archives (containing spectrochempy readable files)
+    read_dir : Read an entire directory.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
+    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_galactic : Read Galactic files (:file:`.spc`).
+    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_csv : Read CSV files (:file:`.csv`).
+    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    read_carroucell : Read files in a directory after a carroucell experiment.
+    read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes
     -----
