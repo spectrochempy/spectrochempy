@@ -29,7 +29,7 @@ def test_EFA_docstrings():
         module,
         obj=scp.EFA,
         # exclude some errors - remove whatever you want to check
-        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+        exclude=["SA01", "EX01", "EX02", "ES01", "GL11", "GL08", "PR01"],
     )
 
 

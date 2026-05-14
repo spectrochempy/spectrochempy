@@ -10,7 +10,6 @@ import traitlets as tr
 from spectrochempy.application.application import app
 from spectrochempy.utils.baseconfigurable import BaseConfigurable
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.exceptions import NotTransformedError
 
 
@@ -18,8 +17,7 @@ from spectrochempy.utils.exceptions import NotTransformedError
 # Base class ProcessingConfigurable
 # ======================================================================================
 class ProcessingConfigurable(BaseConfigurable):
-    __doc__ = docprocess.dedent(
-        r"""
+    """
     Abstract class to write processing models.
 
     Unlike the `AnalysisConfigurable` class,
@@ -29,12 +27,13 @@ class ProcessingConfigurable(BaseConfigurable):
 
     Parameters
     ----------
-    %(BaseConfigurable.parameters.log_level)s
-    """,
-    )
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+
+    """
 
     # Get doc sections for reuse in subclass
-    docprocess.get_sections(__doc__, base="ProcessingConfigurable")
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -104,15 +103,17 @@ class ProcessingConfigurable(BaseConfigurable):
     # Public methods and property
     # ----------------------------------------------------------------------------------
     @_wrap_ndarray_output_to_nddataset
-    @docprocess.dedent
     def transform(self, dataset, dim=-1):
         r"""
         Transform the input dataset X using the current model.
 
         Parameters
         ----------
-        %(dataset)s
-        %(dim)s
+        dataset : `NDDataset`
+            The dataset to be transformed.
+        dim : `int` or `str`, optional, default=-1
+            The axis along which to apply the transformation. If negative, count from
+            the last axis. If a string, it should be the name of the coordinate.
 
         Returns
         -------
@@ -138,12 +139,6 @@ class ProcessingConfigurable(BaseConfigurable):
         # methods which need to be applied will be possibly used.
         self._transformed = True
         return Xt
-
-    docprocess.get_sections(
-        docprocess.dedent(transform.__doc__),
-        base="processing_transform",
-        sections=["Parameters", "Returns"],
-    )
 
     @property
     def log(self):

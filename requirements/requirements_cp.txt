@@ -15,30 +15,10 @@
 #
 # ======================================================================================
 
-channel_priority: strict
-channels:
-    - conda-forge
-    - spectrocat
-    - defaults
+# CORE dependencies
+# -----------------
+-r requirements.txt
 
-dependencies:
-
-    # CORE dependencies
-    # -----------------
-    - colorama
-    - dill
-    - ipython
-    - jinja2
-    - lazy_loader
-    - matplotlib-base
-    - numpy
-    - numpydoc
-    - quaternion>=2024.0.7
-    - osqp
-    - pint
-    - pyyaml
-    - requests
-    - scikit-learn
-    - scipy
-    - tzlocal
-    - xlrd
+# CP dependencies
+# ---------------
+tensorly

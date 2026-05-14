@@ -18,7 +18,6 @@ from spectrochempy.application.application import info_
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import docprocess
 
 
 # ======================================================================================
@@ -26,24 +25,33 @@ from spectrochempy.utils.docutils import docprocess
 # ======================================================================================
 @signature_has_configurable_traits
 class SIMPLISMA(DecompositionAnalysis):
-    docprocess.delete_params("DecompositionAnalysis.see_also", "SIMPLISMA")
-
-    __doc__ = docprocess.dedent(
-        r"""
+    """
     SIMPLe to use Interactive Self-modeling Mixture Analysis (SIMPLISMA).
 
-    This class performs a SIMPLISMA analysis of a 2D `NDDataset` .
-    The algorithm is adapted from :cite:t:`windig:1997`.
+    This class performs a SIMPLISMA analysis of a 2D `NDDataset`.
+    The algorithm is adapted from :cite:`windig:1997`.
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters)s
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+    warm_start : `bool`, optional, default: `False`
+        When fitting repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        reuse the solution of the previous call to fit and add more components
+        (if available) in a sequential manner.
+
+        When `warm_start` is `True`, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to `fit`.
 
     See Also
     --------
-    %(DecompositionAnalysis.see_also.no_SIMPLISMA)s
-    """,
-    )
+    fit : Fit the SIMPLISMA model on X.
+    fit_transform : Fit the model and apply dimensionality reduction.
+    transform : Apply dimensionality reduction.
+
+    """
 
     # TODO : adapt to 3DDataset ?
 
@@ -512,24 +520,24 @@ class SIMPLISMA(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods and properties
     # ----------------------------------------------------------------------------------
-    docprocess.keep_params("analysis_fit.parameters", "X")
-
-    @docprocess.dedent
     def fit(self, X):
         """
         Fit the SIMPLISMA model on X.
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
 
         Returns
         -------
-        %(analysis_fit.returns)s
+        self
+            The fitted SIMPLISMA instance.
 
         See Also
         --------
-        %(analysis_fit.see_also)s
+        fit_transform : Fit the model and apply dimensionality reduction.
+        transform : Apply dimensionality reduction.
 
         """
         return super().fit(X, Y=None)

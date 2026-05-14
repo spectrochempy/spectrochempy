@@ -14,6 +14,7 @@ __all__ = [
     "integration",
     "kinetic",
     "peakfinding",
+    "psd",
 ]
 
 from . import _base
@@ -23,3 +24,4 @@ from . import decomposition
 from . import integration
 from . import kinetic
 from . import peakfinding
+from . import psd

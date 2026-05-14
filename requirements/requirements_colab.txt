@@ -21,6 +21,5 @@
 brukeropusreader
 colorama
 dill
-docrep
 numpy-quaternion
 pint

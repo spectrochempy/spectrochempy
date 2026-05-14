@@ -13,7 +13,6 @@ from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_n
 from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import docprocess
 
 __all__ = ["PLSRegression"]
 __configurables__ = ["PLSRegression"]
@@ -34,23 +33,6 @@ if sklearn_version < "1.5":
 # ======================================================================================
 @signature_has_configurable_traits
 class PLSRegression(CrossDecompositionAnalysis):
-    docprocess.delete_params("DecompositionAnalysis.see_also", "PLSRegression")
-
-    __doc__ = docprocess.dedent(
-        """
-    Partial Least Squares regression (PLSRegression).
-
-    The  Partial Least Squares regression wraps the
-    `sklearn.cross_decomposition.PLSRegression` model, with few
-    additional methods.
-
-    Parameters
-    ----------
-    %(AnalysisConfigurable.parameters)s
-
-    """,
-    )
-
     # ----------------------------------------------------------------------------------
     # Runtime Parameters,
     # only those specific to PLSRegression, the other being defined in AnalysisConfigurable.
@@ -180,9 +162,6 @@ class PLSRegression(CrossDecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public methods and properties specific to PLSRegression
     # ----------------------------------------------------------------------------------
-    docprocess.keep_params("analysis_fit.parameters", "X")
-
-    @docprocess.dedent
     def fit(self, X, Y):
         """
         Fit the PLSRegression model on X and Y.
