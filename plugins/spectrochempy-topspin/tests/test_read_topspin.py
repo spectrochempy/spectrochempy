@@ -3,8 +3,7 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-
-from pathlib import Path
+# ruff: noqa: S101, F841
 
 import pytest
 
