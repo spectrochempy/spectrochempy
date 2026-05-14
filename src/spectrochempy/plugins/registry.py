@@ -27,6 +27,10 @@ class PluginRegistry:
             cls._instance._filetypes: dict[str, dict[str, Any]] = {}
         return cls._instance
 
+    @classmethod
+    def _reset(cls) -> None:
+        cls._instance = None
+
     def register_plugin(self, name: str, plugin: Any) -> None:
         self._plugins[name] = plugin
 
