@@ -705,7 +705,7 @@ and `St`.
             return proposal.value
         closureConc = proposal.value
         if closureConc == "all":
-            closureConc = np.arange(self._n_components)
+            closureConc = list(range(self._n_components))
         elif len(closureConc) > self._n_components:
             raise ValueError(
                 f"The model contains only {self._n_components} components, please check "
