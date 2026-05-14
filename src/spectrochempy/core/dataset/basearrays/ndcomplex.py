@@ -460,7 +460,7 @@ class NDComplexArray(NDArray):
         """
         new = super().transpose(*dims, inplace=inplace)
 
-        if new.is_quaternion:
+        if typequaternion is not None and new.is_quaternion:
             # here if it is hypercomplex quaternion
             # we should interchange the imaginary component
             w, x, y, z = as_float_array(new._data).T
@@ -504,7 +504,7 @@ class NDComplexArray(NDArray):
         # we need also to swap the quaternion
         # WARNING: this work only for 2D - when swapdims is equivalent to a 2D transpose
         # TODO: implement something for any n-D array (n>2)
-        if self.is_quaternion:
+        if typequaternion is not None and self.is_quaternion:
             # here if it is is_quaternion
             # we should interchange the imaginary component
             w, x, y, z = as_float_array(new._data).T
