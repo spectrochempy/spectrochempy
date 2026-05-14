@@ -5,6 +5,8 @@
 # ======================================================================================
 """Module implementing the `Baseline` class for baseline corrections and related methods."""
 
+import warnings
+
 import numpy as np
 import scipy.interpolate
 import scipy.signal
@@ -19,16 +21,12 @@ from spectrochempy.application.application import warning_
 from spectrochempy.processing.baselineprocessing.baselineutils import lls
 from spectrochempy.processing.baselineprocessing.baselineutils import lls_inv
 from spectrochempy.processing.transformation.concatenate import concatenate
-from spectrochempy.utils.colors import NBlue
-from spectrochempy.utils.colors import NGreen
-from spectrochempy.utils.colors import NRed
 from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.traits import NDDatasetType
 
@@ -59,20 +57,6 @@ autosub: Perform an automatic subtraction of reference.
 detrend : Remove polynomial trend along a dimension from dataset.
 """
 
-docprocess.get_sections(
-    docprocess.dedent(_common_see_also),
-    base="Baseline",
-    sections=["See Also"],
-)
-docprocess.delete_params("Baseline.see_also", "Baseline")
-docprocess.delete_params("Baseline.see_also", "get_baseline")
-docprocess.delete_params("Baseline.see_also", "basc")
-docprocess.delete_params("Baseline.see_also", "asls")
-docprocess.delete_params("Baseline.see_also", "snip")
-docprocess.delete_params("Baseline.see_also", "autosub")
-docprocess.delete_params("Baseline.see_also", "detrend")
-docprocess.delete_params("Baseline.see_also", "rubberband")
-
 
 # ======================================================================================
 # Baseline class processor
@@ -82,8 +66,7 @@ docprocess.delete_params("Baseline.see_also", "rubberband")
 # Configurable traits are added to the signature as keywords
 # if they are not yet present.
 class Baseline(AnalysisConfigurable):
-    __doc__ = docprocess.dedent(
-        """
+    """
     Baseline Correction processor.
 
     The baseline correction can be applied to 1D datasets consisting in a single row
@@ -126,13 +109,32 @@ class Baseline(AnalysisConfigurable):
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters)s
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+    warm_start : `bool`, optional, default: `False`
+        When fitting repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        reuse the solution of the previous call to fit and add more components
+        (if available) in a sequential manner.
+
+        When `warm_start` is `True`, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to `fit`.
 
     See Also
     --------
-    %(Baseline.see_also.no_Baseline)s
-    """,
-    )
+    fit : Fit a baseline model on a X dataset.
+    transform : Transform the input dataset X using the current model.
+    corrected : Dataset with baseline removed.
+    get_baseline : Compute a baseline using the Baseline class processor.
+    basc : Make a baseline correction using the Baseline class.
+    asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
+    snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
+    rubberband : Perform a Rubberband baseline correction.
+    autosub: Perform an automatic subtraction of reference.
+    detrend : Remove polynomial trend along a dimension from dataset.
+
+    """
 
     #     if not ranges and dataset.meta.regions is not None:
     #         # use the range stored in metadata
@@ -584,18 +586,19 @@ baseline/trends for different segments of the data.
     # ----------------------------------------------------------------------------------
     # Public methods/properties
     # ----------------------------------------------------------------------------------
-    @docprocess.dedent
     def fit(self, X):
         """
         Fit a baseline model on a `X` dataset.
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
 
         Returns
         -------
-        %(analysis_fit.returns)s
+        self
+            The fitted instance itself.
 
         """
         self._fitted = False  # reinit this flag
@@ -702,9 +705,21 @@ baseline/trends for different segments of the data.
         """Dataset with baseline removed."""
         return self.transform()
 
-    @docprocess.dedent
     def params(self, default=False):
-        """%(MetaConfigurable.parameters_doc)s."""
+        """
+        Return the current configuration parameters.
+
+        Parameters
+        ----------
+        default : `bool`, optional, default: `False`
+            If True, return the default parameters.
+
+        Returns
+        -------
+        `MetaConfigurable`
+            The current configuration parameters.
+
+        """
         d = super().params(default)
         if not default:
             d.ranges = self._ranges
@@ -723,86 +738,79 @@ baseline/trends for different segments of the data.
         return self._ranges
 
     def show_regions(self, ax):
+        """
+        Display the regions used for baseline fitting.
+
+        .. deprecated:: 0.8
+            Use `Baseline.plot(show_regions=True)` instead.
+
+        Parameters
+        ----------
+        ax : matplotlib.axes.Axes or tuple
+            Axes to display regions on. Can be a single Axes or tuple from plot().
+
+        Warns
+        -----
+        DeprecationWarning
+            This method is deprecated. Use `plot(show_regions=True)` instead.
+        """
+        warnings.warn(
+            "Baseline.show_regions() is deprecated. "
+            "Use Baseline.plot(show_regions=True) instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
+        if isinstance(ax, (tuple, list)):
+            if len(ax) == 0:
+                raise ValueError("Empty axes container passed to show_regions().")
+            ax = ax[0]
         if hasattr(self, "_sps") and self._sps:
             for sp in self._sps:
                 sp.remove()
-        # self._sps = []
         for range in self._ranges:
-            range.sort()
-            sp = ax.axvspan(range[0], range[1], facecolor="#2ca02c", alpha=0.5)
-            # self._sps.append(sp)
+            x0, x1 = range
+            xmin, xmax = sorted([x0, x1])
+            sp = ax.axvspan(xmin, xmax, facecolor="#2ca02c", alpha=0.5, zorder=0)
 
     # ----------------------------------------------------------------------------------
     # Plot methods
     # ----------------------------------------------------------------------------------
-    @docprocess.dedent
     def plot(self, **kwargs):
         r"""
         Plot the original, baseline and corrected dataset.
 
         Parameters
         ----------
-        %(kwargs)s
+        show_regions : bool, optional
+            If True, display the regions used for baseline fitting.
+            Default is False.
+        **kwargs : keyword arguments, optional
+            Additional keyword arguments passed to the plot function.
 
         Returns
         -------
-        `~matplotlib.axes.Axes`
-            Matplotlib subplot axe.
-
-        Other Parameters
-        ----------------
-        colors : `tuple` or `~numpy.ndarray` of 3 colors, optional
-            Colors for original , baseline and corrected data.
-            in the case of 2D, The default colormap is used for the original data.
-            By default, the three colors are :const:`NBlue` , :const:`NGreen`
-            and :const:`NRed`  (which are colorblind friendly).
-        offset : `float`, optional, default: `None`
-            Specify the separation (in percent) between the
-            original and corrected data.
-        nb_traces : `int` or ``'all'``, optional
-            Number of lines to display. Default is ``'all'``.
-        **others : Other keywords parameters
-            Parameters passed to the internal `plot` method of the datasets.
+        tuple
+            (ax_top, ax_bottom) matplotlib axes.
 
         """
-        colX, colXhat, colRes = kwargs.pop("colors", [NBlue, NGreen, NRed])
+        from spectrochempy.plotting.composite.plotbaseline import plot_baseline
 
-        X = self.X  # we need to use self.X here not self._X because the mask
-        # are restored automatically
-        Xc = self.transform()
-        bas = self.baseline
+        original = self.X
+        baseline = self.baseline
+        corrected = self.corrected
 
-        if X._squeeze_ndim == 1:
-            X = X.squeeze()
-            Xc = Xc.squeeze()
-            bas = bas.squeeze()
+        regions = getattr(self, "_ranges", None)
+        show_regions_flag = kwargs.pop("show_regions", False)
 
-        # Number of traces to keep
-        nb_traces = kwargs.pop("nb_traces", "all")
-        if X.ndim == 2 and nb_traces != "all":
-            inc = int(X.shape[0] / nb_traces)
-            X = X[::inc]
-            Xc = Xc[::inc]
-            bas = bas[::inc]
-
-        # separation between traces
-        offset = kwargs.pop("offset", None)
-        if offset is None:
-            offset = 0
-        ma = max(X.max(), Xc.max())
-        mao = ma * offset / 100
-        _ = (X - X.min()).plot(color=colX, **kwargs)
-        _ = (Xc - Xc.min() - mao).plot(
-            clear=False,
-            ls="dashed",
-            cmap=None,
-            color=colXhat,
+        return plot_baseline(
+            original=original,
+            baseline=baseline,
+            corrected=corrected,
+            regions=regions,
+            show_regions=show_regions_flag,
+            **kwargs,
         )
-        ax = (bas - X.min()).plot(clear=False, cmap=None, color=colRes)
-        ax.autoscale(enable=True, axis="y")
-        ax.set_title(f"{self.name} plot")
-        ax.yaxis.set_visible(False)
-        return ax
 
 
 # ======================================================================================
@@ -811,9 +819,6 @@ baseline/trends for different segments of the data.
 # Instead of using directly the Baseline class, we provide here some functions
 # which are eventually more user-friendly and which can be used directly on NDDataset or
 # called from the API.
-
-
-@docprocess.dedent
 def get_baseline(dataset, *ranges, **kwargs):
     r"""
     Compute a baseline using the Baseline class processor.
@@ -838,7 +843,13 @@ def get_baseline(dataset, *ranges, **kwargs):
 
     See Also
     --------
-    %(Baseline.see_also.no_get_baseline)s
+    Baseline : Manual baseline correction processor.
+    basc : Make a baseline correction using the Baseline class.
+    asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
+    snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
+    rubberband : Perform a Rubberband baseline correction.
+    autosub: Perform an automatic subtraction of reference.
+    detrend : Remove polynomial trend along a dimension from dataset.
 
     Notes
     -----
@@ -867,7 +878,6 @@ def get_baseline(dataset, *ranges, **kwargs):
     return blc.baseline
 
 
-@docprocess.dedent
 def basc(dataset, *ranges, **kwargs):
     r"""
     Compute a baseline corrected dataset using the Baseline class processor.
@@ -892,7 +902,14 @@ def basc(dataset, *ranges, **kwargs):
 
     See Also
     --------
-    %(Baseline.see_also.no_basc)s
+    Baseline : Manual baseline correction processor.
+    get_baseline : Compute a baseline using the Baseline class.
+    basc : Make a baseline correction using the Baseline class.
+    asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
+    snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
+    rubberband : Perform a Rubberband baseline correction.
+    autosub: Perform an automatic subtraction of reference.
+    detrend : Remove polynomial trend along a dimension from dataset.
 
     Notes
     -----
@@ -903,7 +920,6 @@ def basc(dataset, *ranges, **kwargs):
     return dataset - get_baseline(dataset, *ranges, **kwargs)
 
 
-@docprocess.dedent
 def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     r"""
     Remove polynomial trend along a dimension from dataset.
@@ -939,7 +955,14 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
 
     See Also
     --------
-    %(Baseline.see_also.no_detrend)s
+    Baseline : Manual baseline correction processor.
+    get_baseline : Compute a baseline using the Baseline class.
+    basc : Make a baseline correction using the Baseline class.
+    asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
+    snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
+    rubberband : Perform a Rubberband baseline correction.
+    autosub: Perform an automatic subtraction of reference.
+    detrend : Remove polynomial trend along a dimension from dataset.
 
     """
     # kwargs will be removed in version 0.8
@@ -971,7 +994,6 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     return blc.transform()
 
 
-@docprocess.dedent
 def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     r"""
     Asymmetric Least Squares Smoothing baseline correction.
@@ -1000,7 +1022,14 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
 
     See Also
     --------
-    %(Baseline.see_also.no_asls)s
+    Baseline : Manual baseline correction processor.
+    get_baseline : Compute a baseline using the Baseline class.
+    basc : Make a baseline correction using the Baseline class.
+    asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
+    snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
+    rubberband : Perform a Rubberband baseline correction.
+    autosub: Perform an automatic subtraction of reference.
+    detrend : Remove polynomial trend along a dimension from dataset.
 
     """
     blc = Baseline()
@@ -1014,7 +1043,6 @@ def asls(dataset, lamb=1e5, asymmetry=0.05, tol=1e-3, max_iter=50):
     return blc.transform()
 
 
-@docprocess.dedent
 def snip(dataset, snip_width=50):
     """
     Perform Simple Non-Iterative Peak (SNIP) detection algorithm.
@@ -1035,7 +1063,14 @@ def snip(dataset, snip_width=50):
 
     See Also
     --------
-    %(Baseline.see_also.no_snip)s
+    Baseline : Manual baseline correction processor.
+    get_baseline : Compute a baseline using the Baseline class.
+    basc : Make a baseline correction using the Baseline class.
+    asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
+    snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
+    rubberband : Perform a Rubberband baseline correction.
+    autosub: Perform an automatic subtraction of reference.
+    detrend : Remove polynomial trend along a dimension from dataset.
 
     """
     blc = Baseline()
@@ -1046,7 +1081,6 @@ def snip(dataset, snip_width=50):
     return blc.transform()
 
 
-@docprocess.dedent
 def rubberband(dataset):
     """
     Rubberband baseline correction.
@@ -1066,7 +1100,14 @@ def rubberband(dataset):
 
     See Also
     --------
-    %(Baseline.see_also.no_rubberband)s
+    Baseline : Manual baseline correction processor.
+    get_baseline : Compute a baseline using the Baseline class.
+    basc : Make a baseline correction using the Baseline class.
+    asls : Perform an Asymmetric Least Squares Smoothing baseline correction.
+    snip : Perform a Simple Non-Iterative Peak (SNIP) detection algorithm.
+    rubberband : Perform a Rubberband baseline correction.
+    autosub: Perform an automatic subtraction of reference.
+    detrend : Remove polynomial trend along a dimension from dataset.
 
     """
     blc = Baseline()

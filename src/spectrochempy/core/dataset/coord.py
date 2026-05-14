@@ -12,16 +12,15 @@ import textwrap
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.arraymixins.ndmath import NDMath
 from spectrochempy.core.dataset.arraymixins.ndmath import _set_operators
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
+from spectrochempy.utils._logging import error_
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.decorators import deprecated
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.numutils import get_n_decimals
 from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import colored_output
@@ -224,10 +223,11 @@ class Coord(NDMath, NDArray):
         # Return a correct result only if the data are sorted  # return  # bool(self.data[0] > self.data[-1])
 
     @property
-    @docprocess.dedent
     def data(self):
         """
-        %(data)s.
+        Data array (`~numpy.ndarray`).
+
+        If there is no data but labels, then the labels are returned instead of data.
 
         Notes
         -----
@@ -296,9 +296,33 @@ class Coord(NDMath, NDArray):
     # def values(self):
     #    return super().values
 
-    @docprocess.dedent
     def to(self, other, inplace=False, force=False):
-        """%(to)s."""
+        """
+        Return the object with data rescaled to different units.
+
+        Parameters
+        ----------
+        other : `Quantity` or str
+            Destination units.
+        inplace : bool, optional, default=`False`
+            Flag to say that the method return a new object (default)
+            or not (inplace=True).
+        force : bool, optional, default=False
+            If True the change of units is forced, even for incompatible units.
+
+        Returns
+        -------
+        rescaled
+
+        See Also
+        --------
+        ito : Inplace rescaling of the current object data to different units.
+        to_base_units : Rescaling of the current object data to different units.
+        ito_base_units : Inplace rescaling of the current object data to different units.
+        to_reduced_units : Rescaling to reduced_units.
+        ito_reduced_units : Inplace rescaling to reduced units.
+
+        """
         new = super().to(other, force=force)
 
         if inplace:

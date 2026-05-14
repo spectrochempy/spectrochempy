@@ -27,7 +27,6 @@ dependencies:
     # -----------------
     - colorama
     - dill
-    - docrep
     - ipython
     - jinja2
     - lazy_loader
@@ -41,7 +40,6 @@ dependencies:
     - requests
     - scikit-learn
     - scipy
-    - setuptools-scm
     - tzlocal
     - xlrd
 
@@ -81,6 +79,7 @@ dependencies:
     - numpydoc=1.8.0
     - pickleshare
     - pypandoc=1.15
+    - setuptools_scm
     - sphinx=7.4.7
     - sphinx-tabs=3.4.7
     - sphinx-copybutton=0.5.2

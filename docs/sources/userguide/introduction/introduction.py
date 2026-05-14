@@ -100,19 +100,6 @@ import spectrochempy as scp
 
 nd = scp.NDDataset()
 
-# %% [markdown]
-# **Syntax 2** (discouraged)
-#
-# With a wild `*` import. In this second syntax, the access to objects/functions can be
-# greatly simplified. For example, we can use directly `NDDataset` without a prefix
-# instead of `scp.NDDataset` but there is always a risk of overwriting some variables or
-# functions already present in the namespace. Therefore, the first syntax is generally
-# highly recommended.
-
-# %%
-from spectrochempy import *  # noqa: F403
-
-nd = NDDataset()  # noqa: F405
 
 # %% [markdown]
 # Alternatively, you can also load only the objects and function required by your

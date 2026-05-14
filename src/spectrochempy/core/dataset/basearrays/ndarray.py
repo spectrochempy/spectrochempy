@@ -16,14 +16,14 @@ from datetime import datetime
 import numpy as np
 import traitlets as tr
 
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import info_
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import Unit
 from spectrochempy.core.units import set_nmr_context
 from spectrochempy.core.units import ur
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import info_
 from spectrochempy.utils.constants import DEFAULT_DIM_NAME
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import MASKED
@@ -31,7 +31,6 @@ from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.constants import MaskedConstant
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.meta import Meta
 from spectrochempy.utils.objects import make_new_object
 from spectrochempy.utils.print import convert_to_html
@@ -1162,7 +1161,6 @@ class NDArray(tr.HasTraits):
         return new
 
     @property
-    @docprocess.get_docstring(base="data")
     def data(self):
         """
         Data array (`~numpy.ndarray`).
@@ -2053,8 +2051,6 @@ class NDArray(tr.HasTraits):
             return None
 
         return new
-
-    docprocess.get_docstring(to.__doc__, base="to")
 
     def to_base_units(self, inplace=False):
         """

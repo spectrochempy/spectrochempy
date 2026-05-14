@@ -77,24 +77,24 @@ X = A[-3]
 X.title = "absorbance"
 X.x.title = "Wavelength"
 X.x.units = "nm"
-X.plot(cmap=None)
+_ = X.plot(cmap=None)
 
 # %%
 X_ = X.detrend()
-X_.plot(cmap=None)
+_ = X_.plot(cmap=None)
 # %% [markdown]
 # Let's plot the properties of the sample:
 
 # %%
 Y = A[3]
-Y.T.plot(cmap=None, legend=Y.x.labels)
+_ = Y.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
 # Standardization of the values allows better visualization:
 
 # %%
 Y_std = (Y - Y.mean(dim=0)) / Y.std(dim=0)
-Y_std.T.plot(cmap=None, legend=Y.x.labels)
+_ = Y_std.T.plot(cmap=None, legend=Y.x.labels)
 
 # %% [markdown]
 # ## Running PLSRegression
@@ -119,14 +119,14 @@ _ = pls.fit(X_train, y_train)
 # attributes. Let's for instance, plot the $S_X$ matrix:
 
 # %%
-pls.x_loadings.plot()
+_ = pls.x_loadings.plot()
 
 # %% [markdown]
 # Once fitted, the PLS model can be used to predict the property values of another dataset, for instance:
 
 # %%
 y_test_hat = pls.predict(X_test)
-y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
+_ = y_test_hat.T.plot(title="predicted moisture for $X_{test}$", marker="o")
 
 # %% [markdown]
 # We can generate a parity plot to compare the predicted and actual values, for

@@ -46,9 +46,7 @@ ur = scp.ur
 # When loading experimental dataset using the `read` method, units are generally attributed to coordinates and data
 
 ds = scp.read("wodger.spg")[0]
-prefs = scp.preferences
-prefs.figure.figsize = (7, 3)
-ds.plot()
+_ = ds.plot()
 # %%
 # * `wavenumbers` (`x` ) coordinates are here expressed in $cm^{-1}$
 # * and `data` are in absorbance ($a.u.$) units.
@@ -82,13 +80,13 @@ except Exception as e:
 # Let's try for the `x` coordinate. It is `wavenumber` in $cm^{-1}$ that can be transformed in $Hz$ for instance:
 
 ds.x.ito("terahertz")
-ds.plot()
+_ = ds.plot()
 # %%
 # We can also change the wavenumbers (or frequency units), to energy units or wavelength as
 # Spectrochempy (thanks to [pint](https://pint.readthedocs.io)) knows how to make the transformation.
 
 ds.x.ito("eV")
-ds.plot()
+_ = ds.plot()
 # %%
 try:
     ds.x.ito("nanometer")
@@ -99,17 +97,17 @@ ds.x = ds.x.to("nanometer")
 ds.x
 
 # %%
-ds.plot()
+_ = ds.plot()
 # %%
 # `absorbance` units (the units of the data)
 # can also be transformed into `transmittance`
 ds.ito("transmittance")
-ds.plot()
+_ = ds.plot()
 # %%
 # back into `ansorbance
 ds.ito("absorbance")
 ds.x.ito("cm^-1")
-ds.plot()
+_ = ds.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

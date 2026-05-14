@@ -8,6 +8,7 @@ __all__ = ["Project"]
 import copy as cpy
 import pathlib
 import uuid
+import warnings
 from functools import wraps
 
 import dill  # noqa: F401
@@ -60,6 +61,7 @@ class Project(AbstractProject, NDIO):
 
     Examples
     --------
+    >>> import spectrochempy as scp
     >>> myproj = scp.Project(name='project_1')
     >>> ds = scp.NDDataset([1., 2., 3.], name='dataset_1')
     >>> myproj.add_dataset(ds)
@@ -143,12 +145,12 @@ class Project(AbstractProject, NDIO):
 
         if "/" in key:
             # Case of composed name (we assume not more than one level subproject
-            parent = key.split("/")[0]
+            parent, child = key.split("/")[0], key.split("/")[1]
             if parent in self.projects_names:
-                if key in self._projects[parent].datasets_names:
-                    return self._projects[parent]._datasets[key]
-                if key in self._projects[parent].scripts_names:
-                    return self._projects[parent]._scripts[key]
+                if child in self._projects[parent].datasets_names:
+                    return self._projects[parent]._datasets[child]
+                if child in self._projects[parent].scripts_names:
+                    return self._projects[parent]._scripts[child]
         if key in self.datasets_names:
             return self._datasets[key]
         if key in self.projects_names:
@@ -422,6 +424,7 @@ class Project(AbstractProject, NDIO):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> ds1 = scp.NDDataset([1, 2, 3])
         >>> ds2 = scp.NDDataset([4, 5, 6])
         >>> ds3 = scp.NDDataset([7, 8, 9])
@@ -451,6 +454,7 @@ class Project(AbstractProject, NDIO):
 
         Examples
         --------
+        >>> import spectrochempy as scp
         >>> ds1 = scp.NDDataset([1, 2, 3])
         >>> proj = scp.Project()
         >>> proj.add_dataset(ds1, name='Toto')
@@ -482,11 +486,36 @@ class Project(AbstractProject, NDIO):
         self._datasets[name]._parent = None  # remove the parent info
         del self._datasets[name]  # remove the object from the list of datasets
 
-    def remove_all_dataset(self):
-        """Remove all dataset from the project."""
+    def clear_datasets(self):
+        """
+        Remove all datasets from the project.
+
+        See Also
+        --------
+        remove_dataset : Remove a single dataset.
+        add_dataset : Add a dataset.
+        """
         for v in self._datasets.values():
             v._parent = None
         self._datasets = {}
+
+    def remove_all_dataset(self):
+        """
+        Remove all datasets from the project.
+
+        .. deprecated::
+            Use :meth:`clear_datasets` instead.
+
+        See Also
+        --------
+        clear_datasets : Remove all datasets.
+        """
+        warnings.warn(
+            "remove_all_dataset() is deprecated; use clear_datasets() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.clear_datasets()
 
     # ----------------------------------------------------------------------------------
     # project items
@@ -534,11 +563,36 @@ class Project(AbstractProject, NDIO):
         self._projects[name]._parent = None
         del self._projects[name]
 
-    def remove_all_project(self):
-        """Remove all projects from the current project."""
+    def clear_projects(self):
+        """
+        Remove all subprojects from the current project.
+
+        See Also
+        --------
+        remove_project : Remove a single subproject.
+        add_project : Add a subproject.
+        """
         for v in self._projects.values():
             v._parent = None
         self._projects = {}
+
+    def remove_all_project(self):
+        """
+        Remove all subprojects from the current project.
+
+        .. deprecated::
+            Use :meth:`clear_projects` instead.
+
+        See Also
+        --------
+        clear_projects : Remove all subprojects.
+        """
+        warnings.warn(
+            "remove_all_project() is deprecated; use clear_projects() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.clear_projects()
 
     # ----------------------------------------------------------------------------------
     # script items
@@ -576,10 +630,36 @@ class Project(AbstractProject, NDIO):
         self._scripts[name]._parent = None
         del self._scripts[name]
 
-    def remove_all_script(self):
+    def clear_scripts(self):
+        """
+        Remove all scripts from the project.
+
+        See Also
+        --------
+        remove_script : Remove a single script.
+        add_script : Add a script.
+        """
         for v in self._scripts.values():
             v._parent = None
         self._scripts = {}
+
+    def remove_all_script(self):
+        """
+        Remove all scripts from the project.
+
+        .. deprecated::
+            Use :meth:`clear_scripts` instead.
+
+        See Also
+        --------
+        clear_scripts : Remove all scripts.
+        """
+        warnings.warn(
+            "remove_all_script() is deprecated; use clear_scripts() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        self.clear_scripts()
 
 
 def makescript(priority=50):

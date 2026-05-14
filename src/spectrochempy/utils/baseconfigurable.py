@@ -21,7 +21,6 @@ from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import MASKED
 from spectrochempy.utils.constants import NOMASK
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.exceptions import NotTransformedError
 from spectrochempy.utils.metaconfigurable import MetaConfigurable
 from spectrochempy.utils.traits import NDDatasetType
@@ -31,23 +30,17 @@ from spectrochempy.utils.traits import NDDatasetType
 # Base class BaseConfigurable
 # ======================================================================================
 class BaseConfigurable(MetaConfigurable):
-    __doc__ = docprocess.dedent(
-        r"""
+    """
     Abstract class to write configurable models (analysis, preprocessing, ...).
 
     Model class must subclass this to get a minimal structure
 
     Parameters
     ----------
-    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``\ ], optional, default: ``"WARNING"``
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
         The log level at startup. It can be changed later on using the
         `set_log_level` method or by changing the ``log_level`` attribute.
-    """,
-    )
-
-    # Get doc sections for reuse in subclass
-    docprocess.get_sections(__doc__, base="BaseConfigurable")
-    docprocess.keep_params("BaseConfigurable.parameters", "log_level")
+    """
 
     # ----------------------------------------------------------------------------------
     # Runtime Parameters
@@ -59,6 +52,9 @@ class BaseConfigurable(MetaConfigurable):
     _X_preprocessed = Array(help="Preprocessed inital input X data")
     _X_shape = tr.Tuple(
         help="Original shape of the input X data, before any transformation",
+    )
+    _X_original_ndim = tr.Integer(
+        help="Original number of dimensions of input X data, before any transformation",
     )
     _X_coordset = tr.Instance(CoordSet, allow_none=True)
     _is_dataset = tr.Bool(help="True if the input X data is a NDDataset")
@@ -123,7 +119,12 @@ class BaseConfigurable(MetaConfigurable):
         # if an item k is not in the config parameters, an error is raised.
         for k, v in configkw.items():
             if hasattr(self, k) and k in defaults:
-                if getattr(self, k) != v:
+                current = getattr(self, k)
+                # Handle array comparison
+                if isinstance(current, np.ndarray) or isinstance(v, np.ndarray):
+                    if not np.array_equal(current, v):
+                        setattr(self, k, v)
+                elif current != v:
                     setattr(self, k, v)
             else:
                 raise KeyError(
@@ -282,6 +283,10 @@ class BaseConfigurable(MetaConfigurable):
     def _X_validate(self, proposal):
         # validation fired when self._X is assigned
         X = proposal.value
+
+        # store the original number of dimensions BEFORE any transformation
+        # this is used to determine if we should squeeze the output
+        self._X_original_ndim = X.ndim
 
         # for the following we need X with two dimensions
         # So let's generate the un-squeezed X

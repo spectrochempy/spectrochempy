@@ -18,12 +18,12 @@ import numpy as np
 from quaternion import as_float_array
 
 # Local imports
-from spectrochempy.application.application import error_
-from spectrochempy.application.application import warning_
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
+from spectrochempy.utils._logging import error_
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
@@ -685,7 +685,7 @@ class NDMath:
         "Evenly round to the given number of decimals.\n\nEquivalent to around."
     )
     round_ = around
-    round.__doc__ = (
+    round_.__doc__ = (
         "Evenly round to the given number of decimals.\n\nEquivalent to around."
     )
 
@@ -2889,20 +2889,32 @@ class NDMath:
                         )
                         xotc = (
                             None
-                            if otc is None or otc[obj.dims[-1]].is_empty
-                            else otc[obj.dims[-1]]
+                            if otc is None or otc[other.dims[-1]].is_empty
+                            else otc[other.dims[-1]]
                         )
-                        if xobc is None and xotc is None:
+                        # Permissive: allow operation if either coordset is None
+                        if xobc is None or xotc is None:
                             pass
                         else:
                             raise CoordinatesMismatchError(
-                                obc[obj.dims[-1]].data,
-                                otc[other.dims[-1]].data,
+                                xobc.data,
+                                xotc.data,
                             ) from err
                     except AssertionError as err:
+                        # Coordinates exist but don't match
+                        xobc = (
+                            None
+                            if obc is None or obc[obj.dims[-1]].is_empty
+                            else obc[obj.dims[-1]]
+                        )
+                        xotc = (
+                            None
+                            if otc is None or otc[other.dims[-1]].is_empty
+                            else otc[other.dims[-1]]
+                        )
                         raise CoordinatesMismatchError(
-                            obc[obj.dims[-1]].data,
-                            otc[other.dims[-1]].data,
+                            xobc.data if xobc is not None else None,
+                            xotc.data if xotc is not None else None,
                         ) from err
 
                 # if other is multidimensional and as we are talking about element wise
@@ -3228,64 +3240,7 @@ def _get_op(name):
     return getattr(operator, _op_str(name))
 
 
-class _ufunc:
-    def __init__(self, name):
-        self.name = name
-        self.ufunc = getattr(np, name)
-
-    def __call__(self, *args, **kwargs):
-        return self.ufunc(*args, **kwargs)
-
-    @property
-    def __doc__(self):
-        return f"""
-            {_unary_ufuncs()[self.name].split("->")[-1].strip()}
-
-            Wrapper of the numpy.ufunc function `np.{self.name}(dataset)`.
-
-            Parameters
-            ----------
-            dataset : array-like
-                Object to pass to the numpy function.
-
-            Returns
-            -------
-            out
-                `NDDataset`
-
-            See Also
-            --------
-            numpy.{self.name} : Corresponding numpy Ufunc.
-
-            Notes
-            -----
-            Numpy Ufuncs referenced in our documentation can be directly applied to
-            `NDDataset` or `Coord` type of SpectroChemPy objects.
-            Most of these Ufuncs, however, instead of returning a numpy array, will
-            return the same type of object.
-
-            Examples
-            --------
-
-            >>> ds = scp.read('wodger.spg')
-            >>> ds_transformed = scp.{self.name}(ds)
-
-            Numpy Ufuncs can also be transparently applied directly to SpectroChemPy
-            object
-
-            >>> ds_transformed = np.{self.name}(ds)
-            """
-
-
 thismodule = sys.modules[__name__]
-
-
-# def _set_ufuncs(cls):
-#     for func in _unary_ufuncs():
-#         # setattr(cls, func, _ufunc(func))
-#         setattr(thismodule, func, _ufunc(func))
-#         thismodule.__all__ += [func]
-# TODO: make NDDataset method instead
 
 
 def _set_operators(cls, priority=50):

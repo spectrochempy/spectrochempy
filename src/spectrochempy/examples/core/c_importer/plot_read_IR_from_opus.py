@@ -23,7 +23,7 @@ Z
 # %%
 # plot it
 
-Z.plot()
+_ = Z.plot()
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -6,6 +6,7 @@
 import inspect
 import warnings
 
+import numpy as np
 import traitlets as tr
 
 import spectrochempy as scp
@@ -99,7 +100,7 @@ class TestWrapNdarrayOutput:
         assert isinstance(result, scp.NDDataset)
         # Check that metadata was properly transferred
         assert result.title == "Test Dataset"
-        # Check that the data was properly transformed
-        assert list(result.data) == [2.0, 4.0, 6.0]
+        # Check that the data was properly transformed (flatten for 2D array)
+        np.testing.assert_array_equal(result.data.flatten(), [2.0, 4.0, 6.0])
         # Check that the name was properly set
         assert "test_model.transform" in result.name

@@ -27,7 +27,6 @@ dependencies:
     # -----------------
     - colorama
     - dill
-    - docrep
     - ipython
     - jinja2
     - lazy_loader
@@ -41,7 +40,6 @@ dependencies:
     - requests
     - scikit-learn
     - scipy
-    - setuptools-scm
     - tzlocal
     - xlrd
 

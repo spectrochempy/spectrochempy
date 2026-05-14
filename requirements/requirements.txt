@@ -19,7 +19,6 @@
 # -----------------
 colorama
 dill
-docrep
 ipython
 jinja2
 lazy_loader
@@ -33,6 +32,5 @@ pyyaml
 requests
 scikit-learn
 scipy
-setuptools-scm
 tzlocal
 xlrd

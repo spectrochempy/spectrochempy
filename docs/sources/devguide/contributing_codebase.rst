@@ -322,6 +322,35 @@ Or with one of the following constructs:
 For more, see the `pytest <https://docs.pytest.org/en/latest/>`_ documentation.
 
 
+Test state guards
+-----------------
+
+SpectroChemPy includes diagnostic test guards in ``tests/conftest.py`` to detect
+state leaks during test execution. These guards can monitor:
+
+- Environment variables (``os.environ`` changes)
+- Matplotlib state (rcParams, figures, backend)
+- SpectroChemPy preferences
+
+**Important:** These guards are **disabled by default** to reduce test output noise.
+They can be enabled when debugging:
+
+.. code-block:: bash
+
+    SCP_TEST_GUARDS=1 pytest
+
+When enabled, these guards will report any state mutations detected during tests,
+helping identify:
+- Environment variables added/removed/changed
+- Matplotlib rcParams modifications
+- Leaked figures
+- Preference changes
+
+**Note:** These guards are purely diagnostic - they do NOT enforce test isolation.
+Actual isolation is handled by dedicated fixtures like ``isolate_matplotlib_state``
+which restores matplotlib state after each test.
+
+
 Documenting change log
 -----------------------
 

@@ -10,6 +10,8 @@ NDDataset creation and plotting example
 =======================================
 In this example, we create a 3D NDDataset from scratch,
 and then we plot one section (a 2D plane)
+
+.. sphinx_gallery_thumbnail_number = 2
 """
 
 # %%
@@ -73,6 +75,11 @@ mydataset.author = "Blake and Mortimer"
 print(mydataset)
 
 # %%
+# In a Jupyter notebook, the NDDataset is displayed as follows (click on  the arrow on the left to expand the metadata):
+
+mydataset
+
+# %%
 # We want to plot a section of this 3D NDDataset:
 #
 # NDDataset can be sliced like conventional numpy-array...
@@ -83,21 +90,34 @@ new = mydataset[..., 0]
 new = mydataset["hot"]
 
 # %%
-# To plot a dataset, use the `plot` command (generic plot).
-# As the section NDDataset is 2D, a contour plot is displayed by default.
-new.plot()
+# To plot a dataset, use the `plot` method (generic plot).
+# As the section NDDataset is 2D, a lines plot is displayed by default. As you can see, the x-axis is in wavenumber
+# and the ordinate axis is in absorbance. Note that in this case, the default `NDDataset.plot()` command is equivalent to
+# `plot_lines()`.
+_ = new.plot()
+
 # %%
-# But it is possible to display image
-#
-# sphinx_gallery_thumbnail_number = 2
-new.plot(method="image")
+# Note also that a colormap ('viridis') has been automatically set for the lines. This is because the y-dimension of the
+# dataset has float coordinates (they correspond to a time). In such a case tt is easy to add a colorbar expliciting the
+# colors <-> time value correspondance:
+
+_ = new.plot(colorbar=True)
+
 # %%
-# or stacked plot
-new.plot(method="stack")
+# If the y-dimension had no coordinates or consecutive integer coordinates starting by `0`or `1`, a categorical
+# color map would have been chosen. The default behavior can be overriden by explictly passing a colomap. For instance,
+# if we want to use a categorical colormap instead of a sequential one, we can do:
+
+_ = new[:, 0:20].plot(cmap="tab20")
+
 # %%
-# Note that the scp allows one to use this syntax too:
-scp.plot_stack(new)
-scp.Coord
+# But it is possible to display image plot instead (note that the x-axis is in wavenumber and
+# the y-axis is in time-on-stream)
+_ = new.plot_image()
+# %%
+# or contour plot  (note that
+_ = new.plot_map()
+
 
 # %%
 # This ends the example ! The following line can be uncommented if no plot shows when

@@ -7,15 +7,19 @@
 # ruff: noqa
 
 __all__ = [
+    "_mpl_assets",
     "multiplot",
     "plot1d",
     "plot2d",
     "plot3d",
+    "plot_setup",
     "plotly",
 ]
 
+from . import _mpl_assets
 from . import multiplot
 from . import plot1d
 from . import plot2d
 from . import plot3d
+from . import plot_setup
 from . import plotly

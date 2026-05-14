@@ -12,50 +12,123 @@ import datetime
 
 import numpy as np
 
-from spectrochempy.application.application import error_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
-from spectrochempy.utils.docutils import docprocess
+from spectrochempy.utils._logging import error_
 from spectrochempy.utils.meta import Meta
+
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-docprocess.delete_params("Importer.see_also", "read_labspec")
-
-
-@docprocess.dedent
 def read_labspec(*paths, **kwargs):
-    """
-    Read a single Raman spectrum or a series of Raman spectra.
-
-    Files to open are :file:`.txt` file created by ``Labspec`` software.
-    Non-labspec :file:`.txt` files are ignored (return None)
+    r"""
+    Open Raman LABSPEC files.
 
     Parameters
     ----------
-    %(Importer.parameters)s
+    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
+        The data source(s) can be specified by the name or a list of name for the
+        file(s) to be loaded:
+
+        - e.g., ( filename1, filename2, ..., kwargs )
+
+        If the list of filenames are enclosed into brackets:
+
+        - e.g., ( [filename1, filename2, ...], kwargs )
+
+        The returned datasets are merged to form a single dataset,
+        except if ``merge`` is set to `False`.
+    **kwargs : keyword parameters, optional
+        See Other Parameters.
 
     Returns
     -------
-    %(Importer.returns)s
+    object : `NDDataset` or list of `NDDataset`
+        The returned dataset(s).
 
     Other Parameters
     ----------------
-    %(Importer.other_parameters)s
+    content : `bytes` object, optional
+        Instead of passing a filename for further reading, a bytes content can be
+        directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly
+        useful for a GUI Dash application to handle drag and drop of files into a
+        Browser.
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
+        Set the column delimiter in CSV file.
+    description : `str`, optional
+        A Custom description.
+    directory : `~pathlib.Path` object objects or valid urls, optional
+        From where to read the files.
+    download_only: `bool`, optional, default: `False`
+        Used only when url are specified.  If True, only downloading and saving of the
+        files is performed, with no attempt to read their content.
+    merge : `bool`, optional, default: `False`
+        If `True` and several filenames or a ``directory`` have been provided as
+        arguments, then a single `NDDataset` with merged dataset (stacked along the first
+        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+        then several NDDatasets can be returned for different groups of compatible datasets.
+    origin : str, optional
+        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+        automatically, but can be set manually.
+
+        It is used for instance whn reading directory with different types of files, for merging
+        the datasets with compatible dimensions and different origin into different groups.
+
+        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+        have been implemented.
+    pattern : `str`, optional
+        A pattern to filter the files to read.
+
+        .. versionadded:: 0.7.2
+    protocol : `str`, optional
+        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+        ``'csv'``, ``'excel'``}. If not provided, the correct protocol
+        is inferred (whenever it is possible) from the filename extension.
+    read_only: `bool`, optional, default: `True`
+        Used only when url are specified.  If True, saving of the
+        files is performed in the current directory, or in the directory specified by
+        the directory parameter.
+    recursive : `bool`, optional, default: `False`
+        Read also in subfolders.
+    replace_existing: `bool`, optional, default: `False`
+        Used only when url are specified. By default, existing files are not replaced
+        so not downloaded.
+    sortbydate : `bool`, optional, default: `True`
+        Sort multiple filename by acquisition date.
 
     See Also
     --------
-    %(Importer.see_also.no_read_labspec)s
+    read : Generic reader inferring protocol from the filename extension.
+    read_zip : Read Zip archives (containing spectrochempy readable files)
+    read_dir : Read an entire directory.
+    read_opus : Read OPUS spectra.
+    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_galactic : Read Galactic files (:file:`.spc`).
+    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_csv : Read CSV files (:file:`.csv`).
+    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    read_jcamp : Read Infrared JCAMP-DX files (:file:`.jdx`, :file:`.dx`).
+    read_carroucell : Read files in a directory after a carroucell experiment.
+    read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Examples
     --------
-    >>> A = scp.read_labspec('ramandata/labspec/Activation.txt')
+    Reading a single LABSPEC file
+
+    >>> scp.read_labspec('irdata/labspec.txt')
+    NDDataset: [float64] a.u. (shape: (y:1, x:1024))
 
     """
-    kwargs["filetypes"] = ["LABSPEC exported files (*.txt)"]
-    kwargs["protocol"] = ["labspec", "txt"]
+    kwargs["filetypes"] = ["Labspec files (*.txt)"]
+    kwargs["protocol"] = ["labspec"]
     importer = Importer()
     return importer(*paths, **kwargs)
 

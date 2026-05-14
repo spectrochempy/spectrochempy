@@ -64,7 +64,7 @@ nd3 = scp.pk(nd2, phc0=-118)
 
 # %%
 # plot
-nd3.plot()
+_ = nd3.plot()
 # %%
 # ## Baseline correction
 # Here we use the snip algorithm
@@ -105,18 +105,18 @@ pks.plot_scatter(
     xlim=(225, 25),
 )
 for i, p in enumerate(pks):
-    x, y = p.x.values, (p + 0.5).values
+    x, y = p.x.values.m, (p + 0.5).values.m
     ax.annotate(
-        f"{x.m:0.1f}",
+        f"{x:0.1f}",
         xy=(x, y),
         xytext=(-5, 5),
         rotation=90,
         textcoords="offset points",
     )
     for w in (properties["left_bases"][i], properties["right_bases"][i]):
-        ax.axvline(w, linestyle="--", color="green")
+        ax.axvline(w.m, linestyle="--", color="green")
     for w in (properties["left_ips"][i], properties["right_ips"][i]):
-        ax.axvline(w, linestyle=":", color="red")
+        ax.axvline(w.m, linestyle=":", color="red")
 
 # %%
 # Get the section at once using fancy indexing
@@ -147,7 +147,7 @@ area = scp.NDDataset(
     units=a.units,
     title="area",
 )
-area.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
+_ = area.plot(marker="o", lw="1", ls=":", legend="best", colormap="jet")
 area
 
 # %%

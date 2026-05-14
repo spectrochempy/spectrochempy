@@ -23,7 +23,6 @@ classifiers = [
 dependencies = [
   "colorama",
   "dill",
-  "docrep",
   "ipython",
   "jinja2",
   "lazy_loader",
@@ -37,7 +36,6 @@ dependencies = [
   "requests",
   "scikit-learn",
   "scipy",
-  "setuptools-scm",
   "tzlocal",
   "xlrd",
 ]
@@ -52,6 +50,7 @@ requires-python = ">=3.10"
 [project.optional-dependencies]
 build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
 cantera = ["cantera"]
+cp = ["tensorly"]
 dev = [
   "toml",
   "ruff",
@@ -73,6 +72,7 @@ docs = [
   "numpydoc == 1.8.0",
   "pickleshare",
   "pypandoc == 1.15",
+  "setuptools_scm",
   "sphinx == 7.4.7",
   "sphinx-tabs == 3.4.7",
   "sphinx-copybutton == 0.5.2",
@@ -123,11 +123,12 @@ where = ["src"]
   "*.pyi",
 ]
 "spectrochempy.data" = [
-  "fonts/*",
-  "stylesheets/*",
   "databases/*",
   "*.json",
   "*.cff",
+]
+"spectrochempy.plotting" = [
+  "stylesheets/*.mplstyle",
 ]
 
 [tool.setuptools_scm]
@@ -160,6 +161,7 @@ ignore = [
   "D212", # Docstring should start on first line
   "D413", # Missing blank line after last section
   "D417", # Missing argument descriptions in the docstring
+  "UP038", # This rule has been removed from
 ]
 select = [
   "D", # pydocstyle
@@ -242,6 +244,7 @@ doctest_optionflags = [
 doctest_plus = "enabled"
 markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
 testpaths = ["tests"]
+doctest_norecursedirs = ["tests/test_plotting"]
 
 [tool.coverage.run]
 source = ["src/spectrochempy/"]

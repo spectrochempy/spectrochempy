@@ -7,6 +7,7 @@
 # ruff: noqa
 
 __all__ = [
+    "cp",
     "efa",
     "fast_ica",
     "iris",
@@ -17,6 +18,7 @@ __all__ = [
     "svd",
 ]
 
+from . import cp
 from . import efa
 from . import fast_ica
 from . import iris

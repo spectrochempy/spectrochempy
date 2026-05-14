@@ -250,75 +250,91 @@ def align(dataset, *others, **kwargs):
             else:
                 raise NotImplementedError(f"The method {method} is unknown!")
 
+        # For interpolate method, use reference coordinate as target
+        # instead of the union
+        if method == "interpolate":
+            target_coord = ref_coord.copy()
+            target_coord._labels = None
+        else:
+            target_coord = new_coord
+
         # Now perform alignment of all objects on the new coordinates
         for index, object in _objects.items():
             obj = object["obj"]
 
-            # get the dim index for the given object
-            dim_index = obj.dims.index(dim)
-
-            # prepare slicing keys ; set slice(None) for the untouched
-            # dimensions preceding the dimension of interest
-            prepend_keys = [slice(None)] * dim_index
-
-            # New objects for obj must be created with the new coordinates
-
-            # change the data shape
-            new_obj_shape = list(obj.shape)
-            new_obj_shape[dim_index] = len(new_coord)
-            new_obj_data = np.full(new_obj_shape, np.nan)
-
-            # create new dataset for obj and ref_objects
-            new_obj = obj.copy() if copy else obj
-
-            # update the data and mask
-            coord = obj.coordset[dim]
-            coord_data = set(np.around(coord.data, ndec))
-
-            dim_loc = new_coord._loc2index(sorted(coord_data))
-            loc = tuple(prepend_keys + [dim_loc])
-
-            new_obj._data = new_obj_data
-
-            # mask all the data then unmask later the relevant data in
-            # the next step
-
-            if not new_obj.is_masked:
-                new_obj.mask = MASKED
-                new_obj.mask[loc] = False
-            else:
-                mask = new_obj.mask.copy()
-                new_obj.mask = MASKED
-                new_obj.mask[loc] = mask
-
-            # set the data for the loc
-            new_obj._data[loc] = obj.data
-
-            # update the coordinates
-            new_coordset = obj.coordset.copy()
-            if coord.is_labeled:
-                label_shape = list(coord.labels.shape)
-                label_shape[0] = new_coord.size
-                new_coord._labels = np.zeros(tuple(label_shape)).astype(
-                    coord.labels.dtype,
+            if method == "interpolate":
+                # Perform actual interpolation onto reference coordinates
+                interpolate_method = kwargs.get("interpolate_method", "linear")
+                obj = obj.interpolate(
+                    dim=dim,
+                    coord=target_coord,
+                    method=interpolate_method,
+                    fill_value=np.nan,
+                    inplace=False,
                 )
-                new_coord._labels[:] = "--"
-                new_coord._labels[dim_loc] = coord.labels
-            setattr(new_coordset, dim, new_coord)
-            new_obj._coordset = new_coordset
+            else:
+                # get the dim index for the given object
+                dim_index = obj.dims.index(dim)
 
-            # reversed?
-            if reversed:
-                # we must reverse the given coordinates
-                new_obj.sort(descend=reversed, dim=dim, inplace=True)
+                # prepare slicing keys ; set slice(None) for the untouched
+                # dimensions preceding the dimension of interest
+                prepend_keys = [slice(None)] * dim_index
+
+                # New objects for obj must be created with the new coordinates
+
+                # change the data shape
+                new_obj_shape = list(obj.shape)
+                new_obj_shape[dim_index] = len(new_coord)
+                new_obj_data = np.full(new_obj_shape, np.nan)
+
+                # create new dataset for obj and ref_objects
+                new_obj = obj.copy() if copy else obj
+
+                # update the data and mask
+                coord = obj.coordset[dim]
+                coord_data = set(np.around(coord.data, ndec))
+
+                dim_loc = new_coord._loc2index(sorted(coord_data))
+                loc = tuple(prepend_keys + [dim_loc])
+
+                new_obj._data = new_obj_data
+
+                # mask all the data then unmask later the relevant data in
+                # the next step
+
+                if not new_obj.is_masked:
+                    new_obj.mask = MASKED
+                    new_obj.mask[loc] = False
+                else:
+                    mask = new_obj.mask.copy()
+                    new_obj.mask = MASKED
+                    new_obj.mask[loc] = mask
+
+                # set the data for the loc
+                new_obj._data[loc] = obj.data
+
+                # update the coordinates
+                new_coordset = obj.coordset.copy()
+                if coord.is_labeled:
+                    label_shape = list(coord.labels.shape)
+                    label_shape[0] = new_coord.size
+                    new_coord._labels = np.zeros(tuple(label_shape)).astype(
+                        coord.labels.dtype,
+                    )
+                    new_coord._labels[:] = "--"
+                    new_coord._labels[dim_loc] = coord.labels
+                setattr(new_coordset, dim, new_coord)
+                new_obj._coordset = new_coordset
+
+                # reversed?
+                if reversed:
+                    # we must reverse the given coordinates
+                    new_obj.sort(descend=reversed, dim=dim, inplace=True)
+
+                obj = new_obj
 
             # update the _objects
-            _objects[index]["obj"] = new_obj
-
-            if method == "interpolate":
-                warning_(
-                    "Interpolation not yet implemented - for now equivalent to `outer`",
-                )
+            _objects[index]["obj"] = obj
 
         # the new transformed object must be in the same order as the passed
         # objects
@@ -340,37 +356,3 @@ def align(dataset, *others, **kwargs):
     # Now return
 
     return tuple(objects)
-
-    # if method == 'interpolate':  #  #     # reorders dataset and reference  # in ascending order  #     is_sorted
-    # = False  #     if  # dataset.coordset(axis).reversed:  #         datasetordered =  # dataset.sort(axis,
-    # descend=False)  #         refordered = ref.sort(  # refaxis, descend=False)  #         is_sorted = True  #
-    # else:  #  # datasetordered = dataset.copy()  #         refordered = ref.copy()  #  #     try:  #
-    # datasetordered.coordset(axis).to(  #     refordered.coordset(refaxis).units)  #     except:  #  #     raise
-    # ValueError(  #             'units of the dataset and  #     reference axes on which interpolate are not
-    # compatible')  #  #  #     oldaxisdata = datasetordered.coordset(axis).data  #  #     refaxisdata =
-    # refordered.coordset(refaxis).data  # TODO: at the  #      end restore the original order  #  #     method =
-    #  kwargs.pop(  #      'method', 'linear')  #     fill_value = kwargs.pop('fill_value',  #      np.NaN)  #  #
-    #  if method == 'linear':  #         interpolator  #      = lambda data, ax=0: scipy.interpolate.interp1d(  #  #
-    #  oldaxisdata, data, axis=ax, kind=method, bounds_error=False,  #             fill_value=fill_value,
-    #  assume_sorted=True)  #  #     elif  #             method == 'pchip':  #         interpolator = lambda data,
-    #             ax=0: scipy.interpolate.PchipInterpolator(  #  #             oldaxisdata, data, axis=ax,
-    #             extrapolate=False)  #  #             else:  #         raise AttributeError(f'{method} is not a  #
-    #             recognised option method for `align`')  #  #  #             interpolate_data = interpolator(
-    #             datasetordered.data,  #             axis)  #     newdata = interpolate_data(refaxisdata)  #  #  #
-    #             if datasetordered.is_masked:  #         interpolate_mask =  #             interpolator(
-    #             datasetordered.mask, axis)  #         newmask  #             = interpolate_mask(refaxisdata)  #
-    #             else:  #  #             newmask = NOMASK  #  #     # interpolate_axis =  #
-    #             interpolator(datasetordered.coordset(axis).data)  #     #  #             newaxisdata =
-    #             interpolate_axis(refaxisdata)  #  #             newaxisdata = refaxisdata.copy()  #  #     if
-    #             method ==  #             'pchip' and not np.isnan(fill_value):  #         index =  #
-    #             np.any(np.isnan(newdata))  #         newdata[index] =  #             fill_value  #  #
-    #             index = np.any(np.isnan(  #             newaxisdata))  #         newaxisdata[index] = fill_value
-    #  #     # create the new axis  #     newaxes = dataset.coords.copy()  #  #  newaxes[axis]._data = newaxisdata
-    #     newaxes[axis]._labels =  #  np.array([''] * newaxisdata.size)  #  #     # transform the dataset  #
-    #     inplace = kwargs.pop('inplace', False)  #  #     if inplace:  #  #     out = dataset  #     else:  #
-    #     out = dataset.copy()  #  #  #     out._data = newdata  #     out._coords = newaxes  #     out._mask  #
-    #     = newmask  #  #     out.name = dataset.name  #     out.title =  #     dataset.title  #  #     out.history
-    #     = '{}: Aligned along dim {}  #     with respect to dataset {} using coords {} \n'.format(  #  #     str(
-    #     dataset.modified), axis, ref.name, ref.coords[refaxis].title)  #  #     if is_sorted and out.coordset(
-    #     axis).reversed:  #  #  out.sort(axis, descend=True, inplace=True)  #         ref.sort(  #  refaxis,
-    #     descend=True, inplace=True)  #  # return out

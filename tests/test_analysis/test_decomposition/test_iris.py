@@ -158,7 +158,7 @@ def test_IRIS():
 
     iris2.plotlcurve()
     iris2.plotdistribution(-2)
-    _ = iris2.plotmerit(-2)
+    _ = iris2.plot_merit(-2)
 
     # with automated search, keeping the previous kernel
     reg_par = [-4, -2]

@@ -4,9 +4,13 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-Setup script for matplotlib custom styles and fonts.
+Setup script for matplotlib custom styles only.
 
-This module provides functionality to install custom matplotlib styles and fonts
+Note: Font installation has been removed. SpectroChemPy now relies on
+Matplotlib's built-in fonts.
+
+This module provides functionality to install custom matplotlib styles.
+Fonts are no longer bundled or installed by SpectroChemPy.
 """
 
 import shutil
@@ -29,38 +33,57 @@ def is_on_github_actions():
     return all(var in environ and environ.get(var) for var in required_vars)
 
 
+def is_building_docs():
+    """
+    Detect whether we are running inside a documentation build.
+
+    (Sphinx / nbsphinx / ReadTheDocs / GitHub Actions docs job).
+    """
+    return any(
+        key in environ
+        for key in (
+            "READTHEDOCS",
+            "SPHINX_BUILD",
+            "DOCS_BUILDING",
+            "NBSPHINX_EXECUTE",
+        )
+    )
+
+
 def setup_mpl():
     """
-    Install matplotlib styles and fonts for SpectroChemPy.
+    Install matplotlib styles for SpectroChemPy.
 
     This function:
     1. Checks the execution environment (local or GitHub Actions)
     2. Verifies matplotlib installation
     3. Installs custom stylesheets if not already present
-    4. Installs custom fonts if not already present
-    5. Cleans up font cache after installation
+
+    Note: Font installation has been removed. SpectroChemPy now relies on
+    Matplotlib's built-in fonts.
 
     Raises
     ------
     ImportError
         If matplotlib is not installed
     IOError
-        If source directories for styles or fonts are not found
+        If source directories for styles are not found
 
     """
     # Check execution environment
     GITHUB = is_on_github_actions()
-    if GITHUB:
+    DOCS = is_building_docs()
+
+    if GITHUB and not DOCS:
         print("Running on GitHub Actions")  # noqa: T201
 
     # Verify matplotlib installation
     try:
         import matplotlib as mpl
         import matplotlib.pyplot as plt
-        from matplotlib import get_cachedir
     except ImportError:
         warnings.warn(
-            "Sorry, but we cannot install mpl plotting styles and fonts "
+            "Sorry, but we cannot install mpl plotting styles "
             "if MatPlotLib is not installed.\n"
             "Please install MatPlotLib using:\n"
             "  pip install matplotlib\n"
@@ -72,7 +95,7 @@ def setup_mpl():
         return
 
     # Setup paths for stylesheets
-    stylesheets = Path(__file__).parent / "stylesheets"
+    stylesheets = Path(__file__).parent.parent / "plotting" / "stylesheets"
     if not stylesheets.exists():
         raise OSError(
             f"Can't find the stylesheets from SpectroChemPy {stylesheets!s}.\n"
@@ -85,7 +108,7 @@ def setup_mpl():
     if not stylelib.exists():
         stylelib.mkdir()
 
-    if GITHUB:
+    if GITHUB and not DOCS:
         print(f"MPL Configuration directory: {cfgdir}")  # noqa: T201
         print(f"Stylelib directory: {stylelib}")  # noqa: T201
 
@@ -107,31 +130,6 @@ def setup_mpl():
         if GITHUB:
             print("\nAvailable stylesheets:")  # noqa: T201
             print("\n".join(f"- {style}" for style in plt.style.available))  # noqa: T201
-
-    # Setup paths for fonts
-    dir_source = Path(__file__).parent / "fonts"
-    if not dir_source.exists():
-        raise OSError(f"Fonts directory not found: {dir_source}")
-
-    dir_dest = Path(mpl.get_data_path()) / "fonts" / "ttf"
-    if not dir_dest.exists():
-        dir_dest.mkdir(parents=True, exist_ok=True)
-
-    # Install fonts if needed
-    fonts = list(dir_source.glob("*.[ot]tf"))
-    if not all((dir_dest / src.name).exists() for src in fonts):
-        print("\nInstalling custom fonts...")  # noqa: T201
-        for src in fonts:
-            dest = dir_dest / src.name
-            shutil.copy(src, dest)
-            print(f"Font {src.name} installed successfully")  # noqa: T201
-
-        # Clear font cache
-        dir_cache = Path(get_cachedir())
-        for cache_file in dir_cache.glob("*.cache"):
-            if not cache_file.is_dir():
-                cache_file.unlink()
-                print(f"Cleared font cache: {cache_file.name}")  # noqa: T201
 
 
 if __name__ == "__main__":

@@ -63,7 +63,7 @@ prefs = scp.preferences
 prefs.figure.figsize = (6, 3)
 prefs.colormap = "Dark2"
 prefs.colorbar = True
-X.plot()
+_ = X.plot()
 
 # %% [markdown]
 # Now we can perform some baseline correction.
@@ -81,7 +81,7 @@ blc.order = 3
 blc.fit(X)  # fit the baseline
 
 Xcorr = blc.corrected  # get the corrected dataset
-Xcorr.plot()
+_ = Xcorr.plot()
 
 # %% [markdown]
 # To integrate each row on the full range, we can use the sum or trapz method of an
@@ -112,4 +112,4 @@ scp.plot_multiple(
 diff = (inttrapz - intsimps) * 100.0 / intsimps
 diff.title = "difference"
 diff.units = "percent"
-diff.plot(scatter=True, ms=5)
+_ = diff.plot(scatter=True, ms=5)

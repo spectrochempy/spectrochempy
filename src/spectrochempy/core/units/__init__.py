@@ -574,8 +574,6 @@ else:  # pint version >= 24
 
     if globals().get("ur", None) is None:
         ur = UnitRegistry(on_redefinition="ignore")
-
-        ur = UnitRegistry()
         ur.formatter = ScpFullFormatter(ur)
         ur.formatter._registry = ur
 

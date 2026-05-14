@@ -113,9 +113,9 @@ def plot_with_pp(s, peaks):
         ylim=(-0.1, 7),
     )
     for p in pks:
-        x, y = p.coord(-1).values, (p + 0.2).values
+        x, y = p.coord(-1).values.m, (p + 0.2).values.m
         ax.annotate(
-            f"{x.m:0.1f}",
+            f"{x:0.1f}",
             xy=(x, y),
             xytext=(-5, 5),
             rotation=90,
