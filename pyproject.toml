@@ -66,7 +66,7 @@ docs = [
   "jupyter == 1.1.1",
   "jupyter-sphinx",
   "jupytext == 1.16.7",
-  "nbconvert == 7.16.6",
+  "nbconvert == 7.17.0",
   "nbformat == 5.10.4",
   "nbsphinx == 0.9.6",
   "numpydoc == 1.8.0",
