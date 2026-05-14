@@ -21,4 +21,4 @@
 
 # NMR dependencies
 # ----------------
-spectrochempy[quaternion]
+numpy-quaternion>=2024.0.7
