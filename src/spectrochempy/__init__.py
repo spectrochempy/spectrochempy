@@ -104,20 +104,21 @@ def __getattr__(name):
 
         return getattr(_profile_module, name)
 
-    if name in _LAZY_IMPORTS:
-        module_path = _LAZY_IMPORTS[name]
-        module = __import__(module_path, fromlist=[name])
-        return getattr(module, name)
-
-    # Ensure external plugins are discovered
+    # Ensure external plugins are discovered (before lazy imports so
+    # plugin-provided functions take precedence over core stubs)
     plugin_manager.discover()
 
-    # Check plugin readers
+    # Check plugin readers first (e.g., read_topspin from external plugins)
     if name.startswith("read_"):
         reader_name = name[len("read_") :]
         reader_info = registry.get_reader(reader_name)
         if reader_info:
             return reader_info["func"]
+
+    if name in _LAZY_IMPORTS:
+        module_path = _LAZY_IMPORTS[name]
+        module = __import__(module_path, fromlist=[name])
+        return getattr(module, name)
 
     # Check other plugin-provided attributes
     for plugin in plugin_manager.list_plugins():

@@ -6,23 +6,8 @@
 # ruff: noqa
 
 import numpy as np
-import pytest
 
 from spectrochempy.utils.mplutils import show
-
-pytestmark = pytest.mark.skip("WIP with NMR data")
-
-
-def test_smooth(NMR_dataset_1D):
-    dataset = NMR_dataset_1D.copy()
-    dataset /= dataset.real.data.max()  # normalize
-    dataset = dataset.fft(tdeff=8192, size=2**15) + np.random.random(2**15) * 5.0
-    dataset.plot()
-
-    s = dataset.smooth()
-    s.plot(clear=False, color="r", xlim=[20, -20])
-
-    show()
 
 
 def test_smooth_2D(IR_dataset_2D):
