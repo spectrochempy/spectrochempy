@@ -1,6 +1,7 @@
 """NDMath class - Mathematical operations for N-dimensional arrays."""
 
 # Standard library imports
+import builtins
 import copy as cpy
 import functools
 import inspect
@@ -3079,7 +3080,7 @@ class NDMath:
                 if (
                     not is_quaternion
                     or quaternion_aware
-                    and all(arg.dtype not in TYPE_COMPLEX for arg in args)
+                    and builtins.all(arg.dtype not in TYPE_COMPLEX for arg in args)
                 ):
                     data = f(d, *args)
                 else:
