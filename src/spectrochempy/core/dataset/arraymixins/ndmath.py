@@ -92,7 +92,12 @@ class _from_numpy_method:
                 new = instance.copy()
                 args.insert(0, new)
             else:
-                dataset = cpy.copy(args[0])
+                try:
+                    dataset = cpy.copy(args[0])
+                except (TypeError, ArithmeticError):
+                    # e.g. copy fails on objects with generators (Python 3.14+)
+                    args[0] = cpy.deepcopy(args[0])
+                    dataset = args[0]
                 try:
                     # call as a classmethod
                     # class.method(dataset, ...)
@@ -3074,7 +3079,7 @@ class NDMath:
                 if (
                     not is_quaternion
                     or quaternion_aware
-                    and all(arg.dtype not in TYPE_COMPLEX for arg in args)
+                    and all([arg.dtype not in TYPE_COMPLEX for arg in args])
                 ):
                     data = f(d, *args)
                 else:
