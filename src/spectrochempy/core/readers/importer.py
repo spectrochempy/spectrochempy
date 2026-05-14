@@ -27,9 +27,6 @@ from spectrochempy.processing.transformation.concatenate import stack
 from spectrochempy.utils._logging import debug_
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils._logging import warning_
-from spectrochempy.utils.docutils import docprocess
-
-# from spectrochempy.utils.exceptions import DimensionsCompatibilityError
 from spectrochempy.utils.exceptions import ProtocolError
 from spectrochempy.utils.file import check_filename_to_open
 from spectrochempy.utils.file import get_directory_name
@@ -251,34 +248,7 @@ def _importer_method(func):
 # Public Generic Read function
 # --------------------------------------------------------------------------------------
 
-docprocess.get_sections(
-    r"""
-See Also
---------
-read : Generic reader inferring protocol from the filename extension.
-read_zip : Read Zip archives (containing spectrochempy readable files)
-read_dir : Read an entire directory.
-read_opus : Read OPUS spectra.
-read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
-read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
-read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
-read_galactic : Read Galactic files (:file:`.spc`).
-read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
-read_topspin : Read TopSpin Bruker NMR spectra.
-read_csv : Read CSV files (:file:`.csv`).
-read_jcamp : Read Infrared JCAMP-DX files (:file:`.jdx`, :file:`.dx`).
-read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-read_carroucell : Read files in a directory after a carroucell experiment.
-read_wire : Read REnishaw Wire files (:file:`.wdf`).
-""",
-    sections=["See Also"],
-    base="Importer",
-)
 
-docprocess.delete_params("Importer.see_also", "read")
-
-
-@docprocess.dedent
 def read(*paths, **kwargs):
     r"""
     Read data from various file formats.
@@ -299,7 +269,8 @@ def read(*paths, **kwargs):
 
         The returned datasets are merged to form a single dataset,
         except if ``merge`` is set to `False`.
-    %(kwargs)s
+    **kwargs : keyword parameters, optional
+        See Other Parameters.
 
     Returns
     -------
@@ -362,7 +333,19 @@ def read(*paths, **kwargs):
 
     See Also
     --------
-    %(Importer.see_also.no_read)s
+    read_zip : Read Zip archives (containing spectrochempy readable files)
+    read_dir : Read an entire directory.
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
+    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_galactic : Read Galactic files (:file:`.spc`).
+    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_csv : Read CSV files (:file:`.csv`).
+    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    read_carroucell : Read files in a directory after a carroucell experiment.
+    read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Examples
     --------
@@ -402,7 +385,6 @@ def read(*paths, **kwargs):
     NDDataset: [float64] a.u. (shape: (y:3, x:2567))
 
     Multiple files to merge : they are passed as a list instead of using the keyword
-    `merge`
 
     >>> scp.read(['test.0000', 'test.0001', 'test.0002'], directory='irdata/OPUS')
     NDDataset: [float64] a.u. (shape: (y:3, x:2567))
@@ -425,12 +407,12 @@ def read(*paths, **kwargs):
     >>> len(le)
     2
 
-    Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
+    Again we can use merge to stack all 4 spectra if they have compatible dimensions.
 
     >>> scp.read(directory='irdata/OPUS', merge=True)
-    [NDDataset: [float64] a.u. (shape: (y:1, x:5549)), NDDataset: [float64] a.u. (shape: (y:4, x:2567))]
-
+    [NDDataset: [float64] a.u. (shape: (y:1, x:2567)), NDDataset: [float64] a.u. (shape: (y:4, x:2567))]
     """
+
     importer = Importer()
 
     protocol = kwargs.get("protocol")
@@ -448,34 +430,18 @@ def read(*paths, **kwargs):
         try:
             kwargs["filetypes"] = [importer.filetypes[protocol]]
         except KeyError as e:
-            raise ProtocolError(protocol, list(importer.protocols.values())) from e
-        except TypeError as e:
-            info_(e)
+            raise ProtocolError(
+                protocol,
+                list(importer.protocols.values()),
+            ) from e
 
-    # # deprecated kwargs
-    # listdir = kwargs.pop("listdir", True)
-    # if "listdir" in kwargs and "iterdir" not in kwargs:
-    #     kwargs["iterdir"] = listdir
-    #     warning_(
-    #         "argument `listdir` is deprecated, use ìterdir` instead",
-    #         category=DeprecationWarning,
-    #     )
-    kwargs["iterdir"] = kwargs.pop("iterdir", True)
     return importer(*paths, **kwargs)
 
 
 # for some reasons the doctring.getsection modify the signature of the function
 # when used as a decorator, so we use it as a function
-docprocess.get_sections(
-    read.__doc__,
-    sections=["Parameters", "Other Parameters", "Returns"],
-    base="Importer",
-)
-
-docprocess.delete_params("Importer.see_also", "read_dir")
 
 
-@docprocess.dedent
 def read_dir(directory=None, **kwargs):
     r"""
     Read an entire directory.
@@ -497,13 +463,26 @@ def read_dir(directory=None, **kwargs):
 
     Returns
     -------
-    %(Importer.returns)s
+    object : `NDDataset` or list of `NDDataset`
+        The returned dataset(s).
         Depending on the python version, the order of the datasets in the list
         may change.
 
     See Also
     --------
-    %(Importer.see_also.no_read_dir)s
+    read : Generic reader inferring protocol from the filename extension.
+    read_zip : Read Zip archives (containing spectrochempy readable files)
+    read_opus : Read OPUS spectra.
+    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
+    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_galactic : Read Galactic files (:file:`.spc`).
+    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_csv : Read CSV files (:file:`.csv`).
+    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    read_carroucell : Read files in a directory after a carroucell experiment.
+    read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Examples
     --------

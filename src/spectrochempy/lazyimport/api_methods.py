@@ -38,6 +38,8 @@ _LAZY_IMPORTS = {
     "PCA": "spectrochempy.analysis.decomposition.pca",
     "SIMPLISMA": "spectrochempy.analysis.decomposition.simplisma",
     "SVD": "spectrochempy.analysis.decomposition.svd",
+    "CP": "spectrochempy.analysis.decomposition.cp",
+    "PSD": "spectrochempy.analysis.psd",
     "simps": "spectrochempy.analysis.integration.integrate",
     "trapz": "spectrochempy.analysis.integration.integrate",
     "simpson": "spectrochempy.analysis.integration.integrate",

@@ -16,6 +16,7 @@ VERSIONS = {
     "xarray": "*",
     "cantera": "2.5.1",
     "PyQt5": "*",
+    "tensorly": "*",
 }
 
 # A mapping from import name to package name (on PyPI) for packages where
