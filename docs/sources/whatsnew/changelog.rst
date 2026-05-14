@@ -41,6 +41,7 @@ Bug Fixes
 - Fixed issue #856 (osqp dependency, used for IRIS): Added warning for osqp < 1.0.
 - Fixed MCRALS: Corrected indexing for intermediate spectral matrices (C and St lists).
 - Fixed issue #875: Cannot subtract offset-naive and offset-aware datetimes.
+- Fixed issue #911: MCR-ALS ``closureConc="all"`` no longer raises "The truth value of an array with more than one element is ambiguous".
 
 
 
