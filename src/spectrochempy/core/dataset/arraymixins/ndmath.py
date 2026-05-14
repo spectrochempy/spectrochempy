@@ -3079,7 +3079,7 @@ class NDMath:
                 if (
                     not is_quaternion
                     or quaternion_aware
-                    and all(arg.dtype not in TYPE_COMPLEX for arg in args)
+                    and all([arg.dtype not in TYPE_COMPLEX for arg in args])
                 ):
                     data = f(d, *args)
                 else:
