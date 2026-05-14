@@ -22,16 +22,13 @@ from spectrochempy.extern.brukeropus.file.utils import get_block_type_label
 from spectrochempy.extern.brukeropus.file.utils import get_param_label
 from spectrochempy.utils._logging import debug_
 from spectrochempy.utils.datetimeutils import UTC
-from spectrochempy.utils.docutils import docprocess
 from spectrochempy.utils.meta import Meta
 
 # ======================================================================================
 # Public functions
 # ======================================================================================
-docprocess.delete_params("Importer.see_also", "read_opus")
 
 
-@docprocess.dedent
 def read_opus(*paths, **kwargs):
     r"""
     Open Bruker OPUS file(s).
@@ -41,7 +38,20 @@ def read_opus(*paths, **kwargs):
 
     Parameters
     ----------
-    %(Importer.parameters)s
+    *paths : `str`, `~pathlib.Path` object objects or valid urls, optional
+        The data source(s) can be specified by the name or a list of name for the
+        file(s) to be loaded:
+
+        - e.g., ( filename1, filename2, ...,  kwargs )
+
+        If the list of filenames are enclosed into brackets:
+
+        - e.g., ( [filename1, filename2, ...], kwargs )
+
+        The returned datasets are merged to form a single dataset,
+        except if ``merge`` is set to `False`.
+    **kwargs : keyword parameters, optional
+        See Other Parameters.
     type : str, optional
         The type of data to be read. Possible values are:
 
@@ -65,15 +75,78 @@ def read_opus(*paths, **kwargs):
 
     Returns
     -------
-    %(Importer.returns)s
+    object : `NDDataset` or list of `NDDataset`
+        The returned dataset(s).
 
     Other Parameters
     ----------------
-    %(Importer.other_parameters)s
+    content : `bytes` object, optional
+        Instead of passing a filename for further reading, a bytes content can be
+        directly provided as bytes objects.
+        The most convenient way is to use a dictionary. This feature is particularly
+        useful for a GUI Dash application to handle drag and drop of files into a
+        Browser.
+    csv_delimiter : `str`, optional, default: `~spectrochempy.preferences.csv_delimiter`
+        Set the column delimiter in CSV file.
+    description : `str`, optional
+        A Custom description.
+    directory : `~pathlib.Path` object objects or valid urls, optional
+        From where to read the files.
+    download_only: `bool`, optional, default: `False`
+        Used only when url are specified.  If True, only downloading and saving of the
+        files is performed, with no attempt to read their content.
+    merge : `bool`, optional, default: `False`
+        If `True` and several filenames or a ``directory`` have been provided as
+        arguments, then a single `NDDataset` with merged dataset (stacked along the first
+        dimension) is returned. In the case not all datasets have compatible dimensions or types/origins,
+        then several NDDatasets can be returned for different groups of compatible datasets.
+    origin : str, optional
+        If provided it may be used to define the type of experiment: e.g., 'ir', 'raman',..
+        or the origin of the data, e.g., 'omnic', 'opus', ... It is often provided by the reader
+        automatically, but can be set manually.
+
+        It is used for instance whn reading directory with different types of files, for merging
+        the datasets with compatible dimensions and different origin into different groups.
+
+        It is also used when reading with the CSV protocol. In order to properly interpret CSV file
+        it can be necessary to set the origin of the spectra. Up to now only ``'omnic'`` and ``'tga'``
+        have been implemented.
+    pattern : `str`, optional
+        A pattern to filter the files to read.
+
+        .. versionadded:: 0.7.2
+    protocol : `str`, optional
+        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'excel'``}. If not provided, the correct protocol
+        is inferred (whenever it is possible) from the filename extension.
+    read_only: `bool`, optional, default: `True`
+        Used only when url are specified.  If True, saving of the
+        files is performed in the current directory, or in the directory specified by
+        the directory parameter.
+    recursive : `bool`, optional, default: `False`
+        Read also in subfolders.
+    replace_existing: `bool`, optional, default: `False`
+        Used only when url are specified. By default, existing files are not replaced
+        so not downloaded.
+    sortbydate : `bool`, optional, default: `True`
+        Sort multiple filename by acquisition date.
 
     See Also
     --------
-    %(Importer.see_also.no_read_opus)s
+    read : Generic reader inferring protocol from the filename extension.
+    read_zip : Read Zip archives (containing spectrochempy readable files)
+    read_dir : Read an entire directory.
+    read_labspec : Read Raman LABSPEC spectra (:file:`.txt`).
+    read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
+    read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
+    read_galactic : Read Galactic files (:file:`.spc`).
+    read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
+    read_topspin : Read TopSpin Bruker NMR spectra.
+    read_csv : Read CSV files (:file:`.csv`).
+    read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
+    read_carroucell : Read files in a directory after a carroucell experiment.
+    read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Examples
     --------
@@ -83,8 +156,8 @@ def read_opus(*paths, **kwargs):
     >>> scp.read_opus('irdata\\OPUS\\test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
 
-    Reading a single OPUS file  (providing a unix/python type filename relative to the
-    default `datadir` )
+    Reading a single OPUS file  (providing a unix/python type filename relative to
+    the default ``datadir`` )
 
     >>> scp.read_opus('irdata/OPUS/test.0000')
     NDDataset: [float64] a.u. (shape: (y:1, x:2567))
@@ -113,8 +186,8 @@ def read_opus(*paths, **kwargs):
     directory='irdata/OPUS', merge=True)
     NDDataset: [float64] a.u. (shape: (y:3, x:2567))
 
-    Multiple files to merge : they are passed as a list instead of using the keyword `
-    merge`
+    Multiple files to merge : they are passed as a list instead of using the keyword
+    `merge`
 
     >>> scp.read_opus(['test.0000', 'test.0001', 'test.0002'],
     >>>               directory='irdata/OPUS')
@@ -137,12 +210,12 @@ def read_opus(*paths, **kwargs):
 
     >>> le = scp.read_opus(directory='irdata/OPUS')
     >>> len(le)
-    4
+    2
 
-    Again we can use merge to stack all 4 spectra if thet have compatible dimensions.
+    Again we can use merge to stack all 4 spectra if they have compatible dimensions.
 
     >>> scp.read_opus(directory='irdata/OPUS', merge=True)
-    NDDataset: [float64] a.u. (shape: (y:4, x:2567))
+    [NDDataset: [float64] a.u. (shape: (y:1, x:2567)), NDDataset: [float64] a.u. (shape: (y:4, x:2567))]
 
     Bruker OPUS files often contain several types of data (AB, RF, IGSM ...).
     In some cases, the type of data can be inferred from the file content.

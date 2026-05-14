@@ -10,7 +10,6 @@ import traitlets as tr
 
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.docutils import docprocess
 
 __all__ = ["SVD"]
 __configurables__ = ["SVD"]
@@ -57,10 +56,7 @@ def _svd_flip(U, VT, u_based_decision=True):
 # class PCA
 # ======================================================================================
 class SVD(DecompositionAnalysis):
-    docprocess.delete_params("DecompositionAnalysis.see_also", "SVD")
-
-    __doc__ = docprocess.dedent(
-        r"""
+    r"""
     Singular Value Decomposition (SVD).
 
     The SVD is commonly written as :math:`X = U \Sigma V^{T}`.
@@ -72,11 +68,23 @@ class SVD(DecompositionAnalysis):
 
     Parameters
     ----------
-    %(AnalysisConfigurable.parameters)s
+    log_level : any of [``"INFO"``, ``"DEBUG"``, ``"WARNING"``, ``"ERROR"``], optional, default: ``"WARNING"``
+        The log level at startup. It can be changed later on using the
+        `set_log_level` method or by changing the ``log_level`` attribute.
+    warm_start : `bool`, optional, default: `False`
+        When fitting repeatedly on the same dataset, but for multiple
+        parameter values (such as to find the value maximizing performance),
+        reuse the solution of the previous call to fit and add more components
+        (if available) in a sequential manner.
+
+        When `warm_start` is `True`, the existing fitted model attributes is used to
+        initialize the new model in a subsequent call to `fit`.
 
     See Also
     --------
-    %(DecompositionAnalysis.see_also.no_SVD)s
+    fit : Fit the SVD model on X.
+    transform : Apply dimensionality reduction.
+    fit_transform : Fit the model and apply dimensionality reduction.
 
     Examples
     --------
@@ -90,8 +98,8 @@ class SVD(DecompositionAnalysis):
     [   94.54     99.6 ...      100      100]
     >>> print(svd.ev_ratio.data)
     [   94.54    5.059 ... 8.687e-06 7.779e-06]
-    """,
-    )
+
+    """
 
     # ----------------------------------------------------------------------------------
     # Configuration parameters
@@ -156,24 +164,24 @@ class SVD(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Public method and properties
     # ----------------------------------------------------------------------------------
-    docprocess.keep_params("analysis_fit.parameters", "X")
-
-    @docprocess.dedent
     def fit(self, X):
         """
         Fit the SVD model on X.
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
 
         Returns
         -------
-        %(analysis_fit.returns)s
+        self
+            The fitted SVD instance.
 
         See Also
         --------
-        %(analysis_fit.see_also)s
+        fit_transform : Fit the model and apply dimensionality reduction.
+        transform : Apply dimensionality reduction.
 
         """
         return super().fit(X, Y=None)

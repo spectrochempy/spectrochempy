@@ -12,6 +12,8 @@ New Features
 - The welcome message display functionality has been removed.
 - Implemented lazy matplotlib initialization: SpectroChemPy now loads matplotlib only when plotting is actually used, reducing import-time overhead for non-plotting workflows.
 - Full interpolation feature for NDDataset (issue #673)
+- Added CP (Candecomp/Parafac)
+- Added PSD (Phase Sensitive Detection)
 
 Bug Fixes
 ~~~~~~~~~
@@ -33,6 +35,7 @@ Dependency Updates
     - Minimum Python version increased to 3.11
     - Dropped support for Python 3.10 and below
 - osqp > 1.0 is now allowed (#856). A warning is shown for osqp < 1.0, which will not be supported in future versions.
+- removed docrep dependency
 
 Breaking Changes
 ~~~~~~~~~~~~~~~

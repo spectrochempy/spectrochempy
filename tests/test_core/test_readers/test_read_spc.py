@@ -8,6 +8,48 @@
 import spectrochempy as scp
 
 
+def test_read_spc_merge_behavior():
+    """Test that read_spc respects merge parameter for multi-subfile SPC files."""
+    # BARBITUATES.SPC has 286 subfiles with different x-axis lengths
+    # Default behavior (merge=False) should return all 286 subfiles individually
+    A_default = scp.read_spc("galacticdata/BARBITUATES.SPC")
+    assert (
+        len(A_default) == 286
+    ), "Default merge=False should return 286 individual datasets"
+    assert A_default[90].shape == (1, 17)
+
+    # Explicit merge=False should also return 286 datasets
+    A_no_merge = scp.read_spc("galacticdata/BARBITUATES.SPC", merge=False)
+    assert (
+        len(A_no_merge) == 286
+    ), "Explicit merge=False should return 286 individual datasets"
+
+    # merge=True groups datasets by shape compatibility
+    # Since BARBITUATES.SPC has subfiles with different shapes (incompatible x-axes),
+    # they get grouped by shape but can't be merged into multi-row datasets
+    A_merged = scp.read_spc("galacticdata/BARBITUATES.SPC", merge=True)
+    assert len(A_merged) < 286, "merge=True should group datasets by shape"
+    # Verify the merge operation actually occurred (reduced dataset count)
+    assert len(A_merged) == 57, "merge=True should reduce to 57 shape groups"
+
+    # Single subfile SPC should return single NDDataset regardless of merge setting
+    B_default = scp.read_spc("galacticdata/BENZENE.SPC")
+    assert hasattr(B_default, "shape"), "Single file should return NDDataset, not list"
+    assert B_default.shape == (1, 1842)
+
+    B_merged = scp.read_spc("galacticdata/BENZENE.SPC", merge=True)
+    assert B_merged.shape == (
+        1,
+        1842,
+    ), "Single file with merge=True should still be single dataset"
+
+    B_no_merge = scp.read_spc("galacticdata/BENZENE.SPC", merge=False)
+    assert B_no_merge.shape == (
+        1,
+        1842,
+    ), "Single file with merge=False should still be single dataset"
+
+
 def test_read_spc():
     A = scp.read_spc("galacticdata/BARBITUATES.SPC")
     assert len(A) == 286

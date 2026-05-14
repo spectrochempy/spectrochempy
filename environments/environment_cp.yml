@@ -42,3 +42,8 @@ dependencies:
     - scipy
     - tzlocal
     - xlrd
+
+    # CP dependencies
+    # ---------------
+
+    - tensorly
