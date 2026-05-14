@@ -932,7 +932,7 @@ and `St`.
 
             # Closure
             # ------------------------------------------
-            if self.closureConc:
+            if self.closureConc is not None:
                 if self.closureMethod == "scaling":
                     Q = _lstsq(C[:, self.closureConc], self.closureTarget.T)
                     C[:, self.closureConc] = np.dot(C[:, self.closureConc], np.diag(Q))
