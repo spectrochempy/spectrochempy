@@ -207,6 +207,14 @@ def test_MCRALS(model, data):
 
     assert mcr.log.endswith("Stop ALS optimization.")
 
+    # test closureConc="all" (regression test for issue #911)
+    mcr.reset()
+    mcr.closureConc = "all"
+    mcr.closureMethod = "constantSum"
+    mcr.maxdiv = 1
+    mcr.fit(D, C0)
+    assert mcr.log.endswith("Stop ALS optimization.")
+
     # guess = C0, hard modeling
     mcr.reset()  # we reset everything to default
 
