@@ -70,5 +70,7 @@ class TestMissingPluginError:
         assert "spectrochempy-nmr" in msg
 
     def test_custom_hint(self):
-        err = MissingPluginError("test", plugin_name="mypkg", install_hint="pip install mypkg")
+        err = MissingPluginError(
+            "test", plugin_name="mypkg", install_hint="pip install mypkg"
+        )
         assert "pip install mypkg" in str(err)

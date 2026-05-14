@@ -77,7 +77,6 @@ application.start.set_warnings()
 from spectrochempy.plugins.manager import plugin_manager
 from spectrochempy.plugins.registry import registry
 
-
 # --------------------------------------------------------------------------------------
 # Plot profile API (lazy loaded)
 # --------------------------------------------------------------------------------------
@@ -112,7 +111,7 @@ def __getattr__(name):
 
     # Check plugin readers
     if name.startswith("read_"):
-        reader_name = name[len("read_"):]
+        reader_name = name[len("read_") :]
         reader_info = registry.get_reader(reader_name)
         if reader_info:
             return reader_info["func"]

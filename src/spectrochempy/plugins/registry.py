@@ -7,7 +7,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +43,18 @@ class PluginRegistry:
         return dict(self._plugins)
 
     def register_reader(
-        self, name: str, func: Callable, *, description: str = "", extensions: list[str] | None = None
+        self,
+        name: str,
+        func: Callable,
+        *,
+        description: str = "",
+        extensions: list[str] | None = None,
     ) -> None:
-        self._readers[name] = {"func": func, "description": description, "extensions": extensions or []}
+        self._readers[name] = {
+            "func": func,
+            "description": description,
+            "extensions": extensions or [],
+        }
 
     def get_reader(self, name: str) -> dict[str, Any] | None:
         return self._readers.get(name)
@@ -53,7 +63,9 @@ class PluginRegistry:
     def available_readers(self) -> dict[str, dict[str, Any]]:
         return dict(self._readers)
 
-    def register_writer(self, name: str, func: Callable, *, description: str = "") -> None:
+    def register_writer(
+        self, name: str, func: Callable, *, description: str = ""
+    ) -> None:
         self._writers[name] = {"func": func, "description": description}
 
     def get_writer(self, name: str) -> dict[str, Any] | None:
@@ -63,7 +75,9 @@ class PluginRegistry:
     def available_writers(self) -> dict[str, dict[str, Any]]:
         return dict(self._writers)
 
-    def register_processor(self, name: str, func: Callable, *, description: str = "") -> None:
+    def register_processor(
+        self, name: str, func: Callable, *, description: str = ""
+    ) -> None:
         self._processors[name] = {"func": func, "description": description}
 
     def get_processor(self, name: str) -> dict[str, Any] | None:

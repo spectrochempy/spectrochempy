@@ -4,7 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-from spectrochempy.plugins.registry import PluginRegistry, registry
+from spectrochempy.plugins.registry import PluginRegistry
+from spectrochempy.plugins.registry import registry
 
 
 def test_registry_singleton():
@@ -14,7 +15,8 @@ def test_registry_singleton():
 
 
 def test_register_reader():
-    def dummy_reader(path): ...
+    def dummy_reader(path):
+        ...
 
     registry.register_reader("test", dummy_reader, description="test reader")
     info = registry.get_reader("test")
@@ -28,7 +30,8 @@ def test_available_readers():
 
 
 def test_register_processor():
-    def dummy_processor(data): ...
+    def dummy_processor(data):
+        ...
 
     registry.register_processor("test_proc", dummy_processor)
     info = registry.get_processor("test_proc")
@@ -37,7 +40,8 @@ def test_register_processor():
 
 
 def test_register_writer():
-    def dummy_writer(data, path): ...
+    def dummy_writer(data, path):
+        ...
 
     registry.register_writer("test_writer", dummy_writer)
     info = registry.get_writer("test_writer")
@@ -53,7 +57,8 @@ def test_dtype_handler():
 
 
 def test_unit_context():
-    def setup(): ...
+    def setup():
+        ...
 
     registry.register_unit_context("nmr", setup)
     assert registry.get_unit_context("nmr") is setup

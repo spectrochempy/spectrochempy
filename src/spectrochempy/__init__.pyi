@@ -13,6 +13,7 @@ __all__ = [
     "extern",
     "ipython",
     "plotting",
+    "plugins",
     "processing",
     "utils",
 ]
@@ -23,5 +24,6 @@ from . import core
 from . import extern
 from . import ipython
 from . import plotting
+from . import plugins
 from . import processing
 from . import utils

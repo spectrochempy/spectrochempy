@@ -4,15 +4,18 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-from typing import Protocol
-from typing import runtime_checkable
+# ruff: noqa
 
+__all__ = [
+    "base",
+    "deps",
+    "hooks",
+    "manager",
+    "registry",
+]
 
-@runtime_checkable
-class SpectroChemPyPlugin(Protocol):
-    name: str
-    version: str
-    api_version: str = "1.0"
-
-    def register(self, registry) -> None:
-        ...
+from . import base
+from . import deps
+from . import hooks
+from . import manager
+from . import registry

@@ -12,9 +12,7 @@ class MissingPluginError(ImportError):
         plugin_name: str = "spectrochempy-nmr",
         install_hint: str | None = None,
     ) -> None:
-        msg = (
-            f"The '{feature}' feature requires the plugin '{plugin_name}'.\n"
-        )
+        msg = f"The '{feature}' feature requires the plugin '{plugin_name}'.\n"
         if install_hint:
             msg += install_hint
         else:
