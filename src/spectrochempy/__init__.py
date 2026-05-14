@@ -72,23 +72,10 @@ from . import application
 application.start.set_warnings()
 
 # --------------------------------------------------------------------------------------
-# Plugin manager
+# Plugin  manager
 # --------------------------------------------------------------------------------------
-
-# --------------------------------------------------------------------------------------
-# Plugin manager
-# --------------------------------------------------------------------------------------
-# from .plugins.pluginmanager import PluginManager
-
-# plugin_manager = PluginManager()
-# plugin_manager.discover_plugins()
-
-# # initialize all auto-initializable plugins
-# for plugin in plugin_manager.available_plugins.values():
-#     if plugin.auto_initialize:
-#         plugin.initialize(manager=plugin_manager)
-
-# __all__.append("plugin_manager")
+from spectrochempy.plugins.manager import plugin_manager
+from spectrochempy.plugins.registry import registry
 
 
 # --------------------------------------------------------------------------------------
@@ -122,6 +109,18 @@ def __getattr__(name):
         module_path = _LAZY_IMPORTS[name]
         module = __import__(module_path, fromlist=[name])
         return getattr(module, name)
+
+    # Check plugin readers
+    if name.startswith("read_"):
+        reader_name = name[len("read_"):]
+        reader_info = registry.get_reader(reader_name)
+        if reader_info:
+            return reader_info["func"]
+
+    # Check other plugin-provided attributes
+    for plugin in plugin_manager.list_plugins():
+        if hasattr(plugin, name):
+            return getattr(plugin, name)
 
     # Look also NDDataset attribute which can be used as API methods
     if name in _LAZY_DATASETS_IMPORTS:
