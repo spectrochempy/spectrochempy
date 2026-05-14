@@ -29,7 +29,12 @@ class PluginManager:
     def discover(self) -> None:
         if self._discovered:
             return
-        self._pm.load_setuptools_entrypoints(ENTRY_POINT_GROUP)
+        for ep in importlib.metadata.entry_points(group=ENTRY_POINT_GROUP):
+            if self._pm.get_plugin(ep.name) is not None:
+                continue
+            cls = ep.load()
+            plugin = cls() if isinstance(cls, type) else cls
+            self.register(plugin)
         self._discovered = True
 
     def register(self, plugin: Any) -> None:

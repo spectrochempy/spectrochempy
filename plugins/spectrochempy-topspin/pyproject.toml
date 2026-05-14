@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spectrochempy-topspin"
+version = "0.1.0"
+description = "Bruker TopSpin reader plugin for SpectroChemPy"
+requires-python = ">=3.10"
+dependencies = [
+    "spectrochempy",
+    "numpy",
+    "numpy-quaternion>=2024.0.7",
+]
+
+[project.entry-points."spectrochempy.plugins"]
+topspin = "spectrochempy_topspin:TopSpinPlugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]

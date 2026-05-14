@@ -408,6 +408,18 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         # as we are doing lazy_import, we look in the _api module)
         from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
 
+        # Check plugin readers (e.g., read_topspin from external plugins)
+        if item.startswith("read_"):
+            from spectrochempy.plugins.manager import plugin_manager
+            from spectrochempy.plugins.registry import registry
+
+            plugin_manager.discover()
+            reader_name = item[len("read_") :]
+            reader_info = registry.get_reader(reader_name)
+            if reader_info:
+                func = reader_info["func"]
+                return lambda *args, **kwargs: func(self, *args, **kwargs)
+
         if item in _LAZY_IMPORTS:
             func = tr.import_item(_LAZY_IMPORTS[item] + "." + item)
             # Create a bound method that calls the imported function with self as first argument

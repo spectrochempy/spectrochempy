@@ -109,6 +109,9 @@ def __getattr__(name):
         module = __import__(module_path, fromlist=[name])
         return getattr(module, name)
 
+    # Ensure external plugins are discovered
+    plugin_manager.discover()
+
     # Check plugin readers
     if name.startswith("read_"):
         reader_name = name[len("read_") :]
