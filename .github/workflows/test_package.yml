@@ -147,7 +147,7 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.14' && matrix.os == 'ubuntu-latest' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: coverage.xml
           fail_ci_if_error: true
