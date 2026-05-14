@@ -329,19 +329,9 @@ def ndarraymask():
 # --------------------------------------------------------------------------------------
 @pytest.fixture(scope="session")
 def typequaternion():
-    from spectrochempy.api import plugin_manager as manager
+    from spectrochempy.utils.quaternion import typequaternion
 
-    if (
-        manager.available_plugins.get("quaternion")
-        and manager.available_plugins.get("quaternion").enabled
-    ):
-        try:
-            _typequaternion = np.dtype(np.quaternion)
-        except (ImportError, AttributeError):
-            _typequaternion = None
-    else:
-        _typequaternion = None
-    return _typequaternion
+    return typequaternion
 
 
 @pytest.fixture(scope="function")

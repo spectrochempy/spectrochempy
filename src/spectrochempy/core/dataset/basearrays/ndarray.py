@@ -21,6 +21,7 @@ from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import Unit
 from spectrochempy.core.units import set_nmr_context
 from spectrochempy.core.units import ur
+from spectrochempy.utils.quaternion import typequaternion
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils._logging import error_
 from spectrochempy.utils._logging import info_
@@ -441,11 +442,9 @@ class NDArray(tr.HasTraits):
             value.ito(self.units)
             value = np.asarray(value.magnitude)  # , copy=self.copy)
 
-        if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
+        if typequaternion is not None and self._data.dtype == typequaternion and np.isscalar(value):
             # sometimes do not work directly : here is a work around
-            self._data[keys] = np.full_like(self._data[keys], value).astype(
-                np.dtype(np.quaternion),
-            )
+            self._data[keys] = np.full_like(self._data[keys], value).astype(typequaternion)
             return None
         self._data[keys] = value
         return None

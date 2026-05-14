@@ -25,7 +25,7 @@ def test_smooth():
     dataset = dataset.fft(tdeff=8192, size=2**15) + np.random.random(2**15) * 5.0
     dataset.plot()
 
-    s = dataset.smooth()
+    s = dataset.smooth(size=21)
     s.plot(clear=False, color="r", xlim=[20, -20])
 
     show()

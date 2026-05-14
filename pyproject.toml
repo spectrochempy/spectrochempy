@@ -29,7 +29,6 @@ dependencies = [
   "matplotlib",
   "numpy",
   "numpydoc",
-  "numpy-quaternion >= 2024.0.7",
   "osqp",
   "pluggy",
   "pint",
@@ -91,7 +90,7 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
-# nmr = ["quaternion"]
+nmr = ["numpy-quaternion>=2024.0.7"]
 test = [
   "coverage",
   "ipywidgets",

@@ -9,8 +9,6 @@ import itertools
 import textwrap
 
 import numpy as np
-from quaternion import as_float_array
-from quaternion import as_quat_array
 from traitlets import Bool
 from traitlets import validate
 
@@ -20,6 +18,8 @@ from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.print import insert_masked_print
+from spectrochempy.utils.quaternion import as_float_array
+from spectrochempy.utils.quaternion import as_quat_array
 from spectrochempy.utils.quaternion import as_quaternion
 from spectrochempy.utils.quaternion import get_component
 from spectrochempy.utils.quaternion import typequaternion
@@ -325,7 +325,7 @@ class NDComplexArray(NDArray):
 
         if self.data.dtype in TYPE_COMPLEX:
             return [self.data.real.min(), self.data.imag.max()]
-        if self.data.dtype == np.quaternion:
+        if typequaternion is not None and self.data.dtype == typequaternion:
             data = as_float_array(self.data)[..., 0]
             return [data.min(), data.max()]
         return [self.data.min(), self.data.max()]

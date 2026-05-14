@@ -15,11 +15,11 @@ def test_smooth_2D(IR_dataset_2D):
     dataset /= dataset.real.data.max()  # nromalize
     dataset += np.random.random(dataset.shape[-1]) * 0.02
 
-    s = dataset.smooth(length=21)
+    s = dataset.smooth(size=21)
     (dataset + 0.25).plot(xlim=[4000, 3000])
     s.plot(cmap="copper", clear=False, xlim=[4000, 3000])
 
-    s2 = s.smooth(length=21, dim="y")
+    s2 = s.smooth(size=21, dim="y")
     (s2 - 0.25).plot(cmap="jet", clear=False, xlim=[4000, 3000])
 
     show()
