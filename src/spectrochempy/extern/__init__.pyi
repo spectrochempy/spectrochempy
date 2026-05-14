@@ -8,12 +8,10 @@
 
 __all__ = [
     "brukeropus",
-    "nmrglue",
     "traittypes",
     "whittaker_smooth",
 ]
 
 from . import brukeropus
-from . import nmrglue
 from . import traittypes
 from . import whittaker_smooth
