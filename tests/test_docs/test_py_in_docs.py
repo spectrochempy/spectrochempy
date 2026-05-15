@@ -19,6 +19,7 @@ import pytest
 from traitlets import import_item
 
 import spectrochempy as scp
+from spectrochempy.plugins.deps import MissingPluginError
 
 pytestmark = [
     pytest.mark.slow,
@@ -88,6 +89,12 @@ def test_nbsphinx_script_(script):
     if name in []:
         return
 
+    # Skip scripts that require the topspin plugin if it's not installed
+    if "read_topspin" in script.read_text() and not scp.plugin_manager.has_plugin(
+        "topspin"
+    ):
+        pytest.skip("requires spectrochempy-topspin plugin")
+
     e, message, err = nbsphinx_script_run(script)
     # this give unicoderror on workflow with window
     if e:
@@ -126,6 +133,8 @@ def test_examples(example):
 
     try:
         import_item(module)
+    except MissingPluginError:
+        pytest.skip("requires spectrochempy-topspin plugin")
     except Exception as e:
         error_msg = f"Error in example: {example}\n"
         error_msg += f"Module: {module}\n"
