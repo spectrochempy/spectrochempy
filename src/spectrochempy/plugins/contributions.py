@@ -62,6 +62,26 @@ class WriterContribution:
 
 
 @dataclass
+class VisualizerContribution:
+    """
+    Describes a visualizer contribution from a plugin.
+
+    Parameters
+    ----------
+    name : str
+        Short identifier.
+    func : Callable
+        The visualizer callable.
+    description : str
+        Human-readable description.
+    """
+
+    name: str
+    func: Callable
+    description: str = ""
+
+
+@dataclass
 class ProcessorContribution:
     """
     Describes a data-processor contribution from a plugin.
@@ -99,6 +119,15 @@ def reader_from_dict(d: dict[str, Any]) -> ReaderContribution:
 def writer_from_dict(d: dict[str, Any]) -> WriterContribution:
     """Convert a loosely-typed dict to a ``WriterContribution``."""
     return WriterContribution(
+        name=d["name"],
+        func=d["func"],
+        description=d.get("description", ""),
+    )
+
+
+def visualizer_from_dict(d: dict[str, Any]) -> VisualizerContribution:
+    """Convert a loosely-typed dict to a ``VisualizerContribution``."""
+    return VisualizerContribution(
         name=d["name"],
         func=d["func"],
         description=d.get("description", ""),

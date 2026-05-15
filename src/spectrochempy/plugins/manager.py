@@ -71,9 +71,7 @@ class PluginManager:
                 plugin = cls() if isinstance(cls, type) else cls
                 self.register(plugin)
             except Exception as exc:
-                logger.warning(
-                    "Plugin '%s' failed during discovery: %s", ep.name, exc
-                )
+                logger.warning("Plugin '%s' failed during discovery: %s", ep.name, exc)
                 self._plugin_states[ep.name] = PluginState.FAILED
                 self._plugin_errors[ep.name] = exc
         self._discovered = True
@@ -106,9 +104,7 @@ class PluginManager:
             try:
                 plugin.register(self.registry)
             except Exception as exc:
-                logger.exception(
-                    "Plugin '%s' raised an error during register().", name
-                )
+                logger.exception("Plugin '%s' raised an error during register().", name)
                 self._plugin_states[name] = PluginState.FAILED
                 self._plugin_errors[name] = exc
                 return
@@ -124,9 +120,10 @@ class PluginManager:
     #
     # Each hook type targets a specialised sub-registry:
     #
-    #   register_readers    → self.registry.io
-    #   register_writers    → self.registry.io
-    #   register_processors → self.registry.processing
+    #   register_readers     → self.registry.io
+    #   register_writers     → self.registry.io
+    #   register_processors  → self.registry.processing
+    #   register_visualizers → self.registry.visualization
     # ------------------------------------------------------------------
 
     def _collect_declarative_hooks(self, plugin: Any) -> dict[str, list[str]]:
@@ -135,6 +132,7 @@ class PluginManager:
         self._collect_readers(plugin, contributions)
         self._collect_writers(plugin, contributions)
         self._collect_processors(plugin, contributions)
+        self._collect_visualizers(plugin, contributions)
 
         return contributions
 
@@ -197,6 +195,36 @@ class PluginManager:
                 getattr(plugin, "name", "unknown"),
             )
 
+    def _collect_visualizers(
+        self, plugin: Any, contributions: dict[str, list[str]]
+    ) -> None:
+        if not (
+            hasattr(plugin, "register_visualizers")
+            and callable(plugin.register_visualizers)
+        ):
+            return
+        try:
+            visualizers = plugin.register_visualizers()
+            if not isinstance(visualizers, list):
+                return
+            for vis in visualizers:
+                if not isinstance(vis, dict):
+                    continue
+                name = vis.get("name")
+                func = vis.get("func")
+                if name and func:
+                    self.registry.visualization.register_visualizer(
+                        name,
+                        func,
+                        description=vis.get("description", ""),
+                    )
+                    contributions.setdefault("visualizers", []).append(name)
+        except Exception:
+            logger.exception(
+                "Failed to collect visualizers from plugin '%s'",
+                getattr(plugin, "name", "unknown"),
+            )
+
     def _collect_processors(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
@@ -244,9 +272,7 @@ class PluginManager:
                         plugin = cls() if isinstance(cls, type) else cls
                         self.register(plugin)
                     except Exception as exc:
-                        logger.warning(
-                            "Plugin '%s' failed to load: %s", name, exc
-                        )
+                        logger.warning("Plugin '%s' failed to load: %s", name, exc)
                         self._plugin_states[name] = PluginState.FAILED
                         self._plugin_errors[name] = exc
                     break

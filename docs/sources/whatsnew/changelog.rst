@@ -26,6 +26,13 @@ New Features
 - Added PSD (Phase Sensitive Detection)
 - New plugin infrastructure: external packages can now extend SpectroChemPy via ``spectrochempy.plugins`` entry points. Readers, writers, file types, unit contexts, and dtype handlers are auto-discovered at runtime.
 - The Bruker TopSpin NMR reader has been moved to an external plugin package ``spectrochempy-topspin``. Install with ``pip install spectrochempy-topspin`` — ``scp.read_topspin(...)`` works transparently when the plugin is installed.
+- Plugin registry refactored into specialised sub-registries: ``IORegistry`` (readers, writers, filetypes), ``ProcessingRegistry`` (processors, unit contexts, dtype handlers), ``VisualizationRegistry`` (visualizers), ``MetadataRegistry`` (plugin tracking). ``PluginRegistry`` is now a composite facade with full backward-compatible forwarding.
+- Declarative contribution hooks: plugins can declare readers, writers, processors, and visualizers via ``register_readers()``, ``register_writers()``, ``register_processors()``, ``register_visualizers()`` methods instead of calling the registry directly.
+- Contribution dataclasses (``ReaderContribution``, ``WriterContribution``, ``ProcessorContribution``, ``VisualizerContribution``) provide typed structure for plugin contributions, with dict conversion helpers.
+- Plugin lifecycle states: every plugin is tracked through ``DISCOVERED``, ``LOADED``, ``ACTIVE``, ``FAILED``, ``DISABLED`` states. Introspection API: ``get_plugin_state()``, ``get_active_plugins()``, ``get_failed_plugins()``, ``get_plugin_descriptor()``.
+- Plugin activation/deactivation: ``activate_plugin()`` and ``deactivate_plugin()`` for lightweight state control without unloading.
+- Improved error isolation: a plugin failing during discovery, validation, or registration does not affect other plugins or SpectroChemPy startup.
+- ``PluginCapability`` enum (``READER``, ``WRITER``, ``PROCESSOR``, ``VISUALIZER``) for capability-based plugin classification.
 
 .. section
 
@@ -42,6 +49,10 @@ Bug Fixes
 - Fixed MCRALS: Corrected indexing for intermediate spectral matrices (C and St lists).
 - Fixed issue #875: Cannot subtract offset-naive and offset-aware datetimes.
 - Fixed issue #911: MCR-ALS ``closureConc="all"`` no longer raises "The truth value of an array with more than one element is ambiguous".
+- Fixed quaternion ``abs()`` and NumPy 2.0 dtype compatibility issues.
+- Fixed ``dtype == typequaternion`` false detection on float64 arrays.
+- Fixed ``NDMath.all`` builtin shadowing and generator iteration over objects without ``.dtype``.
+- Fixed Python 3.14 ``copy`` compatibility with optional quaternion guards.
 
 
 

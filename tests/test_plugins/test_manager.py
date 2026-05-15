@@ -58,6 +58,21 @@ class DeclarativeWriterPlugin:
         ]
 
 
+class DeclarativeVisualizerPlugin:
+    name = "decl-viz"
+    version = "0.2.0"
+    api_version = "1.0"
+
+    def register_visualizers(self) -> list[dict]:
+        return [
+            {
+                "name": "myplot",
+                "func": lambda data: None,
+                "description": "Plot data",
+            }
+        ]
+
+
 class DeclarativeProcessorPlugin:
     name = "decl-proc"
     version = "0.2.0"
@@ -214,6 +229,17 @@ def test_declarative_processors():
     assert proc["description"] == "Smooth data"
 
 
+def test_declarative_visualizers():
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeVisualizerPlugin()
+    pm.register(plugin)
+
+    vis = registry.visualization.get_visualizer("myplot")
+    assert vis is not None
+    assert vis["description"] == "Plot data"
+
+
 # ------------------------------------------------------------------
 # Declarative hook routing to specialised sub-registries
 # ------------------------------------------------------------------
@@ -247,6 +273,16 @@ def test_declarative_processors_routed_to_processing():
     pm.register(plugin)
 
     assert registry.processing.get_processor("smooth") is not None
+
+
+def test_declarative_visualizers_routed_to_visualization():
+    """register_visualizers targets registry.visualization."""
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeVisualizerPlugin()
+    pm.register(plugin)
+
+    assert registry.visualization.get_visualizer("myplot") is not None
 
 
 # ------------------------------------------------------------------
@@ -404,8 +440,6 @@ def test_plugin_goes_active_after_register():
 
 
 def test_incompatible_plugin_goes_failed():
-    from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
-
     class BadAPI:
         name = "bad"
         version = "1.0"
@@ -568,8 +602,6 @@ def test_failing_plugin_does_not_affect_others():
 
 
 def test_plugin_state_values():
-    from spectrochempy.plugins.lifecycle import PluginState
-
     assert PluginState.DISCOVERED.value == "discovered"
     assert PluginState.LOADED.value == "loaded"
     assert PluginState.ACTIVE.value == "active"
@@ -579,7 +611,6 @@ def test_plugin_state_values():
 
 def test_plugin_descriptor_defaults():
     from spectrochempy.plugins.lifecycle import PluginDescriptor
-    from spectrochempy.plugins.lifecycle import PluginState
 
     d = PluginDescriptor(name="test")
     assert d.name == "test"

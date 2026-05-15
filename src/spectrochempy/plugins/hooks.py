@@ -95,6 +95,25 @@ class SpectroChemPyHookSpec:
         """
 
     @hookspec
+    def register_visualizers(self) -> list[dict]:
+        """
+        Return visualizer contributions declared by the plugin.
+
+        Expected return format::
+
+            [
+                {
+                    "name": "myplot",
+                    "func": plot_data,
+                    "description": "Plot data",
+                },
+            ]
+
+        Returning ``None`` or an empty list is treated as
+        "no visualizer contribution".
+        """
+
+    @hookspec
     def register_processors(self) -> list[dict]:
         """
         Return processor contributions declared by the plugin.

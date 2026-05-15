@@ -356,6 +356,18 @@ def test_writer_contribution():
     assert c.description == "desc"
 
 
+def test_visualizer_contribution():
+    from spectrochempy.plugins.contributions import VisualizerContribution
+
+    def dummy(data):
+        ...
+
+    c = VisualizerContribution(name="test", func=dummy, description="desc")
+    assert c.name == "test"
+    assert c.func is dummy
+    assert c.description == "desc"
+
+
 def test_processor_contribution():
     from spectrochempy.plugins.contributions import ProcessorContribution
 
@@ -392,6 +404,18 @@ def test_writer_from_dict():
     assert c.name == "w"
     assert c.func is dummy
     assert c.description == ""
+
+
+def test_visualizer_from_dict():
+    from spectrochempy.plugins.contributions import visualizer_from_dict
+
+    def dummy(data):
+        ...
+
+    c = visualizer_from_dict({"name": "v", "func": dummy, "description": "viz"})
+    assert c.name == "v"
+    assert c.func is dummy
+    assert c.description == "viz"
 
 
 def test_processor_from_dict():

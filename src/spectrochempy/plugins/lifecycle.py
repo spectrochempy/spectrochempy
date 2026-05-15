@@ -14,7 +14,6 @@ descriptor for introspection.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from dataclasses import field
 from enum import Enum
 
 
