@@ -22,6 +22,138 @@ from spectrochempy.api.plugins.constants import CORE_PLUGIN_API_VERSION
 logger = logging.getLogger(__name__)
 
 
+def check_plugin_metadata(plugin: Any) -> list[str]:
+    """
+    Check plugin metadata completeness and return a list of issues.
+
+    Unlike ``validate_plugin_compatibility``, this function does **not**
+    check API version compatibility or minimum SpectroChemPy version.
+    It only verifies that required metadata fields exist and have
+    non-empty values.
+
+    Parameters
+    ----------
+    plugin : Any
+        A plugin instance.
+
+    Returns
+    -------
+    list of str
+        Human-readable issue descriptions.  An empty list means no
+        issues were found.
+    """
+    issues: list[str] = []
+    metadata = _get_plugin_metadata(plugin)
+    name = metadata.get("name", "unknown")
+
+    for key in ("name", "version", "plugin_api_version"):
+        if not metadata.get(key):
+            issues.append(
+                f"Plugin '{name}' is missing required metadata field '{key}'."
+            )
+
+    if not metadata.get("description"):
+        issues.append(f"Plugin '{name}' has no description.")
+
+    return issues
+
+
+def check_plugin_contributions(plugin: Any) -> list[str]:
+    """
+    Check plugin contribution declarations for consistency.
+
+    Inspects declarative hooks (``register_readers``,
+    ``register_writers``, ``register_processors``,
+    ``register_visualizers``) and validates the structure of
+    returned data.
+
+    Parameters
+    ----------
+    plugin : Any
+        A plugin instance.
+
+    Returns
+    -------
+    list of str
+        Human-readable issue descriptions.  An empty list means no
+        issues were found.
+    """
+    issues: list[str] = []
+    name = getattr(plugin, "name", "unknown")
+
+    for hook_name in (
+        "register_readers",
+        "register_writers",
+        "register_processors",
+        "register_visualizers",
+    ):
+        if not hasattr(plugin, hook_name):
+            continue
+        method = getattr(plugin, hook_name)
+        if not callable(method):
+            issues.append(f"Plugin '{name}': '{hook_name}' is not callable.")
+            continue
+        try:
+            result = method()
+        except Exception as exc:
+            issues.append(
+                f"Plugin '{name}': '{hook_name}()' raised {type(exc).__name__}: {exc}"
+            )
+            continue
+        if result is None:
+            continue
+        if not isinstance(result, list):
+            issues.append(
+                f"Plugin '{name}': '{hook_name}()' returned {type(result).__name__}, "
+                f"expected list[dict]."
+            )
+            continue
+        for i, item in enumerate(result):
+            if not isinstance(item, dict):
+                issues.append(
+                    f"Plugin '{name}': '{hook_name}()' item {i} is "
+                    f"{type(item).__name__}, expected dict."
+                )
+                continue
+            if "name" not in item:
+                issues.append(
+                    f"Plugin '{name}': '{hook_name}()' item {i} is missing 'name'."
+                )
+            if "func" not in item:
+                issues.append(
+                    f"Plugin '{name}': '{hook_name}()' item {i} is missing 'func'."
+                )
+
+    return issues
+
+
+def check_plugin_compatibility(plugin: Any) -> list[str]:
+    """
+    Full compatibility check for a plugin.
+
+    Combines ``check_plugin_metadata``, ``check_plugin_contributions``,
+    and ``validate_plugin_compatibility`` into a single function that
+    returns all issues at once.
+
+    Parameters
+    ----------
+    plugin : Any
+        A plugin instance.
+
+    Returns
+    -------
+    list of str
+        All compatibility issues found.  An empty list means the
+        plugin is fully compatible.
+    """
+    issues: list[str] = []
+    issues.extend(check_plugin_metadata(plugin))
+    issues.extend(check_plugin_contributions(plugin))
+    _, compat_errors = validate_plugin_compatibility(plugin)
+    issues.extend(compat_errors)
+    return issues
+
+
 def validate_plugin_compatibility(plugin: Any) -> tuple[bool, list[str]]:
     """
     Validate that *plugin* is compatible with the current SpectroChemPy.
