@@ -12,6 +12,7 @@ __all__ = [
     "contributions",
     "deps",
     "hooks",
+    "lifecycle",
     "manager",
     "registries",
     "registry",
@@ -22,6 +23,7 @@ from . import capabilities
 from . import contributions
 from . import deps
 from . import hooks
+from . import lifecycle
 from . import manager
 from . import registries
 from . import registry

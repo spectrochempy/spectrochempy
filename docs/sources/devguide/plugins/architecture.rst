@@ -252,6 +252,85 @@ The public API (``spectrochempy.api``) is stable across releases.
 Internal modules (``spectrochempy.plugins``) may change without notice.
 
 
+Plugin lifecycle
+=================
+
+Every plugin managed by ``PluginManager`` passes through explicit
+lifecycle states:
+
++---------------------+----------------------------------------------------+
+| State               | Meaning                                            |
++=====================+====================================================+
+| ``DISCOVERED``      | Entry point found via ``importlib.metadata``       |
++---------------------+----------------------------------------------------+
+| ``LOADED``          | Instantiated and validated, registered in pluggy   |
++---------------------+----------------------------------------------------+
+| ``ACTIVE``          | All contributions registered in the registry       |
++---------------------+----------------------------------------------------+
+| ``FAILED``          | Error during load, validation, or registration     |
++---------------------+----------------------------------------------------+
+| ``DISABLED``        | Explicitly deactivated by the user                 |
++---------------------+----------------------------------------------------+
+
+Inspect plugin states::
+
+    manager.get_plugin_state("topspin")      # PluginState.ACTIVE
+    manager.get_active_plugins()             # ["topspin", ...]
+    manager.get_failed_plugins()             # {"broken": "error msg"}
+    manager.get_plugin_descriptor("topspin") # PluginDescriptor snapshot
+
+Activation and deactivation::
+
+    manager.deactivate_plugin("topspin")     # → marks DISABLED
+    manager.activate_plugin("topspin")       # → marks ACTIVE
+
+Deactivation is a lightweight state flag — no unloading or reimport
+happens.  A disabled plugin is skipped if its entry point is
+encountered again during discovery.
+
+
+Lazy loading and optional dependencies
+=======================================
+
+Plugins should defer heavy imports to avoid slowing down SpectroChemPy
+startup:
+
+.. code-block:: python
+
+    # ❌ Avoid: top-level import of a heavy library
+    import numpy as np  # fine
+    import torch        # ❌ heavy, loaded at startup
+
+
+    # ✅ Prefer: deferred import inside operational methods
+    class MyPlugin(SpectroChemPyPlugin):
+        name = "mynet"
+        version = "0.1.0"
+
+        def register_readers(self) -> list[dict]:
+            return [
+                {
+                    "name": "myformat",
+                    "func": self._read_myformat,
+                },
+            ]
+
+        def _read_myformat(self, path):
+            from mynet import load_model  # deferred import
+            ...
+
+When a plugin fails to load (missing optional dependency,
+``ImportError`` in constructor, etc.), the manager catches the
+exception, marks the plugin as ``FAILED``, and continues.  Other
+plugins and SpectroChemPy itself are unaffected::
+
+    manager.get_failed_plugins()
+    # → {"mynet": "No module named 'mynet'"}
+
+This lets plugins declare optional dependencies freely without risking
+startup crashes.
+
+
 Test isolation
 ==============
 

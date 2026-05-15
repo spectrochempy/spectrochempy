@@ -9,6 +9,7 @@
 
 from spectrochempy.plugins.base import SpectroChemPyPlugin
 from spectrochempy.plugins.deps import MissingPluginError
+from spectrochempy.plugins.lifecycle import PluginState
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.registry import PluginRegistry
 
@@ -356,3 +357,233 @@ class TestMissingPluginError:
             "test", plugin_name="mypkg", install_hint="pip install mypkg"
         )
         assert "pip install mypkg" in str(err)
+
+
+# ------------------------------------------------------------------
+# Test plugins for lifecycle
+# ------------------------------------------------------------------
+
+
+class FailingConstructorPlugin:
+    """Plugin whose constructor raises (simulates missing optional dep)."""
+
+    name = "fail-ctor"
+    version = "0.1.0"
+    api_version = "1.0"
+
+    def __init__(self):
+        msg = "optional dependency not found"
+        raise ImportError(msg)
+
+    def register(self, registry):
+        ...
+
+
+class FailingRegisterPlugin:
+    """Plugin whose register() raises."""
+
+    name = "fail-reg"
+    version = "0.1.0"
+    api_version = "1.0"
+
+    def register(self, registry):
+        msg = "registration failure"
+        raise RuntimeError(msg)
+
+
+# ------------------------------------------------------------------
+# Lifecycle states
+# ------------------------------------------------------------------
+
+
+def test_plugin_goes_active_after_register():
+    pm = PluginManager()
+    plugin = DummyPlugin()
+    pm.register(plugin)
+    assert pm.get_plugin_state("dummy").value == "active"
+
+
+def test_incompatible_plugin_goes_failed():
+    from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
+
+    class BadAPI:
+        name = "bad"
+        version = "1.0"
+        api_version = "99.0"
+
+        def register(self, registry):
+            ...
+
+    pm = PluginManager()
+    pm.register(BadAPI())
+    assert pm.get_plugin_state("bad").value == "failed"
+
+
+def test_get_active_plugins():
+    pm = PluginManager()
+    pm.register(DummyPlugin())
+    active = pm.get_active_plugins()
+    assert "dummy" in active
+
+
+def test_get_active_plugins_excludes_failed():
+    class BadAPI:
+        name = "bad"
+        version = "1.0"
+        api_version = "99.0"
+
+        def register(self, registry):
+            ...
+
+    pm = PluginManager()
+    pm.register(DummyPlugin())
+    pm.register(BadAPI())
+    active = pm.get_active_plugins()
+    assert "dummy" in active
+    assert "bad" not in active
+
+
+def test_get_failed_plugins():
+    class BadAPI:
+        name = "bad"
+        version = "1.0"
+        api_version = "99.0"
+
+        def register(self, registry):
+            ...
+
+    pm = PluginManager()
+    pm.register(BadAPI())
+    failed = pm.get_failed_plugins()
+    assert "bad" in failed
+
+
+# ------------------------------------------------------------------
+# PluginDescriptor
+# ------------------------------------------------------------------
+
+
+def test_get_plugin_descriptor():
+    pm = PluginManager()
+    plugin = DummyPlugin()
+    pm.register(plugin)
+
+    desc = pm.get_plugin_descriptor("dummy")
+    assert desc is not None
+    assert desc.name == "dummy"
+    assert desc.version == "0.1.0"
+    assert desc.state.value == "active"
+    assert desc.error == ""
+
+
+def test_get_plugin_descriptor_nonexistent():
+    pm = PluginManager()
+    assert pm.get_plugin_descriptor("nope") is None
+
+
+# ------------------------------------------------------------------
+# Activation / deactivation
+# ------------------------------------------------------------------
+
+
+def test_deactivate_plugin():
+    pm = PluginManager()
+    pm.register(DummyPlugin())
+    assert pm.deactivate_plugin("dummy") is True
+    assert pm.get_plugin_state("dummy").value == "disabled"
+
+
+def test_activate_plugin():
+    pm = PluginManager()
+    pm.register(DummyPlugin())
+    pm.deactivate_plugin("dummy")
+    assert pm.activate_plugin("dummy") is True
+    assert pm.get_plugin_state("dummy").value == "active"
+
+
+def test_deactivate_nonexistent_plugin():
+    pm = PluginManager()
+    assert pm.deactivate_plugin("nope") is False
+
+
+def test_activate_nonexistent_plugin():
+    pm = PluginManager()
+    assert pm.activate_plugin("nope") is False
+
+
+def test_disabled_plugin_skipped_on_register():
+    pm = PluginManager()
+    pm.register(DummyPlugin())
+    pm.deactivate_plugin("dummy")
+
+    # Try registering the same plugin again
+    pm.register(DummyPlugin())
+    # Should still be disabled
+    assert pm.get_plugin_state("dummy").value == "disabled"
+
+
+# ------------------------------------------------------------------
+# Error isolation
+# ------------------------------------------------------------------
+
+
+def test_register_with_constructor_error():
+    """A plugin whose constructor raises is handled without crashing."""
+    pm = PluginManager()
+
+    def _register():
+        try:
+            plugin = FailingConstructorPlugin()
+            pm.register(plugin)
+        except ImportError:
+            pm._plugin_states["fail-ctor"] = "failed"  # type: ignore[assignment]
+
+    _register()
+    # The manager should still be usable after a constructor failure
+    healthy = DummyPlugin()
+    pm.register(healthy)
+    assert pm.get_plugin_state("dummy").value == "active"
+
+
+def test_register_with_register_error():
+    """A plugin whose register() raises is marked FAILED."""
+    pm = PluginManager()
+    plugin = FailingRegisterPlugin()
+    pm.register(plugin)
+    assert pm.get_plugin_state("fail-reg").value == "failed"
+
+
+def test_failing_plugin_does_not_affect_others():
+    """Other plugins remain ACTIVE after a sibling fails."""
+    pm = PluginManager()
+    pm.register(DummyPlugin())
+    pm.register(FailingRegisterPlugin())
+    assert pm.get_plugin_state("dummy").value == "active"
+    assert pm.get_plugin_state("fail-reg").value == "failed"
+
+
+# ------------------------------------------------------------------
+# PluginState enum and PluginDescriptor dataclass
+# ------------------------------------------------------------------
+
+
+def test_plugin_state_values():
+    from spectrochempy.plugins.lifecycle import PluginState
+
+    assert PluginState.DISCOVERED.value == "discovered"
+    assert PluginState.LOADED.value == "loaded"
+    assert PluginState.ACTIVE.value == "active"
+    assert PluginState.FAILED.value == "failed"
+    assert PluginState.DISABLED.value == "disabled"
+
+
+def test_plugin_descriptor_defaults():
+    from spectrochempy.plugins.lifecycle import PluginDescriptor
+    from spectrochempy.plugins.lifecycle import PluginState
+
+    d = PluginDescriptor(name="test")
+    assert d.name == "test"
+    assert d.version == ""
+    assert d.state == PluginState.DISCOVERED
+    assert d.error is None
+    assert d.entry_point is None
