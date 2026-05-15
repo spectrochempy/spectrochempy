@@ -30,17 +30,19 @@ contributions and registers them into a
 The registry is decomposed into specialised sub-registries, each
 owning a single domain:
 
-+----------------------+--------------------------------------------------+
-| Sub-registry         | Responsibilities                                  |
-+======================+==================================================+
-| ``registry.io``      | Readers, writers, filetype associations           |
-+----------------------+--------------------------------------------------+
-| ``registry.processing`` | Processors, unit contexts, dtype handlers      |
-+----------------------+--------------------------------------------------+
-| ``registry.visualization`` | Visualizers (future use)                   |
-+----------------------+--------------------------------------------------+
-| ``registry.metadata``    | Plugin descriptors                           |
-+----------------------+--------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Sub-registry
+     - Responsibilities
+   * - ``registry.io``
+     - Readers, writers, filetype associations
+   * - ``registry.processing``
+     - Processors, unit contexts, dtype handlers
+   * - ``registry.visualization``
+     - Visualizers (future use)
+   * - ``registry.metadata``
+     - Plugin descriptors
 
 Legacy code using top-level methods (``registry.register_reader(...)``)
 continues to work via forwarding.  New code can target sub-registries
@@ -156,17 +158,19 @@ your plugin provides (purely informational)::
 
 Available capability values:
 
-+------------------------+-----------+
-| Enum member            | Value     |
-+========================+===========+
-| ``PluginCapability.READER``    | ``"reader"``    |
-+------------------------+-----------+
-| ``PluginCapability.WRITER``    | ``"writer"``    |
-+------------------------+-----------+
-| ``PluginCapability.PROCESSOR`` | ``"processor"`` |
-+------------------------+-----------+
-| ``PluginCapability.VISUALIZER``| ``"visualizer"``|
-+------------------------+-----------+
+.. list-table::
+   :header-rows: 1
+
+   * - Enum member
+     - Value
+   * - ``PluginCapability.READER``
+     - ``"reader"``
+   * - ``PluginCapability.WRITER``
+     - ``"writer"``
+   * - ``PluginCapability.PROCESSOR``
+     - ``"processor"``
+   * - ``PluginCapability.VISUALIZER``
+     - ``"visualizer"``
 
 
 Plugin metadata
@@ -242,42 +246,66 @@ Import guidance
 
 Import from the stable public API namespace:
 
-+------------------------------------------+------------------------------------------+
-| ✅ Recommended                           | ❌ Avoid                              |
-+==========================================+==========================================+
-| ``from spectrochempy.api.plugins import`` | ``from spectrochempy.plugins import``    |
-+------------------------------------------+------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - ✅ Recommended
+     - ❌ Avoid
+   * - ``from spectrochempy.api.plugins import``
+     - ``from spectrochempy.plugins import``
 
 The public API (``spectrochempy.api``) is stable across releases.
 Internal modules (``spectrochempy.plugins``) may change without notice.
 
 All symbols available from ``spectrochempy.api.plugins``:
 
-=========================== ====================================================
-Symbol                      Description
-=========================== ====================================================
-``SpectroChemPyPlugin``     Base class for plugins
-``PluginCapability``        Enum: ``READER``, ``WRITER``, ``PROCESSOR``, ``VISUALIZER``
-``ReaderContribution``      Dataclass for reader contributions
-``WriterContribution``      Dataclass for writer contributions
-``ProcessorContribution``   Dataclass for processor contributions
-``VisualizerContribution``  Dataclass for visualizer contributions
-``reader_from_dict``        Convert dict to ``ReaderContribution``
-``writer_from_dict``        Convert dict to ``WriterContribution``
-``processor_from_dict``     Convert dict to ``ProcessorContribution``
-``visualizer_from_dict``    Convert dict to ``VisualizerContribution``
-``PluginState``             Enum: ``DISCOVERED``, ``LOADED``, ``ACTIVE``, ``FAILED``, ``DISABLED``
-``PluginDescriptor``        Dataclass for plugin state snapshot
-``MissingPluginError``      Import error with install hint
-``PluginVersionError``      Version incompatibility error
-``CORE_PLUGIN_API_VERSION``  Current API version string (``"1.0"``)
-``hookspec``                Decorator for hook specifications
-``hookimpl``                Decorator for hook implementations
-``validate_plugin_compatibility``  Compatibility check (returns ``(bool, list[str])``)
-``check_plugin_metadata``   Metadata completeness check
-``check_plugin_contributions``  Contribution structure validation
-``check_plugin_compatibility``  Full compatibility check (all issues)
-=========================== ====================================================
+.. list-table::
+   :header-rows: 1
+
+   * - Symbol
+     - Description
+   * - ``SpectroChemPyPlugin``
+     - Base class for plugins
+   * - ``PluginCapability``
+     - Enum: ``READER``, ``WRITER``, ``PROCESSOR``, ``VISUALIZER``
+   * - ``ReaderContribution``
+     - Dataclass for reader contributions
+   * - ``WriterContribution``
+     - Dataclass for writer contributions
+   * - ``ProcessorContribution``
+     - Dataclass for processor contributions
+   * - ``VisualizerContribution``
+     - Dataclass for visualizer contributions
+   * - ``reader_from_dict``
+     - Convert dict to ``ReaderContribution``
+   * - ``writer_from_dict``
+     - Convert dict to ``WriterContribution``
+   * - ``processor_from_dict``
+     - Convert dict to ``ProcessorContribution``
+   * - ``visualizer_from_dict``
+     - Convert dict to ``VisualizerContribution``
+   * - ``PluginState``
+     - Enum: ``DISCOVERED``, ``LOADED``, ``ACTIVE``, ``FAILED``, ``DISABLED``
+   * - ``PluginDescriptor``
+     - Dataclass for plugin state snapshot
+   * - ``MissingPluginError``
+     - Import error with install hint
+   * - ``PluginVersionError``
+     - Version incompatibility error
+   * - ``CORE_PLUGIN_API_VERSION``
+     - Current API version string (``"1.0"``)
+   * - ``hookspec``
+     - Decorator for hook specifications
+   * - ``hookimpl``
+     - Decorator for hook implementations
+   * - ``validate_plugin_compatibility``
+     - Compatibility check (returns ``(bool, list[str])``)
+   * - ``check_plugin_metadata``
+     - Metadata completeness check
+   * - ``check_plugin_contributions``
+     - Contribution structure validation
+   * - ``check_plugin_compatibility``
+     - Full compatibility check (all issues)
 
 
 Plugin lifecycle
