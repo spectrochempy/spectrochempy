@@ -4,12 +4,16 @@ spectrochempy-myplugin — A SpectroChemPy plugin.
 Replace this module docstring with your plugin's description.
 """
 
-from spectrochempy.api.plugins import (
-    CORE_PLUGIN_API_VERSION,
-    PluginCapability,
-    ReaderContribution,
-    SpectroChemPyPlugin,
-)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
+
+if TYPE_CHECKING:
+    from spectrochempy import NDDataset
+from spectrochempy.api.plugins import PluginCapability
+from spectrochempy.api.plugins import SpectroChemPyPlugin
 
 
 class MyPlugin(SpectroChemPyPlugin):
@@ -60,7 +64,7 @@ class MyPlugin(SpectroChemPyPlugin):
     # Operational methods (with deferred imports for optional deps)
     # ------------------------------------------------------------------
 
-    def _read_myformat(self, path: str) -> "NDDataset":
+    def _read_myformat(self, path: str) -> NDDataset:
         """Read a MyFormat file and return an NDDataset."""
         # Defer heavy imports to avoid slowing down SpectroChemPy startup
         import numpy as np
@@ -70,7 +74,7 @@ class MyPlugin(SpectroChemPyPlugin):
         data = np.loadtxt(path)
         return NDDataset(data)
 
-    def _write_myformat(self, dataset: "NDDataset", path: str) -> None:
+    def _write_myformat(self, dataset: NDDataset, path: str) -> None:
         """Write an NDDataset to a MyFormat file."""
         import numpy as np
 

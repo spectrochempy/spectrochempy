@@ -1,13 +1,13 @@
+# ruff: noqa: S101  # assert allowed in tests
+
 """Tests for spectrochempy-myplugin."""
 
-from spectrochempy.api.plugins import (
-    PluginCapability,
-    PluginState,
-    check_plugin_compatibility,
-)
-from spectrochempy.testing.plugins import PluginTestHarness
-
 from plugin_name import MyPlugin
+
+from spectrochempy.api.plugins import PluginCapability
+from spectrochempy.api.plugins import PluginState
+from spectrochempy.api.plugins import check_plugin_compatibility
+from spectrochempy.testing.plugins import PluginTestHarness
 
 
 def test_plugin_metadata():
