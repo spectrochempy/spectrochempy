@@ -128,7 +128,7 @@ A recommended CI workflow tests against multiple Python versions::
           - uses: actions/checkout@v4
           - uses: actions/setup-python@v5
             with:
-              python-version: ${{ matrix.python-version }}
+              python-version: ["3.11", "3.12", "3.13"]  # set via CI matrix
           - name: Install SpectroChemPy
             run: |
               git clone https://github.com/spectrochempy/spectrochempy.git
