@@ -242,7 +242,10 @@ doctest_optionflags = [
   "ALLOW_BYTES",
 ]
 doctest_plus = "enabled"
-markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "network: marks tests that require network access (deselect with '-m \"not network\"')",
+]
 testpaths = ["tests"]
 doctest_norecursedirs = ["tests/test_plotting"]
 

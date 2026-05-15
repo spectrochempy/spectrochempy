@@ -23,8 +23,21 @@ from spectrochempy.plugins.deps import MissingPluginError
 
 pytestmark = [
     pytest.mark.slow,
+    pytest.mark.network,
     #    pytest.mark.skip(reason="Too slow and redundant with docs building process"),
 ]
+
+
+def _network_available() -> bool:
+    """Check if network (specifically eigenvector.com) is reachable."""
+    import socket
+
+    try:
+        socket.create_connection(("www.eigenvector.com", 80), timeout=2)
+        return True
+    except OSError:
+        return False
+
 
 repo = Path(__file__).parent.parent.parent
 
@@ -95,6 +108,10 @@ def test_nbsphinx_script_(script):
     ):
         pytest.skip("requires spectrochempy-topspin plugin")
 
+    # Skip scripts requiring network when network is unavailable
+    if "eigenvector.com" in script.read_text() and not _network_available():
+        pytest.skip("requires network access (eigenvector.com)")
+
     e, message, err = nbsphinx_script_run(script)
     # this give unicoderror on workflow with window
     if e:
@@ -130,6 +147,10 @@ def test_examples(example):
     parts[-1] = parts[-1][0:-3]
     sel = parts[-parts[::-1].index("spectrochempy") - 1 :]
     module = ".".join(sel)
+
+    # Skip examples requiring network when network is unavailable
+    if "eigenvector.com" in example.read_text() and not _network_available():
+        pytest.skip("requires network access (eigenvector.com)")
 
     try:
         import_item(module)
