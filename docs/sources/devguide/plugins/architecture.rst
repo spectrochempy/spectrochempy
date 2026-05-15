@@ -27,6 +27,29 @@ The :class:`~spectrochempy.plugins.manager.PluginManager` collects these
 contributions and registers them into a
 :class:`~spectrochempy.plugins.registry.PluginRegistry`.
 
+The registry is decomposed into specialised sub-registries, each
+owning a single domain:
+
++----------------------+--------------------------------------------------+
+| Sub-registry         | Responsibilities                                  |
++======================+==================================================+
+| ``registry.io``      | Readers, writers, filetype associations           |
++----------------------+--------------------------------------------------+
+| ``registry.processing`` | Processors, unit contexts, dtype handlers      |
++----------------------+--------------------------------------------------+
+| ``registry.visualization`` | Visualizers (future use)                   |
++----------------------+--------------------------------------------------+
+| ``registry.metadata``    | Plugin descriptors                           |
++----------------------+--------------------------------------------------+
+
+Legacy code using top-level methods (``registry.register_reader(...)``)
+continues to work via forwarding.  New code can target sub-registries
+directly::
+
+    registry.io.register_reader(...)
+    registry.processing.register_processor(...)
+    registry.metadata.register_plugin(...)
+
 
 Minimal plugin example
 ======================

@@ -9,15 +9,19 @@
 __all__ = [
     "base",
     "capabilities",
+    "contributions",
     "deps",
     "hooks",
     "manager",
+    "registries",
     "registry",
 ]
 
 from . import base
 from . import capabilities
+from . import contributions
 from . import deps
 from . import hooks
 from . import manager
+from . import registries
 from . import registry

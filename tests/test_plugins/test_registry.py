@@ -4,10 +4,27 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-"""Tests for PluginRegistry."""
+"""Tests for PluginRegistry and specialised registries."""
 
+from spectrochempy.plugins.registries import IORegistry
+from spectrochempy.plugins.registries import MetadataRegistry
+from spectrochempy.plugins.registries import ProcessingRegistry
+from spectrochempy.plugins.registries import VisualizationRegistry
 from spectrochempy.plugins.registry import PluginRegistry
 from spectrochempy.plugins.registry import registry as global_registry
+
+# ------------------------------------------------------------------
+# PluginRegistry — composite structure
+# ------------------------------------------------------------------
+
+
+def test_composite_structure():
+    """PluginRegistry composes all specialised registries."""
+    registry = PluginRegistry()
+    assert isinstance(registry.io, IORegistry)
+    assert isinstance(registry.processing, ProcessingRegistry)
+    assert isinstance(registry.visualization, VisualizationRegistry)
+    assert isinstance(registry.metadata, MetadataRegistry)
 
 
 def test_independent_instances():
@@ -21,6 +38,11 @@ def test_independent_instances():
 def test_global_registry_is_instance():
     """The module-level registry is a PluginRegistry instance."""
     assert isinstance(global_registry, PluginRegistry)
+
+
+# ------------------------------------------------------------------
+# PluginRegistry — backward-compatible forwarding
+# ------------------------------------------------------------------
 
 
 def test_register_reader():
@@ -140,3 +162,245 @@ def test_registries_isolated():
 
     r1.register_reader("shared", dummy)
     assert r2.get_reader("shared") is None
+
+
+# ------------------------------------------------------------------
+# PluginRegistry — forwarding targets sub-registries
+# ------------------------------------------------------------------
+
+
+def test_register_reader_forwards_to_io():
+    registry = PluginRegistry()
+
+    def dummy(path):
+        ...
+
+    registry.register_reader("fwd", dummy)
+    assert registry.io.get_reader("fwd") is not None
+
+
+def test_register_writer_forwards_to_io():
+    registry = PluginRegistry()
+
+    def dummy(data, path):
+        ...
+
+    registry.register_writer("fwd", dummy)
+    assert registry.io.get_writer("fwd") is not None
+
+
+def test_register_processor_forwards_to_processing():
+    registry = PluginRegistry()
+
+    def dummy(data):
+        ...
+
+    registry.register_processor("fwd", dummy)
+    assert registry.processing.get_processor("fwd") is not None
+
+
+def test_register_plugin_forwards_to_metadata():
+    registry = PluginRegistry()
+    registry.register_plugin("fwd", "plugin")
+    assert registry.metadata.get_plugin("fwd") == "plugin"
+
+
+def test_dtype_handler_forwards_to_processing():
+    registry = PluginRegistry()
+    registry.register_dtype_handler("fwd", object())
+    assert registry.processing.has_dtype_handler("fwd")
+
+
+# ------------------------------------------------------------------
+# IORegistry — isolated tests
+# ------------------------------------------------------------------
+
+
+def test_io_registry_independent():
+    io = IORegistry()
+
+    def dummy(path):
+        ...
+
+    io.register_reader("r", dummy)
+    io.register_writer("w", dummy)
+    io.register_filetype("ext", {})
+
+    assert "r" in io.available_readers
+    assert "w" in io.available_writers
+    assert "ext" in io.available_filetypes
+
+    io.clear()
+    assert io.available_readers == {}
+    assert io.available_writers == {}
+    assert io.available_filetypes == {}
+
+
+# ------------------------------------------------------------------
+# ProcessingRegistry — isolated tests
+# ------------------------------------------------------------------
+
+
+def test_processing_registry_independent():
+    pr = ProcessingRegistry()
+
+    def dummy(data):
+        ...
+
+    def setup():
+        ...
+
+    pr.register_processor("p", dummy)
+    pr.register_unit_context("ctx", setup)
+    pr.register_dtype_handler("dtype", object())
+
+    assert "p" in pr.available_processors
+    assert pr.get_unit_context("ctx") is setup
+    assert pr.has_dtype_handler("dtype")
+
+    pr.clear()
+    assert pr.available_processors == {}
+    assert pr.get_unit_context("ctx") is None
+    assert not pr.has_dtype_handler("dtype")
+
+
+# ------------------------------------------------------------------
+# VisualizationRegistry — isolated tests
+# ------------------------------------------------------------------
+
+
+def test_visualization_registry():
+    vr = VisualizationRegistry()
+
+    def plot():
+        ...
+
+    vr.register_visualizer("myplot", plot)
+    assert vr.get_visualizer("myplot") is not None
+    assert "myplot" in vr.available_visualizers
+
+    vr.clear()
+    assert vr.available_visualizers == {}
+
+
+# ------------------------------------------------------------------
+# MetadataRegistry — isolated tests
+# ------------------------------------------------------------------
+
+
+def test_metadata_registry():
+    mr = MetadataRegistry()
+    mr.register_plugin("p1", "descriptor")
+    assert mr.get_plugin("p1") == "descriptor"
+    assert "p1" in mr.available_plugins
+
+    mr.clear()
+    assert mr.available_plugins == {}
+
+
+# ------------------------------------------------------------------
+# Specialised registries don't leak across PluginRegistry instances
+# ------------------------------------------------------------------
+
+
+def test_sub_registries_are_independent_instances():
+    r1 = PluginRegistry()
+    r2 = PluginRegistry()
+
+    assert r1.io is not r2.io
+    assert r1.processing is not r2.processing
+    assert r1.visualization is not r2.visualization
+    assert r1.metadata is not r2.metadata
+
+
+# ------------------------------------------------------------------
+# Contribution dataclasses
+# ------------------------------------------------------------------
+
+
+def test_reader_contribution():
+    from spectrochempy.plugins.contributions import ReaderContribution
+
+    def dummy(path):
+        ...
+
+    c = ReaderContribution(
+        name="test", func=dummy, description="desc", extensions=[".ext"]
+    )
+    assert c.name == "test"
+    assert c.func is dummy
+    assert c.description == "desc"
+    assert c.extensions == [".ext"]
+
+
+def test_reader_contribution_defaults():
+    from spectrochempy.plugins.contributions import ReaderContribution
+
+    def dummy(path):
+        ...
+
+    c = ReaderContribution(name="test", func=dummy)
+    assert c.description == ""
+    assert c.extensions is None
+
+
+def test_writer_contribution():
+    from spectrochempy.plugins.contributions import WriterContribution
+
+    def dummy(data, path):
+        ...
+
+    c = WriterContribution(name="test", func=dummy, description="desc")
+    assert c.name == "test"
+    assert c.func is dummy
+    assert c.description == "desc"
+
+
+def test_processor_contribution():
+    from spectrochempy.plugins.contributions import ProcessorContribution
+
+    def dummy(data):
+        ...
+
+    c = ProcessorContribution(name="test", func=dummy, description="desc")
+    assert c.name == "test"
+    assert c.func is dummy
+    assert c.description == "desc"
+
+
+def test_reader_from_dict():
+    from spectrochempy.plugins.contributions import reader_from_dict
+
+    def dummy(path):
+        ...
+
+    c = reader_from_dict(
+        {"name": "r", "func": dummy, "description": "d", "extensions": [".x"]}
+    )
+    assert c.name == "r"
+    assert c.func is dummy
+    assert c.extensions == [".x"]
+
+
+def test_writer_from_dict():
+    from spectrochempy.plugins.contributions import writer_from_dict
+
+    def dummy(data, path):
+        ...
+
+    c = writer_from_dict({"name": "w", "func": dummy})
+    assert c.name == "w"
+    assert c.func is dummy
+    assert c.description == ""
+
+
+def test_processor_from_dict():
+    from spectrochempy.plugins.contributions import processor_from_dict
+
+    def dummy(data):
+        ...
+
+    c = processor_from_dict({"name": "p", "func": dummy, "description": "proc"})
+    assert c.name == "p"
+    assert c.func is dummy
+    assert c.description == "proc"

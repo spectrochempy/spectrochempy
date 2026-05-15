@@ -80,23 +80,19 @@ class PluginManager:
 
     # ------------------------------------------------------------------
     # Declarative hook collection
+    #
+    # Each hook type targets a specialised sub-registry:
+    #
+    #   register_readers    → self.registry.io
+    #   register_writers    → self.registry.io
+    #   register_processors → self.registry.processing
+    #
+    # Backward-compatible forwarding on PluginRegistry means that
+    # ``self.registry.register_reader(...)`` would also work, but
+    # routing directly to sub-registries is more explicit.
     # ------------------------------------------------------------------
 
     def _collect_declarative_hooks(self, plugin: Any) -> dict[str, list[str]]:
-        """
-        Collect contributions from declarative hook implementations.
-
-        Checks whether *plugin* implements any of the new declarative
-        hooks (``register_readers``, ``register_writers``,
-        ``register_processors``) and registers the returned
-        contributions into ``self.registry``.
-
-        Returns
-        -------
-        dict[str, list[str]]
-            Mapping of capability names to lists of registered
-            contribution names (for introspection / testing).
-        """
         contributions: dict[str, list[str]] = {}
 
         self._collect_readers(plugin, contributions)
@@ -122,7 +118,7 @@ class PluginManager:
                 name = reader.get("name")
                 func = reader.get("func")
                 if name and func:
-                    self.registry.register_reader(
+                    self.registry.io.register_reader(
                         name,
                         func,
                         description=reader.get("description", ""),
@@ -152,7 +148,7 @@ class PluginManager:
                 name = writer.get("name")
                 func = writer.get("func")
                 if name and func:
-                    self.registry.register_writer(
+                    self.registry.io.register_writer(
                         name,
                         func,
                         description=writer.get("description", ""),
@@ -182,7 +178,7 @@ class PluginManager:
                 name = proc.get("name")
                 func = proc.get("func")
                 if name and func:
-                    self.registry.register_processor(
+                    self.registry.processing.register_processor(
                         name,
                         func,
                         description=proc.get("description", ""),

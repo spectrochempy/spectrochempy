@@ -214,6 +214,41 @@ def test_declarative_processors():
 
 
 # ------------------------------------------------------------------
+# Declarative hook routing to specialised sub-registries
+# ------------------------------------------------------------------
+
+
+def test_declarative_readers_routed_to_io():
+    """register_readers targets registry.io."""
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeReaderPlugin()
+    pm.register(plugin)
+
+    assert registry.io.get_reader("myformat") is not None
+
+
+def test_declarative_writers_routed_to_io():
+    """register_writers targets registry.io."""
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeWriterPlugin()
+    pm.register(plugin)
+
+    assert registry.io.get_writer("myformat") is not None
+
+
+def test_declarative_processors_routed_to_processing():
+    """register_processors targets registry.processing."""
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeProcessorPlugin()
+    pm.register(plugin)
+
+    assert registry.processing.get_processor("smooth") is not None
+
+
+# ------------------------------------------------------------------
 # Coexistence: imperative + declarative
 # ------------------------------------------------------------------
 
