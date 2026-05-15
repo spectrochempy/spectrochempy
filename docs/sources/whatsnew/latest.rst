@@ -16,18 +16,9 @@ New Features
 - Added PSD (Phase Sensitive Detection)
 - New plugin infrastructure: external packages can now extend SpectroChemPy via ``spectrochempy.plugins`` entry points. Readers, writers, file types, unit contexts, and dtype handlers are auto-discovered at runtime.
 - The Bruker TopSpin NMR reader has been moved to an external plugin package ``spectrochempy-topspin``. Install with ``pip install spectrochempy-topspin`` — ``scp.read_topspin(...)`` works transparently when the plugin is installed.
-- Plugin registry refactored into specialised sub-registries: ``IORegistry`` (readers, writers, filetypes), ``ProcessingRegistry`` (processors, unit contexts, dtype handlers), ``VisualizationRegistry`` (visualizers), ``MetadataRegistry`` (plugin tracking). ``PluginRegistry`` is now a composite facade with full backward-compatible forwarding.
-- Declarative contribution hooks: plugins can declare readers, writers, processors, and visualizers via ``register_readers()``, ``register_writers()``, ``register_processors()``, ``register_visualizers()`` methods instead of calling the registry directly.
-- Contribution dataclasses (``ReaderContribution``, ``WriterContribution``, ``ProcessorContribution``, ``VisualizerContribution``) provide typed structure for plugin contributions, with dict conversion helpers.
-- Plugin lifecycle states: every plugin is tracked through ``DISCOVERED``, ``LOADED``, ``ACTIVE``, ``FAILED``, ``DISABLED`` states. Introspection API: ``get_plugin_state()``, ``get_active_plugins()``, ``get_failed_plugins()``, ``get_plugin_descriptor()``.
-- Plugin activation/deactivation: ``activate_plugin()`` and ``deactivate_plugin()`` for lightweight state control without unloading.
-- Improved error isolation: a plugin failing during discovery, validation, or registration does not affect other plugins or SpectroChemPy startup.
-- ``PluginCapability`` enum (``READER``, ``WRITER``, ``PROCESSOR``, ``VISUALIZER``) for capability-based plugin classification.
-- Plugin SDK namespace strengthened: ``spectrochempy.api.plugins`` now exports contribution dataclasses (``ReaderContribution``, ``WriterContribution``, ``ProcessorContribution``, ``VisualizerContribution``), lifecycle types (``PluginState``, ``PluginDescriptor``), error classes (``MissingPluginError``, ``PluginVersionError``), and conversion helpers.
-- New validation helpers: ``check_plugin_metadata()``, ``check_plugin_contributions()``, ``check_plugin_compatibility()`` provide clear diagnostics for plugin authors.
-- New test harness: ``from spectrochempy.testing.plugins import PluginTestHarness`` for isolated plugin testing with fresh registry and manager per test.
-- New plugin template at ``plugins/plugin-template/`` demonstrating declarative hooks, contribution dataclasses, optional dependency handling, and CI configuration.
-- New developer documentation: testing guide (``plugin-testing``), packaging guide (``plugin-packaging``), validation reference (``plugin-validation``).
+- Improved plugin developer experience: declarative contribution hooks, lifecycle tracking with introspection API, error isolation, plugin validation helpers, and a ``PluginTestHarness`` for isolated testing.
+- New ``spectrochempy-testing`` subpackage with ``PluginTestHarness`` and ``spectrochempy.api.plugins`` now exports all SDK symbols (contribution dataclasses, lifecycle types, error classes).
+- New plugin template and developer documentation (testing guide, packaging guide, validation reference).
 
 Bug Fixes
 ~~~~~~~~~
