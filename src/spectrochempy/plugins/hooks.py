@@ -42,3 +42,73 @@ class SpectroChemPyHookSpec:
         Implementations that omit the method or return an empty dict
         are treated conservatively (no capability advertised).
         """
+
+    # ------------------------------------------------------------------
+    # Declarative contribution hooks (prototype)
+    #
+    # These hooks allow a plugin to declare its contributions without
+    # calling ``registry`` methods directly.  Each hook should return
+    # a ``list[dict]`` where every dict contains at least ``"name"``
+    # and ``"func"`` keys.
+    #
+    # They are optional: the old imperative ``register(registry)``
+    # pattern continues to work.
+    # ------------------------------------------------------------------
+
+    @hookspec
+    def register_readers(self) -> list[dict]:
+        """
+        Return reader contributions declared by the plugin.
+
+        Expected return format::
+
+            [
+                {
+                    "name": "myformat",
+                    "func": read_myformat,
+                    "description": "Read MyFormat files",
+                    "extensions": [".myf"],
+                },
+            ]
+
+        Returning ``None`` or an empty list is treated as
+        "no reader contribution".
+        """
+
+    @hookspec
+    def register_writers(self) -> list[dict]:
+        """
+        Return writer contributions declared by the plugin.
+
+        Expected return format::
+
+            [
+                {
+                    "name": "myformat",
+                    "func": write_myformat,
+                    "description": "Write MyFormat files",
+                },
+            ]
+
+        Returning ``None`` or an empty list is treated as
+        "no writer contribution".
+        """
+
+    @hookspec
+    def register_processors(self) -> list[dict]:
+        """
+        Return processor contributions declared by the plugin.
+
+        Expected return format::
+
+            [
+                {
+                    "name": "smooth",
+                    "func": smooth_data,
+                    "description": "Smooth data",
+                },
+            ]
+
+        Returning ``None`` or an empty list is treated as
+        "no processor contribution".
+        """

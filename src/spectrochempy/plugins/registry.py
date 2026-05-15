@@ -14,23 +14,38 @@ logger = logging.getLogger(__name__)
 
 
 class PluginRegistry:
-    _instance: PluginRegistry | None = None
+    """
+    Central registry for plugin contributions.
 
-    def __new__(cls) -> PluginRegistry:
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._readers: dict[str, dict[str, Any]] = {}
-            cls._instance._writers: dict[str, dict[str, Any]] = {}
-            cls._instance._processors: dict[str, dict[str, Any]] = {}
-            cls._instance._unit_contexts: dict[str, Callable] = {}
-            cls._instance._dtype_handlers: dict[str, Any] = {}
-            cls._instance._plugins: dict[str, Any] = {}
-            cls._instance._filetypes: dict[str, dict[str, Any]] = {}
-        return cls._instance
+    This class can be used as a standalone instance.  For backward
+    compatibility a module-level singleton (``registry``) is provided
+    but new code should inject its own instance to avoid global state::
 
-    @classmethod
-    def _reset(cls) -> None:
-        cls._instance = None
+        registry = PluginRegistry()
+        manager = PluginManager(registry=registry)
+
+    .. versionchanged:: 1.0
+       No longer enforces a singleton in ``__new__``.
+    """
+
+    def __init__(self) -> None:
+        self._readers: dict[str, dict[str, Any]] = {}
+        self._writers: dict[str, dict[str, Any]] = {}
+        self._processors: dict[str, dict[str, Any]] = {}
+        self._unit_contexts: dict[str, Callable] = {}
+        self._dtype_handlers: dict[str, Any] = {}
+        self._plugins: dict[str, Any] = {}
+        self._filetypes: dict[str, dict[str, Any]] = {}
+
+    def clear(self) -> None:
+        """Remove all registered entries (useful in tests)."""
+        self._readers.clear()
+        self._writers.clear()
+        self._processors.clear()
+        self._unit_contexts.clear()
+        self._dtype_handlers.clear()
+        self._plugins.clear()
+        self._filetypes.clear()
 
     def register_plugin(self, name: str, plugin: Any) -> None:
         self._plugins[name] = plugin
@@ -82,6 +97,10 @@ class PluginRegistry:
 
     def get_processor(self, name: str) -> dict[str, Any] | None:
         return self._processors.get(name)
+
+    @property
+    def available_processors(self) -> dict[str, dict[str, Any]]:
+        return dict(self._processors)
 
     def register_unit_context(self, name: str, setup_func: Callable) -> None:
         self._unit_contexts[name] = setup_func

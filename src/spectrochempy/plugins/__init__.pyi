@@ -8,6 +8,7 @@
 
 __all__ = [
     "base",
+    "capabilities",
     "deps",
     "hooks",
     "manager",
@@ -15,6 +16,7 @@ __all__ = [
 ]
 
 from . import base
+from . import capabilities
 from . import deps
 from . import hooks
 from . import manager

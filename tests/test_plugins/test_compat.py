@@ -225,3 +225,35 @@ class TestPublicAPIImports:
         assert info["version"] == "1.0.0"
         assert info["plugin_api_version"] == CORE_PLUGIN_API_VERSION
         assert info["spectrochempy_min_version"] == "0.0.0"
+
+
+# ------------------------------------------------------------------
+# PluginCapability
+# ------------------------------------------------------------------
+
+
+class TestPluginCapability:
+    def test_import_from_api_plugins(self):
+        from spectrochempy.api.plugins import PluginCapability
+
+        assert PluginCapability.READER.value == "reader"
+        assert PluginCapability.WRITER.value == "writer"
+        assert PluginCapability.PROCESSOR.value == "processor"
+        assert PluginCapability.VISUALIZER.value == "visualizer"
+
+    def test_import_from_api(self):
+        from spectrochempy.api import PluginCapability
+
+        assert PluginCapability.READER is not None
+
+    def test_values_are_strings(self):
+        from spectrochempy.api.plugins import PluginCapability
+
+        for cap in PluginCapability:
+            assert isinstance(cap.value, str)
+
+    def test_capabilities_unique(self):
+        from spectrochempy.api.plugins import PluginCapability
+
+        values = [c.value for c in PluginCapability]
+        assert len(values) == len(set(values))

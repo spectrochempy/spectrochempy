@@ -18,9 +18,11 @@ from spectrochempy.api.plugins.constants import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins.hooks import hookimpl
 from spectrochempy.api.plugins.hooks import hookspec
 from spectrochempy.api.plugins.validation import validate_plugin_compatibility
+from spectrochempy.plugins.capabilities import PluginCapability
 
 __all__ = [
     "CORE_PLUGIN_API_VERSION",
+    "PluginCapability",
     "SpectroChemPyPlugin",
     "hookimpl",
     "hookspec",

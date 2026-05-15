@@ -17,9 +17,11 @@ External plugins should import only from this namespace and from
 """
 
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
+from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 
 __all__ = [
     "CORE_PLUGIN_API_VERSION",
+    "PluginCapability",
     "SpectroChemPyPlugin",
 ]
