@@ -22,3 +22,23 @@ class SpectroChemPyHookSpec:
     @hookspec
     def read_file(self, files: dict, protocol, **kwargs):
         ...
+
+    @hookspec
+    def plugin_info(self) -> dict:
+        """
+        Return plugin metadata.
+
+        Expected return format::
+
+            {
+                "name": "my-plugin",
+                "version": "0.1.0",
+                "plugin_api_version": "1.0",
+                "spectrochempy_min_version": "1.2",
+                "description": "...",
+                "capabilities": ["reader"],
+            }
+
+        Implementations that omit the method or return an empty dict
+        are treated conservatively (no capability advertised).
+        """

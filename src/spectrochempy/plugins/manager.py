@@ -38,7 +38,15 @@ class PluginManager:
         self._discovered = True
 
     def register(self, plugin: Any) -> None:
+        from spectrochempy.api.plugins.validation import validate_plugin_compatibility
+
         name = getattr(plugin, "name", plugin.__class__.__name__.lower())
+
+        is_compatible, _errors = validate_plugin_compatibility(plugin)
+        if not is_compatible:
+            logger.warning("Plugin '%s' is incompatible and will be skipped.", name)
+            return
+
         self._pm.register(plugin, name)
         if hasattr(plugin, "register") and callable(plugin.register):
             plugin.register(registry)

@@ -7,25 +7,7 @@
 # ruff: noqa
 
 __all__ = [
-    "analysis",
-    "api",
-    "application",
-    "core",
-    "extern",
-    "ipython",
-    "plotting",
     "plugins",
-    "processing",
-    "utils",
 ]
 
-from . import analysis
-from . import api
-from . import application
-from . import core
-from . import extern
-from . import ipython
-from . import plotting
 from . import plugins
-from . import processing
-from . import utils
