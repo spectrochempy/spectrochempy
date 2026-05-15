@@ -18,3 +18,6 @@ Developer's Guide
     contributing_codespecifics
     contributing_documentation
     contributing_plotting
+    plugins/architecture
+    plugins/testing
+    plugins/packaging

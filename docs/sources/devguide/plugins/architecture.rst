@@ -251,6 +251,34 @@ Import from the stable public API namespace:
 The public API (``spectrochempy.api``) is stable across releases.
 Internal modules (``spectrochempy.plugins``) may change without notice.
 
+All symbols available from ``spectrochempy.api.plugins``:
+
+=========================== ====================================================
+Symbol                      Description
+=========================== ====================================================
+``SpectroChemPyPlugin``     Base class for plugins
+``PluginCapability``        Enum: ``READER``, ``WRITER``, ``PROCESSOR``, ``VISUALIZER``
+``ReaderContribution``      Dataclass for reader contributions
+``WriterContribution``      Dataclass for writer contributions
+``ProcessorContribution``   Dataclass for processor contributions
+``VisualizerContribution``  Dataclass for visualizer contributions
+``reader_from_dict``        Convert dict to ``ReaderContribution``
+``writer_from_dict``        Convert dict to ``WriterContribution``
+``processor_from_dict``     Convert dict to ``ProcessorContribution``
+``visualizer_from_dict``    Convert dict to ``VisualizerContribution``
+``PluginState``             Enum: ``DISCOVERED``, ``LOADED``, ``ACTIVE``, ``FAILED``, ``DISABLED``
+``PluginDescriptor``        Dataclass for plugin state snapshot
+``MissingPluginError``      Import error with install hint
+``PluginVersionError``      Version incompatibility error
+``CORE_PLUGIN_API_VERSION``  Current API version string (``"1.0"``)
+``hookspec``                Decorator for hook specifications
+``hookimpl``                Decorator for hook implementations
+``validate_plugin_compatibility``  Compatibility check (returns ``(bool, list[str])``)
+``check_plugin_metadata``   Metadata completeness check
+``check_plugin_contributions``  Contribution structure validation
+``check_plugin_compatibility``  Full compatibility check (all issues)
+=========================== ====================================================
+
 
 Plugin lifecycle
 =================
@@ -334,14 +362,69 @@ startup crashes.
 Test isolation
 ==============
 
-Use fresh registry and manager instances per test to avoid state
-leakage::
+Use :class:`~spectrochempy.testing.plugins.PluginTestHarness` for
+isolated tests that don't touch the global registry::
 
-    from spectrochempy.plugins.registry import PluginRegistry
-    from spectrochempy.plugins.manager import PluginManager
+    from spectrochempy.testing.plugins import PluginTestHarness
 
 
     def test_my_plugin():
-        registry = PluginRegistry()
-        manager = PluginManager(registry=registry)
-        # ... register plugin and assert on registry ...
+        harness = PluginTestHarness()
+        harness.register(MyPlugin())
+
+        reader = harness.get_reader("myformat")
+        assert reader is not None
+
+It also works as a context manager::
+
+    def test_with_context():
+        with PluginTestHarness() as harness:
+            harness.register(MyPlugin())
+            ...
+
+See :ref:`plugin-testing` for the full testing guide.
+
+.. _plugin-validation:
+
+Plugin validation
+=================
+
+SpectroChemPy provides several validation helpers to check your plugin
+before registration:
+
+``check_plugin_metadata(plugin) -> list[str]``
+    Checks that required metadata fields (``name``, ``version``,
+    ``plugin_api_version``) are present and non-empty.  Also warns
+    if ``description`` is missing.
+
+``check_plugin_contributions(plugin) -> list[str]``
+    Calls each declarative hook (``register_readers``,
+    ``register_writers``, ``register_processors``,
+    ``register_visualizers``) and validates that the returned data
+    has the correct structure (list of dicts with ``"name"`` and
+    ``"func"`` keys).
+
+``check_plugin_compatibility(plugin) -> list[str]``
+    Runs all checks at once: metadata, contributions, API version
+    compatibility, and minimum SpectroChemPy version.
+
+``validate_plugin_compatibility(plugin) -> tuple[bool, list[str]]``
+    Legacy check used by ``PluginManager`` during registration.
+    Returns a boolean and a list of error messages.
+
+Usage::
+
+    from spectrochempy.api.plugins import check_plugin_compatibility
+
+    plugin = MyPlugin()
+    issues = check_plugin_compatibility(plugin)
+    if issues:
+        print("Compatibility issues found:")
+        for issue in issues:
+            print(f"  - {issue}")
+    else:
+        print("Plugin is fully compatible.")
+
+These helpers are designed to give plugin authors clear diagnostics
+during development.  They are also used internally by
+``PluginManager.register()``.

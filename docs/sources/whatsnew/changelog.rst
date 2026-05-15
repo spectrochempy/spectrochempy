@@ -33,6 +33,11 @@ New Features
 - Plugin activation/deactivation: ``activate_plugin()`` and ``deactivate_plugin()`` for lightweight state control without unloading.
 - Improved error isolation: a plugin failing during discovery, validation, or registration does not affect other plugins or SpectroChemPy startup.
 - ``PluginCapability`` enum (``READER``, ``WRITER``, ``PROCESSOR``, ``VISUALIZER``) for capability-based plugin classification.
+- Plugin SDK namespace strengthened: ``spectrochempy.api.plugins`` now exports contribution dataclasses (``ReaderContribution``, ``WriterContribution``, ``ProcessorContribution``, ``VisualizerContribution``), lifecycle types (``PluginState``, ``PluginDescriptor``), error classes (``MissingPluginError``, ``PluginVersionError``), and conversion helpers.
+- New validation helpers: ``check_plugin_metadata()``, ``check_plugin_contributions()``, ``check_plugin_compatibility()`` provide clear diagnostics for plugin authors.
+- New test harness: ``from spectrochempy.testing.plugins import PluginTestHarness`` for isolated plugin testing with fresh registry and manager per test.
+- New plugin template at ``plugins/plugin-template/`` demonstrating declarative hooks, contribution dataclasses, optional dependency handling, and CI configuration.
+- New developer documentation: testing guide (``plugin-testing``), packaging guide (``plugin-packaging``), validation reference (``plugin-validation``).
 
 .. section
 
