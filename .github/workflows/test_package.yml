@@ -187,3 +187,46 @@ jobs:
       - name: Run documentation tests
         run: |
           python -m pytest tests/test_docs -s --durations=10
+
+  test-plugin-topspin:
+    name: Test topspin plugin
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy'
+       && !startsWith(github.ref, 'refs/release/')) || (
+       github.event_name != 'schedule'
+       && !startsWith(github.ref, 'refs/release/'))
+
+    defaults:
+      run:
+        shell: bash {0}
+
+    steps:
+      - name: Checkout spectrochempy repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        id: setup_python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install spectrochempy and topspin plugin
+        run: |
+          python -m pip install ".[test]" plugins/spectrochempy-topspin
+          python src/spectrochempy/data/setup.py
+
+      - name: Download test data
+        run: |
+          python -c "
+          import spectrochempy as scp
+          from spectrochempy.application.testdata import download_full_testdata_directory
+          download_full_testdata_directory(scp.preferences.datadir)
+          "
+
+      - name: Run topspin plugin tests
+        run: |
+          python -m pytest plugins/spectrochempy-topspin/tests -v --durations=10
