@@ -108,7 +108,9 @@ class PluginManager:
     def _collect_readers(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
-        if not (hasattr(plugin, "register_readers") and callable(plugin.register_readers)):
+        if not (
+            hasattr(plugin, "register_readers") and callable(plugin.register_readers)
+        ):
             return
         try:
             readers = plugin.register_readers()
@@ -136,7 +138,9 @@ class PluginManager:
     def _collect_writers(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
-        if not (hasattr(plugin, "register_writers") and callable(plugin.register_writers)):
+        if not (
+            hasattr(plugin, "register_writers") and callable(plugin.register_writers)
+        ):
             return
         try:
             writers = plugin.register_writers()
@@ -163,7 +167,10 @@ class PluginManager:
     def _collect_processors(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
-        if not (hasattr(plugin, "register_processors") and callable(plugin.register_processors)):
+        if not (
+            hasattr(plugin, "register_processors")
+            and callable(plugin.register_processors)
+        ):
             return
         try:
             procs = plugin.register_processors()

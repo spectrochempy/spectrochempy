@@ -6,12 +6,10 @@
 
 """Tests for PluginManager."""
 
-from typing import Any
 
 from spectrochempy.plugins.base import SpectroChemPyPlugin
 from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.plugins.manager import PluginManager
-from spectrochempy.plugins.manager import plugin_manager as global_manager
 from spectrochempy.plugins.registry import PluginRegistry
 
 # ------------------------------------------------------------------
