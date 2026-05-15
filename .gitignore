@@ -6,6 +6,7 @@
 process.pscp
 HIZECOKE_TEST.pscp
 mydefault.mplstyle
+PR_DESCRIPTION.md
 
 ###############################
 # Python                      #
