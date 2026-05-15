@@ -624,7 +624,7 @@ class NDComplexArray(NDArray):
         if fortran:
             data = np.ascontiguousarray(data)
 
-        data.dtype = np.complex128
+        data = data.view(np.complex128)
 
         # restore the previous order
         data = np.asfortranarray(data) if fortran else np.ascontiguousarray(data)

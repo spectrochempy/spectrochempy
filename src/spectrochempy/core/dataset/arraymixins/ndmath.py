@@ -30,6 +30,7 @@ from spectrochempy.utils.exceptions import CoordinatesMismatchError
 from spectrochempy.utils.objects import OrderedSet
 from spectrochempy.utils.quaternion import as_float_array
 from spectrochempy.utils.quaternion import as_quaternion
+from spectrochempy.utils.quaternion import get_component
 from spectrochempy.utils.quaternion import quat_as_complex_array
 from spectrochempy.utils.quaternion import typequaternion
 from spectrochempy.utils.testing import assert_coord_almost_equal
@@ -587,10 +588,10 @@ class NDMath:
 
         else:
             data = np.ma.sqrt(
-                dataset.real**2
-                + dataset.part("IR") ** 2
-                + dataset.part("RI") ** 2
-                + dataset.part("II") ** 2,
+                get_component(dataset, "RR") ** 2
+                + get_component(dataset, "RI") ** 2
+                + get_component(dataset, "IR") ** 2
+                + get_component(dataset, "II") ** 2,
                 dtype=dtype,
             )
             cls._is_quaternion = False
