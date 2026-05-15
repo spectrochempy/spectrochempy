@@ -3086,12 +3086,15 @@ class NDMath:
                     )
                 ):
                     data = f(d, *args)
-                else:
+                elif typequaternion is not None:
                     # in this case we will work on both complex separately
                     dr, di = quat_as_complex_array(d)
                     datar = f(dr, *args)
                     datai = f(di, *args)
                     data = as_quaternion(datar, datai)
+                else:
+                    # quaternion not available, fall back to normal operation
+                    data = f(d, *args)
 
             except Exception as e:
                 raise ArithmeticError(e.args[0]) from e
