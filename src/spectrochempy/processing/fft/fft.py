@@ -28,7 +28,7 @@ from spectrochempy.utils.quaternion import typequaternion
 # Private methods
 # ======================================================================================
 def _fft(data):
-    if data.dtype == typequaternion:
+    if typequaternion is not None and data.dtype == typequaternion:
         dr = get_component(data, "R")
         fr = np.fft.fftshift(np.fft.fft(dr), -1)
         di = get_component(data, "I")
@@ -44,7 +44,7 @@ def _fft(data):
 
 
 def _ifft(data):
-    if data.dtype == typequaternion:
+    if typequaternion is not None and data.dtype == typequaternion:
         fr = get_component(data, "R")
         dr = np.fft.ifft(np.fft.ifftshift(fr, -1))
         fi = get_component(data, "I")
@@ -60,7 +60,7 @@ def _ifft(data):
 
 
 def _fft_positive(data):
-    if data.dtype == typequaternion:
+    if typequaternion is not None and data.dtype == typequaternion:
         dr = get_component(data, "R")
         fr = np.fft.fftshift(np.fft.ifft(dr).astype(data.dtype)) * data.shape[-1]
         di = get_component(data, "I")
@@ -76,7 +76,7 @@ def _fft_positive(data):
 
 
 def _ifft_positive(data):
-    if data.dtype == typequaternion:
+    if typequaternion is not None and data.dtype == typequaternion:
         fr = get_component(data, "R")
         dr = np.fft.fft(np.fft.ifftshift(fr, -1)) * data.shape[-1]
         fi = get_component(data, "I")

@@ -132,25 +132,31 @@ class NDComplexArray(NDArray):
 
         data = proposal["value"]
 
+        # Build list of valid complex/quaternion dtypes (None excluded to avoid
+        # numpy dtype == None returning True for float64)
+        _complex_dtypes = list(TYPE_COMPLEX)
+        if typequaternion is not None:
+            _complex_dtypes.append(typequaternion)
+
         # cast to the desired type
         if self._dtype is not None:
             if self._dtype == data.dtype:
                 pass  # nothing more to do
 
-            elif self._dtype not in [typequaternion] + list(TYPE_COMPLEX):
+            elif self._dtype not in _complex_dtypes:
                 data = data.astype(np.dtype(self._dtype), copy=False)
 
             elif self._dtype in TYPE_COMPLEX:
                 data = self._make_complex(data)
 
-            elif self._dtype == typequaternion:
+            elif typequaternion is not None and self._dtype == typequaternion:
                 data = self._make_quaternion(data)
 
-        elif data.dtype not in [typequaternion] + list(TYPE_COMPLEX):
+        elif data.dtype not in _complex_dtypes:
             data = data.astype(
                 np.float64,
                 copy=False,
-            )  # by default dta are float64 if the dtype is not fixed
+            )  # by default data are float64 if the dtype is not fixed
 
         # return the validated data
         if self._copy:
@@ -171,7 +177,7 @@ class NDComplexArray(NDArray):
             return False
 
         return (self._data.dtype in TYPE_COMPLEX) or (
-            self._data.dtype == typequaternion
+            typequaternion is not None and self._data.dtype == typequaternion
         )
 
     @property
@@ -190,7 +196,7 @@ class NDComplexArray(NDArray):
         """
         if self._data is None:
             return False
-        return self._data.dtype == typequaternion
+        return typequaternion is not None and self._data.dtype == typequaternion
 
     @property
     def is_interleaved(self):
@@ -213,7 +219,7 @@ class NDComplexArray(NDArray):
         try:
             return super().is_masked
         except Exception as e:
-            if self._data.dtype == typequaternion:
+            if typequaternion is not None and self._data.dtype == typequaternion:
                 return np.any(self._mask["I"])
             raise e
 
@@ -233,7 +239,7 @@ class NDComplexArray(NDArray):
             new._data = ma
         elif ma.dtype in TYPE_COMPLEX:
             new._data = ma.real
-        elif ma.dtype == typequaternion:
+        elif typequaternion is not None and ma.dtype == typequaternion:
             # get the scalar component
             # q = a + bi + cj + dk  ->   qr = a
             new._data = as_float_array(ma)[..., 0]
@@ -260,7 +266,7 @@ class NDComplexArray(NDArray):
             new._data = np.zeros_like(ma.data)
         elif ma.dtype in TYPE_COMPLEX:
             new._data = ma.imag.data
-        elif ma.dtype == typequaternion:
+        elif typequaternion is not None and ma.dtype == typequaternion:
             # this is a more complex situation than for real component
             # get the imaginary component (vector component)
             # q = a + bi + cj + dk  ->   qi = bi+cj+dk
@@ -432,7 +438,9 @@ class NDComplexArray(NDArray):
         """
         new = self.copy() if not inplace else self  # default is to return a new array
 
-        if new.dtype != typequaternion:  # not already a quaternion
+        if (
+            typequaternion is not None and new.dtype != typequaternion
+        ):  # not already a quaternion
             new._data = new._make_quaternion(new.data)
 
         return new
