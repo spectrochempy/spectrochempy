@@ -6,7 +6,6 @@
 """Extend NDDataset with the import method for Surface Optics Corp. (soc) data files."""
 
 __all__ = ["read_soc", "read_ddr", "read_sdr", "read_hdr"]
-__dataset_methods__ = __all__
 
 
 from spectrochempy.core.readers.importer import Importer

@@ -110,10 +110,13 @@ passes it as the first argument to the registered callable::
     dataset.iris.kernel_matrix(...)
     dataset.cantera.equilibrium(...)
 
-Readers should not normally be exposed under dataset accessors.  For
-example, prefer ``scp.nmr.read_topspin(...)`` over
+Readers are not exposed under dataset accessors.  For example, use
+``scp.nmr.read_topspin(...)`` rather than
 ``dataset.nmr.read_topspin(...)`` because reading a file creates a
-dataset rather than operating on one.
+dataset rather than operating on one.  The same rule applies to core
+readers such as ``scp.read_omnic(...)`` and ``scp.read_csv(...)``:
+``dataset.read_omnic(...)`` and ``dataset.read_csv(...)`` are not part
+of the supported API.
 
 Legacy package-level reader aliases such as ``scp.read_topspin(...)``
 are kept during transitions when they already exist publicly.  They are

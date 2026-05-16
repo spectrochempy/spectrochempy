@@ -6,7 +6,6 @@
 """Module to extend NDDataset with import methods."""
 
 __all__ = ["read_jcamp"]
-__dataset_methods__ = __all__
 
 import io
 import re

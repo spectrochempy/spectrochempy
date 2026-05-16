@@ -408,7 +408,9 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         # as we are doing lazy_import, we look in the _api module)
         from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
 
-        if item == "read_topspin":
+        if item in {"read", "load_iris", "download_nist_ir"} or item.startswith(
+            "read_"
+        ):
             raise AttributeError
 
         from spectrochempy.plugins.manager import plugin_manager

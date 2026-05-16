@@ -64,8 +64,6 @@ Create ``spectrochempy/core/readers/reader_xxx.py``:
     from spectrochempy.core.readers.importer import _importer_method, Importer
 
     __all__ = ["read_spc"]
-    __dataset_methods__ = __all__
-
     def read_spc(*paths, **kwargs):
         """Read Thermo Galactic .spc file(s).
 

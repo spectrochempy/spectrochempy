@@ -6,7 +6,6 @@
 """In this module, methods are provided to download external datasets from public database."""
 
 __all__ = ["load_iris", "download_nist_ir"]
-__dataset_methods__ = __all__
 
 from pathlib import Path
 

@@ -6,7 +6,6 @@
 """Define a generic class to import directories, files, and contents."""
 
 __all__ = ["read", "read_dir"]  # , "read_remote"]
-__dataset_methods__ = __all__
 
 import io
 import re
@@ -589,8 +588,8 @@ def _read_(*args, **kwargs):
     #     return dataset.load(filename, **kwargs)
     #
     # elif filename and filename.name in ("fid", "ser", "1r", "2rr", "3rrr"):
-    #     # probably an Topspin NMR file
-    #     return dataset.read_topspin(filename, **kwargs)
+    #     # probably a TopSpin NMR file
+    #     return read_topspin(filename, **kwargs)
     # elif filename:
     #     # try scp format
     #     try:
@@ -599,7 +598,7 @@ def _read_(*args, **kwargs):
     #         # lets try some common format
     #         for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
     #             try:
-    #                 _read = getattr(dataset, f"read_{key}")
+    #                 _read = getattr(scp, f"read_{key}")
     #                 f = f"{filename}.{key}"
     #                 return _read(f, **kwargs)
     #             except Exception:
