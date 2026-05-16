@@ -93,12 +93,13 @@ Users can install official plugins through SpectroChemPy extras:
 
 .. code-block:: bash
 
-    pip install "spectrochempy[topspin]"
+    pip install "spectrochempy[nmr]"
     pip install "spectrochempy[iris]"
     pip install "spectrochempy[cantera]"
     pip install "spectrochempy[plugins]"
 
-The ``plugins`` extra installs the current official plugin set.
+The ``nmr`` extra installs the TopSpin reader plugin and its NMR-specific
+dependencies.  The ``plugins`` extra installs the current official plugin set.
 
 ``__init__.py`` — the plugin class
 ==================================

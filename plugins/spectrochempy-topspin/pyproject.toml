@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.entry-points."spectrochempy.plugins"]
-topspin = "spectrochempy_topspin:TopSpinPlugin"
+nmr = "spectrochempy_topspin:TopSpinPlugin"
 
 [tool.setuptools.packages.find]
 where = ["src"]

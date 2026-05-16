@@ -90,13 +90,12 @@ interactive = [
   "jupyter_server",
 ]
 iris = ["spectrochempy-iris>=0.1,<0.2"]
-nmr = ["numpy-quaternion>=2024.0.7"]
+nmr = ["spectrochempy-topspin>=0.1,<0.2"]
 plugins = [
   "spectrochempy-topspin>=0.1,<0.2",
   "spectrochempy-iris>=0.1,<0.2",
   "spectrochempy-cantera>=0.1,<0.2",
 ]
-topspin = ["spectrochempy-topspin>=0.1,<0.2"]
 test = [
   "coverage",
   "ipywidgets",

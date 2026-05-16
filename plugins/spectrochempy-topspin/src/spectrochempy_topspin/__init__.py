@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class TopSpinPlugin(SpectroChemPyPlugin):
     """Bruker TopSpin NMR reader plugin."""
 
-    name = "topspin"
+    name = "nmr"
     version = "0.1.0"
     description = "Read Bruker TopSpin NMR data files (FID, SER, processed)"
     spectrochempy_min_version = "0.8.0"

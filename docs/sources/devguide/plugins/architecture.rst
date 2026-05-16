@@ -277,7 +277,7 @@ The reference external plugin is ``spectrochempy-topspin``::
 
 
     class TopSpinPlugin(SpectroChemPyPlugin):
-        name = "topspin"
+        name = "nmr"
         version = "0.1.0"
 
         def register_readers(self) -> list[dict]:
@@ -293,7 +293,7 @@ The reference external plugin is ``spectrochempy-topspin``::
 Entry point declaration in ``pyproject.toml``::
 
     [project.entry-points."spectrochempy.plugins"]
-    topspin = "spectrochempy_topspin:TopSpinPlugin"
+    nmr = "spectrochempy_topspin:TopSpinPlugin"
 
 
 Import guidance
@@ -395,15 +395,15 @@ lifecycle states:
 
 Inspect plugin states::
 
-    manager.get_plugin_state("topspin")      # PluginState.ACTIVE
-    manager.get_active_plugins()             # ["topspin", ...]
-    manager.get_failed_plugins()             # {"broken": "error msg"}
-    manager.get_plugin_descriptor("topspin") # PluginDescriptor snapshot
+    manager.get_plugin_state("nmr")      # PluginState.ACTIVE
+    manager.get_active_plugins()         # ["nmr", ...]
+    manager.get_failed_plugins()         # {"broken": "error msg"}
+    manager.get_plugin_descriptor("nmr") # PluginDescriptor snapshot
 
 Activation and deactivation::
 
-    manager.deactivate_plugin("topspin")     # → marks DISABLED
-    manager.activate_plugin("topspin")       # → marks ACTIVE
+    manager.deactivate_plugin("nmr")     # → marks DISABLED
+    manager.activate_plugin("nmr")       # → marks ACTIVE
 
 Deactivation is a lightweight state flag — no unloading or reimport
 happens.  A disabled plugin is skipped if its entry point is

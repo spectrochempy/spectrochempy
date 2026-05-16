@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 PLUGIN_DIRS = {
-    "topspin": "spectrochempy-topspin",
+    "nmr": "spectrochempy-topspin",
     "iris": "spectrochempy-iris",
     "cantera": "spectrochempy-cantera",
 }
@@ -40,7 +40,7 @@ def install_plugins(names: list[str], *, editable: bool = False) -> None:
         if editable:
             cmd.append("-e")
         cmd.append(str(path))
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True)  # noqa: S603 - plugin names are allow-listed
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -51,7 +51,7 @@ def main(argv: list[str] | None = None) -> None:
         "plugins",
         nargs="*",
         default=["all"],
-        help="Plugin names to install: topspin, iris, cantera, or all.",
+        help="Plugin names to install: nmr, iris, cantera, or all.",
     )
     parser.add_argument(
         "-e",

@@ -102,9 +102,9 @@ def test_nbsphinx_script_(script):
     if name in []:
         return
 
-    # Skip scripts that require the topspin plugin if it's not installed
+    # Skip scripts that require the NMR plugin if it's not installed
     if "read_topspin" in script.read_text() and not scp.plugin_manager.has_plugin(
-        "topspin"
+        "nmr"
     ):
         pytest.skip("requires spectrochempy-topspin plugin")
 

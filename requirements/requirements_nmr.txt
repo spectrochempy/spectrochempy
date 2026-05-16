@@ -21,4 +21,4 @@
 
 # NMR dependencies
 # ----------------
-numpy-quaternion>=2024.0.7
+spectrochempy-topspin>=0.1,<0.2
