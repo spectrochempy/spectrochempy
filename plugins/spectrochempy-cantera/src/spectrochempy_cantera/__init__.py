@@ -1,7 +1,6 @@
 # ruff: noqa: PLC0415 — defer imports in plugin methods to avoid startup cost
 """
-spectrochempy-cantera — Cantera-based thermodynamics and reactive chemistry
-for SpectroChemPy.
+Cantera-based thermodynamics and reactive chemistry for SpectroChemPy.
 
 Provides equilibrium computation, reactor simulation, kinetic analysis,
 and spectral interpretation support coupled with Cantera.

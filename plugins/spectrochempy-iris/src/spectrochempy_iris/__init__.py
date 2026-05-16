@@ -139,8 +139,7 @@ def _kernel_freundlich(p: np.ndarray, q: np.ndarray) -> np.ndarray:
     import numpy as np
 
     b = np.exp(q)
-    kernel_data = p[:, np.newaxis] ** b[np.newaxis, :]
-    return kernel_data
+    return p[:, np.newaxis] ** b[np.newaxis, :]
 
 
 def _kernel_temkin(p: np.ndarray, q: np.ndarray) -> np.ndarray:
@@ -149,16 +148,14 @@ def _kernel_temkin(p: np.ndarray, q: np.ndarray) -> np.ndarray:
 
     a = -np.exp(q)
     kernel_data = a[np.newaxis, :] * np.log(p[:, np.newaxis])
-    kernel_data = np.maximum(kernel_data, 0.0)
-    return kernel_data
+    return np.maximum(kernel_data, 0.0)
 
 
 def _kernel_linear(p: np.ndarray, q: np.ndarray) -> np.ndarray:
     """Linear interaction kernel: K = p * q."""
     import numpy as np
 
-    kernel_data = p[:, np.newaxis] * q[np.newaxis, :]
-    return kernel_data
+    return p[:, np.newaxis] * q[np.newaxis, :]
 
 
 # ------------------------------------------------------------------
@@ -257,15 +254,6 @@ def compare_kernel_models(
         "temkin": _kernel_temkin,
         "linear": _kernel_linear,
     }
-
-    builtin_kernels = [
-        "langmuir",
-        "ca",
-        "diffusion",
-        "reactant-first-order",
-        "product-first-order",
-        "stejskal-tanner",
-    ]
 
     if kernels is None:
         kernels = ["langmuir", "ca", "freundlich"]

@@ -48,7 +48,7 @@ requires-python = ">=3.10"
 
 [project.optional-dependencies]
 build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
-cantera = ["cantera"]
+cantera = ["spectrochempy-cantera>=0.1,<0.2"]
 cp = ["tensorly"]
 dev = [
   "toml",
@@ -89,8 +89,14 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
-iris = ["spectrochempy-iris"]
+iris = ["spectrochempy-iris>=0.1,<0.2"]
 nmr = ["numpy-quaternion>=2024.0.7"]
+plugins = [
+  "spectrochempy-topspin>=0.1,<0.2",
+  "spectrochempy-iris>=0.1,<0.2",
+  "spectrochempy-cantera>=0.1,<0.2",
+]
+topspin = ["spectrochempy-topspin>=0.1,<0.2"]
 test = [
   "coverage",
   "ipywidgets",

@@ -15,34 +15,10 @@
 #
 # ======================================================================================
 
-channel_priority: strict
-channels:
-    - conda-forge
-    - spectrocat
-    - defaults
+# CORE dependencies
+# -----------------
+-r requirements.txt
 
-dependencies:
-
-    # CORE dependencies
-    # -----------------
-    - colorama
-    - dill
-    - ipython
-    - jinja2
-    - lazy_loader
-    - matplotlib-base
-    - numpy
-    - numpydoc
-    - pluggy
-    - pint
-    - pyyaml
-    - requests
-    - scikit-learn
-    - scipy
-    - tzlocal
-    - xlrd
-
-    # IRIS dependencies
-    # -----------------
-
-    - spectrochempy-iris>=0.1,<0.2
+# TOPSPIN dependencies
+# --------------------
+spectrochempy-topspin>=0.1,<0.2

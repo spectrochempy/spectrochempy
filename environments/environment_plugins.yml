@@ -42,7 +42,9 @@ dependencies:
     - tzlocal
     - xlrd
 
-    # IRIS dependencies
-    # -----------------
+    # PLUGINS dependencies
+    # --------------------
 
+    - spectrochempy-topspin>=0.1,<0.2
     - spectrochempy-iris>=0.1,<0.2
+    - spectrochempy-cantera>=0.1,<0.2
