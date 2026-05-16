@@ -699,6 +699,25 @@ SIMPLe to use Interactive Self-modeling Mixture Analysis
 
     SIMPLISMA
 
+
+CP (CANDECOMP/PARAFAC) decomposition
+====================================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    CP
+
+Phase Sensitive Detection
+=========================
+
+.. autosummary::
+    :nosignatures:
+    :toctree: generated/
+
+    PSD
+
 Utilities
 =========
 
@@ -725,7 +744,7 @@ Find peaks
 
     find_peaks
 
-Kinetic
+Kinetics
 --------
 
 .. autosummary::

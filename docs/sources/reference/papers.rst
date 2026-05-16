@@ -7,8 +7,29 @@ Papers citing `SpectroChemPy`
 2026
 ====
 
+- Speciation of silanol groups on commercial precipitated silicas via IR spectroscopy,
+  :cite:t:`debs:2026`, `DOI: 10.26434/chemrxiv.15002422/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002422/v1>`__.
+
 - Multivariate analysis coupled to infrared spectroscopy unravels the diversity of adsorption sites and strengths of a zeolite surface
-  :cite:t:`aboulayt:2026`, `DOI: 10.26434/chemrxiv.10001501/v1 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv.10001501>`__.
+  :cite:t:`aboulayt:2026`, `DOI: 10.1039/d6cy00101g <https://doi.org/10.1039/d6cy00101g>`__.
+
+- On the Influence of Catalyst Mesopore Structure in the Catalytic Cracking of Polypropylene,
+  :cite:t:`rejman:2026`, `DOI: 10.1002/ceur.202500317 <https://doi.org/10.1002/ceur.202500317>`__.
+
+- Evaluation of Quantification Methods applied to Overlapping FTIR Features,
+  :cite:t:`diehl:2026`, `DOI: 10.70163/2997-8947.1014 <https://doi.org/10.70163/2997-8947.1014>`__.
+
+- Operando Infrared Imaging of Electrolyte Gradients with Lithium Metal Electrodes,
+  :cite:t:`landetta:2026`, `URL: https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1012&context=raise <https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1012&context=raise>`__.
+
+- Effect of reaction temperature on nascent carbonaceous particles from toluene shock-tube pyrolysis: Insights from FTIR and Raman spectroscopy
+  :cite:t:`rezaeian:2026`, `DOI: 10.48550/arXiv.2604.26629 <https://doi.org/10.48550/arXiv.2604.26629>`__.
+
+- Denoising framework for X-ray absorption spectroscopy data
+  :cite:t:`aidukas:2026`, `DOI: 10.1107/S1600577526001712 <https://doi.org/10.1107/S1600577526001712>`__.
+
+- The Effect of Inorganic Impurities in Post-Consumer Plastic Waste on the Cracking of Polyolefins with Zeolite-based Catalysts,
+  :cite:t:`rejman:2026b`, `10.26434/chemrxiv-2025-0nfrn/v2 <https://chemrxiv.org/doi/abs/10.26434/chemrxiv-2025-0nfrn/v2>`__.
 
 2025
 ====
@@ -33,9 +54,6 @@ Papers citing `SpectroChemPy`
 
 - Whole brain resting-state EEG dynamic: A mixture of linear aperiodic and nonlinear resonant stochastic processes,
   :cite:t:`wang:2025`, `DOI: 10.1101/2025.06.27.661950 <https://doi.org/10.1101/2025.06.27.661950>`__.
-
-- On the Influence of Catalyst Mesopore Structure in the Catalytic Cracking of Polypropylene,
-  :cite:t:`rejman:2025b`, `DOI: 10.1002/ceur.202500317 <https://doi.org/10.1002/ceur.202500317>`__.
 
 - AutoSDT: Scaling Data-Driven Discovery Tasks Toward Open Co-Scientists,
   :cite:t:`Li:2025`, `DOI: 10.48550/arXiv.2506.08140 <https://doi.org/10.48550/arXiv.2506.08140>`__.
