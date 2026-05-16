@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 PLUGIN_DIRS = {
-    "nmr": "spectrochempy-topspin",
+    "nmr": "spectrochempy-nmr",
     "iris": "spectrochempy-iris",
     "cantera": "spectrochempy-cantera",
 }

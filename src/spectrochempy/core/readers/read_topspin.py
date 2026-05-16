@@ -6,10 +6,10 @@
 """
 Bruker TopSpin reader - moved to external plugin.
 
-This reader has been moved to the external package ``spectrochempy-topspin``.
+This reader has been moved to the external package ``spectrochempy-nmr``.
 Install it with::
 
-    pip install spectrochempy-topspin
+    pip install spectrochempy[nmr]
 
 The plugin auto-registers via the entry point ``spectrochempy.plugins``
 so that ``scp.read_topspin(...)`` works transparently after installation.
@@ -21,6 +21,6 @@ from spectrochempy.plugins.deps import MissingPluginError
 def read_topspin(*paths, **kwargs):
     raise MissingPluginError(
         "read_topspin",
-        plugin_name="spectrochempy-topspin",
-        install_hint="pip install spectrochempy-topspin",
+        plugin_name="spectrochempy-nmr",
+        install_hint="pip install spectrochempy[nmr]",
     )

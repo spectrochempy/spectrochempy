@@ -1,5 +1,5 @@
-# ruff: noqa: PLC0415 — defer imports in plugin methods to avoid startup cost
-"""spectrochempy-topspin — Bruker TopSpin NMR reader plugin for SpectroChemPy."""
+# ruff: noqa: PLC0415 - defer imports in plugin methods to avoid startup cost
+"""NMR readers and tools plugin for SpectroChemPy."""
 
 from __future__ import annotations
 
@@ -13,12 +13,12 @@ if TYPE_CHECKING:
     pass
 
 
-class TopSpinPlugin(SpectroChemPyPlugin):
-    """Bruker TopSpin NMR reader plugin."""
+class NMRPlugin(SpectroChemPyPlugin):
+    """NMR plugin, currently providing the Bruker TopSpin reader."""
 
     name = "nmr"
     version = "0.1.0"
-    description = "Read Bruker TopSpin NMR data files (FID, SER, processed)"
+    description = "NMR readers and tools for SpectroChemPy"
     spectrochempy_min_version = "0.8.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
     capabilities = [PluginCapability.READER]

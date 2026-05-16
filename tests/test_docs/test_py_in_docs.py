@@ -106,7 +106,7 @@ def test_nbsphinx_script_(script):
     if "read_topspin" in script.read_text() and not scp.plugin_manager.has_plugin(
         "nmr"
     ):
-        pytest.skip("requires spectrochempy-topspin plugin")
+        pytest.skip("requires spectrochempy-nmr plugin")
 
     # Skip scripts requiring network when network is unavailable
     if "eigenvector.com" in script.read_text() and not _network_available():
@@ -155,7 +155,7 @@ def test_examples(example):
     try:
         import_item(module)
     except MissingPluginError:
-        pytest.skip("requires spectrochempy-topspin plugin")
+        pytest.skip("requires spectrochempy-nmr plugin")
     except Exception as e:
         error_msg = f"Error in example: {example}\n"
         error_msg += f"Module: {module}\n"

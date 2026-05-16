@@ -264,19 +264,21 @@ If you need to provide dynamic metadata, override ``plugin_info()``::
         }
 
 
-Full example: topspin plugin
-============================
+Full example: NMR plugin
+========================
 
-The reference external plugin is ``spectrochempy-topspin``::
+The reference external plugin is ``spectrochempy-nmr``.  It currently
+provides the Bruker TopSpin reader, and can grow additional NMR readers
+and tools over time::
 
-    # spectrochempy-topspin/src/spectrochempy_topspin/__init__.py
+    # spectrochempy-nmr/src/spectrochempy_nmr/__init__.py
 
     from spectrochempy.api.plugins import SpectroChemPyPlugin
 
     from .read_topspin import read_topspin
 
 
-    class TopSpinPlugin(SpectroChemPyPlugin):
+    class NMRPlugin(SpectroChemPyPlugin):
         name = "nmr"
         version = "0.1.0"
 
@@ -293,7 +295,7 @@ The reference external plugin is ``spectrochempy-topspin``::
 Entry point declaration in ``pyproject.toml``::
 
     [project.entry-points."spectrochempy.plugins"]
-    nmr = "spectrochempy_topspin:TopSpinPlugin"
+    nmr = "spectrochempy_nmr:NMRPlugin"
 
 
 Import guidance

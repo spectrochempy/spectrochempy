@@ -21,4 +21,4 @@
 
 # NMR dependencies
 # ----------------
-spectrochempy-topspin>=0.1,<0.2
+spectrochempy-nmr>=0.1,<0.2

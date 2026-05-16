@@ -73,7 +73,7 @@ used by PyPI wheels:
 .. code-block:: bash
 
     pip install -e .
-    pip install -e plugins/spectrochempy-topspin
+    pip install -e plugins/spectrochempy-nmr
     pip install -e plugins/spectrochempy-iris
     pip install -e plugins/spectrochempy-cantera
 
@@ -98,8 +98,9 @@ Users can install official plugins through SpectroChemPy extras:
     pip install "spectrochempy[cantera]"
     pip install "spectrochempy[plugins]"
 
-The ``nmr`` extra installs the TopSpin reader plugin and its NMR-specific
-dependencies.  The ``plugins`` extra installs the current official plugin set.
+The ``nmr`` extra installs the NMR plugin, currently including the TopSpin
+reader and its NMR-specific dependencies.  The ``plugins`` extra installs the
+current official plugin set.
 
 ``__init__.py`` — the plugin class
 ==================================
