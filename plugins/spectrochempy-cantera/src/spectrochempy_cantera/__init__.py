@@ -27,7 +27,11 @@ class CanteraPlugin(SpectroChemPyPlugin):
     description = "Thermodynamic equilibrium, reactor simulation, and kinetic analysis via Cantera"
     spectrochempy_min_version = "0.8.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
-    capabilities = [PluginCapability.SIMULATION, PluginCapability.ANALYSIS, PluginCapability.ACCESSOR]
+    capabilities = [
+        PluginCapability.SIMULATION,
+        PluginCapability.ANALYSIS,
+        PluginCapability.ACCESSOR,
+    ]
     requires = ["cantera"]
 
     # ------------------------------------------------------------------
@@ -100,7 +104,9 @@ class CanteraPlugin(SpectroChemPyPlugin):
 # ------------------------------------------------------------------
 
 
-def _ndd_cantera_equilibrium(self: NDDataset, mechanism: str, temperature: float | None = None) -> dict:
+def _ndd_cantera_equilibrium(
+    self: NDDataset, mechanism: str, temperature: float | None = None
+) -> dict:
     """Compute equilibrium composition using dataset temperature/pressure metadata."""
     import numpy as np
 
@@ -155,6 +161,7 @@ def equilibrium_composition(
     mole_fracs = gas.X
 
     import numpy as np
+
     import spectrochempy as scp
 
     mf_ds = scp.NDDataset(
@@ -260,7 +267,6 @@ def flame_speed(
     ``species_profiles``.
     """
     import cantera as ct
-    import numpy as np
 
     gas = ct.Solution(mechanism)
     gas.set_equivalence_ratio(equivalence_ratio, fuel, oxidizer)
@@ -273,7 +279,9 @@ def flame_speed(
     return {
         "flame_speed": float(flame.velocity[0]),
         "temperature_profile": flame.T,
-        "species_profiles": {name: flame.X[:, i] for i, name in enumerate(gas.species_names)},
+        "species_profiles": {
+            name: flame.X[:, i] for i, name in enumerate(gas.species_names)
+        },
         "grid": flame.grid,
     }
 
@@ -312,6 +320,7 @@ def thermo_properties(
     """
     import cantera as ct
     import numpy as np
+
     import spectrochempy as scp
 
     gas = ct.Solution(mechanism)
@@ -379,7 +388,9 @@ def kinetic_sensitivity(
 
     sim.advance(1e-3)
 
-    sensitivities = np.array([reactor.sensitivity(i, 0) for i in range(gas.n_reactions)])
+    sensitivities = np.array(
+        [reactor.sensitivity(i, 0) for i in range(gas.n_reactions)]
+    )
 
     return {
         "reactions": [str(r) for r in gas.reactions()],
@@ -419,6 +430,7 @@ def spectral_coupling(
     """
     import cantera as ct
     import numpy as np
+
     import spectrochempy as scp
 
     gas = ct.Solution(mechanism)
@@ -475,5 +487,3 @@ def read_cantera_mechanism(path: str) -> dict:
 __dataset_methods__ = ["cantera_equilibrium"]
 
 # Re-export PFR from the _pfr module
-from spectrochempy_cantera._pfr import PFR  # noqa: PLC0415
-from spectrochempy_cantera._pfr import _cantera_is_not_available  # noqa: PLC0415

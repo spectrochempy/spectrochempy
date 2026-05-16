@@ -33,9 +33,7 @@ class TestIrisImports:
 
     @staticmethod
     def _check_plugin():
-        pytest.importorskip(
-            "spectrochempy_iris", reason="IRIS plugin not installed"
-        )
+        pytest.importorskip("spectrochempy_iris", reason="IRIS plugin not installed")
 
     def test_plot_iris_lcurve_import(self):
         """Test import of plot_iris_lcurve."""

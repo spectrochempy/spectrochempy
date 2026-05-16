@@ -764,10 +764,7 @@ class PFR:
                     ["G_" + str(gen)] * (popsize * len(param_to_optimize)),
                 )
             gen_labels.append(
-                ["G_polish"]
-                * (
-                    len(func_values) % (popsize * len(param_to_optimize))
-                ),
+                ["G_polish"] * (len(func_values) % (popsize * len(param_to_optimize))),
             )
             gen_labels = [item for sublist in gen_labels for item in sublist]
         else:

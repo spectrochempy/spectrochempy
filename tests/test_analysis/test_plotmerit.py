@@ -8,7 +8,9 @@
 import numpy as np
 import pytest
 
-pytest.importorskip("spectrochempy_iris", reason="IRIS analysis requires the spectrochempy-iris plugin")
+pytest.importorskip(
+    "spectrochempy_iris", reason="IRIS analysis requires the spectrochempy-iris plugin"
+)
 from spectrochempy_iris import IRIS
 from spectrochempy_iris import IrisKernel
 

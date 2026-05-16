@@ -8,7 +8,6 @@
 __all__ = ["IrisKernel", "IRIS"]
 
 import numpy as np
-
 import osqp
 import traitlets as tr
 from scipy import optimize

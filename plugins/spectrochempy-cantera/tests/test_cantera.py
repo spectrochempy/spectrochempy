@@ -23,6 +23,7 @@ _HERE = Path(__file__).parent
 # Skip all tests if cantera is not installed
 try:
     import cantera as ct
+
     HAS_CANTERA = True
     # Check if a default mechanism is available
     ct.Solution("gri30.yaml")

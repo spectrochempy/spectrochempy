@@ -12,8 +12,8 @@ __all__ = [
     "curvefitting",
     "decomposition",
     "integration",
-    "phasesensitivedetection",
     "peakfinding",
+    "phasesensitivedetection",
 ]
 
 from . import _base
@@ -21,5 +21,5 @@ from . import crossdecomposition
 from . import curvefitting
 from . import decomposition
 from . import integration
-from . import phasesensitivedetection
 from . import peakfinding
+from . import phasesensitivedetection

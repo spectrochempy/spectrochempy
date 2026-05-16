@@ -2,12 +2,12 @@
 
 """Tests for spectrochempy-topspin plugin registration and lifecycle."""
 
+from spectrochempy_topspin import TopSpinPlugin
+
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
 from spectrochempy.api.plugins import check_plugin_compatibility
 from spectrochempy.testing.plugins import PluginTestHarness
-
-from spectrochempy_topspin import TopSpinPlugin
 
 
 def test_plugin_metadata():

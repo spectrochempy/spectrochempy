@@ -5,19 +5,17 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
+from spectrochempy_iris import IrisPlugin
+from spectrochempy_iris import batch_iris_analysis
+from spectrochempy_iris import compare_kernel_models
+from spectrochempy_iris import iris_analysis_report
+from spectrochempy_iris import plot_distribution_grid
+from spectrochempy_iris import plot_kernel_comparison
 
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
 from spectrochempy.api.plugins import check_plugin_compatibility
 from spectrochempy.testing.plugins import PluginTestHarness
-
-from spectrochempy_iris import IrisPlugin
-from spectrochempy_iris import batch_iris_analysis
-from spectrochempy_iris import compare_kernel_models
-from spectrochempy_iris import iris_analysis_report
-from spectrochempy_iris import plot_kernel_comparison
-from spectrochempy_iris import plot_distribution_grid
 
 # ------------------------------------------------------------------
 # Test data helpers
@@ -192,7 +190,6 @@ def test_extra_kernels():
     """Plugin-provided custom kernels (freundlich, temkin) are callable."""
     from spectrochempy_iris import IRIS
     from spectrochempy_iris import IrisKernel
-
     from spectrochempy_iris import _kernel_freundlich
     from spectrochempy_iris import _kernel_temkin
 
@@ -213,12 +210,13 @@ def test_extra_kernels():
 
 def test_ndd_kernel_accessor():
     """NDDataset.iris_kernel_matrix returns an IrisKernel."""
-    from spectrochempy_iris import IrisKernel
 
     ds = _make_test_dataset()
 
     # Direct function call (the accessor pattern)
-    result = IrisPlugin().register_accessors()[0]["func"](ds, kernel_type="langmuir", q=[-6, 1, 6])
+    result = IrisPlugin().register_accessors()[0]["func"](
+        ds, kernel_type="langmuir", q=[-6, 1, 6]
+    )
     assert result is not None
     # It should be an IrisKernel or similar
     assert hasattr(result, "kernel")

@@ -59,9 +59,7 @@ def test_analysis_iris_kernel():
     # Indeed, setting using X.coordset[0] = Coord(...) fails unless name is specified: Coord(..., name='y')
 
     # test the docstring example
-    k1 = IrisKernel(
-        X, K="langmuir", p=np.linspace(0, 1, 19), q=np.logspace(-10, 1, 10)
-    )
+    k1 = IrisKernel(X, K="langmuir", p=np.linspace(0, 1, 19), q=np.logspace(-10, 1, 10))
     assert str(k1.kernel) == "NDDataset: [float64] unitless (shape: (y:19, x:10))"
 
     # without specifying p

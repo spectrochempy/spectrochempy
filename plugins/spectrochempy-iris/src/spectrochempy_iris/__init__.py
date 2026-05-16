@@ -26,7 +26,8 @@ if TYPE_CHECKING:
 
 
 class IrisPlugin(SpectroChemPyPlugin):
-    """Extended IRIS analysis plugin for SpectroChemPy.
+    """
+    Extended IRIS analysis plugin for SpectroChemPy.
 
     Adds custom kernels, batch processing, model comparison, and
     extended visualisation on top of the core IRIS class.
@@ -37,7 +38,11 @@ class IrisPlugin(SpectroChemPyPlugin):
     description = "Extended IRIS analysis: custom kernels, batch analysis, model comparison, enhanced plots"
     spectrochempy_min_version = "0.8.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
-    capabilities = [PluginCapability.ANALYSIS, PluginCapability.VISUALIZER, PluginCapability.ACCESSOR]
+    capabilities = [
+        PluginCapability.ANALYSIS,
+        PluginCapability.VISUALIZER,
+        PluginCapability.ACCESSOR,
+    ]
 
     def register_analyses(self) -> list[dict]:
         """Declare analysis workflows extending core IRIS."""
@@ -95,7 +100,8 @@ def _ndd_build_kernel(
     kernel_type: str = "langmuir",
     q: list | None = None,
 ) -> object:
-    """Build an IrisKernel from this dataset.
+    """
+    Build an IrisKernel from this dataset.
 
     Parameters
     ----------
@@ -112,7 +118,6 @@ def _ndd_build_kernel(
     -------
     IrisKernel
     """
-    from ._core import IrisKernel
 
     extra_kernels = {
         "freundlich": _kernel_freundlich,
@@ -167,7 +172,8 @@ def batch_iris_analysis(
     q: list | None = None,
     reg_par: list | None = None,
 ) -> list[dict]:
-    """Run IRIS analysis on multiple datasets or conditions.
+    """
+    Run IRIS analysis on multiple datasets or conditions.
 
     Parameters
     ----------
@@ -185,7 +191,6 @@ def batch_iris_analysis(
     -------
     list[dict] with keys ``label``, ``iris``, ``f``, ``RSS``, ``SM``.
     """
-    from ._core import IRIS
     from ._core import IrisKernel
 
     extra_kernels = {
@@ -225,7 +230,8 @@ def compare_kernel_models(
     q: list | None = None,
     reg_par: list | None = None,
 ) -> list[dict]:
-    """Fit multiple kernel models to the same dataset and compare results.
+    """
+    Fit multiple kernel models to the same dataset and compare results.
 
     Parameters
     ----------
@@ -244,7 +250,6 @@ def compare_kernel_models(
     list[dict] with keys ``kernel``, ``iris``, ``RSS``, ``SM``,
     ``n_components``.
     """
-    from ._core import IRIS
     from ._core import IrisKernel
 
     extra_kernels = {
@@ -253,9 +258,14 @@ def compare_kernel_models(
         "linear": _kernel_linear,
     }
 
-    builtin_kernels = ["langmuir", "ca", "diffusion",
-                       "reactant-first-order", "product-first-order",
-                       "stejskal-tanner"]
+    builtin_kernels = [
+        "langmuir",
+        "ca",
+        "diffusion",
+        "reactant-first-order",
+        "product-first-order",
+        "stejskal-tanner",
+    ]
 
     if kernels is None:
         kernels = ["langmuir", "ca", "freundlich"]
@@ -281,7 +291,8 @@ def compare_kernel_models(
 
 
 def iris_analysis_report(iris_object: object) -> dict:
-    """Generate a summary report of a fitted IRIS analysis.
+    """
+    Generate a summary report of a fitted IRIS analysis.
 
     Parameters
     ----------
@@ -315,7 +326,8 @@ def plot_kernel_comparison(
     comparison_results: list[dict],
     **kwargs,
 ) -> tuple:
-    """Side-by-side comparison of distribution functions from multiple kernels.
+    """
+    Side-by-side comparison of distribution functions from multiple kernels.
 
     Parameters
     ----------
@@ -346,8 +358,14 @@ def plot_kernel_comparison(
             axes[i].set_xlabel("q")
             axes[i].set_ylabel("f(q)")
             rss = float(np.mean(result["RSS"]))
-            axes[i].text(0.05, 0.95, f"RSS={rss:.2e}", transform=axes[i].transAxes,
-                         va="top", fontsize=8)
+            axes[i].text(
+                0.05,
+                0.95,
+                f"RSS={rss:.2e}",
+                transform=axes[i].transAxes,
+                va="top",
+                fontsize=8,
+            )
 
     fig.tight_layout()
     return fig, axes
@@ -357,7 +375,8 @@ def plot_distribution_grid(
     batch_results: list[dict],
     **kwargs,
 ) -> tuple:
-    """Grid of distribution functions across lambdas and conditions.
+    """
+    Grid of distribution functions across lambdas and conditions.
 
     Parameters
     ----------
@@ -369,11 +388,11 @@ def plot_distribution_grid(
     (fig, axes) tuple.
     """
     import matplotlib.pyplot as plt
-    import numpy as np
 
     n_conditions = len(batch_results)
-    fig, axes = plt.subplots(n_conditions, 1, figsize=(8, 3 * n_conditions),
-                             squeeze=False)
+    fig, axes = plt.subplots(
+        n_conditions, 1, figsize=(8, 3 * n_conditions), squeeze=False
+    )
 
     for i, result in enumerate(batch_results):
         ax = axes[i, 0]
@@ -382,8 +401,11 @@ def plot_distribution_grid(
         for j in range(min(len(lambdas), 5)):
             dist = f[j].squeeze().data
             if dist.ndim >= 1:
-                ax.plot(result["iris"].q.data, dist[:, 0] if dist.ndim > 1 else dist,
-                        label=rf"$\lambda$={lambdas[j]:.2e}")
+                ax.plot(
+                    result["iris"].q.data,
+                    dist[:, 0] if dist.ndim > 1 else dist,
+                    label=rf"$\lambda$={lambdas[j]:.2e}",
+                )
         ax.set_title(f"Condition: {result['label']}")
         ax.set_xlabel("q")
         ax.set_ylabel("f(q)")
