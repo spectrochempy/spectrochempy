@@ -72,3 +72,4 @@ def test_nmr_reader_is_not_dataset_accessor_namespace():
 
     dataset = scp.NDDataset([1, 2, 3])
     assert not hasattr(dataset, "nmr")
+    assert not hasattr(dataset, "read_topspin")

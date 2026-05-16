@@ -45,7 +45,3 @@ class NMRPlugin(SpectroChemPyPlugin):
                 ],
             },
         ]
-
-
-# Export reader name so NDDataset can discover it via ndd.read_topspin()
-__dataset_methods__ = ["read_topspin"]

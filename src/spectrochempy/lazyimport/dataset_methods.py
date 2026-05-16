@@ -80,7 +80,6 @@ _LAZY_DATASETS_IMPORTS = {
     "read_sdr": "spectrochempy.core.readers.read_soc",
     "read_hdr": "spectrochempy.core.readers.read_soc",
     "read_spc": "spectrochempy.core.readers.read_spc",
-    "read_topspin": "spectrochempy.core.readers.read_topspin",
     "read_wdf": "spectrochempy.core.readers.read_wire",
     "read_wire": "spectrochempy.core.readers.read_wire",
     "read_zip": "spectrochempy.core.readers.read_zip",

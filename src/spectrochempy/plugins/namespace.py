@@ -68,9 +68,7 @@ class PluginNamespace:
     def _extension_names(self) -> set[str]:
         names: set[str] = set()
         for category in ("analysis", "simulation"):
-            for name, info in self._registry.extensions.list_category(
-                category
-            ).items():
+            for name, info in self._registry.extensions.list_category(category).items():
                 if _matches_namespace(info, self._namespace):
                     names.add(_method_name(name, self._namespace))
         return names
