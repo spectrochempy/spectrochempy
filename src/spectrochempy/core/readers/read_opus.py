@@ -6,7 +6,6 @@
 """Extend NDDataset with the import method for OPUS generated data files."""
 
 __all__ = ["read_opus"]
-__dataset_methods__ = __all__
 
 from datetime import datetime
 from datetime import timedelta

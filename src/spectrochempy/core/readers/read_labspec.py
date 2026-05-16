@@ -6,7 +6,6 @@
 """Extend NDDataset with the import method for Labspec *.txt generated data files."""
 
 __all__ = ["read_labspec"]
-__dataset_methods__ = __all__
 
 import datetime
 
