@@ -228,5 +228,80 @@ jobs:
           "
 
       - name: Run NMR plugin tests
+        working-directory: plugins/spectrochempy-nmr
         run: |
-          python -m pytest plugins/spectrochempy-nmr/tests -v --durations=10
+          python -m pytest tests -v --durations=10
+
+  test-plugin-iris:
+    name: Test IRIS plugin
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy'
+       && !startsWith(github.ref, 'refs/release/')) || (
+       github.event_name != 'schedule'
+       && !startsWith(github.ref, 'refs/release/'))
+
+    defaults:
+      run:
+        shell: bash {0}
+
+    steps:
+      - name: Checkout spectrochempy repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        id: setup_python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install spectrochempy and IRIS plugin
+        run: |
+          python -m pip install ".[test]" plugins/spectrochempy-iris
+          python src/spectrochempy/data/setup.py
+
+      - name: Run IRIS plugin tests
+        working-directory: plugins/spectrochempy-iris
+        run: |
+          python -m pytest tests -v --durations=10
+
+  test-plugin-cantera:
+    name: Test Cantera plugin
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy'
+       && !startsWith(github.ref, 'refs/release/')) || (
+       github.event_name != 'schedule'
+       && !startsWith(github.ref, 'refs/release/'))
+
+    defaults:
+      run:
+        shell: bash {0}
+
+    steps:
+      - name: Checkout spectrochempy repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        id: setup_python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install spectrochempy and Cantera plugin
+        run: |
+          python -m pip install ".[test]" plugins/spectrochempy-cantera
+          python src/spectrochempy/data/setup.py
+
+      - name: Run Cantera plugin tests
+        working-directory: plugins/spectrochempy-cantera
+        run: |
+          python -m pytest tests -v --durations=10
