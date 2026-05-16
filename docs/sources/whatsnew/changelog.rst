@@ -19,6 +19,16 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Core plugin system: external packages can now register readers, writers,
+  processors, visualizers, analyses, simulations, and dataset accessors via
+  ``spectrochempy.plugins`` entry points.
+- Plugin API: stable public interface at ``spectrochempy.api.plugins`` for
+  plugin authors, with versioned API guarantees.
+- Plugin template: cookie-cutter project template in ``plugins/plugin-template/``.
+- Plugin test harness: ``PluginTestHarness`` in ``spectrochempy.testing.plugins``
+  for isolated plugin testing without global state leakage.
+- Plugin documentation: developer guide covering architecture, API policy,
+  packaging, and testing.
 
 .. section
 
@@ -40,6 +50,9 @@ Breaking Changes
 ~~~~~~~~~~~~~~~~
 .. Add here new breaking changes (do not delete this comment)
 
+- Reader functions (e.g. ``read_omnic``, ``read_opus``) are no longer
+  available as ``NDDataset`` methods. Use ``scp.read_omnic(...)`` or
+  plugin-namespaced access (e.g. ``scp.nmr.read_topspin(...)``) instead.
 
 .. section
 
