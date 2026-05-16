@@ -8,25 +8,8 @@ import numpy as np
 import pytest
 
 from spectrochempy import show
-
-# import spectrochempy
-from spectrochempy.analysis.kinetic import kineticutilities as ku
-
-
-@pytest.mark.skipif(
-    ku._cantera_is_not_available(), reason="Cantera must be installed first"
-)
-def test_cu(monkeypatch):
-    # availability of cantera (# should be installed if the test wa not skipped)
-    assert not ku._cantera_is_not_available()
-
-    # simulate abscense of cantera
-    with monkeypatch.context() as m:
-        m.setattr(ku, "ct", None)
-        assert ku._cantera_is_not_available()
-
-    # context restored with ct = cantera
-    assert not ku._cantera_is_not_available()
+from spectrochempy.utils.kinetic import ActionMassKinetics
+from spectrochempy.utils.kinetic import _interpret_equation
 
 
 @pytest.mark.parametrize(
@@ -45,7 +28,7 @@ def test_cu(monkeypatch):
 )
 def test_equations_regex(test_str, left_expected, right_expected):
     species = list(left_expected.keys()) + list(right_expected.keys())
-    left, right = ku._interpret_equation(test_str, species)
+    left, right = _interpret_equation(test_str, species)
 
     assert left_expected == left
     assert right_expected == right
@@ -58,10 +41,10 @@ def test_ABC():
     k_exp = np.array(((1.0e8, 52.0e3), (1.0e8, 50.0e3)))
 
     # isothermal
-    kin_exp = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
+    kin_exp = ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
     C_exp = kin_exp.integrate(time)
     k_guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
-    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess)
+    kin_guess = ActionMassKinetics(reactions, species_concentrations, k_guess)
     res = kin_guess.fit_to_concentrations(
         C_exp,
         iexp=[0, 1, 2],
@@ -96,13 +79,13 @@ def test_ABC():
         return T
 
     # Compute concentration profile
-    kin = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
+    kin = ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
     C_exp = kin.integrate(
         time, k_dt=0.01
     )  # k_dt is a time step for the apporximation the rate constants vs time
 
-    _guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
-    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess, T=T)
+    k_guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
+    kin_guess = ActionMassKinetics(reactions, species_concentrations, k_guess, T=T)
     res = kin_guess.fit_to_concentrations(
         C_exp,
         iexp=[0, 1, 2],
@@ -146,11 +129,11 @@ def test_ABC():
     time = (np.arange(0, 10), np.arange(0, 10, 0.5))
 
     # Compute concentration profiles
-    kin = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
+    kin = ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
     C_exp = kin.integrate(time, k_dt=0.01)
 
     k_guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
-    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess, T=T)
+    kin_guess = ActionMassKinetics(reactions, species_concentrations, k_guess, T=T)
     res = kin_guess.fit_to_concentrations(
         C_exp,
         iexp=[0, 1, 2],

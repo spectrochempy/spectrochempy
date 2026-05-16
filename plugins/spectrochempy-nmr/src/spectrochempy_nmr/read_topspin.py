@@ -23,7 +23,6 @@ Supports both FID and processed data (1D and nD)
 """
 
 __all__ = ["read_topspin"]
-__dataset_methods__ = __all__
 
 import contextlib
 import re

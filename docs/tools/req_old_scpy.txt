@@ -24,7 +24,6 @@ numba
 numpy<2.0
 numpy-quaternion
 numpydoc>=1.2
-osqp
 packaging
 pint>=0.24
 pypandoc

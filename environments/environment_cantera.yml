@@ -33,7 +33,6 @@ dependencies:
     - matplotlib-base
     - numpy
     - numpydoc
-    - osqp
     - pluggy
     - pint
     - pyyaml
@@ -46,4 +45,4 @@ dependencies:
     # CANTERA dependencies
     # --------------------
 
-    - cantera
+    - spectrochempy-cantera>=0.1,<0.2

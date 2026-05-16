@@ -58,14 +58,45 @@ def check_plugin_metadata(plugin: Any) -> list[str]:
     return issues
 
 
+def check_plugin_requires(plugin: Any) -> list[str]:
+    """
+    Check that optional dependencies declared via ``requires`` are importable.
+
+    Parameters
+    ----------
+    plugin : Any
+        A plugin instance.
+
+    Returns
+    -------
+    list of str
+        List of missing dependencies.  An empty list means all declared
+        dependencies are available.
+    """
+    issues: list[str] = []
+    name = getattr(plugin, "name", "unknown")
+    requires = getattr(plugin, "requires", [])
+    if not requires:
+        return issues
+    for dep in requires:
+        # Extract package name from a pip-style spec (e.g. "cantera>=3.0" -> "cantera")
+        pkg_name = dep.split(">=")[0].split("==")[0].split("~=")[0].strip()
+        try:
+            importlib.import_module(pkg_name)
+        except ImportError:
+            issues.append(f"Plugin '{name}' requires '{dep}' which is not installed.")
+    return issues
+
+
 def check_plugin_contributions(plugin: Any) -> list[str]:
     """
     Check plugin contribution declarations for consistency.
 
     Inspects declarative hooks (``register_readers``,
     ``register_writers``, ``register_processors``,
-    ``register_visualizers``) and validates the structure of
-    returned data.
+    ``register_visualizers``, ``register_analyses``,
+    ``register_simulations``, ``register_accessors``) and validates
+    the structure of returned data.
 
     Parameters
     ----------
@@ -86,6 +117,9 @@ def check_plugin_contributions(plugin: Any) -> list[str]:
         "register_writers",
         "register_processors",
         "register_visualizers",
+        "register_analyses",
+        "register_simulations",
+        "register_accessors",
     ):
         if not hasattr(plugin, hook_name):
             continue
@@ -132,8 +166,8 @@ def check_plugin_compatibility(plugin: Any) -> list[str]:
     Full compatibility check for a plugin.
 
     Combines ``check_plugin_metadata``, ``check_plugin_contributions``,
-    and ``validate_plugin_compatibility`` into a single function that
-    returns all issues at once.
+    ``check_plugin_requires``, and ``validate_plugin_compatibility``
+    into a single function that returns all issues at once.
 
     Parameters
     ----------
@@ -149,6 +183,7 @@ def check_plugin_compatibility(plugin: Any) -> list[str]:
     issues: list[str] = []
     issues.extend(check_plugin_metadata(plugin))
     issues.extend(check_plugin_contributions(plugin))
+    issues.extend(check_plugin_requires(plugin))
     _, compat_errors = validate_plugin_compatibility(plugin)
     issues.extend(compat_errors)
     return issues
@@ -254,14 +289,10 @@ def _is_compatible_api_version(plugin_api: str, core_api: str) -> bool:
 
 
 def _satisfies_min_version(current: str, minimum: str) -> bool:
-    """Semver check: *current* >= *minimum*."""
+    """PEP 440 version check: *current* >= *minimum*."""
     try:
-        _cur = [int(x) for x in current.split(".")]
-        _min = [int(x) for x in minimum.split(".")]
-        while len(_cur) < len(_min):
-            _cur.append(0)
-        while len(_min) < len(_cur):
-            _min.append(0)
-        return _cur >= _min
-    except (ValueError, IndexError):
+        from packaging.version import parse
+
+        return parse(current) >= parse(minimum)
+    except Exception:
         return False

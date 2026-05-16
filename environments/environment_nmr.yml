@@ -33,7 +33,6 @@ dependencies:
     - matplotlib-base
     - numpy
     - numpydoc
-    - osqp
     - pluggy
     - pint
     - pyyaml
@@ -46,4 +45,4 @@ dependencies:
     # NMR dependencies
     # ----------------
 
-    - quaternion>=2024.0.7
+    - spectrochempy-nmr>=0.1,<0.2

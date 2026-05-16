@@ -107,6 +107,20 @@ X
 # Other reader functions return either a single `NDDataset` or multiple `NDDataset`
 # objects, depending on the file type and content.
 #
+# Readers are package-level APIs because they create datasets. Use
+# `scp.read_omnic(...)`, `scp.read_csv(...)`, or `scp.nmr.read_topspin(...)`, not
+# `dataset.read_omnic(...)` or `dataset.nmr.read_topspin(...)`.
+#
+# Some readers are provided by optional plugins. For example, the Bruker TopSpin
+# reader is provided by the NMR plugin. Install it with:
+#
+# ```bash
+# pip install "spectrochempy[nmr]"
+# ```
+#
+# Once installed, it is available as `scp.nmr.read_topspin(...)`. The legacy
+# alias `scp.read_topspin(...)` is kept for compatibility.
+#
 # Further details on specific cases are provided below. See the section [Reading directories](#Reading-directories).
 
 # %% [markdown]

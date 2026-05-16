@@ -40,7 +40,9 @@ owning a single domain:
    * - ``registry.processing``
      - Processors, unit contexts, dtype handlers
    * - ``registry.visualization``
-     - Visualizers (future use)
+     - Visualizers
+   * - ``registry.extensions``
+     - Generic extensions: analyses, simulations, fit models, domain schemas
    * - ``registry.metadata``
      - Plugin descriptors
 
@@ -86,6 +88,71 @@ And the corresponding ``pyproject.toml`` entry point::
 
 That is all.  Once installed, ``import spectrochempy`` will discover
 ``MyPlugin``, validate it, and register ``read_myformat`` as a reader.
+
+
+Plugin API policy
+=================
+
+Plugin APIs are exposed in two places, depending on whether they create
+data or operate on an existing object.
+
+Package-level plugin namespaces are used for I/O, object creation, and
+standalone workflows::
+
+    scp.nmr.read_topspin(...)
+    scp.iris.batch_iris(...)
+    scp.cantera.equilibrium(...)
+
+Dataset accessors are used only for operations on an existing
+``NDDataset``.  The accessor holds a reference to the parent dataset and
+passes it as the first argument to the registered callable::
+
+    dataset.iris.kernel_matrix(...)
+
+Do not add a dataset accessor just to make a plugin function look like a
+method.  The callable should use the parent dataset as a real input.  For
+example, Cantera equilibrium calculations currently remain package-level
+simulation APIs because they require explicit thermodynamic state and
+reactants::
+
+    scp.cantera.equilibrium(...)
+
+Readers are not exposed under dataset accessors.  For example, use
+``scp.nmr.read_topspin(...)`` rather than
+``dataset.nmr.read_topspin(...)`` because reading a file creates a
+dataset rather than operating on one.  The same rule applies to core
+readers such as ``scp.read_omnic(...)`` and ``scp.read_csv(...)``:
+``dataset.read_omnic(...)`` and ``dataset.read_csv(...)`` are not part
+of the supported API.
+
+Legacy package-level reader aliases such as ``scp.read_topspin(...)``
+are kept during transitions when they already exist publicly.  They are
+thin dispatches through the reader registry.
+
+Namespaced dataset accessors can keep old flat names by declaring
+``legacy_names``::
+
+    def register_accessors(self) -> list[dict]:
+        return [
+            {
+                "namespace": "iris",
+                "name": "kernel_matrix",
+                "legacy_names": ["iris_kernel_matrix"],
+                "func": _ndd_build_kernel,
+                "description": "Build an IrisKernel from the dataset",
+            },
+        ]
+
+This exposes both ``dataset.iris.kernel_matrix(...)`` and the legacy
+``dataset.iris_kernel_matrix(...)``.
+
+The current accessor mechanism stores namespaced accessors as strings such
+as ``"iris.kernel_matrix"`` in the plugin registry, then exposes them as
+``dataset.iris.kernel_matrix(...)`` at runtime.  This is intentionally a
+minimal bridge.  A future implementation may migrate mature domains to
+dedicated accessor classes, but plugin authors should keep the public rule
+the same: I/O and object creation belong at ``scp.<plugin>.*``; operations
+on an existing dataset belong at ``dataset.<plugin>.*``.
 
 
 Available hooks
@@ -140,6 +207,57 @@ A plugin can implement any combination of the following methods:
                 },
             ]
 
+``register_analyses() -> list[dict]``
+    Declare high-level analysis workflows (decomposition, multivariate
+    analysis, curve fitting, kinetic modelling).  Routed to
+    ``registry.extensions`` under the ``"analysis"`` category.
+
+    ::
+
+        def register_analyses(self) -> list[dict]:
+            return [
+                {
+                    "name": "pca",
+                    "func": perform_pca,
+                    "description": "Principal Component Analysis",
+                },
+            ]
+
+``register_simulations() -> list[dict]``
+    Declare simulation engines (thermodynamics, reactor modelling,
+    kinetic solvers).  Routed to ``registry.extensions`` under the
+    ``"simulation"`` category.
+
+    ::
+
+        def register_simulations(self) -> list[dict]:
+            return [
+                {
+                    "name": "equilibrium",
+                    "func": compute_equilibrium,
+                    "description": "Chemical equilibrium calculation",
+                },
+            ]
+
+``register_accessors() -> list[dict]``
+    Declare dataset accessor methods attached to NDDataset.  Routed to
+    ``registry.extensions`` under the ``"accessor"`` category.
+    Namespaced accessors should set ``"namespace"`` and use ``"name"``
+    for the method name inside that namespace.
+
+    ::
+
+        def register_accessors(self) -> list[dict]:
+            return [
+                {
+                    "namespace": "myplugin",
+                    "name": "analysis",
+                    "legacy_names": ["my_analysis"],
+                    "func": _ndd_analysis,
+                    "description": "Perform analysis on dataset",
+                },
+            ]
+
 
 Returning an empty list (or ``None``) from a hook is treated as "no
 contribution" and is silently ignored.
@@ -171,6 +289,12 @@ Available capability values:
      - ``"processor"``
    * - ``PluginCapability.VISUALIZER``
      - ``"visualizer"``
+   * - ``PluginCapability.ANALYSIS``
+     - ``"analysis"``
+   * - ``PluginCapability.SIMULATION``
+     - ``"simulation"``
+   * - ``PluginCapability.ACCESSOR``
+     - ``"accessor"``
 
 
 Plugin metadata
@@ -209,20 +333,22 @@ If you need to provide dynamic metadata, override ``plugin_info()``::
         }
 
 
-Full example: topspin plugin
-============================
+Full example: NMR plugin
+========================
 
-The reference external plugin is ``spectrochempy-topspin``::
+The reference external plugin is ``spectrochempy-nmr``.  It currently
+provides the Bruker TopSpin reader, and can grow additional NMR readers
+and tools over time::
 
-    # spectrochempy-topspin/src/spectrochempy_topspin/__init__.py
+    # spectrochempy-nmr/src/spectrochempy_nmr/__init__.py
 
     from spectrochempy.api.plugins import SpectroChemPyPlugin
 
     from .read_topspin import read_topspin
 
 
-    class TopSpinPlugin(SpectroChemPyPlugin):
-        name = "topspin"
+    class NMRPlugin(SpectroChemPyPlugin):
+        name = "nmr"
         version = "0.1.0"
 
         def register_readers(self) -> list[dict]:
@@ -238,7 +364,7 @@ The reference external plugin is ``spectrochempy-topspin``::
 Entry point declaration in ``pyproject.toml``::
 
     [project.entry-points."spectrochempy.plugins"]
-    topspin = "spectrochempy_topspin:TopSpinPlugin"
+    nmr = "spectrochempy_nmr:NMRPlugin"
 
 
 Import guidance
@@ -276,6 +402,16 @@ All symbols available from ``spectrochempy.api.plugins``:
      - Dataclass for processor contributions
    * - ``VisualizerContribution``
      - Dataclass for visualizer contributions
+   * - ``AnalysisContribution``
+     - Dataclass for analysis contributions
+   * - ``SimulationContribution``
+     - Dataclass for simulation contributions
+   * - ``analysis_from_dict``
+     - Convert dict to ``AnalysisContribution``
+   * - ``simulation_from_dict``
+     - Convert dict to ``SimulationContribution``
+   * - ``check_plugin_requires``
+     - Check optional dependency availability
    * - ``reader_from_dict``
      - Convert dict to ``ReaderContribution``
    * - ``writer_from_dict``
@@ -330,15 +466,15 @@ lifecycle states:
 
 Inspect plugin states::
 
-    manager.get_plugin_state("topspin")      # PluginState.ACTIVE
-    manager.get_active_plugins()             # ["topspin", ...]
-    manager.get_failed_plugins()             # {"broken": "error msg"}
-    manager.get_plugin_descriptor("topspin") # PluginDescriptor snapshot
+    manager.get_plugin_state("nmr")      # PluginState.ACTIVE
+    manager.get_active_plugins()         # ["nmr", ...]
+    manager.get_failed_plugins()         # {"broken": "error msg"}
+    manager.get_plugin_descriptor("nmr") # PluginDescriptor snapshot
 
 Activation and deactivation::
 
-    manager.deactivate_plugin("topspin")     # → marks DISABLED
-    manager.activate_plugin("topspin")       # → marks ACTIVE
+    manager.deactivate_plugin("nmr")     # → marks DISABLED
+    manager.activate_plugin("nmr")       # → marks ACTIVE
 
 Deactivation is a lightweight state flag — no unloading or reimport
 happens.  A disabled plugin is skipped if its entry point is
@@ -439,6 +575,20 @@ before registration:
 ``validate_plugin_compatibility(plugin) -> tuple[bool, list[str]]``
     Legacy check used by ``PluginManager`` during registration.
     Returns a boolean and a list of error messages.
+
+``check_plugin_requires(plugin) -> list[str]``
+    Checks that optional dependencies declared via the ``requires``
+    class attribute are importable.  If any dependency is missing, its
+    name is returned in the issue list.
+
+    ::
+
+        class MyPlugin(SpectroChemPyPlugin):
+            requires = ["cantera>=3.0"]
+
+Plugin managers also check ``requires`` automatically during
+registration: missing dependencies cause the plugin to be marked
+``FAILED`` with a clear message, without affecting other plugins.
 
 Usage::
 

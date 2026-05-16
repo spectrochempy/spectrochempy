@@ -6,13 +6,8 @@
 """Module that implements the IRIS class."""
 
 __all__ = ["IrisKernel", "IRIS"]
-__configurables__ = ["IRIS"]
-
-# from collections.abc import Iterable
 
 import numpy as np
-
-# QP solvers import
 import osqp
 import traitlets as tr
 from scipy import optimize
@@ -882,7 +877,7 @@ class IRIS(DecompositionAnalysis):
             The matplotlib axes.
 
         """
-        from spectrochempy.plotting.composite.iris import plot_iris_lcurve
+        from ._plotting import plot_iris_lcurve
 
         return plot_iris_lcurve(
             self,
@@ -1054,15 +1049,6 @@ def _nearestPD(A, shift):  # pragma: no cover
         return A3
 
     spacing = np.spacing(np.linalg.norm(A))
-    # The above is different from [1]. It appears that MATLAB's `chol` Cholesky
-    # decomposition will accept matrices with exactly 0-eigenvalue, whereas
-    # Numpy's will not. So where [1] uses `eps(mineig)` (where `eps` is Matlab
-    # for `np.spacing` ), we use the above definition. CAVEAT: our `spacing`
-    # will be much larger than [1]'s `eps(mineig)` , since `mineig` is usually on
-    # the order of 1e-16, and `eps(1e-16)` is on the order of 1e-34, whereas
-    # `spacing` will, for Gaussian random matrices of small dimension, be on
-    # the order of 1e-16. In practice, both ways converge, as the unit test
-    # below suggests.
     Ie = np.eye(A.shape[0])
     k = 1
     while not _isPD(A3):

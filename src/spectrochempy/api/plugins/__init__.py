@@ -21,6 +21,9 @@ Plugin authors should import from here::
         WriterContribution,
         ProcessorContribution,
         VisualizerContribution,
+        AnalysisContribution,
+        SimulationContribution,
+        AccessorContribution,
         hookspec,
         hookimpl,
         MissingPluginError,
@@ -36,14 +39,21 @@ from spectrochempy.api.plugins.hooks import hookspec
 from spectrochempy.api.plugins.validation import check_plugin_compatibility
 from spectrochempy.api.plugins.validation import check_plugin_contributions
 from spectrochempy.api.plugins.validation import check_plugin_metadata
+from spectrochempy.api.plugins.validation import check_plugin_requires
 from spectrochempy.api.plugins.validation import validate_plugin_compatibility
 from spectrochempy.plugins.capabilities import PluginCapability
+from spectrochempy.plugins.contributions import AccessorContribution
+from spectrochempy.plugins.contributions import AnalysisContribution
 from spectrochempy.plugins.contributions import ProcessorContribution
 from spectrochempy.plugins.contributions import ReaderContribution
+from spectrochempy.plugins.contributions import SimulationContribution
 from spectrochempy.plugins.contributions import VisualizerContribution
 from spectrochempy.plugins.contributions import WriterContribution
+from spectrochempy.plugins.contributions import accessor_from_dict
+from spectrochempy.plugins.contributions import analysis_from_dict
 from spectrochempy.plugins.contributions import processor_from_dict
 from spectrochempy.plugins.contributions import reader_from_dict
+from spectrochempy.plugins.contributions import simulation_from_dict
 from spectrochempy.plugins.contributions import visualizer_from_dict
 from spectrochempy.plugins.contributions import writer_from_dict
 from spectrochempy.plugins.deps import MissingPluginError
@@ -52,6 +62,8 @@ from spectrochempy.plugins.lifecycle import PluginDescriptor
 from spectrochempy.plugins.lifecycle import PluginState
 
 __all__ = [
+    "AccessorContribution",
+    "AnalysisContribution",
     "CORE_PLUGIN_API_VERSION",
     "MissingPluginError",
     "PluginCapability",
@@ -60,16 +72,21 @@ __all__ = [
     "PluginVersionError",
     "ProcessorContribution",
     "ReaderContribution",
+    "SimulationContribution",
     "SpectroChemPyPlugin",
     "VisualizerContribution",
     "WriterContribution",
+    "accessor_from_dict",
+    "analysis_from_dict",
     "check_plugin_compatibility",
     "check_plugin_contributions",
     "check_plugin_metadata",
+    "check_plugin_requires",
     "hookimpl",
     "hookspec",
     "processor_from_dict",
     "reader_from_dict",
+    "simulation_from_dict",
     "validate_plugin_compatibility",
     "visualizer_from_dict",
     "writer_from_dict",

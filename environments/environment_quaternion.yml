@@ -33,7 +33,6 @@ dependencies:
     - numpy
     - quaternion>=2024.0.7
     - matplotlib-base
-    - osqp
     - pint
     - pyyaml
     - requests

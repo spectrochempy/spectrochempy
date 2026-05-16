@@ -45,11 +45,15 @@ class IORegistry:
         *,
         description: str = "",
         extensions: list[str] | None = None,
+        plugin: str | None = None,
+        namespace: str | None = None,
     ) -> None:
         self._readers[name] = {
             "func": func,
             "description": description,
             "extensions": extensions or [],
+            "plugin": plugin,
+            "namespace": namespace or plugin,
         }
 
     def get_reader(self, name: str) -> dict[str, Any] | None:
@@ -186,6 +190,56 @@ class VisualizationRegistry:
 
     def clear(self) -> None:
         self._visualizers.clear()
+
+
+class ExtensionRegistry:
+    """
+    Generic registry for arbitrary named extensions.
+
+    Allows plugins to register any named object under a category,
+    providing a flexible escape hatch for contributions that don't
+    fit the specialised sub-registries (e.g. fit models, simulation
+    engines, domain metadata schemas, validation rules).
+
+    Categories are free-form strings (e.g. ``"fit_model"``,
+    ``"reaction_mechanism"``, ``"thermodynamic_package"``).
+    """
+
+    def __init__(self) -> None:
+        self._extensions: dict[str, dict[str, Any]] = {}
+
+    def register(
+        self,
+        category: str,
+        name: str,
+        obj: Any,
+        *,
+        description: str = "",
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        if category not in self._extensions:
+            self._extensions[category] = {}
+        self._extensions[category][name] = {
+            "obj": obj,
+            "description": description,
+            "metadata": metadata or {},
+        }
+
+    def get(self, category: str, name: str) -> dict[str, Any] | None:
+        cat = self._extensions.get(category)
+        if cat is None:
+            return None
+        return cat.get(name)
+
+    def list_category(self, category: str) -> dict[str, dict[str, Any]]:
+        return dict(self._extensions.get(category, {}))
+
+    @property
+    def categories(self) -> list[str]:
+        return list(self._extensions)
+
+    def clear(self) -> None:
+        self._extensions.clear()
 
 
 class MetadataRegistry:

@@ -74,10 +74,13 @@ def nbsphinx_script_run(path):
 
         env = os.environ.copy()
         env["MPLBACKEND"] = "Agg"  # Set backend through environment as well
+        env["QT_QPA_PLATFORM"] = "offscreen"
         pipe = subprocess.Popen(  # noqa: S603
             [sys.executable, str(path), "--nodisplay"],
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             encoding="utf8",
+            env=env,
         )
         (so, serr) = pipe.communicate()
     except Exception as e:
@@ -102,11 +105,11 @@ def test_nbsphinx_script_(script):
     if name in []:
         return
 
-    # Skip scripts that require the topspin plugin if it's not installed
+    # Skip scripts that require the NMR plugin if it's not installed
     if "read_topspin" in script.read_text() and not scp.plugin_manager.has_plugin(
-        "topspin"
+        "nmr"
     ):
-        pytest.skip("requires spectrochempy-topspin plugin")
+        pytest.skip("requires spectrochempy-nmr plugin")
 
     # Skip scripts requiring network when network is unavailable
     if "eigenvector.com" in script.read_text() and not _network_available():
@@ -155,7 +158,7 @@ def test_examples(example):
     try:
         import_item(module)
     except MissingPluginError:
-        pytest.skip("requires spectrochempy-topspin plugin")
+        pytest.skip("requires spectrochempy-nmr plugin")
     except Exception as e:
         error_msg = f"Error in example: {example}\n"
         error_msg += f"Module: {module}\n"

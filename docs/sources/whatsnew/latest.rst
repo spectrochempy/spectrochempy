@@ -15,7 +15,8 @@ New Features
 - Added CP (Candecomp/Parafac)
 - Added PSD (Phase Sensitive Detection)
 - New plugin infrastructure: external packages can now extend SpectroChemPy via ``spectrochempy.plugins`` entry points. Readers, writers, file types, unit contexts, and dtype handlers are auto-discovered at runtime.
-- The Bruker TopSpin NMR reader has been moved to an external plugin package ``spectrochempy-topspin``. Install with ``pip install spectrochempy-topspin`` — ``scp.read_topspin(...)`` works transparently when the plugin is installed.
+- The Bruker TopSpin NMR reader has been moved to the external NMR plugin package ``spectrochempy-nmr``. Install with ``pip install spectrochempy[nmr]`` — ``scp.read_topspin(...)`` works transparently when the plugin is installed.
+- Reader APIs are now consistently package-level only. Use ``scp.read_omnic(...)`` or ``scp.nmr.read_topspin(...)`` for I/O; dataset methods and accessors are reserved for operations on existing datasets, such as ``dataset.iris.kernel_matrix(...)``.
 - Improved plugin developer experience: declarative contribution hooks, lifecycle tracking with introspection API, error isolation, plugin validation helpers, and a ``PluginTestHarness`` for isolated testing.
 - New ``spectrochempy-testing`` subpackage with ``PluginTestHarness`` and ``spectrochempy.api.plugins`` now exports all SDK symbols (contribution dataclasses, lifecycle types, error classes).
 - New plugin template and developer documentation (testing guide, packaging guide, validation reference).
@@ -47,7 +48,7 @@ Dependency Updates
 - osqp > 1.0 is now allowed (#856). A warning is shown for osqp < 1.0, which will not be supported in future versions.
 - removed docrep dependency
 - Added ``pluggy`` as a core dependency for the plugin hook system.
-- Moved ``numpy-quaternion`` from a hard dependency to an optional dependency (``[nmr]`` extra). Install with ``pip install spectrochempy[nmr]``.
+- Moved ``numpy-quaternion`` from a hard dependency to the external NMR plugin dependency chain. Install with ``pip install spectrochempy[nmr]``.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~
@@ -55,8 +56,8 @@ Breaking Changes
 - Dropped support for Python 3.10 and below.
 - ``restore_rcparams()`` is now deprecated: SpectroChemPy no longer modifies global ``matplotlib.rcParams``, so restoration is unnecessary.
 - Plotting initialization behavior has changed internally to reduce global Matplotlib side effects. While intended to be backward compatible, code relying on implicit global ``rcParams`` side effects may behave differently.
-- The Bruker TopSpin NMR reader (``read_topspin``) has been moved out of the core into an external plugin. The ``spectrochempy`` package provides a stub that raises ``MissingPluginError`` with install instructions. Install ``pip install spectrochempy-topspin`` to restore the reader.
-- ``numpy-quaternion`` is no longer a hard dependency. It is an optional dependency installable via ``pip install spectrochempy[nmr]``. Core functionality (complex arrays, FFT, math operations) remains unaffected; quaternion (hypercomplex) support requires the ``numpy-quaternion`` package.
+- The Bruker TopSpin NMR reader (``read_topspin``) has been moved out of the core into the external NMR plugin. The ``spectrochempy`` package provides a stub that raises ``MissingPluginError`` with install instructions. Install ``pip install spectrochempy[nmr]`` to restore the reader.
+- ``numpy-quaternion`` is no longer a hard dependency. It is installed through the NMR extra via the external NMR plugin: ``pip install spectrochempy[nmr]``. Core functionality (complex arrays, FFT, math operations) remains unaffected; quaternion (hypercomplex) support requires the plugin dependency chain.
 
 Deprecations
 ~~~~~~~~~~~~

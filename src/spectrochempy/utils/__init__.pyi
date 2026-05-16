@@ -20,6 +20,7 @@ __all__ = [
     "fake",
     "file",
     "jsonutils",
+    "kinetic",
     "meta",
     "metaconfigurable",
     "mplutils",
@@ -52,6 +53,7 @@ from . import exceptions
 from . import fake
 from . import file
 from . import jsonutils
+from . import kinetic
 from . import meta
 from . import metaconfigurable
 from . import mplutils

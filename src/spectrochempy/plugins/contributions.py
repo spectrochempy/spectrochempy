@@ -101,9 +101,106 @@ class ProcessorContribution:
     description: str = ""
 
 
+@dataclass
+class AnalysisContribution:
+    """
+    Describes an analysis workflow contribution from a plugin.
+
+    Analysis contributions are high-level scientific operations
+    such as decomposition, multivariate analysis, or curve fitting.
+
+    Parameters
+    ----------
+    name : str
+        Short identifier (e.g. ``"pca"``).
+    func : Callable
+        The analysis callable.
+    description : str
+        Human-readable description.
+    """
+
+    name: str
+    func: Callable
+    description: str = ""
+
+
+@dataclass
+class SimulationContribution:
+    """
+    Describes a simulation contribution from a plugin.
+
+    Simulation contributions wrap external computational engines
+    such as thermodynamics packages, reactor simulators, or
+    kinetic solvers.
+
+    Parameters
+    ----------
+    name : str
+        Short identifier (e.g. ``"equilibrium"``).
+    func : Callable
+        The simulation callable.
+    description : str
+        Human-readable description.
+    """
+
+    name: str
+    func: Callable
+    description: str = ""
+
+
+@dataclass
+class AccessorContribution:
+    """
+    Describes a dataset accessor contribution from a plugin.
+
+    Accessor contributions are callables exposed as methods on
+    SpectroChemPy objects such as ``NDDataset``.
+
+    Parameters
+    ----------
+    name : str
+        Short identifier (e.g. ``"iris_kernel_matrix"``).
+    func : Callable
+        The accessor callable.
+    description : str
+        Human-readable description.
+    """
+
+    name: str
+    func: Callable
+    description: str = ""
+
+
 # ------------------------------------------------------------------
 # Conversion helpers (dict ↔ dataclass)
 # ------------------------------------------------------------------
+
+
+def analysis_from_dict(d: dict[str, Any]) -> AnalysisContribution:
+    """Convert a loosely-typed dict to an ``AnalysisContribution``."""
+    return AnalysisContribution(
+        name=d["name"],
+        func=d["func"],
+        description=d.get("description", ""),
+    )
+
+
+def simulation_from_dict(d: dict[str, Any]) -> SimulationContribution:
+    """Convert a loosely-typed dict to a ``SimulationContribution``."""
+    return SimulationContribution(
+        name=d["name"],
+        func=d["func"],
+        description=d.get("description", ""),
+    )
+
+
+def accessor_from_dict(d: dict[str, Any]) -> AccessorContribution:
+    """Convert a loosely-typed dict to an ``AccessorContribution``."""
+    return AccessorContribution(
+        name=d["name"],
+        func=d["func"],
+        description=d.get("description", ""),
+    )
 
 
 def reader_from_dict(d: dict[str, Any]) -> ReaderContribution:

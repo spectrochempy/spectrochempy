@@ -87,6 +87,10 @@ class PluginTestHarness:
         """Look up a visualizer by name."""
         return self.registry.visualization.get_visualizer(name)
 
+    def get_accessor(self, name: str) -> dict[str, Any] | None:
+        """Look up an accessor by name."""
+        return self.registry.get_accessor(name)
+
     @property
     def available_readers(self) -> dict[str, dict[str, Any]]:
         """All registered readers."""

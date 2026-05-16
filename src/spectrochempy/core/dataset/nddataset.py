@@ -408,17 +408,28 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         # as we are doing lazy_import, we look in the _api module)
         from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
 
-        # Check plugin readers (e.g., read_topspin from external plugins)
-        if item.startswith("read_"):
-            from spectrochempy.plugins.manager import plugin_manager
-            from spectrochempy.plugins.registry import registry
+        if item in {"read", "load_iris", "download_nist_ir"} or item.startswith(
+            "read_"
+        ):
+            # Reader functions create datasets from external data. They are
+            # intentionally exposed at package/plugin namespace level only
+            # (e.g. scp.read_omnic or scp.nmr.read_topspin), not as dataset
+            # methods or dataset plugin accessors.
+            raise AttributeError
 
-            plugin_manager.discover()
-            reader_name = item[len("read_") :]
-            reader_info = registry.get_reader(reader_name)
-            if reader_info:
-                func = reader_info["func"]
-                return lambda *args, **kwargs: func(self, *args, **kwargs)
+        from spectrochempy.plugins.manager import plugin_manager
+        from spectrochempy.plugins.namespace import DatasetPluginAccessor
+        from spectrochempy.plugins.namespace import has_dataset_namespace
+        from spectrochempy.plugins.registry import registry
+
+        plugin_manager.discover()
+        if has_dataset_namespace(registry, item):
+            return DatasetPluginAccessor(self, item, registry)
+
+        accessor_info = registry.get_accessor(item)
+        if accessor_info:
+            func = accessor_info["obj"]
+            return lambda *args, **kwargs: func(self, *args, **kwargs)
 
         if item in _LAZY_IMPORTS:
             func = tr.import_item(_LAZY_IMPORTS[item] + "." + item)

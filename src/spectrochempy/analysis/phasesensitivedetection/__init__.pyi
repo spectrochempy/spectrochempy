@@ -7,7 +7,7 @@
 # ruff: noqa
 
 __all__ = [
-    "kineticutilities",
+    "psd",
 ]
 
-from . import kineticutilities
+from . import psd

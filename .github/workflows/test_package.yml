@@ -188,8 +188,8 @@ jobs:
         run: |
           python -m pytest tests/test_docs -s --durations=10
 
-  test-plugin-topspin:
-    name: Test topspin plugin
+  test-plugin-nmr:
+    name: Test NMR plugin
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'schedule'
@@ -214,9 +214,9 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Install spectrochempy and topspin plugin
+      - name: Install spectrochempy and NMR plugin
         run: |
-          python -m pip install ".[test]" plugins/spectrochempy-topspin
+          python -m pip install ".[test]" plugins/spectrochempy-nmr
           python src/spectrochempy/data/setup.py
 
       - name: Download test data
@@ -227,6 +227,81 @@ jobs:
           download_full_testdata_directory(scp.preferences.datadir)
           "
 
-      - name: Run topspin plugin tests
+      - name: Run NMR plugin tests
+        working-directory: plugins/spectrochempy-nmr
         run: |
-          python -m pytest plugins/spectrochempy-topspin/tests -v --durations=10
+          python -m pytest tests -v --durations=10
+
+  test-plugin-iris:
+    name: Test IRIS plugin
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy'
+       && !startsWith(github.ref, 'refs/release/')) || (
+       github.event_name != 'schedule'
+       && !startsWith(github.ref, 'refs/release/'))
+
+    defaults:
+      run:
+        shell: bash {0}
+
+    steps:
+      - name: Checkout spectrochempy repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        id: setup_python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install spectrochempy and IRIS plugin
+        run: |
+          python -m pip install ".[test]" plugins/spectrochempy-iris
+          python src/spectrochempy/data/setup.py
+
+      - name: Run IRIS plugin tests
+        working-directory: plugins/spectrochempy-iris
+        run: |
+          python -m pytest tests -v --durations=10
+
+  test-plugin-cantera:
+    name: Test Cantera plugin
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'schedule'
+       && github.repository == 'spectrochempy/spectrochempy'
+       && !startsWith(github.ref, 'refs/release/')) || (
+       github.event_name != 'schedule'
+       && !startsWith(github.ref, 'refs/release/'))
+
+    defaults:
+      run:
+        shell: bash {0}
+
+    steps:
+      - name: Checkout spectrochempy repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        id: setup_python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install spectrochempy and Cantera plugin
+        run: |
+          python -m pip install ".[test]" plugins/spectrochempy-cantera
+          python src/spectrochempy/data/setup.py
+
+      - name: Run Cantera plugin tests
+        working-directory: plugins/spectrochempy-cantera
+        run: |
+          python -m pytest tests -v --durations=10

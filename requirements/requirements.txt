@@ -25,7 +25,6 @@ lazy_loader
 matplotlib
 numpy
 numpydoc
-osqp
 pluggy
 pint
 pyyaml

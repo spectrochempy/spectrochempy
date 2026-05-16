@@ -12,6 +12,7 @@ from typing import Any
 
 import pluggy
 
+from spectrochempy.api.plugins.validation import check_plugin_requires
 from spectrochempy.api.plugins.validation import validate_plugin_compatibility
 from spectrochempy.plugins.hooks import SpectroChemPyHookSpec
 from spectrochempy.plugins.lifecycle import PluginDescriptor
@@ -90,6 +91,15 @@ class PluginManager:
 
         self._plugin_states.setdefault(name, PluginState.LOADED)
 
+        # --- Optional dependency check ---
+        dep_issues = check_plugin_requires(plugin)
+        if dep_issues:
+            for msg in dep_issues:
+                logger.warning(msg)
+            self._plugin_states[name] = PluginState.FAILED
+            self._plugin_errors[name] = RuntimeError("; ".join(dep_issues))
+            return
+
         # --- Compatibility validation ---
         is_compatible, _errors = validate_plugin_compatibility(plugin)
         if not is_compatible:
@@ -133,12 +143,16 @@ class PluginManager:
         self._collect_writers(plugin, contributions)
         self._collect_processors(plugin, contributions)
         self._collect_visualizers(plugin, contributions)
+        self._collect_analyses(plugin, contributions)
+        self._collect_simulations(plugin, contributions)
+        self._collect_accessors(plugin, contributions)
 
         return contributions
 
     def _collect_readers(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
         if not (
             hasattr(plugin, "register_readers") and callable(plugin.register_readers)
         ):
@@ -158,6 +172,8 @@ class PluginManager:
                         func,
                         description=reader.get("description", ""),
                         extensions=reader.get("extensions"),
+                        plugin=plugin_name,
+                        namespace=reader.get("namespace", plugin_name),
                     )
                     contributions.setdefault("readers", []).append(name)
         except Exception:
@@ -222,6 +238,122 @@ class PluginManager:
         except Exception:
             logger.exception(
                 "Failed to collect visualizers from plugin '%s'",
+                getattr(plugin, "name", "unknown"),
+            )
+
+    def _collect_analyses(
+        self, plugin: Any, contributions: dict[str, list[str]]
+    ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
+        if not (
+            hasattr(plugin, "register_analyses") and callable(plugin.register_analyses)
+        ):
+            return
+        try:
+            analyses = plugin.register_analyses()
+            if not isinstance(analyses, list):
+                return
+            for analysis in analyses:
+                if not isinstance(analysis, dict):
+                    continue
+                name = analysis.get("name")
+                func = analysis.get("func")
+                if name and func:
+                    self.registry.extensions.register(
+                        "analysis",
+                        name,
+                        func,
+                        description=analysis.get("description", ""),
+                        metadata={
+                            "plugin": plugin_name,
+                            "namespace": analysis.get("namespace", plugin_name),
+                        },
+                    )
+                    contributions.setdefault("analyses", []).append(name)
+        except Exception:
+            logger.exception(
+                "Failed to collect analyses from plugin '%s'",
+                getattr(plugin, "name", "unknown"),
+            )
+
+    def _collect_simulations(
+        self, plugin: Any, contributions: dict[str, list[str]]
+    ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
+        if not (
+            hasattr(plugin, "register_simulations")
+            and callable(plugin.register_simulations)
+        ):
+            return
+        try:
+            simulations = plugin.register_simulations()
+            if not isinstance(simulations, list):
+                return
+            for sim in simulations:
+                if not isinstance(sim, dict):
+                    continue
+                name = sim.get("name")
+                func = sim.get("func")
+                if name and func:
+                    self.registry.extensions.register(
+                        "simulation",
+                        name,
+                        func,
+                        description=sim.get("description", ""),
+                        metadata={
+                            "plugin": plugin_name,
+                            "namespace": sim.get("namespace", plugin_name),
+                        },
+                    )
+                    contributions.setdefault("simulations", []).append(name)
+        except Exception:
+            logger.exception(
+                "Failed to collect simulations from plugin '%s'",
+                getattr(plugin, "name", "unknown"),
+            )
+
+    def _collect_accessors(
+        self, plugin: Any, contributions: dict[str, list[str]]
+    ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
+        if not (
+            hasattr(plugin, "register_accessors")
+            and callable(plugin.register_accessors)
+        ):
+            return
+        try:
+            accessors = plugin.register_accessors()
+            if not isinstance(accessors, list):
+                return
+            for accessor in accessors:
+                if not isinstance(accessor, dict):
+                    continue
+                name = accessor.get("name")
+                func = accessor.get("func")
+                if name and func:
+                    namespace = accessor.get("namespace")
+                    metadata = {
+                        "plugin": plugin_name,
+                        "namespace": namespace or plugin_name,
+                    }
+                    registered_names = [name]
+                    if namespace:
+                        registered_names = [f"{namespace}.{name}"]
+                        registered_names.extend(accessor.get("legacy_names", []))
+
+                    for registered_name in registered_names:
+                        self.registry.register_accessor(
+                            registered_name,
+                            func,
+                            description=accessor.get("description", ""),
+                            metadata=metadata,
+                        )
+                        contributions.setdefault("accessors", []).append(
+                            registered_name
+                        )
+        except Exception:
+            logger.exception(
+                "Failed to collect accessors from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
 
@@ -363,6 +495,41 @@ class PluginManager:
             for name, state in self._plugin_states.items()
             if state == PluginState.ACTIVE
         ]
+
+    def list_readers(self) -> dict[str, dict[str, Any]]:
+        """Return all registered reader contributions."""
+        self.discover()
+        return self.registry.available_readers
+
+    def list_writers(self) -> dict[str, dict[str, Any]]:
+        """Return all registered writer contributions."""
+        self.discover()
+        return self.registry.available_writers
+
+    def list_processors(self) -> dict[str, dict[str, Any]]:
+        """Return all registered processor contributions."""
+        self.discover()
+        return self.registry.available_processors
+
+    def list_visualizers(self) -> dict[str, dict[str, Any]]:
+        """Return all registered visualizer contributions."""
+        self.discover()
+        return self.registry.visualization.available_visualizers
+
+    def list_analyses(self) -> dict[str, dict[str, Any]]:
+        """Return all registered analysis contributions."""
+        self.discover()
+        return self.registry.extensions.list_category("analysis")
+
+    def list_simulations(self) -> dict[str, dict[str, Any]]:
+        """Return all registered simulation contributions."""
+        self.discover()
+        return self.registry.extensions.list_category("simulation")
+
+    def list_accessors(self) -> dict[str, dict[str, Any]]:
+        """Return all registered accessor contributions."""
+        self.discover()
+        return self.registry.extensions.list_category("accessor")
 
     # ------------------------------------------------------------------
     # Plugin query API (legacy, preserved)

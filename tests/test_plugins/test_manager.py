@@ -7,10 +7,16 @@
 """Tests for PluginManager."""
 
 
+from operator import attrgetter
+
+import pytest
+
 from spectrochempy.plugins.base import SpectroChemPyPlugin
 from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.plugins.lifecycle import PluginState
 from spectrochempy.plugins.manager import PluginManager
+from spectrochempy.plugins.namespace import DatasetPluginAccessor
+from spectrochempy.plugins.namespace import PluginNamespace
 from spectrochempy.plugins.registry import PluginRegistry
 
 # ------------------------------------------------------------------
@@ -84,6 +90,38 @@ class DeclarativeProcessorPlugin:
                 "name": "smooth",
                 "func": lambda data: data,
                 "description": "Smooth data",
+            }
+        ]
+
+
+class DeclarativeAccessorPlugin:
+    name = "decl-accessor"
+    version = "0.2.0"
+    api_version = "1.0"
+
+    def register_accessors(self) -> list[dict]:
+        return [
+            {
+                "name": "plugin_mean",
+                "func": lambda dataset: dataset.mean(),
+                "description": "Mean via plugin accessor",
+            }
+        ]
+
+
+class NamespacedAccessorPlugin:
+    name = "domain"
+    version = "0.2.0"
+    api_version = "1.0"
+
+    def register_accessors(self) -> list[dict]:
+        return [
+            {
+                "namespace": "domain",
+                "name": "scale",
+                "legacy_names": ["domain_scale"],
+                "func": lambda dataset, factor=2: dataset * factor,
+                "description": "Scale via plugin namespace",
             }
         ]
 
@@ -240,6 +278,46 @@ def test_declarative_visualizers():
     assert vis["description"] == "Plot data"
 
 
+def test_declarative_accessors():
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeAccessorPlugin()
+    pm.register(plugin)
+
+    accessor = registry.get_accessor("plugin_mean")
+    assert accessor is not None
+    assert accessor["description"] == "Mean via plugin accessor"
+
+
+def test_declarative_namespaced_accessors():
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = NamespacedAccessorPlugin()
+    pm.register(plugin)
+
+    accessor = registry.get_accessor("domain.scale")
+    assert accessor is not None
+    assert accessor["metadata"]["namespace"] == "domain"
+    assert registry.get_accessor("domain_scale") is not None
+
+
+def test_plugin_namespace_clear_error_when_api_missing():
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    namespace = PluginNamespace("domain", pm, registry)
+
+    with pytest.raises(AttributeError, match="plugin namespace 'domain'"):
+        attrgetter("missing")(namespace)
+
+
+def test_dataset_namespace_clear_error_when_api_missing():
+    registry = PluginRegistry()
+    namespace = DatasetPluginAccessor(object(), "domain", registry)
+
+    with pytest.raises(AttributeError, match="dataset plugin accessor 'domain'"):
+        attrgetter("missing")(namespace)
+
+
 # ------------------------------------------------------------------
 # Declarative hook routing to specialised sub-registries
 # ------------------------------------------------------------------
@@ -283,6 +361,16 @@ def test_declarative_visualizers_routed_to_visualization():
     pm.register(plugin)
 
     assert registry.visualization.get_visualizer("myplot") is not None
+
+
+def test_declarative_accessors_routed_to_extensions():
+    """register_accessors targets registry.extensions."""
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeAccessorPlugin()
+    pm.register(plugin)
+
+    assert registry.extensions.get("accessor", "plugin_mean") is not None
 
 
 # ------------------------------------------------------------------
@@ -458,6 +546,22 @@ def test_get_active_plugins():
     pm.register(DummyPlugin())
     active = pm.get_active_plugins()
     assert "dummy" in active
+
+
+def test_list_contributions():
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    pm.register(DeclarativeReaderPlugin())
+    pm.register(DeclarativeWriterPlugin())
+    pm.register(DeclarativeProcessorPlugin())
+    pm.register(DeclarativeVisualizerPlugin())
+    pm.register(DeclarativeAccessorPlugin())
+
+    assert "myformat" in pm.list_readers()
+    assert "myformat" in pm.list_writers()
+    assert "smooth" in pm.list_processors()
+    assert "myplot" in pm.list_visualizers()
+    assert "plugin_mean" in pm.list_accessors()
 
 
 def test_get_active_plugins_excludes_failed():

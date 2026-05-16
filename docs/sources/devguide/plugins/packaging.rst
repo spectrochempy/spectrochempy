@@ -43,7 +43,7 @@ to discover your plugin automatically:
     description = "My SpectroChemPy plugin"
     requires-python = ">=3.11"
     dependencies = [
-        "spectrochempy",
+        "spectrochempy>=0.8,<0.9",
     ]
 
     [project.entry-points."spectrochempy.plugins"]
@@ -59,8 +59,48 @@ Key points:
 
 * The **entry point name** (``myplugin``) must match your plugin's
   ``name`` attribute.
-* ``spectrochempy`` must be listed as a dependency.
+* ``spectrochempy`` must be listed as a dependency with a compatibility
+  range, e.g. ``spectrochempy>=0.8,<0.9``.
 * Use ``requires-python = ">=3.11"`` to match SpectroChemPy's minimum.
+
+Local editable development
+==========================
+
+During local development, install the core package and each plugin in
+editable mode.  This exercises the same entry-point discovery mechanism
+used by PyPI wheels:
+
+.. code-block:: bash
+
+    pip install -e .
+    pip install -e plugins/spectrochempy-nmr
+    pip install -e plugins/spectrochempy-iris
+    pip install -e plugins/spectrochempy-cantera
+
+The bundled plugins can also be installed with the helper:
+
+.. code-block:: bash
+
+    python -m spectrochempy.ci.install_plugins --editable all
+
+After installation, SpectroChemPy discovers the plugins automatically via
+the ``spectrochempy.plugins`` entry point group.
+
+Installing from SpectroChemPy extras
+====================================
+
+Users can install official plugins through SpectroChemPy extras:
+
+.. code-block:: bash
+
+    pip install "spectrochempy[nmr]"
+    pip install "spectrochempy[iris]"
+    pip install "spectrochempy[cantera]"
+    pip install "spectrochempy[plugins]"
+
+The ``nmr`` extra installs the NMR plugin, currently including the TopSpin
+reader and its NMR-specific dependencies.  The ``plugins`` extra installs the
+current official plugin set.
 
 ``__init__.py`` — the plugin class
 ==================================
