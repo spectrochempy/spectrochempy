@@ -484,7 +484,5 @@ def read_cantera_mechanism(path: str) -> dict:
     }
 
 
-# Export accessor names so NDDataset can discover them
-__dataset_methods__ = ["cantera_equilibrium"]
-
 # Re-export PFR from the _pfr module
+from ._pfr import PFR  # noqa: E402,F401

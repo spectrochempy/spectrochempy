@@ -16,6 +16,7 @@ New Features
 - Added PSD (Phase Sensitive Detection)
 - New plugin infrastructure: external packages can now extend SpectroChemPy via ``spectrochempy.plugins`` entry points. Readers, writers, file types, unit contexts, and dtype handlers are auto-discovered at runtime.
 - The Bruker TopSpin NMR reader has been moved to the external NMR plugin package ``spectrochempy-nmr``. Install with ``pip install spectrochempy[nmr]`` — ``scp.read_topspin(...)`` works transparently when the plugin is installed.
+- Reader APIs are now consistently package-level only. Use ``scp.read_omnic(...)`` or ``scp.nmr.read_topspin(...)`` for I/O; dataset methods and accessors are reserved for operations on existing datasets, such as ``dataset.iris.kernel_matrix(...)``.
 - Improved plugin developer experience: declarative contribution hooks, lifecycle tracking with introspection API, error isolation, plugin validation helpers, and a ``PluginTestHarness`` for isolated testing.
 - New ``spectrochempy-testing`` subpackage with ``PluginTestHarness`` and ``spectrochempy.api.plugins`` now exports all SDK symbols (contribution dataclasses, lifecycle types, error classes).
 - New plugin template and developer documentation (testing guide, packaging guide, validation reference).

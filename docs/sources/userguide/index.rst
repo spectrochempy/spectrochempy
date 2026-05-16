@@ -13,6 +13,7 @@ A comprehensive guide to using SCPY.
 
     introduction/introduction
     importexport/index
+    plugins
     plotting/index
     processing/index
     analysis/index

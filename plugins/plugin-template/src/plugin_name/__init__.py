@@ -25,7 +25,11 @@ class MyPlugin(SpectroChemPyPlugin):
     description = "My SpectroChemPy plugin"
     spectrochempy_min_version = "0.8.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
-    capabilities = [PluginCapability.READER, PluginCapability.ANALYSIS]
+    capabilities = [
+        PluginCapability.READER,
+        PluginCapability.ANALYSIS,
+        PluginCapability.ACCESSOR,
+    ]
     requires: list[str] = []
     """
     Optional pip-style dependencies.
@@ -43,7 +47,7 @@ class MyPlugin(SpectroChemPyPlugin):
     #   register_visualizers()  -> list[dict]
     #   register_analyses()     -> list[dict]  (analysis workflows)
     #   register_simulations()  -> list[dict]  (simulation engines)
-    #   register_accessors()    -> list[dict]  (dataset methods)
+    #   register_accessors()    -> list[dict]  (dataset accessor methods)
     #
     # Each dict must contain "name" and "func".
     # Optional keys: "description" (str), "extensions" (list[str]).
@@ -80,6 +84,18 @@ class MyPlugin(SpectroChemPyPlugin):
             },
         ]
 
+    def register_accessors(self) -> list[dict]:
+        """Declare dataset accessor methods provided by this plugin."""
+        return [
+            {
+                "namespace": "myplugin",
+                "name": "analysis",
+                "legacy_names": ["my_analysis"],
+                "func": self._perform_analysis,
+                "description": "Example dataset-bound analysis",
+            },
+        ]
+
     # ------------------------------------------------------------------
     # Operational methods (with deferred imports for optional deps)
     # ------------------------------------------------------------------
@@ -108,11 +124,3 @@ class MyPlugin(SpectroChemPyPlugin):
             "mean": float(np.mean(dataset.data)),
             "std": float(np.std(dataset.data)),
         }
-
-
-# ------------------------------------------------------------------
-# Optional: attach methods to NDDataset
-# Methods listed here are discoverable via ndd.method_name()
-# ------------------------------------------------------------------
-
-__dataset_methods__ = ["read_myformat"]

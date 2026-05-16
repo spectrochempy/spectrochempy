@@ -403,7 +403,3 @@ def plot_distribution_grid(
 
     fig.tight_layout()
     return fig, axes
-
-
-# Export accessor names so NDDataset can discover them
-__dataset_methods__ = ["iris_kernel_matrix"]

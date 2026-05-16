@@ -74,10 +74,13 @@ def nbsphinx_script_run(path):
 
         env = os.environ.copy()
         env["MPLBACKEND"] = "Agg"  # Set backend through environment as well
+        env["QT_QPA_PLATFORM"] = "offscreen"
         pipe = subprocess.Popen(  # noqa: S603
             [sys.executable, str(path), "--nodisplay"],
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             encoding="utf8",
+            env=env,
         )
         (so, serr) = pipe.communicate()
     except Exception as e:

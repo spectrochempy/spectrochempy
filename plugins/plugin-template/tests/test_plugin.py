@@ -30,10 +30,11 @@ def test_plugin_capabilities():
     plugin = MyPlugin()
     assert hasattr(plugin, "capabilities")
     assert PluginCapability.READER in plugin.capabilities
+    assert PluginCapability.ACCESSOR in plugin.capabilities
 
 
 def test_registration():
-    """Plugin registers readers, writers, and analyses."""
+    """Plugin registers readers, writers, analyses, and accessors."""
     harness = PluginTestHarness()
     harness.register(MyPlugin())
 
@@ -48,6 +49,10 @@ def test_registration():
     # Analysis contributions via ExtensionRegistry
     analyses = harness.registry.extensions.list_category("analysis")
     assert "my_analysis" in analyses
+
+    accessors = harness.registry.extensions.list_category("accessor")
+    assert "myplugin.analysis" in accessors
+    assert "my_analysis" in accessors
 
 
 def test_lifecycle_state():
@@ -65,6 +70,16 @@ def test_analysis_contribution():
     results = harness.registry.get_by_capability(PluginCapability.ANALYSIS)
     names = [r["name"] for r in results]
     assert "my_analysis" in names
+
+
+def test_accessor_contribution():
+    """Plugin accessor can be discovered via capability query."""
+    harness = PluginTestHarness()
+    harness.register(MyPlugin())
+
+    results = harness.registry.get_by_capability(PluginCapability.ACCESSOR)
+    names = [r["name"] for r in results]
+    assert "myplugin.analysis" in names
 
 
 def test_declarative_hooks():

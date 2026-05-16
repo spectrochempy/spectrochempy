@@ -86,6 +86,7 @@ Breaking Changes
    .. code-block:: python
 
          scp.read("something")        # ✅ API method
-         scp.NDDataset().read("something")  # ✅ Instance method
+         # Reader functions are package-level APIs.
+         # Dataset ``read_*`` methods are no longer part of the supported API.
 
   Code should be updated accordingly.

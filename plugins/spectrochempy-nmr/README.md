@@ -28,10 +28,14 @@ pip install -e plugins/spectrochempy-nmr
 ```python
 import spectrochempy as scp
 
-dataset = scp.read_topspin("path/to/1/fid")
-dataset = scp.read_topspin("path/to/2rr")
-dataset = scp.read_topspin("path/to/experiment", expno=1, procno=1)
+dataset = scp.nmr.read_topspin("path/to/1/fid")
+dataset = scp.nmr.read_topspin("path/to/2rr")
+dataset = scp.nmr.read_topspin("path/to/experiment", expno=1, procno=1)
 ```
+
+The legacy alias `scp.read_topspin(...)` is kept for compatibility. TopSpin is
+a reader, so it is not exposed as `dataset.read_topspin(...)` or
+`dataset.nmr.read_topspin(...)`.
 
 ## Development
 
