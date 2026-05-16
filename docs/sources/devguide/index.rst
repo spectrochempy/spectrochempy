@@ -18,3 +18,7 @@ Developer's Guide
     contributing_codespecifics
     contributing_documentation
     contributing_plotting
+    plugins/api_policy
+    plugins/architecture
+    plugins/testing
+    plugins/packaging
