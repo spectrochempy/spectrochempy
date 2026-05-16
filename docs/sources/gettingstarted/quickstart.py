@@ -311,13 +311,16 @@ _ = ds.plot()
 # specific regularization parameter.
 
 # %%
-from spectrochempy_iris import IRIS
-from spectrochempy_iris import IrisKernel
+try:
+    from spectrochempy_iris import IRIS
+    from spectrochempy_iris import IrisKernel
 
-iris = IRIS(reg_par=[-10, 1, 12])
-K = IrisKernel(ds, "langmuir", q=[-7, -1, 50])
-iris.fit(ds, K)
-_ = iris.f[-7].plot_contour(colorbar=True)
+    iris = IRIS(reg_par=[-10, 1, 12])
+    K = IrisKernel(ds, "langmuir", q=[-7, -1, 50])
+    iris.fit(ds, K)
+    _ = iris.f[-7].plot_contour(colorbar=True)
+except ImportError:
+    pass
 
 # %%
 # %% [markdown]
