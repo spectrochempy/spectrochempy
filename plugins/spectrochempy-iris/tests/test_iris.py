@@ -233,10 +233,14 @@ def test_namespaced_dataset_accessor():
     result = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-6, 1, 6])
     assert result is not None
     assert hasattr(result, "kernel")
+    assert result._X.shape == ds.shape
+    np.testing.assert_allclose(result._X.data, ds.data)
 
     legacy = ds.iris_kernel_matrix(kernel_type="langmuir", q=[-6, 1, 6])
     assert legacy is not None
     assert hasattr(legacy, "kernel")
+    assert legacy._X.shape == ds.shape
+    np.testing.assert_allclose(legacy._X.data, ds.data)
 
 
 # ------------------------------------------------------------------

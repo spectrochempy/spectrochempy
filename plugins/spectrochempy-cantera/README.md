@@ -29,13 +29,12 @@ profile = scp.cantera.reactor_profile(
     initial_conditions={"T": 1000, "P": 101325},
     residence_time=0.1,
 )
-
-# Operations using an existing dataset are exposed through dataset accessors.
-eq_from_dataset = dataset.cantera.equilibrium("gri30.yaml")
 ```
 
-The legacy flat accessor `dataset.cantera_equilibrium(...)` is kept for
-compatibility.
+The Cantera plugin currently exposes package-level simulation and analysis
+functions only. It does not install `dataset.cantera.*` accessors because the
+current equilibrium and reactor workflows require explicit thermodynamic inputs
+rather than deriving them unambiguously from an `NDDataset`.
 
 ## Development
 

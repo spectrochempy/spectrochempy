@@ -7,6 +7,7 @@ from spectrochempy_nmr import NMRPlugin
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
 from spectrochempy.api.plugins import check_plugin_compatibility
+from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.testing.plugins import PluginTestHarness
 
 
@@ -61,6 +62,21 @@ def test_package_namespace_exposes_topspin_reader():
         scp.plugin_manager.register(NMRPlugin())
 
     assert scp.nmr.read_topspin is scp.read_topspin
+
+
+def test_missing_topspin_reader_stub_is_actionable():
+    """The core compatibility stub explains how to install the NMR plugin."""
+    from spectrochempy.core.readers.read_topspin import read_topspin
+
+    try:
+        read_topspin("missing")
+    except MissingPluginError as err:
+        message = str(err)
+    else:  # pragma: no cover
+        raise AssertionError("read_topspin stub should require spectrochempy-nmr")
+
+    assert "spectrochempy-nmr" in message
+    assert "pip install spectrochempy[nmr]" in message
 
 
 def test_nmr_reader_is_not_dataset_accessor_namespace():

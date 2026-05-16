@@ -75,7 +75,13 @@ class PluginNamespace:
 
 
 class DatasetPluginAccessor:
-    """Dataset-bound namespace for plugin operations such as ``nd.iris``."""
+    """
+    Dataset-bound namespace for plugin operations such as ``nd.iris``.
+
+    These accessors are reserved for callables that operate on the parent
+    dataset. Plugin I/O and object creation should remain package-level APIs
+    exposed through :class:`PluginNamespace`, for example ``scp.nmr.read_topspin``.
+    """
 
     def __init__(self, dataset: Any, namespace: str, registry: Any) -> None:
         self._dataset = dataset

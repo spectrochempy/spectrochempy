@@ -46,6 +46,7 @@ def test_plugin_metadata():
     assert plugin.description
     assert PluginCapability.SIMULATION in plugin.capabilities
     assert PluginCapability.ANALYSIS in plugin.capabilities
+    assert PluginCapability.ACCESSOR not in plugin.capabilities
 
 
 def test_plugin_compatibility():
@@ -106,6 +107,32 @@ def test_capability_query():
     results = harness.registry.get_by_capability(PluginCapability.SIMULATION)
     names = [r["name"] for r in results]
     assert "equilibrium" in names
+
+
+def test_package_namespace_exposes_simulations():
+    """Cantera simulations are package-level plugin APIs."""
+    if not HAS_CANTERA:
+        pytest.skip("cantera not installed")
+
+    import spectrochempy as scp
+
+    if not scp.plugin_manager.has_plugin("cantera"):
+        scp.plugin_manager.register(CanteraPlugin())
+
+    assert scp.cantera.equilibrium is equilibrium_composition
+    assert scp.cantera.reactor_profile is reactor_profile
+
+
+def test_cantera_does_not_register_dataset_accessor():
+    """Cantera has no dataset accessor until dataset semantics are explicit."""
+    import spectrochempy as scp
+
+    if HAS_CANTERA and not scp.plugin_manager.has_plugin("cantera"):
+        scp.plugin_manager.register(CanteraPlugin())
+
+    dataset = scp.NDDataset([300.0, 310.0])
+    assert not hasattr(dataset, "cantera")
+    assert not hasattr(dataset, "cantera_equilibrium")
 
 
 # ------------------------------------------------------------------

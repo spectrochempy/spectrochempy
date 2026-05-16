@@ -411,6 +411,10 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         if item in {"read", "load_iris", "download_nist_ir"} or item.startswith(
             "read_"
         ):
+            # Reader functions create datasets from external data. They are
+            # intentionally exposed at package/plugin namespace level only
+            # (e.g. scp.read_omnic or scp.nmr.read_topspin), not as dataset
+            # methods or dataset plugin accessors.
             raise AttributeError
 
         from spectrochempy.plugins.manager import plugin_manager

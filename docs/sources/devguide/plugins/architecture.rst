@@ -108,7 +108,14 @@ Dataset accessors are used only for operations on an existing
 passes it as the first argument to the registered callable::
 
     dataset.iris.kernel_matrix(...)
-    dataset.cantera.equilibrium(...)
+
+Do not add a dataset accessor just to make a plugin function look like a
+method.  The callable should use the parent dataset as a real input.  For
+example, Cantera equilibrium calculations currently remain package-level
+simulation APIs because they require explicit thermodynamic state and
+reactants::
+
+    scp.cantera.equilibrium(...)
 
 Readers are not exposed under dataset accessors.  For example, use
 ``scp.nmr.read_topspin(...)`` rather than
@@ -138,6 +145,14 @@ Namespaced dataset accessors can keep old flat names by declaring
 
 This exposes both ``dataset.iris.kernel_matrix(...)`` and the legacy
 ``dataset.iris_kernel_matrix(...)``.
+
+The current accessor mechanism stores namespaced accessors as strings such
+as ``"iris.kernel_matrix"`` in the plugin registry, then exposes them as
+``dataset.iris.kernel_matrix(...)`` at runtime.  This is intentionally a
+minimal bridge.  A future implementation may migrate mature domains to
+dedicated accessor classes, but plugin authors should keep the public rule
+the same: I/O and object creation belong at ``scp.<plugin>.*``; operations
+on an existing dataset belong at ``dataset.<plugin>.*``.
 
 
 Available hooks

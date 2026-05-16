@@ -29,7 +29,6 @@ class CanteraPlugin(SpectroChemPyPlugin):
     capabilities = [
         PluginCapability.SIMULATION,
         PluginCapability.ANALYSIS,
-        PluginCapability.ACCESSOR,
     ]
     requires = ["cantera"]
 
@@ -83,41 +82,6 @@ class CanteraPlugin(SpectroChemPyPlugin):
                 "description": "Read a Cantera YAML/CTI mechanism file into a workspace",
             },
         ]
-
-    # ------------------------------------------------------------------
-    # Dataset accessor methods
-    # ------------------------------------------------------------------
-
-    def register_accessors(self) -> list[dict]:
-        return [
-            {
-                "namespace": "cantera",
-                "name": "equilibrium",
-                "legacy_names": ["cantera_equilibrium"],
-                "func": _ndd_cantera_equilibrium,
-                "description": "Compute equilibrium composition from dataset conditions",
-            },
-        ]
-
-
-# ------------------------------------------------------------------
-# Dataset accessor implementation
-# ------------------------------------------------------------------
-
-
-def _ndd_cantera_equilibrium(
-    self: NDDataset, mechanism: str, temperature: float | None = None
-) -> dict:
-    """Compute equilibrium composition using dataset temperature/pressure metadata."""
-    import numpy as np
-
-    T = temperature or float(np.mean(self.data)) if hasattr(self, "data") else 300.0
-    return equilibrium_composition(
-        mechanism=mechanism,
-        temperature=T,
-        pressure=101325.0,
-        reactants={"H2": 1.0, "O2": 0.5},
-    )
 
 
 # ------------------------------------------------------------------

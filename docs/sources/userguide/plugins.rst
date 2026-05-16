@@ -63,13 +63,17 @@ to the plugin operation:
 .. code-block:: python
 
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir", q=[-6, 1, 6])
-    result = dataset.cantera.equilibrium("gri30.yaml")
 
 The shape is therefore:
 
 * ``scp.<plugin>.<function>(...)`` for I/O, object creation, and standalone
   workflows.
 * ``dataset.<plugin>.<method>(...)`` for operations on an existing dataset.
+
+For example, Cantera equilibrium calculations currently remain package-level
+APIs such as ``scp.cantera.equilibrium(...)`` because the thermodynamic state and
+reactants are explicit simulation inputs, not information that can be inferred
+unambiguously from any ``NDDataset``.
 
 If a plugin is not installed, its namespace or accessor is absent. Install the
 corresponding extra or package before using it.
