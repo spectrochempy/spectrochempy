@@ -152,6 +152,7 @@ class PluginManager:
     def _collect_readers(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
         if not (
             hasattr(plugin, "register_readers") and callable(plugin.register_readers)
         ):
@@ -171,6 +172,8 @@ class PluginManager:
                         func,
                         description=reader.get("description", ""),
                         extensions=reader.get("extensions"),
+                        plugin=plugin_name,
+                        namespace=reader.get("namespace", plugin_name),
                     )
                     contributions.setdefault("readers", []).append(name)
         except Exception:
@@ -241,6 +244,7 @@ class PluginManager:
     def _collect_analyses(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
         if not (
             hasattr(plugin, "register_analyses") and callable(plugin.register_analyses)
         ):
@@ -260,6 +264,10 @@ class PluginManager:
                         name,
                         func,
                         description=analysis.get("description", ""),
+                        metadata={
+                            "plugin": plugin_name,
+                            "namespace": analysis.get("namespace", plugin_name),
+                        },
                     )
                     contributions.setdefault("analyses", []).append(name)
         except Exception:
@@ -271,6 +279,7 @@ class PluginManager:
     def _collect_simulations(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
         if not (
             hasattr(plugin, "register_simulations")
             and callable(plugin.register_simulations)
@@ -291,6 +300,10 @@ class PluginManager:
                         name,
                         func,
                         description=sim.get("description", ""),
+                        metadata={
+                            "plugin": plugin_name,
+                            "namespace": sim.get("namespace", plugin_name),
+                        },
                     )
                     contributions.setdefault("simulations", []).append(name)
         except Exception:
@@ -302,6 +315,7 @@ class PluginManager:
     def _collect_accessors(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
         if not (
             hasattr(plugin, "register_accessors")
             and callable(plugin.register_accessors)
@@ -317,13 +331,26 @@ class PluginManager:
                 name = accessor.get("name")
                 func = accessor.get("func")
                 if name and func:
-                    self.registry.extensions.register(
-                        "accessor",
-                        name,
-                        func,
-                        description=accessor.get("description", ""),
-                    )
-                    contributions.setdefault("accessors", []).append(name)
+                    namespace = accessor.get("namespace")
+                    metadata = {
+                        "plugin": plugin_name,
+                        "namespace": namespace or plugin_name,
+                    }
+                    registered_names = [name]
+                    if namespace:
+                        registered_names = [f"{namespace}.{name}"]
+                        registered_names.extend(accessor.get("legacy_names", []))
+
+                    for registered_name in registered_names:
+                        self.registry.register_accessor(
+                            registered_name,
+                            func,
+                            description=accessor.get("description", ""),
+                            metadata=metadata,
+                        )
+                        contributions.setdefault("accessors", []).append(
+                            registered_name
+                        )
         except Exception:
             logger.exception(
                 "Failed to collect accessors from plugin '%s'",

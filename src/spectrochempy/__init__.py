@@ -108,6 +108,12 @@ def __getattr__(name):
     # plugin-provided functions take precedence over core stubs)
     plugin_manager.discover()
 
+    from spectrochempy.plugins.namespace import PluginNamespace
+    from spectrochempy.plugins.namespace import has_namespace
+
+    if has_namespace(registry, name):
+        return PluginNamespace(name, plugin_manager, registry)
+
     # Check plugin readers first (e.g., read_topspin from external plugins)
     if name.startswith("read_"):
         reader_name = name[len("read_") :]

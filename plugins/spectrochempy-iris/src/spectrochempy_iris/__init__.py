@@ -83,7 +83,9 @@ class IrisPlugin(SpectroChemPyPlugin):
         """Declare dataset accessor methods for IRIS."""
         return [
             {
-                "name": "iris_kernel_matrix",
+                "namespace": "iris",
+                "name": "kernel_matrix",
+                "legacy_names": ["iris_kernel_matrix"],
                 "func": _ndd_build_kernel,
                 "description": "Build an IrisKernel from the dataset",
             },

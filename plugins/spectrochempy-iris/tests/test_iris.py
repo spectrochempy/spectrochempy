@@ -222,6 +222,23 @@ def test_ndd_kernel_accessor():
     assert hasattr(result, "kernel")
 
 
+def test_namespaced_dataset_accessor():
+    """NDDataset.iris.kernel_matrix returns an IrisKernel."""
+    import spectrochempy as scp
+
+    if not scp.plugin_manager.has_plugin("iris"):
+        scp.plugin_manager.register(IrisPlugin())
+
+    ds = _make_test_dataset()
+    result = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-6, 1, 6])
+    assert result is not None
+    assert hasattr(result, "kernel")
+
+    legacy = ds.iris_kernel_matrix(kernel_type="langmuir", q=[-6, 1, 6])
+    assert legacy is not None
+    assert hasattr(legacy, "kernel")
+
+
 # ------------------------------------------------------------------
 # Visualisation smoke tests
 # ------------------------------------------------------------------

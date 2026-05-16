@@ -91,7 +91,9 @@ class CanteraPlugin(SpectroChemPyPlugin):
     def register_accessors(self) -> list[dict]:
         return [
             {
-                "name": "cantera_equilibrium",
+                "namespace": "cantera",
+                "name": "equilibrium",
+                "legacy_names": ["cantera_equilibrium"],
                 "func": _ndd_cantera_equilibrium,
                 "description": "Compute equilibrium composition from dataset conditions",
             },

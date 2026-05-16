@@ -45,11 +45,15 @@ class IORegistry:
         *,
         description: str = "",
         extensions: list[str] | None = None,
+        plugin: str | None = None,
+        namespace: str | None = None,
     ) -> None:
         self._readers[name] = {
             "func": func,
             "description": description,
             "extensions": extensions or [],
+            "plugin": plugin,
+            "namespace": namespace or plugin,
         }
 
     def get_reader(self, name: str) -> dict[str, Any] | None:

@@ -51,3 +51,24 @@ def test_isolated_harness():
     h1.register(NMRPlugin())
     assert h1.has_plugin("nmr")
     assert h2.registry.metadata.get_plugin("nmr") is None
+
+
+def test_package_namespace_exposes_topspin_reader():
+    """scp.nmr.read_topspin exposes the reader while preserving legacy alias."""
+    import spectrochempy as scp
+
+    if not scp.plugin_manager.has_plugin("nmr"):
+        scp.plugin_manager.register(NMRPlugin())
+
+    assert scp.nmr.read_topspin is scp.read_topspin
+
+
+def test_nmr_reader_is_not_dataset_accessor_namespace():
+    """Readers are package-level APIs, not dataset accessor methods."""
+    import spectrochempy as scp
+
+    if not scp.plugin_manager.has_plugin("nmr"):
+        scp.plugin_manager.register(NMRPlugin())
+
+    dataset = scp.NDDataset([1, 2, 3])
+    assert not hasattr(dataset, "nmr")

@@ -14,6 +14,7 @@ __all__ = [
     "hooks",
     "lifecycle",
     "manager",
+    "namespace",
     "registries",
     "registry",
 ]
@@ -25,5 +26,6 @@ from . import deps
 from . import hooks
 from . import lifecycle
 from . import manager
+from . import namespace
 from . import registries
 from . import registry

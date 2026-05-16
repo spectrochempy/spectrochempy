@@ -421,9 +421,14 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 return lambda *args, **kwargs: func(self, *args, **kwargs)
 
         from spectrochempy.plugins.manager import plugin_manager
+        from spectrochempy.plugins.namespace import DatasetPluginAccessor
+        from spectrochempy.plugins.namespace import has_dataset_namespace
         from spectrochempy.plugins.registry import registry
 
         plugin_manager.discover()
+        if has_dataset_namespace(registry, item):
+            return DatasetPluginAccessor(self, item, registry)
+
         accessor_info = registry.get_accessor(item)
         if accessor_info:
             func = accessor_info["obj"]

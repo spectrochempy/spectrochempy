@@ -90,6 +90,53 @@ That is all.  Once installed, ``import spectrochempy`` will discover
 ``MyPlugin``, validate it, and register ``read_myformat`` as a reader.
 
 
+Plugin API policy
+=================
+
+Plugin APIs are exposed in two places, depending on whether they create
+data or operate on an existing object.
+
+Package-level plugin namespaces are used for I/O, object creation, and
+standalone workflows::
+
+    scp.nmr.read_topspin(...)
+    scp.iris.batch_iris(...)
+    scp.cantera.equilibrium(...)
+
+Dataset accessors are used only for operations on an existing
+``NDDataset``.  The accessor holds a reference to the parent dataset and
+passes it as the first argument to the registered callable::
+
+    dataset.iris.kernel_matrix(...)
+    dataset.cantera.equilibrium(...)
+
+Readers should not normally be exposed under dataset accessors.  For
+example, prefer ``scp.nmr.read_topspin(...)`` over
+``dataset.nmr.read_topspin(...)`` because reading a file creates a
+dataset rather than operating on one.
+
+Legacy package-level reader aliases such as ``scp.read_topspin(...)``
+are kept during transitions when they already exist publicly.  They are
+thin dispatches through the reader registry.
+
+Namespaced dataset accessors can keep old flat names by declaring
+``legacy_names``::
+
+    def register_accessors(self) -> list[dict]:
+        return [
+            {
+                "namespace": "iris",
+                "name": "kernel_matrix",
+                "legacy_names": ["iris_kernel_matrix"],
+                "func": _ndd_build_kernel,
+                "description": "Build an IrisKernel from the dataset",
+            },
+        ]
+
+This exposes both ``dataset.iris.kernel_matrix(...)`` and the legacy
+``dataset.iris_kernel_matrix(...)``.
+
+
 Available hooks
 ===============
 
@@ -177,13 +224,17 @@ A plugin can implement any combination of the following methods:
 ``register_accessors() -> list[dict]``
     Declare dataset accessor methods attached to NDDataset.  Routed to
     ``registry.extensions`` under the ``"accessor"`` category.
+    Namespaced accessors should set ``"namespace"`` and use ``"name"``
+    for the method name inside that namespace.
 
     ::
 
         def register_accessors(self) -> list[dict]:
             return [
                 {
-                    "name": "my_analysis",
+                    "namespace": "myplugin",
+                    "name": "analysis",
+                    "legacy_names": ["my_analysis"],
                     "func": _ndd_analysis,
                     "description": "Perform analysis on dataset",
                 },

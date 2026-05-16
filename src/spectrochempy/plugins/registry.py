@@ -107,9 +107,16 @@ class PluginRegistry:
         *,
         description: str = "",
         extensions: list[str] | None = None,
+        plugin: str | None = None,
+        namespace: str | None = None,
     ) -> None:
         self.io.register_reader(
-            name, func, description=description, extensions=extensions
+            name,
+            func,
+            description=description,
+            extensions=extensions,
+            plugin=plugin,
+            namespace=namespace,
         )
 
     def get_reader(self, name: str) -> dict[str, Any] | None:
@@ -186,9 +193,16 @@ class PluginRegistry:
         return self.extensions.list_category("simulation")
 
     def register_accessor(
-        self, name: str, func: Callable, *, description: str = ""
+        self,
+        name: str,
+        func: Callable,
+        *,
+        description: str = "",
+        metadata: dict[str, Any] | None = None,
     ) -> None:
-        self.extensions.register("accessor", name, func, description=description)
+        self.extensions.register(
+            "accessor", name, func, description=description, metadata=metadata
+        )
 
     def get_accessor(self, name: str) -> dict[str, Any] | None:
         return self.extensions.get("accessor", name)
