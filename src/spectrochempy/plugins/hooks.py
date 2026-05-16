@@ -131,3 +131,57 @@ class SpectroChemPyHookSpec:
         Returning ``None`` or an empty list is treated as
         "no processor contribution".
         """
+
+    # ------------------------------------------------------------------
+    # Analysis hooks
+    # ------------------------------------------------------------------
+
+    @hookspec
+    def register_analyses(self) -> list[dict]:
+        """
+        Return analysis contributions declared by the plugin.
+
+        Analysis contributions are high-level scientific workflows
+        such as decomposition, multivariate analysis, curve fitting,
+        or kinetic modelling.
+
+        Expected return format::
+
+            [
+                {
+                    "name": "pca",
+                    "func": perform_pca,
+                    "description": "Principal Component Analysis",
+                },
+            ]
+
+        Returning ``None`` or an empty list is treated as
+        "no analysis contribution".
+        """
+
+    # ------------------------------------------------------------------
+    # Simulation hooks
+    # ------------------------------------------------------------------
+
+    @hookspec
+    def register_simulations(self) -> list[dict]:
+        """
+        Return simulation contributions declared by the plugin.
+
+        Simulation contributions wrap external computational engines
+        such as thermodynamics packages, reactor simulators, or
+        kinetic solvers.
+
+        Expected return format::
+
+            [
+                {
+                    "name": "equilibrium",
+                    "func": compute_equilibrium,
+                    "description": "Chemical equilibrium calculation",
+                },
+            ]
+
+        Returning ``None`` or an empty list is treated as
+        "no simulation contribution".
+        """

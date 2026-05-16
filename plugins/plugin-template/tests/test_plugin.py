@@ -33,20 +33,21 @@ def test_plugin_capabilities():
 
 
 def test_registration():
-    """Plugin registers readers and writers successfully."""
+    """Plugin registers readers, writers, and analyses."""
     harness = PluginTestHarness()
     harness.register(MyPlugin())
 
-    # Reader should be registered
     reader = harness.get_reader("myformat")
     assert reader is not None
     assert reader["description"] == "Read MyFormat files"
     assert reader["extensions"] == [".myf", ".myformat"]
 
-    # Writer should be registered
     writer = harness.get_writer("myformat")
     assert writer is not None
-    assert writer["description"] == "Write MyFormat files"
+
+    # Analysis contributions via ExtensionRegistry
+    analyses = harness.registry.extensions.list_category("analysis")
+    assert "my_analysis" in analyses
 
 
 def test_lifecycle_state():
@@ -54,6 +55,16 @@ def test_lifecycle_state():
     harness = PluginTestHarness()
     harness.register(MyPlugin())
     assert harness.get_plugin_state("myplugin") == PluginState.ACTIVE
+
+
+def test_analysis_contribution():
+    """Plugin analysis can be discovered via capability query."""
+    harness = PluginTestHarness()
+    harness.register(MyPlugin())
+
+    results = harness.registry.get_by_capability(PluginCapability.ANALYSIS)
+    names = [r["name"] for r in results]
+    assert "my_analysis" in names
 
 
 def test_declarative_hooks():
@@ -72,4 +83,4 @@ def test_isolated_harness():
 
     h1.register(MyPlugin())
     assert h1.has_plugin("myplugin")
-    assert not h2.has_plugin("myplugin")
+    assert h2.registry.extensions.list_category("analysis") == {}

@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.analysis.psd import PSD
+from spectrochempy.analysis.phasesensitivedetection.psd import PSD
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
 

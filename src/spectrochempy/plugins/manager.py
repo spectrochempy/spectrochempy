@@ -12,6 +12,7 @@ from typing import Any
 
 import pluggy
 
+from spectrochempy.api.plugins.validation import check_plugin_requires
 from spectrochempy.api.plugins.validation import validate_plugin_compatibility
 from spectrochempy.plugins.hooks import SpectroChemPyHookSpec
 from spectrochempy.plugins.lifecycle import PluginDescriptor
@@ -90,6 +91,15 @@ class PluginManager:
 
         self._plugin_states.setdefault(name, PluginState.LOADED)
 
+        # --- Optional dependency check ---
+        dep_issues = check_plugin_requires(plugin)
+        if dep_issues:
+            for msg in dep_issues:
+                logger.warning(msg)
+            self._plugin_states[name] = PluginState.FAILED
+            self._plugin_errors[name] = RuntimeError("; ".join(dep_issues))
+            return
+
         # --- Compatibility validation ---
         is_compatible, _errors = validate_plugin_compatibility(plugin)
         if not is_compatible:
@@ -133,6 +143,8 @@ class PluginManager:
         self._collect_writers(plugin, contributions)
         self._collect_processors(plugin, contributions)
         self._collect_visualizers(plugin, contributions)
+        self._collect_analyses(plugin, contributions)
+        self._collect_simulations(plugin, contributions)
 
         return contributions
 
@@ -222,6 +234,67 @@ class PluginManager:
         except Exception:
             logger.exception(
                 "Failed to collect visualizers from plugin '%s'",
+                getattr(plugin, "name", "unknown"),
+            )
+
+    def _collect_analyses(
+        self, plugin: Any, contributions: dict[str, list[str]]
+    ) -> None:
+        if not (
+            hasattr(plugin, "register_analyses") and callable(plugin.register_analyses)
+        ):
+            return
+        try:
+            analyses = plugin.register_analyses()
+            if not isinstance(analyses, list):
+                return
+            for analysis in analyses:
+                if not isinstance(analysis, dict):
+                    continue
+                name = analysis.get("name")
+                func = analysis.get("func")
+                if name and func:
+                    self.registry.extensions.register(
+                        "analysis",
+                        name,
+                        func,
+                        description=analysis.get("description", ""),
+                    )
+                    contributions.setdefault("analyses", []).append(name)
+        except Exception:
+            logger.exception(
+                "Failed to collect analyses from plugin '%s'",
+                getattr(plugin, "name", "unknown"),
+            )
+
+    def _collect_simulations(
+        self, plugin: Any, contributions: dict[str, list[str]]
+    ) -> None:
+        if not (
+            hasattr(plugin, "register_simulations")
+            and callable(plugin.register_simulations)
+        ):
+            return
+        try:
+            simulations = plugin.register_simulations()
+            if not isinstance(simulations, list):
+                return
+            for sim in simulations:
+                if not isinstance(sim, dict):
+                    continue
+                name = sim.get("name")
+                func = sim.get("func")
+                if name and func:
+                    self.registry.extensions.register(
+                        "simulation",
+                        name,
+                        func,
+                        description=sim.get("description", ""),
+                    )
+                    contributions.setdefault("simulations", []).append(name)
+        except Exception:
+            logger.exception(
+                "Failed to collect simulations from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
 

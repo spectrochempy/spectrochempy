@@ -29,7 +29,6 @@ dependencies = [
   "matplotlib",
   "numpy",
   "numpydoc",
-  "osqp",
   "pluggy",
   "pint",
   "pyyaml",
@@ -90,6 +89,7 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
+iris = ["spectrochempy-iris"]
 nmr = ["numpy-quaternion>=2024.0.7"]
 test = [
   "coverage",

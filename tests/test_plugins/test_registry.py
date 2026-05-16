@@ -6,6 +6,7 @@
 
 """Tests for PluginRegistry and specialised registries."""
 
+from spectrochempy.plugins.capabilities import PluginCapability
 from spectrochempy.plugins.registries import IORegistry
 from spectrochempy.plugins.registries import MetadataRegistry
 from spectrochempy.plugins.registries import ProcessingRegistry
@@ -428,3 +429,195 @@ def test_processor_from_dict():
     assert c.name == "p"
     assert c.func is dummy
     assert c.description == "proc"
+
+
+# ------------------------------------------------------------------
+# ExtensionRegistry
+# ------------------------------------------------------------------
+
+
+def test_extension_registry():
+    """ExtensionRegistry stores arbitrary categorised extensions."""
+    from spectrochempy.plugins.registries import ExtensionRegistry
+
+    reg = ExtensionRegistry()
+    reg.register("analysis", "pca", lambda: 42, description="PCA")
+    reg.register("analysis", "mcr", lambda: 43)
+    reg.register(
+        "simulation", "equilibrium", lambda: 44, metadata={"engine": "cantera"}
+    )
+
+    assert reg.get("analysis", "pca")["description"] == "PCA"
+    assert reg.get("analysis", "pca")["obj"]() == 42
+    assert reg.get("analysis", "mcr")["obj"]() == 43
+    assert reg.get("simulation", "equilibrium")["metadata"]["engine"] == "cantera"
+    assert reg.get("missing", "x") is None
+    assert reg.get("analysis", "missing") is None
+
+
+def test_extension_list_category():
+    """ExtensionRegistry.list_category returns all items in a category."""
+    from spectrochempy.plugins.registries import ExtensionRegistry
+
+    reg = ExtensionRegistry()
+    reg.register("analysis", "pca", 1)
+    reg.register("analysis", "mcr", 2)
+    reg.register("simulation", "eq", 3)
+
+    analyses = reg.list_category("analysis")
+    assert "pca" in analyses
+    assert "mcr" in analyses
+    assert "eq" not in analyses
+    assert reg.list_category("nonexistent") == {}
+
+
+def test_extension_categories():
+    """ExtensionRegistry.categories returns all category names."""
+    from spectrochempy.plugins.registries import ExtensionRegistry
+
+    reg = ExtensionRegistry()
+    reg.register("a", "x", 1)
+    reg.register("b", "y", 2)
+    assert sorted(reg.categories) == ["a", "b"]
+
+
+def test_extension_clear():
+    """ExtensionRegistry.clear() removes all entries."""
+    from spectrochempy.plugins.registries import ExtensionRegistry
+
+    reg = ExtensionRegistry()
+    reg.register("analysis", "pca", 1)
+    reg.clear()
+    assert reg.list_category("analysis") == {}
+    assert reg.categories == []
+
+
+def test_extension_registry_in_composite():
+    """PluginRegistry includes an ExtensionRegistry as ``.extensions``."""
+    registry = PluginRegistry()
+    from spectrochempy.plugins.registries import ExtensionRegistry
+
+    assert isinstance(registry.extensions, ExtensionRegistry)
+
+    registry.extensions.register("analysis", "test", 42)
+    assert registry.extensions.get("analysis", "test")["obj"] == 42
+
+
+# ------------------------------------------------------------------
+# PluginRegistry.get_by_capability
+# ------------------------------------------------------------------
+
+
+def test_get_by_capability_reader():
+    """get_by_capability(READER) returns registered readers."""
+    registry = PluginRegistry()
+
+    def dummy(path):
+        ...
+
+    registry.register_reader("myfmt", dummy, description="test")
+    results = registry.get_by_capability(PluginCapability.READER)
+    assert any(r["name"] == "myfmt" for r in results)
+
+
+def test_get_by_capability_writer():
+    """get_by_capability(WRITER) returns registered writers."""
+    registry = PluginRegistry()
+
+    def dummy(data, path):
+        ...
+
+    registry.register_writer("myfmt", dummy)
+    results = registry.get_by_capability(PluginCapability.WRITER)
+    assert any(r["name"] == "myfmt" for r in results)
+
+
+def test_get_by_capability_processor():
+    """get_by_capability(PROCESSOR) returns registered processors."""
+    registry = PluginRegistry()
+
+    def dummy(data):
+        ...
+
+    registry.register_processor("smooth", dummy)
+    results = registry.get_by_capability(PluginCapability.PROCESSOR)
+    assert any(r["name"] == "smooth" for r in results)
+
+
+def test_get_by_capability_analysis():
+    """get_by_capability(ANALYSIS) returns items from extensions registry."""
+    registry = PluginRegistry()
+    registry.extensions.register("analysis", "pca", lambda: 42)
+    results = registry.get_by_capability(PluginCapability.ANALYSIS)
+    assert any(r["name"] == "pca" for r in results)
+
+
+def test_get_by_capability_simulation():
+    """get_by_capability(SIMULATION) returns items from extensions registry."""
+    registry = PluginRegistry()
+    registry.extensions.register("simulation", "cantera_eq", lambda: 42)
+    results = registry.get_by_capability(PluginCapability.SIMULATION)
+    assert any(r["name"] == "cantera_eq" for r in results)
+
+
+def test_get_by_capability_empty():
+    """get_by_capability returns empty list when nothing is registered."""
+    registry = PluginRegistry()
+    assert registry.get_by_capability(PluginCapability.ANALYSIS) == []
+    assert registry.get_by_capability(PluginCapability.SIMULATION) == []
+
+
+# ------------------------------------------------------------------
+# Contribution dataclasses (analysis, simulation)
+# ------------------------------------------------------------------
+
+
+def test_analysis_contribution():
+    """AnalysisContribution stores name, func, description."""
+    from spectrochempy.plugins.contributions import AnalysisContribution
+
+    def dummy(data):
+        ...
+
+    c = AnalysisContribution(name="pca", func=dummy, description="PCA")
+    assert c.name == "pca"
+    assert c.func is dummy
+    assert c.description == "PCA"
+
+
+def test_simulation_contribution():
+    """SimulationContribution stores name, func, description."""
+    from spectrochempy.plugins.contributions import SimulationContribution
+
+    def dummy(data):
+        ...
+
+    c = SimulationContribution(name="equilibrium", func=dummy)
+    assert c.name == "equilibrium"
+    assert c.func is dummy
+    assert c.description == ""
+
+
+def test_analysis_from_dict():
+    """analysis_from_dict converts a dict to AnalysisContribution."""
+    from spectrochempy.plugins.contributions import analysis_from_dict
+
+    def dummy(data):
+        ...
+
+    c = analysis_from_dict({"name": "pca", "func": dummy, "description": "PCA"})
+    assert c.name == "pca"
+    assert c.func is dummy
+    assert c.description == "PCA"
+
+
+def test_simulation_from_dict():
+    """simulation_from_dict converts a dict to SimulationContribution."""
+    from spectrochempy.plugins.contributions import simulation_from_dict
+
+    def dummy(data):
+        ...
+
+    c = simulation_from_dict({"name": "eq", "func": dummy})
+    assert c.name == "eq"
+    assert c.func is dummy

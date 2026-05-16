@@ -31,6 +31,19 @@ class SpectroChemPyPlugin:
     version: str = "0.0.0"
     description: str = ""
     spectrochempy_min_version: str = "0.0.0"
+    requires: list[str] = []
+    """
+    Optional pip-style dependency strings.
+
+    Used by the plugin manager to check availability of required
+    packages before attempting to load the plugin::
+
+        class MyPlugin(SpectroChemPyPlugin):
+            requires = ["cantera>=3.0", "pint"]
+
+    If any dependency cannot be imported, the plugin is marked as
+    ``FAILED`` with a clear message and skipped.
+    """
 
     # ------------------------------------------------------------------
     # Registration API

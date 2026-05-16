@@ -36,3 +36,6 @@ class PluginCapability(Enum):
     WRITER = "writer"
     PROCESSOR = "processor"
     VISUALIZER = "visualizer"
+    ANALYSIS = "analysis"
+    SIMULATION = "simulation"
+    ACCESSOR = "accessor"

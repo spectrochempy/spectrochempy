@@ -13,6 +13,8 @@ In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide c
 
 # %%
 import spectrochempy as scp
+from spectrochempy_iris import IRIS
+from spectrochempy_iris import IrisKernel
 
 # %%
 # Uploading dataset
@@ -98,11 +100,11 @@ _ = X_.plot_contourf()
 # ------------------------------------
 # Perform IRIS without regularization (the loglevel can be set to `INFO` to have
 # information on the running process)
-iris1 = scp.IRIS(log_level="INFO")
+iris1 = IRIS(log_level="INFO")
 
 # %%
 # first we compute the kernel object
-K = scp.IrisKernel(X_, "langmuir", q=[-8, -1, 50])
+K = IrisKernel(X_, "langmuir", q=[-8, -1, 50])
 
 # %%
 # The actual kernel is given by the `kernel` attribute
@@ -123,7 +125,7 @@ _ = iris1.plotmerit()
 # With regularization and a manual search
 # ---------------------------------------
 # Perform  IRIS with regularization, manual search
-iris2 = scp.IRIS(reg_par=[-10, 1, 12])
+iris2 = IRIS(reg_par=[-10, 1, 12])
 
 # %%
 # We keep the same kernel object as previously - performs the fit.
@@ -140,7 +142,7 @@ _ = iris2.plotmerit(-6)
 # %%
 # Now try an automatic search of the regularization parameter around the best value found manually:
 
-iris3 = scp.IRIS(log_level="INFO", reg_par=[-6, -2])
+iris3 = IRIS(log_level="INFO", reg_par=[-6, -2])
 iris3.fit(X_, K)
 _ = iris3.plotlcurve(title="L curve, automated search")
 # %%

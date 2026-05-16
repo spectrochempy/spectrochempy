@@ -15,6 +15,7 @@ from spectrochempy.api.plugins import SpectroChemPyPlugin
 from spectrochempy.api.plugins.validation import _get_plugin_metadata
 from spectrochempy.api.plugins.validation import _is_compatible_api_version
 from spectrochempy.api.plugins.validation import _satisfies_min_version
+from spectrochempy.api.plugins.validation import check_plugin_requires
 from spectrochempy.api.plugins.validation import validate_plugin_compatibility
 
 # ------------------------------------------------------------------
@@ -196,6 +197,74 @@ class TestValidatePluginCompatibility:
 
 
 # ------------------------------------------------------------------
+# ------------------------------------------------------------------
+# check_plugin_requires
+# ------------------------------------------------------------------
+
+
+class TestCheckPluginRequires:
+    def test_no_requires(self):
+        """Plugin without requires passes."""
+        plugin = _ValidPlugin()
+        issues = check_plugin_requires(plugin)
+        assert issues == []
+
+    def test_available_dependency(self):
+        """Plugin with installed dependency passes."""
+
+        class _PluginWithNumpy:
+            name = "has-numpy"
+            requires = ["numpy"]
+
+        issues = check_plugin_requires(_PluginWithNumpy())
+        assert issues == []
+
+    def test_missing_dependency(self):
+        """Plugin with missing dependency reports it."""
+
+        class _PluginWithMissing:
+            name = "missing-dep"
+            requires = ["nonexistent_package_xyz"]
+
+        issues = check_plugin_requires(_PluginWithMissing())
+        assert any("nonexistent_package_xyz" in i for i in issues)
+
+    def test_malformed_required_ignored(self):
+        """Malformed dep string does not crash."""
+
+        class _PluginWithBad:
+            name = "bad-dep"
+            requires = ["numpy>=1.0.0"]
+
+        issues = check_plugin_requires(_PluginWithBad())
+        assert issues == []
+
+
+# ------------------------------------------------------------------
+# PluginCapability — new values
+# ------------------------------------------------------------------
+
+
+class TestPluginCapabilityNewValues:
+    def test_analysis_exists(self):
+        from spectrochempy.api.plugins import PluginCapability
+
+        assert hasattr(PluginCapability, "ANALYSIS")
+        assert PluginCapability.ANALYSIS.value == "analysis"
+
+    def test_simulation_exists(self):
+        from spectrochempy.api.plugins import PluginCapability
+
+        assert hasattr(PluginCapability, "SIMULATION")
+        assert PluginCapability.SIMULATION.value == "simulation"
+
+    def test_accessor_exists(self):
+        from spectrochempy.api.plugins import PluginCapability
+
+        assert hasattr(PluginCapability, "ACCESSOR")
+        assert PluginCapability.ACCESSOR.value == "accessor"
+
+
 # Public API import paths
 # ------------------------------------------------------------------
 

@@ -6,6 +6,11 @@
 """Tests for plotmerit functionality including multi-regularization support."""
 
 import numpy as np
+import pytest
+
+pytest.importorskip("spectrochempy_iris", reason="IRIS analysis requires the spectrochempy-iris plugin")
+from spectrochempy_iris import IRIS
+from spectrochempy_iris import IrisKernel
 
 
 def test_plotmerit_single_index():
@@ -45,8 +50,8 @@ def test_plotmerit_single_index():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     ax = iris.plot_merit(index=0, show=False)
@@ -95,8 +100,8 @@ def test_plotmerit_multi_index():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     axes_list = iris.plot_merit(index=[0, 1, 2], show=False)
@@ -146,8 +151,8 @@ def test_plotmerit_all_regularizations():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     ax = iris.plot_merit(show=False)
@@ -197,8 +202,8 @@ def test_plotmerit_y_limits():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     ax = iris.plot_merit(index=0, show=False)
@@ -274,8 +279,8 @@ def test_plotmerit_zorder():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     ax = iris.plot_merit(index=0, show=False)

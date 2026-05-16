@@ -40,7 +40,9 @@ owning a single domain:
    * - ``registry.processing``
      - Processors, unit contexts, dtype handlers
    * - ``registry.visualization``
-     - Visualizers (future use)
+     - Visualizers
+   * - ``registry.extensions``
+     - Generic extensions: analyses, simulations, fit models, domain schemas
    * - ``registry.metadata``
      - Plugin descriptors
 
@@ -140,6 +142,55 @@ A plugin can implement any combination of the following methods:
                 },
             ]
 
+``register_analyses() -> list[dict]``
+    Declare high-level analysis workflows (decomposition, multivariate
+    analysis, curve fitting, kinetic modelling).  Routed to
+    ``registry.extensions`` under the ``"analysis"`` category.
+
+    ::
+
+        def register_analyses(self) -> list[dict]:
+            return [
+                {
+                    "name": "pca",
+                    "func": perform_pca,
+                    "description": "Principal Component Analysis",
+                },
+            ]
+
+``register_simulations() -> list[dict]``
+    Declare simulation engines (thermodynamics, reactor modelling,
+    kinetic solvers).  Routed to ``registry.extensions`` under the
+    ``"simulation"`` category.
+
+    ::
+
+        def register_simulations(self) -> list[dict]:
+            return [
+                {
+                    "name": "equilibrium",
+                    "func": compute_equilibrium,
+                    "description": "Chemical equilibrium calculation",
+                },
+            ]
+
+``register_accessors() -> list[dict]``
+    Declare dataset accessor methods attached to NDDataset.  Routed to
+    ``registry.extensions`` under the ``"accessor"`` category.  Actual
+    attachment also requires listing the method name in
+    ``__dataset_methods__``.
+
+    ::
+
+        def register_accessors(self) -> list[dict]:
+            return [
+                {
+                    "name": "my_analysis",
+                    "func": _ndd_analysis,
+                    "description": "Perform analysis on dataset",
+                },
+            ]
+
 
 Returning an empty list (or ``None``) from a hook is treated as "no
 contribution" and is silently ignored.
@@ -171,6 +222,12 @@ Available capability values:
      - ``"processor"``
    * - ``PluginCapability.VISUALIZER``
      - ``"visualizer"``
+   * - ``PluginCapability.ANALYSIS``
+     - ``"analysis"``
+   * - ``PluginCapability.SIMULATION``
+     - ``"simulation"``
+   * - ``PluginCapability.ACCESSOR``
+     - ``"accessor"``
 
 
 Plugin metadata
@@ -276,6 +333,16 @@ All symbols available from ``spectrochempy.api.plugins``:
      - Dataclass for processor contributions
    * - ``VisualizerContribution``
      - Dataclass for visualizer contributions
+   * - ``AnalysisContribution``
+     - Dataclass for analysis contributions
+   * - ``SimulationContribution``
+     - Dataclass for simulation contributions
+   * - ``analysis_from_dict``
+     - Convert dict to ``AnalysisContribution``
+   * - ``simulation_from_dict``
+     - Convert dict to ``SimulationContribution``
+   * - ``check_plugin_requires``
+     - Check optional dependency availability
    * - ``reader_from_dict``
      - Convert dict to ``ReaderContribution``
    * - ``writer_from_dict``
@@ -439,6 +506,20 @@ before registration:
 ``validate_plugin_compatibility(plugin) -> tuple[bool, list[str]]``
     Legacy check used by ``PluginManager`` during registration.
     Returns a boolean and a list of error messages.
+
+``check_plugin_requires(plugin) -> list[str]``
+    Checks that optional dependencies declared via the ``requires``
+    class attribute are importable.  If any dependency is missing, its
+    name is returned in the issue list.
+
+    ::
+
+        class MyPlugin(SpectroChemPyPlugin):
+            requires = ["cantera>=3.0"]
+
+Plugin managers also check ``requires`` automatically during
+registration: missing dependencies cause the plugin to be marked
+``FAILED`` with a clear message, without affecting other plugins.
 
 Usage::
 

@@ -10,6 +10,8 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
+from spectrochempy.plugins.capabilities import PluginCapability
+from spectrochempy.plugins.registries import ExtensionRegistry
 from spectrochempy.plugins.registries import IORegistry
 from spectrochempy.plugins.registries import MetadataRegistry
 from spectrochempy.plugins.registries import ProcessingRegistry
@@ -46,6 +48,7 @@ class PluginRegistry:
         self.processing = ProcessingRegistry()
         self.visualization = VisualizationRegistry()
         self.metadata = MetadataRegistry()
+        self.extensions = ExtensionRegistry()
 
     def clear(self) -> None:
         """Remove all entries from every sub-registry."""
@@ -53,6 +56,45 @@ class PluginRegistry:
         self.processing.clear()
         self.visualization.clear()
         self.metadata.clear()
+        self.extensions.clear()
+
+    # ------------------------------------------------------------------
+    # Capability-based query
+    # ------------------------------------------------------------------
+
+    def get_by_capability(self, capability: PluginCapability) -> list[dict[str, Any]]:
+        """
+        Return all plugin contributions matching a given capability.
+
+        This provides a uniform way to discover what the system can do
+        regardless of which sub-registry holds the contributions.
+
+        Example::
+
+            registry.get_by_capability(PluginCapability.ANALYSIS)
+            # → [{"plugin": "iris", "name": "pca", ...}, ...]
+        """
+        results: list[dict[str, Any]] = []
+        if capability == PluginCapability.READER:
+            for name, info in self.io.available_readers.items():
+                results.append({"capability": "reader", "name": name, **info})
+        elif capability == PluginCapability.WRITER:
+            for name, info in self.io.available_writers.items():
+                results.append({"capability": "writer", "name": name, **info})
+        elif capability == PluginCapability.PROCESSOR:
+            for name, info in self.processing.available_processors.items():
+                results.append({"capability": "processor", "name": name, **info})
+        elif capability == PluginCapability.VISUALIZER:
+            for name, info in self.visualization.available_visualizers.items():
+                results.append({"capability": "visualizer", "name": name, **info})
+        elif capability in (
+            PluginCapability.ANALYSIS,
+            PluginCapability.SIMULATION,
+            PluginCapability.ACCESSOR,
+        ):
+            for name, info in self.extensions.list_category(capability.value).items():
+                results.append({"capability": capability.value, "name": name, **info})
+        return results
 
     # ------------------------------------------------------------------
     # Backward-compatible forwarding — IORegistry

@@ -1,3 +1,4 @@
+# ruff: noqa: PLC0415 — defer imports in plugin methods to avoid startup cost
 """
 spectrochempy-myplugin — A SpectroChemPy plugin.
 
@@ -24,16 +25,25 @@ class MyPlugin(SpectroChemPyPlugin):
     description = "My SpectroChemPy plugin"
     spectrochempy_min_version = "0.8.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
-    capabilities = [PluginCapability.READER]
+    capabilities = [PluginCapability.READER, PluginCapability.ANALYSIS]
+    requires: list[str] = []
+    """
+    Optional pip-style dependencies.
+    Plugins with missing deps are marked FAILED with a clear message.
+    Example: requires = ["cantera>=3.0", "pint"]
+    """
 
     # ------------------------------------------------------------------
     # Declarative hooks — these are auto-collected by PluginManager.
     #
-    # You can implement any combination of:
-    #   register_readers()    -> list[dict]
-    #   register_writers()    -> list[dict]
-    #   register_processors() -> list[dict]
+    # Available hooks:
+    #   register_readers()      -> list[dict]
+    #   register_writers()      -> list[dict]
+    #   register_processors()   -> list[dict]
     #   register_visualizers()  -> list[dict]
+    #   register_analyses()     -> list[dict]  (analysis workflows)
+    #   register_simulations()  -> list[dict]  (simulation engines)
+    #   register_accessors()    -> list[dict]  (dataset methods)
     #
     # Each dict must contain "name" and "func".
     # Optional keys: "description" (str), "extensions" (list[str]).
@@ -60,6 +70,16 @@ class MyPlugin(SpectroChemPyPlugin):
             },
         ]
 
+    def register_analyses(self) -> list[dict]:
+        """Declare analysis workflows provided by this plugin."""
+        return [
+            {
+                "name": "my_analysis",
+                "func": self._perform_analysis,
+                "description": "Example analysis workflow",
+            },
+        ]
+
     # ------------------------------------------------------------------
     # Operational methods (with deferred imports for optional deps)
     # ------------------------------------------------------------------
@@ -80,9 +100,19 @@ class MyPlugin(SpectroChemPyPlugin):
 
         np.savetxt(path, dataset.data)
 
+    def _perform_analysis(self, dataset: NDDataset) -> dict:
+        """Run an example analysis workflow."""
+        import numpy as np
+
+        return {
+            "mean": float(np.mean(dataset.data)),
+            "std": float(np.std(dataset.data)),
+        }
+
 
 # ------------------------------------------------------------------
-# Optional: attach reader to NDDataset's method namespace
+# Optional: attach methods to NDDataset
+# Methods listed here are discoverable via ndd.method_name()
 # ------------------------------------------------------------------
 
-__dataset_methods__ = ["read_myformat"]  # exported for ndd.read_myformat()
+__dataset_methods__ = ["read_myformat"]
