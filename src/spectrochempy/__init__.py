@@ -115,6 +115,11 @@ def __getattr__(name):
         if reader_info:
             return reader_info["func"]
 
+    for category in ("analysis", "simulation", "accessor"):
+        extension_info = registry.extensions.get(category, name)
+        if extension_info:
+            return extension_info["obj"]
+
     if name in _LAZY_IMPORTS:
         module_path = _LAZY_IMPORTS[name]
         module = __import__(module_path, fromlist=[name])

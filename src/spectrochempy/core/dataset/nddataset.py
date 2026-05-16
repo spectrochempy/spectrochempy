@@ -420,6 +420,15 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 func = reader_info["func"]
                 return lambda *args, **kwargs: func(self, *args, **kwargs)
 
+        from spectrochempy.plugins.manager import plugin_manager
+        from spectrochempy.plugins.registry import registry
+
+        plugin_manager.discover()
+        accessor_info = registry.get_accessor(item)
+        if accessor_info:
+            func = accessor_info["obj"]
+            return lambda *args, **kwargs: func(self, *args, **kwargs)
+
         if item in _LAZY_IMPORTS:
             func = tr.import_item(_LAZY_IMPORTS[item] + "." + item)
             # Create a bound method that calls the imported function with self as first argument

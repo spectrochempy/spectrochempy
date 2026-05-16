@@ -132,6 +132,28 @@ class SpectroChemPyHookSpec:
         "no processor contribution".
         """
 
+    @hookspec
+    def register_accessors(self) -> list[dict]:
+        """
+        Return dataset accessor contributions declared by the plugin.
+
+        Accessor contributions are callables intended to be exposed as
+        methods on SpectroChemPy objects such as ``NDDataset``.
+
+        Expected return format::
+
+            [
+                {
+                    "name": "my_accessor",
+                    "func": my_accessor,
+                    "description": "Run my plugin accessor",
+                },
+            ]
+
+        Returning ``None`` or an empty list is treated as
+        "no accessor contribution".
+        """
+
     # ------------------------------------------------------------------
     # Analysis hooks
     # ------------------------------------------------------------------

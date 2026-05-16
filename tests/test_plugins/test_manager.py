@@ -88,6 +88,21 @@ class DeclarativeProcessorPlugin:
         ]
 
 
+class DeclarativeAccessorPlugin:
+    name = "decl-accessor"
+    version = "0.2.0"
+    api_version = "1.0"
+
+    def register_accessors(self) -> list[dict]:
+        return [
+            {
+                "name": "plugin_mean",
+                "func": lambda dataset: dataset.mean(),
+                "description": "Mean via plugin accessor",
+            }
+        ]
+
+
 class HybridPlugin:
     """Plugin that implements both imperative register() and declarative hooks."""
 
@@ -240,6 +255,17 @@ def test_declarative_visualizers():
     assert vis["description"] == "Plot data"
 
 
+def test_declarative_accessors():
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeAccessorPlugin()
+    pm.register(plugin)
+
+    accessor = registry.get_accessor("plugin_mean")
+    assert accessor is not None
+    assert accessor["description"] == "Mean via plugin accessor"
+
+
 # ------------------------------------------------------------------
 # Declarative hook routing to specialised sub-registries
 # ------------------------------------------------------------------
@@ -283,6 +309,16 @@ def test_declarative_visualizers_routed_to_visualization():
     pm.register(plugin)
 
     assert registry.visualization.get_visualizer("myplot") is not None
+
+
+def test_declarative_accessors_routed_to_extensions():
+    """register_accessors targets registry.extensions."""
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeAccessorPlugin()
+    pm.register(plugin)
+
+    assert registry.extensions.get("accessor", "plugin_mean") is not None
 
 
 # ------------------------------------------------------------------
@@ -458,6 +494,22 @@ def test_get_active_plugins():
     pm.register(DummyPlugin())
     active = pm.get_active_plugins()
     assert "dummy" in active
+
+
+def test_list_contributions():
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    pm.register(DeclarativeReaderPlugin())
+    pm.register(DeclarativeWriterPlugin())
+    pm.register(DeclarativeProcessorPlugin())
+    pm.register(DeclarativeVisualizerPlugin())
+    pm.register(DeclarativeAccessorPlugin())
+
+    assert "myformat" in pm.list_readers()
+    assert "myformat" in pm.list_writers()
+    assert "smooth" in pm.list_processors()
+    assert "myplot" in pm.list_visualizers()
+    assert "plugin_mean" in pm.list_accessors()
 
 
 def test_get_active_plugins_excludes_failed():

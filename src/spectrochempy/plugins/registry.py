@@ -157,6 +157,46 @@ class PluginRegistry:
     def available_processors(self) -> dict[str, dict[str, Any]]:
         return self.processing.available_processors
 
+    # ------------------------------------------------------------------
+    # Backward-compatible forwarding — ExtensionRegistry
+    # ------------------------------------------------------------------
+
+    def register_analysis(
+        self, name: str, func: Callable, *, description: str = ""
+    ) -> None:
+        self.extensions.register("analysis", name, func, description=description)
+
+    def get_analysis(self, name: str) -> dict[str, Any] | None:
+        return self.extensions.get("analysis", name)
+
+    @property
+    def available_analyses(self) -> dict[str, dict[str, Any]]:
+        return self.extensions.list_category("analysis")
+
+    def register_simulation(
+        self, name: str, func: Callable, *, description: str = ""
+    ) -> None:
+        self.extensions.register("simulation", name, func, description=description)
+
+    def get_simulation(self, name: str) -> dict[str, Any] | None:
+        return self.extensions.get("simulation", name)
+
+    @property
+    def available_simulations(self) -> dict[str, dict[str, Any]]:
+        return self.extensions.list_category("simulation")
+
+    def register_accessor(
+        self, name: str, func: Callable, *, description: str = ""
+    ) -> None:
+        self.extensions.register("accessor", name, func, description=description)
+
+    def get_accessor(self, name: str) -> dict[str, Any] | None:
+        return self.extensions.get("accessor", name)
+
+    @property
+    def available_accessors(self) -> dict[str, dict[str, Any]]:
+        return self.extensions.list_category("accessor")
+
     def register_unit_context(self, name: str, setup_func: Callable) -> None:
         self.processing.register_unit_context(name, setup_func)
 

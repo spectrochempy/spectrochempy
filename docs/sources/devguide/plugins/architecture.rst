@@ -176,9 +176,7 @@ A plugin can implement any combination of the following methods:
 
 ``register_accessors() -> list[dict]``
     Declare dataset accessor methods attached to NDDataset.  Routed to
-    ``registry.extensions`` under the ``"accessor"`` category.  Actual
-    attachment also requires listing the method name in
-    ``__dataset_methods__``.
+    ``registry.extensions`` under the ``"accessor"`` category.
 
     ::
 

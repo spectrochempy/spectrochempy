@@ -81,6 +81,22 @@ def test_register_processor():
     assert info["func"] is dummy_processor
 
 
+def test_register_accessor():
+    registry = PluginRegistry()
+
+    def dummy_accessor(dataset):
+        ...
+
+    registry.register_accessor(
+        "test_accessor", dummy_accessor, description="test accessor"
+    )
+    info = registry.get_accessor("test_accessor")
+    assert info is not None
+    assert info["obj"] is dummy_accessor
+    assert info["description"] == "test accessor"
+    assert "test_accessor" in registry.available_accessors
+
+
 def test_register_writer():
     registry = PluginRegistry()
 
@@ -137,6 +153,7 @@ def test_clear():
     registry.register_reader("r1", dummy)
     registry.register_writer("w1", dummy)
     registry.register_processor("p1", dummy)
+    registry.register_accessor("a1", dummy)
     registry.register_plugin("p1", dummy)
     registry.register_filetype("ext", {})
     registry.register_dtype_handler("d1", dummy)
@@ -147,6 +164,7 @@ def test_clear():
     assert registry.available_readers == {}
     assert registry.available_writers == {}
     assert registry.available_processors == {}
+    assert registry.available_accessors == {}
     assert registry.available_plugins == {}
     assert registry.available_filetypes == {}
     assert registry.get_reader("r1") is None
@@ -204,6 +222,16 @@ def test_register_plugin_forwards_to_metadata():
     registry = PluginRegistry()
     registry.register_plugin("fwd", "plugin")
     assert registry.metadata.get_plugin("fwd") == "plugin"
+
+
+def test_register_accessor_forwards_to_extensions():
+    registry = PluginRegistry()
+
+    def dummy(data):
+        ...
+
+    registry.register_accessor("fwd", dummy)
+    assert registry.extensions.get("accessor", "fwd") is not None
 
 
 def test_dtype_handler_forwards_to_processing():
@@ -560,11 +588,20 @@ def test_get_by_capability_simulation():
     assert any(r["name"] == "cantera_eq" for r in results)
 
 
+def test_get_by_capability_accessor():
+    """get_by_capability(ACCESSOR) returns items from extensions registry."""
+    registry = PluginRegistry()
+    registry.extensions.register("accessor", "iris_kernel_matrix", lambda: 42)
+    results = registry.get_by_capability(PluginCapability.ACCESSOR)
+    assert any(r["name"] == "iris_kernel_matrix" for r in results)
+
+
 def test_get_by_capability_empty():
     """get_by_capability returns empty list when nothing is registered."""
     registry = PluginRegistry()
     assert registry.get_by_capability(PluginCapability.ANALYSIS) == []
     assert registry.get_by_capability(PluginCapability.SIMULATION) == []
+    assert registry.get_by_capability(PluginCapability.ACCESSOR) == []
 
 
 # ------------------------------------------------------------------
@@ -598,6 +635,21 @@ def test_simulation_contribution():
     assert c.description == ""
 
 
+def test_accessor_contribution():
+    """AccessorContribution stores name, func, description."""
+    from spectrochempy.plugins.contributions import AccessorContribution
+
+    def dummy(data):
+        ...
+
+    c = AccessorContribution(
+        name="iris_kernel_matrix", func=dummy, description="IRIS kernel"
+    )
+    assert c.name == "iris_kernel_matrix"
+    assert c.func is dummy
+    assert c.description == "IRIS kernel"
+
+
 def test_analysis_from_dict():
     """analysis_from_dict converts a dict to AnalysisContribution."""
     from spectrochempy.plugins.contributions import analysis_from_dict
@@ -621,3 +673,18 @@ def test_simulation_from_dict():
     c = simulation_from_dict({"name": "eq", "func": dummy})
     assert c.name == "eq"
     assert c.func is dummy
+
+
+def test_accessor_from_dict():
+    """accessor_from_dict converts a dict to AccessorContribution."""
+    from spectrochempy.plugins.contributions import accessor_from_dict
+
+    def dummy(data):
+        ...
+
+    c = accessor_from_dict(
+        {"name": "iris_kernel_matrix", "func": dummy, "description": "IRIS kernel"}
+    )
+    assert c.name == "iris_kernel_matrix"
+    assert c.func is dummy
+    assert c.description == "IRIS kernel"

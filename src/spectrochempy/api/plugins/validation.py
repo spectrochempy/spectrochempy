@@ -94,8 +94,9 @@ def check_plugin_contributions(plugin: Any) -> list[str]:
 
     Inspects declarative hooks (``register_readers``,
     ``register_writers``, ``register_processors``,
-    ``register_visualizers``) and validates the structure of
-    returned data.
+    ``register_visualizers``, ``register_analyses``,
+    ``register_simulations``, ``register_accessors``) and validates
+    the structure of returned data.
 
     Parameters
     ----------
@@ -116,6 +117,9 @@ def check_plugin_contributions(plugin: Any) -> list[str]:
         "register_writers",
         "register_processors",
         "register_visualizers",
+        "register_analyses",
+        "register_simulations",
+        "register_accessors",
     ):
         if not hasattr(plugin, hook_name):
             continue

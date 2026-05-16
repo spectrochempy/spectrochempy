@@ -145,6 +145,7 @@ class PluginManager:
         self._collect_visualizers(plugin, contributions)
         self._collect_analyses(plugin, contributions)
         self._collect_simulations(plugin, contributions)
+        self._collect_accessors(plugin, contributions)
 
         return contributions
 
@@ -298,6 +299,37 @@ class PluginManager:
                 getattr(plugin, "name", "unknown"),
             )
 
+    def _collect_accessors(
+        self, plugin: Any, contributions: dict[str, list[str]]
+    ) -> None:
+        if not (
+            hasattr(plugin, "register_accessors")
+            and callable(plugin.register_accessors)
+        ):
+            return
+        try:
+            accessors = plugin.register_accessors()
+            if not isinstance(accessors, list):
+                return
+            for accessor in accessors:
+                if not isinstance(accessor, dict):
+                    continue
+                name = accessor.get("name")
+                func = accessor.get("func")
+                if name and func:
+                    self.registry.extensions.register(
+                        "accessor",
+                        name,
+                        func,
+                        description=accessor.get("description", ""),
+                    )
+                    contributions.setdefault("accessors", []).append(name)
+        except Exception:
+            logger.exception(
+                "Failed to collect accessors from plugin '%s'",
+                getattr(plugin, "name", "unknown"),
+            )
+
     def _collect_processors(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
@@ -436,6 +468,41 @@ class PluginManager:
             for name, state in self._plugin_states.items()
             if state == PluginState.ACTIVE
         ]
+
+    def list_readers(self) -> dict[str, dict[str, Any]]:
+        """Return all registered reader contributions."""
+        self.discover()
+        return self.registry.available_readers
+
+    def list_writers(self) -> dict[str, dict[str, Any]]:
+        """Return all registered writer contributions."""
+        self.discover()
+        return self.registry.available_writers
+
+    def list_processors(self) -> dict[str, dict[str, Any]]:
+        """Return all registered processor contributions."""
+        self.discover()
+        return self.registry.available_processors
+
+    def list_visualizers(self) -> dict[str, dict[str, Any]]:
+        """Return all registered visualizer contributions."""
+        self.discover()
+        return self.registry.visualization.available_visualizers
+
+    def list_analyses(self) -> dict[str, dict[str, Any]]:
+        """Return all registered analysis contributions."""
+        self.discover()
+        return self.registry.extensions.list_category("analysis")
+
+    def list_simulations(self) -> dict[str, dict[str, Any]]:
+        """Return all registered simulation contributions."""
+        self.discover()
+        return self.registry.extensions.list_category("simulation")
+
+    def list_accessors(self) -> dict[str, dict[str, Any]]:
+        """Return all registered accessor contributions."""
+        self.discover()
+        return self.registry.extensions.list_category("accessor")
 
     # ------------------------------------------------------------------
     # Plugin query API (legacy, preserved)
