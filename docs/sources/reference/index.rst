@@ -643,16 +643,6 @@ Evolving factor analysis
 
     EFA
 
-Integral inversion solver for spectroscopic data
-================================================
-
-.. autosummary::
-    :nosignatures:
-    :toctree: generated/
-
-    IRIS
-    IrisKernel
-
 Multivariate Curve Resolution - Alternating Least Squares
 =========================================================
 

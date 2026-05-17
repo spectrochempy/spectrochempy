@@ -31,8 +31,6 @@ _LAZY_IMPORTS = {
     "Optimize": "spectrochempy.analysis.curvefitting.optimize",
     "EFA": "spectrochempy.analysis.decomposition.efa",
     "FastICA": "spectrochempy.analysis.decomposition.fast_ica",
-    "IrisKernel": "spectrochempy.analysis.decomposition.iris",
-    "IRIS": "spectrochempy.analysis.decomposition.iris",
     "MCRALS": "spectrochempy.analysis.decomposition.mcrals",
     "NMF": "spectrochempy.analysis.decomposition.nmf",
     "PCA": "spectrochempy.analysis.decomposition.pca",

@@ -91,6 +91,7 @@ interactive = [
   "jupyter_server",
 ]
 nmr = ["spectrochempy-nmr>=0.1,<0.2"]
+iris = ["spectrochempy-iris>=0.1,<0.2"]
 test = [
   "coverage",
   "ipywidgets",

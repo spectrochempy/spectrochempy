@@ -9,6 +9,8 @@ Minimal tests for composite plotting modules to improve coverage.
 These tests ensure the modules can be imported and basic functions are callable.
 """
 
+import pytest
+
 
 class TestPlotMeritImports:
     """Test that plotmerit module can be imported and has expected functions."""
@@ -29,21 +31,28 @@ class TestPlotMeritImports:
 class TestIrisImports:
     """Test that iris module can be imported and has expected functions."""
 
+    @staticmethod
+    def _check_plugin():
+        pytest.importorskip("spectrochempy_iris", reason="IRIS plugin not installed")
+
     def test_plot_iris_lcurve_import(self):
         """Test import of plot_iris_lcurve."""
-        from spectrochempy.plotting.composite.iris import plot_iris_lcurve
+        self._check_plugin()
+        from spectrochempy_iris import plot_iris_lcurve
 
         assert callable(plot_iris_lcurve)
 
     def test_plot_iris_distribution_import(self):
         """Test import of plot_iris_distribution."""
-        from spectrochempy.plotting.composite.iris import plot_iris_distribution
+        self._check_plugin()
+        from spectrochempy_iris import plot_iris_distribution
 
         assert callable(plot_iris_distribution)
 
     def test_plot_iris_merit_import(self):
         """Test import of plot_iris_merit."""
-        from spectrochempy.plotting.composite.iris import plot_iris_merit
+        self._check_plugin()
+        from spectrochempy_iris import plot_iris_merit
 
         assert callable(plot_iris_merit)
 
