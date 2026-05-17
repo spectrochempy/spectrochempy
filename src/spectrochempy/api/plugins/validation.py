@@ -267,14 +267,15 @@ def _get_plugin_metadata(plugin: Any) -> dict[str, Any]:
         except Exception as exc:
             logger.debug("plugin_info() raised %s: %s", type(exc).__name__, exc)
 
+    plugin_api_version = getattr(
+        plugin,
+        "PLUGIN_API_VERSION",
+        getattr(plugin, "api_version", ""),
+    )
     return {
         "name": getattr(plugin, "name", ""),
         "version": getattr(plugin, "version", ""),
-        "plugin_api_version": getattr(
-            plugin,
-            "api_version",
-            getattr(plugin, "PLUGIN_API_VERSION", ""),
-        ),
+        "plugin_api_version": plugin_api_version,
         "spectrochempy_min_version": getattr(plugin, "spectrochempy_min_version", ""),
         "description": getattr(plugin, "description", ""),
     }

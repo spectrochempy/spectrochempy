@@ -12,7 +12,7 @@ from typing import runtime_checkable
 class SpectroChemPyPlugin(Protocol):
     name: str
     version: str
-    api_version: str = "1.0"
+    PLUGIN_API_VERSION: str = "1.0"
 
     def register(self, registry) -> None:
         ...

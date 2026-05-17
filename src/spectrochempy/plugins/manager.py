@@ -24,6 +24,14 @@ logger = logging.getLogger(__name__)
 ENTRY_POINT_GROUP = "spectrochempy.plugins"
 
 
+class DiscoveryState:
+    """Discovery state machine for PluginManager."""
+
+    NOT_DISCOVERED = "not_discovered"
+    DISCOVERING = "discovering"
+    DISCOVERED = "discovered"
+
+
 class PluginManager:
     """
     Orchestrates plugin discovery, validation, registration, and lifecycle.
@@ -43,7 +51,8 @@ class PluginManager:
     def __init__(self, registry: Any = None) -> None:
         self._pm = pluggy.PluginManager("spectrochempy")
         self._pm.add_hookspecs(SpectroChemPyHookSpec)
-        self._discovered = False
+        self._discovery_state = DiscoveryState.NOT_DISCOVERED
+        self._discovering = False
 
         if registry is None:
             registry = _default_registry
@@ -59,23 +68,32 @@ class PluginManager:
     # ------------------------------------------------------------------
 
     def discover(self) -> None:
-        if self._discovered:
+        if self._discovery_state == DiscoveryState.DISCOVERED:
             return
-        for ep in importlib.metadata.entry_points(group=ENTRY_POINT_GROUP):
-            if self._pm.get_plugin(ep.name) is not None:
-                continue
-            self._plugin_states[ep.name] = PluginState.DISCOVERED
-            self._plugin_entry_points[ep.name] = ep.value
+        if self._discovering:
+            return
+        self._discovering = True
+        self._discovery_state = DiscoveryState.DISCOVERING
+        try:
+            for ep in importlib.metadata.entry_points(group=ENTRY_POINT_GROUP):
+                if self._pm.get_plugin(ep.name) is not None:
+                    continue
+                self._plugin_states[ep.name] = PluginState.DISCOVERED
+                self._plugin_entry_points[ep.name] = ep.value
 
-            try:
-                cls = ep.load()
-                plugin = cls() if isinstance(cls, type) else cls
-                self.register(plugin)
-            except Exception as exc:
-                logger.warning("Plugin '%s' failed during discovery: %s", ep.name, exc)
-                self._plugin_states[ep.name] = PluginState.FAILED
-                self._plugin_errors[ep.name] = exc
-        self._discovered = True
+                try:
+                    cls = ep.load()
+                    plugin = cls() if isinstance(cls, type) else cls
+                    self.register(plugin)
+                except Exception as exc:
+                    logger.warning(
+                        "Plugin '%s' failed during discovery: %s", ep.name, exc
+                    )
+                    self._plugin_states[ep.name] = PluginState.FAILED
+                    self._plugin_errors[ep.name] = exc
+        finally:
+            self._discovery_state = DiscoveryState.DISCOVERED
+            self._discovering = False
 
     # ------------------------------------------------------------------
     # Registration (with lifecycle tracking)
@@ -105,6 +123,10 @@ class PluginManager:
         if not is_compatible:
             logger.warning("Plugin '%s' is incompatible and will be skipped.", name)
             self._plugin_states[name] = PluginState.FAILED
+            return
+
+        if self._pm.get_plugin(name) is not None:
+            logger.debug("Plugin '%s' already registered — skipping.", name)
             return
 
         self._pm.register(plugin, name)
