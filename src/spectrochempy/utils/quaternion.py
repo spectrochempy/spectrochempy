@@ -83,7 +83,7 @@ def quat_as_complex_array(arr):
 
     """
     _check()
-    if arr.dtype != np.quaternion:
+    if typequaternion is None or arr.dtype != typequaternion:
         return arr
 
     wt, xt, yt, zt = as_float_array(arr).T
