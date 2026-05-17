@@ -1,0 +1,88 @@
+# Template workflow for a plugin moved to its own repository.
+#
+# GitHub Actions only runs workflows from the repository root:
+# .github/workflows/*.yml. This file is therefore documentation while the
+# template lives inside the SpectroChemPy monorepo. Copy it to the repository
+# root when creating a standalone plugin repository.
+
+name: Publish plugin package
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+
+  release:
+    types: [published]
+
+  workflow_dispatch:
+    inputs:
+      publish_to:
+        description: "Package index to publish to"
+        required: true
+        default: testpypi
+        type: choice
+        options:
+          - testpypi
+          - none
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    name: Build and publish plugin distribution
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install pypa/build
+        run: |
+          python -m pip install build --user
+
+      - name: Build source and wheel distributions
+        run: |
+          python -m build --sdist --wheel --outdir dist/ .
+
+      - name: Upload build artifacts
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: pypi-package
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          retention-days: 5
+
+      - name: Publish package to TestPyPI
+        if: |
+          github.event_name == 'workflow_dispatch' &&
+          inputs.publish_to == 'testpypi'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
+
+      - name: Publish package to PyPI
+        if: github.event_name == 'release' && github.event.action == 'published'
+        uses: pypa/gh-action-pypi-publish@release/v1
