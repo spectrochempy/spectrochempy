@@ -73,11 +73,6 @@ class NDComplexArray(NDArray):
             The given array can be a list, a tuple, a `~numpy.ndarray` , a ndarray-like,
             a  `NDArray` or any subclass of `NDArray` .
         mask : array of bool or `NOMASK` , optional
-
-    def __eq__(self, other):
-        if not isinstance(other, NDComplexArray):
-            return NotImplemented
-        return super().__eq__(other) and self._dtype == other._dtype
             Mask for the data. The mask array must have the same shape as the data.
             The given array can be a list,
             a tuple, or a `~numpy.ndarray` . Each values in the array must be `False`
@@ -126,6 +121,14 @@ class NDComplexArray(NDArray):
 
         """
         super().__init__(data=data, **kwargs)
+
+    # ----------------------------------------------------------------------------------
+    # __eq__
+    # ----------------------------------------------------------------------------------
+    def __eq__(self, other):
+        if not isinstance(other, NDComplexArray):
+            return NotImplemented
+        return super().__eq__(other) and self._dtype == other._dtype
 
     # ----------------------------------------------------------------------------------
     # validators
