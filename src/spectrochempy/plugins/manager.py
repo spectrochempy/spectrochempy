@@ -129,18 +129,26 @@ class PluginManager:
             self._plugin_states[name] = PluginState.FAILED
             return
 
-        # --- Declarative hook collection ---
-        self._collect_declarative_hooks(plugin)
-
         # --- Imperative registration (backward compatible) ---
+        # Run BEFORE declarative hook collection so that if register()
+        # fails, no orphan contributions leak into the registry.
         if hasattr(plugin, "register") and callable(plugin.register):
             try:
                 plugin.register(self.registry)
             except Exception as exc:
-                logger.exception("Plugin '%s' raised an error during register().", name)
+                logger.exception(
+                    "Plugin '%s' raised an error during register().\n"
+                    "  → No contributions from this plugin will be registered.",
+                    name,
+                )
                 self._plugin_states[name] = PluginState.FAILED
                 self._plugin_errors[name] = exc
                 return
+
+        # --- Declarative hook collection ---
+        # Collected only after imperative register() succeeds so that
+        # a failing register() cannot leave orphan readers/writers etc.
+        self._collect_declarative_hooks(plugin)
 
         # --- Register in pluggy for hook-based communication ---
         self._pm.register(plugin, name)
@@ -437,6 +445,33 @@ class PluginManager:
     # ------------------------------------------------------------------
 
     def load_plugin(self, name: str) -> Any | None:
+        """
+        Load and register a specific plugin by name.
+
+        The method runs a two‑pass lookup:
+
+        1. **Already discovered?**  ``discover()`` is called first
+           (idempotent — entry points are scanned only once).  If the
+           plugin is already registered in the pluggy manager it is
+           returned immediately.
+
+        2. **Explicit fallback.**  If the plugin was *not* found after
+           discovery, the entry points are iterated again.  This handles
+           the edge case where a plugin was installed *after* the initial
+           ``discover()`` call completed (since ``discover`` skips entry
+           points that are already registered).
+
+        Parameters
+        ----------
+        name : str
+            Plugin name (matching ``entry_point.name``).
+
+        Returns
+        -------
+        Any or None
+            The loaded plugin instance, or ``None`` if the plugin was
+            not found or failed to register (``FAILED`` state).
+        """
         self.discover()
         plugin = self._pm.get_plugin(name)
         if plugin is None:

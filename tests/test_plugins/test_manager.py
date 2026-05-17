@@ -11,7 +11,7 @@ from operator import attrgetter
 
 import pytest
 
-from spectrochempy.plugins.base import SpectroChemPyPlugin
+from spectrochempy.plugins.base import SpectroChemPyPluginProtocol
 from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.plugins.lifecycle import PluginState
 from spectrochempy.plugins.manager import PluginManager
@@ -455,13 +455,13 @@ def test_registry_not_leaked_across_registrations():
 
 class TestPluginProtocol:
     def test_protocol_check(self):
-        assert isinstance(DummyPlugin(), SpectroChemPyPlugin)
+        assert isinstance(DummyPlugin(), SpectroChemPyPluginProtocol)
 
-    def test_protocol_without_name(self):
+        # An InvalidPlugin without name/version/api_version is NOT a protocol match
         class InvalidPlugin:
             pass
 
-        assert not isinstance(InvalidPlugin(), SpectroChemPyPlugin)
+        assert not isinstance(InvalidPlugin(), SpectroChemPyPluginProtocol)
 
 
 # ------------------------------------------------------------------

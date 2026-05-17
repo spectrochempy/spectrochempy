@@ -665,3 +665,203 @@ class TestDiscoveryStateMachine:
         pm = PluginManager()
         pm.register(FakeReaderPlugin())
         assert call_count == 0
+
+
+# ------------------------------------------------------------------
+# K. Orphan contributions when register() fails
+# ------------------------------------------------------------------
+
+
+class TestOrphanContributions:
+    """
+    A plugin whose imperative register() fails must not leave
+    declarative contributions (readers, writers, …) in the registry.
+    """
+
+    def test_reader_not_registered_when_register_fails(self):
+        """register_readers() works but register() raises → no reader in registry."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        class DeclareThenFailPlugin:
+            name = "declare-then-fail"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_readers(self):
+                return [{"name": "orphan-reader", "func": lambda p: p}]
+
+            def register(self, registry):
+                msg = "intentional failure"
+                raise RuntimeError(msg)
+
+        pm.register(DeclareThenFailPlugin())
+        assert pm.get_plugin_state("declare-then-fail").value == "failed"
+        # The reader must NOT be available
+        assert registry.get_reader("orphan-reader") is None
+
+    def test_writer_not_registered_when_register_fails(self):
+        """register_writers() works but register() raises → no writer in registry."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        class DeclareWriterThenFailPlugin:
+            name = "writer-fail"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_writers(self):
+                return [{"name": "orphan-writer", "func": lambda p: p}]
+
+            def register(self, registry):
+                msg = "intentional failure"
+                raise RuntimeError(msg)
+
+        pm.register(DeclareWriterThenFailPlugin())
+        assert pm.get_plugin_state("writer-fail").value == "failed"
+        assert registry.get_writer("orphan-writer") is None
+
+    def test_accessor_not_registered_when_register_fails(self):
+        """register_accessors() works but register() raises → no accessor in registry."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        class DeclareAccessorThenFailPlugin:
+            name = "accessor-fail"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_accessors(self):
+                return [{"name": "orphan-accessor", "func": lambda p: p}]
+
+            def register(self, registry):
+                msg = "intentional failure"
+                raise RuntimeError(msg)
+
+        pm.register(DeclareAccessorThenFailPlugin())
+        assert pm.get_plugin_state("accessor-fail").value == "failed"
+        assert registry.get_accessor("accessor-fail.orphan-accessor") is None
+
+
+# ------------------------------------------------------------------
+# L. check_plugin_contributions does not double-execute hooks
+# ------------------------------------------------------------------
+
+
+class TestCheckPluginContributionsNoSideEffect:
+    """
+    check_plugin_contributions() validates structure only —
+    it must not be called during normal register flow, and when called
+    explicitly it *does* invoke hooks (by design), but we verify that
+    the normal register flow calls each hook exactly once.
+    """
+
+    def test_register_calls_declarative_hooks_once(self):
+        """Registering a plugin calls each declarative hook exactly once."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        class CountingPlugin:
+            call_count = 0
+            name = "counter"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_readers(self):
+                self.call_count += 1
+                return [{"name": "cnt", "func": lambda p: p}]
+
+        plugin = CountingPlugin()
+        pm.register(plugin)
+        assert plugin.call_count == 1, "register_readers should be called exactly once"
+        assert registry.get_reader("cnt") is not None
+
+
+# ------------------------------------------------------------------
+# M. load_plugin behaviour
+# ------------------------------------------------------------------
+
+
+class TestLoadPlugin:
+    def test_load_plugin_returns_none_for_missing(self):
+        """load_plugin('nonexistent') returns None."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+        result = pm.load_plugin("nonexistent-plugin-name")
+        assert result is None
+
+    def test_load_plugin_failed_state(self):
+        """load_plugin returns None when the plugin is in FAILED state."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        class AlwaysFails:
+            name = "always-fails"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register(self, registry):
+                msg = "always fails"
+                raise RuntimeError(msg)
+
+        # Register directly (load only works with entry points)
+        pm.register(AlwaysFails())
+        assert pm.get_plugin_state("always-fails").value == "failed"
+
+        # load_plugin on a FAILED plugin returns None
+        result = pm.load_plugin("always-fails")
+        assert result is None
+
+
+# ------------------------------------------------------------------
+# N. __getattr__ / hasattr side effects
+# ------------------------------------------------------------------
+
+
+class TestGetAttrSideEffects:
+    """
+    Verify that attribute access does not leave corrupted state or
+    trigger repeated expensive discovery.
+    """
+
+    def test_multiple_access_same_reader(self):
+        """Accessing the same reader multiple times does not re-discover."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+        plugin = FakeReaderPlugin()
+        pm.register(plugin)
+
+        # Access via __getattr__ (mimics scp.read_fake)
+        reader1 = registry.get_reader("fake")
+        reader2 = registry.get_reader("fake")
+        assert reader1 is reader2
+
+    def test_hasattr_on_unknown_does_not_crash(self):
+        """Hasattr on a truly unknown attribute does not leave corrupted state."""
+        import spectrochempy as scp
+
+        # Accessing an unknown attribute should not crash hasattr
+        # (hasattr internally calls __getattr__ and catches AttributeError)
+        result = hasattr(scp, "this_attribute_does_not_exist_xyz")
+        assert result is False
+
+    def test_hasattr_on_known_reader(self):
+        """Hasattr returns True for a registered reader name."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        class SimpleReaderPlugin:
+            name = "simple-reader"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_readers(self):
+                return [
+                    {
+                        "name": "simplereader",
+                        "func": lambda p: p,
+                    }
+                ]
+
+        pm.register(SimpleReaderPlugin())
+        assert registry.get_reader("simplereader") is not None
