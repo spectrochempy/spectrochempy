@@ -118,6 +118,21 @@ def test_package_namespace_uses_isolated_plugin_manager(monkeypatch):
     assert scp.iris.iris_report is iris_analysis_report
 
 
+def test_iris_namespace_does_not_shadow_load_iris(monkeypatch):
+    """The IRIS plugin namespace does not collide with the core load_iris API."""
+    import spectrochempy as scp
+
+    harness = PluginTestHarness()
+    harness.register(IrisPlugin())
+    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
+    monkeypatch.setattr(scp, "registry", harness.registry)
+    monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+
+    assert callable(scp.load_iris)
+    assert scp.iris.batch_iris is batch_iris_analysis
+    assert not hasattr(scp.iris, "load_iris")
+
+
 # ------------------------------------------------------------------
 # IRIS analysis function tests (use synthetic data)
 # ------------------------------------------------------------------
