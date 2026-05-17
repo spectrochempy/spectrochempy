@@ -6,6 +6,9 @@
 """Tests for plotmerit functionality including multi-regularization support."""
 
 import numpy as np
+import pytest
+
+pytest.importorskip("spectrochempy_iris", reason="IRIS plugin not installed")
 
 
 def test_plotmerit_single_index():
@@ -16,6 +19,9 @@ def test_plotmerit_single_index():
     import matplotlib.pyplot as plt
 
     import spectrochempy as scp
+
+    from spectrochempy_iris import IRIS
+    from spectrochempy_iris import IrisKernel
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -45,8 +51,8 @@ def test_plotmerit_single_index():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     ax = iris.plot_merit(index=0, show=False)
@@ -66,6 +72,8 @@ def test_plotmerit_multi_index():
     import matplotlib.pyplot as plt
 
     import spectrochempy as scp
+    from spectrochempy_iris import IRIS
+    from spectrochempy_iris import IrisKernel
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -95,8 +103,8 @@ def test_plotmerit_multi_index():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     axes_list = iris.plot_merit(index=[0, 1, 2], show=False)
@@ -117,6 +125,8 @@ def test_plotmerit_all_regularizations():
     import matplotlib.pyplot as plt
 
     import spectrochempy as scp
+    from spectrochempy_iris import IRIS
+    from spectrochempy_iris import IrisKernel
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -146,8 +156,8 @@ def test_plotmerit_all_regularizations():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     ax = iris.plot_merit(show=False)
@@ -168,6 +178,8 @@ def test_plotmerit_y_limits():
     import matplotlib.pyplot as plt
 
     import spectrochempy as scp
+    from spectrochempy_iris import IRIS
+    from spectrochempy_iris import IrisKernel
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -197,8 +209,8 @@ def test_plotmerit_y_limits():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     ax = iris.plot_merit(index=0, show=False)
@@ -245,6 +257,8 @@ def test_plotmerit_zorder():
     import matplotlib.pyplot as plt
 
     import spectrochempy as scp
+    from spectrochempy_iris import IRIS
+    from spectrochempy_iris import IrisKernel
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -274,8 +288,8 @@ def test_plotmerit_zorder():
     X.y = [c_times, c_pressures]
     X.y.select(2)
 
-    K = scp.IrisKernel(X, "langmuir", q=[-8, -1, 50])
-    iris = scp.IRIS(reg_par=[-10, 1, 3])
+    K = IrisKernel(X, "langmuir", q=[-8, -1, 50])
+    iris = IRIS(reg_par=[-10, 1, 3])
     iris.fit(X, K)
 
     ax = iris.plot_merit(index=0, show=False)
