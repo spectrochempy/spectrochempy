@@ -6,6 +6,12 @@ Adding a Reader
 Import of spectroscopic data with their metadata from various file formats is a key feature of SpectroChemPy. Data
 import is handled through the generic ``read()`` function (in ``spectrochempy.core.readers.importer``).
 
+Reader functions are package-level APIs because they create datasets from
+external data. New readers should therefore be exposed as
+``scp.read_xxx(...)`` or, for plugin readers, ``scp.<plugin>.read_xxx(...)``.
+Do not add reader methods to ``NDDataset`` or dataset accessors such as
+``dataset.read_xxx(...)`` or ``dataset.<plugin>.read_xxx(...)``.
+
 This guide describes the steps to add a specific reader, using the example of reading Grams/Thermo .spc files.
 
 .. contents:: Contents
@@ -64,8 +70,6 @@ Create ``spectrochempy/core/readers/reader_xxx.py``:
     from spectrochempy.core.readers.importer import _importer_method, Importer
 
     __all__ = ["read_spc"]
-    __dataset_methods__ = __all__
-
     def read_spc(*paths, **kwargs):
         """Read Thermo Galactic .spc file(s).
 

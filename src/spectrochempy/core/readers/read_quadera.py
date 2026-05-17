@@ -6,7 +6,6 @@
 """Plugin module to extend NDDataset with the import methods method."""
 
 __all__ = ["read_quadera"]
-__dataset_methods__ = __all__
 
 import re
 from datetime import datetime

@@ -10,7 +10,6 @@ This module provides functions to read OMNIC generated data files.
 """
 
 __all__ = ["read_omnic", "read_spg", "read_spa", "read_srs"]
-__dataset_methods__ = __all__
 
 import io
 import re

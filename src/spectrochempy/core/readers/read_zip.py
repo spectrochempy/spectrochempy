@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 __all__ = ["read_zip"]
-__dataset_methods__ = __all__
 
 from spectrochempy.core.readers.filetypes import registry
 from spectrochempy.core.readers.importer import Importer

@@ -6,7 +6,6 @@
 """Provides methods for reading data in a directory after a carroucell experiment."""
 
 __all__ = ["read_carroucell"]
-__dataset_methods__ = __all__
 
 import datetime
 import os

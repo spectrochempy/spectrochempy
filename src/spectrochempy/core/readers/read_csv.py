@@ -4,7 +4,6 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 __all__ = ["read_csv"]
-__dataset_methods__ = __all__
 
 import csv
 

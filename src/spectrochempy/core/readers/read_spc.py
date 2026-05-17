@@ -6,7 +6,6 @@
 """Extend NDDataset with the import method for Thermo galactic (spc) data files."""
 
 __all__ = ["read_spc"]
-__dataset_methods__ = __all__
 
 import struct
 from datetime import datetime
