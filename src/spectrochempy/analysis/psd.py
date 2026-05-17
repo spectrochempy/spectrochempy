@@ -621,6 +621,7 @@ class PSD(AnalysisConfigurable):
 
         else:
             # Averaged or single cycle: D shape (n_spectra, n_wavenumbers)
+            n_wavenumbers = D.shape[1]
 
             # angle: (n_phi, n_spectra)
             angle = (
