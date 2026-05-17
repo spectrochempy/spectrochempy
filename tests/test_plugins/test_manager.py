@@ -482,6 +482,14 @@ class TestMissingPluginError:
         )
         assert "pip install mypkg" in str(err)
 
+    def test_notebook_traceback_rendering_is_compact(self):
+        err = MissingPluginError(
+            "test", plugin_name="mypkg", install_hint="pip install mypkg"
+        )
+        rendered = err._render_traceback_()
+        assert rendered == [f"MissingPluginError: {err}\n"]
+        assert "Traceback" not in rendered[0]
+
 
 # ------------------------------------------------------------------
 # Test plugins for lifecycle

@@ -22,6 +22,10 @@ class MissingPluginError(ImportError):
             )
         super().__init__(msg)
 
+    def _render_traceback_(self) -> list[str]:
+        """Return a compact IPython/Jupyter rendering without the full traceback."""
+        return [f"{type(self).__name__}: {self}\n"]
+
 
 class PluginVersionError(RuntimeError):
     def __init__(self, plugin_name: str, required: str, found: str) -> None:
