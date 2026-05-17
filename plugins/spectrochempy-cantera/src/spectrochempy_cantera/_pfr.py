@@ -482,7 +482,7 @@ class PFR:
                                 + np.argmin(pop_sse)
                                 + 1
                             )
-                            if gen == 1 or prev_min_sse is None:
+                            if gen == 1:
                                 logging.info(
                                     f"                      Minimum SSE: {min_sse:.3e} "
                                     f"(Eval # {it_min_sse})",
