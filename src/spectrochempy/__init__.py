@@ -76,7 +76,7 @@ application.start.set_warnings()
 # --------------------------------------------------------------------------------------
 from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
 from spectrochempy.plugins.features import plugin_namespace_install_hint
-from spectrochempy.plugins.features import plugin_reader_install_hint
+from spectrochempy.plugins.features import plugin_reader_missing_stub
 from spectrochempy.plugins.manager import plugin_manager
 from spectrochempy.plugins.registry import registry
 
@@ -150,9 +150,9 @@ def __getattr__(name):
         reader_info = registry.get_reader(reader_name)
         if reader_info:
             return reader_info["func"]
-        hint = plugin_reader_install_hint(reader_name)
-        if hint:
-            raise AttributeError(hint)
+        stub = plugin_reader_missing_stub(reader_name)
+        if stub:
+            return stub
 
     for category in ("analysis", "simulation", "accessor"):
         extension_info = registry.extensions.get(category, name)

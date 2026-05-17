@@ -17,6 +17,7 @@ import pytest
 import spectrochempy
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 from spectrochempy.api.plugins.validation import check_plugin_contributions
+from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.namespace import PluginNamespace
@@ -257,8 +258,8 @@ class TestMissingPlugin:
             "spectrochempy.missing.lazy_import_entry",
         )
 
-        with pytest.raises(AttributeError) as excinfo:
-            _ = spectrochempy.read_topspin
+        with pytest.raises(MissingPluginError) as excinfo:
+            spectrochempy.read_topspin("missing")
         message = str(excinfo.value)
         assert "spectrochempy-nmr" in message
         assert "spectrochempy[nmr]" in message
