@@ -54,4 +54,4 @@ def test_readdir_for_nmr():
 
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_use_list():
-    scp.read_topspin(nmrdir / "relax" / "100" / "ser", use_list=True)
+    dataset = scp.read_topspin(nmrdir / "relax" / "100" / "ser", use_list=True)
