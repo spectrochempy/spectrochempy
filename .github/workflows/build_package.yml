@@ -86,6 +86,8 @@ jobs:
         plugin:
           - name: spectrochempy-nmr
             path: plugins/spectrochempy-nmr
+          - name: spectrochempy-iris
+            path: plugins/spectrochempy-iris
 
     defaults:
       run:
