@@ -522,6 +522,7 @@ class PFR:
                             + 12 * len(param_to_optimize) * "-"
                             + "--|-----------",
                         )
+                        pop_sse = []
 
                 guess_string = ""
                 for val in guess:
