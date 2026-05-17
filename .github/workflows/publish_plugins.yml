@@ -1,0 +1,111 @@
+# This workflow builds and publishes SpectroChemPy plugin packages to:
+# - TestPyPI on pushes to test branches
+# - PyPI on published releases
+
+name: Publish plugin packages
+
+on:
+  push:
+    branches:
+      - test/plugin-publish-workflow
+    paths:
+      - ".github/workflows/publish_plugins.yml"
+      - "plugins/spectrochempy-nmr/**"
+      - "plugins/spectrochempy-iris/**"
+
+  pull_request:
+    paths:
+      - ".github/workflows/publish_plugins.yml"
+      - "plugins/spectrochempy-nmr/**"
+      - "plugins/spectrochempy-iris/**"
+
+  release:
+    types: [published]
+
+  workflow_dispatch:
+    inputs:
+      publish_to:
+        description: "Package index to publish to"
+        required: true
+        default: testpypi
+        type: choice
+        options:
+          - testpypi
+          - none
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish_plugins:
+    name: Build and publish plugin distributions
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin:
+          - name: spectrochempy-nmr
+            path: plugins/spectrochempy-nmr
+          - name: spectrochempy-iris
+            path: plugins/spectrochempy-iris
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install pypa/build
+        run: |
+          python -m pip install build --user
+
+      - name: Build plugin source and wheel distributions
+        run: |
+          python -m build --sdist --wheel --outdir dist/${{ matrix.plugin.name }} ${{ matrix.plugin.path }}
+
+      - name: Upload plugin build artifacts
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: pypi-package-${{ matrix.plugin.name }}
+          path: |
+            dist/${{ matrix.plugin.name }}/*.whl
+            dist/${{ matrix.plugin.name }}/*.tar.gz
+          retention-days: 5
+
+      - name: Publish plugin package to TestPyPI
+        if: |
+          github.repository == 'spectrochempy/spectrochempy' &&
+          (
+            github.event_name == 'push' ||
+            (github.event_name == 'workflow_dispatch' && inputs.publish_to == 'testpypi')
+          )
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist/${{ matrix.plugin.name }}
+          skip-existing: true
+
+      - name: Publish plugin package to PyPI
+        if: |
+          github.repository == 'spectrochempy/spectrochempy' &&
+          github.event_name == 'release' &&
+          github.event.action == 'published'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/${{ matrix.plugin.name }}

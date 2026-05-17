@@ -9,16 +9,19 @@ class MissingPluginError(ImportError):
     def __init__(
         self,
         feature: str,
-        plugin_name: str = "spectrochempy-nmr",
+        plugin_name: str = "",
         install_hint: str | None = None,
     ) -> None:
-        msg = f"The '{feature}' feature requires the plugin '{plugin_name}'.\n"
+        if plugin_name:
+            msg = f"The '{feature}' feature requires the plugin '{plugin_name}'.\n"
+        else:
+            msg = f"The '{feature}' feature requires an optional plugin.\n"
         if install_hint:
             msg += install_hint
-        else:
+        elif plugin_name:
             msg += (
-                f"Install it with : pip install {plugin_name}\n"
-                f"Or using spectrochempy extras : pip install spectrochempy[{plugin_name.split('-')[-1]}]"
+                f"Install it with: pip install {plugin_name}\n"
+                f"Or using spectrochempy extras: pip install spectrochempy[{plugin_name.split('-')[-1]}]"
             )
         super().__init__(msg)
 

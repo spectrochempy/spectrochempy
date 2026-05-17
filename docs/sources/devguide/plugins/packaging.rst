@@ -142,7 +142,24 @@ Entry point discovery flow
 Distribution (PyPI)
 ===================
 
-To publish on PyPI:
+Official plugins that still live in the SpectroChemPy monorepo are published
+from the root workflow:
+
+.. code-block:: text
+
+    .github/workflows/publish_plugins.yml
+
+GitHub Actions only executes workflows from the repository root, so workflows
+stored inside ``plugins/<plugin>/.github/workflows/`` are templates only while
+the plugin remains in the monorepo.  If a plugin is later moved to its own
+repository, copy the template workflow to that repository's root
+``.github/workflows/`` directory.
+
+The monorepo workflow uses PyPI Trusted Publishing.  Each plugin distribution
+must therefore have its own PyPI/TestPyPI trusted publisher configured with the
+matching project name, for example ``spectrochempy-nmr``.
+
+For a manual local upload:
 
 .. code-block:: bash
 

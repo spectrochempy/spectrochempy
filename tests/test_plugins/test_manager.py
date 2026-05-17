@@ -11,7 +11,7 @@ from operator import attrgetter
 
 import pytest
 
-from spectrochempy.plugins.base import SpectroChemPyPlugin
+from spectrochempy.plugins.base import SpectroChemPyPluginProtocol
 from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.plugins.lifecycle import PluginState
 from spectrochempy.plugins.manager import PluginManager
@@ -27,7 +27,7 @@ from spectrochempy.plugins.registry import PluginRegistry
 class DummyPlugin:
     name = "dummy"
     version = "0.1.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register(self, registry):
         registry.register_reader("dummy", lambda x: x)
@@ -36,7 +36,7 @@ class DummyPlugin:
 class DeclarativeReaderPlugin:
     name = "decl-reader"
     version = "0.2.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register_readers(self) -> list[dict]:
         return [
@@ -52,7 +52,7 @@ class DeclarativeReaderPlugin:
 class DeclarativeWriterPlugin:
     name = "decl-writer"
     version = "0.2.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register_writers(self) -> list[dict]:
         return [
@@ -67,7 +67,7 @@ class DeclarativeWriterPlugin:
 class DeclarativeVisualizerPlugin:
     name = "decl-viz"
     version = "0.2.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register_visualizers(self) -> list[dict]:
         return [
@@ -82,7 +82,7 @@ class DeclarativeVisualizerPlugin:
 class DeclarativeProcessorPlugin:
     name = "decl-proc"
     version = "0.2.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register_processors(self) -> list[dict]:
         return [
@@ -97,7 +97,7 @@ class DeclarativeProcessorPlugin:
 class DeclarativeAccessorPlugin:
     name = "decl-accessor"
     version = "0.2.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register_accessors(self) -> list[dict]:
         return [
@@ -112,7 +112,7 @@ class DeclarativeAccessorPlugin:
 class NamespacedAccessorPlugin:
     name = "domain"
     version = "0.2.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register_accessors(self) -> list[dict]:
         return [
@@ -131,7 +131,7 @@ class HybridPlugin:
 
     name = "hybrid"
     version = "0.3.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register(self, registry):
         registry.register_reader("legacy_reader", lambda x: x)
@@ -151,7 +151,7 @@ class BrokenDeclarativePlugin:
 
     name = "broken"
     version = "0.1.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register_readers(self) -> list[dict]:
         msg = "Internal error"
@@ -166,7 +166,7 @@ class BrokenDeclarativePlugin:
 def test_plugin_manager_creation():
     pm = PluginManager()
     assert pm is not None
-    assert pm._discovered is False
+    assert pm._discovery_state == "not_discovered"
 
 
 def test_plugin_manager_injected_registry():
@@ -190,7 +190,7 @@ def test_plugin_manager_fallback_registry():
 def test_discover_plugins():
     pm = PluginManager()
     pm.discover()
-    assert pm._discovered is True
+    assert pm._discovery_state == "discovered"
     assert isinstance(pm.list_plugins(), list)
 
 
@@ -198,6 +198,16 @@ def test_available_plugins_empty():
     pm = PluginManager()
     pm.discover()
     assert pm.has_plugin("nonexistent") is False
+
+
+def test_available_plugins_uses_registered_plugin_names():
+    pm = PluginManager()
+    plugin = DummyPlugin()
+
+    pm.register(plugin)
+
+    assert pm.available_plugins["dummy"] is plugin
+    assert all(isinstance(name, str) for name in pm.available_plugins)
 
 
 # ------------------------------------------------------------------
@@ -399,7 +409,8 @@ def test_broken_declarative_hook_does_not_crash():
     plugin = BrokenDeclarativePlugin()
     # Must not raise despite the RuntimeError in register_readers
     pm.register(plugin)
-    assert pm.has_plugin("broken")
+    assert pm.get_plugin_state("broken") is PluginState.FAILED
+    assert registry.available_readers == {}
 
 
 # ------------------------------------------------------------------
@@ -455,13 +466,13 @@ def test_registry_not_leaked_across_registrations():
 
 class TestPluginProtocol:
     def test_protocol_check(self):
-        assert isinstance(DummyPlugin(), SpectroChemPyPlugin)
+        assert isinstance(DummyPlugin(), SpectroChemPyPluginProtocol)
 
-    def test_protocol_without_name(self):
+        # An InvalidPlugin without name/version/api_version is NOT a protocol match
         class InvalidPlugin:
             pass
 
-        assert not isinstance(InvalidPlugin(), SpectroChemPyPlugin)
+        assert not isinstance(InvalidPlugin(), SpectroChemPyPluginProtocol)
 
 
 # ------------------------------------------------------------------
@@ -470,11 +481,17 @@ class TestPluginProtocol:
 
 
 class TestMissingPluginError:
-    def test_default_message(self):
-        err = MissingPluginError("topspin reader")
+    def test_default_message_with_plugin_name(self):
+        err = MissingPluginError("topspin reader", plugin_name="spectrochempy-nmr")
         msg = str(err)
         assert "topspin reader" in msg
         assert "spectrochempy-nmr" in msg
+
+    def test_default_message_without_plugin_name(self):
+        err = MissingPluginError("topspin reader")
+        msg = str(err)
+        assert "topspin reader" in msg
+        assert "optional plugin" in msg
 
     def test_custom_hint(self):
         err = MissingPluginError(
@@ -501,7 +518,7 @@ class FailingConstructorPlugin:
 
     name = "fail-ctor"
     version = "0.1.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def __init__(self):
         msg = "optional dependency not found"
@@ -516,7 +533,7 @@ class FailingRegisterPlugin:
 
     name = "fail-reg"
     version = "0.1.0"
-    api_version = "1.0"
+    PLUGIN_API_VERSION = "1.0"
 
     def register(self, registry):
         msg = "registration failure"

@@ -56,8 +56,8 @@ import lazy_loader as _lazy_loader
 # --------------------------------------------------------------------------------------
 # Lazy loading of sub-packages
 # --------------------------------------------------------------------------------------
-# Store the original __getattr__ from lazy_loader
-original_getattr, *_ = _lazy_loader.attach_stub(__name__, __file__)
+# Store the original __getattr__ and __dir__ from lazy_loader
+original_getattr, original_dir, *_ = _lazy_loader.attach_stub(__name__, __file__)
 
 # Dictionary mapping top-level objects to their module paths
 
@@ -74,6 +74,9 @@ application.start.set_warnings()
 # --------------------------------------------------------------------------------------
 # Plugin  manager
 # --------------------------------------------------------------------------------------
+from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
+from spectrochempy.plugins.features import plugin_namespace_install_hint
+from spectrochempy.plugins.features import plugin_reader_missing_stub
 from spectrochempy.plugins.manager import plugin_manager
 from spectrochempy.plugins.registry import registry
 
@@ -88,6 +91,33 @@ _PLOT_PROFILE_FUNCTIONS = {
     "save_plot_profile": "spectrochempy.plotting.profile",
     "delete_plot_profile": "spectrochempy.plotting.profile",
 }
+
+
+def __dir__():
+    names = set(original_dir()) if callable(original_dir) else set()
+    names.update(_PLOT_PROFILE_FUNCTIONS)
+    names.update(_namespace_names())
+    # Include already-discovered plugin readers and extensions
+    # without triggering entry-point scanning (dir() should be side-effect free).
+    names.update(_reader_names())
+    names.update(_extension_names())
+    return sorted(names)
+
+
+def _reader_names():
+    return {f"read_{name}" for name in registry.available_readers}
+
+
+def _namespace_names():
+    return set(KNOWN_PLUGIN_NAMESPACES)
+
+
+def _extension_names():
+    names = set()
+    for category in ("analysis", "simulation"):
+        for entry_name in registry.extensions.list_category(category):
+            names.add(entry_name)
+    return names
 
 
 # Override __getattr__ to handle both submodules and direct class access
@@ -120,6 +150,9 @@ def __getattr__(name):
         reader_info = registry.get_reader(reader_name)
         if reader_info:
             return reader_info["func"]
+        stub = plugin_reader_missing_stub(reader_name)
+        if stub:
+            return stub
 
     for category in ("analysis", "simulation", "accessor"):
         extension_info = registry.extensions.get(category, name)
@@ -146,6 +179,10 @@ def __getattr__(name):
     try:
         return original_getattr(name)
     except AttributeError as err:
+        # Check if this is a known plugin namespace
+        hint = plugin_namespace_install_hint(name)
+        if hint:
+            raise AttributeError(hint) from err
         raise AttributeError(
             f"module 'spectrochempy' has no attribute '{name}'"
         ) from err

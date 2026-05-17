@@ -9,10 +9,18 @@ from typing import runtime_checkable
 
 
 @runtime_checkable
-class SpectroChemPyPlugin(Protocol):
+class SpectroChemPyPluginProtocol(Protocol):
+    """
+    Structural protocol for duck-type checks (e.g., ``isinstance``).
+
+    This is **not** the base class for plugin authors.
+    Use ``spectrochempy.api.plugins.SpectroChemPyPlugin`` (the concrete
+    base class from ``spectrochempy.api.plugins``) when writing a plugin.
+    """
+
     name: str
     version: str
-    api_version: str = "1.0"
+    PLUGIN_API_VERSION: str = "1.0"
 
     def register(self, registry) -> None:
         ...
