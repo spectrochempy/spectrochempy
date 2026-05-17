@@ -17,11 +17,10 @@ def test_plotmerit_single_index():
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-
-    import spectrochempy as scp
-
     from spectrochempy_iris import IRIS
     from spectrochempy_iris import IrisKernel
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -70,10 +69,10 @@ def test_plotmerit_multi_index():
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-
-    import spectrochempy as scp
     from spectrochempy_iris import IRIS
     from spectrochempy_iris import IrisKernel
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -123,10 +122,10 @@ def test_plotmerit_all_regularizations():
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-
-    import spectrochempy as scp
     from spectrochempy_iris import IRIS
     from spectrochempy_iris import IrisKernel
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -176,10 +175,10 @@ def test_plotmerit_y_limits():
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-
-    import spectrochempy as scp
     from spectrochempy_iris import IRIS
     from spectrochempy_iris import IrisKernel
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
@@ -255,10 +254,10 @@ def test_plotmerit_zorder():
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-
-    import spectrochempy as scp
     from spectrochempy_iris import IRIS
     from spectrochempy_iris import IrisKernel
+
+    import spectrochempy as scp
 
     X = scp.read("irdata/CO@Mo_Al2O3.SPG")
     X = X[:, 2250.0:1950.0]
