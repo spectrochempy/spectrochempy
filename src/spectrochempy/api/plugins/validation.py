@@ -92,21 +92,11 @@ def check_plugin_contributions(plugin: Any) -> list[str]:
     """
     Check plugin contribution declarations for consistency.
 
-    .. caution::
-
-       This function **calls** the hook methods (``register_readers()``,
-       etc.) to inspect their return values.  If a hook has side effects
-       (e.g. incrementing a counter), those effects will occur during
-       validation.  During normal discovery/registration the plugin
-       manager calls each hook **once** through
-       :meth:`~spectrochempy.plugins.manager.PluginManager._collect_declarative_hooks`;
-       use this function only for ad‑hoc / development checks.
-
     Inspects declarative hooks (``register_readers``,
     ``register_writers``, ``register_processors``,
     ``register_visualizers``, ``register_analyses``,
-    ``register_simulations``, ``register_accessors``) and validates
-    the structure of returned data.
+    ``register_simulations``, ``register_accessors``) without executing
+    them. This intentionally avoids hook side effects during validation.
 
     Parameters
     ----------
@@ -136,37 +126,6 @@ def check_plugin_contributions(plugin: Any) -> list[str]:
         method = getattr(plugin, hook_name)
         if not callable(method):
             issues.append(f"Plugin '{name}': '{hook_name}' is not callable.")
-            continue
-        try:
-            result = method()
-        except Exception as exc:
-            issues.append(
-                f"Plugin '{name}': '{hook_name}()' raised {type(exc).__name__}: {exc}"
-            )
-            continue
-        if result is None:
-            continue
-        if not isinstance(result, list):
-            issues.append(
-                f"Plugin '{name}': '{hook_name}()' returned {type(result).__name__}, "
-                f"expected list[dict]."
-            )
-            continue
-        for i, item in enumerate(result):
-            if not isinstance(item, dict):
-                issues.append(
-                    f"Plugin '{name}': '{hook_name}()' item {i} is "
-                    f"{type(item).__name__}, expected dict."
-                )
-                continue
-            if "name" not in item:
-                issues.append(
-                    f"Plugin '{name}': '{hook_name}()' item {i} is missing 'name'."
-                )
-            if "func" not in item:
-                issues.append(
-                    f"Plugin '{name}': '{hook_name}()' item {i} is missing 'func'."
-                )
 
     return issues
 

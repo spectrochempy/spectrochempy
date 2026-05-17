@@ -58,6 +58,18 @@ class PluginRegistry:
         self.metadata.clear()
         self.extensions.clear()
 
+    def merge_from(self, other: PluginRegistry) -> None:
+        """Merge contributions from another registry into this registry."""
+        self.io._readers.update(other.io._readers)
+        self.io._writers.update(other.io._writers)
+        self.io._filetypes.update(other.io._filetypes)
+        self.processing._processors.update(other.processing._processors)
+        self.processing._unit_contexts.update(other.processing._unit_contexts)
+        self.processing._dtype_handlers.update(other.processing._dtype_handlers)
+        self.visualization._visualizers.update(other.visualization._visualizers)
+        for category, entries in other.extensions._extensions.items():
+            self.extensions._extensions.setdefault(category, {}).update(entries)
+
     # ------------------------------------------------------------------
     # Capability-based query
     # ------------------------------------------------------------------

@@ -16,6 +16,7 @@ import pytest
 
 import spectrochempy
 from spectrochempy.api.plugins import SpectroChemPyPlugin
+from spectrochempy.api.plugins.validation import check_plugin_contributions
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.namespace import PluginNamespace
@@ -750,11 +751,28 @@ class TestOrphanContributions:
 
 class TestCheckPluginContributionsNoSideEffect:
     """
-    check_plugin_contributions() validates structure only —
-    it must not be called during normal register flow, and when called
-    explicitly it *does* invoke hooks (by design), but we verify that
-    the normal register flow calls each hook exactly once.
+    check_plugin_contributions() validates hook presence only and must not
+    execute declarative hooks.
     """
+
+    def test_check_plugin_contributions_does_not_call_hooks(self):
+        """Validation must not execute declarative hook methods."""
+
+        class CountingPlugin:
+            call_count = 0
+            name = "counter-validation"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_readers(self):
+                self.call_count += 1
+                return [{"name": "cnt", "func": lambda p: p}]
+
+        plugin = CountingPlugin()
+        issues = check_plugin_contributions(plugin)
+
+        assert issues == []
+        assert plugin.call_count == 0
 
     def test_register_calls_declarative_hooks_once(self):
         """Registering a plugin calls each declarative hook exactly once."""

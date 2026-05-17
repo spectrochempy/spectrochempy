@@ -17,6 +17,7 @@ from spectrochempy.api.plugins.validation import validate_plugin_compatibility
 from spectrochempy.plugins.hooks import SpectroChemPyHookSpec
 from spectrochempy.plugins.lifecycle import PluginDescriptor
 from spectrochempy.plugins.lifecycle import PluginState
+from spectrochempy.plugins.registry import PluginRegistry
 from spectrochempy.plugins.registry import registry as _default_registry
 
 logger = logging.getLogger(__name__)
@@ -129,12 +130,15 @@ class PluginManager:
             self._plugin_states[name] = PluginState.FAILED
             return
 
-        # --- Imperative registration (backward compatible) ---
-        # Run BEFORE declarative hook collection so that if register()
-        # fails, no orphan contributions leak into the registry.
+        # --- Atomic contribution collection ---
+        # Declarative hooks and imperative register() write into a temporary
+        # registry first. Nothing is merged into the active registry unless the
+        # whole plugin registration succeeds.
+        temp_registry = PluginRegistry()
+        self._collect_declarative_hooks(plugin, temp_registry)
         if hasattr(plugin, "register") and callable(plugin.register):
             try:
-                plugin.register(self.registry)
+                plugin.register(temp_registry)
             except Exception as exc:
                 logger.exception(
                     "Plugin '%s' raised an error during register().\n"
@@ -145,12 +149,8 @@ class PluginManager:
                 self._plugin_errors[name] = exc
                 return
 
-        # --- Declarative hook collection ---
-        # Collected only after imperative register() succeeds so that
-        # a failing register() cannot leave orphan readers/writers etc.
-        self._collect_declarative_hooks(plugin)
-
         # --- Register in pluggy for hook-based communication ---
+        self.registry.merge_from(temp_registry)
         self._pm.register(plugin, name)
         self.registry.register_plugin(name, plugin)
         self._plugin_states[name] = PluginState.ACTIVE
@@ -166,16 +166,19 @@ class PluginManager:
     #   register_visualizers → self.registry.visualization
     # ------------------------------------------------------------------
 
-    def _collect_declarative_hooks(self, plugin: Any) -> dict[str, list[str]]:
+    def _collect_declarative_hooks(
+        self, plugin: Any, registry: PluginRegistry | None = None
+    ) -> dict[str, list[str]]:
         contributions: dict[str, list[str]] = {}
+        registry = registry or self.registry
 
-        self._collect_readers(plugin, contributions)
-        self._collect_writers(plugin, contributions)
-        self._collect_processors(plugin, contributions)
-        self._collect_visualizers(plugin, contributions)
-        self._collect_analyses(plugin, contributions)
-        self._collect_simulations(plugin, contributions)
-        self._collect_accessors(plugin, contributions)
+        self._collect_readers(plugin, contributions, registry)
+        self._collect_writers(plugin, contributions, registry)
+        self._collect_processors(plugin, contributions, registry)
+        self._collect_visualizers(plugin, contributions, registry)
+        self._collect_analyses(plugin, contributions, registry)
+        self._collect_simulations(plugin, contributions, registry)
+        self._collect_accessors(plugin, contributions, registry)
 
         return contributions
 
@@ -216,7 +219,10 @@ class PluginManager:
         return valid
 
     def _collect_readers(
-        self, plugin: Any, contributions: dict[str, list[str]]
+        self,
+        plugin: Any,
+        contributions: dict[str, list[str]],
+        registry: PluginRegistry,
     ) -> None:
         plugin_name = getattr(plugin, "name", "unknown")
         if not (
@@ -231,7 +237,7 @@ class PluginManager:
             for reader in readers:
                 name = reader["name"]
                 func = reader["func"]
-                self.registry.io.register_reader(
+                registry.io.register_reader(
                     name,
                     func,
                     description=reader.get("description", ""),
@@ -247,7 +253,10 @@ class PluginManager:
             )
 
     def _collect_writers(
-        self, plugin: Any, contributions: dict[str, list[str]]
+        self,
+        plugin: Any,
+        contributions: dict[str, list[str]],
+        registry: PluginRegistry,
     ) -> None:
         plugin_name = getattr(plugin, "name", "unknown")
         if not (
@@ -262,7 +271,7 @@ class PluginManager:
             for writer in writers:
                 name = writer["name"]
                 func = writer["func"]
-                self.registry.io.register_writer(
+                registry.io.register_writer(
                     name,
                     func,
                     description=writer.get("description", ""),
@@ -275,7 +284,10 @@ class PluginManager:
             )
 
     def _collect_visualizers(
-        self, plugin: Any, contributions: dict[str, list[str]]
+        self,
+        plugin: Any,
+        contributions: dict[str, list[str]],
+        registry: PluginRegistry,
     ) -> None:
         plugin_name = getattr(plugin, "name", "unknown")
         if not (
@@ -291,7 +303,7 @@ class PluginManager:
             for vis in visualizers:
                 name = vis["name"]
                 func = vis["func"]
-                self.registry.visualization.register_visualizer(
+                registry.visualization.register_visualizer(
                     name,
                     func,
                     description=vis.get("description", ""),
@@ -304,7 +316,10 @@ class PluginManager:
             )
 
     def _collect_analyses(
-        self, plugin: Any, contributions: dict[str, list[str]]
+        self,
+        plugin: Any,
+        contributions: dict[str, list[str]],
+        registry: PluginRegistry,
     ) -> None:
         plugin_name = getattr(plugin, "name", "unknown")
         if not (
@@ -319,7 +334,7 @@ class PluginManager:
             for analysis in analyses:
                 name = analysis["name"]
                 func = analysis["func"]
-                self.registry.extensions.register(
+                registry.extensions.register(
                     "analysis",
                     name,
                     func,
@@ -337,7 +352,10 @@ class PluginManager:
             )
 
     def _collect_simulations(
-        self, plugin: Any, contributions: dict[str, list[str]]
+        self,
+        plugin: Any,
+        contributions: dict[str, list[str]],
+        registry: PluginRegistry,
     ) -> None:
         plugin_name = getattr(plugin, "name", "unknown")
         if not (
@@ -353,7 +371,7 @@ class PluginManager:
             for sim in simulations:
                 name = sim["name"]
                 func = sim["func"]
-                self.registry.extensions.register(
+                registry.extensions.register(
                     "simulation",
                     name,
                     func,
@@ -371,7 +389,10 @@ class PluginManager:
             )
 
     def _collect_accessors(
-        self, plugin: Any, contributions: dict[str, list[str]]
+        self,
+        plugin: Any,
+        contributions: dict[str, list[str]],
+        registry: PluginRegistry,
     ) -> None:
         plugin_name = getattr(plugin, "name", "unknown")
         if not (
@@ -398,7 +419,7 @@ class PluginManager:
                     registered_names.extend(accessor.get("legacy_names", []))
 
                 for registered_name in registered_names:
-                    self.registry.register_accessor(
+                    registry.register_accessor(
                         registered_name,
                         func,
                         description=accessor.get("description", ""),
@@ -412,7 +433,10 @@ class PluginManager:
             )
 
     def _collect_processors(
-        self, plugin: Any, contributions: dict[str, list[str]]
+        self,
+        plugin: Any,
+        contributions: dict[str, list[str]],
+        registry: PluginRegistry,
     ) -> None:
         plugin_name = getattr(plugin, "name", "unknown")
         if not (
@@ -428,7 +452,7 @@ class PluginManager:
             for proc in procs:
                 name = proc["name"]
                 func = proc["func"]
-                self.registry.processing.register_processor(
+                registry.processing.register_processor(
                     name,
                     func,
                     description=proc.get("description", ""),
