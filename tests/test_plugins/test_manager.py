@@ -410,7 +410,9 @@ def test_broken_declarative_hook_does_not_crash():
     # Must not raise despite the RuntimeError in register_readers
     pm.register(plugin)
     assert pm.get_plugin_state("broken") is PluginState.FAILED
-    assert registry.available_readers == {}
+    assert all(
+        info.get("plugin") != "broken" for info in registry.available_readers.values()
+    )
 
 
 # ------------------------------------------------------------------

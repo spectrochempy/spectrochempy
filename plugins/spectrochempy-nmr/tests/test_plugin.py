@@ -2,13 +2,21 @@
 
 """Tests for spectrochempy-nmr plugin registration and lifecycle."""
 
+import pytest
 from spectrochempy_nmr import NMRPlugin
 
+import spectrochempy.plugins.manager as manager_module
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
 from spectrochempy.api.plugins import check_plugin_compatibility
 from spectrochempy.plugins.deps import MissingPluginError
+from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
+from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.testing.plugins import PluginTestHarness
+
+
+def _require_reader_dependencies() -> None:
+    pytest.importorskip("quaternion")
 
 
 def test_plugin_metadata():
@@ -29,6 +37,7 @@ def test_plugin_compatibility():
 
 def test_registration():
     """Plugin registers the topspin reader via declarative hook."""
+    _require_reader_dependencies()
     harness = PluginTestHarness()
     harness.register(NMRPlugin())
 
@@ -37,8 +46,59 @@ def test_registration():
     assert reader["description"]
 
 
+def test_registration_is_idempotent():
+    """Registering the same NMR plugin twice does not duplicate contributions."""
+    _require_reader_dependencies()
+    harness = PluginTestHarness()
+    plugin = NMRPlugin()
+
+    harness.register(plugin)
+    first_reader = harness.get_reader("topspin")
+    harness.register(plugin)
+    second_reader = harness.get_reader("topspin")
+
+    assert harness.get_plugin_state("nmr") == PluginState.ACTIVE
+    assert list(harness.available_readers).count("topspin") == 1
+    assert second_reader is not None
+    assert first_reader is not None
+    assert second_reader["func"] is first_reader["func"]
+
+
+def test_discovery_is_idempotent(monkeypatch):
+    """Repeated discovery keeps a single active NMR reader and namespace."""
+    _require_reader_dependencies()
+
+    class NMREntryPoint:
+        name = "nmr"
+        value = "spectrochempy_nmr:NMRPlugin"
+
+        @staticmethod
+        def load():
+            return NMRPlugin
+
+    def mock_entry_points(group=None):
+        if group == ENTRY_POINT_GROUP:
+            return [NMREntryPoint()]
+        return []
+
+    monkeypatch.setattr(
+        manager_module.importlib.metadata,
+        "entry_points",
+        mock_entry_points,
+    )
+
+    pm = PluginManager()
+    pm.discover()
+    pm.discover()
+
+    assert pm.get_plugin_state("nmr") == PluginState.ACTIVE
+    assert list(pm.registry.available_readers).count("topspin") == 1
+    assert pm.registry.get_reader("topspin")["namespace"] == "nmr"
+
+
 def test_lifecycle_state():
     """Plugin transitions to ACTIVE after registration."""
+    _require_reader_dependencies()
     harness = PluginTestHarness()
     harness.register(NMRPlugin())
     assert harness.get_plugin_state("nmr") == PluginState.ACTIVE
@@ -46,6 +106,7 @@ def test_lifecycle_state():
 
 def test_isolated_harness():
     """Each PluginTestHarness is independent."""
+    _require_reader_dependencies()
     h1 = PluginTestHarness()
     h2 = PluginTestHarness()
 
@@ -56,6 +117,7 @@ def test_isolated_harness():
 
 def test_package_namespace_exposes_topspin_reader():
     """scp.nmr.read_topspin exposes the reader while preserving legacy alias."""
+    _require_reader_dependencies()
     import spectrochempy as scp
 
     if not scp.plugin_manager.has_plugin("nmr"):
@@ -81,6 +143,7 @@ def test_missing_topspin_reader_stub_is_actionable():
 
 def test_nmr_reader_is_not_dataset_accessor_namespace():
     """Readers are package-level APIs, not dataset accessor methods."""
+    _require_reader_dependencies()
     import spectrochempy as scp
 
     if not scp.plugin_manager.has_plugin("nmr"):

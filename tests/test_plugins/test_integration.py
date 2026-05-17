@@ -250,6 +250,7 @@ class TestMissingPlugin:
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
+        monkeypatch.setattr(im, "entry_points", lambda group=None: [])
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
         monkeypatch.setitem(
@@ -288,6 +289,7 @@ class TestMissingPlugin:
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
+        monkeypatch.setattr(im, "entry_points", lambda group=None: [])
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
 
