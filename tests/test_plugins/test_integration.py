@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import importlib.metadata as im
 import logging
+import subprocess
+import sys
 from typing import Any
 
 import pytest
@@ -119,6 +121,23 @@ class TestCoreImport:
         """scp.read_omnic is accessible (built-in reader)."""
 
         assert callable(spectrochempy.read_omnic)
+
+    def test_import_spectrochempy_does_not_import_iris_plugin(self):
+        """Importing the core package alone does not import the IRIS plugin."""
+
+        code = (
+            "import sys; import spectrochempy; "
+            "raise SystemExit("
+            "any(name.startswith('spectrochempy_iris') for name in sys.modules)"
+            ")"
+        )
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
 
 
 # ------------------------------------------------------------------
@@ -295,6 +314,21 @@ class TestMissingPlugin:
 
         with pytest.raises(AttributeError, match="requires the optional plugin"):
             _ = spectrochempy.nmr
+
+    def test_missing_iris_namespace_clear_error(self, monkeypatch):
+        """Accessing scp.iris without IRIS plugin gives a clear error."""
+
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+        monkeypatch.setattr(im, "entry_points", lambda group=None: [])
+        monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
+        monkeypatch.setattr(spectrochempy, "registry", registry)
+        monkeypatch.delitem(spectrochempy.__dict__, "iris", raising=False)
+
+        with pytest.raises(AttributeError, match="spectrochempy-iris") as excinfo:
+            _ = spectrochempy.iris
+
+        assert "spectrochempy[iris]" in str(excinfo.value)
 
     def test_unknown_attribute_standard_error(self):
         """Accessing a truly unknown attribute gives a standard error."""
