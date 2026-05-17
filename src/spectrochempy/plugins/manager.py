@@ -170,7 +170,8 @@ class PluginManager:
         self, plugin: Any, registry: PluginRegistry | None = None
     ) -> dict[str, list[str]]:
         contributions: dict[str, list[str]] = {}
-        registry = registry or self.registry
+        if registry is None:
+            registry = self.registry
 
         self._collect_readers(plugin, contributions, registry)
         self._collect_writers(plugin, contributions, registry)
