@@ -4,7 +4,14 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-"""Known optional plugin features used for user-facing installation hints."""
+"""
+Known optional plugin features used for user-facing installation hints.
+
+This registry is intentionally static and limited to official optional
+SpectroChemPy plugins. It is only used to produce clear errors when an optional
+plugin is not installed. Installed plugins must declare their own contributions
+through the plugin system; third-party plugins must not be listed here.
+"""
 
 from __future__ import annotations
 

@@ -251,9 +251,17 @@ class TestMissingPlugin:
         pm = PluginManager(registry=registry)
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
+        monkeypatch.setitem(
+            spectrochempy._LAZY_IMPORTS,
+            "read_topspin",
+            "spectrochempy.missing.lazy_import_entry",
+        )
 
-        with pytest.raises(AttributeError, match="requires the optional plugin"):
+        with pytest.raises(AttributeError) as excinfo:
             _ = spectrochempy.read_topspin
+        message = str(excinfo.value)
+        assert "spectrochempy-nmr" in message
+        assert "spectrochempy[nmr]" in message
 
     def test_missing_namespace_clear_error(self, monkeypatch):
         """Accessing scp.nmr without NMR plugin gives a clear error."""
