@@ -200,6 +200,16 @@ def test_available_plugins_empty():
     assert pm.has_plugin("nonexistent") is False
 
 
+def test_available_plugins_uses_registered_plugin_names():
+    pm = PluginManager()
+    plugin = DummyPlugin()
+
+    pm.register(plugin)
+
+    assert pm.available_plugins["dummy"] is plugin
+    assert all(isinstance(name, str) for name in pm.available_plugins)
+
+
 # ------------------------------------------------------------------
 # Imperative registration (backward compatible)
 # ------------------------------------------------------------------
@@ -399,7 +409,8 @@ def test_broken_declarative_hook_does_not_crash():
     plugin = BrokenDeclarativePlugin()
     # Must not raise despite the RuntimeError in register_readers
     pm.register(plugin)
-    assert pm.has_plugin("broken")
+    assert pm.get_plugin_state("broken") is PluginState.FAILED
+    assert registry.available_readers == {}
 
 
 # ------------------------------------------------------------------

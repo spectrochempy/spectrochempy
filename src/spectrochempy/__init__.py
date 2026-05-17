@@ -74,6 +74,9 @@ application.start.set_warnings()
 # --------------------------------------------------------------------------------------
 # Plugin  manager
 # --------------------------------------------------------------------------------------
+from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
+from spectrochempy.plugins.features import plugin_namespace_install_hint
+from spectrochempy.plugins.features import plugin_reader_install_hint
 from spectrochempy.plugins.manager import plugin_manager
 from spectrochempy.plugins.registry import registry
 
@@ -88,31 +91,6 @@ _PLOT_PROFILE_FUNCTIONS = {
     "save_plot_profile": "spectrochempy.plotting.profile",
     "delete_plot_profile": "spectrochempy.plotting.profile",
 }
-
-# Known plugin readers mapped to their plugin names for helpful error messages.
-# These provide clear user-facing errors when a plugin is not installed,
-# before falling through to the lazy-import stub in _LAZY_IMPORTS
-# (e.g., spectrochempy.core.readers.read_topspin which raises MissingPluginError).
-_KNOWN_PLUGIN_READERS = {
-    "topspin": ("nmr", "spectrochempy-nmr", "spectrochempy[nmr]"),
-}
-
-_KNOWN_PLUGIN_NAMESPACES = {
-    "nmr": ("spectrochempy-nmr", "spectrochempy[nmr]"),
-    "iris": ("spectrochempy-iris", "spectrochempy[iris]"),
-}
-
-
-def _plugin_reader_install_hint(reader_name: str) -> str | None:
-    """Return an installation hint if *reader_name* belongs to a known optional plugin."""
-    info = _KNOWN_PLUGIN_READERS.get(reader_name)
-    if info is None:
-        return None
-    _ns, plugin_name, extra = info
-    return (
-        f"The 'read_{reader_name}' feature requires the optional plugin "
-        f"'{plugin_name}'. Install it with: pip install {extra}"
-    )
 
 
 def __dir__():
@@ -131,7 +109,7 @@ def _reader_names():
 
 
 def _namespace_names():
-    return set(_KNOWN_PLUGIN_NAMESPACES)
+    return set(KNOWN_PLUGIN_NAMESPACES)
 
 
 def _extension_names():
@@ -172,7 +150,7 @@ def __getattr__(name):
         reader_info = registry.get_reader(reader_name)
         if reader_info:
             return reader_info["func"]
-        hint = _plugin_reader_install_hint(reader_name)
+        hint = plugin_reader_install_hint(reader_name)
         if hint:
             raise AttributeError(hint)
 
@@ -202,12 +180,9 @@ def __getattr__(name):
         return original_getattr(name)
     except AttributeError as err:
         # Check if this is a known plugin namespace
-        if name in _KNOWN_PLUGIN_NAMESPACES:
-            plugin_name, extra = _KNOWN_PLUGIN_NAMESPACES[name]
-            raise AttributeError(
-                f"The '{name}' namespace requires the optional plugin "
-                f"'{plugin_name}'. Install it with: pip install {extra}"
-            ) from err
+        hint = plugin_namespace_install_hint(name)
+        if hint:
+            raise AttributeError(hint) from err
         raise AttributeError(
             f"module 'spectrochempy' has no attribute '{name}'"
         ) from err

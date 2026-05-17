@@ -134,20 +134,20 @@ class PluginManager:
         # Declarative hooks and imperative register() write into a temporary
         # registry first. Nothing is merged into the active registry unless the
         # whole plugin registration succeeds.
-        temp_registry = PluginRegistry()
-        self._collect_declarative_hooks(plugin, temp_registry)
-        if hasattr(plugin, "register") and callable(plugin.register):
-            try:
+        try:
+            temp_registry = PluginRegistry()
+            self._collect_declarative_hooks(plugin, temp_registry)
+            if hasattr(plugin, "register") and callable(plugin.register):
                 plugin.register(temp_registry)
-            except Exception as exc:
-                logger.exception(
-                    "Plugin '%s' raised an error during register().\n"
-                    "  → No contributions from this plugin will be registered.",
-                    name,
-                )
-                self._plugin_states[name] = PluginState.FAILED
-                self._plugin_errors[name] = exc
-                return
+        except Exception as exc:
+            logger.exception(
+                "Plugin '%s' raised an error during registration.\n"
+                "  → No contributions from this plugin will be registered.",
+                name,
+            )
+            self._plugin_states[name] = PluginState.FAILED
+            self._plugin_errors[name] = exc
+            return
 
         # --- Register in pluggy for hook-based communication ---
         self.registry.merge_from(temp_registry)
@@ -251,6 +251,7 @@ class PluginManager:
                 "Failed to collect readers from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
+            raise
 
     def _collect_writers(
         self,
@@ -282,6 +283,7 @@ class PluginManager:
                 "Failed to collect writers from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
+            raise
 
     def _collect_visualizers(
         self,
@@ -314,6 +316,7 @@ class PluginManager:
                 "Failed to collect visualizers from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
+            raise
 
     def _collect_analyses(
         self,
@@ -350,6 +353,7 @@ class PluginManager:
                 "Failed to collect analyses from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
+            raise
 
     def _collect_simulations(
         self,
@@ -387,6 +391,7 @@ class PluginManager:
                 "Failed to collect simulations from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
+            raise
 
     def _collect_accessors(
         self,
@@ -431,6 +436,7 @@ class PluginManager:
                 "Failed to collect accessors from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
+            raise
 
     def _collect_processors(
         self,
@@ -463,6 +469,7 @@ class PluginManager:
                 "Failed to collect processors from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
+            raise
 
     # ------------------------------------------------------------------
     # Plugin loading
@@ -649,7 +656,13 @@ class PluginManager:
     @property
     def available_plugins(self) -> dict[str, Any]:
         self.discover()
-        return {name: self._pm.get_plugin(name) for name in self._pm.get_plugins()}
+        return {
+            name: plugin
+            for name, plugin in (
+                (self._pm.get_name(plugin), plugin) for plugin in self._pm.get_plugins()
+            )
+            if name is not None
+        }
 
     def list_plugins(self) -> list[Any]:
         self.discover()
