@@ -107,6 +107,10 @@ class PluginManager:
             logger.info("Plugin '%s' is disabled — skipping registration.", name)
             return
 
+        if self._pm.get_plugin(name) is not None:
+            logger.debug("Plugin '%s' already registered — skipping.", name)
+            return
+
         self._plugin_states.setdefault(name, PluginState.LOADED)
 
         # --- Optional dependency check ---
@@ -125,11 +129,8 @@ class PluginManager:
             self._plugin_states[name] = PluginState.FAILED
             return
 
-        if self._pm.get_plugin(name) is not None:
-            logger.debug("Plugin '%s' already registered — skipping.", name)
-            return
-
-        self._pm.register(plugin, name)
+        # --- Declarative hook collection ---
+        self._collect_declarative_hooks(plugin)
 
         # --- Imperative registration (backward compatible) ---
         if hasattr(plugin, "register") and callable(plugin.register):
@@ -141,9 +142,8 @@ class PluginManager:
                 self._plugin_errors[name] = exc
                 return
 
-        # --- Declarative hook collection ---
-        self._collect_declarative_hooks(plugin)
-
+        # --- Register in pluggy for hook-based communication ---
+        self._pm.register(plugin, name)
         self.registry.register_plugin(name, plugin)
         self._plugin_states[name] = PluginState.ACTIVE
 
@@ -171,6 +171,42 @@ class PluginManager:
 
         return contributions
 
+    def _validate_contribution_list(
+        self,
+        plugin_name: str,
+        hook_name: str,
+        items: Any,
+    ) -> list[dict[str, Any]]:
+        valid: list[dict[str, Any]] = []
+        if not isinstance(items, list):
+            logger.warning(
+                "Plugin '%s': '%s()' returned %s, expected list[dict].",
+                plugin_name,
+                hook_name,
+                type(items).__name__,
+            )
+            return valid
+        for i, item in enumerate(items):
+            if not isinstance(item, dict):
+                logger.warning(
+                    "Plugin '%s': '%s()' item %d is %s, expected dict.",
+                    plugin_name,
+                    hook_name,
+                    i,
+                    type(item).__name__,
+                )
+                continue
+            if "name" not in item or "func" not in item:
+                logger.warning(
+                    "Plugin '%s': '%s()' item %d missing required keys 'name'/'func'.",
+                    plugin_name,
+                    hook_name,
+                    i,
+                )
+                continue
+            valid.append(item)
+        return valid
+
     def _collect_readers(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
@@ -180,24 +216,22 @@ class PluginManager:
         ):
             return
         try:
-            readers = plugin.register_readers()
-            if not isinstance(readers, list):
-                return
+            raw = plugin.register_readers()
+            readers = self._validate_contribution_list(
+                plugin_name, "register_readers", raw
+            )
             for reader in readers:
-                if not isinstance(reader, dict):
-                    continue
-                name = reader.get("name")
-                func = reader.get("func")
-                if name and func:
-                    self.registry.io.register_reader(
-                        name,
-                        func,
-                        description=reader.get("description", ""),
-                        extensions=reader.get("extensions"),
-                        plugin=plugin_name,
-                        namespace=reader.get("namespace", plugin_name),
-                    )
-                    contributions.setdefault("readers", []).append(name)
+                name = reader["name"]
+                func = reader["func"]
+                self.registry.io.register_reader(
+                    name,
+                    func,
+                    description=reader.get("description", ""),
+                    extensions=reader.get("extensions"),
+                    plugin=plugin_name,
+                    namespace=reader.get("namespace", plugin_name),
+                )
+                contributions.setdefault("readers", []).append(name)
         except Exception:
             logger.exception(
                 "Failed to collect readers from plugin '%s'",
@@ -207,26 +241,25 @@ class PluginManager:
     def _collect_writers(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
         if not (
             hasattr(plugin, "register_writers") and callable(plugin.register_writers)
         ):
             return
         try:
-            writers = plugin.register_writers()
-            if not isinstance(writers, list):
-                return
+            raw = plugin.register_writers()
+            writers = self._validate_contribution_list(
+                plugin_name, "register_writers", raw
+            )
             for writer in writers:
-                if not isinstance(writer, dict):
-                    continue
-                name = writer.get("name")
-                func = writer.get("func")
-                if name and func:
-                    self.registry.io.register_writer(
-                        name,
-                        func,
-                        description=writer.get("description", ""),
-                    )
-                    contributions.setdefault("writers", []).append(name)
+                name = writer["name"]
+                func = writer["func"]
+                self.registry.io.register_writer(
+                    name,
+                    func,
+                    description=writer.get("description", ""),
+                )
+                contributions.setdefault("writers", []).append(name)
         except Exception:
             logger.exception(
                 "Failed to collect writers from plugin '%s'",
@@ -236,27 +269,26 @@ class PluginManager:
     def _collect_visualizers(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
         if not (
             hasattr(plugin, "register_visualizers")
             and callable(plugin.register_visualizers)
         ):
             return
         try:
-            visualizers = plugin.register_visualizers()
-            if not isinstance(visualizers, list):
-                return
+            raw = plugin.register_visualizers()
+            visualizers = self._validate_contribution_list(
+                plugin_name, "register_visualizers", raw
+            )
             for vis in visualizers:
-                if not isinstance(vis, dict):
-                    continue
-                name = vis.get("name")
-                func = vis.get("func")
-                if name and func:
-                    self.registry.visualization.register_visualizer(
-                        name,
-                        func,
-                        description=vis.get("description", ""),
-                    )
-                    contributions.setdefault("visualizers", []).append(name)
+                name = vis["name"]
+                func = vis["func"]
+                self.registry.visualization.register_visualizer(
+                    name,
+                    func,
+                    description=vis.get("description", ""),
+                )
+                contributions.setdefault("visualizers", []).append(name)
         except Exception:
             logger.exception(
                 "Failed to collect visualizers from plugin '%s'",
@@ -272,26 +304,24 @@ class PluginManager:
         ):
             return
         try:
-            analyses = plugin.register_analyses()
-            if not isinstance(analyses, list):
-                return
+            raw = plugin.register_analyses()
+            analyses = self._validate_contribution_list(
+                plugin_name, "register_analyses", raw
+            )
             for analysis in analyses:
-                if not isinstance(analysis, dict):
-                    continue
-                name = analysis.get("name")
-                func = analysis.get("func")
-                if name and func:
-                    self.registry.extensions.register(
-                        "analysis",
-                        name,
-                        func,
-                        description=analysis.get("description", ""),
-                        metadata={
-                            "plugin": plugin_name,
-                            "namespace": analysis.get("namespace", plugin_name),
-                        },
-                    )
-                    contributions.setdefault("analyses", []).append(name)
+                name = analysis["name"]
+                func = analysis["func"]
+                self.registry.extensions.register(
+                    "analysis",
+                    name,
+                    func,
+                    description=analysis.get("description", ""),
+                    metadata={
+                        "plugin": plugin_name,
+                        "namespace": analysis.get("namespace", plugin_name),
+                    },
+                )
+                contributions.setdefault("analyses", []).append(name)
         except Exception:
             logger.exception(
                 "Failed to collect analyses from plugin '%s'",
@@ -308,26 +338,24 @@ class PluginManager:
         ):
             return
         try:
-            simulations = plugin.register_simulations()
-            if not isinstance(simulations, list):
-                return
+            raw = plugin.register_simulations()
+            simulations = self._validate_contribution_list(
+                plugin_name, "register_simulations", raw
+            )
             for sim in simulations:
-                if not isinstance(sim, dict):
-                    continue
-                name = sim.get("name")
-                func = sim.get("func")
-                if name and func:
-                    self.registry.extensions.register(
-                        "simulation",
-                        name,
-                        func,
-                        description=sim.get("description", ""),
-                        metadata={
-                            "plugin": plugin_name,
-                            "namespace": sim.get("namespace", plugin_name),
-                        },
-                    )
-                    contributions.setdefault("simulations", []).append(name)
+                name = sim["name"]
+                func = sim["func"]
+                self.registry.extensions.register(
+                    "simulation",
+                    name,
+                    func,
+                    description=sim.get("description", ""),
+                    metadata={
+                        "plugin": plugin_name,
+                        "namespace": sim.get("namespace", plugin_name),
+                    },
+                )
+                contributions.setdefault("simulations", []).append(name)
         except Exception:
             logger.exception(
                 "Failed to collect simulations from plugin '%s'",
@@ -344,35 +372,31 @@ class PluginManager:
         ):
             return
         try:
-            accessors = plugin.register_accessors()
-            if not isinstance(accessors, list):
-                return
+            raw = plugin.register_accessors()
+            accessors = self._validate_contribution_list(
+                plugin_name, "register_accessors", raw
+            )
             for accessor in accessors:
-                if not isinstance(accessor, dict):
-                    continue
-                name = accessor.get("name")
-                func = accessor.get("func")
-                if name and func:
-                    namespace = accessor.get("namespace")
-                    metadata = {
-                        "plugin": plugin_name,
-                        "namespace": namespace or plugin_name,
-                    }
-                    registered_names = [name]
-                    if namespace:
-                        registered_names = [f"{namespace}.{name}"]
-                        registered_names.extend(accessor.get("legacy_names", []))
+                name = accessor["name"]
+                func = accessor["func"]
+                namespace = accessor.get("namespace")
+                metadata = {
+                    "plugin": plugin_name,
+                    "namespace": namespace or plugin_name,
+                }
+                registered_names = [name]
+                if namespace:
+                    registered_names = [f"{namespace}.{name}"]
+                    registered_names.extend(accessor.get("legacy_names", []))
 
-                    for registered_name in registered_names:
-                        self.registry.register_accessor(
-                            registered_name,
-                            func,
-                            description=accessor.get("description", ""),
-                            metadata=metadata,
-                        )
-                        contributions.setdefault("accessors", []).append(
-                            registered_name
-                        )
+                for registered_name in registered_names:
+                    self.registry.register_accessor(
+                        registered_name,
+                        func,
+                        description=accessor.get("description", ""),
+                        metadata=metadata,
+                    )
+                    contributions.setdefault("accessors", []).append(registered_name)
         except Exception:
             logger.exception(
                 "Failed to collect accessors from plugin '%s'",
@@ -382,27 +406,26 @@ class PluginManager:
     def _collect_processors(
         self, plugin: Any, contributions: dict[str, list[str]]
     ) -> None:
+        plugin_name = getattr(plugin, "name", "unknown")
         if not (
             hasattr(plugin, "register_processors")
             and callable(plugin.register_processors)
         ):
             return
         try:
-            procs = plugin.register_processors()
-            if not isinstance(procs, list):
-                return
+            raw = plugin.register_processors()
+            procs = self._validate_contribution_list(
+                plugin_name, "register_processors", raw
+            )
             for proc in procs:
-                if not isinstance(proc, dict):
-                    continue
-                name = proc.get("name")
-                func = proc.get("func")
-                if name and func:
-                    self.registry.processing.register_processor(
-                        name,
-                        func,
-                        description=proc.get("description", ""),
-                    )
-                    contributions.setdefault("processors", []).append(name)
+                name = proc["name"]
+                func = proc["func"]
+                self.registry.processing.register_processor(
+                    name,
+                    func,
+                    description=proc.get("description", ""),
+                )
+                contributions.setdefault("processors", []).append(name)
         except Exception:
             logger.exception(
                 "Failed to collect processors from plugin '%s'",
@@ -425,10 +448,13 @@ class PluginManager:
                         cls = ep.load()
                         plugin = cls() if isinstance(cls, type) else cls
                         self.register(plugin)
+                        if self._plugin_states.get(name) == PluginState.FAILED:
+                            plugin = None
                     except Exception as exc:
                         logger.warning("Plugin '%s' failed to load: %s", name, exc)
                         self._plugin_states[name] = PluginState.FAILED
                         self._plugin_errors[name] = exc
+                        plugin = None
                     break
         return plugin
 

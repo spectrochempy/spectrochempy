@@ -8,12 +8,18 @@
 
 from __future__ import annotations
 
+import importlib.metadata as im
+import logging
 from typing import Any
 
 import pytest
 
+import spectrochempy
 from spectrochempy.api.plugins import SpectroChemPyPlugin
+from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
+from spectrochempy.plugins.namespace import PluginNamespace
+from spectrochempy.plugins.namespace import has_namespace
 from spectrochempy.plugins.registry import PluginRegistry
 
 # ------------------------------------------------------------------
@@ -93,28 +99,24 @@ class InvalidPlugin:
 
 class TestCoreImport:
     def test_import_spectrochempy(self):
-        """import spectrochempy works without plugin dependencies."""
-        import spectrochempy
+        """Import spectrochempy works without plugin dependencies."""
 
         assert spectrochempy.__version__ is not None
 
     def test_access_nddataset(self):
         """scp.NDDataset is accessible."""
-        import spectrochempy as scp
 
-        assert scp.NDDataset is not None
+        assert spectrochempy.NDDataset is not None
 
     def test_access_read(self):
         """scp.read is accessible (core IO function)."""
-        import spectrochempy as scp
 
-        assert callable(scp.read)
+        assert callable(spectrochempy.read)
 
     def test_access_read_omnic(self):
         """scp.read_omnic is accessible (built-in reader)."""
-        import spectrochempy as scp
 
-        assert callable(scp.read_omnic)
+        assert callable(spectrochempy.read_omnic)
 
 
 # ------------------------------------------------------------------
@@ -158,7 +160,6 @@ class TestDiscoverIdempotent:
 class TestPluginTopLevelFunction:
     def test_reader_exposed_at_top_level(self, monkeypatch):
         """A registered reader is accessible via scp.read_fake."""
-        import spectrochempy
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
@@ -168,7 +169,7 @@ class TestPluginTopLevelFunction:
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
 
-        read_fake = getattr(spectrochempy, "read_fake")
+        read_fake = spectrochempy.read_fake
         assert callable(read_fake)
         assert read_fake("/some/path") == "fake data from /some/path"
 
@@ -192,10 +193,6 @@ class TestPluginTopLevelFunction:
 class TestPluginNamespace:
     def test_namespace_accessible_with_prefix(self, monkeypatch):
         """Plugin namespace 'fakenamespace' is accessible via scp.fakenamespace."""
-        import spectrochempy
-
-        from spectrochempy.plugins.namespace import PluginNamespace
-        from spectrochempy.plugins.namespace import has_namespace
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
@@ -206,12 +203,11 @@ class TestPluginNamespace:
         monkeypatch.setattr(spectrochempy, "registry", registry)
 
         assert has_namespace(registry, "fakenamespace")
-        ns = getattr(spectrochempy, "fakenamespace")
+        ns = spectrochempy.fakenamespace
         assert isinstance(ns, PluginNamespace)
 
     def test_namespace_reader_accessible(self, monkeypatch):
         """Namespace reader 'scp.fakenamespace.read_fakename' works."""
-        import spectrochempy
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
@@ -221,13 +217,12 @@ class TestPluginNamespace:
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
 
-        ns = getattr(spectrochempy, "fakenamespace")
+        ns = spectrochempy.fakenamespace
         result = ns.read_fakename("/test")
         assert result == "fake ns data from /test"
 
     def test_namespace_error_clear(self, monkeypatch):
         """Accessing a missing attribute on a namespace gives a clear error."""
-        import spectrochempy
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
@@ -237,9 +232,9 @@ class TestPluginNamespace:
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
 
-        ns = getattr(spectrochempy, "fakenamespace")
+        ns = spectrochempy.fakenamespace
         with pytest.raises(AttributeError, match="plugin namespace 'fakenamespace'"):
-            ns.missing_attribute
+            _ = ns.missing_attribute
 
 
 # ------------------------------------------------------------------
@@ -250,7 +245,6 @@ class TestPluginNamespace:
 class TestMissingPlugin:
     def test_missing_reader_clear_error(self, monkeypatch):
         """Accessing scp.read_topspin without NMR plugin gives a clear error."""
-        import spectrochempy
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
@@ -258,11 +252,10 @@ class TestMissingPlugin:
         monkeypatch.setattr(spectrochempy, "registry", registry)
 
         with pytest.raises(AttributeError, match="requires the optional plugin"):
-            getattr(spectrochempy, "read_topspin")
+            _ = spectrochempy.read_topspin
 
     def test_missing_namespace_clear_error(self, monkeypatch):
         """Accessing scp.nmr without NMR plugin gives a clear error."""
-        import spectrochempy
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
@@ -270,19 +263,30 @@ class TestMissingPlugin:
         monkeypatch.setattr(spectrochempy, "registry", registry)
 
         with pytest.raises(AttributeError, match="requires the optional plugin"):
-            getattr(spectrochempy, "nmr")
+            _ = spectrochempy.nmr
 
     def test_unknown_attribute_standard_error(self):
         """Accessing a truly unknown attribute gives a standard error."""
-        import spectrochempy as scp
 
         with pytest.raises(AttributeError, match="has no attribute"):
-            getattr(scp, "nonexistent_attribute_xyz123")
+            _ = spectrochempy.nonexistent_attribute_xyz123
 
 
 # ------------------------------------------------------------------
 # F. Invalid plugin
 # ------------------------------------------------------------------
+
+
+class FailingRegisterPlugin:
+    """Plugin whose imperative register() raises."""
+
+    name = "fail-reg"
+    version = "0.1.0"
+    PLUGIN_API_VERSION = "1.0"
+
+    def register(self, registry):
+        msg = "registration failure"
+        raise RuntimeError(msg)
 
 
 class TestInvalidPlugin:
@@ -310,9 +314,6 @@ class TestInvalidPlugin:
 
     def test_discover_does_not_crash_with_bad_entry_points(self, monkeypatch):
         """An entry point that loads a broken class does not crash discover()."""
-        import importlib.metadata as im
-
-        from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 
         class BrokenEntryPoint:
             name = "broken_ep"
@@ -333,6 +334,55 @@ class TestInvalidPlugin:
         monkeypatch.setattr(im, "entry_points", mock_entry_points)
         pm = PluginManager()
         pm.discover()  # must not raise
+
+    def test_failed_plugin_not_available_via_get_plugin(self):
+        """A FAILED plugin must not appear in get_plugin()."""
+        pm = PluginManager()
+        pm.register(FailingRegisterPlugin())
+        assert pm.get_plugin("fail-reg") is None
+
+    def test_failed_plugin_not_available_via_has_plugin(self):
+        """A FAILED plugin must not appear in has_plugin()."""
+        pm = PluginManager()
+        pm.register(FailingRegisterPlugin())
+        assert pm.has_plugin("fail-reg") is False
+
+    def test_failed_plugin_not_in_list_plugins(self):
+        """A FAILED plugin must not appear in list_plugins()."""
+        pm = PluginManager()
+        pm.register(FailingRegisterPlugin())
+        assert "fail-reg" not in [
+            p.name for p in pm.list_plugins() if hasattr(p, "name")
+        ]
+
+    def test_failed_plugin_not_active(self):
+        """A FAILED plugin must not appear in get_active_plugins()."""
+        pm = PluginManager()
+        pm.register(FailingRegisterPlugin())
+        assert "fail-reg" not in pm.get_active_plugins()
+
+    def test_failed_plugin_reported_in_get_failed(self):
+        """A FAILED plugin is still tracked via get_failed_plugins()."""
+        pm = PluginManager()
+        pm.register(FailingRegisterPlugin())
+        failed = pm.get_failed_plugins()
+        assert "fail-reg" in failed
+
+    def test_load_plugin_returns_none_for_failed(self):
+        """load_plugin returns None when the plugin fails to register."""
+        pm = PluginManager()
+
+        class AlwaysFails:
+            name = "always-fails"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register(self, registry):
+                msg = "always fails"
+                raise RuntimeError(msg)
+
+        result = pm.load_plugin("always-fails")
+        assert result is None
 
 
 # ------------------------------------------------------------------
@@ -364,6 +414,211 @@ class TestDatasetAccessors:
 # ------------------------------------------------------------------
 # H. Discovery state machine
 # ------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------
+# I. __dir__ without side effects
+# ------------------------------------------------------------------
+
+
+class TestDirNoSideEffect:
+    def test_dir_does_not_trigger_discovery(self, monkeypatch):
+        """dir(scp) must not trigger plugin_manager.discover()."""
+
+        discover_called = False
+        original_discover = spectrochempy.plugin_manager.discover
+
+        def tracking_discover():
+            nonlocal discover_called
+            discover_called = True
+            original_discover()
+
+        monkeypatch.setattr(spectrochempy.plugin_manager, "discover", tracking_discover)
+        dir(spectrochempy)
+        assert not discover_called, "dir(scp) triggered plugin_manager.discover()"
+
+
+# ------------------------------------------------------------------
+# J. Warnings for invalid contributions
+# ------------------------------------------------------------------
+
+
+class TestInvalidContributionWarnings:
+    def test_warning_on_non_list_return(self, caplog):
+        """register_readers returning a non-list logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class BadReturnPlugin:
+            name = "bad-return"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_readers(self):
+                return "not a list"
+
+        pm = PluginManager()
+        pm.register(BadReturnPlugin())
+        assert any(
+            "bad-return" in msg and "register_readers" in msg for msg in caplog.messages
+        )
+
+    def test_warning_on_non_dict_item(self, caplog):
+        """register_readers returning a non-dict item logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class BadItemPlugin:
+            name = "bad-item"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_readers(self):
+                return ["not a dict"]
+
+        pm = PluginManager()
+        pm.register(BadItemPlugin())
+        assert any("bad-item" in msg and "is str" in msg for msg in caplog.messages)
+
+    def test_warning_on_missing_keys(self, caplog):
+        """register_readers with missing 'name'/'func' keys logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class MissingKeysPlugin:
+            name = "missing-keys"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_readers(self):
+                return [{"description": "no name or func"}]
+
+        pm = PluginManager()
+        pm.register(MissingKeysPlugin())
+        assert any(
+            "missing-keys" in msg and "missing required keys" in msg
+            for msg in caplog.messages
+        )
+
+    def test_warning_on_writers_non_list(self, caplog):
+        """register_writers returning a non-list logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class BadWritersPlugin:
+            name = "bad-writers"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_writers(self):
+                return 42
+
+        pm = PluginManager()
+        pm.register(BadWritersPlugin())
+        assert any(
+            "bad-writers" in msg and "register_writers" in msg
+            for msg in caplog.messages
+        )
+
+    def test_warning_on_analyses_non_list(self, caplog):
+        """register_analyses returning a non-list logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class BadAnalysesPlugin:
+            name = "bad-analyses"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_analyses(self):
+                return None
+
+        pm = PluginManager()
+        pm.register(BadAnalysesPlugin())
+        assert any(
+            "bad-analyses" in msg and "register_analyses" in msg
+            for msg in caplog.messages
+        )
+
+    def test_warning_on_simulations_non_list(self, caplog):
+        """register_simulations returning a non-list logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class BadSimPlugin:
+            name = "bad-sim"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_simulations(self):
+                return "invalid"
+
+        pm = PluginManager()
+        pm.register(BadSimPlugin())
+        assert any(
+            "bad-sim" in msg and "register_simulations" in msg
+            for msg in caplog.messages
+        )
+
+    def test_warning_on_accessors_non_list(self, caplog):
+        """register_accessors returning a non-list logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class BadAccessorPlugin:
+            name = "bad-accessor"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_accessors(self):
+                return [42]
+
+        pm = PluginManager()
+        pm.register(BadAccessorPlugin())
+        assert any(
+            "bad-accessor" in msg and "register_accessors" in msg
+            for msg in caplog.messages
+        )
+
+    def test_warning_on_processors_non_list(self, caplog):
+        """register_processors returning a non-list logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class BadProcPlugin:
+            name = "bad-proc"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_processors(self):
+                return (1, 2)
+
+        pm = PluginManager()
+        pm.register(BadProcPlugin())
+        assert any(
+            "bad-proc" in msg and "register_processors" in msg
+            for msg in caplog.messages
+        )
+
+    def test_warning_on_visualizers_non_list(self, caplog):
+        """register_visualizers returning a non-list logs a warning."""
+
+        caplog.set_level(logging.WARNING)
+
+        class BadVizPlugin:
+            name = "bad-viz"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_visualizers(self):
+                return [{"name": "foo"}]  # missing func
+
+        pm = PluginManager()
+        pm.register(BadVizPlugin())
+        assert any(
+            "bad-viz" in msg and "missing required keys" in msg
+            for msg in caplog.messages
+        )
 
 
 class TestDiscoveryStateMachine:
@@ -398,8 +653,6 @@ class TestDiscoveryStateMachine:
 
     def test_registration_does_not_trigger_discovery(self):
         """Registering a plugin directly does not trigger entry point discovery."""
-        import importlib.metadata as im
-        from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 
         original = im.entry_points
         call_count = 0

@@ -200,6 +200,7 @@ exclude = ["~*"] # Exclude files and directories. "tests/**"
   "T201", # print statement found.
   "D205", # 1 blank line required between summary line and description.
   "D401", # First line should be in imperative mood; try rephrasing.
+  "PLC0415", # Import should be at the top-level (test isolation requires local imports).
 ]
 
 [tool.ruff.lint.isort]

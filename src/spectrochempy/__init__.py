@@ -90,6 +90,9 @@ _PLOT_PROFILE_FUNCTIONS = {
 }
 
 # Known plugin readers mapped to their plugin names for helpful error messages.
+# These provide clear user-facing errors when a plugin is not installed,
+# before falling through to the lazy-import stub in _LAZY_IMPORTS
+# (e.g., spectrochempy.core.readers.read_topspin which raises MissingPluginError).
 _KNOWN_PLUGIN_READERS = {
     "topspin": ("nmr", "spectrochempy-nmr", "spectrochempy[nmr]"),
 }
@@ -115,9 +118,10 @@ def _plugin_reader_install_hint(reader_name: str) -> str | None:
 def __dir__():
     names = set(original_dir()) if callable(original_dir) else set()
     names.update(_PLOT_PROFILE_FUNCTIONS)
-    plugin_manager.discover()
-    names.update(_reader_names())
     names.update(_namespace_names())
+    # Include already-discovered plugin readers and extensions
+    # without triggering entry-point scanning (dir() should be side-effect free).
+    names.update(_reader_names())
     names.update(_extension_names())
     return sorted(names)
 
