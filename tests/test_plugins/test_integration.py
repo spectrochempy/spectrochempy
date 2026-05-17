@@ -264,6 +264,25 @@ class TestMissingPlugin:
         assert "spectrochempy-nmr" in message
         assert "spectrochempy[nmr]" in message
 
+    def test_unknown_plugin_reader_is_not_stubbed(self, monkeypatch):
+        """Unknown read_* attributes fail normally instead of creating stubs."""
+
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+        monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
+        monkeypatch.setattr(spectrochempy, "registry", registry)
+        monkeypatch.delitem(
+            spectrochempy.__dict__,
+            "read_totally_unknown_format",
+            raising=False,
+        )
+
+        with pytest.raises(AttributeError, match="has no attribute") as excinfo:
+            _ = spectrochempy.read_totally_unknown_format
+
+        assert not isinstance(excinfo.value, MissingPluginError)
+        assert "read_totally_unknown_format" not in spectrochempy.__dict__
+
     def test_missing_namespace_clear_error(self, monkeypatch):
         """Accessing scp.nmr without NMR plugin gives a clear error."""
 
