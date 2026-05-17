@@ -245,6 +245,7 @@ doctest_optionflags = [
 ]
 doctest_plus = "enabled"
 markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
+pythonpath = ["."]
 testpaths = ["tests"]
 doctest_norecursedirs = ["tests/test_plotting"]
 
