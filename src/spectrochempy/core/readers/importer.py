@@ -583,28 +583,6 @@ def _read_(*args, **kwargs):
         return Importer._read_dir(*args, **kwargs)
     raise FileNotFoundError
 
-    # protocol = kwargs.get("protocol", None)
-    # if protocol and ".scp" in protocol:
-    #     return dataset.load(filename, **kwargs)
-    #
-    # elif filename and filename.name in ("fid", "ser", "1r", "2rr", "3rrr"):
-    #     # probably a TopSpin NMR file
-    #     return read_topspin(filename, **kwargs)
-    # elif filename:
-    #     # try scp format
-    #     try:
-    #         return dataset.load(filename, **kwargs)
-    #     except Exception:
-    #         # lets try some common format
-    #         for key in ["omnic", "opus", "topspin", "labspec", "matlab", "jdx"]:
-    #             try:
-    #                 _read = getattr(scp, f"read_{key}")
-    #                 f = f"{filename}.{key}"
-    #                 return _read(f, **kwargs)
-    #             except Exception:
-    #                 pass
-    #         raise NotImplementedError
-
 
 # ======================================================================================
 # Private functions
