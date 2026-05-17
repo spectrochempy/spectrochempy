@@ -1,4 +1,4 @@
-# ruff: noqa: S101  # assert allowed in tests
+# ruff: noqa: S101, PLC0415  # assert/local imports allowed in plugin tests
 
 """Tests for spectrochempy-iris plugin — extended IRIS analysis."""
 
@@ -101,6 +101,21 @@ def test_capability_query():
     assert "batch_iris" in names
     assert "compare_kernels" in names
     assert "iris_report" in names
+
+
+def test_package_namespace_uses_isolated_plugin_manager(monkeypatch):
+    """scp.iris exposes package-level IRIS APIs from the registered plugin."""
+    import spectrochempy as scp
+
+    harness = PluginTestHarness()
+    harness.register(IrisPlugin())
+    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
+    monkeypatch.setattr(scp, "registry", harness.registry)
+    monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+
+    assert scp.iris.batch_iris is batch_iris_analysis
+    assert scp.iris.compare_kernels is compare_kernel_models
+    assert scp.iris.iris_report is iris_analysis_report
 
 
 # ------------------------------------------------------------------
@@ -222,12 +237,14 @@ def test_ndd_kernel_accessor():
     assert hasattr(result, "kernel")
 
 
-def test_namespaced_dataset_accessor():
+def test_namespaced_dataset_accessor(monkeypatch):
     """NDDataset.iris.kernel_matrix returns an IrisKernel."""
     import spectrochempy as scp
 
-    if not scp.plugin_manager.has_plugin("iris"):
-        scp.plugin_manager.register(IrisPlugin())
+    harness = PluginTestHarness()
+    harness.register(IrisPlugin())
+    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
+    monkeypatch.setattr(scp, "registry", harness.registry)
 
     ds = _make_test_dataset()
     result = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-6, 1, 6])
