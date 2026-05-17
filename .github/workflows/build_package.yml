@@ -68,14 +68,11 @@ jobs:
         if: github.event_name == 'push' && github.repository == 'spectrochempy/spectrochempy'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish package to PyPI
         if: github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
 
   build_and_publish_conda_package:
     name: Build and publish conda package to Anaconda.org
