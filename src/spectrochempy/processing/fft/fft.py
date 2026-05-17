@@ -10,7 +10,6 @@ __dataset_methods__ = __all__
 import re
 
 import numpy as np
-from quaternion import as_float_array
 from scipy.signal import hilbert
 
 from spectrochempy.application.application import error_
@@ -19,6 +18,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
 from spectrochempy.utils.numutils import largest_power_of_2
+from spectrochempy.utils.quaternion import as_float_array
 from spectrochempy.utils.quaternion import as_quaternion
 from spectrochempy.utils.quaternion import get_component
 from spectrochempy.utils.quaternion import typequaternion
@@ -28,7 +28,7 @@ from spectrochempy.utils.quaternion import typequaternion
 # Private methods
 # ======================================================================================
 def _fft(data):
-    if data.dtype == typequaternion:
+    if typequaternion is not None and data.dtype == typequaternion:
         dr = get_component(data, "R")
         fr = np.fft.fftshift(np.fft.fft(dr), -1)
         di = get_component(data, "I")
@@ -44,7 +44,7 @@ def _fft(data):
 
 
 def _ifft(data):
-    if data.dtype == typequaternion:
+    if typequaternion is not None and data.dtype == typequaternion:
         fr = get_component(data, "R")
         dr = np.fft.ifft(np.fft.ifftshift(fr, -1))
         fi = get_component(data, "I")
@@ -60,7 +60,7 @@ def _ifft(data):
 
 
 def _fft_positive(data):
-    if data.dtype == typequaternion:
+    if typequaternion is not None and data.dtype == typequaternion:
         dr = get_component(data, "R")
         fr = np.fft.fftshift(np.fft.ifft(dr).astype(data.dtype)) * data.shape[-1]
         di = get_component(data, "I")
@@ -76,7 +76,7 @@ def _fft_positive(data):
 
 
 def _ifft_positive(data):
-    if data.dtype == typequaternion:
+    if typequaternion is not None and data.dtype == typequaternion:
         fr = get_component(data, "R")
         dr = np.fft.fft(np.fft.ifftshift(fr, -1)) * data.shape[-1]
         fi = get_component(data, "I")

@@ -15,7 +15,6 @@ from warnings import catch_warnings
 
 # Third-party imports
 import numpy as np
-from quaternion import as_float_array
 
 # Local imports
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
@@ -28,8 +27,10 @@ from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.exceptions import CoordinatesMismatchError
 from spectrochempy.utils.objects import OrderedSet
+from spectrochempy.utils.quaternion import as_float_array
 from spectrochempy.utils.quaternion import as_quaternion
 from spectrochempy.utils.quaternion import quat_as_complex_array
+from spectrochempy.utils.quaternion import typequaternion
 from spectrochempy.utils.testing import assert_coord_almost_equal
 
 __all__ = []
@@ -777,9 +778,7 @@ class NDMath:
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
         quaternion = False
-        if dataset.dtype in [np.quaternion]:
-            from quaternion import as_float_array
-
+        if typequaternion is not None and dataset.dtype == typequaternion:
             quaternion = True
             data = dataset
             dataset = as_float_array(dataset)[..., 0]  # real part
@@ -876,9 +875,7 @@ class NDMath:
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
         quaternion = False
-        if dataset.dtype in [np.quaternion]:
-            from quaternion import as_float_array
-
+        if typequaternion is not None and dataset.dtype == typequaternion:
             quaternion = True
             data = dataset
             dataset = as_float_array(dataset)[..., 0]  # real part
@@ -2823,7 +2820,7 @@ class NDMath:
             if hasattr(magnitude, "dtype"):
                 if magnitude.dtype in TYPE_COMPLEX:
                     magnitude = magnitude.real
-                elif magnitude.dtype == np.quaternion:
+                elif typequaternion is not None and magnitude.dtype == typequaternion:
                     magnitude = as_float_array(magnitude)[..., 0]
                 magnitude = magnitude.max()
             return magnitude

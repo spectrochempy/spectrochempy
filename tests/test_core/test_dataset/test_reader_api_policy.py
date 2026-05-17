@@ -2,7 +2,11 @@
 
 """Reader API exposure policy tests."""
 
+import pytest
+
 import spectrochempy as scp
+from spectrochempy.plugins.deps import MissingPluginError
+from spectrochempy.plugins.registry import registry
 
 
 def test_core_readers_are_package_level_not_dataset_methods():
@@ -37,3 +41,23 @@ def test_core_readers_are_package_level_not_dataset_methods():
     ):
         assert hasattr(scp, name)
         assert not hasattr(dataset, name)
+
+
+def test_missing_topspin_top_level_alias_is_actionable(monkeypatch):
+    """Without the NMR plugin reader, scp.read_topspin points to a clear stub."""
+    scp.plugin_manager.discover()
+    monkeypatch.delitem(scp.__dict__, "read_topspin", raising=False)
+    monkeypatch.setattr(
+        registry.io,
+        "_readers",
+        {
+            name: info
+            for name, info in registry.io.available_readers.items()
+            if name != "topspin"
+        },
+    )
+
+    with pytest.raises(MissingPluginError, match="spectrochempy-nmr") as excinfo:
+        scp.read_topspin("missing")
+
+    assert "pip install spectrochempy[nmr]" in str(excinfo.value)

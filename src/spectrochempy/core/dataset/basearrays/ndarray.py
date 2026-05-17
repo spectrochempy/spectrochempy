@@ -36,6 +36,7 @@ from spectrochempy.utils.objects import make_new_object
 from spectrochempy.utils.print import convert_to_html
 from spectrochempy.utils.print import insert_masked_print
 from spectrochempy.utils.print import numpyprintoptions
+from spectrochempy.utils.quaternion import typequaternion
 from spectrochempy.utils.typeutils import is_number
 from spectrochempy.utils.typeutils import is_sequence
 
@@ -441,10 +442,14 @@ class NDArray(tr.HasTraits):
             value.ito(self.units)
             value = np.asarray(value.magnitude)  # , copy=self.copy)
 
-        if self._data.dtype == np.dtype(np.quaternion) and np.isscalar(value):
+        if (
+            typequaternion is not None
+            and self._data.dtype == typequaternion
+            and np.isscalar(value)
+        ):
             # sometimes do not work directly : here is a work around
             self._data[keys] = np.full_like(self._data[keys], value).astype(
-                np.dtype(np.quaternion),
+                typequaternion
             )
             return None
         self._data[keys] = value

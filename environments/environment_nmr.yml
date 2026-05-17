@@ -27,13 +27,14 @@ dependencies:
     # -----------------
     - colorama
     - dill
-    - docrep
     - ipython
     - jinja2
-    - numpy
-    - quaternion>=2024.0.7
+    - lazy_loader
     - matplotlib-base
+    - numpy
+    - numpydoc
     - osqp
+    - pluggy
     - pint
     - pyyaml
     - requests
@@ -44,4 +45,5 @@ dependencies:
 
     # NMR dependencies
     # ----------------
-    - spectrochempy[quaternion]
+
+    - spectrochempy-nmr>=0.1,<0.2

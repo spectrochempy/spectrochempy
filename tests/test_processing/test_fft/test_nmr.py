@@ -34,8 +34,9 @@ def test_nmr_reader_1D():
     )
 
     # load the data in a new dataset
-    ndd = NDDataset()
-    ndd.read_topspin(path, expno=1, remove_digital_filter=True)
+    import spectrochempy as scp
+
+    ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == "NDDataset: [complex128] unitless (size: 12411)"
     assert (
         "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='#28A745'> "
@@ -264,8 +265,9 @@ def test_nmr_reader_2D():
     )
 
     # load the data in a new dataset
-    ndd = NDDataset()
-    ndd.read_topspin(path, expno=1, remove_digital_filter=True)
+    import spectrochempy as scp
+
+    ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == "NDDataset: [quaternion] unitless (shape: (y:96, x:948))"
     assert (
         "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px;"

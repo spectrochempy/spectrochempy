@@ -11,6 +11,7 @@ To run it explicitly, use: pytest tests/test_docs/test_py_in_docs.py --override-
 
 import subprocess
 import sys
+from importlib.util import find_spec
 from os import environ
 from pathlib import Path
 
@@ -45,6 +46,14 @@ scripts = [
         for x in ["checkpoint", "make.py", "conf.py", "apigen.py", "gallery"]
     )
 ]
+
+
+def _nmr_plugin_available():
+    return find_spec("spectrochempy_nmr") is not None
+
+
+def _requires_nmr_plugin(path):
+    return "read_topspin" in path.read_text(encoding="utf8")
 
 
 def nbsphinx_script_run(path):
@@ -87,6 +96,8 @@ def test_nbsphinx_script_(script):
     name = script.name
     if name in []:
         return
+    if _requires_nmr_plugin(script) and not _nmr_plugin_available():
+        pytest.skip("requires the optional spectrochempy-nmr plugin")
 
     e, message, err = nbsphinx_script_run(script)
     # this give unicoderror on workflow with window
@@ -108,6 +119,9 @@ def test_nbsphinx_script_(script):
 )
 def test_examples(example):
     """Test example files."""
+    if _requires_nmr_plugin(example) and not _nmr_plugin_available():
+        pytest.skip("requires the optional spectrochempy-nmr plugin")
+
     scp.NO_DISPLAY = True
     mpl.use("agg", force=True)
 
