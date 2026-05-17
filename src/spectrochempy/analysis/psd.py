@@ -621,6 +621,10 @@ class PSD(AnalysisConfigurable):
 
         else:
             # Averaged or single cycle: D shape (n_spectra, n_wavenumbers)
+            n_wavenumbers = D.shape[1]
+
+            # Result array: (n_phi, n_wavenumbers)
+            psd = np.zeros((n_phi, n_wavenumbers))
 
             # angle: (n_phi, n_spectra)
             angle = (
