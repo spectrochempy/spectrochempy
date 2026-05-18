@@ -1,11 +1,11 @@
 .. _plugins:
 
-=================
+================
 Optional Plugins
-=================
+================
 
 SpectroChemPy's core works standalone for common spectroscopic data processing
-and analysis.  Additional functionality is provided by **optional plugins** that
+and analysis. Additional functionality is provided by **optional plugins** that
 extend the framework with domain-specific readers, analyses, and simulations.
 
 .. _plugins-install:
@@ -13,7 +13,7 @@ extend the framework with domain-specific readers, analyses, and simulations.
 Installing a plugin
 ===================
 
-Plugins are distributed as separate packages on PyPI.  Install them with
+Plugins are distributed as separate packages on PyPI. Install them with
 ``pip``:
 
 .. code-block:: bash
@@ -36,25 +36,37 @@ Using a plugin
 ==============
 
 Once installed, the plugin registers itself automatically when you import
-SpectroChemPy.  No extra import is needed:
+SpectroChemPy. Plugin functions are available from package-level namespaces,
+and dataset-bound operations are available from dataset accessors:
 
 .. code-block:: python
 
     import spectrochempy as scp
 
-    # NMR plugin — read TopSpin files
-    ds = scp.read_topspin("path/to/fid")
+    # NMR plugin: read TopSpin files
+    ds = scp.nmr.read_topspin("path/to/fid")
 
-    # Cantera plugin — PFR simulation
-    reactor = scp.PFR(...)
+    # Cantera plugin: access the PFR simulation callable
+    PFR = scp.cantera.PFR
 
-    # IRIS plugin — 2D-IRIS analysis
-    from spectrochempy_iris import IRIS
-    iris = IRIS(reg_par=[-10, 1, 12])
+    # IRIS plugin: build an IRIS kernel from an existing dataset
+    kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
 
-If a plugin is not installed, the corresponding function raises a clear
-:class:`~spectrochempy.plugins.deps.MissingPluginError` with installation
-instructions.
+For backward compatibility, some former top-level APIs remain available as thin
+aliases. For example, ``scp.read_topspin(...)`` delegates to
+``scp.nmr.read_topspin(...)`` when the NMR plugin is installed.
+
+If a plugin is not installed, the corresponding official optional feature gives
+a clear installation hint. For example:
+
+.. code-block:: pycon
+
+    >>> import spectrochempy as scp
+    >>> scp.read_topspin("path/to/fid")
+    Traceback (most recent call last):
+    ...
+    MissingPluginError: The 'read_topspin' feature requires the optional plugin
+    'spectrochempy-nmr'. Install it with: pip install spectrochempy[nmr]
 
 .. _plugins-list:
 
@@ -78,7 +90,7 @@ Available plugins
        :class:`~spectrochempy_iris.IrisKernel`)
    * - Cantera
      - ``spectrochempy-cantera``
-     - :class:`~spectrochempy.PFR` plug flow reactor simulation
+     - ``scp.cantera.PFR`` plug flow reactor simulation callable
 
 .. _plugins-developer:
 

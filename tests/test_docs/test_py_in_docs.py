@@ -9,6 +9,7 @@ This test is skipped by default as it's too slow and redundant with docs buildin
 To run it explicitly, use: pytest tests/test_docs/test_py_in_docs.py --override-skip.
 """
 
+import ast
 import subprocess
 import sys
 from importlib.util import find_spec
@@ -55,6 +56,24 @@ def _plugin_available(name):
 def _plugin_required_by(path):
     """Determine which (if any) optional plugin an example or script needs."""
     text = path.read_text(encoding="utf8")
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        tree = None
+    if tree is not None:
+        for node in tree.body:
+            if not isinstance(node, ast.Assign):
+                continue
+            if not any(
+                isinstance(target, ast.Name) and target.id == "OPTIONAL_PLUGIN"
+                for target in node.targets
+            ):
+                continue
+            if isinstance(node.value, ast.Constant) and isinstance(
+                node.value.value, str
+            ):
+                return node.value.value
+
     markers = {
         "spectrochempy_nmr": "read_topspin",
         "spectrochempy_iris": "spectrochempy_iris",
@@ -82,7 +101,9 @@ def nbsphinx_script_run(path):
         pipe = subprocess.Popen(  # noqa: S603
             [sys.executable, str(path), "--nodisplay"],
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             encoding="utf8",
+            env=env,
         )
         (so, serr) = pipe.communicate()
     except Exception as e:
