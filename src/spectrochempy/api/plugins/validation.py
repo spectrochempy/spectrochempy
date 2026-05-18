@@ -14,6 +14,7 @@ plugins gracefully.
 from __future__ import annotations
 
 import importlib.metadata
+import importlib.util
 import logging
 from typing import Any
 
@@ -81,9 +82,7 @@ def check_plugin_requires(plugin: Any) -> list[str]:
     for dep in requires:
         # Extract package name from a pip-style spec (e.g. "cantera>=3.0" -> "cantera")
         pkg_name = dep.split(">=")[0].split("==")[0].split("~=")[0].strip()
-        try:
-            importlib.import_module(pkg_name)
-        except ImportError:
+        if importlib.util.find_spec(pkg_name) is None:
             issues.append(f"Plugin '{name}' requires '{dep}' which is not installed.")
     return issues
 

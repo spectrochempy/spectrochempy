@@ -12,34 +12,62 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import numpy as np
-
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 
-from ._core import IRIS  # noqa: F401 — re-exported for user convenience
-from ._core import IrisKernel  # noqa: F401 — re-exported for user convenience
-from ._plotting import plot_iris_distribution  # noqa: F401
-from ._plotting import plot_iris_lcurve  # noqa: F401
-from ._plotting import plot_iris_merit  # noqa: F401
+# ------------------------------------------------------------------
+# Lazy module-level access for public API (IRIS, IrisKernel, plotting)
+# ------------------------------------------------------------------
 
-__all__ = [
-    "IRIS",
-    "IrisKernel",
-    "IrisPlugin",
-    "batch_iris_analysis",
-    "compare_kernel_models",
-    "iris_analysis_report",
-    "plot_distribution_grid",
-    "plot_iris_distribution",
-    "plot_iris_lcurve",
-    "plot_iris_merit",
-    "plot_kernel_comparison",
-]
+
+def __getattr__(name: str):
+    if name in ("IRIS", "IrisKernel"):
+        from ._core import IRIS as _IRIS  # noqa: PLC0415
+        from ._core import IrisKernel as _IrisKernel  # noqa: PLC0415
+
+        return _IRIS if name == "IRIS" else _IrisKernel
+
+    # Functions defined in _plotting.py
+    if name in {"plot_iris_distribution", "plot_iris_lcurve", "plot_iris_merit"}:
+        from ._plotting import plot_iris_distribution as _f1  # noqa: PLC0415
+        from ._plotting import plot_iris_lcurve as _f2  # noqa: PLC0415
+        from ._plotting import plot_iris_merit as _f3  # noqa: PLC0415
+
+        _mapping = {
+            "plot_iris_distribution": _f1,
+            "plot_iris_lcurve": _f2,
+            "plot_iris_merit": _f3,
+        }
+        return _mapping[name]
+
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
+
+
+def __dir__() -> list[str]:
+    return [
+        "IRIS",
+        "IrisKernel",
+        "IrisPlugin",
+        "batch_iris_analysis",
+        "compare_kernel_models",
+        "iris_analysis_report",
+        "plot_distribution_grid",
+        "plot_iris_distribution",
+        "plot_iris_lcurve",
+        "plot_iris_merit",
+        "plot_kernel_comparison",
+    ]
+
 
 if TYPE_CHECKING:
     from spectrochempy import NDDataset
+
+
+# ------------------------------------------------------------------
+# Plugin class
+# ------------------------------------------------------------------
 
 
 class IrisPlugin(SpectroChemPyPlugin):
@@ -110,8 +138,32 @@ class IrisPlugin(SpectroChemPyPlugin):
 
 
 # ------------------------------------------------------------------
-# Dataset accessor implementation
+# Helper / kernel functions (deferred imports internally)
 # ------------------------------------------------------------------
+
+
+def _kernel_freundlich(p, q):
+    """Freundlich isotherm kernel: K = p^b (with b = exp(q))."""
+    import numpy as np  # noqa: PLC0415
+
+    b = np.exp(q)
+    return p[:, np.newaxis] ** b[np.newaxis, :]
+
+
+def _kernel_temkin(p, q):
+    """Temkin isotherm kernel: K = -exp(q) * ln(p)."""
+    import numpy as np  # noqa: PLC0415
+
+    a = -np.exp(q)
+    kernel_data = a[np.newaxis, :] * np.log(p[:, np.newaxis])
+    return np.maximum(kernel_data, 0.0)
+
+
+def _kernel_linear(p, q):
+    """Linear interaction kernel: K = p * q."""
+    import numpy as np  # noqa: PLC0415
+
+    return p[:, np.newaxis] * q[np.newaxis, :]
 
 
 def _ndd_build_kernel(
@@ -119,67 +171,15 @@ def _ndd_build_kernel(
     kernel_type: str = "langmuir",
     q: list | None = None,
 ) -> object:
-    """
-    Build an IrisKernel from this dataset.
-
-    Parameters
-    ----------
-    self : NDDataset
-        The dataset (used as ``X`` in the kernel).
-    kernel_type : str
-        Predefined kernel name (``"langmuir"``, ``"ca"``, etc.) or a custom
-        kernel name provided by this plugin.
-    q : list or None
-        Internal variable range.  If three elements, interpreted as
-        ``[start, stop, num]`` for ``np.logspace``.
-
-    Returns
-    -------
-    IrisKernel
-    """
+    from ._core import IrisKernel as _IrisKernel  # noqa: PLC0415
 
     extra_kernels = {
         "freundlich": _kernel_freundlich,
         "temkin": _kernel_temkin,
         "linear": _kernel_linear,
     }
-
     selected_kernel = extra_kernels.get(kernel_type, kernel_type)
-    return IrisKernel(self, selected_kernel, q=q)
-
-
-# ------------------------------------------------------------------
-# Additional kernel functions (deferred imports)
-# ------------------------------------------------------------------
-
-
-def _kernel_freundlich(p: np.ndarray, q: np.ndarray) -> np.ndarray:
-    """Freundlich isotherm kernel: K = p^b (with b = exp(q))."""
-    import numpy as np
-
-    b = np.exp(q)
-    return p[:, np.newaxis] ** b[np.newaxis, :]
-
-
-def _kernel_temkin(p: np.ndarray, q: np.ndarray) -> np.ndarray:
-    """Temkin isotherm kernel: K = -exp(q) * ln(p)."""
-    import numpy as np
-
-    a = -np.exp(q)
-    kernel_data = a[np.newaxis, :] * np.log(p[:, np.newaxis])
-    return np.maximum(kernel_data, 0.0)
-
-
-def _kernel_linear(p: np.ndarray, q: np.ndarray) -> np.ndarray:
-    """Linear interaction kernel: K = p * q."""
-    import numpy as np
-
-    return p[:, np.newaxis] * q[np.newaxis, :]
-
-
-# ------------------------------------------------------------------
-# Analysis functions
-# ------------------------------------------------------------------
+    return _IrisKernel(self, selected_kernel, q=q)
 
 
 def batch_iris_analysis(
@@ -188,26 +188,8 @@ def batch_iris_analysis(
     q: list | None = None,
     reg_par: list | None = None,
 ) -> list[dict]:
-    """
-    Run IRIS analysis on multiple datasets or conditions.
-
-    Parameters
-    ----------
-    datasets : list[NDDataset] or dict[str, NDDataset]
-        Datasets to analyse.  If a dict, keys are used as condition labels.
-    kernel_type : str
-        Kernel type (``"langmuir"``, ``"ca"``, ``"freundlich"``,
-        ``"temkin"``, etc.).
-    q : list or None
-        Internal variable ``[start, stop, num]`` for ``np.logspace``.
-    reg_par : list or None
-        Regularisation parameters.
-
-    Returns
-    -------
-    list[dict] with keys ``label``, ``iris``, ``f``, ``RSS``, ``SM``.
-    """
-    from ._core import IrisKernel
+    from ._core import IRIS as _IRIS  # noqa: PLC0415
+    from ._core import IrisKernel as _IrisKernel  # noqa: PLC0415
 
     extra_kernels = {
         "freundlich": _kernel_freundlich,
@@ -223,8 +205,8 @@ def batch_iris_analysis(
     results = []
     for label, ds in items:
         kernel_fn = extra_kernels.get(kernel_type, kernel_type)
-        kernel = IrisKernel(ds, kernel_fn, q=q)
-        iris = IRIS(reg_par=reg_par)
+        kernel = _IrisKernel(ds, kernel_fn, q=q)
+        iris = _IRIS(reg_par=reg_par)
         iris.fit(ds, kernel)
 
         results.append(
@@ -246,27 +228,8 @@ def compare_kernel_models(
     q: list | None = None,
     reg_par: list | None = None,
 ) -> list[dict]:
-    """
-    Fit multiple kernel models to the same dataset and compare results.
-
-    Parameters
-    ----------
-    dataset : NDDataset
-        Input spectroscopic data.
-    kernels : list[str] or None
-        Kernel names to compare.  Defaults to ``["langmuir", "ca",
-        "freundlich"]``.
-    q : list or None
-        Internal variable ``[start, stop, num]``.
-    reg_par : list or None
-        Regularisation parameters (same for all models).
-
-    Returns
-    -------
-    list[dict] with keys ``kernel``, ``iris``, ``RSS``, ``SM``,
-    ``n_components``.
-    """
-    from ._core import IrisKernel
+    from ._core import IRIS as _IRIS  # noqa: PLC0415
+    from ._core import IrisKernel as _IrisKernel  # noqa: PLC0415
 
     extra_kernels = {
         "freundlich": _kernel_freundlich,
@@ -280,8 +243,8 @@ def compare_kernel_models(
     results = []
     for name in kernels:
         kernel_fn = extra_kernels.get(name, name)
-        kernel = IrisKernel(dataset, kernel_fn, q=q)
-        iris = IRIS(reg_par=reg_par)
+        kernel = _IrisKernel(dataset, kernel_fn, q=q)
+        iris = _IRIS(reg_par=reg_par)
         iris.fit(dataset, kernel)
 
         results.append(
@@ -298,20 +261,7 @@ def compare_kernel_models(
 
 
 def iris_analysis_report(iris_object: object) -> dict:
-    """
-    Generate a summary report of a fitted IRIS analysis.
-
-    Parameters
-    ----------
-    iris_object : IRIS
-        A fitted IRIS instance.
-
-    Returns
-    -------
-    dict with keys ``kernel_type``, ``n_lambdas``, ``lambda_values``,
-    ``RSS_range``, ``SM_range``, ``q_range``, ``n_channels``.
-    """
-    import numpy as np
+    import numpy as np  # noqa: PLC0415
 
     return {
         "kernel_type": str(type(iris_object.K).__name__),
@@ -324,29 +274,12 @@ def iris_analysis_report(iris_object: object) -> dict:
     }
 
 
-# ------------------------------------------------------------------
-# Visualisation functions (deferred matplotlib imports)
-# ------------------------------------------------------------------
-
-
 def plot_kernel_comparison(
     comparison_results: list[dict],
     **kwargs,
 ) -> tuple:
-    """
-    Side-by-side comparison of distribution functions from multiple kernels.
-
-    Parameters
-    ----------
-    comparison_results : list[dict]
-        Output from ``compare_kernel_models()``.
-
-    Returns
-    -------
-    (fig, axes) tuple.
-    """
-    import matplotlib.pyplot as plt
-    import numpy as np
+    import matplotlib.pyplot as plt  # noqa: PLC0415
+    import numpy as np  # noqa: PLC0415
 
     n = len(comparison_results)
     fig, axes = plt.subplots(1, n, figsize=(5 * n, 4), squeeze=False)
@@ -355,7 +288,6 @@ def plot_kernel_comparison(
     for i, result in enumerate(comparison_results):
         f = result["iris"].f
         if f is not None and f.data.ndim >= 2:
-            # Plot the first lambda's distribution
             dist = f[0].squeeze().data
             if dist.ndim == 1:
                 axes[i].plot(f[0].y.data, dist)
@@ -382,19 +314,7 @@ def plot_distribution_grid(
     batch_results: list[dict],
     **kwargs,
 ) -> tuple:
-    """
-    Grid of distribution functions across lambdas and conditions.
-
-    Parameters
-    ----------
-    batch_results : list[dict]
-        Output from ``batch_iris_analysis()``.
-
-    Returns
-    -------
-    (fig, axes) tuple.
-    """
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # noqa: PLC0415
 
     n_conditions = len(batch_results)
     fig, axes = plt.subplots(

@@ -25,11 +25,10 @@ from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
 from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
-from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.traits import CoordType
 from spectrochempy.utils.traits import NDDatasetType
 
-quadprog = import_optional_dependency("quadprog", errors="ignore")
+_quadprog = None  # loaded lazily on first use
 
 
 @tr.signature_has_traits
@@ -432,11 +431,19 @@ class IRIS(DecompositionAnalysis):
     @tr.validate("qpsolver")
     def _qpsolver_validate(self, proposal):
         qpsolver = proposal.value
-        if qpsolver == "quadprog" and quadprog is False:
-            raise ValueError(
-                "quadprog module is not installed. Please install it or run IRIS Solver "
-                "with qpsolver='osqp'",
-            )
+        if qpsolver == "quadprog":
+            global _quadprog
+            if _quadprog is None:
+                from spectrochempy.utils.optional import (
+                    import_optional_dependency,  # noqa: PLC0415
+                )
+
+                _quadprog = import_optional_dependency("quadprog", errors="ignore")
+            if _quadprog is False:
+                raise ValueError(
+                    "quadprog module is not installed. Please install it or run IRIS Solver "
+                    "with qpsolver='osqp'",
+                )
 
     @tr.validate("reg_par")
     def _reg_par_validate(self, proposal):
@@ -600,7 +607,7 @@ class IRIS(DecompositionAnalysis):
                     for j, channel in enumerate(channels.data):
                         try:
                             P = P0 + 2 * lamda * S
-                            fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
+                            fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
 
                         except ValueError:  # pragma: no cover
                             msg = (
@@ -611,7 +618,9 @@ class IRIS(DecompositionAnalysis):
                             warning_(msg)
                             try:
                                 P = _nearestPD(P0 + 2 * lamda * S, 0)
-                                fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
+                                fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[
+                                    0
+                                ]
 
                             except ValueError:
                                 msg = (
@@ -620,7 +629,9 @@ class IRIS(DecompositionAnalysis):
                                 )
                                 warning_(msg)
                                 P = _nearestPD(P0 + 2 * lamda * S, 1e-3)
-                                fi[:, j] = quadprog.solve_qp(P, q[j].squeeze(), A, b)[0]
+                                fi[:, j] = _quadprog.solve_qp(P, q[j].squeeze(), A, b)[
+                                    0
+                                ]
 
                 resi = X.data - np.dot(K.data, fi)
                 RSSi = np.sum(resi**2)

@@ -139,6 +139,63 @@ class TestCoreImport:
         )
         assert result.returncode == 0, result.stderr
 
+    def test_import_does_not_import_heavy_optional_deps(self):
+        """Import spectrochempy does NOT import heavy plugin dependencies."""
+        code = """
+import sys
+import spectrochempy as scp
+scp.plugin_manager.discover()
+# These packages belong to optional plugins only
+heavy = ['osqp', 'cantera', 'nmrglue', 'quaternion', 'quadprog']
+for mod in heavy:
+    if mod in sys.modules:
+        print(f'EAGER: {mod}')
+        raise SystemExit(1)
+# Also check scipy sub-modules used only by plugins
+for mod in list(sys.modules):
+    if mod.startswith('scipy.optimize') or mod.startswith('scipy.sparse'):
+        print(f'EAGER: {mod}')
+        raise SystemExit(1)
+raise SystemExit(0)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            msg = f"heavy dep imported: {result.stderr or result.stdout}"
+            raise AssertionError(msg)
+
+    def test_import_does_not_eagerly_load_plugin_modules(self):
+        """Plugin _core / _pfr / read_topspin modules NOT loaded at import."""
+        code = """
+import sys
+import spectrochempy as scp
+scp.plugin_manager.discover()
+lazy_modules = [
+    'spectrochempy_iris._core',
+    'spectrochempy_cantera._pfr',
+    'spectrochempy_nmr.read_topspin',
+    'spectrochempy_nmr.nmrglue',
+]
+for mod in lazy_modules:
+    if mod in sys.modules:
+        print(f'EAGER: {mod}')
+        raise SystemExit(1)
+raise SystemExit(0)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            msg = f"plugin sub-module loaded eagerly: {result.stderr or result.stdout}"
+            raise AssertionError(msg)
+
 
 # ------------------------------------------------------------------
 # B. Discover idempotent

@@ -142,8 +142,8 @@ def test_package_namespace_exposes_topspin_reader(monkeypatch):
 
     assert scp.nmr.read_topspin is scp.read_topspin
     assert registry.get_reader("topspin")["namespace"] == "nmr"
-    assert scp.read_topspin.__module__ == "spectrochempy_nmr.read_topspin"
-    assert scp.nmr.read_topspin.__module__ == "spectrochempy_nmr.read_topspin"
+    assert scp.read_topspin.__module__ == "spectrochempy_nmr"
+    assert scp.nmr.read_topspin.__module__ == "spectrochempy_nmr"
 
 
 def test_top_level_stub_is_actionable_without_registered_nmr(monkeypatch):

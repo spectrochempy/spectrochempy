@@ -1,16 +1,18 @@
-# ruff: noqa: PLC0415 - defer imports in plugin methods to avoid startup cost
+# ruff: noqa: PLC0415 — defer imports in plugin methods to avoid startup cost
 """NMR readers and tools plugin for SpectroChemPy."""
 
 from __future__ import annotations
-
-from typing import TYPE_CHECKING
 
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 
-if TYPE_CHECKING:
-    pass
+
+def _lazy_read_topspin(*args, **kwargs):
+    """Lazy wrapper — imports ``read_topspin`` only on call."""
+    from .read_topspin import read_topspin  # noqa: PLC0415
+
+    return read_topspin(*args, **kwargs)
 
 
 class NMRPlugin(SpectroChemPyPlugin):
@@ -25,13 +27,10 @@ class NMRPlugin(SpectroChemPyPlugin):
 
     def register_readers(self) -> list[dict]:
         """Declare the TopSpin file reader."""
-        # Deferred import: read_topspin pulls in numpy-quaternion
-        from .read_topspin import read_topspin
-
         return [
             {
                 "name": "topspin",
-                "func": read_topspin,
+                "func": _lazy_read_topspin,
                 "description": "Bruker TOPSPIN fid, series, or processed data",
                 "extensions": [
                     ".fid",
@@ -45,3 +44,21 @@ class NMRPlugin(SpectroChemPyPlugin):
                 ],
             },
         ]
+
+
+# ------------------------------------------------------------------
+# Lazy module-level access for public API
+# ------------------------------------------------------------------
+
+
+def __getattr__(name: str):
+    if name == "read_topspin":
+        from .read_topspin import read_topspin  # noqa: PLC0415
+
+        return read_topspin
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
+
+
+def __dir__() -> list[str]:
+    return ["NMRPlugin", "read_topspin"]
