@@ -5,14 +5,14 @@
 # ======================================================================================
 # pragma: no cover
 # excluded for coverage for the moment
-"""Kinetic utilities — ActionMassKinetics and PFR reactor model.
+"""
+Kinetic utilities — ActionMassKinetics and PFR reactor model.
 
 ``ActionMassKinetics`` is cantera-independent and lives here.
 ``PFR`` is delegated to the ``spectrochempy-cantera`` plugin when installed.
 """
 
 import datetime
-import logging
 import re
 import warnings
 from functools import partial
@@ -827,19 +827,19 @@ class ActionMassKinetics(tr.HasTraits):
         # optimizer (kw)arguments:
         # ... parameters for scipy.minimize
         optimizer_method = optimizer_kwargs.get("Method", "Nelder-Mead")
-        optimizer_bounds = optimizer_kwargs.get("bounds", None)
-        optimizer_tol = optimizer_kwargs.get("tol", None)
+        optimizer_bounds = optimizer_kwargs.get("bounds")
+        optimizer_tol = optimizer_kwargs.get("tol")
         optimizer_options = optimizer_kwargs.get("options", {"disp": True})
         # optimizer_callback = optimizer_kwargs.get("callback", None)
         # ... other parameters
-        optimizer_left_op = optimizer_kwargs.get("left_op", None)
+        optimizer_left_op = optimizer_kwargs.get("left_op")
 
         # ivp solver (kw)arguments:
         # ... parameters for integrate.ivp_solve
         ivp_solver_method = ivp_solver_kwargs.get("method", "LSODA")
         # ... other parameters
-        ivp_solver_k_dt = ivp_solver_kwargs.get("k_dt", None)
-        ivp_solver_left_op = ivp_solver_kwargs.get("left_op", None)
+        ivp_solver_k_dt = ivp_solver_kwargs.get("k_dt")
+        ivp_solver_left_op = ivp_solver_kwargs.get("left_op")
 
         # get x0
         x0 = np.zeros(len(dict_param_to_optimize))
@@ -911,15 +911,14 @@ try:
     from spectrochempy_cantera._pfr import PFR
     from spectrochempy_cantera._pfr import _cantera_is_not_available
 except ImportError:
+    from spectrochempy.plugins.deps import MissingPluginError
 
-    class PFR:
-        """PFR reactor model — requires the ``spectrochempy-cantera`` plugin."""
-
-        def __init__(self, *args, **kwargs):
-            raise ImportError(
-                "PFR requires the 'spectrochempy-cantera' plugin. "
-                "Install it with: pip install spectrochempy-cantera",
-            )
+    def PFR(*args, **kwargs):
+        raise MissingPluginError(
+            "PFR",
+            plugin_name="spectrochempy-cantera",
+            install_hint="pip install spectrochempy-cantera",
+        )
 
     def _cantera_is_not_available():
         return True
