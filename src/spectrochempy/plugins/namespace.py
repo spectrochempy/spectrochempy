@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import importlib
 from collections.abc import Callable
+from types import ModuleType
 from typing import Any
 
 
@@ -36,6 +38,9 @@ class PluginNamespace:
         plugin = self._manager.get_plugin(self._namespace)
         if plugin is not None:
             names.update(name for name in dir(plugin) if not name.startswith("_"))
+            module = self._plugin_module(plugin)
+            if module is not None:
+                names.update(name for name in dir(module) if not name.startswith("_"))
         return sorted(names)
 
     def __getattr__(self, name: str) -> Any:
@@ -54,9 +59,24 @@ class PluginNamespace:
         if plugin is not None and hasattr(plugin, name):
             return getattr(plugin, name)
 
+        if plugin is not None:
+            module = self._plugin_module(plugin)
+            if module is not None:
+                try:
+                    return getattr(module, name)
+                except AttributeError:
+                    pass
+
         raise AttributeError(
             f"plugin namespace '{self._namespace}' has no attribute '{name}'"
         )
+
+    @staticmethod
+    def _plugin_module(plugin: Any) -> ModuleType | None:
+        module_name = getattr(plugin.__class__, "__module__", None)
+        if not module_name:
+            return None
+        return importlib.import_module(module_name)
 
     def _reader_names(self) -> set[str]:
         return {

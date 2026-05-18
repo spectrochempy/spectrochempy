@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from spectrochempy_iris import IrisPlugin
 from spectrochempy_iris import batch_iris_analysis
 from spectrochempy_iris import compare_kernel_models
@@ -131,6 +132,47 @@ def test_iris_namespace_does_not_shadow_load_iris(monkeypatch):
     assert callable(scp.load_iris)
     assert scp.iris.batch_iris is batch_iris_analysis
     assert not hasattr(scp.iris, "load_iris")
+
+
+def test_iris_namespace_exposes_lazy_module_classes(monkeypatch):
+    """scp.iris delegates unknown attributes to the plugin module lazily."""
+    import sys
+
+    import spectrochempy as scp
+
+    harness = PluginTestHarness()
+    harness.register(IrisPlugin())
+    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
+    monkeypatch.setattr(scp, "registry", harness.registry)
+    monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+    monkeypatch.delitem(sys.modules, "spectrochempy_iris._core", raising=False)
+
+    namespace = scp.iris
+    assert "spectrochempy_iris._core" not in sys.modules
+    assert "IRIS" in dir(namespace)
+    assert "IrisKernel" in dir(namespace)
+    assert "spectrochempy_iris._core" not in sys.modules
+
+    iris_class = namespace.IRIS
+    assert iris_class.__name__ == "IRIS"
+    assert "spectrochempy_iris._core" in sys.modules
+
+    kernel_class = namespace.IrisKernel
+    assert kernel_class.__name__ == "IrisKernel"
+
+
+def test_iris_classes_are_not_exposed_at_scp_root(monkeypatch):
+    """Plugin module attributes stay under scp.iris, not at the scp root."""
+    import spectrochempy as scp
+
+    harness = PluginTestHarness()
+    harness.register(IrisPlugin())
+    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
+    monkeypatch.setattr(scp, "registry", harness.registry)
+    monkeypatch.delitem(scp.__dict__, "IRIS", raising=False)
+
+    with pytest.raises(AttributeError):
+        _ = scp.IRIS
 
 
 # ------------------------------------------------------------------
