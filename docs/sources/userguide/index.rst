@@ -16,5 +16,6 @@ A comprehensive guide to using SCPY.
     plotting/index
     processing/index
     analysis/index
+    plugins
     api/api
     objects/index

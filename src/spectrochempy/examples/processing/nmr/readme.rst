@@ -1,6 +1,17 @@
 .. _examples-processing-nmr-index:
 
-Processing NMR datasets
------------------------
+#############################
+NMR processing (plugin-based)
+#############################
 
-This section contains examples of how to process NMR datasets.
+.. warning::
+
+    These examples require the optional ``spectrochempy-nmr`` plugin.
+
+    Install it with:
+
+    .. code-block:: bash
+
+        pip install spectrochempy[nmr]
+
+    See :ref:`plugins` for more information.
