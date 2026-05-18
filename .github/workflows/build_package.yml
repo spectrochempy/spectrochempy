@@ -151,7 +151,9 @@ jobs:
 
             for package in "${packages[@]}"; do
               echo "Uploading $package with label: $label"
-              anaconda upload --force -l "$label" "$package"
+              anaconda --token "$ANACONDA_API_TOKEN" whoami
+              anaconda --token "$ANACONDA_API_TOKEN" show spectrocat/spectrochempy
+              anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "$label" "$package"
             done
           }
 
