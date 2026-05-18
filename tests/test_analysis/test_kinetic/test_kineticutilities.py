@@ -20,9 +20,11 @@ def test_cu(monkeypatch):
     # availability of cantera (# should be installed if the test wa not skipped)
     assert not ku._cantera_is_not_available()
 
-    # simulate abscense of cantera
+    # simulate absence of cantera by patching the plugin module
     with monkeypatch.context() as m:
-        m.setattr(ku, "ct", None)
+        import spectrochempy_cantera._pfr as pfr_mod
+
+        m.setattr(pfr_mod, "ct", None)
         assert ku._cantera_is_not_available()
 
     # context restored with ct = cantera

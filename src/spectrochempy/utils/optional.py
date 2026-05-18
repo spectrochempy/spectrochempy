@@ -14,7 +14,6 @@ from packaging.version import Version
 
 VERSIONS = {
     "xarray": "*",
-    "cantera": "2.5.1",
     "PyQt5": "*",
     "tensorly": "*",
 }

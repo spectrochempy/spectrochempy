@@ -27,6 +27,7 @@ __all__ = [
 ]
 
 ct = import_optional_dependency("cantera", errors="ignore")
+# TODO(plugin-audit): once core PFR is removed, this will be the single source of truth
 
 SCIPY_MINIMIZE_METHODS = [
     "NELDER-MEAD",
