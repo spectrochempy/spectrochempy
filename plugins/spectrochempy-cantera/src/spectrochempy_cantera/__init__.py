@@ -4,6 +4,8 @@ Cantera PFR plugin for SpectroChemPy.
 
 Currently provides:
 - ``PFR``: Plug-flow reactor model using Cantera.
+
+PFR is lazily imported so that plugin discovery stays lightweight.
 """
 
 from __future__ import annotations
@@ -11,6 +13,13 @@ from __future__ import annotations
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
+
+
+def _lazy_pfr(*args, **kwargs):
+    """Lazy wrapper — imports ``_pfr.PFR`` only on call."""
+    from ._pfr import PFR  # noqa: PLC0415
+
+    return PFR(*args, **kwargs)
 
 
 class CanteraPlugin(SpectroChemPyPlugin):
@@ -34,7 +43,7 @@ class CanteraPlugin(SpectroChemPyPlugin):
         return [
             {
                 "name": "PFR",
-                "func": PFR,
+                "func": _lazy_pfr,
                 "description": "Plug-flow reactor (CSTR-in-series) model",
             },
         ]
@@ -46,5 +55,19 @@ class CanteraPlugin(SpectroChemPyPlugin):
         return []
 
 
-# Re-export PFR from the _pfr module
-from ._pfr import PFR  # noqa: E402,F401
+# ------------------------------------------------------------------
+# Lazy module-level access
+# ------------------------------------------------------------------
+
+
+def __getattr__(name: str):
+    if name == "PFR":
+        from ._pfr import PFR  # noqa: PLC0415
+
+        return PFR
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
+
+
+def __dir__() -> list[str]:
+    return ["CanteraPlugin", "PFR", "_lazy_pfr"]
