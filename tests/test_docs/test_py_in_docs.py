@@ -48,12 +48,22 @@ scripts = [
 ]
 
 
-def _nmr_plugin_available():
-    return find_spec("spectrochempy_nmr") is not None
+def _plugin_available(name):
+    return find_spec(name) is not None
 
 
-def _requires_nmr_plugin(path):
-    return "read_topspin" in path.read_text(encoding="utf8")
+def _plugin_required_by(path):
+    """Determine which (if any) optional plugin an example or script needs."""
+    text = path.read_text(encoding="utf8")
+    markers = {
+        "spectrochempy_nmr": "read_topspin",
+        "spectrochempy_iris": "spectrochempy_iris",
+        "spectrochempy_cantera": "spectrochempy_cantera",
+    }
+    for plugin_name, marker in markers.items():
+        if marker in text:
+            return plugin_name
+    return None
 
 
 def nbsphinx_script_run(path):
@@ -96,8 +106,9 @@ def test_nbsphinx_script_(script):
     name = script.name
     if name in []:
         return
-    if _requires_nmr_plugin(script) and not _nmr_plugin_available():
-        pytest.skip("requires the optional spectrochempy-nmr plugin")
+    required = _plugin_required_by(script)
+    if required and not _plugin_available(required):
+        pytest.skip(f"requires the optional {required} plugin")
 
     e, message, err = nbsphinx_script_run(script)
     # this give unicoderror on workflow with window
@@ -119,8 +130,9 @@ def test_nbsphinx_script_(script):
 )
 def test_examples(example):
     """Test example files."""
-    if _requires_nmr_plugin(example) and not _nmr_plugin_available():
-        pytest.skip("requires the optional spectrochempy-nmr plugin")
+    required = _plugin_required_by(example)
+    if required and not _plugin_available(required):
+        pytest.skip(f"requires the optional {required} plugin")
 
     scp.NO_DISPLAY = True
     mpl.use("agg", force=True)
