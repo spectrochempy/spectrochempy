@@ -36,7 +36,16 @@ Using a plugin
 ==============
 
 Once installed, the plugin registers itself automatically when you import
-SpectroChemPy. Plugin functions are available from package-level namespaces,
+SpectroChemPy.
+
+.. note::
+
+    Plugin optional dependencies (such as ``osqp``, ``cantera``, ``quaternion``,
+    ``nmrglue``) are **not imported** when you run ``import spectrochempy``.
+    They are loaded lazily, only when you actually call a plugin function.
+    This keeps startup fast and avoids unnecessary imports.
+
+Plugin functions are available from package-level namespaces,
 and dataset-bound operations are available from dataset accessors:
 
 .. code-block:: python
@@ -91,6 +100,24 @@ Available plugins
    * - Cantera
      - ``spectrochempy-cantera``
      - ``scp.cantera.PFR`` plug flow reactor simulation callable
+
+.. _plugins-dev-install:
+
+Installing plugins in development mode
+=======================================
+
+If you are working on the SpectroChemPy source (for example from the monorepo
+with the ``plugins`` branch), you can install the plugins in **editable mode**
+with ``pip``:
+
+.. code-block:: bash
+
+    pip install -e plugins/spectrochempy-nmr
+    pip install -e plugins/spectrochempy-iris
+    pip install -e plugins/spectrochempy-cantera
+
+Editable mode (``-e``) lets you modify the plugin source and test changes
+without reinstalling.
 
 .. _plugins-developer:
 
