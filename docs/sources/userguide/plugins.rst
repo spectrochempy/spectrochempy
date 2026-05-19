@@ -45,7 +45,7 @@ SpectroChemPy.
     They are loaded lazily, only when you actually call a plugin function.
     This keeps startup fast and avoids unnecessary imports.
 
-Plugin functions are available from package-level namespaces,
+Plugin functions and classes are available from package-level namespaces,
 and dataset-bound operations are available from dataset accessors:
 
 .. code-block:: python
@@ -58,12 +58,21 @@ and dataset-bound operations are available from dataset accessors:
     # Cantera plugin: access the PFR simulation callable
     PFR = scp.cantera.PFR
 
+    # IRIS plugin: use the modern namespaced analysis class
+    iris = scp.iris.IRIS()
+
     # IRIS plugin: build an IRIS kernel from an existing dataset
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
 
 For backward compatibility, some former top-level APIs remain available as thin
 aliases. For example, ``scp.read_topspin(...)`` delegates to
 ``scp.nmr.read_topspin(...)`` when the NMR plugin is installed.
+
+Some official plugins may also provide explicit root-level compatibility aliases.
+For example, ``scp.IRIS`` delegates to ``scp.iris.IRIS`` and emits a
+``FutureWarning`` when accessed. New code and examples should prefer the
+namespaced API, such as ``scp.iris.IRIS``. Compatibility aliases are intentionally
+limited and may disappear in a future release.
 
 If a plugin is not installed, the corresponding official optional feature gives
 a clear installation hint. For example:

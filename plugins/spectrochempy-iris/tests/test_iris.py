@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 import pytest
 from spectrochempy_iris import IrisPlugin
@@ -153,16 +155,37 @@ def test_iris_namespace_exposes_lazy_module_classes(monkeypatch):
     assert "IrisKernel" in dir(namespace)
     assert "spectrochempy_iris._core" not in sys.modules
 
-    iris_class = namespace.IRIS
+    with warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("always", FutureWarning)
+        iris_class = namespace.IRIS
     assert iris_class.__name__ == "IRIS"
+    assert captured == []
     assert "spectrochempy_iris._core" in sys.modules
 
     kernel_class = namespace.IrisKernel
     assert kernel_class.__name__ == "IrisKernel"
 
 
-def test_iris_classes_are_not_exposed_at_scp_root(monkeypatch):
-    """Plugin module attributes stay under scp.iris, not at the scp root."""
+def test_from_spectrochempy_import_iris_supports_lazy_classes(monkeypatch):
+    """Importing iris from spectrochempy returns the same lazy namespace API."""
+    import spectrochempy as scp
+
+    harness = PluginTestHarness()
+    harness.register(IrisPlugin())
+    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
+    monkeypatch.setattr(scp, "registry", harness.registry)
+    monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+
+    from spectrochempy import iris
+
+    assert iris.IRIS.__name__ == "IRIS"
+    assert iris.IrisKernel.__name__ == "IrisKernel"
+
+
+def test_iris_root_compatibility_alias_warns_once(monkeypatch):
+    """scp.IRIS works as an explicit compatibility alias and warns once."""
+    import sys
+
     import spectrochempy as scp
 
     harness = PluginTestHarness()
@@ -170,9 +193,36 @@ def test_iris_classes_are_not_exposed_at_scp_root(monkeypatch):
     monkeypatch.setattr(scp, "plugin_manager", harness.manager)
     monkeypatch.setattr(scp, "registry", harness.registry)
     monkeypatch.delitem(scp.__dict__, "IRIS", raising=False)
+    monkeypatch.delitem(sys.modules, "spectrochempy_iris._core", raising=False)
+    scp._EMITTED_PLUGIN_ROOT_WARNINGS.clear()
+
+    assert "spectrochempy_iris._core" not in sys.modules
+    with warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("default", FutureWarning)
+        iris_class = scp.IRIS
+        second_access = scp.IRIS
+
+    assert iris_class.__name__ == "IRIS"
+    assert second_access is iris_class
+    assert "spectrochempy_iris._core" in sys.modules
+    assert len(captured) == 1
+    assert captured[0].category is FutureWarning
+    assert "scp.IRIS is deprecated" in str(captured[0].message)
+    assert "scp.iris.IRIS" in str(captured[0].message)
+
+
+def test_iris_kernel_is_not_exposed_at_scp_root(monkeypatch):
+    """Only explicit official compatibility aliases are exposed at the root."""
+    import spectrochempy as scp
+
+    harness = PluginTestHarness()
+    harness.register(IrisPlugin())
+    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
+    monkeypatch.setattr(scp, "registry", harness.registry)
+    monkeypatch.delitem(scp.__dict__, "IrisKernel", raising=False)
 
     with pytest.raises(AttributeError):
-        _ = scp.IRIS
+        _ = scp.IrisKernel
 
 
 # ------------------------------------------------------------------

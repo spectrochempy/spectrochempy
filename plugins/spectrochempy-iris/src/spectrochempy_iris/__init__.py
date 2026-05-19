@@ -88,6 +88,13 @@ class IrisPlugin(SpectroChemPyPlugin):
         PluginCapability.VISUALIZER,
         PluginCapability.ACCESSOR,
     ]
+    root_exports = {
+        "IRIS": {
+            "target": "IRIS",
+            "deprecated": True,
+            "replacement": "scp.iris.IRIS",
+        }
+    }
 
     def register_analyses(self) -> list[dict]:
         """Declare analysis workflows extending core IRIS."""

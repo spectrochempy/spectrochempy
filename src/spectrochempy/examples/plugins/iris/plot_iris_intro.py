@@ -27,10 +27,7 @@ if find_spec(OPTIONAL_PLUGIN) is None:
 else:
     # %%
     # The IRIS plugin provides package-level workflows under ``scp.iris`` and
-    # dataset-bound helpers under ``dataset.iris``. The classes remain available
-    # from the plugin package for advanced workflows.
-
-    from spectrochempy_iris import IRIS
+    # dataset-bound helpers under ``dataset.iris``.
 
     # Load CO adsorption data
     ds = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
@@ -65,7 +62,7 @@ else:
     # Build the IRIS kernel from the dataset accessor, then run the analysis:
 
     K = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-7, -1, 50])
-    iris = IRIS(reg_par=[-10, 1, 12])
+    iris = scp.iris.IRIS(reg_par=[-10, 1, 12])
     iris.fit(ds, K)
 
     _ = iris.f[-7].plot_contour(colorbar=True)

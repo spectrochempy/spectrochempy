@@ -51,6 +51,8 @@ This module serves as the main entry point for the SpectroChemPy package, provid
 - Dynamic attribute access to NDDataset methods
 """
 
+import warnings
+
 import lazy_loader as _lazy_loader
 
 # --------------------------------------------------------------------------------------
@@ -80,6 +82,8 @@ from spectrochempy.plugins.features import plugin_reader_missing_stub
 from spectrochempy.plugins.manager import plugin_manager
 from spectrochempy.plugins.registry import registry
 
+_EMITTED_PLUGIN_ROOT_WARNINGS: set[str] = set()
+
 # --------------------------------------------------------------------------------------
 # Plot profile API (lazy loaded)
 # --------------------------------------------------------------------------------------
@@ -101,6 +105,7 @@ def __dir__():
     # without triggering entry-point scanning (dir() should be side-effect free).
     names.update(_reader_names())
     names.update(_extension_names())
+    names.update(_root_export_names())
     return sorted(names)
 
 
@@ -118,6 +123,51 @@ def _extension_names():
         for entry_name in registry.extensions.list_category(category):
             names.add(entry_name)
     return names
+
+
+def _root_export_names():
+    names = set()
+    for plugin in registry.available_plugins.values():
+        names.update(getattr(plugin, "root_exports", {}))
+    return names
+
+
+def _normalise_root_export(plugin, alias, export):
+    if isinstance(export, str):
+        export = {"target": export}
+    if not isinstance(export, dict):
+        return None
+    target = export.get("target", alias)
+    namespace = export.get("namespace", getattr(plugin, "name", None))
+    if not target or not namespace:
+        return None
+    return {
+        "deprecated": bool(export.get("deprecated", False)),
+        "namespace": namespace,
+        "replacement": export.get("replacement", f"scp.{namespace}.{target}"),
+        "target": target,
+    }
+
+
+def _plugin_root_export(name, namespace_cls):
+    for plugin in plugin_manager.list_plugins():
+        root_exports = getattr(plugin, "root_exports", {})
+        if name not in root_exports:
+            continue
+        export = _normalise_root_export(plugin, name, root_exports[name])
+        if export is None:
+            continue
+        if export["deprecated"] and name not in _EMITTED_PLUGIN_ROOT_WARNINGS:
+            warnings.warn(
+                f"scp.{name} is deprecated and may be removed in a future release. "
+                f"Use {export['replacement']} instead.",
+                FutureWarning,
+                stacklevel=3,
+            )
+            _EMITTED_PLUGIN_ROOT_WARNINGS.add(name)
+        namespace = namespace_cls(export["namespace"], plugin_manager, registry)
+        return getattr(namespace, export["target"])
+    return None
 
 
 # Override __getattr__ to handle both submodules and direct class access
@@ -159,15 +209,14 @@ def __getattr__(name):
         if extension_info:
             return extension_info["obj"]
 
+    root_export = _plugin_root_export(name, PluginNamespace)
+    if root_export is not None:
+        return root_export
+
     if name in _LAZY_IMPORTS:
         module_path = _LAZY_IMPORTS[name]
         module = __import__(module_path, fromlist=[name])
         return getattr(module, name)
-
-    # Check other plugin-provided attributes
-    for plugin in plugin_manager.list_plugins():
-        if hasattr(plugin, name):
-            return getattr(plugin, name)
 
     # Look also NDDataset attribute which can be used as API methods
     if name in _LAZY_DATASETS_IMPORTS:
