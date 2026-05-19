@@ -13,17 +13,6 @@ In this example, we perform the 2D IRIS analysis of CO adsorption on a sulfide c
 
 # %%
 import spectrochempy as scp
-
-# %%
-# Check plugin availability
-from importlib.util import find_spec
-
-if find_spec("spectrochempy_iris") is None:
-    raise ImportError(
-        "This example requires the optional spectrochempy-iris plugin.\n"
-        "Install it with: pip install spectrochempy[iris]"
-    )
-
 from spectrochempy_iris import IRIS
 from spectrochempy_iris import IrisKernel
 

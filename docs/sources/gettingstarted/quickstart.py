@@ -309,23 +309,16 @@ _ = ds.plot()
 # %% [markdown]
 # Perform IRIS analysis assuming a local Langmuir isotherms and plot the distribution of adsorption energies at a
 # specific regularization parameter.
+#
+# .. note::
+#    The 2D-IRIS analysis requires the optional ``spectrochempy-iris`` plugin.
+#    Install it with ``pip install spectrochempy[iris]``.
 
 # %%
-try:
-    from importlib.util import find_spec
-
-    if find_spec("spectrochempy_iris") is None:
-        raise ImportError(
-            "This example requires the optional spectrochempy-iris plugin.\n"
-            "Install it with: pip install spectrochempy[iris]"
-        )
-
-    iris = scp.iris.IRIS(reg_par=[-10, 1, 12])
-    K = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-7, -1, 50])
-    iris.fit(ds, K)
-    _ = iris.f[-7].plot_contour(colorbar=True)
-except ImportError as e:
-    print(e)
+iris = scp.iris.IRIS(reg_par=[-10, 1, 12])
+K = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-7, -1, 50])
+iris.fit(ds, K)
+_ = iris.f[-7].plot_contour(colorbar=True)
 
 # %%
 # %% [markdown]
