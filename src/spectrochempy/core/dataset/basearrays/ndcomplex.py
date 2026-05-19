@@ -122,6 +122,14 @@ class NDComplexArray(NDArray):
         """
         super().__init__(data=data, **kwargs)
 
+    def __eq__(self, other, attrs=None):
+        if not isinstance(other, NDComplexArray):
+            return super().__eq__(other, attrs)
+        eq = super().__eq__(other, attrs)
+        if eq is NotImplemented or not eq:
+            return eq
+        return self._dtype == other._dtype and self._interleaved == other._interleaved
+
     # ----------------------------------------------------------------------------------
     # validators
     # ----------------------------------------------------------------------------------
