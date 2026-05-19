@@ -62,9 +62,9 @@ else:
     # Build the IRIS kernel from the dataset accessor, then run the analysis:
 
     K = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-7, -1, 50])
-    iris = scp.iris.IRIS(reg_par=[-10, 1, 12])
-    iris.fit(ds, K)
+    iris_analysis = scp.iris.IRIS(reg_par=[-10, 1, 12])
+    iris_analysis.fit(ds, K)
 
-    _ = iris.f[-7].plot_contour(colorbar=True)
+    _ = iris_analysis.f[-7].plot_contour(colorbar=True)
 
 # scp.show()

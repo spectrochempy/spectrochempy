@@ -59,7 +59,7 @@ and dataset-bound operations are available from dataset accessors:
     PFR = scp.cantera.PFR
 
     # IRIS plugin: use the modern namespaced analysis class
-    iris = scp.iris.IRIS()
+    iris_analysis = scp.iris.IRIS()
 
     # IRIS plugin: build an IRIS kernel from an existing dataset
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")

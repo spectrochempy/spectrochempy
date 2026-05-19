@@ -315,10 +315,10 @@ _ = ds.plot()
 #    Install it with ``pip install spectrochempy[iris]``.
 
 # %%
-iris = scp.iris.IRIS(reg_par=[-10, 1, 12])
+iris_analysis = scp.iris.IRIS(reg_par=[-10, 1, 12])
 K = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-7, -1, 50])
-iris.fit(ds, K)
-_ = iris.f[-7].plot_contour(colorbar=True)
+iris_analysis.fit(ds, K)
+_ = iris_analysis.f[-7].plot_contour(colorbar=True)
 
 # %%
 # %% [markdown]
