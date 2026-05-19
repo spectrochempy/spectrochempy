@@ -29,11 +29,6 @@ def set_warnings() -> None:
     warnings.filterwarnings(action="ignore", module="pykwalify")
     warnings.filterwarnings(action="ignore", module="matplotlib")
     warnings.filterwarnings(action="ignore", category=FutureWarning)
-    warnings.filterwarnings(
-        action="once",
-        category=FutureWarning,
-        message=r"^scp\..* is deprecated.*",
-    )
 
     # from pint import UnitStrippedWarning
 

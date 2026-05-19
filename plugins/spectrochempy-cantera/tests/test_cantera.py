@@ -155,7 +155,7 @@ def test_package_namespace_exposes_pfr():
 
 
 def test_pfr_root_compatibility_alias_warns_once():
-    """scp.PFR works as a compatibility alias and emits FutureWarning once."""
+    """scp.PFR works as a compatibility alias and emits DeprecationWarning once."""
     if not HAS_CANTERA:
         pytest.skip("cantera not installed")
 
@@ -169,15 +169,16 @@ def test_pfr_root_compatibility_alias_warns_once():
     scp._EMITTED_PLUGIN_ROOT_WARNINGS.discard("PFR")
 
     with warnings.catch_warnings(record=True) as captured:
-        warnings.simplefilter("always", FutureWarning)
+        warnings.simplefilter("always", DeprecationWarning)
         pfr1 = scp.PFR
         pfr2 = scp.PFR
 
     assert callable(pfr1)
     assert pfr1 is pfr2
     assert len(captured) == 1
-    assert captured[0].category is FutureWarning
-    assert "scp.PFR is deprecated" in str(captured[0].message)
+    assert captured[0].category is DeprecationWarning
+    assert "scp.PFR is deprecated since SpectroChemPy 0.9.0" in str(captured[0].message)
+    assert "will be removed in 0.10.0" in str(captured[0].message)
     assert "scp.cantera.PFR" in str(captured[0].message)
 
 

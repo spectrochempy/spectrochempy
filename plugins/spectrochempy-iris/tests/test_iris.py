@@ -156,7 +156,7 @@ def test_iris_namespace_exposes_lazy_module_classes(monkeypatch):
     assert "spectrochempy_iris._core" not in sys.modules
 
     with warnings.catch_warnings(record=True) as captured:
-        warnings.simplefilter("always", FutureWarning)
+        warnings.simplefilter("always", DeprecationWarning)
         iris_class = namespace.IRIS
     assert iris_class.__name__ == "IRIS"
     assert captured == []
@@ -197,7 +197,7 @@ _IRIS_ROOT_ALIASES = [
 
 
 def test_iris_namespaced_api_no_warning(monkeypatch):
-    """scp.iris.* public objects are accessible without FutureWarning."""
+    """scp.iris.* public objects are accessible without DeprecationWarning."""
     import spectrochempy as scp
 
     harness = PluginTestHarness()
@@ -207,22 +207,24 @@ def test_iris_namespaced_api_no_warning(monkeypatch):
     monkeypatch.delitem(scp.__dict__, "iris", raising=False)
 
     with warnings.catch_warnings(record=True) as captured:
-        warnings.simplefilter("always", FutureWarning)
+        warnings.simplefilter("always", DeprecationWarning)
         assert scp.iris.IRIS.__name__ == "IRIS"
         assert scp.iris.IrisKernel.__name__ == "IrisKernel"
         assert scp.iris.batch_iris is batch_iris_analysis
         assert scp.iris.compare_kernels is compare_kernel_models
         assert scp.iris.iris_report is iris_analysis_report
 
-    future_warnings = [w for w in captured if issubclass(w.category, FutureWarning)]
+    deprecation_warnings = [
+        w for w in captured if issubclass(w.category, DeprecationWarning)
+    ]
     assert (
-        future_warnings == []
-    ), f"Expected no FutureWarning from namespaced API, got: {future_warnings}"
+        deprecation_warnings == []
+    ), f"Expected no DeprecationWarning from namespaced API, got: {deprecation_warnings}"
 
 
 @pytest.mark.parametrize("alias,heavy_module", _IRIS_ROOT_ALIASES)
 def test_iris_root_alias_warns_once(monkeypatch, alias, heavy_module):
-    """scp.<alias> works as a compatibility alias and emits FutureWarning once."""
+    """scp.<alias> works as a compatibility alias and emits DeprecationWarning once."""
     import sys
 
     import spectrochempy as scp
@@ -240,29 +242,27 @@ def test_iris_root_alias_warns_once(monkeypatch, alias, heavy_module):
         assert heavy_module not in sys.modules
 
     with warnings.catch_warnings(record=True) as captured:
-        warnings.simplefilter("always", FutureWarning)
+        warnings.simplefilter("always", DeprecationWarning)
         val1 = getattr(scp, alias)
         val2 = getattr(scp, alias)
 
     assert val1 is val2
     assert len(captured) == 1
-    assert captured[0].category is FutureWarning
-    assert f"scp.{alias} is deprecated" in str(captured[0].message)
+    assert captured[0].category is DeprecationWarning
+    assert f"scp.{alias} is deprecated since SpectroChemPy 0.9.0" in str(
+        captured[0].message
+    )
+    assert "will be removed in 0.10.0" in str(captured[0].message)
     assert f"scp.iris.{alias}" in str(captured[0].message)
 
     if heavy_module:
         assert heavy_module in sys.modules
 
 
-# ------------------------------------------------------------------
-# IRIS analysis function tests (use synthetic data)
-# ------------------------------------------------------------------
-
-
 def test_iris_analysis_report():
     """iris_analysis_report produces expected summary."""
-    from spectrochempy_iris import IRIS
-    from spectrochempy_iris import IrisKernel
+    from spectrochempy_iris import IRIS  # noqa: PLC0415
+    from spectrochempy_iris import IrisKernel  # noqa: PLC0415
 
     ds = _make_test_dataset()
     kernel = IrisKernel(ds, "langmuir", q=[-8, 1, 10])

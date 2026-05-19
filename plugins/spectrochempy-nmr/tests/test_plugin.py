@@ -175,21 +175,23 @@ def test_core_stub_is_actionable():
     assert "pip install spectrochempy[nmr]" in message
 
 
-def test_read_topspin_no_future_warning():
-    """scp.read_topspin and scp.nmr.read_topspin do not emit FutureWarning."""
+def test_read_topspin_no_deprecation_warning():
+    """scp.read_topspin and scp.nmr.read_topspin do not emit DeprecationWarning."""
     _require_reader_dependencies()
 
     with warnings.catch_warnings(record=True) as captured:
-        warnings.simplefilter("always", FutureWarning)
+        warnings.simplefilter("always", DeprecationWarning)
         rt = scp.read_topspin
         rt_ns = scp.nmr.read_topspin
 
     assert callable(rt)
     assert rt is rt_ns
-    future_warnings = [w for w in captured if issubclass(w.category, FutureWarning)]
+    deprecation_warnings = [
+        w for w in captured if issubclass(w.category, DeprecationWarning)
+    ]
     assert (
-        future_warnings == []
-    ), f"Expected no FutureWarning from read_topspin, got: {future_warnings}"
+        deprecation_warnings == []
+    ), f"Expected no DeprecationWarning from read_topspin, got: {deprecation_warnings}"
 
 
 def test_nmr_reader_is_not_dataset_accessor_namespace(monkeypatch):

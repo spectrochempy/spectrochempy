@@ -159,9 +159,10 @@ def _plugin_root_export(name, namespace_cls):
             continue
         if export["deprecated"] and name not in _EMITTED_PLUGIN_ROOT_WARNINGS:
             warnings.warn(
-                f"scp.{name} is deprecated and may be removed in a future release. "
+                f"scp.{name} is deprecated since SpectroChemPy 0.9.0 "
+                f"and will be removed in 0.10.0. "
                 f"Use {export['replacement']} instead.",
-                FutureWarning,
+                DeprecationWarning,
                 stacklevel=3,
             )
             _EMITTED_PLUGIN_ROOT_WARNINGS.add(name)
