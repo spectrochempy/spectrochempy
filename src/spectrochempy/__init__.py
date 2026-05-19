@@ -231,7 +231,9 @@ def __getattr__(name):
         # Check if this is a known plugin namespace
         hint = plugin_namespace_install_hint(name)
         if hint:
-            raise AttributeError(hint) from err
+            from spectrochempy.plugins.deps import MissingPluginNamespaceError
+
+            raise MissingPluginNamespaceError(hint) from err
         raise AttributeError(
             f"module 'spectrochempy' has no attribute '{name}'"
         ) from err

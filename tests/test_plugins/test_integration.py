@@ -20,6 +20,7 @@ import spectrochempy
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 from spectrochempy.api.plugins.validation import check_plugin_contributions
 from spectrochempy.plugins.deps import MissingPluginError
+from spectrochempy.plugins.deps import MissingPluginNamespaceError
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.namespace import PluginNamespace
@@ -369,7 +370,9 @@ class TestMissingPlugin:
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
 
-        with pytest.raises(AttributeError, match="requires the optional plugin"):
+        with pytest.raises(
+            MissingPluginNamespaceError, match="requires the optional plugin"
+        ):
             _ = spectrochempy.nmr
 
     def test_missing_iris_namespace_clear_error(self, monkeypatch):
@@ -382,10 +385,42 @@ class TestMissingPlugin:
         monkeypatch.setattr(spectrochempy, "registry", registry)
         monkeypatch.delitem(spectrochempy.__dict__, "iris", raising=False)
 
-        with pytest.raises(AttributeError, match="spectrochempy-iris") as excinfo:
+        with pytest.raises(
+            MissingPluginNamespaceError, match="spectrochempy-iris"
+        ) as excinfo:
             _ = spectrochempy.iris
 
         assert "spectrochempy[iris]" in str(excinfo.value)
+
+    def test_missing_iris_from_import_clear_error(self):
+        """From spectrochempy import iris keeps the missing-plugin hint."""
+        code = """
+import importlib.metadata as im
+import spectrochempy as scp
+from spectrochempy.plugins.manager import PluginManager
+from spectrochempy.plugins.registry import PluginRegistry
+
+registry = PluginRegistry()
+scp.plugin_manager = PluginManager(registry=registry)
+scp.registry = registry
+im.entry_points = lambda group=None: []
+
+try:
+    from spectrochempy import iris
+except ImportError as exc:
+    message = str(exc)
+    assert "spectrochempy-iris" in message
+    assert "spectrochempy[iris]" in message
+else:
+    raise AssertionError("from spectrochempy import iris should fail")
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr or result.stdout
 
     def test_unknown_attribute_standard_error(self):
         """Accessing a truly unknown attribute gives a standard error."""
