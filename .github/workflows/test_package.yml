@@ -124,6 +124,13 @@ jobs:
           # check the MPL setup
           python src/spectrochempy/data/setup.py
 
+      - name: Install SpectroChemPy plugins
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          python -m pip install -e plugins/spectrochempy-nmr
+          python -m pip install -e plugins/spectrochempy-iris
+          python -m pip install -e plugins/spectrochempy-cantera
+
       - name: Test with coverage
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
