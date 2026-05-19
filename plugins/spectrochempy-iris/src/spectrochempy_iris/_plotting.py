@@ -271,7 +271,7 @@ def plot_iris_merit(
     X = analysis_object.X
     X_hat = analysis_object.inverse_transform()
 
-    from spectrochempy.plotting.composite import plotmerit
+    from spectrochempy.plotting.composite.plotmerit import plotmerit
 
     axeslist = []
 

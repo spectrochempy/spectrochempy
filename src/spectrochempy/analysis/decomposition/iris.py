@@ -18,7 +18,10 @@ from __future__ import annotations
 
 import warnings
 
-__all__ = ["IrisKernel", "IRIS"]  # noqa: F822 — resolved via __getattr__
+IRIS = None
+IrisKernel = None
+
+__all__ = ["IrisKernel", "IRIS"]
 __configurables__ = ["IRIS"]
 
 _IRIS_DEPRECATION_MSG = (

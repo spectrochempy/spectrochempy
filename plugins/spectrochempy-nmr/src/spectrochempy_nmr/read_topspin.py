@@ -43,9 +43,6 @@ from .nmrglue import read_pdata
 # ======================================================================================
 # Constants
 # ======================================================================================
-FREQ_UNIT = ur.megahertz  # Define frequency unit
-TIME_UNIT = ur.microsecond  # Define time unit
-
 FnMODE = ["undefined", "QF", "QSEQ", "TPPI", "STATES", "STATES-TPPI", "ECHO-ANTIECHO"]
 AQ_mod = ["QF", "QSIM", "QSEQ", "DQD"]
 
