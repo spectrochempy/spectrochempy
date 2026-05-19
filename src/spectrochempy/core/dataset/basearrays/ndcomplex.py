@@ -124,7 +124,7 @@ class NDComplexArray(NDArray):
 
     def __eq__(self, other, attrs=None):
         if not isinstance(other, NDComplexArray):
-            return NotImplemented
+            return super().__eq__(other, attrs)
         eq = super().__eq__(other, attrs)
         if eq is NotImplemented or not eq:
             return eq
