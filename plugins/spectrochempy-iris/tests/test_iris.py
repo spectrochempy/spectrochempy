@@ -198,7 +198,6 @@ def test_iris_root_compatibility_alias_warns_once(monkeypatch):
 
     assert "spectrochempy_iris._core" not in sys.modules
     with warnings.catch_warnings(record=True) as captured:
-        warnings.simplefilter("default", FutureWarning)
         iris_class = scp.IRIS
         second_access = scp.IRIS
 
