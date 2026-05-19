@@ -154,6 +154,33 @@ def test_package_namespace_exposes_pfr():
     assert callable(pfr_entry)
 
 
+def test_pfr_root_compatibility_alias_warns_once():
+    """scp.PFR works as a compatibility alias and emits FutureWarning once."""
+    if not HAS_CANTERA:
+        pytest.skip("cantera not installed")
+
+    import warnings
+
+    import spectrochempy as scp  # noqa: PLC0415
+
+    if not scp.plugin_manager.has_plugin("cantera"):
+        scp.plugin_manager.register(CanteraPlugin())
+
+    scp._EMITTED_PLUGIN_ROOT_WARNINGS.discard("PFR")
+
+    with warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("always", FutureWarning)
+        pfr1 = scp.PFR
+        pfr2 = scp.PFR
+
+    assert callable(pfr1)
+    assert pfr1 is pfr2
+    assert len(captured) == 1
+    assert captured[0].category is FutureWarning
+    assert "scp.PFR is deprecated" in str(captured[0].message)
+    assert "scp.cantera.PFR" in str(captured[0].message)
+
+
 def test_cantera_does_not_register_dataset_accessor():
     """Cantera has no dataset accessor."""
     import spectrochempy as scp  # noqa: PLC0415

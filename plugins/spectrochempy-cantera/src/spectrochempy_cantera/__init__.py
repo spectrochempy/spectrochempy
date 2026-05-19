@@ -34,6 +34,13 @@ class CanteraPlugin(SpectroChemPyPlugin):
         PluginCapability.SIMULATION,
     ]
     requires = ["cantera"]
+    root_exports = {
+        "PFR": {
+            "target": "PFR",
+            "deprecated": True,
+            "replacement": "scp.cantera.PFR",
+        },
+    }
 
     # ------------------------------------------------------------------
     # Declarative hooks

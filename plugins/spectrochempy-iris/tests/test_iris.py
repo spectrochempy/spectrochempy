@@ -182,8 +182,47 @@ def test_from_spectrochempy_import_iris_supports_lazy_classes(monkeypatch):
     assert iris.IrisKernel.__name__ == "IrisKernel"
 
 
-def test_iris_root_compatibility_alias_warns_once(monkeypatch):
-    """scp.IRIS works as an explicit compatibility alias and warns once."""
+# ------------------------------------------------------------------
+# Root-level compatibility alias tests
+# ------------------------------------------------------------------
+
+
+_IRIS_ROOT_ALIASES = [
+    ("IRIS", "spectrochempy_iris._core"),
+    ("IrisKernel", "spectrochempy_iris._core"),
+    ("batch_iris", None),
+    ("compare_kernels", None),
+    ("iris_report", None),
+]
+
+
+def test_iris_namespaced_api_no_warning(monkeypatch):
+    """scp.iris.* public objects are accessible without FutureWarning."""
+    import spectrochempy as scp
+
+    harness = PluginTestHarness()
+    harness.register(IrisPlugin())
+    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
+    monkeypatch.setattr(scp, "registry", harness.registry)
+    monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+
+    with warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("always", FutureWarning)
+        assert scp.iris.IRIS.__name__ == "IRIS"
+        assert scp.iris.IrisKernel.__name__ == "IrisKernel"
+        assert scp.iris.batch_iris is batch_iris_analysis
+        assert scp.iris.compare_kernels is compare_kernel_models
+        assert scp.iris.iris_report is iris_analysis_report
+
+    future_warnings = [w for w in captured if issubclass(w.category, FutureWarning)]
+    assert (
+        future_warnings == []
+    ), f"Expected no FutureWarning from namespaced API, got: {future_warnings}"
+
+
+@pytest.mark.parametrize("alias,heavy_module", _IRIS_ROOT_ALIASES)
+def test_iris_root_alias_warns_once(monkeypatch, alias, heavy_module):
+    """scp.<alias> works as a compatibility alias and emits FutureWarning once."""
     import sys
 
     import spectrochempy as scp
@@ -192,36 +231,27 @@ def test_iris_root_compatibility_alias_warns_once(monkeypatch):
     harness.register(IrisPlugin())
     monkeypatch.setattr(scp, "plugin_manager", harness.manager)
     monkeypatch.setattr(scp, "registry", harness.registry)
-    monkeypatch.delitem(scp.__dict__, "IRIS", raising=False)
-    monkeypatch.delitem(sys.modules, "spectrochempy_iris._core", raising=False)
-    scp._EMITTED_PLUGIN_ROOT_WARNINGS.clear()
+    monkeypatch.delitem(scp.__dict__, alias, raising=False)
+    if heavy_module:
+        monkeypatch.delitem(sys.modules, heavy_module, raising=False)
+    scp._EMITTED_PLUGIN_ROOT_WARNINGS.discard(alias)
 
-    assert "spectrochempy_iris._core" not in sys.modules
+    if heavy_module:
+        assert heavy_module not in sys.modules
+
     with warnings.catch_warnings(record=True) as captured:
-        iris_class = scp.IRIS
-        second_access = scp.IRIS
+        warnings.simplefilter("always", FutureWarning)
+        val1 = getattr(scp, alias)
+        val2 = getattr(scp, alias)
 
-    assert iris_class.__name__ == "IRIS"
-    assert second_access is iris_class
-    assert "spectrochempy_iris._core" in sys.modules
+    assert val1 is val2
     assert len(captured) == 1
     assert captured[0].category is FutureWarning
-    assert "scp.IRIS is deprecated" in str(captured[0].message)
-    assert "scp.iris.IRIS" in str(captured[0].message)
+    assert f"scp.{alias} is deprecated" in str(captured[0].message)
+    assert f"scp.iris.{alias}" in str(captured[0].message)
 
-
-def test_iris_kernel_is_not_exposed_at_scp_root(monkeypatch):
-    """Only explicit official compatibility aliases are exposed at the root."""
-    import spectrochempy as scp
-
-    harness = PluginTestHarness()
-    harness.register(IrisPlugin())
-    monkeypatch.setattr(scp, "plugin_manager", harness.manager)
-    monkeypatch.setattr(scp, "registry", harness.registry)
-    monkeypatch.delitem(scp.__dict__, "IrisKernel", raising=False)
-
-    with pytest.raises(AttributeError):
-        _ = scp.IrisKernel
+    if heavy_module:
+        assert heavy_module in sys.modules
 
 
 # ------------------------------------------------------------------

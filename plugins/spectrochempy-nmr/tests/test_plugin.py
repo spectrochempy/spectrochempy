@@ -2,6 +2,8 @@
 
 """Tests for spectrochempy-nmr plugin registration and lifecycle."""
 
+import warnings
+
 import pytest
 from spectrochempy_nmr import NMRPlugin
 
@@ -171,6 +173,23 @@ def test_core_stub_is_actionable():
 
     assert "spectrochempy-nmr" in message
     assert "pip install spectrochempy[nmr]" in message
+
+
+def test_read_topspin_no_future_warning():
+    """scp.read_topspin and scp.nmr.read_topspin do not emit FutureWarning."""
+    _require_reader_dependencies()
+
+    with warnings.catch_warnings(record=True) as captured:
+        warnings.simplefilter("always", FutureWarning)
+        rt = scp.read_topspin
+        rt_ns = scp.nmr.read_topspin
+
+    assert callable(rt)
+    assert rt is rt_ns
+    future_warnings = [w for w in captured if issubclass(w.category, FutureWarning)]
+    assert (
+        future_warnings == []
+    ), f"Expected no FutureWarning from read_topspin, got: {future_warnings}"
 
 
 def test_nmr_reader_is_not_dataset_accessor_namespace(monkeypatch):

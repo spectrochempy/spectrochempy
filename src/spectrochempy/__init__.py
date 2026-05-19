@@ -194,6 +194,13 @@ def __getattr__(name):
     if has_namespace(registry, name):
         return PluginNamespace(name, plugin_manager, registry)
 
+    # Check root-level compatibility aliases before extensions so that
+    # deprecated root exports emit FutureWarning (the namespaced API
+    # accessed via PluginNamespace does not warn).
+    root_export = _plugin_root_export(name, PluginNamespace)
+    if root_export is not None:
+        return root_export
+
     # Check plugin readers first (e.g., read_topspin from external plugins)
     if name.startswith("read_"):
         reader_name = name[len("read_") :]
@@ -208,10 +215,6 @@ def __getattr__(name):
         extension_info = registry.extensions.get(category, name)
         if extension_info:
             return extension_info["obj"]
-
-    root_export = _plugin_root_export(name, PluginNamespace)
-    if root_export is not None:
-        return root_export
 
     if name in _LAZY_IMPORTS:
         module_path = _LAZY_IMPORTS[name]

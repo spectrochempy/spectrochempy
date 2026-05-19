@@ -22,6 +22,7 @@ KNOWN_PLUGIN_READERS = {
 KNOWN_PLUGIN_NAMESPACES = {
     "nmr": ("spectrochempy-nmr", "spectrochempy[nmr]"),
     "iris": ("spectrochempy-iris", "spectrochempy[iris]"),
+    "cantera": ("spectrochempy-cantera", "spectrochempy[cantera]"),
 }
 
 
