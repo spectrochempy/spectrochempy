@@ -196,7 +196,7 @@ def __getattr__(name):
         return PluginNamespace(name, plugin_manager, registry)
 
     # Check root-level compatibility aliases before extensions so that
-    # deprecated root exports emit FutureWarning (the namespaced API
+    # deprecated root exports emit DeprecationWarning (the namespaced API
     # accessed via PluginNamespace does not warn).
     root_export = _plugin_root_export(name, PluginNamespace)
     if root_export is not None:

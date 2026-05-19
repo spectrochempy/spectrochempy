@@ -215,6 +215,25 @@ def batch_iris_analysis(
     q: list | None = None,
     reg_par: list | None = None,
 ) -> list[dict]:
+    """
+    Run IRIS analysis on multiple datasets or conditions.
+
+    Parameters
+    ----------
+    datasets : list[NDDataset] or dict[str, NDDataset]
+        Datasets to analyse. If a dict, keys are used as condition labels.
+    kernel_type : str, optional
+        Kernel type name or callable. Default is ``"langmuir"``.
+    q : list, optional
+        Internal variable parameter vector or ``[start, stop, num]``.
+    reg_par : list, optional
+        Regularisation parameters (``[min, max]`` or ``[start, stop, num]``).
+
+    Returns
+    -------
+    list[dict]
+        Each dict contains ``label``, ``iris``, ``f``, ``RSS``, ``SM``.
+    """
     from ._core import IRIS as _IRIS  # noqa: PLC0415
     from ._core import IrisKernel as _IrisKernel  # noqa: PLC0415
 
@@ -255,6 +274,25 @@ def compare_kernel_models(
     q: list | None = None,
     reg_par: list | None = None,
 ) -> list[dict]:
+    """
+    Compare multiple IRIS kernel models on the same dataset.
+
+    Parameters
+    ----------
+    dataset : NDDataset
+        Dataset to fit.
+    kernels : list[str], optional
+        Kernel names to compare. Defaults to ``["langmuir", "ca", "freundlich"]``.
+    q : list, optional
+        Internal variable parameter vector or ``[start, stop, num]``.
+    reg_par : list, optional
+        Regularisation parameters (``[min, max]`` or ``[start, stop, num]``).
+
+    Returns
+    -------
+    list[dict]
+        Each dict contains ``kernel``, ``iris``, ``RSS``, ``SM``, ``n_components``.
+    """
     from ._core import IRIS as _IRIS  # noqa: PLC0415
     from ._core import IrisKernel as _IrisKernel  # noqa: PLC0415
 
@@ -288,6 +326,20 @@ def compare_kernel_models(
 
 
 def iris_analysis_report(iris_object: object) -> dict:
+    """
+    Generate a summary report of an IRIS analysis.
+
+    Parameters
+    ----------
+    iris_object : IRIS
+        A fitted IRIS object.
+
+    Returns
+    -------
+    dict
+        Report containing ``kernel_type``, ``n_lambdas``, ``lambda_values``,
+        ``RSS_range``, ``SM_range``, ``q_range``, ``n_channels``.
+    """
     import numpy as np  # noqa: PLC0415
 
     return {
@@ -305,6 +357,21 @@ def plot_kernel_comparison(
     comparison_results: list[dict],
     **kwargs,
 ) -> tuple:
+    """
+    Plot a side-by-side comparison of multiple kernel fits.
+
+    Parameters
+    ----------
+    comparison_results : list[dict]
+        Output from :func:`compare_kernel_models`.
+    **kwargs
+        Additional keyword arguments (reserved for future use).
+
+    Returns
+    -------
+    tuple of (matplotlib.figure.Figure, numpy.ndarray of Axes)
+        The figure and axes array.
+    """
     import matplotlib.pyplot as plt  # noqa: PLC0415
     import numpy as np  # noqa: PLC0415
 
@@ -341,6 +408,21 @@ def plot_distribution_grid(
     batch_results: list[dict],
     **kwargs,
 ) -> tuple:
+    """
+    Plot a grid of distribution functions across conditions and lambdas.
+
+    Parameters
+    ----------
+    batch_results : list[dict]
+        Output from :func:`batch_iris_analysis`.
+    **kwargs
+        Additional keyword arguments (reserved for future use).
+
+    Returns
+    -------
+    tuple of (matplotlib.figure.Figure, numpy.ndarray of Axes)
+        The figure and axes array.
+    """
     import matplotlib.pyplot as plt  # noqa: PLC0415
 
     n_conditions = len(batch_results)
