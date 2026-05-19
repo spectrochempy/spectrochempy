@@ -312,15 +312,20 @@ _ = ds.plot()
 
 # %%
 try:
-    from spectrochempy_iris import IRIS
-    from spectrochempy_iris import IrisKernel
+    from importlib.util import find_spec
 
-    iris = IRIS(reg_par=[-10, 1, 12])
-    K = IrisKernel(ds, "langmuir", q=[-7, -1, 50])
+    if find_spec("spectrochempy_iris") is None:
+        raise ImportError(
+            "This example requires the optional spectrochempy-iris plugin.\n"
+            "Install it with: pip install spectrochempy[iris]"
+        )
+
+    iris = scp.iris.IRIS(reg_par=[-10, 1, 12])
+    K = ds.iris.kernel_matrix(kernel_type="langmuir", q=[-7, -1, 50])
     iris.fit(ds, K)
     _ = iris.f[-7].plot_contour(colorbar=True)
-except ImportError:
-    pass
+except ImportError as e:
+    print(e)
 
 # %%
 # %% [markdown]
