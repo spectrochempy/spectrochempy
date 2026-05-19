@@ -10,6 +10,7 @@ __all__ = [
     "cp",
     "efa",
     "fast_ica",
+    "iris",
     "mcrals",
     "nmf",
     "pca",
@@ -20,6 +21,7 @@ __all__ = [
 from . import cp
 from . import efa
 from . import fast_ica
+from . import iris
 from . import mcrals
 from . import nmf
 from . import pca
