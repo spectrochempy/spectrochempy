@@ -501,9 +501,9 @@ class IRIS(DecompositionAnalysis):
     # ----------------------------------------------------------------------------------
     # Private methods (overloading abstract classes)
     # ----------------------------------------------------------------------------------
-    def _fit(self, X, K):
-        # X is the data array to fit
-        # K is the kernel data array
+    def _fit(self, X, K=None):
+        if K is None:
+            K = self._Y_preprocessed
 
         q = self._q.data
         lambdas = self._lambdas.data
