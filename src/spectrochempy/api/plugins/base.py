@@ -44,6 +44,14 @@ class SpectroChemPyPlugin:
     If any dependency cannot be imported, the plugin is marked as
     ``FAILED`` with a clear message and skipped.
     """
+    root_exports: dict[str, str | dict[str, Any]] = {}
+    """
+    Explicit root-level compatibility exports.
+
+    Modern plugin APIs should live under the plugin namespace
+    (for example ``scp.iris.IRIS``). Official plugins may use this
+    mapping for selected backward-compatible aliases such as ``scp.IRIS``.
+    """
 
     # ------------------------------------------------------------------
     # Registration API
