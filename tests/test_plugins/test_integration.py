@@ -24,6 +24,7 @@ from spectrochempy.plugins.deps import MissingPluginNamespaceError
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.namespace import PluginNamespace
+from spectrochempy.plugins.namespace import PluginNamespaceModule
 from spectrochempy.plugins.namespace import has_namespace
 from spectrochempy.plugins.registry import PluginRegistry
 
@@ -314,6 +315,149 @@ class TestPluginNamespace:
         ns = spectrochempy.fakenamespace
         with pytest.raises(AttributeError, match="plugin namespace 'fakenamespace'"):
             _ = ns.missing_attribute
+
+
+class TestSubmoduleImport:
+    """``from spectrochempy.<ns> import X`` via PluginNamespaceModule."""
+
+    def test_from_iris_import_iris(self):
+        """From spectrochempy.iris import IRIS works with lazy loading."""
+
+        from spectrochempy.iris import IRIS
+
+        assert IRIS is not None
+
+    def test_from_iris_import_iriskernel(self):
+        """From spectrochempy.iris import IrisKernel works."""
+
+        from spectrochempy.iris import IrisKernel
+
+        assert IrisKernel is not None
+
+    def test_import_as_module(self):
+        """Import spectrochempy.iris as iris works."""
+
+        import spectrochempy.iris as iris_mod
+
+        assert iris_mod.IRIS is not None
+
+    def test_is_plugin_namespace_module(self):
+        """Module is a PluginNamespaceModule instance."""
+
+        import spectrochempy.iris as iris_mod
+
+        assert isinstance(iris_mod, PluginNamespaceModule)
+
+    def test_from_nmr_import_read_topspin(self):
+        """From spectrochempy.nmr import read_topspin works."""
+
+        from spectrochempy.nmr import read_topspin
+
+        assert callable(read_topspin)
+
+    def test_from_cantera_import_pfr(self):
+        """From spectrochempy.cantera import PFR works."""
+
+        from spectrochempy.cantera import PFR
+
+        assert PFR is not None
+
+    def test_lazy_loading_on_module_import(self):
+        """Import spectrochempy.iris does NOT load the plugin _core module."""
+        import subprocess
+        import sys
+
+        code = """
+import sys
+import spectrochempy.iris  # noqa: F811
+lazy = [\"spectrochempy_iris._core\", \"spectrochempy_cantera._pfr\"]
+for mod in lazy:
+    if mod in sys.modules:
+        print(f\"EAGER: {mod}\")
+        raise SystemExit(1)
+raise SystemExit(0)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr or result.stdout
+
+    def test_lazy_loading_on_import_with_access(self):
+        """Accessing IRIS after import spectrochempy.iris loads _core."""
+        import subprocess
+        import sys
+
+        code = """
+import sys
+import spectrochempy.iris as iris_mod
+_ = iris_mod.IRIS
+expected = [\"spectrochempy_iris._core\"]
+for mod in expected:
+    if mod not in sys.modules:
+        print(f\"Missing: {mod}\")
+        raise SystemExit(1)
+unexpected = [\"spectrochempy_cantera._pfr\", \"spectrochempy_nmr.read_topspin\"]
+for mod in unexpected:
+    if mod in sys.modules:
+        print(f\"Unexpected eager: {mod}\")
+        raise SystemExit(1)
+raise SystemExit(0)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr or result.stdout
+
+    def test_submodule_dir(self):
+        """dir() on the pseudo-module works and includes plugin names."""
+        import spectrochempy.iris as iris_mod
+
+        names = dir(iris_mod)
+        assert "IRIS" in names
+        assert "IrisKernel" in names
+
+    def test_known_missing_submodule_import_error(self):
+        """Known namespace without plugin gives MissingPluginNamespaceError."""
+        import subprocess
+        import sys
+
+        code = """
+import importlib.metadata as im
+import sys
+import spectrochempy as scp
+from spectrochempy.plugins.manager import PluginManager
+from spectrochempy.plugins.registry import PluginRegistry
+
+registry = PluginRegistry()
+scp.plugin_manager = PluginManager(registry=registry)
+scp.registry = registry
+im.entry_points = lambda group=None: []
+
+from spectrochempy.plugins.namespace import register_namespace_modules
+register_namespace_modules()
+
+try:
+    import spectrochempy.nmr as nmr_mod
+except ImportError as exc:
+    message = str(exc)
+    assert "spectrochempy-nmr" in message
+    assert "spectrochempy[nmr]" in message
+else:
+    raise AssertionError("import spectrochempy.nmr should fail when plugin missing")
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr or result.stdout
 
 
 # ------------------------------------------------------------------

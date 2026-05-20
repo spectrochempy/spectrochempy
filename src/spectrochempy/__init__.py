@@ -189,10 +189,18 @@ def __getattr__(name):
     # plugin-provided functions take precedence over core stubs)
     plugin_manager.discover()
 
+    import sys
+
     from spectrochempy.plugins.namespace import PluginNamespace
+    from spectrochempy.plugins.namespace import PluginNamespaceModule
     from spectrochempy.plugins.namespace import has_namespace
 
     if has_namespace(registry, name):
+        module_key = f"spectrochempy.{name}"
+        if module_key in sys.modules and isinstance(
+            sys.modules[module_key], PluginNamespaceModule
+        ):
+            return sys.modules[module_key]
         return PluginNamespace(name, plugin_manager, registry)
 
     # Check root-level compatibility aliases before extensions so that
@@ -241,3 +249,11 @@ def __getattr__(name):
         raise AttributeError(
             f"module 'spectrochempy' has no attribute '{name}'"
         ) from err
+
+
+# --------------------------------------------------------------------------------------
+# Register pseudo-modules for ``from spectrochempy.<ns> import X`` support
+# --------------------------------------------------------------------------------------
+from spectrochempy.plugins.namespace import register_namespace_modules
+
+register_namespace_modules()

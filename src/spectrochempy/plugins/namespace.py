@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import sys
 from collections.abc import Callable
 from types import ModuleType
 from typing import Any
@@ -159,3 +160,41 @@ def has_dataset_namespace(registry: Any, namespace: str) -> bool:
         _matches_namespace(info, namespace)
         for info in registry.available_accessors.values()
     )
+
+
+class PluginNamespaceModule(ModuleType):
+    """
+    A module-like wrapper that makes ``from spectrochempy.<ns> import X`` possible.
+
+    Instances are inserted into ``sys.modules`` under keys such as
+    ``spectrochempy.iris`` and delegate attribute access to the underlying
+    :class:`PluginNamespace`, preserving lazy loading of the actual plugin.
+    """
+
+    def __init__(self, namespace: str, manager: Any, registry: Any) -> None:
+        self._namespace_obj = PluginNamespace(namespace, manager, registry)
+        name = f"spectrochempy.{namespace}"
+        super().__init__(name)
+        self.__package__ = "spectrochempy"
+        self.__path__: list[str] = []
+        self.__file__: str | None = None
+
+    def __getattr__(self, name: str) -> Any:
+        if name.startswith("_"):
+            raise AttributeError(name)
+        return getattr(self._namespace_obj, name)
+
+    def __dir__(self) -> list[str]:
+        return dir(self._namespace_obj)
+
+
+def register_namespace_modules() -> None:
+    """Insert ``PluginNamespaceModule`` instances into ``sys.modules``."""
+    from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
+    from spectrochempy.plugins.manager import plugin_manager
+    from spectrochempy.plugins.registry import registry
+
+    for ns in KNOWN_PLUGIN_NAMESPACES:
+        key = f"spectrochempy.{ns}"
+        if key not in sys.modules:
+            sys.modules[key] = PluginNamespaceModule(ns, plugin_manager, registry)

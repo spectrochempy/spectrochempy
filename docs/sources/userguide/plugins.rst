@@ -38,6 +38,8 @@ Using a plugin
 Once installed, the plugin registers itself automatically when you import
 SpectroChemPy.
 
+.. _plugins-lazy:
+
 .. note::
 
     Plugin optional dependencies (such as ``osqp``, ``cantera``, ``quaternion``,
@@ -63,6 +65,21 @@ and dataset-bound operations are available from dataset accessors:
 
     # IRIS plugin: build an IRIS kernel from an existing dataset
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
+
+You can also import directly from a plugin namespace:
+
+.. code-block:: python
+
+    from spectrochempy.iris import IRIS, IrisKernel
+    from spectrochempy.nmr import read_topspin
+    from spectrochempy.cantera import PFR
+
+    import spectrochempy.iris as iris
+    iris.IRIS()
+
+All three forms — ``scp.iris.IRIS``, ``from spectrochempy import iris; iris.IRIS``,
+and ``from spectrochempy.iris import IRIS`` — are supported and preserve the
+:ref:`lazy loading <plugins-lazy>` behaviour described below.
 
 For backward compatibility, some former top-level APIs remain available as thin
 aliases. For example, ``scp.read_topspin(...)`` delegates to
