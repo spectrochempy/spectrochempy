@@ -13,22 +13,19 @@ the ``scp.cantera.PFR`` plug flow reactor simulation callable.
 """
 
 # %%
-from spectrochempy.examples._plugin_deps import requires_plugin
-
 import spectrochempy as scp
 
-if requires_plugin("spectrochempy_cantera", "spectrochempy-cantera"):
-    # %%
-    # When the plugin is installed, ``PFR`` is available from the ``scp.cantera``
-    # plugin namespace. It is a lazy callable that imports the implementation
-    # only when used:
+# %%
+# When the plugin is installed, ``PFR`` is available from the ``scp.cantera``
+# plugin namespace. It is a lazy callable that imports the implementation
+# only when used:
 
-    print(f"PFR callable: {scp.cantera.PFR}")
+print(f"PFR callable: {scp.cantera.PFR}")
 
-    # %%
-    # The PFR constructor currently expects inputs compatible with the legacy
-    # Cantera mechanism API. Full construction examples will be added after the
-    # PFR implementation is adapted to Cantera 3.2+.
+# %%
+# The PFR constructor currently expects inputs compatible with the legacy
+# Cantera mechanism API. Full construction examples will be added after the
+# PFR implementation is adapted to Cantera 3.2+.
 
 # %%
 # If the plugin is not installed, accessing ``scp.cantera`` raises a clear

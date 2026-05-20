@@ -26,7 +26,7 @@ U = scp.ur
 datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
-dataset = scp.read_topspin(nmrdir / "relax" / "100" / "ser", use_list="vdlist")
+dataset = scp.nmr.read_topspin(nmrdir / "relax" / "100" / "ser", use_list="vdlist")
 
 # %%
 # Analysing the data

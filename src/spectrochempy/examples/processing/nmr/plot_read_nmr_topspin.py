@@ -14,28 +14,25 @@ optional ``spectrochempy-nmr`` plugin.
 """
 
 # %%
-from spectrochempy.examples._plugin_deps import requires_plugin
-
 import spectrochempy as scp
 
-if requires_plugin("spectrochempy_nmr", "spectrochempy-nmr"):
-    # %%
-    # ``read_topspin`` is registered under the ``scp.nmr`` plugin namespace.
-    # The top-level ``scp.read_topspin`` alias is kept for compatibility.
+# %%
+# ``read_topspin`` is registered under the ``scp.nmr`` plugin namespace.
+# The top-level ``scp.read_topspin`` alias is kept for compatibility.
 
-    ds = scp.nmr.read_topspin(
-        scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d",
-        expno=1,
-        remove_digital_filter=True,
-    )
+ds = scp.nmr.read_topspin(
+    scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d",
+    expno=1,
+    remove_digital_filter=True,
+)
 
-    print(f"Loaded dataset: {ds}")
-    print(f"Shape: {ds.shape}")
+print(f"Loaded dataset: {ds}")
+print(f"Shape: {ds.shape}")
 
-    # %%
-    # Plot the spectrum:
+# %%
+# Plot the spectrum:
 
-    _ = ds.plot()
+_ = ds.plot()
 
 # %%
 # If the plugin is not installed, the function or method raises a

@@ -27,7 +27,7 @@ nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "CP"
 # Set the `glob` pattern in order to load a series of spectra of given type
 # in the given directory (here we read fid, but we could also read "1r" files
 # when available)
-dataset = scp.read_topspin(nmrdir, glob="**/fid")
+dataset = scp.nmr.read_topspin(nmrdir, glob="**/fid")
 
 # %%
 # 15 fids have been read and merged into a single dataset
