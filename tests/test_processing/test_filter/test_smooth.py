@@ -10,7 +10,10 @@ import pytest
 
 from spectrochempy.utils.mplutils import show
 
-pytestmark = pytest.mark.skip("WIP with NMR data")
+pytestmark = pytest.mark.skip(
+    "quarantined legacy smoothing tests: mixes NMR plugin data and plotting; "
+    "split core/plugin coverage before reactivation"
+)
 
 
 def test_smooth(NMR_dataset_1D):

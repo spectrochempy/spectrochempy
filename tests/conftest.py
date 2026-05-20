@@ -525,6 +525,7 @@ def IR_dataset_1D():
 # --------------------------------------------------------------------------------------
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
+    pytest.importorskip("spectrochempy_nmr", reason="requires the NMR plugin")
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid"
     dataset = spectrochempy.read_topspin(
         path, remove_digital_filter=True, name="NMR_1D"
@@ -534,6 +535,7 @@ def NMR_dataset_1D():
 
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
+    pytest.importorskip("spectrochempy_nmr", reason="requires the NMR plugin")
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "ser"
     dataset = spectrochempy.read_topspin(
         path, expno=1, remove_digital_filter=True, name="NMR_2D"

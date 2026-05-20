@@ -20,7 +20,10 @@ from spectrochempy.utils.testing import (
     assert_equal,
 )
 
-pytestmark = pytest.mark.skip("all tests still WIP")
+pytestmark = pytest.mark.skip(
+    "quarantined legacy NMR tests: requires spectrochempy-nmr, NMR test data, "
+    "and review before reactivation"
+)
 
 
 # 1D

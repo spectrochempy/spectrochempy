@@ -43,7 +43,9 @@ adata = (
 )
 
 
-@pytest.mark.skip("Skipping test because it raises an error in  github test")
+@pytest.mark.skip(
+    "docstring checker is unstable in CI for NDDataset; runtime dataset tests remain active"
+)
 def test_nddataset_docstring():
     from spectrochempy.utils import docutils as chd
 

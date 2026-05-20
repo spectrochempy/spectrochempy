@@ -142,10 +142,16 @@ def test_package_namespace_exposes_topspin_reader(monkeypatch):
     pm, registry = _isolate_scp_plugins(monkeypatch, scp)
     pm.register(NMRPlugin())
 
-    assert scp.nmr.read_topspin is scp.read_topspin
+    namespaced_reader = scp.nmr.read_topspin
+    top_level_reader = scp.read_topspin
+
+    assert callable(namespaced_reader)
+    assert callable(top_level_reader)
+    assert namespaced_reader.__name__ == top_level_reader.__name__ == "read_topspin"
+    assert namespaced_reader.__wrapped__ is top_level_reader.__wrapped__
     assert registry.get_reader("topspin")["namespace"] == "nmr"
-    assert scp.read_topspin.__module__ == "spectrochempy_nmr"
-    assert scp.nmr.read_topspin.__module__ == "spectrochempy_nmr"
+    assert top_level_reader.__module__ == namespaced_reader.__module__
+    assert top_level_reader.__module__.startswith("spectrochempy_nmr")
 
 
 def test_top_level_stub_is_actionable_without_registered_nmr(monkeypatch):

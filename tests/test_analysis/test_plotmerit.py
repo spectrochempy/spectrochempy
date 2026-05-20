@@ -3,12 +3,15 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Tests for plotmerit functionality including multi-regularization support."""
+"""IRIS plugin integration tests for plotmerit functionality."""
 
 import numpy as np
 import pytest
 
-pytest.importorskip("spectrochempy_iris", reason="IRIS plugin not installed")
+pytest.importorskip(
+    "spectrochempy_iris",
+    reason="requires the optional spectrochempy-iris plugin",
+)
 
 
 def test_plotmerit_single_index():

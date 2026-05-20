@@ -29,11 +29,14 @@ class TestPlotMeritImports:
 
 
 class TestIrisImports:
-    """Test that iris module can be imported and has expected functions."""
+    """IRIS plugin integration checks for exported plotting helpers."""
 
     @staticmethod
     def _check_plugin():
-        pytest.importorskip("spectrochempy_iris", reason="IRIS plugin not installed")
+        pytest.importorskip(
+            "spectrochempy_iris",
+            reason="requires the optional spectrochempy-iris plugin",
+        )
 
     def test_plot_iris_lcurve_import(self):
         """Test import of plot_iris_lcurve."""
