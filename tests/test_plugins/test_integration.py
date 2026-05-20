@@ -145,7 +145,12 @@ class TestCoreImport:
 
 
 class TestLazyLoadingNonRegression:
-    """Verify that certain operations do NOT load heavy plugin modules."""
+    """
+    Verify that certain operations do NOT load heavy plugin modules.
+
+    Each test runs in a fresh subprocess and snapshots ``sys.modules`` **after**
+    the setup phase so that only the targeted operation is checked.
+    """
 
     LAZY_MODULES = [
         "spectrochempy_nmr",
@@ -157,28 +162,36 @@ class TestLazyLoadingNonRegression:
         "cantera",
     ]
 
-    def _assert_no_heavy_modules(self, code: str, description: str):
+    @staticmethod
+    def _bad_imports_filter():
+        parts = [
+            f"mod == {m!r} or mod.startswith({m!r} + '.')"
+            for m in TestLazyLoadingNonRegression.LAZY_MODULES
+        ]
+        return " or ".join(parts)
+
+    def _run(self, setup: str, operation: str, description: str) -> None:
         import subprocess
         import sys
 
-        bad_imports = " or ".join(
-            f"mod == {m!r} or mod.startswith({m!r} + '.')" for m in self.LAZY_MODULES
-        )
-        wrapped = f"""
+        bad = self._bad_imports_filter()
+        # We snapshot *after* setup so that any modules legitimately loaded
+        # during setup (e.g. by plugin_manager.discover()) do not cause a
+        # false positive.  Only the operation is checked for new additions.
+        code = f"""
 import sys
-import spectrochempy
-spectrochempy.plugin_manager.discover()
-before = {{mod for mod in sys.modules if {bad_imports}}}
-{code}
-after = {{mod for mod in sys.modules if {bad_imports}}}
-new = after - before
+{setup}
+after_setup = {{mod for mod in sys.modules if {bad}}}
+{operation}
+after = {{mod for mod in sys.modules if {bad}}}
+new = after - after_setup
 if new:
     print(f"EAGER ({description}): {{new}}")
     raise SystemExit(1)
 raise SystemExit(0)
 """
         result = subprocess.run(
-            [sys.executable, "-c", wrapped],
+            [sys.executable, "-c", code],
             check=False,
             capture_output=True,
             text=True,
@@ -188,48 +201,96 @@ raise SystemExit(0)
         ), f"{description}: {result.stderr or result.stdout}"
 
     def test_import_spectrochempy(self):
-        """Import spectrochempy does not load plugin modules."""
-        self._assert_no_heavy_modules("pass", "import spectrochempy")
-
-    def test_scp_namespace_access(self):
-        """Accessing scp.iris / scp.nmr / scp.cantera does not resolve."""
-        self._assert_no_heavy_modules(
-            "_ = spectrochempy.iris; _ = spectrochempy.nmr; _ = spectrochempy.cantera",
-            "namespace access",
+        """``import spectrochempy`` does not load plugin modules."""
+        self._run(
+            setup="",
+            operation="import spectrochempy",
+            description="import spectrochempy",
         )
 
-    def test_import_as_module(self):
-        """Import spectrochempy.iris does not resolve."""
-        self._assert_no_heavy_modules(
-            "import spectrochempy.iris",
-            "import spectrochempy.iris",
+    def test_discover(self):
+        """``plugin_manager.discover()`` loads plugin modules (expected)."""
+        # discover() calls ep.load() which imports the actual plugin
+        # packages.  This is by design — it is the explicit API for
+        # loading all registered plugin entry points.
+        import subprocess
+        import sys
+
+        code = """
+import sys
+import spectrochempy
+spectrochempy.plugin_manager.discover()
+expected = {"spectrochempy_iris", "spectrochempy_nmr", "spectrochempy_cantera"}
+loaded = {m for m in sys.modules if m.startswith("spectrochempy_")}
+assert loaded.issuperset(expected), f"Missing plugins: {expected - loaded}"
+raise SystemExit(0)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
         )
-        self._assert_no_heavy_modules(
-            "import spectrochempy.nmr",
-            "import spectrochempy.nmr",
+        assert result.returncode == 0, result.stderr or result.stdout
+
+    def test_namespace_access(self):
+        """``scp.iris / scp.nmr / scp.cantera`` do not load plugin modules."""
+        self._run(
+            setup="import spectrochempy",
+            operation=(
+                "_ = spectrochempy.iris\n"
+                "_ = spectrochempy.nmr\n"
+                "_ = spectrochempy.cantera"
+            ),
+            description="namespace access",
         )
-        self._assert_no_heavy_modules(
-            "import spectrochempy.cantera",
-            "import spectrochempy.cantera",
-        )
+
+    def test_submodule_import(self):
+        """``import spectrochempy.<ns>`` does not load plugin modules."""
+        for ns in ("iris", "nmr", "cantera"):
+            self._run(
+                setup="import spectrochempy",
+                operation=f"import spectrochempy.{ns}",
+                description=f"import spectrochempy.{ns}",
+            )
 
     def test_repr_does_not_resolve(self):
-        """repr(scp.nmr.read_topspin) does not load the plugin module."""
-        from spectrochempy.plugins.proxies import LazyProxy
+        """``repr(proxy)`` does not load the underlying sub-module."""
+        self._run(
+            setup=(
+                "import spectrochempy\n"
+                "spectrochempy.plugin_manager.discover()\n"
+                "proxy = spectrochempy.nmr.read_topspin"
+            ),
+            operation="_ = repr(proxy)",
+            description="repr",
+        )
 
-        proxy = spectrochempy.nmr.read_topspin
-        r = repr(proxy)
-        assert isinstance(proxy, LazyProxy)
-        assert "unresolved" in r
-        assert "LazyProxy" in r
+    def test_from_import_resolves(self):
+        """``from spectrochempy.nmr import read_topspin`` returns a callable."""
+        import subprocess
+        import sys
 
-    def test_no_resolve_on_import_access(self):
-        """From spectrochempy.nmr import read_topspin returns lazy proxy (not resolved)."""
-        from spectrochempy.plugins.proxies import LazyProxy
-
-        proxy = spectrochempy.nmr.read_topspin
-        assert isinstance(proxy, LazyProxy)
-        assert proxy.__name__ == "read_topspin"  # name metadata available
+        code = """
+import sys
+import spectrochempy as scp
+scp.plugin_manager.discover()
+from spectrochempy.nmr import read_topspin
+# The proxy should be callable but should NOT have loaded the
+# read_topspin sub-module (that only happens on actual resolution).
+assert callable(read_topspin), "read_topspin should be callable"
+if "spectrochempy_nmr.read_topspin" in sys.modules:
+    print("read_topspin sub-module was eagerly resolved")
+    raise SystemExit(1)
+raise SystemExit(0)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr or result.stdout
 
 
 # ------------------------------------------------------------------
@@ -372,8 +433,8 @@ raise SystemExit(0)
         assert "IRIS" in names
         assert "IrisKernel" in names
 
-    def test_known_missing_submodule_import_error(self):
-        """Known namespace without plugin gives MissingPluginNamespaceError."""
+    def test_known_missing_submodule_import_succeeds(self):
+        """``import spectrochempy.<ns>`` succeeds (returns PluginNamespaceModule)."""
         import subprocess
         import sys
 
@@ -384,22 +445,32 @@ import spectrochempy as scp
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.registry import PluginRegistry
 
+# Replace manager/registry with empty ones
 registry = PluginRegistry()
-scp.plugin_manager = PluginManager(registry=registry)
+manager = PluginManager(registry=registry)
+scp.plugin_manager = manager
 scp.registry = registry
 im.entry_points = lambda group=None: []
 
+# Remove existing namespace modules from sys.modules and re-register
+from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
+for ns in KNOWN_PLUGIN_NAMESPACES:
+    sys.modules.pop(f"spectrochempy.{ns}", None)
 from spectrochempy.plugins.namespace import register_namespace_modules
 register_namespace_modules()
 
+# import should succeed (returns PluginNamespaceModule)
+import spectrochempy.nmr as nmr_mod
+assert nmr_mod is not None
+
+# Attribute access on the namespace should raise
+from spectrochempy.plugins.deps import MissingPluginNamespaceError
 try:
-    import spectrochempy.nmr as nmr_mod
-except ImportError as exc:
-    message = str(exc)
-    assert "spectrochempy-nmr" in message
-    assert "spectrochempy[nmr]" in message
+    _ = nmr_mod.read_topspin
+except MissingPluginNamespaceError:
+    pass
 else:
-    raise AssertionError("import spectrochempy.nmr should fail when plugin missing")
+    raise AssertionError("attribute access should raise MissingPluginNamespaceError")
 """
         result = subprocess.run(
             [sys.executable, "-c", code],
@@ -456,57 +527,90 @@ class TestMissingPlugin:
         assert "read_totally_unknown_format" not in spectrochempy.__dict__
 
     def test_missing_namespace_clear_error(self, monkeypatch):
-        """Accessing scp.nmr without NMR plugin gives a clear error."""
+        """Accessing a sub-attribute on a missing namespace gives a clear error."""
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
         monkeypatch.setattr(im, "entry_points", lambda group=None: [])
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
+        monkeypatch.setattr(spectrochempy.plugins.manager, "plugin_manager", pm)
+
+        # Remove existing sys.modules entries so they get recreated with
+        # the monkeypatched manager.
+        for ns in ("nmr", "iris", "cantera"):
+            key = f"spectrochempy.{ns}"
+            if key in sys.modules:
+                del sys.modules[key]
 
         with pytest.raises(
             MissingPluginNamespaceError, match="requires the optional plugin"
         ):
-            _ = spectrochempy.nmr
+            _ = spectrochempy.nmr.read_topspin
 
     def test_missing_iris_namespace_clear_error(self, monkeypatch):
-        """Accessing scp.iris without IRIS plugin gives a clear error."""
+        """Attribute access on a missing iris namespace gives a clear error."""
 
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
         monkeypatch.setattr(im, "entry_points", lambda group=None: [])
         monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
         monkeypatch.setattr(spectrochempy, "registry", registry)
-        monkeypatch.delitem(spectrochempy.__dict__, "iris", raising=False)
+        monkeypatch.setattr(spectrochempy.plugins.manager, "plugin_manager", pm)
+
+        # Remove existing sys.modules entries so they get recreated with
+        # the monkeypatched manager.
+        for ns in ("nmr", "iris", "cantera"):
+            key = f"spectrochempy.{ns}"
+            if key in sys.modules:
+                del sys.modules[key]
 
         with pytest.raises(
             MissingPluginNamespaceError, match="spectrochempy-iris"
         ) as excinfo:
-            _ = spectrochempy.iris
+            _ = spectrochempy.iris.IRIS
 
         assert "spectrochempy[iris]" in str(excinfo.value)
 
     def test_missing_iris_from_import_clear_error(self):
-        """From spectrochempy import iris keeps the missing-plugin hint."""
+        """``from spectrochempy import iris`` succeeds; attribute access gives the hint."""
         code = """
 import importlib.metadata as im
+import sys
 import spectrochempy as scp
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.registry import PluginRegistry
 
+# Replace manager/registry with empty ones
 registry = PluginRegistry()
-scp.plugin_manager = PluginManager(registry=registry)
+manager = PluginManager(registry=registry)
+scp.plugin_manager = manager
 scp.registry = registry
+scp.plugins.manager.plugin_manager = manager
 im.entry_points = lambda group=None: []
 
+# Remove existing sys.modules entries so they get recreated with
+# the monkeypatched manager.
+from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
+for ns in KNOWN_PLUGIN_NAMESPACES:
+    sys.modules.pop(f"spectrochempy.{ns}", None)
+from spectrochempy.plugins.namespace import register_namespace_modules
+register_namespace_modules()
+
+# from-import should succeed
+from spectrochempy import iris
+assert iris is not None
+
+# Attribute access should raise the missing-plugin hint
+from spectrochempy.plugins.deps import MissingPluginNamespaceError
 try:
-    from spectrochempy import iris
-except ImportError as exc:
+    _ = iris.IRIS
+except MissingPluginNamespaceError as exc:
     message = str(exc)
     assert "spectrochempy-iris" in message
     assert "spectrochempy[iris]" in message
 else:
-    raise AssertionError("from spectrochempy import iris should fail")
+    raise AssertionError("attribute access on missing iris namespace should raise")
 """
         result = subprocess.run(
             [sys.executable, "-c", code],

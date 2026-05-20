@@ -185,14 +185,26 @@ def __getattr__(name):
 
         return getattr(_profile_module, name)
 
+    import sys
+
+    from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
+    from spectrochempy.plugins.namespace import PluginNamespace
+    from spectrochempy.plugins.namespace import PluginNamespaceModule
+
+    # Handle known plugin namespaces *before* discovery so that simply
+    # accessing ``scp.iris`` / ``scp.nmr`` / ``scp.cantera`` does not
+    # trigger loading of the actual plugin packages.
+    if name in KNOWN_PLUGIN_NAMESPACES:
+        module_key = f"spectrochempy.{name}"
+        if module_key in sys.modules and isinstance(
+            sys.modules[module_key], PluginNamespaceModule
+        ):
+            return sys.modules[module_key]
+
     # Ensure external plugins are discovered (before lazy imports so
     # plugin-provided functions take precedence over core stubs)
     plugin_manager.discover()
 
-    import sys
-
-    from spectrochempy.plugins.namespace import PluginNamespace
-    from spectrochempy.plugins.namespace import PluginNamespaceModule
     from spectrochempy.plugins.namespace import has_namespace
 
     if has_namespace(registry, name):

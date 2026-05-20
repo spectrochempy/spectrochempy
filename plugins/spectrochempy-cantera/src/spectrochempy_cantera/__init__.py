@@ -51,7 +51,7 @@ class CanteraPlugin(SpectroChemPyPlugin):
         return [
             {
                 "name": "PFR",
-                "func": lazy_proxy(_resolve_pfr),
+                "func": lazy_proxy(_resolve_pfr, name="spectrochempy.cantera.PFR"),
                 "description": "Plug-flow reactor (CSTR-in-series) model",
             },
         ]

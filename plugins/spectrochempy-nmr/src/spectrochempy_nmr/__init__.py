@@ -31,7 +31,9 @@ class NMRPlugin(SpectroChemPyPlugin):
         return [
             {
                 "name": "topspin",
-                "func": lazy_proxy(_resolve_read_topspin),
+                "func": lazy_proxy(
+                    _resolve_read_topspin, name="spectrochempy.nmr.read_topspin"
+                ),
                 "description": "Bruker TOPSPIN fid, series, or processed data",
                 "extensions": [
                     ".fid",
