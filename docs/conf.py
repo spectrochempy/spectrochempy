@@ -357,14 +357,12 @@ if not single_doc_or_dir:
             f"{example_source_dir}/core",
             f"{example_source_dir}/processing",
             f"{example_source_dir}/analysis",
-            f"{example_source_dir}/plugins",
         ],
         # Generated RST files in generated directory
         "gallery_dirs": [
             f"{example_generated_dir}/auto_examples_core",
             f"{example_generated_dir}/auto_examples_processing",
             f"{example_generated_dir}/auto_examples_analysis",
-            f"{example_generated_dir}/auto_examples_plugins",
         ],
         "backreferences_dir": f"{example_generated_dir}/backreferences",
         "reference_url": {

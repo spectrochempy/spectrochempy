@@ -1,1 +1,0 @@
-"""IRIS plugin examples."""

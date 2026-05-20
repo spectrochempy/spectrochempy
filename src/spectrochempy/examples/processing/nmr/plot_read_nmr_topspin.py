@@ -14,18 +14,11 @@ optional ``spectrochempy-nmr`` plugin.
 """
 
 # %%
-from importlib.util import find_spec
+from spectrochempy.examples._plugin_deps import requires_plugin
 
 import spectrochempy as scp
 
-OPTIONAL_PLUGIN = "spectrochempy_nmr"
-
-if find_spec(OPTIONAL_PLUGIN) is None:
-    print(
-        "This example requires the optional spectrochempy-nmr plugin.\n"
-        "Install it with: pip install spectrochempy[nmr]"
-    )
-else:
+if requires_plugin("spectrochempy_nmr", "spectrochempy-nmr"):
     # %%
     # ``read_topspin`` is registered under the ``scp.nmr`` plugin namespace.
     # The top-level ``scp.read_topspin`` alias is kept for compatibility.

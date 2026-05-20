@@ -1,9 +1,11 @@
 .. _examples-plugins-index:
 
-###############################
-Plugin-dependent functionality
-###############################
+Plugin-dependent examples
+=========================
 
-These examples require one or more optional plugins.
+Plugin-dependent examples have been moved to their respective thematic sections
+(:ref:`Decomposition <examples-analysis-decomposition-index>`,
+:ref:`Simulation <examples-analysis-simulation-index>`,
+:ref:`NMR processing <examples-processing-nmr-index>`, etc.).
 
-See :ref:`plugins` for installation instructions.
+See the :ref:`plugin-examples-list` page for a complete listing.

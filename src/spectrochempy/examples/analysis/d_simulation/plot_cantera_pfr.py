@@ -13,18 +13,11 @@ the ``scp.cantera.PFR`` plug flow reactor simulation callable.
 """
 
 # %%
+from spectrochempy.examples._plugin_deps import requires_plugin
+
 import spectrochempy as scp
 
-from importlib.util import find_spec
-
-OPTIONAL_PLUGIN = "spectrochempy_cantera"
-
-if find_spec(OPTIONAL_PLUGIN) is None:
-    print(
-        "This example requires the optional spectrochempy-cantera plugin.\n"
-        "Install it with: pip install spectrochempy[cantera]"
-    )
-else:
+if requires_plugin("spectrochempy_cantera", "spectrochempy-cantera"):
     # %%
     # When the plugin is installed, ``PFR`` is available from the ``scp.cantera``
     # plugin namespace. It is a lazy callable that imports the implementation

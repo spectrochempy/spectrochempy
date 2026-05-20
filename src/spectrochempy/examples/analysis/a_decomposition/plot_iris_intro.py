@@ -13,18 +13,11 @@ This example introduces the 2D-IRIS analysis provided by the optional
 """
 
 # %%
-from importlib.util import find_spec
+from spectrochempy.examples._plugin_deps import requires_plugin
 
 import spectrochempy as scp
 
-OPTIONAL_PLUGIN = "spectrochempy_iris"
-
-if find_spec(OPTIONAL_PLUGIN) is None:
-    print(
-        "This example requires the optional spectrochempy-iris plugin.\n"
-        "Install it with: pip install spectrochempy[iris]"
-    )
-else:
+if requires_plugin("spectrochempy_iris", "spectrochempy-iris"):
     # %%
     # The IRIS plugin provides package-level workflows under ``scp.iris`` and
     # dataset-bound helpers under ``dataset.iris``.
@@ -34,25 +27,8 @@ else:
 
     # Attach pressure coordinates
     pressure = [
-        0.003,
-        0.004,
-        0.009,
-        0.014,
-        0.021,
-        0.026,
-        0.036,
-        0.051,
-        0.093,
-        0.150,
-        0.203,
-        0.300,
-        0.404,
-        0.503,
-        0.602,
-        0.702,
-        0.801,
-        0.905,
-        1.004,
+        0.003, 0.004, 0.009, 0.014, 0.021, 0.026, 0.036, 0.051, 0.093, 0.150,
+        0.203, 0.300, 0.404, 0.503, 0.602, 0.702, 0.801, 0.905, 1.004,
     ]
     ds.y = scp.Coord(pressure, title="Pressure", units="torr")
 

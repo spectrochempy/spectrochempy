@@ -29,6 +29,7 @@
 #       version_minor: 0
 # ---
 
+# %%
 # ruff: noqa: T201
 # %% [markdown]
 # # Quickstart Tutorial 🚀
