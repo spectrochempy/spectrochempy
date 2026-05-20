@@ -1,5 +1,6 @@
+# ruff: noqa: T201, D205
 """
-Plugin-dependent examples
+Plugin-dependent examples.
 ==========================
 
 This section gathers examples that require optional SpectroChemPy plugins.
