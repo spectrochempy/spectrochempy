@@ -32,33 +32,29 @@ _INTROSPECTION_ATTRS = frozenset(
 )
 
 
-class lazy_proxy:
+class LazyProxy:
     """
     A callable proxy that lazily resolves and caches the real callable.
+
+    The proxy stays unresolved until the first call or explicit introspection
+    access (``__doc__``, ``__wrapped__``, ``__signature__``, etc.).
+    ``repr()`` returns a descriptive string *without* triggering resolution.
 
     Parameters
     ----------
     resolve : callable
         A no-argument callable that returns the real object.
-
-    Examples
-    --------
-    ::
-
-        >>> def _resolve():
-        ...     from myplugin import myfunc
-        ...     return myfunc
-        >>> proxy = lazy_proxy(_resolve)
-        >>> proxy  # triggers resolution
-        <function myfunc at ...>
-        >>> proxy.__doc__  # real docstring
+    name : str, optional
+        A human-readable name for ``repr()`` (e.g. ``"spectrochempy.nmr.read_topspin"``).
+        If omitted the class name is used.
     """
 
     _MISSING = object()
 
-    def __init__(self, resolve: Callable[[], Any]) -> None:
+    def __init__(self, resolve: Callable[[], Any], name: str | None = None) -> None:
         self.__dict__["_resolve"] = resolve
         self.__dict__["_resolved"] = self._MISSING
+        self.__dict__["_repr_name"] = name
 
     def _resolve_now(self) -> Any:
         if self.__dict__["_resolved"] is self._MISSING:
@@ -78,5 +74,9 @@ class lazy_proxy:
         return super().__getattribute__(name)
 
     def __repr__(self) -> str:
-        resolved = self._resolve_now()
-        return repr(resolved)
+        rname = self.__dict__.get("_repr_name") or type(self).__name__
+        return f"<{rname} unresolved>"
+
+
+# Keep the lowercase alias for internal use (no deprecation — same class).
+lazy_proxy = LazyProxy

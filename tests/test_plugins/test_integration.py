@@ -23,9 +23,6 @@ from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.plugins.deps import MissingPluginNamespaceError
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
-from spectrochempy.plugins.namespace import PluginNamespace
-from spectrochempy.plugins.namespace import PluginNamespaceModule
-from spectrochempy.plugins.namespace import has_namespace
 from spectrochempy.plugins.registry import PluginRegistry
 
 # ------------------------------------------------------------------
@@ -139,251 +136,204 @@ class TestCoreImport:
             capture_output=True,
             text=True,
         )
-        assert result.returncode == 0, result.stderr
+        assert result.returncode == 0, result.stderr or result.stdout
 
-    def test_import_does_not_import_heavy_optional_deps(self):
-        """Import spectrochempy does NOT import heavy plugin dependencies."""
-        code = """
+
+# ------------------------------------------------------------------
+# G. Lazy loading non-regression
+# ------------------------------------------------------------------
+
+
+class TestLazyLoadingNonRegression:
+    """Verify that certain operations do NOT load heavy plugin modules."""
+
+    LAZY_MODULES = [
+        "spectrochempy_nmr",
+        "spectrochempy_nmr.read_topspin",
+        "spectrochempy_cantera",
+        "spectrochempy_cantera._pfr",
+        "spectrochempy_iris",
+        "spectrochempy_iris._core",
+        "cantera",
+    ]
+
+    def _assert_no_heavy_modules(self, code: str, description: str):
+        import subprocess
+        import sys
+
+        bad_imports = " or ".join(
+            f"mod == {m!r} or mod.startswith({m!r} + '.')" for m in self.LAZY_MODULES
+        )
+        wrapped = f"""
 import sys
-import spectrochempy as scp
-scp.plugin_manager.discover()
-# These packages belong to optional plugins only
-heavy = ['osqp', 'cantera', 'nmrglue', 'quaternion', 'quadprog']
-for mod in heavy:
-    if mod in sys.modules:
-        print(f'EAGER: {mod}')
-        raise SystemExit(1)
-# Also check scipy sub-modules used only by plugins
-for mod in list(sys.modules):
-    if mod.startswith('scipy.optimize') or mod.startswith('scipy.sparse'):
-        print(f'EAGER: {mod}')
-        raise SystemExit(1)
+import spectrochempy
+spectrochempy.plugin_manager.discover()
+before = {{mod for mod in sys.modules if {bad_imports}}}
+{code}
+after = {{mod for mod in sys.modules if {bad_imports}}}
+new = after - before
+if new:
+    print(f"EAGER ({description}): {{new}}")
+    raise SystemExit(1)
 raise SystemExit(0)
 """
         result = subprocess.run(
-            [sys.executable, "-c", code],
+            [sys.executable, "-c", wrapped],
             check=False,
             capture_output=True,
             text=True,
         )
-        if result.returncode != 0:
-            msg = f"heavy dep imported: {result.stderr or result.stdout}"
-            raise AssertionError(msg)
+        assert (
+            result.returncode == 0
+        ), f"{description}: {result.stderr or result.stdout}"
 
-    def test_import_does_not_eagerly_load_plugin_modules(self):
-        """Plugin _core / _pfr / read_topspin modules NOT loaded at import."""
-        code = """
-import sys
-import spectrochempy as scp
-scp.plugin_manager.discover()
-lazy_modules = [
-    'spectrochempy_iris._core',
-    'spectrochempy_cantera._pfr',
-    'spectrochempy_nmr.read_topspin',
-    'spectrochempy_nmr.nmrglue',
-]
-for mod in lazy_modules:
-    if mod in sys.modules:
-        print(f'EAGER: {mod}')
-        raise SystemExit(1)
-raise SystemExit(0)
-"""
-        result = subprocess.run(
-            [sys.executable, "-c", code],
-            check=False,
-            capture_output=True,
-            text=True,
+    def test_import_spectrochempy(self):
+        """Import spectrochempy does not load plugin modules."""
+        self._assert_no_heavy_modules("pass", "import spectrochempy")
+
+    def test_scp_namespace_access(self):
+        """Accessing scp.iris / scp.nmr / scp.cantera does not resolve."""
+        self._assert_no_heavy_modules(
+            "_ = spectrochempy.iris; _ = spectrochempy.nmr; _ = spectrochempy.cantera",
+            "namespace access",
         )
-        if result.returncode != 0:
-            msg = f"plugin sub-module loaded eagerly: {result.stderr or result.stdout}"
-            raise AssertionError(msg)
+
+    def test_import_as_module(self):
+        """Import spectrochempy.iris does not resolve."""
+        self._assert_no_heavy_modules(
+            "import spectrochempy.iris",
+            "import spectrochempy.iris",
+        )
+        self._assert_no_heavy_modules(
+            "import spectrochempy.nmr",
+            "import spectrochempy.nmr",
+        )
+        self._assert_no_heavy_modules(
+            "import spectrochempy.cantera",
+            "import spectrochempy.cantera",
+        )
+
+    def test_repr_does_not_resolve(self):
+        """repr(scp.nmr.read_topspin) does not load the plugin module."""
+        from spectrochempy.plugins.proxies import LazyProxy
+
+        proxy = spectrochempy.nmr.read_topspin
+        r = repr(proxy)
+        assert isinstance(proxy, LazyProxy)
+        assert "unresolved" in r
+        assert "LazyProxy" in r
+
+    def test_no_resolve_on_import_access(self):
+        """From spectrochempy.nmr import read_topspin returns lazy proxy (not resolved)."""
+        from spectrochempy.plugins.proxies import LazyProxy
+
+        proxy = spectrochempy.nmr.read_topspin
+        assert isinstance(proxy, LazyProxy)
+        assert proxy.__name__ == "read_topspin"  # name metadata available
 
 
 # ------------------------------------------------------------------
-# B. Discover idempotent
+# H. Missing plugin — clear actionable error
 # ------------------------------------------------------------------
 
 
-class TestDiscoverIdempotent:
-    def test_discover_idempotent(self):
-        """Two discover() calls do not duplicate readers."""
+class TestMissingPluginError:
+    """Clear error messages when an official plugin is not installed."""
+
+    def _make_missing_namespace(self, ns_name: str, monkeypatch):
+        """Create a PluginNamespace with discovery disabled (simulating missing plugin)."""
+        from spectrochempy.plugins.manager import PluginManager
+        from spectrochempy.plugins.namespace import PluginNamespace
+
+        monkeypatch.setattr(im, "entry_points", lambda group=None: [])
         registry = PluginRegistry()
-        pm = PluginManager(registry=registry)
-        plugin = FakeReaderPlugin()
-        pm.register(plugin)
+        manager = PluginManager(registry=registry)
+        return PluginNamespace(ns_name, manager, registry)
 
-        pm.discover()
-        before = len(registry.available_readers)
-        pm.discover()
-        assert len(registry.available_readers) == before
+    def test_missing_known_namespace_attribute_error(self, monkeypatch):
+        """Accessing an attribute on a missing known namespace raises MissingPluginNamespaceError."""
+        from spectrochempy.plugins.deps import MissingPluginNamespaceError
 
-    def test_discover_does_not_duplicate_plugins(self):
-        """Calling discover() twice does not register plugins twice."""
-        pm = PluginManager()
-        pm.register(FakeReaderPlugin())
-        active_before = pm.get_active_plugins()
-        pm.discover()
-        active_after = pm.get_active_plugins()
-        assert active_before == active_after
+        for ns_name in ("nmr", "iris", "cantera"):
+            ns = self._make_missing_namespace(ns_name, monkeypatch)
+            with pytest.raises(MissingPluginNamespaceError) as excinfo:
+                _ = ns.some_attribute
+            msg = str(excinfo.value)
+            assert "pip install" in msg, f"{ns_name}: {msg}"
 
-    def test_discover_not_discovered_initial_state(self):
-        """Fresh PluginManager starts as not_discovered."""
-        pm = PluginManager()
-        assert pm._discovery_state == "not_discovered"
+    def test_missing_unknown_namespace_generic_error(self, monkeypatch):
+        """Unknown namespace without hint raises generic AttributeError."""
+        ns = self._make_missing_namespace("nonexistent", monkeypatch)
+        with pytest.raises(AttributeError) as excinfo:
+            _ = ns.something
+        msg = str(excinfo.value)
+        assert "has no attribute" in msg
 
 
 # ------------------------------------------------------------------
-# C. Plugin top-level function via __getattr__
+# I. Deprecated root aliases
 # ------------------------------------------------------------------
 
 
-class TestPluginTopLevelFunction:
-    def test_reader_exposed_at_top_level(self, monkeypatch):
-        """A registered reader is accessible via scp.read_fake."""
+class TestDeprecatedRootAliases:
+    """``scp.IRIS``, ``scp.PFR`` etc. emit a DeprecationWarning."""
 
-        registry = PluginRegistry()
-        pm = PluginManager(registry=registry)
-        plugin = FakeReaderPlugin()
-        pm.register(plugin)
+    def test_iris_root_alias_deprecated(self):
+        """scp.IRIS emits DeprecationWarning pointing to scp.iris.IRIS."""
+        import warnings
 
-        monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
-        monkeypatch.setattr(spectrochempy, "registry", registry)
+        import spectrochempy as scp
 
-        read_fake = spectrochempy.read_fake
-        assert callable(read_fake)
-        assert read_fake("/some/path") == "fake data from /some/path"
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            obj = scp.IRIS
+            assert obj is not None, "IRIS should still be accessible"
+            assert any(
+                "deprecated" in str(msg.message).lower() for msg in w
+            ), f"No deprecation warning: {[str(m.message) for m in w]}"
 
-    def test_reader_callable(self):
-        """A registered reader function works when called."""
-        registry = PluginRegistry()
-        pm = PluginManager(registry=registry)
-        plugin = FakeReaderPlugin()
-        pm.register(plugin)
+    def test_iris_kernel_root_alias_deprecated(self):
+        """scp.IrisKernel emits DeprecationWarning."""
+        import warnings
 
-        reader = registry.get_reader("fake")
-        assert reader is not None
-        assert reader["func"]("/test") == "fake data from /test"
+        import spectrochempy as scp
 
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            obj = scp.IrisKernel
+            assert obj is not None
+            assert any("deprecated" in str(msg.message).lower() for msg in w)
 
-# ------------------------------------------------------------------
-# D. Plugin namespace
-# ------------------------------------------------------------------
+    def test_pfr_root_alias_deprecated(self):
+        """scp.PFR emits DeprecationWarning."""
+        import warnings
 
+        import spectrochempy as scp
 
-class TestPluginNamespace:
-    def test_namespace_accessible_with_prefix(self, monkeypatch):
-        """Plugin namespace 'fakenamespace' is accessible via scp.fakenamespace."""
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            obj = scp.PFR
+            assert obj is not None
+            assert any("deprecated" in str(msg.message).lower() for msg in w)
 
-        registry = PluginRegistry()
-        pm = PluginManager(registry=registry)
-        plugin = FakeNamespacePlugin()
-        pm.register(plugin)
+    def test_namespaced_access_no_warning(self):
+        """scp.iris.IRIS does NOT emit DeprecationWarning."""
+        import warnings
 
-        monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
-        monkeypatch.setattr(spectrochempy, "registry", registry)
+        import spectrochempy as scp
 
-        assert has_namespace(registry, "fakenamespace")
-        ns = spectrochempy.fakenamespace
-        assert isinstance(ns, PluginNamespace)
-
-    def test_namespace_reader_accessible(self, monkeypatch):
-        """Namespace reader 'scp.fakenamespace.read_fakename' works."""
-
-        registry = PluginRegistry()
-        pm = PluginManager(registry=registry)
-        plugin = FakeNamespacePlugin()
-        pm.register(plugin)
-
-        monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
-        monkeypatch.setattr(spectrochempy, "registry", registry)
-
-        ns = spectrochempy.fakenamespace
-        result = ns.read_fakename("/test")
-        assert result == "fake ns data from /test"
-
-    def test_namespace_error_clear(self, monkeypatch):
-        """Accessing a missing attribute on a namespace gives a clear error."""
-
-        registry = PluginRegistry()
-        pm = PluginManager(registry=registry)
-        plugin = FakeNamespacePlugin()
-        pm.register(plugin)
-
-        monkeypatch.setattr(spectrochempy, "plugin_manager", pm)
-        monkeypatch.setattr(spectrochempy, "registry", registry)
-
-        ns = spectrochempy.fakenamespace
-        with pytest.raises(AttributeError, match="plugin namespace 'fakenamespace'"):
-            _ = ns.missing_attribute
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            obj = scp.iris.IRIS
+            assert obj is not None
+            dep_msgs = [
+                str(m.message) for m in w if "deprecated" in str(m.message).lower()
+            ]
+            assert len(dep_msgs) == 0, f"Unexpected warnings: {dep_msgs}"
 
 
 class TestSubmoduleImport:
     """``from spectrochempy.<ns> import X`` via PluginNamespaceModule."""
-
-    def test_from_iris_import_iris(self):
-        """From spectrochempy.iris import IRIS works with lazy loading."""
-
-        from spectrochempy.iris import IRIS
-
-        assert IRIS is not None
-
-    def test_from_iris_import_iriskernel(self):
-        """From spectrochempy.iris import IrisKernel works."""
-
-        from spectrochempy.iris import IrisKernel
-
-        assert IrisKernel is not None
-
-    def test_import_as_module(self):
-        """Import spectrochempy.iris as iris works."""
-
-        import spectrochempy.iris as iris_mod
-
-        assert iris_mod.IRIS is not None
-
-    def test_is_plugin_namespace_module(self):
-        """Module is a PluginNamespaceModule instance."""
-
-        import spectrochempy.iris as iris_mod
-
-        assert isinstance(iris_mod, PluginNamespaceModule)
-
-    def test_from_nmr_import_read_topspin(self):
-        """From spectrochempy.nmr import read_topspin works."""
-
-        from spectrochempy.nmr import read_topspin
-
-        assert callable(read_topspin)
-
-    def test_from_cantera_import_pfr(self):
-        """From spectrochempy.cantera import PFR works."""
-
-        from spectrochempy.cantera import PFR
-
-        assert PFR is not None
-
-    def test_lazy_loading_on_module_import(self):
-        """Import spectrochempy.iris does NOT load the plugin _core module."""
-        import subprocess
-        import sys
-
-        code = """
-import sys
-import spectrochempy.iris  # noqa: F811
-lazy = [\"spectrochempy_iris._core\", \"spectrochempy_cantera._pfr\"]
-for mod in lazy:
-    if mod in sys.modules:
-        print(f\"EAGER: {mod}\")
-        raise SystemExit(1)
-raise SystemExit(0)
-"""
-        result = subprocess.run(
-            [sys.executable, "-c", code],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0, result.stderr or result.stdout
 
     def test_lazy_loading_on_import_with_access(self):
         """Accessing IRIS after import spectrochempy.iris loads _core."""

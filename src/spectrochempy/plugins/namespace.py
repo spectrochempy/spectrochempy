@@ -68,6 +68,15 @@ class PluginNamespace:
                 except AttributeError:
                     pass
 
+        if plugin is None:
+            from spectrochempy.plugins.features import plugin_namespace_install_hint
+
+            hint = plugin_namespace_install_hint(self._namespace)
+            if hint:
+                from spectrochempy.plugins.deps import MissingPluginNamespaceError
+
+                raise MissingPluginNamespaceError(hint)
+
         raise AttributeError(
             f"plugin namespace '{self._namespace}' has no attribute '{name}'"
         )
