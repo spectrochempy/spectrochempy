@@ -10,6 +10,9 @@ Cantera: PFR reactor simulation (plugin)
 
 This example shows how the optional ``spectrochempy-cantera`` plugin provides
 the ``scp.cantera.PFR`` plug flow reactor simulation callable.
+
+Requires the official ``spectrochempy-cantera`` plugin.
+Install with: ``pip install spectrochempy[cantera]``.
 """
 
 # %%

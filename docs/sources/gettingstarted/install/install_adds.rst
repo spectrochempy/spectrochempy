@@ -73,9 +73,11 @@ Cantera
 ~~~~~~~
 
 .. note::
-   Cantera is now provided by the ``spectrochempy-cantera`` plugin (see
-   :ref:`Optional Plugins <install_adds_plugins>` above).  The core no longer
-   depends on Cantera directly.
+   Cantera workflows are now provided by the official
+   ``spectrochempy-cantera`` plugin (see
+   :ref:`Optional Plugins <install_adds_plugins>` above). This keeps the
+   standard installation lighter while preserving access to the workflow when
+   the plugin is installed.
 
 For users who still need the Cantera library outside of SpectroChemPy,
 it can be installed separately:

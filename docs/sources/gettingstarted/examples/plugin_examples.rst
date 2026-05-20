@@ -24,6 +24,15 @@ examples, organised by scientific topic.
    * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_read_nmr_topspin.py`
      - ``spectrochempy-nmr``
      - :ref:`NMR processing <examples-processing-nmr-index>`
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_core_c_importer_plot_read_nmr_from_bruker.py`
+     - ``spectrochempy-nmr``
+     - Import/export
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_apodization_plot_proc_em.py`
+     - ``spectrochempy-nmr``
+     - Processing / apodization
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_apodization_plot_proc_sp.py`
+     - ``spectrochempy-nmr``
+     - Processing / apodization
    * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_processing_nmr.py`
      - ``spectrochempy-nmr``
      - :ref:`NMR processing <examples-processing-nmr-index>`

@@ -9,6 +9,9 @@
 Analysis CP NMR spectra
 =======================
 Example with handling of a series of CP NMR spectra.
+
+Requires the official ``spectrochempy-nmr`` plugin.
+Install with: ``pip install spectrochempy[nmr]``.
 """
 
 # %%

@@ -9,6 +9,9 @@
 Processing Relaxation measurement
 =================================
 Processing NMR spectra taken for relaxation measurements
+
+Requires the official ``spectrochempy-nmr`` plugin.
+Install with: ``pip install spectrochempy[nmr]``.
 """
 
 # %%

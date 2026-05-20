@@ -10,6 +10,9 @@ Loading of experimental 1D NMR data
 
 In this example, we load a NMR dataset (in the Bruker format) and plot it.
 
+Requires the official ``spectrochempy-nmr`` plugin.
+Install with: ``pip install spectrochempy[nmr]``.
+
 """
 
 # %%

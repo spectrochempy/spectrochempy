@@ -3,9 +3,9 @@
 NMR processing (plugin-based)
 -----------------------------
 
-.. warning::
+.. note::
 
-    These examples require the optional ``spectrochempy-nmr`` plugin.
+    These examples require the official ``spectrochempy-nmr`` plugin.
 
     Install it with:
 

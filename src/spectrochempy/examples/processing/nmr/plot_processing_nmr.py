@@ -9,6 +9,9 @@
 Processing NMR spectra (slicing, baseline correction, peak picking, peak fitting)
 =================================================================================
 Various examples of processing NMR spectra
+
+Requires the official ``spectrochempy-nmr`` plugin.
+Install with: ``pip install spectrochempy[nmr]``.
 """
 
 # %%

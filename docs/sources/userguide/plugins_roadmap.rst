@@ -24,7 +24,9 @@ A modular architecture can help SpectroChemPy:
 
 This should not make everyday usage more complicated. Standard workflows such
 as reading common infrared files or running established chemometric analyses
-should remain natural for users.
+should remain natural for users. In particular, modularity is intended to make
+the ecosystem easier to organize and maintain while keeping familiar workflows
+available through the standard SpectroChemPy experience.
 
 Conceptual categories
 =====================
@@ -77,6 +79,11 @@ One possible future distribution model is:
 
 No package split is implemented here. The current package name and installation
 behavior remain unchanged.
+
+In such a future, "installed" would simply mean that the relevant official
+plugin package is present in the environment. "Discovered" would mean
+SpectroChemPy has found it through entry points. "Lazy-loaded" would mean the
+implementation is imported only when a user actually accesses that feature.
 
 Infrared workflows
 ==================

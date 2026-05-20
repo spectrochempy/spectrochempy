@@ -11,6 +11,9 @@ Sine bell and squared Sine bell window multiplication
 
 In this example, we use sine bell or squared sine bell window multiplication to apodize a NMR signal in the time domain.
 
+Requires the official ``spectrochempy-nmr`` plugin.
+Install with: ``pip install spectrochempy[nmr]``.
+
 """
 
 # %%

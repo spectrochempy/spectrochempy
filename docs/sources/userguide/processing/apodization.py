@@ -41,13 +41,16 @@ from spectrochempy.core.units import ur
 #
 # As an example, apodization is a transformation particularly useful for preprocessing NMR time domain data before
 # Fourier transformation. It generally helps for signal-to-noise improvement.
+#
+# Requires the official ``spectrochempy-nmr`` plugin.
+# Install with: ``pip install spectrochempy[nmr]``.
 
 # %%
 # read an experimental spectra
 path = scp.pathclean("nmrdata/bruker/tests/nmr/topspin_1d")
 
 # the method pathclean allow to write pth in linux or window style indifferently
-dataset = scp.read_topspin(path, expno=1, remove_digital_filter=True)
+dataset = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
 dataset = dataset / dataset.max()  # normalization
 
 # store original data

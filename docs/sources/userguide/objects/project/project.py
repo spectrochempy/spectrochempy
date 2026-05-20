@@ -35,6 +35,7 @@
 # from pathlib import Path
 
 # %%
+import spectrochempy as scp
 from spectrochempy import Project
 from spectrochempy import pathclean
 from spectrochempy import preferences as prefs
@@ -70,18 +71,19 @@ proj
 # %% [markdown]
 # Now we will add a dataset to the project.
 #
-# First we read the dataset (here some NMR data) and we give it some name (e.g. 'nmr n°1')
+# First we read the dataset (here some NMR data) and we give it some name (e.g. 'nmr n°1').
+#
+# Requires the official ``spectrochempy-nmr`` plugin.
+# Install with: ``pip install spectrochempy[nmr]``.
 
 # %%
 datadir = pathclean(prefs.datadir)
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
-from spectrochempy import read_topspin
-
-nd1 = read_topspin(
+nd1 = scp.nmr.read_topspin(
     path / "topspin_1d", expno=1, remove_digital_filter=True, name="NMR_1D"
 )
-nd2 = read_topspin(
+nd2 = scp.nmr.read_topspin(
     path / "topspin_2d", expno=1, remove_digital_filter=True, name="NMR_2D"
 )
 

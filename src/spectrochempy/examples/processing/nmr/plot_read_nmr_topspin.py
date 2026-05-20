@@ -11,6 +11,9 @@ NMR: reading TopSpin files (plugin)
 
 This example shows how to read Bruker TopSpin NMR files using the
 optional ``spectrochempy-nmr`` plugin.
+
+Requires the official ``spectrochempy-nmr`` plugin.
+Install with: ``pip install spectrochempy[nmr]``.
 """
 
 # %%

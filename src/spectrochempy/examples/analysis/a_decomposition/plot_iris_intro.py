@@ -10,6 +10,9 @@ IRIS: 2D-IRIS analysis (plugin)
 
 This example introduces the 2D-IRIS analysis provided by the optional
 ``spectrochempy-iris`` plugin.
+
+Requires the official ``spectrochempy-iris`` plugin.
+Install with: ``pip install spectrochempy[iris]``.
 """
 
 # %%

@@ -1,16 +1,29 @@
 .. _plugins:
 
-================
-Optional Plugins
-================
+========
+Plugins
+========
 
-SpectroChemPy's core works standalone for common spectroscopic data processing
-and analysis. Additional functionality is provided by **optional plugins** that
-extend the framework with domain-specific readers, analyses, and simulations.
+SpectroChemPy uses plugins to keep the project modular while preserving a
+simple scientific workflow. Official plugins remain part of the SpectroChemPy
+ecosystem: they provide domain-specific readers, analyses, and simulations, but
+they are discovered automatically once installed.
+
+For most users, this means:
+
+* standard infrared workflows remain natural and easy to use;
+* no explicit plugin-loading command is needed in normal code;
+* optional or heavier dependencies are imported only when the corresponding
+  feature is used;
+* specialized domains can evolve without making the technical core heavier.
+
+Pluginization is therefore mostly an internal modularization strategy. It is
+not intended to make established SpectroChemPy workflows feel removed or harder
+to access.
 
 .. _plugins-install:
 
-Installing a plugin
+Installing a Plugin
 ===================
 
 Plugins are distributed as separate packages on PyPI. Install them with
@@ -32,11 +45,11 @@ Or install a specific plugin directly:
 
 .. _plugins-usage:
 
-Using a plugin
+Using a Plugin
 ==============
 
 Once installed, the plugin registers itself automatically when you import
-SpectroChemPy.
+SpectroChemPy. There is no ``load_plugin(...)`` step for normal use.
 
 .. _plugins-lazy:
 
@@ -66,6 +79,13 @@ and dataset-bound operations are available from dataset accessors:
     # IRIS plugin: build an IRIS kernel from an existing dataset
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
 
+The distinction is:
+
+* use ``scp.<plugin>.*`` for readers, object creation, simulations, and other
+  package-level workflows;
+* use ``dataset.<plugin>.*`` only for operations that act on an existing
+  :class:`~spectrochempy.NDDataset`.
+
 You can also import directly from a plugin namespace:
 
 .. code-block:: python
@@ -77,8 +97,8 @@ You can also import directly from a plugin namespace:
     import spectrochempy.iris as iris
     iris.IRIS()
 
-All three forms — ``scp.iris.IRIS``, ``from spectrochempy import iris; iris.IRIS``,
-and ``from spectrochempy.iris import IRIS`` — are supported and preserve the
+All three forms - ``scp.iris.IRIS``, ``from spectrochempy import iris; iris.IRIS``,
+and ``from spectrochempy.iris import IRIS`` - are supported and preserve the
 :ref:`lazy loading <plugins-lazy>` behaviour described below.
 
 For backward compatibility, some former top-level APIs remain available as thin
@@ -98,15 +118,24 @@ a clear installation hint. For example:
 
     >>> import spectrochempy as scp
     >>> scp.read_topspin("path/to/fid")
-    Traceback (most recent call last):
-    ...
     MissingPluginError: The 'read_topspin' feature requires the optional plugin
     'spectrochempy-nmr'. Install it with: pip install spectrochempy[nmr]
 
 .. _plugins-list:
 
-Available plugins
-=================
+Official and Third-Party Plugins
+================================
+
+Official plugins are maintained with the SpectroChemPy project and documented
+alongside the main package. Third-party plugins can use the same discovery
+mechanism, but they declare and document their own contributions.
+
+Installed plugins are discovered through Python entry points. Missing official
+plugins are known only well enough to produce clear installation hints when a
+feature is accessed.
+
+Available Official Plugins
+==========================
 
 .. list-table::
    :header-rows: 1
@@ -147,7 +176,7 @@ without reinstalling.
 
 .. _plugins-developer:
 
-Developing a plugin
+Developing a Plugin
 ===================
 
 See the :ref:`plugin-architecture` section for the plugin API documentation,
@@ -160,4 +189,5 @@ Related pages
    :maxdepth: 1
 
    plugins_official
+   plugins_examples
    plugins_roadmap

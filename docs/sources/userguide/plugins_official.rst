@@ -6,8 +6,11 @@ Official plugins
 
 SpectroChemPy can be extended by plugins. Some plugins are maintained as part
 of the SpectroChemPy project and are considered **official plugins**. They use
-the same plugin discovery mechanism as third-party plugins, but their API and
-documentation are coordinated with the main project.
+the same plugin discovery mechanism as third-party plugins, but their API,
+examples, tests, and documentation are coordinated with the main project.
+
+Official plugins should feel like part of SpectroChemPy once installed. They are
+not loaded manually: import SpectroChemPy, then use the documented namespace.
 
 Current official plugins
 ========================
@@ -64,7 +67,9 @@ The recommended form is namespaced:
 
     import spectrochempy as scp
 
-    analysis = scp.iris.IRIS()
+    from spectrochempy.iris import IRIS
+
+    analysis = IRIS()
     dataset = scp.nmr.read_topspin("path/to/fid")
     reactor = scp.cantera.PFR
 
@@ -77,6 +82,59 @@ Dataset accessors are reserved for operations that act on an existing dataset:
 Some official plugins may expose limited root-level compatibility aliases, such
 as ``scp.IRIS``. New examples should prefer the namespaced form,
 ``scp.iris.IRIS``.
+
+Plugin summaries
+================
+
+IRIS
+----
+
+The ``spectrochempy-iris`` plugin provides 2D-IRIS analysis tools for
+spectroscopic adsorption and diffusion studies.
+
+.. code-block:: bash
+
+    pip install spectrochempy[iris]
+
+.. code-block:: python
+
+    import spectrochempy as scp
+    from spectrochempy.iris import IRIS
+
+    kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
+    analysis = IRIS()
+
+NMR
+---
+
+The ``spectrochempy-nmr`` plugin provides Bruker TopSpin reading and future
+NMR-specific workflows.
+
+.. code-block:: bash
+
+    pip install spectrochempy[nmr]
+
+.. code-block:: python
+
+    import spectrochempy as scp
+
+    dataset = scp.nmr.read_topspin("path/to/fid")
+
+Cantera
+-------
+
+The ``spectrochempy-cantera`` plugin provides simulation workflows based on
+Cantera, currently centered on plug-flow reactor support.
+
+.. code-block:: bash
+
+    pip install spectrochempy[cantera]
+
+.. code-block:: python
+
+    import spectrochempy as scp
+
+    PFR = scp.cantera.PFR
 
 Examples and gallery convention
 ===============================
