@@ -1,8 +1,7 @@
 .. _examples-processing-nmr-index:
 
-#############################
 NMR processing (plugin-based)
-#############################
+-----------------------------
 
 .. warning::
 
