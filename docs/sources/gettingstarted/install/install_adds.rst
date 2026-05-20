@@ -35,35 +35,64 @@ Installation options:
       .. note::
          You may need to configure data paths when using manual installation.
 
-Scientific Computing Extensions
--------------------------------
+.. _install_adds_plugins:
+
+Optional Plugins
+----------------
+
+SpectroChemPy includes several optional plugins that extend its capabilities
+for specific domains. Install them as needed:
+
+.. tabs::
+
+   .. tab:: Using pip (recommended)
+
+      .. code-block:: bash
+
+         pip install spectrochempy[cantera]   # Chemical kinetics, thermodynamics
+         pip install spectrochempy[iris]      # 2D-IRIS analysis
+         pip install spectrochempy[nmr]       # Bruker TopSpin reader & NMR processing
+
+   .. tab:: Development install (from source)
+
+      .. code-block:: bash
+
+         pip install -e plugins/spectrochempy-cantera
+         pip install -e plugins/spectrochempy-iris
+         pip install -e plugins/spectrochempy-nmr
+
+Each plugin is independently versioned and maintained. Missing plugins
+raise a clear ``MissingPluginError`` with installation instructions when
+the corresponding feature is accessed.
+
+.. seealso::
+
+   :doc:`/userguide/plugins` for more details on the plugin system.
 
 Cantera
 ~~~~~~~
-Required for chemical kinetics, thermodynamics and transport processes.
-(See `Cantera documentation <https://cantera.org>`__)
+
+.. note::
+   Cantera is now provided by the ``spectrochempy-cantera`` plugin (see
+   :ref:`Optional Plugins <install_adds_plugins>` above).  The core no longer
+   depends on Cantera directly.
+
+For users who still need the Cantera library outside of SpectroChemPy,
+it can be installed separately:
 
 .. tabs::
 
    .. tab:: Using mamba (recommended)
 
-      Stable version:
-
       .. code-block:: bash
 
-         mamba install -c cantera cantera>=2.6.0
-
-      Development version:
-
-      .. code-block:: bash
-
-         mamba install -c cantera/label/dev cantera
+         mamba install -c cantera cantera
 
    .. tab:: Using pip
 
       .. code-block:: bash
 
-         pip install cantera>=2.6.0
+         pip install cantera
 
 GUI Support
 -----------
