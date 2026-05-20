@@ -1,3 +1,4 @@
+# ruff: noqa: T201 — print() is intentional for gallery output
 """
 Utility for examples that require optional SpectroChemPy plugins.
 
@@ -17,26 +18,7 @@ from importlib.util import find_spec
 
 
 def requires_plugin(package_name: str, dist_name: str | None = None) -> bool:
-    """
-    Check whether an optional plugin package is installed.
-
-    When the plugin is **not** found, a human-readable message is printed so
-    that it appears as the first cell output of the rendered gallery example.
-
-    Parameters
-    ----------
-    package_name : str
-        The Python import name of the plugin, e.g. ``"spectrochempy_iris"``.
-    dist_name : str, optional
-        The PyPI / conda distribution name, e.g. ``"spectrochempy-iris"``.
-        When ``None`` the *package_name* is used after replacing underscores
-        with dashes.
-
-    Returns
-    -------
-    bool
-        ``True`` when the plugin can be imported, ``False`` otherwise.
-    """
+    """..."""
     if find_spec(package_name) is not None:
         return True
 
