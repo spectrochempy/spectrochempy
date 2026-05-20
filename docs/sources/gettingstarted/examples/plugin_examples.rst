@@ -15,22 +15,22 @@ examples, organised by scientific topic.
    * - Example
      - Required plugin
      - Gallery section
-   * - :ref:`sphx_glr_auto_examples_analysis_plot_iris_intro.py`
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_analysis_a_decomposition_plot_iris_intro.py`
      - ``spectrochempy-iris``
      - :ref:`Decomposition <examples-analysis-decomposition-index>`
-   * - :ref:`sphx_glr_auto_examples_analysis_plot_cantera_pfr.py`
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_analysis_d_simulation_plot_cantera_pfr.py`
      - ``spectrochempy-cantera``
      - :ref:`Simulation <examples-analysis-simulation-index>`
-   * - :ref:`sphx_glr_auto_examples_processing_plot_read_nmr_topspin.py`
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_read_nmr_topspin.py`
      - ``spectrochempy-nmr``
      - :ref:`NMR processing <examples-processing-nmr-index>`
-   * - :ref:`sphx_glr_auto_examples_processing_plot_processing_nmr.py`
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_processing_nmr.py`
      - ``spectrochempy-nmr``
      - :ref:`NMR processing <examples-processing-nmr-index>`
-   * - :ref:`sphx_glr_auto_examples_processing_plot_processing_cp_nmr.py`
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_processing_cp_nmr.py`
      - ``spectrochempy-nmr``
      - :ref:`NMR processing <examples-processing-nmr-index>`
-   * - :ref:`sphx_glr_auto_examples_processing_plot_processing_nmr_relax.py`
+   * - :ref:`sphx_glr_gettingstarted_examples_gallery_auto_examples_processing_nmr_plot_processing_nmr_relax.py`
      - ``spectrochempy-nmr``
      - :ref:`NMR processing <examples-processing-nmr-index>`
 

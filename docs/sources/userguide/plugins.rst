@@ -150,5 +150,14 @@ without reinstalling.
 Developing a plugin
 ===================
 
-See the :ref:`devguide-plugins` section for the plugin API documentation,
+See the :ref:`plugin-architecture` section for the plugin API documentation,
 packaging guide, and a full reference example (``spectrochempy-nmr``).
+
+Related pages
+=============
+
+.. toctree::
+   :maxdepth: 1
+
+   plugins_official
+   plugins_roadmap

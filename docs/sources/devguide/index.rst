@@ -20,5 +20,6 @@ Developer's Guide
     contributing_plotting
     plugins/api_policy
     plugins/architecture
+    plugins/domain_architecture
     plugins/testing
     plugins/packaging
