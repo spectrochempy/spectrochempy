@@ -53,4 +53,3 @@ plugin.
 The project should avoid moving established infrared workflows out of the
 standard user experience until packaging, documentation, and compatibility
 layers are ready.
-

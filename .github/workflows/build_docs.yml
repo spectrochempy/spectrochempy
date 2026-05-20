@@ -65,6 +65,11 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
+      - name: Initialize CI diagnostics
+        run: |
+          echo "CI_TIMING_FILE=$RUNNER_TEMP/ci-timings.txt" >> "$GITHUB_ENV"
+          : > "$RUNNER_TEMP/ci-timings.txt"
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -72,41 +77,70 @@ jobs:
 
       - name: Create virtual environment
         run: |
+          set -e
+          start=$SECONDS
           python -m venv .venv
           echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+          duration=$((SECONDS - start))
+          echo "environment creation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Install uv and verify installation
         run: |
+          set -e
           . .venv/bin/activate
+          start=$SECONDS
           python -m pip install --upgrade pip
           python -m pip install --upgrade uv
           which uv
           uv --version
+          duration=$((SECONDS - start))
+          echo "uv installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Install spectrochempy
         run: |
+          set -e
           . .venv/bin/activate
+          start=$SECONDS
           uv pip install -e ".[docs]"
+          duration=$((SECONDS - start))
+          echo "dependency installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Install SpectroChemPy plugins
         run: |
+          set -e
           . .venv/bin/activate
+          start=$SECONDS
           uv pip install -e plugins/spectrochempy-nmr
           uv pip install -e plugins/spectrochempy-iris
           uv pip install -e plugins/spectrochempy-cantera
+          duration=$((SECONDS - start))
+          echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
+
+      - name: Environment and plugin diagnostics
+        run: |
+          . .venv/bin/activate
+          python .github/workflows/scripts/ci_diagnostics.py environment
 
       - name: Install Pandoc
         run: |
+          set -e
+          start=$SECONDS
           sudo apt-get update
           sudo apt-get install -y pandoc
           pandoc --version
+          duration=$((SECONDS - start))
+          echo "pandoc installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Setup Jupyter kernel
         run: |
+          set -e
           . .venv/bin/activate
+          start=$SECONDS
           uv pip install ipykernel
           python3 -m ipykernel install --user --name python3 --display-name "Python 3"
+          duration=$((SECONDS - start))
+          echo "jupyter kernel setup: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Set up version environment variable
         run: |
@@ -141,13 +175,26 @@ jobs:
       # ---------- build docs ----------
       - name: Build docs
         run: |
+          set -e
           . .venv/bin/activate
+          start=$SECONDS
           if [[ "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
               python3 docs/make.py -j1 html
           else
             python3 docs/make.py -j1 html
           fi
+          duration=$((SECONDS - start))
+          echo "documentation build: ${duration}s" | tee -a "$CI_TIMING_FILE"
+
+      - name: CI diagnostics summary
+        if: ${{ always() }}
+        run: |
+          if [ -f .venv/bin/activate ]; then
+            . .venv/bin/activate
+          fi
+          python .github/workflows/scripts/ci_diagnostics.py summary \
+            --timings "${CI_TIMING_FILE:-}"
 
       # ---------- build oldest version (stable only) ----------
       - name: Build oldest version of the documentation

@@ -97,6 +97,12 @@ jobs:
           echo "pythonVersion: ${{ matrix.pythonVersion }}"
           echo "os: ${{ matrix.os }}"
 
+      - name: Initialize CI diagnostics
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          echo "CI_TIMING_FILE=$RUNNER_TEMP/ci-timings.txt" >> "$GITHUB_ENV"
+          : > "$RUNNER_TEMP/ci-timings.txt"
+
       - name: Checkout spectrochempy repository
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         uses: actions/checkout@v6
@@ -120,29 +126,57 @@ jobs:
       - name: Install spectrochempy
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
+          set -e
+          start=$SECONDS
           python -m pip install ".[test]"
           # check the MPL setup
           python src/spectrochempy/data/setup.py
+          duration=$((SECONDS - start))
+          echo "dependency installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Install SpectroChemPy plugins
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
+          set -e
+          start=$SECONDS
           python -m pip install -e plugins/spectrochempy-nmr
           python -m pip install -e plugins/spectrochempy-iris
           python -m pip install -e plugins/spectrochempy-cantera
+          duration=$((SECONDS - start))
+          echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
+
+      - name: Environment and plugin diagnostics
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          python .github/workflows/scripts/ci_diagnostics.py environment
 
       - name: Test with coverage
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
-          coverage run --source=spectrochempy -m pytest tests -s --durations=10
+          set -o pipefail
+          start=$SECONDS
+          coverage run --source=spectrochempy -m pytest tests -s -ra --durations=10 | tee pytest.log
+          status=${PIPESTATUS[0]}
+          duration=$((SECONDS - start))
+          echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
+          exit "$status"
+
+      - name: CI diagnostics summary
+        if: ${{ always() && !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          python .github/workflows/scripts/ci_diagnostics.py summary \
+            --pytest-log pytest.log \
+            --timings "$CI_TIMING_FILE"
 
       - name: Debug info coverage content
+        if: ${{ always() && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
-          coverage report -m
+          coverage report -m || echo "coverage report unavailable"
 
       - name: Debug info workflow completion
+        if: ${{ always() }}
         run: |
-          echo "Tests completed successfully"
+          echo "Test workflow diagnostic step completed"
           echo "Workflow name: ${{ github.workflow }}"
           echo "Run ID: ${{ github.run_id }}"
           echo "Current branch: ${{ github.ref }}"

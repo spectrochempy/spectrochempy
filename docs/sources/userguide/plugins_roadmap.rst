@@ -111,4 +111,3 @@ The gallery should remain centralized and organized scientifically. Examples
 that require a plugin should be marked with the required plugin, while
 beginner-oriented pages and quickstart material should continue to work with
 the standard SpectroChemPy environment.
-

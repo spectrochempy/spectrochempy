@@ -84,4 +84,3 @@ Examples and gallery convention
 Examples remain organized by scientific topic in the central SpectroChemPy
 gallery. Plugin-dependent examples should be clearly marked with their required
 plugin, but they do not need a separate plugin-only gallery.
-
