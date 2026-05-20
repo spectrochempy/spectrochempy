@@ -977,10 +977,12 @@ def read_fid(
 
     # read the pulse program and add to the dictionary
     if read_pulseprogram:
-        try:
-            dic["pprog"] = read_pprog(os.path.join(dir, pprog_file))
-        except Exception:
-            warn("Error reading the pulse program", stacklevel=2)
+        pprog_path = os.path.join(dir, pprog_file)
+        if os.path.isfile(pprog_path):
+            try:
+                dic["pprog"] = read_pprog(pprog_path)
+            except Exception:
+                warn("Error reading the pulse program", stacklevel=2)
 
     # determine file size and add to the dictionary
     dic["FILE_SIZE"] = os.stat(os.path.join(dir, bin_file)).st_size
