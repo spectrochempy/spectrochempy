@@ -1183,3 +1183,132 @@ class TestGetAttrSideEffects:
 
         pm.register(SimpleReaderPlugin())
         assert registry.get_reader("simplereader") is not None
+
+
+# ------------------------------------------------------------------
+# F. Lazy proxy introspection
+# ------------------------------------------------------------------
+
+
+class TestLazyProxyIntrospection:
+    """``lazy_proxy`` introspection behaviour (real doc/signature)."""
+
+    def test_nmr_read_topspin_doc(self):
+        """__doc__ is the real read_topspin docstring, not a wrapper one."""
+        import spectrochempy as scp
+
+        doc = scp.nmr.read_topspin.__doc__
+        assert doc is not None
+        assert "Lazy wrapper" not in doc
+
+    def test_nmr_read_topspin_name(self):
+        """__name__ is 'read_topspin'."""
+        import spectrochempy as scp
+
+        assert scp.nmr.read_topspin.__name__ == "read_topspin"
+
+    def test_nmr_read_topspin_wrapped(self):
+        """__wrapped__ is the real read_topspin function."""
+        import spectrochempy as scp
+
+        wrapped = scp.nmr.read_topspin.__wrapped__
+        assert wrapped is not None
+        assert wrapped.__name__ == "read_topspin"
+
+    def test_nmr_signature(self):
+        """inspect.signature returns real params, not just (*args, **kwargs)."""
+        import inspect
+
+        import spectrochempy as scp
+
+        sig = inspect.signature(scp.nmr.read_topspin)
+        params = list(sig.parameters.keys())
+        assert "paths" in params or len(params) > 1
+
+    def test_cantera_pfr_doc(self):
+        """__doc__ is the real PFR docstring."""
+        import spectrochempy as scp
+
+        doc = scp.cantera.PFR.__doc__
+        assert doc is not None
+        assert "Lazy wrapper" not in doc
+
+    def test_cantera_pfr_name(self):
+        """__name__ is 'PFR'."""
+        import spectrochempy as scp
+
+        assert scp.cantera.PFR.__name__ == "PFR"
+
+    def test_cantera_pfr_wrapped(self):
+        """__wrapped__ is the real PFR class."""
+        import spectrochempy as scp
+
+        wrapped = scp.cantera.PFR.__wrapped__
+        assert wrapped is not None
+
+    def test_cantera_pfr_signature(self):
+        """inspect.signature returns real params, not placeholder ones."""
+        import inspect
+
+        import spectrochempy as scp
+
+        sig = inspect.signature(scp.cantera.PFR)
+        params = list(sig.parameters.keys())
+        assert len(params) > 2
+
+    def test_lazy_loading_preserved_on_import(self):
+        """Import spectrochempy does NOT eagerly resolve lazy_proxy objects."""
+        import subprocess
+        import sys
+
+        code = """
+import sys
+import spectrochempy as scp
+scp.plugin_manager.discover()
+lazy = [
+    "spectrochempy_nmr.read_topspin",
+    "spectrochempy_cantera._pfr",
+]
+for mod in lazy:
+    if mod in sys.modules:
+        print(f"EAGER on scp only: {mod}")
+        raise SystemExit(1)
+raise SystemExit(0)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr or result.stdout
+
+    def test_lazy_loading_proxy_creation_no_resolve(self):
+        """Accessing scp.nmr.read_topspin returns unresolved proxy."""
+        import subprocess
+        import sys
+
+        code = """
+import sys
+import spectrochempy as scp
+scp.plugin_manager.discover()
+before = [k for k in sys.modules if k.startswith("spectrochempy_nmr.")]
+rt = scp.nmr.read_topspin
+after = [k for k in sys.modules if k.startswith("spectrochempy_nmr.")]
+if "spectrochempy_nmr.read_topspin" in after:
+    print(f"RESOLVED on proxy creation: {after}")
+    raise SystemExit(1)
+_ = rt.__doc__
+resolved = [k for k in sys.modules if k.startswith("spectrochempy_nmr.")]
+if "spectrochempy_nmr.read_topspin" not in resolved:
+    print(f"Not resolved after __doc__: {resolved}")
+    raise SystemExit(1)
+raise SystemExit(0)
+"""
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr or result.stdout

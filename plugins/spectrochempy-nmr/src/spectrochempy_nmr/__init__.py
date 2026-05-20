@@ -6,13 +6,14 @@ from __future__ import annotations
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
+from spectrochempy.plugins.proxies import lazy_proxy
 
 
-def _lazy_read_topspin(*args, **kwargs):
-    """Lazy wrapper — imports ``read_topspin`` only on call."""
+def _resolve_read_topspin():
+    """Lazily import and return the real ``read_topspin`` function."""
     from .read_topspin import read_topspin  # noqa: PLC0415
 
-    return read_topspin(*args, **kwargs)
+    return read_topspin
 
 
 class NMRPlugin(SpectroChemPyPlugin):
@@ -30,7 +31,7 @@ class NMRPlugin(SpectroChemPyPlugin):
         return [
             {
                 "name": "topspin",
-                "func": _lazy_read_topspin,
+                "func": lazy_proxy(_resolve_read_topspin),
                 "description": "Bruker TOPSPIN fid, series, or processed data",
                 "extensions": [
                     ".fid",

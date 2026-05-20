@@ -13,13 +13,14 @@ from __future__ import annotations
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
+from spectrochempy.plugins.proxies import lazy_proxy
 
 
-def _lazy_pfr(*args, **kwargs):
-    """Lazy wrapper — imports ``_pfr.PFR`` only on call."""
+def _resolve_pfr():
+    """Lazily import and return the real ``PFR`` callable."""
     from ._pfr import PFR  # noqa: PLC0415
 
-    return PFR(*args, **kwargs)
+    return PFR
 
 
 class CanteraPlugin(SpectroChemPyPlugin):
@@ -50,7 +51,7 @@ class CanteraPlugin(SpectroChemPyPlugin):
         return [
             {
                 "name": "PFR",
-                "func": _lazy_pfr,
+                "func": lazy_proxy(_resolve_pfr),
                 "description": "Plug-flow reactor (CSTR-in-series) model",
             },
         ]
@@ -77,4 +78,4 @@ def __getattr__(name: str):
 
 
 def __dir__() -> list[str]:
-    return ["CanteraPlugin", "PFR", "_lazy_pfr"]
+    return ["CanteraPlugin", "PFR", "_resolve_pfr"]
