@@ -49,26 +49,51 @@ def test_read():
     with pytest.raises(FileNotFoundError):
         scp.read("irdata/nh4y-acti.spg")
 
-    # generic read - direct URL
-    ds1 = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
-    assert len(ds1) == 7  # Original MATLAB file has 7 datasets
-
-    # specific matlab reader
-    ds2 = scp.read_mat("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
-    assert len(ds2) == 7  # Same as above
-
-    # generic read of a zipped file - this may return different number of datasets
-    # due to compression or file structure changes on the server
-    ds3 = scp.read(
-        "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip", merge=False
-    )
-    # Just verify we get multiple datasets with expected shapes
-    assert len(ds3) == 7
-
-    # doesn't exist
-    with pytest.raises(FileNotFoundError):
-        scp.read("http://www.eigenvector.com/does_not_exist.mat")
-
     # not a scpy readable type
     with pytest.raises(TypeError):
         scp.read("https://www.spectrochempy.fr/latest/index.html")
+
+
+@pytest.mark.network
+def test_read_eigenvector_corn():
+    """Read corn.mat from eigenvector.com."""
+    import requests
+
+    try:
+        ds1 = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+        assert len(ds1) == 7
+    except requests.exceptions.RequestException:
+        pytest.skip("eigenvector.com not reachable")
+
+    try:
+        ds2 = scp.read_mat("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+        assert len(ds2) == 7
+    except requests.exceptions.RequestException:
+        pytest.skip("eigenvector.com not reachable")
+
+
+@pytest.mark.network
+def test_read_eigenvector_corn_zip():
+    """Read corn.mat_.zip from eigenvector.com."""
+    import requests
+
+    try:
+        ds3 = scp.read(
+            "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip",
+            merge=False,
+        )
+        assert len(ds3) == 7
+    except requests.exceptions.RequestException:
+        pytest.skip("eigenvector.com not reachable")
+
+
+@pytest.mark.network
+def test_read_eigenvector_missing():
+    """Read a non-existent file from eigenvector.com."""
+    import requests
+
+    try:
+        with pytest.raises(FileNotFoundError):
+            scp.read("http://www.eigenvector.com/does_not_exist.mat")
+    except requests.exceptions.RequestException:
+        pytest.skip("eigenvector.com not reachable")

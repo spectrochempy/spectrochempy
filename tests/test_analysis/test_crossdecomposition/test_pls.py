@@ -42,8 +42,14 @@ def test_PLS_docstrings():
 
 # test pls
 # ---------
+@pytest.mark.network
 def test_pls():
-    datasets = read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+    import requests
+
+    try:
+        datasets = read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+    except requests.exceptions.RequestException:
+        pytest.skip("eigenvector.com not reachable")
     # information: [20x59 char ]    Information about the data
     # m5spec: [80x700 dataset] Spectra on instrument m5
     # mp5spec: [80x700 dataset] Spectra on instrument mp5
