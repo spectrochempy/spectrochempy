@@ -38,12 +38,6 @@ class PSD(AnalysisConfigurable):
         Computation method. "matrix" is faster using linear algebra.
     n_spectra_per_cycle : int or None, default=None
         Number of spectra per cycle. If None, inferred from data shape.
-    input_mode : {"auto", "raw", "grouped", "averaged"}, default="auto"
-        Input data format:
-        - "raw": 2D (N_cycles*n_spectra_per_cycle, n_wavenumbers)
-        - "grouped": 3D (N_cycles, n_spectra_per_cycle, n_wavenumbers)
-        - "averaged": 2D (n_spectra_per_cycle, n_wavenumbers)
-        - "auto": infer from shape
     harmonic : int, default=1
         Demodulation harmonic index (k in sin(k*ω*t + phi)).
     phi : array-like, default=np.arange(0.0, 360.0, 15.0)
@@ -135,11 +129,6 @@ class PSD(AnalysisConfigurable):
         allow_none=True,
         default_value=None,
         help="Number of spectra per cycle.",
-    ).tag(config=True)
-
-    input_mode = tr.Enum(
-        ["auto", "raw", "grouped", "averaged"],
-        default_value="auto",
     ).tag(config=True)
 
     harmonic = tr.Integer(
@@ -279,6 +268,12 @@ class PSD(AnalysisConfigurable):
         """
         Normalize input to internal 3D representation.
 
+        Input format is inferred from dimensionality and ``n_spectra_per_cycle``:
+
+        - 3D: grouped cycles ``(n_cycles, n_spectra_per_cycle, n_wavenumbers)``
+        - 2D + ``n_spectra_per_cycle`` provided: raw concatenated cycles
+        - 2D + ``n_spectra_per_cycle`` is ``None``: already averaged / single cycle
+
         Returns
         -------
         data_3d : np.ndarray
@@ -296,11 +291,12 @@ class PSD(AnalysisConfigurable):
 
         ndim = X.ndim
         shape = X.shape
+        n_spectra_per_cycle = self.n_spectra_per_cycle
 
         # Reject 1D and 4D+ input
         if ndim == 1:
             raise ValueError(
-                f"1D input is not supported. Got shape {shape}. " "Use 2D or 3D input."
+                f"1D input is not supported. Got shape {shape}. Use 2D or 3D input."
             )
         if ndim > 3:
             raise ValueError(
@@ -308,77 +304,34 @@ class PSD(AnalysisConfigurable):
                 "Use 2D or 3D input."
             )
 
-        # Determine input mode
-        input_mode = self.input_mode
-        n_spectra_per_cycle = self.n_spectra_per_cycle
-
-        if input_mode == "auto":
-            if ndim == 3:
-                input_mode = "grouped"
-            elif ndim == 2:
-                if n_spectra_per_cycle is not None and shape[0] == n_spectra_per_cycle:
-                    input_mode = "averaged"
-                elif (
-                    n_spectra_per_cycle is not None
-                    and shape[0] % n_spectra_per_cycle == 0
-                ):
-                    input_mode = "raw"
-                else:
-                    raise ValueError(
-                        f"Cannot infer input_mode for 2D input with shape {shape}. "
-                        "Please specify input_mode and/or n_spectra_per_cycle."
-                    )
-
-        # Process based on input mode
-        if input_mode == "grouped":
-            if ndim != 3:
-                raise ValueError(
-                    f"input_mode='grouped' requires 3D input. Got {ndim}D with shape {shape}."
-                )
+        # Infer format from dimensionality and n_spectra_per_cycle
+        if ndim == 3:
+            # Grouped cycles: (n_cycles, n_spectra_per_cycle, n_wavenumbers)
             data_3d = X.data.copy()
             n_cycles, n_spectra, n_wavenumbers = shape
 
-        elif input_mode == "raw":
-            if ndim != 2:
-                raise ValueError(
-                    f"input_mode='raw' requires 2D input. Got {ndim}D with shape {shape}."
-                )
+        elif ndim == 2:
             if n_spectra_per_cycle is None:
-                raise ValueError(
-                    "n_spectra_per_cycle must be specified for input_mode='raw'."
+                # Already averaged / single cycle: (n_spectra, n_wavenumbers)
+                n_cycles = 1
+                n_spectra = shape[0]
+                n_wavenumbers = shape[1]
+                data_3d = X.data.copy()[
+                    np.newaxis, :, :
+                ]  # Shape: (1, n_spectra, n_wavenumbers)
+            else:
+                # Raw concatenated cycles
+                if shape[0] % n_spectra_per_cycle != 0:
+                    raise ValueError(
+                        f"Input shape {shape} not divisible by n_spectra_per_cycle={n_spectra_per_cycle}. "
+                        f"Expected first dimension to be N * {n_spectra_per_cycle}."
+                    )
+                n_cycles = shape[0] // n_spectra_per_cycle
+                n_spectra = n_spectra_per_cycle
+                n_wavenumbers = shape[1]
+                data_3d = X.data.copy().reshape(
+                    n_cycles, n_spectra_per_cycle, n_wavenumbers
                 )
-            if shape[0] % n_spectra_per_cycle != 0:
-                raise ValueError(
-                    f"Input shape {shape} not divisible by n_spectra_per_cycle={n_spectra_per_cycle}. "
-                    f"Expected first dimension to be N * {n_spectra_per_cycle}."
-                )
-            n_cycles = shape[0] // n_spectra_per_cycle
-            n_wavenumbers = shape[1]
-            data_3d = X.data.copy().reshape(
-                n_cycles, n_spectra_per_cycle, n_wavenumbers
-            )
-            n_spectra = n_spectra_per_cycle
-
-        elif input_mode == "averaged":
-            if ndim != 2:
-                raise ValueError(
-                    f"input_mode='averaged' requires 2D input. Got {ndim}D with shape {shape}."
-                )
-            if n_spectra_per_cycle is None:
-                raise ValueError(
-                    "n_spectra_per_cycle must be specified for input_mode='averaged'."
-                )
-            if shape[0] != n_spectra_per_cycle:
-                raise ValueError(
-                    f"For input_mode='averaged', shape[0] must equal n_spectra_per_cycle. "
-                    f"Got shape[0]={shape[0]}, n_spectra_per_cycle={n_spectra_per_cycle}."
-                )
-            n_cycles = 1
-            n_spectra = n_spectra_per_cycle
-            n_wavenumbers = shape[1]
-            data_3d = X.data.copy()[
-                np.newaxis, :, :
-            ]  # Shape: (1, n_spectra, n_wavenumbers)
 
         # Get coordinates
         time_coord = None
@@ -386,23 +339,20 @@ class PSD(AnalysisConfigurable):
         spectral_coord = None
 
         if X.coordset is not None:
-            # For 3D grouped input
-            if input_mode == "grouped" and ndim == 3:
+            if ndim == 3:
                 # Assume dims are (cycle, time, spectral)
                 dim_names = X.dims
                 if len(dim_names) >= 3:
                     cycle_coord = X.coordset[dim_names[0]].copy()
                     time_coord = X.coordset[dim_names[1]].copy()
                     spectral_coord = X.coordset[dim_names[2]].copy()
-            # For 2D input
             elif ndim == 2:
                 dim_names = X.dims
                 if len(dim_names) >= 2:
-                    if input_mode == "raw":
-                        # For raw input, extract time coord from first dim
+                    if n_spectra_per_cycle is not None:
+                        # Raw concatenated: extract time coord from first dim
                         # and compute averaged relative time across cycles
                         full_time_coord = X.coordset[dim_names[0]]
-                        # Reshape to (n_cycles, n_spectra_per_cycle)
                         full_time_data = full_time_coord.data.reshape(
                             n_cycles, n_spectra_per_cycle
                         )
@@ -417,13 +367,13 @@ class PSD(AnalysisConfigurable):
                             units=full_time_coord.units,
                         )
                         spectral_coord = X.coordset[dim_names[1]].copy()
-                    else:  # averaged
+                    else:
+                        # Averaged / single cycle
                         time_coord = X.coordset[dim_names[0]].copy()
                         spectral_coord = X.coordset[dim_names[1]].copy()
 
         # Create time coordinate if not available
         if time_coord is None:
-            # Prefer linspace(0, 1, n_spectra) to include both 0 and 1
             time_coord = Coord(
                 np.linspace(0.0, 1.0, n_spectra),
                 title="time",
@@ -497,8 +447,10 @@ class PSD(AnalysisConfigurable):
                     "Use an odd n_spectra_per_cycle or choose a different quadrature method."
                 )
             w = np.ones(n)
-            w[0::2] = 4.0 / 3.0
-            w[1::2] = 2.0 / 3.0
+            w[0] = 1.0 / 3.0
+            w[-1] = 1.0 / 3.0
+            w[1:-1:2] = 4.0 / 3.0
+            w[2:-1:2] = 2.0 / 3.0
         else:
             raise ValueError(f"Unknown quadrature method: {quadrature}")
 

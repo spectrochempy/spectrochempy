@@ -98,16 +98,13 @@ class TestPSD:
         assert hasattr(scp, "PSD"), "PSD not found in spectrochempy namespace"
 
     # ----------------------------------------------------------------------------------
-    # Input mode tests
+    # Input inference tests
     # ----------------------------------------------------------------------------------
     def test_psd_raw_2d_input(self, raw_2d):
-        """Test raw 2D input mode."""
+        """Test raw 2D input with n_spectra_per_cycle."""
         ds, n_cycles, n_spectra, n_wavenumbers = raw_2d
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra,
-            input_mode="raw",
-        )
+        psd = PSD(n_spectra_per_cycle=n_spectra)
         psd.fit(ds)
 
         assert psd.prs is not None
@@ -116,10 +113,10 @@ class TestPSD:
         assert psd._n_wavenumbers == n_wavenumbers
 
     def test_psd_grouped_3d_input(self, grouped_3d):
-        """Test grouped 3D input mode."""
+        """Test grouped 3D input."""
         ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
 
-        psd = PSD(input_mode="grouped")
+        psd = PSD()
         psd.fit(ds)
 
         assert psd.prs is not None
@@ -128,13 +125,10 @@ class TestPSD:
         assert psd._n_wavenumbers == n_wavenumbers
 
     def test_psd_averaged_2d_input(self, averaged_2d):
-        """Test averaged 2D input mode."""
+        """Test averaged 2D input without n_spectra_per_cycle."""
         ds, n_spectra, n_wavenumbers = averaged_2d
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra,
-            input_mode="averaged",
-        )
+        psd = PSD()
         psd.fit(ds)
 
         assert psd.prs is not None
@@ -142,35 +136,30 @@ class TestPSD:
         assert psd._n_spectra == n_spectra
         assert psd._n_wavenumbers == n_wavenumbers
 
-    def test_psd_input_mode_auto_3d(self, grouped_3d):
-        """Test input_mode='auto' with 3D data."""
+    def test_psd_3d_infer_n_spectra(self, grouped_3d):
+        """Test 3D input infers n_spectra_per_cycle from shape."""
         ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
 
-        psd = PSD(input_mode="auto")
+        psd = PSD()
         psd.fit(ds)
 
         assert psd._n_cycles == n_cycles
+        assert psd._n_spectra == n_spectra
 
-    def test_psd_input_mode_auto_raw(self, raw_2d):
-        """Test input_mode='auto' with 2D raw data."""
+    def test_psd_2d_raw_infer_from_n_spectra(self, raw_2d):
+        """Test 2D raw input inferred from n_spectra_per_cycle."""
         ds, n_cycles, n_spectra, n_wavenumbers = raw_2d
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra,
-            input_mode="auto",
-        )
+        psd = PSD(n_spectra_per_cycle=n_spectra)
         psd.fit(ds)
 
         assert psd._n_cycles == n_cycles
 
-    def test_psd_input_mode_auto_averaged(self, averaged_2d):
-        """Test input_mode='auto' with 2D averaged data."""
+    def test_psd_2d_averaged_no_n_spectra(self, averaged_2d):
+        """Test 2D averaged input when n_spectra_per_cycle is None."""
         ds, n_spectra, n_wavenumbers = averaged_2d
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra,
-            input_mode="auto",
-        )
+        psd = PSD()
         psd.fit(ds)
 
         assert psd._n_cycles == 1
@@ -199,24 +188,18 @@ class TestPSD:
         """Test invalid n_spectra_per_cycle."""
         ds, _, n_spectra, _ = raw_2d
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra + 1,  # Wrong value
-            input_mode="raw",
-        )
+        psd = PSD(n_spectra_per_cycle=n_spectra + 1)
 
         with pytest.raises(ValueError, match="not divisible"):
             psd.fit(ds)
 
-    def test_psd_invalid_averaged_shape(self, averaged_2d):
-        """Test invalid averaged input shape."""
+    def test_psd_2d_raw_not_divisible(self, averaged_2d):
+        """Test 2D input with wrong n_spectra_per_cycle raises not divisible."""
         ds, n_spectra, _ = averaged_2d
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra + 1,  # Wrong value
-            input_mode="averaged",
-        )
+        psd = PSD(n_spectra_per_cycle=n_spectra + 1)
 
-        with pytest.raises(ValueError, match="must equal n_spectra_per_cycle"):
+        with pytest.raises(ValueError, match="not divisible"):
             psd.fit(ds)
 
     # ----------------------------------------------------------------------------------
@@ -227,13 +210,67 @@ class TestPSD:
         ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
 
         phi = np.arange(0.0, 360.0, 30.0)
-        psd = PSD(input_mode="grouped", phi=phi)
+        psd = PSD(phi=phi)
         psd.fit(ds)
 
         T = psd.T
         assert T.shape == (len(phi), n_spectra)
         assert "y" in T.dims
         assert T.coordset["y"] is not None
+
+    def test_psd_simpson_weights(self):
+        """Test Simpson weights are correct for odd n."""
+        n_spectra = 5
+        n_wavenumbers = 10
+        data = np.random.rand(n_spectra, n_wavenumbers)
+        ds = NDDataset(data)
+
+        psd = PSD(
+            n_spectra_per_cycle=n_spectra,
+            integration_method="simpson",
+            method="matrix",
+        )
+        psd.fit(ds)
+
+        T = psd.T
+        # Simpson weights should be [1/3, 4/3, 2/3, 4/3, 1/3] for n=5
+        expected_weights = np.array(
+            [1.0 / 3.0, 4.0 / 3.0, 2.0 / 3.0, 4.0 / 3.0, 1.0 / 3.0]
+        )
+        # The T matrix has shape (n_phi, n_spectra) and each row is:
+        # scaling * w * sin(...)
+        # We can't directly check sin(...) but we can check that the weight ratios are correct
+        # by looking at the absolute values scaled by the global factor.
+        # For simpson, scaling = 2.0 / n, so T_data = (2.0/n) * w * sin(...)
+        # A simpler approach: check that the first and last columns have the smallest absolute
+        # values for a given row when sin is monotonic, but that's complex.
+        # Instead, let's compute what T should be for phi=0:
+        # T[0, j] = (2.0/n) * w[j] * sin(2*pi*harmonic*t_norm[j])
+        # t_norm = (arange(n)+1)/n = [0.2, 0.4, 0.6, 0.8, 1.0]
+        # For phi=0, we can directly verify the ratios.
+        phi = psd._get_phi()
+        phi_0_idx = np.where(np.isclose(phi, 0.0))[0][0]
+        T_row = T.data[phi_0_idx]
+        t_norm = (np.arange(n_spectra) + 1) / n_spectra
+        scaling = 2.0 / n_spectra
+        expected_T_row = scaling * expected_weights * np.sin(2.0 * np.pi * t_norm)
+        np.testing.assert_allclose(T_row, expected_T_row, atol=1e-10)
+
+    def test_psd_simpson_requires_odd_n(self):
+        """Test Simpson integration requires odd n_spectra_per_cycle."""
+        n_spectra = 4  # even
+        n_wavenumbers = 10
+        data = np.random.rand(n_spectra, n_wavenumbers)
+        ds = NDDataset(data)
+
+        psd = PSD(
+            n_spectra_per_cycle=n_spectra,
+            integration_method="simpson",
+            method="matrix",
+        )
+
+        with pytest.raises(ValueError, match="odd number of points"):
+            psd.fit(ds)
 
     # ----------------------------------------------------------------------------------
     # Method tests
@@ -242,10 +279,7 @@ class TestPSD:
         """Test matrix method output shape and coords."""
         ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
 
-        psd = PSD(
-            input_mode="grouped",
-            method="matrix",
-        )
+        psd = PSD(method="matrix")
         psd.fit(ds)
 
         assert psd.prs.shape[0] == len(psd._get_phi())
@@ -255,10 +289,7 @@ class TestPSD:
         """Test integration method output shape and coords."""
         ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
 
-        psd = PSD(
-            input_mode="grouped",
-            method="integration",
-        )
+        psd = PSD(method="integration")
         psd.fit(ds)
 
         assert psd.prs.shape[0] == len(psd._get_phi())
@@ -270,19 +301,11 @@ class TestPSD:
         phi = np.arange(0.0, 360.0, 30.0)
 
         # Matrix method
-        psd_matrix = PSD(
-            input_mode="grouped",
-            method="matrix",
-            phi=phi,
-        )
+        psd_matrix = PSD(method="matrix", phi=phi)
         psd_matrix.fit(ds)
 
         # Integration method
-        psd_int = PSD(
-            input_mode="grouped",
-            method="integration",
-            phi=phi,
-        )
+        psd_int = PSD(method="integration", phi=phi)
         psd_int.fit(ds)
 
         # Should be approximately equal (within numerical precision)
@@ -303,7 +326,6 @@ class TestPSD:
         ds, amplitude_true, phase_deg_true = synthetic_sine
 
         psd = PSD(
-            input_mode="grouped",
             method="matrix",
             phi=np.arange(0.0, 360.0, 15.0),
         )
@@ -333,7 +355,6 @@ class TestPSD:
         ds, _, _, _ = grouped_3d
 
         psd = PSD(
-            input_mode="grouped",
             method="matrix",
             phi=np.arange(0.0, 360.0, 15.0),
         )
@@ -351,7 +372,6 @@ class TestPSD:
         ds, _, _, _ = grouped_3d
 
         psd = PSD(
-            input_mode="grouped",
             method="matrix",
             phi=np.arange(0.0, 360.0, 15.0),
             phase_unit="degrees",
@@ -368,7 +388,6 @@ class TestPSD:
         ds, _, _, _ = grouped_3d
 
         psd = PSD(
-            input_mode="grouped",
             method="matrix",
             phi=np.arange(0.0, 360.0, 15.0),
             phase_unit="radians",
@@ -402,10 +421,7 @@ class TestPSD:
             x=Coord(np.arange(n_wavenumbers), title="wavenumber", units="cm^-1"),
         )
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra,
-            input_mode="raw",
-        )
+        psd = PSD(n_spectra_per_cycle=n_spectra)
         psd.fit(ds)
 
         # T should have time axis length = n_spectra
@@ -425,7 +441,7 @@ class TestPSD:
         """Test grouped 3D input preserves time coordinate."""
         ds, n_cycles, n_spectra, n_wavenumbers = grouped_3d
 
-        psd = PSD(input_mode="grouped")
+        psd = PSD()
         psd.fit(ds)
 
         # T should have time axis length = n_spectra
@@ -440,10 +456,7 @@ class TestPSD:
         """Test averaged 2D input preserves time coordinate."""
         ds, n_spectra, n_wavenumbers = averaged_2d
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra,
-            input_mode="averaged",
-        )
+        psd = PSD()
         psd.fit(ds)
 
         # T should have time axis length = n_spectra
@@ -465,10 +478,7 @@ class TestPSD:
             x=Coord(spectral_values, title="wavenumber", units="cm^-1"),
         )
 
-        psd = PSD(
-            n_spectra_per_cycle=n_spectra,
-            input_mode="raw",
-        )
+        psd = PSD(n_spectra_per_cycle=n_spectra)
         psd.fit(ds)
 
         # Check that spectral coordinate is preserved in all outputs
@@ -490,7 +500,7 @@ class TestPSD:
             x=Coord(spectral_values, title="wavenumber", units="cm^-1"),
         )
 
-        psd = PSD(input_mode="grouped")
+        psd = PSD()
         psd.fit(ds)
 
         # Check that spectral coordinate is preserved in all outputs
