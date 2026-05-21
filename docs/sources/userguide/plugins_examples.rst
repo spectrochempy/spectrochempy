@@ -14,9 +14,9 @@ example and use the recommended namespaced API:
 
 .. code-block:: python
 
-    from spectrochempy.iris import IRIS
     import spectrochempy as scp
 
+    analysis = scp.iris.IRIS()
     dataset = scp.nmr.read_topspin("path/to/fid")
     reactor = scp.cantera.PFR
 

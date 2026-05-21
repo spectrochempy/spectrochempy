@@ -4,7 +4,7 @@ NMR plugin for SpectroChemPy.
 
 This package is the home for NMR-specific readers and tools that are useful in
 SpectroChemPy but should not live in the core package. It currently contributes
-the Bruker TopSpin reader, exposed as `scp.read_topspin(...)` and registered
+the Bruker TopSpin reader, exposed as `scp.nmr.read_topspin(...)` and registered
 under the reader name `topspin`.
 
 Future NMR readers or processing helpers can be added here without creating a

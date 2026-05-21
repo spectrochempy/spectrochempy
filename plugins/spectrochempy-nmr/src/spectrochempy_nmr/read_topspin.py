@@ -981,7 +981,7 @@ def read_topspin(*paths, **kwargs):
     --------
     Reading a single TopSpin file
 
-    >>> scp.read_topspin('irdata/topspin/1/pdata/1/1r')
+    >>> scp.nmr.read_topspin('irdata/topspin/1/pdata/1/1r')
     NDDataset: [float64] a.u. (shape: (y:1, x:16384))
 
     """

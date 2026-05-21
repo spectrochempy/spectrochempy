@@ -58,6 +58,22 @@ or directly:
 Once installed, plugins are discovered automatically. No explicit plugin
 loading call is required in user code.
 
+Inspect installed plugins
+=========================
+
+Use ``scp.plugins()`` to see which official plugins are installed and which
+plugin namespaces are available:
+
+.. code-block:: python
+
+    import spectrochempy as scp
+
+    scp.plugins()
+
+Use ``scp.plugins(verbose=True)`` to include lightweight package metadata such
+as versions. This inspection command reads entry-point and package metadata; it
+does not import optional plugin implementation modules.
+
 API convention
 ==============
 
@@ -67,9 +83,7 @@ The recommended form is namespaced:
 
     import spectrochempy as scp
 
-    from spectrochempy.iris import IRIS
-
-    analysis = IRIS()
+    analysis = scp.iris.IRIS()
     dataset = scp.nmr.read_topspin("path/to/fid")
     reactor = scp.cantera.PFR
 
@@ -99,10 +113,9 @@ spectroscopic adsorption and diffusion studies.
 .. code-block:: python
 
     import spectrochempy as scp
-    from spectrochempy.iris import IRIS
 
     kernel = dataset.iris.kernel_matrix(kernel_type="langmuir")
-    analysis = IRIS()
+    analysis = scp.iris.IRIS()
 
 NMR
 ---

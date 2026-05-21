@@ -16,9 +16,9 @@ global plugin-level workflows.  These functions do not operate on an existing
 Examples::
 
     scp.nmr.read_topspin(...)
+    scp.iris.IRIS(...)
     scp.iris.batch_iris(...)
-    scp.cantera.equilibrium(...)
-    scp.cantera.reactor_profile(...)
+    scp.cantera.PFR(...)
 
 The legacy alias ``scp.read_topspin(...)`` is kept as a compatibility layer for
 existing code.  When the NMR plugin is installed, it delegates through the
@@ -60,3 +60,16 @@ public policy should remain stable:
 * I/O, object creation, and global workflows belong at ``scp.<plugin>.*``.
 * Operations on an existing dataset belong at ``dataset.<plugin>.*``.
 * Legacy aliases are thin compatibility layers, not new primary APIs.
+
+Namespace conventions
+---------------------
+
+Official plugin namespaces should be short, stable, and domain-oriented. They
+represent the scientific or technical domain exposed to users, for example
+``scp.iris``, ``scp.nmr``, or ``scp.cantera``. Avoid creating a second namespace
+for the same domain unless there is a clear migration plan.
+
+Documentation and examples should prefer namespace APIs, such as
+``scp.iris.IRIS()`` or ``scp.cantera.PFR``, over root-level compatibility
+aliases such as ``scp.IRIS`` or ``scp.PFR``. Compatibility aliases may remain in
+tests when they intentionally protect old user code.
