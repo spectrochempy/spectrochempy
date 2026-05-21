@@ -174,11 +174,15 @@ def main() -> int:
     parser.add_argument("--event-name", default=os.environ.get("GITHUB_EVENT_NAME", ""))
     parser.add_argument("--ref-name", default=os.environ.get("GITHUB_REF_NAME", ""))
     parser.add_argument("--base-ref", default=os.environ.get("GITHUB_BASE_REF", ""))
-    parser.add_argument("--files", nargs="*", help="Explicit changed files for testing.")
+    parser.add_argument(
+        "--files", nargs="*", help="Explicit changed files for testing."
+    )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    files = args.files if args.files is not None else changed_files(args.base, args.head)
+    files = (
+        args.files if args.files is not None else changed_files(args.base, args.head)
+    )
     mode, targets, reason = select_targets(
         files,
         event_name=args.event_name,
