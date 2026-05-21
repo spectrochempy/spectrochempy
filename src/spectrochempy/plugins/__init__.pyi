@@ -35,5 +35,3 @@ from . import namespace
 from . import proxies
 from . import registries
 from . import registry
-
-def __call__(verbose: bool = False): ...
