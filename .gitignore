@@ -148,3 +148,13 @@ saved_pkglist.txt
 utils_analyses.md
 *.DDR
 *.HDR
+
+
+# Codex local config
+.codex/config.toml
+AGENTS.md
+
+# Codex runtime/cache
+.codex/cache/
+.codex/logs/
+.codex/tmp/

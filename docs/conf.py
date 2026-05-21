@@ -357,11 +357,15 @@ def _copy_example_tree(source: Path, destination: Path) -> None:
 
 
 def _plugin_gallery_manifests() -> list[Path]:
-    manifests = sorted((PROJECT / "plugins").glob("spectrochempy-*/examples/gallery.toml"))
+    manifests = sorted(
+        (PROJECT / "plugins").glob("spectrochempy-*/examples/gallery.toml")
+    )
 
     extra_manifests = os.environ.get("SCP_PLUGIN_GALLERY_MANIFESTS")
     if extra_manifests:
-        manifests.extend(Path(path) for path in extra_manifests.split(os.pathsep) if path)
+        manifests.extend(
+            Path(path) for path in extra_manifests.split(os.pathsep) if path
+        )
 
     return manifests
 
@@ -381,7 +385,9 @@ def _load_plugin_gallery_entries() -> list[dict[str, str]]:
                 {
                     "path": path,
                     "plugin": plugin.get("name", manifest.parent.parent.name),
-                    "plugin_title": plugin.get("title", plugin.get("name", manifest.parent.parent.name)),
+                    "plugin_title": plugin.get(
+                        "title", plugin.get("name", manifest.parent.parent.name)
+                    ),
                     "manifest": manifest,
                     "section": example.get("section", path),
                     "section_ref": example.get("section_ref", ""),
@@ -442,7 +448,9 @@ def _plugin_examples_table(entries: list[dict[str, str]]) -> str:
     else:
         lines.append("No plugin-dependent examples are currently registered.")
 
-    lines.extend(["", "See :ref:`plugins` for general plugin installation instructions.", ""])
+    lines.extend(
+        ["", "See :ref:`plugins` for general plugin installation instructions.", ""]
+    )
 
     return "\n".join(lines)
 
@@ -465,7 +473,9 @@ def _plugin_gallery_readme(entries: list[dict[str, str]]) -> str:
     return "\n".join(lines)
 
 
-def _write_plugin_gallery_readmes(staged_examples: Path, entries: list[dict[str, str]]) -> None:
+def _write_plugin_gallery_readmes(
+    staged_examples: Path, entries: list[dict[str, str]]
+) -> None:
     plugin_dir = staged_examples / "plugins"
     plugin_dir.mkdir(parents=True, exist_ok=True)
     (plugin_dir / "readme.rst").write_text(
@@ -488,7 +498,9 @@ def _write_plugin_gallery_readmes(staged_examples: Path, entries: list[dict[str,
         )
 
 
-def _stage_plugin_gallery_examples(staged_examples: Path, entries: list[dict[str, str]]) -> None:
+def _stage_plugin_gallery_examples(
+    staged_examples: Path, entries: list[dict[str, str]]
+) -> None:
     plugin_dir = staged_examples / "plugins"
     for entry in entries:
         source = entry["manifest"].parent / entry["path"]
