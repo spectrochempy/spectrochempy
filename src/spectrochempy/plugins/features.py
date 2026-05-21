@@ -15,6 +15,8 @@ through the plugin system; third-party plugins must not be listed here.
 
 from __future__ import annotations
 
+from spectrochempy.plugins.deps import MissingPluginError
+
 KNOWN_PLUGIN_READERS = {
     "topspin": ("nmr", "spectrochempy-nmr", "spectrochempy[nmr]"),
 }
@@ -23,6 +25,27 @@ KNOWN_PLUGIN_NAMESPACES = {
     "nmr": ("spectrochempy-nmr", "spectrochempy[nmr]"),
     "iris": ("spectrochempy-iris", "spectrochempy[iris]"),
     "cantera": ("spectrochempy-cantera", "spectrochempy[cantera]"),
+}
+
+OFFICIAL_PLUGINS = {
+    "iris": {
+        "title": "IRIS plugin",
+        "package": "spectrochempy-iris",
+        "extra": "spectrochempy[iris]",
+        "namespace": "iris",
+    },
+    "nmr": {
+        "title": "NMR plugin",
+        "package": "spectrochempy-nmr",
+        "extra": "spectrochempy[nmr]",
+        "namespace": "nmr",
+    },
+    "cantera": {
+        "title": "Cantera plugin",
+        "package": "spectrochempy-cantera",
+        "extra": "spectrochempy[cantera]",
+        "namespace": "cantera",
+    },
 }
 
 
@@ -47,8 +70,6 @@ def plugin_reader_missing_stub(reader_name: str):
     feature = f"read_{reader_name}"
 
     def _missing_plugin_reader(*args, **kwargs):
-        from spectrochempy.plugins.deps import MissingPluginError
-
         raise MissingPluginError(
             feature,
             plugin_name=plugin_name,
