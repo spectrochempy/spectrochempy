@@ -405,6 +405,15 @@ def _gallery_ref_for_example(path: str) -> str:
     return f"sphx_glr_{ref_path.replace('/', '_')}"
 
 
+def _gallery_thumbnail_for_example(path: str) -> str:
+    source_path = Path(path)
+    section = source_path.parts[0]
+    generated_path = Path(example_generated_dir, f"auto_examples_{section}")
+    example_dir = generated_path.joinpath(*source_path.parts[1:-1])
+    thumbnail = f"sphx_glr_{source_path.stem}_thumb.png"
+    return example_dir.joinpath("images", "thumb", thumbnail).as_posix()
+
+
 def _section_cell(section: str, section_ref: str) -> str:
     if section_ref:
         return f":ref:`{section} <{section_ref}>`"
@@ -512,7 +521,12 @@ def _stage_plugin_gallery_examples(
         stem = re.sub(r"[^0-9A-Za-z_]+", "_", stem)
         destination = plugin_dir / entry["plugin"] / f"{stem}.py"
         destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, destination)
+        content = source.read_text(encoding="utf-8")
+        thumbnail_path = _gallery_thumbnail_for_example(entry["path"])
+        destination.write_text(
+            f"# sphinx_gallery_thumbnail_path = {thumbnail_path!r}\n{content}",
+            encoding="utf-8",
+        )
 
 
 def _stage_gallery_examples() -> Path:
