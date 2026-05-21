@@ -164,12 +164,25 @@ jobs:
         run: |
           python .github/workflows/scripts/ci_diagnostics.py environment
 
+      - name: Select pytest targets
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          python .github/workflows/scripts/select_test_targets.py \
+            --base "${{ github.event.pull_request.base.sha || github.event.before || '' }}" \
+            --head "${{ github.sha }}" \
+            --event-name "${{ github.event_name }}" \
+            --ref-name "${{ github.ref_name }}" \
+            --base-ref "${{ github.base_ref }}"
+
       - name: Test with coverage
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           set -o pipefail
           start=$SECONDS
-          coverage run --source=spectrochempy -m pytest tests -s -ra --durations=10 | tee pytest.log
+          echo "pytest selection: ${SCPY_TEST_SELECTION:-full}"
+          echo "pytest selection reason: ${SCPY_TEST_SELECTION_REASON:-not provided}"
+          echo "pytest targets: ${SCPY_TEST_TARGETS:-tests}"
+          coverage run --source=spectrochempy -m pytest ${SCPY_TEST_TARGETS:-tests} -s -ra --durations=10 | tee pytest.log
           status=${PIPESTATUS[0]}
           duration=$((SECONDS - start))
           echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
