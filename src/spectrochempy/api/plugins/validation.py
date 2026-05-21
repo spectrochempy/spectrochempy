@@ -18,6 +18,8 @@ import importlib.util
 import logging
 from typing import Any
 
+from packaging.version import parse
+
 from spectrochempy.api.plugins.constants import CORE_PLUGIN_API_VERSION
 
 logger = logging.getLogger(__name__)
@@ -94,8 +96,9 @@ def check_plugin_contributions(plugin: Any) -> list[str]:
     Inspects declarative hooks (``register_readers``,
     ``register_writers``, ``register_processors``,
     ``register_visualizers``, ``register_analyses``,
-    ``register_simulations``, ``register_accessors``) without executing
-    them. This intentionally avoids hook side effects during validation.
+    ``register_simulations``, ``register_accessors``,
+    ``register_unit_contexts``) without executing them. This intentionally
+    avoids hook side effects during validation.
 
     Parameters
     ----------
@@ -119,6 +122,7 @@ def check_plugin_contributions(plugin: Any) -> list[str]:
         "register_analyses",
         "register_simulations",
         "register_accessors",
+        "register_unit_contexts",
     ):
         if not hasattr(plugin, hook_name):
             continue
@@ -252,7 +256,9 @@ def _get_plugin_metadata(plugin: Any) -> dict[str, Any]:
 def _is_compatible_api_version(plugin_api: str, core_api: str) -> bool:
     """Compare major version numbers only."""
     try:
-        return plugin_api.split(".")[0] == core_api.split(".")[0]
+        return (
+            plugin_api.split(".", maxsplit=1)[0] == core_api.split(".", maxsplit=1)[0]
+        )
     except (ValueError, IndexError):
         return False
 
@@ -260,8 +266,6 @@ def _is_compatible_api_version(plugin_api: str, core_api: str) -> bool:
 def _satisfies_min_version(current: str, minimum: str) -> bool:
     """PEP 440 version check: *current* >= *minimum*."""
     try:
-        from packaging.version import parse
-
         return parse(current) >= parse(minimum)
     except Exception:
         return False

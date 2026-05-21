@@ -94,6 +94,21 @@ class DeclarativeProcessorPlugin:
         ]
 
 
+class DeclarativeUnitContextPlugin:
+    name = "decl-unit-context"
+    version = "0.2.0"
+    PLUGIN_API_VERSION = "1.0"
+
+    def register_unit_contexts(self) -> list[dict]:
+        return [
+            {
+                "name": "my-context",
+                "func": lambda value: value,
+                "description": "Set up a custom unit context",
+            }
+        ]
+
+
 class DeclarativeAccessorPlugin:
     name = "decl-accessor"
     version = "0.2.0"
@@ -277,6 +292,17 @@ def test_declarative_processors():
     assert proc["description"] == "Smooth data"
 
 
+def test_declarative_unit_contexts():
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeUnitContextPlugin()
+    pm.register(plugin)
+
+    setup = registry.get_unit_context("my-context")
+    assert setup is not None
+    assert setup("value") == "value"
+
+
 def test_declarative_visualizers():
     registry = PluginRegistry()
     pm = PluginManager(registry=registry)
@@ -361,6 +387,16 @@ def test_declarative_processors_routed_to_processing():
     pm.register(plugin)
 
     assert registry.processing.get_processor("smooth") is not None
+
+
+def test_declarative_unit_contexts_routed_to_processing():
+    """register_unit_contexts targets registry.processing."""
+    registry = PluginRegistry()
+    pm = PluginManager(registry=registry)
+    plugin = DeclarativeUnitContextPlugin()
+    pm.register(plugin)
+
+    assert registry.processing.get_unit_context("my-context") is not None
 
 
 def test_declarative_visualizers_routed_to_visualization():

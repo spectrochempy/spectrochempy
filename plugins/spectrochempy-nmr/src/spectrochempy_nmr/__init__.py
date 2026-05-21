@@ -16,6 +16,13 @@ def _resolve_read_topspin():
     return read_topspin
 
 
+def _resolve_set_nmr_context():
+    """Lazily import and return the NMR unit-context setup function."""
+    from .units import set_nmr_context  # noqa: PLC0415
+
+    return set_nmr_context
+
+
 class NMRPlugin(SpectroChemPyPlugin):
     """NMR plugin, currently providing the Bruker TopSpin reader."""
 
@@ -48,6 +55,19 @@ class NMRPlugin(SpectroChemPyPlugin):
             },
         ]
 
+    def register_unit_contexts(self) -> list[dict]:
+        """Declare the NMR ppm/frequency Pint context."""
+        return [
+            {
+                "name": "nmr",
+                "func": lazy_proxy(
+                    _resolve_set_nmr_context,
+                    name="spectrochempy.nmr.set_nmr_context",
+                ),
+                "description": "NMR ppm/frequency conversion context",
+            },
+        ]
+
 
 # ------------------------------------------------------------------
 # Lazy module-level access for public API
@@ -59,9 +79,13 @@ def __getattr__(name: str):
         from .read_topspin import read_topspin  # noqa: PLC0415
 
         return read_topspin
+    if name == "set_nmr_context":
+        from .units import set_nmr_context  # noqa: PLC0415
+
+        return set_nmr_context
     msg = f"module {__name__!r} has no attribute {name!r}"
     raise AttributeError(msg)
 
 
 def __dir__() -> list[str]:
-    return ["NMRPlugin", "read_topspin"]
+    return ["NMRPlugin", "read_topspin", "set_nmr_context"]

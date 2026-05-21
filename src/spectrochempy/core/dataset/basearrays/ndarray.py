@@ -19,9 +19,10 @@ import traitlets as tr
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import Unit
-from spectrochempy.core.units import set_nmr_context
 from spectrochempy.core.units import ur
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.plugins import manager as manager_module
+from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.utils._logging import error_
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils.constants import DEFAULT_DIM_NAME
@@ -43,6 +44,23 @@ from spectrochempy.utils.typeutils import is_sequence
 # Printing settings
 # --------------------------------------------------------------------------------------
 numpyprintoptions()
+
+
+def _setup_nmr_unit_context(larmor) -> None:
+    """Configure the plugin-provided NMR unit context."""
+    plugin_manager = manager_module.plugin_manager
+    setup_context = plugin_manager.registry.get_unit_context("nmr")
+    if setup_context is None:
+        plugin_manager.load_plugin("nmr")
+        setup_context = plugin_manager.registry.get_unit_context("nmr")
+
+    if setup_context is None:
+        raise MissingPluginError(
+            "NMR ppm/frequency unit conversion",
+            "spectrochempy-nmr",
+        )
+
+    setup_context(larmor)
 
 
 # ======================================================================================
@@ -1970,7 +1988,7 @@ class NDArray(tr.HasTraits):
             try:
                 # noinspection PyUnresolvedReferences
                 if new._implements("Coord") and new.larmor:
-                    set_nmr_context(new.larmor)
+                    _setup_nmr_unit_context(new.larmor)
                     with ur.context("nmr"):
                         new = self._unittransform(new, units)
 

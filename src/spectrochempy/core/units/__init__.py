@@ -10,7 +10,6 @@ __all__ = [
     "Unit",
     "Quantity",
     "ur",
-    "set_nmr_context",  # TODO put this in the nmr plugin
     "DimensionalityError",
 ]
 
@@ -35,7 +34,6 @@ if pint_version < 24:
 if pint_version < 24:
     from functools import wraps
 
-    from pint import Context
     from pint import DimensionalityError
     from pint import Quantity
     from pint import Unit
@@ -320,82 +318,37 @@ if pint_version < 24:
 
     # utilities
 
-    # Context for NMR
+    # Deprecated compatibility shim for the NMR plugin
     # --------------------------------------------------------------------------------------
     def set_nmr_context(larmor):
         """
-        Set a NMR context relative to the given Larmor frequency.
+        Delegate the deprecated NMR context helper to the NMR plugin.
 
-        Parameters
-        ----------
-        larmor : `Quantity` or `float`
-            The Larmor frequency of the current nucleus.
-            If it is not a quantity it is assumed to be given in MHz.
-
-        Examples
-        --------
-        First we set the NMR context,
-
-        >>> from spectrochempy.core.units import ur, set_nmr_context
-        >>>
-        >>> set_nmr_context(104.3 * ur.MHz)
-
-        then, we can use the context as follow
-
-        >>> fhz = 10000 * ur.Hz
-        >>> with ur.context('nmr'):
-        ...     fppm = fhz.to('ppm')
-        >>> print("{:~.3f}".format(fppm))
-        95.877 ppm
-
-        or in the opposite direction
-
-        >>> with ur.context('nmr'):
-        ...     fhz = fppm.to('kHz')
-        >>> print("{:~.3f}".format(fhz))
-        10.000 kHz
-
-        Now we update the context :
-
-        >>> with ur.context('nmr', larmor=100. * ur.MHz):
-        ...     fppm = fhz.to('ppm')
-        >>> print("{:~.3f}".format(fppm))
-        100.000 ppm
-
-        >>> set_nmr_context(75 * ur.MHz)
-        >>> fhz = 10000 * ur.Hz
-        >>> with ur.context('nmr'):
-        ...     fppm = fhz.to('ppm')
-        >>> print("{:~.3f}".format(fppm))
-        133.333 ppm
-
+        Use ``spectrochempy_nmr.units.set_nmr_context`` or
+        ``spectrochempy.nmr.set_nmr_context`` instead.
         """
-        if not isinstance(larmor, U_.Quantity):
-            larmor = larmor * U_.MHz
-
-        if "nmr" not in list(ur._contexts.keys()):
-            c = Context("nmr", defaults={"larmor": larmor})
-
-            c.add_transformation(
-                "[]",
-                "[frequency]",
-                lambda ur, x, **kwargs: x * kwargs.get("larmor") / 1.0e6,
+        warnings.warn(
+            "spectrochempy.core.units.set_nmr_context is deprecated; "
+            "use spectrochempy_nmr.units.set_nmr_context instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        try:
+            from spectrochempy_nmr.units import (  # noqa: PLC0415
+                set_nmr_context as _set_nmr_context,
             )
-            c.add_transformation(
-                "[frequency]",
-                "[]",
-                lambda U_, x, **kwargs: x * 1.0e6 / kwargs.get("larmor"),
-            )
-            U_.add_context(c)
+        except ImportError as exc:
+            from spectrochempy.plugins.deps import MissingPluginError  # noqa: PLC0415
 
-        else:
-            c = U_._contexts["nmr"]
-            c.defaults["larmor"] = larmor
+            raise MissingPluginError(
+                "NMR ppm/frequency unit conversion",
+                "spectrochempy-nmr",
+            ) from exc
+        return _set_nmr_context(larmor)
 
 else:  # pint version >= 24
     from functools import wraps
 
-    from pint import Context
     from pint import DimensionalityError
     from pint import Unit
     from pint import UnitRegistry
@@ -601,77 +554,33 @@ else:  # pint version >= 24
     ur.enable_contexts("spectroscopy", "boltzmann", "chemistry")
 
     ###################################################################################
-    # Context for NMR
+    # Deprecated compatibility shim for the NMR plugin
     ###################################################################################
     def set_nmr_context(larmor):
         """
-        Set a NMR context relative to the given Larmor frequency.
+        Delegate the deprecated NMR context helper to the NMR plugin.
 
-        Parameters
-        ----------
-        larmor : `Quantity` or `float`
-            The Larmor frequency of the current nucleus.
-            If it is not a quantity it is assumed to be given in MHz.
-
-        Examples
-        --------
-        First we set the NMR context,
-
-        >>> from spectrochempy.core.units import ur, set_nmr_context
-        >>>
-        >>> set_nmr_context(104.3 * ur.MHz)
-
-        then, we can use the context as follow
-
-        >>> fhz = 10000 * ur.Hz
-        >>> with ur.context('nmr'):
-        ...     fppm = fhz.to('ppm')
-        >>> print("{:~.3f}".format(fppm))
-        95.877 ppm
-
-        or in the opposite direction
-
-        >>> with ur.context('nmr'):
-        ...     fhz = fppm.to('kHz')
-        >>> print("{:~.3f}".format(fhz))
-        10.000 kHz
-
-        Now we update the context :
-
-        >>> with ur.context('nmr', larmor=100. * ur.MHz):
-        ...     fppm = fhz.to('ppm')
-        >>> print("{:~.3f}".format(fppm))
-        100.000 ppm
-
-        >>> set_nmr_context(75 * ur.MHz)
-        >>> fhz = 10000 * ur.Hz
-        >>> with ur.context('nmr'):
-        ...     fppm = fhz.to('ppm')
-        >>> print("{:~.3f}".format(fppm))
-        133.333 ppm
-
+        Use ``spectrochempy_nmr.units.set_nmr_context`` or
+        ``spectrochempy.nmr.set_nmr_context`` instead.
         """
-        if not isinstance(larmor, ur.Quantity):
-            larmor = larmor * ur.MHz
-
-        if "nmr" not in list(ur._contexts.keys()):
-            c = Context("nmr", defaults={"larmor": larmor})
-
-            c.add_transformation(
-                "[]",
-                "[frequency]",
-                lambda ur, x, **kwargs: x * kwargs.get("larmor") / 1.0e6,
+        warnings.warn(
+            "spectrochempy.core.units.set_nmr_context is deprecated; "
+            "use spectrochempy_nmr.units.set_nmr_context instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        try:
+            from spectrochempy_nmr.units import (  # noqa: PLC0415
+                set_nmr_context as _set_nmr_context,
             )
-            c.add_transformation(
-                "[frequency]",
-                "[]",
-                lambda U_, x, **kwargs: x * 1.0e6 / kwargs.get("larmor"),
-            )
-            ur.add_context(c)
+        except ImportError as exc:
+            from spectrochempy.plugins.deps import MissingPluginError  # noqa: PLC0415
 
-        else:
-            c = ur._contexts["nmr"]
-            c.defaults["larmor"] = larmor
+            raise MissingPluginError(
+                "NMR ppm/frequency unit conversion",
+                "spectrochempy-nmr",
+            ) from exc
+        return _set_nmr_context(larmor)
 
 
 ########################################################################################

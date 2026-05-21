@@ -154,6 +154,25 @@ class SpectroChemPyHookSpec:
         "no accessor contribution".
         """
 
+    @hookspec
+    def register_unit_contexts(self) -> list[dict]:
+        """
+        Return Pint unit-context contributions declared by the plugin.
+
+        Expected return format::
+
+            [
+                {
+                    "name": "nmr",
+                    "func": set_nmr_context,
+                    "description": "NMR ppm/frequency conversion context",
+                },
+            ]
+
+        Returning ``None`` or an empty list is treated as
+        "no unit-context contribution".
+        """
+
     # ------------------------------------------------------------------
     # Analysis hooks
     # ------------------------------------------------------------------
