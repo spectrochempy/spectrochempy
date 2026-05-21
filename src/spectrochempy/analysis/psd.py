@@ -29,8 +29,8 @@ class PSD(AnalysisConfigurable):
     PSD (Phase-Sensitive Detection) for demodulating spectroscopic data.
 
     Supports two computation methods:
-    1. Matrix transform method: demodulated = np.dot(T, A)
-    2. Explicit integration method: PSD(phi, nu) = 2/T * ∫ D(t,nu) * sin(k*ω*t + phi) dt
+    1. Matrix transform method: A_demodulated = T · A_averaged
+    2. Explicit integration method: A_demodulated (φ, λ) = (2/period) ∫ A_averaged(t, λ) · sin(k·ω·t + φ) dt
 
     Parameters
     ----------
@@ -91,14 +91,14 @@ class PSD(AnalysisConfigurable):
 
     **PSD equation (matrix method):**
 
-        A = T · D_averaged
+        A_demodulated = T · A_averaged
 
-    where D_averaged has shape (n_spectra_per_cycle, n_wavenumbers),
+    where A_averaged has shape (n_spectra_per_cycle, n_wavenumbers),
     averaged across all cycles.
 
     **PSD equation (integration method):**
 
-        PSD(φ, λ) = (2/period) ∫ D_averaged(t, λ) · sin(k·ω·t + φ) dt
+        A_demodulated (φ, λ) = (2/period) ∫ A_averaged(t, λ) · sin(k·ω·t + φ) dt
 
     where φ is the demodulation phase angle, λ is wavenumber,
     and t is normalized time within one modulation period.
