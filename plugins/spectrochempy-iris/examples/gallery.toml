@@ -1,0 +1,7 @@
+[plugin]
+name = "spectrochempy-iris"
+
+[[examples]]
+path = "analysis/a_decomposition/plot_iris_intro.py"
+section = "Decomposition"
+section_ref = "examples-analysis-decomposition-index"
