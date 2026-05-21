@@ -4,22 +4,9 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
-# ruff: noqa
+import lazy_loader as _lazy_loader
 
-__all__ = [
-    "_base",
-    "crossdecomposition",
-    "curvefitting",
-    "decomposition",
-    "integration",
-    "kinetic",
-    "peakfinding",
-]
-
-from . import _base
-from . import crossdecomposition
-from . import curvefitting
-from . import decomposition
-from . import integration
-from . import kinetic
-from . import peakfinding
+# --------------------------------------------------------------------------------------
+# Lazy loading of sub-packages
+# --------------------------------------------------------------------------------------
+__getattr__, __dir__, __all__ = _lazy_loader.attach_stub(__name__, __file__)
