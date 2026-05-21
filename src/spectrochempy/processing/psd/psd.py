@@ -100,6 +100,9 @@ class PSD(BaseConfigurable):
         Phase angles for demodulation (in degrees).
     integration_rule : {"riemann", "trapezoid", "simpson"}, default="trapezoid"
         Integration rule for numerical integration weights.
+        ``"riemann"`` uses a right-endpoint rectangular rule over n equal
+        subintervals of [0, 1], sampling at ``t = (i+1)/n``. This rule
+        gives exact results for pure sinusoids at any n.
     phase_unit : {"degrees", "radians"}, default="degrees"
         Unit for phase output.
 
@@ -108,8 +111,9 @@ class PSD(BaseConfigurable):
     - Requires phi to contain 0° and 90° for in_phase/quadrature extraction.
     - Matrix demodulation is default and faster.
     - Integration demodulation uses explicit numerical integration with a configurable integration rule.
-    - The ``"riemann"`` rule assumes uniform sampling (equal time steps); for
-      irregular time coordinates use ``"trapezoid"`` or ``"simpson"``.
+    - The ``"riemann"`` rule uses a right-endpoint rectangular grid ``t = (i+1)/n``
+      independent of the actual time coordinate; for irregular time coordinates
+      use ``"trapezoid"`` or ``"simpson"``.
     - Constant offsets (DC) do not affect the PSD result because sinusoidal
       demodulation functions integrate to zero over one complete modulation
       period. No explicit mean subtraction is necessary.
@@ -171,37 +175,8 @@ class PSD(BaseConfigurable):
 
     phi = tr.Union(
         (tr.List(), Array()),
-        default_value=None,
         help="Phase angles for demodulation (in degrees).",
     ).tag(config=True)
-
-    # Default phi values as tuple (to avoid array comparison issues)
-    _default_phi = (
-        0.0,
-        15.0,
-        30.0,
-        45.0,
-        60.0,
-        75.0,
-        90.0,
-        105.0,
-        120.0,
-        135.0,
-        150.0,
-        165.0,
-        180.0,
-        195.0,
-        210.0,
-        225.0,
-        240.0,
-        255.0,
-        270.0,
-        285.0,
-        300.0,
-        315.0,
-        330.0,
-        345.0,
-    )
 
     integration_rule = tr.Enum(
         ["riemann", "trapezoid", "simpson"],
@@ -228,6 +203,14 @@ class PSD(BaseConfigurable):
         )
 
     # ----------------------------------------------------------------------------------
+    # Default trait values
+    # ----------------------------------------------------------------------------------
+    @tr.default("phi")
+    def _default_phi(self):
+        """Return a fresh array of default demodulation phase angles."""
+        return np.arange(0.0, 360.0, 15.0)
+
+    # ----------------------------------------------------------------------------------
     # Validation methods
     # ----------------------------------------------------------------------------------
     @tr.validate("harmonic")
@@ -247,8 +230,6 @@ class PSD(BaseConfigurable):
     @tr.validate("phi")
     def _validate_phi(self, proposal):
         value = proposal.value
-        if value is None:
-            return None
         phi_array = np.asarray(value)
         if phi_array.ndim != 1:
             raise ValueError(
@@ -260,10 +241,8 @@ class PSD(BaseConfigurable):
     # Helper methods
     # ----------------------------------------------------------------------------------
     def _get_phi(self):
-        """Get phi values, using default if not set."""
-        if self.phi is None:
-            return np.array(self._default_phi)
-        return np.asarray(self.phi)
+        """Return phi values as a float numpy array."""
+        return np.asarray(self.phi, dtype=float)
 
     # ----------------------------------------------------------------------------------
     # Private methods
@@ -415,11 +394,16 @@ class PSD(BaseConfigurable):
         integration_rule = self.integration_rule.lower()
         harmonic = self.harmonic
 
-        # Normalized time from 0 to 1
-        # Use the raw time values (magnitude) so that matrix and integration
-        # methods share the exact same grid and agree numerically.
+        # Normalized time grid depends on the integration rule.
+        # Riemann uses a right-endpoint rectangular rule over n equal subintervals
+        # of [0, 1], sampling at t = (i+1)/n for i = 0..n-1.
+        # Trapezoid and Simpson use the coordinate-derived grid spanning [0, 1].
         t_raw = np.asarray(time_coord.magnitude)
-        if len(t_raw) > 1:
+
+        if integration_rule == "riemann":
+            # Right-endpoint rectangular rule: t = (i+1)/n for i = 0..n-1
+            t_norm = (np.arange(n) + 1) / n
+        elif len(t_raw) > 1:
             period = t_raw[-1] - t_raw[0]
             if period == 0:
                 raise ValueError(
@@ -464,7 +448,7 @@ class PSD(BaseConfigurable):
             # h = 1/(n-1);  scaling = 2 * h / 3 = 2/(3*(n-1))
             scaling = 2.0 / (3.0 * (n - 1))
         else:
-            # riemann: h = 1/n;  scaling = 2 * h = 2/n
+            # riemann: right-endpoint rectangular rule, h = 1/n;  scaling = 2 * h = 2/n
             scaling = 2.0 / n
 
         T_data = scaling * w * np.sin(2.0 * np.pi * harmonic * t_norm_2d + phi_rad)
@@ -524,6 +508,7 @@ class PSD(BaseConfigurable):
         phi = self._get_phi()
         n_phi = len(phi)
         harmonic = self.harmonic
+        integration_rule = self.integration_rule.lower()
 
         # Get time coordinate data
         time_data = time_coord_data
@@ -541,9 +526,13 @@ class PSD(BaseConfigurable):
         else:
             T_period = 1.0
 
-        # Normalized relative time: t_rel = 0 at start, t_rel = 1 at end of period.
-        # This ensures matrix and integration methods agree regardless of absolute origin.
-        t_rel = (time_data - time_data[0]) / T_period
+        # Normalized time grid depends on the integration rule.
+        # Riemann uses a right-endpoint rectangular rule: t = (i+1)/n.
+        # Trapezoid and Simpson use the coordinate-derived grid.
+        if integration_rule == "riemann":
+            t_norm = (np.arange(n) + 1) / n
+        else:
+            t_norm = (time_data - time_data[0]) / T_period
 
         # Convert phi to radians
         phi_rad = phi * np.pi / 180.0  # Shape: (n_phi,)
@@ -555,18 +544,17 @@ class PSD(BaseConfigurable):
 
         # angle: (n_phi, n_spectra)
         angle = (
-            harmonic * 2.0 * np.pi * t_rel + phi_rad[:, np.newaxis]
+            harmonic * 2.0 * np.pi * t_norm + phi_rad[:, np.newaxis]
         )  # (n_phi, n_spectra)
         # integrand: (n_phi, n_spectra, n_wavenumbers)
         integrand = A[np.newaxis, :, :] * np.sin(angle)[:, :, np.newaxis]
 
         # Integrate over spectra dimension (axis=1)
-        integration_rule = self.integration_rule.lower()
         if integration_rule == "simpson":
             psd = (2.0 / T_period) * simpson(integrand, time_data, axis=1)
         elif integration_rule == "riemann":
-            # Uniform rectangular rule: step = T_period / n
-            # Matches the matrix-method scaling of 2/n.
+            # Right-endpoint rectangular rule: sum * (T_period / n)
+            # Combined with global factor (2 / T_period) gives scaling 2/n.
             psd = (2.0 / T_period) * np.sum(integrand, axis=1) * (T_period / n)
         else:  # trapezoid
             psd = (2.0 / T_period) * np.trapezoid(integrand, time_data, axis=1)
