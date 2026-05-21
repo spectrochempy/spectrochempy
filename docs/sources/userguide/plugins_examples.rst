@@ -5,9 +5,9 @@ Plugin-dependent Examples
 ==========================
 
 SpectroChemPy keeps one central gallery, organized by scientific topic rather
-than by package internals. Plugin-dependent examples remain visible in their
-natural sections, such as decomposition, simulation, import/export, or NMR
-processing.
+than by package internals. Plugin-dependent examples are maintained by the
+plugin that provides the feature, then staged into their natural gallery
+sections, such as decomposition, simulation, import/export, or NMR processing.
 
 When an example needs an official plugin, it should say so near the top of the
 example and use the recommended namespaced API:
@@ -27,8 +27,9 @@ Plugin-dependent examples should use short, consistent notes such as:
     Requires the official spectrochempy-nmr plugin.
     Install with: pip install spectrochempy[nmr]
 
-The current list of plugin-dependent examples is maintained in
-:ref:`plugin-examples-list`.
+Official plugins declare their gallery examples in an ``examples/gallery.toml``
+manifest. The current list of plugin-dependent examples is generated from
+these manifests in :ref:`plugin-examples-list`.
 
 This convention keeps the beginner path uncluttered while still making
 specialized workflows easy to find.

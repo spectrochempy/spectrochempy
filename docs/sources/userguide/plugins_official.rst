@@ -140,5 +140,7 @@ Examples and gallery convention
 ===============================
 
 Examples remain organized by scientific topic in the central SpectroChemPy
-gallery. Plugin-dependent examples should be clearly marked with their required
-plugin, but they do not need a separate plugin-only gallery.
+gallery. Plugin-dependent examples live with the plugin source and are staged
+into the central gallery from the plugin ``examples/gallery.toml`` manifest.
+They should be clearly marked with their required plugin, but they do not need
+a separate plugin-only gallery.
