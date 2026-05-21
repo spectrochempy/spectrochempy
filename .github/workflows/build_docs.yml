@@ -165,6 +165,20 @@ jobs:
             echo "build_subdir=build/branch_preview" >> "$GITHUB_OUTPUT"
           fi
 
+      # ---------- restore reusable Sphinx/Sphinx-Gallery outputs for previews ----------
+      - name: Restore documentation build cache
+        if: steps.preview.outputs.is_preview == 'true'
+        uses: actions/cache@v5
+        with:
+          path: |
+            build/branch_preview/~doctrees
+            docs/sources/gettingstarted/examples/gallery
+          key: >-
+            ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-${{ hashFiles('pyproject.toml', 'docs/conf.py', 'docs/make.py', 'docs/sources/**/*.rst', 'docs/sources/**/*.py', 'docs/sources/**/*.ipynb', 'src/spectrochempy/examples/**/*.py', 'plugins/**/examples/**/*.py', 'plugins/**/examples/gallery.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-
+            ${{ runner.os }}-docs-
+
       # ---------- clone gh-pages (preserve existing content) ----------
       - name: Clone gh-pages branch
         run: |

@@ -123,6 +123,20 @@ jobs:
           echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
           echo "PYTHONUTF8=1" >> $GITHUB_ENV
 
+      - name: Restore test data and runtime caches
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.spectrochempy/testdata
+            ~/.cache/matplotlib
+            .pytest_cache
+          key: >-
+            ${{ runner.os }}-py${{ matrix.pythonVersion }}-test-runtime-${{ hashFiles('src/spectrochempy/application/testdata.py', 'tests/conftest.py', 'pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-py${{ matrix.pythonVersion }}-test-runtime-
+            ${{ runner.os }}-test-runtime-
+
       - name: Install spectrochempy
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
