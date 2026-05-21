@@ -1,5 +1,6 @@
 [plugin]
 name = "spectrochempy-iris"
+title = "IRIS plugin"
 
 [[examples]]
 path = "analysis/a_decomposition/plot_iris_intro.py"

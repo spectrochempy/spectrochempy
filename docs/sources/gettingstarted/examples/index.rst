@@ -25,4 +25,3 @@ in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>
    gallery/auto_examples_analysis/index
    gallery/auto_examples_processing/index
    gallery/auto_examples_plugins/index
-   plugin_examples

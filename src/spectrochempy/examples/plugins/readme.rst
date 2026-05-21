@@ -8,8 +8,9 @@ This section contains examples that require optional SpectroChemPy plugins,
 including both official plugins (``spectrochempy-iris``, ``spectrochempy-nmr``,
 ``spectrochempy-cantera``) and third-party plugins.
 
-See the :ref:`plugin-examples-list` page for a complete listing of all
-plugin-dependent examples.
+When the SpectroChemPy documentation is built, this page is completed from
+``examples/gallery.toml`` manifests provided by bundled plugins or listed in
+``SCP_PLUGIN_GALLERY_MANIFESTS``.
 
 .. note::
 
@@ -19,5 +20,5 @@ plugin-dependent examples.
    :ref:`NMR processing <examples-processing-nmr-index>`, etc.), so you can
    browse by scientific topic or filter by required plugin.
 
-   Third-party plugins can add their own examples here by placing a
-   ``plot_*.py`` file in a subdirectory of this folder.
+   Third-party plugins can add their own examples by providing an
+   ``examples/gallery.toml`` manifest.

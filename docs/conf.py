@@ -8,6 +8,7 @@
 
 import inspect
 import os
+import re
 import shutil
 import sys
 import tomllib
@@ -380,6 +381,8 @@ def _load_plugin_gallery_entries() -> list[dict[str, str]]:
                 {
                     "path": path,
                     "plugin": plugin.get("name", manifest.parent.parent.name),
+                    "plugin_title": plugin.get("title", plugin.get("name", manifest.parent.parent.name)),
+                    "manifest": manifest,
                     "section": example.get("section", path),
                     "section_ref": example.get("section_ref", ""),
                 }
@@ -402,11 +405,10 @@ def _section_cell(section: str, section_ref: str) -> str:
     return section
 
 
-def _write_plugin_examples_index(entries: list[dict[str, str]]) -> None:
+def _plugin_examples_table(entries: list[dict[str, str]]) -> str:
     lines = [
         ".. _plugin-examples-list:",
         "",
-        "==========================",
         "Examples requiring plugins",
         "==========================",
         "",
@@ -442,10 +444,63 @@ def _write_plugin_examples_index(entries: list[dict[str, str]]) -> None:
 
     lines.extend(["", "See :ref:`plugins` for general plugin installation instructions.", ""])
 
-    (GETTINGSTARTED / "examples" / "plugin_examples.rst").write_text(
-        "\n".join(lines),
+    return "\n".join(lines)
+
+
+def _plugin_gallery_readme(entries: list[dict[str, str]]) -> str:
+    lines = [
+        ".. _examples-plugins-index:",
+        "",
+        "###############################",
+        "Plugin-dependent functionality",
+        "###############################",
+        "",
+        "This section contains examples that require optional SpectroChemPy plugins.",
+        "Official plugin examples also appear in their respective scientific sections,",
+        "so you can browse either by topic or by plugin.",
+        "",
+        _plugin_examples_table(entries),
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def _write_plugin_gallery_readmes(staged_examples: Path, entries: list[dict[str, str]]) -> None:
+    plugin_dir = staged_examples / "plugins"
+    plugin_dir.mkdir(parents=True, exist_ok=True)
+    (plugin_dir / "readme.rst").write_text(
+        _plugin_gallery_readme(entries),
         encoding="utf-8",
     )
+
+    plugins = {}
+    for entry in entries:
+        plugins.setdefault(entry["plugin"], entry["plugin_title"])
+
+    for name, title in sorted(plugins.items()):
+        title = str(title)
+        underline = "-" * len(title)
+        plugin_section_dir = plugin_dir / name
+        plugin_section_dir.mkdir(parents=True, exist_ok=True)
+        (plugin_section_dir / "readme.rst").write_text(
+            f"{title}\n{underline}\n",
+            encoding="utf-8",
+        )
+
+
+def _stage_plugin_gallery_examples(staged_examples: Path, entries: list[dict[str, str]]) -> None:
+    plugin_dir = staged_examples / "plugins"
+    for entry in entries:
+        source = entry["manifest"].parent / entry["path"]
+        if not source.exists():
+            continue
+
+        source_path = Path(entry["path"])
+        stem = "__".join([entry["plugin"], *source_path.with_suffix("").parts])
+        stem = re.sub(r"[^0-9A-Za-z_]+", "_", stem)
+        destination = plugin_dir / entry["plugin"] / f"{stem}.py"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
 
 
 def _stage_gallery_examples() -> Path:
@@ -473,8 +528,9 @@ def _get_default_image_scraper():
 if not single_doc_or_dir:
     # generate example only if were are in full doc mode
     plugin_gallery_entries = _load_plugin_gallery_entries()
-    _write_plugin_examples_index(plugin_gallery_entries)
     example_source_dir = _stage_gallery_examples()
+    _write_plugin_gallery_readmes(example_source_dir, plugin_gallery_entries)
+    _stage_plugin_gallery_examples(example_source_dir, plugin_gallery_entries)
 
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,

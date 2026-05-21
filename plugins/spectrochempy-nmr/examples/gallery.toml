@@ -1,5 +1,6 @@
 [plugin]
 name = "spectrochempy-nmr"
+title = "NMR plugin"
 
 [[examples]]
 path = "core/c_importer/plot_read_nmr_from_bruker.py"
