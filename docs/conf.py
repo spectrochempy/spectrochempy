@@ -519,7 +519,7 @@ def _stage_plugin_gallery_examples(
         source_path = Path(entry["path"])
         stem = "__".join([entry["plugin"], *source_path.with_suffix("").parts])
         stem = re.sub(r"[^0-9A-Za-z_]+", "_", stem)
-        destination = plugin_dir / entry["plugin"] / f"{stem}.py"
+        destination = plugin_dir / entry["plugin"] / f"plot_{stem}.py"
         destination.parent.mkdir(parents=True, exist_ok=True)
         content = source.read_text(encoding="utf-8")
         thumbnail_path = _gallery_thumbnail_for_example(entry["path"])
