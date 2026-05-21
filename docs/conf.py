@@ -8,7 +8,6 @@
 
 import inspect
 import os
-import re
 import shutil
 import sys
 import tomllib
@@ -234,6 +233,7 @@ html_theme_options = {
     "collapse_navigation": False,
     "navigation_depth": 5,
     "sticky_navigation": True,
+    "titles_only": True,
     "prev_next_buttons_location": "both",
 }
 
@@ -727,75 +727,7 @@ def rstjinja(app, docname, source):
     source[0] = rendered
 
 
-def _move_gallery_index_toctree_to_root(source: str) -> str:
-    """Keep sphinx-gallery subsection toctrees out of the last visible section."""
-    toctree_pattern = re.compile(
-        r"\n\n(?P<toctree>\.\. toctree::\n"
-        r"   :hidden:\n"
-        r"   :includehidden:\n"
-        r"(?:\n|.)*)\Z",
-        re.MULTILINE,
-    )
-    match = toctree_pattern.search(source)
-    if match is None:
-        return source
-
-    insert_at = _root_heading_end(source)
-    if insert_at is None:
-        return source
-
-    without_toctree = source[: match.start()].rstrip() + "\n"
-    toctree = match.group("toctree").rstrip()
-    return (
-        without_toctree[:insert_at]
-        + "\n\n"
-        + toctree
-        + "\n\n"
-        + without_toctree[insert_at:].lstrip()
-    )
-
-
-def _root_heading_end(source: str) -> int | None:
-    """Return the character offset just after the first RST document heading."""
-    adornments = set("#*=+-^~")
-    lines = source.splitlines(keepends=True)
-    offset = 0
-    index = 0
-
-    while index < len(lines):
-        stripped = lines[index].strip()
-        if stripped == ":orphan:" or stripped == "" or stripped.startswith(".. _"):
-            offset += len(lines[index])
-            index += 1
-            continue
-        break
-
-    def is_adornment(line: str) -> bool:
-        stripped = line.strip()
-        return len(stripped) >= 3 and len(set(stripped)) == 1 and stripped[0] in adornments
-
-    if index + 2 < len(lines) and is_adornment(lines[index]) and is_adornment(lines[index + 2]):
-        return offset + len(lines[index]) + len(lines[index + 1]) + len(lines[index + 2])
-    if index + 1 < len(lines) and is_adornment(lines[index + 1]):
-        return offset + len(lines[index]) + len(lines[index + 1])
-    return None
-
-
-def fix_gallery_index_toctrees(app, docname, source):
-    """Move generated gallery subsection toctrees to document root."""
-    if app.builder.format != "html":
-        return
-    if not re.fullmatch(
-        r"gettingstarted/examples/gallery/auto_examples_(analysis|core|processing)/index",
-        docname,
-    ):
-        return
-
-    source[0] = _move_gallery_index_toctree_to_root(source[0])
-
-
 def setup(app):
-    app.connect("source-read", fix_gallery_index_toctrees)
     app.connect("source-read", rstjinja)
     app.connect("autodoc-skip-member", autodoc_skip_member)
     app.connect("autodoc-process-signature", shorter_signature)

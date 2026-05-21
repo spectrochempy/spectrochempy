@@ -18,6 +18,7 @@ in the `discussions <https://github.com/spectrochempy/spectrochempy/discussions>
 
 .. toctree::
    :maxdepth: 2
+   :titlesonly:
    :caption: Examples
 
    gallery/auto_examples_core/index
