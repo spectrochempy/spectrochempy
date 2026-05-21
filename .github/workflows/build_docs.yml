@@ -212,6 +212,7 @@ jobs:
         run: |
           PREVIEW_PATH="${{ steps.preview.outputs.preview_path }}"
           # The preview build output is in build_subdir/html/ after make.py post-build
+          rm -rf "build/html/$PREVIEW_PATH"
           mkdir -p "build/html/$PREVIEW_PATH"
           cp -a "build/branch_preview/html/." "build/html/$PREVIEW_PATH/"
           echo "Branch preview installed under build/html/$PREVIEW_PATH/"

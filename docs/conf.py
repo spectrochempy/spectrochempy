@@ -6,6 +6,7 @@
 # ruff: noqa: T201,S603
 """SpectroChemPy documentation build configuration file."""
 
+import ast
 import inspect
 import os
 import re
@@ -524,9 +525,34 @@ def _stage_plugin_gallery_examples(
         content = source.read_text(encoding="utf-8")
         thumbnail_path = _gallery_thumbnail_for_example(entry["path"])
         destination.write_text(
-            f"# sphinx_gallery_thumbnail_path = {thumbnail_path!r}\n{content}",
+            _with_plugin_gallery_thumbnail(content, thumbnail_path),
             encoding="utf-8",
         )
+
+
+def _with_plugin_gallery_thumbnail(content: str, thumbnail_path: str) -> str:
+    directive = f"# sphinx_gallery_thumbnail_path = {thumbnail_path!r}"
+    lines = content.splitlines()
+
+    try:
+        module = ast.parse(content)
+    except SyntaxError:
+        return f"{directive}\n{content}"
+
+    if (
+        module.body
+        and isinstance(module.body[0], ast.Expr)
+        and isinstance(module.body[0].value, ast.Constant)
+        and isinstance(module.body[0].value.value, str)
+        and module.body[0].end_lineno is not None
+    ):
+        insert_at = module.body[0].end_lineno
+        return "\n".join([*lines[:insert_at], directive, *lines[insert_at:]]) + "\n"
+
+    if lines and lines[0].startswith("# %%"):
+        return "\n".join([lines[0], directive, *lines[1:]]) + "\n"
+
+    return f"{directive}\n{content}"
 
 
 def _stage_gallery_examples() -> Path:
