@@ -420,8 +420,12 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             raise AttributeError
 
         from spectrochempy.plugins.manager import plugin_manager  # noqa: PLC0415
-        from spectrochempy.plugins.namespace import DatasetPluginAccessor  # noqa: PLC0415
-        from spectrochempy.plugins.namespace import has_dataset_namespace  # noqa: PLC0415
+        from spectrochempy.plugins.namespace import (
+            DatasetPluginAccessor,  # noqa: PLC0415
+        )
+        from spectrochempy.plugins.namespace import (
+            has_dataset_namespace,  # noqa: PLC0415
+        )
         from spectrochempy.plugins.registry import registry  # noqa: PLC0415
 
         plugin_manager.discover()
