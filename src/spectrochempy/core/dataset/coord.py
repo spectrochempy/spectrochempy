@@ -221,8 +221,8 @@ class Coord(NDMath, NDArray):
             if result is not None:
                 return result
 
-        # Default logic — TODO: NMR-specific "ppm" check should eventually
-        # be provided by the NMR plugin via the handler above.
+        # Decreasing-x convention for common spectroscopic units.
+        # Plugins may override via a "coord.reversed" handler.
         return bool(
             self.units == "ppm"
             or self.units == "1 / centimeter"

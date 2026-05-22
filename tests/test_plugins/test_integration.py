@@ -1366,3 +1366,148 @@ raise SystemExit(0)
             text=True,
         )
         assert result.returncode == 0, result.stderr or result.stdout
+
+
+# ------------------------------------------------------------------
+# O. register_handlers integration
+# ------------------------------------------------------------------
+
+
+class TestRegisterHandlers:
+    """Integration tests for the register_handlers declarative hook."""
+
+    def test_handler_collection(self):
+        """register_handlers is collected when a plugin is registered."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        def my_handler():
+            return "handled"
+
+        class HandlerPlugin(SpectroChemPyPlugin):
+            name = "handler_plugin"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_handlers(self):
+                return {"test.handler": my_handler}
+
+        pm.register(HandlerPlugin())
+        assert registry.get_handler("test.handler") is my_handler
+
+    def test_handler_collection_returns_none(self):
+        """A plugin that returns None from register_handlers is handled gracefully."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        class NoneHandlerPlugin(SpectroChemPyPlugin):
+            name = "none_handler"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_handlers(self):
+                return None
+
+        pm.register(NoneHandlerPlugin())
+        assert registry.available_handlers == {}
+
+    def test_handler_collection_returns_empty_dict(self):
+        """A plugin that returns {} from register_handlers registers nothing."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        class EmptyHandlerPlugin(SpectroChemPyPlugin):
+            name = "empty_handler"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_handlers(self):
+                return {}
+
+        pm.register(EmptyHandlerPlugin())
+        assert registry.available_handlers == {}
+
+    def test_handler_override_last_wins(self):
+        """When two plugins register the same handler name, the last one wins."""
+        registry = PluginRegistry()
+        pm = PluginManager(registry=registry)
+
+        def handler_a():
+            return "a"
+
+        def handler_b():
+            return "b"
+
+        class PluginA(SpectroChemPyPlugin):
+            name = "plugin_a"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_handlers(self):
+                return {"dup.handler": handler_a}
+
+        class PluginB(SpectroChemPyPlugin):
+            name = "plugin_b"
+            version = "0.1.0"
+            PLUGIN_API_VERSION = "1.0"
+
+            def register_handlers(self):
+                return {"dup.handler": handler_b}
+
+        pm.register(PluginA())
+        pm.register(PluginB())
+        assert registry.get_handler("dup.handler") is handler_b
+
+    def test_coord_reversed_no_handler_uses_default(self):
+        """Without any coord.reversed handler, ppm and 1/centimeter still reverse."""
+        from spectrochempy.core.dataset.coord import Coord
+
+        c = Coord([1, 2, 3], units="ppm")
+        assert c.reversed is True
+
+    def test_coord_reversed_no_handler_shows_false(self):
+        """Without any coord.reversed handler, meter stays unreversed."""
+        from spectrochempy.core.dataset.coord import Coord
+
+        c = Coord([1, 2, 3], units="meter")
+        assert c.reversed is False
+
+    def test_coord_reversed_custom_handler_overrides_default(self):
+        """
+        Registering a coord.reversed handler on the global registry overrides
+        the default ppm-reversal logic.
+        """
+        from spectrochempy.core.dataset.coord import Coord
+        from spectrochempy.plugins.registry import registry as global_registry
+
+        saved = dict(global_registry.available_handlers)
+        try:
+            global_registry.register_handler("coord.reversed", lambda c: False)
+            c = Coord([1, 2, 3], units="ppm")
+            assert c.reversed is False
+        finally:
+            global_registry.handlers.clear()
+            for k, v in saved.items():
+                global_registry.register_handler(k, v)
+
+    def test_coord_reversed_handler_none_falls_through(self):
+        """A handler returning None lets default logic run."""
+        from spectrochempy.core.dataset.coord import Coord
+        from spectrochempy.plugins.registry import registry as global_registry
+
+        def maybe_reversed(coord):
+            if coord.units == "ppm":
+                return None  # let default handle it
+            return False
+
+        saved = dict(global_registry.available_handlers)
+        try:
+            global_registry.register_handler("coord.reversed", maybe_reversed)
+            c = Coord([1, 2, 3], units="ppm")
+            assert c.reversed is True
+            c2 = Coord([1, 2, 3], units="meter")
+            assert c2.reversed is False
+        finally:
+            global_registry.handlers.clear()
+            for k, v in saved.items():
+                global_registry.register_handler(k, v)

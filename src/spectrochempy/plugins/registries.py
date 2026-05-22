@@ -314,7 +314,19 @@ class HandlerRegistry:
         self._handlers: dict[str, Callable] = {}
 
     def register_handler(self, name: str, func: Callable) -> None:
-        """Register a callable for the given extension point."""
+        """
+        Register a callable for the given extension point.
+
+        If a handler with the same name already exists it is silently
+        overridden (last-registered plugin wins).  Plugins are loaded
+        in a deterministic order, so override order is stable for a
+        given environment.
+        """
+        if name in self._handlers:
+            logger.warning(
+                "Handler %r is being overridden. " "The last-registered plugin wins.",
+                name,
+            )
         self._handlers[name] = func
 
     def get_handler(self, name: str) -> Callable | None:

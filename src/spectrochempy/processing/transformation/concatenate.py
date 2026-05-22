@@ -117,39 +117,16 @@ def concatenate(*datasets, **kwargs):
     # --------------------------------------------
     sss = []
 
-    # TODO: This NMR-specific block should eventually be provided
-    #       by the NMR plugin via a generic hook mechanism.
-    if datasets[0].origin == "topspin":
-        # we can use metadata to create new coordinates
-        metacoords = {}
-        meta0 = datasets[0].meta
-        for i, dataset in enumerate(datasets):
-            if i == 0:
-                continue
-            meta = dataset.meta
-            for key in meta0:
-                if key in ["file_size", "pprog", "phc0", "phc1", "nsold"]:
-                    continue
-                keepitem = key if key != "date" else "timestamp"
-                if np.any(meta0[key][-1] != meta[key][-1]):
-                    if hasattr(meta0[key][-1], "size") and meta0[key][-1].size > 1:
-                        # case of pulse length or delays for instance
-                        for i in range(meta0[key][-1].size):
-                            if np.any(meta0[key][-1][i] == meta[key][-1][i]):
-                                continue
-                            itemi = f"{key}{i}"
-                            if itemi not in metacoords:
-                                metacoords[itemi] = [
-                                    meta0[key][-1][i],
-                                    meta[key][-1][i],
-                                ]
-                            else:
-                                metacoords[itemi].append(meta[key][-1][i])
-                        continue
-                    if keepitem not in metacoords:
-                        metacoords[keepitem] = [meta0[key][-1], meta[key][-1]]
-                    else:
-                        metacoords[keepitem].append(meta[key][-1])
+    # Extract metadata coordinates for domain-specific datasets
+    # (e.g. variable-temperature TopSpin parameters for NMR).
+    metacoords: dict[str, list] = {}
+    from spectrochempy.plugins.registry import registry  # noqa: PLC0415
+
+    extract = registry.get_handler("concatenate.extract_metadata")
+    if extract is not None:
+        result = extract(datasets)
+        if result is not None:
+            metacoords = result
 
     for _i, dataset in enumerate(datasets):
         d = dataset.masked_data
@@ -205,9 +182,7 @@ def concatenate(*datasets, **kwargs):
 
     handler = registry.get_handler("concatenate.postprocess")
     if handler is not None:
-        result = handler(
-            out, datasets, metacoords=metacoords if "metacoords" in locals() else {}
-        )
+        result = handler(out, datasets, metacoords=metacoords)
         if result is not None:
             out = result
 

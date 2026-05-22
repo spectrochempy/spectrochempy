@@ -47,13 +47,50 @@ def _nmr_coord_reversed(coord) -> bool | None:
     return None
 
 
+def _nmr_concat_extract_metadata(datasets):
+    """Extract metadata coordinates for variable-parameter TopSpin datasets."""
+    import numpy as np  # noqa: PLC0415
+
+    if datasets[0].origin != "topspin":
+        return None
+    metacoords: dict[str, list] = {}
+    meta0 = datasets[0].meta
+    for i, dataset in enumerate(datasets):
+        if i == 0:
+            continue
+        meta = dataset.meta
+        for key in meta0:
+            if key in ["file_size", "pprog", "phc0", "phc1", "nsold"]:
+                continue
+            keepitem = key if key != "date" else "timestamp"
+            if np.any(meta0[key][-1] != meta[key][-1]):
+                if hasattr(meta0[key][-1], "size") and meta0[key][-1].size > 1:
+                    for i in range(meta0[key][-1].size):
+                        if np.any(meta0[key][-1][i] == meta[key][-1][i]):
+                            continue
+                        itemi = f"{key}{i}"
+                        if itemi not in metacoords:
+                            metacoords[itemi] = [
+                                meta0[key][-1][i],
+                                meta[key][-1][i],
+                            ]
+                        else:
+                            metacoords[itemi].append(meta[key][-1][i])
+                    continue
+                if keepitem not in metacoords:
+                    metacoords[keepitem] = [meta0[key][-1], meta[key][-1]]
+                else:
+                    metacoords[keepitem].append(meta[key][-1])
+    return metacoords
+
+
 def _nmr_concat_postprocess(out, datasets, **kwargs):
     """Post-process concatenation for NMR TopSpin datasets."""
     from spectrochempy.core.dataset.coord import Coord  # noqa: PLC0415
     from spectrochempy.core.dataset.coordset import CoordSet  # noqa: PLC0415
 
     metacoords = kwargs.get("metacoords", {})
-    if datasets[0].origin == "topspin" and metacoords:
+    if metacoords:
         coords = []
         for key, value in metacoords.items():
             coords.append(Coord(value, title=key))
@@ -112,6 +149,7 @@ class NMRPlugin(SpectroChemPyPlugin):
         """Register handler overrides for core extension points."""
         return {
             "coord.reversed": _nmr_coord_reversed,
+            "concatenate.extract_metadata": _nmr_concat_extract_metadata,
             "concatenate.postprocess": _nmr_concat_postprocess,
         }
 
