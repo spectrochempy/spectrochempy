@@ -325,6 +325,57 @@ def test_nddataset_add_with_masks():
     assert result.mask.all()
 
 
+# --------------------------------------------------------------------------------------
+# Unit resolution characterisation tests
+# --------------------------------------------------------------------------------------
+
+
+def test_require_units_dimensionless():
+    """Functions requiring dimensionless units reject dimensioned input."""
+    ds = NDDataset([1.0, 2.0], units="m")
+    for func in (np.log10, np.log, np.log2, np.exp, np.expm1):
+        with pytest.raises(DimensionalityError, match="requires DIMENSIONLESS"):
+            func(ds)
+
+
+def test_require_units_radian():
+    """Trig functions accept dimensionless (incl. radian) but reject dimensioned."""
+    ds_m = NDDataset([0.0, 1.0], units="m")
+    with pytest.raises(DimensionalityError, match="requires `radian` units"):
+        np.sin(ds_m)
+
+    # Radian input is accepted
+    ds_rad = NDDataset([0.0, 1.0], units="radian")
+    result = np.sin(ds_rad)
+    assert isinstance(result, NDDataset)
+    assert result.units == Unit("dimensionless")
+
+
+def test_require_units_degree():
+    """deg2rad requires degree input."""
+    ds_m = NDDataset([0.0, 90.0], units="m")
+    with pytest.raises(DimensionalityError, match="requires `degree` units"):
+        np.deg2rad(ds_m)
+
+    ds_deg = NDDataset([0.0, 90.0], units="degree")
+    result = np.deg2rad(ds_deg)
+    assert isinstance(result, NDDataset)
+
+
+def test_remove_units_early_return():
+    """
+    sign/isfinite skip _op() via early return in __array_ufunc__,
+    returning a raw ndarray (no units attr).
+    """
+    ds = NDDataset([1.0, -2.0, 0.0], units="m")
+    result = np.sign(ds)
+    assert isinstance(result, np.ndarray)
+    assert np.all(result == [1.0, -1.0, 0.0])
+
+    result = np.isfinite(ds)
+    assert isinstance(result, np.ndarray)
+
+
 def test_nddataset_subtract():
     """Test subtraction of datasets."""
     d1 = NDDataset(np.ones((5, 5)))

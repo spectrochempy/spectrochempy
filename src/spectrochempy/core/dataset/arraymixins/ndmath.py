@@ -2977,6 +2977,101 @@ class NDMath:
             ) from err
 
     # ------------------------------------------------------------------
+    # Helper: resolve operation units
+    # ------------------------------------------------------------------
+
+    def _resolve_operation_units(
+        self,
+        fname: str,
+        f: Callable,
+        q,
+        otherqs: list,
+        remove_units: bool,
+        compatible_units: bool,
+    ):
+        """
+        Compute the resulting units for an operation.
+
+        Parameters
+        ----------
+        fname : str
+            Operation name.
+        f : Callable
+            The original function.
+        q : Quantity
+            Probe quantity for the first operand.
+        otherqs : list of Quantity
+            Probe quantities for other operands (mutated in place).
+        remove_units : bool
+            Whether to strip units from the result.
+        compatible_units : bool
+            Whether the operation requires compatible units.
+
+        Returns
+        -------
+        str or None
+            Resolved unit string, or UNITLESS (None) if units are stripped.
+        """
+
+        def check_require_units(fname, _units):
+            if fname in self.__require_units:
+                requnits = self.__require_units[fname]
+                if (
+                    requnits in (DIMENSIONLESS, "radian", "degree")
+                    and _units.dimensionless
+                ):
+                    _units = DIMENSIONLESS
+                else:
+                    if requnits == DIMENSIONLESS:
+                        s = "DIMENSIONLESS input"
+                    else:
+                        s = f"`{requnits}` units"
+                    raise DimensionalityError(
+                        _units,
+                        requnits,
+                        extra_msg=f"\nFunction `{fname}` requires {s}",
+                    )
+            return _units
+
+        units = UNITLESS
+
+        if not remove_units:
+            if hasattr(q, "units"):
+                q = q.to(check_require_units(fname, q.units))
+
+            for i, otherq in enumerate(otherqs[:]):
+                if hasattr(otherq, "units"):
+                    otherqm = otherq.m.data if np.ma.isMaskedArray(otherq) else otherq.m
+                    otherqs[i] = otherqm * check_require_units(fname, otherq.units)
+                elif fname in [
+                    "add",
+                    "sub",
+                    "iadd",
+                    "isub",
+                    "and",
+                    "xor",
+                    "or",
+                ] and hasattr(q, "units"):
+                    otherqs[i] = otherq * q.units
+
+            f_u = f
+            if compatible_units:
+                f_u = np.add
+
+            try:
+                res = f_u(q, *otherqs)
+            except Exception as e:
+                if not otherqs:
+                    res = q
+                else:
+                    raise e
+
+            if hasattr(res, "units"):
+                units = res.units
+
+        return units
+
+    # ------------------------------------------------------------------
     # Helper: execute operation on magnitudes
     # ------------------------------------------------------------------
 
@@ -3095,64 +3190,10 @@ class NDMath:
             othertype,
         )
 
-        # Calculate the resulting units (and their compatibility for such operation)
-        # ------------------------------------------------------------------------------
-
-        def check_require_units(fname, _units):
-            if fname in self.__require_units:
-                requnits = self.__require_units[fname]
-                if (
-                    requnits in (DIMENSIONLESS, "radian", "degree")
-                    and _units.dimensionless
-                ):
-                    _units = DIMENSIONLESS
-                else:
-                    if requnits == DIMENSIONLESS:
-                        s = "DIMENSIONLESS input"
-                    else:
-                        s = f"`{requnits}` units"
-                    raise DimensionalityError(
-                        _units,
-                        requnits,
-                        extra_msg=f"\nFunction `{fname}` requires {s}",
-                    )
-            return _units
-
-        units = UNITLESS
-
-        if not remove_units:
-            if hasattr(q, "units"):
-                q = q.to(check_require_units(fname, q.units))
-
-            for i, otherq in enumerate(otherqs[:]):
-                if hasattr(otherq, "units"):
-                    otherqm = otherq.m.data if np.ma.isMaskedArray(otherq) else otherq.m
-                    otherqs[i] = otherqm * check_require_units(fname, otherq.units)
-                elif fname in [
-                    "add",
-                    "sub",
-                    "iadd",
-                    "isub",
-                    "and",
-                    "xor",
-                    "or",
-                ] and hasattr(q, "units"):
-                    otherqs[i] = otherq * q.units
-
-            f_u = f
-            if compatible_units:
-                f_u = np.add
-
-            try:
-                res = f_u(q, *otherqs)
-            except Exception as e:
-                if not otherqs:
-                    res = q
-                else:
-                    raise e
-
-            if hasattr(res, "units"):
-                units = res.units
+        # Resolve operation units
+        units = self._resolve_operation_units(
+            fname, f, q, otherqs, remove_units, compatible_units
+        )
 
         # perform operation on magnitudes
         data = self._execute_operation(
