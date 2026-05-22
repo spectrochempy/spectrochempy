@@ -104,6 +104,8 @@ class DeclarativeUnitContextPlugin:
             {
                 "name": "my-context",
                 "func": lambda value: value,
+                "predicate": lambda obj: getattr(obj, "use_context", False),
+                "argument_extractor": lambda obj: (obj.value,),
                 "description": "Set up a custom unit context",
             }
         ]
@@ -301,6 +303,15 @@ def test_declarative_unit_contexts():
     setup = registry.get_unit_context("my-context")
     assert setup is not None
     assert setup("value") == "value"
+
+    class Target:
+        use_context = True
+        value = "target-value"
+
+    context = registry.get_applicable_unit_context(Target())
+    assert context is not None
+    assert context["name"] == "my-context"
+    assert context["argument_extractor"](Target()) == ("target-value",)
 
 
 def test_declarative_visualizers():

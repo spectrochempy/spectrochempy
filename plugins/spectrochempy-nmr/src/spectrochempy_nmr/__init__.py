@@ -23,6 +23,21 @@ def _resolve_set_nmr_context():
     return set_nmr_context
 
 
+def _coord_has_larmor(obj) -> bool:
+    """Return whether an object should use the NMR unit context."""
+    implements = getattr(obj, "_implements", None)
+    return (
+        callable(implements)
+        and implements("Coord")
+        and bool(getattr(obj, "larmor", None))
+    )
+
+
+def _coord_larmor_argument(obj):
+    """Extract the Larmor frequency for the NMR unit-context setup function."""
+    return obj.larmor
+
+
 class NMRPlugin(SpectroChemPyPlugin):
     """NMR plugin, currently providing the Bruker TopSpin reader."""
 
@@ -64,6 +79,8 @@ class NMRPlugin(SpectroChemPyPlugin):
                     _resolve_set_nmr_context,
                     name="spectrochempy.nmr.set_nmr_context",
                 ),
+                "predicate": _coord_has_larmor,
+                "argument_extractor": _coord_larmor_argument,
                 "description": "NMR ppm/frequency conversion context",
             },
         ]

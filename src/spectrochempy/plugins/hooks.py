@@ -165,9 +165,17 @@ class SpectroChemPyHookSpec:
                 {
                     "name": "nmr",
                     "func": set_nmr_context,
+                    "predicate": applies_to_coord,
+                    "argument_extractor": get_larmor,
                     "description": "NMR ppm/frequency conversion context",
                 },
             ]
+
+        ``predicate`` is optional.  When provided, the core calls it with the
+        object being converted and uses the context only when it returns
+        ``True``.  ``argument_extractor`` is also optional; when provided, it
+        receives the same object and returns either positional arguments,
+        keyword arguments, or ``(args, kwargs)`` for the setup function.
 
         Returning ``None`` or an empty list is treated as
         "no unit-context contribution".

@@ -493,7 +493,13 @@ class PluginManager:
             for context in contexts:
                 name = context["name"]
                 func = context["func"]
-                registry.processing.register_unit_context(name, func)
+                registry.processing.register_unit_context(
+                    name,
+                    func,
+                    predicate=context.get("predicate"),
+                    argument_extractor=context.get("argument_extractor"),
+                    description=context.get("description", ""),
+                )
                 contributions.setdefault("unit_contexts", []).append(name)
         except Exception:
             logger.exception(

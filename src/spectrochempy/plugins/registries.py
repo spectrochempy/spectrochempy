@@ -113,7 +113,7 @@ class ProcessingRegistry:
 
     def __init__(self) -> None:
         self._processors: dict[str, dict[str, Any]] = {}
-        self._unit_contexts: dict[str, Callable] = {}
+        self._unit_contexts: dict[str, dict[str, Any]] = {}
         self._dtype_handlers: dict[str, Any] = {}
 
     # ------------------------------------------------------------------
@@ -136,11 +136,43 @@ class ProcessingRegistry:
     # Unit contexts
     # ------------------------------------------------------------------
 
-    def register_unit_context(self, name: str, setup_func: Callable) -> None:
-        self._unit_contexts[name] = setup_func
+    def register_unit_context(
+        self,
+        name: str,
+        setup_func: Callable,
+        *,
+        predicate: Callable[[Any], bool] | None = None,
+        argument_extractor: Callable[[Any], Any] | None = None,
+        description: str = "",
+    ) -> None:
+        self._unit_contexts[name] = {
+            "name": name,
+            "func": setup_func,
+            "predicate": predicate,
+            "argument_extractor": argument_extractor,
+            "description": description,
+        }
 
     def get_unit_context(self, name: str) -> Callable | None:
-        return self._unit_contexts.get(name)
+        info = self._unit_contexts.get(name)
+        if info is None:
+            return None
+        return info["func"]
+
+    def get_unit_context_info(self, name: str) -> dict[str, Any] | None:
+        info = self._unit_contexts.get(name)
+        if info is None:
+            return None
+        return dict(info)
+
+    def get_applicable_unit_context(self, obj: Any) -> dict[str, Any] | None:
+        for info in self._unit_contexts.values():
+            predicate = info.get("predicate")
+            if predicate is None:
+                continue
+            if predicate(obj):
+                return dict(info)
+        return None
 
     # ------------------------------------------------------------------
     # Dtype handlers
