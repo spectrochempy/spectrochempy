@@ -414,23 +414,44 @@ class PSD(BaseConfigurable):
         else:
             t_norm = np.array([0.0])
 
-        # Integration weights
+        # Integration weights.
+        # For Riemann the grid is always uniform right-endpoint (independent of
+        # actual time coordinate).  For trapezoid and Simpson the weights are
+        # derived from the *actual* normalized coordinate spacing so that the
+        # matrix result is algebraically identical to explicit numerical
+        # integration (np.trapezoid / scipy.integrate.simpson) performed on the
+        # same grid.
         if integration_rule == "riemann":
             w = np.ones(n)
+            scaling = 2.0 / n
         elif integration_rule == "trapezoid":
-            w = np.ones(n)
             if n > 1:
-                w[0] = 0.5
-                w[-1] = 0.5
+                h = np.diff(t_norm)
+                w = np.zeros(n)
+                w[0] = 0.5 * h[0]
+                if n > 2:
+                    w[1:-1] = 0.5 * (h[:-1] + h[1:])
+                w[-1] = 0.5 * h[-1]
+            else:
+                w = np.array([1.0])
+            scaling = 2.0
         elif integration_rule == "simpson":
             if n < 3 or n % 2 == 0:
                 raise ValueError(
                     f"Simpson's rule requires an odd number of points >= 3. Got n={n}. "
                     "Use an odd n_spectra_per_cycle >= 3 or choose a different integration rule."
                 )
-            w = np.ones(n)
-            w[1:-1:2] = 4.0
-            w[2:-1:2] = 2.0
+            h = np.diff(t_norm)
+            w = np.zeros(n)
+            for i in range(0, n - 2, 2):
+                h0 = h[i]
+                h1 = h[i + 1]
+                hsum = h0 + h1
+                hprod = h0 * h1
+                w[i] += hsum / 6.0 * (2.0 - h1 / h0)
+                w[i + 1] += hsum / 6.0 * hsum**2 / hprod
+                w[i + 2] += hsum / 6.0 * (2.0 - h0 / h1)
+            scaling = 2.0
         else:
             raise ValueError(f"Unknown integration rule: {integration_rule}")
 
@@ -438,18 +459,6 @@ class PSD(BaseConfigurable):
         # T shape: (n_phi, n_spectra)
         phi_rad = phi[:, np.newaxis] * np.pi / 180.0
         t_norm_2d = t_norm[np.newaxis, :]
-
-        # Scaling incorporates the integration step size and the global factor 2
-        # (from PSD(phi) = 2 * integral_0^1 D(t) sin(...) dt).
-        if integration_rule == "trapezoid":
-            # h = 1/(n-1);  scaling = 2 * h = 2/(n-1)
-            scaling = 2.0 / (n - 1) if n > 1 else 2.0
-        elif integration_rule == "simpson":
-            # h = 1/(n-1);  scaling = 2 * h / 3 = 2/(3*(n-1))
-            scaling = 2.0 / (3.0 * (n - 1))
-        else:
-            # riemann: right-endpoint rectangular rule, h = 1/n;  scaling = 2 * h = 2/n
-            scaling = 2.0 / n
 
         T_data = scaling * w * np.sin(2.0 * np.pi * harmonic * t_norm_2d + phi_rad)
 

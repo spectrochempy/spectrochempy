@@ -303,6 +303,56 @@ class TestPSD:
         )
 
     # --------------------------------------------------------------------------
+    # Regression: non-uniform time coordinate (matrix = integration)
+    # --------------------------------------------------------------------------
+    @pytest.mark.parametrize("rule", ["trapezoid", "simpson"])
+    def test_psd_nonuniform_time_agreement(self, rule):
+        """
+        Matrix and integration agree for NON-UNIFORM time coordinates.
+
+        This is a regression test for the fix where the T-matrix
+        construction previously assumed uniform weights, causing
+        disagreement with explicit integration on non-uniform grids.
+        """
+        n_spectra = 5 if rule == "simpson" else 7
+        n_wavenumbers = 10
+
+        # Slightly jittered time grid (endpoints fixed at 0 and 1)
+        rng = np.random.RandomState(42)
+        t_base = np.linspace(0.0, 1.0, n_spectra)
+        jitter = rng.uniform(-0.03, 0.03, n_spectra)
+        jitter[0] = 0.0
+        jitter[-1] = 0.0
+        t_nonuniform = t_base + jitter
+
+        data = np.sin(2.0 * np.pi * t_nonuniform)[:, np.newaxis] * np.ones(
+            n_wavenumbers
+        )
+        ds = NDDataset(data)
+        ds.set_coordset(
+            y=Coord(t_nonuniform, title="time", units="s"),
+            x=Coord(np.arange(n_wavenumbers), title="wavenumber"),
+        )
+
+        phi = np.array([0.0, 90.0])
+        result_matrix = PSD(
+            demodulation="matrix",
+            integration_rule=rule,
+            phi=phi,
+        ).transform(ds)
+        result_int = PSD(
+            demodulation="integration",
+            integration_rule=rule,
+            phi=phi,
+        ).transform(ds)
+
+        np.testing.assert_allclose(
+            result_matrix.prs.data,
+            result_int.prs.data,
+            atol=1e-12,
+        )
+
+    # --------------------------------------------------------------------------
     # Riemann exact sinusoid (protects right-endpoint restoration)
     # --------------------------------------------------------------------------
     def test_psd_riemann_exact_on_sinusoid(self):
