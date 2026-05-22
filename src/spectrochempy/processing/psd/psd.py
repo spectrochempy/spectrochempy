@@ -723,7 +723,7 @@ class PSD(BaseConfigurable):
             in_phase=in_phase,
             quadrature=quadrature,
             amplitude=amplitude,
-            phase=phase_lag,
+            phase_lag=phase_lag,
             T=T_matrix,
         )
 
