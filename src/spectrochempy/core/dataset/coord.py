@@ -20,7 +20,6 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import error_
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import NOMASK
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.numutils import get_n_decimals
 from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import colored_output
@@ -171,8 +170,6 @@ class Coord(NDMath, NDArray):
         if data is not None and not is_iterable(data):
             raise ValueError("Data for coordinates must be an iterable or None")
 
-        # in case Coord replace old LinearCoord object
-        # without changing the arguments
         _offset = kwargs.pop("offset", 0)
         _increment = kwargs.pop("increment", None)
         _size = kwargs.pop("size", None)
@@ -919,23 +916,6 @@ class Coord(NDMath, NDArray):
 
 
 # ======================================================================================
-# LinearCoord (Deprecated)
-# TODO : should be removed in version 0.8
-# ======================================================================================
-@tr.signature_has_traits
-class LinearCoord(Coord):
-    @deprecated(
-        kind="object",
-        replace="Coord",
-        removed="0.8",
-    )
-    def __init__(self, **kwargs):
-        # TODO : remove in version 0.8
-        super().__init__(**kwargs)
-
-
-# ======================================================================================
 # Set the operators
 # ======================================================================================
 _set_operators(Coord, priority=50)
-_set_operators(LinearCoord, priority=50)  # Suppress 0.8
