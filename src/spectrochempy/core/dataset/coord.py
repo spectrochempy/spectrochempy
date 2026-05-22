@@ -101,8 +101,7 @@ class Coord(NDMath, NDArray):
         Number of significant digits to be used for rounding and linearizing
         the data.
     larmor : `float` or `Quantity` instance, optional
-        The Larmor frequency of the nucleus. This is used only for NMR
-        data.
+        Optional resonance frequency metadata used by plugin-provided unit contexts.
     offset : `float` instance, optional
         The offset of the axis. This is used to generate an evenly values spaced axis
         together with `ìncrement` and `size`.
@@ -160,7 +159,7 @@ class Coord(NDMath, NDArray):
     _sigdigits = tr.Int(4)
     _rounding = tr.Bool(True)
 
-    # specific to NMR
+    # Optional spectroscopy metadata consumed by plugin-provided unit contexts.
     _larmor = tr.Instance(Quantity, allow_none=True)
 
     # ----------------------------------------------------------------------------------
@@ -180,7 +179,6 @@ class Coord(NDMath, NDArray):
         if data is None and _size is not None and _increment is not None:
             data = np.arange(_size) * _increment + _offset
 
-        # specific case of NMR (initialize unit context NMR)
         larmor = kwargs.pop("larmor", None)
 
         self._linearize_below = kwargs.pop("linearize_below", 1.0)
@@ -812,7 +810,7 @@ class Coord(NDMath, NDArray):
 
     @property
     def larmor(self):
-        """Return larmor frequency in NMR spectroscopy context."""
+        """Return optional resonance frequency metadata."""
         return self._larmor
 
     @larmor.setter

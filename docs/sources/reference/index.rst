@@ -435,7 +435,6 @@ Units manipulation
     ito_base_units
     ito_reduced_units
     is_units_compatible
-    set_nmr_context
 
 
 Mathematical operations

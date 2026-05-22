@@ -19,9 +19,9 @@ import traitlets as tr
 from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import Unit
-from spectrochempy.core.units import set_nmr_context
 from spectrochempy.core.units import ur
 from spectrochempy.extern.traittypes import Array
+from spectrochempy.plugins import manager as manager_module
 from spectrochempy.utils._logging import error_
 from spectrochempy.utils._logging import info_
 from spectrochempy.utils.constants import DEFAULT_DIM_NAME
@@ -43,6 +43,46 @@ from spectrochempy.utils.typeutils import is_sequence
 # Printing settings
 # --------------------------------------------------------------------------------------
 numpyprintoptions()
+
+
+def _normalize_unit_context_arguments(extracted):
+    """Normalize plugin-extracted context setup arguments."""
+    if extracted is None:
+        return (), {}
+    if (
+        isinstance(extracted, tuple)
+        and len(extracted) == 2
+        and isinstance(extracted[1], dict)
+    ):
+        args, kwargs = extracted
+        if isinstance(args, tuple):
+            return args, kwargs
+        if isinstance(args, list):
+            return tuple(args), kwargs
+        return (args,), kwargs
+    if isinstance(extracted, dict):
+        return (), extracted
+    if isinstance(extracted, tuple):
+        return extracted, {}
+    if isinstance(extracted, list):
+        return tuple(extracted), {}
+    return (extracted,), {}
+
+
+def _setup_applicable_unit_context(obj) -> str | None:
+    """Configure the first plugin-provided unit context applicable to ``obj``."""
+    plugin_manager = manager_module.plugin_manager
+    plugin_manager.discover()
+    context = plugin_manager.registry.get_applicable_unit_context(obj)
+    if context is None:
+        return None
+
+    setup_context = context["func"]
+    argument_extractor = context.get("argument_extractor")
+    extracted = argument_extractor(obj) if argument_extractor is not None else None
+    args, kwargs = _normalize_unit_context_arguments(extracted)
+    setup_context(*args, **kwargs)
+    return context["name"]
 
 
 # ======================================================================================
@@ -1969,9 +2009,8 @@ class NDArray(tr.HasTraits):
 
             try:
                 # noinspection PyUnresolvedReferences
-                if new._implements("Coord") and new.larmor:
-                    set_nmr_context(new.larmor)
-                    with ur.context("nmr"):
+                if context_name := _setup_applicable_unit_context(new):
+                    with ur.context(context_name):
                         new = self._unittransform(new, units)
 
                 # particular case of dimensionless units: absorbance and transmittance

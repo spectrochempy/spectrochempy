@@ -133,6 +133,10 @@ NMR-specific workflows.
 
     dataset = scp.nmr.read_topspin("path/to/fid")
 
+    from spectrochempy_nmr.units import set_nmr_context
+
+    set_nmr_context(104.3 * scp.ur.MHz)
+
 Cantera
 -------
 

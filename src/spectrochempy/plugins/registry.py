@@ -223,11 +223,31 @@ class PluginRegistry:
     def available_accessors(self) -> dict[str, dict[str, Any]]:
         return self.extensions.list_category("accessor")
 
-    def register_unit_context(self, name: str, setup_func: Callable) -> None:
-        self.processing.register_unit_context(name, setup_func)
+    def register_unit_context(
+        self,
+        name: str,
+        setup_func: Callable,
+        *,
+        predicate: Callable[[Any], bool] | None = None,
+        argument_extractor: Callable[[Any], Any] | None = None,
+        description: str = "",
+    ) -> None:
+        self.processing.register_unit_context(
+            name,
+            setup_func,
+            predicate=predicate,
+            argument_extractor=argument_extractor,
+            description=description,
+        )
 
     def get_unit_context(self, name: str) -> Callable | None:
         return self.processing.get_unit_context(name)
+
+    def get_unit_context_info(self, name: str) -> dict[str, Any] | None:
+        return self.processing.get_unit_context_info(name)
+
+    def get_applicable_unit_context(self, obj: Any) -> dict[str, Any] | None:
+        return self.processing.get_applicable_unit_context(obj)
 
     def register_dtype_handler(self, dtype: str, handler: Any) -> None:
         self.processing.register_dtype_handler(dtype, handler)

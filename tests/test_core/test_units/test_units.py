@@ -5,26 +5,12 @@
 # ======================================================================================
 # ruff: noqa
 
-from spectrochempy import Quantity, set_nmr_context, ur
+from spectrochempy import Quantity, ur
 
 
 def test_ppm():
     x = 1 * ur.ppm
     assert x.units == ur.ppm
-
-
-def test_nmr_context():
-    set_nmr_context(larmor=104.3 * ur.MHz)
-    fhz = 10000 * ur.Hz
-    with ur.context("nmr"):
-        fppm = fhz.to("ppm")
-    assert "{:~.3f}".format(fppm) == "95.877 ppm"
-    print("{:.1f}".format(fppm))
-
-    with ur.context("nmr"):
-        fhz = fppm.to("Hz")
-    assert "{:~.3f}".format(fhz) == "10000.000 Hz"
-    print("{:.1f}".format(fhz))
 
 
 def test_units():

@@ -123,8 +123,31 @@ def test_unit_context():
     def setup():
         ...
 
-    registry.register_unit_context("nmr", setup)
-    assert registry.get_unit_context("nmr") is setup
+    registry.register_unit_context("ctx", setup)
+    assert registry.get_unit_context("ctx") is setup
+
+
+def test_applicable_unit_context():
+    registry = PluginRegistry()
+    marker = object()
+
+    def setup(value):
+        return value
+
+    registry.register_unit_context(
+        "ctx",
+        setup,
+        predicate=lambda obj: obj is marker,
+        argument_extractor=lambda obj: ("value",),
+        description="Context for marked objects",
+    )
+
+    info = registry.get_applicable_unit_context(marker)
+    assert info is not None
+    assert info["name"] == "ctx"
+    assert info["func"] is setup
+    assert info["argument_extractor"](marker) == ("value",)
+    assert registry.get_applicable_unit_context(object()) is None
 
 
 def test_register_plugin():
