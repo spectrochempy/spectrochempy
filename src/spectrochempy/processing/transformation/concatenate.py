@@ -120,9 +120,11 @@ def concatenate(*datasets, **kwargs):
     # Extract metadata coordinates for domain-specific datasets
     # (e.g. variable-temperature TopSpin parameters for NMR).
     metacoords: dict[str, list] = {}
-    from spectrochempy.plugins.registry import registry  # noqa: PLC0415
+    from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
 
-    extract = registry.get_handler("concatenate.extract_metadata")
+    extract = manager_module.plugin_manager.registry.get_handler(
+        "concatenate.extract_metadata"
+    )
     if extract is not None:
         result = extract(datasets)
         if result is not None:
@@ -178,9 +180,9 @@ def concatenate(*datasets, **kwargs):
         out._coordset[dim] = coords[dim]
 
     # Let plugins post-process the concatenation result.
-    from spectrochempy.plugins.registry import registry  # noqa: PLC0415
-
-    handler = registry.get_handler("concatenate.postprocess")
+    handler = manager_module.plugin_manager.registry.get_handler(
+        "concatenate.postprocess"
+    )
     if handler is not None:
         result = handler(out, datasets, metacoords=metacoords)
         if result is not None:

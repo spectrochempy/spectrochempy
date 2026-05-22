@@ -213,9 +213,9 @@ class Coord(NDMath, NDArray):
     def reversed(self):
         """Whether the axis is reversed."""
         # Give plugins a chance to override via handler registry.
-        from spectrochempy.plugins.registry import registry  # noqa: PLC0415
+        from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
 
-        handler = registry.get_handler("coord.reversed")
+        handler = manager_module.plugin_manager.registry.get_handler("coord.reversed")
         if handler is not None:
             result = handler(self)
             if result is not None:
