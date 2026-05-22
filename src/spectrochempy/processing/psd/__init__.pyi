@@ -7,7 +7,9 @@
 # ruff: noqa
 
 __all__ = [
-    "psd",
+    "PSD",
+    "PSDResult",
 ]
 
-from . import psd
+from .psd import PSD
+from .psd import PSDResult
