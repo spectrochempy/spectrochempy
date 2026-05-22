@@ -421,7 +421,7 @@ class TestPSD:
         )
         result = psd.transform(ds)
         assert np.all(result.phase_lag.data >= lo - 1e-6)
-        assert np.all(result.phase_lg.data <= hi + 1e-6)
+        assert np.all(result.phase_lag.data <= hi + 1e-6)
         if expected_unit is not None:
             assert result.phase_lag.units == expected_unit
 
