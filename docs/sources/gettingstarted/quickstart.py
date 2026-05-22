@@ -125,7 +125,7 @@ print(f"y-axis unit: {ds.y.units}")  # Show time units
 # You can display the loaded NDDataset in a Jupyter notebook as follows:
 
 # %%
-ds
+print(ds)
 
 # %% [markdown]
 # Basic information about the data are given in the summary: data type, units, shape, and name of the dataset.

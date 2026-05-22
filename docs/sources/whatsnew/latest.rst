@@ -25,6 +25,12 @@ New Features
   provided by an official plugin at ``plugins/spectrochempy-iris/``.
 - Cantera plugin (``spectrochempy-cantera``): Plug Flow Reactor simulation
   utilities added at ``plugins/spectrochempy-cantera/``.
+- Added ``NDDataset.reshape()``.
+
+Bug Fixes
+~~~~~~~~~
+
+- Refactored PSD processing.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~

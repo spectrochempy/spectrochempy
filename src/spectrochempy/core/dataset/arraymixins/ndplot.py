@@ -21,7 +21,7 @@ If you relied on this module directly, migrate to the new plotting API.
 
 
 def __getattr__(name):
-    raise ImportError(
+    raise AttributeError(
         "spectrochempy.core.dataset.arraymixins.ndplot has been removed. "
         "Use dataset.plot() or functions from spectrochempy.plotting instead."
     )
