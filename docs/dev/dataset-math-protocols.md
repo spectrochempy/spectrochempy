@@ -4,7 +4,10 @@ This note is a low-risk study branch for future work on mathematical operations
 on `NDDataset`, `Coord`, and related array objects. It is intentionally not a
 redesign proposal yet. The goal is to clarify the current behavior, compare it
 with NumPy and xarray conventions, and identify incremental directions before
-tackling larger pieces such as quaternion support.
+tackling larger pieces such as quaternion support. In the context of the plugin
+architecture work, this also means identifying which numerical capabilities
+must remain core behavior and which ones should become optional or
+domain-specific extensions.
 
 ## Context
 
@@ -32,6 +35,14 @@ a single dense path where several independent policies are interleaved:
 
 That makes future changes risky, especially for quaternion data, plugin-provided
 domain behavior, and NumPy 2.x compatibility.
+
+The plugin work, especially the direction explored around PR 952, adds an
+important constraint: optional scientific domains should not force all users to
+pay for domain-specific behavior at import time or in the central execution
+path. Quaternion handling is the clearest example, but the same question applies
+to some complex-data behavior. Infrared users should keep a simple, fast, and
+predictable real-valued path, while NMR or future domains can opt into richer
+numeric semantics when they need them.
 
 ## Relevant External Conventions
 
@@ -120,7 +131,15 @@ should be separate enough to test independently.
    current behavior. It should be isolated behind a small execution policy before
    changing quaternion semantics.
 
-7. Metadata propagation is implicit.
+7. Complex-data behavior is also mixed into the common path.
+
+   Complex numbers are more general than quaternion data and should remain well
+   supported, but not every scientific workflow needs the same complex-aware
+   behavior. The future operation layer should allow a real-valued default path,
+   a core complex path, and plugin/domain extensions without making every
+   operation branch through all possible numeric modes.
+
+8. Metadata propagation is implicit.
 
    History, title, units, mask, and coordinates are updated in several places.
    A clearer result-construction phase would make future changes easier to
@@ -138,7 +157,8 @@ implementation yet:
 - in-place operations and explicit non-alignment behavior;
 - coordinate mismatch and accepted spectroscopy-specific broadcasting;
 - unit conversion and unit failure cases;
-- representative complex and quaternion cases;
+- representative real, complex, and quaternion cases, with separate tests for
+  the real-valued default path and optional/domain-specific numeric paths;
 - unsupported ufunc methods returning `NotImplemented` or raising clear errors.
 
 This phase is cheap and protects the existing user experience.
@@ -162,8 +182,10 @@ Without changing public behavior, split `_op()` into small internal phases:
    Encapsulates coordinate compatibility and future alignment choices.
 
 5. `ExecutionPlan`
-   Runs the numeric operation on magnitudes, including complex/quaternion
-   policies.
+   Runs the numeric operation on magnitudes. This should start with a small
+   real-valued/default execution path and delegate complex or quaternion behavior
+   to explicit numeric policies instead of embedding those branches in the
+   common path.
 
 6. `ResultPlan`
    Builds the returned object and applies units, mask, coordinates, title, and
@@ -199,12 +221,27 @@ Do not implement broad `__array_function__` in the first pass. A safer first
 step is a small registry of explicitly supported high-level functions if needed
 later, such as `np.concatenate`, `np.stack`, or `np.trapz` replacements.
 
-### Phase 4: Isolate Quaternion Execution
+### Phase 4: Decouple Numeric Execution Policies
 
-Before changing quaternion behavior, move the current quaternion-specific data
-execution into a private helper with tests. The helper should receive normalized
-magnitudes and return only numeric data. Unit and coordinate policy should not
-live in the quaternion branch.
+Before changing quaternion behavior, move the current complex and
+quaternion-specific data execution into explicit private helpers with tests. The
+helpers should receive normalized magnitudes and return only numeric data. Unit
+and coordinate policy should not live in those branches.
+
+The target shape is:
+
+- a core real-valued/default execution policy used by most spectroscopy
+  operations;
+- a core complex execution policy only where complex data are actually present
+  or explicitly requested;
+- a quaternion execution policy that can later be moved behind a plugin or
+  optional extension boundary if that is the cleanest outcome;
+- no hard dependency from ordinary dataset arithmetic on quaternion-specific
+  imports or assumptions.
+
+This mirrors the plugin architecture principle: the core may expose a generic
+extension point, but domain-specific numeric behavior should be registered or
+selected explicitly.
 
 ### Phase 5: Consider xarray Interoperability, Not Replacement
 
@@ -224,11 +261,13 @@ But the separation of concerns is worth following.
 A first real PR should be limited to:
 
 1. Add focused tests documenting current operator, ufunc, unit, coordinate, and
-   quaternion behavior.
+   numeric-mode behavior.
 2. Introduce private `OperationRequest` and `OperationPlan` helpers.
 3. Move only operand normalization and result-type selection out of `_op()`.
-4. Keep behavior unchanged.
-5. Run only targeted tests:
+4. Name the current real, complex, and quaternion branches as internal execution
+   policies, without moving them to plugins yet.
+5. Keep behavior unchanged.
+6. Run only targeted tests:
 
    ```bash
    conda activate scpy
@@ -237,7 +276,8 @@ A first real PR should be limited to:
    pytest tests/test_core/test_dataset/test_dataset.py -q -ra
    ```
 
-This gives us a safer base for quaternion and future plugin/domain extensions.
+This gives us a safer base for complex/quaternion decoupling and future
+plugin/domain extensions.
 
 ## Open Questions
 
@@ -250,10 +290,17 @@ This gives us a safer base for quaternion and future plugin/domain extensions.
 - Should plugin-provided array-like objects participate in the same math
   hierarchy, or should plugins expose conversion functions instead?
 - How should units interact with NumPy scalar promotion in NumPy 2.x edge cases?
+- Should quaternion execution remain in core as an optional internal policy, or
+  become a plugin-provided numeric policy once the extension point is stable?
+- Which complex-data operations are truly generic core behavior, and which ones
+  are domain-specific convenience behavior?
 
 ## Current Recommendation
 
 Do not start with quaternion. Start by naming and testing the operation pipeline.
 Once dispatch, unit policy, coordinate policy, and result construction are
-separated, quaternion support becomes a contained numeric execution problem
-rather than a cross-cutting change to the whole math layer.
+separated, complex and quaternion support become contained numeric execution
+policies rather than cross-cutting changes to the whole math layer. This is
+aligned with the plugin direction: the core owns the generic protocol and the
+common real-valued path; optional domains should be able to provide richer
+numeric behavior without making that behavior central for every user.
