@@ -18,14 +18,14 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
-
+- added NDDataset.reshape()
 
 .. section
 
 Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
-
+- refactor of PSD
 
 .. section
 
