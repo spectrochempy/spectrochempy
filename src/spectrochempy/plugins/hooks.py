@@ -4,6 +4,8 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 
+from collections.abc import Callable
+
 import pluggy
 
 hookspec = pluggy.HookspecMarker("spectrochempy")
@@ -233,4 +235,33 @@ class SpectroChemPyHookSpec:
 
         Returning ``None`` or an empty list is treated as
         "no simulation contribution".
+        """
+
+    # ------------------------------------------------------------------
+    # Generic handler overrides
+    #
+    # A single hook that lets plugins override named behaviour in core
+    # classes.  Keys follow the convention ``"<domain>.<action>"``.
+    #
+    # Unlike the list-based register_* hooks above, this one returns a
+    # single dict whose values are callables.  Each callable receives
+    # arguments specific to its extension point and returns either a
+    # result or ``None`` (meaning "use the core default").
+    # ------------------------------------------------------------------
+
+    @hookspec
+    def register_handlers(self) -> dict[str, Callable]:
+        """
+        Return a dict of named handler overrides for core extension points.
+
+        Example::
+
+            def register_handlers(self):
+                return {
+                    "coord.reversed": _my_coord_reversed,
+                    "concatenate.postprocess": _my_concat_postprocess,
+                }
+
+        Returning ``None`` or an empty dict is treated as
+        "no handler override".
         """

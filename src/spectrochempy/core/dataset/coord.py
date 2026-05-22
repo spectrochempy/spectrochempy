@@ -212,6 +212,17 @@ class Coord(NDMath, NDArray):
     @property
     def reversed(self):
         """Whether the axis is reversed."""
+        # Give plugins a chance to override via handler registry.
+        from spectrochempy.plugins.registry import registry  # noqa: PLC0415
+
+        handler = registry.get_handler("coord.reversed")
+        if handler is not None:
+            result = handler(self)
+            if result is not None:
+                return result
+
+        # Default logic — TODO: NMR-specific "ppm" check should eventually
+        # be provided by the NMR plugin via the handler above.
         return bool(
             self.units == "ppm"
             or self.units == "1 / centimeter"

@@ -13,7 +13,6 @@ import numpy as np
 
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.decorators import deprecated
@@ -118,6 +117,8 @@ def concatenate(*datasets, **kwargs):
     # --------------------------------------------
     sss = []
 
+    # TODO: This NMR-specific block should eventually be provided
+    #       by the NMR plugin via a generic hook mechanism.
     if datasets[0].origin == "topspin":
         # we can use metadata to create new coordinates
         metacoords = {}
@@ -199,12 +200,16 @@ def concatenate(*datasets, **kwargs):
     if coords is not None:
         out._coordset[dim] = coords[dim]
 
-    # for topspin data, we can create new coordinates from metadata
-    if datasets[0].origin == "topspin" and metacoords != {}:
-        c = []
-        for key, value in metacoords.items():
-            c.append(Coord(value, title=key))
-        out.y = CoordSet(c)
+    # Let plugins post-process the concatenation result.
+    from spectrochempy.plugins.registry import registry  # noqa: PLC0415
+
+    handler = registry.get_handler("concatenate.postprocess")
+    if handler is not None:
+        result = handler(
+            out, datasets, metacoords=metacoords if "metacoords" in locals() else {}
+        )
+        if result is not None:
+            out = result
 
     out._mask = mask
     out._units = units

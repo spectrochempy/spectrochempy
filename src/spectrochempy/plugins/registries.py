@@ -298,3 +298,33 @@ class MetadataRegistry:
 
     def clear(self) -> None:
         self._plugins.clear()
+
+
+class HandlerRegistry:
+    """
+    Manages generic handler overrides registered by plugins.
+
+    Each handler is a callable associated with a named extension point
+    (e.g. ``"coord.reversed"``).  The core dispatches to handlers when
+    present, falling back to the default behaviour when a handler
+    returns ``None`` or is not registered.
+    """
+
+    def __init__(self) -> None:
+        self._handlers: dict[str, Callable] = {}
+
+    def register_handler(self, name: str, func: Callable) -> None:
+        """Register a callable for the given extension point."""
+        self._handlers[name] = func
+
+    def get_handler(self, name: str) -> Callable | None:
+        """Return the handler for *name*, or ``None`` if not registered."""
+        return self._handlers.get(name)
+
+    @property
+    def available_handlers(self) -> dict[str, Callable]:
+        """Return a snapshot of all registered handlers."""
+        return dict(self._handlers)
+
+    def clear(self) -> None:
+        self._handlers.clear()

@@ -181,6 +181,7 @@ class PluginManager:
         self._collect_simulations(plugin, contributions, registry)
         self._collect_accessors(plugin, contributions, registry)
         self._collect_unit_contexts(plugin, contributions, registry)
+        self._collect_handlers(plugin, contributions, registry)
 
         return contributions
 
@@ -504,6 +505,52 @@ class PluginManager:
         except Exception:
             logger.exception(
                 "Failed to collect unit contexts from plugin '%s'",
+                getattr(plugin, "name", "unknown"),
+            )
+            raise
+
+    def _collect_handlers(
+        self,
+        plugin: Any,
+        _contributions: dict[str, list[str]],
+        registry: PluginRegistry,
+    ) -> None:
+        """Collect generic handler overrides declared by the plugin."""
+        plugin_name = getattr(plugin, "name", "unknown")
+        if not (
+            hasattr(plugin, "register_handlers") and callable(plugin.register_handlers)
+        ):
+            return
+        try:
+            raw = plugin.register_handlers()
+            if raw is None:
+                return
+            if not isinstance(raw, dict):
+                logger.warning(
+                    "Plugin '%s': register_handlers() returned %s, expected dict.",
+                    plugin_name,
+                    type(raw).__name__,
+                )
+                return
+            for key, func in raw.items():
+                if not isinstance(key, str):
+                    logger.warning(
+                        "Plugin '%s': register_handlers() key %r is not a string, skipping.",
+                        plugin_name,
+                        key,
+                    )
+                    continue
+                if not callable(func):
+                    logger.warning(
+                        "Plugin '%s': register_handlers() value for %r is not callable, skipping.",
+                        plugin_name,
+                        key,
+                    )
+                    continue
+                registry.handlers.register_handler(key, func)
+        except Exception:
+            logger.exception(
+                "Failed to collect handlers from plugin '%s'",
                 getattr(plugin, "name", "unknown"),
             )
             raise

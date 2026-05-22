@@ -12,6 +12,7 @@ from typing import Any
 
 from spectrochempy.plugins.capabilities import PluginCapability
 from spectrochempy.plugins.registries import ExtensionRegistry
+from spectrochempy.plugins.registries import HandlerRegistry
 from spectrochempy.plugins.registries import IORegistry
 from spectrochempy.plugins.registries import MetadataRegistry
 from spectrochempy.plugins.registries import ProcessingRegistry
@@ -49,6 +50,7 @@ class PluginRegistry:
         self.visualization = VisualizationRegistry()
         self.metadata = MetadataRegistry()
         self.extensions = ExtensionRegistry()
+        self.handlers = HandlerRegistry()
 
     def clear(self) -> None:
         """Remove all entries from every sub-registry."""
@@ -57,6 +59,7 @@ class PluginRegistry:
         self.visualization.clear()
         self.metadata.clear()
         self.extensions.clear()
+        self.handlers.clear()
 
     def merge_from(self, other: PluginRegistry) -> None:
         """Merge contributions from another registry into this registry."""
@@ -69,6 +72,7 @@ class PluginRegistry:
         self.visualization._visualizers.update(other.visualization._visualizers)
         for category, entries in other.extensions._extensions.items():
             self.extensions._extensions.setdefault(category, {}).update(entries)
+        self.handlers._handlers.update(other.handlers._handlers)
 
     # ------------------------------------------------------------------
     # Capability-based query
@@ -271,6 +275,22 @@ class PluginRegistry:
     @property
     def available_plugins(self) -> dict[str, Any]:
         return self.metadata.available_plugins
+
+    # ------------------------------------------------------------------
+    # HandlerRegistry forwarding
+    # ------------------------------------------------------------------
+
+    def get_handler(self, name: str) -> Callable | None:
+        """Return the handler registered for extension point *name*."""
+        return self.handlers.get_handler(name)
+
+    def register_handler(self, name: str, func: Callable) -> None:
+        """Register *func* as the handler for extension point *name*."""
+        self.handlers.register_handler(name, func)
+
+    @property
+    def available_handlers(self) -> dict[str, Callable]:
+        return self.handlers.available_handlers
 
 
 registry = PluginRegistry()

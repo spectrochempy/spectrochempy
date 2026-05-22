@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
@@ -36,6 +38,27 @@ def _coord_has_larmor(obj) -> bool:
 def _coord_larmor_argument(obj):
     """Extract the Larmor frequency for the NMR unit-context setup function."""
     return obj.larmor
+
+
+def _nmr_coord_reversed(coord) -> bool | None:
+    """Return True if the Coord has ppm units (NMR axis reversal)."""
+    if coord.units == "ppm":
+        return True
+    return None
+
+
+def _nmr_concat_postprocess(out, datasets, **kwargs):
+    """Post-process concatenation for NMR TopSpin datasets."""
+    from spectrochempy.core.dataset.coord import Coord  # noqa: PLC0415
+    from spectrochempy.core.dataset.coordset import CoordSet  # noqa: PLC0415
+
+    metacoords = kwargs.get("metacoords", {})
+    if datasets[0].origin == "topspin" and metacoords:
+        coords = []
+        for key, value in metacoords.items():
+            coords.append(Coord(value, title=key))
+        out.y = CoordSet(coords)
+    return out
 
 
 class NMRPlugin(SpectroChemPyPlugin):
@@ -84,6 +107,13 @@ class NMRPlugin(SpectroChemPyPlugin):
                 "description": "NMR ppm/frequency conversion context",
             },
         ]
+
+    def register_handlers(self) -> dict[str, Callable]:
+        """Register handler overrides for core extension points."""
+        return {
+            "coord.reversed": _nmr_coord_reversed,
+            "concatenate.postprocess": _nmr_concat_postprocess,
+        }
 
 
 # ------------------------------------------------------------------
