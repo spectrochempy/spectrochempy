@@ -710,7 +710,7 @@ class PSD(BaseConfigurable):
         psd.set_coordset(y=y_coord, x=x_coord)
 
         psd.units = X.units if hasattr(X, "units") else None
-        psd.title = f"{X.title if hasattr(X, 'title') else 'data'}"
+        psd.title = X.title if hasattr(X, "title") else "data"
         psd.history = "Created by SpectroChemPy PSD"
 
         # Extract in_phase (phi=0°), quadrature (phi=90°), amplitude, phase lag
