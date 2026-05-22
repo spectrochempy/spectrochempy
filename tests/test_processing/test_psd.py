@@ -372,7 +372,7 @@ class TestPSD:
         result = psd.transform(ds)
 
         np.testing.assert_allclose(result.amplitude.data[0], amplitude_true, atol=1e-10)
-        np.testing.assert_allclose(result.phase.data[0], phase_deg_true, atol=1e-10)
+        np.testing.assert_allclose(result.phase_lag.data[0], phase_deg_true, atol=1e-10)
 
     # --------------------------------------------------------------------------
     # Output components and physical properties
@@ -386,8 +386,8 @@ class TestPSD:
         assert result.in_phase is not None
         assert result.quadrature is not None
         assert result.amplitude is not None
-        assert result.phase is not None
-        assert np.all(np.isfinite(result.phase.data))
+        assert result.phase_lag is not None
+        assert np.all(np.isfinite(result.phase_lag.data))
 
         # DC offset insensitivity
         n_spectra = 7
@@ -420,10 +420,10 @@ class TestPSD:
             phase_unit=unit,
         )
         result = psd.transform(ds)
-        assert np.all(result.phase.data >= lo - 1e-6)
-        assert np.all(result.phase.data <= hi + 1e-6)
+        assert np.all(result.phase_lag.data >= lo - 1e-6)
+        assert np.all(result.phase_lg.data <= hi + 1e-6)
         if expected_unit is not None:
-            assert result.phase.units == expected_unit
+            assert result.phase_lag.units == expected_unit
 
     # --------------------------------------------------------------------------
     # Trait validation
