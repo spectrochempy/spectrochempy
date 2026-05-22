@@ -1250,6 +1250,44 @@ def test_coordinate_compatible_operation():
     assert_array_equal(r.data, np.full(5, 2.0))
 
 
+def test_coordinate_multidim_last_dim_only():
+    """
+    Multi-D datasets are only checked on the last dimension.
+
+    This documents the current ``spectroscopic-last-dim`` policy:
+    even when *other* is multi-dimensional, only the **last** (x)
+    dimension coordinates must match.  Coordinates on earlier dimensions
+    are ignored.  This is the existing behaviour — a previous
+    ``elif other._squeeze_ndim > 1`` branch that intended to check
+    all dimensions was unreachable and has been removed.
+    """
+    coord_x = Coord(np.arange(5.0))
+    coord_y1 = Coord(np.array([10.0, 20.0, 30.0]))
+    coord_y2 = Coord(np.array([99.0, 88.0, 77.0]))  # different from y1
+
+    ds1 = NDDataset(np.ones((3, 5)), coordset=[coord_y1, coord_x])
+    ds2 = NDDataset(np.ones((3, 5)), coordset=[coord_y2, coord_x])
+
+    # Even though coord_y1 != coord_y2, the last dim (x) matches,
+    # so the operation succeeds under the current policy.
+    r = ds1 + ds2
+    assert isinstance(r, NDDataset)
+    assert_array_equal(r.data, np.full((3, 5), 2.0))
+
+
+def test_coordinate_multidim_last_dim_mismatch():
+    """Multi-D operation raises when the last dimension does not match."""
+    coord_x1 = Coord(np.arange(5.0))
+    coord_x2 = Coord(np.arange(10.0, 15.0))
+    coord_y = Coord(np.array([10.0, 20.0, 30.0]))
+
+    ds1 = NDDataset(np.ones((3, 5)), coordset=[coord_y, coord_x1])
+    ds2 = NDDataset(np.ones((3, 5)), coordset=[coord_y, coord_x2])
+
+    with pytest.raises(CoordinatesMismatchError):
+        ds1 + ds2
+
+
 def test_numpy_ufunc_via_operator_equivalence():
     """Using np.<ufunc>(a, b) gives same result as a <op> b."""
     ds = NDDataset(np.array([1.0, 2.0, 3.0]))
