@@ -338,15 +338,46 @@ def _comp_ufuncs():
 
 
 LOGICAL_BINARY_STR = """
-
-logical_and(x1, x2 [, out, where, …])          Compute the truth value of x1 AND x2 element-wise.
-logical_or(x1, x2 [, out, where, casting, …])  Compute the truth value of x1 OR x2 element-wise.
-logical_xor(x1, x2 [, out, where, …])          Compute the truth value of x1 XOR x2, element-wise.
+# logical binary operators
 """
 
+# Current coordinate alignment policy used by NDMath._op().
+# ``"spectroscopic-last-dim"`` means:
+# - 1-D operands are compared on their last (x) dimension only.
+# - Multi-D operands are compared on every dimension.
+# - Scalar-like operands (squeeze_ndim == 0) skip comparison.
+# - Tolerance is 3 decimal places, data-only.
+_COORDINATE_POLICY: str = "spectroscopic-last-dim"
 
-def _logical_binary_ufuncs():
-    return _extract_ufuncs(LOGICAL_BINARY_STR)
+
+class _ExecutionPlan:
+    """Named numeric execution branches for NDMath operations."""
+
+    REAL = "real"
+    QUATERNION = "quaternion"
+
+    @staticmethod
+    def execute(branch: str, f: Callable, d: np.ndarray, args: list) -> np.ndarray:
+        """Run *f* on data *d* using the named execution *branch*."""
+        if branch == _ExecutionPlan.REAL:
+            return f(d, *args)
+        dr, di = quat_as_complex_array(d)
+        datar = f(dr, *args)
+        datai = f(di, *args)
+        return as_quaternion(datar, datai)
+
+    @staticmethod
+    def select(
+        is_quaternion: bool,
+        quaternion_aware: bool,
+        args: list,
+    ) -> str:
+        """Return the branch name appropriate for the current operands."""
+        if is_quaternion and not (
+            quaternion_aware and all(arg.dtype not in TYPE_COMPLEX for arg in args)
+        ):
+            return _ExecutionPlan.QUATERNION
+        return _ExecutionPlan.REAL
 
 
 class NDMath:
@@ -506,22 +537,12 @@ class NDMath:
         return self.data.__array_struct__
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        fname = ufunc.__name__
+        # Only __call__ is supported; reject ufunc methods such as
+        # reduce, accumulate, outer, at with a clear message.
+        if method != "__call__":
+            return NotImplemented
 
-        #        # case of complex or hypercomplex data
-        #        if self._implements(NDComplexArray) and self.has_complex_dims:
-        #
-        #            if fname in self.__complex_funcs:
-        #                return getattr(inputs[0], fname)()
-        #
-        #            if fname in ["fabs", ]:
-        #                # function not available for complex data
-        #                raise ValueError(f"Operation `{ufunc}` does not accept complex
-        #                data!")
-        #
-        #        # If this reached, data are not complex or hypercomplex
-        #        if fname in ['absolute', 'abs']:
-        #            f = np.fabs
+        fname = ufunc.__name__
         from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 
         # set history string
@@ -3069,21 +3090,10 @@ class NDMath:
             # TODO: check the complex nature of the result to return it
 
         else:
-            # make a simple operation
+            # simple operation — select execution branch
+            branch = _ExecutionPlan.select(is_quaternion, quaternion_aware, args)
             try:
-                if (
-                    not is_quaternion
-                    or quaternion_aware
-                    and all(arg.dtype not in TYPE_COMPLEX for arg in args)
-                ):
-                    data = f(d, *args)
-                else:
-                    # in this case we will work on both complex separately
-                    dr, di = quat_as_complex_array(d)
-                    datar = f(dr, *args)
-                    datai = f(di, *args)
-                    data = as_quaternion(datar, datai)
-
+                data = _ExecutionPlan.execute(branch, f, d, args)
             except Exception as e:
                 raise ArithmeticError(e.args[0]) from e
 
