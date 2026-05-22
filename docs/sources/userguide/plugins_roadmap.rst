@@ -101,6 +101,36 @@ In that scenario, pluginization would primarily be an internal modularization
 strategy. Infrared users should not have to manage extra plugin loading steps
 for normal usage.
 
+Further decoupling of domain-specific plugins from the core
+===========================================================
+
+The current plugin system is an important first step. A future evolution
+will aim to make the core completely independent from domain-specific
+concepts.
+
+Concrete next steps include:
+
+* moving NMR-specific notions such as Larmor frequency, NMR unit contexts
+  (ppm↔Hz conversion), and possibly ``Quaternion`` support fully into the
+  NMR plugin;
+* removing transitional coupling between the core and official plugins
+  that may remain in this branch.
+
+The public documentation will be progressively separated into:
+
+* **core documentation**, which stays domain-neutral and focuses on
+  generic extension mechanisms (metadata, unit contexts, readers/writers,
+  analyses/processings, accessors, documentation integration);
+* **official plugin documentation**, which explains domain-specific
+  concepts for each official plugin;
+* **third-party plugin development documentation**, which describes how
+  to extend SpectroChemPy without modifying the core.
+
+Official plugins should be documented on spectrochempy.fr as first-class
+extensions. Third-party developers should eventually be able to add
+similar behavior without modifying the core, using the same plugin
+mechanisms.
+
 Official and third-party plugins
 ================================
 
