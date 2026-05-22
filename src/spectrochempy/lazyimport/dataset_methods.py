@@ -101,8 +101,6 @@ _LAZY_DATASETS_IMPORTS = {
     "write_matlab": "spectrochempy.core.writers.write_matlab",
     "write_mat": "spectrochempy.core.writers.write_matlab",
     "align": "spectrochempy.processing.alignement.align",
-    "ab": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
-    "abc": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
     "get_baseline": "spectrochempy.processing.baselineprocessing.baselineprocessing",
     "basc": "spectrochempy.processing.baselineprocessing.baselineprocessing",
     "detrend": "spectrochempy.processing.baselineprocessing.baselineprocessing",

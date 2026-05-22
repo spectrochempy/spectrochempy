@@ -35,11 +35,11 @@ class PSDResult:
     Attributes
     ----------
     prs : NDDataset
-        Phase-resolved spectra with shape (n_phi, n_wavenumbers).
+        Phase-resolved spectra with shape (n_phi, n_channels).
     in_phase : NDDataset
-        In-phase component (phi=0°) with shape (n_wavenumbers,).
+        In-phase component (phi=0°) with shape (n_channels,).
     quadrature : NDDataset
-        Quadrature component (phi=90°) with shape (n_wavenumbers,).
+        Quadrature component (phi=90°) with shape (n_channels,).
     amplitude : NDDataset
         Amplitude = sqrt(in_phase² + quadrature²).
     phase : NDDataset
@@ -49,12 +49,12 @@ class PSDResult:
         None when ``demodulation="integration"``.
     """
 
-    def __init__(self, prs, in_phase, quadrature, amplitude, phase, T=None):
+    def __init__(self, prs, in_phase, quadrature, amplitude, phase_lag, T=None):
         self.prs = prs
         self.in_phase = in_phase
         self.quadrature = quadrature
         self.amplitude = amplitude
-        self.phase = phase
+        self.phase_lag = phase_lag
         self.T = T
 
     def __repr__(self):
@@ -63,7 +63,7 @@ class PSDResult:
             f"in_phase={self.in_phase.shape}, "
             f"quadrature={self.quadrature.shape}, "
             f"amplitude={self.amplitude.shape}, "
-            f"phase={self.phase.shape}, "
+            f"phase={self.phase_lag.shape}, "
             f"T={'None' if self.T is None else self.T.shape})"
         )
 
@@ -129,14 +129,14 @@ class PSD(BaseConfigurable):
 
         A_demodulated = T · A_averaged
 
-    where A_averaged has shape (n_spectra_per_cycle, n_wavenumbers),
+    where A_averaged has shape (n_spectra_per_cycle, n_channels),
     averaged across all cycles.
 
     **PSD equation (integration method):**
 
         A_demodulated (φ, λ) = (2/period) ∫ A_averaged(t, λ) · sin(k·ω·t_rel + φ) dt
 
-    where φ is the demodulation phase angle, λ is wavenumber,
+    where φ is the demodulation phase angle, λ is the channel,
     and t_rel is normalized relative time within one modulation period
     (t_rel = 0 at the start of the period, t_rel = 1 at the end).
 
@@ -144,7 +144,7 @@ class PSD(BaseConfigurable):
     --------
     >>> import spectrochempy as scp
     >>> import numpy as np
-    >>> # Raw 2D input (120 spectra, 1000 wavenumbers)
+    >>> # Raw 2D input (120 spectra, 1000 channels)
     >>> X = scp.NDDataset(np.random.rand(120, 1000))
     >>> psd = scp.PSD(n_spectra_per_cycle=60, demodulation='matrix')
     >>> result = psd.transform(X)
@@ -252,29 +252,29 @@ class PSD(BaseConfigurable):
         Normalize input to the canonical 2D cycle-averaged modulation waveform.
 
         All supported input formats are reduced to a single cycle-averaged
-        2D array ``A`` with shape ``(n_spectra_per_cycle, n_wavenumbers)``,
+        2D array ``A`` with shape ``(n_spectra_per_cycle, n_channels)``,
         which is the direct input to PSD demodulation.
 
         Input formats
         -------------
-        - 3D grouped: ``(n_cycles, n_spectra_per_cycle, n_wavenumbers)``
-        - 2D raw concatenated: ``(n_cycles * n_spectra_per_cycle, n_wavenumbers)``
+        - 3D grouped: ``(n_cycles, n_spectra_per_cycle, n_channels)``
+        - 2D raw concatenated: ``(n_cycles * n_spectra_per_cycle, n_channels)``
           (requires ``n_spectra_per_cycle``)
-        - 2D already averaged: ``(n_spectra_per_cycle, n_wavenumbers)``
+        - 2D already averaged: ``(n_spectra_per_cycle, n_channels)``
           (when ``n_spectra_per_cycle`` is ``None``)
 
         Returns
         -------
         A : np.ndarray
-            Cycle-averaged data with shape (n_spectra_per_cycle, n_wavenumbers).
+            Cycle-averaged data with shape (n_spectra_per_cycle, n_channels).
         time_coord : Coord
             Time coordinate for the modulation axis.
         spectral_coord : Coord
             Spectral coordinate.
         n_spectra : int
             Number of spectra per cycle.
-        n_wavenumbers : int
-            Number of wavenumbers.
+        n_channels : int
+            Number of channels.
         """
         # Ensure X is NDDataset
         if not isinstance(X, NDDataset):
@@ -301,7 +301,7 @@ class PSD(BaseConfigurable):
         # Infer format from dimensionality and n_spectra_per_cycle
         if ndim == 3:
             # Grouped cycles: average over the cycle axis directly
-            n_cycles, n_spectra, n_wavenumbers = shape
+            n_cycles, n_spectra, n_channels = shape
             A = np.mean(X.data, axis=0)
 
             if X.coordset is not None:
@@ -313,7 +313,7 @@ class PSD(BaseConfigurable):
         elif ndim == 2:
             if n_spectra_per_cycle is None:
                 # Already averaged / single cycle: return directly as 2D
-                n_spectra, n_wavenumbers = shape
+                n_spectra, n_channels = shape
                 A = X.data.copy()
 
                 if X.coordset is not None:
@@ -330,8 +330,8 @@ class PSD(BaseConfigurable):
                     )
                 n_cycles = shape[0] // n_spectra_per_cycle
                 n_spectra = n_spectra_per_cycle
-                n_wavenumbers = shape[1]
-                data_3d = X.data.reshape(n_cycles, n_spectra_per_cycle, n_wavenumbers)
+                n_channels = shape[1]
+                data_3d = X.data.reshape(n_cycles, n_spectra_per_cycle, n_channels)
                 A = np.mean(data_3d, axis=0)
 
                 if X.coordset is not None:
@@ -366,12 +366,12 @@ class PSD(BaseConfigurable):
         # Create spectral coordinate if not available
         if spectral_coord is None:
             spectral_coord = Coord(
-                np.arange(n_wavenumbers),
-                title="wavenumber",
+                np.arange(n_channels),
+                title="channel",
                 units=None,
             )
 
-        return A, time_coord, spectral_coord, n_spectra, n_wavenumbers
+        return A, time_coord, spectral_coord, n_spectra, n_channels
 
     def _compute_T(self, n_spectra, time_coord):
         """
@@ -469,7 +469,7 @@ class PSD(BaseConfigurable):
             y=Coord(phi, title="demodulation phase angle", units="degrees"),
             x=time_coord.copy(),
         )
-        T.title = "PSD transform matrix T"
+        T.title = "Demodulation coefficients"
         T.history = "Created by SpectroChemPy PSD"
 
         return T
@@ -481,18 +481,18 @@ class PSD(BaseConfigurable):
         Parameters
         ----------
         A : np.ndarray
-            Cycle-averaged data with shape (n_spectra, n_wavenumbers).
+            Cycle-averaged data with shape (n_spectra, n_channels).
         T_data : np.ndarray
             Transform matrix with shape (n_phi, n_spectra).
 
         Returns
         -------
         np.ndarray
-            PSD result with shape (n_phi, n_wavenumbers).
+            PSD result with shape (n_phi, n_channels).
         """
-        # A shape: (n_spectra, n_wavenumbers)
+        # A shape: (n_spectra, n_channels)
         # T shape: (n_phi, n_spectra)
-        # Result: (n_phi, n_wavenumbers)
+        # Result: (n_phi, n_channels)
         return np.dot(T_data, A)
 
     def _compute_psd_integration(self, A, n_spectra, time_coord_data):
@@ -502,7 +502,7 @@ class PSD(BaseConfigurable):
         Parameters
         ----------
         A : np.ndarray
-            Cycle-averaged data with shape (n_spectra, n_wavenumbers).
+            Cycle-averaged data with shape (n_spectra, n_channels).
         n_spectra : int
             Number of spectra per cycle.
         time_coord_data : np.ndarray
@@ -511,7 +511,7 @@ class PSD(BaseConfigurable):
         Returns
         -------
         np.ndarray
-            Phase-resolved spectra (PRS) with shape (n_phi, n_wavenumbers).
+            Phase-resolved spectra (PRS) with shape (n_phi, n_channels).
         """
         n = n_spectra
         phi = self._get_phi()
@@ -546,16 +546,16 @@ class PSD(BaseConfigurable):
         # Convert phi to radians
         phi_rad = phi * np.pi / 180.0  # Shape: (n_phi,)
 
-        n_wavenumbers = A.shape[1]
+        channels = A.shape[1]
 
-        # Result array: (n_phi, n_wavenumbers)
-        psd = np.zeros((n_phi, n_wavenumbers))
+        # Result array: (n_phi, n_channels)
+        psd = np.zeros((n_phi, channels))
 
         # angle: (n_phi, n_spectra)
         angle = (
             harmonic * 2.0 * np.pi * t_norm + phi_rad[:, np.newaxis]
         )  # (n_phi, n_spectra)
-        # integrand: (n_phi, n_spectra, n_wavenumbers)
+        # integrand: (n_phi, n_spectra, n_channels)
         integrand = A[np.newaxis, :, :] * np.sin(angle)[:, :, np.newaxis]
 
         # Integrate over spectra dimension (axis=1)
@@ -577,14 +577,14 @@ class PSD(BaseConfigurable):
         Parameters
         ----------
         prs : NDDataset
-            Phase-resolved spectra with shape (n_phi, n_wavenumbers).
+            Phase-resolved spectra with shape (n_phi, n_channels).
         phi : np.ndarray
             Phase angles.
 
         Returns
         -------
         tuple
-            (in_phase, quadrature, amplitude, phase) as NDDatasets.
+            (in_phase, quadrature, amplitude, phase_lag) as NDDatasets.
         """
         # Find indices for 0° and 90° (with tolerance for floating point)
         idx_0 = np.where(np.isclose(phi, 0.0))[0]
@@ -602,7 +602,7 @@ class PSD(BaseConfigurable):
         idx_0 = idx_0[0]
         idx_90 = idx_90[0]
 
-        # psd shape: (n_phi, n_wavenumbers)
+        # psd shape: (n_phi, n_channels)
         in_phase_data = prs.data[idx_0, :]
         quadrature_data = prs.data[idx_90, :]
 
@@ -613,14 +613,14 @@ class PSD(BaseConfigurable):
         in_phase.dims = ["x"]
         in_phase.set_coordset(x=x_coord)
         in_phase.units = prs.units
-        in_phase.title = "In-phase component (0°)"
+        in_phase.title = "In-phase spectrum (0°)"
         in_phase.history = "Created by SpectroChemPy PSD"
 
         quadrature = NDDataset(quadrature_data)
         quadrature.dims = ["x"]
         quadrature.set_coordset(x=x_coord)
         quadrature.units = prs.units
-        quadrature.title = "Quadrature component (90°)"
+        quadrature.title = "Quadrature spectrum (90°)"
         quadrature.history = "Created by SpectroChemPy PSD"
 
         # Compute amplitude
@@ -632,18 +632,25 @@ class PSD(BaseConfigurable):
         amplitude.title = "PSD Amplitude"
         amplitude.history = "Created by SpectroChemPy PSD"
 
-        # Compute phase using np.arctan2
-        phase_data = np.arctan2(quadrature.data, in_phase.data)
-        if self.phase_unit == "degrees":
-            phase_data = phase_data * 180.0 / np.pi
-        phase = NDDataset(phase_data)
-        phase.dims = in_phase.dims
-        phase.set_coordset(**in_phase.coordset)
-        phase.units = "degree" if self.phase_unit == "degrees" else "radian"
-        phase.title = "PSD Phase"
-        phase.history = "Created by SpectroChemPy PSD"
+        # Compute phase lag using np.arctan2
+        phase_lag_data = np.arctan2(quadrature.data, in_phase.data)
 
-        return in_phase, quadrature, amplitude, phase
+        if self.phase_unit == "degrees":
+            phase_lag_data = np.degrees(phase_lag_data)
+            phase_lag_data = np.mod(phase_lag_data, 360.0)
+            phase_lag_units = "degree"
+        else:
+            phase_lag_data = np.mod(phase_lag_data, 2.0 * np.pi)
+            phase_lag_units = "radian"
+
+        phase_lag = NDDataset(phase_lag_data)
+        phase_lag.dims = in_phase.dims
+        phase_lag.set_coordset(**in_phase.coordset)
+        phase_lag.units = phase_lag_units
+        phase_lag.title = "Phase lag"
+        phase_lag.history = "Created by SpectroChemPy PSD"
+
+        return in_phase, quadrature, amplitude, phase_lag
 
     # ----------------------------------------------------------------------------------
     # Public methods
@@ -674,7 +681,7 @@ class PSD(BaseConfigurable):
             time_coord,
             spectral_coord,
             n_spectra,
-            n_wavenumbers,
+            n_channels,
         ) = self._normalize_to_cycle_average(X)
 
         # Compute PSD
@@ -687,15 +694,17 @@ class PSD(BaseConfigurable):
             psd_data = self._compute_psd_integration(A, n_spectra, time_coord.magnitude)
 
         # Create NDDataset for psd
-        # Shape: (n_phi, n_wavenumbers)
+        # Shape: (n_phi, n_channels)
         psd = NDDataset(psd_data, dims=["y", "x"])
-        y_coord = Coord(self._get_phi(), title="demodulation phase", units="degrees")
+        y_coord = Coord(
+            self._get_phi(), title=r"demodulation phase angle", units="degrees"
+        )
         if spectral_coord is not None:
             x_coord = spectral_coord.copy()
         else:
             x_coord = Coord(
-                np.arange(n_wavenumbers),
-                title="wavenumber",
+                np.arange(n_channels),
+                title="channel",
                 units=None,
             )
         psd.set_coordset(y=y_coord, x=x_coord)
@@ -704,8 +713,8 @@ class PSD(BaseConfigurable):
         psd.title = f"PSD of {X.title if hasattr(X, 'title') else 'data'}"
         psd.history = "Created by SpectroChemPy PSD"
 
-        # Extract in_phase (phi=0°), quadrature (phi=90°), amplitude, phase
-        in_phase, quadrature, amplitude, phase = self._extract_components(
+        # Extract in_phase (phi=0°), quadrature (phi=90°), amplitude, phase lag
+        in_phase, quadrature, amplitude, phase_lag = self._extract_components(
             psd, self._get_phi()
         )
 
@@ -714,7 +723,7 @@ class PSD(BaseConfigurable):
             in_phase=in_phase,
             quadrature=quadrature,
             amplitude=amplitude,
-            phase=phase,
+            phase=phase_lag,
             T=T_matrix,
         )
 
