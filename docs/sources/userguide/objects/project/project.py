@@ -36,16 +36,13 @@
 
 # %%
 import spectrochempy as scp
-from spectrochempy import Project
-from spectrochempy import pathclean
-from spectrochempy import preferences as prefs
 
 # %% [markdown]
 # ## Project creation
 # We can easily create a new project to store various datasets
 
 # %%
-proj = Project()
+proj = scp.Project()
 
 # %% [markdown]
 # As we did not specify a name, a name has been attributed automatically:
@@ -77,7 +74,7 @@ proj
 # Install with: ``pip install spectrochempy[nmr]``.
 
 # %%
-datadir = pathclean(prefs.datadir)
+datadir = scp.pathclean(scp.preferences.datadir)
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
 nd1 = scp.nmr.read_topspin(
@@ -160,7 +157,7 @@ proj.save_as("NMR")
 # #### Loading
 
 # %%
-proj2 = Project.load("NMR")
+proj2 = scp.Project.load("NMR")
 
 # %%
 proj2

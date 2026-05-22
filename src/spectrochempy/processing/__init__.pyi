@@ -13,6 +13,7 @@ __all__ = [
     "fft",
     "filter",
     "interpolation",
+    "psd",
     "transformation",
 ]
 
@@ -22,4 +23,5 @@ from . import baselineprocessing
 from . import fft
 from . import filter
 from . import interpolation
+from . import psd
 from . import transformation

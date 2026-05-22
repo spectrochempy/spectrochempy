@@ -11,6 +11,7 @@ __dataset_methods__ = [  # Methods that can be called as API functions
     "squeeze",
     "swapdims",
     "transpose",
+    "reshape",
     "to_array",
     "to_xarray",
     "take",
@@ -59,6 +60,7 @@ from spectrochempy.utils.exceptions import SpectroChemPyError
 from spectrochempy.utils.optional import import_optional_dependency
 from spectrochempy.utils.print import colored_output
 from spectrochempy.utils.system import get_user_and_node
+from spectrochempy.utils.typeutils import is_sequence
 
 
 # ======================================================================================
@@ -406,7 +408,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             raise AttributeError
 
         # as we are doing lazy_import, we look in the _api module)
-        from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
+        from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS  # noqa: PLC0415
 
         if item in {"read", "load_iris", "download_nist_ir"} or item.startswith(
             "read_"
@@ -417,10 +419,10 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             # methods or dataset plugin accessors.
             raise AttributeError
 
-        from spectrochempy.plugins.manager import plugin_manager
-        from spectrochempy.plugins.namespace import DatasetPluginAccessor
-        from spectrochempy.plugins.namespace import has_dataset_namespace
-        from spectrochempy.plugins.registry import registry
+        from spectrochempy.plugins.manager import plugin_manager  # noqa: PLC0415
+        from spectrochempy.plugins.namespace import DatasetPluginAccessor  # noqa: PLC0415
+        from spectrochempy.plugins.namespace import has_dataset_namespace  # noqa: PLC0415
+        from spectrochempy.plugins.registry import registry  # noqa: PLC0415
 
         plugin_manager.discover()
         if has_dataset_namespace(registry, item):
@@ -1444,6 +1446,216 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             f"Data transposed between dims: {dims}" if dims else "Data transposed"
         )
 
+        return new
+
+    def reshape(
+        self,
+        shape,
+        *,
+        dims=None,
+        coord_policy="safe",
+        coords=None,
+        inplace=False,
+    ):
+        """
+        Reshape an NDDataset to a new shape, with conservative metadata handling.
+
+        The underlying data array is reshaped exactly like `numpy.reshape`.
+        Coordinates are handled according to `coord_policy` to avoid attaching
+        misleading coordinates when dimensions are split or merged.
+
+        Parameters
+        ----------
+        shape : int or tuple of ints
+            New shape. One dimension may be ``-1`` to be inferred automatically.
+        dims : list of str, optional
+            Explicit dimension names for the output. Must match the output
+            number of dimensions and be unique.
+        coord_policy : {"safe", "drop", "strict"}, default="safe"
+            Policy for handling existing coordinates:
+
+            - ``"safe"`` : Preserve coordinates only for dimensions whose
+              shape and position are unambiguously unchanged. Create default
+              coordinates for new or ambiguous dimensions.
+            - ``"drop"`` : Discard all old coordinates and create default
+              coordinates for every dimension.
+            - ``"strict"`` : Raise `ValueError` if any existing coordinate
+              cannot be unambiguously mapped to the new shape.
+        coords : dict, optional
+            User-provided coordinates to override inferred ones. Keys are
+            dimension names, values are `Coord` objects. The length of each
+            coordinate must match the corresponding new dimension.
+        inplace : bool, optional, default=`False`
+            If True, modify the dataset in place.
+
+        Returns
+        -------
+        NDDataset
+            Reshaped dataset.
+
+        Examples
+        --------
+        No-op reshape preserves everything:
+
+        >>> Y = X.reshape((60, 1000))
+
+        Add a singleton cycle dimension:
+
+        >>> Y = X.reshape((1, 60, 1000), dims=("cycle", "time", "x"))
+
+        Split raw spectra into cycles:
+
+        >>> Y = X.reshape((2, 60, 1000), dims=("cycle", "time", "x"))
+        """
+        if coord_policy not in {"safe", "drop", "strict"}:
+            raise ValueError(
+                f"coord_policy must be 'safe', 'drop', or 'strict'. Got {coord_policy!r}."
+            )
+
+        # Resolve the shape, handling -1 like NumPy
+        shape = tuple(shape) if is_sequence(shape) else (shape,)
+        if -1 in shape:
+            known_size = 1
+            n_minus_one = 0
+            for s in shape:
+                if s == -1:
+                    n_minus_one += 1
+                else:
+                    known_size *= s
+            if n_minus_one != 1:
+                raise ValueError(
+                    "Only one dimension can be -1 for automatic inference."
+                )
+            inferred = self.size // known_size
+            if inferred * known_size != self.size:
+                raise ValueError(
+                    f"Cannot reshape array of size {self.size} into shape {shape}"
+                )
+            shape = tuple(inferred if s == -1 else s for s in shape)
+
+        if np.prod(shape) != self.size:
+            raise ValueError(
+                f"Cannot reshape array of size {self.size} into shape {shape}"
+            )
+
+        new = self.copy() if not inplace else self
+
+        # Reshape data and mask
+        new._data = new._data.reshape(shape)
+        if new.is_masked:
+            new._mask = new._mask.reshape(shape)
+
+        # --- Dimension names ------------------------------------------------
+        old_shape = self.shape
+        old_dims = list(self.dims)
+        new_ndim = len(shape)
+
+        if dims is not None:
+            if len(dims) != new_ndim:
+                raise ValueError(
+                    f"dims length ({len(dims)}) must match output ndim ({new_ndim})."
+                )
+            if len(set(dims)) != len(dims):
+                raise ValueError("dims must be unique.")
+            new_dims = list(dims)
+        else:
+            # Try to preserve dim names for unambiguously unchanged dimensions
+            new_dims = []
+            matched_old = set()
+
+            # Map old dims to new dims by finding exact shape matches at unique positions
+            for new_idx, new_size in enumerate(shape):
+                candidates = []
+                for old_idx, old_size in enumerate(old_shape):
+                    if old_size == new_size and old_idx not in matched_old:
+                        candidates.append(old_idx)
+                if len(candidates) == 1:
+                    old_idx = candidates[0]
+                    matched_old.add(old_idx)
+                    new_dims.append(old_dims[old_idx])
+                else:
+                    # ambiguous or new dimension — generate default
+                    new_dims.append(DEFAULT_DIM_NAME[-(new_ndim - new_idx)])
+
+            # Ensure we don't have duplicate default names if old dims also use them
+            seen = set()
+            for i, d in enumerate(new_dims):
+                if d in seen:
+                    # find a unique default name
+                    for alt in DEFAULT_DIM_NAME:
+                        if alt not in seen and alt not in new_dims:
+                            new_dims[i] = alt
+                            break
+                seen.add(d)
+
+        new._dims = new_dims
+
+        # --- Coordinate handling --------------------------------------------
+        old_coordset = self.coordset
+
+        # Validate explicit coords early
+        if coords is not None:
+            for dim_name, coord in coords.items():
+                if dim_name not in new_dims:
+                    raise ValueError(
+                        f"Coordinate dim '{dim_name}' not found in new dims {new_dims}."
+                    )
+                if len(coord) != shape[new_dims.index(dim_name)]:
+                    raise ValueError(
+                        f"Coordinate for '{dim_name}' has length {len(coord)}, "
+                        f"expected {shape[new_dims.index(dim_name)]}."
+                    )
+
+        if coord_policy == "drop" or old_coordset is None:
+            new._coordset = None
+        else:
+            # Build the list of coords for all new dimensions
+            new_coords = []
+            for new_idx, new_dim in enumerate(new_dims):
+                new_size = shape[new_idx]
+
+                # 1. Explicit user coords take precedence
+                if coords is not None and new_dim in coords:
+                    new_coords.append(coords[new_dim])
+                    continue
+
+                # 2. Policy-based coord preservation
+                if coord_policy == "strict":
+                    # Validate that every old dim maps unambiguously
+                    for old_idx_s, old_dim_s in enumerate(old_dims):
+                        old_size_s = old_shape[old_idx_s]
+                        matches = [i for i, s in enumerate(shape) if s == old_size_s]
+                        if len(matches) != 1:
+                            raise ValueError(
+                                f"strict mode: cannot unambiguously map dim "
+                                f"'{old_dim_s}' (size {old_size_s}) to the new "
+                                f"shape {shape}."
+                            )
+                        if new_dims[matches[0]] != old_dim_s:
+                            raise ValueError(
+                                f"strict mode: dim '{old_dim_s}' maps to new dim "
+                                f"'{new_dims[matches[0]]}' but name changed."
+                            )
+                    # All valid — copy preserved coord if present
+                    if old_coordset is not None and new_dim in old_coordset.names:
+                        new_coords.append(old_coordset[new_dim].copy())
+                    else:
+                        new_coords.append(None)
+
+                else:  # "safe"
+                    if (
+                        new_dim in old_dims
+                        and old_shape[old_dims.index(new_dim)] == new_size
+                        and old_coordset is not None
+                        and new_dim in old_coordset.names
+                    ):
+                        new_coords.append(old_coordset[new_dim].copy())
+                    else:
+                        new_coords.append(None)
+
+            new._coordset = CoordSet(*new_coords, dims=new_dims.copy())
+
+        new.history = f"Data reshaped from {old_shape} to {shape}"
         return new
 
     # ======================================================================================

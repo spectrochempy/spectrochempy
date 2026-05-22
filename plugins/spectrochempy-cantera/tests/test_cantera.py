@@ -5,9 +5,10 @@
 from __future__ import annotations
 
 import sys
+import warnings
 
 import pytest
-from spectrochempy_cantera import CanteraPlugin
+import spectrochempy_cantera
 
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
@@ -72,7 +73,7 @@ def test_registration_does_not_load__pfr():
 
 def test_plugin_metadata():
     """Plugin has required metadata fields (PFR scope only)."""
-    plugin = CanteraPlugin()
+    plugin = spectrochempy_cantera.CanteraPlugin()
     assert plugin.name == "cantera"
     assert plugin.version == "0.1.0"
     assert plugin.description
@@ -83,7 +84,7 @@ def test_plugin_metadata():
 
 def test_plugin_compatibility():
     """Plugin passes full compatibility check."""
-    plugin = CanteraPlugin()
+    plugin = spectrochempy_cantera.CanteraPlugin()
     issues = check_plugin_compatibility(plugin)
     if not HAS_CANTERA:
         assert any("cantera" in issue for issue in issues)
@@ -102,7 +103,7 @@ def test_registration_with_cantera():
         pytest.skip("cantera not installed")
 
     harness = PluginTestHarness()
-    harness.register(CanteraPlugin())
+    harness.register(spectrochempy_cantera.CanteraPlugin())
 
     simulations = harness.registry.extensions.list_category("simulation")
     assert "PFR" in simulations
@@ -114,7 +115,7 @@ def test_registration_with_cantera():
 def test_registration_without_cantera():
     """Plugin is marked FAILED when cantera is missing."""
     harness = PluginTestHarness()
-    harness.register(CanteraPlugin())
+    harness.register(spectrochempy_cantera.CanteraPlugin())
 
     if not HAS_CANTERA:
         assert harness.get_plugin_state("cantera") == PluginState.FAILED
@@ -128,7 +129,7 @@ def test_capability_query():
         pytest.skip("cantera not installed")
 
     harness = PluginTestHarness()
-    harness.register(CanteraPlugin())
+    harness.register(spectrochempy_cantera.CanteraPlugin())
 
     results = harness.registry.get_by_capability(PluginCapability.SIMULATION)
     names = [r["name"] for r in results]
@@ -148,7 +149,7 @@ def test_package_namespace_exposes_pfr():
     import spectrochempy as scp  # noqa: PLC0415
 
     if not scp.plugin_manager.has_plugin("cantera"):
-        scp.plugin_manager.register(CanteraPlugin())
+        scp.plugin_manager.register(spectrochempy_cantera.CanteraPlugin())
 
     pfr_entry = scp.cantera.PFR
     assert callable(pfr_entry)
@@ -159,12 +160,10 @@ def test_pfr_root_compatibility_alias_warns_once():
     if not HAS_CANTERA:
         pytest.skip("cantera not installed")
 
-    import warnings
-
     import spectrochempy as scp  # noqa: PLC0415
 
     if not scp.plugin_manager.has_plugin("cantera"):
-        scp.plugin_manager.register(CanteraPlugin())
+        scp.plugin_manager.register(spectrochempy_cantera.CanteraPlugin())
 
     scp._EMITTED_PLUGIN_ROOT_WARNINGS.discard("PFR")
 
@@ -187,7 +186,7 @@ def test_cantera_does_not_register_dataset_accessor():
     import spectrochempy as scp  # noqa: PLC0415
 
     if HAS_CANTERA and not scp.plugin_manager.has_plugin("cantera"):
-        scp.plugin_manager.register(CanteraPlugin())
+        scp.plugin_manager.register(spectrochempy_cantera.CanteraPlugin())
 
     dataset = scp.NDDataset([300.0, 310.0])
     assert not hasattr(dataset, "cantera")
