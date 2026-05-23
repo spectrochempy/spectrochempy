@@ -259,8 +259,39 @@ class SpectroChemPyHookSpec:
             def register_handlers(self):
                 return {
                     "coord.reversed": _my_coord_reversed,
+                    "concatenate.extract_metadata": _my_extract_metadata,
                     "concatenate.postprocess": _my_concat_postprocess,
+                    "ndmath.execution_branch": _my_ndmath_branch,
+                    "ndmath.execute": _my_ndmath_execute,
                 }
+
+        Recognised handler names
+        ------------------------
+        ``"coord.reversed"``
+            ``callable(self: Coord) -> bool | None``
+            Return True/False for whether the coordinate axis should be
+            displayed in decreasing order, or ``None`` to use the core default.
+        ``"concatenate.extract_metadata"``
+            ``callable(datasets: list) -> dict | None``
+            Extract metadata coordinates (e.g. TopSpin parameters) from
+            a list of datasets before concatenation.  Return a dict of
+            ``{name: [values, ...]}`` or ``None``.
+        ``"concatenate.postprocess"``
+            ``callable(out: NDDataset, datasets: list, metacoords: dict) -> NDDataset | None``
+            Post-process the result of a concatenation.  Return the
+            modified dataset or ``None``.
+        ``"ndmath.execution_branch"``
+            ``callable(is_quaternion: bool, quaternion_aware: bool, args: list) -> str | None``
+            Return the execution branch name (``"real"``, ``"quaternion"``, …)
+            for the current math operation, or ``None`` to use the core default.
+            This allows a plugin to define non-real numeric execution paths
+            (e.g. quaternion decomposition for NMR) without the core knowing
+            about those types.
+        ``"ndmath.execute"``
+            ``callable(branch: str, f: Callable, d: np.ndarray, args: list) -> np.ndarray | None``
+            Execute the math operation *f* on data *d* for the given
+            *branch*.  Should return the result array or ``None`` to fall
+            back to the core default implementation.
 
         Returning ``None`` or an empty dict is treated as
         "no handler override".

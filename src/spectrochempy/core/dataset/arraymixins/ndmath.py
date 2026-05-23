@@ -355,6 +355,14 @@ class _ExecutionPlan:
     @staticmethod
     def execute(branch: str, f: Callable, d: np.ndarray, args: list) -> np.ndarray:
         """Run *f* on data *d* using the named execution *branch*."""
+        from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+        handler = manager_module.plugin_manager.registry.get_handler("ndmath.execute")
+        if handler is not None:
+            result = handler(branch, f, d, args)
+            if result is not None:
+                return result
+
         if branch == _ExecutionPlan.REAL:
             return f(d, *args)
         dr, di = quat_as_complex_array(d)
@@ -369,6 +377,16 @@ class _ExecutionPlan:
         args: list,
     ) -> str:
         """Return the branch name appropriate for the current operands."""
+        from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+        handler = manager_module.plugin_manager.registry.get_handler(
+            "ndmath.execution_branch"
+        )
+        if handler is not None:
+            result = handler(is_quaternion, quaternion_aware, args)
+            if result is not None:
+                return result
+
         if is_quaternion and not (
             quaternion_aware and all(arg.dtype not in TYPE_COMPLEX for arg in args)
         ):
