@@ -55,7 +55,7 @@ SpectroChemPy. There is no ``load_plugin(...)`` step for normal use.
 
 .. note::
 
-    Plugin optional dependencies (such as ``osqp``, ``cantera``, ``quaternion``,
+    Plugin optional dependencies (such as ``osqp``, ``cantera``, ``numpy-quaternion``,
     ``nmrglue``) are **not imported** when you run ``import spectrochempy``.
     They are loaded lazily, only when you actually call a plugin function.
     This keeps startup fast and avoids unnecessary imports.
@@ -145,8 +145,8 @@ Available Official Plugins
      - Provides
    * - NMR
      - ``spectrochempy-nmr``
-     - :func:`~spectrochempy.read_topspin` (Bruker TopSpin reader),
-       NMR processing utilities
+      - ``scp.nmr.read_topspin`` (Bruker TopSpin reader),
+        NMR processing utilities
    * - IRIS
      - ``spectrochempy-iris``
      - 2D-IRIS analysis
@@ -189,5 +189,6 @@ Related pages
    :maxdepth: 1
 
    plugins_official
+   plugins_hypercomplex
    plugins_examples
    plugins_roadmap

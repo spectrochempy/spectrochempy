@@ -19,22 +19,26 @@ Current official plugins
    :header-rows: 1
    :widths: 20 25 25 30
 
-   * - Domain
-     - Package
-     - Namespace
-     - Typical use
-   * - IRIS
-     - ``spectrochempy-iris``
-     - ``scp.iris``, ``dataset.iris``
-     - 2D-IRIS analysis, IRIS kernels, dataset-bound IRIS operations.
-   * - NMR
-     - ``spectrochempy-nmr``
-     - ``scp.nmr``
-     - TopSpin/Bruker NMR reading and future NMR-specific processing.
-   * - Cantera / simulation
-     - ``spectrochempy-cantera``
-     - ``scp.cantera``
-     - Plug-flow reactor and simulation workflows based on Cantera.
+    * - Domain
+      - Package
+      - Namespace
+      - Typical use
+    * - IRIS
+      - ``spectrochempy-iris``
+      - ``scp.iris``, ``dataset.iris``
+      - 2D-IRIS analysis, IRIS kernels, dataset-bound IRIS operations.
+    * - NMR
+      - ``spectrochempy-nmr``
+      - ``scp.nmr``
+      - TopSpin/Bruker NMR reading and NMR-specific processing utilities.
+    * - Hypercomplex
+      - ``spectrochempy-hypercomplex``
+      - ``dataset.hyper``
+      - Quaternion/hypercomplex data support for phase-sensitive 2D NMR and other multi-dimensional complex workflows.
+    * - Cantera / simulation
+      - ``spectrochempy-cantera``
+      - ``scp.cantera``
+      - Plug-flow reactor and simulation workflows based on Cantera.
 
 Install commands
 ================
@@ -45,6 +49,7 @@ Official plugins can be installed through SpectroChemPy extras:
 
     pip install spectrochempy[iris]
     pip install spectrochempy[nmr]
+    pip install spectrochempy[nmr,hypercomplex]  # NMR with 2D hypercomplex support
     pip install spectrochempy[cantera]
 
 or directly:
@@ -53,6 +58,7 @@ or directly:
 
     pip install spectrochempy-iris
     pip install spectrochempy-nmr
+    pip install spectrochempy-hypercomplex
     pip install spectrochempy-cantera
 
 Once installed, plugins are discovered automatically. No explicit plugin
@@ -120,7 +126,7 @@ spectroscopic adsorption and diffusion studies.
 NMR
 ---
 
-The ``spectrochempy-nmr`` plugin provides Bruker TopSpin reading and future
+The ``spectrochempy-nmr`` plugin provides Bruker TopSpin reading and
 NMR-specific workflows.
 
 .. code-block:: bash
@@ -136,6 +142,29 @@ NMR-specific workflows.
     from spectrochempy_nmr.units import set_nmr_context
 
     set_nmr_context(104.3 * scp.ur.MHz)
+
+Hypercomplex
+------------
+
+The ``spectrochempy-hypercomplex`` plugin provides quaternion/hypercomplex
+support for multi-dimensional complex data, primarily used in phase-sensitive
+2D NMR.
+
+.. code-block:: bash
+
+    pip install spectrochempy-hypercomplex
+
+.. code-block:: python
+
+    import spectrochempy as scp
+
+    # After reading 2D NMR data, convert to hypercomplex
+    dataset = scp.nmr.read_topspin("path/to/ser")
+    dataset.hyper.set_quaternion(inplace=True)
+
+    # Extract components
+    rr = dataset.hyper.RR
+    ri = dataset.hyper.component("RI")
 
 Cantera
 -------

@@ -192,7 +192,6 @@ Import a NDataset from external source
     read_spc
     read_spg
     read_srs
-    read_topspin
     read_zip
     read_carroucell
     load_iris
@@ -289,9 +288,7 @@ Changing type
     :nosignatures:
     :toctree: generated/
 
-    set_complex
-    set_hypercomplex
-    set_quaternion
+     set_complex
 
 
 Joining or splitting datasets

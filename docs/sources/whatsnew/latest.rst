@@ -29,8 +29,9 @@ New Features
   and ``_ExecutionPlan`` class from ``NDMath._op()``, reducing it from ~300 to ~70 lines.
 - ``__array_ufunc__`` now explicitly rejects unsupported ufunc methods (``reduce``,
   ``accumulate``, ``outer``, ``at``) by returning ``NotImplemented``.
-- ``numpy-quaternion`` is now an optional dependency, imported through
-  ``spectrochempy.utils.quaternion`` with a graceful fallback when not installed.
+- Hypercomplex / quaternion support has been extracted from the core into the
+  official ``spectrochempy-hypercomplex`` plugin. Use ``dataset.hyper.set_quaternion()``
+  after installing the plugin.
 - Added ``NDDataset.reshape()``.
 
 Bug Fixes

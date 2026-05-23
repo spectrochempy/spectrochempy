@@ -108,13 +108,23 @@ The current plugin system is an important first step. A future evolution
 will aim to make the core completely independent from domain-specific
 concepts.
 
-Concrete next steps include:
+Completed steps in this direction:
 
-* moving NMR-specific notions such as Larmor frequency, NMR unit contexts
-  (ppm↔Hz conversion), and possibly ``Quaternion`` support fully into the
-  NMR plugin;
-* removing transitional coupling between the core and official plugins
-  that may remain in this branch.
+* Larmor frequency metadata has moved from ``Coord.larmor`` (core trait)
+  to ``coord.meta["acquisition_frequency"]`` (generic metadata).
+* NMR unit contexts (ppm↔Hz) live in the NMR plugin.
+* Quaternion / hypercomplex support has been fully extracted from the core
+  into the official ``spectrochempy-hypercomplex`` plugin. The core no
+  longer contains quaternion-specific logic; it delegates through generic
+  numeric-backend hooks (``ndmath.execution_branch``, ``ndmath.execute``,
+  ``fft.encoding``) that the hypercomplex plugin implements.
+* NMR-specific 2D FFT encodings (STATES, TPPI, ECHO-ANTIECHO) have moved
+  from ``processing/fft/fft.py`` into the NMR plugin.
+
+Remaining transitional work:
+
+* removing TopSpin-specific reader logic from ``core/readers/importer.py``;
+* moving ``processing/fft/phasing.py`` and ``shift.py`` to the NMR plugin.
 
 The public documentation will be progressively separated into:
 
