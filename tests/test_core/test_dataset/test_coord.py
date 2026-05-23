@@ -56,9 +56,9 @@ def test_coord():
     assert a.name == "x"
     assert a.title == "<untitled>"
 
-    # larmor frequency
-    a = Coord([1, 2, 3], name="x", units="ppm", larmor=104.7 * ur.MHz)
-    assert a.larmor == 104.7 * ur.MHz
+    # reversed for ppm
+    a = Coord([1, 2, 3], name="x", units="ppm")
+    a.meta["acquisition_frequency"] = 104.7 * ur.MHz
     assert a.reversed is True
     assert a.units == ur.ppm
 

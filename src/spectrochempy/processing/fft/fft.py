@@ -518,7 +518,9 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             newcoord.ito("us")
 
         if is_nmr and not inv:
-            newcoord.larmor = bf1  # needed for ppm transformation
+            # Store the acquisition frequency for the NMR plugin's
+            # ppm conversion context.
+            newcoord.meta["acquisition_frequency"] = bf1
             ppm = kwargs.get("ppm", True)
             if ppm:
                 newcoord.ito("ppm")

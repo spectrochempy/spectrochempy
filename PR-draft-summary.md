@@ -13,10 +13,8 @@ domain-specific concepts live only in their respective plugins.
 The core exposes generic extension mechanisms but must not know domain-specific concepts
 from plugins.  In particular, the core must not contain references to:
 
-- NMR, `larmor`, `nmr.larmor`
 - TopSpin / Bruker NMR semantics
 - NMR-specific ppm↔Hz conversion
-- `Quaternion` (if only useful for NMR)
 
 ### What this PR achieves
 
@@ -35,6 +33,11 @@ from plugins.  In particular, the core must not contain references to:
 | `concatenate` postprocess simplified — no longer checks `origin == "topspin"` in core | ✅ This PR |
 | `HandlerRegistry.register_handler()` warns on override collision (log warning, last wins) | ✅ This PR |
 | Dedicated tests for `register_handlers`, `HandlerRegistry`, dispatch, collisions, fallback | ✅ This PR |
+| `Coord.larmor` (trait + property + init kwarg) removed from core — frequency metadata now stored via `coord.meta["acquisition_frequency"]` | ✅ This PR |
+| `fft.py` no longer assigns `newcoord.larmor` — uses `meta["acquisition_frequency"]` instead | ✅ This PR |
+| NMR plugin reads acquisition frequency from `coord.meta` via renamed helpers | ✅ This PR |
+| `_ExecutionPlan.select()` / `execute()` dispatch through `"ndmath.execution_branch"` and `"ndmath.execute"` handlers | ✅ This PR |
+| NMR plugin registers `ndmath.*` handlers replicating quaternion detection/decomposition | ✅ This PR |
 
 ### What this PR does NOT do (future PRs)
 
@@ -45,11 +48,31 @@ These items still have domain coupling in core and need hook mechanisms before t
 | `core/readers/importer.py` | TopSpin-specific protocol/download logic | `file.resolve` or reader-side file resolution |
 | `utils/file.py` | `_topspin_check_filename`, `.topspin` extension | `file.resolve` handler |
 | `core/readers/filetypes.py` | `"topspin"` entry in FileTypeRegistry | Plugin reader registration should populate this |
-| `processing/fft/fft.py` | `is_nmr`, `ppm=True`, encoding modes, larmor assignment | `fft.preprocess` / `fft.postprocess` handlers |
+| `processing/fft/fft.py` | `is_nmr`, `ppm=True`, encoding modes | `fft.preprocess` / `fft.postprocess` handlers |
 | `processing/fft/phasing.py` | Entire module (NMR spectral processing) | Move to plugin |
 | `processing/fft/shift.py` | Entire module (NMRGLUE adaptation) | Move to plugin |
-| `utils/quaternion.py` | Bruker conventions | Move to plugin or generalize |
-| `core/dataset/basearrays/ndcomplex.py` | Quaternion handling | Generalize or move |
+| `core/dataset/arraymixins/ndmath.py` | quaternion execution (handlers exist but core fallback still uses `quat_as_complex_array`/`as_quaternion`) | Generic numeric backend interface |
+| `core/dataset/basearrays/ndcomplex.py` | Quaternion properties, `is_quaternion`, `set_quaternion` | Generalize or move |
+| `core/dataset/basearrays/ndarray.py` | `typequaternion` dtype check for `is_quaternion` property | Generalize or move |
+| `processing/fft/fft.py` | Quaternion FFT branches (`is_quaternion`, quaternion-aware FFT) | Move to plugin |
+| `utils/quaternion.py` | Full module (optional quaternion import, helper functions) | Move to plugin or generic backend |
+
+### Quaternion decoupling status
+
+This PR prepares quaternion decoupling by adding `"ndmath.execution_branch"` and
+`"ndmath.execute"` handler hooks, but does **not** fully extract quaternion from core.
+Quaternion-specific code remains in:
+
+| Location | What remains | Why deferred |
+|----------|-------------|--------------|
+| `ndmath.py` | `_ExecutionPlan.QUATERNION` branch, imports of `typequaternion`/`as_quaternion`/`quat_as_complex_array`, `is_quaternion` detection in `_preprocess_op_inputs` | Need a generic numeric backend interface first |
+| `ndcomplex.py` | `is_quaternion`, `set_quaternion`, `_make_quaternion`, quaternion-aware properties | Deep integration with array slicing/dtype dispatch |
+| `ndarray.py` | `typequaternion` dtype check for `is_quaternion` property | Core dtype infrastructure |
+| `fft.py` | Quaternion-aware FFT branches (`typequaternion` imports, `is_quaternion` checks) | FFT module needs full plugin extraction first |
+| `utils/quaternion.py` | Entire module (optional `numpy-quaternion` wrapper) | Must decide: move to NMR plugin or create generic backend |
+
+A follow-up PR to define a **generic numeric backend interface** (allowing plugins to
+register custom dtype execution paths) is the recommended next step.
 
 ### Notable design decisions
 
@@ -88,18 +111,24 @@ without modifying the plugin base class.
 ### Files changed
 
 ```
+M  PR-draft-summary.md                                                        # this document
 M  docs/sources/userguide/plugins_roadmap.rst                                # roadmap section
-M  plugins/spectrochempy-nmr/src/spectrochempy_nmr/__init__.py               # handlers (extract + postprocess + coord.reversed)
+M  plugins/spectrochempy-nmr/src/spectrochempy_nmr/__init__.py               # handlers (extract + postprocess + coord.reversed) + ndmath handlers + larmor→meta
+M  plugins/spectrochempy-nmr/src/spectrochempy_nmr/read_topspin.py           # larmor→meta["acquisition_frequency"]
 A  plugins/spectrochempy-nmr/src/spectrochempy_nmr/units.py                  # moved set_nmr_context
 A  plugins/spectrochempy-nmr/tests/test_units.py                             # NMR unit context tests
-M  src/spectrochempy/core/dataset/coord.py                                   # handler dispatch + removed NMR-specific comment
+M  plugins/spectrochempy-nmr/tests/test_units.py                             # larmor→meta in test
+M  src/spectrochempy/core/dataset/arraymixins/ndmath.py                      # _ExecutionPlan handler dispatch + removed larmor refs
+M  src/spectrochempy/core/dataset/coord.py                                   # removed larmor trait/property/init, handler dispatch, generic comment
 M  src/spectrochempy/core/dataset/basearrays/ndarray.py                      # plugin unit-context lookup
-M  src/spectrochempy/core/units/__init__.py                                  # deprecation shim
-M  src/spectrochempy/plugins/hooks.py                                        # register_handlers hookspec
+M  src/spectrochempy/core/units/__init__.py                                  # deprecation shim (unchanged)
+M  src/spectrochempy/plugins/hooks.py                                        # register_handlers hookspec + ndmath handler docs
 M  src/spectrochempy/plugins/manager.py                                      # _collect_handlers
 M  src/spectrochempy/plugins/registries.py                                   # HandlerRegistry + override collision warning
 M  src/spectrochempy/plugins/registry.py                                     # compose + forward
+M  src/spectrochempy/processing/fft/fft.py                                   # larmor→meta["acquisition_frequency"]
 M  src/spectrochempy/processing/transformation/concatenate.py                # handler dispatch (extract_metadata + postprocess)
+M  tests/test_core/test_dataset/test_coord.py                                # larmor→meta in test
 M  tests/test_core/test_units/test_units.py                                  # removed test_nmr_context
 M  tests/test_plugins/test_registry.py                                       # HandlerRegistry unit tests + PluginRegistry forwarding tests
 M  tests/test_plugins/test_integration.py                                    # handler collection, dispatch, collisions, edge cases

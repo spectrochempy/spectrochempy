@@ -1261,7 +1261,7 @@ def _read_topspin(*args, **kwargs):
                 title=f"F{axis + 1} acquisition time",
             )  # TODO: use AQSEQ for >2D data
 
-            coord.larmor = meta.sfo1[axis]
+            coord.meta["acquisition_frequency"] = meta.sfo1[axis]
             coords.append(coord)
         else:
             size = meta.si[axis]
@@ -1271,7 +1271,7 @@ def _read_topspin(*args, **kwargs):
 
             coordpoints = np.arange(size) * deltaf + first
             coord = Coord(coordpoints)
-            coord.larmor = meta.sfo1[axis]  # needed for ppm transformation
+            coord.meta["acquisition_frequency"] = meta.sfo1[axis]
             coord.ito("ppm")
             if meta.nuc1 is not None:
                 nuc1 = meta.nuc1[axis]

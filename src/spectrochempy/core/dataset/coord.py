@@ -100,8 +100,6 @@ class Coord(NDMath, NDArray):
     sigdigits : int, optional, default=4
         Number of significant digits to be used for rounding and linearizing
         the data.
-    larmor : `float` or `Quantity` instance, optional
-        Optional resonance frequency metadata used by plugin-provided unit contexts.
     offset : `float` instance, optional
         The offset of the axis. This is used to generate an evenly values spaced axis
         together with `ìncrement` and `size`.
@@ -159,9 +157,6 @@ class Coord(NDMath, NDArray):
     _sigdigits = tr.Int(4)
     _rounding = tr.Bool(True)
 
-    # Optional spectroscopy metadata consumed by plugin-provided unit contexts.
-    _larmor = tr.Instance(Quantity, allow_none=True)
-
     # ----------------------------------------------------------------------------------
     # initialization
     # ----------------------------------------------------------------------------------
@@ -179,8 +174,6 @@ class Coord(NDMath, NDArray):
         if data is None and _size is not None and _increment is not None:
             data = np.arange(_size) * _increment + _offset
 
-        larmor = kwargs.pop("larmor", None)
-
         self._linearize_below = kwargs.pop("linearize_below", 1.0)
 
         # extract parameters for linearization and data rounding
@@ -194,17 +187,6 @@ class Coord(NDMath, NDArray):
 
         # initialize the object
         super().__init__(data=data, **kwargs)
-
-        # set the larmor frequency if any
-        if larmor is not None:
-            self.larmor = larmor
-
-    # ----------------------------------------------------------------------------------
-    # default values
-    # ----------------------------------------------------------------------------------
-    @tr.default("_larmor")
-    def _default_larmor(self):
-        return None
 
     # ----------------------------------------------------------------------------------
     # readonly property
@@ -612,7 +594,6 @@ class Coord(NDMath, NDArray):
             "roi",
             "linear",
             "sigdigits",
-            "larmor",
         ]
 
     def __getattr__(self, attr):
@@ -818,15 +799,6 @@ class Coord(NDMath, NDArray):
     @show_datapoints.setter
     def show_datapoints(self, val):
         self._show_datapoints = val
-
-    @property
-    def larmor(self):
-        """Return optional resonance frequency metadata."""
-        return self._larmor
-
-    @larmor.setter
-    def larmor(self, val):
-        self._larmor = val
 
     @property
     def laser_frequency(self):

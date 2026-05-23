@@ -51,7 +51,8 @@ def test_plugin_declares_nmr_unit_context(monkeypatch):
     with scp.ur.context("nmr"):
         assert f"{(10000 * scp.ur.Hz).to('ppm'):~.3f}" == "100.000 ppm"
 
-    coord = scp.Coord([10000.0], units="Hz", larmor=100 * scp.ur.MHz)
+    coord = scp.Coord([10000.0], units="Hz")
+    coord.meta["acquisition_frequency"] = 100 * scp.ur.MHz
     assert context["predicate"](coord) is True
     assert context["argument_extractor"](coord) == 100 * scp.ur.MHz
 

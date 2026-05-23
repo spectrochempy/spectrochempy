@@ -31,13 +31,13 @@ def _coord_has_larmor(obj) -> bool:
     return (
         callable(implements)
         and implements("Coord")
-        and bool(getattr(obj, "larmor", None))
+        and bool(obj.meta.get("acquisition_frequency"))
     )
 
 
 def _coord_larmor_argument(obj):
     """Extract the Larmor frequency for the NMR unit-context setup function."""
-    return obj.larmor
+    return obj.meta.get("acquisition_frequency")
 
 
 def _nmr_coord_reversed(coord) -> bool | None:
