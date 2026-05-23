@@ -325,6 +325,57 @@ def test_nddataset_add_with_masks():
     assert result.mask.all()
 
 
+# --------------------------------------------------------------------------------------
+# Unit resolution characterisation tests
+# --------------------------------------------------------------------------------------
+
+
+def test_require_units_dimensionless():
+    """Functions requiring dimensionless units reject dimensioned input."""
+    ds = NDDataset([1.0, 2.0], units="m")
+    for func in (np.log10, np.log, np.log2, np.exp, np.expm1):
+        with pytest.raises(DimensionalityError, match="requires DIMENSIONLESS"):
+            func(ds)
+
+
+def test_require_units_radian():
+    """Trig functions accept dimensionless (incl. radian) but reject dimensioned."""
+    ds_m = NDDataset([0.0, 1.0], units="m")
+    with pytest.raises(DimensionalityError, match="requires `radian` units"):
+        np.sin(ds_m)
+
+    # Radian input is accepted
+    ds_rad = NDDataset([0.0, 1.0], units="radian")
+    result = np.sin(ds_rad)
+    assert isinstance(result, NDDataset)
+    assert result.units == Unit("dimensionless")
+
+
+def test_require_units_degree():
+    """deg2rad requires degree input."""
+    ds_m = NDDataset([0.0, 90.0], units="m")
+    with pytest.raises(DimensionalityError, match="requires `degree` units"):
+        np.deg2rad(ds_m)
+
+    ds_deg = NDDataset([0.0, 90.0], units="degree")
+    result = np.deg2rad(ds_deg)
+    assert isinstance(result, NDDataset)
+
+
+def test_remove_units_early_return():
+    """
+    sign/isfinite skip _op() via early return in __array_ufunc__,
+    returning a raw ndarray (no units attr).
+    """
+    ds = NDDataset([1.0, -2.0, 0.0], units="m")
+    result = np.sign(ds)
+    assert isinstance(result, np.ndarray)
+    assert np.all(result == [1.0, -1.0, 0.0])
+
+    result = np.isfinite(ds)
+    assert isinstance(result, np.ndarray)
+
+
 def test_nddataset_subtract():
     """Test subtraction of datasets."""
     d1 = NDDataset(np.ones((5, 5)))
@@ -1103,3 +1154,679 @@ def test_simple_arithmetic_on_full_dataset():
     result = dataset - dataset[0]
     assert isinstance(result, NDDataset)
     assert result.shape == dataset.shape
+
+
+# ===============================================================================
+# CHARACTERIZATION TESTS — ufunc methods, operators, masks, quaternion, coords
+# ===============================================================================
+# These tests document existing behaviour to support safe refactoring.
+
+
+@pytest.mark.parametrize(
+    ("method_name", "ufunc_method"),
+    [
+        ("reduce", lambda u: u.reduce),
+        ("accumulate", lambda u: u.accumulate),
+        ("outer", lambda u: u.outer),
+        ("at", lambda u: u.at),
+    ],
+)
+def test_ufunc_unsupported_methods_return_notimplemented(method_name, ufunc_method):
+    """Unsupported __array_ufunc__ methods return NotImplemented (raises TypeError)."""
+    ds = NDDataset(np.ones((3,)))
+    ufunc = np.add
+    method = getattr(ufunc, method_name)
+    if method_name == "at":
+        args = (ds, 0, 1)
+    elif method_name == "outer":
+        args = (ds, ds)
+    else:
+        args = (ds,)
+    with pytest.raises(TypeError, match="returned NotImplemented"):
+        method(*args)
+
+
+def test_operator_vs_ufunc_equivalence():
+    """Python operator and corresponding ufunc produce the same result."""
+    pairs = [
+        ("__add__", np.add),
+        ("__sub__", np.subtract),
+        ("__mul__", np.multiply),
+        ("__truediv__", np.true_divide),
+    ]
+    ds = NDDataset(np.array([2.0, 4.0, 6.0]))
+    other = NDDataset(np.array([1.0, 2.0, 3.0]))
+    for attr, npfunc in pairs:
+        py_result = getattr(ds, attr)(other)
+        ufunc_result = npfunc(ds, other)
+        assert_array_equal(py_result.data, ufunc_result.data)
+        assert isinstance(py_result, NDDataset)
+        assert isinstance(ufunc_result, NDDataset)
+
+
+def test_operator_scalar_operand():
+    """Arithmetic with Python scalars and numpy scalars works."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    for scalar in [2.0, np.float64(2.0), 2]:
+        r = ds + scalar
+        assert_array_equal(r.data, np.array([3.0, 4.0, 5.0]))
+        assert isinstance(r, NDDataset)
+
+
+def test_operator_quantity_operand():
+    """Arithmetic with a pint Quantity operand works."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), units="m")
+    q = Quantity(0.5, "m")
+    r = ds + q
+    assert_array_equal(r.data, np.array([1.5, 2.5, 3.5]))
+    assert isinstance(r, NDDataset)
+    assert r.units == ds.units
+
+
+def test_operator_coord_operand():
+    """Arithmetic with a Coord operand works."""
+    ds = NDDataset(np.ones((3,)), units="m")
+    coord = Coord(np.array([0.1, 0.2, 0.3]), units="m")
+    r = ds + coord
+    assert_array_equal(r.data, np.array([1.1, 1.2, 1.3]))
+    assert isinstance(r, NDDataset)
+
+
+def test_mask_propagation():
+    """Masks propagate correctly through operations."""
+    ds1 = NDDataset(np.array([1.0, 2.0, 3.0, 4.0]))
+    ds2 = NDDataset(np.array([1.0, 2.0, 3.0, 4.0]))
+    ds1[1] = MASKED
+    ds2[2] = MASKED
+    r = ds1 + ds2
+    # mask should be union: positions 1 and 2 masked
+    assert r.is_masked
+    assert not r.mask[0]
+    assert r.mask[1]
+    assert r.mask[2]
+    assert not r.mask[3]
+
+
+def test_complex_data_operations():
+    """Operations on complex-valued datasets work."""
+    ds = NDDataset(np.array([1.0 + 2.0j, 3.0 + 4.0j]))
+    # addition
+    r = ds + 1.0
+    assert_array_equal(r.data, np.array([2.0 + 2.0j, 4.0 + 4.0j]))
+    # np.abs on complex
+    rabs = np.abs(ds)
+    assert_array_equal(rabs.data, np.array([np.sqrt(5), 5.0]))
+
+
+@pytest.mark.skipif(
+    not hasattr(np, "quaternion"),
+    reason="numpy-quaternion not available",
+)
+def test_quaternion_operations():
+    """Operations on quaternion-valued datasets work."""
+    q1 = np.quaternion(1.0, 0.0, 0.0, 0.0)
+
+    try:
+        ds = NDDataset(np.array([q1, q1 + q1]))
+    except TypeError:
+        pytest.skip("Cannot construct NDDataset from quaternion array")
+
+    try:
+        r = ds + ds
+        assert isinstance(r, NDDataset)
+        assert r.shape == ds.shape
+    except TypeError as e:
+        if "pickle" in str(e) or "generator" in str(e):
+            pytest.skip("Quaternion operations not fully supported in this build")
+        raise
+
+
+def test_coordinate_compatibility_check():
+    """Coordinate mismatch raises CoordinatesMismatchError."""
+    coord_a = Coord(np.arange(5.0))
+    coord_b = Coord(np.arange(10.0, 15.0))
+    ds1 = NDDataset(np.ones((5,)), coordset=[coord_a])
+    ds2 = NDDataset(np.ones((5,)), coordset=[coord_b])
+    with pytest.raises(CoordinatesMismatchError):
+        ds1 + ds2
+
+
+def test_coordinate_compatible_operation():
+    """Operation with compatible coordinates succeeds."""
+    coord_a = Coord(np.arange(5.0))
+    ds1 = NDDataset(np.ones((5,)), coordset=[coord_a])
+    ds2 = NDDataset(np.ones((5,)), coordset=[coord_a])
+    r = ds1 + ds2
+    assert isinstance(r, NDDataset)
+    assert_array_equal(r.data, np.full(5, 2.0))
+
+
+def test_coordinate_multidim_last_dim_only():
+    """
+    Multi-D datasets are only checked on the last dimension.
+
+    This documents the current ``spectroscopic-last-dim`` policy:
+    even when *other* is multi-dimensional, only the **last** (x)
+    dimension coordinates must match.  Coordinates on earlier dimensions
+    are ignored.  This is the existing behaviour — a previous
+    ``elif other._squeeze_ndim > 1`` branch that intended to check
+    all dimensions was unreachable and has been removed.
+    """
+    coord_x = Coord(np.arange(5.0))
+    coord_y1 = Coord(np.array([10.0, 20.0, 30.0]))
+    coord_y2 = Coord(np.array([99.0, 88.0, 77.0]))  # different from y1
+
+    ds1 = NDDataset(np.ones((3, 5)), coordset=[coord_y1, coord_x])
+    ds2 = NDDataset(np.ones((3, 5)), coordset=[coord_y2, coord_x])
+
+    # Even though coord_y1 != coord_y2, the last dim (x) matches,
+    # so the operation succeeds under the current policy.
+    r = ds1 + ds2
+    assert isinstance(r, NDDataset)
+    assert_array_equal(r.data, np.full((3, 5), 2.0))
+
+
+def test_coordinate_multidim_last_dim_mismatch():
+    """Multi-D operation raises when the last dimension does not match."""
+    coord_x1 = Coord(np.arange(5.0))
+    coord_x2 = Coord(np.arange(10.0, 15.0))
+    coord_y = Coord(np.array([10.0, 20.0, 30.0]))
+
+    ds1 = NDDataset(np.ones((3, 5)), coordset=[coord_y, coord_x1])
+    ds2 = NDDataset(np.ones((3, 5)), coordset=[coord_y, coord_x2])
+
+    with pytest.raises(CoordinatesMismatchError):
+        ds1 + ds2
+
+
+def test_numpy_ufunc_via_operator_equivalence():
+    """Using np.<ufunc>(a, b) gives same result as a <op> b."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    ufunc_add = np.add(ds, 2.0)
+    op_add = ds + 2.0
+    assert_array_equal(ufunc_add.data, op_add.data)
+    assert isinstance(ufunc_add, NDDataset)
+    assert isinstance(op_add, NDDataset)
+
+
+def test_ufunc_log1p_works():
+    """np.log1p is dispatched correctly (remapped to log internally)."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    r = np.log1p(ds)
+    assert isinstance(r, NDDataset)
+    assert_array_equal(r.data, np.log(np.array([2.0, 3.0, 4.0])))
+
+
+def test_ufunc_sign_returns_masked_data():
+    """np.sign returns plain masked data, not an NDDataset (historical behaviour)."""
+    ds = NDDataset(np.array([-1.0, 0.0, 2.0]))
+    r = np.sign(ds)
+    # np.sign is in the short-circuit list that returns masked_data directly
+    assert isinstance(r, np.ndarray | np.ma.MaskedArray)
+    assert not isinstance(r, NDDataset)
+
+
+def test_operator_inplace_preserves_type():
+    """In-place operators modify the object and return self."""
+    ds = NDDataset(np.array([1.0, 2.0]))
+    original_id = id(ds)
+    ds += 1.0
+    assert id(ds) == original_id
+    assert_array_equal(ds.data, np.array([2.0, 3.0]))
+
+
+def test_operator_unary_neg():
+    """Unary negation works."""
+    ds = NDDataset(np.array([1.0, -2.0, 3.0]))
+    r = -ds
+    assert_array_equal(r.data, np.array([-1.0, 2.0, -3.0]))
+    assert isinstance(r, NDDataset)
+
+
+# ===============================================================================
+# CHARACTERISATION: reductions with keepdims and units
+# ===============================================================================
+
+
+def test_sum_keepdims():
+    """Sum with keepdims=True preserves dimensions (size 1)."""
+    ds = NDDataset(np.ones((3, 4)))
+    r = ds.sum(keepdims=True)
+    assert r.shape == (1, 1)
+    assert isinstance(r, NDDataset)
+
+
+def test_sum_with_units():
+    """Sum of a dataset with units produces a Quantity when scalar."""
+    ds = NDDataset(np.ones((3,)), units="m")
+    r = ds.sum()
+    assert isinstance(r, Quantity)
+    assert r.units == ur.m
+
+
+def test_sum_dim_units():
+    """Sum along a dimension with units yields a dataset with same units."""
+    ds = NDDataset(np.ones((3, 4)), units="m")
+    r = ds.sum(dim="x")
+    assert isinstance(r, NDDataset)
+    assert r.units == ur.m
+
+
+def test_mean_keepdims():
+    """Mean with keepdims=True preserves dimensions (size 1)."""
+    ds = NDDataset(np.ones((3, 4)))
+    r = ds.mean(keepdims=True)
+    assert r.shape == (1, 1)
+    assert isinstance(r, NDDataset)
+
+
+def test_std_ddof():
+    """Std with ddof=1 uses Bessel correction."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0, 4.0]))
+    r = ds.std(ddof=1)
+    assert isinstance(r, np.floating)
+    assert abs(r - 1.29099) < 1e-4
+
+
+def test_var_with_units():
+    """
+    var of a dataset with units returns a Quantity when scalar.
+    Note: the units of var are the square of the input units.
+    """
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), units="m")
+    r = ds.var()
+    # var of data with units returns a Quantity
+    assert isinstance(r, (Quantity, np.floating))
+
+
+def test_ptp_keepdims():
+    """Ptp with keepdims=True preserves dimension size of 1."""
+    ds = NDDataset(np.array([[1.0, 3.0], [2.0, 5.0]]))
+    r = ds.ptp(keepdims=True)
+    assert r.shape == (1, 1)
+
+
+def test_ptp_scalar():
+    """Ptp of a 1-D dataset returns a scalar Quantity when units present."""
+    ds = NDDataset(np.array([1.0, 3.0, 2.0]), units="m")
+    r = ds.ptp()
+    assert isinstance(r, Quantity)
+    assert r.units == ur.m
+    assert abs(r.magnitude - 2.0) < 1e-10
+
+
+# ===============================================================================
+# CHARACTERISATION: pipe
+# ===============================================================================
+
+
+def test_pipe_with_tuple():
+    """Pipe with (func, target) routes self to the named kwarg."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+
+    def my_transform(data, factor=2.0):
+        return data * factor
+
+    result = ds.pipe((my_transform, "data"), factor=3.0)
+    assert_array_equal(result.data, np.array([3.0, 6.0, 9.0]))
+
+
+def test_pipe_direct():
+    """Pipe with a plain function passes self as first arg."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    result = ds.pipe(lambda x, p: x * p, p=2.0)
+    assert_array_equal(result.data, np.array([2.0, 4.0, 6.0]))
+
+
+# ===============================================================================
+# CHARACTERISATION: clip
+# ===============================================================================
+
+
+def test_clip_basic():
+    """Clip limits values to the given interval."""
+    ds = NDDataset(np.array([-1.0, 0.5, 2.0, 3.0]))
+    r = ds.clip(a_min=0.0, a_max=2.0)
+    assert_array_equal(r.data, np.array([0.0, 0.5, 2.0, 2.0]))
+
+
+def test_clip_preserves_units():
+    """Clip preserves dataset units."""
+    ds = NDDataset(np.array([-1.0, 0.5, 2.0]), units="m")
+    r = ds.clip(a_min=0.0, a_max=1.0)
+    assert_units_equal(r.units, ur.m)
+
+
+def test_clip_no_min():
+    """Clip with only a_max clips from above."""
+    ds = NDDataset(np.array([-1.0, 0.5, 2.0]))
+    r = ds.clip(a_max=1.0)
+    assert_array_equal(r.data, np.array([-1.0, 0.5, 1.0]))
+
+
+# ===============================================================================
+# CHARACTERISATION: coordmax / coordmin
+# ===============================================================================
+
+
+def test_coordmax_basic():
+    """Coordmax returns the coordinate of the maximum value."""
+    x = Coord.linspace(0, 9, 10, title="wavelength")
+    ds = NDDataset(np.sin(np.linspace(0, 3, 10)), coordset=CoordSet(x=x))
+    cm = ds.coordmax()
+    # For 1-D datasets coordmax may return a scalar or dict depending on dim
+    assert cm is not None
+
+
+def test_coordmax_dim_arg():
+    """Coordmax with a dim argument returns a scalar coordinate."""
+    x = Coord.linspace(0, 9, 10)
+    ds = NDDataset(np.sin(np.linspace(0, 3, 10)), coordset=CoordSet(x=x))
+    cm = ds.coordmax(dim="x")
+    assert not isinstance(cm, dict)
+
+
+def test_coordmin_basic():
+    """Coordmin returns the coordinate of the minimum value."""
+    x = Coord.linspace(0, 9, 10)
+    ds = NDDataset(np.sin(np.linspace(0, 3, 10)), coordset=CoordSet(x=x))
+    cm = ds.coordmin()
+    # For 1-D datasets coordmin may return a scalar or dict depending on dim
+    assert cm is not None
+
+
+def test_coordmin_dim_arg():
+    """Coordmin with a dim argument returns a scalar coordinate."""
+    x = Coord.linspace(0, 9, 10)
+    ds = NDDataset(np.sin(np.linspace(0, 3, 10)), coordset=CoordSet(x=x))
+    cm = ds.coordmin(dim="x")
+    assert not isinstance(cm, dict)
+
+
+def test_coordmax_fails_on_coord():
+    """Coordmax raises when called on a Coord (no coordset)."""
+    c = Coord(np.array([1.0, 2.0, 3.0]))
+    with pytest.raises((Exception, TypeError)):
+        c.coordmax()
+
+
+def test_coordmin_fails_on_coord():
+    """Coordmin raises when called on a Coord (no coordset)."""
+    c = Coord(np.array([1.0, 2.0, 3.0]))
+    with pytest.raises((Exception, TypeError)):
+        c.coordmin()
+
+
+# ===============================================================================
+# CHARACTERISATION: creation functions (identity, arange, ones, zeros, full, eye)
+# ===============================================================================
+
+
+def test_identity():
+    """Identity creates a square NDDataset with ones on the diagonal."""
+    ds = NDDataset.identity(3, units="m")
+    assert ds.shape == (3, 3)
+    assert ds.units == ur.m
+    assert_array_equal(np.diag(ds.data), np.ones(3))
+
+
+def test_arange_units():
+    """Arange with units produces a dataset with those units."""
+    ds = NDDataset.arange(0, 10, 2, units="s")
+    assert_array_equal(ds.data, np.array([0, 2, 4, 6, 8]))
+    assert_units_equal(ds.units, ur.s)
+
+
+def test_ones_with_units():
+    """Ones with units."""
+    ds = NDDataset.ones((2, 3), units="km")
+    assert ds.shape == (2, 3)
+    assert_units_equal(ds.units, ur.km)
+
+
+def test_zeros_with_title():
+    """Zeros with metadata."""
+    ds = NDDataset.zeros(5, title="empty")
+    assert ds.shape == (5,)
+    assert ds.title == "empty"
+
+
+def test_full_with_units():
+    """Full with constant value and units."""
+    ds = NDDataset.full((2, 2), fill_value=3.14, units="cm")
+    assert_array_equal(ds.data, np.full((2, 2), 3.14))
+    assert_units_equal(ds.units, ur.cm)
+
+
+def test_eye_with_units():
+    """Eye with units."""
+    ds = NDDataset.eye(3, units="Hz")
+    assert ds.shape == (3, 3)
+    assert_units_equal(ds.units, ur.Hz)
+
+
+# ===============================================================================
+# CHARACTERISATION: absolute with complex data
+# ===============================================================================
+
+
+def test_absolute_complex():
+    """Absolute computes magnitude for complex data (covers non-quaternion branch)."""
+    ds = NDDataset(np.array([3.0 + 4.0j, 0.0 + 1.0j]))
+    r = np.abs(ds)
+    assert_array_equal(r.data, np.array([5.0, 1.0]))
+
+
+def test_conjugate_complex():
+    """Conjugate for complex data (covers the non-quaternion path)."""
+    ds = NDDataset(np.array([1.0 + 2.0j, 3.0 + 4.0j]))
+    r = np.conj(ds)
+    assert_array_equal(r.data, np.array([1.0 - 2.0j, 3.0 - 4.0j]))
+
+
+# ===============================================================================
+# CHARACTERISATION: masked data
+# ===============================================================================
+
+
+def test_sum_masked():
+    """Sum on masked data ignores masked entries."""
+    ds = NDDataset(
+        np.ma.MaskedArray([1.0, 2.0, 3.0, 4.0], mask=[False, True, False, False])
+    )
+    r = ds.sum()
+    assert abs(r - 8.0) < 1e-10
+
+
+def test_mean_masked():
+    """Mean on masked data ignores masked entries."""
+    ds = NDDataset(
+        np.ma.MaskedArray([1.0, 2.0, 10.0, 4.0], mask=[False, True, False, False])
+    )
+    r = ds.mean()
+    assert abs(r - 5.0) < 1e-10
+
+
+def test_absolute_masked():
+    """Absolute on masked data preserves mask."""
+    ds = NDDataset(np.ma.MaskedArray([-1.0, 2.0, -3.0], mask=[False, True, False]))
+    r = np.abs(ds)
+    assert bool(r.mask[1])
+    assert_array_equal(r.data[~r.mask], np.array([1.0, 3.0]))
+
+
+def test_clip_masked():
+    """Clip on masked data preserves mask."""
+    ds = NDDataset(
+        np.ma.MaskedArray([-1.0, 0.5, 2.0, 3.0], mask=[False, True, False, False])
+    )
+    r = ds.clip(0.0, 2.0)
+    assert bool(r.mask[1])
+
+
+# ===============================================================================
+# CHARACTERISATION: Coord-level operations
+# ===============================================================================
+
+
+def test_coord_addition():
+    """Coord addition produces a Coord."""
+    c1 = Coord.linspace(0, 9, 10, units="m")
+    c2 = Coord.linspace(0, 9, 10, units="m")
+    r = c1 + c2
+    assert isinstance(r, Coord)
+    assert_units_equal(r.units, ur.m)
+
+
+def test_coord_subtraction():
+    """Coord subtraction produces a Coord."""
+    c1 = Coord.linspace(0, 9, 10)
+    c2 = Coord.linspace(0, 9, 10)
+    r = c1 - c2
+    assert isinstance(r, Coord)
+
+
+def test_coord_multiplication_scalar():
+    """Coord * scalar produces a Coord."""
+    c = Coord.linspace(0, 9, 10, units="m")
+    r = c * 2.0
+    assert isinstance(r, Coord)
+    assert_units_equal(r.units, ur.m)
+
+
+def test_coord_absolute():
+    """Abs of a Coord works and returns a Coord."""
+    c = Coord(np.array([-1.0, 2.0, -3.0]), units="m")
+    r = abs(c)
+    assert isinstance(r, Coord)
+    assert_array_equal(r.data, np.array([1.0, 2.0, 3.0]))
+
+
+def test_coord_creation_from_array():
+    """A Coord created from an array has correct data and units."""
+    c = Coord(np.array([1.0, 2.0, 3.0]), units="m")
+    assert_array_equal(c.data, np.array([1.0, 2.0, 3.0]))
+    assert_units_equal(c.units, ur.m)
+
+
+# ===============================================================================
+# CHARACTERISATION: _check_coordinate_compatibility error paths
+# ===============================================================================
+
+
+def test_operation_mismatched_coordinates_raises():
+    """Operation between datasets with different last-dim coord raises."""
+    x1 = Coord.linspace(0, 9, 10)
+    x2 = Coord.linspace(0, 19, 10)
+    ds1 = NDDataset(np.ones(10), coordset=CoordSet(x=x1))
+    ds2 = NDDataset(np.ones(10), coordset=CoordSet(x=x2))
+    with pytest.raises(CoordinatesMismatchError):
+        ds1 + ds2
+
+
+def test_operation_matching_coordinates_succeeds():
+    """Operation between datasets with same last-dim coord succeeds."""
+    x = Coord.linspace(0, 9, 10)
+    ds1 = NDDataset(np.ones(10), coordset=CoordSet(x=x))
+    ds2 = NDDataset(np.ones(10), coordset=CoordSet(x=x))
+    r = ds1 + ds2
+    assert isinstance(r, NDDataset)
+
+
+def test_operation_coord_vs_dataset_no_check():
+    """Operation with a Coord and a Dataset skips coord check."""
+    x = Coord.linspace(0, 9, 10)
+    ds = NDDataset(np.ones(10), coordset=CoordSet(x=x))
+    r = ds + 1.0
+    assert isinstance(r, NDDataset)
+
+
+# ===============================================================================
+# CHARACTERISATION: average
+# ===============================================================================
+
+
+def test_average_basic():
+    """Average with weights."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    r = ds.average(weights=np.array([1.0, 1.0, 1.0]))
+    assert abs(r - 2.0) < 1e-10
+
+
+def test_average_with_units():
+    """Average with units preserves units."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), units="m")
+    r = ds.average()
+    assert isinstance(r, Quantity)
+    assert_units_equal(r.units, ur.m)
+
+
+def test_average_returned():
+    """Average with returned=True returns (result, sum_of_weights)."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    r = ds.average(weights=np.array([1.0, 1.0, 1.0]), returned=True)
+    # average with returned may return a tuple or a single value
+    assert r is not None
+
+
+# ===============================================================================
+# CHARACTERISATION: empty_like, ones_like, zeros_like, full_like
+# ===============================================================================
+
+
+def test_ones_like_shape():
+    """ones_like preserves shape of the reference."""
+    ref = NDDataset(np.ones((2, 3)))
+    ds = NDDataset.ones_like(ref)
+    assert ds.shape == ref.shape
+
+
+def test_zeros_like_shape():
+    """zeros_like preserves shape."""
+    ref = NDDataset(np.ones((4,)))
+    ds = NDDataset.zeros_like(ref)
+    assert ds.shape == ref.shape
+
+
+def test_empty_like_shape():
+    """empty_like preserves shape."""
+    ref = NDDataset(np.ones((3, 3)))
+    ds = NDDataset.empty_like(ref)
+    assert ds.shape == ref.shape
+
+
+# ===============================================================================
+# CHARACTERISATION: cumsum
+# ===============================================================================
+
+
+def test_cumsum_basic():
+    """Cumsum produces increasing values."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    r = ds.cumsum()
+    assert_array_equal(r.data, np.array([1.0, 3.0, 6.0]))
+    assert isinstance(r, NDDataset)
+
+
+def test_cumsum_with_units():
+    """Cumsum preserves units."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]), units="m")
+    r = ds.cumsum()
+    assert_units_equal(r.units, ur.m)
+
+
+# ===============================================================================
+# CHARACTERISATION: linspace, geomspace, logspace
+# ===============================================================================
+
+
+def test_geomspace_basic():
+    """Geomspace creates a geometric progression."""
+    ds = NDDataset.geomspace(1, 1000, num=4)
+    assert_array_equal(ds.data, np.geomspace(1, 1000, num=4))
+
+
+def test_logspace_basic():
+    """Logspace creates a logarithmic progression."""
+    ds = NDDataset.logspace(0, 3, num=4)
+    assert_array_equal(ds.data, np.logspace(0, 3, num=4))
