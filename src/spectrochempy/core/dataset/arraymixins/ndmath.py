@@ -11,11 +11,9 @@ from collections.abc import Callable
 from collections.abc import Sequence
 from typing import Any
 from typing import TypeVar
-from warnings import catch_warnings
 
 # Third-party imports
 import numpy as np
-from quaternion import as_float_array
 
 # Local imports
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
@@ -23,14 +21,13 @@ from spectrochempy.core.units import DimensionalityError
 from spectrochempy.core.units import Quantity
 from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import error_
-from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX
-from spectrochempy.utils.exceptions import CoordinatesMismatchError
 from spectrochempy.utils.objects import OrderedSet
+from spectrochempy.utils.quaternion import as_float_array
 from spectrochempy.utils.quaternion import as_quaternion
 from spectrochempy.utils.quaternion import quat_as_complex_array
-from spectrochempy.utils.testing import assert_coord_almost_equal
+from spectrochempy.utils.quaternion import typequaternion
 
 __all__ = []
 __dataset_methods__ = []
@@ -337,15 +334,46 @@ def _comp_ufuncs():
 
 
 LOGICAL_BINARY_STR = """
-
-logical_and(x1, x2 [, out, where, …])          Compute the truth value of x1 AND x2 element-wise.
-logical_or(x1, x2 [, out, where, casting, …])  Compute the truth value of x1 OR x2 element-wise.
-logical_xor(x1, x2 [, out, where, …])          Compute the truth value of x1 XOR x2, element-wise.
+# logical binary operators
 """
 
+# Current coordinate alignment policy used by NDMath._op().
+# ``"spectroscopic-last-dim"`` means:
+# - 1-D operands are compared on their last (x) dimension only.
+# - Multi-D operands are compared on every dimension.
+# - Scalar-like operands (squeeze_ndim == 0) skip comparison.
+# - Tolerance is 3 decimal places, data-only.
+_COORDINATE_POLICY: str = "spectroscopic-last-dim"
 
-def _logical_binary_ufuncs():
-    return _extract_ufuncs(LOGICAL_BINARY_STR)
+
+class _ExecutionPlan:
+    """Named numeric execution branches for NDMath operations."""
+
+    REAL = "real"
+    QUATERNION = "quaternion"
+
+    @staticmethod
+    def execute(branch: str, f: Callable, d: np.ndarray, args: list) -> np.ndarray:
+        """Run *f* on data *d* using the named execution *branch*."""
+        if branch == _ExecutionPlan.REAL:
+            return f(d, *args)
+        dr, di = quat_as_complex_array(d)
+        datar = f(dr, *args)
+        datai = f(di, *args)
+        return as_quaternion(datar, datai)
+
+    @staticmethod
+    def select(
+        is_quaternion: bool,
+        quaternion_aware: bool,
+        args: list,
+    ) -> str:
+        """Return the branch name appropriate for the current operands."""
+        if is_quaternion and not (
+            quaternion_aware and all(arg.dtype not in TYPE_COMPLEX for arg in args)
+        ):
+            return _ExecutionPlan.QUATERNION
+        return _ExecutionPlan.REAL
 
 
 class NDMath:
@@ -505,22 +533,12 @@ class NDMath:
         return self.data.__array_struct__
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        fname = ufunc.__name__
+        # Only __call__ is supported; reject ufunc methods such as
+        # reduce, accumulate, outer, at with a clear message.
+        if method != "__call__":
+            return NotImplemented
 
-        #        # case of complex or hypercomplex data
-        #        if self._implements(NDComplexArray) and self.has_complex_dims:
-        #
-        #            if fname in self.__complex_funcs:
-        #                return getattr(inputs[0], fname)()
-        #
-        #            if fname in ["fabs", ]:
-        #                # function not available for complex data
-        #                raise ValueError(f"Operation `{ufunc}` does not accept complex
-        #                data!")
-        #
-        #        # If this reached, data are not complex or hypercomplex
-        #        if fname in ['absolute', 'abs']:
-        #            f = np.fabs
+        fname = ufunc.__name__
         from spectrochempy.core.dataset.basearrays.ndarray import NDArray
 
         # set history string
@@ -777,9 +795,7 @@ class NDMath:
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
         quaternion = False
-        if dataset.dtype in [np.quaternion]:
-            from quaternion import as_float_array
-
+        if typequaternion is not None and dataset.dtype == typequaternion:
             quaternion = True
             data = dataset
             dataset = as_float_array(dataset)[..., 0]  # real part
@@ -876,9 +892,7 @@ class NDMath:
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
         quaternion = False
-        if dataset.dtype in [np.quaternion]:
-            from quaternion import as_float_array
-
+        if typequaternion is not None and dataset.dtype == typequaternion:
             quaternion = True
             data = dataset
             dataset = as_float_array(dataset)[..., 0]  # real part
@@ -2775,6 +2789,352 @@ class NDMath:
 
         return fname, inputs, objtypes, returntype, is_masked, is_quaternion
 
+    # ------------------------------------------------------------------
+    # Helper: prepare probe quantities for unit calculations
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _prepare_operation_quantities(
+        obj,
+        other,
+        d,
+        fname,
+        compatible_units,
+        is_masked,
+        is_dataset,
+        objtype,
+        othertype,
+    ):
+        """
+        Build probe quantities *q*, *otherqs* and operand *args* list.
+
+        Parameters
+        ----------
+        obj : NDArray
+            First operand.
+        other : NDArray or scalar or None
+            Second operand (``None`` for unary).
+        d : np.ndarray
+            Raw data from *obj* (already unmasked if needed).
+        fname : str
+            Normalised function name.
+        compatible_units : bool
+            Whether the operation requires compatible units.
+        is_masked : bool
+            Whether any operand has a mask.
+        is_dataset : bool
+            Whether *obj* is an NDDataset.
+        objtype : str
+            Type name of *obj*.
+        othertype : str or None
+            Type name of *other* (``None`` if unary).
+
+        Returns
+        -------
+        q : Quantity or scalar
+            Probe quantity for unit calculation.
+        otherqs : list
+            Probe quantities for *other* operands.
+        args : list
+            Operand data arrays (unmasked where necessary).
+        """
+        from spectrochempy.core.units import Quantity  # noqa: PLC0415
+
+        def reduce_(magnitude):
+            if hasattr(magnitude, "dtype"):
+                if magnitude.dtype in TYPE_COMPLEX:
+                    magnitude = magnitude.real
+                elif typequaternion is not None and magnitude.dtype == typequaternion:
+                    magnitude = as_float_array(magnitude)[..., 0]
+                magnitude = magnitude.max()
+            return magnitude
+
+        q = reduce_(d)
+        if hasattr(obj, "units") and obj.units is not None:
+            q = Quantity(q, obj.units)
+            q = q.values if hasattr(q, "values") else q
+
+        args: list = []
+        otherqs: list = []
+
+        if other is not None:
+            # Adapt other's units when compatible
+            if (
+                othertype in ["NDDataset", "Coord", "Quantity"]
+                and not other.unitless
+                and hasattr(obj, "units")
+                and compatible_units
+            ):
+                other.ito(obj.units)
+
+            # Coordinate compatibility check
+            NDMath._check_coordinate_compatibility(
+                obj,
+                other,
+                is_dataset,
+                objtype,
+                othertype,
+            )
+
+            # Extract raw data from other
+            if othertype in ["NDDataset", "Coord"]:
+                arg = (
+                    other._umasked(other.data, other.mask) if is_masked else other.data
+                )
+            else:
+                arg = other.m if isinstance(other, Quantity) else other
+
+            args.append(arg)
+
+            otherq = reduce_(arg)
+            if hasattr(other, "units") and other.units is not None:
+                otherq = Quantity(otherq, other.units)
+                otherq = otherq.values if hasattr(otherq, "values") else otherq
+            otherqs.append(otherq)
+
+        return q, otherqs, args
+
+    # ------------------------------------------------------------------
+    # Helper: coordinate compatibility check
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _check_coordinate_compatibility(
+        obj,
+        other,
+        is_dataset: bool,
+        objtype: str,
+        othertype: str,
+    ) -> None:
+        """
+        Check coordinate compatibility under the ``spectroscopic-last-dim`` policy.
+
+        Raises :exc:`~spectrochempy.utils.exceptions.CoordinatesMismatchError`
+        when coordinates are incompatible.
+
+        Notes
+        -----
+        The current policy only checks the **last** (x) dimension when
+        ``other._squeeze_ndim >= 1``.  A previous ``elif other._squeeze_ndim > 1``
+        branch that would have checked all dimensions was unreachable and has been
+        removed.  Multi-dimensional operands are validated against the last
+        dimension only, matching long-standing behaviour.
+        """
+        from spectrochempy.utils.exceptions import (
+            CoordinatesMismatchError,  # noqa: PLC0415
+        )
+        from spectrochempy.utils.testing import (
+            assert_coord_almost_equal,  # noqa: PLC0415
+        )
+
+        if not (is_dataset and othertype == "NDDataset"):
+            return
+        if other._coordset == obj._coordset:
+            return
+
+        obc = obj.coordset
+        otc = other.coordset
+
+        # Both empty or scalar-like other → skip check
+        if other._squeeze_ndim == 0 or (
+            (obc is None or obc.is_empty) and (otc is None or otc.is_empty)
+        ):
+            return
+
+        # All remaining cases (1-D and multi-D) check only the last dimension.
+        # The previous `elif other._squeeze_ndim > 1` branch was removed because
+        # it was unreachable (``>= 1`` matched first).
+        try:
+            assert_coord_almost_equal(
+                obc[obj.dims[-1]],
+                otc[other.dims[-1]],
+                decimal=3,
+                data_only=True,
+            )
+        except TypeError:
+            xobc = (
+                None if obc is None or obc[obj.dims[-1]].is_empty else obc[obj.dims[-1]]
+            )
+            xotc = (
+                None
+                if otc is None or otc[other.dims[-1]].is_empty
+                else otc[other.dims[-1]]
+            )
+            if xobc is not None and xotc is not None:
+                raise CoordinatesMismatchError(xobc.data, xotc.data) from None
+        except AssertionError as err:
+            xobc = (
+                None if obc is None or obc[obj.dims[-1]].is_empty else obc[obj.dims[-1]]
+            )
+            xotc = (
+                None
+                if otc is None or otc[other.dims[-1]].is_empty
+                else otc[other.dims[-1]]
+            )
+            raise CoordinatesMismatchError(
+                xobc.data if xobc is not None else None,
+                xotc.data if xotc is not None else None,
+            ) from err
+
+    # ------------------------------------------------------------------
+    # Helper: resolve operation units
+    # ------------------------------------------------------------------
+
+    def _resolve_operation_units(
+        self,
+        fname: str,
+        f: Callable,
+        q,
+        otherqs: list,
+        remove_units: bool,
+        compatible_units: bool,
+    ):
+        """
+        Compute the resulting units for an operation.
+
+        Parameters
+        ----------
+        fname : str
+            Operation name.
+        f : Callable
+            The original function.
+        q : Quantity
+            Probe quantity for the first operand.
+        otherqs : list of Quantity
+            Probe quantities for other operands (mutated in place).
+        remove_units : bool
+            Whether to strip units from the result.
+        compatible_units : bool
+            Whether the operation requires compatible units.
+
+        Returns
+        -------
+        str or None
+            Resolved unit string, or UNITLESS (None) if units are stripped.
+        """
+
+        def check_require_units(fname, _units):
+            if fname in self.__require_units:
+                requnits = self.__require_units[fname]
+                if (
+                    requnits in (DIMENSIONLESS, "radian", "degree")
+                    and _units.dimensionless
+                ):
+                    _units = DIMENSIONLESS
+                else:
+                    if requnits == DIMENSIONLESS:
+                        s = "DIMENSIONLESS input"
+                    else:
+                        s = f"`{requnits}` units"
+                    raise DimensionalityError(
+                        _units,
+                        requnits,
+                        extra_msg=f"\nFunction `{fname}` requires {s}",
+                    )
+            return _units
+
+        units = UNITLESS
+
+        if not remove_units:
+            if hasattr(q, "units"):
+                q = q.to(check_require_units(fname, q.units))
+
+            for i, otherq in enumerate(otherqs[:]):
+                if hasattr(otherq, "units"):
+                    otherqm = otherq.m.data if np.ma.isMaskedArray(otherq) else otherq.m
+                    otherqs[i] = otherqm * check_require_units(fname, otherq.units)
+                elif fname in [
+                    "add",
+                    "sub",
+                    "iadd",
+                    "isub",
+                    "and",
+                    "xor",
+                    "or",
+                ] and hasattr(q, "units"):
+                    otherqs[i] = otherq * q.units
+
+            f_u = f
+            if compatible_units:
+                f_u = np.add
+
+            try:
+                res = f_u(q, *otherqs)
+            except Exception as e:
+                if not otherqs:
+                    res = q
+                else:
+                    raise e
+
+            if hasattr(res, "units"):
+                units = res.units
+
+        return units
+
+    # ------------------------------------------------------------------
+    # Helper: execute operation on magnitudes
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _execute_operation(
+        f: Callable,
+        fname: str,
+        d: np.ndarray,
+        args: list,
+        isufunc: bool,
+        is_quaternion: bool,
+        quaternion_aware: bool,
+    ) -> np.ndarray:
+        """
+        Execute *f* on data *d* and operand *args*.
+
+        Returns the result data array (may be masked).
+        """
+
+        from warnings import catch_warnings  # noqa: PLC0415
+
+        import numpy as np  # noqa: PLC0415
+
+        from spectrochempy.utils._logging import warning_  # noqa: PLC0415
+
+        if isufunc:
+            with catch_warnings(record=True) as ws:
+                # ufunc-specific preprocessing
+                if fname == "log1p":
+                    fname = "log"
+                    d = d + 1.0
+                if fname in ["arccos", "arcsin", "arctanh"]:
+                    if np.any(np.abs(d) > 1):
+                        d = d.astype(np.complex128)
+                elif fname in ["sqrt"] and np.any(d < 0):
+                    d = d.astype(np.complex128)
+
+                if fname == "sqrt":
+                    data = d ** (1.0 / 2.0)
+                elif fname == "cbrt":
+                    data = np.sign(d) * np.abs(d) ** (1.0 / 3.0)
+                else:
+                    data = getattr(np, fname)(d, *args)
+
+                # Warning-based fallback to complex
+                if ws and "invalid value encountered in " in ws[-1].message.args[0]:
+                    ws = []
+                    data = getattr(np, fname)(d.astype(np.complex128), *args)
+                    if ws:
+                        raise ValueError(ws[-1].message.args[0])
+                elif ws and "overflow encountered" in ws[-1].message.args[0]:
+                    warning_(ws[-1].message.args[0])
+                elif ws:
+                    raise ValueError(ws[-1].message.args[0])
+        else:
+            branch = _ExecutionPlan.select(is_quaternion, quaternion_aware, args)
+            try:
+                data = _ExecutionPlan.execute(branch, f, d, args)
+            except Exception as e:
+                raise ArithmeticError(e.args[0]) from e
+
+        return data
+
     def _op(
         self,
         f: Callable,
@@ -2804,6 +3164,7 @@ class NDMath:
         objtype = objtypes.pop(0)
 
         other = None
+        othertype = None
         if inputs:
             other = cpy.copy(inputs.pop(0))
             othertype = objtypes.pop(0)
@@ -2816,286 +3177,41 @@ class NDMath:
         # masked array
         d = obj._umasked(obj.data, obj.mask) if is_masked and is_dataset else obj.data
 
-        # Do we have units?
-        # We create a quantity q that will be used for unit calculations (without
-        # dealing with the whole object)
-        def reduce_(magnitude):
-            if hasattr(magnitude, "dtype"):
-                if magnitude.dtype in TYPE_COMPLEX:
-                    magnitude = magnitude.real
-                elif magnitude.dtype == np.quaternion:
-                    magnitude = as_float_array(magnitude)[..., 0]
-                magnitude = magnitude.max()
-            return magnitude
+        # Prepare probe quantities and operand data
+        q, otherqs, args = self._prepare_operation_quantities(
+            obj,
+            other,
+            d,
+            fname,
+            compatible_units,
+            is_masked,
+            is_dataset,
+            objtype,
+            othertype,
+        )
 
-        q = reduce_(d)
-        if hasattr(obj, "units") and obj.units is not None:
-            q = Quantity(q, obj.units)
-            q = q.values if hasattr(q, "values") else q  # case of nddataset, coord,
-
-        # Now we analyse the other operands
-        # ---------------------------------------------------------------------------
-        args = []
-        otherqs = []
-
-        # If other is None, then it is a unary operation we can pass the following
-
-        if other is not None:
-            # First the units may require to be compatible, and if thet are sometimes
-            # they may need to be rescales
-            if (
-                othertype in ["NDDataset", "Coord", "Quantity"]
-                and not other.unitless
-                and hasattr(obj, "units")
-                and compatible_units
-            ):
-                # adapt the other units to that of object
-                other.ito(obj.units)
-
-            # If all inputs are datasets BUT coordset mismatch.
-            if (
-                is_dataset
-                and (othertype == "NDDataset")
-                and (other._coordset != obj._coordset)
-            ):
-                obc = obj.coordset
-                otc = other.coordset
-
-                # here we can have several situations:
-                # -----------------------------------
-                # One acceptable situation could be that we have a single value
-                if other._squeeze_ndim == 0 or (
-                    (obc is None or obc.is_empty) and (otc is None or otc.is_empty)
-                ):
-                    pass
-
-                # Another acceptable situation is that the other NDDataset is 1D, with
-                # compatible
-                # coordinates in the x dimension
-                elif other._squeeze_ndim >= 1:
-                    try:
-                        assert_coord_almost_equal(
-                            obc[obj.dims[-1]],
-                            otc[other.dims[-1]],
-                            decimal=3,
-                            data_only=True,
-                        )  # we compare only data for this operation
-                    except TypeError as err:
-                        # This happen when coord are None or empty
-                        xobc = (
-                            None
-                            if obc is None or obc[obj.dims[-1]].is_empty
-                            else obc[obj.dims[-1]]
-                        )
-                        xotc = (
-                            None
-                            if otc is None or otc[other.dims[-1]].is_empty
-                            else otc[other.dims[-1]]
-                        )
-                        # Permissive: allow operation if either coordset is None
-                        if xobc is None or xotc is None:
-                            pass
-                        else:
-                            raise CoordinatesMismatchError(
-                                xobc.data,
-                                xotc.data,
-                            ) from err
-                    except AssertionError as err:
-                        # Coordinates exist but don't match
-                        xobc = (
-                            None
-                            if obc is None or obc[obj.dims[-1]].is_empty
-                            else obc[obj.dims[-1]]
-                        )
-                        xotc = (
-                            None
-                            if otc is None or otc[other.dims[-1]].is_empty
-                            else otc[other.dims[-1]]
-                        )
-                        raise CoordinatesMismatchError(
-                            xobc.data if xobc is not None else None,
-                            xotc.data if xotc is not None else None,
-                        ) from err
-
-                # if other is multidimensional and as we are talking about element wise
-                # operation, we assume
-                # that all coordinates must match
-                elif other._squeeze_ndim > 1:
-                    for idx in range(obj.ndim):
-                        try:
-                            assert_coord_almost_equal(
-                                obc[obj.dims[idx]],
-                                otc[other.dims[idx]],
-                                decimal=3,
-                                data_only=True,
-                            )  # we compare only data for this operation
-                        except AssertionError as err:
-                            raise CoordinatesMismatchError(
-                                obc[obj.dims[idx]].data,
-                                otc[other.dims[idx]].data,
-                            ) from err
-
-            if othertype in ["NDDataset", "Coord"]:
-                # mask?
-                if is_masked:
-                    arg = other._umasked(other.data, other.mask)
-                else:
-                    arg = other.data
-
-            else:
-                # Not a NDArray.
-
-                # if it is a quantity than separate units and magnitude
-                arg = other.m if isinstance(other, Quantity) else other
-
-            args.append(arg)
-
-            otherq = reduce_(arg)
-
-            if hasattr(other, "units") and other.units is not None:
-                otherq = Quantity(otherq, other.units)
-                otherq = (
-                    otherq.values if hasattr(otherq, "values") else otherq
-                )  # case of nddataset, coord,
-            otherqs.append(otherq)
-
-        # Calculate the resulting units (and their compatibility for such operation)
-        # ------------------------------------------------------------------------------
-        # Do the calculation with the units to find the final one
-
-        def check_require_units(fname, _units):
-            if fname in self.__require_units:
-                requnits = self.__require_units[fname]
-                if (
-                    requnits in (DIMENSIONLESS, "radian", "degree")
-                    and _units.dimensionless
-                ):
-                    # this is compatible:
-                    _units = DIMENSIONLESS
-                else:
-                    if requnits == DIMENSIONLESS:
-                        s = "DIMENSIONLESS input"
-                    else:
-                        s = f"`{requnits}` units"
-                    raise DimensionalityError(
-                        _units,
-                        requnits,
-                        extra_msg=f"\nFunction `{fname}` requires {s}",
-                    )
-
-            return _units
-
-        # define an arbitrary quantity `q` on which to perform the units calculation
-
-        units = UNITLESS
-
-        if not remove_units:
-            if hasattr(q, "units"):
-                # q = q.m * check_require_units(fname, q.units)
-                q = q.to(check_require_units(fname, q.units))
-
-            for i, otherq in enumerate(otherqs[:]):
-                if hasattr(otherq, "units"):
-                    otherqm = otherq.m.data if np.ma.isMaskedArray(otherq) else otherq.m
-                    otherqs[i] = otherqm * check_require_units(fname, otherq.units)
-                elif fname in [
-                    "add",
-                    "sub",
-                    "iadd",
-                    "isub",
-                    "and",
-                    "xor",
-                    "or",
-                ] and hasattr(q, "units"):
-                    otherqs[i] = otherq * q.units  # take the unit of the first obj
-
-            # some functions are not handled by pint regardings units, try to solve this
-            # here
-            f_u = f
-            if compatible_units:
-                f_u = np.add  # take a similar function handled by pint
-
-            try:
-                res = f_u(q, *otherqs)
-
-            except Exception as e:
-                if not otherqs:
-                    # in this case easy we take the units of the single argument except
-                    # for some function where units
-                    # can be dropped
-                    res = q
-                else:
-                    raise e
-
-            if hasattr(res, "units"):
-                units = res.units
+        # Resolve operation units
+        units = self._resolve_operation_units(
+            fname, f, q, otherqs, remove_units, compatible_units
+        )
 
         # perform operation on magnitudes
-        # ------------------------------------------------------------------------------
-        if isufunc:
-            with catch_warnings(record=True) as ws:
-                # try to apply the ufunc
-                if fname == "log1p":
-                    fname = "log"
-                    d = d + 1.0
-                if fname in ["arccos", "arcsin", "arctanh"]:
-                    if np.any(np.abs(d) > 1):
-                        d = d.astype(np.complex128)
-                elif fname in ["sqrt"] and np.any(d < 0):
-                    d = d.astype(np.complex128)
-
-                if fname == "sqrt":  # do not work with masked array
-                    data = d ** (1.0 / 2.0)
-                elif fname == "cbrt":
-                    data = np.sign(d) * np.abs(d) ** (1.0 / 3.0)
-                else:
-                    data = getattr(np, fname)(d, *args)
-
-                # if a warning occurs, let handle it with complex numbers or return an
-                # exception:
-                if ws and "invalid value encountered in " in ws[-1].message.args[0]:
-                    ws = []  # clear
-                    # this can happen with some function that do not work on some real
-                    # values such as log(-1)
-                    # then try to use complex
-                    data = getattr(np, fname)(
-                        d.astype(np.complex128),
-                        *args,
-                    )  # data = getattr(np.emath, fname)(d, *args)
-                    if ws:
-                        raise ValueError(ws[-1].message.args[0])
-                elif ws and "overflow encountered" in ws[-1].message.args[0]:
-                    warning_(ws[-1].message.args[0])
-                elif ws:
-                    raise ValueError(ws[-1].message.args[0])
-
-            # TODO: check the complex nature of the result to return it
-
-        else:
-            # make a simple operation
-            try:
-                if (
-                    not is_quaternion
-                    or quaternion_aware
-                    and all(arg.dtype not in TYPE_COMPLEX for arg in args)
-                ):
-                    data = f(d, *args)
-                else:
-                    # in this case we will work on both complex separately
-                    dr, di = quat_as_complex_array(d)
-                    datar = f(dr, *args)
-                    datai = f(di, *args)
-                    data = as_quaternion(datar, datai)
-
-            except Exception as e:
-                raise ArithmeticError(e.args[0]) from e
+        data = self._execute_operation(
+            f,
+            fname,
+            d,
+            args,
+            isufunc,
+            is_quaternion,
+            quaternion_aware,
+        )
 
         # get possible mask
         if isinstance(data, np.ma.MaskedArray):
             mask = data._mask
             data = data._data
         else:
-            mask = NOMASK  # np.zeros_like(data, dtype=bool)
+            mask = NOMASK
 
         # return calculated data, units and mask
         return data, units, mask, returntype

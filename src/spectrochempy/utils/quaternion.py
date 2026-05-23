@@ -3,17 +3,36 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Various methods and classes used in other part of the program."""
+"""Optional quaternion support (requires ``numpy-quaternion``)."""
 
 import warnings
 
 import numpy as np
-from quaternion import as_float_array
-from quaternion import as_quat_array
 
 from spectrochempy.utils.constants import TYPE_COMPLEX
 
-typequaternion = np.dtype(np.quaternion)
+# Try to import the quaternion library (optional dependency)
+_HAS_QUATERNION = False
+typequaternion = None
+as_float_array = None
+as_quat_array = None
+
+try:
+    from quaternion import as_float_array  # noqa: F811
+    from quaternion import as_quat_array  # noqa: F811
+
+    _HAS_QUATERNION = True
+    typequaternion = np.dtype(np.quaternion)
+except ImportError:
+    pass
+
+
+def _check():
+    if not _HAS_QUATERNION:
+        raise ImportError(
+            "Missing optional dependency 'numpy-quaternion'. "
+            "Use pip or conda to install numpy-quaternion."
+        )
 
 
 # ======================================================================================
@@ -33,13 +52,14 @@ def as_quaternion(*args):
         to w + i.x and y + j.z.
 
     """
+    _check()
     if len(args) == 4:
-        # we assume here that the for components have been provided w, x, y, z
         w, x, y, z = args
-
-    if len(args) == 2:
+    elif len(args) == 2:
         r, i = args
         w, x, y, z = r.real, r.imag, i.real, i.imag
+    else:
+        raise ValueError("as_quaternion requires 2 or 4 arguments")
 
     data = as_quat_array(
         list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten(), strict=False)),
@@ -62,8 +82,8 @@ def quat_as_complex_array(arr):
         Tuple of two complex array.
 
     """
-    if arr.dtype != np.quaternion:
-        # no change
+    _check()
+    if typequaternion is None or arr.dtype != typequaternion:
         return arr
 
     wt, xt, yt, zt = as_float_array(arr).T
@@ -111,7 +131,7 @@ def get_component(data, select="REAL"):
 
     w = x = y = z = None
 
-    if new.dtype == typequaternion:
+    if typequaternion is not None and new.dtype == typequaternion:
         w, x, y, z = as_float_array(new).T
         w, x, y, z = w.T, x.T, y.T, z.T
         if select == "R":
