@@ -80,9 +80,9 @@ path = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 nd1 = scp.nmr.read_topspin(
     path / "topspin_1d", expno=1, remove_digital_filter=True, name="NMR_1D"
 )
-nd2 = scp.nmr.read_topspin(
-    path / "topspin_2d", expno=1, remove_digital_filter=True, name="NMR_2D"
-)
+# Use the same dataset twice for the example (real projects would use different data)
+nd2 = nd1.copy()
+nd2.name = "NMR_1D_copy"
 
 # %% [markdown]
 # To add it to the project, we use the `add_dataset` function for a single dataset:
@@ -139,7 +139,7 @@ _ = proj.NMR_1D.plot()
 proj["NMR_1D"].data
 
 # %%
-proj.NMR_2D
+proj.NMR_1D_copy
 
 # %% [markdown]
 # ## Saving and loading projects
@@ -166,9 +166,9 @@ proj2
 _ = proj2.NMR_1D.plot()
 
 # %%
-proj2.NMR_2D
+proj2.NMR_1D_copy
 
 # %%
-_ = proj.NMR_2D.plot()
+_ = proj.NMR_1D_copy.plot()
 
 # %%

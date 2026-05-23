@@ -34,6 +34,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.units import ur
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
 
 from .nmrglue import read_fid
@@ -1186,10 +1187,21 @@ def _read_topspin(*args, **kwargs):
     meta.tdeff = meta.td[:]
     meta.td = list(data.shape)
 
+    # The td adjustment for complex axes (except last) assumes quaternion/hypercomplex
+    # conversion which is handled by the spectrochempy-hypercomplex plugin. Without it
+    # the raw data shape must be preserved so that coordinates match.
+    try:
+        import spectrochempy_hypercomplex  # noqa: PLC0415
+    except ImportError:
+        _hypercomplex_available = False
+    else:
+        _hypercomplex_available = True
+
     for axis in range(parmode + 1):
         if meta.iscomplex[axis]:
             if axis != parmode:  # already done for last axis
-                meta.td[axis] = meta.td[axis] // 2
+                if _hypercomplex_available:
+                    meta.td[axis] = meta.td[axis] // 2
             meta.tdeff[axis] = meta.tdeff[axis] // 2
 
     meta.sw_h = [
@@ -1292,12 +1304,12 @@ def _read_topspin(*args, **kwargs):
         if cplex and axis > 0:
             try:
                 dataset.hyper.set_quaternion(inplace=True)
-            except AttributeError as exc:
-                msg = (
+            except AttributeError:
+                warning_(
                     "2D hypercomplex NMR data requires the spectrochempy-hypercomplex "
-                    "plugin. Install it with: pip install spectrochempy-hypercomplex"
+                    "plugin. Install it with: pip install spectrochempy-hypercomplex",
+                    stacklevel=2,
                 )
-                raise RuntimeError(msg) from exc
 
     dataset.meta.update(meta)
     dataset.meta.readonly = True
