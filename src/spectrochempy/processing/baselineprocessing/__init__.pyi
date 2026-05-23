@@ -7,11 +7,9 @@
 # ruff: noqa
 
 __all__ = [
-    "baseline_deprecated",
     "baselineprocessing",
     "baselineutils",
 ]
 
-from . import baseline_deprecated
 from . import baselineprocessing
 from . import baselineutils

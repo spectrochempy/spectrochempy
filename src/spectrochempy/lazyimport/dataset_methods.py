@@ -5,7 +5,7 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 #
-# This file was generated for SpectroChemPy version: 0.7.3.dev10+g6b5d0168b.d20250313
+# This file was generated for SpectroChemPy version: 0.8.5.dev4+g9c887df25.d20260521
 #
 #    ###################################################################################
 #    #           DO NOT MODIFY THIS FILE BECAUSE IT IS CREATED AUTOMATICALLY.          #
@@ -31,6 +31,7 @@ _LAZY_DATASETS_IMPORTS = {
     "squeeze": "spectrochempy.core.dataset.nddataset",
     "swapdims": "spectrochempy.core.dataset.nddataset",
     "transpose": "spectrochempy.core.dataset.nddataset",
+    "reshape": "spectrochempy.core.dataset.nddataset",
     "to_array": "spectrochempy.core.dataset.nddataset",
     "to_xarray": "spectrochempy.core.dataset.nddataset",
     "take": "spectrochempy.core.dataset.nddataset",
@@ -43,6 +44,14 @@ _LAZY_DATASETS_IMPORTS = {
     "ito_reduced_units": "spectrochempy.core.dataset.nddataset",
     "is_units_compatible": "spectrochempy.core.dataset.nddataset",
     "remove_masks": "spectrochempy.core.dataset.nddataset",
+    "multiplot": "spectrochempy.core.plotters.multiplot",
+    "multiplot_map": "spectrochempy.core.plotters.multiplot",
+    "multiplot_stack": "spectrochempy.core.plotters.multiplot",
+    "multiplot_image": "spectrochempy.core.plotters.multiplot",
+    "multiplot_lines": "spectrochempy.core.plotters.multiplot",
+    "multiplot_scatter": "spectrochempy.core.plotters.multiplot",
+    "multiplot_with_transposed": "spectrochempy.core.plotters.multiplot",
+    "plot_with_transposed": "spectrochempy.core.plotters.multiplot",
     "plot_1D": "spectrochempy.plotting.plot1d",
     "plot_pen": "spectrochempy.plotting.plot1d",
     "plot_scatter": "spectrochempy.plotting.plot1d",
@@ -92,8 +101,6 @@ _LAZY_DATASETS_IMPORTS = {
     "write_matlab": "spectrochempy.core.writers.write_matlab",
     "write_mat": "spectrochempy.core.writers.write_matlab",
     "align": "spectrochempy.processing.alignement.align",
-    "ab": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
-    "abc": "spectrochempy.processing.baselineprocessing.baseline_deprecated",
     "get_baseline": "spectrochempy.processing.baselineprocessing.baselineprocessing",
     "basc": "spectrochempy.processing.baselineprocessing.baselineprocessing",
     "detrend": "spectrochempy.processing.baselineprocessing.baselineprocessing",

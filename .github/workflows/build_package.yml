@@ -1,7 +1,6 @@
-# This workflow builds and publishes SpectrochemPy packages to:
-# - PyPI (Python Package Index)
+# This workflow builds and publishes SpectroChemPy packages to:
+# - PyPI
 # - Anaconda Cloud
-# It runs after successful completion of the test workflow
 
 name: Build and publish packages 📦
 
@@ -16,7 +15,7 @@ on:
   release:
     types: [published]
 
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,8 +27,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Job 1: Build and publish to PyPI
-  # ---------------------------------
   build-and-publish_pypi:
     name: Build and publish distribution to PyPI
     runs-on: ubuntu-latest
@@ -39,29 +36,24 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      # Step 2: Setup Python
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
-      # Step 3: Install pypa/build
       - name: Install pypa/build
         run: |
           python -m pip install build --user
 
-      # Step 4: Build a binary wheel and a source tarball
       - name: Build a binary wheel and a source tarball
         run: |
           python -m build --sdist --wheel --outdir dist/ .
 
-      # Step 5: Upload PyPI build artifacts
       - name: Upload PyPI build artifacts
         if: ${{ !env.ACT }}
         uses: actions/upload-artifact@v7
@@ -72,23 +64,16 @@ jobs:
             dist/*.tar.gz
           retention-days: 5
 
-      # Step 6: Publish package to Test PyPI
       - name: Publish package to Test PyPI
-        if: (github.event_name == 'push' && github.repository == 'spectrochempy/spectrochempy')
+        if: github.event_name == 'push' && github.repository == 'spectrochempy/spectrochempy'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
 
-      # Step 7: Publish package to PyPI
       - name: Publish package to PyPI
-        if: (github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy')
+        if: github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
 
-  # Job 2: Build and publish to Anaconda
-  # -------------------------------------
   build_and_publish_conda_package:
     name: Build and publish conda package to Anaconda.org
     runs-on: ubuntu-latest
@@ -98,13 +83,11 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      # Step 2: Install Conda environment with Micromamba
       - name: Install Conda environment with Micromamba
         uses: mamba-org/setup-micromamba@v3
         with:
@@ -114,13 +97,11 @@ jobs:
             python=3.11
           cache-environment: true
 
-      # Step 3: Generate conda recipe (with the correct information on version, etc...)
       - name: Generate conda recipe
         run: |
           python3 .github/workflows/scripts/generate_conda_recipe.py
           cat recipe/meta.yaml
 
-      # Step 4: Build conda package
       - name: Build conda package
         uses: prefix-dev/rattler-build-action@v0.2.37
         env:
@@ -129,10 +110,12 @@ jobs:
           recipe-path: recipe/meta.yaml
           upload-artifact: false
           build-args: "-c conda-forge -c spectrocat"
-      - run: mv ../output .
 
-      # Step 5: Upload build artifacts
-      - name: Upload build artifacts
+      - name: Move conda build output
+        run: |
+          mv ../output .
+
+      - name: Upload conda build artifacts
         if: ${{ !env.ACT }}
         uses: actions/upload-artifact@v7
         with:
@@ -142,32 +125,40 @@ jobs:
             output/**/*.tar.bz2
           retention-days: 5
 
-      # Step 6: Publish packages to Anaconda.org
       - name: Upload to Anaconda.org
-        # to xecute this on a fork this line should be commented
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
           (github.event_name == 'release' || github.event_name == 'push')
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
+          set -euo pipefail
+          shopt -s nullglob globstar
 
-          # Function to upload package with specific label
+          if [ -z "${ANACONDA_API_TOKEN:-}" ]; then
+            echo "::error::ANACONDA_API_TOKEN is not set. Cannot upload to Anaconda.org."
+            exit 1
+          fi
+
           upload_package() {
-            local label=$1
-            for package in output/**/*.tar.bz2 output/**/*.conda; do
-              if [ -f "$package" ]; then
-                echo "Uploading $package with label: $label"
-                anaconda upload --force -l $label "$package" || echo "Failed to upload $package"
-              fi
+            local label="$1"
+            local packages=(output/**/*.tar.bz2 output/**/*.conda)
+
+            if [ ${#packages[@]} -eq 0 ]; then
+              echo "::error::No conda packages found in output/"
+              exit 1
+            fi
+
+            for package in "${packages[@]}"; do
+              echo "Uploading $package with label: $label"
+              anaconda --token "$ANACONDA_API_TOKEN" whoami
+              anaconda --token "$ANACONDA_API_TOKEN" show spectrocat/spectrochempy
+              anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "$label" "$package"
             done
           }
 
-          # Upload with appropriate label based on event type
           if [ "${{ github.event_name }}" = "release" ]; then
-            # For releases, upload as main/stable version
             upload_package "main"
           else
-            # For pushes to master/fix branches, upload as dev version
             upload_package "dev"
           fi

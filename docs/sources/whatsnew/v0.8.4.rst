@@ -1,0 +1,7 @@
+:orphan:
+
+What's New in Revision 0.8.4
+---------------------------------------------------------------------------------------
+
+These are the changes in SpectroChemPy-0.8.4.
+See :ref:`release` for a full changelog, including other versions of SpectroChemPy.

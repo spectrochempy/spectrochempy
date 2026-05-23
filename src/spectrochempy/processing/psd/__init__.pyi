@@ -7,19 +7,9 @@
 # ruff: noqa
 
 __all__ = [
-    "_base",
-    "crossdecomposition",
-    "curvefitting",
-    "decomposition",
-    "integration",
-    "kinetic",
-    "peakfinding",
+    "PSD",
+    "PSDResult",
 ]
 
-from . import _base
-from . import crossdecomposition
-from . import curvefitting
-from . import decomposition
-from . import integration
-from . import kinetic
-from . import peakfinding
+from .psd import PSD
+from .psd import PSDResult
