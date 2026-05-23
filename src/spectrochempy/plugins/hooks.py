@@ -281,17 +281,23 @@ class SpectroChemPyHookSpec:
             Post-process the result of a concatenation.  Return the
             modified dataset or ``None``.
         ``"ndmath.execution_branch"``
-            ``callable(is_quaternion: bool, quaternion_aware: bool, args: list) -> str | None``
+            ``callable(fname: str, data: np.ndarray, args: list) -> str | None``
             Return the execution branch name (``"real"``, ``"quaternion"``, …)
             for the current math operation, or ``None`` to use the core default.
             This allows a plugin to define non-real numeric execution paths
-            (e.g. quaternion decomposition for NMR) without the core knowing
-            about those types.
+            (e.g. quaternion decomposition) without the core knowing about
+            those types.
         ``"ndmath.execute"``
             ``callable(branch: str, f: Callable, d: np.ndarray, args: list) -> np.ndarray | None``
             Execute the math operation *f* on data *d* for the given
             *branch*.  Should return the result array or ``None`` to fall
             back to the core default implementation.
+        ``"ndmath.numpy_method.<name>"``
+            ``callable(dataset: NDDataset, *args, **kwargs) -> NDDataset | None``
+            Override the ``@_from_numpy_method`` decorated method *name*
+            (e.g. ``"absolute"``, ``"amax"``, ``"conjugate"``) when the
+            data requires plugin-specific handling.  Return the modified
+            dataset or ``None`` to fall back to the standard numpy path.
 
         Returning ``None`` or an empty dict is treated as
         "no handler override".

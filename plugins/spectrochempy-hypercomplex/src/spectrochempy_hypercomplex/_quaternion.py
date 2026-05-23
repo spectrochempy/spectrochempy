@@ -3,7 +3,10 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""Optional quaternion support (requires ``numpy-quaternion``)."""
+"""Optional quaternion support — internal to the hypercomplex plugin.
+
+The public API is exposed through :class:`HyperAccessor`.
+"""
 
 import warnings
 

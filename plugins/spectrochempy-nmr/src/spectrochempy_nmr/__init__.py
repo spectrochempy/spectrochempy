@@ -84,32 +84,6 @@ def _nmr_concat_extract_metadata(datasets):
     return metacoords
 
 
-def _nmr_ndmath_branch(
-    is_quaternion: bool, quaternion_aware: bool, args: list
-) -> str | None:
-    """Return ``"quaternion"`` when the operands require quaternion execution."""
-    from spectrochempy.utils.constants import TYPE_COMPLEX  # noqa: PLC0415
-
-    if is_quaternion and not (
-        quaternion_aware and all(arg.dtype not in TYPE_COMPLEX for arg in args)
-    ):
-        return "quaternion"
-    return None
-
-
-def _nmr_ndmath_execute(branch: str, f, d, args):
-    """Execute *f* on quaternion data *d* by decomposing into complex arrays."""
-    if branch != "quaternion":
-        return None
-    from spectrochempy.utils.quaternion import as_quaternion  # noqa: PLC0415
-    from spectrochempy.utils.quaternion import quat_as_complex_array  # noqa: PLC0415
-
-    dr, di = quat_as_complex_array(d)
-    datar = f(dr, *args)
-    datai = f(di, *args)
-    return as_quaternion(datar, datai)
-
-
 def _nmr_concat_postprocess(out, datasets, **kwargs):
     """Post-process concatenation for NMR TopSpin datasets."""
     from spectrochempy.core.dataset.coord import Coord  # noqa: PLC0415
@@ -177,8 +151,6 @@ class NMRPlugin(SpectroChemPyPlugin):
             "coord.reversed": _nmr_coord_reversed,
             "concatenate.extract_metadata": _nmr_concat_extract_metadata,
             "concatenate.postprocess": _nmr_concat_postprocess,
-            "ndmath.execution_branch": _nmr_ndmath_branch,
-            "ndmath.execute": _nmr_ndmath_execute,
         }
 
 

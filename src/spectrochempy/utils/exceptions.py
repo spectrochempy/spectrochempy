@@ -153,10 +153,6 @@ class LabelsError(SpectroChemPyError):
     """
 
 
-class NotHyperComplexArrayError(SpectroChemPyError):
-    """Returned when a hypercomplex related method is applied to a not hypercomplex array."""
-
-
 # class UnknownTimeZoneError(pytz.UnknownTimeZoneError):
 #    """
 #    Exception raised when Timezone code is not recognized.

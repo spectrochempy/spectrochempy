@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spectrochempy-hypercomplex"
+version = "0.1.0"
+description = "Hypercomplex / quaternion support plugin for SpectroChemPy"
+requires-python = ">=3.11"
+dependencies = [
+    "spectrochempy>=0.8,<0.10",
+    "numpy",
+    "numpy-quaternion>=2024.0.7",
+]
+
+[project.entry-points."spectrochempy.plugins"]
+hypercomplex = "spectrochempy_hypercomplex:HyperComplexPlugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

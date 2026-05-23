@@ -113,9 +113,9 @@ def test_register_writer():
 def test_dtype_handler():
     registry = PluginRegistry()
     handler = object()
-    registry.register_dtype_handler("quaternion", handler)
-    assert registry.has_dtype_handler("quaternion")
-    assert registry.get_dtype_handler("quaternion") is handler
+    registry.register_dtype_handler("custom_dtype", handler)
+    assert registry.has_dtype_handler("custom_dtype")
+    assert registry.get_dtype_handler("custom_dtype") is handler
 
 
 def test_unit_context():

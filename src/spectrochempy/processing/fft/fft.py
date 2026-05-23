@@ -18,138 +18,17 @@ from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
 from spectrochempy.utils.numutils import largest_power_of_2
-from spectrochempy.utils.quaternion import as_float_array
-from spectrochempy.utils.quaternion import as_quaternion
-from spectrochempy.utils.quaternion import get_component
-from spectrochempy.utils.quaternion import typequaternion
 
 
 # ======================================================================================
 # Private methods
 # ======================================================================================
 def _fft(data):
-    if typequaternion is not None and data.dtype == typequaternion:
-        dr = get_component(data, "R")
-        fr = np.fft.fftshift(np.fft.fft(dr), -1)
-        di = get_component(data, "I")
-        fi = np.fft.fftshift(np.fft.fft(di), -1)
-
-        # rebuild the quaternion
-        data = as_quaternion(fr, fi)
-
-    else:
-        data = np.fft.fftshift(np.fft.fft(data), -1)
-
-    return data
+    return np.fft.fftshift(np.fft.fft(data), -1)
 
 
 def _ifft(data):
-    if typequaternion is not None and data.dtype == typequaternion:
-        fr = get_component(data, "R")
-        dr = np.fft.ifft(np.fft.ifftshift(fr, -1))
-        fi = get_component(data, "I")
-        di = np.fft.ifft(np.fft.ifftshift(fi, -1))
-
-        # rebuild the quaternion
-        data = as_quaternion(dr, di)
-
-    else:
-        data = np.fft.ifft(np.fft.ifftshift(data, -1))
-
-    return data
-
-
-def _fft_positive(data):
-    if typequaternion is not None and data.dtype == typequaternion:
-        dr = get_component(data, "R")
-        fr = np.fft.fftshift(np.fft.ifft(dr).astype(data.dtype)) * data.shape[-1]
-        di = get_component(data, "I")
-        fi = np.fft.fftshift(np.fft.ifft(di).astype(data.dtype)) * data.shape[-1]
-
-        # rebuild the quaternion
-        data = as_quaternion(fr, fi)
-
-    else:
-        data = np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
-
-    return data
-
-
-def _ifft_positive(data):
-    if typequaternion is not None and data.dtype == typequaternion:
-        fr = get_component(data, "R")
-        dr = np.fft.fft(np.fft.ifftshift(fr, -1)) * data.shape[-1]
-        fi = get_component(data, "I")
-        di = np.fft.fft(np.fft.ifftshift(fi, -1)) * data.shape[-1]
-
-        # rebuild the quaternion
-        data = as_quaternion(dr, di)
-
-    else:
-        data = np.fft.fft(np.fft.ifftshift(data, -1)) * data.shape[-1]
-
-    return data
-
-
-def _states_fft(data, tppi=False):
-    # FFT transform according to STATES encoding
-
-    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
-    wt, yt, xt, zt = as_float_array(
-        data,
-    ).T  # x and y are exchanged due to swapping of dims
-    w, y, x, z = wt.T, yt.T, xt.T, zt.T
-
-    sr = (w - 1j * y) / 2.0
-    si = (x - 1j * z) / 2.0
-
-    if tppi:
-        sr[..., 1::2] = -sr[..., 1::2]
-        si[..., 1::2] = -si[..., 1::2]
-
-    fr = np.fft.fftshift(np.fft.fft(sr), -1)
-    fi = np.fft.fftshift(np.fft.fft(si), -1)
-
-    # rebuild the quaternion
-    return as_quaternion(fr, fi)
-
-
-def _echoanti_fft(data):
-    # FFT transform according to ECHO-ANTIECHO encoding
-
-    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
-    wt, yt, xt, zt = as_float_array(
-        data,
-    ).T  # x and y are exchanged due to swapping of dims
-    w, y, x, z = wt.T, xt.T, yt.T, zt.T
-
-    c = (w + y) + 1j * (w - y)
-    s = (x + z) - 1j * (x - z)
-    fc = np.fft.fftshift(np.fft.fft(c / 2.0), -1)
-    fs = np.fft.fftshift(np.fft.fft(s / 2.0), -1)
-    return as_quaternion(fc, fs)
-
-
-def _tppi_fft(data):
-    # FFT transform according to TPPI encoding
-
-    # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
-    wt, yt, xt, zt = as_float_array(
-        data,
-    ).T  # x and y are exchanged due to swapping of dims
-    w, y, x, z = wt.T, xt.T, yt.T, zt.T
-
-    sx = w + 1j * y
-    sy = x + 1j * z
-
-    sx[..., 1::2] = -sx[..., 1::2]
-    sy[..., 1::2] = -sy[..., 1::2]
-
-    fx = np.fft.fftshift(np.fft.fft(sx), -1)  # reverse
-    fy = np.fft.fftshift(np.fft.fft(sy), -1)
-
-    # rebuild the quaternion
-    return as_quaternion(fx, fy)
+    return np.fft.ifft(np.fft.ifftshift(data, -1))
 
 
 def _qf_fft(data):
@@ -395,7 +274,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         iscomplex = False
         if axis == -1:
             iscomplex = new.is_complex
-        if new.is_quaternion or new.is_interleaved:
+        if new.is_interleaved:
             iscomplex = True
 
         # If we are in NMR we have an additional complication due to the mode
@@ -406,10 +285,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         qsim = encoding in ["QSIM", "DQD"]
         qseq = "QSEQ" in encoding
-        states = "STATES" in encoding
-        echoanti = "ECHO-ANTIECHO" in encoding
-        tppi = "TPPI" in encoding
-        qf = "QF" in encoding
 
         zf_size(new, size=size, inplace=True)
 
@@ -419,19 +294,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         elif qseq:
             raise NotImplementedError("QSEQ not yet implemented")
-
-        elif states:
-            data = _states_fft(new.data, tppi)
-
-        elif tppi:
-            data = _tppi_fft(new.data)
-
-        elif echoanti:
-            data = _echoanti_fft(new.data)
-
-        elif qf:
-            # we must perform a real fourier transform of a time domain dataset
-            data = _qf_fft(new.data)
 
         elif iscomplex and inv:
             # We assume no special encoding for inverse complex fft transform
@@ -447,7 +309,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         else:
             raise NotImplementedError(
                 f"{encoding} not yet implemented. We recommend you to put an issue on "
-                f"Github, so we will not forget to work on this!.",
+                "https://github.com/spectrochempy/spectrochempy/issues"
             )
 
         # We need here to create a new dataset with new shape and axis
@@ -533,7 +395,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         new.history = f"{s} applied on dimension {dim}"
 
         # PHASE ?
-        iscomplex = new.is_complex or new.is_quaternion
+        iscomplex = new.is_complex
         if iscomplex and not inv:
             # phase frequency domain
 

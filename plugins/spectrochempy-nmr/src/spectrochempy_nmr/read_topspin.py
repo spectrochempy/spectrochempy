@@ -1289,7 +1289,14 @@ def _read_topspin(*args, **kwargs):
 
     for axis, cplex in enumerate(meta.iscomplex[::-1]):
         if cplex and axis > 0:
-            dataset.set_quaternion(inplace=True)
+            try:
+                dataset.hyper.set_quaternion(inplace=True)
+            except AttributeError as exc:
+                msg = (
+                    "2D hypercomplex NMR data requires the spectrochempy-hypercomplex "
+                    "plugin. Install it with: pip install spectrochempy-hypercomplex"
+                )
+                raise RuntimeError(msg) from exc
 
     dataset.meta.update(meta)
     dataset.meta.readonly = True

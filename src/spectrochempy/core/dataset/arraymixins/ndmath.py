@@ -24,10 +24,6 @@ from spectrochempy.utils._logging import error_
 from spectrochempy.utils.constants import NOMASK
 from spectrochempy.utils.constants import TYPE_COMPLEX
 from spectrochempy.utils.objects import OrderedSet
-from spectrochempy.utils.quaternion import as_float_array
-from spectrochempy.utils.quaternion import as_quaternion
-from spectrochempy.utils.quaternion import quat_as_complex_array
-from spectrochempy.utils.quaternion import typequaternion
 
 __all__ = []
 __dataset_methods__ = []
@@ -156,8 +152,19 @@ class _from_numpy_method:
                 # argpos[0] = argpos[0].real.masked_data
                 argpos[0] = argpos[0].masked_data
 
+            # Check for plugin-provided override for this numpy method
+            from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+            handler = manager_module.plugin_manager.registry.get_handler(
+                f"ndmath.numpy_method.{method}"
+            )
+            if handler is not None:
+                result = handler(new, *argpos, **kwargs)
+                if result is not None:
+                    return result
+
             # case of creation like method
-            # ............................
+            # ...........................
 
             if not self.reduce:  # _like' in method:
                 new = self.method(new, *argpos)
@@ -167,7 +174,7 @@ class _from_numpy_method:
                 return new
 
             # reduce methods
-            # ...............
+            # .................
 
             # apply the numpy operator on the masked data
             new = self.method(new, *argpos)
@@ -350,7 +357,6 @@ class _ExecutionPlan:
     """Named numeric execution branches for NDMath operations."""
 
     REAL = "real"
-    QUATERNION = "quaternion"
 
     @staticmethod
     def execute(branch: str, f: Callable, d: np.ndarray, args: list) -> np.ndarray:
@@ -363,17 +369,14 @@ class _ExecutionPlan:
             if result is not None:
                 return result
 
-        if branch == _ExecutionPlan.REAL:
-            return f(d, *args)
-        dr, di = quat_as_complex_array(d)
-        datar = f(dr, *args)
-        datai = f(di, *args)
-        return as_quaternion(datar, datai)
+        # Only REAL execution is built into core;
+        # other branches (e.g. quaternion) are plugin-provided via handlers.
+        return f(d, *args)
 
     @staticmethod
     def select(
-        is_quaternion: bool,
-        quaternion_aware: bool,
+        fname: str,
+        data: np.ndarray,
         args: list,
     ) -> str:
         """Return the branch name appropriate for the current operands."""
@@ -383,14 +386,11 @@ class _ExecutionPlan:
             "ndmath.execution_branch"
         )
         if handler is not None:
-            result = handler(is_quaternion, quaternion_aware, args)
+            result = handler(fname, data, args)
             if result is not None:
                 return result
 
-        if is_quaternion and not (
-            quaternion_aware and all(arg.dtype not in TYPE_COMPLEX for arg in args)
-        ):
-            return _ExecutionPlan.QUATERNION
+        # Default: standard real/complex execution.
         return _ExecutionPlan.REAL
 
 
@@ -515,32 +515,6 @@ class NDMath:
         "signbit",
         "sign",
     ]
-    __quaternion_aware = [
-        "add",
-        "iadd",
-        "sub",
-        "isub",
-        "mul",
-        "imul",
-        "div",
-        "idiv",
-        "log",
-        "exp",
-        "power",
-        "negative",
-        "conjugate",
-        "copysign",
-        "equal",
-        "not_equal",
-        "less",
-        "less_equal",
-        "isnan",
-        "isinf",
-        "isfinite",
-        "absolute",
-        "abs",
-    ]
-
     # the following methods are to give NDArray based class
     # a behavior similar to np.ndarray regarding the ufuncs
 
@@ -611,18 +585,8 @@ class NDMath:
                 dtype=dtype,
             )  # not a complex, return fabs should be faster
 
-        elif not cls.is_quaternion:
-            data = np.ma.sqrt(dataset.real**2 + dataset.imag**2)
-
         else:
-            data = np.ma.sqrt(
-                dataset.real**2
-                + dataset.part("IR") ** 2
-                + dataset.part("RI") ** 2
-                + dataset.part("II") ** 2,
-                dtype=dtype,
-            )
-            cls._is_quaternion = False
+            data = np.ma.sqrt(dataset.real**2 + dataset.imag**2)
 
         cls._data = data.data
         cls._mask = data.mask
@@ -658,13 +622,7 @@ class NDMath:
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
 
-        if cls.is_quaternion:
-            # TODO:
-            dataset = dataset.swapdims(axis, -1)
-            dataset[..., 1::2] = -dataset[..., 1::2]
-            dataset = dataset(axis, -1)
-        else:
-            dataset = np.ma.conjugate(dataset)
+        dataset = np.ma.conjugate(dataset)
 
         cls._data = dataset.data
         cls._mask = dataset.mask
@@ -807,28 +765,15 @@ class NDMath:
 
         Notes
         -----
-        For dataset with complex or hypercomplex type type, the default is the
+        For dataset with complex type, the default is the
         value with the maximum real part.
 
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
-        quaternion = False
-        if typequaternion is not None and dataset.dtype == typequaternion:
-            quaternion = True
-            data = dataset
-            dataset = as_float_array(dataset)[..., 0]  # real part
         m = np.ma.max(dataset, axis=axis, keepdims=keepdims)
-        if quaternion:
-            if dim is None:
-                # we return the corresponding quaternion value
-                idx = np.ma.argmax(dataset)
-                c = list(np.unravel_index(idx, dataset.shape))
-                m = data[..., c[-2], c[-1]][()]
-            else:
-                m = np.ma.diag(data[np.ma.argmax(dataset, axis=axis)])
 
         if np.isscalar(m) or (m.size == 1 and not keepdims):
-            if not np.isscalar(m):  # case of quaternion
+            if not np.isscalar(m):
                 m = m[()]
             if cls.units is not None:
                 return Quantity(m, cls.units)
@@ -909,23 +854,10 @@ class NDMath:
 
         """
         axis, dim = cls.get_axis(dim, allows_none=True)
-        quaternion = False
-        if typequaternion is not None and dataset.dtype == typequaternion:
-            quaternion = True
-            data = dataset
-            dataset = as_float_array(dataset)[..., 0]  # real part
         m = np.ma.min(dataset, axis=axis, keepdims=keepdims)
-        if quaternion:
-            if dim is None:
-                # we return the corresponding quaternion value
-                idx = np.ma.argmin(dataset)
-                c = list(np.unravel_index(idx, dataset.shape))
-                m = data[..., c[-2], c[-1]][()]
-            else:
-                m = np.ma.diag(data[np.ma.argmin(dataset, axis=axis)])
 
         if np.isscalar(m) or (m.size == 1 and not keepdims):
-            if not np.isscalar(m):  # case of quaternion
+            if not np.isscalar(m):
                 m = m[()]
             if cls.units is not None:
                 return Quantity(m, cls.units)
@@ -2741,16 +2673,11 @@ class NDMath:
         # compatible units.
         # If the object are not compatible then we raise an error
 
-        # Take the objects out of the input list and get their types and units.
-        # Additionally determine if we need to
-        # use operation on masked arrays and/or on quaternion
-
         is_masked = False
         objtypes = []
         objunits = OrderedSet()
         returntype = None
 
-        is_quaternion = False
         compatible_units = fname in self.__compatible_units
 
         for _i, obj in enumerate(inputs):
@@ -2782,13 +2709,6 @@ class NDMath:
             if hasattr(obj, "mask") and np.any(obj.mask):
                 is_masked = True
 
-            # If one of the input is hypercomplex, this will demand a special treatment
-            is_quaternion = (
-                is_quaternion or False
-                if not hasattr(obj, "is_quaternion")
-                else obj.is_quaternion
-            )
-
         # it may be necessary to change the object order regarding the types
         if returntype in ["NDDataset", "Coord"] and objtypes[0] != returntype:
             inputs.reverse()
@@ -2805,7 +2725,7 @@ class NDMath:
             else:
                 raise NotImplementedError
 
-        return fname, inputs, objtypes, returntype, is_masked, is_quaternion
+        return fname, inputs, objtypes, returntype, is_masked
 
     # ------------------------------------------------------------------
     # Helper: prepare probe quantities for unit calculations
@@ -2862,8 +2782,6 @@ class NDMath:
             if hasattr(magnitude, "dtype"):
                 if magnitude.dtype in TYPE_COMPLEX:
                     magnitude = magnitude.real
-                elif typequaternion is not None and magnitude.dtype == typequaternion:
-                    magnitude = as_float_array(magnitude)[..., 0]
                 magnitude = magnitude.max()
             return magnitude
 
@@ -3100,8 +3018,6 @@ class NDMath:
         d: np.ndarray,
         args: list,
         isufunc: bool,
-        is_quaternion: bool,
-        quaternion_aware: bool,
     ) -> np.ndarray:
         """
         Execute *f* on data *d* and operand *args*.
@@ -3145,7 +3061,7 @@ class NDMath:
                 elif ws:
                     raise ValueError(ws[-1].message.args[0])
         else:
-            branch = _ExecutionPlan.select(is_quaternion, quaternion_aware, args)
+            branch = _ExecutionPlan.select(fname, d, args)
             try:
                 data = _ExecutionPlan.execute(branch, f, d, args)
             except Exception as e:
@@ -3165,7 +3081,6 @@ class NDMath:
 
         compatible_units = fname in self.__compatible_units
         remove_units = fname in self.__remove_units
-        quaternion_aware = fname in self.__quaternion_aware
 
         (
             fname,
@@ -3173,7 +3088,6 @@ class NDMath:
             objtypes,
             returntype,
             is_masked,
-            is_quaternion,
         ) = self._preprocess_op_inputs(fname, inputs)
 
         # Now we can proceed
@@ -3220,8 +3134,6 @@ class NDMath:
             d,
             args,
             isufunc,
-            is_quaternion,
-            quaternion_aware,
         )
 
         # get possible mask

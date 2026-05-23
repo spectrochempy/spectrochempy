@@ -886,7 +886,7 @@ def test_nddataset_bug_par_arnaud():
     assert ds2.data.shape[0] == 2400, "taille dimension 0 doit être 2400"
 
 
-# ################ Complex and Quaternion, and NMR ##################
+# ################ Complex and NMR ##################
 # ======================================================================================
 # Complex NDDataset tests
 # ======================================================================================

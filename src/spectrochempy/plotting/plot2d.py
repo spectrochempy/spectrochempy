@@ -1482,7 +1482,7 @@ def plot_2D(dataset, method=None, **kwargs):
         if not kwargs.get("imag", False):
             zdata = new.real.masked_data
         else:
-            zdata = new.imag.masked_data  # TODO: quaternion case (3 imag.components)
+            zdata = new.imag.masked_data
 
         zlim = kwargs.get("zlim", (np.ma.min(zdata), np.ma.max(zdata)))
 
