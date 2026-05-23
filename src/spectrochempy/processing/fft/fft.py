@@ -33,7 +33,6 @@ def _ifft(data):
 
 def _qf_fft(data):
     # FFT transform according to QF encoding
-
     return np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
 
 
@@ -285,6 +284,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         qsim = encoding in ["QSIM", "DQD"]
         qseq = "QSEQ" in encoding
+        states = "STATES" in encoding
+        echoanti = "ECHO-ANTIECHO" in encoding
+        tppi = "TPPI" in encoding
+        qf = "QF" in encoding
 
         zf_size(new, size=size, inplace=True)
 
@@ -294,6 +297,27 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
 
         elif qseq:
             raise NotImplementedError("QSEQ not yet implemented")
+
+        elif states or tppi or echoanti:
+            try:
+                from spectrochempy.plugins import (
+                    manager as manager_module,  # noqa: PLC0415
+                )
+
+                handler = manager_module.plugin_manager.registry.get_handler(
+                    "fft.encoding"
+                )
+            except Exception:  # noqa: BLE001
+                handler = None
+            if handler is None:
+                raise NotImplementedError(
+                    f"{encoding} NMR encoding requires the spectrochempy-nmr plugin. "
+                    "Install it with: pip install spectrochempy-nmr[hypercomplex]"
+                )
+            data = handler(new.data, encoding, tppi=tppi)
+
+        elif qf:
+            data = _qf_fft(new.data)
 
         elif iscomplex and inv:
             # We assume no special encoding for inverse complex fft transform

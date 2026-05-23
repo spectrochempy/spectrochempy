@@ -147,10 +147,13 @@ class NMRPlugin(SpectroChemPyPlugin):
 
     def register_handlers(self) -> dict[str, Callable]:
         """Register handler overrides for core extension points."""
+        from .fft_encodings import _fft_encoding_handler  # noqa: PLC0415
+
         return {
             "coord.reversed": _nmr_coord_reversed,
             "concatenate.extract_metadata": _nmr_concat_extract_metadata,
             "concatenate.postprocess": _nmr_concat_postprocess,
+            "fft.encoding": _fft_encoding_handler,
         }
 
 

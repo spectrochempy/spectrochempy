@@ -29,7 +29,6 @@ import re
 from datetime import datetime
 
 import numpy as np
-from quaternion import as_quat_array
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
@@ -1077,6 +1076,8 @@ def _read_topspin(*args, **kwargs):
             if datalist[0].ndim == 2:
                 data, dataRI, dataIR, dataII = datalist
                 # make quaternion
+                from quaternion import as_quat_array  # noqa: PLC0415
+
                 shape = data.shape
                 data = as_quat_array(
                     list(
