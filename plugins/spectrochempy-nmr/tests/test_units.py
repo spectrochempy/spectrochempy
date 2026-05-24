@@ -9,7 +9,6 @@ from spectrochempy_nmr.units import set_nmr_context
 import spectrochempy as scp
 import spectrochempy.plugins.manager as manager_module
 from spectrochempy.core.units import DimensionalityError
-from spectrochempy.core.units import set_nmr_context as core_set_nmr_context
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.registry import PluginRegistry
@@ -61,14 +60,6 @@ def test_public_nmr_namespace_exposes_set_nmr_context(monkeypatch):
     _isolated_plugin_manager(monkeypatch, with_nmr=True)
 
     scp.nmr.set_nmr_context(100 * scp.ur.MHz)
-    with scp.ur.context("nmr"):
-        assert f"{(10000 * scp.ur.Hz).to('ppm'):~.3f}" == "100.000 ppm"
-
-
-def test_core_set_nmr_context_shim_warns():
-    with pytest.warns(DeprecationWarning, match="deprecated"):
-        core_set_nmr_context(100 * scp.ur.MHz)
-
     with scp.ur.context("nmr"):
         assert f"{(10000 * scp.ur.Hz).to('ppm'):~.3f}" == "100.000 ppm"
 

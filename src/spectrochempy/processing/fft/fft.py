@@ -255,7 +255,7 @@ def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
         # Eventually apply the effective size
         new[..., tdeff:] = 0.0
 
-        # Should we work on complex or hypercomplex data
+        # Determine whether the data are complex (or plugin-specific interleaved)
         # interleaved is in case of >2D data  ( # TODO: >D not yet implemented in ndcomplex.py
         iscomplex = False
         if axis == -1:

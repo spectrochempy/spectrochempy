@@ -12,7 +12,6 @@ import spectrochempy.plugins.manager as manager_module
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import PluginState
 from spectrochempy.api.plugins import check_plugin_compatibility
-from spectrochempy.core.readers.read_topspin import read_topspin as core_read_topspin
 from spectrochempy.plugins.deps import MissingPluginError
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
@@ -164,19 +163,6 @@ def test_top_level_stub_is_actionable_without_registered_nmr(monkeypatch):
         read_topspin("missing")
 
     message = str(excinfo.value)
-    assert "spectrochempy-nmr" in message
-    assert "pip install spectrochempy[nmr]" in message
-
-
-def test_core_stub_is_actionable():
-    """The core compatibility stub explains how to install the NMR plugin."""
-    try:
-        core_read_topspin("missing")
-    except MissingPluginError as err:
-        message = str(err)
-    else:  # pragma: no cover
-        raise AssertionError("read_topspin stub should require spectrochempy-nmr")
-
     assert "spectrochempy-nmr" in message
     assert "pip install spectrochempy[nmr]" in message
 

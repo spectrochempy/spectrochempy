@@ -165,11 +165,11 @@ class SpectroChemPyHookSpec:
 
             [
                 {
-                    "name": "nmr",
-                    "func": set_nmr_context,
+                    "name": "my_context",
+                    "func": setup_context,
                     "predicate": applies_to_coord,
-                    "argument_extractor": get_larmor,
-                    "description": "NMR ppm/frequency conversion context",
+                    "argument_extractor": get_context_args,
+                    "description": "Custom unit conversion context",
                 },
             ]
 
@@ -273,20 +273,19 @@ class SpectroChemPyHookSpec:
             displayed in decreasing order, or ``None`` to use the core default.
         ``"concatenate.extract_metadata"``
             ``callable(datasets: list) -> dict | None``
-            Extract metadata coordinates (e.g. TopSpin parameters) from
-            a list of datasets before concatenation.  Return a dict of
-            ``{name: [values, ...]}`` or ``None``.
+            Extract metadata coordinates (e.g. variable acquisition
+            parameters) from a list of datasets before concatenation.
+            Return a dict of ``{name: [values, ...]}`` or ``None``.
         ``"concatenate.postprocess"``
             ``callable(out: NDDataset, datasets: list, metacoords: dict) -> NDDataset | None``
             Post-process the result of a concatenation.  Return the
             modified dataset or ``None``.
         ``"ndmath.execution_branch"``
             ``callable(fname: str, data: np.ndarray, args: list) -> str | None``
-            Return the execution branch name (``"real"``, ``"quaternion"``, …)
+            Return the execution branch name (``"real"``, ``"custom_numeric"``, …)
             for the current math operation, or ``None`` to use the core default.
             This allows a plugin to define non-real numeric execution paths
-            (e.g. quaternion decomposition) without the core knowing about
-            those types.
+            without the core knowing about those types.
         ``"ndmath.execute"``
             ``callable(branch: str, f: Callable, d: np.ndarray, args: list) -> np.ndarray | None``
             Execute the math operation *f* on data *d* for the given
