@@ -66,17 +66,17 @@ def _nmr_concat_extract_metadata(datasets):
             keepitem = key if key != "date" else "timestamp"
             if np.any(meta0[key][-1] != meta[key][-1]):
                 if hasattr(meta0[key][-1], "size") and meta0[key][-1].size > 1:
-                    for i in range(meta0[key][-1].size):
-                        if np.any(meta0[key][-1][i] == meta[key][-1][i]):
+                    for idx in range(meta0[key][-1].size):
+                        if np.any(meta0[key][-1][idx] == meta[key][-1][idx]):
                             continue
-                        itemi = f"{key}{i}"
+                        itemi = f"{key}{idx}"
                         if itemi not in metacoords:
                             metacoords[itemi] = [
-                                meta0[key][-1][i],
-                                meta[key][-1][i],
+                                meta0[key][-1][idx],
+                                meta[key][-1][idx],
                             ]
                         else:
-                            metacoords[itemi].append(meta[key][-1][i])
+                            metacoords[itemi].append(meta[key][-1][idx])
                     continue
                 if keepitem not in metacoords:
                     metacoords[keepitem] = [meta0[key][-1], meta[key][-1]]
