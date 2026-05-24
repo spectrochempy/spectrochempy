@@ -66,9 +66,22 @@ def _tppi_fft(data):
     return as_quaternion(fx, fy)
 
 
+def _qf_fft(data):
+    """FFT transform according to QF encoding."""
+    return np.fft.fftshift(np.fft.fft(np.conjugate(data)), -1)
+
+
 def _fft_encoding_handler(data, encoding, **kwargs):
-    """Dispatch NMR 2D encoding-specific FFT transforms."""
+    """Dispatch NMR encoding-specific FFT transforms."""
     tppi = kwargs.get("tppi", False)
+    if encoding in ("QSIM", "DQD"):
+        # Standard complex FFT – core already handles this, but we keep it
+        # here for explicitness when a plugin encoding handler is queried.
+        return np.fft.fftshift(np.fft.fft(data), -1)
+    if "QF" in encoding:
+        return _qf_fft(data)
+    if "QSEQ" in encoding:
+        raise NotImplementedError("QSEQ NMR encoding is not yet implemented")
     if "STATES" in encoding:
         return _states_fft(data, tppi=tppi)
     if "TPPI" in encoding and "STATES" not in encoding:

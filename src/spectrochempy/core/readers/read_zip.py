@@ -80,7 +80,7 @@ def read_zip(*paths, **kwargs):
         .. versionadded:: 0.7.2
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
         ``'csv'``, ``'excel'``}. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`

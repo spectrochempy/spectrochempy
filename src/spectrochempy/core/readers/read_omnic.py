@@ -114,7 +114,7 @@ def read_omnic(*paths, **kwargs):
         .. versionadded:: 0.7.2
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
         ``'excel'``}. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`
@@ -288,7 +288,7 @@ def read_spg(*paths, **kwargs):
     .. versionadded:: 0.7.2
     protocol : `str`, optional
     ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-    ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+    ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
     ``'csv'``, ``'excel'``}. If not provided, the correct protocol
     is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`
@@ -405,7 +405,7 @@ def read_spa(*paths, **kwargs):
     .. versionadded:: 0.7.2
     protocol : `str`, optional
     ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-    ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+    ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
     ``'csv'``, ``'excel'``}. If not provided, the correct protocol
     is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`
@@ -529,7 +529,7 @@ def read_srs(*paths, **kwargs):
     .. versionadded:: 0.7.2
     protocol : `str`, optional
     ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-    ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+    ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
     ``'csv'``, ``'excel'``}. If not provided, the correct protocol
     is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`

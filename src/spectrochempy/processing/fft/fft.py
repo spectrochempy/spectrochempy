@@ -7,8 +7,6 @@ __all__ = ["fft", "ifft", "mc", "ps", "ht"]
 
 __dataset_methods__ = __all__
 
-import re
-
 import numpy as np
 from scipy.signal import hilbert
 
@@ -17,7 +15,6 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import ur
 from spectrochempy.processing.fft.zero_filling import zf_size
 from spectrochempy.utils.decorators import _units_agnostic_method
-from spectrochempy.utils.numutils import largest_power_of_2
 
 
 # ======================================================================================
@@ -118,7 +115,7 @@ def ifft(dataset, size=None, **kwargs):
     return fft(dataset, size=size, inv=True, **kwargs)
 
 
-def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
+def fft(dataset, size=None, sizeff=None, inv=False, **kwargs):
     """
     Apply a complex fast fourier transform.
 
@@ -136,15 +133,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     dataset : `NDDataset`
         The dataset on which to apply the fft transformation.
     size : int, optional
-        Size of the transformed dataset dimension - a shorter parameter is `si` . by default, the size is the closest
-        power of two greater than the data size.
+        Size of the transformed dataset dimension - a shorter parameter is `si` .
+        By default, the size is the data size.
     sizeff : int, optional
         The number of effective data point to take into account for the transformation. By default it is equal to the
         data size, but may be smaller.
     inv : bool, optional, default=False
         If True, an inverse Fourier transform is performed - size parameter is not taken into account.
-    ppm : bool, optional, default=True
-        If True, and data are from NMR, then a ppm scale is calculated instead of frequency.
     **kwargs
         Optional keyword parameters (see Other Parameters).
 
@@ -161,17 +156,13 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
     inplace : bool, optional, default=False.
         True if we make the transform inplace.  If False, the function return a new object
     tdeff : int, optional
-        Alias of sizeff (specific to NMR). If both sizeff and tdeff are passed, sizeff has the priority.
+        Alias of sizeff. If both sizeff and tdeff are passed, sizeff has the priority.
 
     See Also
     --------
     ifft : Inverse Fourier transform.
 
     """
-    # datatype
-    is_nmr = dataset.origin.lower() in [
-        "topspin",
-    ]
     is_ir = dataset.meta.interferogram
 
     # On which axis do we want to apply transform (get axis from arguments)
@@ -253,10 +244,6 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         if size is None or inv:
             size = kwargs.get("si", x.size)
 
-        # we default to the closest power of two larger of the data size
-        if is_nmr:
-            size = largest_power_of_2(size)
-
         # do we have an effective td to apply
         tdeff = sizeff
         if tdeff is None:
@@ -276,29 +263,15 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
         if new.is_interleaved:
             iscomplex = True
 
-        # If we are in NMR we have an additional complication due to the mode
-        # of acquisition (sequential mode when ['QSEQ','TPPI','STATES-TPPI'])
+        # If a plugin-registered encoding is present, delegate the transform to it.
         encoding = "undefined"
         if not inv and "encoding" in new.meta:
             encoding = new.meta.encoding[-1]
 
-        qsim = encoding in ["QSIM", "DQD"]
-        qseq = "QSEQ" in encoding
-        states = "STATES" in encoding
-        echoanti = "ECHO-ANTIECHO" in encoding
-        tppi = "TPPI" in encoding
-        qf = "QF" in encoding
-
         zf_size(new, size=size, inplace=True)
 
         # Perform the fft
-        if qsim:  # F2 fourier transform
-            data = _fft(new.data)
-
-        elif qseq:
-            raise NotImplementedError("QSEQ not yet implemented")
-
-        elif states or tppi or echoanti:
+        if encoding != "undefined":
             try:
                 from spectrochempy.plugins import (
                     manager as manager_module,  # noqa: PLC0415
@@ -311,13 +284,10 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
                 handler = None
             if handler is None:
                 raise NotImplementedError(
-                    f"{encoding} NMR encoding requires the spectrochempy-nmr plugin. "
-                    "Install it with: pip install spectrochempy-nmr[hypercomplex]"
+                    f"FFT encoding {encoding!r} requires a plugin. "
+                    "Install the relevant plugin (e.g. spectrochempy-nmr)."
                 )
-            data = handler(new.data, encoding, tppi=tppi)
-
-        elif qf:
-            data = _qf_fft(new.data)
+            data = handler(new.data, encoding, **kwargs)
 
         elif iscomplex and inv:
             # We assume no special encoding for inverse complex fft transform
@@ -331,59 +301,36 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
             raise NotImplementedError("Inverse FFT for real dimension")
 
         else:
-            raise NotImplementedError(
-                f"{encoding} not yet implemented. We recommend you to put an issue on "
-                "https://github.com/spectrochempy/spectrochempy/issues"
-            )
+            data = _fft(new.data)
 
         # We need here to create a new dataset with new shape and axis
         new._data = data
         new.mask = False
 
-        # create new coordinates for the transformed data
+        # Determine the coordinate size for the output
+        coord_size = size
+        if not inv and is_ir:
+            # interferogram FFT yields half the number of points
+            coord_size = size // 2
 
-        if is_nmr:
-            sfo1 = new.meta.sfo1[-1]
-            bf1 = new.meta.bf1[-1]
-            sf = new.meta.sf[-1]
-            sw = new.meta.sw_h[-1]
-            if new.meta.nuc1 is not None:
-                nuc1 = new.meta.nuc1[-1]
-                regex = r"([^a-zA-Z]+)([a-zA-Z]+)"
-                m = re.match(regex, nuc1)
-                if m is not None:
-                    mass = m[1]
-                    name = m[2]
-                    nucleus = "^{" + mass + "}" + name
-                else:
-                    nucleus = ""
-            else:
-                nucleus = ""
-        else:
-            sfo1 = 0 * ur.Hz
-            bf1 = sfo1
+        # create new coordinates for the transformed data
+        if not inv:
+            # time to frequency
             dw = x.spacing
             if isinstance(dw, list):
                 pass  # print()
             sw = 1 / 2 / dw
             sf = -sw / 2
-            size = size // 2
 
-        if not inv:
-            # time to frequency
-            sizem = max(size - 1, 1)
+            sizem = max(coord_size - 1, 1)
             deltaf = -sw / sizem
-            first = sfo1 - sf - deltaf * sizem / 2.0
+            first = sf - deltaf * sizem / 2.0
 
-            # newcoord = type(x)(np.arange(size) * deltaf + first)
-            newcoord = Coord.arange(size) * deltaf + first
+            newcoord = Coord.arange(coord_size) * deltaf + first
             newcoord.show_datapoints = False
             newcoord.name = x.name
             new.title = "intensity"
-            if is_nmr:
-                newcoord.title = f"${nucleus}$ frequency"
-                newcoord.ito("Hz")
-            elif is_ir:
+            if is_ir:
                 new._units = None
                 newcoord.title = "wavenumbers"
                 newcoord.ito("cm^-1")
@@ -392,27 +339,36 @@ def fft(dataset, size=None, sizeff=None, inv=False, ppm=True, **kwargs):
                 newcoord.ito("Hz")
 
         else:
-            # frequency or ppm to time
+            # frequency to time
             sw = abs(x.data[-1] - x.data[0])
-            if x.units == "ppm":
-                sw = bf1.to("Hz") * sw / 1.0e6
-            deltat = (1.0 / sw).to("us")
+            # sw is a plain float here (x.data is an ndarray).  Multiply by the
+            # original coordinate unit so that 1/sw has time dimensionality.
+            if x.units is not None and x.units.dimensionality == "1/[time]":
+                deltat = (1.0 / (sw * x.units)).to("us")
+            else:
+                # For ppm or dimensionless coordinates we cannot determine the
+                # correct time step without extra context.  Use a placeholder
+                # so that plugins (e.g. NMR) can replace the coordinate.
+                deltat = (1.0 / sw) * ur.us
 
-            newcoord = Coord.arange(size) * deltat
+            newcoord = Coord.arange(coord_size) * deltat
             newcoord.name = x.name
             newcoord.title = "time"
             newcoord.ito("us")
 
-        if is_nmr and not inv:
-            # Store the acquisition frequency for the NMR plugin's
-            # ppm conversion context.
-            newcoord.meta["acquisition_frequency"] = bf1
-            ppm = kwargs.get("ppm", True)
-            if ppm:
-                newcoord.ito("ppm")
-                newcoord.title = rf"$\delta\ {nucleus}$"
-
         new.coordset[dim] = newcoord
+
+        # Allow plugins to post-process the result (e.g. NMR axis labels, ppm conversion)
+        try:
+            from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+            post_handler = manager_module.plugin_manager.registry.get_handler(
+                "fft.postprocess_result"
+            )
+        except Exception:  # noqa: BLE001
+            post_handler = None
+        if post_handler is not None:
+            new = post_handler(new, dim=dim, inv=inv, **kwargs)
 
         # update history
         s = "ifft" if inv else "fft"
