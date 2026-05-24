@@ -30,6 +30,7 @@ def test_plugin_capabilities():
     plugin = MyPlugin()
     assert hasattr(plugin, "capabilities")
     assert PluginCapability.READER in plugin.capabilities
+    assert PluginCapability.WRITER in plugin.capabilities
     assert PluginCapability.ACCESSOR in plugin.capabilities
 
 
@@ -46,13 +47,33 @@ def test_registration():
     writer = harness.get_writer("myformat")
     assert writer is not None
 
-    # Analysis contributions via ExtensionRegistry
     analyses = harness.registry.extensions.list_category("analysis")
     assert "my_analysis" in analyses
 
     accessors = harness.registry.extensions.list_category("accessor")
     assert "myplugin.analysis" in accessors
     assert "my_analysis" in accessors
+
+
+def test_handlers_registered():
+    """Plugin can declare handler overrides (empty dict is valid)."""
+    plugin = MyPlugin()
+    handlers = plugin.register_handlers()
+    # Template returns an empty dict by default; a real plugin would
+    # return populated handler mappings.
+    assert isinstance(handlers, dict)
+    for key, value in handlers.items():
+        assert isinstance(key, str)
+        assert callable(value)
+
+
+def test_unit_contexts_api():
+    """Plugin exposes the unit-context hook if implemented."""
+    plugin = MyPlugin()
+    # register_unit_contexts is not implemented in the template,
+    # but the API should be available.
+    assert hasattr(plugin, "register_unit_contexts")
+    # When implemented it returns a list[dict].
 
 
 def test_lifecycle_state():
