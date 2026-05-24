@@ -27,8 +27,9 @@ import numpy as np
 import pytest
 
 from spectrochempy.utils.file import _get_file_for_protocol
+from spectrochempy.utils.file import _infer_filetype_key
 from spectrochempy.utils.file import _insensitive_case_glob
-from spectrochempy.utils.file import _topspin_check_filename
+from spectrochempy.utils.file import _resolve_directory_target
 from spectrochempy.utils.file import check_filename_to_open
 from spectrochempy.utils.file import check_filename_to_save
 from spectrochempy.utils.file import check_filenames
@@ -335,81 +336,34 @@ class TestCheckFilenames:
         assert result == {"mock": "result"}
 
 
-class TestTopspinFilename:
-    """
-    Tests for the _topspin_check_filename function.
+class TestImporterHandlers:
+    """Tests for format-neutral importer handler dispatch."""
 
-    These tests use complex mocking to simulate Topspin's directory structure
-    and file detection logic without needing actual Topspin files.
-    """
+    def test_resolve_directory_target_uses_registered_handler(self):
+        directory = Path("/path/to/myformat")
+        resolved = [directory / "data.bin"]
 
-    @patch("pathlib.Path.exists")
-    @patch("pathlib.Path.glob")
-    def test_topspin_check_filename_iterdir(self, mock_glob, mock_exists):
-        """Test _topspin_check_filename with iterdir=True."""
-        # Set up a test path structure
-        filename = Path("/path/to/topspin")
-        ser_path = filename / "123" / "ser"
+        with patch("spectrochempy.utils.file._get_importer_handler") as handler:
+            handler.return_value = lambda filename, **kwargs: resolved
 
-        # Use side_effect to make glob return different results depending on the input pattern
-        # This simulates finding certain files only with specific glob patterns
-        mock_glob.side_effect = lambda pattern: [ser_path] if "ser" in pattern else []
-        mock_exists.return_value = True
+            assert (
+                _resolve_directory_target(directory, protocol=["myformat"]) == resolved
+            )
+            handler.assert_called_once_with("importer.resolve_directory_target")
 
-        # Also need to mock patterns to control which patterns are used by the function
-        with patch("spectrochempy.utils.file.patterns") as mock_patterns:
-            mock_patterns.return_value = ["ser"]
-            result = _topspin_check_filename(filename, iterdir=True)
-            assert len(result) == 1
-            assert result[0] == ser_path
+    def test_resolve_directory_target_falls_back_to_directory(self):
+        directory = Path("/path/to/myformat")
 
-    @patch("pathlib.Path.glob")
-    def test_topspin_check_filename_with_expno(self, mock_glob):
-        """Test _topspin_check_filename with expno specified."""
-        # Set up test paths that simulate Topspin directory structure
-        filename = Path("/path/to/topspin")
-        expno_path = Path("/path/to/topspin/123")
-        ser_path = Path("/path/to/topspin/123/ser")
-        fid_path = Path("/path/to/topspin/123/fid")
+        with patch("spectrochempy.utils.file._get_importer_handler", return_value=None):
+            assert _resolve_directory_target(directory) == directory
 
-        # Mock multiple parts of the Path interaction chain
-        with (
-            # Control what sorted returns when it sorts directory entries
-            patch("builtins.sorted") as mock_sorted,
-            # Control Path.exists behavior
-            patch.object(Path, "exists") as mock_exists,
-            # Control Path division (/ operator) to return specific paths
-            patch("pathlib.Path.__truediv__", autospec=True) as mock_truediv,
-        ):
-            # Make sorted return our experiment number path
-            mock_sorted.return_value = [expno_path]
+    def test_infer_filetype_key_normalizes_key(self):
+        filename = Path("/path/to/extensionless")
 
-            # Complex mocking of path division - different results based on inputs
-            def truediv_side_effect(self, other):
-                """Simulate path division (/) operator based on specific path components."""
-                if str(self) == "/path/to/topspin" and other == "123":
-                    return expno_path
-                if str(self) == "/path/to/topspin/123" and other == "ser":
-                    return ser_path
-                if str(self) == "/path/to/topspin/123" and other == "fid":
-                    return fid_path
-                return Path(f"{self}/{other}")
+        with patch("spectrochempy.utils.file._get_importer_handler") as handler:
+            handler.return_value = lambda filename, **kwargs: "myformat"
 
-            mock_truediv.side_effect = truediv_side_effect
-
-            # Make exists() return True only for the fid path, False for ser
-            def exists_side_effect(path=None):
-                """Make exists() return true only for fid path, simulating only fid exists."""
-                if path is None:  # Handle call with no args
-                    return False
-                return str(path) == str(fid_path)
-
-            mock_exists.side_effect = exists_side_effect
-
-            # Test the function with this complex mocking setup
-            result = _topspin_check_filename(filename, expno="123")
-            assert len(result) == 1
-            assert result[0] == fid_path
+            assert _infer_filetype_key(filename, protocol=["myformat"]) == ".myformat"
 
 
 class TestGetFilenames:

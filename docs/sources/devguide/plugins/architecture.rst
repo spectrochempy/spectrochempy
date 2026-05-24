@@ -258,6 +258,25 @@ A plugin can implement any combination of the following methods:
                 },
             ]
 
+``register_handlers() -> dict[str, Callable]``
+    Declare named extension-point handlers. Handlers let core code delegate
+    plugin-owned behavior without importing plugin formats, metadata
+    conventions, or numeric types.
+
+    ::
+
+        def register_handlers(self) -> dict:
+            return {
+                "importer.resolve_directory_target": resolve_directory_target,
+                "importer.infer_filetype_key": infer_filetype_key,
+                "ndmath.execution_branch": execution_branch,
+                "ndmath.execute": execute,
+            }
+
+    Importer handlers are the right place for directory layouts and
+    extensionless filenames owned by a plugin format. Numeric handlers are the
+    right place for plugin-owned array backends such as quaternion data.
+
 
 Returning an empty list (or ``None``) from a hook is treated as "no
 contribution" and is silently ignored.

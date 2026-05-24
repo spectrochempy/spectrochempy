@@ -1,4 +1,4 @@
-import numpy as np
+# ruff: noqa: S101
 import pytest
 
 

@@ -67,7 +67,7 @@ the corresponding feature is accessed.
 
 .. seealso::
 
-   :doc:`/userguide/plugins` for more details on the plugin system.
+   :doc:`/userguide/plugins/index` for more details on the plugin system.
 
 Cantera
 ~~~~~~~

@@ -5,13 +5,16 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+import numpy as np
+
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 
 
 class HyperAccessor:
-    """Dataset accessor for hypercomplex / quaternion operations.
+    """
+    Dataset accessor for hypercomplex / quaternion operations.
 
     Accessed via ``dataset.hyper``.
     """
@@ -29,8 +32,7 @@ class HyperAccessor:
         from ._quaternion import typequaternion  # noqa: PLC0415
 
         return (
-            typequaternion is not None
-            and self._dataset._data.dtype == typequaternion
+            typequaternion is not None and self._dataset._data.dtype == typequaternion
         )
 
     @property
@@ -87,7 +89,8 @@ class HyperAccessor:
     set_hypercomplex.__doc__ = "Alias of set_quaternion."
 
     def component(self, select="REAL"):
-        """Extract a named component from a hypercomplex array.
+        """
+        Extract a named component from a hypercomplex array.
 
         Parameters
         ----------
@@ -102,7 +105,6 @@ class HyperAccessor:
 
 def _make_quaternion(data):
     """Convert real/interleaved data to quaternion dtype."""
-    from ._quaternion import as_quat_array  # noqa: PLC0415
     from ._quaternion import as_quaternion  # noqa: PLC0415
     from ._quaternion import typequaternion  # noqa: PLC0415
 
@@ -130,22 +132,50 @@ def _make_quaternion(data):
 # Ufunc names that numpy-quaternion handles natively (no decomposition needed).
 # Everything else must be decomposed into complex arrays, executed,
 # and recomposed.
-_NATIVE_QUATERNION_UFUNCS = frozenset([
-    "add", "iadd", "sub", "isub", "subtract",
-    "mul", "imul", "multiply", "div", "idiv", "divide", "true_divide", "truediv",
-    "power", "negative", "positive", "sign",
-    "equal", "not_equal", "less", "less_equal", "greater", "greater_equal",
-    "isnan", "isinf", "isfinite",
-    "copysign", "nextafter", "spacing",
-    "maximum", "minimum", "fmax", "fmin",
-    "absolute", "fabs",
-    "conj", "conjugate",
-])
+_NATIVE_QUATERNION_UFUNCS = frozenset(
+    [
+        "add",
+        "iadd",
+        "sub",
+        "isub",
+        "subtract",
+        "mul",
+        "imul",
+        "multiply",
+        "div",
+        "idiv",
+        "divide",
+        "true_divide",
+        "truediv",
+        "power",
+        "negative",
+        "positive",
+        "sign",
+        "equal",
+        "not_equal",
+        "less",
+        "less_equal",
+        "greater",
+        "greater_equal",
+        "isnan",
+        "isinf",
+        "isfinite",
+        "copysign",
+        "nextafter",
+        "spacing",
+        "maximum",
+        "minimum",
+        "fmax",
+        "fmin",
+        "absolute",
+        "fabs",
+        "conj",
+        "conjugate",
+    ]
+)
 
 
-def _hyper_ndmath_branch(
-    fname: str, data: np.ndarray, args: list
-) -> str | None:
+def _hyper_ndmath_branch(fname: str, data: np.ndarray, args: list) -> str | None:
     """Return ``"quaternion"`` when the operands require quaternion execution."""
     from ._quaternion import typequaternion  # noqa: PLC0415
 
@@ -219,8 +249,7 @@ def _hyper_numpy_conjugate(dataset, *args, **kwargs):
     axis, _ = dataset.get_axis(dim, allows_none=True)
     dataset = dataset.swapdims(axis, -1)
     dataset[..., 1::2] = -dataset[..., 1::2]
-    dataset = dataset.swapdims(axis, -1)
-    return dataset
+    return dataset.swapdims(axis, -1)
 
 
 def _hyper_numpy_max(dataset, *args, **kwargs):

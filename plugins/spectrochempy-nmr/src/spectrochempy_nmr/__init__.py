@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 
 from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
@@ -98,6 +99,86 @@ def _nmr_concat_postprocess(out, datasets, **kwargs):
     return out
 
 
+_VALID_TOPSPIN_FILENAMES = {"fid", "ser", "1r", "2rr", "3rrr"}
+
+
+def _is_topspin_protocol(**kwargs) -> bool:
+    protocol = kwargs.get("protocol")
+    if protocol is None:
+        return False
+    if isinstance(protocol, str):
+        protocol = [protocol]
+    return "topspin" in protocol
+
+
+def _resolve_topspin_directory_target(filename, **kwargs):
+    """Resolve a TopSpin experiment directory to concrete data files."""
+    if not _is_topspin_protocol(**kwargs):
+        return None
+
+    if kwargs.get("iterdir", False) or kwargs.get("glob") is not None:
+        glob = kwargs.get("glob")
+        if glob:
+            files_ = list(filename.glob(glob))
+        elif not kwargs.get("processed", False):
+            files_ = list(filename.glob("**/ser"))
+            files_.extend(filename.glob("**/fid"))
+        else:
+            files_ = list(filename.glob("**/1r"))
+            files_.extend(filename.glob("**/2rr"))
+            files_.extend(filename.glob("**/3rrr"))
+    else:
+        expno = kwargs.get("expno")
+        procno = kwargs.get("procno")
+
+        if expno is None:
+            expnos = sorted(filename.glob("[0-9]*"))
+            expno = expnos[0] if expnos else expno
+
+        if procno is None:
+            f = filename / str(expno)
+            files_ = [f / "ser"] if (f / "ser").exists() else [f / "fid"]
+        else:
+            f = filename / str(expno) / "pdata" / str(procno)
+            if (f / "3rrr").exists():
+                files_ = [f / "3rrr"]
+            elif (f / "2rr").exists():
+                files_ = [f / "2rr"]
+            else:
+                files_ = [f / "1r"]
+
+    return [item for item in files_ if item.name in _VALID_TOPSPIN_FILENAMES]
+
+
+def _infer_topspin_filetype_key(filename, **kwargs):
+    """Return the TopSpin filetype key for extensionless Bruker data files."""
+    if filename.name in _VALID_TOPSPIN_FILENAMES:
+        return ".topspin"
+    return None
+
+
+def _topspin_remote_download_target(path, **kwargs):
+    """Download the TopSpin experiment directory for component data files."""
+    if not _is_topspin_protocol(**kwargs):
+        return None
+    match = re.match(r"(.*)(/pdata/\d+/\d+[ri]{1,3}|ser|fid)", str(path))
+    if match is None:
+        return None
+    return match[1]
+
+
+def _ensure_topspin_filetype_registered() -> None:
+    """Register the plugin-owned TopSpin key in the legacy importer registry."""
+    from spectrochempy.core.readers.filetypes import registry  # noqa: PLC0415
+
+    known = {name for name, _description in registry.filetypes}
+    if "topspin" not in known:
+        registry.register_filetype(
+            "topspin",
+            "Bruker TOPSPIN fid, series, or processed data files",
+        )
+
+
 class NMRPlugin(SpectroChemPyPlugin):
     """NMR plugin, currently providing the Bruker TopSpin reader."""
 
@@ -110,6 +191,7 @@ class NMRPlugin(SpectroChemPyPlugin):
 
     def register_readers(self) -> list[dict]:
         """Declare the TopSpin file reader."""
+        _ensure_topspin_filetype_registered()
         return [
             {
                 "name": "topspin",
@@ -154,6 +236,9 @@ class NMRPlugin(SpectroChemPyPlugin):
             "concatenate.extract_metadata": _nmr_concat_extract_metadata,
             "concatenate.postprocess": _nmr_concat_postprocess,
             "fft.encoding": _fft_encoding_handler,
+            "importer.infer_filetype_key": _infer_topspin_filetype_key,
+            "importer.remote_download_target": _topspin_remote_download_target,
+            "importer.resolve_directory_target": _resolve_topspin_directory_target,
         }
 
 

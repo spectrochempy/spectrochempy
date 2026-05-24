@@ -288,12 +288,6 @@ class TestImporterDirectoryReading:
 
     def setup_method(self):
         """Setup common test environment."""
-        # Register NMR files types
-        registry.register_filetype(
-            "topspin",
-            "Bruker TOPSPIN files (fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
-        )
-
         # Register protocol
         registry.register_filetype(
             "fake",

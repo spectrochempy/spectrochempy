@@ -298,6 +298,21 @@ class SpectroChemPyHookSpec:
             (e.g. ``"absolute"``, ``"amax"``, ``"conjugate"``) when the
             data requires plugin-specific handling.  Return the modified
             dataset or ``None`` to fall back to the standard numpy path.
+        ``"importer.resolve_directory_target"``
+            ``callable(path: Path, **kwargs) -> Path | list[Path] | None``
+            Resolve a directory passed to ``read`` into one or more concrete
+            files for a plugin-owned format.  Return ``None`` to use the core
+            directory globbing behavior.
+        ``"importer.infer_filetype_key"``
+            ``callable(path: Path, **kwargs) -> str | None``
+            Return a filetype key such as ``".myformat"`` for extensionless
+            files owned by a plugin format.  Return ``None`` when the plugin
+            does not recognize the path.
+        ``"importer.remote_download_target"``
+            ``callable(path: Path, **kwargs) -> Path | None``
+            Return the path that should be downloaded for formats whose data
+            lives in a surrounding directory.  Return ``None`` to download the
+            requested path directly.
 
         Returning ``None`` or an empty dict is treated as
         "no handler override".
