@@ -159,7 +159,6 @@ _LAZY_IMPORTS = {
     "download_nist_ir": "spectrochempy.core.readers.download",
     "read": "spectrochempy.core.readers.importer",
     "read_dir": "spectrochempy.core.readers.importer",
-    "read_carroucell": "spectrochempy.core.readers.read_carroucell",
     "read_csv": "spectrochempy.core.readers.read_csv",
     "read_jcamp": "spectrochempy.core.readers.read_jcamp",
     "read_labspec": "spectrochempy.core.readers.read_labspec",

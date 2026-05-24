@@ -39,7 +39,6 @@ def test_core_readers_are_package_level_not_dataset_methods():
         "read_wire",
         "read_wdf",
         "read_zip",
-        "read_carroucell",
         "load_iris",
         "download_nist_ir",
     ):

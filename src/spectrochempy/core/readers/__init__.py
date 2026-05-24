@@ -10,7 +10,6 @@
 from . import download
 from . import filetypes
 from . import importer
-from . import read_carroucell
 from . import read_csv
 from . import read_jcamp
 from . import read_labspec

@@ -143,7 +143,6 @@ def read_omnic(*paths, **kwargs):
 
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_carroucell : Read files in a directory after a carroucell experiment.
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
     read_spg : Alias of `read_omnic`.
     read_spa : Alias of `read_omnic`.
@@ -320,7 +319,6 @@ def read_spg(*paths, **kwargs):
 
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_carroucell : Read files in a directory after a carroucell experiment.
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes
@@ -434,7 +432,6 @@ def read_spa(*paths, **kwargs):
 
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_carroucell : Read files in a directory after a carroucell experiment.
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes
@@ -558,7 +555,6 @@ def read_srs(*paths, **kwargs):
 
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_carroucell : Read files in a directory after a carroucell experiment.
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Notes

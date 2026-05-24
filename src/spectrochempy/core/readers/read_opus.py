@@ -144,7 +144,6 @@ def read_opus(*paths, **kwargs):
 
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_carroucell : Read files in a directory after a carroucell experiment.
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Examples
