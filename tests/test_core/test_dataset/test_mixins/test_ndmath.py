@@ -1258,29 +1258,6 @@ def test_complex_data_operations():
     assert_array_equal(rabs.data, np.array([np.sqrt(5), 5.0]))
 
 
-@pytest.mark.skipif(
-    not hasattr(np, "quaternion"),
-    reason="numpy-quaternion not available",
-)
-def test_quaternion_operations():
-    """Operations on quaternion-valued datasets work."""
-    q1 = np.quaternion(1.0, 0.0, 0.0, 0.0)
-
-    try:
-        ds = NDDataset(np.array([q1, q1 + q1]))
-    except TypeError:
-        pytest.skip("Cannot construct NDDataset from quaternion array")
-
-    try:
-        r = ds + ds
-        assert isinstance(r, NDDataset)
-        assert r.shape == ds.shape
-    except TypeError as e:
-        if "pickle" in str(e) or "generator" in str(e):
-            pytest.skip("Quaternion operations not fully supported in this build")
-        raise
-
-
 def test_coordinate_compatibility_check():
     """Coordinate mismatch raises CoordinatesMismatchError."""
     coord_a = Coord(np.arange(5.0))
@@ -1611,14 +1588,14 @@ def test_eye_with_units():
 
 
 def test_absolute_complex():
-    """Absolute computes magnitude for complex data (covers non-quaternion branch)."""
+    """Absolute computes magnitude for complex data."""
     ds = NDDataset(np.array([3.0 + 4.0j, 0.0 + 1.0j]))
     r = np.abs(ds)
     assert_array_equal(r.data, np.array([5.0, 1.0]))
 
 
 def test_conjugate_complex():
-    """Conjugate for complex data (covers the non-quaternion path)."""
+    """Conjugate for complex data."""
     ds = NDDataset(np.array([1.0 + 2.0j, 3.0 + 4.0j]))
     r = np.conj(ds)
     assert_array_equal(r.data, np.array([1.0 - 2.0j, 3.0 - 4.0j]))

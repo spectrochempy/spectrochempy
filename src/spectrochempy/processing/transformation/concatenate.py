@@ -13,7 +13,6 @@ import numpy as np
 
 from spectrochempy.core.dataset.basearrays.ndarray import DEFAULT_DIM_NAME
 from spectrochempy.core.dataset.coord import Coord
-from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.utils import exceptions
 from spectrochempy.utils.datetimeutils import utcnow
 from spectrochempy.utils.decorators import deprecated
@@ -118,37 +117,18 @@ def concatenate(*datasets, **kwargs):
     # --------------------------------------------
     sss = []
 
-    if datasets[0].origin == "topspin":
-        # we can use metadata to create new coordinates
-        metacoords = {}
-        meta0 = datasets[0].meta
-        for i, dataset in enumerate(datasets):
-            if i == 0:
-                continue
-            meta = dataset.meta
-            for key in meta0:
-                if key in ["file_size", "pprog", "phc0", "phc1", "nsold"]:
-                    continue
-                keepitem = key if key != "date" else "timestamp"
-                if np.any(meta0[key][-1] != meta[key][-1]):
-                    if hasattr(meta0[key][-1], "size") and meta0[key][-1].size > 1:
-                        # case of pulse length or delays for instance
-                        for i in range(meta0[key][-1].size):
-                            if np.any(meta0[key][-1][i] == meta[key][-1][i]):
-                                continue
-                            itemi = f"{key}{i}"
-                            if itemi not in metacoords:
-                                metacoords[itemi] = [
-                                    meta0[key][-1][i],
-                                    meta[key][-1][i],
-                                ]
-                            else:
-                                metacoords[itemi].append(meta[key][-1][i])
-                        continue
-                    if keepitem not in metacoords:
-                        metacoords[keepitem] = [meta0[key][-1], meta[key][-1]]
-                    else:
-                        metacoords[keepitem].append(meta[key][-1])
+    # Extract metadata coordinates for domain-specific datasets
+    # (e.g. variable-temperature TopSpin parameters for NMR).
+    metacoords: dict[str, list] = {}
+    from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+    extract = manager_module.plugin_manager.registry.get_handler(
+        "concatenate.extract_metadata"
+    )
+    if extract is not None:
+        result = extract(datasets)
+        if result is not None:
+            metacoords = result
 
     for _i, dataset in enumerate(datasets):
         d = dataset.masked_data
@@ -199,12 +179,14 @@ def concatenate(*datasets, **kwargs):
     if coords is not None:
         out._coordset[dim] = coords[dim]
 
-    # for topspin data, we can create new coordinates from metadata
-    if datasets[0].origin == "topspin" and metacoords != {}:
-        c = []
-        for key, value in metacoords.items():
-            c.append(Coord(value, title=key))
-        out.y = CoordSet(c)
+    # Let plugins post-process the concatenation result.
+    handler = manager_module.plugin_manager.registry.get_handler(
+        "concatenate.postprocess"
+    )
+    if handler is not None:
+        result = handler(out, datasets, metacoords=metacoords)
+        if result is not None:
+            out = result
 
     out._mask = mask
     out._units = units

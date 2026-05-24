@@ -12,6 +12,7 @@ from typing import Any
 
 from spectrochempy.plugins.capabilities import PluginCapability
 from spectrochempy.plugins.registries import ExtensionRegistry
+from spectrochempy.plugins.registries import HandlerRegistry
 from spectrochempy.plugins.registries import IORegistry
 from spectrochempy.plugins.registries import MetadataRegistry
 from spectrochempy.plugins.registries import ProcessingRegistry
@@ -49,6 +50,7 @@ class PluginRegistry:
         self.visualization = VisualizationRegistry()
         self.metadata = MetadataRegistry()
         self.extensions = ExtensionRegistry()
+        self.handlers = HandlerRegistry()
 
     def clear(self) -> None:
         """Remove all entries from every sub-registry."""
@@ -57,6 +59,7 @@ class PluginRegistry:
         self.visualization.clear()
         self.metadata.clear()
         self.extensions.clear()
+        self.handlers.clear()
 
     def merge_from(self, other: PluginRegistry) -> None:
         """Merge contributions from another registry into this registry."""
@@ -69,6 +72,7 @@ class PluginRegistry:
         self.visualization._visualizers.update(other.visualization._visualizers)
         for category, entries in other.extensions._extensions.items():
             self.extensions._extensions.setdefault(category, {}).update(entries)
+        self.handlers._handlers.update(other.handlers._handlers)
 
     # ------------------------------------------------------------------
     # Capability-based query
@@ -223,11 +227,31 @@ class PluginRegistry:
     def available_accessors(self) -> dict[str, dict[str, Any]]:
         return self.extensions.list_category("accessor")
 
-    def register_unit_context(self, name: str, setup_func: Callable) -> None:
-        self.processing.register_unit_context(name, setup_func)
+    def register_unit_context(
+        self,
+        name: str,
+        setup_func: Callable,
+        *,
+        predicate: Callable[[Any], bool] | None = None,
+        argument_extractor: Callable[[Any], Any] | None = None,
+        description: str = "",
+    ) -> None:
+        self.processing.register_unit_context(
+            name,
+            setup_func,
+            predicate=predicate,
+            argument_extractor=argument_extractor,
+            description=description,
+        )
 
     def get_unit_context(self, name: str) -> Callable | None:
         return self.processing.get_unit_context(name)
+
+    def get_unit_context_info(self, name: str) -> dict[str, Any] | None:
+        return self.processing.get_unit_context_info(name)
+
+    def get_applicable_unit_context(self, obj: Any) -> dict[str, Any] | None:
+        return self.processing.get_applicable_unit_context(obj)
 
     def register_dtype_handler(self, dtype: str, handler: Any) -> None:
         self.processing.register_dtype_handler(dtype, handler)
@@ -251,6 +275,22 @@ class PluginRegistry:
     @property
     def available_plugins(self) -> dict[str, Any]:
         return self.metadata.available_plugins
+
+    # ------------------------------------------------------------------
+    # HandlerRegistry forwarding
+    # ------------------------------------------------------------------
+
+    def get_handler(self, name: str) -> Callable | None:
+        """Return the handler registered for extension point *name*."""
+        return self.handlers.get_handler(name)
+
+    def register_handler(self, name: str, func: Callable) -> None:
+        """Register *func* as the handler for extension point *name*."""
+        self.handlers.register_handler(name, func)
+
+    @property
+    def available_handlers(self) -> dict[str, Callable]:
+        return self.handlers.available_handlers
 
 
 registry = PluginRegistry()

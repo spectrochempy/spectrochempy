@@ -10,9 +10,11 @@ requires-python = ">=3.11"
 dependencies = [
     "spectrochempy>=0.8,<0.10",
     "numpy",
-    "numpy-quaternion>=2024.0.7",
     # nmrglue is intentionally vendored/adapted in spectrochempy_nmr.nmrglue.
 ]
+
+[project.optional-dependencies]
+hypercomplex = ["spectrochempy-hypercomplex>=0.1.0"]
 
 [project.entry-points."spectrochempy.plugins"]
 nmr = "spectrochempy_nmr:NMRPlugin"

@@ -4,9 +4,18 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 """
-NMR spectral processing functions which operate on the last dimension (1) of 2D arrays.
+Shift and frequency-shift functions operating on the selected dataset dimension.
 
 Adapted from NMRGLUE proc_base (New BSD License)
+
+Architecture note
+-----------------
+The implementation is generic array/signal processing: point shifts, circular
+shifts and Fourier-domain shifts do not depend on NMR metadata or hypercomplex
+storage.  The NMR origin is historical and remains only in some terminology and
+docstrings.  If the NMR plugin later needs Bruker/nmrglue-compatible aliases or
+domain-specific defaults, those aliases should be added in the plugin while
+these generic kernels stay in core.
 """
 
 __all__ = ["rs", "ls", "roll", "cs", "fsh", "fsh2", "dc"]
@@ -258,14 +267,11 @@ def fsh2(dataset, pts, **kwargs):
     ls, rs, cs, roll, fsh2
 
     """
-    from spectrochempy.processing.fft.fft import _fft_positive
-    from spectrochempy.processing.fft.fft import _ifft_positive
-
     s = float(dataset.shape[-1])
 
-    data = _ifft_positive(dataset)
+    data = np.fft.fft(np.fft.ifftshift(dataset, -1)) * dataset.shape[-1]
     data = np.exp(2.0j * pi * pts * np.arange(s) / s) * data
-    return _fft_positive(data)
+    return np.fft.fftshift(np.fft.ifft(data).astype(data.dtype)) * data.shape[-1]
 
 
 @_units_agnostic_method

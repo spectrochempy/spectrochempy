@@ -7,6 +7,7 @@
 """Tests for PluginRegistry and specialised registries."""
 
 from spectrochempy.plugins.capabilities import PluginCapability
+from spectrochempy.plugins.registries import HandlerRegistry
 from spectrochempy.plugins.registries import IORegistry
 from spectrochempy.plugins.registries import MetadataRegistry
 from spectrochempy.plugins.registries import ProcessingRegistry
@@ -112,9 +113,9 @@ def test_register_writer():
 def test_dtype_handler():
     registry = PluginRegistry()
     handler = object()
-    registry.register_dtype_handler("quaternion", handler)
-    assert registry.has_dtype_handler("quaternion")
-    assert registry.get_dtype_handler("quaternion") is handler
+    registry.register_dtype_handler("custom_dtype", handler)
+    assert registry.has_dtype_handler("custom_dtype")
+    assert registry.get_dtype_handler("custom_dtype") is handler
 
 
 def test_unit_context():
@@ -123,8 +124,31 @@ def test_unit_context():
     def setup():
         ...
 
-    registry.register_unit_context("nmr", setup)
-    assert registry.get_unit_context("nmr") is setup
+    registry.register_unit_context("ctx", setup)
+    assert registry.get_unit_context("ctx") is setup
+
+
+def test_applicable_unit_context():
+    registry = PluginRegistry()
+    marker = object()
+
+    def setup(value):
+        return value
+
+    registry.register_unit_context(
+        "ctx",
+        setup,
+        predicate=lambda obj: obj is marker,
+        argument_extractor=lambda obj: ("value",),
+        description="Context for marked objects",
+    )
+
+    info = registry.get_applicable_unit_context(marker)
+    assert info is not None
+    assert info["name"] == "ctx"
+    assert info["func"] is setup
+    assert info["argument_extractor"](marker) == ("value",)
+    assert registry.get_applicable_unit_context(object()) is None
 
 
 def test_register_plugin():
@@ -291,6 +315,45 @@ def test_processing_registry_independent():
     assert pr.available_processors == {}
     assert pr.get_unit_context("ctx") is None
     assert not pr.has_dtype_handler("dtype")
+
+
+# ------------------------------------------------------------------
+# PluginRegistry — handler forwarding
+# ------------------------------------------------------------------
+
+
+def test_handler_forwards_to_handlers():
+    """PluginRegistry.get_handler forwards to HandlerRegistry."""
+    registry = PluginRegistry()
+
+    def dummy():
+        ...
+
+    registry.register_handler("test.name", dummy)
+    assert registry.get_handler("test.name") is dummy
+
+
+def test_handler_available_handlers():
+    """PluginRegistry.available_handlers reflects handler state."""
+    registry = PluginRegistry()
+
+    def dummy():
+        ...
+
+    registry.register_handler("h1", dummy)
+    assert "h1" in registry.available_handlers
+
+
+def test_handler_clear():
+    """PluginRegistry.clear removes registered handlers."""
+    registry = PluginRegistry()
+
+    def dummy():
+        ...
+
+    registry.register_handler("h1", dummy)
+    registry.clear()
+    assert registry.get_handler("h1") is None
 
 
 # ------------------------------------------------------------------
@@ -688,3 +751,59 @@ def test_accessor_from_dict():
     assert c.name == "iris_kernel_matrix"
     assert c.func is dummy
     assert c.description == "IRIS kernel"
+
+
+# ------------------------------------------------------------------
+# HandlerRegistry — isolated tests
+# ------------------------------------------------------------------
+
+
+def test_handler_registry_basic():
+    """HandlerRegistry stores and retrieves handlers by name."""
+    hr = HandlerRegistry()
+
+    def handler_a():
+        return "a"
+
+    hr.register_handler("coord.reversed", handler_a)
+    assert hr.get_handler("coord.reversed") is handler_a
+    assert "coord.reversed" in hr.available_handlers
+
+
+def test_handler_registry_returns_none_for_missing():
+    """get_handler returns None when no handler is registered."""
+    hr = HandlerRegistry()
+    assert hr.get_handler("nonexistent") is None
+
+
+def test_handler_registry_clear():
+    """clear() removes all registered handlers."""
+    hr = HandlerRegistry()
+
+    def handler_a():
+        return "a"
+
+    hr.register_handler("h", handler_a)
+    hr.clear()
+    assert hr.get_handler("h") is None
+    assert hr.available_handlers == {}
+
+
+def test_handler_registry_override_warning(caplog):
+    """register_handler logs a warning when overriding an existing handler."""
+    import logging
+
+    caplog.set_level(logging.WARNING)
+    hr = HandlerRegistry()
+
+    def handler_a():
+        return "a"
+
+    def handler_b():
+        return "b"
+
+    hr.register_handler("h", handler_a)
+    caplog.clear()
+    hr.register_handler("h", handler_b)
+    assert "overridden" in caplog.text
+    assert hr.get_handler("h") is handler_b

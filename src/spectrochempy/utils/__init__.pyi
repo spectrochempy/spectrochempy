@@ -28,7 +28,6 @@ __all__ = [
     "optional",
     "packages",
     "print",
-    "quaternion",
     "show_versions",
     "system",
     "testing",
@@ -60,7 +59,6 @@ from . import objects
 from . import optional
 from . import packages
 from . import print
-from . import quaternion
 from . import show_versions
 from . import system
 from . import testing

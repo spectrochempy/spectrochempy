@@ -14,6 +14,20 @@ DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
 
 
+def _skip_if_eigenvector_unreachable(exc):
+    import requests
+
+    network_errors = (
+        FileNotFoundError,
+        OSError,
+        TimeoutError,
+        requests.exceptions.RequestException,
+    )
+    if isinstance(exc, network_errors):
+        pytest.skip("eigenvector.com not reachable")
+    raise exc
+
+
 def test_read():
     filename = IRDATA / "CO@Mo_Al2O3.SPG"
 
@@ -57,43 +71,37 @@ def test_read():
 @pytest.mark.network
 def test_read_eigenvector_corn():
     """Read corn.mat from eigenvector.com."""
-    import requests
-
     try:
         ds1 = scp.read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
         assert len(ds1) == 7
-    except requests.exceptions.RequestException:
-        pytest.skip("eigenvector.com not reachable")
+    except Exception as exc:  # noqa: BLE001
+        _skip_if_eigenvector_unreachable(exc)
 
     try:
         ds2 = scp.read_mat("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
         assert len(ds2) == 7
-    except requests.exceptions.RequestException:
-        pytest.skip("eigenvector.com not reachable")
+    except Exception as exc:  # noqa: BLE001
+        _skip_if_eigenvector_unreachable(exc)
 
 
 @pytest.mark.network
 def test_read_eigenvector_corn_zip():
     """Read corn.mat_.zip from eigenvector.com."""
-    import requests
-
     try:
         ds3 = scp.read(
             "https://eigenvector.com/wp-content/uploads/2019/06/corn.mat_.zip",
             merge=False,
         )
         assert len(ds3) == 7
-    except requests.exceptions.RequestException:
-        pytest.skip("eigenvector.com not reachable")
+    except Exception as exc:  # noqa: BLE001
+        _skip_if_eigenvector_unreachable(exc)
 
 
 @pytest.mark.network
 def test_read_eigenvector_missing():
     """Read a non-existent file from eigenvector.com."""
-    import requests
-
     try:
         with pytest.raises(FileNotFoundError):
             scp.read("http://www.eigenvector.com/does_not_exist.mat")
-    except requests.exceptions.RequestException:
-        pytest.skip("eigenvector.com not reachable")
+    except Exception as exc:  # noqa: BLE001
+        _skip_if_eigenvector_unreachable(exc)

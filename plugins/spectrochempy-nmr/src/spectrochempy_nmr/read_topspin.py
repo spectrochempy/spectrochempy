@@ -25,16 +25,17 @@ Supports both FID and processed data (1D and nD)
 __all__ = ["read_topspin"]
 
 import contextlib
+import importlib.util
 import re
 from datetime import datetime
 
 import numpy as np
-from quaternion import as_quat_array
 
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.readers.importer import Importer
 from spectrochempy.core.readers.importer import _importer_method
 from spectrochempy.core.units import ur
+from spectrochempy.utils._logging import warning_
 from spectrochempy.utils.meta import Meta
 
 from .nmrglue import read_fid
@@ -1077,6 +1078,8 @@ def _read_topspin(*args, **kwargs):
             if datalist[0].ndim == 2:
                 data, dataRI, dataIR, dataII = datalist
                 # make quaternion
+                from quaternion import as_quat_array  # noqa: PLC0415
+
                 shape = data.shape
                 data = as_quat_array(
                     list(
@@ -1185,9 +1188,16 @@ def _read_topspin(*args, **kwargs):
     meta.tdeff = meta.td[:]
     meta.td = list(data.shape)
 
+    # The td adjustment for complex axes (except last) assumes quaternion/hypercomplex
+    # conversion which is handled by the spectrochempy-hypercomplex plugin. Without it
+    # the raw data shape must be preserved so that coordinates match.
+    _hypercomplex_available = (
+        importlib.util.find_spec("spectrochempy_hypercomplex") is not None
+    )
+
     for axis in range(parmode + 1):
         if meta.iscomplex[axis]:
-            if axis != parmode:  # already done for last axis
+            if axis != parmode and _hypercomplex_available:  # noqa: SIM102
                 meta.td[axis] = meta.td[axis] // 2
             meta.tdeff[axis] = meta.tdeff[axis] // 2
 
@@ -1261,7 +1271,7 @@ def _read_topspin(*args, **kwargs):
                 title=f"F{axis + 1} acquisition time",
             )  # TODO: use AQSEQ for >2D data
 
-            coord.larmor = meta.sfo1[axis]
+            coord.meta["acquisition_frequency"] = meta.sfo1[axis]
             coords.append(coord)
         else:
             size = meta.si[axis]
@@ -1271,7 +1281,7 @@ def _read_topspin(*args, **kwargs):
 
             coordpoints = np.arange(size) * deltaf + first
             coord = Coord(coordpoints)
-            coord.larmor = meta.sfo1[axis]  # needed for ppm transformation
+            coord.meta["acquisition_frequency"] = meta.sfo1[axis]
             coord.ito("ppm")
             if meta.nuc1 is not None:
                 nuc1 = meta.nuc1[axis]
@@ -1289,7 +1299,14 @@ def _read_topspin(*args, **kwargs):
 
     for axis, cplex in enumerate(meta.iscomplex[::-1]):
         if cplex and axis > 0:
-            dataset.set_quaternion(inplace=True)
+            try:
+                dataset.hyper.set_quaternion(inplace=True)
+            except AttributeError:
+                warning_(
+                    "2D hypercomplex NMR data requires the spectrochempy-hypercomplex "
+                    "plugin. Install it with: pip install spectrochempy-hypercomplex",
+                    stacklevel=2,
+                )
 
     dataset.meta.update(meta)
     dataset.meta.readonly = True

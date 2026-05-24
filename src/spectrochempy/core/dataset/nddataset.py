@@ -435,6 +435,10 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         accessor_info = registry.get_accessor(item)
         if accessor_info:
             func = accessor_info["obj"]
+            if isinstance(func, type):
+                # Class-based accessor: instantiate with the dataset,
+                # giving the result object property-based access.
+                return func(self)
             return lambda *args, **kwargs: func(self, *args, **kwargs)
 
         if item in _LAZY_IMPORTS:

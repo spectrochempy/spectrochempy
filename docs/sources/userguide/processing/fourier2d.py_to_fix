@@ -32,6 +32,15 @@
 # ---
 
 # %% [markdown]
+# .. note::
+#    This script is **outdated** and is **not included** in the current
+#    documentation build. It predates the plugin architecture and uses the
+#    legacy ``scp.read_topspin()`` API and core ``set_quaternion()`` which
+#    have been moved to the ``spectrochempy-nmr`` and
+#    ``spectrochempy-hypercomplex`` plugins. A replacement 2D NMR processing
+#    example should be added to the NMR plugin examples gallery.
+
+# %% [markdown]
 # # Two-dimensional (2D) Fourier transformation
 
 # %%

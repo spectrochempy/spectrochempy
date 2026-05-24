@@ -33,6 +33,14 @@ dataset = scp.nmr.read_topspin("path/to/2rr")
 dataset = scp.nmr.read_topspin("path/to/experiment", expno=1, procno=1)
 ```
 
+The NMR ppm/frequency unit context is also provided by this plugin:
+
+```python
+from spectrochempy_nmr.units import set_nmr_context
+
+set_nmr_context(104.3 * scp.ur.MHz)
+```
+
 The legacy alias `scp.read_topspin(...)` is kept for compatibility. TopSpin is
 a reader, so it is not exposed as `dataset.read_topspin(...)` or
 `dataset.nmr.read_topspin(...)`.

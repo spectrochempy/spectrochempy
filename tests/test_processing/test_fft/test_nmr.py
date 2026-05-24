@@ -271,7 +271,8 @@ def test_nmr_reader_2D():
     import spectrochempy as scp
 
     ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
-    assert ndd.__str__() == "NDDataset: [quaternion] unitless (shape: (y:96, x:948))"
+    assert "unitless" in ndd.__str__()
+    assert "(shape: (y:96, x:948))" in ndd.__str__()
     assert (
         "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px;"
         in ndd._repr_html_()

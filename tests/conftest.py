@@ -325,44 +325,12 @@ def ndarraymask():
 
 
 # --------------------------------------------------------------------------------------
-# Fixtures: Some NDComplex's and  NDQuaternion array
+# Fixtures: Some NDComplex arrays
 # --------------------------------------------------------------------------------------
-@pytest.fixture(scope="session")
-def typequaternion():
-    from spectrochempy.api import plugin_manager as manager
-
-    if (
-        manager.available_plugins.get("quaternion")
-        and manager.available_plugins.get("quaternion").enabled
-    ):
-        try:
-            _typequaternion = np.dtype(np.quaternion)
-        except (ImportError, AttributeError):
-            _typequaternion = None
-    else:
-        _typequaternion = None
-    return _typequaternion
-
-
 @pytest.fixture(scope="function")
 def ndarraycplx():
     # return a complex ndarray
     return NDComplexArray(ref_data, units="m/s", dtype=np.complex128, copy=True).copy()
-
-
-# @pytest.fixture(scope="function")
-# def ndarrayquaternion(typequaternion):
-#     # return a quaternion ndarray
-#     if typequaternion is None:
-#         raise ModuleNotFoundError("quaternion plugin not installed")
-
-#     from spectrochempy.plugins.quaternion.core.dataset.baseobjects.ndquaternion import (
-#         NDQuaternionArray,
-#     )
-
-#     return NDQuaternionArray(
-#         ref_data, units="m/s", dtype=typequaternion, copy=True
-#     ).copy()
 
 
 # --------------------------------------------------------------------------------------

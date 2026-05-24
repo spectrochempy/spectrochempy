@@ -178,6 +178,35 @@ def _get_file_for_protocol(f, **kwargs):
     return None
 
 
+def _get_importer_handler(name):
+    try:
+        from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+        return manager_module.plugin_manager.registry.get_handler(name)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _resolve_directory_target(filename, **kwargs):
+    handler = _get_importer_handler("importer.resolve_directory_target")
+    if handler is None:
+        return filename
+
+    resolved = handler(filename, **kwargs)
+    return filename if resolved is None else resolved
+
+
+def _infer_filetype_key(filename, **kwargs):
+    handler = _get_importer_handler("importer.infer_filetype_key")
+    if handler is None:
+        return None
+
+    key = handler(filename, **kwargs)
+    if not key:
+        return None
+    return key if str(key).startswith(".") else f".{key}"
+
+
 def check_filenames(*args, **kwargs):
     """
     Return a list or a dictionary of filenames.
@@ -301,12 +330,10 @@ def check_filenames(*args, **kwargs):
             if fexist:
                 filename = fexist
 
-            # Particular case for topspin where filename can be provided
-            # as a directory only
-            if filename.is_dir() and "topspin" in kwargs.get("protocol", []):
-                filename = _topspin_check_filename(filename, **kwargs)
+            if filename.is_dir():
+                filename = _resolve_directory_target(filename, **kwargs)
 
-            if not isinstance(filename, list):
+            if not isinstance(filename, (list, tuple)):
                 filename = [filename]
 
             filenames_.extend(filename)
@@ -314,52 +341,6 @@ def check_filenames(*args, **kwargs):
         filenames = filenames_
 
     return filenames
-
-
-def _topspin_check_filename(filename, **kwargs):
-    if kwargs.get("iterdir", False) or kwargs.get("glob") is not None:
-        # when we list topspin dataset we have to read directories, not directly files
-        # we can retrieve them using glob patterns
-        glob = kwargs.get("glob")
-        if glob:
-            files_ = list(filename.glob(glob))
-        elif not kwargs.get("processed", False):
-            files_ = list(filename.glob("**/ser"))
-            files_.extend(list(filename.glob("**/fid")))
-        else:
-            files_ = list(filename.glob("**/1r"))
-            files_.extend(list(filename.glob("**/2rr")))
-            files_.extend(list(filename.glob("**/3rrr")))
-    else:
-        expno = kwargs.pop("expno", None)
-        procno = kwargs.pop("procno", None)
-
-        if expno is None:
-            expnos = sorted(filename.glob("[0-9]*"))
-            expno = expnos[0] if expnos else expno
-
-        # read a fid or a ser
-        if procno is None:
-            f = filename / str(expno)
-            files_ = [f / "ser"] if (f / "ser").exists() else [f / "fid"]
-
-        else:
-            # get the adsorption spectrum
-            f = filename / str(expno) / "pdata" / str(procno)
-            if (f / "3rrr").exists():
-                files_ = [f / "3rrr"]
-            elif (f / "2rr").exists():
-                files_ = [f / "2rr"]
-            else:
-                files_ = [f / "1r"]
-
-    # depending on the glob patterns too many files may have been selected : restriction to the valid subset
-    filename = []
-    for item in files_:
-        if item.name in ["fid", "ser", "1r", "2rr", "3rrr"]:
-            filename.append(item)
-
-    return filename
 
 
 def get_filenames(*filenames, **kwargs):
@@ -480,11 +461,7 @@ def get_filenames(*filenames, **kwargs):
         # open a file dialog    # TODO: revise this as we have suppressed the dialogs
         # except if a directory is specified or iterdir is True.
 
-        getdir = kwargs.get(
-            "iterdir",
-            directory is not None or kwargs.get("protocol") == ["topspin"],
-            # or kwargs.get("protocol", None) == ["carroucell"],
-        )
+        getdir = kwargs.get("iterdir", directory is not None)
 
         if not getdir:
             # we open a dialog to select one or several files manually
@@ -496,15 +473,19 @@ def get_filenames(*filenames, **kwargs):
             if not directory:
                 directory = get_directory_name(environ.get("TEST_FOLDER"))
 
-            elif kwargs.get("protocol") == ["topspin"]:
-                directory = get_directory_name(environ.get("TEST_NMR_FOLDER"))
-
             if directory is None:
                 return None
 
             filenames = []
 
-            if kwargs.get("protocol") != ["topspin"]:
+            resolved = _resolve_directory_target(directory, **kwargs)
+            if resolved != directory:
+                filenames = (
+                    list(resolved)
+                    if isinstance(resolved, (list, tuple))
+                    else [resolved]
+                )
+            else:
                 # automatic reading of the whole directory
                 fil = []
                 for pat in patterns(filetypes):
@@ -519,9 +500,6 @@ def get_filenames(*filenames, **kwargs):
                         kw_pat = f"**/{kw_pat}"
                     fil2 = [f for f in list(directory.glob(kw_pat)) if f in fil]
                     filenames.extend(fil2)
-            else:
-                # Topspin directory detection
-                filenames = [directory]
 
             # on mac case insensitive OS this cause doubling the number of files.
             # Eliminates doublons:
@@ -554,7 +532,7 @@ def get_filenames(*filenames, **kwargs):
 
     dictionary = kwargs.get("dictionary", True)
     protocol = kwargs.get("protocol")
-    if dictionary and protocol != ["topspin"]:
+    if dictionary:
         # make and return a dictionary
         filenames_dict = {}
         for filename in filenames:
@@ -562,8 +540,7 @@ def get_filenames(*filenames, **kwargs):
                 continue
             extension = filename.suffix.lower()
             if not extension:
-                if re.match(r"^fid$|^ser$|^[1-3][ri]*$", filename.name) is not None:
-                    extension = ".topspin"
+                extension = _infer_filetype_key(filename, **kwargs) or extension
             elif extension[1:].isdigit():
                 # probably an opus file
                 extension = ".opus"
@@ -676,11 +653,8 @@ def check_filename_to_open(*args, **kwargs):
         elif filenames[0].startswith("http://") or filenames[0].startswith("https://"):
             key = pathclean(filenames[0]).suffix.lower()
 
-        if (
-            not key
-            and re.match(r"^fid$|^ser$|^[1-3][ri]*$", filenames[0].name) is not None
-        ):
-            key = ".topspin"
+        if not key:
+            key = _infer_filetype_key(filenames[0], **kwargs) or key
         if key[1:].isdigit():
             # probably an opus file
             key = ".opus"

@@ -91,11 +91,6 @@ class Importer(HasTraits):
                 key = ".carroucell"
                 self.files = {".carroucell": self.files[""]}
 
-            # particular case of topspin files
-            elif key == "" and kwargs.get("protocol") == ["topspin"]:
-                key = ".topspin"
-                self.files = {".topspin": self.files[""]}
-
             if key == "frombytes":
                 # here we need to read contents
                 for filename, content in self.files[key].items():
@@ -314,10 +309,10 @@ def read(*paths, **kwargs):
 
         .. versionadded:: 0.7.2
     protocol : `str`, optional
-        ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
-        ``'excel'``}. If not provided, the correct protocol
-        is inferred (whenever it is possible) from the filename extension.
+        ``Protocol`` used for reading, for example ``'scp'``, ``'omnic'``,
+        ``'opus'``, ``'matlab'``, ``'jcamp'``, ``'csv'`` or a plugin-provided
+        protocol. If not provided, the correct protocol is inferred whenever
+        possible from the filename extension.
     read_only: `bool`, optional, default: `True`
         Used only when url are specified.  If True, saving of the
         files is performed in the current directory, or in the directory specified by
@@ -340,7 +335,6 @@ def read(*paths, **kwargs):
     read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
-    read_topspin : Read TopSpin Bruker NMR spectra.
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
     read_carroucell : Read files in a directory after a carroucell experiment.
@@ -477,7 +471,6 @@ def read_dir(directory=None, **kwargs):
     read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
-    read_topspin : Read TopSpin Bruker NMR spectra.
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
     read_carroucell : Read files in a directory after a carroucell experiment.
@@ -747,16 +740,22 @@ def _read_remote(*args, **kwargs):
     # downloaded file
     # we try to download the github testdata
     path = pathclean(path)
+    requested_path = path
+    download_root = None
 
-    # we need to download additional files for topspin
-    topspin = "topspin" in read_method.__name__
-    # we have to treat a special case: topspin, where the parent directory need
-    # to be downloaded with the required file
-    if topspin:
-        savedpath = path
-        m = re.match(r"(.*)(\/pdata\/\d+\/\d+[r|i]{1,2}|ser|fid)", str(path))
-        if m is not None:
-            path = pathclean(m[1])
+    try:
+        from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+        handler = manager_module.plugin_manager.registry.get_handler(
+            "importer.remote_download_target"
+        )
+    except Exception:  # noqa: BLE001
+        handler = None
+    if handler is not None:
+        target = handler(path, **kwargs)
+        if target is not None:
+            download_root = pathclean(target)
+            path = download_root
 
     if _is_relative_to(path, datadir):
         # try to make it relative for remote downloading on github
@@ -776,10 +775,10 @@ def _read_remote(*args, **kwargs):
 
     if not download_only:
         if content is None:
-            if topspin:
+            if download_root is not None:
                 return read_method(
                     dataset,
-                    dst / _relative_to(savedpath, dst),
+                    dst / _relative_to(requested_path, download_root),
                     **kwargs,
                 )
             return read_method(dataset, dst, **kwargs)

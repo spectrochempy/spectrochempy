@@ -859,13 +859,12 @@ _ = nd.plot()
 # Install with: ``pip install spectrochempy[nmr]``.
 
 # %%
-path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
+path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
 
 # load the data directly (no need to create the dataset first)
 nd2 = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
 
 # view it...
 nd2.x.to("s")
-nd2.y.to("ms")
 
-ax = nd2.plot(method="map")
+ax = nd2.plot()

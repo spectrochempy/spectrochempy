@@ -113,7 +113,7 @@ class ProcessingRegistry:
 
     def __init__(self) -> None:
         self._processors: dict[str, dict[str, Any]] = {}
-        self._unit_contexts: dict[str, Callable] = {}
+        self._unit_contexts: dict[str, dict[str, Any]] = {}
         self._dtype_handlers: dict[str, Any] = {}
 
     # ------------------------------------------------------------------
@@ -136,11 +136,43 @@ class ProcessingRegistry:
     # Unit contexts
     # ------------------------------------------------------------------
 
-    def register_unit_context(self, name: str, setup_func: Callable) -> None:
-        self._unit_contexts[name] = setup_func
+    def register_unit_context(
+        self,
+        name: str,
+        setup_func: Callable,
+        *,
+        predicate: Callable[[Any], bool] | None = None,
+        argument_extractor: Callable[[Any], Any] | None = None,
+        description: str = "",
+    ) -> None:
+        self._unit_contexts[name] = {
+            "name": name,
+            "func": setup_func,
+            "predicate": predicate,
+            "argument_extractor": argument_extractor,
+            "description": description,
+        }
 
     def get_unit_context(self, name: str) -> Callable | None:
-        return self._unit_contexts.get(name)
+        info = self._unit_contexts.get(name)
+        if info is None:
+            return None
+        return info["func"]
+
+    def get_unit_context_info(self, name: str) -> dict[str, Any] | None:
+        info = self._unit_contexts.get(name)
+        if info is None:
+            return None
+        return dict(info)
+
+    def get_applicable_unit_context(self, obj: Any) -> dict[str, Any] | None:
+        for info in self._unit_contexts.values():
+            predicate = info.get("predicate")
+            if predicate is None:
+                continue
+            if predicate(obj):
+                return dict(info)
+        return None
 
     # ------------------------------------------------------------------
     # Dtype handlers
@@ -266,3 +298,45 @@ class MetadataRegistry:
 
     def clear(self) -> None:
         self._plugins.clear()
+
+
+class HandlerRegistry:
+    """
+    Manages generic handler overrides registered by plugins.
+
+    Each handler is a callable associated with a named extension point
+    (e.g. ``"coord.reversed"``).  The core dispatches to handlers when
+    present, falling back to the default behaviour when a handler
+    returns ``None`` or is not registered.
+    """
+
+    def __init__(self) -> None:
+        self._handlers: dict[str, Callable] = {}
+
+    def register_handler(self, name: str, func: Callable) -> None:
+        """
+        Register a callable for the given extension point.
+
+        If a handler with the same name already exists it is silently
+        overridden (last-registered plugin wins).  Plugins are loaded
+        in a deterministic order, so override order is stable for a
+        given environment.
+        """
+        if name in self._handlers:
+            logger.warning(
+                "Handler %r is being overridden. " "The last-registered plugin wins.",
+                name,
+            )
+        self._handlers[name] = func
+
+    def get_handler(self, name: str) -> Callable | None:
+        """Return the handler for *name*, or ``None`` if not registered."""
+        return self._handlers.get(name)
+
+    @property
+    def available_handlers(self) -> dict[str, Callable]:
+        """Return a snapshot of all registered handlers."""
+        return dict(self._handlers)
+
+    def clear(self) -> None:
+        self._handlers.clear()

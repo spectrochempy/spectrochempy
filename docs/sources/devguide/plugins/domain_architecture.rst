@@ -11,17 +11,18 @@ extensions, while preserving a simple public API for users.
 Current direction
 =================
 
-The project may progressively distinguish:
+The project distinguishes:
 
-* a technical core containing shared infrastructure such as ``NDDataset``,
+* a **technical core** containing shared infrastructure such as ``NDDataset``,
   coordinates, units, plotting, generic processing foundations, and plugin
   registration;
-* official domain plugins for coordinated scientific domains such as IR, NMR,
+* **official domain plugins** for coordinated scientific domains such as IR, NMR,
   Raman, IRIS, and simulation;
-* advanced or specialized plugins for heavier optional workflows.
+* **advanced or specialized plugins** for heavier optional workflows.
 
-This is an architectural direction rather than a completed migration plan.
-APIs, packaging details, and plugin boundaries may still evolve.
+This is an ongoing architectural evolution. APIs, packaging details, and
+plugin boundaries may still evolve, but the major extraction of NMR-specific
+and hypercomplex semantics from the core is now in place.
 
 Official plugins
 ================
@@ -34,6 +35,12 @@ Official plugins should:
 * use the public plugin API from ``spectrochempy.api.plugins``;
 * keep examples in the central gallery, clearly marked when a plugin is
   required.
+
+Domain-specific numeric backends (for example quaternion data) should be
+implemented as plugins that register generic core hooks rather than
+embedding domain knowledge in the core. The core provides extension points
+such as ``ndmath.execution_branch`` and ``fft.encoding``; the plugin
+provides the domain-specific behaviour.
 
 Limited root-level compatibility aliases may be provided for official plugins
 when they preserve important existing user workflows. These aliases should be

@@ -50,7 +50,12 @@ def test_pls():
 
     try:
         datasets = read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
-    except (FileNotFoundError, requests.exceptions.RequestException):
+    except (
+        FileNotFoundError,
+        OSError,
+        TimeoutError,
+        requests.exceptions.RequestException,
+    ):
         pytest.skip("eigenvector.com corn dataset not reachable")
     # information: [20x59 char ]    Information about the data
     # m5spec: [80x700 dataset] Spectra on instrument m5
