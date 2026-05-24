@@ -318,34 +318,6 @@ if pint_version < 24:
 
     # utilities
 
-    # Deprecated compatibility shim for the NMR plugin
-    # --------------------------------------------------------------------------------------
-    def set_nmr_context(larmor):
-        """
-        Delegate the deprecated NMR context helper to the NMR plugin.
-
-        Use ``spectrochempy_nmr.units.set_nmr_context`` or
-        ``spectrochempy.nmr.set_nmr_context`` instead.
-        """
-        warnings.warn(
-            "spectrochempy.core.units.set_nmr_context is deprecated; "
-            "use spectrochempy_nmr.units.set_nmr_context instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        try:
-            from spectrochempy_nmr.units import (  # noqa: PLC0415
-                set_nmr_context as _set_nmr_context,
-            )
-        except ImportError as exc:
-            from spectrochempy.plugins.deps import MissingPluginError  # noqa: PLC0415
-
-            raise MissingPluginError(
-                "NMR ppm/frequency unit conversion",
-                "spectrochempy-nmr",
-            ) from exc
-        return _set_nmr_context(larmor)
-
 else:  # pint version >= 24
     from functools import wraps
 
@@ -552,36 +524,6 @@ else:  # pint version >= 24
         )
 
     ur.enable_contexts("spectroscopy", "boltzmann", "chemistry")
-
-    ###################################################################################
-    # Deprecated compatibility shim for the NMR plugin
-    ###################################################################################
-    def set_nmr_context(larmor):
-        """
-        Delegate the deprecated NMR context helper to the NMR plugin.
-
-        Use ``spectrochempy_nmr.units.set_nmr_context`` or
-        ``spectrochempy.nmr.set_nmr_context`` instead.
-        """
-        warnings.warn(
-            "spectrochempy.core.units.set_nmr_context is deprecated; "
-            "use spectrochempy_nmr.units.set_nmr_context instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        try:
-            from spectrochempy_nmr.units import (  # noqa: PLC0415
-                set_nmr_context as _set_nmr_context,
-            )
-        except ImportError as exc:
-            from spectrochempy.plugins.deps import MissingPluginError  # noqa: PLC0415
-
-            raise MissingPluginError(
-                "NMR ppm/frequency unit conversion",
-                "spectrochempy-nmr",
-            ) from exc
-        return _set_nmr_context(larmor)
-
 
 ########################################################################################
 # utilities
