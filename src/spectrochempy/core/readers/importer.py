@@ -91,11 +91,6 @@ class Importer(HasTraits):
                 key = ".carroucell"
                 self.files = {".carroucell": self.files[""]}
 
-            # particular case of topspin files
-            elif key == "" and kwargs.get("protocol") == ["topspin"]:
-                key = ".topspin"
-                self.files = {".topspin": self.files[""]}
-
             if key == "frombytes":
                 # here we need to read contents
                 for filename, content in self.files[key].items():
@@ -748,11 +743,11 @@ def _read_remote(*args, **kwargs):
     # we try to download the github testdata
     path = pathclean(path)
 
-    # we need to download additional files for topspin
-    topspin = "topspin" in read_method.__name__
-    # we have to treat a special case: topspin, where the parent directory need
-    # to be downloaded with the required file
-    if topspin:
+    # Some file formats store auxiliary files alongside the main data file
+    # inside a parent directory. When the protocol signals this we download
+    # the parent directory rather than the file itself.
+    download_parent = kwargs.get("protocol") == ["topspin"]
+    if download_parent:
         savedpath = path
         m = re.match(r"(.*)(\/pdata\/\d+\/\d+[r|i]{1,2}|ser|fid)", str(path))
         if m is not None:
@@ -776,7 +771,7 @@ def _read_remote(*args, **kwargs):
 
     if not download_only:
         if content is None:
-            if topspin:
+            if download_parent:
                 return read_method(
                     dataset,
                     dst / _relative_to(savedpath, dst),

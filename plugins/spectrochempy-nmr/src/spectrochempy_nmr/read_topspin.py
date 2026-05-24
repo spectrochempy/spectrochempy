@@ -25,6 +25,7 @@ Supports both FID and processed data (1D and nD)
 __all__ = ["read_topspin"]
 
 import contextlib
+import importlib.util
 import re
 from datetime import datetime
 
@@ -1190,18 +1191,14 @@ def _read_topspin(*args, **kwargs):
     # The td adjustment for complex axes (except last) assumes quaternion/hypercomplex
     # conversion which is handled by the spectrochempy-hypercomplex plugin. Without it
     # the raw data shape must be preserved so that coordinates match.
-    try:
-        import spectrochempy_hypercomplex  # noqa: PLC0415
-    except ImportError:
-        _hypercomplex_available = False
-    else:
-        _hypercomplex_available = True
+    _hypercomplex_available = (
+        importlib.util.find_spec("spectrochempy_hypercomplex") is not None
+    )
 
     for axis in range(parmode + 1):
         if meta.iscomplex[axis]:
-            if axis != parmode:  # already done for last axis
-                if _hypercomplex_available:
-                    meta.td[axis] = meta.td[axis] // 2
+            if axis != parmode and _hypercomplex_available:  # noqa: SIM102
+                meta.td[axis] = meta.td[axis] // 2
             meta.tdeff[axis] = meta.tdeff[axis] // 2
 
     meta.sw_h = [
