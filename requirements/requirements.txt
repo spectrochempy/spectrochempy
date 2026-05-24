@@ -31,4 +31,3 @@ requests
 scikit-learn
 scipy
 tzlocal
-xlrd
