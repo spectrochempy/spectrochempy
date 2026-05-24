@@ -1029,9 +1029,19 @@ def test_nddataset_init_complex_1D_with_mask():
 
 
 def test_nddataset_timezone():
+    from zoneinfo import ZoneInfo
+
     nd = scp.NDDataset(np.ones((1, 3, 1, 2)), name="value")
     assert nd.timezone is not None
     assert nd.timezone == nd.local_timezone
+
+    # Skip named-timezone checks when the IANA database is absent
+    # (e.g. minimal Windows containers or stripped-down Linux images)
+    try:
+        ZoneInfo("Pacific/Honolulu")
+    except ZoneInfoNotFoundError:
+        pytest.skip("IANA timezone database not available on this system")
+
     nd.timezone = "Pacific/Honolulu"
     assert nd.timezone != nd.local_timezone
     with pytest.raises(ZoneInfoNotFoundError):
