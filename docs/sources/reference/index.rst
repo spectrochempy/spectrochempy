@@ -192,8 +192,6 @@ Import a NDataset from external source
     read_spc
     read_spg
     read_srs
-    read_zip
-    read_carroucell
     load_iris
     download_nist_ir
 

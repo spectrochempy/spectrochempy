@@ -35,10 +35,14 @@ Current official plugins
      - ``spectrochempy-hypercomplex``
      - ``dataset.hyper``
      - Quaternion/hypercomplex support for phase-sensitive 2D NMR.
-   * - Cantera / simulation
-     - ``spectrochempy-cantera``
-     - ``scp.cantera``
-     - Plug-flow reactor and simulation workflows based on Cantera.
+    * - Carroucell
+      - ``spectrochempy-carroucell``
+      - ``scp.carroucell``
+      - Carroucell experiment reader for spectroscopic data.
+    * - Cantera / simulation
+      - ``spectrochempy-cantera``
+      - ``scp.cantera``
+      - Plug-flow reactor and simulation workflows based on Cantera.
 
 Install commands
 ================
@@ -60,6 +64,7 @@ or directly:
     pip install spectrochempy-nmr
     pip install spectrochempy-hypercomplex
     pip install spectrochempy-cantera
+    pip install spectrochempy-carroucell
 
 Once installed, plugins are discovered automatically. No explicit plugin
 loading call is required in user code.
@@ -161,6 +166,22 @@ support for multi-dimensional complex data, primarily used in phase-sensitive
     # Extract components
     rr = dataset.hyper.RR
     ri = dataset.hyper.component("RI")
+
+Carroucell
+----------
+
+The ``spectrochempy-carroucell`` plugin provides the Carroucell experiment
+reader for spectroscopic data analysis.
+
+.. code-block:: bash
+
+    pip install spectrochempy-carroucell
+
+.. code-block:: python
+
+    import spectrochempy as scp
+
+    dataset = scp.carroucell.read_carroucell("path/to/carroucell_dir")
 
 Cantera
 -------

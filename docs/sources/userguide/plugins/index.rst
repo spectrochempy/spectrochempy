@@ -25,6 +25,15 @@ or install plugin packages directly:
     pip install spectrochempy-iris
     pip install spectrochempy-cantera
     pip install spectrochempy-hypercomplex
+    pip install spectrochempy-carroucell
+
+Conda users can install from the ``spectrocat`` channel::
+
+    mamba install -c spectrocat -c conda-forge spectrochempy-nmr
+
+Development (pre-release) builds are available on the ``dev`` label::
+
+    mamba install -c spectrocat/label/dev -c conda-forge spectrochempy-nmr
 
 Using plugins
 =============

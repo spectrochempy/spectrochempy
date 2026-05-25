@@ -52,6 +52,7 @@ for specific domains. Install them as needed:
           pip install spectrochempy[cantera]   # Chemical kinetics, thermodynamics
           pip install spectrochempy[iris]      # 2D-IRIS analysis
           pip install spectrochempy[nmr]       # Bruker TopSpin reader & NMR processing
+          pip install spectrochempy-carroucell  # Carroucell experiment reader
 
     .. tab:: Using mamba (recommended)
 
@@ -61,6 +62,7 @@ for specific domains. Install them as needed:
           mamba install -c spectrocat spectrochempy-iris    # 2D-IRIS analysis
           mamba install -c spectrocat spectrochempy-nmr     # Bruker TopSpin & NMR
           mamba install -c spectrocat spectrochempy-hypercomplex  # Quaternion support
+          mamba install -c spectrocat spectrochempy-carroucell  # Carroucell reader
 
     .. tab:: Development install (from source)
 
@@ -73,6 +75,20 @@ for specific domains. Install them as needed:
 Each plugin is independently versioned and maintained. Missing plugins
 raise a clear ``MissingPluginError`` with installation instructions when
 the corresponding feature is accessed.
+
+.. note::
+
+   **Development builds**
+
+   Pre-release (dev) versions of plugins are published to the ``dev`` label
+   on Anaconda.org. To install the latest development build::
+
+      mamba install -c spectrocat/label/dev -c conda-forge spectrochempy-nmr
+
+   Dev builds may depend on the latest dev core package, so include the
+   dev channel for core as well::
+
+      mamba install -c spectrocat/label/dev -c conda-forge spectrochempy
 
 .. seealso::
 
