@@ -100,14 +100,14 @@ jobs:
       - name: Generate conda recipe
         run: |
           python3 .github/workflows/scripts/generate_conda_recipe.py
-          cat recipe/meta.yaml
+          cat recipe/recipe.yaml
 
       - name: Build conda package
         uses: prefix-dev/rattler-build-action@v0.2.37
         env:
           CONDA_BLD_PATH: ../output
         with:
-          recipe-path: recipe/meta.yaml
+          recipe-path: recipe/recipe.yaml
           upload-artifact: false
           build-args: "-c conda-forge -c spectrocat"
 

@@ -40,9 +40,9 @@
 ### Core Package (`spectrochempy`)
 | Status | Detail |
 |--------|--------|
-| Recipe format | rattler-build (`recipe/meta.yaml` generated from template) |
+| Recipe format | rattler-build (`recipe/recipe.yaml` generated from template) |
 | Generator script | `.github/workflows/scripts/generate_conda_recipe.py` |
-| Template | `.github/workflows/scripts/templates/meta.tmpl` |
+| Template | `.github/workflows/scripts/templates/recipe.tmpl` |
 | Build tool | `prefix-dev/rattler-build-action` |
 | Channel | `spectrocat` (Anaconda Cloud) |
 | Labels | `main` (releases), `dev` (pushes) |
