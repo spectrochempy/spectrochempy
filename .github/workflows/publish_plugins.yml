@@ -6,6 +6,17 @@
 # for directories containing a pyproject.toml file.
 # Official plugins should also include a recipe.yaml (or meta.yaml) in their
 # root so that build_package.yml can build the corresponding conda package.
+#
+# Release policy:
+#   - Official plugins are released independently from the core package.
+#   - Plugin releases are triggered by GitHub releases whose tag matches the
+#     plugin name, e.g.  spectrochempy-nmr-v0.1.1
+#   - A core release tag (e.g. spectrochempy-v0.8.3) does NOT publish plugins.
+#   - plugin-template is excluded from discovery — it is a developer scaffold.
+#   - PyPI upload uses skip-existing so an already-published version never
+#     causes a hard failure.
+#   - Conda upload uses --force only on the dev label; stable (main) uploads
+#     fail cleanly if the version already exists.
 
 name: Publish plugin packages
 
@@ -61,10 +72,15 @@ jobs:
         id: set-matrix
         run: |
           # Discover plugins by looking for pyproject.toml in plugins/*/
+          # Exclude plugin-template — it is a developer scaffold, not an official package.
           plugins=()
           for dir in plugins/*/; do
+            name=$(basename "$dir")
+            if [ "$name" = "plugin-template" ]; then
+              echo "Skipping $name (developer template, not publishable)"
+              continue
+            fi
             if [ -f "${dir}pyproject.toml" ]; then
-              name=$(basename "$dir")
               plugins+=("{\"name\":\"$name\",\"path\":\"$dir\"}")
             fi
           done
@@ -142,3 +158,4 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/${{ matrix.plugin.name }}
+          skip-existing: true

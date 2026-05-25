@@ -1,6 +1,13 @@
 # This workflow builds and publishes SpectroChemPy packages to:
 # - PyPI
 # - Anaconda Cloud
+#
+# Conda publication strategy:
+#   - Non-release builds (pushes, PRs) are uploaded to the Anaconda dev label.
+#   - Release builds are uploaded to the main (stable) label.
+#   - The dev label is used for testing; stable packages should not be overwritten.
+#   - Plugin conda recipes should declare a bounded dependency on the core
+#     package, e.g.  spectrochempy >=0.8,<0.10
 
 name: Build and publish packages 📦
 
@@ -142,6 +149,7 @@ jobs:
 
           upload_package() {
             local label="$1"
+            local force_flag="$2"
             local packages=(output/**/*.tar.bz2 output/**/*.conda)
 
             if [ ${#packages[@]} -eq 0 ]; then
@@ -153,14 +161,17 @@ jobs:
               echo "Uploading $package with label: $label"
               anaconda --token "$ANACONDA_API_TOKEN" whoami
               anaconda --token "$ANACONDA_API_TOKEN" show spectrocat/spectrochempy
-              anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "$label" "$package"
+              anaconda --token "$ANACONDA_API_TOKEN" upload $force_flag -l "$label" "$package"
             done
           }
 
           if [ "${{ github.event_name }}" = "release" ]; then
-            upload_package "main"
+            # Stable label: do not force overwrite. If a version already exists
+            # the upload will fail cleanly, preventing accidental republishing.
+            upload_package "main" ""
           else
-            upload_package "dev"
+            # Dev label: allow overwrite so the latest dev build is always available.
+            upload_package "dev" "--force"
           fi
 
   discover-conda-plugins:
@@ -180,9 +191,14 @@ jobs:
       - name: Set plugin matrix
         id: set-matrix
         run: |
+          # Exclude plugin-template — it is a developer scaffold, not an official package.
           plugins=()
           for dir in plugins/*/; do
             name=$(basename "$dir")
+            if [ "$name" = "plugin-template" ]; then
+              echo "Skipping $name (developer template, not publishable)"
+              continue
+            fi
             if [ -f "${dir}recipe.yaml" ] || [ -f "${dir}meta.yaml" ]; then
               recipe_file="recipe.yaml"
               [ -f "${dir}meta.yaml" ] && recipe_file="meta.yaml"
@@ -239,7 +255,12 @@ jobs:
         with:
           recipe-path: ${{ matrix.plugin.recipe }}/${{ matrix.plugin.recipe_file }}
           upload-artifact: false
-          build-args: "-c conda-forge -c spectrocat"
+          # For non-release builds, resolve dependencies from the dev label so that
+          # dev plugin packages can depend on the latest dev core package.
+          build-args: >-
+            -c conda-forge
+            -c spectrocat/label/dev
+            -c spectrocat
 
       - name: Move conda build output
         run: |
@@ -277,11 +298,15 @@ jobs:
           fi
 
           label="dev"
+          force_flag="--force"
           if [ "${{ github.event_name }}" = "release" ]; then
             label="main"
+            # Do NOT force overwrite on the stable label. If a version already
+            # exists the upload will fail cleanly, preventing accidental republishing.
+            force_flag=""
           fi
 
           for package in "${packages[@]}"; do
             echo "Uploading $package with label: $label"
-            anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "$label" "$package"
+            anaconda --token "$ANACONDA_API_TOKEN" upload $force_flag -l "$label" "$package"
           done
