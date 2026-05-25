@@ -45,15 +45,24 @@ for specific domains. Install them as needed:
 
 .. tabs::
 
-   .. tab:: Using pip (recommended)
+    .. tab:: Using pip (recommended)
 
-      .. code-block:: bash
+       .. code-block:: bash
 
-         pip install spectrochempy[cantera]   # Chemical kinetics, thermodynamics
-         pip install spectrochempy[iris]      # 2D-IRIS analysis
-         pip install spectrochempy[nmr]       # Bruker TopSpin reader & NMR processing
+          pip install spectrochempy[cantera]   # Chemical kinetics, thermodynamics
+          pip install spectrochempy[iris]      # 2D-IRIS analysis
+          pip install spectrochempy[nmr]       # Bruker TopSpin reader & NMR processing
 
-   .. tab:: Development install (from source)
+    .. tab:: Using mamba (recommended)
+
+       .. code-block:: bash
+
+          mamba install -c spectrocat spectrochempy-cantera   # Chemical kinetics
+          mamba install -c spectrocat spectrochempy-iris    # 2D-IRIS analysis
+          mamba install -c spectrocat spectrochempy-nmr     # Bruker TopSpin & NMR
+          mamba install -c spectrocat spectrochempy-hypercomplex  # Quaternion support
+
+    .. tab:: Development install (from source)
 
       .. code-block:: bash
 
