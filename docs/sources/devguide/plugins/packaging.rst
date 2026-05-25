@@ -192,7 +192,21 @@ Plugin versions are declared **statically** in the monorepo (``setuptools-scm``
 is not used for plugins because plugin and core tags share the same Git
 repository, which leads to version collisions).
 
-To release a plugin::
+The recommended way to release a plugin is through the
+``release_plugin.yml`` workflow:
+
+1. Go to **Actions → Release an official plugin** in the GitHub UI.
+2. Click **Run workflow**.
+3. Enter:
+   - Plugin name: ``spectrochempy-nmr``
+   - Version: ``0.1.1``
+4. The workflow bumps ``pyproject.toml`` and ``recipe.yaml``, commits,
+   pushes to the ``plugins`` branch, and creates the release tag
+   ``spectrochempy-nmr-v0.1.1`` automatically.
+5. The tag triggers CI which builds and publishes the wheel to PyPI and
+   Anaconda.org.
+
+Manual fallback::
 
     # 1. Bump version in plugins/<name>/pyproject.toml
     # 2. Bump version in plugins/<name>/recipe.yaml (conda)
