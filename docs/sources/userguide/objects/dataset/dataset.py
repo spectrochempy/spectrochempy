@@ -817,7 +817,7 @@ d3D_copy = d3D.copy()
 # or alternatively:
 
 # %%
-d3D_copy = d3D[:]
+d3D_copy_alt = d3D[:]
 
 # %% [markdown]
 # Finally, it is also possible to initialize a dataset using an existing one:
