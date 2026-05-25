@@ -63,9 +63,8 @@ Key points:
   range, e.g. ``spectrochempy>=0.8,<0.10``.
 * Use ``requires-python = ">=3.11"`` to match SpectroChemPy's minimum.
 * Official plugins in the monorepo use a static ``version`` field.
-  When a plugin is moved to its own repository, ``setuptools_scm``
-  is recommended so that tags such as ``spectrochempy-nmr-v0.1.1``
-  drive the published version automatically.
+  ``setuptools_scm`` is not used because plugin and core tags share the
+  same Git repository, which would cause version collisions.
 
 Local editable development
 ==========================
@@ -178,12 +177,36 @@ Release policy
 
 Plugins are released **independently** from the core package.
 
-* A core release tag such as ``spectrochempy-v0.8.3`` publishes the core
-  wheel only; it does **not** trigger plugin uploads.
+* A core release tag such as ``0.8.3`` publishes the core wheel only;
+  it does **not** trigger plugin uploads.
 * A plugin release tag such as ``spectrochempy-nmr-v0.1.1`` triggers the
-  ``publish_plugins.yml`` workflow for that plugin only.
+  ``publish_plugins.yml`` and ``build_package.yml`` workflows for that
+  plugin only.
 * The workflow uses ``skip-existing: true`` on PyPI so an already-published
   version never causes a hard failure.
+
+Bumping a plugin version
+------------------------
+
+Plugin versions are declared **statically** in the monorepo (``setuptools-scm``
+is not used for plugins because plugin and core tags share the same Git
+repository, which leads to version collisions).
+
+To release a plugin::
+
+    # 1. Bump version in plugins/<name>/pyproject.toml
+    # 2. Bump version in plugins/<name>/recipe.yaml (conda)
+    # 3. Commit and push:
+    git add plugins/<name>/pyproject.toml plugins/<name>/recipe.yaml
+    git commit -m "Bump spectrochempy-<name> to 0.1.1"
+    git push upstream plugins
+
+    # 4. Create and push the release tag:
+    git tag spectrochempy-<name>-v0.1.1
+    git push upstream spectrochempy-<name>-v0.1.1
+
+The tag is a pure CI trigger; the actual package version comes from
+``pyproject.toml`` (pip) and ``recipe.yaml`` (conda).
 
 Distribution (conda)
 ====================
