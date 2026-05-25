@@ -37,7 +37,7 @@ about:
     NMR-specific FFT encodings (STATES, TPPI, ECHO-ANTIECHO), and ppm/Hz
     unit conversion contexts.
   homepage: https://www.spectrochempy.fr
-  license: CeCILL-B
+  license: LicenseRef-CeCILL-B
   repository: https://github.com/spectrochempy/spectrochempy
 
 extra:

@@ -38,7 +38,7 @@ about:
     Solver) analysis, kernel matrix operations, and batch IRIS processing
     for spectroscopic datasets.
   homepage: https://www.spectrochempy.fr
-  license: CeCILL-B
+  license: LicenseRef-CeCILL-B
   repository: https://github.com/spectrochempy/spectrochempy
 
 extra:
