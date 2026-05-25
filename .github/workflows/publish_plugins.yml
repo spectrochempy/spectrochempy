@@ -154,7 +154,8 @@ jobs:
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
           github.event_name == 'release' &&
-          github.event.action == 'published'
+          github.event.action == 'published' &&
+          startsWith(github.ref_name, matrix.plugin.name)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/${{ matrix.plugin.name }}

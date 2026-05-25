@@ -185,6 +185,32 @@ Plugins are released **independently** from the core package.
 * The workflow uses ``skip-existing: true`` on PyPI so an already-published
   version never causes a hard failure.
 
+Tag-based versioning
+--------------------
+
+Official plugins use `setuptools-scm <https://setuptools-scm.readthedocs.io/>`_
+to derive their version from Git tags.  The tag convention is::
+
+    spectrochempy-<plugin>-v<version>
+
+Examples::
+
+    spectrochempy-nmr-v0.1.1
+    spectrochempy-iris-v0.2.0
+    spectrorochempy-cantera-v0.1.0
+
+When a matching tag is pushed, the CI workflow builds the wheel with that
+version and publishes it.  If no tag exists, ``fallback_version`` (set in
+``pyproject.toml``) is used for local or dev builds.
+
+To bump a plugin version in the monorepo::
+
+    # 1. Update the fallback_version in plugins/<name>/pyproject.toml
+    # 2. Update the version in plugins/<name>/recipe.yaml (conda)
+    # 3. Commit, tag, and push:
+    git tag spectrochempy-nmr-v0.1.1
+    git push upstream spectrochempy-nmr-v0.1.1
+
 Distribution (conda)
 ====================
 
