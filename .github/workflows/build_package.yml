@@ -103,7 +103,7 @@ jobs:
           cat recipe/recipe.yaml
 
       - name: Build conda package
-        uses: prefix-dev/rattler-build-action@v0.2.37
+        uses: prefix-dev/rattler-build-action@v0.2.38
         env:
           CONDA_BLD_PATH: ../output
         with:
@@ -233,7 +233,7 @@ jobs:
           cache-environment: true
 
       - name: Build conda plugin package
-        uses: prefix-dev/rattler-build-action@v0.2.37
+        uses: prefix-dev/rattler-build-action@v0.2.38
         env:
           CONDA_BLD_PATH: ../output
         with:
