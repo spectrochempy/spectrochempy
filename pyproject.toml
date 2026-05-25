@@ -35,7 +35,6 @@ dependencies = [
   "scikit-learn",
   "scipy",
   "tzlocal",
-  "xlrd",  # TODO: remove after plugin-carroucel extraction is merged
 ]
 description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
 dynamic = ["version"]

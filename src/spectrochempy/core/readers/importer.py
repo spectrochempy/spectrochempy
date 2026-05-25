@@ -86,11 +86,6 @@ class Importer(HasTraits):
             return None
 
         for key in self.files:
-            # particular case of carroucell files
-            if key == "" and kwargs.get("protocol") == ["carroucell"]:
-                key = ".carroucell"
-                self.files = {".carroucell": self.files[""]}
-
             if key == "frombytes":
                 # here we need to read contents
                 for filename, content in self.files[key].items():
@@ -337,7 +332,6 @@ def read(*paths, **kwargs):
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_carroucell : Read files in a directory after a carroucell experiment.
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Examples
@@ -473,7 +467,6 @@ def read_dir(directory=None, **kwargs):
     read_quadera : Read a Pfeiffer Vacuum's QUADERA mass spectrometer software file.
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
-    read_carroucell : Read files in a directory after a carroucell experiment.
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Examples
