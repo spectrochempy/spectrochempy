@@ -25,6 +25,7 @@ KNOWN_PLUGIN_NAMESPACES = {
     "nmr": ("spectrochempy-nmr", "spectrochempy[nmr]"),
     "iris": ("spectrochempy-iris", "spectrochempy[iris]"),
     "cantera": ("spectrochempy-cantera", "spectrochempy[cantera]"),
+    "carroucell": ("spectrochempy-carroucell", "spectrochempy-carroucell"),
 }
 
 OFFICIAL_PLUGINS = {
@@ -45,6 +46,18 @@ OFFICIAL_PLUGINS = {
         "package": "spectrochempy-cantera",
         "extra": "spectrochempy[cantera]",
         "namespace": "cantera",
+    },
+    "hypercomplex": {
+        "title": "Hypercomplex plugin",
+        "package": "spectrochempy-hypercomplex",
+        "extra": "spectrochempy-hypercomplex",
+        "namespace": "",
+    },
+    "carroucell": {
+        "title": "Carroucell plugin",
+        "package": "spectrochempy-carroucell",
+        "extra": "spectrochempy-carroucell",
+        "namespace": "carroucell",
     },
 }
 
