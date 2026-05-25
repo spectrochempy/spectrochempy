@@ -1,0 +1,47 @@
+context:
+  name: spectrochempy-hypercomplex
+  version: "0.1.0"
+
+package:
+  name: "${{ context.name }}"
+  version: "${{ context.version }}"
+
+source:
+  path: ../../plugins/spectrochempy-hypercomplex
+
+build:
+  number: 0
+  noarch: python
+  script: python -m pip install . --no-deps --ignore-installed -vv
+
+requirements:
+  host:
+    - python >=3.11
+    - pip
+    - setuptools >=64
+  run:
+    - python >=3.11
+    - spectrochempy >=0.8,<0.10
+    - numpy
+    - numpy-quaternion >=2024.0.7
+
+tests:
+  - python:
+      imports:
+        - spectrochempy_hypercomplex
+      pip_check: true
+
+about:
+  summary: "Hypercomplex / quaternion support plugin for SpectroChemPy"
+  description: |
+    Official SpectroChemPy plugin providing quaternion dtype support,
+    hypercomplex dataset accessors (dataset.hyper.RR), and NDMath
+    overrides for quaternion data operations.
+  homepage: https://www.spectrochempy.fr
+  license: CeCILL-B
+  repository: https://github.com/spectrochempy/spectrochempy
+
+extra:
+  recipe-maintainers:
+    - fernandezc
+    - atravert

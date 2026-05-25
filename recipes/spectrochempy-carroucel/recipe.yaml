@@ -1,0 +1,46 @@
+context:
+  name: spectrochempy-carroucel
+  version: "0.1.0"
+
+package:
+  name: "${{ context.name }}"
+  version: "${{ context.version }}"
+
+source:
+  path: ../../plugins/spectrochempy-carroucel
+
+build:
+  number: 0
+  noarch: python
+  script: python -m pip install . --no-deps --ignore-installed -vv
+
+requirements:
+  host:
+    - python >=3.11
+    - pip
+    - setuptools >=64
+  run:
+    - python >=3.11
+    - spectrochempy >=0.8,<0.10
+    - xlrd
+    - scipy
+
+tests:
+  - python:
+      imports:
+        - spectrochempy_carroucel
+      pip_check: true
+
+about:
+  summary: "Carroucell experiment reader for SpectroChemPy"
+  description: |
+    Official SpectroChemPy plugin providing Carroucell experiment data reading
+    from .spa files, including temperature interpolation from Excel logs.
+  homepage: https://www.spectrochempy.fr
+  license: CeCILL-B
+  repository: https://github.com/spectrochempy/spectrochempy
+
+extra:
+  recipe-maintainers:
+    - fernandezc
+    - atravert
