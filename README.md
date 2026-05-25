@@ -47,7 +47,7 @@ Extend SpectroChemPy with official plugins (installed separately):
 | `spectrochempy-hypercomplex` | `pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
 | `spectrochempy-carroucell` | `pip install spectrochempy-carroucell` | Carroucell experiment reader |
 
-Or via conda:
+Or via conda from the `spectrocat` channel (`conda-forge` provides the dependencies):
 
 ```bash
 mamba install -c spectrocat -c conda-forge spectrochempy-nmr
