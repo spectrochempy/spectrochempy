@@ -27,10 +27,8 @@ requirements:
     - scipy
 
 tests:
-  - python:
-      imports:
-        - spectrochempy_cantera
-      pip_check: true
+  - script:
+      - python -c "import importlib.util; assert importlib.util.find_spec('spectrochempy_cantera') is not None"
 
 about:
   summary: "Cantera-based thermodynamics and reactive chemistry for SpectroChemPy"

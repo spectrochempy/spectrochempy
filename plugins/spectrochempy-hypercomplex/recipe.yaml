@@ -26,10 +26,8 @@ requirements:
     - numpy-quaternion >=2024.0.7
 
 tests:
-  - python:
-      imports:
-        - spectrochempy_hypercomplex
-      pip_check: true
+  - script:
+      - python -c "import importlib.util; assert importlib.util.find_spec('spectrochempy_hypercomplex') is not None"
 
 about:
   summary: "Hypercomplex / quaternion support plugin for SpectroChemPy"

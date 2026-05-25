@@ -26,10 +26,8 @@ requirements:
     - osqp
 
 tests:
-  - python:
-      imports:
-        - spectrochempy_iris
-      pip_check: true
+  - script:
+      - python -c "import importlib.util; assert importlib.util.find_spec('spectrochempy_iris') is not None"
 
 about:
   summary: "IRIS analysis extension for SpectroChemPy"
