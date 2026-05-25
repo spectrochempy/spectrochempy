@@ -10,9 +10,9 @@ repo_path = Path(__file__).parent.parent.parent.parent
 template_dir = Path(__file__).parent / "templates"
 
 # Load template
-meta_template_file = template_dir / "meta.tmpl"
-meta_template = Template(
-    meta_template_file.read_text("utf-8"),
+recipe_template_file = template_dir / "recipe.tmpl"
+recipe_template = Template(
+    recipe_template_file.read_text("utf-8"),
     keep_trailing_newline=True,
 )
 
@@ -66,8 +66,8 @@ readme_file = repo_path / "README.md"
 readme = readme_file.read_text()
 readme_strg = textwrap.indent(readme, "    ")
 
-# Update meta.yaml using jinja2 template
-meta_content = meta_template.render(
+# Update recipe.yaml using jinja2 template
+recipe_content = recipe_template.render(
     version=version,
     devstring=devstring,
     dependencies=deps_strg,
@@ -75,7 +75,8 @@ meta_content = meta_template.render(
     readme=readme_strg,
 )
 
-# Write updated meta.yaml to file
-meta_filename = repo_path / "recipe" / "meta.yaml"
-meta_filename.write_text(meta_content)
-# print(f"Updated {meta_filename}")
+# Write updated recipe.yaml to file
+recipe_filename = repo_path / "recipe" / "recipe.yaml"
+recipe_filename.parent.mkdir(parents=True, exist_ok=True)
+recipe_filename.write_text(recipe_content)
+# print(f"Updated {recipe_filename}")

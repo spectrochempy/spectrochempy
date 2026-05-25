@@ -158,3 +158,6 @@ AGENTS.md
 .codex/cache/
 .codex/logs/
 .codex/tmp/
+
+# Generated conda recipe (source of truth is pyproject.toml + template)
+recipe/recipe.yaml
