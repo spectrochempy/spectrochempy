@@ -28,8 +28,9 @@
 | spectrochempy-carroucel | `spectrochempy-carroucel` | 0.1.0 | N/A (not merged) | TODO in workflow | Will be added after `plugin-carroucel` merge |
 
 ### PyPI Workflow Changes Made
-- `publish_plugins.yml` updated to include all 5 official plugins in the matrix
-- Carroucel is commented with a TODO until its branch is merged
+- `publish_plugins.yml` now auto-discovers plugins by scanning `plugins/*/` for `pyproject.toml`
+- Matrix is generated dynamically — no hardcoded list, new plugins are picked up automatically
+- Carroucel will be included once its branch is merged and its directory contains a `pyproject.toml`
 - Trigger paths updated to watch all plugin directories
 
 ---
@@ -51,18 +52,19 @@
 
 | Plugin | Conda Name | Recipe Location | Build Status | Channel | Notes |
 |--------|------------|-----------------|--------------|---------|-------|
-| spectrochempy-nmr | `spectrochempy-nmr` | `recipes/spectrochempy-nmr/recipe.yaml` | Ready | `spectrocat` | Created in this branch |
-| spectrochempy-hypercomplex | `spectrochempy-hypercomplex` | `recipes/spectrochempy-hypercomplex/recipe.yaml` | Ready | `spectrocat` | Created in this branch |
-| spectrochempy-iris | `spectrochempy-iris` | `recipes/spectrochempy-iris/recipe.yaml` | Ready | `spectrocat` | Created in this branch |
-| spectrochempy-cantera | `spectrochempy-cantera` | `recipes/spectrochempy-cantera/recipe.yaml` | Ready | `spectrocat` | Created in this branch |
-| spectrochempy-carroucel | `spectrochempy-carroucel` | `recipes/spectrochempy-carroucel/recipe.yaml` | Ready | `spectrocat` | Created in this branch (recipe ready, plugin not yet merged) |
+| spectrochempy-nmr | `spectrochempy-nmr` | `plugins/spectrochempy-nmr/recipe.yaml` | Ready | `spectrocat` | Co-located with source |
+| spectrochempy-hypercomplex | `spectrochempy-hypercomplex` | `plugins/spectrochempy-hypercomplex/recipe.yaml` | Ready | `spectrocat` | Co-located with source |
+| spectrochempy-iris | `spectrochempy-iris` | `plugins/spectrochempy-iris/recipe.yaml` | Ready | `spectrocat` | Co-located with source |
+| spectrochempy-cantera | `spectrochempy-cantera` | `plugins/spectrochempy-cantera/recipe.yaml` | Ready | `spectrocat` | Co-located with source |
+| spectrochempy-carroucel | `spectrochempy-carroucel` | `plugins/spectrochempy-carroucel/recipe.yaml` | Ready | `spectrocat` | Recipe ready; plugin source pending PR #956 merge |
 
 ### Conda Workflow Changes Made
-- `build_package.yml` updated with new job `build_and_publish_conda_plugins`
-- Builds all plugin recipes in a matrix after the core package succeeds
+- `build_package.yml` updated with `discover-conda-plugins` + `build_and_publish_conda_plugins` jobs
+- `discover-conda-plugins` scans `plugins/*/` for `recipe.yaml` or `meta.yaml` files and generates the matrix dynamically
+- `build_and_publish_conda_plugins` builds discovered recipes in parallel after core succeeds
 - Uses `rattler-build-action` for all plugin recipes
 - Uploads to Anaconda.org with the same label logic as core (`main` for releases, `dev` for pushes)
-- Carroucel recipe exists but workflow has a TODO until the plugin is merged
+- Adding a new official plugin only requires adding a `recipe.yaml` in its root — no workflow edits needed
 
 ---
 
@@ -104,6 +106,8 @@ tzlocal, xlrd
 | carroucel | Yes | Yes | Yes | Yes | OK |
 
 All plugins use `setuptools` with `packages.find.where = ["src"]` and declare their own entry points under `spectrochempy.plugins`. They can be built independently with `python -m build`.
+
+Official plugins that include a `recipe.yaml` (or `meta.yaml`) in their root directory are automatically discovered by CI for conda packaging. Third-party plugins may omit the recipe and handle their own distribution.
 
 ### Verified builds (local)
 - All 4 existing plugins built successfully as wheels
@@ -192,7 +196,7 @@ For each package on PyPI, the repository owner must configure:
 | # | Item | Priority | Status |
 |---|------|----------|--------|
 | 1 | Merge `plugin-carroucel` into `plugins` | High | Pending PR #956 |
-| 2 | Uncomment carroucel in workflows after merge | High | TODO in files |
+| 2 | No workflow edits needed — carroucel will be auto-discovered once directory exists | High | Dynamic discovery in place |
 | 3 | Configure PyPI trusted publishers for all plugin packages | High | Not started |
 | 4 | Configure TestPyPI trusted publishers | Medium | Not started |
 | 5 | Verify `ANACONDA_API_TOKEN` secret is set | High | Check with repo admin |

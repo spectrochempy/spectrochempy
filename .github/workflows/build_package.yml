@@ -163,25 +163,55 @@ jobs:
             upload_package "dev"
           fi
 
-  build_and_publish_conda_plugins:
-    name: Build and publish conda plugin packages to Anaconda.org
+  discover-conda-plugins:
+    name: Discover plugins with conda recipes
     runs-on: ubuntu-latest
     needs: build_and_publish_conda_package
     if: github.repository == 'spectrochempy/spectrochempy'
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set plugin matrix
+        id: set-matrix
+        run: |
+          plugins=()
+          for dir in plugins/*/; do
+            name=$(basename "$dir")
+            if [ -f "${dir}recipe.yaml" ] || [ -f "${dir}meta.yaml" ]; then
+              recipe_file="recipe.yaml"
+              [ -f "${dir}meta.yaml" ] && recipe_file="meta.yaml"
+              plugins+=("{\"name\":\"$name\",\"recipe\":\"${dir%/}\",\"recipe_file\":\"$recipe_file\"}")
+            fi
+          done
+
+          if [ ${#plugins[@]} -eq 0 ]; then
+            echo "No plugins with conda recipes found. Skipping plugin builds."
+            echo "matrix={}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          joined=$(IFS=,; echo "${plugins[*]}")
+          echo "matrix={\"plugin\":[$joined]}" >> "$GITHUB_OUTPUT"
+          echo "Discovered conda plugins: $joined"
+
+  build_and_publish_conda_plugins:
+    name: Build and publish conda plugin packages to Anaconda.org
+    runs-on: ubuntu-latest
+    needs: discover-conda-plugins
+    if: |
+      github.repository == 'spectrochempy/spectrochempy' &&
+      needs.discover-conda-plugins.outputs.matrix != '{}' &&
+      needs.discover-conda-plugins.outputs.matrix != ''
 
     strategy:
       fail-fast: false
-      matrix:
-        plugin:
-          - name: spectrochempy-nmr
-            recipe: recipes/spectrochempy-nmr
-          - name: spectrochempy-hypercomplex
-            recipe: recipes/spectrochempy-hypercomplex
-          - name: spectrochempy-iris
-            recipe: recipes/spectrochempy-iris
-          - name: spectrochempy-cantera
-            recipe: recipes/spectrochempy-cantera
-          # TODO: add spectrochempy-carroucel after plugin-carroucel branch is merged
+      matrix: ${{ fromJson(needs.discover-conda-plugins.outputs.matrix) }}
 
     defaults:
       run:
@@ -207,7 +237,7 @@ jobs:
         env:
           CONDA_BLD_PATH: ../output
         with:
-          recipe-path: ${{ matrix.plugin.recipe }}/recipe.yaml
+          recipe-path: ${{ matrix.plugin.recipe }}/${{ matrix.plugin.recipe_file }}
           upload-artifact: false
           build-args: "-c conda-forge -c spectrocat"
 

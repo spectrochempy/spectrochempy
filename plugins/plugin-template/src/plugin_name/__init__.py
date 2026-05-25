@@ -3,6 +3,11 @@
 spectrochempy-myplugin — A SpectroChemPy plugin.
 
 Replace this module docstring with your plugin's description.
+
+For SpectroChemPy official plugins only:
+- Place a conda recipe file (recipe.yaml or meta.yaml) in the plugin root
+  so the monorepo CI can discover and build it automatically.
+- Third-party plugins may omit the recipe and publish via their own CI.
 """
 
 from __future__ import annotations
