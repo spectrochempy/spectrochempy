@@ -1,5 +1,5 @@
 context:
-  name: spectrochempy-carroucel
+  name: spectrochempy-carroucell
   version: "0.1.0"
 
 package:
@@ -7,7 +7,7 @@ package:
   version: "${{ version }}"
 
 source:
-  path: ../../plugins/spectrochempy-carroucel
+  path: ../../plugins/spectrochempy-carroucell
 
 build:
   number: 0
@@ -27,7 +27,7 @@ requirements:
 
 tests:
   - script:
-      - python -c "import importlib.util; assert importlib.util.find_spec('spectrochempy_carroucel') is not None"
+      - python -c "import importlib.util; assert importlib.util.find_spec('spectrochempy_carroucell') is not None"
 
 about:
   summary: "Carroucell experiment reader for SpectroChemPy"

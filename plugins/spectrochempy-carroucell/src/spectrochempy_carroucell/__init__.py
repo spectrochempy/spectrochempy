@@ -28,10 +28,10 @@ def _infer_carroucell_filetype_key(filename, **kwargs):
     return None
 
 
-class CarroucelPlugin(SpectroChemPyPlugin):
+class CarroucellPlugin(SpectroChemPyPlugin):
     """Carroucell plugin, providing the Carroucell experiment reader."""
 
-    name = "carroucel"
+    name = "carroucell"
     version = "0.1.0"
     description = "Carroucell experiment reader for SpectroChemPy"
     spectrochempy_min_version = "0.8.0"
@@ -45,7 +45,7 @@ class CarroucelPlugin(SpectroChemPyPlugin):
                 "name": "carroucell",
                 "func": lazy_proxy(
                     _resolve_read_carroucell,
-                    name="spectrochempy.carroucel.read_carroucell",
+                    name="spectrochempy.carroucell.read_carroucell",
                 ),
                 "description": "Carroucell experiment data (*.spa)",
                 "extensions": [".carroucell"],
@@ -69,4 +69,4 @@ def __getattr__(name: str):
 
 
 def __dir__() -> list[str]:
-    return ["CarroucelPlugin", "read_carroucell"]
+    return ["CarroucellPlugin", "read_carroucell"]

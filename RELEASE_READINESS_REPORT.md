@@ -25,7 +25,7 @@
 | spectrochempy-hypercomplex | `spectrochempy-hypercomplex` | 0.1.0 | OK | Updated in `publish_plugins.yml` | Depends on `spectrochempy`, `numpy-quaternion` |
 | spectrochempy-iris | `spectrochempy-iris` | 0.1.0 | OK | Updated in `publish_plugins.yml` | Depends on `spectrochempy`, `scipy`, `osqp` |
 | spectrochempy-cantera | `spectrochempy-cantera` | 0.1.0 | OK | Updated in `publish_plugins.yml` | Depends on `spectrochempy`, `cantera`, `numpy`, `scipy` |
-| spectrochempy-carroucel | `spectrochempy-carroucel` | 0.1.0 | N/A (not merged) | TODO in workflow | Will be added after `plugin-carroucel` merge |
+| spectrochempy-carroucell | `spectrochempy-carroucell` | 0.1.0 | N/A (not merged) | TODO in workflow | Will be added after `plugin-carroucell  merge |
 
 ### PyPI Workflow Changes Made
 - `publish_plugins.yml` now auto-discovers plugins by scanning `plugins/*/` for `pyproject.toml`
@@ -56,7 +56,7 @@
 | spectrochempy-hypercomplex | `spectrochempy-hypercomplex` | `plugins/spectrochempy-hypercomplex/recipe.yaml` | Ready | `spectrocat` | Co-located with source |
 | spectrochempy-iris | `spectrochempy-iris` | `plugins/spectrochempy-iris/recipe.yaml` | Ready | `spectrocat` | Co-located with source |
 | spectrochempy-cantera | `spectrochempy-cantera` | `plugins/spectrochempy-cantera/recipe.yaml` | Ready | `spectrocat` | Co-located with source |
-| spectrochempy-carroucel | `spectrochempy-carroucel` | `plugins/spectrochempy-carroucel/recipe.yaml` | Ready | `spectrocat` | Recipe ready; plugin source pending PR #956 merge |
+| spectrochempy-carroucell | `spectrochempy-carroucell` | `plugins/spectrochempy-carroucell/recipe.yaml` | Ready | `spectrocat` | Recipe ready; plugin source pending PR #956 merge |
 
 ### Conda Workflow Changes Made
 - `build_package.yml` updated with `discover-conda-plugins` + `build_and_publish_conda_plugins` jobs
@@ -85,7 +85,7 @@ tzlocal, xlrd
 | hypercomplex | `spectrochempy`, `numpy`, `numpy-quaternion` | None | Yes | None |
 | iris | `spectrochempy`, `scipy`, `osqp` | None | Yes | None |
 | cantera | `spectrochempy`, `cantera`, `numpy`, `scipy` | None | Yes | None |
-| carroucel | `spectrochempy`, `xlrd`, `scipy` | None | Yes | None |
+| carroucell | `spectrochempy`, `xlrd`, `scipy` | None | Yes | None |
 
 ### Cross-Plugin Dependencies
 - `spectrochempy-nmr[hypercomplex]` → pulls in `spectrochempy-hypercomplex`
@@ -103,7 +103,7 @@ tzlocal, xlrd
 | hypercomplex | Yes | Yes | Yes | Yes | OK |
 | iris | Yes | Yes | Yes | Yes | OK |
 | cantera | Yes | Yes | Yes | Yes | OK |
-| carroucel | Yes | Yes | Yes | Yes | OK |
+| carroucell | Yes | Yes | Yes | Yes | OK |
 
 All plugins use `setuptools` with `packages.find.where = ["src"]` and declare their own entry points under `spectrochempy.plugins`. They can be built independently with `python -m build`.
 
@@ -195,8 +195,8 @@ For each package on PyPI, the repository owner must configure:
 
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 1 | Merge `plugin-carroucel` into `plugins` | High | Pending PR #956 |
-| 2 | No workflow edits needed — carroucel will be auto-discovered once directory exists | High | Dynamic discovery in place |
+| 1 | Merge `plugin-carroucell  into `plugins` | High | Pending PR #956 |
+| 2 | No workflow edits needed — carroucell will be auto-discovered once directory exists | High | Dynamic discovery in place |
 | 3 | Configure PyPI trusted publishers for all plugin packages | High | Not started |
 | 4 | Configure TestPyPI trusted publishers | Medium | Not started |
 | 5 | Verify `ANACONDA_API_TOKEN` secret is set | High | Check with repo admin |
@@ -226,7 +226,7 @@ python -c "import spectrochempy_iris"
 python -c "import spectrochempy_cantera"
   # Result: OK ✓
 
-python -c "import spectrochempy_carroucel"
+python -c "import spectrochempy_carroucell"
   # Result: N/A (plugin not on this branch yet)
 ```
 
@@ -253,7 +253,7 @@ python -m build --wheel plugins/spectrochempy-cantera    # ✓
 - Carroucel: Recipe ready, plugin source waiting for merge
 
 **Blockers before first release:**
-1. Merge `plugin-carroucel`
+1. Merge `plugin-carroucell
 2. Configure PyPI trusted publishers (core + 5 plugins)
 3. Verify Anaconda token is active
 4. Run a test release (e.g., `v0.9.0-rc1`) to validate the full pipeline

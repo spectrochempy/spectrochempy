@@ -1,6 +1,6 @@
 # ruff: noqa: S101  # assert allowed in tests
 
-"""Tests for spectrochempy-carroucel."""
+"""Tests for spectrochempy-carroucell."""
 
 import pytest
 
@@ -22,17 +22,17 @@ def dialog_carroucell(*args, **kwargs):
     reason="Experimental data not available for testing",
 )
 def test_read_carroucell(monkeypatch):
-    nd = scp.carroucel.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
+    nd = scp.carroucell.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
     assert len(nd) == 11
     assert nd[3].shape == (2, 11098)
 
-    nd = scp.carroucel.read_carroucell("irdata/carroucell_samp", spectra=(1, 1))
+    nd = scp.carroucell.read_carroucell("irdata/carroucell_samp", spectra=(1, 1))
     assert isinstance(nd, NDDataset)
 
-    nd = scp.carroucel.read_carroucell("irdata/carroucell_samp", spectra=(1, 3))
+    nd = scp.carroucell.read_carroucell("irdata/carroucell_samp", spectra=(1, 3))
     assert nd[3].shape == (3, 11098)
 
-    nd = scp.carroucel.read_carroucell(
+    nd = scp.carroucell.read_carroucell(
         "irdata/carroucell_samp", spectra=(2, 3), discardbg=False
     )
     assert nd[3].shape == (2, 11098)

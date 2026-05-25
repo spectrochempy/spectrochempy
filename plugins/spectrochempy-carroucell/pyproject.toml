@@ -3,7 +3,7 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "spectrochempy-carroucel"
+name = "spectrochempy-carroucell"
 version = "0.1.0"
 description = "Carroucell experiment reader for SpectroChemPy"
 requires-python = ">=3.11"
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.entry-points."spectrochempy.plugins"]
-carroucel = "spectrochempy_carroucel:CarroucelPlugin"
+carroucell = "spectrochempy_carroucell:CarroucellPlugin"
 
 [tool.setuptools.packages.find]
 where = ["src"]
