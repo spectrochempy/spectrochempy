@@ -23,7 +23,7 @@ requirements:
     - python >=3.11
     - spectrochempy >=0.8,<0.10
     - numpy
-    - numpy-quaternion >=2024.0.7
+    - quaternion >=2024.0.7
 
 tests:
   - script:
