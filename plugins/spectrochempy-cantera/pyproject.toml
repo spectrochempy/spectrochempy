@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools-scm>=8"]
+requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "spectrochempy-cantera"
-dynamic = ["version"]
+version = "0.1.0"
 description = "Cantera-based thermodynamics and reactive chemistry for SpectroChemPy"
 requires-python = ">=3.11"
 dependencies = [
@@ -25,6 +25,3 @@ testpaths = ["tests"]
 markers = [
     "network: tests requiring network access",
 ]
-
-[tool.setuptools_scm]
-fallback_version = "0.1.0"

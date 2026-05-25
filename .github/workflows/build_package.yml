@@ -248,16 +248,6 @@ jobs:
             python=3.11
           cache-environment: true
 
-      - name: Update recipe version from release tag
-        if: github.event_name == 'release'
-        run: |
-          # Extract version from tag such as spectrochempy-nmr-v0.1.1 → 0.1.1
-          tag="${{ github.ref_name }}"
-          version="${tag#*-v}"
-          sed -i "s/version: \".*\"/version: \"$version\"/" ${{ matrix.plugin.recipe }}/${{ matrix.plugin.recipe_file }}
-          echo "Updated recipe version to $version from tag $tag"
-          cat ${{ matrix.plugin.recipe }}/${{ matrix.plugin.recipe_file }}
-
       - name: Build conda plugin package
         uses: prefix-dev/rattler-build-action@v0.2.38
         env:
