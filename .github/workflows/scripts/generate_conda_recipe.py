@@ -77,5 +77,6 @@ recipe_content = recipe_template.render(
 
 # Write updated recipe.yaml to file
 recipe_filename = repo_path / "recipe" / "recipe.yaml"
+recipe_filename.parent.mkdir(parents=True, exist_ok=True)
 recipe_filename.write_text(recipe_content)
 # print(f"Updated {recipe_filename}")
