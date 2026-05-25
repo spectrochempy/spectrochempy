@@ -41,6 +41,8 @@ New Features
 - Hypercomplex / quaternion support has been extracted from the core into the
   official ``spectrochempy-hypercomplex`` plugin. Use ``dataset.hyper.set_quaternion()``
   after installing the plugin.
+- Carroucell reader extracted from the core into the official
+  ``spectrochempy-carroucell`` plugin.
 - Added ``NDDataset.reshape()``.
 
 .. section
@@ -50,6 +52,13 @@ Bug Fixes
 .. Add here new bug fixes (do not delete this comment)
 
 - Refactored PSD processing.
+- Core publication workflows now only trigger on core release tags
+  (``spectrochempy-v*``), preventing accidental core republication when
+  plugin releases are created.
+- PyPI publication uses ``skip-existing`` to avoid hard failures on duplicate
+  version uploads.
+- Conda stable (``main`` label) uploads no longer use ``--force``, preventing
+  accidental overwrites of published releases.
 
 .. section
 
@@ -57,6 +66,10 @@ Dependency Updates
 ~~~~~~~~~~~~~~~~~~
 .. Add here new dependency updates (do not delete this comment)
 
+- Core dependency trimming: ``osqp`` and ``numpydoc`` removed from core
+  dependencies; ``xlrd`` moved to the carroucell plugin.
+- Added ``spectrochempy[plugins]`` pip extra that installs all 5 official
+  plugins at once.
 
 .. section
 
