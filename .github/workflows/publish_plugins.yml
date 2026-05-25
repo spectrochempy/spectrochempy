@@ -11,13 +11,19 @@ on:
     paths:
       - ".github/workflows/publish_plugins.yml"
       - "plugins/spectrochempy-nmr/**"
+      - "plugins/spectrochempy-hypercomplex/**"
       - "plugins/spectrochempy-iris/**"
+      - "plugins/spectrochempy-cantera/**"
+      # TODO: add "plugins/spectrochempy-carroucel/**" after plugin-carroucel branch is merged
 
   pull_request:
     paths:
       - ".github/workflows/publish_plugins.yml"
       - "plugins/spectrochempy-nmr/**"
+      - "plugins/spectrochempy-hypercomplex/**"
       - "plugins/spectrochempy-iris/**"
+      - "plugins/spectrochempy-cantera/**"
+      # TODO: add "plugins/spectrochempy-carroucel/**" after plugin-carroucel branch is merged
 
   release:
     types: [published]
@@ -52,8 +58,13 @@ jobs:
         plugin:
           - name: spectrochempy-nmr
             path: plugins/spectrochempy-nmr
+          - name: spectrochempy-hypercomplex
+            path: plugins/spectrochempy-hypercomplex
           - name: spectrochempy-iris
             path: plugins/spectrochempy-iris
+          - name: spectrochempy-cantera
+            path: plugins/spectrochempy-cantera
+          # TODO: add spectrochempy-carroucel after plugin-carroucel branch is merged
 
     defaults:
       run:
