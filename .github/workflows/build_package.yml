@@ -78,7 +78,11 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish package to PyPI
-        if: github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy'
+        if: |
+          github.event_name == 'release' &&
+          github.event.action == 'published' &&
+          github.repository == 'spectrochempy/spectrochempy' &&
+          startsWith(github.ref_name, 'spectrochempy-v')
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build_and_publish_conda_package:
@@ -135,7 +139,10 @@ jobs:
       - name: Upload to Anaconda.org
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
-          (github.event_name == 'release' || github.event_name == 'push')
+          (
+            github.event_name == 'push' ||
+            (github.event_name == 'release' && startsWith(github.ref_name, 'spectrochempy-v'))
+          )
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |

@@ -34,7 +34,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           target_commitish: ${{ github.event.pull_request.merge_commit_sha }}
-          tag_name: ${{ env.RELEASE_VERSION }}
+          tag_name: spectrochempy-v${{ env.RELEASE_VERSION }}
           name: SpectroChemPy v.${{ env.RELEASE_VERSION }}
           draft: true
           prerelease: false
