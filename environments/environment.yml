@@ -39,4 +39,3 @@ dependencies:
     - scikit-learn
     - scipy
     - tzlocal
-    - xlrd

@@ -39,7 +39,6 @@ dependencies:
     - scikit-learn
     - scipy
     - tzlocal
-    - xlrd
 
     # IRIS dependencies
     # -----------------
