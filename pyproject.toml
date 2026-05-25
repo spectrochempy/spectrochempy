@@ -28,8 +28,6 @@ dependencies = [
   "lazy_loader",
   "matplotlib",
   "numpy",
-  "numpydoc",
-  "osqp",
   "pluggy",
   "pint",
   "pyyaml",
@@ -37,7 +35,7 @@ dependencies = [
   "scikit-learn",
   "scipy",
   "tzlocal",
-  "xlrd",
+  "xlrd",  # TODO: remove after plugin-carroucel extraction is merged
 ]
 description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
 dynamic = ["version"]

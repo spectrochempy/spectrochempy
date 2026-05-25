@@ -32,8 +32,6 @@ dependencies:
     - lazy_loader
     - matplotlib-base
     - numpy
-    - numpydoc
-    - osqp
     - pluggy
     - pint
     - pyyaml
