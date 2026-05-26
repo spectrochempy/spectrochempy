@@ -7,12 +7,21 @@
 
 from __future__ import annotations
 
+import importlib.util
 import inspect
 
 import numpy as np
 import pytest
 
+_HYPERCOMPLEX_AVAILABLE = (
+    importlib.util.find_spec("spectrochempy_hypercomplex") is not None
+)
+_NMR_AVAILABLE = importlib.util.find_spec("spectrochempy_nmr") is not None
 
+
+@pytest.mark.skipif(
+    not _HYPERCOMPLEX_AVAILABLE, reason="spectrochempy-hypercomplex not installed"
+)
 def test_hypercomplex_public_api_is_exported():
     """spectrochempy_hypercomplex must expose quaternion utilities publicly."""
     from spectrochempy_hypercomplex import as_float_array
@@ -26,6 +35,7 @@ def test_hypercomplex_public_api_is_exported():
     assert isinstance(is_available, bool)
 
 
+@pytest.mark.skipif(not _NMR_AVAILABLE, reason="spectrochempy-nmr not installed")
 def test_nmr_fft_encodings_use_public_hypercomplex_imports():
     """NMR fft_encodings must not reach into hypercomplex private _quaternion."""
     from spectrochempy_nmr import fft_encodings
@@ -36,6 +46,7 @@ def test_nmr_fft_encodings_use_public_hypercomplex_imports():
     assert "from spectrochempy_hypercomplex import" in source
 
 
+@pytest.mark.skipif(not _NMR_AVAILABLE, reason="spectrochempy-nmr not installed")
 def test_nmr_read_topspin_uses_public_hypercomplex_imports():
     """read_topspin must not import as_quat_array directly from numpy-quaternion."""
     from spectrochempy_nmr import read_topspin
@@ -45,6 +56,10 @@ def test_nmr_read_topspin_uses_public_hypercomplex_imports():
     assert "from spectrochempy_hypercomplex import as_quat_array" in source
 
 
+@pytest.mark.skipif(not _NMR_AVAILABLE, reason="spectrochempy-nmr not installed")
+@pytest.mark.skipif(
+    not _HYPERCOMPLEX_AVAILABLE, reason="spectrochempy-hypercomplex not installed"
+)
 def test_fft_encodings_graceful_when_hypercomplex_absent(monkeypatch):
     """Hypercomplex encodings raise a clear ImportError when hypercomplex is missing."""
     from spectrochempy_nmr.fft_encodings import _states_fft
