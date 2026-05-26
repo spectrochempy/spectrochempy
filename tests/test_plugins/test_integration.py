@@ -1393,7 +1393,7 @@ class TestRegisterHandlers:
                 return {"test.handler": my_handler}
 
         pm.register(HandlerPlugin())
-        assert registry.get_handler("test.handler") is my_handler
+        assert registry.get_handler("test.handler")() == "handled"
 
     def test_handler_collection_returns_none(self):
         """A plugin that returns None from register_handlers is handled gracefully."""
@@ -1427,13 +1427,13 @@ class TestRegisterHandlers:
         pm.register(EmptyHandlerPlugin())
         assert registry.available_handlers == {}
 
-    def test_handler_override_last_wins(self):
-        """When two plugins register the same handler name, the last one wins."""
+    def test_handler_composable_first_non_none_wins(self):
+        """When two plugins register the same handler name, first non-None wins."""
         registry = PluginRegistry()
         pm = PluginManager(registry=registry)
 
         def handler_a():
-            return "a"
+            return None
 
         def handler_b():
             return "b"
@@ -1456,7 +1456,7 @@ class TestRegisterHandlers:
 
         pm.register(PluginA())
         pm.register(PluginB())
-        assert registry.get_handler("dup.handler") is handler_b
+        assert registry.get_handler("dup.handler")() == "b"
 
     def test_coord_reversed_no_handler_uses_default(self):
         """Without any coord.reversed handler, ppm and 1/centimeter still reverse."""
@@ -1472,42 +1472,41 @@ class TestRegisterHandlers:
         c = Coord([1, 2, 3], units="meter")
         assert c.reversed is False
 
-    def test_coord_reversed_custom_handler_overrides_default(self):
+    def test_coord_reversed_custom_handler_overrides_default(self, monkeypatch):
         """
-        Registering a coord.reversed handler on the global registry overrides
-        the default ppm-reversal logic.
+        A coord.reversed handler that returns a non-None value takes
+        precedence over the default ppm-reversal logic.
         """
         from spectrochempy.core.dataset.coord import Coord
-        from spectrochempy.plugins.registry import registry as global_registry
+        from spectrochempy.plugins import manager as manager_module
 
-        saved = dict(global_registry.available_handlers)
-        try:
-            global_registry.register_handler("coord.reversed", lambda c: False)
-            c = Coord([1, 2, 3], units="ppm")
-            assert c.reversed is False
-        finally:
-            global_registry.handlers.clear()
-            for k, v in saved.items():
-                global_registry.register_handler(k, v)
+        def always_false(coord):
+            return False
 
-    def test_coord_reversed_handler_none_falls_through(self):
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: always_false if name == "coord.reversed" else None,
+        )
+        c = Coord([1, 2, 3], units="ppm")
+        assert c.reversed is False
+
+    def test_coord_reversed_handler_none_falls_through(self, monkeypatch):
         """A handler returning None lets default logic run."""
         from spectrochempy.core.dataset.coord import Coord
-        from spectrochempy.plugins.registry import registry as global_registry
+        from spectrochempy.plugins import manager as manager_module
 
         def maybe_reversed(coord):
             if coord.units == "ppm":
                 return None  # let default handle it
             return False
 
-        saved = dict(global_registry.available_handlers)
-        try:
-            global_registry.register_handler("coord.reversed", maybe_reversed)
-            c = Coord([1, 2, 3], units="ppm")
-            assert c.reversed is True
-            c2 = Coord([1, 2, 3], units="meter")
-            assert c2.reversed is False
-        finally:
-            global_registry.handlers.clear()
-            for k, v in saved.items():
-                global_registry.register_handler(k, v)
+        monkeypatch.setattr(
+            manager_module.plugin_manager.registry,
+            "get_handler",
+            lambda name: maybe_reversed if name == "coord.reversed" else None,
+        )
+        c = Coord([1, 2, 3], units="ppm")
+        assert c.reversed is True
+        c2 = Coord([1, 2, 3], units="meter")
+        assert c2.reversed is False

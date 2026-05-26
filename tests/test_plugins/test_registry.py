@@ -327,10 +327,10 @@ def test_handler_forwards_to_handlers():
     registry = PluginRegistry()
 
     def dummy():
-        ...
+        return "ok"
 
     registry.register_handler("test.name", dummy)
-    assert registry.get_handler("test.name") is dummy
+    assert registry.get_handler("test.name")() == "ok"
 
 
 def test_handler_available_handlers():
@@ -766,7 +766,7 @@ def test_handler_registry_basic():
         return "a"
 
     hr.register_handler("coord.reversed", handler_a)
-    assert hr.get_handler("coord.reversed") is handler_a
+    assert hr.get_handler("coord.reversed")() == "a"
     assert "coord.reversed" in hr.available_handlers
 
 
@@ -789,21 +789,23 @@ def test_handler_registry_clear():
     assert hr.available_handlers == {}
 
 
-def test_handler_registry_override_warning(caplog):
-    """register_handler logs a warning when overriding an existing handler."""
-    import logging
-
-    caplog.set_level(logging.WARNING)
+def test_handler_registry_composable_chain():
+    """Multiple handlers for the same name are called in order (first non-None wins)."""
     hr = HandlerRegistry()
 
-    def handler_a():
-        return "a"
+    def handler_a(x):
+        return None
 
-    def handler_b():
+    def handler_b(x):
         return "b"
 
+    def handler_c(x):
+        return "c"
+
     hr.register_handler("h", handler_a)
-    caplog.clear()
     hr.register_handler("h", handler_b)
-    assert "overridden" in caplog.text
-    assert hr.get_handler("h") is handler_b
+    hr.register_handler("h", handler_c)
+
+    chain = hr.get_handler("h")
+    assert chain(1) == "b"
+    assert hr.available_handlers["h"] == [handler_a, handler_b, handler_c]
