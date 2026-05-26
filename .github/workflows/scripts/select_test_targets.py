@@ -84,7 +84,9 @@ def _add_existing(targets: list[str], target: str) -> None:
 def _plugin_targets(path: str, targets: list[str]) -> bool:
     for plugin_name, test_path in PLUGIN_TESTS.items():
         if path.startswith(f"plugins/{plugin_name}/"):
-            _add_existing(targets, test_path)
+            # Individual plugin tests cannot be imported from the repo root
+            # due to pytest namespace resolution (tests.test_* conflicts).
+            # They must be run from their own directory. Only add core tests.
             _add_existing(targets, "tests/test_plugins")
             return True
     return False
