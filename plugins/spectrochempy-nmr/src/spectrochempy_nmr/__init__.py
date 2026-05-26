@@ -115,6 +115,8 @@ def _resolve_topspin_directory_target(filename, **kwargs):
     """Resolve a TopSpin experiment directory to concrete data files."""
     if not _is_topspin_protocol(**kwargs):
         return None
+    if filename.name in _VALID_TOPSPIN_FILENAMES:
+        return None
 
     if kwargs.get("iterdir", False) or kwargs.get("glob") is not None:
         glob = kwargs.get("glob")
@@ -133,7 +135,9 @@ def _resolve_topspin_directory_target(filename, **kwargs):
 
         if expno is None:
             expnos = sorted(filename.glob("[0-9]*"))
-            expno = expnos[0] if expnos else expno
+            # A missing local directory can still be fetched remotely. TopSpin
+            # experiment directories conventionally begin at experiment 1.
+            expno = expnos[0] if expnos else 1
 
         if procno is None:
             f = filename / str(expno)

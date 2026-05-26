@@ -357,6 +357,25 @@ class TestImporterHandlers:
         with patch("spectrochempy.utils.file._get_importer_handler", return_value=None):
             assert _resolve_directory_target(directory) == directory
 
+    def test_missing_directory_target_can_be_resolved_by_plugin(self, tmp_path):
+        directory = tmp_path / "missing_dataset"
+        resolved = directory / "1" / "data"
+
+        def get_handler(name):
+            if name == "importer.resolve_directory_target":
+                return lambda filename, **kwargs: [resolved]
+            if name == "importer.infer_filetype_key":
+                return lambda filename, **kwargs: "myformat"
+            return None
+
+        with patch(
+            "spectrochempy.utils.file._get_importer_handler",
+            side_effect=get_handler,
+        ):
+            result = check_filename_to_open(directory, protocol=["myformat"])
+
+        assert result == {".myformat": [resolved]}
+
     def test_infer_filetype_key_normalizes_key(self):
         filename = Path("/path/to/extensionless")
 

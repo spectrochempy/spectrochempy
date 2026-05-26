@@ -330,7 +330,7 @@ def check_filenames(*args, **kwargs):
             if fexist:
                 filename = fexist
 
-            if filename.is_dir():
+            if filename.is_dir() or fexist is None:
                 filename = _resolve_directory_target(filename, **kwargs)
 
             if not isinstance(filename, (list, tuple)):
