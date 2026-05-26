@@ -49,9 +49,13 @@ def test_plugin_inspection_reports_installed_and_missing(monkeypatch):
     result = inspection.inspect_plugins()
     rendered = str(result)
 
-    assert "IRIS plugin     installed" in rendered
-    assert "NMR plugin      missing" in rendered
-    assert "Cantera plugin  missing" in rendered
+    import re
+
+    assert re.search(r"IRIS plugin\s+installed", rendered)
+    assert re.search(r"NMR plugin\s+missing", rendered)
+    assert re.search(r"Cantera plugin\s+missing", rendered)
+    assert re.search(r"Hypercomplex plugin\s+missing", rendered)
+    assert re.search(r"Carroucell plugin\s+missing", rendered)
     assert "scp.iris" in rendered
     assert "scp.nmr" not in rendered
     assert result.official[0].version == "1.2.3"
