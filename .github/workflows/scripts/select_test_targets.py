@@ -121,8 +121,10 @@ def select_targets(
 
         if any(path.startswith(prefix) for prefix in PLUGIN_CORE_PREFIXES):
             docs_only = False
-            for target in ALL_PLUGIN_TARGETS:
-                _add_existing(targets, target)
+            # Core plugin system changes only need the core plugin test suite.
+            # Individual plugin tests are run only when that specific plugin is
+            # modified (handled by _plugin_targets below).
+            _add_existing(targets, "tests/test_plugins")
             continue
 
         if _plugin_targets(path, targets):
