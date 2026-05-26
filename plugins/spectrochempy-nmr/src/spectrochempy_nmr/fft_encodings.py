@@ -7,8 +7,8 @@ import numpy as np
 
 def _states_fft(data, tppi=False):
     """FFT transform according to STATES encoding."""
-    from spectrochempy_hypercomplex._quaternion import as_float_array  # noqa: PLC0415
-    from spectrochempy_hypercomplex._quaternion import as_quaternion  # noqa: PLC0415
+    from spectrochempy_hypercomplex import as_float_array  # noqa: PLC0415
+    from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
 
     # warning: at this point, data must have been swapped so the last dimension is the one used for FFT
     wt, yt, xt, zt = as_float_array(
@@ -32,8 +32,8 @@ def _states_fft(data, tppi=False):
 
 def _echoanti_fft(data):
     """FFT transform according to ECHO-ANTIECHO encoding."""
-    from spectrochempy_hypercomplex._quaternion import as_float_array  # noqa: PLC0415
-    from spectrochempy_hypercomplex._quaternion import as_quaternion  # noqa: PLC0415
+    from spectrochempy_hypercomplex import as_float_array  # noqa: PLC0415
+    from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
 
     wt, yt, xt, zt = as_float_array(data).T
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
@@ -47,8 +47,8 @@ def _echoanti_fft(data):
 
 def _tppi_fft(data):
     """FFT transform according to TPPI encoding."""
-    from spectrochempy_hypercomplex._quaternion import as_float_array  # noqa: PLC0415
-    from spectrochempy_hypercomplex._quaternion import as_quaternion  # noqa: PLC0415
+    from spectrochempy_hypercomplex import as_float_array  # noqa: PLC0415
+    from spectrochempy_hypercomplex import as_quaternion  # noqa: PLC0415
 
     wt, yt, xt, zt = as_float_array(data).T
     w, y, x, z = wt.T, xt.T, yt.T, zt.T
