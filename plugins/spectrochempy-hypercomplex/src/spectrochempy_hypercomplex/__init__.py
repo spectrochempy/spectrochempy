@@ -12,9 +12,7 @@ from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 
 # Public quaternion utilities — safe for other plugins to import
-from ._quaternion import _HAS_QUATERNION as is_available
 from ._quaternion import as_float_array
-from ._quaternion import as_quat_array
 from ._quaternion import as_quaternion
 
 
