@@ -11,6 +11,12 @@ from spectrochempy.api.plugins import CORE_PLUGIN_API_VERSION
 from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 
+# Public quaternion utilities — safe for other plugins to import
+from ._quaternion import _HAS_QUATERNION as is_available
+from ._quaternion import as_float_array
+from ._quaternion import as_quat_array
+from ._quaternion import as_quaternion
+
 
 class HyperAccessor:
     """
@@ -105,7 +111,6 @@ class HyperAccessor:
 
 def _make_quaternion(data):
     """Convert real/interleaved data to quaternion dtype."""
-    from ._quaternion import as_quaternion  # noqa: PLC0415
     from ._quaternion import typequaternion  # noqa: PLC0415
 
     if data.ndim == 0:
@@ -202,7 +207,6 @@ def _hyper_ndmath_execute(branch: str, f, d, args):
     """Execute *f* on quaternion data *d* by decomposing into complex arrays."""
     if branch != "quaternion":
         return None
-    from ._quaternion import as_quaternion  # noqa: PLC0415
     from ._quaternion import quat_as_complex_array  # noqa: PLC0415
 
     dr, di = quat_as_complex_array(d)
@@ -232,7 +236,6 @@ def _hyper_numpy_abs(dataset, *args, **kwargs):
     """Quaternion-aware absolute value."""
     if not _is_quaternion_dataset(dataset):
         return None
-    from ._quaternion import as_float_array  # noqa: PLC0415
 
     w, x, y, z = as_float_array(dataset.data).T
     data = np.ma.sqrt(w**2 + x**2 + y**2 + z**2)
@@ -256,7 +259,6 @@ def _hyper_numpy_max(dataset, *args, **kwargs):
     """Quaternion-aware max — operates on the real (w) component."""
     if not _is_quaternion_dataset(dataset):
         return None
-    from ._quaternion import as_float_array  # noqa: PLC0415
 
     data = dataset.data
     w = as_float_array(data)[..., 0]
@@ -280,7 +282,6 @@ def _hyper_numpy_min(dataset, *args, **kwargs):
     """Quaternion-aware min — operates on the real (w) component."""
     if not _is_quaternion_dataset(dataset):
         return None
-    from ._quaternion import as_float_array  # noqa: PLC0415
 
     data = dataset.data
     w = as_float_array(data)[..., 0]
