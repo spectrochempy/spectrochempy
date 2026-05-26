@@ -12,10 +12,10 @@ from spectrochempy.api.plugins import PluginCapability
 from spectrochempy.api.plugins import SpectroChemPyPlugin
 
 # Public quaternion utilities — safe for other plugins to import
-from ._quaternion import _HAS_QUATERNION as is_available
-from ._quaternion import as_float_array
-from ._quaternion import as_quat_array
-from ._quaternion import as_quaternion
+from ._quaternion import _HAS_QUATERNION as is_available  # noqa: F401, N811
+from ._quaternion import as_float_array  # noqa: F401
+from ._quaternion import as_quat_array  # noqa: F401
+from ._quaternion import as_quaternion  # noqa: F401
 
 
 class HyperAccessor:
