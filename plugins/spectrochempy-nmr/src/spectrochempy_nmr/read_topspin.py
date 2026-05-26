@@ -1077,8 +1077,13 @@ def _read_topspin(*args, **kwargs):
             if datalist[0].ndim == 2:
                 data, dataRI, dataIR, dataII = datalist
                 # make quaternion
-                from spectrochempy_hypercomplex import as_quat_array  # noqa: PLC0415
+                try:
+                    from spectrochempy_hypercomplex import as_quat_array  # noqa: PLC0415
+                except ImportError:
+                    as_quat_array = None  # type: ignore[assignment]
 
+                if as_quat_array is None:
+                    return None
                 shape = data.shape
                 data = as_quat_array(
                     list(
@@ -1190,9 +1195,12 @@ def _read_topspin(*args, **kwargs):
     # The td adjustment for complex axes (except last) assumes quaternion/hypercomplex
     # conversion which is handled by the spectrochempy-hypercomplex plugin. Without it
     # the raw data shape must be preserved so that coordinates match.
-    from spectrochempy_hypercomplex import (
-        is_available as _hypercomplex_available,  # noqa: PLC0415
-    )
+    try:
+        from spectrochempy_hypercomplex import (
+            is_available as _hypercomplex_available,  # noqa: PLC0415
+        )
+    except ImportError:
+        _hypercomplex_available = False  # type: ignore[assignment]
 
     for axis in range(parmode + 1):
         if meta.iscomplex[axis]:

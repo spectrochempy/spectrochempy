@@ -632,6 +632,12 @@ def _get_url_content_and_save(url, dst, replace, read_only=False):
     try:
         r = requests.get(url, allow_redirects=True, timeout=10)
 
+        if r.status_code != 200:
+            info_(
+                f"Download failed for {url}: status={r.status_code}, "
+                f"content-length={len(r.content)}"
+            )
+
         r.raise_for_status()
 
         # write downloaded file
@@ -641,7 +647,10 @@ def _get_url_content_and_save(url, dst, replace, read_only=False):
         # in all case return the content
         return r.content
 
-    except OSError:
+    except Exception as exc:
+        info_(
+            f"Download exception for {url}: {type(exc).__name__}: {exc}"
+        )
         raise FileNotFoundError(f"Not found locally or at url: {url}") from None
 
 
@@ -679,6 +688,18 @@ def _download_from_github(path, dst, replace=False):
     index = None
     if r.status_code == 200:
         index = yaml.safe_load(r.content)
+        info_(
+            f"Index found for {path}: files={index.get('files', [])}, "
+            f"folders={index.get('folders', [])}"
+        )
+    elif r.status_code in (403, 429):
+        info_(
+            f"GitHub rate limit hit for {path}/__index__: status={r.status_code}"
+        )
+    else:
+        info_(
+            f"Index not found for {path}/__index__: status={r.status_code}"
+        )
 
     if index is None:
         return _get_url_content_and_save(path, dst, replace)
@@ -758,6 +779,10 @@ def _read_remote(*args, **kwargs):
         relative_path = path
 
     # Try to download it
+    info_(
+        f"_read_remote: path={path}, relative_path={relative_path}, "
+        f"download_root={download_root}, datadir={datadir}"
+    )
     dst = datadir / relative_path
     if dst.name == "testdata":
         # we are going to download the whole testdata directory
