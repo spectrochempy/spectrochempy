@@ -376,6 +376,7 @@ class TestDeprecatedRootAliases:
             assert obj is not None
             assert any("deprecated" in str(msg.message).lower() for msg in w)
 
+    @pytest.mark.skipif(not _CANTERA_INSTALLED, reason="cantera plugin not installed")
     def test_pfr_root_alias_deprecated(self):
         """scp.PFR emits DeprecationWarning."""
         import warnings
