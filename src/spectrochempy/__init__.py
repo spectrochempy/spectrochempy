@@ -194,9 +194,9 @@ def __getattr__(name):
     from spectrochempy.plugins.namespace import PluginNamespace
     from spectrochempy.plugins.namespace import PluginNamespaceModule
 
-    # Handle known plugin namespaces *before* discovery so that simply
-    # accessing ``scp.iris`` / ``scp.nmr`` / ``scp.cantera`` does not
-    # trigger loading of the actual plugin packages.
+    # Handle known and experimental plugin namespaces *before* discovery so
+    # that simply accessing ``scp.iris`` / ``scp.nmr`` / ``scp.cantera``
+    # does not trigger loading of the actual plugin packages.
     if name in KNOWN_PLUGIN_NAMESPACES or name in EXPERIMENTAL_PLUGIN_NAMESPACES:
         module_key = f"spectrochempy.{name}"
         if module_key in sys.modules and isinstance(
