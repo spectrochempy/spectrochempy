@@ -35,7 +35,7 @@ SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling spect
   * Namespaced APIs: `scp.nmr.read_topspin(...)`, `scp.iris.IRIS()`
   * Dataset accessors for plugin-bound operations
 
-## Optional Plugins
+## Official Plugins
 
 Extend SpectroChemPy with official plugins (installed separately):
 
@@ -43,7 +43,6 @@ Extend SpectroChemPy with official plugins (installed separately):
 |--------|---------|------------------|
 | `spectrochempy-nmr` | `pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
 | `spectrochempy-iris` | `pip install spectrochempy-iris` | 2D-IRIS analysis tools |
-| `spectrochempy-cantera` | `pip install spectrochempy-cantera` | Cantera-based reactor simulations |
 | `spectrochempy-hypercomplex` | `pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
 | `spectrochempy-carroucell` | `pip install spectrochempy-carroucell` | Carroucell experiment reader |
 
@@ -54,6 +53,14 @@ mamba install -c spectrocat -c conda-forge spectrochempy-nmr
 ```
 
 Plugins are discovered automatically once installed — no manual loading step required.
+
+### Experimental plugins
+
+`spectrochempy-cantera` is available as an **experimental** plugin. It is not
+officially supported, not included in aggregate extras, and must be installed
+manually::
+
+    pip install spectrochempy-cantera
 
 > **⚠️ WARNING**: SpectroChemPy is under active development. The current design may undergo major changes. Please report any issues to our [Issue Tracker](https://github.com/spectrochempy/spectrochempy/issues).
 

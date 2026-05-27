@@ -35,14 +35,10 @@ Current official plugins
      - ``spectrochempy-hypercomplex``
      - ``dataset.hyper``
      - Quaternion/hypercomplex support for phase-sensitive 2D NMR.
-    * - Carroucell
-      - ``spectrochempy-carroucell``
-      - ``scp.carroucell``
-      - Carroucell experiment reader for spectroscopic data.
-    * - Cantera / simulation
-      - ``spectrochempy-cantera``
-      - ``scp.cantera``
-      - Plug-flow reactor and simulation workflows based on Cantera.
+   * - Carroucell
+     - ``spectrochempy-carroucell``
+     - ``scp.carroucell``
+     - Carroucell experiment reader for spectroscopic data.
 
 Install commands
 ================
@@ -54,7 +50,6 @@ Official plugins can be installed through SpectroChemPy extras:
     pip install spectrochempy[iris]
     pip install spectrochempy[nmr]
     pip install spectrochempy[nmr,hypercomplex]  # NMR with 2D hypercomplex support
-    pip install spectrochempy[cantera]
 
 or directly:
 
@@ -63,7 +58,6 @@ or directly:
     pip install spectrochempy-iris
     pip install spectrochempy-nmr
     pip install spectrochempy-hypercomplex
-    pip install spectrochempy-cantera
     pip install spectrochempy-carroucell
 
 Once installed, plugins are discovered automatically. No explicit plugin
@@ -96,7 +90,6 @@ The recommended form is namespaced:
 
     analysis = scp.iris.IRIS()
     dataset = scp.nmr.read_topspin("path/to/fid")
-    reactor = scp.cantera.PFR
 
 Dataset accessors are reserved for operations that act on an existing dataset:
 
@@ -182,22 +175,6 @@ reader for spectroscopic data analysis.
     import spectrochempy as scp
 
     dataset = scp.carroucell.read_carroucell("path/to/carroucell_dir")
-
-Cantera
--------
-
-The ``spectrochempy-cantera`` plugin provides simulation workflows based on
-Cantera, currently centered on plug-flow reactor support.
-
-.. code-block:: bash
-
-    pip install spectrochempy[cantera]
-
-.. code-block:: python
-
-    import spectrochempy as scp
-
-    PFR = scp.cantera.PFR
 
 Examples and gallery convention
 ===============================

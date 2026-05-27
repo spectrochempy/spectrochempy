@@ -49,7 +49,6 @@ for specific domains. Install them as needed:
 
        .. code-block:: bash
 
-          pip install spectrochempy[cantera]   # Chemical kinetics, thermodynamics
           pip install spectrochempy[iris]      # 2D-IRIS analysis
           pip install spectrochempy[nmr]       # Bruker TopSpin reader & NMR processing
           pip install spectrochempy-carroucell  # Carroucell experiment reader
@@ -58,7 +57,6 @@ for specific domains. Install them as needed:
 
        .. code-block:: bash
 
-          mamba install -c spectrocat spectrochempy-cantera   # Chemical kinetics
           mamba install -c spectrocat spectrochempy-iris    # 2D-IRIS analysis
           mamba install -c spectrocat spectrochempy-nmr     # Bruker TopSpin & NMR
           mamba install -c spectrocat spectrochempy-hypercomplex  # Quaternion support
@@ -68,9 +66,9 @@ for specific domains. Install them as needed:
 
       .. code-block:: bash
 
-         pip install -e plugins/spectrochempy-cantera
          pip install -e plugins/spectrochempy-iris
          pip install -e plugins/spectrochempy-nmr
+         pip install -e plugins/spectrochempy-carroucell
 
 Each plugin is independently versioned and maintained. Missing plugins
 raise a clear ``MissingPluginError`` with installation instructions when
@@ -94,15 +92,17 @@ the corresponding feature is accessed.
 
    :doc:`/userguide/plugins/index` for more details on the plugin system.
 
-Cantera
-~~~~~~~
+Cantera (experimental)
+~~~~~~~~~~~~~~~~~~~~~~
 
-.. note::
-   Cantera workflows are now provided by the official
-   ``spectrochempy-cantera`` plugin (see
-   :ref:`Optional Plugins <install_adds_plugins>` above). This keeps the
-   standard installation lighter while preserving access to the workflow when
-   the plugin is installed.
+.. warning::
+   The ``spectrochempy-cantera`` plugin is **experimental** and **not**
+   officially supported. It is not included in aggregate extras and must be
+   installed manually::
+
+      pip install spectrochempy-cantera
+
+   See :doc:`/userguide/plugins/experimental_plugins` for details.
 
 For users who still need the Cantera library outside of SpectroChemPy,
 it can be installed separately:

@@ -8,13 +8,18 @@ SpectroChemPy plugins add optional scientific features while keeping the core
 installation lighter. Once a plugin is installed, it is discovered
 automatically; normal user code does not need a manual loading step.
 
+Official plugins
+================
+
+Official plugins are maintained as part of the SpectroChemPy project. They are
+auto-published, officially supported, and included in aggregate extras.
+
 Install official plugins with extras:
 
 .. code-block:: bash
 
     pip install spectrochempy[nmr]
     pip install spectrochempy[iris]
-    pip install spectrochempy[cantera]
     pip install spectrochempy[nmr,hypercomplex]
 
 or install plugin packages directly:
@@ -23,7 +28,6 @@ or install plugin packages directly:
 
     pip install spectrochempy-nmr
     pip install spectrochempy-iris
-    pip install spectrochempy-cantera
     pip install spectrochempy-hypercomplex
     pip install spectrochempy-carroucell
 
@@ -36,7 +40,7 @@ Development (pre-release) builds are available on the ``dev`` label::
     mamba install -c spectrocat/label/dev -c conda-forge spectrochempy-nmr
 
 Using plugins
-=============
+-------------
 
 Plugin APIs are exposed through namespaces:
 
@@ -46,7 +50,6 @@ Plugin APIs are exposed through namespaces:
 
     dataset = scp.nmr.read_topspin("path/to/fid")
     analysis = scp.iris.IRIS()
-    reactor = scp.cantera.PFR
 
 Operations that act on an existing dataset use dataset accessors:
 
@@ -60,7 +63,7 @@ Some former top-level names remain as compatibility aliases. New code should
 prefer namespaced APIs such as ``scp.nmr.read_topspin`` and ``scp.iris.IRIS``.
 
 Inspecting plugins
-==================
+------------------
 
 Use ``scp.plugins()`` to list discovered plugins:
 
@@ -73,6 +76,19 @@ Use ``scp.plugins()`` to list discovered plugins:
 
 If an official optional feature is missing, SpectroChemPy raises a clear
 installation hint instead of failing with an import error.
+
+Experimental plugins
+====================
+
+Some plugins in the repository are considered **experimental**. They are
+available mainly for developers and early testers, may change without
+deprecation, and are **not** officially supported.
+
+Experimental plugins are **not** included in aggregate extras or auto-published.
+They may still be installed manually and are discoverable via the same
+entry-point mechanism as official plugins.
+
+See :doc:`experimental_plugins` for details.
 
 User roadmap
 ============
@@ -94,6 +110,6 @@ Plugin pages
    nmr
    hypercomplex
    iris
-   cantera
+   experimental_plugins
    examples
    roadmap
