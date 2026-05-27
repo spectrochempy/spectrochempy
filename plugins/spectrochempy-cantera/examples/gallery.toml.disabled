@@ -1,8 +1,0 @@
-[plugin]
-name = "spectrochempy-cantera"
-title = "Cantera plugin"
-
-[[examples]]
-path = "analysis/d_simulation/plot_cantera_pfr.py"
-section = "Simulation"
-section_ref = "examples-analysis-simulation-index"

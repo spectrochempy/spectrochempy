@@ -33,9 +33,10 @@ tests:
 about:
   summary: "Cantera-based thermodynamics and reactive chemistry for SpectroChemPy"
   description: |
-    Official SpectroChemPy plugin providing Cantera-based reactor simulations,
+    Experimental SpectroChemPy plugin providing Cantera-based reactor simulations,
     chemical equilibrium calculations, and thermodynamic property lookups
-    for spectroscopic data analysis.
+    for spectroscopic data analysis. This plugin is not officially supported,
+    the API may change without notice, and manual installation is required.
   homepage: https://www.spectrochempy.fr
   license: LicenseRef-CeCILL-B
   repository: https://github.com/spectrochempy/spectrochempy
