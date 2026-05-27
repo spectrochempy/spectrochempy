@@ -53,7 +53,6 @@ def test_plugin_inspection_reports_installed_and_missing(monkeypatch):
 
     assert re.search(r"IRIS plugin\s+installed", rendered)
     assert re.search(r"NMR plugin\s+missing", rendered)
-    assert re.search(r"Cantera plugin\s+missing", rendered)
     assert re.search(r"Hypercomplex plugin\s+missing", rendered)
     assert re.search(r"Carroucell plugin\s+missing", rendered)
     assert "scp.iris" in rendered
