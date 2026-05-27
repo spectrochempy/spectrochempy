@@ -32,7 +32,8 @@ New Features
 - IRIS plugin (``spectrochempy-iris``): IRIS analysis and plotting are now
   provided by an official plugin at ``plugins/spectrochempy-iris/``.
 - Cantera plugin (``spectrochempy-cantera``): Plug Flow Reactor simulation
-  utilities added at ``plugins/spectrochempy-cantera/``.
+  utilities added at ``plugins/spectrochempy-cantera/`` as an **experimental**
+  plugin (not officially supported, API may change).
 - NDMath internal refactor: extracted focused private helpers (``_prepare_operation_quantities``,
   ``_check_coordinate_compatibility``, ``_resolve_operation_units``, ``_execute_operation``)
   and ``_ExecutionPlan`` class from ``NDMath._op()``, reducing it from ~300 to ~70 lines.
