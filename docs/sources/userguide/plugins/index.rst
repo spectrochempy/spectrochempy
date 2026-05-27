@@ -84,9 +84,10 @@ Some plugins in the repository are considered **experimental**. They are
 available mainly for developers and early testers, may change without
 deprecation, and are **not** officially supported.
 
-Experimental plugins are **not** included in aggregate extras or auto-published.
-They may still be installed manually and are discoverable via the same
-entry-point mechanism as official plugins.
+Experimental plugins are **not** auto-published by the official release
+workflows, though they may be published manually or through separate
+workflows. They may still be installed manually and are discoverable via
+the same entry-point mechanism as official plugins.
 
 See :doc:`experimental_plugins` for details.
 

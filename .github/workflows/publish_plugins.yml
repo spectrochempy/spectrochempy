@@ -2,10 +2,10 @@
 # - TestPyPI on pushes to test branches
 # - PyPI on published releases
 #
-# It discovers plugins automatically by scanning the plugins/ directory
-# for directories containing a pyproject.toml file.
-# Official plugins should also include a recipe.yaml (or meta.yaml) in their
-# root so that build_package.yml can build the corresponding conda package.
+# Official plugins are explicitly listed in the allowlist below.
+# Experimental plugins (e.g. spectrochempy-cantera) live in the repository
+# but are NOT auto-published by this workflow — they must be published
+# manually or through a separate publish workflow.
 #
 # Release policy:
 #   - Official plugins are released independently from the core package.

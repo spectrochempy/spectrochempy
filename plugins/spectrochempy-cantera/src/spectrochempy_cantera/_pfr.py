@@ -45,7 +45,12 @@ SCIPY_MINIMIZE_METHODS = [
 
 
 def _cantera_is_not_available():
-    """Cantera is a mandatory dependency of this plugin; always available at import time."""
+    """
+    Compatibility shim for legacy tests and imports — always returns False.
+
+    Cantera is a mandatory dependency of this plugin; the import at the top of
+    this module would have already failed if it were missing.
+    """
     return False
 
 
