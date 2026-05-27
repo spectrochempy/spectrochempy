@@ -53,37 +53,28 @@ jobs:
         shell: bash {0}
         # do not use -l flag (do not work with macos when bash is se in login mode)
 
-    # Define test matrix - this will run tests in parallel for:
-    # - Different operating systems (Ubuntu, macOS, Windows)
-    # - Different Python versions (3.10, 3.13)
+    # Run the complete instrumented suite once, then keep lightweight
+    # compatibility coverage for the minimum Python and other operating systems.
     strategy:
       fail-fast: false  # Continue testing even if one combination fails
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        pythonVersion: ["3.11", "3.14"]
         include:
-          # Full testing on Ubuntu with all Python versions
-          - os: ubuntu-latest
-            pythonVersion: "3.11"
-            full_test: true
           - os: ubuntu-latest
             pythonVersion: "3.14"
-            full_test: true
-
-          # Limited testing on Windows/macOS
+            coverage: true
+            docs_examples: true
+          - os: ubuntu-latest
+            pythonVersion: "3.11"
+            coverage: false
+            docs_examples: false
           - os: windows-latest
             pythonVersion: "3.14"
-            full_test: false
+            coverage: false
+            docs_examples: false
           - os: macos-latest
             pythonVersion: "3.14"
-            full_test: false
-
-        exclude:
-          # Exclude other combinations
-          - os: macos-latest
-            pythonVersion: "3.11"
-          - os: windows-latest
-            pythonVersion: "3.11"
+            coverage: false
+            docs_examples: false
 
     steps:
       # Print debug information about the current run
@@ -176,7 +167,7 @@ jobs:
             --ref-name "${{ github.ref_name }}" \
             --base-ref "${{ github.base_ref }}"
 
-      - name: Test with coverage
+      - name: Test package
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           set -o pipefail
@@ -184,7 +175,26 @@ jobs:
           echo "pytest selection: ${SCPY_TEST_SELECTION:-full}"
           echo "pytest selection reason: ${SCPY_TEST_SELECTION_REASON:-not provided}"
           echo "pytest targets: ${SCPY_TEST_TARGETS:-tests}"
-          coverage run --source=spectrochempy -m pytest ${SCPY_TEST_TARGETS:-tests} -s -ra --durations=10 | tee pytest.log
+          targets="${SCPY_TEST_TARGETS:-tests}"
+          pytest_extra_args=()
+          if [[ "${{ matrix.docs_examples }}" != "true" ]]; then
+            pytest_extra_args+=(--ignore=tests/test_docs/test_py_in_docs.py)
+            echo "documentation scripts: omitted in compatibility job"
+          fi
+          if [[ "${{ matrix.docs_examples }}" != "true" && "$targets" == "tests/test_docs" ]]; then
+            echo "documentation-only selection is covered by the canonical Ubuntu job and docs workflow" | tee pytest.log
+            duration=$((SECONDS - start))
+            echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
+            exit 0
+          fi
+          run_tests() {
+            if [[ "${{ matrix.coverage }}" == "true" ]]; then
+              coverage run --source=spectrochempy -m pytest $targets "${pytest_extra_args[@]}" -s -ra --durations=10
+            else
+              python -m pytest $targets "${pytest_extra_args[@]}" -s -ra --durations=10
+            fi
+          }
+          run_tests | tee pytest.log
           status=${PIPESTATUS[0]}
           duration=$((SECONDS - start))
           echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
@@ -198,7 +208,7 @@ jobs:
             --timings "$CI_TIMING_FILE"
 
       - name: Debug info coverage content
-        if: ${{ always() && !(env.ACT && matrix.pythonVersion == '3.14') }}
+        if: ${{ always() && matrix.coverage && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           coverage report -m || echo "coverage report unavailable"
 
