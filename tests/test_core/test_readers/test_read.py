@@ -28,8 +28,33 @@ def _skip_if_eigenvector_unreachable(exc):
     raise exc
 
 
-def test_read():
+def _skip_if_scpy_data_unreachable(exc):
+    import requests
+
+    network_errors = (
+        FileNotFoundError,
+        OSError,
+        TimeoutError,
+        requests.exceptions.RequestException,
+    )
+    if isinstance(exc, network_errors):
+        pytest.skip("spectrochempy_data GitHub testdata not reachable")
+    raise exc
+
+
+def _read_scpy_data_or_skip(reader, path):
+    try:
+        dataset = reader(path)
+    except Exception as exc:  # noqa: BLE001
+        _skip_if_scpy_data_unreachable(exc)
+    if dataset is None:
+        pytest.skip("spectrochempy_data GitHub testdata not reachable")
+    return dataset
+
+
+def test_read(tmp_path):
     filename = IRDATA / "CO@Mo_Al2O3.SPG"
+    backup = tmp_path / filename.name
 
     # read normally
     nd1 = scp.read(filename)
@@ -38,26 +63,33 @@ def test_read():
     nd1 = scp.read_omnic(filename)
     assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
 
-    # delete file to simulate its absence:
-    filename.unlink()
+    filename.replace(backup)
+    try:
+        # now try to download from github s not found locally (use _read_remote)
+        nd2 = _read_scpy_data_or_skip(
+            scp.read_omnic,
+            "irdata/CO@Mo_Al2O3.SPG",
+        )
+        assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
 
-    # now try to download from github s not found locally (use _read_remote)
-    nd2 = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")
-    assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
+        # delete file to simulate its absence:
+        filename.unlink()
 
-    # delete file to simulate its absence:
-    filename.unlink()
+        # now try to download from github s not found locally (use _read_remote)
+        # but file doesn't exist on github
+        with pytest.raises(FileNotFoundError):
+            scp.read_omnic("irdata/nh4y-active.spg")
 
-    # now try to download from github s not found locally (use _read_remote)
-    # but file doesn't exist on github
-    with pytest.raises(FileNotFoundError):
-        scp.read_omnic("irdata/nh4y-active.spg")
-
-    # now try a using generic read
-    assert not filename.exists()
-    nd2 = scp.read("irdata/CO@Mo_Al2O3.SPG")
-    assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
-    assert filename.exists()
+        # now try a using generic read
+        assert not filename.exists()
+        nd2 = _read_scpy_data_or_skip(scp.read, "irdata/CO@Mo_Al2O3.SPG")
+        assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
+        assert filename.exists()
+    finally:
+        if filename.exists():
+            filename.unlink()
+        if backup.exists():
+            backup.replace(filename)
 
     # now try a using generic read with a missing
     with pytest.raises(FileNotFoundError):
