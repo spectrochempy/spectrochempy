@@ -32,7 +32,8 @@ OPTIONAL_DEPENDENCIES = [
 OFFICIAL_PLUGIN_DISTRIBUTIONS = [
     "spectrochempy-iris",
     "spectrochempy-nmr",
-    "spectrochempy-cantera",
+    "spectrochempy-hypercomplex",
+    "spectrochempy-carroucell",
 ]
 
 PYTEST_STATUSES = [

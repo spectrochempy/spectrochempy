@@ -147,7 +147,6 @@ jobs:
           python -m pip install -e plugins/spectrochempy-hypercomplex
           python -m pip install -e plugins/spectrochempy-nmr
           python -m pip install -e plugins/spectrochempy-iris
-          python -m pip install -e plugins/spectrochempy-cantera
           python -m pip install -e plugins/spectrochempy-carroucell
           duration=$((SECONDS - start))
           echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
