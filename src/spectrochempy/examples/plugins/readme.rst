@@ -5,8 +5,8 @@ Plugin-dependent functionality
 ###############################
 
 This section contains examples that require optional SpectroChemPy plugins,
-including both official plugins (``spectrochempy-iris``, ``spectrochempy-nmr``,
-``spectrochempy-cantera``) and third-party plugins.
+including both official plugins (``spectrochempy-iris``, ``spectrochempy-nmr``)
+and third-party plugins.
 
 When the SpectroChemPy documentation is built, this page is completed from
 ``examples/gallery.toml`` manifests provided by bundled plugins or listed in

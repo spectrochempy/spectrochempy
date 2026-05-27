@@ -101,7 +101,6 @@ standalone workflows::
 
     scp.nmr.read_topspin(...)
     scp.iris.batch_iris(...)
-    scp.cantera.equilibrium(...)
 
 Dataset accessors are used only for operations on an existing
 ``NDDataset``.  The accessor holds a reference to the parent dataset and
@@ -110,12 +109,7 @@ passes it as the first argument to the registered callable::
     dataset.iris.kernel_matrix(...)
 
 Do not add a dataset accessor just to make a plugin function look like a
-method.  The callable should use the parent dataset as a real input.  For
-example, Cantera equilibrium calculations currently remain package-level
-simulation APIs because they require explicit thermodynamic state and
-reactants::
-
-    scp.cantera.equilibrium(...)
+method.  The callable should use the parent dataset as a real input.
 
 Readers are not exposed under dataset accessors.  For example, use
 ``scp.nmr.read_topspin(...)`` rather than

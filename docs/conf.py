@@ -358,9 +358,13 @@ def _copy_example_tree(source: Path, destination: Path) -> None:
 
 
 def _plugin_gallery_manifests() -> list[Path]:
+    # Official plugins only. Experimental plugins are excluded from the main
+    # gallery to keep the user experience stable.
     manifests = sorted(
         (PROJECT / "plugins").glob("spectrochempy-*/examples/gallery.toml")
     )
+    # Exclude experimental plugins
+    manifests = [m for m in manifests if "spectrochempy-cantera" not in str(m)]
 
     extra_manifests = os.environ.get("SCP_PLUGIN_GALLERY_MANIFESTS")
     if extra_manifests:

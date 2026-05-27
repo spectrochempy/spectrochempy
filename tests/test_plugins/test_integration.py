@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import importlib.metadata as im
+import importlib.util
 import logging
 import subprocess
 import sys
@@ -24,6 +25,9 @@ from spectrochempy.plugins.deps import MissingPluginNamespaceError
 from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
 from spectrochempy.plugins.manager import PluginManager
 from spectrochempy.plugins.registry import PluginRegistry
+
+_CANTERA_INSTALLED = importlib.util.find_spec("spectrochempy_cantera") is not None
+_IRIS_INSTALLED = importlib.util.find_spec("spectrochempy_iris") is not None
 
 # ------------------------------------------------------------------
 # Fake plugins for integration testing
@@ -217,12 +221,17 @@ raise SystemExit(0)
         import sys
 
         code = """
+import importlib.metadata as im
 import sys
 import spectrochempy
 spectrochempy.plugin_manager.discover()
-expected = {"spectrochempy_iris", "spectrochempy_nmr", "spectrochempy_cantera"}
-loaded = {m for m in sys.modules if m.startswith("spectrochempy_")}
-assert loaded.issuperset(expected), f"Missing plugins: {expected - loaded}"
+expected_mods = set()
+for ep in im.entry_points(group="spectrochempy.plugins"):
+    mod_name = ep.value.split(":")[0]
+    expected_mods.add(mod_name)
+loaded = set(sys.modules)
+missing = expected_mods - loaded
+assert not missing, f"Missing modules: {missing}"
 raise SystemExit(0)
 """
         result = subprocess.run(
@@ -339,6 +348,7 @@ class TestMissingPluginError:
 class TestDeprecatedRootAliases:
     """``scp.IRIS``, ``scp.PFR`` etc. emit a DeprecationWarning."""
 
+    @pytest.mark.skipif(not _IRIS_INSTALLED, reason="iris plugin not installed")
     def test_iris_root_alias_deprecated(self):
         """scp.IRIS emits DeprecationWarning pointing to scp.iris.IRIS."""
         import warnings
@@ -353,6 +363,7 @@ class TestDeprecatedRootAliases:
                 "deprecated" in str(msg.message).lower() for msg in w
             ), f"No deprecation warning: {[str(m.message) for m in w]}"
 
+    @pytest.mark.skipif(not _IRIS_INSTALLED, reason="iris plugin not installed")
     def test_iris_kernel_root_alias_deprecated(self):
         """scp.IrisKernel emits DeprecationWarning."""
         import warnings
@@ -365,6 +376,7 @@ class TestDeprecatedRootAliases:
             assert obj is not None
             assert any("deprecated" in str(msg.message).lower() for msg in w)
 
+    @pytest.mark.skipif(not _CANTERA_INSTALLED, reason="cantera plugin not installed")
     def test_pfr_root_alias_deprecated(self):
         """scp.PFR emits DeprecationWarning."""
         import warnings
@@ -377,6 +389,7 @@ class TestDeprecatedRootAliases:
             assert obj is not None
             assert any("deprecated" in str(msg.message).lower() for msg in w)
 
+    @pytest.mark.skipif(not _IRIS_INSTALLED, reason="iris plugin not installed")
     def test_namespaced_access_no_warning(self):
         """scp.iris.IRIS does NOT emit DeprecationWarning."""
         import warnings
@@ -396,6 +409,7 @@ class TestDeprecatedRootAliases:
 class TestSubmoduleImport:
     """``from spectrochempy.<ns> import X`` via PluginNamespaceModule."""
 
+    @pytest.mark.skipif(not _IRIS_INSTALLED, reason="iris plugin not installed")
     def test_lazy_loading_on_import_with_access(self):
         """Accessing IRIS after import spectrochempy.iris loads _core."""
         import subprocess
@@ -425,6 +439,7 @@ raise SystemExit(0)
         )
         assert result.returncode == 0, result.stderr or result.stdout
 
+    @pytest.mark.skipif(not _IRIS_INSTALLED, reason="iris plugin not installed")
     def test_submodule_dir(self):
         """dir() on the pseudo-module works and includes plugin names."""
         import spectrochempy.iris as iris_mod
@@ -1279,6 +1294,7 @@ class TestLazyProxyIntrospection:
         params = list(sig.parameters.keys())
         assert "paths" in params or len(params) > 1
 
+    @pytest.mark.skipif(not _CANTERA_INSTALLED, reason="cantera plugin not installed")
     def test_cantera_pfr_doc(self):
         """__doc__ is the real PFR docstring."""
         import spectrochempy as scp
@@ -1287,12 +1303,14 @@ class TestLazyProxyIntrospection:
         assert doc is not None
         assert "Lazy wrapper" not in doc
 
+    @pytest.mark.skipif(not _CANTERA_INSTALLED, reason="cantera plugin not installed")
     def test_cantera_pfr_name(self):
         """__name__ is 'PFR'."""
         import spectrochempy as scp
 
         assert scp.cantera.PFR.__name__ == "PFR"
 
+    @pytest.mark.skipif(not _CANTERA_INSTALLED, reason="cantera plugin not installed")
     def test_cantera_pfr_wrapped(self):
         """__wrapped__ is the real PFR class."""
         import spectrochempy as scp
@@ -1300,6 +1318,7 @@ class TestLazyProxyIntrospection:
         wrapped = scp.cantera.PFR.__wrapped__
         assert wrapped is not None
 
+    @pytest.mark.skipif(not _CANTERA_INSTALLED, reason="cantera plugin not installed")
     def test_cantera_pfr_signature(self):
         """inspect.signature returns real params, not placeholder ones."""
         import inspect

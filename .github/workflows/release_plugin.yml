@@ -1,15 +1,16 @@
 name: Release an official plugin
 
 # This workflow prepares and releases a single official plugin.
-# It bumps the plugin version, commits, pushes, and creates the release tag.
-# The tag triggers publish_plugins.yml (PyPI) and build_package.yml (conda).
+# It bumps the plugin version, commits, pushes, creates the release tag,
+# and creates a GitHub Release. The release event triggers
+# publish_plugins.yml (PyPI) and build_package.yml (conda).
 #
 # Usage:
 #   1. Run this workflow manually (workflow_dispatch).
 #   2. Enter the plugin name (e.g. "spectrochempy-nmr") and version (e.g. "0.1.1").
-#   3. The workflow bumps pyproject.toml and recipe.yaml, commits, and creates
-#      the tag spectrochempy-nmr-v0.1.1.
-#   4. The tag automatically triggers the CI publish jobs.
+#   3. The workflow bumps pyproject.toml and recipe.yaml, commits, creates
+#      the tag spectrochempy-nmr-v0.1.1, and opens a GitHub Release.
+#   4. The release event automatically triggers the CI publish jobs.
 
 on:
   workflow_dispatch:
@@ -41,6 +42,13 @@ jobs:
 
       - name: Validate plugin name
         run: |
+          # Official plugins are explicitly listed. Experimental plugins should be
+          # released manually and are not handled by this workflow.
+          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-hypercomplex spectrochempy-carroucell"
+          if ! echo "$OFFICIAL_PLUGINS" | grep -qw "${{ inputs.plugin_name }}"; then
+            echo "::error::${{ inputs.plugin_name }} is not in the official plugin allowlist. Experimental plugins must be released manually."
+            exit 1
+          fi
           plugin_dir="plugins/${{ inputs.plugin_name }}"
           if [ ! -d "$plugin_dir" ]; then
             echo "::error::Plugin directory $plugin_dir does not exist"
@@ -92,3 +100,14 @@ jobs:
           git tag "$tag"
           git push origin "$tag"
           echo "Created and pushed tag: $tag"
+
+      - name: Create GitHub Release
+        run: |
+          tag="${{ inputs.plugin_name }}-v${{ inputs.version }}"
+          gh release create "$tag" \
+            --repo "${{ github.repository }}" \
+            --title "${{ inputs.plugin_name }} v${{ inputs.version }}" \
+            --notes "Release of ${{ inputs.plugin_name }} v${{ inputs.version }}." \
+            --verify-tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

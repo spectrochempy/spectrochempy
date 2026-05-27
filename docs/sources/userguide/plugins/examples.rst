@@ -9,7 +9,7 @@ than by package internals. Plugin-dependent examples are maintained by the
 plugin that provides the feature, then staged into their natural gallery
 sections, such as decomposition, simulation, import/export, or NMR processing.
 
-When an example needs an official plugin, it should say so near the top of the
+When an example needs a plugin, it should say so near the top of the
 example and use the recommended namespaced API:
 
 .. code-block:: python
@@ -18,13 +18,12 @@ example and use the recommended namespaced API:
 
     analysis = scp.iris.IRIS()
     dataset = scp.nmr.read_topspin("path/to/fid")
-    reactor = scp.cantera.PFR
 
 Plugin-dependent examples should use short, consistent notes such as:
 
 .. code-block:: text
 
-    Requires the official spectrochempy-nmr plugin.
+    Requires the spectrochempy-nmr plugin.
     Install with: pip install spectrochempy[nmr]
 
 Official plugins declare their gallery examples in an ``examples/gallery.toml``

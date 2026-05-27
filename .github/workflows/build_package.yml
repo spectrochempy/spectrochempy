@@ -198,12 +198,19 @@ jobs:
       - name: Set plugin matrix
         id: set-matrix
         run: |
-          # Exclude plugin-template — it is a developer scaffold, not an official package.
+          # Official plugins are explicitly listed. Experimental plugins may live in
+          # the repository but are NOT auto-published by this workflow.
+          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-hypercomplex spectrochempy-carroucell"
+
           plugins=()
           for dir in plugins/*/; do
             name=$(basename "$dir")
             if [ "$name" = "plugin-template" ]; then
               echo "Skipping $name (developer template, not publishable)"
+              continue
+            fi
+            if ! echo "$OFFICIAL_PLUGINS" | grep -qw "$name"; then
+              echo "Skipping $name (not in official plugin allowlist)"
               continue
             fi
             if [ -f "${dir}recipe.yaml" ] || [ -f "${dir}meta.yaml" ]; then
@@ -214,14 +221,14 @@ jobs:
           done
 
           if [ ${#plugins[@]} -eq 0 ]; then
-            echo "No plugins with conda recipes found. Skipping plugin builds."
+            echo "No official plugins with conda recipes found. Skipping plugin builds."
             echo "matrix={}" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           joined=$(IFS=,; echo "${plugins[*]}")
           echo "matrix={\"plugin\":[$joined]}" >> "$GITHUB_OUTPUT"
-          echo "Discovered conda plugins: $joined"
+          echo "Discovered official conda plugins: $joined"
 
   build_and_publish_conda_plugins:
     name: Build and publish conda plugin packages to Anaconda.org

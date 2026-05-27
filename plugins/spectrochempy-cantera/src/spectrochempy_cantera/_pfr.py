@@ -16,17 +16,15 @@ from scipy.optimize import differential_evolution
 from scipy.optimize import least_squares
 from scipy.optimize import minimize
 
-from spectrochempy.application.application import error_
 from spectrochempy.application.application import info_
 from spectrochempy.core.dataset.nddataset import Coord
 from spectrochempy.core.dataset.nddataset import NDDataset
-from spectrochempy.utils.optional import import_optional_dependency
 
 __all__ = [
     "PFR",
 ]
 
-ct = import_optional_dependency("cantera", errors="ignore")
+import cantera as ct
 
 SCIPY_MINIMIZE_METHODS = [
     "NELDER-MEAD",
@@ -47,13 +45,13 @@ SCIPY_MINIMIZE_METHODS = [
 
 
 def _cantera_is_not_available():
-    if ct is None:
-        error_(
-            ImportError,
-            "Missing optional dependency 'cantera'.  "
-            "Use conda or pip to install cantera.",
-        )
-    return ct is None
+    """
+    Compatibility shim for legacy tests and imports — always returns False.
+
+    Cantera is a mandatory dependency of this plugin; the import at the top of
+    this module would have already failed if it were missing.
+    """
+    return False
 
 
 def _ct_modify_rate(reactive_phase, i_reaction, rate):
@@ -85,9 +83,6 @@ def _ct_modify_surface_kinetics(surface, param_to_set):
     site_density, coverages, concentrations,
     pre-exponential factor, temperature_exponent, activation_energy.
     """
-    if _cantera_is_not_available():
-        return
-
     if not isinstance(surface, ct.composite.Interface):
         raise ValueError("only implemented of ct.composite.Interface")
 
@@ -160,9 +155,6 @@ class PFR:
         K=1e-5,
         kin_param_to_set=None,
     ):
-        if _cantera_is_not_available():
-            raise ImportError
-
         add_surface = area is not None
 
         self._cti = cti_file

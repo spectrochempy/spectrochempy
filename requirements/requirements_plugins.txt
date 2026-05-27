@@ -23,6 +23,5 @@
 # --------------------
 spectrochempy[nmr]
 spectrochempy[iris]
-spectrochempy[cantera]
 spectrochempy-hypercomplex>=0.1,<0.2
 spectrochempy-carroucell>=0.1,<0.2

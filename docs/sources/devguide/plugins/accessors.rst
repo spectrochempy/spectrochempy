@@ -19,7 +19,6 @@ objects independently. Those belong under package-level namespaces:
 .. code-block:: python
 
     dataset = scp.nmr.read_topspin("path/to/fid")
-    reactor = scp.cantera.PFR
 
 Accessor contributions are declared with ``register_accessors()``. Prefer a
 namespace and a short operation name:
