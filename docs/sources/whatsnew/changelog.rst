@@ -69,8 +69,9 @@ Dependency Updates
 
 - Core dependency trimming: ``osqp`` and ``numpydoc`` removed from core
   dependencies; ``xlrd`` moved to the carroucell plugin.
-- Added ``spectrochempy[plugins]`` pip extra that installs all 5 official
-  plugins at once.
+- Added ``spectrochempy[plugins]`` pip extra that installs the official plugins:
+  NMR, IRIS, Hypercomplex, and Carroucell. Cantera is available separately as an
+  experimental plugin.
 
 .. section
 
