@@ -79,6 +79,7 @@ application.start.set_warnings()
 from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
 from spectrochempy.plugins.features import plugin_namespace_install_hint
 from spectrochempy.plugins.features import plugin_reader_missing_stub
+from spectrochempy.plugins.features import plugin_symbol_install_hint
 from spectrochempy.plugins.manager import plugin_manager
 from spectrochempy.plugins.registry import registry
 
@@ -261,6 +262,9 @@ def __getattr__(name):
             from spectrochempy.plugins.deps import MissingPluginNamespaceError
 
             raise MissingPluginNamespaceError(hint) from err
+        symbol_hint = plugin_symbol_install_hint(name)
+        if symbol_hint:
+            raise AttributeError(symbol_hint) from err
         raise AttributeError(
             f"module 'spectrochempy' has no attribute '{name}'"
         ) from err

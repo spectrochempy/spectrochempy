@@ -320,6 +320,14 @@ class TestMissingPluginError:
         manager = PluginManager(registry=registry)
         return PluginNamespace(ns_name, manager, registry)
 
+    def _simulate_no_discovered_plugins(self, monkeypatch):
+        """Point the package-level plugin manager at an empty registry."""
+        registry = PluginRegistry()
+        manager = PluginManager(registry=registry)
+        monkeypatch.setattr(im, "entry_points", lambda group=None: [])
+        monkeypatch.setattr(spectrochempy, "registry", registry)
+        monkeypatch.setattr(spectrochempy, "plugin_manager", manager)
+
     def test_missing_known_namespace_attribute_error(self, monkeypatch):
         """Accessing an attribute on a missing known namespace raises MissingPluginNamespaceError."""
         from spectrochempy.plugins.deps import MissingPluginNamespaceError
@@ -338,6 +346,42 @@ class TestMissingPluginError:
             _ = ns.something
         msg = str(excinfo.value)
         assert "has no attribute" in msg
+
+    def test_missing_official_root_symbol_guides_install(self, monkeypatch):
+        """A missing official plugin root symbol gives an actionable AttributeError."""
+        self._simulate_no_discovered_plugins(monkeypatch)
+
+        with pytest.raises(AttributeError) as excinfo:
+            _ = spectrochempy.IRIS
+
+        msg = str(excinfo.value)
+        assert "module 'spectrochempy' has no attribute 'IRIS'" in msg
+        assert "Did you mean:" in msg
+        assert "scp.iris.IRIS" in msg
+        assert "The official IRIS plugin is not installed" in msg
+        assert "pip install spectrochempy-iris" in msg
+        assert "pip install spectrochempy[plugins]" in msg
+
+    def test_missing_official_root_symbol_preserves_hasattr(self, monkeypatch):
+        """The richer AttributeError remains compatible with hasattr()."""
+        self._simulate_no_discovered_plugins(monkeypatch)
+
+        assert hasattr(spectrochempy, "IRIS") is False
+
+    def test_experimental_root_symbol_has_no_special_hint(self, monkeypatch):
+        """Experimental plugin symbols are not promoted by install guidance."""
+        from spectrochempy.plugins.features import plugin_symbol_install_hint
+
+        assert plugin_symbol_install_hint("PFR") is None
+        self._simulate_no_discovered_plugins(monkeypatch)
+
+        with pytest.raises(AttributeError) as excinfo:
+            _ = spectrochempy.CanteraReactor
+
+        msg = str(excinfo.value)
+        assert "module 'spectrochempy' has no attribute 'CanteraReactor'" in msg
+        assert "Did you mean:" not in msg
+        assert "spectrochempy-cantera" not in msg
 
 
 # ------------------------------------------------------------------
