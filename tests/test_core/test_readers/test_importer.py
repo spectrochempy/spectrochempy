@@ -195,6 +195,32 @@ class TestBasicImporter:
         assert nd.shape == (1, 3)  # Check shape
         assert nd.name == self.test_file.stem  # Check name preserved
 
+    def test_existing_local_reader_oserror_is_preserved(self, tmp_path, monkeypatch):
+        """A reader failure on existing data must not be reported as missing data."""
+        filename = tmp_path / "local.fake"
+        filename.touch()
+        importer = Importer()
+        importer.objtype = NDDataset
+
+        def fail_to_read(*args, **kwargs):
+            raise OSError("local parse failure")
+
+        def unexpected_remote_fallback(*args, **kwargs):
+            raise AssertionError("remote fallback should not be attempted")
+
+        monkeypatch.setattr(importer, "_read_topspin", fail_to_read, raising=False)
+        monkeypatch.setattr(
+            "spectrochempy.core.readers.importer._read_remote",
+            unexpected_remote_fallback,
+        )
+
+        with pytest.raises(OSError, match="local parse failure"):
+            importer._switch_protocol(
+                ".topspin",
+                {".topspin": [filename]},
+                protocol=["topspin"],
+            )
+
 
 class TestImporterMerging:
     """Test dataset merging behavior."""

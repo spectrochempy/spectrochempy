@@ -189,6 +189,25 @@ jobs:
               print('NMR dir contents:', [p.name for p in nmr_dir.iterdir()])
           else:
               print('WARNING: NMR dir does not exist:', nmr_dir)
+          # Validate plugin directory resolution and reads used by documentation.
+          # An old cache can contain file names while holding incomplete data.
+          def validate_nmr_reads():
+              nmr_root = nmr_dir.parents[1]
+              for sample, expno in [('topspin_1d', 1), ('h3po4', 4), ('cadmium', 100)]:
+                  nd = scp.nmr.read_topspin(
+                      nmr_root / sample,
+                      expno=expno,
+                      remove_digital_filter=True,
+                      local_only=True,
+                  )
+                  print(f'NMR TopSpin read verified: {sample}/{expno} {nd.shape}')
+
+          try:
+              validate_nmr_reads()
+          except Exception as exc:
+              print(f'NMR read validation failed ({exc!r}); forcing re-download...')
+              download_full_testdata_directory(datadir, force=True)
+              validate_nmr_reads()
           print('Test data ready.')
           "
           duration=$((SECONDS - start))

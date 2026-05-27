@@ -215,6 +215,7 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
             f.name not in ["zenodo.json", "versions.json", "preferences.json"]
             and ".vscode" not in f.parts
             and ".venv" not in f.parts
+            and ".git" not in f.parts
         ):
             f.unlink()
     for f in list(cwd.glob("**/*.log")):
