@@ -184,11 +184,27 @@ class Importer(HasTraits):
                 dataset = read_(self.objtype(), filename, **kwargs)
 
             except (FileNotFoundError, OSError) as exc:
-                # file was not found.
-                # it is an url we raise an error
                 local_only = kwargs.get("local_only", False)
-                if _is_url(filename) or local_only:
-                    raise (FileNotFoundError) from exc
+                is_url = _is_url(filename)
+                protocol = kwargs.get("protocol", [])
+                protocol = [protocol] if isinstance(protocol, str) else protocol
+                is_topspin = "topspin" in protocol
+
+                # TopSpin data is resolved to a concrete binary before reading.
+                # Preserve errors on that local binary instead of obscuring
+                # them with a failed remote download attempt.
+                local_target_exists = not is_url and pathclean(filename).exists()
+                if (
+                    is_topspin
+                    and isinstance(exc, OSError)
+                    and not isinstance(exc, FileNotFoundError)
+                    and local_target_exists
+                ):
+                    raise
+
+                # An explicitly local request or URL cannot use the fallback.
+                if is_url or local_only:
+                    raise FileNotFoundError from exc
 
                 # else, we try on github
                 try:

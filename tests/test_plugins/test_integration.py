@@ -1433,7 +1433,7 @@ class TestRegisterHandlers:
         pm = PluginManager(registry=registry)
 
         def handler_a():
-            return None
+            return "a"
 
         def handler_b():
             return "b"
@@ -1456,7 +1456,8 @@ class TestRegisterHandlers:
 
         pm.register(PluginA())
         pm.register(PluginB())
-        assert registry.get_handler("dup.handler")() == "b"
+        assert registry.get_handler("dup.handler")() == "a"
+        assert registry.available_handlers["dup.handler"] == [handler_a, handler_b]
 
     def test_coord_reversed_no_handler_uses_default(self):
         """Without any coord.reversed handler, ppm and 1/centimeter still reverse."""

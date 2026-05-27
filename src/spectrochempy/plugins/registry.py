@@ -72,7 +72,8 @@ class PluginRegistry:
         self.visualization._visualizers.update(other.visualization._visualizers)
         for category, entries in other.extensions._extensions.items():
             self.extensions._extensions.setdefault(category, {}).update(entries)
-        self.handlers._handlers.update(other.handlers._handlers)
+        for name, handlers in other.handlers._handlers.items():
+            self.handlers._handlers.setdefault(name, []).extend(handlers)
 
     # ------------------------------------------------------------------
     # Capability-based query
