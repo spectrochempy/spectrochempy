@@ -42,7 +42,7 @@ keywords = ["spectroscopy", "chemistry", "data analysis"]
 license = {text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT"}
 name = "spectrochempy"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 [project.optional-dependencies]
 build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]

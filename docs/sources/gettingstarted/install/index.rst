@@ -10,7 +10,7 @@ Installation Guide
 Prerequisites
 -------------
 
-`SpectroChemPy` requires Python 3.10 or higher (tested up to 3.13). Python is a widely-adopted
+`SpectroChemPy` requires Python 3.11 or higher (tested up to 3.14). Python is a widely-adopted
 scientific programming language, particularly suited for data analysis and scientific computing.
 
 Installing Python
