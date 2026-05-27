@@ -24,8 +24,11 @@ KNOWN_PLUGIN_READERS = {
 KNOWN_PLUGIN_NAMESPACES = {
     "nmr": ("spectrochempy-nmr", "spectrochempy[nmr]"),
     "iris": ("spectrochempy-iris", "spectrochempy[iris]"),
-    "cantera": ("spectrochempy-cantera", "spectrochempy[cantera]"),
     "carroucell": ("spectrochempy-carroucell", "spectrochempy-carroucell"),
+}
+
+EXPERIMENTAL_PLUGIN_NAMESPACES = {
+    "cantera": ("spectrochempy-cantera", "spectrochempy-cantera"),
 }
 
 OFFICIAL_PLUGINS = {
@@ -40,12 +43,6 @@ OFFICIAL_PLUGINS = {
         "package": "spectrochempy-nmr",
         "extra": "spectrochempy[nmr]",
         "namespace": "nmr",
-    },
-    "cantera": {
-        "title": "Cantera plugin",
-        "package": "spectrochempy-cantera",
-        "extra": "spectrochempy[cantera]",
-        "namespace": "cantera",
     },
     "hypercomplex": {
         "title": "Hypercomplex plugin",
@@ -98,10 +95,19 @@ def plugin_reader_missing_stub(reader_name: str):
 def plugin_namespace_install_hint(namespace: str) -> str | None:
     """Return an install hint if *namespace* belongs to an optional plugin."""
     info = KNOWN_PLUGIN_NAMESPACES.get(namespace)
-    if info is None:
-        return None
-    plugin_name, extra = info
-    return (
-        f"The '{namespace}' namespace requires the optional plugin "
-        f"'{plugin_name}'. Install it with: pip install {extra}"
-    )
+    if info is not None:
+        plugin_name, extra = info
+        return (
+            f"The '{namespace}' namespace requires the optional plugin "
+            f"'{plugin_name}'. Install it with: pip install {extra}"
+        )
+    info = EXPERIMENTAL_PLUGIN_NAMESPACES.get(namespace)
+    if info is not None:
+        plugin_name, extra = info
+        return (
+            f"The '{namespace}' namespace requires the experimental plugin "
+            f"'{plugin_name}'. It is not officially supported, the API may change "
+            f"without notice, and manual installation is required. "
+            f"Install it with: pip install {extra}"
+        )
+    return None

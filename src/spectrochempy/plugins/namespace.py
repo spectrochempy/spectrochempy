@@ -199,11 +199,12 @@ class PluginNamespaceModule(ModuleType):
 
 def register_namespace_modules() -> None:
     """Insert ``PluginNamespaceModule`` instances into ``sys.modules``."""
+    from spectrochempy.plugins.features import EXPERIMENTAL_PLUGIN_NAMESPACES
     from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
     from spectrochempy.plugins.manager import plugin_manager
     from spectrochempy.plugins.registry import registry
 
-    for ns in KNOWN_PLUGIN_NAMESPACES:
+    for ns in {**KNOWN_PLUGIN_NAMESPACES, **EXPERIMENTAL_PLUGIN_NAMESPACES}:
         key = f"spectrochempy.{ns}"
         if key not in sys.modules:
             sys.modules[key] = PluginNamespaceModule(ns, plugin_manager, registry)

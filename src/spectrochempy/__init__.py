@@ -114,7 +114,9 @@ def _reader_names():
 
 
 def _namespace_names():
-    return set(KNOWN_PLUGIN_NAMESPACES)
+    from spectrochempy.plugins.features import EXPERIMENTAL_PLUGIN_NAMESPACES
+
+    return set(KNOWN_PLUGIN_NAMESPACES) | set(EXPERIMENTAL_PLUGIN_NAMESPACES)
 
 
 def _extension_names():
@@ -187,6 +189,7 @@ def __getattr__(name):
 
     import sys
 
+    from spectrochempy.plugins.features import EXPERIMENTAL_PLUGIN_NAMESPACES
     from spectrochempy.plugins.features import KNOWN_PLUGIN_NAMESPACES
     from spectrochempy.plugins.namespace import PluginNamespace
     from spectrochempy.plugins.namespace import PluginNamespaceModule
@@ -194,7 +197,7 @@ def __getattr__(name):
     # Handle known plugin namespaces *before* discovery so that simply
     # accessing ``scp.iris`` / ``scp.nmr`` / ``scp.cantera`` does not
     # trigger loading of the actual plugin packages.
-    if name in KNOWN_PLUGIN_NAMESPACES:
+    if name in KNOWN_PLUGIN_NAMESPACES or name in EXPERIMENTAL_PLUGIN_NAMESPACES:
         module_key = f"spectrochempy.{name}"
         if module_key in sys.modules and isinstance(
             sys.modules[module_key], PluginNamespaceModule
