@@ -51,4 +51,5 @@ dependencies:
     - pytest-doctestplus
     - pytest-ruff
     - pytest-mock
+    - pytest-xdist
     - numpydoc

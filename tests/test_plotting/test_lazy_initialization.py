@@ -99,9 +99,9 @@ sys.exit(0 if not matplotlib_loaded else 1)
             if line.startswith("IMPORT_TIME:"):
                 import_time = float(line.split(":")[1])
                 limit = 2.0 if os.environ.get("PYTEST_XDIST_WORKER") else 0.5
-                assert import_time < limit, (
-                    f"Import took {import_time}s, expected < {limit}s"
-                )
+                assert (
+                    import_time < limit
+                ), f"Import took {import_time}s, expected < {limit}s"
                 break
 
     def test_matplotlib_not_loaded_on_dataset_creation(self):

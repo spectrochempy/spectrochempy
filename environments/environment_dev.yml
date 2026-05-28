@@ -62,6 +62,7 @@ dependencies:
     - pytest-doctestplus
     - pytest-ruff
     - pytest-mock
+    - pytest-xdist
     - numpydoc
     # docs
     - ipykernel=6.29.5
