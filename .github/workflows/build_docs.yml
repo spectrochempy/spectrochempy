@@ -132,6 +132,7 @@ jobs:
           echo "pandoc installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Setup Jupyter kernel
+        if: github.event_name != 'pull_request'
         run: |
           set -e
           . .venv/bin/activate
@@ -191,7 +192,12 @@ jobs:
           set -e
           . .venv/bin/activate
           start=$SECONDS
-          if [[ "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
+            SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
+              python3 docs/make.py --no-exec -j auto html
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            python3 docs/make.py --no-exec -j auto html
+          elif [[ "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
               python3 docs/make.py -j1 html
           else
