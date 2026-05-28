@@ -20,6 +20,14 @@ import pytest
 
 import spectrochempy
 
+
+def pytest_collection_modifyitems(items):
+    """Keep docstring validation out of xdist workers."""
+    for item in items:
+        if "docstrings" in item.name:
+            item.add_marker(pytest.mark.serial)
+
+
 # ======================================================================================
 # OPTIONAL DIAGNOSTIC STATE GUARDS
 # ======================================================================================
