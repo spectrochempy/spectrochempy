@@ -1,35 +1,41 @@
-# This workflow tests if SpectrochemPy can be installed and run in a Google Colab environment
-# It uses Docker to simulate the Colab environment locally on GitHub's servers
+# This workflow tests SpectroChemPy compatibility in a Google Colab environment.
+# It uses Docker to simulate the Colab environment locally on GitHub's runners.
+#
+# The smoke test verifies:
+#   - Core-only install: basic NDDataset creation and helpful missing-plugin errors
+#   - Core + official plugins: namespace access, module imports, lightweight feature smoke tests
 
-name: Test Colab Notebook
+name: Test Colab compatibility
 
-# Define when this workflow should run
 on:
+  pull_request:
+    paths:
+      - "spectrochempy/**"
+      - "plugins/**"
+      - "pyproject.toml"
+      - "requirements/**"
+      - ".github/workflows/install_on_colab.yml"
   push:
     branches:
       - develop
+      - plugins
       - feature/*
       - fix/*
-  workflow_dispatch:  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write
 
-# Prevent multiple copies of this workflow from running simultaneously
-# This saves resources and prevents conflicts
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test notebook in Colab environment
-    runs-on: ubuntu-latest  # Use Ubuntu as our base system
-
+  colab-smoke-test:
+    name: Colab smoke test
+    runs-on: ubuntu-latest
     steps:
-      # Step 1: Free up space on the GitHub runner
-      - name: Maximize disc space
+      - name: Maximize disk space
         uses: AdityaGarg8/remove-unwanted-software@v5
         with:
           remove-dotnet: "true"
@@ -37,101 +43,35 @@ jobs:
           remove-haskell: "true"
           remove-codeql: "true"
 
-      # Step 2: Get our code
       - name: Checkout code
         uses: actions/checkout@v6
 
-      # Step 3: Set up Docker build system with caching support
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      # Step 4: Cache Docker images to speed up subsequent runs
-      - name: Cache Docker images
-        uses: actions/cache@v5
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      # Step 5: Cache pip packages to speed up installation
-      - name: Cache pip packages
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      # Step 6: Download the official Google Colab Docker image
-      # This image contains the same environment as Google Colab
       - name: Pull Colab image
         run: docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
 
-      # Step 7: Create test script
-      - name: Create test script
+      - name: Core-only smoke test
         run: |
-          cat << EOF > test_install.py
-          import sys
-          import subprocess
-
-          def install_package(path):
-              # Install requirements
-              requirements = f"{path}/requirements/requirements.txt"
-              subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "-r", requirements])
-              # Install spectrochempy
-              subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", "--no-deps", path])
-              print("Installation completed")
-
-          def test_functionality():
-              # Only import after installation
-              import spectrochempy as scp
-              # Test basic functionality
-              ds = scp.NDDataset([1, 2, 3])
-              assert ds.shape == (3,), "Dataset shape mismatch"
-              print("Basic functionality test passed")
-
-          if __name__ == "__main__":
-              workspace_dir = "/workspace"
-              install_package(workspace_dir)
-              test_functionality()
-          EOF
-
-      # Step 8: Run the test script in the Colab environment
-      - name: Run test script in Colab environment
-        run: |
-          # Create pip cache directory
-          mkdir -p ~/.cache/pip
-          chmod -R 777 ~/.cache/pip  # Ensure proper permissions
-
-          # Start the Colab container with pip cache mounted
-          docker run --rm -d \
-            -p 8888:8888 \
+          docker run --rm \
             -v ${{ github.workspace }}:/workspace \
-            -v ~/.cache/pip:/root/.cache/pip \
-            --name colab_container \
-            europe-docker.pkg.dev/colab-images/public/runtime:latest
+            europe-docker.pkg.dev/colab-images/public/runtime:latest \
+            bash -c "
+              pip install -q /workspace && \
+              python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode core-only
+            "
 
-          # Wait for Jupyter to start
-          sleep 10
-
-          # Install required tools in the container
-          docker exec colab_container \
-            pip install -q ipykernel
-
-          # Execute the test script
-          docker exec colab_container \
-            python3 /workspace/test_install.py
-
-          # Stop container
-          docker stop colab_container
-
-      # Step 9: Save the results
-      - name: Upload notebook results
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: notebook-output
-          path: |
-            output.ipynb
-            test_install.py
+      - name: Core + plugins smoke test
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            europe-docker.pkg.dev/colab-images/public/runtime:latest \
+            bash -c "
+              pip install -q /workspace && \
+              pip install -q /workspace/plugins/spectrochempy-iris && \
+              pip install -q /workspace/plugins/spectrochempy-nmr && \
+              pip install -q /workspace/plugins/spectrochempy-hypercomplex && \
+              pip install -q /workspace/plugins/spectrochempy-carroucell && \
+              python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode with-plugins
+            "
