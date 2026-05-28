@@ -199,9 +199,9 @@ jobs:
             python3 docs/make.py --no-exec -j auto html
           elif [[ "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
             SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
-              python3 docs/make.py -j1 html
+              python3 docs/make.py -j auto html
           else
-            python3 docs/make.py -j1 html
+            python3 docs/make.py -j auto html
           fi
           duration=$((SECONDS - start))
           echo "documentation build: ${duration}s" | tee -a "$CI_TIMING_FILE"
