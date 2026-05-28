@@ -49,7 +49,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -143,6 +142,8 @@ jobs:
             dist/${{ matrix.plugin.name }}/*.tar.gz
           retention-days: 5
 
+      # Publishing currently uses API tokens rather than Trusted Publishing (OIDC),
+      # as a temporary workaround for PyPI Trusted Publisher setup issues.
       - name: Publish plugin package to TestPyPI
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
@@ -155,6 +156,7 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist/${{ matrix.plugin.name }}
           skip-existing: true
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
 
       - name: Publish plugin package to PyPI
         if: |
@@ -166,3 +168,4 @@ jobs:
         with:
           packages-dir: dist/${{ matrix.plugin.name }}
           skip-existing: true
+          password: ${{ secrets.PYPI_API_TOKEN }}
