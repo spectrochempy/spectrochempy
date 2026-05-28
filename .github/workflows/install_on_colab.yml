@@ -53,25 +53,29 @@ jobs:
         run: docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
 
       - name: Core-only smoke test
+        timeout-minutes: 15
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             europe-docker.pkg.dev/colab-images/public/runtime:latest \
             bash -c "
-              pip install -q /workspace && \
+              pip install -q --no-deps /workspace && \
+              pip install -q colorama pint && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode core-only
             "
 
       - name: Core + plugins smoke test
+        timeout-minutes: 15
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             europe-docker.pkg.dev/colab-images/public/runtime:latest \
             bash -c "
-              pip install -q /workspace && \
-              pip install -q /workspace/plugins/spectrochempy-iris && \
-              pip install -q /workspace/plugins/spectrochempy-nmr && \
-              pip install -q /workspace/plugins/spectrochempy-hypercomplex && \
-              pip install -q /workspace/plugins/spectrochempy-carroucell && \
+              pip install -q --no-deps /workspace && \
+              pip install -q colorama pint numpy-quaternion && \
+              pip install -q --no-deps /workspace/plugins/spectrochempy-iris && \
+              pip install -q --no-deps /workspace/plugins/spectrochempy-nmr && \
+              pip install -q --no-deps /workspace/plugins/spectrochempy-hypercomplex && \
+              pip install -q --no-deps /workspace/plugins/spectrochempy-carroucell && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode with-plugins
             "
