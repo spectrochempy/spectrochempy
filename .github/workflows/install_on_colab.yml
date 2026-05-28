@@ -50,6 +50,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Pull Colab image
+        timeout-minutes: 30
         run: docker pull europe-docker.pkg.dev/colab-images/public/runtime:latest
 
       - name: Core-only smoke test
