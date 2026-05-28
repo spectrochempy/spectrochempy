@@ -186,11 +186,17 @@ jobs:
             echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
             exit 0
           fi
+          pytest_capture_args=(-s)
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            pytest_extra_args+=(-n auto)
+            pytest_capture_args=()
+            echo "pytest-xdist: enabled for pull request validation"
+          fi
           run_tests() {
-            if [[ "${{ matrix.coverage }}" == "true" ]]; then
-              coverage run --source=spectrochempy -m pytest $targets "${pytest_extra_args[@]}" -s -ra --durations=10
+            if [[ "${{ matrix.coverage }}" == "true" && "${{ github.event_name }}" != "pull_request" ]]; then
+              coverage run --source=spectrochempy -m pytest $targets "${pytest_extra_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
             else
-              python -m pytest $targets "${pytest_extra_args[@]}" -s -ra --durations=10
+              python -m pytest $targets "${pytest_extra_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
             fi
           }
           run_tests | tee pytest.log
@@ -207,7 +213,7 @@ jobs:
             --timings "$CI_TIMING_FILE"
 
       - name: Debug info coverage content
-        if: ${{ always() && matrix.coverage && !(env.ACT && matrix.pythonVersion == '3.14') }}
+        if: ${{ always() && matrix.coverage && github.event_name != 'pull_request' && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           coverage report -m || echo "coverage report unavailable"
 
