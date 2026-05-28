@@ -187,7 +187,7 @@ jobs:
             exit 0
           fi
           run_tests() {
-            if [[ "${{ matrix.coverage }}" == "true" ]]; then
+            if [[ "${{ matrix.coverage }}" == "true" && "${{ github.event_name }}" != "pull_request" ]]; then
               coverage run --source=spectrochempy -m pytest $targets "${pytest_extra_args[@]}" -s -ra --durations=10
             else
               python -m pytest $targets "${pytest_extra_args[@]}" -s -ra --durations=10
@@ -207,7 +207,7 @@ jobs:
             --timings "$CI_TIMING_FILE"
 
       - name: Debug info coverage content
-        if: ${{ always() && matrix.coverage && !(env.ACT && matrix.pythonVersion == '3.14') }}
+        if: ${{ always() && matrix.coverage && github.event_name != 'pull_request' && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           coverage report -m || echo "coverage report unavailable"
 
