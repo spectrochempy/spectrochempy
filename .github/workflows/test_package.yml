@@ -186,15 +186,33 @@ jobs:
             echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
             exit 0
           fi
+          pytest_xdist_args=("${pytest_extra_args[@]}")
+          pytest_capture_args=(-s)
+          serial_pytest_args=("${pytest_extra_args[@]}")
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            pytest_xdist_args+=(-n auto -m "not serial")
+            serial_pytest_args+=(-m serial)
+            pytest_capture_args=()
+            echo "pytest-xdist: enabled for pull request validation"
+          fi
           run_tests() {
+            local pytest_args=("$@")
             if [[ "${{ matrix.coverage }}" == "true" && "${{ github.event_name }}" != "pull_request" ]]; then
-              coverage run --source=spectrochempy -m pytest $targets "${pytest_extra_args[@]}" -s -ra --durations=10
+              coverage run --source=spectrochempy -m pytest $targets "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
             else
-              python -m pytest $targets "${pytest_extra_args[@]}" -s -ra --durations=10
+              python -m pytest $targets "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
             fi
           }
-          run_tests | tee pytest.log
+          run_tests "${pytest_xdist_args[@]}" | tee pytest.log
           status=${PIPESTATUS[0]}
+          if [[ "$status" == "0" && "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "pytest serial tests: enabled for tests marked serial" | tee -a pytest.log
+            python -m pytest $targets "${serial_pytest_args[@]}" -s -ra --durations=10 | tee -a pytest.log
+            serial_status=${PIPESTATUS[0]}
+            if [[ "$serial_status" != "0" && "$serial_status" != "5" ]]; then
+              status=$serial_status
+            fi
+          fi
           duration=$((SECONDS - start))
           echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
           exit "$status"
