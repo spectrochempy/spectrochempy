@@ -75,12 +75,9 @@ jobs:
 
       - name: Bump version in recipe.yaml (if present)
         run: |
-          plugin_dir="plugins/${{ inputs.plugin_name }}"
-          recipe="$plugin_dir/recipe.yaml"
+          recipe="plugins/${{ inputs.plugin_name }}/recipe.yaml"
           if [ -f "$recipe" ]; then
-            sed -i 's/version: ".*"/version: "${{ inputs.version }}"/' "$recipe"
-            echo "Updated $recipe"
-            grep "version:" "$recipe"
+            python3 .github/workflows/scripts/bump_recipe_version.py "$recipe" "${{ inputs.version }}"
           else
             echo "No recipe.yaml found; skipping conda version bump"
           fi
