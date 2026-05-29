@@ -5,7 +5,7 @@
 # - Development branches (non-master, non-docs/*, non-release) publish
 #   preview docs under /<branch-name>/ on GitHub Pages.
 # - Branch names are sanitised: "/" becomes "-".
-# - Example: branch "plugins" → /plugins/, "feature/new-nmr" → /feature-new-nmr/
+# - Example: branch "feature/new-nmr" → /feature-new-nmr/
 # - Stable docs at root level remain untouched.
 # - Preview docs are automatically removed when the branch is deleted
 #   via the cleanup workflow (cleanup_branch_docs.yml).
