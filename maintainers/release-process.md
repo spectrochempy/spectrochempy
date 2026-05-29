@@ -292,3 +292,64 @@ entrées sont incorrectes car :
 > **Note** : `spectrochempy-cantera` est actuellement **expérimental**
 > et n'est pas publié automatiquement par les workflows CI. Sa publication
 > doit être faite manuellement si nécessaire.
+
+---
+
+## Maintainer checklist
+
+### Avant toute release
+
+- [ ] Vérifier que les secrets GitHub (`PYPI_API_TOKEN`, `ANACONDA_API_TOKEN`,
+      `BOT_TOKEN`) sont valides et non expirés
+- [ ] Vérifier l'état des services externes (Zenodo, PyPI, Anaconda.org)
+- [ ] Lancer les tests CI sur la branche cible
+- [ ] Vérifier que le Colab smoke test passe (`install_on_colab.yml`)
+
+### Release du core
+
+- [ ] Vérifier que l'intégration GitHub → Zenodo est active
+- [ ] Lancer **Prepare a new release** avec la version X.Y.Z
+- [ ] Vérifier la PR de release (CITATION.cff, zenodo.json, whatsnew)
+- [ ] Merger la PR → attendre la Draft Release
+- [ ] Vérifier la Draft Release, puis publier
+- [ ] Vérifier PyPI : `pip install spectrochempy==X.Y.Z`
+- [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy`
+- [ ] Vérifier Zenodo : le DOI pointe vers la nouvelle version
+- [ ] Vérifier que les docs sont déployées sur `gh-pages`
+
+### Release des plugins
+
+- [ ] Désactiver l'intégration GitHub → Zenodo
+- [ ] Lancer **Release an official plugin** avec `confirm_zenodo_disabled=true`
+- [ ] Vérifier PyPI : `pip install spectrochempy-XXX==X.Y.Z`
+- [ ] Vérifier Anaconda : `anaconda show spectrocat/spectrochempy-XXX`
+- [ ] Répéter pour chaque plugin (nmr → iris → hypercomplex → carroucell)
+- [ ] Réactiver l'intégration GitHub → Zenodo (avant la prochaine release core)
+
+### TestPyPI cleanup
+
+- [ ] Les pushes sur `master` publient automatiquement sur TestPyPI
+- [ ] Les releases plugins sur TestPyPI ne remplacent pas les versions
+      existantes (le workflow utilise `skip-existing: true`)
+- [ ] Si une version a été publiée sur TestPyPI puis modifiée, supprimer
+      manuellement l'ancienne version sur
+      [TestPyPI](https://test.pypi.org/manage/projects/)
+- [ ] Ne pas confondre TestPyPI et PyPI lors des vérifications
+
+### Colab verification
+
+- [ ] Le workflow `install_on_colab.yml` s'exécute automatiquement sur les PR
+      marquées `needs-colab`
+- [ ] Avant une release, vérifier que le test Colab passe en
+      `workflow_dispatch` manuel
+- [ ] Les deux modes (`core-only` et `with-plugins`) doivent passer
+- [ ] En cas d'échec, vérifier les dépendances Colab (numpy, matplotlib, etc.)
+      et les contraintes réseau
+
+### Zenodo / plugins
+
+- [ ] Ne jamais laisser Zenodo actif pendant une release plugin
+- [ ] Vérifier qu'aucune entrée Zenodo parasite n'a été créée après une
+      release plugin
+- [ ] Si des entrées plugins existent dans Zenodo, les supprimer
+      (voir `emergency-recovery.md`)
