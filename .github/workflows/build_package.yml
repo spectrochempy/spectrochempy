@@ -272,10 +272,17 @@ jobs:
 
       - name: Setup local conda channel from core build
         run: |
+          echo "=== Artifact structure ==="
+          find /tmp/core-pkg -type f 2>/dev/null || echo "(empty)"
+          echo "=== Copying to local channel ==="
           PARENT=$(dirname "${{ github.workspace }}")
           mkdir -p "$PARENT/output"
-          cp -r /tmp/core-pkg/output/* "$PARENT/output/"
-          echo "Local channel contents:"
+          if [ -d /tmp/core-pkg/output ]; then
+            cp -r /tmp/core-pkg/output/* "$PARENT/output/"
+          else
+            cp -r /tmp/core-pkg/* "$PARENT/output/"
+          fi
+          echo "=== Local channel contents ==="
           find "$PARENT/output" -type f
 
       - name: Build conda plugin package
