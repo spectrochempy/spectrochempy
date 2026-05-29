@@ -303,3 +303,67 @@ Zenodo importe alors la release et génère le DOI normalement.
   que la release en échec sera retraitée automatiquement.
 - La recréation de la GitHub Release peut être nécessaire pour forcer
   la réimportation.
+
+---
+
+## Zenodo a archivé des releases plugins par erreur
+
+### Symptômes
+
+- Des enregistrements Zenodo apparaissent avec des versions de plugins
+  (ex. `spectrochempy-carroucell-v0.1.1`) dans la liste des enregistrements
+  de la communauté SpectroChemPy
+- Le titre de l'enregistrement Zenodo affiche "SpectroChemPy..." mais la
+  version est celle d'un plugin
+- Les métadonnées (auteurs, description) sont celles du core, pas du
+  plugin
+- Des DOI ont été créés pour des releases plugins qui ne devraient pas
+  être archivées
+
+### Cause
+
+L'intégration GitHub → Zenodo étant active sur
+`spectrochempy/spectrochempy`, Zenodo archive automatiquement **toutes**
+les GitHub Releases, y compris celles des plugins (tags
+`spectrochempy-XXX-vX.Y.Z`).
+
+### Résolution
+
+1. **Supprimer les enregistrements Zenodo erronés** :
+   - Aller sur la
+     [page Zenodo de SpectroChemPy](https://zenodo.org/communities/spectrochempy)
+   - Repérer les entrées correspondant aux releases plugins
+   - Ouvrir chaque enregistrement → cliquer sur **Edit** → **Delete**
+     (ou contacter l'admin Zenodo si le bouton de suppression n'est pas
+     disponible)
+   - Confirmer la suppression
+
+2. **Désactiver l'intégration GitHub dans Zenodo** avant toute future
+   release plugin :
+   - Aller dans
+     [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
+   - Décocher / désactiver le dépôt `spectrochempy/spectrochempy`
+   - Ne réactiver que pour les releases du core
+
+3. **Vérifier qu'aucune nouvelle entrée parasite n'est créée** après les
+   prochaines releases plugins.
+
+### Prévention
+
+- Suivre la procédure décrite dans
+  [release-process.md — Zenodo and plugin releases](../release-process.md#zenodo-and-plugin-releases)
+- Ne jamais laisser l'intégration Zenodo active pendant une phase de
+  release plugin
+
+### Note stratégique
+
+À long terme, si les plugins doivent avoir leurs propres DOI, deux
+options :
+
+1. **Dépôts séparés** : déplacer chaque plugin dans son propre dépôt
+   GitHub et connecter Zenodo indépendamment
+2. **Procédure manuelle** : créer les entrées Zenodo manuellement pour
+   chaque plugin, avec des métadonnées spécifiques
+
+Sinon, les plugins ne doivent pas créer d'entrées Zenodo séparées — seul
+le core a un DOI via l'intégration GitHub automatique.
