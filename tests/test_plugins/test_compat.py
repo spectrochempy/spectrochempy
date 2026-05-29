@@ -135,6 +135,12 @@ class TestSatisfiesMinVersion:
     def test_malformed(self):
         assert _satisfies_min_version("abc", "1.0.0") is False
 
+    def test_pre_release(self):
+        assert _satisfies_min_version("0.9.0.dev42", "0.9.0.dev0") is True
+        assert _satisfies_min_version("0.9.0.dev0", "0.9.0.dev0") is True
+        assert _satisfies_min_version("0.9.0", "0.9.0.dev0") is True
+        assert _satisfies_min_version("0.8.0", "0.9.0.dev0") is False
+
 
 # ------------------------------------------------------------------
 # Compatibility validation

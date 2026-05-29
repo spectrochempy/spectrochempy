@@ -189,7 +189,7 @@ class NMRPlugin(SpectroChemPyPlugin):
     name = "nmr"
     version = "0.1.0"
     description = "NMR readers and tools for SpectroChemPy"
-    spectrochempy_min_version = "0.8.0"
+    spectrochempy_min_version = "0.9.0.dev0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
     capabilities = [PluginCapability.READER]
 

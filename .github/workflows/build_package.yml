@@ -7,7 +7,7 @@
 #   - Release builds are uploaded to the main (stable) label.
 #   - The dev label is used for testing; stable packages should not be overwritten.
 #   - Plugin conda recipes should declare a bounded dependency on the core
-#     package, e.g.  spectrochempy >=0.8,<0.10
+#     package, e.g.  spectrochempy >=0.9.0.dev0,<0.10
 
 name: Build and publish packages 📦
 

@@ -11,7 +11,7 @@
 #   - Official plugins are released independently from the core package.
 #   - Plugin releases are triggered by GitHub releases whose tag matches the
 #     plugin name, e.g.  spectrochempy-nmr-v0.1.1
-#   - A core release tag (e.g. spectrochempy-v0.8.3) does NOT publish plugins.
+#   - A core release tag (e.g. spectrochempy-v0.9.0) does NOT publish plugins.
 #   - plugin-template is excluded from discovery — it is a developer scaffold.
 #   - PyPI upload uses skip-existing so an already-published version never
 #     causes a hard failure.
