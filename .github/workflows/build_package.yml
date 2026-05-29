@@ -53,6 +53,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Determine core version for PyPI build
+        run: |
+          LATEST_CORE_TAG=$(git tag -l 'spectrochempy-v*' --sort=-v:refname | head -1)
+          if [[ -z "$LATEST_CORE_TAG" ]]; then
+            echo "::error::No core tag found — cannot determine core version"
+            exit 1
+          fi
+          if [[ "${{ github.ref_name }}" == spectrochempy-v* ]]; then
+            CORE_VERSION="${GITHUB_REF_NAME#spectrochempy-v}"
+          else
+            CORE_VERSION="${LATEST_CORE_TAG#spectrochempy-v}.dev0"
+          fi
+          echo "Using core version: $CORE_VERSION (latest core tag: $LATEST_CORE_TAG)"
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=$CORE_VERSION" >> "$GITHUB_ENV"
+
       - name: Install pypa/build
         run: |
           python -m pip install build --user
@@ -76,6 +91,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
 
       - name: Publish package to PyPI
         if: |
