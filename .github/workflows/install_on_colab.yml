@@ -62,7 +62,9 @@ jobs:
             europe-docker.pkg.dev/colab-images/public/runtime:latest \
             -c "
               pip install -q setuptools wheel build setuptools-scm && \
-              pip install --no-build-isolation --no-deps /workspace && \
+              git config --global --add safe.directory /workspace && \
+              SETUPTOOLS_SCM_PRETEND_VERSION_FOR_SPECTROCHEMPY=0.8.5.dev0 \
+                pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode core-only
             "
@@ -76,7 +78,9 @@ jobs:
             europe-docker.pkg.dev/colab-images/public/runtime:latest \
             -c "
               pip install -q setuptools wheel build setuptools-scm && \
-              pip install --no-build-isolation --no-deps /workspace && \
+              git config --global --add safe.directory /workspace && \
+              SETUPTOOLS_SCM_PRETEND_VERSION_FOR_SPECTROCHEMPY=0.8.5.dev0 \
+                pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint numpy-quaternion && \
               pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-iris && \
               pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-nmr && \
