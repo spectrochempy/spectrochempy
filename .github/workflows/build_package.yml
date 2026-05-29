@@ -109,8 +109,6 @@ jobs:
           cache-environment: true
 
       - name: Generate conda recipe
-        env:
-          SETUPTOOLS_SCM_PRETEND_VERSION: 0.9.0.dev0
         run: |
           python3 .github/workflows/scripts/generate_conda_recipe.py
           cat recipe/recipe.yaml
