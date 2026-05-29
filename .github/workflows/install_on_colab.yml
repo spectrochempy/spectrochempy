@@ -9,6 +9,7 @@ name: Test Colab compatibility
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     paths:
       - "spectrochempy/**"
       - "plugins/**"
@@ -33,6 +34,9 @@ concurrency:
 jobs:
   colab-smoke-test:
     name: Colab smoke test
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(github.event.pull_request.labels.*.name, 'needs-colab')
     runs-on: ubuntu-latest
     steps:
       - name: Maximize disk space
