@@ -172,7 +172,7 @@ jobs:
           upload_package() {
             local label="$1"
             local force_flag="$2"
-            local skip_flag="$3"
+            local skip_flag="${3:-}"
             local packages=(output/**/*.tar.bz2 output/**/*.conda)
 
             if [ ${#packages[@]} -eq 0 ]; then
