@@ -28,16 +28,13 @@ dependencies = [
   "lazy_loader",
   "matplotlib",
   "numpy",
-  "numpydoc",
-  "numpy-quaternion >= 2024.0.7",
-  "osqp",
+  "pluggy",
   "pint",
   "pyyaml",
   "requests",
   "scikit-learn",
   "scipy",
   "tzlocal",
-  "xlrd",
 ]
 description = "Processing, analysis and modelling Spectroscopic data for Chemistry with Python"
 dynamic = ["version"]
@@ -45,11 +42,10 @@ keywords = ["spectroscopy", "chemistry", "data analysis"]
 license = {text = "CeCILL-B FREE SOFTWARE LICENSE AGREEMENT"}
 name = "spectrochempy"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 [project.optional-dependencies]
 build = ["setuptools", "setuptools_scm", "toml", "jinja2", "anaconda-client"]
-cantera = ["cantera"]
 cp = ["tensorly"]
 dev = [
   "toml",
@@ -90,7 +86,14 @@ interactive = [
   "nodejs",
   "jupyter_server",
 ]
-# nmr = ["quaternion"]
+nmr = ["spectrochempy-nmr>=0.1,<0.2"]
+iris = ["spectrochempy-iris>=0.1,<0.2"]
+plugins = [
+    "spectrochempy[nmr]",
+    "spectrochempy[iris]",
+    "spectrochempy-hypercomplex>=0.1,<0.2",
+    "spectrochempy-carroucell>=0.1,<0.2",
+]
 test = [
   "coverage",
   "ipywidgets",
@@ -100,6 +103,7 @@ test = [
   "pytest-doctestplus",
   "pytest-ruff",
   "pytest-mock",
+  "pytest-xdist",
   "numpydoc",
 ]
 
@@ -199,6 +203,7 @@ exclude = ["~*"] # Exclude files and directories. "tests/**"
   "T201", # print statement found.
   "D205", # 1 blank line required between summary line and description.
   "D401", # First line should be in imperative mood; try rephrasing.
+  "PLC0415", # Import should be at the top-level (test isolation requires local imports).
 ]
 
 [tool.ruff.lint.isort]
@@ -242,7 +247,12 @@ doctest_optionflags = [
   "ALLOW_BYTES",
 ]
 doctest_plus = "enabled"
-markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "network: marks tests requiring network access (deselect with '-m \"not network\"')",
+    "serial: marks tests that must not run in parallel xdist workers",
+]
+pythonpath = ["."]
 testpaths = ["tests"]
 doctest_norecursedirs = ["tests/test_plotting"]
 

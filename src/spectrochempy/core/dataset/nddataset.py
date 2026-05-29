@@ -408,7 +408,38 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             raise AttributeError
 
         # as we are doing lazy_import, we look in the _api module)
-        from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS
+        from spectrochempy.lazyimport.api_methods import _LAZY_IMPORTS  # noqa: PLC0415
+
+        if item in {"read", "load_iris", "download_nist_ir"} or item.startswith(
+            "read_"
+        ):
+            # Reader functions create datasets from external data. They are
+            # intentionally exposed at package/plugin namespace level only
+            # (e.g. scp.read_omnic or scp.nmr.read_topspin), not as dataset
+            # methods or dataset plugin accessors.
+            raise AttributeError
+
+        from spectrochempy.plugins.manager import plugin_manager  # noqa: PLC0415
+        from spectrochempy.plugins.namespace import (
+            DatasetPluginAccessor,  # noqa: PLC0415
+        )
+        from spectrochempy.plugins.namespace import (
+            has_dataset_namespace,  # noqa: PLC0415
+        )
+        from spectrochempy.plugins.registry import registry  # noqa: PLC0415
+
+        plugin_manager.discover()
+        if has_dataset_namespace(registry, item):
+            return DatasetPluginAccessor(self, item, registry)
+
+        accessor_info = registry.get_accessor(item)
+        if accessor_info:
+            func = accessor_info["obj"]
+            if isinstance(func, type):
+                # Class-based accessor: instantiate with the dataset,
+                # giving the result object property-based access.
+                return func(self)
+            return lambda *args, **kwargs: func(self, *args, **kwargs)
 
         if item in _LAZY_IMPORTS:
             func = tr.import_item(_LAZY_IMPORTS[item] + "." + item)

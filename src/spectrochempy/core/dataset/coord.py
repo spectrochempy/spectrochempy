@@ -20,6 +20,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils._logging import error_
 from spectrochempy.utils.constants import INPLACE
 from spectrochempy.utils.constants import NOMASK
+from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.numutils import get_n_decimals
 from spectrochempy.utils.numutils import spacings
 from spectrochempy.utils.print import colored_output
@@ -99,9 +100,6 @@ class Coord(NDMath, NDArray):
     sigdigits : int, optional, default=4
         Number of significant digits to be used for rounding and linearizing
         the data.
-    larmor : `float` or `Quantity` instance, optional
-        The Larmor frequency of the nucleus. This is used only for NMR
-        data.
     offset : `float` instance, optional
         The offset of the axis. This is used to generate an evenly values spaced axis
         together with `ìncrement` and `size`.
@@ -159,9 +157,6 @@ class Coord(NDMath, NDArray):
     _sigdigits = tr.Int(4)
     _rounding = tr.Bool(True)
 
-    # specific to NMR
-    _larmor = tr.Instance(Quantity, allow_none=True)
-
     # ----------------------------------------------------------------------------------
     # initialization
     # ----------------------------------------------------------------------------------
@@ -170,15 +165,14 @@ class Coord(NDMath, NDArray):
         if data is not None and not is_iterable(data):
             raise ValueError("Data for coordinates must be an iterable or None")
 
+        # in case Coord replace old LinearCoord object
+        # without changing the arguments
         _offset = kwargs.pop("offset", 0)
         _increment = kwargs.pop("increment", None)
         _size = kwargs.pop("size", None)
 
         if data is None and _size is not None and _increment is not None:
             data = np.arange(_size) * _increment + _offset
-
-        # specific case of NMR (initialize unit context NMR)
-        larmor = kwargs.pop("larmor", None)
 
         self._linearize_below = kwargs.pop("linearize_below", 1.0)
 
@@ -194,23 +188,23 @@ class Coord(NDMath, NDArray):
         # initialize the object
         super().__init__(data=data, **kwargs)
 
-        # set the larmor frequency if any
-        if larmor is not None:
-            self.larmor = larmor
-
-    # ----------------------------------------------------------------------------------
-    # default values
-    # ----------------------------------------------------------------------------------
-    @tr.default("_larmor")
-    def _default_larmor(self):
-        return None
-
     # ----------------------------------------------------------------------------------
     # readonly property
     # ----------------------------------------------------------------------------------
     @property
     def reversed(self):
         """Whether the axis is reversed."""
+        # Give plugins a chance to override via handler registry.
+        from spectrochempy.plugins import manager as manager_module  # noqa: PLC0415
+
+        handler = manager_module.plugin_manager.registry.get_handler("coord.reversed")
+        if handler is not None:
+            result = handler(self)
+            if result is not None:
+                return result
+
+        # Decreasing-x convention for common spectroscopic units.
+        # Plugins may override via a "coord.reversed" handler.
         return bool(
             self.units == "ppm"
             or self.units == "1 / centimeter"
@@ -600,7 +594,6 @@ class Coord(NDMath, NDArray):
             "roi",
             "linear",
             "sigdigits",
-            "larmor",
         ]
 
     def __getattr__(self, attr):
@@ -808,15 +801,6 @@ class Coord(NDMath, NDArray):
         self._show_datapoints = val
 
     @property
-    def larmor(self):
-        """Return larmor frequency in NMR spectroscopy context."""
-        return self._larmor
-
-    @larmor.setter
-    def larmor(self, val):
-        self._larmor = val
-
-    @property
     def laser_frequency(self):
         """Laser frequency if needed (Quantity)."""
         return self.meta.laser_frequency
@@ -916,6 +900,23 @@ class Coord(NDMath, NDArray):
 
 
 # ======================================================================================
+# LinearCoord (Deprecated)
+# TODO : should be removed in version 0.8
+# ======================================================================================
+@tr.signature_has_traits
+class LinearCoord(Coord):
+    @deprecated(
+        kind="object",
+        replace="Coord",
+        removed="0.8",
+    )
+    def __init__(self, **kwargs):
+        # TODO : remove in version 0.8
+        super().__init__(**kwargs)
+
+
+# ======================================================================================
 # Set the operators
 # ======================================================================================
 _set_operators(Coord, priority=50)
+_set_operators(LinearCoord, priority=50)  # Suppress 0.8

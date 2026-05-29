@@ -32,16 +32,13 @@ dependencies:
     - lazy_loader
     - matplotlib-base
     - numpy
-    - numpydoc
-    - quaternion>=2024.0.7
-    - osqp
+    - pluggy
     - pint
     - pyyaml
     - requests
     - scikit-learn
     - scipy
     - tzlocal
-    - xlrd
 
     # DEV dependencies
     # ----------------
@@ -65,6 +62,7 @@ dependencies:
     - pytest-doctestplus
     - pytest-ruff
     - pytest-mock
+    - pytest-xdist
     - numpydoc
     # docs
     - ipykernel=6.29.5

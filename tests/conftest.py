@@ -20,6 +20,14 @@ import pytest
 
 import spectrochempy
 
+
+def pytest_collection_modifyitems(items):
+    """Keep docstring validation out of xdist workers."""
+    for item in items:
+        if "docstrings" in item.name:
+            item.add_marker(pytest.mark.serial)
+
+
 # ======================================================================================
 # OPTIONAL DIAGNOSTIC STATE GUARDS
 # ======================================================================================
@@ -215,6 +223,7 @@ def pytest_sessionfinish(session, exitstatus):  # pragma: no cover
             f.name not in ["zenodo.json", "versions.json", "preferences.json"]
             and ".vscode" not in f.parts
             and ".venv" not in f.parts
+            and ".git" not in f.parts
         ):
             f.unlink()
     for f in list(cwd.glob("**/*.log")):
@@ -325,44 +334,12 @@ def ndarraymask():
 
 
 # --------------------------------------------------------------------------------------
-# Fixtures: Some NDComplex's and  NDQuaternion array
+# Fixtures: Some NDComplex arrays
 # --------------------------------------------------------------------------------------
-@pytest.fixture(scope="session")
-def typequaternion():
-    from spectrochempy.api import plugin_manager as manager
-
-    if (
-        manager.available_plugins.get("quaternion")
-        and manager.available_plugins.get("quaternion").enabled
-    ):
-        try:
-            _typequaternion = np.dtype(np.quaternion)
-        except (ImportError, AttributeError):
-            _typequaternion = None
-    else:
-        _typequaternion = None
-    return _typequaternion
-
-
 @pytest.fixture(scope="function")
 def ndarraycplx():
     # return a complex ndarray
     return NDComplexArray(ref_data, units="m/s", dtype=np.complex128, copy=True).copy()
-
-
-# @pytest.fixture(scope="function")
-# def ndarrayquaternion(typequaternion):
-#     # return a quaternion ndarray
-#     if typequaternion is None:
-#         raise ModuleNotFoundError("quaternion plugin not installed")
-
-#     from spectrochempy.plugins.quaternion.core.dataset.baseobjects.ndquaternion import (
-#         NDQuaternionArray,
-#     )
-
-#     return NDQuaternionArray(
-#         ref_data, units="m/s", dtype=typequaternion, copy=True
-#     ).copy()
 
 
 # --------------------------------------------------------------------------------------
@@ -525,6 +502,7 @@ def IR_dataset_1D():
 # --------------------------------------------------------------------------------------
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
+    pytest.importorskip("spectrochempy_nmr", reason="requires the NMR plugin")
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid"
     dataset = spectrochempy.read_topspin(
         path, remove_digital_filter=True, name="NMR_1D"
@@ -534,6 +512,7 @@ def NMR_dataset_1D():
 
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
+    pytest.importorskip("spectrochempy_nmr", reason="requires the NMR plugin")
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "ser"
     dataset = spectrochempy.read_topspin(
         path, expno=1, remove_digital_filter=True, name="NMR_2D"

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spectrochempy-iris"
+version = "0.1.0"
+description = "IRIS analysis extension for SpectroChemPy"
+requires-python = ">=3.11"
+dependencies = [
+    "spectrochempy>=0.8,<0.10",
+    "scipy",
+    "osqp",
+]
+
+[project.entry-points."spectrochempy.plugins"]
+iris = "spectrochempy_iris:IrisPlugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "network: tests requiring network access",
+]

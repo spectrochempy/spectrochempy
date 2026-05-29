@@ -20,7 +20,10 @@ from spectrochempy.utils.testing import (
     assert_equal,
 )
 
-pytestmark = pytest.mark.skip("all tests still WIP")
+pytestmark = pytest.mark.skip(
+    "quarantined legacy NMR tests: requires spectrochempy-nmr, NMR test data, "
+    "and review before reactivation"
+)
 
 
 # 1D
@@ -34,8 +37,9 @@ def test_nmr_reader_1D():
     )
 
     # load the data in a new dataset
-    ndd = NDDataset()
-    ndd.read_topspin(path, expno=1, remove_digital_filter=True)
+    import spectrochempy as scp
+
+    ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
     assert ndd.__str__() == "NDDataset: [complex128] unitless (size: 12411)"
     assert (
         "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px; width:124px'><font color='#28A745'> "
@@ -264,9 +268,11 @@ def test_nmr_reader_2D():
     )
 
     # load the data in a new dataset
-    ndd = NDDataset()
-    ndd.read_topspin(path, expno=1, remove_digital_filter=True)
-    assert ndd.__str__() == "NDDataset: [quaternion] unitless (shape: (y:96, x:948))"
+    import spectrochempy as scp
+
+    ndd = scp.read_topspin(path, expno=1, remove_digital_filter=True)
+    assert "unitless" in ndd.__str__()
+    assert "(shape: (y:96, x:948))" in ndd.__str__()
     assert (
         "<tr><td style='padding-right:5px; padding-bottom:0px; padding-top:0px;"
         in ndd._repr_html_()

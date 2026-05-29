@@ -9,8 +9,10 @@ This test is skipped by default as it's too slow and redundant with docs buildin
 To run it explicitly, use: pytest tests/test_docs/test_py_in_docs.py --override-skip.
 """
 
+import ast
 import subprocess
 import sys
+from importlib.util import find_spec
 from os import environ
 from pathlib import Path
 
@@ -47,6 +49,42 @@ scripts = [
 ]
 
 
+def _plugin_available(name):
+    return find_spec(name) is not None
+
+
+def _plugin_required_by(path):
+    """Determine which (if any) optional plugin an example or script needs."""
+    text = path.read_text(encoding="utf8")
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        tree = None
+    if tree is not None:
+        for node in tree.body:
+            if not isinstance(node, ast.Assign):
+                continue
+            if not any(
+                isinstance(target, ast.Name) and target.id == "OPTIONAL_PLUGIN"
+                for target in node.targets
+            ):
+                continue
+            if isinstance(node.value, ast.Constant) and isinstance(
+                node.value.value, str
+            ):
+                return node.value.value
+
+    markers = {
+        "spectrochempy_nmr": "read_topspin",
+        "spectrochempy_iris": "spectrochempy_iris",
+        "spectrochempy_cantera": "spectrochempy_cantera",
+    }
+    for plugin_name, marker in markers.items():
+        if marker in text:
+            return plugin_name
+    return None
+
+
 def nbsphinx_script_run(path):
     import matplotlib
 
@@ -63,7 +101,9 @@ def nbsphinx_script_run(path):
         pipe = subprocess.Popen(  # noqa: S603
             [sys.executable, str(path), "--nodisplay"],
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             encoding="utf8",
+            env=env,
         )
         (so, serr) = pipe.communicate()
     except Exception as e:
@@ -87,6 +127,9 @@ def test_nbsphinx_script_(script):
     name = script.name
     if name in []:
         return
+    required = _plugin_required_by(script)
+    if required and not _plugin_available(required):
+        pytest.skip(f"requires the optional {required} plugin")
 
     e, message, err = nbsphinx_script_run(script)
     # this give unicoderror on workflow with window
@@ -108,6 +151,10 @@ def test_nbsphinx_script_(script):
 )
 def test_examples(example):
     """Test example files."""
+    required = _plugin_required_by(example)
+    if required and not _plugin_available(required):
+        pytest.skip(f"requires the optional {required} plugin")
+
     scp.NO_DISPLAY = True
     mpl.use("agg", force=True)
 

@@ -1,0 +1,24 @@
+name: Test spectrochempy-cantera
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install system deps
+        run: sudo apt-get update && sudo apt-get install -y libsundials-dev
+      - name: Install core spectrochempy
+        run: pip install -e ../..
+      - name: Install plugin
+        run: pip install -e .
+      - name: Run tests
+        run: python -m pytest tests/ -v

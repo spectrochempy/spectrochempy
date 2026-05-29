@@ -43,7 +43,9 @@ adata = (
 )
 
 
-@pytest.mark.skip("Skipping test because it raises an error in  github test")
+@pytest.mark.skip(
+    "docstring checker is unstable in CI for NDDataset; runtime dataset tests remain active"
+)
 def test_nddataset_docstring():
     from spectrochempy.utils import docutils as chd
 
@@ -884,7 +886,7 @@ def test_nddataset_bug_par_arnaud():
     assert ds2.data.shape[0] == 2400, "taille dimension 0 doit être 2400"
 
 
-# ################ Complex and Quaternion, and NMR ##################
+# ################ Complex and NMR ##################
 # ======================================================================================
 # Complex NDDataset tests
 # ======================================================================================
@@ -1027,9 +1029,19 @@ def test_nddataset_init_complex_1D_with_mask():
 
 
 def test_nddataset_timezone():
+    from zoneinfo import ZoneInfo
+
     nd = scp.NDDataset(np.ones((1, 3, 1, 2)), name="value")
     assert nd.timezone is not None
     assert nd.timezone == nd.local_timezone
+
+    # Skip named-timezone checks when the IANA database is absent
+    # (e.g. minimal Windows containers or stripped-down Linux images)
+    try:
+        ZoneInfo("Pacific/Honolulu")
+    except ZoneInfoNotFoundError:
+        pytest.skip("IANA timezone database not available on this system")
+
     nd.timezone = "Pacific/Honolulu"
     assert nd.timezone != nd.local_timezone
     with pytest.raises(ZoneInfoNotFoundError):

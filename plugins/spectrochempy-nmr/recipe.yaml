@@ -1,0 +1,44 @@
+context:
+  name: spectrochempy-nmr
+  version: "0.1.0"
+
+package:
+  name: "${{ name }}"
+  version: "${{ version }}"
+
+source:
+  path: ../../plugins/spectrochempy-nmr
+
+build:
+  number: 0
+  noarch: python
+  script: python -m pip install . --no-deps --ignore-installed -vv
+
+requirements:
+  host:
+    - python >=3.11
+    - pip
+    - setuptools >=64
+  run:
+    - python >=3.11
+    - spectrochempy >=0.8,<0.10
+    - numpy
+
+tests:
+  - script:
+      - python -c "import importlib.util; assert importlib.util.find_spec('spectrochempy_nmr') is not None"
+
+about:
+  summary: "NMR readers and tools plugin for SpectroChemPy"
+  description: |
+    Official SpectroChemPy plugin providing Bruker TopSpin NMR data reading,
+    NMR-specific FFT encodings (STATES, TPPI, ECHO-ANTIECHO), and ppm/Hz
+    unit conversion contexts.
+  homepage: https://www.spectrochempy.fr
+  license: LicenseRef-CeCILL-B
+  repository: https://github.com/spectrochempy/spectrochempy
+
+extra:
+  recipe-maintainers:
+    - fernandezc
+    - atravert

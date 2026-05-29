@@ -3,7 +3,19 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-"""NMR spectral processing functions which operate on the last dimension (1) of 2D arrays."""
+"""
+Phase correction functions operating on the selected dataset dimension.
+
+Architecture note
+-----------------
+The numerical phase kernel is generic signal processing.  The dataset wrapper
+still carries NMR-origin metadata conventions (``phc0``, ``phc1``, ``pivot``,
+``exptc`` and the imported phase sign convention).  Moving those conventions to
+``spectrochempy-nmr`` requires the plugin to provide replacement public
+accessors for ``pk`` and ``pk_exp`` while preserving existing metadata updates.
+Until that plugin-side accessor exists, keep the code here to avoid changing
+public phasing behavior during the core/plugin split.
+"""
 
 __all__ = ["pk", "pk_exp"]
 __dataset_methods__ = __all__
@@ -79,7 +91,8 @@ def _phase_method(method):
             ).magnitude
 
             if not new.meta.phased[-1]:
-                # initial phase from topspin have not yet been used
+                # TODO(plugin-nmr): this imported-initial-phase convention belongs
+                # in the NMR plugin once pk/pk_exp are provided there.
                 kwargs["phc0"] = -kwargs["phc0"]
                 kwargs["phc1"] = -kwargs["phc1"]
 

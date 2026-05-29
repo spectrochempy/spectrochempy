@@ -125,7 +125,7 @@ print(f"y-axis unit: {ds.y.units}")  # Show time units
 # You can display the loaded NDDataset in a Jupyter notebook as follows:
 
 # %%
-ds
+print(ds)
 
 # %% [markdown]
 # Basic information about the data are given in the summary: data type, units, shape, and name of the dataset.
@@ -261,62 +261,14 @@ _ = blc.corrected.plot()
 # %% [markdown]
 # ## Advanced Analysis
 #
-# ### 2D-IRIS Processing example
+# ### Optional plugin workflows
 #
-# Two-Dimensional Integral Regularized Inversion for Spectroscopy (2D-IRIS) is an advanced technique for analyzing
-# spectroscopic data. In the following example, spectra of CO adsorption on a sulfide catalyst at various pressures
-# are used to extract the distribution of adsorption energies using 2D-IRIS analysis.
-
-# %% [markdown]
-# Load and prepare CO adsorption data
-
-# %%
-ds = scp.read_omnic("irdata/CO@Mo_Al2O3.SPG")[:, 2250.0:1950.0]
-
-# %% [markdown]
-# Define pressure coordinates
-
-# %%
-pressure = [
-    0.003,
-    0.004,
-    0.009,
-    0.014,
-    0.021,
-    0.026,
-    0.036,
-    0.051,
-    0.093,
-    0.150,
-    0.203,
-    0.300,
-    0.404,
-    0.503,
-    0.602,
-    0.702,
-    0.801,
-    0.905,
-    1.004,
-]
-ds.y = scp.Coord(pressure, title="Pressure", units="torr")
-
-# %% [markdown]
-# Plot the dataset
-
-# %%
-_ = ds.plot()
-
-# %% [markdown]
-# Perform IRIS analysis assuming a local Langmuir isotherms and plot the distribution of adsorption energies at a
-# specific regularization parameter.
-
-# %%
-iris = scp.IRIS(reg_par=[-10, 1, 12])
-K = scp.IrisKernel(ds, "langmuir", q=[-7, -1, 50])
-iris.fit(ds, K)
-_ = iris.f[-7].plot_contour(colorbar=True)
-
-# %%
+# Some advanced workflows are provided by optional official plugins. For
+# example, 2D-IRIS analysis is available through the ``spectrochempy-iris``
+# plugin and NMR TopSpin reading is available through ``spectrochempy-nmr``.
+# These workflows are documented in the central examples gallery and in the
+# [plugin guide](../userguide/plugins/index.rst), while this quickstart keeps to the
+# standard SpectroChemPy experience.
 # %% [markdown]
 # ### Other Advanced Analysis Techniques
 # SpectroChemPy includes many other advanced analysis techniques, such as:

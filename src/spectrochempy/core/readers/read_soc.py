@@ -6,7 +6,6 @@
 """Extend NDDataset with the import method for Surface Optics Corp. (soc) data files."""
 
 __all__ = ["read_soc", "read_ddr", "read_sdr", "read_hdr"]
-__dataset_methods__ = __all__
 
 
 from spectrochempy.core.readers.importer import Importer
@@ -80,7 +79,7 @@ def read_soc(*paths, **kwargs):
         .. versionadded:: 0.7.2
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
         ``'excel'``}. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`
@@ -177,7 +176,7 @@ def read_ddr(*paths, **kwargs):
         .. versionadded:: 0.7.2
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
         ``'excel'``}. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`
@@ -274,7 +273,7 @@ def read_hdr(*paths, **kwargs):
         .. versionadded:: 0.7.2
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
         ``'excel'``}. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`
@@ -371,7 +370,7 @@ def read_sdr(*paths, **kwargs):
         .. versionadded:: 0.7.2
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``, ``'csv'``,
+        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``, ``'csv'``,
         ``'excel'``}. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`

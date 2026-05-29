@@ -1,0 +1,35 @@
+[plugin]
+name = "spectrochempy-nmr"
+title = "NMR plugin"
+
+[[examples]]
+path = "core/c_importer/plot_read_nmr_from_bruker.py"
+section = "Import/export"
+
+[[examples]]
+path = "processing/apodization/plot_proc_em.py"
+section = "Processing / apodization"
+
+[[examples]]
+path = "processing/apodization/plot_proc_sp.py"
+section = "Processing / apodization"
+
+[[examples]]
+path = "processing/nmr/plot_read_nmr_topspin.py"
+section = "NMR processing"
+section_ref = "examples-processing-nmr-index"
+
+[[examples]]
+path = "processing/nmr/plot_processing_nmr.py"
+section = "NMR processing"
+section_ref = "examples-processing-nmr-index"
+
+[[examples]]
+path = "processing/nmr/plot_processing_cp_nmr.py"
+section = "NMR processing"
+section_ref = "examples-processing-nmr-index"
+
+[[examples]]
+path = "processing/nmr/plot_processing_nmr_relax.py"
+section = "NMR processing"
+section_ref = "examples-processing-nmr-index"

@@ -6,7 +6,6 @@
 """Plugin module to extend NDDataset with the import methods method."""
 
 __all__ = ["read_quadera"]
-__dataset_methods__ = __all__
 
 import re
 from datetime import datetime
@@ -89,7 +88,7 @@ def read_quadera(*paths, **kwargs):
         .. versionadded:: 0.7.2
     protocol : `str`, optional
         ``Protocol`` used for reading. It can be one of {``'scp'``, ``'omnic'``,
-        ``'opus'``, ``'topspin'``, ``'matlab'``, ``'jcamp'``,
+        ``'opus'``, ````, ``'matlab'``, ``'jcamp'``,
         ``'csv'``, ``'excel'``}. If not provided, the correct protocol
         is inferred (whenever it is possible) from the filename extension.
     read_only: `bool`, optional, default: `True`
@@ -114,11 +113,10 @@ def read_quadera(*paths, **kwargs):
     read_omnic : Read Omnic spectra (:file:`.spa`, :file:`.spg`, :file:`.srs`).
     read_soc : Read Surface Optics Corps. files (:file:`.ddr` , :file:`.hdr` or :file:`.sdr`).
     read_galactic : Read Galactic files (:file:`.spc`).
-    read_topspin : Read TopSpin Bruker NMR spectra.
+
     read_csv : Read CSV files (:file:`.csv`).
     read_matlab : Read Matlab files (:file:`.mat`, :file:`.dso`).
     read_jcamp : Read Infrared JCAMP-DX files (:file:`.jdx`, :file:`.dx`).
-    read_carroucell : Read files in a directory after a carroucell experiment.
     read_wire : Read Renishaw Wire files (:file:`.wdf`).
 
     Examples

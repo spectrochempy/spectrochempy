@@ -1,6 +1,13 @@
 # This workflow builds and publishes SpectroChemPy packages to:
 # - PyPI
 # - Anaconda Cloud
+#
+# Conda publication strategy:
+#   - Non-release builds (pushes, PRs) are uploaded to the Anaconda dev label.
+#   - Release builds are uploaded to the main (stable) label.
+#   - The dev label is used for testing; stable packages should not be overwritten.
+#   - Plugin conda recipes should declare a bounded dependency on the core
+#     package, e.g.  spectrochempy >=0.8,<0.10
 
 name: Build and publish packages 📦
 
@@ -71,7 +78,11 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish package to PyPI
-        if: github.event_name == 'release' && github.event.action == 'published' && github.repository == 'spectrochempy/spectrochempy'
+        if: |
+          github.event_name == 'release' &&
+          github.event.action == 'published' &&
+          github.repository == 'spectrochempy/spectrochempy' &&
+          startsWith(github.ref_name, 'spectrochempy-v')
         uses: pypa/gh-action-pypi-publish@release/v1
 
   build_and_publish_conda_package:
@@ -100,14 +111,14 @@ jobs:
       - name: Generate conda recipe
         run: |
           python3 .github/workflows/scripts/generate_conda_recipe.py
-          cat recipe/meta.yaml
+          cat recipe/recipe.yaml
 
       - name: Build conda package
         uses: prefix-dev/rattler-build-action@v0.2.38
         env:
           CONDA_BLD_PATH: ../output
         with:
-          recipe-path: recipe/meta.yaml
+          recipe-path: recipe/recipe.yaml
           upload-artifact: false
           build-args: "-c conda-forge -c spectrocat"
 
@@ -128,7 +139,10 @@ jobs:
       - name: Upload to Anaconda.org
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
-          (github.event_name == 'release' || github.event_name == 'push')
+          (
+            github.event_name == 'push' ||
+            (github.event_name == 'release' && startsWith(github.ref_name, 'spectrochempy-v'))
+          )
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
@@ -142,6 +156,7 @@ jobs:
 
           upload_package() {
             local label="$1"
+            local force_flag="$2"
             local packages=(output/**/*.tar.bz2 output/**/*.conda)
 
             if [ ${#packages[@]} -eq 0 ]; then
@@ -153,12 +168,162 @@ jobs:
               echo "Uploading $package with label: $label"
               anaconda --token "$ANACONDA_API_TOKEN" whoami
               anaconda --token "$ANACONDA_API_TOKEN" show spectrocat/spectrochempy
-              anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "$label" "$package"
+              anaconda --token "$ANACONDA_API_TOKEN" upload $force_flag -l "$label" "$package"
             done
           }
 
           if [ "${{ github.event_name }}" = "release" ]; then
-            upload_package "main"
+            # Stable label: do not force overwrite. If a version already exists
+            # the upload will fail cleanly, preventing accidental republishing.
+            upload_package "main" ""
           else
-            upload_package "dev"
+            # Dev label: allow overwrite so the latest dev build is always available.
+            upload_package "dev" "--force"
           fi
+
+  discover-conda-plugins:
+    name: Discover plugins with conda recipes
+    runs-on: ubuntu-latest
+    needs: build_and_publish_conda_package
+    if: github.repository == 'spectrochempy/spectrochempy'
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set plugin matrix
+        id: set-matrix
+        run: |
+          # Official plugins are explicitly listed. Experimental plugins may live in
+          # the repository but are NOT auto-published by this workflow.
+          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-hypercomplex spectrochempy-carroucell"
+
+          plugins=()
+          for dir in plugins/*/; do
+            name=$(basename "$dir")
+            if [ "$name" = "plugin-template" ]; then
+              echo "Skipping $name (developer template, not publishable)"
+              continue
+            fi
+            if ! echo "$OFFICIAL_PLUGINS" | grep -qw "$name"; then
+              echo "Skipping $name (not in official plugin allowlist)"
+              continue
+            fi
+            if [ -f "${dir}recipe.yaml" ] || [ -f "${dir}meta.yaml" ]; then
+              recipe_file="recipe.yaml"
+              [ -f "${dir}meta.yaml" ] && recipe_file="meta.yaml"
+              plugins+=("{\"name\":\"$name\",\"recipe\":\"${dir%/}\",\"recipe_file\":\"$recipe_file\"}")
+            fi
+          done
+
+          if [ ${#plugins[@]} -eq 0 ]; then
+            echo "No official plugins with conda recipes found. Skipping plugin builds."
+            echo "matrix={}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          joined=$(IFS=,; echo "${plugins[*]}")
+          echo "matrix={\"plugin\":[$joined]}" >> "$GITHUB_OUTPUT"
+          echo "Discovered official conda plugins: $joined"
+
+  build_and_publish_conda_plugins:
+    name: Build and publish conda plugin packages to Anaconda.org
+    runs-on: ubuntu-latest
+    needs: discover-conda-plugins
+    if: |
+      github.repository == 'spectrochempy/spectrochempy' &&
+      needs.discover-conda-plugins.outputs.matrix != '{}' &&
+      needs.discover-conda-plugins.outputs.matrix != ''
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover-conda-plugins.outputs.matrix) }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-file: environments/environment_build.yml
+          environment-name: scpy_build
+          create-args: >-
+            python=3.11
+          cache-environment: true
+
+      - name: Build conda plugin package
+        uses: prefix-dev/rattler-build-action@v0.2.38
+        env:
+          CONDA_BLD_PATH: ../output
+        with:
+          recipe-path: ${{ matrix.plugin.recipe }}/${{ matrix.plugin.recipe_file }}
+          upload-artifact: false
+          # For non-release builds, resolve dependencies from the dev label so that
+          # dev plugin packages can depend on the latest dev core package.
+          build-args: >-
+            -c conda-forge
+            -c spectrocat/label/dev
+            -c spectrocat
+
+      - name: Move conda build output
+        run: |
+          mv ../output .
+
+      - name: Upload conda build artifacts
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: conda-package-${{ matrix.plugin.name }}
+          path: |
+            output/**/*.conda
+            output/**/*.tar.bz2
+          retention-days: 5
+
+      - name: Upload plugin to Anaconda.org
+        if: |
+          github.repository == 'spectrochempy/spectrochempy' &&
+          (
+            github.event_name == 'push' ||
+            (github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name))
+          )
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          shopt -s nullglob globstar
+
+          if [ -z "${ANACONDA_API_TOKEN:-}" ]; then
+            echo "::error::ANACONDA_API_TOKEN is not set. Cannot upload to Anaconda.org."
+            exit 1
+          fi
+
+          packages=(output/**/*.tar.bz2 output/**/*.conda)
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "::error::No conda packages found in output/"
+            exit 1
+          fi
+
+          label="dev"
+          force_flag="--force"
+          if [ "${{ github.event_name }}" = "release" ]; then
+            label="main"
+            # Do NOT force overwrite on the stable label. If a version already
+            # exists the upload will fail cleanly, preventing accidental republishing.
+            force_flag=""
+          fi
+
+          for package in "${packages[@]}"; do
+            echo "Uploading $package with label: $label"
+            anaconda --token "$ANACONDA_API_TOKEN" upload $force_flag -l "$label" "$package"
+          done

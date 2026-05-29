@@ -45,10 +45,13 @@ import spectrochempy as scp
 
 # %% [markdown]
 # First we open read some time domain data. Here is a NMD free induction decay (FID):
+#
+# Requires the official ``spectrochempy-nmr`` plugin.
+# Install with: ``pip install spectrochempy[nmr]``.
 
 # %%
 path = scp.preferences.datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
-fid = scp.read_topspin(path)
+fid = scp.nmr.read_topspin(path)
 fid
 
 # %% [markdown]

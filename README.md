@@ -14,30 +14,60 @@ SpectroChemPy
 
 ## What is SpectroChemPy?
 
-SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling Spectroscopic data for Chemistry with Python. It is a cross-platform software, running on Linux, Windows or OS X.
+SpectroChemPy (SCPy) is a framework for processing, analyzing and modeling spectroscopic data for chemistry with Python. It is cross-platform (Linux, Windows, macOS) and features a lightweight core with optional plugins for domain-specific workflows.
 
 ## Key Features
 
-* **Core Data Structure**: NDDataset object with labeled axes and metadata
-* **Project Management**: Work with multiple NDDatasets simultaneously
+* **Core Data Structure**: `NDDataset` object with labeled axes and metadata
+* **Project Management**: Work with multiple `NDDataset` objects simultaneously
 * **Data Processing**:
-  * Physical Units support
-  * Mathematical operations (addition, multiplication, etc.)
-  * Baseline correction
-  * Automatic subtraction
+  * Physical units support
+  * Mathematical operations, baseline correction, automatic subtraction
+  * Generic FFT with plugin-specific post-processing
 * **Analysis Tools**:
-  * SVD, PCA, MCR_ALS, EFA, PLS, ...
-  * Fitting for single/multiple datasets
+  * SVD, PCA, MCR-ALS, EFA, PLS, fitting …
 * **I/O Support**:
   * Import from various experiment formats
-  * Export to CSV, JCAMP, MATLAB ...
-  * Advanced plotting capabilities
+  * Export to CSV, JCAMP-DX, MATLAB …
+  * Plugin-based readers (NMR TopSpin, Carroucell …)
+* **Plugin System**:
+  * Automatic discovery of optional plugins
+  * Namespaced APIs: `scp.nmr.read_topspin(...)`, `scp.iris.IRIS()`
+  * Dataset accessors for plugin-bound operations
+
+## Official Plugins
+
+Extend SpectroChemPy with official plugins (installed separately):
+
+| Plugin | Install | What it provides |
+|--------|---------|------------------|
+| `spectrochempy-nmr` | `pip install spectrochempy-nmr` | Bruker TopSpin reader, NMR-specific processing |
+| `spectrochempy-iris` | `pip install spectrochempy-iris` | 2D-IRIS analysis tools |
+| `spectrochempy-hypercomplex` | `pip install spectrochempy-hypercomplex` | Quaternion / hypercomplex support |
+| `spectrochempy-carroucell` | `pip install spectrochempy-carroucell` | Carroucell experiment reader |
+
+Or via conda from the `spectrocat` channel (`conda-forge` provides the dependencies):
+
+```bash
+mamba install -c spectrocat -c conda-forge spectrochempy-nmr
+```
+
+Plugins are discovered automatically once installed — no manual loading step required.
+
+### Experimental plugins
+
+`spectrochempy-cantera` is available as an **experimental** plugin. It is not
+officially supported, not included in aggregate extras, and must be installed
+manually::
+
+    pip install spectrochempy-cantera
 
 > **⚠️ WARNING**: SpectroChemPy is under active development. The current design may undergo major changes. Please report any issues to our [Issue Tracker](https://github.com/spectrochempy/spectrochempy/issues).
 
 ## Quick Links
 
 * 📚 [Documentation](https://www.spectrochempy.fr)
+* 🔌 [Plugins](https://www.spectrochempy.fr/userguide/plugins/index.html)
 * 🚀 [Installation Guide](https://www.spectrochempy.fr/gettingstarted/install/index.html)
 * 📓 [Example Notebooks](https://www.spectrochempy.fr/gettingstarted/examples/index.html)
 * 🐛 [Issue Tracker](https://github.com/spectrochempy/spectrochempy/issues)

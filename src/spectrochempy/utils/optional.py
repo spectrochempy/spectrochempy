@@ -14,7 +14,6 @@ from packaging.version import Version
 
 VERSIONS = {
     "xarray": "*",
-    "cantera": "2.5.1",
     "PyQt5": "*",
     "tensorly": "*",
 }
@@ -100,7 +99,7 @@ def import_optional_dependency(
         return None
 
     # Handle submodules: if we have submodule, grab parent module from sys.modules
-    parent = name.split(".")[0]
+    parent = name.split(".", maxsplit=1)[0]
     if parent != name:
         install_name = parent
         module_to_get = sys.modules[install_name]

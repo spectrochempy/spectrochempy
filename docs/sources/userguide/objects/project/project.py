@@ -35,16 +35,14 @@
 # from pathlib import Path
 
 # %%
-from spectrochempy import Project
-from spectrochempy import pathclean
-from spectrochempy import preferences as prefs
+import spectrochempy as scp
 
 # %% [markdown]
 # ## Project creation
 # We can easily create a new project to store various datasets
 
 # %%
-proj = Project()
+proj = scp.Project()
 
 # %% [markdown]
 # As we did not specify a name, a name has been attributed automatically:
@@ -70,20 +68,21 @@ proj
 # %% [markdown]
 # Now we will add a dataset to the project.
 #
-# First we read the dataset (here some NMR data) and we give it some name (e.g. 'nmr n°1')
+# First we read the dataset (here some NMR data) and we give it some name (e.g. 'nmr n°1').
+#
+# Requires the official ``spectrochempy-nmr`` plugin.
+# Install with: ``pip install spectrochempy[nmr]``.
 
 # %%
-datadir = pathclean(prefs.datadir)
+datadir = scp.pathclean(scp.preferences.datadir)
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
-from spectrochempy import read_topspin
-
-nd1 = read_topspin(
+nd1 = scp.nmr.read_topspin(
     path / "topspin_1d", expno=1, remove_digital_filter=True, name="NMR_1D"
 )
-nd2 = read_topspin(
-    path / "topspin_2d", expno=1, remove_digital_filter=True, name="NMR_2D"
-)
+# Use the same dataset twice for the example (real projects would use different data)
+nd2 = nd1.copy()
+nd2.name = "NMR_1D_copy"
 
 # %% [markdown]
 # To add it to the project, we use the `add_dataset` function for a single dataset:
@@ -140,7 +139,7 @@ _ = proj.NMR_1D.plot()
 proj["NMR_1D"].data
 
 # %%
-proj.NMR_2D
+proj.NMR_1D_copy
 
 # %% [markdown]
 # ## Saving and loading projects
@@ -158,7 +157,7 @@ proj.save_as("NMR")
 # #### Loading
 
 # %%
-proj2 = Project.load("NMR")
+proj2 = scp.Project.load("NMR")
 
 # %%
 proj2
@@ -167,9 +166,9 @@ proj2
 _ = proj2.NMR_1D.plot()
 
 # %%
-proj2.NMR_2D
+proj2.NMR_1D_copy
 
 # %%
-_ = proj.NMR_2D.plot()
+_ = proj.NMR_1D_copy.plot()
 
 # %%

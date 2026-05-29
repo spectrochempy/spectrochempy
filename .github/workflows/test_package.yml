@@ -53,37 +53,28 @@ jobs:
         shell: bash {0}
         # do not use -l flag (do not work with macos when bash is se in login mode)
 
-    # Define test matrix - this will run tests in parallel for:
-    # - Different operating systems (Ubuntu, macOS, Windows)
-    # - Different Python versions (3.10, 3.13)
+    # Run the complete instrumented suite once, then keep lightweight
+    # compatibility coverage for the minimum Python and other operating systems.
     strategy:
       fail-fast: false  # Continue testing even if one combination fails
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        pythonVersion: ["3.11", "3.14"]
         include:
-          # Full testing on Ubuntu with all Python versions
-          - os: ubuntu-latest
-            pythonVersion: "3.11"
-            full_test: true
           - os: ubuntu-latest
             pythonVersion: "3.14"
-            full_test: true
-
-          # Limited testing on Windows/macOS
+            coverage: true
+            docs_examples: true
+          - os: ubuntu-latest
+            pythonVersion: "3.11"
+            coverage: false
+            docs_examples: false
           - os: windows-latest
             pythonVersion: "3.14"
-            full_test: false
+            coverage: false
+            docs_examples: false
           - os: macos-latest
             pythonVersion: "3.14"
-            full_test: false
-
-        exclude:
-          # Exclude other combinations
-          - os: macos-latest
-            pythonVersion: "3.11"
-          - os: windows-latest
-            pythonVersion: "3.11"
+            coverage: false
+            docs_examples: false
 
     steps:
       # Print debug information about the current run
@@ -96,6 +87,12 @@ jobs:
           echo "Workflow: ${{ github.workflow }}"
           echo "pythonVersion: ${{ matrix.pythonVersion }}"
           echo "os: ${{ matrix.os }}"
+
+      - name: Initialize CI diagnostics
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          echo "CI_TIMING_FILE=$RUNNER_TEMP/ci-timings.txt" >> "$GITHUB_ENV"
+          : > "$RUNNER_TEMP/ci-timings.txt"
 
       - name: Checkout spectrochempy repository
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
@@ -117,25 +114,125 @@ jobs:
           echo "PYTHONIOENCODING=utf-8" >> $GITHUB_ENV
           echo "PYTHONUTF8=1" >> $GITHUB_ENV
 
+      - name: Restore test data and runtime caches
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.spectrochempy/testdata
+            ~/.cache/matplotlib
+            .pytest_cache
+          key: >-
+            ${{ runner.os }}-py${{ matrix.pythonVersion }}-test-runtime-${{ hashFiles('src/spectrochempy/application/testdata.py', 'tests/conftest.py', 'pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-py${{ matrix.pythonVersion }}-test-runtime-
+            ${{ runner.os }}-test-runtime-
+
       - name: Install spectrochempy
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
+          set -e
+          start=$SECONDS
           python -m pip install ".[test]"
           # check the MPL setup
           python src/spectrochempy/data/setup.py
+          duration=$((SECONDS - start))
+          echo "dependency installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      - name: Test with coverage
+      - name: Install SpectroChemPy plugins
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
-          coverage run --source=spectrochempy -m pytest tests -s --durations=10
+          set -e
+          start=$SECONDS
+          python -m pip install -e plugins/spectrochempy-hypercomplex
+          python -m pip install -e plugins/spectrochempy-nmr
+          python -m pip install -e plugins/spectrochempy-iris
+          python -m pip install -e plugins/spectrochempy-carroucell
+          duration=$((SECONDS - start))
+          echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
+
+      - name: Environment and plugin diagnostics
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          python .github/workflows/scripts/ci_diagnostics.py environment
+
+      - name: Select pytest targets
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          python .github/workflows/scripts/select_test_targets.py \
+            --base "${{ github.event.pull_request.base.sha || github.event.before || '' }}" \
+            --head "${{ github.sha }}" \
+            --event-name "${{ github.event_name }}" \
+            --ref-name "${{ github.ref_name }}" \
+            --base-ref "${{ github.base_ref }}"
+
+      - name: Test package
+        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          set -o pipefail
+          start=$SECONDS
+          echo "pytest selection: ${SCPY_TEST_SELECTION:-full}"
+          echo "pytest selection reason: ${SCPY_TEST_SELECTION_REASON:-not provided}"
+          echo "pytest targets: ${SCPY_TEST_TARGETS:-tests}"
+          targets="${SCPY_TEST_TARGETS:-tests}"
+          pytest_extra_args=()
+          if [[ "${{ matrix.docs_examples }}" != "true" ]]; then
+            pytest_extra_args+=(--ignore=tests/test_docs/test_py_in_docs.py)
+            echo "documentation scripts: omitted in compatibility job"
+          fi
+          if [[ "${{ matrix.docs_examples }}" != "true" && "$targets" == "tests/test_docs" ]]; then
+            echo "documentation-only selection is covered by the canonical Ubuntu job and docs workflow" | tee pytest.log
+            duration=$((SECONDS - start))
+            echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
+            exit 0
+          fi
+          pytest_xdist_args=("${pytest_extra_args[@]}")
+          pytest_capture_args=(-s)
+          serial_pytest_args=("${pytest_extra_args[@]}")
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            pytest_xdist_args+=(-n auto -m "not serial")
+            serial_pytest_args+=(-m serial)
+            pytest_capture_args=()
+            echo "pytest-xdist: enabled for pull request validation"
+          fi
+          run_tests() {
+            local pytest_args=("$@")
+            if [[ "${{ matrix.coverage }}" == "true" && "${{ github.event_name }}" != "pull_request" ]]; then
+              coverage run --source=spectrochempy -m pytest $targets "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
+            else
+              python -m pytest $targets "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
+            fi
+          }
+          run_tests "${pytest_xdist_args[@]}" | tee pytest.log
+          status=${PIPESTATUS[0]}
+          if [[ "$status" == "0" && "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "pytest serial tests: enabled for tests marked serial" | tee -a pytest.log
+            python -m pytest $targets "${serial_pytest_args[@]}" -s -ra --durations=10 | tee -a pytest.log
+            serial_status=${PIPESTATUS[0]}
+            if [[ "$serial_status" != "0" && "$serial_status" != "5" ]]; then
+              status=$serial_status
+            fi
+          fi
+          duration=$((SECONDS - start))
+          echo "pytest execution: ${duration}s" | tee -a "$CI_TIMING_FILE"
+          exit "$status"
+
+      - name: CI diagnostics summary
+        if: ${{ always() && !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          python .github/workflows/scripts/ci_diagnostics.py summary \
+            --pytest-log pytest.log \
+            --timings "$CI_TIMING_FILE"
 
       - name: Debug info coverage content
+        if: ${{ always() && matrix.coverage && github.event_name != 'pull_request' && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
-          coverage report -m
+          coverage report -m || echo "coverage report unavailable"
 
       - name: Debug info workflow completion
+        if: ${{ always() }}
         run: |
-          echo "Tests completed successfully"
+          echo "Test workflow diagnostic step completed"
           echo "Workflow name: ${{ github.workflow }}"
           echo "Run ID: ${{ github.run_id }}"
           echo "Current branch: ${{ github.ref }}"

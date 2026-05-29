@@ -99,7 +99,7 @@ X
 # | read          | Generic reader (automatically detects format)  | -              |
 # | read_dir      | Reads all supported files in a directory       | -              |
 # | read_zip      | Reads files from a ZIP archive                 | .zip           |
-# | read_carroucell | Reads files from a carrousel experiment directory | -          |
+# | read_carroucell | Reads files from a carroucell experiment directory | -          | (requires spectrochempy-carroucell plugin)
 #
 # The `read_dir` function scans a directory and reads all supported files,
 # returning a list of `NDDataset` objects.

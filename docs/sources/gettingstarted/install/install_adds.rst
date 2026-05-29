@@ -35,35 +35,91 @@ Installation options:
       .. note::
          You may need to configure data paths when using manual installation.
 
-Scientific Computing Extensions
--------------------------------
+.. _install_adds_plugins:
 
-Cantera
-~~~~~~~
-Required for chemical kinetics, thermodynamics and transport processes.
-(See `Cantera documentation <https://cantera.org>`__)
+Optional Plugins
+----------------
+
+SpectroChemPy includes several optional plugins that extend its capabilities
+for specific domains. Install them as needed:
+
+.. tabs::
+
+    .. tab:: Using pip (recommended)
+
+       .. code-block:: bash
+
+          pip install spectrochempy[iris]      # 2D-IRIS analysis
+          pip install spectrochempy[nmr]       # Bruker TopSpin reader & NMR processing
+          pip install spectrochempy-carroucell  # Carroucell experiment reader
+
+    .. tab:: Using mamba (recommended)
+
+       .. code-block:: bash
+
+          mamba install -c spectrocat spectrochempy-iris    # 2D-IRIS analysis
+          mamba install -c spectrocat spectrochempy-nmr     # Bruker TopSpin & NMR
+          mamba install -c spectrocat spectrochempy-hypercomplex  # Quaternion support
+          mamba install -c spectrocat spectrochempy-carroucell  # Carroucell reader
+
+    .. tab:: Development install (from source)
+
+      .. code-block:: bash
+
+         pip install -e plugins/spectrochempy-iris
+         pip install -e plugins/spectrochempy-nmr
+         pip install -e plugins/spectrochempy-carroucell
+
+Each plugin is independently versioned and maintained. Missing plugins
+raise a clear ``MissingPluginError`` with installation instructions when
+the corresponding feature is accessed.
+
+.. note::
+
+   **Development builds**
+
+   Pre-release (dev) versions of plugins are published to the ``dev`` label
+   on Anaconda.org. To install the latest development build::
+
+      mamba install -c spectrocat/label/dev -c conda-forge spectrochempy-nmr
+
+   Dev builds may depend on the latest dev core package, so include the
+   dev channel for core as well::
+
+      mamba install -c spectrocat/label/dev -c conda-forge spectrochempy
+
+.. seealso::
+
+   :doc:`/userguide/plugins/index` for more details on the plugin system.
+
+Cantera (experimental)
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. warning::
+   The ``spectrochempy-cantera`` plugin is **experimental** and **not**
+   officially supported. It is not included in aggregate extras and must be
+   installed manually::
+
+      pip install spectrochempy-cantera
+
+   See :doc:`/userguide/plugins/experimental_plugins` for details.
+
+For users who still need the Cantera library outside of SpectroChemPy,
+it can be installed separately:
 
 .. tabs::
 
    .. tab:: Using mamba (recommended)
 
-      Stable version:
-
       .. code-block:: bash
 
-         mamba install -c cantera cantera>=2.6.0
-
-      Development version:
-
-      .. code-block:: bash
-
-         mamba install -c cantera/label/dev cantera
+         mamba install -c cantera cantera
 
    .. tab:: Using pip
 
       .. code-block:: bash
 
-         pip install cantera>=2.6.0
+         pip install cantera
 
 GUI Support
 -----------

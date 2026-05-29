@@ -157,6 +157,14 @@ once your pull request is submitted.
 A pull-request will be considered for merging when you have an all 'green' build. If any tests are failing,
 then you will get a red 'X', where you can click through to see the individual failed tests.
 
+The Google Colab compatibility workflow uses the official Colab Docker image,
+which is intentionally large and slow to pull. To keep ordinary pull requests
+responsive, this workflow only runs automatically on a pull request when the
+``needs-colab`` label is present. Maintainers should add this label when a
+change may affect installation, optional dependencies, plugin discovery, or
+Colab-specific user workflows. The workflow can also be started manually from
+GitHub Actions with ``workflow_dispatch``.
+
 
 .. _contributing.tdd:
 

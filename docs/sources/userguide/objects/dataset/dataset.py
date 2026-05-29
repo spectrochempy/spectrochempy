@@ -817,7 +817,7 @@ d3D_copy = d3D.copy()
 # or alternatively:
 
 # %%
-d3D_copy = d3D[:]
+d3D_copy_alt = d3D[:]
 
 # %% [markdown]
 # Finally, it is also possible to initialize a dataset using an existing one:
@@ -854,15 +854,17 @@ _ = nd.plot()
 
 # %% [markdown]
 # Now, lets load a NMR dataset (in the Bruker format).
+#
+# Requires the official ``spectrochempy-nmr`` plugin.
+# Install with: ``pip install spectrochempy[nmr]``.
 
 # %%
-path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
+path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
 
 # load the data directly (no need to create the dataset first)
-nd2 = scp.read_topspin(path, expno=1, remove_digital_filter=True)
+nd2 = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
 
 # view it...
 nd2.x.to("s")
-nd2.y.to("ms")
 
-ax = nd2.plot(method="map")
+ax = nd2.plot()

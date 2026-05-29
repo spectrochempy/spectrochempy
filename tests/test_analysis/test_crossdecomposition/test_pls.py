@@ -28,7 +28,9 @@ from spectrochempy.utils.testing import assert_dataset_equal
 # test docstring
 
 
-@pytest.mark.skip("Skipping test because it raises an error in  github test")
+@pytest.mark.skip(
+    "docstring checker is unstable in CI for PLSRegression; runtime PLS tests remain active"
+)
 def test_PLS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
     module = "spectrochempy.analysis.crossdecomposition.pls"
@@ -42,8 +44,19 @@ def test_PLS_docstrings():
 
 # test pls
 # ---------
+@pytest.mark.network
 def test_pls():
-    datasets = read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+    import requests
+
+    try:
+        datasets = read("http://www.eigenvector.com/data/Corn/corn.mat", merge=False)
+    except (
+        FileNotFoundError,
+        OSError,
+        TimeoutError,
+        requests.exceptions.RequestException,
+    ):
+        pytest.skip("eigenvector.com corn dataset not reachable")
     # information: [20x59 char ]    Information about the data
     # m5spec: [80x700 dataset] Spectra on instrument m5
     # mp5spec: [80x700 dataset] Spectra on instrument mp5

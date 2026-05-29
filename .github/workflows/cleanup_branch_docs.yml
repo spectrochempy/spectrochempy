@@ -1,0 +1,46 @@
+# Cleanup branch preview documentation from GitHub Pages when a branch is deleted.
+# Triggered on any delete event; only acts on branch deletions (not tags).
+
+name: Cleanup branch docs 🧹
+
+on:
+  delete:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: github.repository == 'spectrochempy/spectrochempy' && github.event.ref_type == 'branch'
+
+    name: Remove branch preview from gh-pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository }}
+          ref: gh-pages
+          fetch-depth: 1
+
+      - name: Remove preview directory for deleted branch
+        run: |
+          # Extract short branch name from refs/heads/<name>
+          BRANCH="${{ github.event.ref }}"
+          BRANCH="${BRANCH#refs/heads/}"
+          # Sanitize: replace "/" with "-"
+          SANITIZED=$(echo "$BRANCH" | tr '/' '-')
+          if [ -d "$SANITIZED" ]; then
+            rm -rf "$SANITIZED"
+            echo "Removed preview directory: $SANITIZED/"
+
+            # Configure git for the bot user
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Remove preview docs for deleted branch: $BRANCH"
+            git push
+          else
+            echo "No preview directory found for deleted branch: $BRANCH"
+          fi

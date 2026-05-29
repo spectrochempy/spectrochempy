@@ -10,7 +10,6 @@
 from . import download
 from . import filetypes
 from . import importer
-from . import read_carroucell
 from . import read_csv
 from . import read_jcamp
 from . import read_labspec
@@ -20,6 +19,5 @@ from . import read_opus
 from . import read_quadera
 from . import read_soc
 from . import read_spc
-from . import read_topspin
 from . import read_wire
 from . import read_zip

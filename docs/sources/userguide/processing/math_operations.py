@@ -553,15 +553,14 @@ out = np.floor_divide(dataset, dataset2)
 _ = out.plot(figsize=(6, 2.5))
 
 # %% [markdown]
-# ## Complex or hypercomplex NDDatasets
+# ## Complex NDDatasets
 #
 #
 # NDDataset objects with complex data are handled differently than in
 # `numpy.ndarray` .
 #
 # Instead, complex data are stored by interlacing the real and imaginary part.
-# This allows the definition of data that can be complex in several axis, and *e
-# .g.,* allows 2D-hypercomplex array that can be transposed (useful for NMR data).
+# This allows the definition of data that can be complex in several axis.
 
 # %%
 da = scp.NDDataset(
@@ -590,12 +589,6 @@ dac
 # Note the `x`dimension size is divided by a factor of two
 
 # %% [markdown]
-# A dataset which is complex in two dimensions is called hypercomplex (it's datatype in SpectroChemPy is set to
-# quaternion).
-
-# %%
-daq = da.set_quaternion()  # equivalently one can use the set_hypercomplex method
-daq
-
-# %%
-daq.dtype
+# **Hypercomplex (quaternion) data** — 2D hypercomplex datasets (useful for phase-sensitive NMR data)
+# are supported via the optional `spectrochempy-hypercomplex` plugin.
+# Install it and use `dataset.hyper.set_quaternion()` to convert compatible data.

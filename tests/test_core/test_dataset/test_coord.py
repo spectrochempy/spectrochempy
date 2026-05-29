@@ -9,10 +9,15 @@ from copy import copy
 
 import numpy as np
 import pytest
+from pint import Context
 
 from spectrochempy.application.application import debug_
 from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.units import Quantity, ur
+import spectrochempy.plugins.manager as manager_module
+from spectrochempy.plugins.manager import ENTRY_POINT_GROUP
+from spectrochempy.plugins.manager import PluginManager
+from spectrochempy.plugins.registry import PluginRegistry
 from spectrochempy.utils.testing import (
     assert_approx_equal,
     assert_array_equal,
@@ -51,9 +56,9 @@ def test_coord():
     assert a.name == "x"
     assert a.title == "<untitled>"
 
-    # larmor frequency
-    a = Coord([1, 2, 3], name="x", units="ppm", larmor=104.7 * ur.MHz)
-    assert a.larmor == 104.7 * ur.MHz
+    # reversed for ppm
+    a = Coord([1, 2, 3], name="x", units="ppm")
+    a.meta["acquisition_frequency"] = 104.7 * ur.MHz
     assert a.reversed is True
     assert a.units == ur.ppm
 
@@ -414,6 +419,42 @@ def test_coord():
     assert sp == -333.3 * ur.cm**-1
 
 
+def test_coord_unit_conversion_uses_plugin_context(monkeypatch):
+    registry = PluginRegistry()
+    plugin_manager = PluginManager(registry=registry)
+    monkeypatch.setattr(
+        manager_module.importlib.metadata,
+        "entry_points",
+        lambda group=None: [] if group == ENTRY_POINT_GROUP else [],
+    )
+    monkeypatch.setattr(manager_module, "plugin_manager", plugin_manager)
+
+    context_name = "coord_test_context"
+
+    def setup(scale):
+        if context_name not in ur._contexts:
+            context = Context(context_name)
+            context.add_transformation(
+                "[length]",
+                "[time]",
+                lambda _ur, value, **_kwargs: value.magnitude * scale * ur.second,
+            )
+            ur.add_context(context)
+
+    registry.register_unit_context(
+        context_name,
+        setup,
+        predicate=lambda obj: getattr(obj, "name", None) == "contextual",
+        argument_extractor=lambda _obj: (2.0,),
+    )
+
+    coord = Coord([3.0], units="m", name="contextual")
+    converted = coord.to("s")
+
+    assert converted.units == ur.s
+    np.testing.assert_allclose(converted.data, [6.0])
+
+
 # Math
 # --------------------------------------------------------------------------------------
 # first operand has units km, second is a scalar with units m
@@ -530,3 +571,16 @@ def test_coord_not_implemented(name):
     )
     with pytest.raises(NotImplementedError):
         getattr(coord0, name)()
+
+
+def test_linearcoord():
+    from spectrochempy.core.dataset.coord import LinearCoord
+
+    with assert_produces_warning(DeprecationWarning, check_stacklevel=False):
+        _ = LinearCoord(offset=0, increment=10, size=10)
+
+    # test it for creation using offset and increment
+    coord0 = LinearCoord(offset=1, increment=10, size=10)
+    assert isinstance(coord0, LinearCoord)
+    assert coord0[0] == 1
+    assert_array_equal(coord0.data, Coord.arange(1, 100, 10).data)

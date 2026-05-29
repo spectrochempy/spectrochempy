@@ -1,19 +1,21 @@
 # This workflow builds and publishes the documentation for SpectrochemPy
 # Documentation is built using Sphinx and published to GitHub Pages
+#
+# Branch preview deployment:
+# - Development branches (non-master, non-docs/*, non-release) publish
+#   preview docs under /<branch-name>/ on GitHub Pages.
+# - Branch names are sanitised: "/" becomes "-".
+# - Example: branch "plugins" → /plugins/, "feature/new-nmr" → /feature-new-nmr/
+# - Stable docs at root level remain untouched.
+# - Preview docs are automatically removed when the branch is deleted
+#   via the cleanup workflow (cleanup_branch_docs.yml).
 
 name: Docs 📕
 
-# Trigger on:
-# - Code pushes to main branches
-# - Pull requests
-# - New releases
-# - Manual triggers
-# - Weekly schedule
 on:
   push:
     branches:
-      - master
-      - docs/*
+      - "**"
 
   pull_request:
 
@@ -36,11 +38,15 @@ concurrency:
 
 jobs:
   build_and_publish_documentation:
-    # Only run scheduled jobs on main repository
+    # Only run scheduled jobs on main repository.
+    # For pull_request events, skip if the PR is from the same repository
+    # (push events on the branch already trigger the workflow).
     if: |
       (github.event_name == 'schedule'
        && github.repository == 'spectrochempy/spectrochempy') || (
-       github.event_name != 'schedule')
+       github.event_name != 'schedule' &&
+       (github.event_name != 'pull_request' ||
+        github.event.pull_request.head.repo.full_name != github.repository))
 
     name: Build and publish documentation
     runs-on: ubuntu-latest
@@ -52,7 +58,6 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      # Step 1: Get the code
       - name: Checkout code
         uses: actions/checkout@v6
         with:
@@ -60,69 +65,159 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      # step 2: Set up Python
+      - name: Initialize CI diagnostics
+        run: |
+          echo "CI_TIMING_FILE=$RUNNER_TEMP/ci-timings.txt" >> "$GITHUB_ENV"
+          : > "$RUNNER_TEMP/ci-timings.txt"
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
-      # step 3: Create a virtual environment (necessary to use pip interface)
       - name: Create virtual environment
         run: |
+          set -e
+          start=$SECONDS
           python -m venv .venv
           echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
           echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+          duration=$((SECONDS - start))
+          echo "environment creation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      # step 4: Install uv
       - name: Install uv and verify installation
         run: |
+          set -e
           . .venv/bin/activate
+          start=$SECONDS
           python -m pip install --upgrade pip
           python -m pip install --upgrade uv
           which uv
           uv --version
+          duration=$((SECONDS - start))
+          echo "uv installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      # Step 5: Install spectrochempy and dependencies using uv
       - name: Install spectrochempy
         run: |
-           . .venv/bin/activate
-           uv pip install -e ".[docs]"
+          set -e
+          . .venv/bin/activate
+          start=$SECONDS
+          uv pip install -e ".[docs]"
+          duration=$((SECONDS - start))
+          echo "dependency installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      # Step 6: Install Pandoc and check version
+      - name: Install SpectroChemPy plugins
+        run: |
+          set -e
+          . .venv/bin/activate
+          start=$SECONDS
+          uv pip install -e plugins/spectrochempy-nmr
+          uv pip install -e plugins/spectrochempy-iris
+          duration=$((SECONDS - start))
+          echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
+
+      - name: Environment and plugin diagnostics
+        run: |
+          . .venv/bin/activate
+          python .github/workflows/scripts/ci_diagnostics.py environment
+
       - name: Install Pandoc
         run: |
+          set -e
+          start=$SECONDS
           sudo apt-get update
           sudo apt-get install -y pandoc
           pandoc --version
+          duration=$((SECONDS - start))
+          echo "pandoc installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      # Step 7: Setup Jupyter kernel for notebooks
       - name: Setup Jupyter kernel
+        if: github.event_name != 'pull_request'
         run: |
+          set -e
           . .venv/bin/activate
+          start=$SECONDS
           uv pip install ipykernel
           python3 -m ipykernel install --user --name python3 --display-name "Python 3"
+          duration=$((SECONDS - start))
+          echo "jupyter kernel setup: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      # Step 8: Set up version environment variable
       - name: Set up version environment variable
         run: |
           . .venv/bin/activate
           python3 .github/workflows/scripts/set_env_var.py
 
-      # Step 9: Clone gh-pages branch
+      # ---------- preview / stable branch detection ----------
+      - name: Determine preview parameters
+        id: preview
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          EVENT="${{ github.event_name }}"
+          # Stable builds: master, docs/* branches, and release events
+          if [[ "$BRANCH" == "master" || "$BRANCH" == docs/* || "$EVENT" == "release" ]]; then
+            echo "is_preview=false" >> "$GITHUB_OUTPUT"
+            echo "preview_path=" >> "$GITHUB_OUTPUT"
+            echo "build_subdir=" >> "$GITHUB_OUTPUT"
+          else
+            SANITIZED=$(echo "$BRANCH" | tr '/' '-')
+            echo "is_preview=true" >> "$GITHUB_OUTPUT"
+            echo "preview_path=$SANITIZED" >> "$GITHUB_OUTPUT"
+            echo "build_subdir=build/branch_preview" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ---------- restore reusable Sphinx/Sphinx-Gallery outputs for previews ----------
+      - name: Restore documentation build cache
+        if: steps.preview.outputs.is_preview == 'true'
+        uses: actions/cache@v5
+        with:
+          path: |
+            build/branch_preview/~doctrees
+            docs/sources/gettingstarted/examples/gallery
+          key: >-
+            ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-${{ hashFiles('pyproject.toml', 'docs/conf.py', 'docs/make.py', 'docs/sources/**/*.rst', 'docs/sources/**/*.py', 'docs/sources/**/*.ipynb', 'src/spectrochempy/examples/**/*.py', 'plugins/**/examples/**/*.py', 'plugins/**/examples/gallery.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-docs-${{ steps.preview.outputs.preview_path }}-
+            ${{ runner.os }}-docs-
+
+      # ---------- clone gh-pages (preserve existing content) ----------
       - name: Clone gh-pages branch
         run: |
           mkdir -p build
-          git clone --branch=gh-pages --single-branch https://github.com/${{ github.repository }}.git build/html
+          git clone --branch=gh-pages --single-branch \
+            https://github.com/${{ github.repository }}.git build/html
 
-      # Step 10: Build the documentation
+      # ---------- build docs ----------
       - name: Build docs
         run: |
+          set -e
           . .venv/bin/activate
-          echo "Updating docs"
-          python3 docs/make.py -j1 html
+          start=$SECONDS
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
+            SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
+              python3 docs/make.py --no-exec -j auto html
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            python3 docs/make.py --no-exec -j auto html
+          elif [[ "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
+            SCPY_BUILDDIR=${{ steps.preview.outputs.build_subdir }} \
+              python3 docs/make.py -j auto html
+          else
+            python3 docs/make.py -j auto html
+          fi
+          duration=$((SECONDS - start))
+          echo "documentation build: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
-      # Step 11: Build oldest version of the documentation if it doesn't yet exist
+      - name: CI diagnostics summary
+        if: ${{ always() }}
+        run: |
+          if [ -f .venv/bin/activate ]; then
+            . .venv/bin/activate
+          fi
+          python .github/workflows/scripts/ci_diagnostics.py summary \
+            --timings "${CI_TIMING_FILE:-}"
+
+      # ---------- build oldest version (stable only) ----------
       - name: Build oldest version of the documentation
+        if: steps.preview.outputs.is_preview != 'true'
         run: |
           . .venv/bin/activate
           if [ ! -d build/html/0.6.10 ]; then
@@ -130,16 +225,39 @@ jobs:
             python3 docs/make.py -j1 html -T 0.6.10
           fi
 
-      # Step 12: Upload build artifacts
+      # ---------- install branch preview into gh-pages clone ----------
+      - name: Install branch preview into gh-pages
+        if: steps.preview.outputs.is_preview == 'true'
+        run: |
+          PREVIEW_PATH="${{ steps.preview.outputs.preview_path }}"
+          # The preview build output is in build_subdir/html/ after make.py post-build
+          rm -rf "build/html/$PREVIEW_PATH"
+          mkdir -p "build/html/$PREVIEW_PATH"
+          cp -a "build/branch_preview/html/." "build/html/$PREVIEW_PATH/"
+          echo "Branch preview installed under build/html/$PREVIEW_PATH/"
+
+      # ---------- upload artifacts ----------
+      - name: Determine artifact name
+        id: artifact
+        run: |
+          if [[ "${{ steps.preview.outputs.is_preview }}" == "true" ]]; then
+            echo "name=docs-preview-${{ steps.preview.outputs.preview_path }}" >> "$GITHUB_OUTPUT"
+            echo "path=build/branch_preview/html/" >> "$GITHUB_OUTPUT"
+            echo "retention=3" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=docs" >> "$GITHUB_OUTPUT"
+            echo "path=build/html/" >> "$GITHUB_OUTPUT"
+            echo "retention=5" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: docs
-          path: build/html/
-          retention-days: 5
+          name: ${{ steps.artifact.outputs.name }}
+          path: ${{ steps.artifact.outputs.path }}
+          retention-days: ${{ steps.artifact.outputs.retention }}
 
-      # Final step: Deploy to GitHub Pages
-      # Only runs on push events (not pull requests)
+      # ---------- deploy to gh-pages ----------
       - name: Deployment
         if: (github.event_name != 'pull_request' && !github.event.act)
         uses: JamesIves/github-pages-deploy-action@v4

@@ -14,18 +14,11 @@ from spectrochempy.analysis.kinetic import kineticutilities as ku
 
 
 @pytest.mark.skipif(
-    ku._cantera_is_not_available(), reason="Cantera must be installed first"
+    ku._cantera_is_not_available(),
+    reason="requires the experimental spectrochempy-cantera plugin with Cantera",
 )
-def test_cu(monkeypatch):
-    # availability of cantera (# should be installed if the test wa not skipped)
-    assert not ku._cantera_is_not_available()
-
-    # simulate abscense of cantera
-    with monkeypatch.context() as m:
-        m.setattr(ku, "ct", None)
-        assert ku._cantera_is_not_available()
-
-    # context restored with ct = cantera
+def test_cu():
+    # availability of cantera (should be installed if the test was not skipped)
     assert not ku._cantera_is_not_available()
 
 

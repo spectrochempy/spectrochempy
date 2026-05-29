@@ -22,14 +22,8 @@ class FileTypeRegistry:
             ("excel", "Microsoft Excel files (*.xls)"),
             ("zip", "Compressed folder of data files (*.zip)"),
             ("quadera", "Quadera ascii files (*.asc)"),
-            ("carroucell", "Carroucell files (*spa)"),
             ("galactic", "GRAMS/Thermo Galactic files (*.spc)"),
             ("wire", "Renishaw WiRE files (*.wdf)"),
-            (
-                "topspin",
-                "Bruker TOPSPIN fid or series or processed data files "
-                "(fid ser 1[r|i] 2[r|i]* 3[r|i]*)",
-            ),
         ]
 
         self._aliases: list[tuple[str, str]] = [

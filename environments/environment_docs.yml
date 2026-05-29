@@ -32,16 +32,13 @@ dependencies:
     - lazy_loader
     - matplotlib-base
     - numpy
-    - numpydoc
-    - quaternion>=2024.0.7
-    - osqp
+    - pluggy
     - pint
     - pyyaml
     - requests
     - scikit-learn
     - scipy
     - tzlocal
-    - xlrd
 
     # DOCS dependencies
     # -----------------

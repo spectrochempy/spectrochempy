@@ -7,10 +7,12 @@
 
 from pathlib import Path
 
-
 # --------------------------------------------------------------------------------------
 # Testdata
 # --------------------------------------------------------------------------------------
+_TESTDATA_CACHE_MARKER = "spectrochempy-testdata-v1\n"
+
+
 def download_full_testdata_directory(datadir, force=False):
     """
     Download and extract the full SpectroChemPy test data directory.
@@ -21,13 +23,17 @@ def download_full_testdata_directory(datadir, force=False):
         Target directory where test data should be extracted.
     force : bool, optional
         If True, force re-download even if already downloaded.
-        If False, skip download if marker file exists.
+        If False, skip download if a current cache marker exists.
     """
 
-    # Marker file used to prevent repeated downloads
-    # This avoids re-downloading test data on every docs build.
+    # Only a marker created by this extraction contract is trusted. Legacy empty
+    # markers may represent partial caches restored by CI.
     downloaded = datadir / "__downloaded__"
-    if downloaded.exists() and not force:
+    if (
+        downloaded.exists()
+        and downloaded.read_text(encoding="utf8") == _TESTDATA_CACHE_MARKER
+        and not force
+    ):
         return
 
     # GitHub archive URL (zip of master branch)
@@ -120,4 +126,4 @@ def download_full_testdata_directory(datadir, force=False):
     # This prevents re-running the download on subsequent builds
     # unless force=True is explicitly passed.
     # ------------------------------------------------------------------
-    downloaded.touch(exist_ok=True)
+    downloaded.write_text(_TESTDATA_CACHE_MARKER, encoding="utf8")

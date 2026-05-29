@@ -6,9 +6,13 @@
 # ruff: noqa: T201,S603
 """SpectroChemPy documentation build configuration file."""
 
+import ast
 import inspect
 import os
+import re
+import shutil
 import sys
+import tomllib
 import warnings
 from datetime import datetime
 from pathlib import Path
@@ -231,6 +235,7 @@ html_theme_options = {
     "collapse_navigation": False,
     "navigation_depth": 5,
     "sticky_navigation": True,
+    "titles_only": True,
     "prev_next_buttons_location": "both",
 }
 
@@ -332,11 +337,240 @@ html_context = {
 # Generate the plots for the gallery
 from sphinx_gallery.sorting import FileNameSortKey
 
-example_source_dir = str(SOURCES / "examples")
+example_source_dir = SOURCES / "examples"
 example_generated_dir = "gettingstarted/examples/gallery"
+gallery_sections = ("core", "processing", "analysis", "plugins")
 
 # Check for the SPHINX_NOEXEC environment variable
 noexec = os.environ.get("SPHINX_NOEXEC") == "1"
+
+
+def _copy_example_tree(source: Path, destination: Path) -> None:
+    if not source.exists():
+        return
+
+    shutil.copytree(
+        source,
+        destination,
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".ipynb_checkpoints"),
+    )
+
+
+def _plugin_gallery_manifests() -> list[Path]:
+    # Official plugins only. Experimental plugins are excluded from the main
+    # gallery to keep the user experience stable.
+    manifests = sorted(
+        (PROJECT / "plugins").glob("spectrochempy-*/examples/gallery.toml")
+    )
+    # Exclude experimental plugins
+    manifests = [m for m in manifests if "spectrochempy-cantera" not in str(m)]
+
+    extra_manifests = os.environ.get("SCP_PLUGIN_GALLERY_MANIFESTS")
+    if extra_manifests:
+        manifests.extend(
+            Path(path) for path in extra_manifests.split(os.pathsep) if path
+        )
+
+    return manifests
+
+
+def _load_plugin_gallery_entries() -> list[dict[str, str]]:
+    entries = []
+
+    for manifest in _plugin_gallery_manifests():
+        with manifest.open("rb") as fid:
+            data = tomllib.load(fid)
+
+        plugin = data.get("plugin", {})
+        examples = data.get("examples", [])
+        for example in examples:
+            path = example["path"]
+            entries.append(
+                {
+                    "path": path,
+                    "plugin": plugin.get("name", manifest.parent.parent.name),
+                    "plugin_title": plugin.get(
+                        "title", plugin.get("name", manifest.parent.parent.name)
+                    ),
+                    "manifest": manifest,
+                    "section": example.get("section", path),
+                    "section_ref": example.get("section_ref", ""),
+                }
+            )
+
+    return entries
+
+
+def _gallery_ref_for_example(path: str) -> str:
+    source_path = Path(path)
+    section = source_path.parts[0]
+    generated_path = f"{example_generated_dir}/auto_examples_{section}"
+    ref_path = Path(generated_path, *source_path.parts[1:]).as_posix()
+    return f"sphx_glr_{ref_path.replace('/', '_')}"
+
+
+def _gallery_thumbnail_for_example(path: str) -> str:
+    source_path = Path(path)
+    section = source_path.parts[0]
+    generated_path = Path(example_generated_dir, f"auto_examples_{section}")
+    example_dir = generated_path.joinpath(*source_path.parts[1:-1])
+    thumbnail = f"sphx_glr_{source_path.stem}_thumb.png"
+    return example_dir.joinpath("images", "thumb", thumbnail).as_posix()
+
+
+def _section_cell(section: str, section_ref: str) -> str:
+    if section_ref:
+        return f":ref:`{section} <{section_ref}>`"
+    return section
+
+
+def _plugin_examples_table(entries: list[dict[str, str]]) -> str:
+    lines = [
+        ".. _plugin-examples-list:",
+        "",
+        "Examples requiring plugins",
+        "==========================",
+        "",
+        "The examples listed below require one or more optional SpectroChemPy plugins.",
+        "They appear in the :ref:`main gallery <examples-index>` alongside core-only",
+        "examples, organised by scientific topic.",
+        "",
+    ]
+
+    if entries:
+        lines.extend(
+            [
+                ".. list-table::",
+                "   :header-rows: 1",
+                "   :widths: 40 25 35",
+                "",
+                "   * - Example",
+                "     - Required plugin",
+                "     - Gallery section",
+            ]
+        )
+
+        for entry in entries:
+            lines.extend(
+                [
+                    f"   * - :ref:`{_gallery_ref_for_example(entry['path'])}`",
+                    f"     - ``{entry['plugin']}``",
+                    f"     - {_section_cell(entry['section'], entry['section_ref'])}",
+                ]
+            )
+    else:
+        lines.append("No plugin-dependent examples are currently registered.")
+
+    lines.extend(
+        ["", "See :ref:`plugins` for general plugin installation instructions.", ""]
+    )
+
+    return "\n".join(lines)
+
+
+def _plugin_gallery_readme(entries: list[dict[str, str]]) -> str:
+    lines = [
+        ".. _examples-plugins-index:",
+        "",
+        "###############################",
+        "Plugin-dependent functionality",
+        "###############################",
+        "",
+        "This section contains examples that require optional SpectroChemPy plugins.",
+        "Official plugin examples also appear in their respective scientific sections,",
+        "so you can browse either by topic or by plugin.",
+        "",
+        _plugin_examples_table(entries),
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def _write_plugin_gallery_readmes(
+    staged_examples: Path, entries: list[dict[str, str]]
+) -> None:
+    plugin_dir = staged_examples / "plugins"
+    plugin_dir.mkdir(parents=True, exist_ok=True)
+    (plugin_dir / "readme.rst").write_text(
+        _plugin_gallery_readme(entries),
+        encoding="utf-8",
+    )
+
+    plugins = {}
+    for entry in entries:
+        plugins.setdefault(entry["plugin"], entry["plugin_title"])
+
+    for name, title in sorted(plugins.items()):
+        title = str(title)
+        underline = "-" * len(title)
+        plugin_section_dir = plugin_dir / name
+        plugin_section_dir.mkdir(parents=True, exist_ok=True)
+        (plugin_section_dir / "readme.rst").write_text(
+            f"{title}\n{underline}\n",
+            encoding="utf-8",
+        )
+
+
+def _stage_plugin_gallery_examples(
+    staged_examples: Path, entries: list[dict[str, str]]
+) -> None:
+    plugin_dir = staged_examples / "plugins"
+    for entry in entries:
+        source = entry["manifest"].parent / entry["path"]
+        if not source.exists():
+            continue
+
+        source_path = Path(entry["path"])
+        stem = "__".join([entry["plugin"], *source_path.with_suffix("").parts])
+        stem = re.sub(r"[^0-9A-Za-z_]+", "_", stem)
+        destination = plugin_dir / entry["plugin"] / f"plot_{stem}.py"
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        content = source.read_text(encoding="utf-8")
+        thumbnail_path = _gallery_thumbnail_for_example(entry["path"])
+        destination.write_text(
+            _with_plugin_gallery_thumbnail(content, thumbnail_path),
+            encoding="utf-8",
+        )
+
+
+def _with_plugin_gallery_thumbnail(content: str, thumbnail_path: str) -> str:
+    directive = f"# sphinx_gallery_thumbnail_path = {thumbnail_path!r}"
+    lines = content.splitlines()
+
+    try:
+        module = ast.parse(content)
+    except SyntaxError:
+        return f"{directive}\n{content}"
+
+    if (
+        module.body
+        and isinstance(module.body[0], ast.Expr)
+        and isinstance(module.body[0].value, ast.Constant)
+        and isinstance(module.body[0].value.value, str)
+        and module.body[0].end_lineno is not None
+    ):
+        insert_at = module.body[0].end_lineno
+        return "\n".join([*lines[:insert_at], directive, *lines[insert_at:]]) + "\n"
+
+    if lines and lines[0].startswith("# %%"):
+        return "\n".join([lines[0], directive, *lines[1:]]) + "\n"
+
+    return f"{directive}\n{content}"
+
+
+def _stage_gallery_examples() -> Path:
+    staged_examples = BUILDIR / "~gallery_examples"
+    shutil.rmtree(staged_examples, ignore_errors=True)
+    staged_examples.mkdir(parents=True, exist_ok=True)
+
+    for section in gallery_sections:
+        _copy_example_tree(example_source_dir / section, staged_examples / section)
+
+    for manifest in _plugin_gallery_manifests():
+        _copy_example_tree(manifest.parent, staged_examples)
+
+    return staged_examples
 
 
 def _get_default_image_scraper():
@@ -349,20 +583,24 @@ def _get_default_image_scraper():
 
 if not single_doc_or_dir:
     # generate example only if were are in full doc mode
+    plugin_gallery_entries = _load_plugin_gallery_entries()
+    example_source_dir = _stage_gallery_examples()
+    _write_plugin_gallery_readmes(example_source_dir, plugin_gallery_entries)
+    _stage_plugin_gallery_examples(example_source_dir, plugin_gallery_entries)
+
     sphinx_gallery_conf = {
         "plot_gallery": not noexec,
         "doc_module": "spectrochempy",
         # Source example files in separate directory
         "examples_dirs": [
-            f"{example_source_dir}/core",
-            f"{example_source_dir}/processing",
-            f"{example_source_dir}/analysis",
+            f"{example_source_dir}/{section}" for section in gallery_sections
         ],
         # Generated RST files in generated directory
         "gallery_dirs": [
             f"{example_generated_dir}/auto_examples_core",
             f"{example_generated_dir}/auto_examples_processing",
             f"{example_generated_dir}/auto_examples_analysis",
+            f"{example_generated_dir}/auto_examples_plugins",
         ],
         "backreferences_dir": f"{example_generated_dir}/backreferences",
         "reference_url": {
