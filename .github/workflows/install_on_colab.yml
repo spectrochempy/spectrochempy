@@ -62,7 +62,7 @@ jobs:
             europe-docker.pkg.dev/colab-images/public/runtime:latest \
             -c "
               pip install -q setuptools wheel build setuptools-scm && \
-              pip install -q --no-deps /workspace && \
+              pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode core-only
             "
@@ -76,11 +76,11 @@ jobs:
             europe-docker.pkg.dev/colab-images/public/runtime:latest \
             -c "
               pip install -q setuptools wheel build setuptools-scm && \
-              pip install -q --no-deps /workspace && \
+              pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint numpy-quaternion && \
-              pip install -q --no-deps /workspace/plugins/spectrochempy-iris && \
-              pip install -q --no-deps /workspace/plugins/spectrochempy-nmr && \
-              pip install -q --no-deps /workspace/plugins/spectrochempy-hypercomplex && \
-              pip install -q --no-deps /workspace/plugins/spectrochempy-carroucell && \
+              pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-iris && \
+              pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-nmr && \
+              pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-hypercomplex && \
+              pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-carroucell && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode with-plugins
             "
