@@ -21,6 +21,45 @@ du dépôt `spectrochempy/spectrochempy` :
   ([instructions Zenodo](https://docs.github.com/en/repositories/archiving-a-github-repository/referencing-and-citing-content)).
   Une Release GitHub publiée déclenche automatiquement l'archivage DOI.
 
+## Vérifications préalables des services externes
+
+Avant de lancer une release (core ou plugin), vérifier l'état des
+services externes.
+
+### Zenodo
+
+- Le dépôt `spectrochempy/spectrochempy` est bien activé dans
+  [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
+- L'intégration GitHub est active (pas de croix rouge)
+- L'onglet **Errors** de la page Zenodo ne contient pas d'erreur active
+- `CITATION.cff` et `zenodo.json` sont valides (vérifier les versions)
+
+### Anaconda.org
+
+- L'organisation `spectrocat` contient le package attendu :
+  ```bash
+  anaconda show spectrocat/spectrochempy
+  ```
+  ```bash
+  anaconda show spectrocat/spectrochempy-nmr
+  anaconda show spectrocat/spectrochempy-iris
+  anaconda show spectrocat/spectrochempy-hypercomplex
+  anaconda show spectrocat/spectrochempy-carroucell
+  ```
+
+- **Première release d'un plugin** : si le package n'existe pas encore sur
+  Anaconda, la commande `anaconda show` échouera — c'est normal. Le
+  workflow `build_package.yml` utilise une commande `anaconda show` en
+  diagnostic avant l'upload. Si le package n'existe pas encore, cette
+  commande peut échouer et bloquer le script à cause de `set -e`.
+
+  → Solution : soit supprimer la ligne `anaconda show` du workflow pour
+  les plugins, soit créer le package vide manuellement avant la première
+  release (`anaconda upload --skip-existing -l main <fichier>.conda`).
+
+  Le `ANACONDA_API_TOKEN` utilisé par le workflow doit avoir les droits
+  de **création** de nouveaux packages sur l'organisation `spectrocat`.
+
 ---
 
 ## Release du core
