@@ -108,6 +108,21 @@ jobs:
             python=3.11
           cache-environment: true
 
+      - name: Determine core version for conda build
+        run: |
+          LATEST_CORE_TAG=$(git tag -l 'spectrochempy-v*' --sort=-v:refname | head -1)
+          if [[ -z "$LATEST_CORE_TAG" ]]; then
+            echo "::error::No core tag found — cannot determine core version"
+            exit 1
+          fi
+          if [[ "${{ github.ref_name }}" == spectrochempy-v* ]]; then
+            CORE_VERSION="${GITHUB_REF_NAME#spectrochempy-v}"
+          else
+            CORE_VERSION="${LATEST_CORE_TAG#spectrochempy-v}.dev0"
+          fi
+          echo "Using core version: $CORE_VERSION (latest core tag: $LATEST_CORE_TAG)"
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=$CORE_VERSION" >> "$GITHUB_ENV"
+
       - name: Generate conda recipe
         run: |
           python3 .github/workflows/scripts/generate_conda_recipe.py
@@ -290,12 +305,13 @@ jobs:
         with:
           recipe-path: ${{ matrix.plugin.recipe }}/${{ matrix.plugin.recipe_file }}
           upload-artifact: false
-          # For non-release builds, resolve dependencies from the dev label so that
-          # dev plugin packages can depend on the latest dev core package.
+          # spectrocat channels come first so that spectrochempy is resolved from
+          # our channel (avoiding strict channel priority exclusion by conda-forge).
+          # For non-release builds, the dev label provides the latest dev core.
           build-args: >-
-            -c conda-forge
             -c spectrocat/label/dev
             -c spectrocat
+            -c conda-forge
 
       - name: Move conda build output
         run: |

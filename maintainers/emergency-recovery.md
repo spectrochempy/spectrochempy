@@ -178,6 +178,56 @@ Le job `build_and_publish_conda_package` échoue.
 
 ---
 
+## Build conda des plugins échoué
+
+### Symptôme
+
+```
+Error: × Test failed: failed to setup test environment:
+  │ └─ spectrochempy-iris ==0.1.1 cannot be installed because
+  │    └─ spectrochempy >=0.9.0.dev0,<0.10, which cannot be installed
+```
+
+Le plugin est publié sur PyPI mais pas sur Anaconda.
+
+### Causes possibles
+
+**1. Version du core mal détectée pendant une release plugin**
+
+Lors d'une release plugin (tag `spectrochempy-nmr-v0.1.1`),
+`setuptools_scm` peut détecter la version `0.1.1` (celle du tag plugin)
+au lieu de la version `0.9.0` du core. Le package core est alors
+buildé avec une version incorrecte.
+
+*Résolution* : le workflow `build_package.yml` inclut maintenant une
+étape "Determine core version for conda build" qui extrait la version
+depuis le dernier tag `spectrochempy-v*`.
+
+**2. Strict channel priority exclut spectrocat**
+
+Le solveur conda utilise `conda-forge` en priorité. Comme
+`spectrochempy` existe sur `conda-forge` (à une version antérieure),
+le solveur exclut les versions plus récentes de `spectrocat` à cause
+de la priorité stricte.
+
+*Résolution* : l'ordre des canaux dans le build des plugins a été
+inversé : `spectrocat/label/dev` et `spectrocat` passent avant
+`conda-forge`.
+
+### Résolution pour une release déjà publiée
+
+Si le plugin est déjà publié sur PyPI mais pas sur Anaconda :
+
+1. Supprimer la Release GitHub et le tag du plugin :
+   ```bash
+   gh release delete spectrochempy-XXX-vX.Y.Z --repo spectrochempy/spectrochempy --yes
+   git push upstream --delete refs/tags/spectrochempy-XXX-vX.Y.Z
+   ```
+2. Relancer le workflow **Release an official plugin** depuis
+   [Actions](https://github.com/spectrochempy/spectrochempy/actions/workflows/release_plugin.yml)
+
+---
+
 ## Zenodo non mis à jour
 
 ### Symptôme
