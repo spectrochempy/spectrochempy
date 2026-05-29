@@ -41,6 +41,38 @@ les workflows de CI (tests, builds) ne démarrent pas.
 
 ---
 
+## Le push vers master échoue dans release_plugin.yml
+
+### Symptôme
+
+```
+remote: error: GH006: Protected branch update failed for refs/heads/master.
+remote: - Changes must be made through a pull request.
+```
+
+### Cause
+
+Le `GITHUB_TOKEN` automatique ne peut pas contourner les règles de
+protection de la branche `master`. Le workflow `release_plugin.yml`
+utilise `secrets.BOT_TOKEN` (un PAT personnel) pour le checkout, ce qui
+permet de pusher.
+
+Si ce secret est expiré ou a été révoqué, le push est rejeté.
+
+### Résolution
+
+1. Créer un nouveau **classic PAT** sur
+   [github.com/settings/tokens](https://github.com/settings/tokens) avec le
+   scope `repo`
+2. Mettre à jour le secret `BOT_TOKEN` dans
+   [Settings → Secrets → Actions](https://github.com/spectrochempy/spectrochempy/settings/secrets/actions)
+3. Relancer le workflow
+
+> **Note** : Les PAT arrivent à expiration après 3 mois. Ajouter un rappel
+> calendaire pour le renouvellement.
+
+---
+
 ## Erreur setuptools-scm / version incompatible
 
 ### Symptôme

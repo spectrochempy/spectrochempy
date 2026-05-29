@@ -13,6 +13,7 @@ du dépôt `spectrochempy/spectrochempy` :
 | `PYPI_API_TOKEN` | Publication sur PyPI (via `pypa/gh-action-pypi-publish`) |
 | `TEST_PYPI_API_TOKEN` | Publication sur Test PyPI (poussées vers master) |
 | `ANACONDA_API_TOKEN` | Publication sur Anaconda.org (compte `spectrocat`) |
+| `BOT_TOKEN` | PAT personnel utilisé pour contourner la protection de branche lors des releases de plugins (expire tous les 3 mois — penser à le renouveler et mettre à jour le secret) |
 
 ### Comptes externes
 
