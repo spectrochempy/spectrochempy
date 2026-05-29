@@ -254,3 +254,52 @@ vers une version antérieure.
 - Si l'intégration est cassée, la réactiver depuis
   [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
   (déconnecter puis reconnecter le dépôt)
+
+---
+
+## Zenodo affiche "Failed" après une release
+
+### Symptôme
+
+Une release apparaît dans Zenodo avec le statut :
+
+```text
+Failed
+```
+
+et le message :
+
+```text
+Bad credentials
+```
+
+Les releases suivantes peuvent être synchronisées avec succès après
+reconnexion, mais la release en échec reste bloquée.
+
+### Cause
+
+Les identifiants GitHub stockés par Zenodo sont devenus invalides
+(expiration, révocation, changement de mot de passe…). Zenodo n'arrive
+plus à cloner le dépôt ni à importer la release.
+
+### Résolution
+
+1. Aller dans **Zenodo → Account → GitHub** :
+   https://zenodo.org/account/settings/github/
+2. **Déconnecter** GitHub (Disconnect).
+3. **Reconnecter** GitHub (Connect) — autoriser l'accès.
+4. **Réactiver** le dépôt `spectrochempy/spectrochempy` si nécessaire.
+5. Vérifier que les nouvelles releases sont correctement synchronisées.
+6. Si la release en échec n'est pas retraitée automatiquement :
+
+   * recréer la GitHub Release concernée (en conservant le tag existant) ;
+   * la republier.
+
+Zenodo importe alors la release et génère le DOI normalement.
+
+### Notes
+
+- Une synchronisation réussie des releases suivantes **ne garantit pas**
+  que la release en échec sera retraitée automatiquement.
+- La recréation de la GitHub Release peut être nécessaire pour forcer
+  la réimportation.
