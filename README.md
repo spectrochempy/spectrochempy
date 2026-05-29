@@ -74,6 +74,11 @@ manually::
 * 📝 [How to Cite](https://www.spectrochempy.fr/credits/citing.html)
 * 💻 [Source Code](https://github.com/spectrochempy/spectrochempy)
 
+## For maintainers
+
+Internal documentation for project maintainers (release procedures, incident
+recovery) is available in the [`maintainers/`](maintainers/) directory.
+
 ## License
 
 [CeCILL-B FREE SOFTWARE LICENSE AGREEMENT](https://cecill.info/licences/Licence_CeCILL-B_V1-en.html)
