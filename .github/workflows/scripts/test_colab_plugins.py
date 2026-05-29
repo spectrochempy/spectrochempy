@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Colab compatibility smoke test for SpectroChemPy and its official plugins.
+# ruff: noqa: S101, T201
+"""
+Colab compatibility smoke test for SpectroChemPy and its official plugins.
 
 Tests two scenarios:
   --mode core-only    : install core without plugins, verify basic functionality
@@ -45,7 +47,9 @@ def test_core_install():
             if pkg in str(e):
                 print(f"  PASS: scp.{ns}.{symbol} -> ImportError with install hint")
             else:
-                print(f"  PASS: scp.{ns}.{symbol} -> ImportError (hint mentions '{pkg}')")
+                print(
+                    f"  PASS: scp.{ns}.{symbol} -> ImportError (hint mentions '{pkg}')"
+                )
         except Exception as e:
             print(f"  INFO: scp.{ns}.{symbol} -> {type(e).__name__}: {e}")
 
@@ -145,9 +149,7 @@ def main():
     )
     args = parser.parse_args()
 
-    success = (
-        test_core_install() if args.mode == "core-only" else test_with_plugins()
-    )
+    success = test_core_install() if args.mode == "core-only" else test_with_plugins()
     sys.exit(0 if success else 1)
 
 
