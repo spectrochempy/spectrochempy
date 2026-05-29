@@ -19,7 +19,6 @@ on:
   push:
     branches:
       - develop
-      - plugins
       - feature/*
       - fix/*
   workflow_dispatch:

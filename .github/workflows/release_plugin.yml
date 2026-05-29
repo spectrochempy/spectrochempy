@@ -40,6 +40,13 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Ensure running from master
+        run: |
+          if [ "${{ github.ref_name }}" != "master" ]; then
+            echo "::error::Plugin releases must be triggered from the master branch (current: ${{ github.ref_name }})"
+            exit 1
+          fi
+
       - name: Validate plugin name
         run: |
           # Official plugins are explicitly listed. Experimental plugins should be
@@ -91,8 +98,8 @@ jobs:
           fi
           git commit --no-verify -m "Bump ${{ inputs.plugin_name }} to v${{ inputs.version }}"
 
-      - name: Push commit to plugins branch
-        run: git push origin HEAD:plugins
+      - name: Push commit to current branch
+        run: git push origin HEAD:${{ github.ref_name }}
 
       - name: Create and push release tag
         run: |
