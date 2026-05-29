@@ -17,9 +17,11 @@ du dépôt `spectrochempy/spectrochempy` :
 
 ### Comptes externes
 
-- **Zenodo** : l'intégration GitHub → Zenodo doit être activée sur le dépôt
+- **Zenodo (core uniquement)** : l'intégration GitHub → Zenodo doit être activée sur le dépôt
   ([instructions Zenodo](https://docs.github.com/en/repositories/archiving-a-github-repository/referencing-and-citing-content)).
-  Une Release GitHub publiée déclenche automatiquement l'archivage DOI.
+  Une Release GitHub du **core** (tag `spectrochempy-vX.Y.Z`) déclenche automatiquement l'archivage DOI.
+  Les releases plugins (tag `spectrochempy-XXX-vX.Y.Z`) ne doivent **pas** être archivées par Zenodo
+  (voir [Zenodo and plugin releases](#zenodo-and-plugin-releases)).
 
 ## Vérifications préalables des services externes
 
@@ -28,11 +30,18 @@ services externes.
 
 ### Zenodo
 
+**Avant une release du core :**
+
 - Le dépôt `spectrochempy/spectrochempy` est bien activé dans
   [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
 - L'intégration GitHub est active (pas de croix rouge)
 - L'onglet **Errors** de la page Zenodo ne contient pas d'erreur active
 - `CITATION.cff` et `zenodo.json` sont valides (vérifier les versions)
+
+**Avant une release de plugins :**
+
+- Vérifier que l'intégration GitHub est **désactivée** dans Zenodo
+  (voir [Zenodo and plugin releases](#zenodo-and-plugin-releases))
 
 ### Anaconda.org
 
@@ -63,6 +72,11 @@ services externes.
 ---
 
 ## Release du core
+
+> **Note Zenodo** : avant une release du core, vérifier que l'intégration
+> GitHub est active dans Zenodo. Si elle a été désactivée pour une phase
+> de release plugin, la réactiver (voir
+> [Zenodo and plugin releases](#zenodo-and-plugin-releases)).
 
 ### 1. Vérifier l'état de `master`
 
@@ -162,6 +176,11 @@ Vérifier également que le DOI Zenodo a été mis à jour sur la
 
 ## Release des plugins
 
+> **Important Zenodo** : avant de publier des plugins, désactiver
+> l'intégration GitHub dans Zenodo (voir
+> [Zenodo and plugin releases](#zenodo-and-plugin-releases)).
+> La réactiver uniquement pour la prochaine release du core.
+
 ### Workflow
 
 Depuis **Actions** → **Release an official plugin**, exécuter le workflow avec les
@@ -170,7 +189,11 @@ paramètres :
 ```
 plugin_name: spectrochempy-XXX
 version: X.Y.Z
+confirm_zenodo_disabled: true   # ← doit être coché
 ```
+
+> Le workflow refuse de démarrer si `confirm_zenodo_disabled` n'est pas coché.
+> Cela garantit que l'intégration Zenodo a été désactivée avant la publication.
 
 ### Déroulement
 
@@ -193,13 +216,74 @@ anaconda show spectrocat/spectrochempy-XXX
 
 ---
 
+## Zenodo and plugin releases
+
+### Contexte
+
+SpectroChemPy est un monorepo contenant le core et plusieurs plugins
+officiels. Zenodo est connecté au dépôt GitHub
+`spectrochempy/spectrochempy` et archive automatiquement toutes les
+GitHub Releases si l'intégration est active.
+
+### Problème
+
+Lors de la publication des plugins, Zenodo crée des entrées pour les tags
+plugin (`spectrochempy-iris-v0.1.1`, `spectrochempy-nmr-v0.1.1`, …). Ces
+entrées sont incorrectes car :
+
+- Elles archivent le dépôt monorepo complet avec les métadonnées globales
+  de SpectroChemPy (titre, description, auteurs)
+- Elles créent des DOI pour des releases qui ne représentent pas des
+  versions du core
+- Le titre Zenodo affiche "SpectroChemPy…" mais avec la version du plugin
+
+### Politique
+
+- **Zenodo doit être réservé aux releases du core SpectroChemPy** (tags
+  `spectrochempy-vX.Y.Z`).
+- **Les releases plugins ne doivent pas être archivées dans Zenodo** tant
+  que les plugins restent dans le monorepo.
+- Si un plugin nécessite son propre DOI à long terme, il devra soit être
+  déplacé dans un dépôt séparé, soit utiliser une procédure Zenodo
+  manuelle/spécifique à ce plugin. Sinon, les plugins ne doivent pas créer
+  d'entrées Zenodo séparées.
+
+### Procédure opérationnelle
+
+1. **Avant de publier des plugins**, désactiver temporairement
+   l'intégration GitHub du dépôt `spectrochempy/spectrochempy` dans Zenodo
+   :
+   - Aller dans
+     [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
+   - Décocher / désactiver le dépôt `spectrochempy/spectrochempy`
+2. **Publier les plugins** via le workflow **Release an official plugin**
+   - Le workflow demande de cocher `confirm_zenodo_disabled` — le faire
+     uniquement après avoir désactivé Zenodo
+   - Si la case n'est pas cochée, le workflow échoue immédiatement avec
+     un message explicite
+3. **Vérifier PyPI et Anaconda.org** :
+   ```bash
+   pip install spectrochempy-XXX==X.Y.Z
+   anaconda show spectrocat/spectrochempy-XXX
+   ```
+4. **Ne réactiver Zenodo** que pour la release du core suivante :
+   - Aller dans
+     [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
+   - Réactiver le dépôt `spectrochempy/spectrochempy`
+   - Vérifier que l'intégration est active (pas de croix rouge)
+
+---
+
 ## Ordre recommandé
 
 1. **Release du core** → attendre la fin des builds CI
 2. **Vérifier PyPI** : `pip install spectrochempy==X.Y.Z`
 3. **Vérifier Anaconda** : `anaconda show spectrocat/spectrochempy`
-4. **Vérifier Zenodo** : le DOI doit pointer vers la nouvelle version
-5. **Release des plugins** (dans cet ordre) :
+4. **Vérifier Zenodo** : le DOI doit pointer vers la nouvelle version du
+   core
+5. **Désactiver Zenodo** (voir
+   [Zenodo and plugin releases](#zenodo-and-plugin-releases))
+6. **Release des plugins** (dans cet ordre) :
    - `spectrochempy-nmr`
    - `spectrochempy-iris`
    - `spectrochempy-hypercomplex`

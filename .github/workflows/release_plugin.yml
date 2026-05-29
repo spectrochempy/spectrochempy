@@ -23,6 +23,11 @@ on:
         description: "Version to release (e.g. 0.1.1)"
         required: true
         type: string
+      confirm_zenodo_disabled:
+        description: "Confirm Zenodo GitHub integration is disabled (see maintainers/release-process.md)"
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -46,6 +51,18 @@ jobs:
             echo "::error::Plugin releases must be triggered from the master branch (current: ${{ github.ref_name }})"
             exit 1
           fi
+
+      - name: Check Zenodo integration is disabled
+        run: |
+          if [ "${{ inputs.confirm_zenodo_disabled }}" != "true" ]; then
+            echo "::error::Zenodo GitHub integration must be disabled before releasing plugins."
+            echo "::error::1. Go to https://zenodo.org/account/settings/github/"
+            echo "::error::2. Deactivate the spectrochempy/spectrochempy repository"
+            echo "::error::3. Re-run this workflow with confirm_zenodo_disabled=true"
+            echo "::error::See maintainers/release-process.md for details."
+            exit 1
+          fi
+          echo "Zenodo disabled confirmation acknowledged."
 
       - name: Validate plugin name
         run: |
