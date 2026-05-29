@@ -95,6 +95,11 @@ jobs:
           fi
           git commit --no-verify -m "Bump ${{ inputs.plugin_name }} to v${{ inputs.version }}"
 
+      - name: Rebase on latest remote branch
+        run: |
+          git fetch origin ${{ github.ref_name }}
+          git rebase origin/${{ github.ref_name }}
+
       - name: Push commit to current branch
         run: git push origin HEAD:${{ github.ref_name }}
 
