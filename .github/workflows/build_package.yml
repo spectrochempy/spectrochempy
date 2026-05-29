@@ -361,6 +361,14 @@ jobs:
           fi
 
           for package in "${packages[@]}"; do
+            basename=$(basename "$package")
+            # Skip the core spectrochempy package (spectrochempy-<version>...)
+            # which was already uploaded by the core build job. Only upload
+            # plugin packages (spectrochempy-<pluginname>-<version>...).
+            if [[ "$basename" == spectrochempy-[0-9]* ]]; then
+              echo "Skipping core package (already uploaded): $package"
+              continue
+            fi
             echo "Uploading $package with label: $label"
             anaconda --token "$ANACONDA_API_TOKEN" upload $force_flag -l "$label" "$package"
           done
