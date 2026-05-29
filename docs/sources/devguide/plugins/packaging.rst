@@ -43,7 +43,7 @@ to discover your plugin automatically:
     description = "My SpectroChemPy plugin"
     requires-python = ">=3.11"
     dependencies = [
-        "spectrochempy>=0.9.0.dev0,<0.10",
+        "spectrochempy>=0.9,<0.10",
     ]
 
     [project.entry-points."spectrochempy.plugins"]
@@ -60,7 +60,7 @@ Key points:
 * The **entry point name** (``myplugin``) must match your plugin's
   ``name`` attribute.
 * ``spectrochempy`` must be listed as a dependency with a compatibility
-  range, e.g. ``spectrochempy>=0.9.0.dev0,<0.10``.
+   range, e.g. ``spectrochempy>=0.9,<0.10``.
 * Use ``requires-python = ">=3.11"`` to match SpectroChemPy's minimum.
 * Official plugins in the monorepo use a static ``version`` field.
   ``setuptools_scm`` is not used because plugin and core tags share the
@@ -127,7 +127,7 @@ Your plugin class must implement the
         name = "myplugin"
         version = "0.1.0"
         description = "My SpectroChemPy plugin"
-        spectrochempy_min_version = "0.9.0.dev0"
+        spectrochempy_min_version = "0.9.0"
         PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
 
         def register_readers(self) -> list[dict]:
@@ -245,7 +245,7 @@ published to Anaconda.org automatically by ``build_package.yml``.
       mamba install -c spectrocat -c conda-forge spectrochempy-nmr
 
 Plugin recipes should declare a bounded dependency on the core package,
-e.g. ``spectrochempy >=0.9.0.dev0,<0.10``.
+e.g. ``spectrochempy >=0.9,<0.10``.
 
 The ``plugin-template`` directory is excluded from discovery; it is a
 developer scaffold and must never be published.
