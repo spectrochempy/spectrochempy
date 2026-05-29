@@ -172,7 +172,6 @@ jobs:
           upload_package() {
             local label="$1"
             local force_flag="$2"
-            local skip_flag="${3:-}"
             local packages=(output/**/*.tar.bz2 output/**/*.conda)
 
             if [ ${#packages[@]} -eq 0 ]; then
@@ -184,14 +183,14 @@ jobs:
               echo "Uploading $package with label: $label"
               anaconda --token "$ANACONDA_API_TOKEN" whoami
               anaconda --token "$ANACONDA_API_TOKEN" show spectrocat/spectrochempy
-              anaconda --token "$ANACONDA_API_TOKEN" upload $skip_flag $force_flag -l "$label" "$package"
+              anaconda --token "$ANACONDA_API_TOKEN" upload $force_flag -l "$label" "$package"
             done
           }
 
           if [ "${{ github.event_name }}" = "release" ]; then
-            # Stable label: do not force overwrite. If a version already exists,
-            # skip it gracefully instead of failing.
-            upload_package "main" "" "--skip-existing"
+            # Stable label: force upload so the label is correctly set to
+            # "main", even if a push build already uploaded it to "dev".
+            upload_package "main" "--force"
           else
             # Dev label: allow overwrite so the latest dev build is always available.
             upload_package "dev" "--force"
@@ -354,14 +353,11 @@ jobs:
 
           label="dev"
           force_flag="--force"
-          skip_flag=""
           if [ "${{ github.event_name }}" = "release" ]; then
             label="main"
-            # Do NOT force overwrite on the stable label. If a version already
-            # exists, skip it gracefully instead of failing. This handles
-            # re-runs where the package was already uploaded successfully.
-            force_flag=""
-            skip_flag="--skip-existing"
+            # Use --force so the label is correctly set to "main" even if a
+            # push build already uploaded the same package to "dev" earlier.
+            force_flag="--force"
           fi
 
           for package in "${packages[@]}"; do
@@ -374,5 +370,5 @@ jobs:
               continue
             fi
             echo "Uploading $package with label: $label"
-            anaconda --token "$ANACONDA_API_TOKEN" upload $skip_flag $force_flag -l "$label" "$package"
+            anaconda --token "$ANACONDA_API_TOKEN" upload $force_flag -l "$label" "$package"
           done
