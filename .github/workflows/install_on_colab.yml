@@ -66,7 +66,7 @@ jobs:
             -c "
               pip install -q setuptools wheel build setuptools-scm && \
               git config --global --add safe.directory /workspace && \
-              SETUPTOOLS_SCM_PRETEND_VERSION_FOR_SPECTROCHEMPY=0.8.5.dev0 \
+              SETUPTOOLS_SCM_PRETEND_VERSION=0.9.0.dev0 \
                 pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode core-only
@@ -82,7 +82,7 @@ jobs:
             -c "
               pip install -q setuptools wheel build setuptools-scm && \
               git config --global --add safe.directory /workspace && \
-              SETUPTOOLS_SCM_PRETEND_VERSION_FOR_SPECTROCHEMPY=0.8.5.dev0 \
+              SETUPTOOLS_SCM_PRETEND_VERSION=0.9.0.dev0 \
                 pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint numpy-quaternion && \
               pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-iris && \

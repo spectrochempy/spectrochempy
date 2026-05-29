@@ -7,7 +7,7 @@
 #   - Release builds are uploaded to the main (stable) label.
 #   - The dev label is used for testing; stable packages should not be overwritten.
 #   - Plugin conda recipes should declare a bounded dependency on the core
-#     package, e.g.  spectrochempy >=0.8,<0.10
+#     package, e.g.  spectrochempy >=0.9.0.dev0,<0.10
 
 name: Build and publish packages 📦
 
@@ -109,6 +109,8 @@ jobs:
           cache-environment: true
 
       - name: Generate conda recipe
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION: 0.9.0.dev0
         run: |
           python3 .github/workflows/scripts/generate_conda_recipe.py
           cat recipe/recipe.yaml
@@ -261,6 +263,27 @@ jobs:
           create-args: >-
             python=3.11
           cache-environment: true
+
+      - name: Download core conda package
+        uses: actions/download-artifact@v4
+        with:
+          name: conda-package
+          path: /tmp/core-pkg
+
+      - name: Setup local conda channel from core build
+        run: |
+          echo "=== Artifact structure ==="
+          find /tmp/core-pkg -type f 2>/dev/null || echo "(empty)"
+          echo "=== Copying to local channel ==="
+          PARENT=$(dirname "${{ github.workspace }}")
+          mkdir -p "$PARENT/output"
+          if [ -d /tmp/core-pkg/output ]; then
+            cp -r /tmp/core-pkg/output/* "$PARENT/output/"
+          else
+            cp -r /tmp/core-pkg/* "$PARENT/output/"
+          fi
+          echo "=== Local channel contents ==="
+          find "$PARENT/output" -type f
 
       - name: Build conda plugin package
         uses: prefix-dev/rattler-build-action@v0.2.38
