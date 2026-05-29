@@ -72,8 +72,8 @@ Verifying Installation
 
 .. sourcecode:: python
 
-    from spectrochempy import *
-    print(version)
+    import spectrochempy as scp
+    print(scp.__version__)
 
 Updating SpectroChemPy
 ----------------------

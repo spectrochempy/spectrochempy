@@ -105,7 +105,7 @@ Verifying Installation
 
    .. code-block:: ipython
 
-      In [1]: from spectrochempy import *
+      In [1]: import spectrochempy as scp
 
 Next Steps
 ----------
