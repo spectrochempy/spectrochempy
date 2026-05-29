@@ -372,7 +372,7 @@ def savgol_filter(*args, **kwargs):
 
     Alias of `savgol`.
     """
-    # for backward compatibility TODO: should we deprecate this?
+    # for backward compatibility TODO: deprecate in 0.10 (prefer savgol)
     return savgol(*args, **kwargs)
 
 

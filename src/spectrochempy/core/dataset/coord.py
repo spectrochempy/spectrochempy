@@ -901,7 +901,7 @@ class Coord(NDMath, NDArray):
 
 # ======================================================================================
 # LinearCoord (Deprecated)
-# TODO : should be removed in version 0.8
+# TODO : should be removed in version 0.10 (overdue since 0.8)
 # ======================================================================================
 @tr.signature_has_traits
 class LinearCoord(Coord):
@@ -911,7 +911,7 @@ class LinearCoord(Coord):
         removed="0.8",
     )
     def __init__(self, **kwargs):
-        # TODO : remove in version 0.8
+        # TODO : remove in version 0.10
         super().__init__(**kwargs)
 
 
