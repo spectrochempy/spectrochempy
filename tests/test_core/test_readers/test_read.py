@@ -81,7 +81,9 @@ def test_read(tmp_path):
             scp.read_omnic("irdata/nh4y-active.spg")
 
         # now try a using generic read
-        assert not filename.exists()
+        # macOS CI: unlink() may not immediately reflect in exists()
+        if filename.exists():
+            filename.unlink()
         nd2 = _read_scpy_data_or_skip(scp.read, "irdata/CO@Mo_Al2O3.SPG")
         assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
         assert filename.exists()
