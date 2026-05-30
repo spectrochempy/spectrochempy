@@ -227,6 +227,18 @@ jobs:
             python3 docs/make.py -j1 html -T 0.6.10
           fi
 
+      # ---------- build missing stable versions for dropdown ----------
+      - name: Build missing stable versions
+        if: steps.preview.outputs.is_preview != 'true'
+        run: |
+          . .venv/bin/activate
+          if [ ! -d build/html/0.9.0 ]; then
+            echo "Creating local alias tag for v0.9.0"
+            git tag 0.9.0 spectrochempy-v0.9.0
+            echo "Building v0.9.0 docs"
+            python3 docs/make.py -j1 html -T 0.9.0
+          fi
+
       # ---------- install branch preview into gh-pages clone ----------
       - name: Install branch preview into gh-pages
         if: steps.preview.outputs.is_preview == 'true'

@@ -557,12 +557,15 @@ class BuildDocumentation:
 
     @staticmethod
     def _get_previous_tag():
-        # Get the previous tag from the git repository.
+        # Get the previous core release tag from the git repository.
+        # Filters for plain semver tags (e.g., 0.9.0) to exclude plugin tags.
         # Returns: str - The previous release tag
 
         sh("git fetch --tags", silent=True)
-        rev = sh("git rev-list --tags --max-count=1", silent=True)
-        result = sh(f"git describe --tags {rev}", silent=True)
+        result = sh(
+            "git tag -l '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -1",
+            silent=True,
+        )
         return result.strip()
 
     def _make_dirs(self):
@@ -788,8 +791,9 @@ class BuildDocumentation:
         layout_template = TEMPLATES / "layout.html"
         with open(layout_template) as f:
             content = f.read()
+            # replace the Jinja template expression with the actual version list
             content = content.replace(
-                "data-versions=\"{{ os.environ.get('PREVIOUS_VERSIONS', '') }}\"",
+                "data-versions=\"{{ previous_versions|join(',') if previous_versions else '' }}\"",
                 f'data-versions="{versions_str}"',
             )
 
