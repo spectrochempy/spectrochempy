@@ -562,11 +562,13 @@ class BuildDocumentation:
         # Returns: str - The previous release tag
 
         sh("git fetch --tags", silent=True)
-        result = sh(
-            "git tag -l '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -1",
+        tags = sh(
+            "git tag -l '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname",
             silent=True,
         )
-        return result.strip()
+        if tags:
+            return tags.strip().split("\n")[0]
+        return ""
 
     def _make_dirs(self):
         # Create the directories required to build the documentation.
