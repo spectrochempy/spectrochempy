@@ -113,8 +113,8 @@ jobs:
           set -e
           . .venv/bin/activate
           start=$SECONDS
-          uv pip install -e plugins/spectrochempy-nmr
-          uv pip install -e plugins/spectrochempy-iris
+          uv pip install --no-deps -e plugins/spectrochempy-nmr
+          uv pip install --no-deps -e plugins/spectrochempy-iris
           duration=$((SECONDS - start))
           echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 

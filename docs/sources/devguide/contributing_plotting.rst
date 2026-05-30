@@ -246,7 +246,7 @@ This happens in ``PlotPreferences._apply_style()``.
 
 Example:
 
-.. code-block:: python
+.. code-block:: text
 
     lines.linewidth : 0.75
     agg.path.chunksize : 20000.0
@@ -315,7 +315,7 @@ SpectroChemPy preserves these semantics by:
 
 Example:
 
-.. code-block:: python
+.. code-block:: text
 
     legend.framealpha : None
 
