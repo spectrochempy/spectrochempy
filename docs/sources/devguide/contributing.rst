@@ -129,3 +129,13 @@ Tips for Success
 * Ensure tests pass
 * Update your PR regularly
 * Follow the code style guidelines
+
+Maintainer and Release Notes
+============================
+
+Some project-maintenance procedures are documented separately in the
+``maintainers/`` directory. These notes cover operational topics such as release
+publishing, PyPI/TestPyPI behavior, conda builds, Zenodo issues, and emergency
+recovery procedures.
+
+See the `maintainers/ <https://github.com/spectrochempy/spectrochempy/tree/master/maintainers>`__ directory for details.

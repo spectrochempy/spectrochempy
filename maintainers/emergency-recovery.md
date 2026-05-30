@@ -128,6 +128,20 @@ Le job `build-and-publish_pypi` échoue dans le workflow
    le build échoue. Dans ce cas, supprimer la version sur PyPI ou
    incrémenter le numéro de version
 
+### Re-running a stable PyPI release
+
+Stable PyPI releases cannot overwrite an already published version. If a release
+workflow is re-run after the package version has already been uploaded to PyPI,
+the PyPI upload step is expected to fail.
+
+Do not treat this as a packaging regression. Either:
+
+- create a new release/tag with a new version, or
+- skip the PyPI upload if the existing artifact is already correct.
+
+This differs from some TestPyPI/dev workflows where ``skip-existing`` may be used
+to avoid hard failures during repeated test uploads.
+
 ### Résolution
 
 ```bash
