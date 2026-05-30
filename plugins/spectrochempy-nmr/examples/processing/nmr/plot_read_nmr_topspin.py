@@ -28,7 +28,6 @@ ds = scp.nmr.read_topspin(
     expno=1,
     remove_digital_filter=True,
 )
-
 print(f"Loaded dataset: {ds}")
 print(f"Shape: {ds.shape}")
 

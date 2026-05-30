@@ -16,8 +16,12 @@ on:
     branches:
       - master
       - fix/*
+    paths-ignore:
+      - 'docs/**'
 
   pull_request:
+    paths-ignore:
+      - 'docs/**'
 
   release:
     types: [published]

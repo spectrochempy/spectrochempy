@@ -26,12 +26,12 @@ Third-party Licenses
 
 - Reading of TOPSPIN NMR files and digital filter removal is based on
   `nmrglue <https://www.nmrglue.com>`_ open sourcepackage.
-   [J.J. Helmus, C.P. Jaroniec, Nmrglue: An open source Python package for the analysis of multidimensional NMR data, J. Biomol. NMR 2013, 55, 355-367.
-   `doi: 10.1007/s10858-013-9718-x <https://dx.doi.org/10.1007/s10858-013-9718-x>`_]. **nmrglue** is distributed under the BSD-3 License.
+  [J.J. Helmus, C.P. Jaroniec, Nmrglue: An open source Python package for the analysis of multidimensional NMR data, J. Biomol. NMR 2013, 55, 355-367.
+  `doi: 10.1007/s10858-013-9718-x <https://dx.doi.org/10.1007/s10858-013-9718-x>`_]. **nmrglue** is distributed under the BSD-3 License.
 
 - Reading of Opus files uses the
   `brukeropus <https://joshduran.github.io/brukeropus/brukeropus.html>`_ open source software.
-   **brukeropus** is distributed under the MIT License.
+  **brukeropus** is distributed under the MIT License.
 
 - Licenses about other works that may be partially included in SpectroChemPy can be
   found in the LICENCES folder as individual files and/or in the source code.

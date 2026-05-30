@@ -209,7 +209,7 @@ _ = region.plot(colorbar=True)
 #
 # - [More insight on the NDDataset objects](../userguide/objects/dataset/dataset.ipynb) section.
 # - [API Reference](../reference/index.rst) for a full list of available operations.
-# - [Plotting tutorial](../userguide/plotting/plotting.ipynb) for more information on advanced plotting.
+# - [Plotting tutorial](../userguide/plotting/index.rst) for more information on advanced plotting.
 
 # %% [markdown]
 # ## Data Processing Techniques
@@ -284,7 +284,7 @@ _ = blc.corrected.plot()
 #
 # Now that you've got a taste of SpectroChemPy's capabilities, here are some suggestions for diving deeper:
 #
-# - [Examples Gallery](examples/index) 📈: Browse through practical examples and use cases
-# - [User Guide](../userguide/index) 📖: Learn about specific features in detail
-# - [API Reference](../reference/index) 🔍: Explore the complete API documentation
+# - [Examples Gallery](examples/index.rst) 📈: Browse through practical examples and use cases
+# - [User Guide](../userguide/index.rst) 📖: Learn about specific features in detail
+# - [API Reference](../reference/index.rst) 🔍: Explore the complete API documentation
 # - [Get Help](https://github.com/spectrochempy/spectrochempy/discussions) 💬: Join our community discussions

@@ -48,7 +48,7 @@
 #
 # This offers a lot of flexibility in using NDDatasets that, we hope, will be useful
 # for applications.
-# See the [Examples](../../../gettingstarted/examples/gallery/auto_examples_core/index.rst) for
+# See the :ref:`examples-gallery` for
 # additional information about such possible applications.
 
 # %% [markdown]
@@ -372,7 +372,7 @@ d1D.to("K")
 
 # %% [markdown]
 # For more examples on how to use units with NDDataset, see the
-# [gallery example](../../../gettingstarted/examples/gallery/auto_examples_core/a_nddataset/plot_c_units.html)
+# :ref:`examples-gallery`.
 
 # %% [markdown]
 # ## Coordinates

@@ -1697,15 +1697,15 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 Colormap name. If None, auto-detected based on data.
                 Defaults to "viridis" (sequential) or "RdBu_r" (diverging).
             - cmap_mode : str, optional, default: "auto"
-                Colormap mode for 2D plots.
-                - "auto": automatically choose sequential or diverging based on data.
-                - "sequential": force sequential colormap (viridis).
-                - "diverging": force diverging colormap (RdBu_r).
+                Colormap mode for 2D plots. Possible values:
+                "auto" - automatically choose sequential or diverging based on data
+                "sequential" - force sequential colormap (viridis)
+                "diverging" - force diverging colormap (RdBu_r)
             - center : numeric or str, optional
-                Center value for diverging colormaps.
-                - None: use 0 for diverging mode.
-                - "auto": auto-detect center (0 if data crosses zero, else midpoint).
-                - numeric: use this value as center.
+                Center value for diverging colormaps. Possible values:
+                None - use 0 for diverging mode
+                "auto" - auto-detect center (0 if data crosses zero, else midpoint)
+                numeric - use this value as center
             - norm : matplotlib.colors.Normalize, optional
                 Explicit normalization object. If provided, overrides cmap and center.
             - contrast_safe : bool, optional, default: True
