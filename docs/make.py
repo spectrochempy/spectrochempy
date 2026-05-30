@@ -210,17 +210,15 @@ class BuildOldTagDocs:
 
             # Check for setup.py or pyproject.toml in different locations
             install_dir = workingdir
-            has_setup = (
-                (install_dir / "setup.py").exists()
-                or (install_dir / "pyproject.toml").exists()
-            )
+            has_setup = (install_dir / "setup.py").exists() or (
+                install_dir / "pyproject.toml"
+            ).exists()
             if not has_setup:
                 install_dir = install_dir / "scp"
                 print(f"Checking alternate location: {install_dir}")
-                has_setup = (
-                    (install_dir / "setup.py").exists()
-                    or (install_dir / "pyproject.toml").exists()
-                )
+                has_setup = (install_dir / "setup.py").exists() or (
+                    install_dir / "pyproject.toml"
+                ).exists()
                 if not has_setup:
                     raise FileNotFoundError(
                         f"No setup.py or pyproject.toml found in version {tagname} "
