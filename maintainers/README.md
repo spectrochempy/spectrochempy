@@ -4,7 +4,7 @@ Ce dossier contient la documentation destinée aux **mainteneurs** du projet
 SpectroChemPy. Elle décrit les procédures de publication, de déploiement et
 de récupération après incident.
 
-> **⚠️ Ce n'est pas de la documentation utilisateur.**  
+> **⚠️ Ce n'est pas de la documentation utilisateur.**
 > La documentation publique se trouve sur
 > [spectrochempy.fr](https://www.spectrochempy.fr) et dans le dossier
 > [`docs/`](../docs/).
