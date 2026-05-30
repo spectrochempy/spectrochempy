@@ -332,7 +332,7 @@ class TestMissingPluginError:
         """Accessing an attribute on a missing known namespace raises MissingPluginNamespaceError."""
         from spectrochempy.plugins.deps import MissingPluginNamespaceError
 
-        for ns_name in ("nmr", "iris", "cantera"):
+        for ns_name in ("nmr", "iris", "carroucell", "cantera"):
             ns = self._make_missing_namespace(ns_name, monkeypatch)
             with pytest.raises(MissingPluginNamespaceError) as excinfo:
                 _ = ns.some_attribute

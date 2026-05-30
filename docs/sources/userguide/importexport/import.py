@@ -89,7 +89,7 @@ X
 # | read_csv      | Comma-Separated Values (CSV) files             | .csv           |
 # | read_jcamp, <br/>read_dx| JCAMP-DX spectral data files                   | .dx, .jdx      |
 # | read_matlab,<br/>read_mat   | MATLAB files                                   | .mat, .dso     |
-# | read_topspin  | Bruker TopSpin NMR files                       | fid, ser, 1r, 1i, 2rr... |
+# | read_topspin  | Bruker TopSpin NMR files   (requires spectrochempy-nmr plugin)  | fid, ser, 1r, 1i, 2rr... |
 # | read_labspec  | LABSPEC6 spectral data files                   | .txt           |
 # | read_wire,<br/>read_wdf | Renishaw Wire files                     | .wdf           |
 # | read_scp      | SpectroChemPy-specific files                   | .scp           |

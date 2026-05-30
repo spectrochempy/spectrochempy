@@ -78,7 +78,7 @@ Si ce secret est expiré ou a été révoqué, le push est rejeté.
 ### Symptôme
 
 ```text
-Could not find a version that satisfies the requirement spectrochempy>=0.9.0.dev0
+Could not find a version that satisfies the requirement spectrochempy>=0.9
 ```
 
 ### Cause
@@ -185,7 +185,7 @@ Le job `build_and_publish_conda_package` échoue.
 ```
 Error: × Test failed: failed to setup test environment:
   │ └─ spectrochempy-iris ==0.1.1 cannot be installed because
-  │    └─ spectrochempy >=0.9.0.dev0,<0.10, which cannot be installed
+  │    └─ spectrochempy >=0.9,<0.10, which cannot be installed
 ```
 
 Le plugin est publié sur PyPI mais pas sur Anaconda.

@@ -18,8 +18,7 @@ jobs:
     if: |
       github.event.pull_request.merged == true
       && startsWith(github.event.pull_request.head.ref, 'release/')
-    # only merged pull requests from a release branch must trigger this job
-    # to trigger this only from spectrochempy master add this : && github.repository == 'spectrochempy/spectrochempy'
+      && github.repository == 'spectrochempy/spectrochempy'
 
     steps:
       - name: Extract version from branch name (for release branches)

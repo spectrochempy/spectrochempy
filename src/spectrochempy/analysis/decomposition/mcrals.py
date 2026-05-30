@@ -514,7 +514,7 @@ and `St`.
         # warn about deprecation
         # ----------------------
         # We use pop to remove the deprecated argument before processing the rest
-        # TODO: These arguments should be removed in version 0.7 probably
+        # TODO: These arguments should have been removed in 0.7; schedule for 0.10
 
         # verbose
         if "verbose" in kwargs:
