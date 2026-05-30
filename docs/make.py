@@ -348,7 +348,13 @@ class BuildDocumentation:
         self.tagname = settings["tagname"]
         if self.tagname:
             self.SRC = SRC = Path(kwargs.get("workingdir")) / "docs"
+            if (SRC / "sources").exists():
+                self.SRC = SRC = SRC / "sources"
             self.PROJECT_SOURCES = Path(kwargs.get("workingdir")) / "spectrochempy"
+            if not self.PROJECT_SOURCES.exists():
+                self.PROJECT_SOURCES = (
+                    Path(kwargs.get("workingdir")) / "src" / "spectrochempy"
+                )
         else:
             self.SRC = SRC = DOCS / "sources"
             self.PROJECT_SOURCES = PROJECT / "src" / "spectrochempy"
