@@ -30,7 +30,7 @@ pint>=0.24
 pypandoc
 pytz
 pyyaml
-pyzmq==25.1.2
+pyzmq
 requests
 scikit-image
 scikit-learn
