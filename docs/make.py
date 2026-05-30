@@ -208,16 +208,21 @@ class BuildOldTagDocs:
             print(f"Contents of {workingdir}:")
             sh(f"ls -la {workingdir}", silent=False)
 
-            # Check for setup.py in different locations
+            # Check for setup.py or pyproject.toml in different locations
             install_dir = workingdir
-            if not (install_dir / "setup.py").exists():
+            has_setup = (install_dir / "setup.py").exists() or (
+                install_dir / "pyproject.toml"
+            ).exists()
+            if not has_setup:
                 install_dir = install_dir / "scp"
                 print(f"Checking alternate location: {install_dir}")
-                if not install_dir.exists():
-                    print(f"scp directory not found at {install_dir}")
-                if not (install_dir / "setup.py").exists():
+                has_setup = (install_dir / "setup.py").exists() or (
+                    install_dir / "pyproject.toml"
+                ).exists()
+                if not has_setup:
                     raise FileNotFoundError(
-                        f"No setup.py found in version {tagname} (checked {workingdir} and {install_dir})"
+                        f"No setup.py or pyproject.toml found in version {tagname} "
+                        f"(checked {workingdir} and {install_dir})"
                     )
 
             print(f"Installing from: {install_dir}")
