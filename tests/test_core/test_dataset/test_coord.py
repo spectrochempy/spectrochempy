@@ -23,8 +23,6 @@ from spectrochempy.utils.testing import (
     assert_array_equal,
     assert_units_equal,
 )
-from spectrochempy.utils.warnings import assert_produces_warning
-
 # --------------------------------------------------------------------------------------
 # Coord
 # --------------------------------------------------------------------------------------
@@ -571,16 +569,3 @@ def test_coord_not_implemented(name):
     )
     with pytest.raises(NotImplementedError):
         getattr(coord0, name)()
-
-
-def test_linearcoord():
-    from spectrochempy.core.dataset.coord import LinearCoord
-
-    with assert_produces_warning(DeprecationWarning, check_stacklevel=False):
-        _ = LinearCoord(offset=0, increment=10, size=10)
-
-    # test it for creation using offset and increment
-    coord0 = LinearCoord(offset=1, increment=10, size=10)
-    assert isinstance(coord0, LinearCoord)
-    assert coord0[0] == 1
-    assert_array_equal(coord0.data, Coord.arange(1, 100, 10).data)

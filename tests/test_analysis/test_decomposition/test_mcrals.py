@@ -315,21 +315,6 @@ def test_MCRALS_errors(model, data):
         mcr.nonnegConc = [0, 1, 1]
     assert "please check the" in e.value.args[0]
 
-    # guess = C, test with deprecated parameters
-    # and few other parameters set to non-default values to improve coverage
-    with testing.catch_warnings(DeprecationWarning) as w:
-        MCRALS(unimodMod="strict")
-    print(w)
-    assert w[0].category == DeprecationWarning
-
-    with testing.catch_warnings(DeprecationWarning) as w:
-        MCRALS(unimodTol=1.0)
-    assert w[0].category == DeprecationWarning
-
-    with testing.catch_warnings(DeprecationWarning) as w:
-        MCRALS(verbose=True)
-    assert w[0].category == DeprecationWarning
-
     with pytest.raises(tr.TraitError):
         mcr.unimodSpec = "alls"
 

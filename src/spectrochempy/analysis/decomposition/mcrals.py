@@ -168,8 +168,8 @@ class MCRALS(DecompositionAnalysis):
 
 Correction is applied only if:
 
-- ``C[i,j] > C[i-1,j] * unimodTol`` on the decreasing branch of profile ``#j``,
-- ``C[i,j] < C[i-1,j] * unimodTol`` on the increasing branch of profile ``#j``."""
+- ``C[i,j] > C[i-1,j] * unimodConcTol`` on the decreasing branch of profile ``#j``,
+- ``C[i,j] < C[i-1,j] * unimodConcTol`` on the increasing branch of profile ``#j``."""
         ),
     ).tag(config=True)
 
@@ -189,7 +189,7 @@ Correction is applied only if:
         default_value=1.1,
         help=r"""Tolerance parameter for monotonic decrease.
 
-Correction is applied only if: ``C[i,j] > C[i-1,j] * unimodTol`` .""",
+Correction is applied only if: ``C[i,j] > C[i-1,j] * monoDecTol`` .""",
     ).tag(config=True)
 
     monoIncConc = tr.List(
@@ -208,7 +208,7 @@ Correction is applied only if: ``C[i,j] > C[i-1,j] * unimodTol`` .""",
         default_value=1.1,
         help=r"""Tolerance parameter for monotonic decrease.
 
-Correction is applied only if ``C[i,j] < C[i-1,j] * unimodTol`` along profile ``#j``.""",
+Correction is applied only if ``C[i,j] < C[i-1,j] * monoIncTol`` along profile ``#j``.""",
     ).tag(config=True)
 
     unimodConc = tr.Union(
@@ -414,7 +414,7 @@ and `C[:,hardConc]`.
 
 Correction is applied only if the deviating point ``St[j, i]`` is larger than
 ``St[j, i-1] * unimodSpecTol`` on the decreasing branch of profile
-``#j``, or lower than ``St[j, i-1] * unimodTol`` on the increasing branch of
+``#j``, or lower than ``St[j, i-1] * unimodSpecTol`` on the increasing branch of
 profile  ``#j``."""
         ),
     ).tag(config=True)
@@ -510,38 +510,6 @@ and `St`.
                 "Instead, use MCRAL() followed by MCRALS.fit(X, profile). "
                 "See the documentation and examples",
             )
-
-        # warn about deprecation
-        # ----------------------
-        # We use pop to remove the deprecated argument before processing the rest
-        # TODO: These arguments should have been removed in 0.7; schedule for 0.10
-
-        # verbose
-        if "verbose" in kwargs:
-            deprecated("verbose", replace="log_level='INFO'", removed="0.7")
-            verbose = kwargs.pop("verbose")
-            if verbose:
-                log_level = "INFO"
-
-        # unimodTol deprecation
-        if "unimodTol" in kwargs:
-            deprecated("unimodTol", replace="unimodConcTol", removed="0.7")
-            kwargs["unimodConcTol"] = kwargs.pop("unimodTol")
-
-        # unimodMod deprecation
-        if "unimodMod" in kwargs:
-            deprecated("unimodMod", replace="unimodConcMod", removed="0.7")
-            kwargs["unimodConcMod"] = kwargs.pop("unimodMod")
-
-        # hardC_to_C_idx deprecation
-        if "hardC_to_C_idx" in kwargs:
-            deprecated("hardC_to_C_idx", replace="getC_to_C_idx", removed="0.7")
-            kwargs["getC_to_C_idx"] = kwargs.pop("hardC_to_C_idx")
-
-        # hardSt_to_St_idx deprecation
-        if "hardSt_to_St_idx" in kwargs:
-            deprecated("hardSt_to_St_idx", replace="getSt_to_St_idx", removed="0.7")
-            kwargs["getSt_to_St_idx"] = kwargs.pop("hardSt_to_St_idx")
 
         # call the super class for initialisation
         super().__init__(
@@ -1343,8 +1311,8 @@ def _unimodal_2D(a, axis, idxes, tol, mod):
     #
     # tol: float
     #     Tolerance parameter for unimodality. Correction is applied only if:
-    #     `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
-    #     `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
+    #     `a[i] > a[i-1] * tol`  on a decreasing branch of profile,
+    #     `a[i] < a[i-1] * tol`  on an increasing branch of profile.
 
     if axis == 0:
         a_ = a
@@ -1374,8 +1342,8 @@ def _unimodal_1D(a: np.ndarray, tol: str, mod: str) -> np.ndarray:
     #
     # tol: float
     #     Tolerance parameter for unimodality. Correction is applied only if:
-    #     `a[i] > a[i-1] * unimodTol`  on a decreasing branch of profile,
-    #     `a[i] < a[i-1] * unimodTol`  on an increasing branch of profile.
+    #     `a[i] > a[i-1] * tol`  on a decreasing branch of profile,
+    #     `a[i] < a[i-1] * tol`  on an increasing branch of profile.
 
     maxid = np.argmax(a)
     curmax = max(a)
