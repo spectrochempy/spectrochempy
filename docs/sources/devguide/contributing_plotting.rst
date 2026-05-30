@@ -1,7 +1,7 @@
 .. _contributing_plotting:
 
 Plotting Architecture and Lazy Matplotlib Integration
-==================================================
+=====================================================
 
 Plotting in SpectroChemPy is built on top of Matplotlib but deliberately avoids
 direct, uncontrolled manipulation of ``matplotlib.rcParams`` and pyplot state.
@@ -28,7 +28,7 @@ contributors should extend or modify plotting behavior.
 
 
 High-Level Architecture
-----------------------
+-----------------------
 
 The key components are:
 
@@ -62,7 +62,7 @@ are deferred. However, some plotting modules have unavoidable matplotlib imports
 at module level for reading defaults.
 
 Actual Architecture (Simplified)
--------------------------------
+--------------------------------
 
 The current implementation uses a simplified architecture:
 
@@ -102,7 +102,7 @@ Lazy Initialization System
 SpectroChemPy implements lazy matplotlib initialization to reduce import overhead.
 
 Core Components
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 The lazy system is implemented in ``spectrochempy.core.plotters.plot_setup``:
 
@@ -119,7 +119,7 @@ The lazy system is implemented in ``spectrochempy.core.plotters.plot_setup``:
         _MPL_READY = True
 
 Implementation Details
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 - **State tracking**: A simple boolean flag (``_MPL_READY``), not a complex state machine
 - **No threading lock**: The current implementation is single-threaded; the lock was designed but not implemented
@@ -127,7 +127,7 @@ Implementation Details
 - **Minimal**: Only sets the ready flag; actual matplotlib setup happens on first use
 
 Trigger Points
-^^^^^^^^^^^^^
+^^^^^^^^^^^^^^
 
 Matplotlib initialization is triggered from multiple entry points:
 
@@ -156,7 +156,7 @@ Benefits
 - **Local application**: No global state modification
 
 Import Behavior Clarification
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The lazy system **reduces** but does **not fully eliminate** matplotlib imports at module load time:
 
@@ -195,7 +195,7 @@ Key properties:
 
 Mapping back to Matplotlib keys is handled automatically:
 
-.. code-block:: python
+.. code-block:: text
 
     axes_facecolor  →  "axes.facecolor"
 
@@ -230,7 +230,7 @@ Contributors should **never write to ``rcParams`` directly**. Instead:
 
 
 Step 3: Style Sheets Are Parsed, Not Applied
----------------------------------------------
+--------------------------------------------
 
 Matplotlib style sheets (``.mplstyle`` files) are **not** applied using
 ``plt.style.use()``.
@@ -277,7 +277,7 @@ Implemented in ``_coerce_style_value()``:
 
 Example:
 
-.. code-block:: python
+.. code-block:: text
 
     "20000.0" → 20000.0
     "true"    → True
@@ -323,7 +323,7 @@ is kept as string ``"None"`` for compatibility with Matplotlib.
 
 
 Step 6: Logical vs File-Based Styles
--------------------------------------
+------------------------------------
 
 Some Matplotlib styles are *logical*, not file-based.
 
@@ -388,7 +388,7 @@ Common failure modes:
 
 
 Performance Guidelines for Contributors
--------------------------------------
+---------------------------------------
 
 When contributing to plotting code:
 

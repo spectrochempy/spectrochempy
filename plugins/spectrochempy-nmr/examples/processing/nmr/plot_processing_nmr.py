@@ -29,6 +29,7 @@ nmrdir = datadir / "nmrdata"
 dataset = scp.nmr.read_topspin(
     nmrdir / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "pdata" / "1" / "2rr"
 )
+assert dataset is not None, "read_topspin returned None — check data path or plugin installation"
 
 
 # %%

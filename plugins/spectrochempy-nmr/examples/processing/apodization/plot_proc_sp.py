@@ -24,6 +24,7 @@ path = DATADIR / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
 
 # %%
 dataset1D = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
+assert dataset1D is not None, "read_topspin returned None — check data path or plugin installation"
 dataset1D
 
 # %%

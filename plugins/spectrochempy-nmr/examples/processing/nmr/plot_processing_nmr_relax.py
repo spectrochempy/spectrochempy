@@ -30,6 +30,7 @@ datadir = scp.preferences.datadir
 nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr"
 
 dataset = scp.nmr.read_topspin(nmrdir / "relax" / "100" / "ser", use_list="vdlist")
+assert dataset is not None, "read_topspin returned None — check data path or plugin installation"
 
 # %%
 # Analysing the data

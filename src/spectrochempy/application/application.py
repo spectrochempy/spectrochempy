@@ -660,20 +660,20 @@ def _start_testdata_download():
 
 
 def error_(*args, **kwargs):
-    """Forward to app.error_."""
+    """Forward to the ``error_`` method on the application instance."""
     return _get_error_()(*args, **kwargs)
 
 
 def info_(*args, **kwargs):
-    """Forward to app.info_."""
+    """Forward to the ``info_`` method on the application instance."""
     return _get_info_()(*args, **kwargs)
 
 
 def debug_(*args, **kwargs):
-    """Forward to app.debug_."""
+    """Forward to the ``debug_`` method on the application instance."""
     return _get_debug_()(*args, **kwargs)
 
 
 def warning_(*args, **kwargs):
-    """Forward to app.warning_."""
+    """Forward to the ``warning_`` method on the application instance."""
     return _get_warning_()(*args, **kwargs)

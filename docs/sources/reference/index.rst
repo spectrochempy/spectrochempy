@@ -172,8 +172,7 @@ Import a NDataset from external source
 
     load
     read
-    read_topspin \*
-    read_carroucell \*
+    read_topspin
     read_csv
     read_ddr
     read_dir
@@ -397,8 +396,6 @@ Complex
     :nosignatures:
     :toctree: generated/
 
-    real
-    imag
     conj
     conjugate
     abs
@@ -804,5 +801,5 @@ File
 
 .. note::
 
-   ``\*``  These readers require the corresponding official plugin
-   (e.g. ``pip install spectrochempy[nmr]`` for ``read_topspin``)
+   ``read_topspin`` requires the official ``spectrochempy[nmr]`` plugin
+   (i.e. ``pip install spectrochempy[nmr]``).

@@ -28,7 +28,7 @@ ds = scp.nmr.read_topspin(
     expno=1,
     remove_digital_filter=True,
 )
-
+assert ds is not None, "read_topspin returned None — check data path or plugin installation"
 print(f"Loaded dataset: {ds}")
 print(f"Shape: {ds.shape}")
 
