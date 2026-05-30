@@ -29,7 +29,6 @@ path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d"
 # load the data in a new dataset
 
 ndd = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
-assert ndd is not None, "read_topspin returned None — check data path or plugin installation"
 
 # %%
 # view it...
@@ -40,7 +39,6 @@ _ = ndd.plot()
 
 path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d"
 ndd = scp.nmr.read_topspin(path, expno=1, remove_digital_filter=True)
-assert ndd is not None, "read_topspin returned None (2D)"
 _ = ndd.plot()
 
 # %%

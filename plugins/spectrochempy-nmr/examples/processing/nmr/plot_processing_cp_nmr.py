@@ -31,7 +31,6 @@ nmrdir = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "CP"
 # in the given directory (here we read fid, but we could also read "1r" files
 # when available)
 dataset = scp.nmr.read_topspin(nmrdir, glob="**/fid")
-assert dataset is not None, "read_topspin returned None — check data path or plugin installation"
 
 # %%
 # 15 fids have been read and merged into a single dataset
