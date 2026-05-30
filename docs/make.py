@@ -245,12 +245,15 @@ class BuildOldTagDocs:
                 raise FileNotFoundError(f"Requirements file not found at {req_file}")
             os.system(f"{uv} pip install -r {req_file} --force-reinstall")
             print("Installing package in development mode...")
-            os.system(f"{uv} pip install -e {str(install_dir)} --no-deps")
+            os.system(f"{uv} pip install -e {str(install_dir)}")
 
             # Add package directory to Python path
+            # Supports both flat layout (install_dir/spectrochempy) and src layout (install_dir/src/spectrochempy)
             package_dir = workingdir / "spectrochempy"
             if not package_dir.exists():
                 package_dir = install_dir / "spectrochempy"
+            if not package_dir.exists():
+                package_dir = install_dir / "src" / "spectrochempy"
             if package_dir.exists() and str(package_dir.parent) not in sys.path:
                 sys.path.insert(0, str(package_dir.parent))
 
