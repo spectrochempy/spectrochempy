@@ -684,6 +684,16 @@ class BuildDocumentation:
         # Run the Sphinx build process.
         # Returns: int - Sphinx build result
 
+        # imghdr was removed in Python 3.13 but Sphinx 5.3's epub3 builder still imports it
+        try:
+            import imghdr  # noqa: F401
+        except ImportError:
+            import types as _types
+
+            _imghdr = _types.ModuleType("imghdr")
+            _imghdr.__dict__.update({"what": lambda *a, **kw: None, "tests": []})
+            sys.modules["imghdr"] = _imghdr
+
         from sphinx.application import Sphinx
         from sphinx.errors import ExtensionError
 
