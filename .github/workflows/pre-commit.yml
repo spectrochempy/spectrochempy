@@ -28,7 +28,12 @@ jobs:
           echo "::error::No core tag found — cannot determine core version"
           exit 1
         fi
-        CORE_VERSION="${LATEST_CORE_TAG#spectrochempy-v}.dev0"
-        echo "Using core version: $CORE_VERSION"
+        BASE="${LATEST_CORE_TAG#spectrochempy-v}"
+        MAJOR="${BASE%%.*}"
+        REST="${BASE#*.}"
+        MINOR="${REST%%.*}"
+        PATCH="${REST#*.}"
+        CORE_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1)).dev0"
+        echo "Using core version: $CORE_VERSION (from tag $LATEST_CORE_TAG)"
         echo "SETUPTOOLS_SCM_PRETEND_VERSION=$CORE_VERSION" >> "$GITHUB_ENV"
     - uses: pre-commit/action@v3.0.1
