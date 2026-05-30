@@ -10,7 +10,6 @@ import traitlets as tr
 import spectrochempy.utils.traits as mtr
 from spectrochempy.extern.whittaker_smooth import whittaker_smooth as ws
 from spectrochempy.processing._base._processingbase import ProcessingConfigurable
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 __dataset_methods__ = [
@@ -138,7 +137,7 @@ The type of extension to use for the padded signal to which the filter is applie
 * When mode is ‘constant’, the padding value is given by `cval`.
 * When the ‘interp’ mode is selected (the default), no extension is used.
   Instead, a polynomial of degree `order` is fit to the last `size` values
-  of the edges, and this polynomial is used to evaluate the last window_length // 2
+  of the edges, and this polynomial is used to evaluate the last size // 2
   output values.
 * When mode is ‘nearest’, the last size values are repeated.
 * When mode is ‘mirror’, the padding is created by reflecting the signal about the end
@@ -227,14 +226,6 @@ and ‘nearest’.
         return data
 
 
-# TODO history
-#     new.history = (
-#         f"savgol_filter applied (window_length={window_length}, "
-#         f"polyorder={polyorder}, deriv={deriv}, delta={delta}, mode={mode}, "
-#         f"cval={cval}"
-#     )
-
-
 # ======================================================================================
 # API / NDDataset functions
 # ======================================================================================
@@ -290,10 +281,6 @@ def smooth(dataset, size=5, window="avg", **kwargs):
             window = "avg"
         if window == "hanning":
             window = "han"
-
-        if kwargs.get("window_length") is not None:
-            deprecated("window_length", replace="size", removed="0.8")
-            size = kwargs.pop("window_length")
 
         return Filter(method=window, size=size, **kwargs).transform(dataset)
     raise ValueError(
@@ -355,14 +342,6 @@ def savgol(dataset, size=5, order=2, **kwargs):
     """
     # TODO : check if coordinates are evenly spaced
 
-    if kwargs.get("window_length") is not None:
-        deprecated("window_length", replace="size", removed="0.8")
-        size = kwargs.pop("window_length")
-
-    if kwargs.get("polyorder") is not None:
-        deprecated("polyorder", replace="order", removed="0.8")
-        order = kwargs.pop("polyorder")
-
     return Filter(method="savgol", size=size, order=order, **kwargs).transform(dataset)
 
 
@@ -372,7 +351,6 @@ def savgol_filter(*args, **kwargs):
 
     Alias of `savgol`.
     """
-    # for backward compatibility TODO: deprecate in 0.10 (prefer savgol)
     return savgol(*args, **kwargs)
 
 
