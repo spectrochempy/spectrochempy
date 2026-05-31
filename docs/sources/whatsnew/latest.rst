@@ -9,6 +9,9 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 New Features
 ~~~~~~~~~~~~
 
+- Add PyPI ``README.md`` description to all official plugin packages (``spectrochempy-nmr``,
+  ``spectrochempy-iris``, ``spectrochempy-hypercomplex``, ``spectrochempy-carroucell``,
+  ``spectrochempy-cantera``).
 - Add :mod:`spectrochempy-hypercomplex` to CI test selection and install from local checkout in docs CI.
 - Vectorise :func:`~spectrochempy_hypercomplex._quaternion.as_quaternion` with :func:`numpy.stack` for better performance.
 - Add :mod:`bump_plugin_init_version.py` script to bump plugin class ``version`` attribute on release, with cross-source verification.
