@@ -41,7 +41,20 @@ ZENODO = PROJECT / "zenodo.json"
 DOCS = PROJECT / "docs"
 WN = DOCS / "sources" / "whatsnew"
 
-gitversion = get_version(root=PROJECT, relative_to=__file__)
+gitversion = get_version(
+    root=PROJECT,
+    relative_to=__file__,
+    git_describe_command=[
+        "git",
+        "describe",
+        "--long",
+        "--tags",
+        "--always",
+        "--first-parent",
+        "--match",
+        "spectrochempy-v[0-9]*",
+    ],
+)
 
 
 class Zenodo:
