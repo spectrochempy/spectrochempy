@@ -109,6 +109,8 @@ def test_capability_query():
 
 def test_package_namespace_uses_isolated_plugin_manager(monkeypatch):
     """scp.iris exposes package-level IRIS APIs from the registered plugin."""
+    import sys
+
     import spectrochempy as scp
 
     harness = PluginTestHarness()
@@ -116,6 +118,7 @@ def test_package_namespace_uses_isolated_plugin_manager(monkeypatch):
     monkeypatch.setattr(scp, "plugin_manager", harness.manager)
     monkeypatch.setattr(scp, "registry", harness.registry)
     monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+    monkeypatch.delitem(sys.modules, "spectrochempy.iris", raising=False)
 
     assert scp.iris.batch_iris is batch_iris_analysis
     assert scp.iris.compare_kernels is compare_kernel_models
@@ -124,6 +127,8 @@ def test_package_namespace_uses_isolated_plugin_manager(monkeypatch):
 
 def test_iris_namespace_does_not_shadow_load_iris(monkeypatch):
     """The IRIS plugin namespace does not collide with the core load_iris API."""
+    import sys
+
     import spectrochempy as scp
 
     harness = PluginTestHarness()
@@ -131,6 +136,7 @@ def test_iris_namespace_does_not_shadow_load_iris(monkeypatch):
     monkeypatch.setattr(scp, "plugin_manager", harness.manager)
     monkeypatch.setattr(scp, "registry", harness.registry)
     monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+    monkeypatch.delitem(sys.modules, "spectrochempy.iris", raising=False)
 
     assert callable(scp.load_iris)
     assert scp.iris.batch_iris is batch_iris_analysis
@@ -148,6 +154,7 @@ def test_iris_namespace_exposes_lazy_module_classes(monkeypatch):
     monkeypatch.setattr(scp, "plugin_manager", harness.manager)
     monkeypatch.setattr(scp, "registry", harness.registry)
     monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+    monkeypatch.delitem(sys.modules, "spectrochempy.iris", raising=False)
     monkeypatch.delitem(sys.modules, "spectrochempy_iris._core", raising=False)
 
     namespace = scp.iris
@@ -169,6 +176,8 @@ def test_iris_namespace_exposes_lazy_module_classes(monkeypatch):
 
 def test_from_spectrochempy_import_iris_supports_lazy_classes(monkeypatch):
     """Importing iris from spectrochempy returns the same lazy namespace API."""
+    import sys
+
     import spectrochempy as scp
 
     harness = PluginTestHarness()
@@ -176,6 +185,7 @@ def test_from_spectrochempy_import_iris_supports_lazy_classes(monkeypatch):
     monkeypatch.setattr(scp, "plugin_manager", harness.manager)
     monkeypatch.setattr(scp, "registry", harness.registry)
     monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+    monkeypatch.delitem(sys.modules, "spectrochempy.iris", raising=False)
 
     from spectrochempy import iris
 
@@ -199,6 +209,8 @@ _IRIS_ROOT_ALIASES = [
 
 def test_iris_namespaced_api_no_warning(monkeypatch):
     """scp.iris.* public objects are accessible without DeprecationWarning."""
+    import sys
+
     import spectrochempy as scp
 
     harness = PluginTestHarness()
@@ -206,6 +218,7 @@ def test_iris_namespaced_api_no_warning(monkeypatch):
     monkeypatch.setattr(scp, "plugin_manager", harness.manager)
     monkeypatch.setattr(scp, "registry", harness.registry)
     monkeypatch.delitem(scp.__dict__, "iris", raising=False)
+    monkeypatch.delitem(sys.modules, "spectrochempy.iris", raising=False)
 
     with warnings.catch_warnings(record=True) as captured:
         warnings.simplefilter("always", DeprecationWarning)

@@ -1,38 +1,85 @@
 # ruff: noqa: S101
+from importlib.metadata import version
+
 import numpy as np
 import pytest
+from spectrochempy_hypercomplex import HyperComplexPlugin
+
+import spectrochempy as scp
+from spectrochempy.api.plugins import PluginCapability
+from spectrochempy.api.plugins import PluginState
+from spectrochempy.api.plugins import check_plugin_compatibility
+from spectrochempy.testing.plugins import PluginTestHarness
+
+
+class TestPluginLifecycle:
+    def test_import(self):
+        import spectrochempy_hypercomplex  # noqa: F401
+
+    def test_plugin_metadata(self):
+        plugin = HyperComplexPlugin()
+        assert plugin.name == "hypercomplex"
+        assert plugin.description
+        assert PluginCapability.ACCESSOR in plugin.capabilities
+
+    def test_plugin_version(self):
+        plugin = HyperComplexPlugin()
+        assert plugin.version
+        assert isinstance(plugin.version, str)
+        pkg_ver = version("spectrochempy-hypercomplex")
+        assert plugin.version == pkg_ver, (
+            f"Plugin version {plugin.version} != package version {pkg_ver}. "
+            "Run `pip install -e` to sync."
+        )
+
+    def test_plugin_compatibility(self):
+        plugin = HyperComplexPlugin()
+        issues = check_plugin_compatibility(plugin)
+        assert not issues, f"Compatibility issues: {issues}"
+
+    def test_registration(self):
+        harness = PluginTestHarness()
+        harness.register(HyperComplexPlugin())
+
+        accessors = list(harness.registry.available_accessors)
+        assert "hyper" in accessors
+
+    def test_lifecycle_state(self):
+        harness = PluginTestHarness()
+        harness.register(HyperComplexPlugin())
+        assert harness.get_plugin_state("hypercomplex") == PluginState.ACTIVE
+
+    def test_accessor_registered_via_plugin(self):
+        harness = PluginTestHarness()
+        harness.register(HyperComplexPlugin())
+
+        acc = harness.get_accessor("hyper")
+        assert acc is not None
+        assert acc["obj"] is not None
+        assert acc["metadata"]["plugin"] == "hypercomplex"
+        assert acc["metadata"]["namespace"] == "hypercomplex"
 
 
 class TestHyperAccessor:
     def test_accessor_registered(self):
-        import spectrochempy as scp
-
         ds = scp.NDDataset([1.0, 2.0, 3.0])
         assert hasattr(ds, "hyper")
 
     def test_is_quaternion_false_for_real(self):
-        import spectrochempy as scp
-
         ds = scp.NDDataset([1.0, 2.0, 3.0])
         assert ds.hyper.is_quaternion is False
 
     def test_set_quaternion_creates_quaternion_dtype(self):
-        import spectrochempy as scp
-
         ds = scp.NDDataset([1.0, 2.0, 3.0, 4.0])
         result = ds.hyper.set_quaternion()
         assert result._data.dtype.name == "quaternion"
 
     def test_component_real_data_noop(self):
-        import spectrochempy as scp
-
         ds = scp.NDDataset([1.0, 2.0, 3.0])
         result = ds.hyper.component("RR")
         assert result is not None
 
     def test_RR_RI_IR_II_raise_for_real(self):
-        import spectrochempy as scp
-
         ds = scp.NDDataset([1.0, 2.0, 3.0])
         for prop in ["RR", "RI", "IR", "II"]:
             with pytest.raises(TypeError):
