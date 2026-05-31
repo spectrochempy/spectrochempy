@@ -5,8 +5,8 @@
 # ======================================================================================
 # ruff: noqa
 """
-Loading of experimental 1D NMR data
-===================================
+Loading of experimental NMR data
+=================================
 
 In this example, we load a NMR dataset (in the Bruker format) and plot it.
 
