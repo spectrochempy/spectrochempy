@@ -1201,6 +1201,15 @@ def _read_topspin(*args, **kwargs):
         if meta.iscomplex[axis]:
             if axis != parmode and _hypercomplex_available:  # noqa: SIM102
                 meta.td[axis] = meta.td[axis] // 2
+                # Halve data along this axis to match the td adjustment.
+                # For States/States-TPPI each pair of rows (cos, sin) is
+                # combined into a single complex row.
+                slices = [slice(None)] * data.ndim
+                slices[axis] = slice(0, None, 2)
+                data_even = data[tuple(slices)]
+                slices[axis] = slice(1, None, 2)
+                data_odd = data[tuple(slices)]
+                data = data_even + 1j * data_odd
             meta.tdeff[axis] = meta.tdeff[axis] // 2
 
     meta.sw_h = [
@@ -1303,6 +1312,16 @@ def _read_topspin(*args, **kwargs):
         if cplex and axis > 0:
             try:
                 dataset.hyper.set_quaternion(inplace=True)
+                # set_quaternion halves the last complex dimension.
+                # Update meta.td and rebuild the corresponding coordinate.
+                meta.td[-1] = dataset.data.shape[-1]
+                if not meta.isfreq[-1]:
+                    dw = (1.0 / meta.sw_h[-1]).to("us")
+                    coordpoints = np.arange(meta.td[-1])
+                    coords[-1] = Coord(
+                        coordpoints * dw,
+                        title=coords[-1].title,
+                    )
             except AttributeError:
                 warning_(
                     "2D hypercomplex NMR data requires the spectrochempy-hypercomplex "

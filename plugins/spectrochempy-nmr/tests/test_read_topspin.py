@@ -26,7 +26,7 @@ def test_read_topspin():
     assert str(nd) == "NDDataset: [complex128] pp (size: 16384)"
 
     nd = scp.read_topspin(nmrdir / "topspin_2d/1/ser")
-    assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:96, x:948))"
+    assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:96, x:474))"
 
     nd = scp.read_topspin(nmrdir / "topspin_2d/1/pdata/1/2rr")
     assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:1024, x:2048))"
