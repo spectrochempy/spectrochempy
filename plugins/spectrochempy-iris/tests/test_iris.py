@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import warnings
+from importlib.metadata import version
 
 import numpy as np
 import pytest
@@ -58,7 +59,7 @@ def test_plugin_metadata():
     """Plugin declares IRIS-related capabilities."""
     plugin = IrisPlugin()
     assert plugin.name == "iris"
-    assert plugin.version == "0.1.0"
+    assert plugin.version == version("spectrochempy-iris")
     assert plugin.description
     assert PluginCapability.ANALYSIS in plugin.capabilities
     assert PluginCapability.VISUALIZER in plugin.capabilities

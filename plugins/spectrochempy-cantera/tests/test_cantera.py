@@ -7,6 +7,7 @@ from __future__ import annotations
 import sys
 import warnings
 from importlib import import_module
+from importlib.metadata import version
 
 import pytest
 
@@ -82,7 +83,7 @@ def test_plugin_metadata():
     """Plugin has required metadata fields (PFR scope only)."""
     plugin = _cantera_plugin()
     assert plugin.name == "cantera"
-    assert plugin.version == "0.1.0"
+    assert plugin.version == version("spectrochempy-cantera")
     assert plugin.description
     assert PluginCapability.SIMULATION in plugin.capabilities
     assert PluginCapability.ANALYSIS not in plugin.capabilities
