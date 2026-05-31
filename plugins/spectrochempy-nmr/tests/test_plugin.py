@@ -3,6 +3,7 @@
 """Tests for spectrochempy-nmr plugin registration and lifecycle."""
 
 import warnings
+from importlib.metadata import version
 
 import pytest
 from spectrochempy_nmr import NMRPlugin
@@ -40,7 +41,7 @@ def test_plugin_metadata():
     """Plugin has required metadata fields."""
     plugin = NMRPlugin()
     assert plugin.name == "nmr"
-    assert plugin.version == "0.1.0"
+    assert plugin.version == version("spectrochempy-nmr")
     assert plugin.description
     assert PluginCapability.READER in plugin.capabilities
 

@@ -67,7 +67,8 @@ def test_public_nmr_namespace_exposes_set_nmr_context(monkeypatch):
 def test_coord_larmor_conversion_uses_plugin_unit_context(monkeypatch):
     _isolated_plugin_manager(monkeypatch, with_nmr=True)
 
-    coord = scp.Coord([0.0, 10000.0], units="Hz", larmor=100 * scp.ur.MHz)
+    coord = scp.Coord([0.0, 10000.0], units="Hz")
+    coord.meta["larmor"] = 100 * scp.ur.MHz
     ppm = coord.to("ppm")
     hz = ppm.to("Hz")
 

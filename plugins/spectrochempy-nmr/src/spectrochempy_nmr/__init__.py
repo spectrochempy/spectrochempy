@@ -32,13 +32,13 @@ def _coord_has_larmor(obj) -> bool:
     return (
         callable(implements)
         and implements("Coord")
-        and bool(obj.meta.get("acquisition_frequency"))
+        and bool(obj.meta.get("acquisition_frequency") or obj.meta.get("larmor"))
     )
 
 
 def _coord_larmor_argument(obj):
     """Extract the Larmor frequency for the NMR unit-context setup function."""
-    return obj.meta.get("acquisition_frequency")
+    return obj.meta.get("acquisition_frequency") or obj.meta.get("larmor")
 
 
 def _nmr_coord_reversed(coord) -> bool | None:
@@ -187,7 +187,7 @@ class NMRPlugin(SpectroChemPyPlugin):
     """NMR plugin, currently providing the Bruker TopSpin reader."""
 
     name = "nmr"
-    version = "0.1.0"
+    version = "0.1.1"
     description = "NMR readers and tools for SpectroChemPy"
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION

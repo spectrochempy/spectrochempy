@@ -51,6 +51,7 @@ jobs:
     name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     defaults:
       run:
@@ -135,7 +136,7 @@ jobs:
       - name: Install spectrochempy
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
         env:
-          SETUPTOOLS_SCM_PRETEND_VERSION: 0.9.0.dev0
+          SETUPTOOLS_SCM_PRETEND_VERSION: 0.9.1.dev0
         run: |
           set -e
           start=$SECONDS
@@ -174,6 +175,8 @@ jobs:
 
       - name: Test package
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        env:
+          MPLBACKEND: Agg
         run: |
           set -o pipefail
           start=$SECONDS
@@ -203,11 +206,21 @@ jobs:
           fi
           run_tests() {
             local pytest_args=("$@")
-            if [[ "${{ matrix.coverage }}" == "true" && "${{ github.event_name }}" != "pull_request" ]]; then
-              coverage run --source=spectrochempy -m pytest $targets "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
-            else
-              python -m pytest $targets "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
-            fi
+            local target
+            local target_status=0
+            for target in $targets; do
+              echo "pytest target: $target"
+              if [[ "${{ matrix.coverage }}" == "true" && "${{ github.event_name }}" != "pull_request" ]]; then
+                coverage run --append --source=spectrochempy -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
+              else
+                python -m pytest "$target" "${pytest_args[@]}" "${pytest_capture_args[@]}" -ra --durations=10
+              fi
+              target_status=$?
+              if [[ "$target_status" != "0" && "$target_status" != "5" ]]; then
+                return "$target_status"
+              fi
+            done
+            return 0
           }
           run_tests "${pytest_xdist_args[@]}" | tee pytest.log
           status=${PIPESTATUS[0]}

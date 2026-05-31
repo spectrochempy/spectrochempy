@@ -65,10 +65,8 @@ def as_quaternion(*args):
     else:
         raise ValueError("as_quaternion requires 2 or 4 arguments")
 
-    data = as_quat_array(
-        list(zip(w.flatten(), x.flatten(), y.flatten(), z.flatten(), strict=False)),
-    )
-    return data.reshape(w.shape)
+    stacked = np.stack([w, x, y, z], axis=-1)
+    return as_quat_array(stacked)
 
 
 def quat_as_complex_array(arr):
@@ -90,8 +88,11 @@ def quat_as_complex_array(arr):
     if typequaternion is None or arr.dtype != typequaternion:
         return arr
 
-    wt, xt, yt, zt = as_float_array(arr).T
-    w, x, y, z = wt.T, xt.T, yt.T, zt.T
+    float_arr = as_float_array(arr)
+    w = float_arr[..., 0]
+    x = float_arr[..., 1]
+    y = float_arr[..., 2]
+    z = float_arr[..., 3]
 
     return (w + 1j * x), (y + 1j * z)
 
@@ -136,8 +137,11 @@ def get_component(data, select="REAL"):
     w = x = y = z = None
 
     if typequaternion is not None and new.dtype == typequaternion:
-        w, x, y, z = as_float_array(new).T
-        w, x, y, z = w.T, x.T, y.T, z.T
+        float_arr = as_float_array(new)
+        w = float_arr[..., 0]
+        x = float_arr[..., 1]
+        y = float_arr[..., 2]
+        z = float_arr[..., 3]
         if select == "R":
             new = w + x * 1j
         elif select == "I":

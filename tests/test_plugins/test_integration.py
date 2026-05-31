@@ -13,6 +13,7 @@ import importlib.util
 import logging
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -1574,3 +1575,39 @@ class TestRegisterHandlers:
         assert c.reversed is True
         c2 = Coord([1, 2, 3], units="meter")
         assert c2.reversed is False
+
+
+# ------------------------------------------------------------------
+# P. Plugin test directory layout guard
+# ------------------------------------------------------------------
+
+
+class TestPluginTestDirLayout:
+    """
+    Guard: plugin test directories must NOT be Python packages.
+
+    If a ``plugins/*/tests/__init__.py`` exists, pytest's import machinery
+    treats every plugin test directory as a top-level ``tests`` package,
+    causing ``ModuleNotFoundError`` when multiple plugin test directories
+    are collected together (e.g. ``tests.test_iris`` collides across
+    different plugin test dirs).
+
+    Remove any ``plugins/*/tests/__init__.py`` files instead.
+    """
+
+    PLUGIN_TEST_DIRS = sorted(Path("plugins").glob("*/tests"))
+
+    def test_plugin_test_dirs_are_not_packages(self):
+        """No ``plugins/*/tests/__init__.py`` exists."""
+        offenders = [d for d in self.PLUGIN_TEST_DIRS if (d / "__init__.py").exists()]
+        assert not offenders, (
+            f"plugin test directories must not be packages (remove __init__.py): "
+            f"{[str(p) for p in offenders]}"
+        )
+
+    def test_plugin_test_dirs_contain_test_files(self):
+        """Each ``plugins/*/tests/`` directory has at least one ``test_*.py``."""
+        empty = [d for d in self.PLUGIN_TEST_DIRS if not list(d.glob("test_*.py"))]
+        assert (
+            not empty
+        ), f"plugin test dirs without test files: {[str(p) for p in empty]}"

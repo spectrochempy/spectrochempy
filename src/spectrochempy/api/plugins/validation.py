@@ -267,8 +267,8 @@ def _satisfies_min_version(current: str, minimum: str) -> bool:
     """
     PEP 440 version check: *current* >= *minimum*.
 
-    Dev versions of the same release are considered sufficient, e.g.
-    ``0.9.0.dev0 >= 0.9.0``, so that an editable ``0.9.0.dev0`` checkout
+    Dev versions of a later release are considered sufficient, e.g.
+    ``0.9.1.dev0 >= 0.9.0``, so that an editable post-release checkout
     satisfies the ``>=0.9.0`` constraint during development.
     """
     try:
@@ -276,7 +276,7 @@ def _satisfies_min_version(current: str, minimum: str) -> bool:
         minimum_ver = parse(minimum)
         if current_ver >= minimum_ver:
             return True
-        if current_ver.is_prerelease and parse(current_ver.base_version) >= minimum_ver:
+        if current_ver.is_prerelease and parse(current_ver.base_version) > minimum_ver:
             return True
         return False
     except Exception:
