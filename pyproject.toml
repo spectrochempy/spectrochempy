@@ -136,6 +136,7 @@ where = ["src"]
 ]
 
 [tool.setuptools_scm]
+git_describe_command = ['git', 'describe', '--long', '--tags', '--always', '--first-parent', '--match', 'spectrochempy-v[0-9]*']
 local_scheme = "dirty-tag"
 
 [tool.ruff]
