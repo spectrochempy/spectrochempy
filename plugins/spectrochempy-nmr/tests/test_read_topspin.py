@@ -18,12 +18,16 @@ nmrdir = NMRDATA / "bruker" / "tests" / "nmr"
 def test_read_topspin():
     nd = scp.read_topspin(nmrdir / "exam2d_HC/3/pdata/1/2rr")
     assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:1024, x:1024))"
+    assert nd.y.size == 1024
+    assert nd.x.size == 1024
 
     nd = scp.read_topspin(nmrdir / "topspin_1d/1/fid")
     assert str(nd) == "NDDataset: [complex128] pp (size: 12411)"
+    assert nd.x.size == 12411
 
     nd = scp.read_topspin(nmrdir / "topspin_1d/1/pdata/1/1r")
     assert str(nd) == "NDDataset: [complex128] pp (size: 16384)"
+    assert nd.x.size == 16384
 
     nd = scp.read_topspin(nmrdir / "topspin_2d/1/ser")
     assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:96, x:474))"

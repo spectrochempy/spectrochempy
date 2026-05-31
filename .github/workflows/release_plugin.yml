@@ -8,7 +8,8 @@ name: Release an official plugin
 # Usage:
 #   1. Run this workflow manually (workflow_dispatch).
 #   2. Enter the plugin name (e.g. "spectrochempy-nmr") and version (e.g. "0.1.1").
-#   3. The workflow bumps pyproject.toml and recipe.yaml, commits, creates
+#   3. The workflow bumps pyproject.toml, recipe.yaml, and the plugin's
+#      ``__init__.py`` version string, commits, creates
 #      the tag spectrochempy-nmr-v0.1.1, and opens a GitHub Release.
 #   4. The release event automatically triggers the CI publish jobs.
 
@@ -99,6 +100,41 @@ jobs:
             echo "No recipe.yaml found; skipping conda version bump"
           fi
 
+      - name: Bump version in plugin class __init__.py
+        run: |
+          python3 .github/workflows/scripts/bump_plugin_init_version.py \
+            "${{ inputs.plugin_name }}" "${{ inputs.version }}"
+
+      - name: Verify all version sources are consistent
+        run: |
+          plugin_name="${{ inputs.plugin_name }}"
+          plugin_dir="plugins/$plugin_name"
+          expected="${{ inputs.version }}"
+
+          pyproject_ver=$(grep -oP '^version = "\K[^"]+' "$plugin_dir/pyproject.toml")
+          if [ "$pyproject_ver" != "$expected" ]; then
+            echo "::error::pyproject.toml version mismatch: $pyproject_ver != $expected"
+            exit 1
+          fi
+
+          src_dir="${plugin_dir}/src/${plugin_name//-/_}"
+          init_ver=$(grep -oP '^    version = "\K[^"]+' "$src_dir/__init__.py")
+          if [ "$init_ver" != "$expected" ]; then
+            echo "::error::__init__.py version mismatch: $init_ver != $expected"
+            exit 1
+          fi
+
+          recipe="$plugin_dir/recipe.yaml"
+          if [ -f "$recipe" ]; then
+            recipe_ver=$(grep -oP '^  version: "\K[^"]+' "$recipe")
+            if [ "$recipe_ver" != "$expected" ]; then
+              echo "::error::recipe.yaml version mismatch: $recipe_ver != $expected"
+              exit 1
+            fi
+          fi
+
+          echo "All version sources match: $expected"
+
       - name: Configure git
         run: |
           git config user.email "github-actions@users.noreply.github.com"
@@ -106,9 +142,13 @@ jobs:
 
       - name: Commit version bump
         run: |
-          git add plugins/${{ inputs.plugin_name }}/pyproject.toml
-          if [ -f "plugins/${{ inputs.plugin_name }}/recipe.yaml" ]; then
-            git add plugins/${{ inputs.plugin_name }}/recipe.yaml
+          plugin_name="${{ inputs.plugin_name }}"
+          plugin_dir="plugins/$plugin_name"
+          git add "$plugin_dir/pyproject.toml"
+          src_dir="${plugin_dir}/src/${plugin_name//-/_}"
+          git add "$src_dir/__init__.py"
+          if [ -f "$plugin_dir/recipe.yaml" ]; then
+            git add "$plugin_dir/recipe.yaml"
           fi
           git commit --no-verify -m "Bump ${{ inputs.plugin_name }} to v${{ inputs.version }}"
 

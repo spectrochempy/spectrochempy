@@ -11,14 +11,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-FULL_TARGETS = ["tests"]
-DOC_TARGETS = ["tests/test_docs"]
 PLUGIN_TESTS = {
     "spectrochempy-cantera": "plugins/spectrochempy-cantera/tests",
+    "spectrochempy-hypercomplex": "plugins/spectrochempy-hypercomplex/tests",
     "spectrochempy-iris": "plugins/spectrochempy-iris/tests",
     "spectrochempy-nmr": "plugins/spectrochempy-nmr/tests",
 }
 ALL_PLUGIN_TARGETS = ["tests/test_plugins", *PLUGIN_TESTS.values()]
+FULL_TARGETS = ["tests", *ALL_PLUGIN_TARGETS]
+DOC_TARGETS = ["tests/test_docs"]
 PROTECTED_REFS = {"master", "develop"}
 FULL_TEST_FILES = {
     "pyproject.toml",
@@ -82,11 +83,9 @@ def _add_existing(targets: list[str], target: str) -> None:
 
 
 def _plugin_targets(path: str, targets: list[str]) -> bool:
-    for plugin_name, _ in PLUGIN_TESTS.items():
+    for plugin_name, plugin_target in PLUGIN_TESTS.items():
         if path.startswith(f"plugins/{plugin_name}/"):
-            # Individual plugin tests cannot be imported from the repo root
-            # due to pytest namespace resolution (tests.test_* conflicts).
-            # They must be run from their own directory. Only add core tests.
+            _add_existing(targets, plugin_target)
             _add_existing(targets, "tests/test_plugins")
             return True
     return False
