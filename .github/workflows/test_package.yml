@@ -51,6 +51,7 @@ jobs:
     name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
     defaults:
       run:
@@ -174,6 +175,8 @@ jobs:
 
       - name: Test package
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        env:
+          MPLBACKEND: Agg
         run: |
           set -o pipefail
           start=$SECONDS
