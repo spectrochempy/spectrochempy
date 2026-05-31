@@ -21,7 +21,7 @@ PLUGIN_TESTS = {
 FULL_PLUGIN_TARGETS = [
     target
     for plugin, target in PLUGIN_TESTS.items()
-    if plugin != "spectrochempy-cantera"
+    if plugin not in {"spectrochempy-cantera", "spectrochempy-carroucell"}
 ]
 ALL_PLUGIN_TARGETS = list(PLUGIN_TESTS.values())
 FULL_TARGETS = ["tests", *FULL_PLUGIN_TARGETS]
