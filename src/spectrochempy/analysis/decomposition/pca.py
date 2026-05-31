@@ -16,7 +16,6 @@ from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.analysis._base._analysisbase import NotFittedError
 from spectrochempy.analysis._base._analysisbase import _wrap_ndarray_output_to_nddataset
 from spectrochempy.application.application import info_
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 __all__ = ["PCA"]
@@ -178,10 +177,6 @@ for reproducible results across multiple function calls.""",
         warm_start=False,
         **kwargs,
     ):
-        if "used_components" in kwargs:
-            deprecated("used_components", replace="n_components", removed="0.7")
-            kwargs["n_components"] = kwargs.pop("used_components")
-
         # call the super class for initialisation of the configuration parameters
         # to do before anything else!
         super().__init__(

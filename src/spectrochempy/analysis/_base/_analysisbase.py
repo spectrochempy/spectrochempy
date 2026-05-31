@@ -324,10 +324,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
         X_transform = self._transform(newX)
 
         # Slice according to n_components
-        n_components = kwargs.pop(
-            "n_components",
-            kwargs.pop("n_pc", self._n_components),
-        )
+        n_components = kwargs.pop("n_components", self._n_components)
         if n_components > self._n_components:
             warnings.warn(
                 "The number of components required for reduction "
@@ -378,10 +375,7 @@ class DecompositionAnalysis(AnalysisConfigurable):
             raise NotFittedError
 
         # get optional n_components
-        n_components = kwargs.pop(
-            "n_components",
-            kwargs.pop("n_pc", self._n_components),
-        )
+        n_components = kwargs.pop("n_components", self._n_components)
         if n_components > self._n_components:
             warnings.warn(
                 "The number of components required for reduction "

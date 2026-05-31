@@ -11,7 +11,6 @@ import traitlets as tr
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.application.application import info_
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 __all__ = ["EFA"]
@@ -104,9 +103,6 @@ class EFA(DecompositionAnalysis):
             warm_start=warm_start,
             **kwargs,
         )
-        if "used_components" in kwargs:
-            deprecated("used_components", replace="n_components", removed="0.7")
-            kwargs["n_components"] = kwargs.pop("used_components")
 
     def _fit(self, X, Y=None):
         # X has already been validated and eventually

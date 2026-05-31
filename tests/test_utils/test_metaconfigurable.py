@@ -93,15 +93,6 @@ def test_params(test_configurable):
     assert default_params.test_param == 42
 
 
-def test_parameters_deprecated(test_configurable):
-    """Test that parameters method is deprecated but works."""
-    with pytest.warns(DeprecationWarning):
-        params = test_configurable.parameters()
-
-    assert params.test_param == 42
-    assert params.another_param == "default"
-
-
 def test_reset(test_configurable):
     """Test reset method."""
     test_configurable.test_param = 100
