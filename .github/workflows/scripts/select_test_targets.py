@@ -17,7 +17,7 @@ PLUGIN_TESTS = {
     "spectrochempy-iris": "plugins/spectrochempy-iris/tests",
     "spectrochempy-nmr": "plugins/spectrochempy-nmr/tests",
 }
-ALL_PLUGIN_TARGETS = ["tests/test_plugins", *PLUGIN_TESTS.values()]
+ALL_PLUGIN_TARGETS = list(PLUGIN_TESTS.values())
 FULL_TARGETS = ["tests", *ALL_PLUGIN_TARGETS]
 DOC_TARGETS = ["tests/test_docs"]
 PROTECTED_REFS = {"master", "develop"}
