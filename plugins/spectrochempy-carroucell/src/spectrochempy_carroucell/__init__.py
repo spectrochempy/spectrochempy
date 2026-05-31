@@ -28,6 +28,18 @@ def _infer_carroucell_filetype_key(filename, **kwargs):
     return None
 
 
+def _ensure_carroucell_filetype_registered():
+    """Register the carroucell filetype with the legacy FileTypeRegistry."""
+    from spectrochempy.core.readers.filetypes import registry  # noqa: PLC0415
+
+    known = {name for name, _description in registry.filetypes}
+    if "carroucell" not in known:
+        registry.register_filetype(
+            "carroucell",
+            "Carroucell experiment data (*.spa)",
+        )
+
+
 class CarroucellPlugin(SpectroChemPyPlugin):
     """Carroucell plugin, providing the Carroucell experiment reader."""
 
@@ -40,6 +52,7 @@ class CarroucellPlugin(SpectroChemPyPlugin):
 
     def register_readers(self) -> list[dict]:
         """Declare the Carroucell file reader."""
+        _ensure_carroucell_filetype_registered()
         return [
             {
                 "name": "carroucell",

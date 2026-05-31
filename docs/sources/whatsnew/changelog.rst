@@ -19,6 +19,19 @@ New Features
 ~~~~~~~~~~~~
 .. Add here new public features (do not delete this comment)
 
+- Added plugin lifecycle tests for ``spectrochempy-hypercomplex``,
+  ``spectrochempy-carroucell``, ``spectrochempy-nmr``, and
+  ``spectrochempy-iris`` covering import, metadata, compatibility,
+  registration, lifecycle state, reader/accessor registration,
+  and isolated harness behaviour (:ghpr:`1000`).
+- Added ``_ensure_carroucell_filetype_registered()`` to register the
+  ``carroucell`` filetype with the legacy :class:`~spectrochempy.core.readers.filetypes.FileTypeRegistry`,
+  fixing ``TypeError: Filetype '.carroucell' is unknown`` when reading
+  CarrouCELL data (:ghpr:`1000`).
+- Fixed test isolation in ``spectrochempy-iris`` tests: monkeypatched
+  :func:`sys.modules` cleanup ensures each test uses its own harness
+  when validating the ``scp.iris`` namespace (:ghpr:`1000`).
+
 
 .. section
 
