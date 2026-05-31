@@ -51,9 +51,7 @@ def test_read_topspin():
     nd = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d/1/pdata/1/2rr"))
     assert str(nd) == "NDDataset: [quaternion] pp (shape: (y:1024, x:2048))"
 
-    nd1 = _read_topspin_or_skip(
-        _require_path(nmrdir / "topspin_2d"), expno=1, procno=1
-    )
+    nd1 = _read_topspin_or_skip(_require_path(nmrdir / "topspin_2d"), expno=1, procno=1)
     assert nd1 == nd
 
     nd = _read_topspin_or_skip(directory=_require_path(nmrdir))

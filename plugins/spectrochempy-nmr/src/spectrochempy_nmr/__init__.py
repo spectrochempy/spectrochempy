@@ -32,10 +32,7 @@ def _coord_has_larmor(obj) -> bool:
     return (
         callable(implements)
         and implements("Coord")
-        and bool(
-            obj.meta.get("acquisition_frequency")
-            or obj.meta.get("larmor")
-        )
+        and bool(obj.meta.get("acquisition_frequency") or obj.meta.get("larmor"))
     )
 
 
