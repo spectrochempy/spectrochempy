@@ -23,7 +23,6 @@ from traitlets.config import Config
 from traitlets.config.configurable import Configurable
 from traitlets.config.loader import LazyConfigValue
 
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.objects import Adict
 
 ur = UnitRegistry()
@@ -107,16 +106,6 @@ class MetaConfigurable(Configurable):
         else:
             d.update(self.trait_defaults(config=True))
         return d
-
-    @deprecated(replace="params", removed="0.8.0")
-    def parameters(self, default=False):
-        """
-        Alias for `params` method.
-
-        .. deprecated:: 0.8.0
-            Use `params` instead.
-        """
-        return self.params(default=default)
 
     def reset(self):
         """Reset configuration parameters to their default values."""

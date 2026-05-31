@@ -25,7 +25,6 @@ from spectrochempy.utils.constants import TYPE_FLOAT
 from spectrochempy.utils.constants import TYPE_INTEGER
 from spectrochempy.utils.coordrange import trim_ranges
 from spectrochempy.utils.decorators import _wrap_ndarray_output_to_nddataset
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.exceptions import NotFittedError
 from spectrochempy.utils.traits import NDDatasetType
@@ -965,25 +964,8 @@ def detrend(dataset, order="linear", breakpoints=None, **kwargs):
     detrend : Remove polynomial trend along a dimension from dataset.
 
     """
-    # kwargs will be removed in version 0.8
     if breakpoints is None:
         breakpoints = []
-    inplace = kwargs.pop("inplace", None)
-    if inplace is not None:
-        warning_("inplace parameter was removed in version 0.7 and has no more effect.")
-
-    type = kwargs.pop("type", None)
-    if type is not None:
-        deprecated("type", replace="order", removed="0.8")
-        order = type
-
-    dim = kwargs.pop("dim", None)
-    if dim is not None:
-        deprecated(
-            "dim",
-            extra_msg="Transpose your data before processing if needed.",
-            removed="0.8",
-        )
 
     blc = Baseline()
     blc.model = "detrend"

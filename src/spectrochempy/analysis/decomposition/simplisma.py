@@ -16,7 +16,6 @@ import traitlets as tr
 from spectrochempy.analysis._base._analysisbase import DecompositionAnalysis
 from spectrochempy.application.application import info_
 from spectrochempy.utils import exceptions
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 
 
@@ -110,22 +109,6 @@ class SIMPLISMA(DecompositionAnalysis):
                 "Instead, use SIMPLISMA() followed by SIMPLISMA.fit(X). "
                 "See the documentation and exemples",
             )
-
-        # warn about deprecations
-        # -----------------------
-        if "verbose" in kwargs:
-            deprecated("verbose", replace="log_level='INFO'", removed="0.7")
-            verbose = kwargs.pop("verbose")
-            if verbose:
-                log_level = "INFO"
-
-        if "n_pc" in kwargs:
-            deprecated("n_pc", replace="n_components", removed="0.7")
-            kwargs["n_components"] = kwargs.pop("n_pc")
-
-        if "max_components" in kwargs:
-            deprecated("max_components", replace="n_components", removed="0.7")
-            kwargs["n_components"] = kwargs.pop("max_components")
 
         # call the super class for initialisation
         super().__init__(
