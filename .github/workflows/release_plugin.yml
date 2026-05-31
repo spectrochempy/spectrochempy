@@ -126,7 +126,7 @@ jobs:
 
           recipe="$plugin_dir/recipe.yaml"
           if [ -f "$recipe" ]; then
-            recipe_ver=$(grep -oP '^  version: "\K[^"]+' "$recipe")
+            recipe_ver=$(grep -oP '^  version: "\K[^"]+' "$recipe" | head -1)
             if [ "$recipe_ver" != "$expected" ]; then
               echo "::error::recipe.yaml version mismatch: $recipe_ver != $expected"
               exit 1
