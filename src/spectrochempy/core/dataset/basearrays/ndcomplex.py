@@ -210,9 +210,15 @@ class NDComplexArray(NDArray):
         (Readonly property).
         """
         new = self.copy()
-        if not new.has_complex_dims:
-            return new
         ma = new.masked_data
+        if not new.has_complex_dims:
+            if ma.dtype.name == "quaternion":
+                import quaternion
+
+                new._data = quaternion.as_float_array(ma)[..., 0]
+                if isinstance(ma, np.ma.masked_array):
+                    new._mask = ma.mask
+            return new
 
         if ma.dtype in TYPE_FLOAT:
             new._data = ma
@@ -233,10 +239,17 @@ class NDComplexArray(NDArray):
         (Readonly property).
         """
         new = self.copy()
+        ma = new.masked_data
         if not new.has_complex_dims:
+            if ma.dtype.name == "quaternion":
+                import quaternion
+
+                new._data = quaternion.as_float_array(ma)[..., 1]
+                if isinstance(ma, np.ma.masked_array):
+                    new._mask = ma.mask
+                return new
             return None
 
-        ma = new.masked_data
         if ma.dtype in TYPE_FLOAT:
             new._data = np.zeros_like(ma.data)
         elif ma.dtype in TYPE_COMPLEX:
