@@ -174,6 +174,59 @@ Vérifier également que le DOI Zenodo a été mis à jour sur la
 
 ---
 
+## Décider si un plugin nécessite une release
+
+Avant de publier un plugin, comparer les changements depuis son dernier
+tag publié.
+
+### Trouver le dernier tag
+
+```bash
+git tag --list 'spectrochempy-nmr-v*' --sort=-v:refname
+git log --oneline spectrochempy-nmr-v0.1.1..HEAD -- plugins/spectrochempy-nmr
+```
+
+### Vérifier la dernière version publiée
+
+```bash
+pip index versions spectrochempy-nmr
+anaconda show spectrocat/spectrochempy-nmr
+```
+
+### Qu'est-ce qui justifie une nouvelle release ?
+
+Un plugin mérite une nouvelle release si **des fichiers distribués** ont
+changé depuis le dernier tag :
+
+- `src/` (code livré aux utilisateurs)
+- `pyproject.toml` (métadonnées, dépendances, entry points)
+- `recipe.yaml` (recette conda)
+- Fichiers inclus dans le package via `include` / `MANIFEST.in`
+- Dépendances ajoutées, supprimées ou modifiées
+- Compatibilité avec la nouvelle version du core
+- Bug runtime corrigé
+
+### Qu'est-ce qui ne justifie PAS une release ?
+
+Un changement limité à l'un des éléments suivants ne nécessite
+généralement pas de publication :
+
+- Tests uniquement
+- Documentation interne au dépôt
+- CI / workflows GitHub
+- Refactoring sans impact utilisateur
+
+### Numérotation des versions
+
+- **Ne jamais réutiliser** une version déjà publiée sur PyPI ou conda.
+- Si `0.1.1` existe déjà et que le plugin a changé, publier `0.1.2`.
+- Avant de choisir une version, vérifier :
+  - [PyPI](https://pypi.org/project/spectrochempy-XXX/#history)
+  - Anaconda : `anaconda show spectrocat/spectrochempy-XXX`
+  - Tags GitHub : `git tag --list 'spectrochempy-XXX-v*'`
+
+---
+
 ## Release des plugins
 
 > **Important Zenodo** : avant de publier des plugins, désactiver
@@ -197,7 +250,7 @@ confirm_zenodo_disabled: true   # ← doit être coché
 
 ### Déroulement
 
-1. Le workflow `release_plugin.yml` :
+1. Le workflow **Release an official plugin** (`release_plugin.yml`) :
    - Vérifie que le plugin est dans la liste officielle
    - Bump la version dans `pyproject.toml` et `recipe.yaml`
    - Pousse le commit sur `master` (via `BOT_TOKEN`)
@@ -253,9 +306,11 @@ entrées sont incorrectes car :
 1. **Avant de publier des plugins**, désactiver temporairement
    l'intégration GitHub du dépôt `spectrochempy/spectrochempy` dans Zenodo
    :
-   - Aller dans
-     [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
-   - Décocher / désactiver le dépôt `spectrochempy/spectrochempy`
+   - Aller sur [zenodo.org → GitHub](https://zenodo.org/account/settings/github/)
+   - Chercher le dépôt `spectrochempy/spectrochempy` dans la liste
+   - Basculer le bouton sur **Disabled** (le dépôt passe en grisé)
+   - Vérifier que la croix rouge est absente (l'état grisé signifie
+     désactivé, pas en erreur)
 2. **Publier les plugins** via le workflow **Release an official plugin**
    - Le workflow demande de cocher `confirm_zenodo_disabled` — le faire
      uniquement après avoir désactivé Zenodo
@@ -267,10 +322,14 @@ entrées sont incorrectes car :
    anaconda show spectrocat/spectrochempy-XXX
    ```
 4. **Ne réactiver Zenodo** que pour la release du core suivante :
-   - Aller dans
-     [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
-   - Réactiver le dépôt `spectrochempy/spectrochempy`
+   - Aller sur [zenodo.org → GitHub](https://zenodo.org/account/settings/github/)
+   - Chercher le dépôt `spectrochempy/spectrochempy`
+   - Basculer le bouton sur **Enabled**
    - Vérifier que l'intégration est active (pas de croix rouge)
+
+> **Rappel** : l'état Zenodo doit toujours être **Enabled** pendant une
+> release du core et **Disabled** pendant une release de plugins.
+> Ne jamais laisser Zenodo actif pendant une release plugin.
 
 ---
 

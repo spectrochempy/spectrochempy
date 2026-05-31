@@ -41,7 +41,7 @@ les workflows de CI (tests, builds) ne démarrent pas.
 
 ---
 
-## Le push vers master échoue dans release_plugin.yml
+## Le push vers master échoue dans le workflow **Release an official plugin** (`release_plugin.yml`)
 
 ### Symptôme
 
@@ -53,8 +53,8 @@ remote: - Changes must be made through a pull request.
 ### Cause
 
 Le `GITHUB_TOKEN` automatique ne peut pas contourner les règles de
-protection de la branche `master`. Le workflow `release_plugin.yml`
-utilise `secrets.BOT_TOKEN` (un PAT personnel) pour le checkout, ce qui
+protection de la branche `master`. Le workflow **Release an official plugin** (`release_plugin.yml`)
+   utilise `secrets.BOT_TOKEN` (un PAT personnel) pour le checkout, ce qui
 permet de pusher.
 
 Si ce secret est expiré ou a été révoqué, le push est rejeté.
