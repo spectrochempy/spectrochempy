@@ -13,12 +13,18 @@ from pathlib import Path
 
 PLUGIN_TESTS = {
     "spectrochempy-cantera": "plugins/spectrochempy-cantera/tests",
+    "spectrochempy-carroucell": "plugins/spectrochempy-carroucell/tests",
     "spectrochempy-hypercomplex": "plugins/spectrochempy-hypercomplex/tests",
     "spectrochempy-iris": "plugins/spectrochempy-iris/tests",
     "spectrochempy-nmr": "plugins/spectrochempy-nmr/tests",
 }
+FULL_PLUGIN_TARGETS = [
+    target
+    for plugin, target in PLUGIN_TESTS.items()
+    if plugin != "spectrochempy-cantera"
+]
 ALL_PLUGIN_TARGETS = list(PLUGIN_TESTS.values())
-FULL_TARGETS = ["tests", *ALL_PLUGIN_TARGETS]
+FULL_TARGETS = ["tests", *FULL_PLUGIN_TARGETS]
 DOC_TARGETS = ["tests/test_docs"]
 PROTECTED_REFS = {"master", "develop"}
 FULL_TEST_FILES = {
