@@ -199,15 +199,17 @@ repository, which leads to version collisions).
 The recommended way to release a plugin is through the
 ``release_plugin.yml`` workflow:
 
-1. Go to **Actions → Release an official plugin** in the GitHub UI.
-2. Click **Run workflow**.
-3. Enter:
+1. Optionally run **Actions → Check plugin release status** first to inspect
+   which official plugins changed since their last release tag.
+2. Go to **Actions → Release an official plugin** in the GitHub UI.
+3. Click **Run workflow** from the ``master`` branch.
+4. Enter:
    - Plugin name: ``spectrochempy-nmr``
    - Version: ``0.1.1``
-4. The workflow bumps ``pyproject.toml``, ``recipe.yaml``, and the plugin
-   ``__init__.py`` version string, commits to the current branch, and creates
+5. The workflow bumps ``pyproject.toml``, ``recipe.yaml``, and the plugin
+   ``__init__.py`` version string, commits to ``master``, and creates
    the release tag ``spectrochempy-nmr-v0.1.1`` automatically.
-5. The tag triggers CI which builds and publishes the wheel to PyPI and
+6. The tag triggers CI which builds and publishes the wheel to PyPI and
    Anaconda.org.
 
 Manual fallback::

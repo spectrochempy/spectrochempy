@@ -34,6 +34,8 @@ Developer
 - DOC: Updated plugin release documentation to use canonical core tags,
   current branch pushes, plugin ``__init__.py`` version bumps, and the current
   Anaconda ``main`` upload behavior.
+- DOC: Clarified that official plugin releases must be run from ``master`` and
+  can be prepared with the read-only plugin release status workflow.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — shows a "no changes" message when all plugins are

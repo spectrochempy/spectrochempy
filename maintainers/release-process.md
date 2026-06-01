@@ -325,8 +325,11 @@ généralement pas de publication :
 
 ### Workflow
 
-Depuis **Actions** → **Release an official plugin**, exécuter le workflow avec les
-paramètres :
+Si nécessaire, lancer d'abord **Actions** → **Check plugin release status**
+pour vérifier quels plugins ont changé depuis leur dernier tag publié.
+
+Ensuite, depuis **Actions** → **Release an official plugin**, exécuter le
+workflow depuis la branche `master` avec les paramètres :
 
 ```
 plugin_name: spectrochempy-XXX
@@ -347,8 +350,9 @@ confirm_zenodo_disabled: true   # ← doit être coché
 ### Déroulement
 
 1. Le workflow **Release an official plugin** (`release_plugin.yml`) :
+   - Vérifie que le workflow est déclenché depuis `master`
    - Vérifie que le plugin est dans la liste officielle
-   - Bump la version dans `pyproject.toml` et `recipe.yaml`
+   - Bump la version dans `pyproject.toml`, `recipe.yaml` et `__init__.py`
    - Pousse le commit sur `master` (via `BOT_TOKEN`)
    - Crée le tag `spectrochempy-XXX-vX.Y.Z`
    - Crée une Release GitHub
