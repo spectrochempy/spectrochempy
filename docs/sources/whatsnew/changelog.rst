@@ -78,6 +78,9 @@ Developer
 - DOC: Finished maintainer release notes cleanup for master checkout, draft
   release titles, TestPyPI wording, plugin PyPI ``skip-existing`` behavior, and
   internal recovery links.
+- DOC: Tightened the developer guide entry points, Git commands, pull request
+  template guidance, and testing guidance without expanding the guide
+  substantially.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — shows a "no changes" message when all plugins are

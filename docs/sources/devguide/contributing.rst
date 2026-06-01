@@ -30,7 +30,8 @@ Version Control Setup
      or `git-scm.com <https://git-scm.com/download/mac>`__
      or `Homebrew <https://brew.sh>`__ using ``brew install git``
    * Windows: From `git-scm.com <https://git-scm.com/download/win>`__
-   * Linux: ``sudo apt-get install git`` or ``pip install gitpython``
+   * Linux: use your distribution package manager, for example
+     ``sudo apt-get install git``
 
 Optional: Install a GUI client like `SourceTree <https://www.sourcetreeapp.com>`__
 or `GitHub Desktop <https://desktop.github.com>`__
@@ -83,7 +84,7 @@ Making Changes
 
    .. sourcecode:: bash
 
-       git checkout -b my-new-feature
+       git switch -c my-new-feature
 
 2. Make your changes and commit them:
 
@@ -116,10 +117,22 @@ To update your PR with upstream changes:
 
 .. sourcecode:: bash
 
-    git checkout my-new-feature
+    git switch my-new-feature
     git fetch upstream
     git merge upstream/master
     git push origin my-new-feature
+
+Before asking for review, use the pull request template as the source of truth
+for required items. In practice, make sure your branch is focused and that the
+checks matching your change have been run locally when practical:
+
+* targeted tests around the changed code
+* an entry in ``docs/sources/whatsnew/changelog.rst`` when the change affects
+  users, developers, tests, CI, packaging, or documentation
+* any new dependencies, public API entries, contributor metadata, or reference
+  docs requested by the pull request template
+* ``pre-commit run --all-files`` for formatting and generated docs files before
+  the final commit when practical
 
 Tips for Success
 ----------------
