@@ -58,7 +58,8 @@ Developer
   verification steps, docs build note, and roadmap for modular docs.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
-  last release tag — informative only, does not block the workflow.
+  last release tag — shows a "no changes" message when all plugins are
+  unchanged, or highlights modified plugins when some need a release.
 - CI: Added ``confirm_zenodo_enabled`` checkbox to
   ``prepare_new_release.yml`` so maintainers verify Zenodo is active before
   creating a release PR.
