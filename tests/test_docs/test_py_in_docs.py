@@ -98,6 +98,71 @@ def _requires_external_network(path):
     return None
 
 
+NETWORK_ERROR_PATTERNS = [
+    "URLError",
+    "ConnectionError",
+    "ConnectionRefusedError",
+    "ConnectionResetError",
+    "TimeoutError",
+    "timed out",
+    "Temporary failure in name resolution",
+    "getaddrinfo failed",
+    "Name or service not known",
+    "No route to host",
+    "Network is unreachable",
+    "Cannot connect to host",
+    "Remote end closed connection",
+    "EOF occurred in violation of protocol",
+    "SSL: CERTIFICATE_VERIFY_FAILED",
+    "Name or service not known",
+    "Failed to establish a new connection",
+]
+
+
+def _looks_like_external_network_failure(error_text, network_marker):
+    """
+    Determine if a failure is likely due to external network unavailability.
+
+    Returns ``True`` only when *error_text* contains patterns consistent with
+    an external network failure **and** the script is known to require external
+    network access (*network_marker* is not ``None``).
+
+    Parameters
+    ----------
+    error_text : str or None
+        The error output (stderr or exception string).
+    network_marker : str or None
+        The network URL pattern detected in the script, or ``None``.
+
+    Returns
+    -------
+    bool
+    """
+    if not network_marker:
+        return False
+    error_text = error_text or ""
+
+    # FileNotFoundError is ambiguous (local file vs network URL)
+    # Only treat as network failure if the path looks like a URL
+    if "FileNotFoundError" in error_text:
+        if "http://" in error_text.lower() or "https://" in error_text.lower():
+            return True
+        if network_marker.lower() in error_text.lower():
+            return True
+        return False
+
+    for pattern in NETWORK_ERROR_PATTERNS:
+        if pattern.lower() in error_text.lower():
+            return True
+
+    # As a last保守 check: if the network marker domain appears in the error
+    # text alongside a failure context, treat as network failure
+    if network_marker.lower() in error_text.lower():
+        return True
+
+    return False
+
+
 def nbsphinx_script_run(path):
     import matplotlib
 
@@ -145,12 +210,13 @@ def test_nbsphinx_script_(script):
         pytest.skip(f"requires the optional {required} plugin")
 
     network_marker = _requires_external_network(script)
-    if network_marker and not environ.get("SCPY_ALLOW_NETWORK_DOCS"):
-        pytest.skip(f"requires external network access to {network_marker}")
 
     e, message, err = nbsphinx_script_run(script)
     # this give unicoderror on workflow with window
     if e:
+        error_text = (err or "") + "\n" + (message or "")
+        if _looks_like_external_network_failure(error_text, network_marker):
+            pytest.skip(f"external network ({network_marker}) not reachable")
         error_msg = f"Error in script: {script}\n"
         error_msg += f"Return code: {e}\n"
         error_msg += f"Standard output:\n{message}\n"
@@ -173,8 +239,6 @@ def test_examples(example):
         pytest.skip(f"requires the optional {required} plugin")
 
     network_marker = _requires_external_network(example)
-    if network_marker and not environ.get("SCPY_ALLOW_NETWORK_DOCS"):
-        pytest.skip(f"requires external network access to {network_marker}")
 
     scp.NO_DISPLAY = True
     mpl.use("agg", force=True)
@@ -195,6 +259,9 @@ def test_examples(example):
     try:
         import_item(module)
     except Exception as e:
+        error_text = f"{type(e).__name__}: {e}"
+        if _looks_like_external_network_failure(error_text, network_marker):
+            pytest.skip(f"external network ({network_marker}) not reachable")
         error_msg = f"Error in example: {example}\n"
         error_msg += f"Module: {module}\n"
         error_msg += f"Exception: {type(e).__name__}: {e}\n"
@@ -202,3 +269,78 @@ def test_examples(example):
 
         error_msg += f"Traceback:\n{traceback.format_exc()}\n"
         pytest.fail(error_msg)
+
+
+# --------------------------------------------------------------------------------------
+# Unit tests for helper functions (not marked slow — run directly)
+# --------------------------------------------------------------------------------------
+
+
+def test_unit__requires_external_network(tmp_path):
+    """_requires_external_network detects eigenvector.com in script text."""
+    p = tmp_path / "script.py"
+    p.write_text('scp.read("http://www.eigenvector.com/data/Corn/corn.mat")')
+    assert _requires_external_network(p) == "eigenvector.com"
+
+    p2 = tmp_path / "no_network.py"
+    p2.write_text("x = 1 + 1")
+    assert _requires_external_network(p2) is None
+
+
+def test_unit__looks_like_external_network_failure_FileNotFoundError_with_url():
+    """FileNotFoundError containing http/https URL is a network failure."""
+    assert _looks_like_external_network_failure(
+        'FileNotFoundError: [Errno 2] No such file or directory: "http://www.eigenvector.com/data/Corn/corn.mat"',
+        "eigenvector.com",
+    )
+
+
+def test_unit__looks_like_external_network_failure_FileNotFoundError_no_url():
+    """FileNotFoundError without URL is NOT a network failure."""
+    assert not _looks_like_external_network_failure(
+        'FileNotFoundError: [Errno 2] No such file or directory: "local_data.mat"',
+        "eigenvector.com",
+    )
+
+
+def test_unit__looks_like_external_network_failure_no_marker():
+    """Without a network marker, no error is considered network failure."""
+    assert not _looks_like_external_network_failure(
+        "FileNotFoundError: http://example.com/data.mat",
+        None,
+    )
+
+
+def test_unit__looks_like_external_network_failure_connection_errors():
+    """Connection/Timeout/DNS errors are network failures (with marker)."""
+    for err_text in [
+        "URLError: <urlopen error [Errno -2] Name or service not known>",
+        "TimeoutError: timed out",
+        "ConnectionRefusedError: [Errno 111] Connection refused",
+        "Temporary failure in name resolution",
+        "getaddrinfo failed",
+        "No route to host",
+        "Network is unreachable",
+        "Failed to establish a new connection",
+    ]:
+        assert _looks_like_external_network_failure(
+            err_text, "eigenvector.com"
+        ), f"expected network failure for: {err_text}"
+
+
+def test_unit__looks_like_external_network_failure_non_network():
+    """AssertionError, ValueError, ShapeError are NOT network failures."""
+    for err_text in [
+        "AssertionError: assert 1 == 2",
+        "ValueError: operands could not be broadcast together with shapes (3,) (4,)",
+        "TypeError: 'NoneType' object is not iterable",
+    ]:
+        assert not _looks_like_external_network_failure(
+            err_text, "eigenvector.com"
+        ), f"expected NOT network failure for: {err_text}"
+
+
+def test_unit__looks_like_external_network_failure_none_text():
+    """None error text does not crash and returns False."""
+    assert not _looks_like_external_network_failure(None, "eigenvector.com")
+    assert not _looks_like_external_network_failure(None, None)
