@@ -1,0 +1,105 @@
+# This workflow provides a read-only overview of official plugin changes since
+# their last release tag.  It is intended to be run manually before deciding
+# which plugin to release, so maintainers can inspect the state of each plugin
+# at a glance.
+#
+# No packages are built, no tags/releases are created, and nothing is
+# published during this workflow.
+
+name: Check plugin release status
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plugin-status:
+    name: List official plugin changes since last release tag
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Build plugin status table
+        run: |
+          python3 << 'PYEOF'
+          import os, subprocess, re
+
+          plugins = [
+              'spectrochempy-nmr',
+              'spectrochempy-iris',
+              'spectrochempy-hypercomplex',
+              'spectrochempy-carroucell',
+          ]
+
+          lines = []
+          lines.append('## Plugin release status')
+          lines.append('')
+          lines.append('| Plugin | Status | Last tag | Changed files |')
+          lines.append('|--------|--------|----------|---------------|')
+
+          any_changes = False
+
+          for plugin in plugins:
+              plugin_dir = f'plugins/{plugin}'
+              if not os.path.isdir(plugin_dir):
+                  lines.append(f'| {plugin} | :warning: directory missing | -- | -- |')
+                  any_changes = True
+                  continue
+
+              result = subprocess.run(
+                  ['git', 'tag', '--list', f'{plugin}-v*'],
+                  capture_output=True, text=True,
+              )
+              tags = [t for t in result.stdout.strip().split('\n') if t]
+              tags.sort(key=lambda t: [int(x) for x in t.split('-v')[-1].split('.')])
+              last_tag = tags[-1] if tags else ''
+
+              if not last_tag:
+                  lines.append(f'| {plugin} | :new: no previous plugin tag | -- | -- |')
+                  any_changes = True
+              else:
+                  ret = subprocess.run(
+                      ['git', 'diff', '--quiet', last_tag, '--', f'{plugin_dir}/'],
+                  )
+                  if ret.returncode == 0:
+                      lines.append(f'| {plugin} | :white_check_mark: unchanged | `{last_tag}` | 0 |')
+                  else:
+                      stat_ret = subprocess.run(
+                          ['git', 'diff', '--stat', last_tag, '--', f'{plugin_dir}/'],
+                          capture_output=True, text=True,
+                      )
+                      stat_text = stat_ret.stdout.strip()
+                      changed_count = '?'
+                      if stat_text:
+                          m = re.search(r'(\d+) file[s]? changed', stat_text)
+                          if m:
+                              changed_count = m.group(1)
+                      lines.append(f'| {plugin} | :large_orange_diamond: modified since `{last_tag}` | {changed_count} |')
+                      any_changes = True
+
+          lines.append('')
+
+          if any_changes:
+              lines.append('_Some plugins have changes since their last release. Consider releasing them._')
+          else:
+              lines.append('**No official plugin changes detected since their last release tags.**')
+
+          output = '\n'.join(lines)
+
+          summary_path = os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary_path:
+              with open(summary_path, 'a') as f:
+                  f.write(output + '\n')
+
+          print(output)
+          PYEOF
