@@ -123,12 +123,13 @@ def restore_rcparams() -> None:
 
     DEPRECATED: This is now a no-op since SpectroChemPy no longer modifies
     global matplotlib rcParams. The function is kept for backward compatibility.
+    Will be removed in version 0.10.0.
     """
     import warnings
 
     warnings.warn(
-        "restore_rcparams() is deprecated and has no effect. "
-        "SpectroChemPy no longer modifies global matplotlib rcParams.",
+        "restore_rcparams() is deprecated and will be removed in 0.10.0. "
+        "It has no effect since SpectroChemPy no longer modifies global matplotlib rcParams.",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -142,12 +143,13 @@ def get_import_time_rcparams():
 
     DEPRECATED: This now returns None since SpectroChemPy no longer modifies
     global matplotlib rcParams and therefore doesn't need to snapshot them.
+    Will be removed in version 0.10.0.
     """
     import warnings
 
     warnings.warn(
-        "get_import_time_rcparams() is deprecated and now returns None. "
-        "SpectroChemPy no longer modifies global matplotlib rcParams.",
+        "get_import_time_rcparams() is deprecated and will be removed in 0.10.0. "
+        "It now returns None since SpectroChemPy no longer modifies global matplotlib rcParams.",
         DeprecationWarning,
         stacklevel=2,
     )

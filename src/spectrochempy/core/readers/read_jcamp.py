@@ -130,12 +130,12 @@ def read_jcamp(*paths, **kwargs):
     return importer(*paths, **kwargs)
 
 
-@deprecated(replace="read__jcamp")
+@deprecated(replace="read__jcamp", removed="0.10.0")
 def read_jdx(*args, **kwargs):
     return read_jcamp(*args, **kwargs)
 
 
-@deprecated(replace="read_jcamp")
+@deprecated(replace="read_jcamp", removed="0.10.0")
 def read_dx(*args, **kwargs):  # pragma: no cover
     return read_jcamp(*args, **kwargs)
 

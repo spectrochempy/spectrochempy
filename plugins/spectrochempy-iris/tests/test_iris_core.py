@@ -159,7 +159,7 @@ def test_IRIS():
     assert f2.shape == (reg_par[2], q[2], X.shape[1])
 
     iris2.plotlcurve()
-    iris2.plotdistribution(-2)
+    _ = iris2.f[-2].plot(method="contour")
     _ = iris2.plot_merit(-2)
 
     # with automated search, keeping the previous kernel

@@ -742,6 +742,7 @@ baseline/trends for different segments of the data.
 
         .. deprecated:: 0.8
             Use `Baseline.plot(show_regions=True)` instead.
+            Will be removed in version 0.10.0.
 
         Parameters
         ----------
@@ -751,10 +752,11 @@ baseline/trends for different segments of the data.
         Warns
         -----
         DeprecationWarning
-            This method is deprecated. Use `plot(show_regions=True)` instead.
+            This method is deprecated and will be removed in 0.10.0.
+            Use `plot(show_regions=True)` instead.
         """
         warnings.warn(
-            "Baseline.show_regions() is deprecated. "
+            "Baseline.show_regions() is deprecated and will be removed in 0.10.0. "
             "Use Baseline.plot(show_regions=True) instead.",
             DeprecationWarning,
             stacklevel=2,

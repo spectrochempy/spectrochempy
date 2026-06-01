@@ -101,6 +101,7 @@ def multiplot_stack(datasets, **kwargs):
 
     .. deprecated::
         Use :func:`multiplot_lines` instead.
+        Will be removed in version 0.10.0.
 
     Parameters
     ----------
@@ -115,7 +116,8 @@ def multiplot_stack(datasets, **kwargs):
         The matplotlib figure.
     """
     warnings.warn(
-        "multiplot_stack is deprecated, use multiplot_lines instead",
+        "multiplot_stack is deprecated and will be removed in 0.10.0. "
+        "Use multiplot_lines instead.",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -129,6 +131,7 @@ def multiplot_map(datasets, **kwargs):
 
     .. deprecated::
         Use :func:`multiplot_contour` instead.
+        Will be removed in version 0.10.0.
 
     Parameters
     ----------
@@ -143,7 +146,8 @@ def multiplot_map(datasets, **kwargs):
         The matplotlib figure.
     """
     warnings.warn(
-        "multiplot_map is deprecated, use multiplot_contour instead",
+        "multiplot_map is deprecated and will be removed in 0.10.0. "
+        "Use multiplot_contour instead.",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -157,6 +161,7 @@ def multiplot_image(datasets, **kwargs):
 
     .. deprecated::
         Use :func:`multiplot_contourf` instead.
+        Will be removed in version 0.10.0.
 
     Parameters
     ----------
@@ -171,7 +176,8 @@ def multiplot_image(datasets, **kwargs):
         The matplotlib figure.
     """
     warnings.warn(
-        "multiplot_image is deprecated, use multiplot_contourf instead",
+        "multiplot_image is deprecated and will be removed in 0.10.0. "
+        "Use multiplot_contourf instead.",
         DeprecationWarning,
         stacklevel=2,
     )

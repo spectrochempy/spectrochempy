@@ -466,6 +466,7 @@ for reproducible results across multiple function calls.""",
 
         .. deprecated:: 0.7.4
             Use :meth:`plot_scree` instead.
+            Will be removed in version 0.10.0.
 
         Parameters
         ----------
@@ -480,7 +481,8 @@ for reproducible results across multiple function calls.""",
             The primary axes.
         """
         warnings.warn(
-            "PCA.screeplot() is deprecated; use PCA.plot_scree() instead.",
+            "PCA.screeplot() is deprecated and will be removed in 0.10.0; "
+            "use PCA.plot_scree() instead.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -573,6 +575,7 @@ for reproducible results across multiple function calls.""",
 
         .. deprecated:: 0.7.4
             Use :meth:`plot_score` instead.
+            Will be removed in version 0.10.0.
 
         Parameters
         ----------
@@ -589,7 +592,8 @@ for reproducible results across multiple function calls.""",
             The matplotlib axes.
         """
         warnings.warn(
-            "PCA.scoreplot() is deprecated; use PCA.plot_score() instead.",
+            "PCA.scoreplot() is deprecated and will be removed in 0.10.0; "
+            "use PCA.plot_score() instead.",
             DeprecationWarning,
             stacklevel=2,
         )

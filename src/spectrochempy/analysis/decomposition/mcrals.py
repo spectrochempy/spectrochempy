@@ -1188,13 +1188,14 @@ and `St`.
         return self._outfit[3]
 
     @property
-    @deprecated(replace="St_ls")
+    @property
+    @deprecated(replace="St_ls", removed="0.10.0")
     def St_unconstrained(self):
         """Deprecated. Equivalent to `St_ls`."""
         return self.St_ls
 
     @property
-    @deprecated(replace="St_ls")
+    @deprecated(replace="St_ls", removed="0.10.0")
     def S_soft(self):
         """Deprecated. Equivalent to `St_ls`."""
         return self.St_ls
