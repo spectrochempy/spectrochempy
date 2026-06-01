@@ -362,8 +362,31 @@ which restores matplotlib state after each test.
 Documenting change log
 -----------------------
 
-Changes should be reflected in the release notes located in ``whatsnew/changelog.rst`` in the `docs` directory of the spectrochempy package.
+Changes should be reflected in the release notes located in ``whatsnew/changelog.rst``
+in the ``docs`` directory of the spectrochempy package.
 This file contains an ongoing change log for each release.  Add an entry to this file to
 document your fix, enhancement or (unavoidable) breaking change.  Include the
 GitHub issue number when adding your entry (using ``(issue #1234)`` where ``1234`` is the
 issue/pull request number).
+
+The sections are organised in two groups:
+
+**User-facing sections** (for changes visible to end users):
+
+- ``New Features`` — new public API, functionality or plugins
+- ``Bug Fixes`` — corrections to user-visible behaviour
+- ``Dependency Updates`` — changes to project dependencies
+- ``Breaking Changes`` — API removals or incompatibilities
+- ``Deprecations`` — features scheduled for removal
+
+**Developer section** (for maintainers and contributors):
+
+- ``Developer`` — internal changes such as tests, CI, refactoring, tooling,
+  and documentation infrastructure. Each entry must be prefixed with one of
+  the following keywords:
+
+  - ``FEATURE:`` — new developer-facing capability (test harness, script, …)
+  - ``FIX:`` — correction of a test, CI or internal bug
+  - ``MAINT:`` — maintenance, refactoring, cleanup
+  - ``CI:`` — CI/CD workflow changes
+  - ``DEV:`` — developer tooling (version bump scripts, …)
