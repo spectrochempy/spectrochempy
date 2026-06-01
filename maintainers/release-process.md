@@ -212,6 +212,29 @@ Vérifier également que le DOI Zenodo a été mis à jour sur la
 Avant de publier un plugin, comparer les changements depuis son dernier
 tag publié.
 
+### Workflow automatique (recommandé)
+
+Le workflow **Check plugin release status** (`plugin_release_status.yml`)
+s'exécute automatiquement à chaque push sur `master` et peut aussi être
+déclenché manuellement depuis Actions → **Check plugin release status** →
+**Run workflow**.
+
+Il produit un tableau de synthèse dans le *workflow summary* (onglet
+Summary du run) listant les 4 plugins officiels avec :
+
+- Statut (unchanged / modified / no previous tag)
+- Dernier tag publié
+- Nombre de commits ayant touché le répertoire du plugin
+- Nombre de fichiers modifiés
+
+Ce tableau permet de décider en un coup d'œil si un plugin mérite une
+nouvelle release.
+
+> **Attention** : le workflow ne vérifie pas la *nature* des changements
+> (un commit CI qui touche accidentellement des fichiers plugins peut
+> suffire à marquer le plugin comme modifié). Utiliser la commande
+> `git log` ci-dessous pour inspecter le détail si nécessaire.
+
 ### Trouver le dernier tag
 
 ```bash
