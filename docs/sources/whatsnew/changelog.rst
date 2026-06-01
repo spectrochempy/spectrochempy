@@ -65,6 +65,8 @@ Developer
   automatically.
 - DOC: Updated contributor documentation build instructions to use the
   repository-root ``docs/make.py`` entry point and current ``build/html`` output.
+- DOC: Updated optional plugin installation notes so conda development
+  channels no longer imply automatic plugin dev uploads.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — shows a "no changes" message when all plugins are
