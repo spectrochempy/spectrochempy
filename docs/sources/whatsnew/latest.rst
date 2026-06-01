@@ -28,6 +28,9 @@ Developer
   repository-root ``docs/make.py`` entry point and current ``build/html`` output.
 - DOC: Updated optional plugin installation notes so conda development
   channels no longer imply automatic plugin dev uploads.
+- DOC: Aligned workflow comments and recovery notes with the current plugin
+  conda policy: stable plugin releases upload to ``main`` and dev uploads are
+  disabled until distinct dev versions exist.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — shows a "no changes" message when all plugins are

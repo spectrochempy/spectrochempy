@@ -3,9 +3,11 @@
 # - Anaconda Cloud
 #
 # Conda publication strategy:
-#   - Non-release builds (pushes, PRs) are uploaded to the Anaconda dev label.
-#   - Release builds are uploaded to the main (stable) label.
-#   - The dev label is used for testing; stable packages should not be overwritten.
+#   - Core non-release builds (pushes, PRs) are uploaded to the Anaconda dev label.
+#   - Core release builds are uploaded to the main (stable) label.
+#   - Plugin release builds are uploaded to the main label only.
+#   - Plugin dev uploads are disabled until plugin recipes generate distinct
+#     dev versions/builds; plugin conda packages are still built in CI.
 #   - Plugin conda recipes should declare a bounded dependency on the core
 #     package, e.g.  spectrochempy >=0.9.0.dev0,<0.10
 

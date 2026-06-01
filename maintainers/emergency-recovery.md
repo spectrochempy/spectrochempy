@@ -251,8 +251,9 @@ le solveur exclut les versions plus récentes de `spectrocat` à cause
 de la priorité stricte.
 
 *Résolution* : l'ordre des canaux dans le build des plugins a été
-inversé : `spectrocat/label/dev` et `spectrocat` passent avant
-`conda-forge`.
+inversé : `spectrocat/label/dev` (pour le core dev construit sur push) et
+`spectrocat` passent avant `conda-forge`. Les plugins eux-mêmes ne sont
+uploadés sur Anaconda.org que pendant une release stable de plugin.
 
 ### Résolution pour une release déjà publiée
 
