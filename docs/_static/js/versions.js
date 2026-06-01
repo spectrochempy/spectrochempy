@@ -42,40 +42,58 @@ document.addEventListener("DOMContentLoaded", function () {
             : 'latest';
     }
 
-    const currentVersion = getCurrentVersion();
-    const versions = (document.documentElement.dataset.versions || '').split(',');
-
-    // Remove empty strings and sort versions in descending order
-    const sortedVersions = versions
-        .filter(v => v)
-        .sort((a, b) => {
-            const partsA = a.split('.').map(Number);
-            const partsB = b.split('.').map(Number);
-            for (let i = 0; i < 3; i++) {
-                if (partsA[i] !== partsB[i]) {
-                    return partsB[i] - partsA[i];
+    function sortVersions(versions) {
+        return versions
+            .filter(v => v)
+            .sort((a, b) => {
+                const partsA = a.split('.').map(Number);
+                const partsB = b.split('.').map(Number);
+                for (let i = 0; i < 3; i++) {
+                    if (partsA[i] !== partsB[i]) {
+                        return partsB[i] - partsA[i];
+                    }
                 }
+                return 0;
+            });
+    }
+
+    async function loadVersions() {
+        const fallback = (document.documentElement.dataset.versions || '').split(',');
+        try {
+            const response = await fetch(`${window.location.origin}${basePath}_static/versions.json`, {
+                cache: 'no-cache',
+            });
+            if (!response.ok) {
+                return fallback;
             }
-            return 0;
+            const manifest = await response.json();
+            return Array.isArray(manifest.versions) ? manifest.versions : fallback;
+        } catch {
+            return fallback;
+        }
+    }
+
+    function populateDropdown(versions) {
+        const currentVersion = getCurrentVersion();
+        const sortedVersions = sortVersions(versions);
+
+        const latestOption = document.createElement("option");
+        latestOption.value = window.location.origin + basePath;
+        latestOption.textContent = "latest";
+        latestOption.selected = currentVersion === 'latest';
+        versionsDropdown.appendChild(latestOption);
+
+        sortedVersions.forEach(version => {
+            const option = document.createElement("option");
+            option.value = `${window.location.origin}${basePath}${version}/`;
+            option.textContent = version;
+            option.selected = currentVersion === version;
+            versionsDropdown.appendChild(option);
         });
+    }
 
-    // Add latest version
-    const latestOption = document.createElement("option");
-    latestOption.value = window.location.origin + basePath;
-    latestOption.textContent = "latest";
-    latestOption.selected = currentVersion === 'latest';
-    versionsDropdown.appendChild(latestOption);
+    loadVersions().then(populateDropdown);
 
-    // Add older versions
-    sortedVersions.forEach(version => {
-        const option = document.createElement("option");
-        option.value = `${window.location.origin}${basePath}${version}/`;
-        option.textContent = version;
-        option.selected = currentVersion === version;
-        versionsDropdown.appendChild(option);
-    });
-
-    // Handle version selection
     versionsDropdown.addEventListener("change", function () {
         const selectedVersion = this.value;
         if (selectedVersion) {

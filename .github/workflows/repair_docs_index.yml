@@ -1,0 +1,52 @@
+# Repair the published documentation version manifest without rebuilding docs.
+
+name: Repair docs version index
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair-docs-index:
+    name: Refresh docs versions manifest on gh-pages
+    runs-on: ubuntu-latest
+    if: github.repository == 'spectrochempy/spectrochempy'
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Checkout gh-pages
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository }}
+          ref: gh-pages
+          path: build/html
+          fetch-depth: 1
+
+      - name: Refresh docs version index
+        run: |
+          python3 docs/make.py versions
+          cat build/html/versions.json
+
+      - name: Commit repaired docs index
+        run: |
+          cd build/html
+          if git diff --quiet; then
+            echo "Documentation version index is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Repair docs version index"
+          git push

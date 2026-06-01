@@ -57,6 +57,7 @@ Build docs for specific version:
 """
 
 import argparse
+import json
 import multiprocessing as mp
 import os
 import re
@@ -113,6 +114,80 @@ def _canonical_doc_tag(tagname):
     if SEMVER_RE.match(tagname):
         return [tagname, f"{CORE_TAG_PREFIX}{tagname}"], tagname
     return [tagname], tagname
+
+
+def _version_sort_key(version):
+    return tuple(int(part) for part in version.split("."))
+
+
+def _get_published_versions(html_dir=HTML):
+    versions = []
+    version_pattern = re.compile(r"^\d+\.\d+\.\d+$")
+    html_dir = Path(html_dir)
+    if not html_dir.exists():
+        return versions
+    for item in html_dir.iterdir():
+        if item.is_dir() and version_pattern.match(item.name):
+            versions.append(item.name)
+    return sorted(versions, key=_version_sort_key, reverse=True)
+
+
+def _write_versions_manifest(html_dir=HTML):
+    versions = _get_published_versions(html_dir)
+    manifest = {
+        "schema_version": 1,
+        "latest": "latest",
+        "stable": versions[0] if versions else "",
+        "versions": versions,
+    }
+    html_dir = Path(html_dir)
+    static_dir = html_dir / "_static"
+    static_dir.mkdir(parents=True, exist_ok=True)
+    content = json.dumps(manifest, indent=2) + "\n"
+    (html_dir / "versions.json").write_text(content, encoding="utf-8")
+    (static_dir / "versions.json").write_text(content, encoding="utf-8")
+    return manifest
+
+
+def _update_version_template_data(html_dir=HTML):
+    versions = _get_published_versions(html_dir)
+    versions_str = ",".join(versions)
+
+    layout_template = TEMPLATES / "layout.html"
+    content = layout_template.read_text(encoding="utf-8").replace(
+        "data-versions=\"{{ previous_versions|join(',') if previous_versions else '' }}\"",
+        f'data-versions="{versions_str}"',
+    )
+
+    for version_dir in Path(html_dir).glob("[0-9]*.[0-9]*.[0-9]*"):
+        target_dir = version_dir / "_templates"
+        target_dir.mkdir(exist_ok=True)
+        (target_dir / "layout.html").write_text(content, encoding="utf-8")
+
+    return versions
+
+
+def _sync_versions_script(html_dir=HTML):
+    source = STATIC / "js" / "versions.js"
+    if not source.exists():
+        return
+
+    html_dir = Path(html_dir)
+    targets = [html_dir / "_static" / "js" / "versions.js"]
+    targets.extend(
+        version_dir / "_static" / "js" / "versions.js"
+        for version_dir in html_dir.glob("[0-9]*.[0-9]*.[0-9]*")
+    )
+
+    for target in targets:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+
+
+def refresh_versions_index(html_dir=HTML):
+    _update_version_template_data(html_dir)
+    _sync_versions_script(html_dir)
+    return _write_versions_manifest(html_dir)
 
 
 # ======================================================================================
@@ -634,12 +709,7 @@ class BuildDocumentation:
         # Get a list of previous versions from the HTML directory.
         # Returns: list - List of previous versions
 
-        versions = []
-        version_pattern = re.compile(r"^(\d+\.\d+\.\d+)$")
-        for item in HTML.iterdir():
-            if item.is_dir() and version_pattern.match(item.name):
-                versions.append(item.name)
-        return versions
+        return _get_published_versions(HTML)
 
     def _make_docs(self):
         # Simplified documentation building process.
@@ -832,34 +902,8 @@ class BuildDocumentation:
             shutil.rmtree(source_dir)
             print(f"Removed directory {source_dir}")
 
-        # Get all version directories
-        versions = []
-        version_pattern = re.compile(r"^\d+\.\d+\.\d+$")
-        for item in HTML.iterdir():
-            if item.is_dir() and version_pattern.match(item.name):
-                versions.append(item.name)
-
-        versions.sort(reverse=True)  # Sort in descending order
-        versions_str = ",".join(versions)
-
-        # Update layout.html to include latest versions list
-        layout_template = TEMPLATES / "layout.html"
-        with open(layout_template) as f:
-            content = f.read()
-            # replace the Jinja template expression with the actual version list
-            content = content.replace(
-                "data-versions=\"{{ previous_versions|join(',') if previous_versions else '' }}\"",
-                f'data-versions="{versions_str}"',
-            )
-
-        # Update also in each version directory
-        for version_dir in HTML.glob("[0-9]*.[0-9]*.[0-9]*"):
-            target_dir = version_dir / "_templates"
-            target_dir.mkdir(exist_ok=True)
-            target_file = target_dir / "layout.html"
-
-            with open(target_file, "w") as f:
-                f.write(content)
+        manifest = refresh_versions_index(HTML)
+        print(f"Updated docs versions manifest: {manifest['versions']}")
 
         # Remove the environment variables
         del environ["PREVIOUS_VERSIONS"]
@@ -938,6 +982,12 @@ class BuildDocumentation:
         if self.settings["delnb"]:
             self._delnb()  # Erase nb before starting
         self._sync_notebooks()
+
+    def versions(self):
+        """Refresh the published documentation versions manifest."""
+        manifest = refresh_versions_index(HTML)
+        print(f"Updated docs versions manifest in {HTML}: {manifest['versions']}")
+        return 0
 
     def linkcheck(self):
         """Check the links in the documentation."""

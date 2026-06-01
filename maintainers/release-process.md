@@ -233,10 +233,14 @@ Vérifier enfin la documentation :
 
 Si la version n'apparaît pas dans le dropdown alors que la release existe :
 
-1. Relancer manuellement **Actions → Docs → Run workflow** depuis `master`.
-2. Vérifier que `gh-pages` contient bien le répertoire `X.Y.Z/`.
-3. Vérifier que le tag core suit le format `spectrochempy-vX.Y.Z`.
-4. Ne pas créer de tag alias local `X.Y.Z` : `docs/make.py -T` accepte les
+1. Vérifier que `gh-pages` contient bien le répertoire `X.Y.Z/`.
+2. Si le répertoire existe, lancer **Actions → Repair docs version index** :
+   ce workflow régénère seulement `versions.json` et le dropdown, sans
+   reconstruire toute la documentation.
+3. Si le répertoire est absent, relancer manuellement
+   **Actions → Docs → Run workflow** depuis `master`.
+4. Vérifier que le tag core suit le format `spectrochempy-vX.Y.Z`.
+5. Ne pas créer de tag alias local `X.Y.Z` : `docs/make.py -T` accepte les
    tags canoniques `spectrochempy-vX.Y.Z`.
 
 ---
