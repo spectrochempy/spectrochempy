@@ -69,13 +69,13 @@ jobs:
                   any_changes = True
               else:
                   ret = subprocess.run(
-                      ['git', 'diff', '--quiet', last_tag, '--', f'{plugin_dir}/'],
+                      ['git', 'diff', '--ignore-cr-at-eol', '--quiet', last_tag, '--', f'{plugin_dir}/'],
                   )
                   if ret.returncode == 0:
                       lines.append(f'| {plugin} | :white_check_mark: unchanged | `{last_tag}` | 0 |')
                   else:
                       stat_ret = subprocess.run(
-                          ['git', 'diff', '--stat', last_tag, '--', f'{plugin_dir}/'],
+                          ['git', 'diff', '--ignore-cr-at-eol', '--stat', last_tag, '--', f'{plugin_dir}/'],
                           capture_output=True, text=True,
                       )
                       stat_text = stat_ret.stdout.strip()
