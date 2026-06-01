@@ -174,10 +174,7 @@ def test_compare_project(simple_project):
         for item in proj.datasets:
             item.data = item.data + 1
             return True
-        for subproj in proj.projects:
-            if modify_first_dataset(subproj):
-                return True
-        return False
+        return any(modify_first_dataset(subproj) for subproj in proj.projects)
 
     assert modify_first_dataset(proj4)
     with testing.raises(AssertionError):
