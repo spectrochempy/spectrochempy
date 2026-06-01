@@ -245,15 +245,10 @@ jobs:
           # excluding plugin tags (spectrochempy-*-vX.Y.Z).
           for tag in $(git tag --list 'spectrochempy-v*' | sort -V); do
             version="${tag#spectrochempy-v}"
-            # Create a local lightweight alias tag so make.py -T can find it
-            if ! git rev-parse --verify "$version" >/dev/null 2>&1; then
-              echo "Creating local alias tag for $tag"
-              git tag "$version" "$tag"
-            fi
             # Build docs for this version if not already present
             if [ ! -d "build/html/$version" ]; then
               echo "Building v$version docs"
-              python3 docs/make.py -j1 html -T "$version"
+              python3 docs/make.py -j1 html -T "$tag"
             fi
           done
 

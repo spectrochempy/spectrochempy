@@ -63,6 +63,19 @@ or directly:
 Once installed, plugins are discovered automatically. No explicit plugin
 loading call is required in user code.
 
+Versions and compatibility
+==========================
+
+Official plugins are versioned independently from the SpectroChemPy core
+package. A core release and a plugin release therefore do not need to share the
+same version number. For example, a stable ``spectrochempy 0.9.2`` environment
+may use ``spectrochempy-nmr 0.1.3``.
+
+Stable plugin packages are published on PyPI and on the main ``spectrocat``
+conda channel. Conda development builds for official plugins are currently not
+published automatically; they will be re-enabled once plugin development builds
+use versions distinct from stable releases.
+
 Inspect installed plugins
 =========================
 

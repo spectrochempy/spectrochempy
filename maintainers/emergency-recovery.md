@@ -176,8 +176,9 @@ Le job `build-and-publish_plugins` échoue dans le workflow
    [secrets du dépôt](https://github.com/spectrochempy/spectrochempy/settings/secrets/actions)
    et qu'ils n'ont pas expiré ou été révoqués
 2. **Version déjà publiée** : le workflow publie les plugins avec
-   `skip-existing: true` sur TestPyPI. Sur PyPI stable, une version
-   déjà publiée provoque un échec (pas de `--skip-existing`).
+   `skip-existing: true` sur TestPyPI et PyPI stable. Une version déjà
+   publiée est donc ignorée, mais PyPI ne remplace jamais un artefact
+   existant. Si le contenu publié est incorrect, incrémenter la version.
 
 ---
 
@@ -198,11 +199,11 @@ Le job `build_and_publish_conda_package` échoue.
    anaconda show spectrocat/spectrochempy
    ```
 3. **Labels** :
-   - Sur release : upload vers le label `main` (sans `--force`)
+   - Sur release : upload vers le label `main` (avec `--force`, pour déplacer
+     si nécessaire une build déjà publiée sur `dev` vers le label stable)
    - Sur push : upload vers le label `dev` (avec `--force`)
-4. **Version déjà publiée** : si le label `main` contient déjà la même
-   version, le build échoue (pas de `--force` sur la release). Supprimer
-   la version sur Anaconda si nécessaire :
+4. **Version déjà publiée** : si Anaconda refuse malgré tout l'upload,
+   supprimer la version sur Anaconda si nécessaire :
    ```bash
    anaconda remove spectrocat/spectrochempy/X.Y.Z
    ```
@@ -251,8 +252,9 @@ le solveur exclut les versions plus récentes de `spectrocat` à cause
 de la priorité stricte.
 
 *Résolution* : l'ordre des canaux dans le build des plugins a été
-inversé : `spectrocat/label/dev` et `spectrocat` passent avant
-`conda-forge`.
+inversé : `spectrocat/label/dev` (pour le core dev construit sur push) et
+`spectrocat` passent avant `conda-forge`. Les plugins eux-mêmes ne sont
+uploadés sur Anaconda.org que pendant une release stable de plugin.
 
 ### Résolution pour une release déjà publiée
 
@@ -391,7 +393,7 @@ les GitHub Releases, y compris celles des plugins (tags
 ### Prévention
 
 - Suivre la procédure décrite dans
-  [release-process.md — Zenodo and plugin releases](../release-process.md#zenodo-and-plugin-releases)
+  [release-process.md — Zenodo and plugin releases](release-process.md#zenodo-and-plugin-releases)
 - Ne jamais laisser l'intégration Zenodo active pendant une phase de
   release plugin
 

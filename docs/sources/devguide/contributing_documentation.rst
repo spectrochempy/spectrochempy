@@ -49,33 +49,40 @@ Building Documentation
 Quick Start
 ~~~~~~~~~~~
 1. Set up development environment (:ref:`guide <contributing.environment>`)
-2. Navigate to ``docs/`` directory
-3. Build HTML::
+2. From the repository root, build HTML::
 
-    python make.py html
+    python docs/make.py html
 
-4. View at ``docs/build/html/latest/index.html``
+3. View at ``build/html/index.html``
+
+For documentation-only edits where executing examples is not needed, use::
+
+    python docs/make.py --no-exec html
+
+On the published site, the root of ``gh-pages`` is the ``latest``
+documentation. Stable releases are published under version directories such as
+``0.9.2/``.
 
 Build Options
 ~~~~~~~~~~~~~
 
 - Full rebuild::
 
-    python make.py clean
-    python make.py html
+    python docs/make.py clean
+    python docs/make.py html
 
 - Build a single file::
 
-    python make.py --single-doc <path-to-file-relative-to-docs>.rst
-    python make.py --single-doc <path-to-file-relative-to-docs>.ipynb
+    python docs/make.py --single-doc <path-to-file-relative-to-docs>.rst
+    python docs/make.py --single-doc <path-to-file-relative-to-docs>.ipynb
 
 - Build a single directory::
 
-    python make.py --directory <path-to-directory-relative-to-docs>
+    python docs/make.py --directory <path-to-directory-relative-to-docs>
 
 - Build a single API entry::
 
-    python make.py --single-doc spectrochempy.<class-or-method-name>
+    python docs/make.py --single-doc spectrochempy.<class-or-method-name>
     # where ``<class-or-method-name>`` is the name of an importable method in the API.
 
 Writing Tips

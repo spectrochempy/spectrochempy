@@ -76,14 +76,12 @@ services externes.
   ```
 
 - **Première release d'un plugin** : si le package n'existe pas encore sur
-  Anaconda, la commande `anaconda show` échouera — c'est normal. Le
-  workflow `build_package.yml` utilise une commande `anaconda show` en
-  diagnostic avant l'upload. Si le package n'existe pas encore, cette
-  commande peut échouer et bloquer le script à cause de `set -e`.
+  Anaconda, vérifier que `ANACONDA_API_TOKEN` a les droits de création de
+  nouveaux packages sur l'organisation `spectrocat`.
 
-  → Solution : soit supprimer la ligne `anaconda show` du workflow pour
-  les plugins, soit créer le package vide manuellement avant la première
-  release (`anaconda upload --skip-existing -l main <fichier>.conda`).
+  → Si la création automatique échoue, créer le package manuellement avec le
+  fichier `.conda` construit par CI, puis relancer la release :
+  `anaconda upload -l main <fichier>.conda`.
 
   Le `ANACONDA_API_TOKEN` utilisé par le workflow doit avoir les droits
   de **création** de nouveaux packages sur l'organisation `spectrocat`.
@@ -101,7 +99,8 @@ services externes.
 
 ```bash
 git fetch upstream
-git checkout upstream/master
+git switch master
+git merge --ff-only upstream/master
 git status
 ```
 
@@ -158,7 +157,7 @@ Dans la Pull Request :
 Le workflow `publish_draft_new_release.yml` crée une **Draft Release** avec :
 
 - Tag : `spectrochempy-vX.Y.Z`
-- Titre : `SpectroChemPy v.X.Y.Z`
+- Titre : `SpectroChemPy vX.Y.Z`
 
 Aller sur la
 [page des releases](https://github.com/spectrochempy/spectrochempy/releases)
@@ -172,7 +171,8 @@ pour vérifier la Draft.
   **Build and publish packages** qui publie sur :
 
   - **PyPI** (label stable, sans `--force`)
-  - **Anaconda.org** (label `main`, sans `--force`)
+  - **Anaconda.org** (label `main`, avec `--force` pour déplacer une build
+    déjà publiée sur `dev` vers le label stable)
   - **Zenodo** (via l'intégration GitHub)
 
 - La publication déclenche également le workflow **Docs** (`build_docs.yml`)
@@ -183,6 +183,24 @@ pour vérifier la Draft.
   > tag publié (`spectrochempy-vX.Y.Z`). Il alimente aussi la documentation
   > versionnée (accessible sous `/<version>/`) et le dropdown des versions.
   > **Ne pas supprimer ce job** dans le workflow `build_docs.yml`.
+
+### Modèle actuel de documentation versionnée
+
+Le site publié par GitHub Pages est construit dans la branche `gh-pages` :
+
+- la documentation `latest` est publiée à la racine du site et correspond à
+  l'état courant de `master` ;
+- chaque release stable du core est publiée dans un répertoire `X.Y.Z/`
+  (par exemple `0.9.2/`) ;
+- le dropdown des versions est généré à partir des répertoires semver présents
+  dans `gh-pages` ;
+- les tags Git du core utilisent le format canonique `spectrochempy-vX.Y.Z`,
+  mais le répertoire public de documentation reste `X.Y.Z/` ;
+- les tags plugins (`spectrochempy-<plugin>-vX.Y.Z`) ne doivent pas créer de
+  documentation stable séparée.
+
+`latest.rst` ne doit pas être modifié manuellement : il est régénéré depuis
+`docs/sources/whatsnew/changelog.rst` par le hook pre-commit.
 
 ---
 
@@ -204,6 +222,22 @@ python -c "import spectrochempy; print(spectrochempy.__version__)"
 
 Vérifier également que le DOI Zenodo a été mis à jour sur la
 [page Zenodo](https://zenodo.org/communities/spectrochempy).
+
+Vérifier enfin la documentation :
+
+- le workflow **Docs** (`build_docs.yml`) a réussi après publication de la
+  release ;
+- `https://www.spectrochempy.fr/X.Y.Z/` existe pour la nouvelle version ;
+- le dropdown des versions contient `X.Y.Z` ;
+- la racine du site affiche toujours la documentation `latest`.
+
+Si la version n'apparaît pas dans le dropdown alors que la release existe :
+
+1. Relancer manuellement **Actions → Docs → Run workflow** depuis `master`.
+2. Vérifier que `gh-pages` contient bien le répertoire `X.Y.Z/`.
+3. Vérifier que le tag core suit le format `spectrochempy-vX.Y.Z`.
+4. Ne pas créer de tag alias local `X.Y.Z` : `docs/make.py -T` accepte les
+   tags canoniques `spectrochempy-vX.Y.Z`.
 
 ---
 
@@ -292,8 +326,11 @@ généralement pas de publication :
 
 ### Workflow
 
-Depuis **Actions** → **Release an official plugin**, exécuter le workflow avec les
-paramètres :
+Si nécessaire, lancer d'abord **Actions** → **Check plugin release status**
+pour vérifier quels plugins ont changé depuis leur dernier tag publié.
+
+Ensuite, depuis **Actions** → **Release an official plugin**, exécuter le
+workflow depuis la branche `master` avec les paramètres :
 
 ```
 plugin_name: spectrochempy-XXX
@@ -314,8 +351,9 @@ confirm_zenodo_disabled: true   # ← doit être coché
 ### Déroulement
 
 1. Le workflow **Release an official plugin** (`release_plugin.yml`) :
+   - Vérifie que le workflow est déclenché depuis `master`
    - Vérifie que le plugin est dans la liste officielle
-   - Bump la version dans `pyproject.toml` et `recipe.yaml`
+   - Bump la version dans `pyproject.toml`, `recipe.yaml` et `__init__.py`
    - Pousse le commit sur `master` (via `BOT_TOKEN`)
    - Crée le tag `spectrochempy-XXX-vX.Y.Z`
    - Crée une Release GitHub
@@ -461,8 +499,8 @@ entrées sont incorrectes car :
 
 ### TestPyPI cleanup
 
-- [ ] Les pushes sur `master` publient automatiquement sur TestPyPI
-- [ ] Les releases plugins sur TestPyPI ne remplacent pas les versions
+- [ ] Les pushes sur `master` publient automatiquement le core sur TestPyPI
+- [ ] Les publications plugins vers TestPyPI ne remplacent pas les versions
       existantes (le workflow utilise `skip-existing: true`)
 - [ ] Si une version a été publiée sur TestPyPI puis modifiée, supprimer
       manuellement l'ancienne version sur
@@ -496,5 +534,4 @@ entrées sont incorrectes car :
 - Éviter de reconstruire inutilement des versions inchangées (build complet
   même quand seuls quelques fichiers RST ont changé)
 - Rendre le version selector moins dépendant des détails de tagging
-  (actuellement lié aux répertoires `X.Y.Z` dans le HTML et aux alias de
-  tags locaux)
+  (actuellement lié aux répertoires `X.Y.Z` dans le HTML)

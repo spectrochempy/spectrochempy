@@ -181,7 +181,7 @@ Release policy
 
 Plugins are released **independently** from the core package.
 
-* A core release tag such as ``0.9.0`` publishes the core wheel only;
+* A core release tag such as ``spectrochempy-v0.9.0`` publishes the core wheel only;
   it does **not** trigger plugin uploads.
 * A plugin release tag such as ``spectrochempy-nmr-v0.1.1`` triggers the
   ``publish_plugins.yml`` and ``build_package.yml`` workflows for that
@@ -199,15 +199,17 @@ repository, which leads to version collisions).
 The recommended way to release a plugin is through the
 ``release_plugin.yml`` workflow:
 
-1. Go to **Actions → Release an official plugin** in the GitHub UI.
-2. Click **Run workflow**.
-3. Enter:
+1. Optionally run **Actions → Check plugin release status** first to inspect
+   which official plugins changed since their last release tag.
+2. Go to **Actions → Release an official plugin** in the GitHub UI.
+3. Click **Run workflow** from the ``master`` branch.
+4. Enter:
    - Plugin name: ``spectrochempy-nmr``
    - Version: ``0.1.1``
-4. The workflow bumps ``pyproject.toml`` and ``recipe.yaml``, commits,
-   pushes to the ``plugins`` branch, and creates the release tag
-   ``spectrochempy-nmr-v0.1.1`` automatically.
-5. The tag triggers CI which builds and publishes the wheel to PyPI and
+5. The workflow bumps ``pyproject.toml``, ``recipe.yaml``, and the plugin
+   ``__init__.py`` version string, commits to ``master``, and creates
+   the release tag ``spectrochempy-nmr-v0.1.1`` automatically.
+6. The tag triggers CI which builds and publishes the wheel to PyPI and
    Anaconda.org.
 
 Manual fallback::
@@ -215,9 +217,10 @@ Manual fallback::
     # 1. Bump version in plugins/<name>/pyproject.toml
     # 2. Bump version in plugins/<name>/recipe.yaml (conda)
     # 3. Commit and push:
-    git add plugins/<name>/pyproject.toml plugins/<name>/recipe.yaml
+    git add plugins/<name>/pyproject.toml plugins/<name>/recipe.yaml \
+        plugins/<name>/src/spectrochempy_<name>/__init__.py
     git commit -m "Bump spectrochempy-<name> to 0.1.1"
-    git push upstream plugins
+    git push upstream master
 
     # 4. Create and push the release tag:
     git tag spectrochempy-<name>-v0.1.1

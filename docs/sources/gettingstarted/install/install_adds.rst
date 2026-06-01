@@ -78,15 +78,10 @@ the corresponding feature is accessed.
 
    **Development builds**
 
-   Pre-release (dev) versions of plugins are published to the ``dev`` label
-   on Anaconda.org. To install the latest development build::
-
-      mamba install -c spectrocat/label/dev -c conda-forge spectrochempy-nmr
-
-   Dev builds may depend on the latest dev core package, so include the
-   dev channel for core as well::
-
-      mamba install -c spectrocat/label/dev -c conda-forge spectrochempy
+   Conda development builds are available for the core package, but official
+   plugin development builds are not currently uploaded automatically. Stable
+   plugin packages are published on the main ``spectrocat`` channel. For plugin
+   development, install the plugin from a local source checkout as shown above.
 
 .. seealso::
 

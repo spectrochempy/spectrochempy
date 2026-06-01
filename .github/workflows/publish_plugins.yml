@@ -15,8 +15,7 @@
 #   - plugin-template is excluded from discovery — it is a developer scaffold.
 #   - PyPI upload uses skip-existing so an already-published version never
 #     causes a hard failure.
-#   - Conda upload uses --force only on the dev label; stable (main) uploads
-#     fail cleanly if the version already exists.
+#   - Conda plugin publication is handled by build_package.yml.
 
 name: Publish plugin packages
 

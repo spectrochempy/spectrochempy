@@ -20,6 +20,10 @@ do not make sudden changes to the code that could have the potential to break
 a lot of user code as a result, that is, we need it to be as *backwards compatible*
 as possible to avoid mass breakages.
 
+Prefer small, focused changes. If a patch affects public APIs, packaging,
+release workflows, or broad test behavior, document the risk in the pull request
+and keep unrelated cleanups for a separate change.
+
 Some extra checks can be run by
 ``pre-commit`` - see :ref:`here <contributing.pre-commit>` for how to
 run them.
@@ -312,6 +316,10 @@ The tests can then be run directly inside your Git clone by typing:
 The test suite is exhaustive and takes several minutes to run.  Often it is
 worth running only a subset of tests first around your changes before running the
 entire suite.
+
+When opening a pull request, prefer a small local test selection that matches
+the edited area and let CI cover the full matrix across operating systems and
+Python versions.
 
 The easiest way to do this is with:
 
