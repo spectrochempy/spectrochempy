@@ -3,7 +3,8 @@
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
-# ruff: noqa
+import copy
+
 import pytest
 
 from spectrochempy.core.dataset.basearrays.ndarray import NDArray
@@ -147,38 +148,33 @@ def test_compare_dataset(IR_dataset_1D):
     testing.assert_dataset_equal(nd1, nd6, data_only=True)
 
 
-@pytest.mark.skip(
-    "assert_project_equal does not yet compare nested project dataset content; "
-    "needs a dedicated Project comparison refactor"
-)
 def test_compare_project(simple_project):
     """Test comparison functions for Project objects."""
     # project comparison
 
-    proj1 = simple_project.copy()
+    # Project.copy() is intentionally shallow; use deepcopy here so mutations
+    # below do not also mutate the reference project.
+    proj1 = copy.deepcopy(simple_project)
     proj1.name = "PROJ1"
-    proj2 = proj1.copy()
+    proj2 = copy.deepcopy(proj1)
     proj2.name = "PROJ2"
 
     testing.assert_project_equal(proj1, proj2)
 
-    proj3 = proj2.copy()
+    proj3 = copy.deepcopy(proj2)
     proj3.add_script(Script(content="print()", name="just_a_try"))
 
     with testing.raises(AssertionError):
         testing.assert_project_equal(proj1, proj3)
 
     # Test with datasets having different data, including nested projects.
-    proj4 = proj1.copy()
+    proj4 = copy.deepcopy(proj1)
 
     def modify_first_dataset(proj):
         for item in proj.datasets:
             item.data = item.data + 1
             return True
-        for subproj in proj.projects:
-            if modify_first_dataset(subproj):
-                return True
-        return False
+        return any(modify_first_dataset(subproj) for subproj in proj.projects)
 
     assert modify_first_dataset(proj4)
     with testing.raises(AssertionError):
