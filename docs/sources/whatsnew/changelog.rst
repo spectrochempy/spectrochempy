@@ -75,6 +75,9 @@ Developer
   Anaconda ``main`` upload behavior.
 - DOC: Clarified that official plugin releases must be run from ``master`` and
   can be prepared with the read-only plugin release status workflow.
+- DOC: Finished maintainer release notes cleanup for master checkout, draft
+  release titles, TestPyPI wording, plugin PyPI ``skip-existing`` behavior, and
+  internal recovery links.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — shows a "no changes" message when all plugins are

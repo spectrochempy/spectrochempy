@@ -176,8 +176,9 @@ Le job `build-and-publish_plugins` échoue dans le workflow
    [secrets du dépôt](https://github.com/spectrochempy/spectrochempy/settings/secrets/actions)
    et qu'ils n'ont pas expiré ou été révoqués
 2. **Version déjà publiée** : le workflow publie les plugins avec
-   `skip-existing: true` sur TestPyPI. Sur PyPI stable, une version
-   déjà publiée provoque un échec (pas de `--skip-existing`).
+   `skip-existing: true` sur TestPyPI et PyPI stable. Une version déjà
+   publiée est donc ignorée, mais PyPI ne remplace jamais un artefact
+   existant. Si le contenu publié est incorrect, incrémenter la version.
 
 ---
 
@@ -392,7 +393,7 @@ les GitHub Releases, y compris celles des plugins (tags
 ### Prévention
 
 - Suivre la procédure décrite dans
-  [release-process.md — Zenodo and plugin releases](../release-process.md#zenodo-and-plugin-releases)
+  [release-process.md — Zenodo and plugin releases](release-process.md#zenodo-and-plugin-releases)
 - Ne jamais laisser l'intégration Zenodo active pendant une phase de
   release plugin
 

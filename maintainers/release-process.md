@@ -99,7 +99,8 @@ services externes.
 
 ```bash
 git fetch upstream
-git checkout upstream/master
+git switch master
+git merge --ff-only upstream/master
 git status
 ```
 
@@ -156,7 +157,7 @@ Dans la Pull Request :
 Le workflow `publish_draft_new_release.yml` crée une **Draft Release** avec :
 
 - Tag : `spectrochempy-vX.Y.Z`
-- Titre : `SpectroChemPy v.X.Y.Z`
+- Titre : `SpectroChemPy vX.Y.Z`
 
 Aller sur la
 [page des releases](https://github.com/spectrochempy/spectrochempy/releases)
@@ -498,8 +499,8 @@ entrées sont incorrectes car :
 
 ### TestPyPI cleanup
 
-- [ ] Les pushes sur `master` publient automatiquement sur TestPyPI
-- [ ] Les releases plugins sur TestPyPI ne remplacent pas les versions
+- [ ] Les pushes sur `master` publient automatiquement le core sur TestPyPI
+- [ ] Les publications plugins vers TestPyPI ne remplacent pas les versions
       existantes (le workflow utilise `skip-existing: true`)
 - [ ] Si une version a été publiée sur TestPyPI puis modifiée, supprimer
       manuellement l'ancienne version sur
