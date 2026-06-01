@@ -44,11 +44,18 @@ services externes.
 
 **Avant une release du core :**
 
-- Le dépôt `spectrochempy/spectrochempy` est bien activé dans
-  [Zenodo GitHub settings](https://zenodo.org/account/settings/github/)
-- L'intégration GitHub est active (pas de croix rouge)
-- L'onglet **Errors** de la page Zenodo ne contient pas d'erreur active
-- `CITATION.cff` et `zenodo.json` sont valides (vérifier les versions)
+1. Aller sur la [page GitHub de Zenodo](https://zenodo.org/account/settings/github/)
+2. Ouvrir l'onglet **GitHub** (premier onglet, par défaut)
+3. Chercher `spectrochempy/spectrochempy` dans la liste des dépôts
+4. Vérifier que le bouton est sur **Enabled** (vert) — pas grisé (Disabled)
+5. Si le dépôt est grisé, cliquer sur le bouton pour le réactiver
+6. Si le dépôt est déjà Enabled mais que l'intégration semble ne pas
+   fonctionner (par exemple après une phase de releases plugins), on peut
+   **toggle** (Disabled → Enabled) pour forcer Zenodo à reconnaître le dépôt
+7. Vérifier l'onglet **Errors** (deuxième onglet) : aucune erreur active
+   (pas de croix rouge)
+8. Vérifier que `CITATION.cff` et `zenodo.json` sont valides (les versions
+   sont correctes)
 
 **Avant une release de plugins :**
 
@@ -162,6 +169,15 @@ pour vérifier la Draft.
   - **PyPI** (label stable, sans `--force`)
   - **Anaconda.org** (label `main`, sans `--force`)
   - **Zenodo** (via l'intégration GitHub)
+
+- La publication déclenche également le workflow **Docs** (`build_docs.yml`)
+  via l'événement `release: [published]` :
+
+  > **Note sur la construction de la documentation** : ce build est volontaire.
+  > Il vérifie que la documentation de release peut être construite avec le
+  > tag publié (`spectrochempy-vX.Y.Z`). Il alimente aussi la documentation
+  > versionnée (accessible sous `/<version>/`) et le dropdown des versions.
+  > **Ne pas supprimer ce job** dans le workflow `build_docs.yml`.
 
 ---
 
@@ -380,6 +396,9 @@ entrées sont incorrectes car :
 ### Release du core
 
 - [ ] Vérifier que l'intégration GitHub → Zenodo est active
+      (aller sur https://zenodo.org/account/settings/github/ → onglet GitHub →
+      `spectrochempy/spectrochempy` doit être **Enabled** ; si besoin,
+      toggle Disabled → Enabled pour forcer la prise en compte)
 - [ ] Vérifier que le workflow `build_package.yml` est configuré comme
       Trusted Publisher sur PyPI et TestPyPI (paramètres du projet
       `spectrochempy` sur PyPI → Trusted Publishers → GitHub repository
@@ -432,3 +451,15 @@ entrées sont incorrectes car :
       release plugin
 - [ ] Si des entrées plugins existent dans Zenodo, les supprimer
       (voir `emergency-recovery.md`)
+
+---
+
+## TODO — Documentation modulaire (chantier futur)
+
+- Séparer plus clairement les docs `latest`, les docs stables et les docs
+  plugins
+- Éviter de reconstruire inutilement des versions inchangées (build complet
+  même quand seuls quelques fichiers RST ont changé)
+- Rendre le version selector moins dépendant des détails de tagging
+  (actuellement lié aux répertoires `X.Y.Z` dans le HTML et aux alias de
+  tags locaux)

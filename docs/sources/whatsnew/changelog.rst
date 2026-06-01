@@ -53,3 +53,6 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- DOC: Improved maintainer release documentation with explicit Zenodo
+  verification steps, docs build note, and roadmap for modular docs.
