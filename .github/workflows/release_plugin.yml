@@ -57,50 +57,43 @@ jobs:
         run: |
           OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-hypercomplex spectrochempy-carroucell"
           HAS_CHANGES=false
-          TABLE=""
+          SUMMARY="$GITHUB_STEP_SUMMARY"
+
+          echo "## Plugin release status" >> "$SUMMARY"
+          echo "" >> "$SUMMARY"
+          echo "| Plugin | Status | Last tag |" >> "$SUMMARY"
+          echo "|--------|--------|----------|" >> "$SUMMARY"
 
           for plugin in $OFFICIAL_PLUGINS; do
             plugin_dir="plugins/$plugin"
             last_tag=$(git tag --list "${plugin}-v*" | sort -V | tail -1)
 
             if [ ! -d "$plugin_dir" ]; then
-              TABLE+="| $plugin | ⚠️  directory missing | — |\n"
+              echo "| $plugin | :warning: directory missing | -- |" >> "$SUMMARY"
               HAS_CHANGES=true
               continue
             fi
 
             if [ -z "$last_tag" ]; then
-              TABLE+="| $plugin | 🆕 no previous plugin tag | — |\n"
+              echo "| $plugin | :new: no previous plugin tag | -- |" >> "$SUMMARY"
               HAS_CHANGES=true
             elif git diff --quiet "$last_tag" -- "$plugin_dir/"; then
-              TABLE+="| $plugin | ✅ unchanged since last tag | \`$last_tag\` |\n"
+              echo "| $plugin | :white_check_mark: unchanged since last tag | \`$last_tag\` |" >> "$SUMMARY"
             else
-              TABLE+="| $plugin | 🔶 modified since last tag | \`$last_tag\` |\n"
+              echo "| $plugin | :large_orange_diamond: modified since last tag | \`$last_tag\` |" >> "$SUMMARY"
               HAS_CHANGES=true
             fi
           done
 
-          {
-            echo "## Plugin release status"
-            echo ""
+          echo "" >> "$SUMMARY"
 
-            if [ "$HAS_CHANGES" = "false" ]; then
-              echo "**No changes detected in any official plugin — no new releases needed at this time.**"
-              echo ""
-              echo "| Plugin | Status | Last tag |"
-              echo "|--------|--------|----------|"
-              echo -e "$TABLE"
-              echo ""
-              echo "_The workflow will proceed with releasing **${{ inputs.plugin_name }} v${{ inputs.version }}** regardless._"
-            else
-              echo "| Plugin | Status | Last tag |"
-              echo "|--------|--------|----------|"
-              echo -e "$TABLE"
-              echo ""
-              echo "_The table above highlights plugins that may need a release._"
-              echo "_The workflow will proceed with releasing **${{ inputs.plugin_name }} v${{ inputs.version }}** regardless._"
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$HAS_CHANGES" = "true" ]; then
+            echo "_The table above highlights plugins that may need a release._" >> "$SUMMARY"
+          else
+            echo "**No changes detected in any official plugin - no new releases needed at this time.**" >> "$SUMMARY"
+          fi
+
+          echo "_The workflow will proceed with releasing **${{ inputs.plugin_name }} v${{ inputs.version }}** regardless._" >> "$SUMMARY"
 
       - name: Check Zenodo integration is disabled
         run: |
