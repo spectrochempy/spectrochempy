@@ -453,7 +453,10 @@ class TestDirectoryFunctions:
 
     @pytest.mark.skipif(
         sys.platform == "win32",
-        reason="I do not have the OS to test on windows and it fails on github actions",
+        reason=(
+            "Windows path dialog fallback is not stable in GitHub Actions; "
+            "needs a Windows-specific filesystem/mock review"
+        ),
     )
     @patch("spectrochempy.utils.file.pathclean")
     @patch("spectrochempy.application.application.warning_")

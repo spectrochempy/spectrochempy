@@ -93,12 +93,17 @@ def test_decode_datetime64():
 
     encoded_data, attrs = encode_datetime64(datetimes)
 
-    # This will fail until decode_datetime64 is implemented
-    try:
-        decoded_data = decode_datetime64(encoded_data, attrs)
-        np.testing.assert_array_equal(decoded_data, datetimes)
-    except NotImplementedError:
-        pytest.skip("decode_datetime64 not yet implemented")
+    decoded_data = decode_datetime64(encoded_data, attrs)
+    np.testing.assert_array_equal(decoded_data, datetimes)
+
+
+def test_decode_datetime64_rejects_unsupported_units():
+    """Test errors for unsupported datetime64 metadata."""
+    with pytest.raises(ValueError, match="Unsupported datetime64 units"):
+        decode_datetime64([0, 1], {"units": "relative time / s"})
+
+    with pytest.raises(ValueError, match="Unsupported datetime64 unit"):
+        decode_datetime64([0, 1], {"units": "fortnights since 2023-01-01"})
 
 
 def test_strptime64():

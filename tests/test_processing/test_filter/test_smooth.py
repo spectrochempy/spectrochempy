@@ -10,6 +10,8 @@ import pytest
 
 from spectrochempy.utils.mplutils import show
 
+# TODO(0.9.3): Split legacy smoothing coverage into core smoothing tests and
+# spectrochempy-nmr plugin tests once NMR 2D inputs are stable.
 pytestmark = pytest.mark.skip(
     "quarantined legacy smoothing tests: mixes NMR plugin data and plotting; "
     "split core/plugin coverage before reactivation"

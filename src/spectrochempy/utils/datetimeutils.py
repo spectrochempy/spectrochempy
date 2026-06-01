@@ -138,7 +138,21 @@ def encode_datetime64(data, **attrs):
 
 def decode_datetime64(data, *attrs):
     """Decode numpy.datetime64 encoded by encode_datetime64."""
-    raise NotImplementedError  # TODO: implement decode_datetime64
+    attrs = attrs[0] if attrs else {}
+    units = attrs.get("units", "")
+    match = re.match(r"^(\w+) since (.+)$", units)
+    if not match:
+        raise ValueError(f"Unsupported datetime64 units: {units!r}")
+
+    cf_unit, origin = match.groups()
+    if cf_unit not in CF_TO_DT64_UNITS:
+        raise ValueError(f"Unsupported datetime64 unit: {cf_unit!r}")
+
+    dt64_unit = CF_TO_DT64_UNITS[cf_unit]
+    origin64 = np.datetime64(origin.replace(" ", "T"), "ns")
+    scale = np.timedelta64(1, dt64_unit) / np.timedelta64(1, "ns")
+    deltas = np.rint(np.asarray(data, dtype=float) * scale).astype("timedelta64[ns]")
+    return origin64 + deltas
 
 
 # Utility to convert between ISO8601 string, datetime, datetime64 and timestamps
