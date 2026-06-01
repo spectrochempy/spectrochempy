@@ -141,8 +141,7 @@ class Test3DPlotting:
             assert ax is not None, "Basic waterfall should work with small dataset"
 
         except Exception as e:
-            # Document what fails even with simple case
-            pytest.skip(f"Basic waterfall failed: {e}")
+            pytest.xfail(f"Known 3D waterfall limitation: {e}")
 
     @pytest.mark.parametrize("method", ["surface", "waterfall"])
     def test_3d_plot_methods(self, sample_3d_dataset, method, clean_figures):
@@ -160,5 +159,6 @@ class Test3DPlotting:
             assert isinstance(ax, (Axes, Axes3D))
 
         except Exception as e:
-            # Some methods might not be fully implemented
-            pytest.skip(f"3D plotting not fully tested: {e}")
+            if method == "waterfall":
+                pytest.xfail(f"Known 3D waterfall limitation: {e}")
+            raise

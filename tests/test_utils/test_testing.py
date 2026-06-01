@@ -147,9 +147,9 @@ def test_compare_dataset(IR_dataset_1D):
     testing.assert_dataset_equal(nd1, nd6, data_only=True)
 
 
-# TODO: fix assert_project_equal to handle project name differences or use data_only
 @pytest.mark.skip(
-    "test_compare_project: assert_project_equal compares names/metadata; needs refactor"
+    "assert_project_equal does not yet compare nested project dataset content; "
+    "needs a dedicated Project comparison refactor"
 )
 def test_compare_project(simple_project):
     """Test comparison functions for Project objects."""
@@ -168,50 +168,21 @@ def test_compare_project(simple_project):
     with testing.raises(AssertionError):
         testing.assert_project_equal(proj1, proj3)
 
-    # Test with datasets having different metadata
-    # Handle case where datasets might be in subprojects
+    # Test with datasets having different data, including nested projects.
     proj4 = proj1.copy()
 
-    # First check if there are datasets at any level
-    modified = False
-
-    # Helper function to modify titles recursively
-    def modify_dataset_titles(proj):
-        nonlocal modified
+    def modify_first_dataset(proj):
         for item in proj.datasets:
-            if hasattr(item, "title"):
-                item.title = "changed"
-                modified = True
-
-        # Also check subprojects
+            item.data = item.data + 1
+            return True
         for subproj in proj.projects:
-            modify_dataset_titles(subproj)
+            if modify_first_dataset(subproj):
+                return True
+        return False
 
-    # Modify titles across the project hierarchy
-    modify_dataset_titles(proj4)
-
-    # Only run this test if we actually modified any datasets
-    if modified:
-        # The assertion should fail if titles are different without dataset_data_only
-        with testing.raises(AssertionError):
-            testing.assert_project_equal(proj1, proj4)
-
-        # Should pass with dataset_data_only=True
-        testing.assert_project_equal(proj1, proj4, dataset_data_only=True)
-    else:
-        # If no datasets were found, add a dataset to test
-        test_dataset = proj1._create_dataset()
-        test_dataset.title = "original"
-        proj1.add_dataset(test_dataset)
-
-        test_dataset2 = test_dataset.copy()
-        test_dataset2.title = "changed"
-        proj4.add_dataset(test_dataset2)
-
-        with testing.raises(AssertionError):
-            testing.assert_project_equal(proj1, proj4)
-
-        testing.assert_project_equal(proj1, proj4, dataset_data_only=True)
+    assert modify_first_dataset(proj4)
+    with testing.raises(AssertionError):
+        testing.assert_project_equal(proj1, proj4)
 
 
 def test_compare_units():

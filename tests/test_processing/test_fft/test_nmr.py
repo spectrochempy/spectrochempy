@@ -20,9 +20,11 @@ from spectrochempy.utils.testing import (
     assert_equal,
 )
 
+# TODO(0.9.3): Revisit this legacy coverage after NMR 2D processing is
+# stabilized in the spectrochempy-nmr plugin.
 pytestmark = pytest.mark.skip(
     "quarantined legacy NMR tests: requires spectrochempy-nmr, NMR test data, "
-    "and review before reactivation"
+    "and NMR 2D review before reactivation"
 )
 
 
