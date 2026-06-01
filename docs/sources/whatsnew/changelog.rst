@@ -63,6 +63,8 @@ Developer
 - DOC: Clarified that official plugin versions are independent from the core
   package version and that conda dev plugin builds are not currently published
   automatically.
+- DOC: Updated contributor documentation build instructions to use the
+  repository-root ``docs/make.py`` entry point and current ``build/html`` output.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — shows a "no changes" message when all plugins are
