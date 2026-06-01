@@ -25,11 +25,13 @@ on:
       - test/plugin-publish-workflow
     paths:
       - ".github/workflows/publish_plugins.yml"
+      - ".github/workflows/scripts/plugin_version_status.py"
       - "plugins/**"
 
   pull_request:
     paths:
       - ".github/workflows/publish_plugins.yml"
+      - ".github/workflows/scripts/plugin_version_status.py"
       - "plugins/**"
 
   release:
@@ -127,6 +129,16 @@ jobs:
         run: |
           python -m pip install build --user
 
+      - name: Apply plugin development version
+        id: plugin-version
+        if: ${{ github.event_name != 'release' }}
+        run: |
+          python3 .github/workflows/scripts/plugin_version_status.py \
+            --plugin "${{ matrix.plugin.name }}" \
+            --apply-dev-version \
+            --github-output \
+            --json
+
       - name: Build plugin source and wheel distributions
         run: |
           python -m build --sdist --wheel --outdir dist/${{ matrix.plugin.name }} ${{ matrix.plugin.path }}
@@ -168,3 +180,9 @@ jobs:
           packages-dir: dist/${{ matrix.plugin.name }}
           skip-existing: true
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Restore plugin version metadata
+        if: ${{ always() && github.event_name != 'release' }}
+        run: |
+          git restore --worktree -- "${{ matrix.plugin.path }}"
+          git diff --exit-code -- "${{ matrix.plugin.path }}"

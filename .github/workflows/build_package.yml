@@ -6,8 +6,8 @@
 #   - Core non-release builds (pushes, PRs) are uploaded to the Anaconda dev label.
 #   - Core release builds are uploaded to the main (stable) label.
 #   - Plugin release builds are uploaded to the main label only.
-#   - Plugin dev uploads are disabled until plugin recipes generate distinct
-#     dev versions/builds; plugin conda packages are still built in CI.
+#   - Plugin dev builds use temporary next-patch .devN versions derived from
+#     plugin tags, and push builds with plugin changes upload to the dev label.
 #   - Plugin conda recipes should declare a bounded dependency on the core
 #     package, e.g.  spectrochempy >=0.9.0.dev0,<0.10
 
@@ -320,6 +320,16 @@ jobs:
           echo "=== Local channel contents ==="
           find "$PARENT/output" -type f
 
+      - name: Apply plugin development version
+        id: plugin-version
+        if: ${{ !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name)) }}
+        run: |
+          python3 .github/workflows/scripts/plugin_version_status.py \
+            --plugin "${{ matrix.plugin.name }}" \
+            --apply-dev-version \
+            --github-output \
+            --json
+
       - name: Build conda plugin package
         uses: prefix-dev/rattler-build-action@v0.2.38
         env:
@@ -349,14 +359,59 @@ jobs:
             output/**/*.tar.bz2
           retention-days: 5
 
-      - name: Skip dev upload for plugin (dev versions not yet distinct from stable)
+      - name: Restore plugin version metadata
+        if: ${{ always() && !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name)) }}
+        run: |
+          git restore --worktree -- "${{ matrix.plugin.recipe }}"
+          git diff --exit-code -- "${{ matrix.plugin.recipe }}"
+
+      - name: Upload plugin dev package to Anaconda.org
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
-          !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name))
+          github.event_name == 'push' &&
+          github.ref_name == 'master' &&
+          steps.plugin-version.outputs.has_changes == 'true'
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
-          echo "Skipping dev upload for plugin ${{ matrix.plugin.name }}: plugin dev versions are not yet distinct from stable versions"
-          echo "Plugin conda builds are still produced for testing, but not uploaded to Anaconda.org."
-          echo "See TODO in docs/sources/devguide/plugins/packaging.rst for context."
+          set -euo pipefail
+          shopt -s nullglob globstar
+
+          echo "Plugin development build detected; uploading ${{ matrix.plugin.name }} to Anaconda label: dev"
+          echo "Computed development version: ${{ steps.plugin-version.outputs.dev_version }}"
+
+          if [ -z "${ANACONDA_API_TOKEN:-}" ]; then
+            echo "::error::ANACONDA_API_TOKEN is not set. Cannot upload to Anaconda.org."
+            exit 1
+          fi
+
+          packages=(output/**/*.tar.bz2 output/**/*.conda)
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "::error::No conda packages found in output/"
+            exit 1
+          fi
+
+          for package in "${packages[@]}"; do
+            basename=$(basename "$package")
+            if [[ "$basename" == spectrochempy-[0-9]* ]]; then
+              echo "Skipping core package (already uploaded): $package"
+              continue
+            fi
+            echo "Uploading $package with label: dev"
+            anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "dev" "$package"
+          done
+
+          echo "::notice::Plugin ${{ matrix.plugin.name }} uploaded to Anaconda label: dev"
+
+      - name: Skip plugin dev upload
+        if: |
+          github.repository == 'spectrochempy/spectrochempy' &&
+          !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name)) &&
+          !(github.event_name == 'push' && github.ref_name == 'master' && steps.plugin-version.outputs.has_changes == 'true')
+        run: |
+          echo "Skipping dev upload for plugin ${{ matrix.plugin.name }}."
+          echo "Computed development version: ${{ steps.plugin-version.outputs.dev_version }}"
+          echo "Upload happens only on push to master when release-relevant plugin files changed."
 
       - name: Upload plugin to Anaconda.org
         if: |

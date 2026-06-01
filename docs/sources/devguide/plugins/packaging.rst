@@ -196,6 +196,22 @@ Plugin versions are declared **statically** in the monorepo (``setuptools-scm``
 is not used for plugins because plugin and core tags share the same Git
 repository, which leads to version collisions).
 
+Stable plugin tags are named ``spectrochempy-<plugin>-vX.Y.Z``.  Development
+builds derive their temporary version from the latest plugin tag and the number
+of commits that touched release-relevant files still differing from that tag.
+Those files are the plugin ``src/`` tree and published metadata such as
+``pyproject.toml``, ``recipe.yaml``, ``README.md``, ``LICENSE``, and
+``MANIFEST.in``.  Tests, documentation-only changes, CI changes, and CRLF-only
+differences do not mark a plugin as modified.  For example, if the latest
+``spectrochempy-nmr`` tag is ``spectrochempy-nmr-v0.1.3`` and 12 relevant
+commits remain, CI builds ``spectrochempy-nmr`` as ``0.1.4.dev12``.
+
+The dev version uses the next patch version, not the current patch version:
+``0.1.4.dev12`` is newer than ``0.1.3``, whereas ``0.1.3.dev12`` is older than
+``0.1.3`` under PEP 440.  CI injects this version into ``pyproject.toml``,
+``recipe.yaml``, and the plugin class only inside the workflow workspace; no
+version bump is committed for development builds.
+
 The recommended way to release a plugin is through the
 ``release_plugin.yml`` workflow:
 
@@ -242,18 +258,12 @@ published to Anaconda.org automatically by ``build_package.yml``.
 
       mamba install -c spectrocat -c conda-forge spectrochempy-nmr
 
-* **Dev uploads are currently disabled** for plugins (pushes, PRs).  The
-  packages are still built in CI for testing, but not uploaded to
-  Anaconda.org.
+* **Development builds** on ``master`` use generated versions such as
+  ``0.1.4.dev12`` and upload to ``spectrocat/label/dev`` only when the
+  computed plugin status reports release-relevant changes.  Pull requests build
+  the packages for validation but do not publish them.
 
-  .. TODO / FIXME:
-     Dev conda uploads for official plugins are disabled until plugin recipes
-     generate distinct dev versions/builds, to avoid overwriting stable labels
-     on Anaconda.org.  Once each plugin recipe uses dynamic dev versions
-     (e.g. ``X.Y.Z.dev0``), re-enable dev uploads by adding ``push`` to the
-     upload condition in ``build_package.yml`` (job
-     ``build_and_publish_conda_plugins``, step ``Upload plugin to
-     Anaconda.org``).
+  Stable plugin release uploads remain on the ``main`` label.
 
 Plugin recipes should declare a bounded dependency on the core package,
 e.g. ``spectrochempy >=0.9,<0.10``.
