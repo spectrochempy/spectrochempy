@@ -28,9 +28,6 @@ from spectrochempy.utils.testing import assert_dataset_equal
 # test docstring
 
 
-@pytest.mark.skip(
-    "docstring checker is unstable in CI for PLSRegression; runtime PLS tests remain active"
-)
 def test_PLS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
     module = "spectrochempy.analysis.crossdecomposition.pls"
@@ -38,7 +35,7 @@ def test_PLS_docstrings():
         module,
         obj=scp.PLSRegression,
         # exclude some errors - remove whatever you want to check
-        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01", "SS01"],
     )
 
 

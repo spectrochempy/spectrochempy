@@ -15,7 +15,6 @@ from spectrochempy.utils.mplutils import show
 # https://stackoverflow.com/questions/27948126/how-can-i-write-unit-tests-against-code-that-uses-matplotlib
 
 
-# @pytest.mark.skip
 def test_plot_1D():
     dataset = read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
 

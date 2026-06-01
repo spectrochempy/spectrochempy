@@ -15,6 +15,7 @@ import io
 import os
 import pathlib
 import subprocess
+import sys
 import tempfile
 
 import numpy
@@ -178,7 +179,7 @@ class _DocstringValidator(Validator):
         with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as file:
             file.write(content)
             file.flush()
-            cmd = ["python", "-m", "flake8", "--quiet", "--statistics", file.name]
+            cmd = [sys.executable, "-m", "flake8", "--quiet", "--statistics", file.name]
             response = subprocess.run(cmd, capture_output=True, text=True, check=False)  # noqa: S603
             stdout = response.stdout
             stdout = stdout.replace(file.name, "")

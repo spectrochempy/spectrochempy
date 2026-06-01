@@ -14,10 +14,6 @@ import spectrochempy as scp
 RAMANDIR = scp.preferences.datadir / "ramandata/labspec"
 
 
-# @pytest.mark.skipif(
-#     not RAMANDIR.exists(),
-#     reason="Experimental data not available for testing",
-# )
 def test_read_labspec():
     # single file
     nd = scp.read_labspec("Activation.txt", directory=RAMANDIR)

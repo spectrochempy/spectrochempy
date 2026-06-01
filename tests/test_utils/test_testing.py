@@ -147,8 +147,10 @@ def test_compare_dataset(IR_dataset_1D):
     testing.assert_dataset_equal(nd1, nd6, data_only=True)
 
 
-# Skip the failing test until it can be fixed
-@pytest.mark.skip("Skipping test for project title comparison until issue is resolved")
+# TODO: fix assert_project_equal to handle project name differences or use data_only
+@pytest.mark.skip(
+    "test_compare_project: assert_project_equal compares names/metadata; needs refactor"
+)
 def test_compare_project(simple_project):
     """Test comparison functions for Project objects."""
     # project comparison

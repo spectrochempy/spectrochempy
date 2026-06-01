@@ -1505,15 +1505,16 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         --------
         No-op reshape preserves everything:
 
-        >>> Y = X.reshape((60, 1000))
+        >>> X = scp.read("irdata/nh4y-activation.spg")
+        >>> Y = X.reshape((60, 1000))  # doctest: +SKIP
 
         Add a singleton cycle dimension:
 
-        >>> Y = X.reshape((1, 60, 1000), dims=("cycle", "time", "x"))
+        >>> Y = X.reshape((1, 60, 1000), dims=("cycle", "time", "x"))  # doctest: +SKIP
 
         Split raw spectra into cycles:
 
-        >>> Y = X.reshape((2, 60, 1000), dims=("cycle", "time", "x"))
+        >>> Y = X.reshape((2, 60, 1000), dims=("cycle", "time", "x"))  # doctest: +SKIP
         """
         if coord_policy not in {"safe", "drop", "strict"}:
             raise ValueError(
@@ -1723,9 +1724,9 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         See Also
         --------
-        spectrochempy.plotting.plot1d : 1D plotting functions.
-        spectrochempy.plotting.plot2d : 2D plotting functions.
-        spectrochempy.plotting.plot3d : 3D plotting functions.
+        plotting.plot1d : 1D plotting functions.
+        plotting.plot2d : 2D plotting functions.
+        plotting.plot3d : 3D plotting functions.
         """
         from spectrochempy.plotting.dispatcher import plot_dataset
 

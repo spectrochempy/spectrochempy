@@ -16,10 +16,6 @@ DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
 
 
-# @pytest.mark.skipif(
-#     not IRDATA.exists(),
-#     reason="Experimental data not available for testing",
-# )
 def test_read_omnic():
     # Class method opening a dialog (but for test it is preset)
     nd1 = scp.read_omnic(IRDATA / "nh4y-activation.spg")

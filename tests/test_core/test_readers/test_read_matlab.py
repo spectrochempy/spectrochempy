@@ -13,10 +13,6 @@ from spectrochempy import preferences as prefs
 MATLABDATA = prefs.datadir / "matlabdata"
 
 
-# @pytest.mark.skipif(
-#     not MATLABDATA.exists(),
-#     reason="Experimental data not available for testing",
-# )
 def test_read_matlab():
     A = read_matlab(MATLABDATA / "als2004dataset.MAT")
     assert len(A) == 6
