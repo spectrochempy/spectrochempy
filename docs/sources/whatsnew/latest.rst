@@ -95,3 +95,6 @@ Developer
   MAINT:, CI:, DEV:) in a new ``Developer`` section at the end.
 - DOC: Updated contributing guide and PR template to document the new
   changelog convention and the ``Developer`` section.
+- CI: Replaced hardcoded ``0.9.0`` stable docs build with a dynamic loop
+  over all ``spectrochempy-v*`` core tags, so new releases (e.g. ``0.9.1``)
+  are automatically included in the version dropdown.
