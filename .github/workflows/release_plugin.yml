@@ -55,45 +55,69 @@ jobs:
 
       - name: List official plugins with changes since last tag
         run: |
-          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-hypercomplex spectrochempy-carroucell"
-          HAS_CHANGES=false
-          SUMMARY="$GITHUB_STEP_SUMMARY"
+          python3 << 'PYEOF'
+          import os, subprocess
 
-          echo "## Plugin release status" >> "$SUMMARY"
-          echo "" >> "$SUMMARY"
-          echo "| Plugin | Status | Last tag |" >> "$SUMMARY"
-          echo "|--------|--------|----------|" >> "$SUMMARY"
+          plugins = [
+              'spectrochempy-nmr',
+              'spectrochempy-iris',
+              'spectrochempy-hypercomplex',
+              'spectrochempy-carroucell',
+          ]
+          has_changes = False
+          lines = []
 
-          for plugin in $OFFICIAL_PLUGINS; do
-            plugin_dir="plugins/$plugin"
-            last_tag=$(git tag --list "${plugin}-v*" | sort -V | tail -1)
+          lines.append('## Plugin release status')
+          lines.append('')
+          lines.append('| Plugin | Status | Last tag |')
+          lines.append('|--------|--------|----------|')
 
-            if [ ! -d "$plugin_dir" ]; then
-              echo "| $plugin | :warning: directory missing | -- |" >> "$SUMMARY"
-              HAS_CHANGES=true
-              continue
-            fi
+          for plugin in plugins:
+              plugin_dir = f'plugins/{plugin}'
+              if not os.path.isdir(plugin_dir):
+                  lines.append(f'| {plugin} | :warning: directory missing | -- |')
+                  has_changes = True
+                  continue
 
-            if [ -z "$last_tag" ]; then
-              echo "| $plugin | :new: no previous plugin tag | -- |" >> "$SUMMARY"
-              HAS_CHANGES=true
-            elif git diff --quiet "$last_tag" -- "$plugin_dir/"; then
-              echo "| $plugin | :white_check_mark: unchanged since last tag | \`$last_tag\` |" >> "$SUMMARY"
-            else
-              echo "| $plugin | :large_orange_diamond: modified since last tag | \`$last_tag\` |" >> "$SUMMARY"
-              HAS_CHANGES=true
-            fi
-          done
+              result = subprocess.run(
+                  ['git', 'tag', '--list', f'{plugin}-v*'],
+                  capture_output=True, text=True,
+              )
+              tags = [t for t in result.stdout.strip().split('\n') if t]
+              tags.sort(key=lambda t: [int(x) for x in t.split('-v')[-1].split('.')])
+              last_tag = tags[-1] if tags else ''
 
-          echo "" >> "$SUMMARY"
+              if not last_tag:
+                  lines.append(f'| {plugin} | :new: no previous plugin tag | -- |')
+                  has_changes = True
+              else:
+                  ret = subprocess.run(
+                      ['git', 'diff', '--quiet', last_tag, '--', f'{plugin_dir}/'],
+                  )
+                  if ret.returncode == 0:
+                      lines.append(f'| {plugin} | :white_check_mark: unchanged since last tag | ```{last_tag}``` |')
+                  else:
+                      lines.append(f'| {plugin} | :large_orange_diamond: modified since last tag | ```{last_tag}``` |')
+                      has_changes = True
 
-          if [ "$HAS_CHANGES" = "true" ]; then
-            echo "_The table above highlights plugins that may need a release._" >> "$SUMMARY"
-          else
-            echo "**No changes detected in any official plugin - no new releases needed at this time.**" >> "$SUMMARY"
-          fi
+          lines.append('')
 
-          echo "_The workflow will proceed with releasing **${{ inputs.plugin_name }} v${{ inputs.version }}** regardless._" >> "$SUMMARY"
+          if has_changes:
+              lines.append('_The table above highlights plugins that may need a release._')
+          else:
+              lines.append('**No changes detected in any official plugin - no new releases needed at this time.**')
+
+          lines.append('_The workflow will proceed with releasing **${{ inputs.plugin_name }} v${{ inputs.version }}** regardless._')
+
+          output = '\n'.join(lines)
+
+          summary_path = os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary_path:
+              with open(summary_path, 'a') as f:
+                  f.write(output + '\n')
+
+          print(output)
+          PYEOF
 
       - name: Check Zenodo integration is disabled
         run: |
