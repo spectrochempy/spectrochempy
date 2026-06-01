@@ -241,12 +241,21 @@ jobs:
         if: steps.preview.outputs.is_preview != 'true'
         run: |
           . .venv/bin/activate
-          if [ ! -d build/html/0.9.0 ]; then
-            echo "Creating local alias tag for v0.9.0"
-            git tag 0.9.0 spectrochempy-v0.9.0
-            echo "Building v0.9.0 docs"
-            python3 docs/make.py -j1 html -T 0.9.0
-          fi
+          # Iterate over all core release tags (spectrochempy-vX.Y.Z),
+          # excluding plugin tags (spectrochempy-*-vX.Y.Z).
+          for tag in $(git tag --list 'spectrochempy-v*' | sort -V); do
+            version="${tag#spectrochempy-v}"
+            # Create a local lightweight alias tag so make.py -T can find it
+            if ! git rev-parse --verify "$version" >/dev/null 2>&1; then
+              echo "Creating local alias tag for $tag"
+              git tag "$version" "$tag"
+            fi
+            # Build docs for this version if not already present
+            if [ ! -d "build/html/$version" ]; then
+              echo "Building v$version docs"
+              python3 docs/make.py -j1 html -T "$version"
+            fi
+          done
 
       # ---------- install branch preview into gh-pages clone ----------
       - name: Install branch preview into gh-pages
