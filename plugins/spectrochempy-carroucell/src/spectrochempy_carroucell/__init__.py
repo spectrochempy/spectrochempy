@@ -44,7 +44,7 @@ class CarroucellPlugin(SpectroChemPyPlugin):
     """Carroucell plugin, providing the Carroucell experiment reader."""
 
     name = "carroucell"
-    version = "0.1.2"
+    version = "0.1.3"
     description = "Carroucell experiment reader for SpectroChemPy"
     spectrochempy_min_version = "0.9.0"
     PLUGIN_API_VERSION = CORE_PLUGIN_API_VERSION
