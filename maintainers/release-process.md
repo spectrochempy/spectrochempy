@@ -276,6 +276,13 @@ confirm_zenodo_disabled: true   # ← doit être coché
 > Le workflow refuse de démarrer si `confirm_zenodo_disabled` n'est pas coché.
 > Cela garantit que l'intégration Zenodo a été désactivée avant la publication.
 
+> **Note** : avant les étapes de bump, le workflow affiche un tableau
+> dans le *step summary* listant tous les plugins officiels et leur
+> statut (modifié depuis le dernier tag, inchangé, ou sans tag
+> préexistant). Ce tableau est purement informatif : il aide le
+> mainteneur à identifier quels autres plugins pourraient nécessiter
+> une release, sans bloquer ni modifier la publication en cours.
+
 ### Déroulement
 
 1. Le workflow **Release an official plugin** (`release_plugin.yml`) :

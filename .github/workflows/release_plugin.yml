@@ -53,6 +53,40 @@ jobs:
             exit 1
           fi
 
+      - name: List official plugins with changes since last tag
+        run: |
+          OFFICIAL_PLUGINS="spectrochempy-nmr spectrochempy-iris spectrochempy-hypercomplex spectrochempy-carroucell"
+
+          {
+            echo "## Plugin release status"
+            echo ""
+            echo "| Plugin | Status | Last tag |"
+            echo "|--------|--------|----------|"
+
+            for plugin in $OFFICIAL_PLUGINS; do
+              plugin_dir="plugins/$plugin"
+
+              last_tag=$(git tag --list "${plugin}-v*" | sort -V | tail -1)
+
+              if [ ! -d "$plugin_dir" ]; then
+                echo "| $plugin | ⚠️  directory missing | — |"
+                continue
+              fi
+
+              if [ -z "$last_tag" ]; then
+                echo "| $plugin | 🆕 no previous plugin tag | — |"
+              elif git diff --quiet "$last_tag" -- "$plugin_dir/"; then
+                echo "| $plugin | ✅ unchanged since last tag | \`$last_tag\` |"
+              else
+                echo "| $plugin | 🔶 modified since last tag | \`$last_tag\` |"
+              fi
+            done
+
+            echo ""
+            echo "_This information is provided to help decide which plugins may need a release._"
+            echo "_The workflow will proceed with releasing **${{ inputs.plugin_name }} v${{ inputs.version }}** regardless._"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Check Zenodo integration is disabled
         run: |
           if [ "${{ inputs.confirm_zenodo_disabled }}" != "true" ]; then

@@ -56,3 +56,6 @@ Developer
 
 - DOC: Improved maintainer release documentation with explicit Zenodo
   verification steps, docs build note, and roadmap for modular docs.
+- CI: Added plugin status table to ``release_plugin.yml`` step summary,
+  listing all official plugins and whether they have changed since their
+  last release tag — informative only, does not block the workflow.
