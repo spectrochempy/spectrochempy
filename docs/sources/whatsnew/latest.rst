@@ -32,3 +32,8 @@ Developer
 - DEV: Added TODO/FIXME note in ``docs/sources/devguide/plugins/packaging.rst``
   explaining that dev conda uploads for plugins are disabled until distinct
   dev versions are generated.
+- CI: Added ``plugin_release_status.yml`` workflow (``workflow_dispatch``)
+  to inspect official plugin changes since their last release tag before
+  deciding to run a release.  Writes a Markdown table (plugin, status, last
+  tag, changed files count) to the workflow summary.  Read-only — no
+  packages, tags, or releases are created.

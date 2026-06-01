@@ -54,6 +54,10 @@ jobs:
           fi
 
       - name: List official plugins with changes since last tag
+        # Use the separate "Check plugin release status" workflow
+        # (.github/workflows/plugin_release_status.yml) to inspect plugin
+        # status before running a release.  This step provides a final
+        # confirmation during the release workflow itself.
         run: |
           python3 << 'PYEOF'
           import os, subprocess
