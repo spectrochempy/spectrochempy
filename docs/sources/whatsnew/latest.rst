@@ -15,8 +15,12 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Developer
 ~~~~~~~~~
 
+- CI: Allowed documentation builds to use canonical core release tags such as
+  ``spectrochempy-v0.9.2`` directly, while publishing versioned docs under the
+  plain semver directory.
 - DOC: Improved maintainer release documentation with explicit Zenodo
-  verification steps, docs build note, and roadmap for modular docs.
+  verification steps, versioned docs checks, docs build note, and roadmap for
+  modular docs.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — shows a "no changes" message when all plugins are

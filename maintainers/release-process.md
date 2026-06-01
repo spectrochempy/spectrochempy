@@ -184,6 +184,24 @@ pour vérifier la Draft.
   > versionnée (accessible sous `/<version>/`) et le dropdown des versions.
   > **Ne pas supprimer ce job** dans le workflow `build_docs.yml`.
 
+### Modèle actuel de documentation versionnée
+
+Le site publié par GitHub Pages est construit dans la branche `gh-pages` :
+
+- la documentation `latest` est publiée à la racine du site et correspond à
+  l'état courant de `master` ;
+- chaque release stable du core est publiée dans un répertoire `X.Y.Z/`
+  (par exemple `0.9.2/`) ;
+- le dropdown des versions est généré à partir des répertoires semver présents
+  dans `gh-pages` ;
+- les tags Git du core utilisent le format canonique `spectrochempy-vX.Y.Z`,
+  mais le répertoire public de documentation reste `X.Y.Z/` ;
+- les tags plugins (`spectrochempy-<plugin>-vX.Y.Z`) ne doivent pas créer de
+  documentation stable séparée.
+
+`latest.rst` ne doit pas être modifié manuellement : il est régénéré depuis
+`docs/sources/whatsnew/changelog.rst` par le hook pre-commit.
+
 ---
 
 ## Vérifications post-release
@@ -204,6 +222,22 @@ python -c "import spectrochempy; print(spectrochempy.__version__)"
 
 Vérifier également que le DOI Zenodo a été mis à jour sur la
 [page Zenodo](https://zenodo.org/communities/spectrochempy).
+
+Vérifier enfin la documentation :
+
+- le workflow **Docs** (`build_docs.yml`) a réussi après publication de la
+  release ;
+- `https://www.spectrochempy.fr/X.Y.Z/` existe pour la nouvelle version ;
+- le dropdown des versions contient `X.Y.Z` ;
+- la racine du site affiche toujours la documentation `latest`.
+
+Si la version n'apparaît pas dans le dropdown alors que la release existe :
+
+1. Relancer manuellement **Actions → Docs → Run workflow** depuis `master`.
+2. Vérifier que `gh-pages` contient bien le répertoire `X.Y.Z/`.
+3. Vérifier que le tag core suit le format `spectrochempy-vX.Y.Z`.
+4. Ne pas créer de tag alias local `X.Y.Z` : `docs/make.py -T` accepte les
+   tags canoniques `spectrochempy-vX.Y.Z`.
 
 ---
 
@@ -496,5 +530,4 @@ entrées sont incorrectes car :
 - Éviter de reconstruire inutilement des versions inchangées (build complet
   même quand seuls quelques fichiers RST ont changé)
 - Rendre le version selector moins dépendant des détails de tagging
-  (actuellement lié aux répertoires `X.Y.Z` dans le HTML et aux alias de
-  tags locaux)
+  (actuellement lié aux répertoires `X.Y.Z` dans le HTML)

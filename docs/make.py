@@ -100,6 +100,19 @@ DOWNLOADS = HTML / "downloads"
 TEMPDIRS = PROJECT.parent / "tempdirs"
 
 ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
+CORE_TAG_PREFIX = "spectrochempy-v"
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+
+
+def _canonical_doc_tag(tagname):
+    """Return possible git tags and the version directory for a docs tag."""
+    if tagname.startswith(CORE_TAG_PREFIX):
+        version = tagname.removeprefix(CORE_TAG_PREFIX)
+        if SEMVER_RE.match(version):
+            return [tagname], version
+    if SEMVER_RE.match(tagname):
+        return [tagname, f"{CORE_TAG_PREFIX}{tagname}"], tagname
+    return [tagname], tagname
 
 
 # ======================================================================================
@@ -123,9 +136,13 @@ class BuildOldTagDocs:
     """
 
     def __init__(self, **kwargs):
-        self.tagname = kwargs.get("tagname")
-        if not self.tagname:
+        self.requested_tagname = kwargs.get("tagname")
+        if not self.requested_tagname:
             raise ValueError("Please provide a tag name.")
+        self.git_tag_candidates, self.doc_version = _canonical_doc_tag(
+            self.requested_tagname
+        )
+        self.git_tagname = self.git_tag_candidates[0]
 
         self.verbose = kwargs.get("verbose")
 
@@ -167,14 +184,15 @@ class BuildOldTagDocs:
             If setup.py is missing
         """
         workingdir = self.workingdir
-        tagname = self.tagname
+        tagname = self.git_tagname
 
         try:
             if self.verbose:
                 # Debug prints
                 print(f"Project directory: {PROJECT}")
                 print(f"Temporary directory: {workingdir}")
-                print(f"Working with tag: {tagname}")
+                print(f"Requested docs tag: {self.requested_tagname}")
+                print(f"Documentation version directory: {self.doc_version}")
             self.uv = uv = shutil.which("uv")
             print("UV : ", uv)
             # Ensure we're in a git repository and tag exists
@@ -185,15 +203,19 @@ class BuildOldTagDocs:
                     raise RuntimeError(f"{PROJECT} is not a git repository")
 
                 # Check if tag exists locally
-                tag_exists = sh("git tag -l " + tagname, silent=True).strip()
+                tag_exists = self._find_existing_git_tag()
                 if not tag_exists:
                     print("Tag not found locally, trying to fetch...")
                     sh("git fetch origin --tags", silent=False)
-                    tag_exists = sh("git tag -l " + tagname, silent=True).strip()
+                    tag_exists = self._find_existing_git_tag()
                     if not tag_exists:
-                        raise RuntimeError(f"Tag {tagname} not found in repository")
+                        candidates = ", ".join(self.git_tag_candidates)
+                        raise RuntimeError(
+                            f"None of the expected tags were found: {candidates}"
+                        )
 
-                print(f"Found tag: {tag_exists}")
+                self.git_tagname = tagname = tag_exists
+                print(f"Found git tag: {tagname}")
 
                 # Create a worktree from the local repository at the specific tag
                 sh(
@@ -278,6 +300,13 @@ class BuildOldTagDocs:
             if hasattr(e, "stderr"):
                 print(f"Error output: {e.stderr}")
             return None
+
+    def _find_existing_git_tag(self):
+        for candidate in self.git_tag_candidates:
+            tag_exists = sh("git tag -l " + candidate, silent=True).strip()
+            if tag_exists:
+                return tag_exists.splitlines()[0]
+        return ""
 
     def cleanup(self):
         """Cleanup the worktree and temporary directory."""
@@ -1103,7 +1132,7 @@ def _main():
             # Create BuildDocumentation instance directly (don't import it)
             build = BuildDocumentation(
                 jobs=args.jobs,
-                tagname=build_old.tagname,
+                tagname=build_old.doc_version,
                 workingdir=build_old.workingdir,
             )
 
