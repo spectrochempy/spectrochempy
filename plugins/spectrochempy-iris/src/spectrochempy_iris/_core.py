@@ -23,7 +23,6 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.extern.traittypes import Array
 from spectrochempy.utils.constants import EPSILON
-from spectrochempy.utils.decorators import deprecated
 from spectrochempy.utils.decorators import signature_has_configurable_traits
 from spectrochempy.utils.traits import CoordType
 from spectrochempy.utils.traits import NDDatasetType
@@ -903,81 +902,6 @@ class IRIS(DecompositionAnalysis):
             markersize=markersize,
             **kwargs,
         )
-
-    @deprecated(
-        replace="IRIS.f[index].plot",
-        removed="0.9.0",
-        extra_msg='Use the plot method of the distribution function instead: IRIS.f[index].plot(method="map")',
-    )
-    def plotdistribution(
-        self,
-        index=None,
-        ax=None,
-        clear=True,
-        show=True,
-        title=None,
-        cmap=None,
-        cmap_mode="auto",
-        center=None,
-        **kwargs,
-    ):
-        """
-        Plot the distribution function.
-
-        This function plots the distribution function f of the `IRIS` object.
-
-        Parameters
-        ----------
-        index : `int` , `list` or `tuple` of `int`, optional, default: `None`
-            Index(es) of the inversions (i.e. of the :term:`regularization` parameter)
-            to consider.
-            If `None`, plots all indices.
-        ax : matplotlib.axes.Axes, optional
-            Axes to plot on. If provided, used for single index only.
-        clear : bool, optional
-            Whether to clear the axes before plotting. Default: True.
-        show : bool, optional
-            Whether to display the figure. Default: True.
-        title : str, optional
-            Plot title. If None, default lambda-aware title is used.
-        cmap : str or Colormap, optional
-            Colormap name or object.
-        cmap_mode : str, optional
-            Colormap mode ("auto", "sequential", "diverging").
-            Default: "auto".
-        center : float, optional
-            Center value for diverging colormaps.
-        **kwargs
-            Other optional arguments passed to the plots.
-
-        Returns
-        -------
-        `~matplotlib.axes.Axes`
-            The matplotlib axes.
-
-        """
-        from spectrochempy.plotting.plot2d import plot_map
-        from spectrochempy.utils.mplutils import show as mpl_show
-
-        target = self.f if index is None else self.f[index]
-
-        plot_kwargs = {
-            "show": False,
-            "clear": clear,
-            "ax": ax,
-            "title": title,
-            "cmap": cmap,
-            "cmap_mode": cmap_mode,
-            "center": center,
-        }
-        plot_kwargs.update(kwargs)
-
-        ax = plot_map(target, **plot_kwargs)
-
-        if show:
-            mpl_show()
-
-        return ax
 
 
 # --------------------------------------------------------------------------------------

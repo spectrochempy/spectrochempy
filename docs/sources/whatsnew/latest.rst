@@ -41,3 +41,20 @@ Breaking Changes
   :meth:`~spectrochempy.analysis._base._analysisbase.DecompositionAnalysis.transform`
   and :meth:`~spectrochempy.analysis._base._analysisbase.DecompositionAnalysis.inverse_transform`
   (use ``n_components`` instead).
+
+Deprecations
+~~~~~~~~~~~~
+
+- Removed ``IRIS.plotdistribution()`` from the ``spectrochempy-iris`` plugin
+  (target ``removed="0.9.0"`` was reached). Use ``IRIS.f[index].plot()`` instead.
+- Added explicit ``removed="0.10.0`` to all remaining API deprecations that
+  did not yet specify a removal version :
+  ``Baseline.show_regions``, ``PCA.screeplot``, ``PCA.scoreplot``,
+  ``DecompositionAnalysis.reduce``, ``DecompositionAnalysis.reconstruct``,
+  ``MCRALS.St_unconstrained``, ``MCRALS.S_soft``,
+  ``concatenate(force_stack=...)``, ``read_jdx``, ``read_dx``,
+  ``trapz``, ``multiplot_stack``, ``multiplot_map``, ``multiplot_image``,
+  ``Project.remove_all_dataset``, ``Project.remove_all_project``,
+  ``Project.remove_all_script``, ``restore_rcparams``,
+  ``get_import_time_rcparams``, and legacy plot-method aliases
+  (``stack`` → ``lines``, ``map`` → ``contour``, ``image`` → ``contourf``).
