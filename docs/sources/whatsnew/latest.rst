@@ -15,6 +15,9 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Developer
 ~~~~~~~~~
 
+- CI: Added an explicit documentation versions manifest and a manual
+  ``Repair docs version index`` workflow to refresh the published version
+  dropdown without rebuilding the full documentation.
 - CI: Allowed documentation builds to use canonical core release tags such as
   ``spectrochempy-v0.9.2`` directly, while publishing versioned docs under the
   plain semver directory.
