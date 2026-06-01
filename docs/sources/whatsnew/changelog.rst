@@ -60,6 +60,9 @@ Developer
 - DOC: Improved maintainer release documentation with explicit Zenodo
   verification steps, versioned docs checks, docs build note, and roadmap for
   modular docs.
+- DOC: Clarified that official plugin versions are independent from the core
+  package version and that conda dev plugin builds are not currently published
+  automatically.
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — shows a "no changes" message when all plugins are

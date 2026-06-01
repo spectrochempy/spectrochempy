@@ -35,9 +35,14 @@ Conda users can install from the ``spectrocat`` channel::
 
     mamba install -c spectrocat -c conda-forge spectrochempy-nmr
 
-Development (pre-release) builds are available on the ``dev`` label::
+Plugin versions are independent from the SpectroChemPy core version. For
+example, ``spectrochempy 0.9.2`` may be used with
+``spectrochempy-nmr 0.1.3``. Use ``scp.plugins(verbose=True)`` to inspect the
+plugin versions discovered in the current environment.
 
-    mamba install -c spectrocat/label/dev -c conda-forge spectrochempy-nmr
+Conda development builds for official plugins are not published automatically
+at the moment. Stable plugin packages are available from the main
+``spectrocat`` channel.
 
 Using plugins
 -------------
