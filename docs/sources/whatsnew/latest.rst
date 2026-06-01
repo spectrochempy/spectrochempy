@@ -13,14 +13,14 @@ New Features
   ``spectrochempy-carroucell``, ``spectrochempy-nmr``, and
   ``spectrochempy-iris`` covering import, metadata, compatibility,
   registration, lifecycle state, reader/accessor registration,
-  and isolated harness behaviour (:ghpr:`1000`).
+  and isolated harness behaviour.
 - Added ``_ensure_carroucell_filetype_registered()`` to register the
   ``carroucell`` filetype with the legacy :class:`~spectrochempy.core.readers.filetypes.FileTypeRegistry`,
   fixing ``TypeError: Filetype '.carroucell' is unknown`` when reading
-  CarrouCELL data (:ghpr:`1000`).
+  CarrouCELL data.
 - Fixed test isolation in ``spectrochempy-iris`` tests: monkeypatched
   :func:`sys.modules` cleanup ensures each test uses its own harness
-  when validating the ``scp.iris`` namespace (:ghpr:`1000`).
+  when validating the ``scp.iris`` namespace.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~
