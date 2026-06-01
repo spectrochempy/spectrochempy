@@ -96,7 +96,7 @@ jobs:
                   has_changes = True
               else:
                   ret = subprocess.run(
-                      ['git', 'diff', '--quiet', last_tag, '--', f'{plugin_dir}/'],
+                      ['git', 'diff', '--ignore-cr-at-eol', '--quiet', last_tag, '--', f'{plugin_dir}/'],
                   )
                   if ret.returncode == 0:
                       lines.append(f'| {plugin} | :white_check_mark: unchanged since last tag | ```{last_tag}``` |')
