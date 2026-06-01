@@ -11,6 +11,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Official plugins with stable lifecycle tests (import, metadata,
+# compatibility, registration, state transitions, reader/accessor checks).
+# Cantera stays excluded: experimental, heavy external dependency, no
+# lifecycle tests yet.
 PLUGIN_TESTS = {
     "spectrochempy-cantera": "plugins/spectrochempy-cantera/tests",
     "spectrochempy-carroucell": "plugins/spectrochempy-carroucell/tests",
@@ -21,7 +25,7 @@ PLUGIN_TESTS = {
 FULL_PLUGIN_TARGETS = [
     target
     for plugin, target in PLUGIN_TESTS.items()
-    if plugin not in {"spectrochempy-cantera", "spectrochempy-carroucell"}
+    if plugin not in {"spectrochempy-cantera"}  # cantera = experimental
 ]
 ALL_PLUGIN_TARGETS = list(PLUGIN_TESTS.values())
 FULL_TARGETS = ["tests", *FULL_PLUGIN_TARGETS]
