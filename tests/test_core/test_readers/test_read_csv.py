@@ -16,10 +16,6 @@ AGIR_FOLDER = DATADIR / "agirdata"
 IR_FOLDER = DATADIR / "irdata"
 
 
-# @pytest.mark.skipif(
-#     not AGIR_FOLDER.exists() or not IR_FOLDER.exists(),
-#     reason="Experimental data not available for testing",
-# )
 def test_read_csv():
     prefs.csv_delimiter = ","
 

@@ -168,17 +168,19 @@ class PLSRegression(CrossDecompositionAnalysis):
 
         Parameters
         ----------
-        %(analysis_fit.parameters.X)s
-        Y :  :term:`array-like` of shape (n_samples,) or (n_samples, n_targets)
+        X : `NDDataset` or :term:`array-like` of shape (:term:`n_observations`, :term:`n_features`)
+            Training data.
+        Y : :term:`array-like` of shape (n_samples,) or (n_samples, n_targets)
             Target vectors, where n_samples is the number of samples and n_targets is the number of response variables.
 
         Returns
         -------
-        %(analysis_fit.returns)s
+        self
+            The fitted instance itself.
 
         See Also
         --------
-        %(analysis_fit.see_also)s
+        fit_transform : Fit the model with an input dataset ``X`` and apply the dimensionality reduction on ``X``.
 
         """
         return super().fit(X, Y)

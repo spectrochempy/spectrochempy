@@ -436,10 +436,9 @@ for reproducible results across multiple function calls.""",
 
         Examples
         --------
-        >>> import spectrochempy as scp
         >>> X = scp.read("irdata/nh4y-activation.spg")
         >>> pca = scp.PCA(n_components=5)
-        >>> pca.fit(X)
+        >>> _ = pca.fit(X)
         >>> ax = pca.plot_scree(show=False)  # doctest: +SKIP
         """
         from spectrochempy.plotting.composite.plotscree import plot_scree
@@ -533,10 +532,9 @@ for reproducible results across multiple function calls.""",
 
         Examples
         --------
-        >>> import spectrochempy as scp
         >>> X = scp.read("irdata/nh4y-activation.spg")
         >>> pca = scp.PCA(n_components=5)
-        >>> pca.fit(X)
+        >>> _ = pca.fit(X)
         >>> ax = pca.plot_score((1, 2), show=False)  # doctest: +SKIP
 
         With custom labels:

@@ -22,6 +22,28 @@ New Features
   :func:`sys.modules` cleanup ensures each test uses its own harness
   when validating the ``scp.iris`` namespace.
 
+Bug Fixes
+~~~~~~~~~
+
+- Fixed missing ``import sys`` in :mod:`~spectrochempy.utils.docutils` that caused
+  ``NameError`` when validating docstrings with ``Examples`` sections
+  (the root cause of "docstring checker unstable in CI" skips).
+- Fixed docstring examples in :meth:`~spectrochempy.analysis.decomposition.pca.PCA.plot_score`
+  and :meth:`~spectrochempy.analysis.decomposition.pca.PCA.plot_scree`:
+  removed auto-imported ``import spectrochempy`` and used ``_ = pca.fit(X)``
+  to suppress output.
+- Fixed docstring examples in :meth:`~spectrochempy.core.dataset.nddataset.NDDataset.reshape`:
+  added ``doctest: +SKIP`` to examples that required undefined ``X`` variable.
+- Fixed ``See Also`` entries in :meth:`~spectrochempy.core.dataset.nddataset.NDDataset.plot`
+  that used incorrect ``spectrochempy.plotting.*`` prefix (should omit ``spectrochempy.``).
+- Resolved ``%(analysis_fit.parameters.X)s`` docrep template leftovers in
+  :meth:`~spectrochempy.analysis.crossdecomposition.pls.PLSRegression.fit`
+  by replacing with the actual parameter text (docrep dependency was removed in 0.8.4).
+- Reactivated 4 docstring validation tests for ``PLSRegression``, ``PCA``, ``NDDataset``,
+  and ``IRIS`` that had been disabled as "unstable in CI".
+- Removed stale commented-out ``@pytest.mark.skipif`` blocks from 5 reader test files
+  (test data is available in CI).
+
 Breaking Changes
 ~~~~~~~~~~~~~~~~
 

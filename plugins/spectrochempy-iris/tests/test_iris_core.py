@@ -19,9 +19,6 @@ from spectrochempy_iris import IRIS
 from spectrochempy_iris import IrisKernel
 
 
-@pytest.mark.skip(
-    "IRIS docstring checker is unstable in CI; runtime IRIS tests remain active"
-)
 def test_IRIS_docstrings():
     chd.PRIVATE_CLASSES = []  # do not test private class docstring
     module = "spectrochempy_iris._core"

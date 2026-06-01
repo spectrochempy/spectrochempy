@@ -15,10 +15,6 @@ DATADIR = prefs.datadir
 AGIRDATA = DATADIR / "agirdata"
 
 
-# @pytest.mark.skipif(
-#     not AGIRDATA.exists(),
-#     reason="Experimental data not available for testing",
-# )
 def test_read_zip():
     A = read_zip(
         "agirdata/P350/FTIR/FTIR.zip",
