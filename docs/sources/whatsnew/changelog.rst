@@ -59,3 +59,6 @@ Developer
 - CI: Added plugin status table to ``release_plugin.yml`` step summary,
   listing all official plugins and whether they have changed since their
   last release tag — informative only, does not block the workflow.
+- CI: Added ``confirm_zenodo_enabled`` checkbox to
+  ``prepare_new_release.yml`` so maintainers verify Zenodo is active before
+  creating a release PR.

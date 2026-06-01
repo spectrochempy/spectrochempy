@@ -9,6 +9,11 @@ on:
       versionString:
         description: "The version we want to release (e.g. 0.4.2)"
         required: true
+      confirm_zenodo_enabled:
+        description: "Confirm Zenodo GitHub integration is ENABLED before creating the release PR (see maintainers/release-process.md)"
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -25,6 +30,18 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+
+      - name: Check Zenodo integration is enabled
+        run: |
+          if [ "${{ inputs.confirm_zenodo_enabled }}" != "true" ]; then
+            echo "::error::Zenodo GitHub integration must be ENABLED before preparing a core release."
+            echo "::error::1. Go to https://zenodo.org/account/settings/github/"
+            echo "::error::2. Verify (or toggle) the spectrochempy/spectrochempy repository is Enabled"
+            echo "::error::3. Re-run this workflow with confirm_zenodo_enabled=true"
+            echo "::error::See maintainers/release-process.md for details."
+            exit 1
+          fi
+          echo "Zenodo enabled confirmation acknowledged."
 
       - name: Install dependencies
         run: |

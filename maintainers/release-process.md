@@ -113,13 +113,18 @@ Depuis l'interface GitHub :
 
 1. Aller dans **Actions** → **Prepare a new release**
 2. Cliquer **Run workflow**
-3. Renseigner le paramètre :
+3. Renseigner les paramètres :
 
 ```
-versionString = X.Y.Z
+versionString = X.Y.Z                          # (ex: 0.9.0 ou 0.10.0)
+confirm_zenodo_enabled = true                  # ← cocher après avoir vérifié Zenodo
 ```
 
-(par exemple `0.9.0` ou `0.10.0`)
+> **Important** : avant de lancer le workflow, vérifier que l'intégration
+> GitHub → Zenodo est **Enabled** (voir [Zenodo](#zenodo) ci-dessus).
+> La case `confirm_zenodo_enabled` doit être cochée pour que le workflow
+> démarre — cela garantit que Zenodo est prêt à archiver la future release
+> sans intervention manuelle au moment de la publication.
 
 ### 3. Déroulement automatisé
 
