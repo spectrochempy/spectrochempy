@@ -63,3 +63,11 @@ Developer
 - CI: Added ``confirm_zenodo_enabled`` checkbox to
   ``prepare_new_release.yml`` so maintainers verify Zenodo is active before
   creating a release PR.
+- CI: Disabled automatic dev conda uploads for official plugins
+  (``build_package.yml``).  Plugin conda packages are still built in CI for
+  testing, but only uploaded to Anaconda.org during a stable plugin release
+  (label ``main``).  Dev uploads will be re-enabled once plugin recipes
+  generate distinct dev versions.
+- DEV: Added TODO/FIXME note in ``docs/sources/devguide/plugins/packaging.rst``
+  explaining that dev conda uploads for plugins are disabled until distinct
+  dev versions are generated.

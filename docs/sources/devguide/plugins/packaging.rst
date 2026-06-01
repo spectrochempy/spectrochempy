@@ -232,17 +232,25 @@ Distribution (conda)
 Official plugins with a ``recipe.yaml`` in their root are built and
 published to Anaconda.org automatically by ``build_package.yml``.
 
-* **Dev builds** (pushes, PRs) are uploaded to the ``dev`` label:
-
-  .. code-block:: bash
-
-      mamba install -c spectrocat/label/dev -c conda-forge spectrochempy-nmr
-
-* **Stable builds** (releases) are uploaded to the ``main`` label:
+* **Stable builds** (releases with a ``spectrochempy-<plugin>-vX.Y.Z`` tag)
+  are uploaded to the ``main`` label:
 
   .. code-block:: bash
 
       mamba install -c spectrocat -c conda-forge spectrochempy-nmr
+
+* **Dev uploads are currently disabled** for plugins (pushes, PRs).  The
+  packages are still built in CI for testing, but not uploaded to
+  Anaconda.org.
+
+  .. TODO / FIXME:
+     Dev conda uploads for official plugins are disabled until plugin recipes
+     generate distinct dev versions/builds, to avoid overwriting stable labels
+     on Anaconda.org.  Once each plugin recipe uses dynamic dev versions
+     (e.g. ``X.Y.Z.dev0``), re-enable dev uploads by adding ``push`` to the
+     upload condition in ``build_package.yml`` (job
+     ``build_and_publish_conda_plugins``, step ``Upload plugin to
+     Anaconda.org``).
 
 Plugin recipes should declare a bounded dependency on the core package,
 e.g. ``spectrochempy >=0.9,<0.10``.
