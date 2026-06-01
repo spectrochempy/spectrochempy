@@ -76,14 +76,12 @@ services externes.
   ```
 
 - **Première release d'un plugin** : si le package n'existe pas encore sur
-  Anaconda, la commande `anaconda show` échouera — c'est normal. Le
-  workflow `build_package.yml` utilise une commande `anaconda show` en
-  diagnostic avant l'upload. Si le package n'existe pas encore, cette
-  commande peut échouer et bloquer le script à cause de `set -e`.
+  Anaconda, vérifier que `ANACONDA_API_TOKEN` a les droits de création de
+  nouveaux packages sur l'organisation `spectrocat`.
 
-  → Solution : soit supprimer la ligne `anaconda show` du workflow pour
-  les plugins, soit créer le package vide manuellement avant la première
-  release (`anaconda upload --skip-existing -l main <fichier>.conda`).
+  → Si la création automatique échoue, créer le package manuellement avec le
+  fichier `.conda` construit par CI, puis relancer la release :
+  `anaconda upload -l main <fichier>.conda`.
 
   Le `ANACONDA_API_TOKEN` utilisé par le workflow doit avoir les droits
   de **création** de nouveaux packages sur l'organisation `spectrocat`.
@@ -172,7 +170,8 @@ pour vérifier la Draft.
   **Build and publish packages** qui publie sur :
 
   - **PyPI** (label stable, sans `--force`)
-  - **Anaconda.org** (label `main`, sans `--force`)
+  - **Anaconda.org** (label `main`, avec `--force` pour déplacer une build
+    déjà publiée sur `dev` vers le label stable)
   - **Zenodo** (via l'intégration GitHub)
 
 - La publication déclenche également le workflow **Docs** (`build_docs.yml`)

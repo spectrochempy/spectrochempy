@@ -198,11 +198,11 @@ Le job `build_and_publish_conda_package` échoue.
    anaconda show spectrocat/spectrochempy
    ```
 3. **Labels** :
-   - Sur release : upload vers le label `main` (sans `--force`)
+   - Sur release : upload vers le label `main` (avec `--force`, pour déplacer
+     si nécessaire une build déjà publiée sur `dev` vers le label stable)
    - Sur push : upload vers le label `dev` (avec `--force`)
-4. **Version déjà publiée** : si le label `main` contient déjà la même
-   version, le build échoue (pas de `--force` sur la release). Supprimer
-   la version sur Anaconda si nécessaire :
+4. **Version déjà publiée** : si Anaconda refuse malgré tout l'upload,
+   supprimer la version sur Anaconda si nécessaire :
    ```bash
    anaconda remove spectrocat/spectrochempy/X.Y.Z
    ```
