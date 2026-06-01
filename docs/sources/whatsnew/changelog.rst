@@ -68,6 +68,10 @@ Bug Fixes
   :func:`~spectrochempy.utils.datetimeutils.encode_datetime64`, and tightened
   isolated test debt by converting broad 3D plotting skips to waterfall-specific
   ``xfail`` handling while clarifying remaining quarantined tests.
+- Reactivated the project comparison utility test by using independent deep
+  copies of nested projects, ensuring
+  :func:`~spectrochempy.utils.testing.assert_project_equal` detects script and
+  nested dataset differences.
 
 
 .. section
