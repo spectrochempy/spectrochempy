@@ -347,18 +347,27 @@ jobs:
             output/**/*.tar.bz2
           retention-days: 5
 
+      - name: Skip dev upload for plugin (dev versions not yet distinct from stable)
+        if: |
+          github.repository == 'spectrochempy/spectrochempy' &&
+          !(github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name))
+        run: |
+          echo "Skipping dev upload for plugin ${{ matrix.plugin.name }}: plugin dev versions are not yet distinct from stable versions"
+          echo "Plugin conda builds are still produced for testing, but not uploaded to Anaconda.org."
+          echo "See TODO in docs/sources/devguide/plugins/packaging.rst for context."
+
       - name: Upload plugin to Anaconda.org
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
-          (
-            github.event_name == 'push' ||
-            (github.event_name == 'release' && startsWith(github.ref_name, matrix.plugin.name))
-          )
+          github.event_name == 'release' &&
+          startsWith(github.ref_name, matrix.plugin.name)
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
           set -euo pipefail
           shopt -s nullglob globstar
+
+          echo "Stable plugin release detected; uploading ${{ matrix.plugin.name }} to Anaconda label: main"
 
           if [ -z "${ANACONDA_API_TOKEN:-}" ]; then
             echo "::error::ANACONDA_API_TOKEN is not set. Cannot upload to Anaconda.org."
@@ -371,24 +380,14 @@ jobs:
             exit 1
           fi
 
-          label="dev"
-          force_flag="--force"
-          if [ "${{ github.event_name }}" = "release" ]; then
-            label="main"
-            # Use --force so the label is correctly set to "main" even if a
-            # push build already uploaded the same package to "dev" earlier.
-            force_flag="--force"
-          fi
-
           for package in "${packages[@]}"; do
             basename=$(basename "$package")
-            # Skip the core spectrochempy package (spectrochempy-<version>...)
-            # which was already uploaded by the core build job. Only upload
-            # plugin packages (spectrochempy-<pluginname>-<version>...).
             if [[ "$basename" == spectrochempy-[0-9]* ]]; then
               echo "Skipping core package (already uploaded): $package"
               continue
             fi
-            echo "Uploading $package with label: $label"
-            anaconda --token "$ANACONDA_API_TOKEN" upload $force_flag -l "$label" "$package"
+            echo "Uploading $package with label: main"
+            anaconda --token "$ANACONDA_API_TOKEN" upload --force -l "main" "$package"
           done
+
+          echo "::notice::Plugin ${{ matrix.plugin.name }} uploaded to Anaconda label: main"
