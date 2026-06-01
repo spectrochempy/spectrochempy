@@ -43,6 +43,10 @@ Bug Fixes
   and ``IRIS`` that had been disabled as "unstable in CI".
 - Removed stale commented-out ``@pytest.mark.skipif`` blocks from 5 reader test files
   (test data is available in CI).
+- Fixed ``test_py_in_docs.py`` to skip docs scripts and examples that require
+  external network access (eigenvector.com) when the network is unreachable,
+  avoiding spurious CI failures on non-deterministic network outages. Set
+  ``SCPY_ALLOW_NETWORK_DOCS=1`` environment variable to force execution.
 
 Breaking Changes
 ~~~~~~~~~~~~~~~~

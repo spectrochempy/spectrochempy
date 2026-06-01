@@ -27,6 +27,10 @@ pytestmark = [
     #    pytest.mark.skip(reason="Too slow and redundant with docs building process"),
 ]
 
+NETWORK_URL_PATTERNS = [
+    "eigenvector.com",
+]
+
 repo = Path(__file__).parent.parent.parent
 
 # Get example files list at module level
@@ -85,6 +89,15 @@ def _plugin_required_by(path):
     return None
 
 
+def _requires_external_network(path):
+    """Check if a script requires external network access to run."""
+    text = path.read_text(encoding="utf8")
+    for pattern in NETWORK_URL_PATTERNS:
+        if pattern in text:
+            return pattern
+    return None
+
+
 def nbsphinx_script_run(path):
     import matplotlib
 
@@ -131,6 +144,10 @@ def test_nbsphinx_script_(script):
     if required and not _plugin_available(required):
         pytest.skip(f"requires the optional {required} plugin")
 
+    network_marker = _requires_external_network(script)
+    if network_marker and not environ.get("SCPY_ALLOW_NETWORK_DOCS"):
+        pytest.skip(f"requires external network access to {network_marker}")
+
     e, message, err = nbsphinx_script_run(script)
     # this give unicoderror on workflow with window
     if e:
@@ -154,6 +171,10 @@ def test_examples(example):
     required = _plugin_required_by(example)
     if required and not _plugin_available(required):
         pytest.skip(f"requires the optional {required} plugin")
+
+    network_marker = _requires_external_network(example)
+    if network_marker and not environ.get("SCPY_ALLOW_NETWORK_DOCS"):
+        pytest.skip(f"requires external network access to {network_marker}")
 
     scp.NO_DISPLAY = True
     mpl.use("agg", force=True)
