@@ -108,18 +108,23 @@ du core publiée (ex. `spectrochempy >=0.9.0,<0.10`).
 
 ---
 
-## Publication PyPI échouée
+## Publication PyPI échouée — core (`build_package.yml`)
 
 ### Symptôme
 
 Le job `build-and-publish_pypi` échoue dans le workflow
-`build_package.yml`.
+`build_package.yml` (package **core**).
 
 ### Vérifications
 
-1. **Token PyPI** : vérifier que `PYPI_API_TOKEN` est défini dans les
-   [secrets du dépôt](https://github.com/spectrochempy/spectrochempy/settings/secrets/actions)
-   et qu'il n'a pas expiré ou été révoqué
+1. **Trusted Publishing / OIDC** : le package core utilise
+   [Trusted Publishing](https://docs.pypi.org/trusted-publishers/).
+   Il n'utilise **pas** `PYPI_API_TOKEN` ou `TEST_PYPI_API_TOKEN`.
+   Vérifier la configuration sur PyPI/TestPyPI :
+   - Aller sur les paramètres du projet `spectrochempy` sur PyPI
+   - Vérifier que le workflow `build_package.yml` du dépôt
+     `spectrochempy/spectrochempy` est bien listé dans Trusted Publishers
+   - L'environment `pypi` doit correspondre à celui du workflow
 2. **Permissions GitHub** : le workflow nécessite `contents: read`,
    `packages: write` et `id-token: write` dans les permissions du
    workflow
@@ -142,16 +147,37 @@ Do not treat this as a packaging regression. Either:
 This differs from some TestPyPI/dev workflows where ``skip-existing`` may be used
 to avoid hard failures during repeated test uploads.
 
-### Résolution
+### Résolution manuelle
 
 ```bash
 # Vérifier si la version existe déjà sur PyPI
 pip index versions spectrochempy
 
-# Si nécessaire, forcer la publication depuis une machine locale
+# Si nécessaire, forcer la publication depuis une machine locale (token API nécessaire)
 python -m build
 python -m twine upload dist/*
 ```
+
+---
+
+## Publication PyPI échouée — plugins (`publish_plugins.yml`)
+
+### Symptôme
+
+Le job `build-and-publish_plugins` échoue dans le workflow
+`publish_plugins.yml`.
+
+### Vérifications
+
+1. **Token PyPI / TestPyPI** : les plugins utilisent les **API tokens** :
+   - `PYPI_API_TOKEN` pour PyPI
+   - `TEST_PYPI_API_TOKEN` pour TestPyPI
+   Vérifier qu'ils sont définis dans les
+   [secrets du dépôt](https://github.com/spectrochempy/spectrochempy/settings/secrets/actions)
+   et qu'ils n'ont pas expiré ou été révoqués
+2. **Version déjà publiée** : le workflow publie les plugins avec
+   `skip-existing: true` sur TestPyPI. Sur PyPI stable, une version
+   déjà publiée provoque un échec (pas de `--skip-existing`).
 
 ---
 

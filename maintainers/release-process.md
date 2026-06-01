@@ -10,10 +10,22 @@ du dépôt `spectrochempy/spectrochempy` :
 
 | Secret | Usage |
 |--------|-------|
-| `PYPI_API_TOKEN` | Publication sur PyPI (via `pypa/gh-action-pypi-publish`) |
-| `TEST_PYPI_API_TOKEN` | Publication sur Test PyPI (poussées vers master) |
-| `ANACONDA_API_TOKEN` | Publication sur Anaconda.org (compte `spectrocat`) |
+| `PYPI_API_TOKEN` | Publication **plugins** sur PyPI (via `pypa/gh-action-pypi-publish` avec `password`) |
+| `TEST_PYPI_API_TOKEN` | Publication **plugins** sur Test PyPI (workflow `publish_plugins.yml`) |
+| `ANACONDA_API_TOKEN` | Publication sur Anaconda.org (compte `spectrocat`) — core + plugins |
 | `BOT_TOKEN` | PAT personnel utilisé pour contourner la protection de branche lors des releases de plugins (expire tous les 3 mois — penser à le renouveler et mettre à jour le secret) |
+
+> **Note PyPI core** : le package **core** (`spectrochempy`) utilise
+> [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (OIDC)
+> via le workflow `build_package.yml`.  Il n'utilise **pas**
+> `PYPI_API_TOKEN` ni `TEST_PYPI_API_TOKEN`.  Les secrets API token ne
+> sont requis que pour la publication des **plugins**
+> (`publish_plugins.yml`).
+>
+> Avant la première release core via Trusted Publishing, vérifier que
+> le workflow `build_package.yml` est bien configuré comme Trusted
+> Publisher dans les paramètres PyPI et TestPyPI du projet
+> `spectrochempy`.
 
 ### Comptes externes
 
@@ -358,8 +370,9 @@ entrées sont incorrectes car :
 
 ### Avant toute release
 
-- [ ] Vérifier que les secrets GitHub (`PYPI_API_TOKEN`, `ANACONDA_API_TOKEN`,
-      `BOT_TOKEN`) sont valides et non expirés
+- [ ] Vérifier que les secrets GitHub nécessaires sont valides et non expirés :
+      - Core : `ANACONDA_API_TOKEN` (Trusted Publishing PyPI ne nécessite pas de token secret)
+      - Plugins : `PYPI_API_TOKEN`, `TEST_PYPI_API_TOKEN`, `ANACONDA_API_TOKEN`, `BOT_TOKEN`
 - [ ] Vérifier l'état des services externes (Zenodo, PyPI, Anaconda.org)
 - [ ] Lancer les tests CI sur la branche cible
 - [ ] Vérifier que le Colab smoke test passe (`install_on_colab.yml`)
@@ -367,6 +380,11 @@ entrées sont incorrectes car :
 ### Release du core
 
 - [ ] Vérifier que l'intégration GitHub → Zenodo est active
+- [ ] Vérifier que le workflow `build_package.yml` est configuré comme
+      Trusted Publisher sur PyPI et TestPyPI (paramètres du projet
+      `spectrochempy` sur PyPI → Trusted Publishers → GitHub repository
+      `spectrochempy/spectrochempy`, workflow `build_package.yml`,
+      environment `pypi`)
 - [ ] Lancer **Prepare a new release** avec la version X.Y.Z
 - [ ] Vérifier la PR de release (CITATION.cff, zenodo.json, whatsnew)
 - [ ] Merger la PR → attendre la Draft Release
@@ -378,6 +396,8 @@ entrées sont incorrectes car :
 
 ### Release des plugins
 
+- [ ] Vérifier que `PYPI_API_TOKEN` et `TEST_PYPI_API_TOKEN` sont valides
+- [ ] Vérifier que `BOT_TOKEN` est valide (expire tous les 3 mois)
 - [ ] Désactiver l'intégration GitHub → Zenodo
 - [ ] Lancer **Release an official plugin** avec `confirm_zenodo_disabled=true`
 - [ ] Vérifier PyPI : `pip install spectrochempy-XXX==X.Y.Z`
