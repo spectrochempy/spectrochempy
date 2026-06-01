@@ -109,7 +109,7 @@ def trapezoid(dataset, **kwargs):
     return scipy.integrate.trapezoid(dataset.data, **kwargs)
 
 
-@deprecated(replace="Trapezoid")
+@deprecated(replace="Trapezoid", removed="0.10.0")
 def trapz(dataset, **kwargs):
     return trapezoid(dataset, **kwargs)
 

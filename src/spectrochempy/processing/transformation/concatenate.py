@@ -79,7 +79,7 @@ def concatenate(*datasets, **kwargs):
     """
     # check uise
     if "force_stack" in kwargs:
-        deprecated("force_stack", replace="method stack()")
+        deprecated("force_stack", replace="method stack()", removed="0.10.0")
         return stack(datasets)
 
     # get a copy of input datasets in order that input data are not modified
