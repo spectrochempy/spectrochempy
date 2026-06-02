@@ -522,10 +522,12 @@ entrées sont incorrectes car :
 
 ### Colab verification
 
-- [ ] Le workflow `install_on_colab.yml` s'exécute automatiquement sur les PR
-      marquées `needs-colab`
-- [ ] Avant une release, vérifier que le test Colab passe en
-      `workflow_dispatch` manuel
+- [ ] Le workflow `install_on_colab.yml` ne s'exécute plus automatiquement
+      sur les branches (`push` supprimé) — uniquement sur les PR marquées
+      `needs-colab` ou en `workflow_dispatch` manuel
+- [ ] Avant une release, lancer le `workflow_dispatch` manuel depuis
+      **`master`** (ou la branche courante de release) pour valider la
+      compatibilité Colab
 - [ ] Les deux modes (`core-only` et `with-plugins`) doivent passer
 - [ ] En cas d'échec, vérifier les dépendances Colab (numpy, matplotlib, etc.)
       et les contraintes réseau

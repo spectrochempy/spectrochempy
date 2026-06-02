@@ -11,16 +11,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
     paths:
-      - "spectrochempy/**"
+      - "src/spectrochempy/**"
       - "plugins/**"
       - "pyproject.toml"
       - "requirements/**"
       - ".github/workflows/install_on_colab.yml"
-  push:
-    branches:
-      - develop
-      - feature/*
-      - fix/*
   workflow_dispatch:
 
 permissions:
@@ -29,6 +24,9 @@ permissions:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+env:
+  SCPY_COLAB_PRETEND_VERSION: "0.9.3.dev0"
 
 jobs:
   colab-smoke-test:
@@ -66,7 +64,7 @@ jobs:
             -c "
               pip install -q setuptools wheel build setuptools-scm && \
               git config --global --add safe.directory /workspace && \
-              SETUPTOOLS_SCM_PRETEND_VERSION=0.9.1.dev0 \
+              SETUPTOOLS_SCM_PRETEND_VERSION=${SCPY_COLAB_PRETEND_VERSION} \
                 pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint && \
               python3 /workspace/.github/workflows/scripts/test_colab_plugins.py --mode core-only
@@ -82,7 +80,7 @@ jobs:
             -c "
               pip install -q setuptools wheel build setuptools-scm && \
               git config --global --add safe.directory /workspace && \
-              SETUPTOOLS_SCM_PRETEND_VERSION=0.9.1.dev0 \
+              SETUPTOOLS_SCM_PRETEND_VERSION=${SCPY_COLAB_PRETEND_VERSION} \
                 pip install --no-build-isolation --no-deps /workspace && \
               pip install -q colorama pint numpy-quaternion && \
               pip install --no-build-isolation --no-deps /workspace/plugins/spectrochempy-iris && \
