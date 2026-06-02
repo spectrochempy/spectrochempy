@@ -10,7 +10,6 @@ import pytest
 from pint.errors import DimensionalityError
 
 import spectrochempy as scp
-from spectrochempy.application.application import error_
 from spectrochempy.application.application import info_
 from spectrochempy.core.dataset.arraymixins.ndmath import _binary_ufuncs
 from spectrochempy.core.dataset.arraymixins.ndmath import _comp_ufuncs
@@ -39,7 +38,8 @@ from spectrochempy.utils.testing import assert_units_equal
 
 @pytest.mark.parametrize(("name", "comment"), _unary_ufuncs().items())
 def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
-    """Test unary universal functions with numerical validation against NumPy.
+    """
+    Test unary universal functions with numerical validation against NumPy.
 
     Validates:
     - Operation does not raise
@@ -58,8 +58,16 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
     # complex-domain fallback for out-of-real-domain inputs
     # sqrt/cbrt may have floating-point precision differences with units
     _numpy_deviation = {
-        "log1p", "arcsin", "arccos", "arctanh", "radians", "degrees",
-        "deg2rad", "rad2deg", "sqrt", "cbrt",
+        "log1p",
+        "arcsin",
+        "arccos",
+        "arctanh",
+        "radians",
+        "degrees",
+        "deg2rad",
+        "rad2deg",
+        "sqrt",
+        "cbrt",
     }
 
     # --- Unitless NDDataset ---
@@ -70,12 +78,14 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
 
     ref = f(data)
 
-    if isinstance(result, NDDataset):
-        if name not in _numpy_deviation:
-            assert_array_equal(result.data, ref)
-    elif isinstance(result, np.ndarray) and result.dtype == ref.dtype:
-        if name not in _numpy_deviation:
-            assert_array_equal(result, ref)
+    if isinstance(result, NDDataset) and name not in _numpy_deviation:
+        assert_array_equal(result.data, ref)
+    elif (
+        isinstance(result, np.ndarray)
+        and result.dtype == ref.dtype
+        and name not in _numpy_deviation
+    ):
+        assert_array_equal(result, ref)
 
     # --- With units (dimensionless-only ufuncs should raise) ---
     nd_with_units = NDDataset(data.copy(), units="absorbance")
@@ -97,9 +107,8 @@ def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
         return
 
     ref_masked = f(np.ma.MaskedArray(data, mask=mask))
-    if isinstance(result_masked, NDDataset):
-        if name not in _numpy_deviation:
-            assert_array_equal(result_masked.data, ref_masked.data)
+    if isinstance(result_masked, NDDataset) and name not in _numpy_deviation:
+        assert_array_equal(result_masked.data, ref_masked.data)
 
 
 def test_unary_ops():
@@ -143,7 +152,8 @@ def test_unary_ops_with_units():
 
 
 def test_bug_lost_dimensionless_units():
-    """Test bug with dimensionless units after operations.
+    """
+    Test bug with dimensionless units after operations.
 
     The bug was that dimensionless units were lost after clip+log2.
     """
@@ -1442,7 +1452,7 @@ def test_operator_floordiv():
 def test_operator_pow():
     """Power operator works on datasets."""
     ds = NDDataset(np.array([1.0, 2.0, 3.0]))
-    r = ds ** 2.0
+    r = ds**2.0
     assert_array_equal(r.data, np.array([1.0, 4.0, 9.0]))
     assert isinstance(r, NDDataset)
 
@@ -1596,7 +1606,9 @@ def test_std_masked():
         np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False])
     )
     r = ds.std()
-    ref = np.std(np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False]))
+    ref = np.std(
+        np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False])
+    )
     assert abs(r - ref) < 1e-10
 
 
@@ -1637,7 +1649,9 @@ def test_var_masked():
         np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False])
     )
     r = ds.var()
-    ref = np.var(np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False]))
+    ref = np.var(
+        np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False])
+    )
     assert abs(r - ref) < 1e-10
 
 

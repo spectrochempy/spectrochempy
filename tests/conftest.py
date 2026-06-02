@@ -698,7 +698,9 @@ with RandomSeedContext(42):
 with RandomSeedContext(123):
     _ref_3d = np.round(10.0 * np.random.random((3, 4, 2)), 2)
 
-_ref_mask_1d = np.array([False, True, False, False, True, False, False, False, True, False])
+_ref_mask_1d = np.array(
+    [False, True, False, False, True, False, False, False, True, False]
+)
 _ref_mask_2d = _ref_2d < 3.0
 
 _core_coord_x = Coord(
@@ -749,9 +751,7 @@ def ndarray_2d_mask():
 
 @pytest.fixture(scope="function")
 def ndarray_complex():
-    return NDComplexArray(
-        _ref_2d.copy().astype(np.complex128), units="m/s", copy=True
-    )
+    return NDComplexArray(_ref_2d.copy().astype(np.complex128), units="m/s", copy=True)
 
 
 @pytest.fixture(scope="function")

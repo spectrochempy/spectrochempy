@@ -219,3 +219,21 @@ def test_ndcomplex_squeeze(ndarrayunit):
     # d1 = d.squeeze(dims=1, inplace=True)  # assert d1.shape == (10,)  # assert d1 is d  #
     # d = nd[0:1]  # assert d.shape == (1, 8)  # d1 = d.squeeze(dims=0, inplace=True)
     # assert d1.shape == (8,)  # assert d1 is d
+
+
+def test_ndcomplex_squeeze_preserves_complex_data_dims_and_mask():
+    data = np.arange(6.0).reshape(1, 2, 3) + 1j
+    mask = [[[False, True, False], [False, False, True]]]
+    nd = NDComplexArray(data, mask=mask)
+
+    squeezed = nd.squeeze()
+
+    assert isinstance(squeezed, NDComplexArray)
+    assert squeezed.is_complex
+    assert squeezed.shape == (2, 3)
+    assert squeezed.dims == ["y", "x"]
+    assert_array_equal(squeezed.data, data.squeeze(axis=0))
+    assert_array_equal(
+        squeezed.mask,
+        np.array([[False, True, False], [False, False, True]]),
+    )
