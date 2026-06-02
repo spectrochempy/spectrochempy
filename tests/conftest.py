@@ -683,6 +683,190 @@ def simple_project():
     return proj
 
 
+# ===========================================================================
+# Core test fixtures (deterministic synthetic datasets for unit testing)
+# Merged from tests/test_core/conftest.py to avoid ImportPathMismatchError.
+# All are: deterministic, small, fast, self-contained.
+# ===========================================================================
+
+# -- Reference data constants --
+_ref_1d = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
+
+with RandomSeedContext(42):
+    _ref_2d = np.round(10.0 * np.random.random((5, 5)), 2)
+
+with RandomSeedContext(123):
+    _ref_3d = np.round(10.0 * np.random.random((3, 4, 2)), 2)
+
+_ref_mask_1d = np.array([False, True, False, False, True, False, False, False, True, False])
+_ref_mask_2d = _ref_2d < 3.0
+
+_core_coord_x = Coord(
+    data=np.linspace(4000.0, 1000.0, 10),
+    labels=list("abcdefghij"),
+    units="cm^-1",
+    title="wavenumber",
+)
+_core_coord_y = Coord(
+    data=np.linspace(0.0, 60.0, 100),
+    units="s",
+    title="time",
+)
+_core_coord_z = Coord(
+    data=np.linspace(200.0, 300.0, 3),
+    labels=["cold", "normal", "hot"],
+    units="K",
+    title="temperature",
+)
+_core_coord_2d_x = Coord(np.linspace(0.0, 10.0, 5), title="x_coord")
+_core_coord_2d_y = Coord(np.linspace(0.0, 5.0, 5), title="y_coord")
+
+
+@pytest.fixture(scope="function")
+def ndarray_1d():
+    return NDArray(_ref_1d.copy(), copy=True)
+
+
+@pytest.fixture(scope="function")
+def ndarray_2d():
+    return NDArray(_ref_2d.copy(), copy=True)
+
+
+@pytest.fixture(scope="function")
+def ndarray_1d_unit():
+    return NDArray(_ref_1d.copy(), units="m/s", copy=True)
+
+
+@pytest.fixture(scope="function")
+def ndarray_2d_mask():
+    return NDArray(
+        _ref_2d.copy(),
+        mask=_ref_mask_2d.copy(),
+        units="absorbance",
+        copy=True,
+    )
+
+
+@pytest.fixture(scope="function")
+def ndarray_complex():
+    return NDComplexArray(
+        _ref_2d.copy().astype(np.complex128), units="m/s", copy=True
+    )
+
+
+@pytest.fixture(scope="function")
+def coord_x():
+    return _core_coord_x.copy()
+
+
+@pytest.fixture(scope="function")
+def coord_y():
+    return _core_coord_y.copy()
+
+
+@pytest.fixture(scope="function")
+def coord_z():
+    return _core_coord_z.copy()
+
+
+@pytest.fixture(scope="function")
+def coord_2d_x():
+    return _core_coord_2d_x.copy()
+
+
+@pytest.fixture(scope="function")
+def coord_2d_y():
+    return _core_coord_2d_y.copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_1d():
+    return NDDataset(_ref_1d.copy()).copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_2d():
+    return NDDataset(_ref_2d.copy()).copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_3d():
+    return NDDataset(
+        _ref_3d.copy(),
+        coordset=[_core_coord_x.copy(), _core_coord_y.copy(), _core_coord_z.copy()],
+        title="absorbance",
+        units="absorbance",
+    ).copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_1d_unit():
+    return NDDataset(_ref_1d.copy(), units="m").copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_2d_units():
+    return NDDataset(_ref_2d.copy(), units="absorbance").copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_2d_masked():
+    return NDDataset(
+        _ref_2d.copy(),
+        mask=_ref_mask_2d.copy(),
+        coordset=[_core_coord_2d_y.copy(), _core_coord_2d_x.copy()],
+        title="masked_data",
+        units="absorbance",
+    ).copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_1d_masked():
+    return NDDataset(
+        _ref_1d.copy(),
+        mask=_ref_mask_1d.copy(),
+        title="masked_1d",
+    ).copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_complex():
+    return NDDataset(
+        _ref_1d.copy().astype(np.complex128) * (1.0 + 0.5j),
+        title="complex_data",
+    ).copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_nan():
+    data = _ref_2d.copy()
+    data[0, 0] = np.nan
+    data[2, 3] = np.nan
+    return NDDataset(data, title="with_nan").copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_broadcast():
+    return NDDataset(np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])).copy()
+
+
+@pytest.fixture(scope="function")
+def ndataset_aligned_pair(coord_x):
+    c = coord_x
+    d1 = NDDataset(np.sin(np.linspace(0, np.pi, 10)), coordset=[c])
+    d2 = NDDataset(np.cos(np.linspace(0, np.pi, 10)), coordset=[c.copy()])
+    return d1, d2
+
+
+@pytest.fixture(scope="function")
+def ndataset_misaligned_pair():
+    c1 = Coord(np.linspace(0.0, 10.0, 10))
+    c2 = Coord(np.linspace(1.0, 11.0, 10))
+    d1 = NDDataset(np.ones(10), coordset=[c1])
+    d2 = NDDataset(np.ones(10), coordset=[c2])
+    return d1, d2
+
+
 # --------------------------------------------------------------------------------------
 # fixture mpl dirs
 # --------------------------------------------------------------------------------------
