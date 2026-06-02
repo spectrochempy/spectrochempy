@@ -18,6 +18,26 @@ from spectrochempy.testing.plugins import PluginTestHarness
 DATADIR = prefs.datadir
 CARROUCELL_FOLDER = DATADIR / "irdata/carroucell_samp"
 
+
+def _has_required_carroucell_data():
+    if not CARROUCELL_FOLDER.exists():
+        return False
+
+    available = {}
+    for filename in CARROUCELL_FOLDER.glob("*.SPA"):
+        if "BCKG" in filename.stem:
+            continue
+        try:
+            prefix, spectrum = filename.stem.rsplit("_", maxsplit=1)
+            available.setdefault(prefix, set()).add(int(spectrum))
+        except ValueError:
+            continue
+
+    complete_samples = [
+        prefix for prefix, spectra in available.items() if {1, 2, 3} <= spectra
+    ]
+    return len(complete_samples) >= 11
+
 # ------------------------------------------------------------------
 # Plugin lifecycle tests
 # ------------------------------------------------------------------
@@ -113,9 +133,10 @@ def test_reader_stub_raises_on_nonexistent_path():
 # ------------------------------------------------------------------
 
 
+@pytest.mark.data
 @pytest.mark.skipif(
-    not CARROUCELL_FOLDER.exists(),
-    reason="Experimental data not available for testing",
+    not _has_required_carroucell_data(),
+    reason="Complete Carroucell experimental data not available for testing",
 )
 def test_read_carroucell():
     nd = scp.carroucell.read_carroucell("irdata/carroucell_samp", spectra=(1, 2))
