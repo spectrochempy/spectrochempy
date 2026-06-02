@@ -49,7 +49,7 @@ jobs:
        github.event_name != 'schedule'
        && !startsWith(github.ref, 'refs/release/'))
 
-    name: Test ${{ matrix.validation }} using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
+    name: ${{ matrix.check_name }}
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
@@ -73,6 +73,7 @@ jobs:
             core_only: true
             test_targets: tests/test_core/test_dataset tests/test_core/test_units tests/test_core/test_projects tests/test_core/test_scripts tests/test_core/test_plotters
             validation: core-only
+            check_name: Test core-only using ubuntu-latest and python 3.14
           - os: ubuntu-latest
             pythonVersion: "3.14"
             coverage: true
@@ -81,6 +82,7 @@ jobs:
             core_only: false
             test_targets: ""
             validation: integration
+            check_name: Test using ubuntu-latest and python 3.14
           - os: ubuntu-latest
             pythonVersion: "3.11"
             coverage: false
@@ -89,6 +91,7 @@ jobs:
             core_only: false
             test_targets: ""
             validation: compatibility
+            check_name: Test using ubuntu-latest and python 3.11
           - os: windows-latest
             pythonVersion: "3.14"
             coverage: false
@@ -97,6 +100,7 @@ jobs:
             core_only: false
             test_targets: ""
             validation: compatibility
+            check_name: Test using windows-latest and python 3.14
           - os: macos-latest
             pythonVersion: "3.14"
             coverage: false
@@ -105,6 +109,7 @@ jobs:
             core_only: false
             test_targets: ""
             validation: compatibility
+            check_name: Test using macos-latest and python 3.14
 
     steps:
       # Print debug information about the current run
