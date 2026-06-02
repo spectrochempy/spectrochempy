@@ -19,6 +19,9 @@ Developer
   ``next_patch.devN`` metadata injection for plugin development builds, with
   automatic conda uploads to ``spectrocat/label/dev`` on ``master`` when
   release-relevant plugin files changed.
+- CI: Restored unique TestPyPI development uploads by deriving core push builds
+  from the next patch version and publishing plugin TestPyPI builds from
+  ``master`` only when release-relevant plugin files changed.
 - CI: Added an explicit documentation versions manifest and a manual
   ``Repair docs version index`` workflow to refresh the published version
   dropdown without rebuilding the full documentation.
