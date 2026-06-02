@@ -10,6 +10,8 @@ from pathlib import Path
 import pytest
 
 import spectrochempy as scp
+from spectrochempy.core.dataset.nddataset import NDDataset
+from spectrochempy.core.readers.read_labspec import _read_txt
 
 RAMANDIR = scp.preferences.datadir / "ramandata/labspec"
 
@@ -32,6 +34,23 @@ def test_read_labspec():
     nd = scp.read_labspec(f)
     f.unlink()
     assert nd is None
+
+
+def test_read_labspec_latin1_content():
+    content = (
+        "#Acq. time (s)=1\n"
+        "#Dark correction=No\n"
+        "#Acquired=01.01.2024 00:00:01\n"
+        "#Accumulations=1\n"
+        "#Comment=20\xb0C\n"
+        "100\t1\n"
+        "101\t2\n"
+    ).encode("latin-1")
+
+    nd = _read_txt(NDDataset(), Path("latin_labspec.txt"), content=content)
+
+    assert nd.shape == (1, 2)
+    assert nd.meta["Comment"] == "20°C"
 
     # non labspec txt file
     f = Path("i_am_not_labspec.txt")
