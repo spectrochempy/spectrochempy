@@ -1185,7 +1185,14 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
             for i in axis:
                 dim = old[i]
-                del new._coordset[dim]
+                # Delete the coord for the squeezed dimension, if it exists.
+                # A dimension might have no explicit coord (e.g., singleton
+                # dim auto-created without a coord), in which case there is
+                # nothing to clean up.
+                try:
+                    del new._coordset[dim]
+                except KeyError:
+                    pass
 
         return new
 
