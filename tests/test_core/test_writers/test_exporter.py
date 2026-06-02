@@ -5,22 +5,16 @@
 # ======================================================================================
 # ruff: noqa
 
-from pathlib import Path
-
-import numpy as np
 import pytest
 
 import spectrochempy as scp
-from spectrochempy.application.preferences import preferences as prefs
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import testing
-from spectrochempy.utils.file import pathclean
-
-irdatadir = pathclean(prefs.datadir) / "irdata"
 
 
-def test_write(mock_cwd):
-    nd = scp.read_omnic("irdata/nh4y-activation.spg")
+def test_write(mock_cwd, ndataset_1d):
+    nd = ndataset_1d.copy()
+    nd.name = "synthetic"
 
     # API write methods needs an instance of a NDDataset as the first argument
     with pytest.raises(
@@ -56,18 +50,6 @@ def test_write(mock_cwd):
     assert filename.stem == nd.name
     assert filename.suffix == ".scp"
     filename.unlink()
-
-    # # a write protocole can be specified
-    # filename = nd.write(protocole='json')
-    # assert filename is not None
-    # assert filename.stem == nd.name
-    # assert filename.suffix == '.json'
-    # filename.unlink()
-
-    irdatadir = pathclean(prefs.datadir) / "irdata"
-    for f in ["essai.scp", "nh4y-activation.scp"]:
-        if (irdatadir / f).is_file():
-            (irdatadir / f).unlink()
 
 
 # EOF

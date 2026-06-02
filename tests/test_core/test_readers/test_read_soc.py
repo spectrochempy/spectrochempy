@@ -13,6 +13,8 @@ import requests
 import spectrochempy as scp
 from spectrochempy.utils.objects import ScpObjectList
 
+pytestmark = pytest.mark.network
+
 
 def test_read_soc_merge_behavior():
     """Test that read_soc respects merge parameter.
@@ -103,7 +105,7 @@ def test_read_SOC():
     ]
 
     for i, fname in enumerate(fnames):
-        response = requests.get(baseurl + fname)
+        response = requests.get(baseurl + fname, timeout=10)
         if response.status_code == 200:
             with open(fname, "wb") as f:
                 f.write(response.content)

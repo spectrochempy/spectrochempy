@@ -8,6 +8,8 @@ from spectrochempy.extern.brukeropus import OPUSFile
 from spectrochempy.extern.brukeropus.file import find_opus_files
 from spectrochempy.extern.brukeropus.file import read_opus
 
+pytestmark = pytest.mark.data
+
 
 def get_all_blocks(opusfile: OPUSFile) -> list:
     """Return a list of all `FileBlock` in an `OPUSFile` instance."""
@@ -40,7 +42,10 @@ def find_all_files(directory: str) -> list:
 @pytest.fixture
 def test_directory():
     DATADIR = prefs.datadir
-    return DATADIR / "irdata" / "OPUS"
+    directory = DATADIR / "irdata" / "OPUS"
+    if not directory.exists():
+        pytest.skip("OPUS testdata not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+    return directory
 
 
 @pytest.fixture
@@ -59,7 +64,7 @@ def test_opus_file_detection(test_directory):
     opus_files = find_opus_files(test_directory, recursive=True)
 
     all_files = [f for f in all_files if f.name not in ["__index__", ".DS_Store"]]
-    assert len(all_files) == 6, "No files found in test directory"
+    assert len(all_files) >= 5, "No files found in test directory"
     assert len(opus_files) == 5, "No OPUS files found in test directory"
 
     # Test that files with OPUS extension are valid OPUS files

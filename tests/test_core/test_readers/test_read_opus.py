@@ -16,6 +16,14 @@ from spectrochempy.utils.testing import assert_dataset_equal
 DATADIR = prefs.datadir
 OPUSDATA = DATADIR / "irdata" / "OPUS"
 
+pytestmark = pytest.mark.data
+
+
+@pytest.fixture(autouse=True)
+def require_opus_testdata():
+    if not OPUSDATA.exists():
+        pytest.skip("OPUS testdata not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+
 
 class TestOpusBasic:
     """Test basic OPUS file reading functionality."""
