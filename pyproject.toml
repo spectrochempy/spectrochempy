@@ -252,6 +252,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "network: marks tests requiring network access (deselect with '-m \"not network\"')",
     "serial: marks tests that must not run in parallel xdist workers",
+    "data: marks tests requiring external testdata downloads (set SCP_TEST_DATA_DOWNLOAD=1)",
 ]
 pythonpath = ["."]
 testpaths = ["tests"]
