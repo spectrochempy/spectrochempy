@@ -25,6 +25,8 @@ Developer
 - CI: Added a dedicated core-only package-test validation row that skips
   official plugin installation, plugin diagnostics, documentation script
   execution, external testdata restore, coverage generation, and Codecov upload.
+- CI: Aligned the plugin release workflow status summary with the shared
+  release-relevant plugin change detector used by the read-only status workflow.
 - DEV: Modernized core dataset tests with stronger ``NDDataset``, ``NDMath``,
   ``Coord``, ``CoordSet``, ``NDArray``, and ``NDComplexArray`` validation and
   split the large dataset test module into focused test files.
