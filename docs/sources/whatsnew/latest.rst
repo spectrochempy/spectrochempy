@@ -12,9 +12,22 @@ What's New in Revision 0.9.3.dev
 These are the changes in SpectroChemPy-0.9.3.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+Bug Fixes
+~~~~~~~~~
+
+- Fixed ``NDDataset.squeeze()`` for singleton dimensions without explicit
+  coordinates and aligned Labspec in-memory byte decoding with the Latin-1
+  fallback already used for local files.
+
 Developer
 ~~~~~~~~~
 
+- CI: Added a dedicated core-only package-test validation row that skips
+  official plugin installation, plugin diagnostics, documentation script
+  execution, external testdata restore, coverage generation, and Codecov upload.
+- DEV: Modernized core dataset tests with stronger ``NDDataset``, ``NDMath``,
+  ``Coord``, ``CoordSet``, ``NDArray``, and ``NDComplexArray`` validation and
+  split the large dataset test module into focused test files.
 - CI: Added reusable plugin version-status tooling and temporary
   ``next_patch.devN`` metadata injection for plugin development builds, with
   automatic conda uploads to ``spectrocat/label/dev`` on ``master`` when

@@ -479,6 +479,23 @@ def test_ndarray_slicing(refarray, ndarray):
     assert_array_equal(d0["c":"d"].values, np.array(["c", "d"]))
 
 
+def test_ndarray_squeeze_reports_axis_and_preserves_mask():
+    nd = NDArray(
+        np.arange(6.0).reshape(1, 2, 3),
+        mask=[[[False, True, False], [False, False, True]]],
+    )
+
+    squeezed, axis = nd.squeeze(return_axis=True)
+
+    assert axis == (0,)
+    assert squeezed.shape == (2, 3)
+    assert squeezed.dims == ["y", "x"]
+    assert_array_equal(
+        squeezed.mask,
+        np.array([[False, True, False], [False, False, True]]),
+    )
+
+
 def test_dim_names_specified(ndarray):
     nd = ndarray.copy()
     assert not nd.is_masked

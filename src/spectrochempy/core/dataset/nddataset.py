@@ -1189,10 +1189,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 # A dimension might have no explicit coord (e.g., singleton
                 # dim auto-created without a coord), in which case there is
                 # nothing to clean up.
-                try:
+                with suppress(KeyError):
                     del new._coordset[dim]
-                except KeyError:
-                    pass
 
         return new
 

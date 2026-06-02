@@ -38,6 +38,7 @@ def _has_required_carroucell_data():
     ]
     return len(complete_samples) >= 11
 
+
 # ------------------------------------------------------------------
 # Plugin lifecycle tests
 # ------------------------------------------------------------------
