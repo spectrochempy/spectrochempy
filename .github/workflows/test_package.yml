@@ -49,7 +49,7 @@ jobs:
        github.event_name != 'schedule'
        && !startsWith(github.ref, 'refs/release/'))
 
-    name: Test using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
+    name: Test ${{ matrix.validation }} using ${{ matrix.os }} and python ${{ matrix.pythonVersion }}
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
@@ -67,20 +67,44 @@ jobs:
         include:
           - os: ubuntu-latest
             pythonVersion: "3.14"
+            coverage: false
+            docs_examples: false
+            plugins: false
+            core_only: true
+            test_targets: tests/test_core/test_dataset tests/test_core/test_units tests/test_core/test_projects tests/test_core/test_scripts tests/test_core/test_plotters
+            validation: core-only
+          - os: ubuntu-latest
+            pythonVersion: "3.14"
             coverage: true
             docs_examples: true
+            plugins: true
+            core_only: false
+            test_targets: ""
+            validation: integration
           - os: ubuntu-latest
             pythonVersion: "3.11"
             coverage: false
             docs_examples: false
+            plugins: true
+            core_only: false
+            test_targets: ""
+            validation: compatibility
           - os: windows-latest
             pythonVersion: "3.14"
             coverage: false
             docs_examples: false
+            plugins: true
+            core_only: false
+            test_targets: ""
+            validation: compatibility
           - os: macos-latest
             pythonVersion: "3.14"
             coverage: false
             docs_examples: false
+            plugins: true
+            core_only: false
+            test_targets: ""
+            validation: compatibility
 
     steps:
       # Print debug information about the current run
@@ -93,6 +117,8 @@ jobs:
           echo "Workflow: ${{ github.workflow }}"
           echo "pythonVersion: ${{ matrix.pythonVersion }}"
           echo "os: ${{ matrix.os }}"
+          echo "core_only: ${{ matrix.core_only }}"
+          echo "plugins: ${{ matrix.plugins }}"
 
       - name: Initialize CI diagnostics
         if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
@@ -121,7 +147,7 @@ jobs:
           echo "PYTHONUTF8=1" >> $GITHUB_ENV
 
       - name: Restore test data and runtime caches
-        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        if: ${{ !matrix.core_only && !(env.ACT && matrix.pythonVersion == '3.14') }}
         uses: actions/cache@v5
         with:
           path: |
@@ -148,7 +174,7 @@ jobs:
           echo "dependency installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Install SpectroChemPy plugins
-        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        if: ${{ matrix.plugins && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           set -e
           start=$SECONDS
@@ -160,12 +186,52 @@ jobs:
           echo "plugin installation: ${duration}s" | tee -a "$CI_TIMING_FILE"
 
       - name: Environment and plugin diagnostics
-        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        if: ${{ matrix.plugins && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           python .github/workflows/scripts/ci_diagnostics.py environment
 
+      - name: Core-only environment diagnostics
+        if: ${{ matrix.core_only && !(env.ACT && matrix.pythonVersion == '3.14') }}
+        run: |
+          python - <<'PY'
+          from importlib import metadata
+          from importlib.util import find_spec
+
+          official_plugins = [
+              "spectrochempy-hypercomplex",
+              "spectrochempy-nmr",
+              "spectrochempy-iris",
+              "spectrochempy-carroucell",
+          ]
+          import_names = {
+              "spectrochempy-hypercomplex": "spectrochempy_hypercomplex",
+              "spectrochempy-nmr": "spectrochempy_nmr",
+              "spectrochempy-iris": "spectrochempy_iris",
+              "spectrochempy-carroucell": "spectrochempy_carroucell",
+          }
+
+          installed = []
+          importable = []
+          for package in official_plugins:
+              try:
+                  metadata.version(package)
+              except metadata.PackageNotFoundError:
+                  pass
+              else:
+                  installed.append(package)
+              if find_spec(import_names[package]) is not None:
+                  importable.append(import_names[package])
+
+          if installed or importable:
+              raise SystemExit(
+                  "core-only job found official plugins installed/importable: "
+                  f"installed={installed}, importable={importable}"
+              )
+          print("core-only plugin check: no official plugins installed/importable")
+          PY
+
       - name: Select pytest targets
-        if: ${{ !(env.ACT && matrix.pythonVersion == '3.14') }}
+        if: ${{ !matrix.core_only && !(env.ACT && matrix.pythonVersion == '3.14') }}
         run: |
           python .github/workflows/scripts/select_test_targets.py \
             --base "${{ github.event.pull_request.base.sha || github.event.before || '' }}" \
@@ -183,12 +249,16 @@ jobs:
           start=$SECONDS
           echo "pytest selection: ${SCPY_TEST_SELECTION:-full}"
           echo "pytest selection reason: ${SCPY_TEST_SELECTION_REASON:-not provided}"
-          echo "pytest targets: ${SCPY_TEST_TARGETS:-tests}"
-          targets="${SCPY_TEST_TARGETS:-tests}"
+          echo "pytest targets: ${SCPY_TEST_TARGETS:-${{ matrix.test_targets || 'tests' }}}"
+          targets="${SCPY_TEST_TARGETS:-${{ matrix.test_targets || 'tests' }}}"
           pytest_extra_args=()
           if [[ "${{ matrix.docs_examples }}" != "true" ]]; then
             pytest_extra_args+=(--ignore=tests/test_docs/test_py_in_docs.py)
-            echo "documentation scripts: omitted in compatibility job"
+            echo "documentation scripts: omitted in this job"
+          fi
+          if [[ "${{ matrix.core_only }}" == "true" ]]; then
+            pytest_extra_args+=(-m "not network and not data")
+            echo "core-only markers: excluding network and data tests"
           fi
           if [[ "${{ matrix.docs_examples }}" != "true" && "$targets" == "tests/test_docs" ]]; then
             echo "documentation-only selection is covered by the canonical Ubuntu job and docs workflow" | tee pytest.log
@@ -258,12 +328,12 @@ jobs:
           echo "Current branch: ${{ github.ref }}"
 
       - name: Coverage report to xml
-        if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.14' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ !env.ACT && github.event_name == 'push' && matrix.coverage && matrix.pythonVersion == '3.14' && matrix.os == 'ubuntu-latest' }}
         run: |
           coverage xml
 
       - name: Upload coverage reports to Codecov
-        if: ${{ !env.ACT &&  github.event_name == 'push' && matrix.pythonVersion == '3.14' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ !env.ACT && github.event_name == 'push' && matrix.coverage && matrix.pythonVersion == '3.14' && matrix.os == 'ubuntu-latest' }}
         uses: codecov/codecov-action@v6
         with:
           files: coverage.xml
