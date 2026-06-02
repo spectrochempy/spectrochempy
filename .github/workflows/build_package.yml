@@ -42,6 +42,9 @@ concurrency:
 jobs:
   build-and-publish_pypi:
     name: Build and publish distribution to PyPI
+    if: >
+      github.repository == 'spectrochempy/spectrochempy' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     defaults:
@@ -112,6 +115,9 @@ jobs:
 
   build_and_publish_conda_package:
     name: Build and publish conda package to Anaconda.org
+    if: >
+      github.repository == 'spectrochempy/spectrochempy' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     defaults:

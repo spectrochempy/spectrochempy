@@ -32,8 +32,11 @@ jobs:
   colab-smoke-test:
     name: Colab smoke test
     if: >-
-      github.event_name != 'pull_request' ||
-      contains(github.event.pull_request.labels.*.name, 'needs-colab')
+      (github.repository == 'spectrochempy/spectrochempy' ||
+       github.event_name == 'workflow_dispatch') && (
+        github.event_name != 'pull_request' ||
+        contains(github.event.pull_request.labels.*.name, 'needs-colab')
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Maximize disk space

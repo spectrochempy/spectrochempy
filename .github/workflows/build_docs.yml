@@ -41,12 +41,17 @@ jobs:
     # Only run scheduled jobs on main repository.
     # For pull_request events, skip if the PR is from the same repository
     # (push events on the branch already trigger the workflow).
-    if: |
-      (github.event_name == 'schedule'
-       && github.repository == 'spectrochempy/spectrochempy') || (
-       github.event_name != 'schedule' &&
-       (github.event_name != 'pull_request' ||
-        github.event.pull_request.head.repo.full_name != github.repository))
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.repository == 'spectrochempy/spectrochempy' &&
+        (
+          (github.event_name == 'schedule') ||
+          (github.event_name != 'schedule' &&
+           (github.event_name != 'pull_request' ||
+            github.event.pull_request.head.repo.full_name != github.repository))
+        )
+      )
 
     name: Build and publish documentation
     runs-on: ubuntu-latest

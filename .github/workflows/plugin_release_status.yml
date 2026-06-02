@@ -19,6 +19,9 @@ permissions:
 
 jobs:
   plugin-status:
+    if: >
+      github.repository == 'spectrochempy/spectrochempy' ||
+      github.event_name == 'workflow_dispatch'
     name: List official plugin changes since last release tag
     runs-on: ubuntu-latest
 
