@@ -30,6 +30,17 @@ def _read_topspin_or_skip(*args, **kwargs):
     return result
 
 
+def _has_readdir_nmr_data():
+    return all(
+        path.exists()
+        for path in (
+            nmrdir / "topspin_1d/1/fid",
+            nmrdir / "topspin_2d/1/ser",
+            nmrdir / "topspin_2d/1/pdata/1/2rr",
+        )
+    )
+
+
 @pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
 def test_read_topspin():
     nd = _read_topspin_or_skip(_require_path(nmrdir / "exam2d_HC/3/pdata/1/2rr"))
@@ -63,7 +74,11 @@ def test_read_topspin():
     assert str(nd[1]) == "NDDataset: [quaternion] pp (shape: (y:1024, x:2048))"
 
 
-@pytest.mark.skipif(not NMRDATA.exists(), reason="NMR test data not available")
+@pytest.mark.data
+@pytest.mark.skipif(
+    not _has_readdir_nmr_data(),
+    reason="Complete NMR read_dir test data not available",
+)
 def test_readdir_for_nmr():
     try:
         nd = scp.read_dir("nmrdata/bruker/tests/nmr", protocol="topspin")
