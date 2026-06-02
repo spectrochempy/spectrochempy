@@ -1512,7 +1512,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         --------
         No-op reshape preserves everything:
 
-        >>> X = scp.read("irdata/nh4y-activation.spg")
+        >>> X = scp.read("irdata/nh4y-activation.spg")  # doctest: +SKIP
         >>> Y = X.reshape((60, 1000))  # doctest: +SKIP
 
         Add a singleton cycle dimension:
