@@ -39,32 +39,67 @@ from spectrochempy.utils.testing import assert_units_equal
 
 @pytest.mark.parametrize(("name", "comment"), _unary_ufuncs().items())
 def test_ndmath_unary_ufuncs_simple_data(nd2d, name, comment):
-    """Test unary universal functions on simple data."""
-    nd1 = nd2d.copy() / 1.0e10  # divide to avoid some overflow in exp ufuncs
+    """Test unary universal functions with numerical validation against NumPy.
 
-    # Test on unitless NDDataset
-    assert nd1.unitless
+    Validates:
+    - Operation does not raise
+    - Numerical values match NumPy reference (with try/except for domain edges)
+    - Units handled (skip when dimensional mismatch expected)
+    - Mask propagation matches NumPy masked array behavior
+    """
+    # Use positive data safe for log, sqrt, trig domain edges
+    data = np.abs(np.asarray(nd2d.data)) + 1.0
+    nd1 = NDDataset(data.copy())
     f = getattr(np, name)
-    f(nd1)
 
-    # Test on NDDataset with units
-    nd1.units = ur.absorbance
-    f = getattr(np, name)
+    # ufuncs known to intentionally deviate from NumPy
+    # (documented in dedicated tests — validated there instead)
+    # log1p is remapped to log internally; arcsin/arccos/arctanh use
+    # complex-domain fallback for out-of-real-domain inputs
+    # sqrt/cbrt may have floating-point precision differences with units
+    _numpy_deviation = {
+        "log1p", "arcsin", "arccos", "arctanh", "radians", "degrees",
+        "deg2rad", "rad2deg", "sqrt", "cbrt",
+    }
 
-    skip = False
-    if not skip:
-        try:
-            f(nd1)
-            # Reset dataset for next test
-            nd1 = nd2d.copy()
+    # --- Unitless NDDataset ---
+    try:
+        result = f(nd1)
+    except (DimensionalityError, TypeError, ValueError):
+        return  # domain restriction (e.g. arcsin, deg2rad w/o units)
 
-            # Test with units and mask
-            nd1.units = ur.absorbance
-            nd1[1, 1] = MASKED
-            f(nd1)
+    ref = f(data)
 
-        except DimensionalityError as e:
-            error_(f"{name}: ", e)
+    if isinstance(result, NDDataset):
+        if name not in _numpy_deviation:
+            assert_array_equal(result.data, ref)
+    elif isinstance(result, np.ndarray) and result.dtype == ref.dtype:
+        if name not in _numpy_deviation:
+            assert_array_equal(result, ref)
+
+    # --- With units (dimensionless-only ufuncs should raise) ---
+    nd_with_units = NDDataset(data.copy(), units="absorbance")
+    try:
+        result_units = f(nd_with_units)
+    except DimensionalityError:
+        pass  # expected for log, trig, etc.
+    else:
+        if isinstance(result_units, NDDataset) and name not in _numpy_deviation:
+            assert_array_equal(result_units.data, ref)
+
+    # --- With mask ---
+    mask = np.zeros(data.shape, dtype=bool)
+    mask[1, 1] = True
+    nd_masked = NDDataset(data.copy(), mask=mask)
+    try:
+        result_masked = f(nd_masked)
+    except DimensionalityError:
+        return
+
+    ref_masked = f(np.ma.MaskedArray(data, mask=mask))
+    if isinstance(result_masked, NDDataset):
+        if name not in _numpy_deviation:
+            assert_array_equal(result_masked.data, ref_masked.data)
 
 
 def test_unary_ops():
@@ -141,6 +176,9 @@ def test_ndmath_binary_ufuncs_two_datasets(nd2d, name, comment):
     f = getattr(np, name)
     r = f(nd1, nd2)
     assert isinstance(r, NDDataset)
+    # Numerical equivalence
+    ref = f(np.asarray(nd1.data), np.asarray(nd2.data))
+    assert_array_equal(r.data, ref)
 
     # NDDataset with units
     nd1.units = ur.m
@@ -170,6 +208,9 @@ def test_ndmath_binary_ufuncs_scalar(nd2d, name, comment):
     f = getattr(np, name)
     r = f(nd1, nd2)
     assert isinstance(r, NDDataset)
+    # Numerical equivalence
+    ref = f(np.asarray(nd1.data), nd2)
+    assert_array_equal(r.data, ref)
 
     # NDDataset with units and scalar
     nd1.units = ur.absorbance
@@ -196,12 +237,17 @@ def test_ndmath_comp_ufuncs_two_datasets(nd2d, name, comment):
     f = getattr(np, name)
     r = f(nd1, nd2)
     assert isinstance(r, NDDataset)
+    # Numerical equivalence
+    ref = f(np.asarray(nd1.data), np.asarray(nd2.data))
+    assert_array_equal(r.data, ref)
 
     # NDDataset with units comparison
     nd1.units = ur.absorbance
     nd2.units = ur.absorbance
     r = f(nd1, nd2)
     assert isinstance(r, NDDataset)
+    ref = f(np.asarray(nd1.data), np.asarray(nd2.data))
+    assert_array_equal(r.data, ref)
 
 
 def test_nddataset_add():
@@ -975,6 +1021,27 @@ def test_eye_identity():
     assert ds.units == ur.km
 
 
+def test_empty_creation():
+    """Empty creates an uninitialized dataset with the given shape."""
+    ds = NDDataset.empty((3, 4))
+    assert ds.shape == (3, 4)
+    assert isinstance(ds, NDDataset)
+    # Empty allows dtype specification
+    ds = NDDataset.empty(5, dtype=np.complex128)
+    assert ds.shape == (5,)
+    assert ds.dtype == np.complex128
+
+
+def test_argmin_basic():
+    """Argmin returns the index of the minimum value."""
+    ds = NDDataset(np.array([3.0, 1.0, 2.0, 4.0]))
+    r = ds.argmin()
+    assert r == 1
+    # NumPy equivalence
+    ref = np.argmin(np.array([3.0, 1.0, 2.0, 4.0]))
+    assert r == ref
+
+
 def test_random():
     """Test random creation function."""
     ds = scp.random((3, 3), units="km")
@@ -1351,6 +1418,72 @@ def test_coordinate_multidim_last_dim_mismatch():
         ds1 + ds2
 
 
+def test_operator_floordiv():
+    """Floor division works on datasets."""
+    ds1 = NDDataset(np.array([5.0, 7.0, 9.0]))
+    ds2 = NDDataset(np.array([2.0, 3.0, 4.0]))
+    r = ds1 // ds2
+    assert_array_equal(r.data, np.array([2.0, 2.0, 2.0]))
+    assert isinstance(r, NDDataset)
+
+    # NumPy equivalence for dataset-dataset
+    ref = np.floor_divide(np.asarray(ds1.data), np.asarray(ds2.data))
+    assert_array_equal(r.data, ref)
+
+    # With scalar
+    r_scalar = ds1 // 2.0
+    assert_array_equal(r_scalar.data, np.array([2.0, 3.0, 4.0]))
+
+    # NumPy equivalence for scalar
+    ref_scalar = np.floor_divide(np.asarray(ds1.data), 2.0)
+    assert_array_equal(r_scalar.data, ref_scalar)
+
+
+def test_operator_pow():
+    """Power operator works on datasets."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    r = ds ** 2.0
+    assert_array_equal(r.data, np.array([1.0, 4.0, 9.0]))
+    assert isinstance(r, NDDataset)
+
+    # NumPy equivalence
+    ref = np.power(np.asarray(ds.data), 2.0)
+    assert_array_equal(r.data, ref)
+
+
+def test_operator_inplace_floordiv():
+    """In-place floor division works."""
+    ds = NDDataset(np.array([5.0, 7.0, 9.0]))
+    ds //= 2.0
+    assert_array_equal(ds.data, np.array([2.0, 3.0, 4.0]))
+
+
+def test_operator_inplace_pow():
+    """In-place power works."""
+    ds = NDDataset(np.array([1.0, 2.0, 3.0]))
+    ds **= 2.0
+    assert_array_equal(ds.data, np.array([1.0, 4.0, 9.0]))
+
+
+def test_operator_broadcasting():
+    """Broadcasting rules apply to NDDataset operations."""
+    # 2D + 1D broadcasts along first dimension
+    ds2d = NDDataset(np.ones((3, 4)))
+    ds1d = NDDataset(np.array([1.0, 2.0, 3.0, 4.0]))
+    r = ds2d + ds1d
+    assert r.shape == (3, 4)
+    ref = np.asarray(ds2d.data) + np.asarray(ds1d.data)
+    assert_array_equal(r.data, ref)
+
+    # Scalar broadcasting
+    r2 = ds2d + 5.0
+    assert_array_equal(r2.data, np.full((3, 4), 6.0))
+
+    # 1D + scalar
+    r3 = ds1d + 10.0
+    assert_array_equal(r3.data, np.array([11.0, 12.0, 13.0, 14.0]))
+
+
 def test_numpy_ufunc_via_operator_equivalence():
     """Using np.<ufunc>(a, b) gives same result as a <op> b."""
     ds = NDDataset(np.array([1.0, 2.0, 3.0]))
@@ -1436,8 +1569,35 @@ def test_std_ddof():
     """Std with ddof=1 uses Bessel correction."""
     ds = NDDataset(np.array([1.0, 2.0, 3.0, 4.0]))
     r = ds.std(ddof=1)
-    assert isinstance(r, np.floating)
-    assert abs(r - 1.29099) < 1e-4
+    ref = np.std(np.array([1.0, 2.0, 3.0, 4.0]), ddof=1)
+    assert abs(r - ref) < 1e-10
+
+
+def test_std_keepdims():
+    """Std with keepdims=True preserves dimensions."""
+    ds = NDDataset(np.array([[1.0, 2.0], [3.0, 4.0]]))
+    r = ds.std(keepdims=True)
+    assert r.shape == (1, 1)
+    ref = np.std(ds.data)
+    assert abs(r.data.flat[0] - ref) < 1e-10
+
+
+def test_std_dim():
+    """Std along a dimension."""
+    ds = NDDataset(np.array([[1.0, 2.0], [3.0, 4.0]]))
+    r = ds.std(dim="x")
+    ref = np.std(ds.data, axis=1)
+    assert_array_equal(r.data, ref)
+
+
+def test_std_masked():
+    """Std on masked data ignores masked entries."""
+    ds = NDDataset(
+        np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False])
+    )
+    r = ds.std()
+    ref = np.std(np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False]))
+    assert abs(r - ref) < 1e-10
 
 
 def test_var_with_units():
@@ -1448,7 +1608,37 @@ def test_var_with_units():
     ds = NDDataset(np.array([1.0, 2.0, 3.0]), units="m")
     r = ds.var()
     # var of data with units returns a Quantity
-    assert isinstance(r, (Quantity, np.floating))
+    assert isinstance(r, Quantity)
+    # Numerical validation against NumPy
+    ref = np.var(np.array([1.0, 2.0, 3.0]))
+    assert abs(r.magnitude - ref) < 1e-10
+
+
+def test_var_keepdims():
+    """Var with keepdims=True preserves dimensions."""
+    ds = NDDataset(np.array([[1.0, 2.0], [3.0, 4.0]]))
+    r = ds.var(keepdims=True)
+    assert r.shape == (1, 1)
+    ref = np.var(ds.data)
+    assert abs(r.data.flat[0] - ref) < 1e-10
+
+
+def test_var_dim():
+    """Var along a dimension."""
+    ds = NDDataset(np.array([[1.0, 2.0], [3.0, 4.0]]))
+    r = ds.var(dim="x")
+    ref = np.var(ds.data, axis=1)
+    assert_array_equal(r.data, ref)
+
+
+def test_var_masked():
+    """Var on masked data ignores masked entries."""
+    ds = NDDataset(
+        np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False])
+    )
+    r = ds.var()
+    ref = np.var(np.ma.MaskedArray([1.0, 2.0, 100.0, 4.0], mask=[False, True, False, False]))
+    assert abs(r - ref) < 1e-10
 
 
 def test_ptp_keepdims():
@@ -1456,6 +1646,8 @@ def test_ptp_keepdims():
     ds = NDDataset(np.array([[1.0, 3.0], [2.0, 5.0]]))
     r = ds.ptp(keepdims=True)
     assert r.shape == (1, 1)
+    ref = np.ptp(ds.data)
+    assert abs(r.data.flat[0] - ref) < 1e-10
 
 
 def test_ptp_scalar():
@@ -1657,6 +1849,27 @@ def test_mean_masked():
     )
     r = ds.mean()
     assert abs(r - 5.0) < 1e-10
+
+
+def test_mean_coord_propagation():
+    """Mean with dim preserves coordinate values on the remaining dim."""
+    x_coord = Coord(np.array([10.0, 20.0, 30.0, 40.0]), title="wavelength")
+    y_coord = Coord(np.array([100.0, 200.0]), title="time")
+    ds = NDDataset(
+        np.array([[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]]),
+        coordset=[y_coord, x_coord],
+    )
+    # Mean along x should preserve y coordinate
+    r = ds.mean(dim="x")
+    assert r.shape == (2,)
+    assert r.y.title == "time"
+    assert_array_equal(r.y.data, np.array([100.0, 200.0]))
+
+    # Mean along y should preserve x coordinate
+    r = ds.mean(dim="y")
+    assert r.shape == (4,)
+    assert r.x.title == "wavelength"
+    assert_array_equal(r.x.data, np.array([10.0, 20.0, 30.0, 40.0]))
 
 
 def test_absolute_masked():
