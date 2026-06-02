@@ -453,6 +453,58 @@ def test_issue_310():
     assert str(D[:, 1]) == "NDDataset: [float64] unitless (shape: (y:10, x:1))"
 
 
+def test_coordset_del_missing_key(coord0, coord1):
+    coords = CoordSet(coord0, coord1)
+    with pytest.raises(KeyError):
+        del coords["nonexistent"]
+    with pytest.raises(KeyError):
+        del coords["z"]
+
+
+def test_coordset_names_sizes_after_deletion(coord0, coord1, coord2):
+    coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
+    assert coords.names == ["x", "y", "z"]
+    assert coords.sizes == [coord1.size, coord0.size, coord2.size]
+
+    del coords["x"]
+    assert coords.names == ["y", "z"]
+    assert coords.sizes == [coord0.size, coord2.size]
+
+    del coords.y["_1"]
+    assert coords.names == ["y", "z"]
+    assert coords.y.names == ["_2"]
+
+    with pytest.raises(KeyError):
+        del coords["nonexistent"]
+
+    with pytest.raises(KeyError):
+        del coords.y["_1"]  # already deleted
+
+
+def test_coordset_deepcopy_isolation(coord0, coord1):
+    import copy
+
+    coords = CoordSet(coord0, [coord1, coord1.copy()])
+    coords_copy = copy.deepcopy(coords)
+
+    assert coords_copy is not coords
+    assert coords_copy == coords
+
+    # modifying a coord inside the copy must not affect the original
+    # (coordset sorts: sub-CoordSet first (x), then coord0 (y))
+    coords_copy.y._data[0] = -9999
+    assert coords.y._data[0] == coord0._data[0]
+
+    # modifying titles in the copy must not affect the original
+    coords_copy.x._1.title = "mutated_title"
+    assert coords.x._1.title == coord1.title
+
+    # deleting from the copy must not affect the original
+    del coords_copy.x
+    assert "x" in coords.names
+    assert "x" not in coords_copy.names
+
+
 def test_coordset_arithmetics():
     # typical use case
     ds = NDDataset([0.0, 1.0, 2.0])

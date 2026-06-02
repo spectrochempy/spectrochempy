@@ -1337,16 +1337,16 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
 
         Examples
         --------
-        >>> dataset = scp.read('wodger.spg')
-        >>> a = scp.to_array(dataset)
+        >>> dataset = scp.read('wodger.spg')  # doctest: +SKIP
+        >>> a = scp.to_array(dataset)  # doctest: +SKIP
 
         equivalent to:
 
-        >>> a = np.ma.array(dataset)
+        >>> a = np.ma.array(dataset)  # doctest: +SKIP
 
         or
 
-        >>> a = dataset.masked_data
+        >>> a = dataset.masked_data  # doctest: +SKIP
 
         """
         return np.ma.array(self)

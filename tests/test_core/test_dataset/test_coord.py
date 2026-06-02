@@ -569,3 +569,45 @@ def test_coord_not_implemented(name):
     )
     with pytest.raises(NotImplementedError):
         getattr(coord0, name)()
+
+
+def test_coord_mask():
+    c = Coord([1, 2, 3])
+    from spectrochempy.utils.constants import NOMASK
+
+    assert c.mask is NOMASK
+    c.mask = [True, False, True]
+    assert c.mask is NOMASK
+
+
+def test_coord_dims():
+    c = Coord([1, 2, 3])
+    assert c.dims == ["x"]
+
+
+def test_coord_sigdigits():
+    c = Coord([1, 2, 3])
+    assert c.sigdigits == 4
+    c.sigdigits = 6
+    assert c.sigdigits == 6
+
+
+def test_coord_deepcopy_isolation():
+    import copy
+
+    c0 = Coord(np.linspace(4000, 1000, 10), units="cm^-1", title="wavenumber")
+    c1 = copy.deepcopy(c0)
+
+    assert c1 is not c0
+    assert_array_equal(c1.data, c0.data)
+    assert c1.units == c0.units
+    assert c1.title == c0.title
+    assert c1.name == c0.name
+
+    # modifying deepcopy must not affect original
+    c1.name = "new_name"
+    assert c0.name != c1.name
+    c1.title = "new_title"
+    assert c0.title == "wavenumber"
+    c1._data[0] = 9999
+    assert c0.data[0] == 4000.0
