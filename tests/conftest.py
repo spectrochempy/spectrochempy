@@ -278,13 +278,37 @@ from spectrochempy.core.script import Script
 from spectrochempy.utils.file import pathclean
 from spectrochempy.utils.testing import RandomSeedContext
 
-# first download missing data
+# Test data directory
 datadir = pathclean(prefs.datadir)
 
+# --------------------------------------------------------------------------------------
+# Test data download policy
+#
+# By default, the full testdata directory is NOT downloaded automatically.
+#
+# To enable downloads, set the environment variable:
+#   SCP_TEST_DATA_DOWNLOAD=1
+#
+# When enabled, the download happens once and is cached on disk.
+# When disabled (default), tests that require external data will skip
+# gracefully if the data is not already present.
+#
+# This protects CI and local runs from:
+#   - unintended network access during test collection
+#   - slow downloads during simple unit test runs
+#   - dependency on GitHub archive availability
+#
+# Tests that require downloaded data MUST be marked with @pytest.mark.data
+# and will be skipped when the data is not available.
+# --------------------------------------------------------------------------------------
+_SCP_TEST_DATA_DOWNLOAD = os.environ.get("SCP_TEST_DATA_DOWNLOAD", "0") == "1"
+_has_testdata = (datadir / "__downloaded__").exists()
 
-from spectrochempy.application.testdata import download_full_testdata_directory
+if _SCP_TEST_DATA_DOWNLOAD and not _has_testdata:
+    from spectrochempy.application.testdata import download_full_testdata_directory
 
-download_full_testdata_directory(datadir, force=False)
+    download_full_testdata_directory(datadir, force=False)
+    _has_testdata = True
 
 
 # --------------------------------------------------------------------------------------
@@ -480,19 +504,35 @@ def dsm():
     ).copy()
 
 
-dataset = spectrochempy.read(datadir / "irdata" / "nh4y-activation.spg")
+# Flag indicating whether large external testdata is available
+# (downloaded via download_full_testdata_directory or by setting SCP_TEST_DATA_DOWNLOAD=1)
+
+_IR_DATA_PATH = datadir / "irdata" / "nh4y-activation.spg"
+_has_ir_data = _has_testdata and _IR_DATA_PATH.exists()
 
 
 @pytest.fixture(scope="function")
 def IR_dataset_2D():
-    nd = dataset.copy()
+    if not _has_ir_data:
+        pytest.skip(
+            "IR test data not available. "
+            "Set SCP_TEST_DATA_DOWNLOAD=1 to download, "
+            "or use lightweight synthetic fixtures."
+        )
+    nd = spectrochempy.read(_IR_DATA_PATH)
     nd.name = "IR_2D"
     return nd
 
 
 @pytest.fixture(scope="function")
 def IR_dataset_1D():
-    nd = dataset[0].squeeze().copy()
+    if not _has_ir_data:
+        pytest.skip(
+            "IR test data not available. "
+            "Set SCP_TEST_DATA_DOWNLOAD=1 to download, "
+            "or use lightweight synthetic fixtures."
+        )
+    nd = spectrochempy.read(_IR_DATA_PATH)[0].squeeze()
     nd.name = "IR_1D"
     return nd
 
@@ -503,6 +543,8 @@ def IR_dataset_1D():
 @pytest.fixture(scope="function")
 def NMR_dataset_1D():
     pytest.importorskip("spectrochempy_nmr", reason="requires the NMR plugin")
+    if not _has_testdata:
+        pytest.skip("NMR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_1d" / "1" / "fid"
     dataset = spectrochempy.read_topspin(
         path, remove_digital_filter=True, name="NMR_1D"
@@ -513,6 +555,8 @@ def NMR_dataset_1D():
 @pytest.fixture(scope="function")
 def NMR_dataset_2D():
     pytest.importorskip("spectrochempy_nmr", reason="requires the NMR plugin")
+    if not _has_testdata:
+        pytest.skip("NMR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     path = datadir / "nmrdata" / "bruker" / "tests" / "nmr" / "topspin_2d" / "1" / "ser"
     dataset = spectrochempy.read_topspin(
         path, expno=1, remove_digital_filter=True, name="NMR_2D"

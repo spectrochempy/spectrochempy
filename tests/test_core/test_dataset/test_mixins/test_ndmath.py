@@ -108,17 +108,22 @@ def test_unary_ops_with_units():
 
 
 def test_bug_lost_dimensionless_units():
-    """Test bug with dimensionless units after operations."""
-    import os
+    """Test bug with dimensionless units after operations.
 
-    dataset = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
-    assert dataset.units == "absorbance"
-    dataset = dataset - 2.0 - 50.0  # artificially negate some values
-    assert dataset.units == "absorbance"
+    The bug was that dimensionless units were lost after clip+log2.
+    """
+    from spectrochempy.core.units import ur as _ur
+
+    with RandomSeedContext(42):
+        dataset = NDDataset(10.0 * np.random.random(10) - 5.0)
+    dataset.units = _ur.absorbance
+    assert "a.u." in str(dataset.units)
+    dataset = dataset - 2.0 - 50.0
+    assert "a.u." in str(dataset.units)
 
     dataset = dataset.clip(-2.0, 2.0)
     y = np.log2(dataset)
-    y._repr_html_()
+    assert y.dimensionless or y.units == _ur.dimensionless
 
 
 # ===============================================================================
@@ -788,7 +793,14 @@ def test_from_function_docstring():
 
 
 def test_round_docstring_example():
-    ds = scp.read("wodger.spg")
+    # Use synthetic data - the test validates round behavior, not file reading
+    ds = NDDataset(
+        np.array([[1.2345, 2.3456, 3.4567], [4.5678, 5.6789, 6.7890]]),
+        coordset=[
+            Coord(np.arange(2.0), title="y"),
+            Coord(np.linspace(3000.0, 3500.0, 3), title="x"),
+        ],
+    )
     ds_transformed1 = np.round(ds, 3)
     ds_transformed2 = np.around(ds, 3)
     ds_transformed5 = ds.round(3)
@@ -808,25 +820,43 @@ def test_round_docstring_example():
 
 
 def test_issue417():
-    X = scp.read_omnic("irdata/nh4y-activation.spg")
-    x = X - X[-1]
+    # Use synthetic data - tests save/load and arithmetic roundtrip
+    from tempfile import TemporaryDirectory
 
-    f = X.write("X.scp")
-    X_r = scp.read("X.scp")
-    f.unlink()
+    with TemporaryDirectory() as tmpdir:
+        import os
 
-    assert_array_equal(X.data, X_r.data)
-    assert_dataset_equal(X, X_r)
-    assert_units_equal(X.units, X_r.units)
-    assert_dataset_equal(X[-1], X_r[-1])
+        orig = os.getcwd()
+        os.chdir(tmpdir)
+        try:
+            X = NDDataset(
+                np.random.random((5, 10)),
+                coordset=[
+                    Coord(np.arange(5.0), title="y"),
+                    Coord(np.linspace(1000.0, 4000.0, 10), title="x"),
+                ],
+                units="absorbance",
+            )
+            x = X - X[-1]
 
-    x_r = X_r - X_r[-1]
+            f = X.write("X.scp")
+            X_r = scp.read("X.scp")
+            f.unlink()
 
-    x_r2 = X_r - X_r[-1].data
+            assert_array_equal(X.data, X_r.data)
+            assert_dataset_equal(X, X_r)
+            assert_units_equal(X.units, X_r.units)
+            assert_dataset_equal(X[-1], X_r[-1])
 
-    assert_array_equal(x.data, x_r2.data)
-    assert_array_equal(x.data, x_r.data)
-    assert_dataset_equal(x, x_r)
+            x_r = X_r - X_r[-1]
+
+            x_r2 = X_r - X_r[-1].data
+
+            assert_array_equal(x.data, x_r2.data)
+            assert_array_equal(x.data, x_r.data)
+            assert_dataset_equal(x, x_r)
+        finally:
+            os.chdir(orig)
 
 
 def test_creation_like_methods():
@@ -1146,11 +1176,16 @@ def test_nddataset_fancy_indexing():
 
 def test_simple_arithmetic_on_full_dataset():
     """Test simple arithmetic on a full dataset (from a bug report)."""
-    # Due to a bug in notebook with the following
-    import os
-
-    dataset = scp.read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
-    # Suppress the first spectrum to all other spectra in the series
+    # Use synthetic data - the bug was about shape preservation, not file reading
+    dataset = NDDataset(
+        np.random.random((10, 20)),
+        coordset=[
+            Coord(np.arange(10.0), title="y"),
+            Coord(np.linspace(1000.0, 4000.0, 20), title="x"),
+        ],
+        units="absorbance",
+    )
+    # Suppress the first spectrum from all other spectra
     result = dataset - dataset[0]
     assert isinstance(result, NDDataset)
     assert result.shape == dataset.shape
