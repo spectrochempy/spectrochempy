@@ -259,7 +259,11 @@ def test_nddataset_str_repr(ds1):
 
 
 def test_nddataset_mask_valid():
-    scp.NDDataset(np.random.random((10, 10)), mask=np.random.random((10, 10)) > 0.5)
+    mask = np.random.random((10, 10)) > 0.5
+    ds = scp.NDDataset(np.random.random((10, 10)), mask=mask)
+    assert ds.is_masked
+    assert ds.mask.shape == (10, 10)
+    assert_array_equal(ds.mask, mask)
 
 
 def test_nddataset_copy_ref():
@@ -708,6 +712,9 @@ def test_nddataset_comparison():
     ndd = scp.NDDataset([1.0, 2.0 + 1j, 3.0])
     val = ndd * 1.2 - 10.0
     val = np.abs(val)
+    # Numerical validation
+    expected = np.abs(np.array([1.0, 2.0 + 1j, 3.0]) * 1.2 - 10.0)
+    assert_array_equal(val.data, expected)
     assert np.all(val >= 6.0)
 
 
@@ -737,7 +744,11 @@ def test_nddataset_repr_html():
     da = scp.NDDataset(
         dx, coordset=[coord0, coord1, coord2], title="absorbance", units="absorbance"
     )
-    da._repr_html_()
+    html = da._repr_html_()
+    assert html is not None
+    assert "NDDataset" in html
+    assert "absorbance" in html
+    assert "cm" in html or "cm⁻¹" in html
 
 
 # ### Metadata ################################################################
@@ -839,8 +850,18 @@ def test_nddataset_square_dataset_with_identical_coordinates():
 
 # ### Test masks ######
 def test_nddataset_use_of_mask(dsm):
-    nd = dsm
+    nd = dsm.copy()
+    # dsm already has a mask; verify more values can be masked
+    original_mask_sum = nd.mask.sum()
     nd[950.0:1260.0] = scp.MASKED
+    assert nd.is_masked
+    # Additional mask entries were added
+    assert nd.mask.sum() > original_mask_sum
+    # Setting MASKED with values outside the coordinate range should be a no-op
+    nd_noop = dsm.copy()
+    mask_before = nd_noop.mask.sum()
+    nd_noop[99999.0:100000.0] = scp.MASKED
+    assert nd_noop.mask.sum() == mask_before
 
 
 # --------------------------------------------------------------------------------------
@@ -1025,6 +1046,45 @@ def test_nddataset_init_complex_1D_with_mask():
     assert d1R._mask.shape == (5,)
 
 
+def test_nddataset_deepcopy():
+    """Deep copy via copy.deepcopy or copy() isolates all mutable state."""
+    import copy
+
+    ds = scp.NDDataset(
+        np.array([[1.0, 2.0], [3.0, 4.0]]),
+        units="m",
+        title="original",
+    )
+    # Use copy.deepcopy (function, not method)
+    ds_copy = copy.deepcopy(ds)
+    # Modify original
+    ds.data[0, 0] = 99.0
+    ds.title = "modified"
+    # Copy should be isolated
+    assert_array_equal(ds_copy.data, np.array([[1.0, 2.0], [3.0, 4.0]]))
+    assert ds_copy.title == "original"
+
+    # copy() method should also be isolated
+    ds2 = scp.NDDataset(np.array([[5.0, 6.0], [7.0, 8.0]]), units="s")
+    ds2_copy = ds2.copy()
+    ds2.data[0, 0] = 99.0
+    assert_array_equal(ds2_copy.data, np.array([[5.0, 6.0], [7.0, 8.0]]))
+
+
+def test_nddataset_squeeze_coord_propagation():
+    """Squeeze preserves coordinates on remaining dimensions."""
+    coord_y = scp.Coord(np.array([1.0]), title="y_dim")
+    coord_x = scp.Coord(np.array([100.0, 200.0, 300.0, 400.0]), title="wavelength")
+    ds = scp.NDDataset(np.ones((1, 4)), coordset=[coord_y, coord_x])
+    assert ds.shape == (1, 4)
+    assert ds.dims == ["y", "x"]
+    squeezed = ds.squeeze()
+    assert squeezed.shape == (4,)
+    assert squeezed.dims == ["x"]
+    assert_array_equal(squeezed.x.data, np.array([100.0, 200.0, 300.0, 400.0]))
+    assert squeezed.x.title == "wavelength"
+
+
 def test_nddataset_timezone():
     from zoneinfo import ZoneInfo
 
@@ -1160,15 +1220,29 @@ def test_nddataset_issue_29_mulitlabels():
 
 
 def test_nddataset_apply_funcs(dsm):
-    # convert to masked array
-    np.ma.array(dsm)
-    dsm[1] = scp.MASKED
-    np.ma.array(dsm)
-    np.array(dsm)
+    nd = dsm.copy()
+    # convert to masked array preserves shape
+    ma = np.ma.array(nd)
+    assert isinstance(ma, np.ma.MaskedArray)
+    assert ma.shape == nd.shape
+
+    nd[1] = scp.MASKED
+    ma_masked = np.ma.array(nd)
+    assert isinstance(ma_masked, np.ma.MaskedArray)
+    assert ma_masked.mask.any()
+
+    ar = np.array(nd)
+    assert isinstance(ar, np.ndarray)
+    assert ar.shape == nd.shape
 
 
 def test_take(dsm):
-    pass
+    nd = dsm.copy()
+    # take by index
+    taken = nd.take([0, 2])
+    assert taken.shape[0] == 2
+    assert_array_equal(taken.data[0], nd.data[0])
+    assert_array_equal(taken.data[1], nd.data[2])
 
 
 def test_nddataset_bug_462():
