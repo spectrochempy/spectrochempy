@@ -5,10 +5,6 @@
 # ======================================================================================
 # ruff: noqa
 
-import os
-
-from spectrochempy.application.preferences import preferences
-from spectrochempy import read_omnic
 from spectrochempy.core.plotters.multiplot import (
     multiplot,
     multiplot_map,
@@ -16,13 +12,9 @@ from spectrochempy.core.plotters.multiplot import (
 )
 from spectrochempy.utils.mplutils import show
 
-prefs = preferences
 
-
-def test_multiplot():
-    dataset = read_omnic(os.path.join(prefs.datadir, "irdata", "nh4y-activation.spg"))[
-        :, 0:100
-    ]
+def test_multiplot(sample_2d_dataset):
+    dataset = sample_2d_dataset
 
     datasets = [dataset, dataset * 1.1, dataset * 1.2, dataset * 1.3]
     labels = ["sample {}".format(label) for label in ["1", "2", "3", "4"]]

@@ -5,9 +5,7 @@
 # ======================================================================================
 # ruff: noqa
 
-import os
-
-from spectrochempy import read_omnic, NDDataset
+from spectrochempy import NDDataset
 from spectrochempy.utils.mplutils import show
 
 # TODO: from spectrochempy.utils.testing import figures_dir, same_images
@@ -15,11 +13,8 @@ from spectrochempy.utils.mplutils import show
 # https://stackoverflow.com/questions/27948126/how-can-i-write-unit-tests-against-code-that-uses-matplotlib
 
 
-def test_plot_1D():
-    dataset = read_omnic(os.path.join("irdata", "nh4y-activation.spg"))
-
-    # get first 1D spectrum
-    nd0 = dataset[0, 1550.0:1600.0]
+def test_plot_1D(sample_1d_dataset, sample_2d_dataset):
+    nd0 = sample_1d_dataset
 
     # plot generic 1D
     nd0.plot()
@@ -30,7 +25,7 @@ def test_plot_1D():
     nd0.plot(marker="o", markevery=10, title="with marker")
 
     # plot 1D column
-    col = dataset[:, 3500.0]  # note the indexing using wavenumber!
+    col = sample_2d_dataset[:, 0]
     _ = col.plot_scatter()
 
     _ = col.plot_scatter(uselabel=True)

@@ -5,15 +5,11 @@
 # ======================================================================================
 # ruff: noqa
 
-import os
-
-from spectrochempy import Coord, NDDataset, show, read_matlab
+from spectrochempy import Coord, show
 
 
-def test_plot2D_as_3D():
-    data = read_matlab(os.path.join("matlabdata", "als2004dataset.MAT"))
-
-    X = data[0]
+def test_plot2D_as_3D(sample_3d_dataset):
+    X = sample_3d_dataset.copy()
 
     X.plot_surface()
 
