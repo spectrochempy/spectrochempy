@@ -22,6 +22,7 @@ name: Publish plugin packages
 on:
   push:
     branches:
+      - master
       - test/plugin-publish-workflow
     paths:
       - ".github/workflows/publish_plugins.yml"
@@ -158,6 +159,7 @@ jobs:
       - name: Publish plugin package to TestPyPI
         if: |
           github.repository == 'spectrochempy/spectrochempy' &&
+          steps.plugin-version.outputs.has_changes == 'true' &&
           (
             github.event_name == 'push' ||
             (github.event_name == 'workflow_dispatch' && inputs.publish_to == 'testpypi')
