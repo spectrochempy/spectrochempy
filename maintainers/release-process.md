@@ -262,16 +262,17 @@ Summary du run) listant les 4 plugins officiels avec :
 
 - Statut (unchanged / modified / no previous tag)
 - Dernier tag publié
-- Nombre de commits ayant touché le répertoire du plugin
-- Nombre de fichiers modifiés
+- Nombre de commits ayant touché les fichiers distribués modifiés du plugin
+- Nombre de fichiers distribués modifiés
+- Version de développement calculée pour les builds non-release
 
 Ce tableau permet de décider en un coup d'œil si un plugin mérite une
 nouvelle release.
 
 > **Attention** : le workflow ne vérifie pas la *nature* des changements
-> (un commit CI qui touche accidentellement des fichiers plugins peut
-> suffire à marquer le plugin comme modifié). Utiliser la commande
-> `git log` ci-dessous pour inspecter le détail si nécessaire.
+> (un changement de métadonnées distribuées comme `pyproject.toml` ou
+> `recipe.yaml` peut suffire à marquer le plugin comme modifié). Utiliser la
+> commande `git log` ci-dessous pour inspecter le détail si nécessaire.
 
 ### Trouver le dernier tag
 
@@ -314,6 +315,14 @@ généralement pas de publication :
 
 - **Ne jamais réutiliser** une version déjà publiée sur PyPI ou conda.
 - Si `0.1.1` existe déjà et que le plugin a changé, publier `0.1.2`.
+- Les builds de développement calculent automatiquement `next_patch.devN`
+  depuis le dernier tag plugin et le nombre de commits ayant touché les
+  fichiers distribués qui diffèrent encore du tag. Exemple : après
+  `spectrochempy-nmr-v0.1.3`, avec 12 commits pertinents, la version de build
+  est `0.1.4.dev12`.
+- `next_patch.devN` est volontaire : selon PEP 440, `0.1.3.dev12` serait plus
+  ancien que `0.1.3`, alors que `0.1.4.dev12` est bien plus récent que la
+  dernière stable.
 - Avant de choisir une version, vérifier :
   - [PyPI](https://pypi.org/project/spectrochempy-XXX/#history)
   - Anaconda : `anaconda show spectrocat/spectrochempy-XXX`

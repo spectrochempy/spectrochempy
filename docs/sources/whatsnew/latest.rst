@@ -15,6 +15,10 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Developer
 ~~~~~~~~~
 
+- CI: Added reusable plugin version-status tooling and temporary
+  ``next_patch.devN`` metadata injection for plugin development builds, with
+  automatic conda uploads to ``spectrocat/label/dev`` on ``master`` when
+  release-relevant plugin files changed.
 - CI: Added an explicit documentation versions manifest and a manual
   ``Repair docs version index`` workflow to refresh the published version
   dropdown without rebuilding the full documentation.
