@@ -145,7 +145,10 @@ def _read_txt(*args, **kwargs):
     content = kwargs.get("content", False)
 
     if content:
-        lines = content.decode("utf-8").splitlines()
+        try:
+            lines = content.decode("utf-8").splitlines()
+        except UnicodeDecodeError:
+            lines = content.decode("latin-1").splitlines()
     else:
         try:
             with open(filename, encoding="utf-8") as fid:
