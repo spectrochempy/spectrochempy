@@ -31,6 +31,18 @@ def pytest_configure(config):
         "markers",
         "docs: marks tests that validate documentation examples",
     )
+    config.addinivalue_line(
+        "markers",
+        "network: marks tests that require network access (e.g., Eigenvector, SOC downloads)",
+    )
+    config.addinivalue_line(
+        "markers",
+        "plugin: marks tests that require external plugins (e.g., spectrochempy-nmr, spectrochempy-iris)",
+    )
+    config.addinivalue_line(
+        "markers",
+        "serial: marks tests that must not run in parallel with xdist",
+    )
 
 
 def pytest_collection_modifyitems(items):
