@@ -58,6 +58,9 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- DEV: Modernized selected analysis tests with deterministic synthetic datasets,
+  reducing unnecessary real-data dependencies and strengthening numerical,
+  shape, metadata, masking, and reporting assertions.
 - DEV: Classified plugin-dependent tests with explicit markers and skip guards
   so optional plugin imports do not fail during core-only collection, while
   keeping core-only and plugin/integration validation clearly separated.
