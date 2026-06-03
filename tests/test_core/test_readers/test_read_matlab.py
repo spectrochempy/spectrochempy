@@ -12,6 +12,14 @@ from spectrochempy import preferences as prefs
 
 MATLABDATA = prefs.datadir / "matlabdata"
 
+pytestmark = pytest.mark.data
+
+
+@pytest.fixture(autouse=True)
+def _skip_if_no_testdata():
+    if not MATLABDATA.exists():
+        pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+
 
 def test_read_matlab():
     A = read_matlab(MATLABDATA / "als2004dataset.MAT")

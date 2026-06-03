@@ -5,7 +5,20 @@
 # ======================================================================================
 # ruff: noqa
 
+import pytest
+
 import spectrochempy as scp
+from spectrochempy.application.preferences import preferences as prefs
+
+DATADIR = prefs.datadir
+
+pytestmark = pytest.mark.data
+
+
+@pytest.fixture(autouse=True)
+def _skip_if_no_testdata():
+    if not (DATADIR / "galacticdata").exists():
+        pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
 
 
 def test_read_spc_merge_behavior():

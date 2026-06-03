@@ -15,6 +15,14 @@ from spectrochempy.core.readers.read_labspec import _read_txt
 
 RAMANDIR = scp.preferences.datadir / "ramandata/labspec"
 
+pytestmark = pytest.mark.data
+
+
+@pytest.fixture(autouse=True)
+def _skip_if_no_testdata():
+    if not RAMANDIR.exists():
+        pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+
 
 def test_read_labspec():
     # single file
