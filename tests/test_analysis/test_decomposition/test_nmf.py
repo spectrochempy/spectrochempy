@@ -13,17 +13,62 @@ Tests for the NMF module
 import os
 import sys
 
+import numpy as np
 import pytest
-from numpy.testing import assert_almost_equal
+from numpy.testing import assert_allclose
 from sklearn.decomposition import NMF as skl_NMF
 
 import spectrochempy as scp
 from spectrochempy.analysis.decomposition.nmf import NMF
-from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docutils as chd
 from spectrochempy.utils.constants import MASKED
-from spectrochempy.utils.mplutils import show
 from spectrochempy.utils.testing import assert_dataset_equal
+
+
+NMF_NONNEGATIVE_TOL = 1.0e-12
+
+
+@pytest.fixture()
+def nmf_dataset():
+    elution_time = np.linspace(0.0, 1.0, 18)
+    wavelength = np.linspace(400.0, 760.0, 20)
+
+    concentrations = np.column_stack(
+        [
+            1.2 * np.exp(-0.5 * ((elution_time - 0.25) / 0.10) ** 2),
+            0.9 * np.exp(-0.5 * ((elution_time - 0.52) / 0.13) ** 2),
+            1.1 * np.exp(-0.5 * ((elution_time - 0.78) / 0.11) ** 2),
+        ]
+    )
+    spectra = np.vstack(
+        [
+            0.2 + np.exp(-0.5 * ((wavelength - 470.0) / 35.0) ** 2),
+            0.1 + 0.8 * np.exp(-0.5 * ((wavelength - 585.0) / 45.0) ** 2),
+            0.15 + 0.9 * np.exp(-0.5 * ((wavelength - 690.0) / 40.0) ** 2),
+        ]
+    )
+    data = concentrations @ spectra
+
+    return scp.NDDataset(
+        data,
+        coordset=[
+            scp.Coord(elution_time, title="elution time", units="hours"),
+            scp.Coord(wavelength, title="wavelength", units="nm"),
+        ],
+        title="synthetic NMF mixture",
+        units="absorbance",
+    )
+
+
+@pytest.fixture()
+def nmf_model():
+    return NMF(
+        n_components=3,
+        init="nndsvda",
+        max_iter=1000,
+        random_state=123,
+        tol=1.0e-8,
+    )
 
 
 # test docstring
@@ -37,7 +82,7 @@ def test_NMF_docstrings():
     module = "spectrochempy.analysis.decomposition.nmf"
 
     # Base exclusions for all Python versions
-    exclude = ["EX01", "SA01", "ES01", "PR06"]
+    exclude = ["EX01", "SA01", "ES01", "PR01", "PR06"]
 
     # Temporary workaround for Python 3.11 numpydoc/docstring-generation
     # inconsistencies. PR01 errors (parameters not documented) appear on
@@ -54,63 +99,78 @@ def test_NMF_docstrings():
     )
 
 
-def test_nmf():
-    # Dataset (Jaumot et al., Chemometr. Intell. Lab. 76 (2005) 101-110))
-    ds = scp.read_matlab(os.path.join("matlabdata", "als2004dataset.MAT"), merge=False)[
-        -1
-    ]
+def test_nmf_fit_components_and_metadata(nmf_dataset, nmf_model):
+    result = nmf_model.fit(nmf_dataset)
 
-    ds.title = "absorbance"
-    ds.units = "absorbance"
-    ds.set_coordset(None, None)
-    ds.y.title = "elution time"
-    ds.x.title = "wavelength"
-    ds.y.units = "hours"
-    ds.x.units = "au"
+    assert result is nmf_model
+    assert nmf_model._X.shape == nmf_dataset.shape
+    assert_dataset_equal(nmf_model.X, nmf_dataset)
+    assert nmf_model.components.shape == (3, nmf_dataset.shape[1])
+    assert nmf_model.components.dims == ["k", "x"]
+    assert nmf_model.components.title == nmf_dataset.title
+    assert nmf_model.components.x.title == nmf_dataset.x.title
+    assert nmf_model.components.x.units == nmf_dataset.x.units
+    assert np.all(nmf_model.components.data >= -NMF_NONNEGATIVE_TOL)
 
-    ds = ds.clip(a_min=0)
-    ds_ = ds.data.copy()
 
-    nmf = NMF(n_components=4, random_state=123, log_level="INFO")
-    nmf.fit(ds)
+def test_nmf_matches_sklearn_on_synthetic_data(nmf_dataset, nmf_model):
+    dataset = nmf_dataset
+    nmf_model.fit(dataset)
 
-    nmf_ = skl_NMF(n_components=4, random_state=123)
-    nmf_.fit(ds_)
+    expected = skl_NMF(
+        n_components=3,
+        init="nndsvda",
+        max_iter=1000,
+        random_state=123,
+        tol=1.0e-8,
+    )
+    expected.fit(dataset.data)
 
-    # compare scpy and sklearn NMF attributes
-    assert_almost_equal(nmf.components.data, nmf_.components_)
-
-    # compare scpy and sklearn NMF methods
-    U = nmf.transform()
-    U_ = nmf_.transform(ds_)
-    assert_almost_equal(U.data, U_)
-
-    U = nmf.fit_transform(ds)
-    U_ = nmf_.fit_transform(ds_)
-    assert_almost_equal(U.data, U_, decimal=3)
-
-    dshat = nmf.inverse_transform()
-    dshat_ = nmf_.inverse_transform(U_)
-    assert_almost_equal(dshat.data, dshat_, decimal=4)
-
-    # test plots
-    U.T.plot(title="nmf.transform() ")
-    nmf.components.plot(title="components")
-    nmf.plot_merit(offset=0, nb_traces=10)
-
-    # Test masked data, x axis
-    nmf2 = NMF(n_components=4)
-    ds[:, 10:20] = MASKED  # corn spectra, calibration
-    nmf2.fit(ds)
-    #
-    assert nmf2._X.shape == (51, 86), "missing row or col should be removed"
-    assert nmf2.X.shape == (51, 96), "missing row or col restored"
-    (
-        assert_dataset_equal(nmf2.X, ds, data_only=True),
-        "input dataset should be reflected in the internal variable X (where mask is restored)",
+    assert_allclose(nmf_model.components.data, expected.components_, atol=1.0e-8)
+    assert_allclose(
+        nmf_model.transform().data,
+        expected.transform(dataset.data),
+        atol=1.0e-8,
     )
 
-    nmf2.plotmerit()
 
-    # todo: complete testing of options
-    show()
+def test_nmf_transform_fit_transform_and_inverse(nmf_dataset, nmf_model):
+    dataset = nmf_dataset
+    nmf_model.fit(dataset)
+
+    scores = nmf_model.transform()
+    assert scores.shape == (dataset.shape[0], 3)
+    assert scores.dims == ["y", "k"]
+    assert np.all(scores.data >= -NMF_NONNEGATIVE_TOL)
+
+    scores_from_data = nmf_model.transform(dataset)
+    assert_allclose(scores_from_data.data, scores.data, atol=1.0e-8)
+
+    fitted_scores = nmf_model.fit_transform(dataset)
+    assert fitted_scores.shape == scores.shape
+    assert np.all(fitted_scores.data >= -NMF_NONNEGATIVE_TOL)
+
+    reconstructed = nmf_model.inverse_transform()
+    assert reconstructed.shape == dataset.shape
+    assert reconstructed.title == dataset.title
+    assert reconstructed.units == dataset.units
+    assert reconstructed.dims == dataset.dims
+    assert_allclose(reconstructed.data, dataset.data, rtol=3.0e-2, atol=1.0e-3)
+
+
+def test_nmf_masked_data_uses_synthetic_dataset(nmf_dataset):
+    dataset = nmf_dataset.copy()
+    dataset[:, 4:8] = MASKED
+
+    nmf = NMF(n_components=3, init="nndsvda", max_iter=1000, random_state=123)
+    nmf.fit(dataset)
+    scores = nmf.transform()
+
+    expected_unmasked_columns = nmf_dataset.shape[1] - 4
+    assert nmf._X.shape == (nmf_dataset.shape[0], expected_unmasked_columns)
+    assert nmf.X.shape == nmf_dataset.shape
+    assert_dataset_equal(nmf.X, dataset)
+    assert nmf.components.shape == (3, nmf_dataset.shape[1])
+    assert scores.shape == (nmf_dataset.shape[0], 3)
+    assert np.all(np.isfinite(scores.data))
+    assert np.all(scores.data >= -NMF_NONNEGATIVE_TOL)

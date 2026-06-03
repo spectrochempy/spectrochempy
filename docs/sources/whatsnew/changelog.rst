@@ -61,6 +61,9 @@ Developer
 - DEV: Modernized selected analysis tests with deterministic synthetic datasets,
   reducing unnecessary real-data dependencies and strengthening numerical,
   shape, metadata, masking, and reporting assertions.
+- DEV: Converted NMF analysis tests from the legacy MATLAB fixture to a
+  deterministic non-negative synthetic dataset with focused parity,
+  reconstruction, masking, metadata, and non-negativity checks.
 - DEV: Classified plugin-dependent tests with explicit markers and skip guards
   so optional plugin imports do not fail during core-only collection, while
   keeping core-only and plugin/integration validation clearly separated.
