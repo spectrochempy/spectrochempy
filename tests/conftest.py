@@ -21,6 +21,18 @@ import pytest
 import spectrochempy
 
 
+def pytest_configure(config):
+    """Register custom markers used across the test suite."""
+    config.addinivalue_line(
+        "markers",
+        "data: marks tests that require external testdata (e.g., IR, NMR datasets)",
+    )
+    config.addinivalue_line(
+        "markers",
+        "docs: marks tests that validate documentation examples",
+    )
+
+
 def pytest_collection_modifyitems(items):
     """Keep docstring validation out of xdist workers."""
     for item in items:
