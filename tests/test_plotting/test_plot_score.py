@@ -36,6 +36,26 @@ def _pca_dataset():
     return NDDataset(data, coordset=[y, x])
 
 
+def _precomputed_scores():
+    """Precomputed synthetic scores NDDataset (20×5, labeled) for plotting tests."""
+    rng = np.random.RandomState(42)
+    data = rng.randn(20, 5)
+    from spectrochempy import Coord
+    from spectrochempy import NDDataset
+
+    y = Coord(
+        data=np.arange(20),
+        labels=np.column_stack(
+            [
+                np.array([f"R{i}" for i in range(20)]),
+                np.array([f"G{i // 5}" for i in range(20)]),
+            ]
+        ),
+    )
+    x = Coord(data=np.arange(5))
+    return NDDataset(data, coordset=[y, x])
+
+
 class TestPlotScore:
     """Tests for plot_score composite function."""
 
@@ -261,19 +281,15 @@ class TestPlotScore:
 
     def test_plot_score_with_external_scores_labels(self):
         """Test plot_score with external scores object that has custom labels."""
-        import spectrochempy as scp
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
-        X = _pca_dataset()
-        pca = scp.PCA(n_components=5)
-        pca.fit(X)
-
-        scores = pca.transform()
+        scores = _precomputed_scores()
 
         custom_labels = np.array([f"Sample_{i}" for i in range(scores.shape[0])])
         scores.y.labels = custom_labels.reshape(-1, 1)
 
-        ax = pca.plot_score(
-            scores=scores,
+        ax = plot_score(
+            scores,
             components=(1, 2),
             show_labels=True,
             labels_column=0,
@@ -291,20 +307,17 @@ class TestPlotScore:
 
     def test_plot_score_external_scores_appended_labels(self):
         """Test plot_score with scores that have appended label columns."""
-        import spectrochempy as scp
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
-        X = _pca_dataset()
-        pca = scp.PCA(n_components=5)
-        pca.fit(X)
-
-        scores = pca.transform()
+        scores = _precomputed_scores()
 
         n_samples = scores.shape[0]
         custom_labels = np.array([f"C{i}" for i in range(n_samples)]).reshape(-1, 1)
         scores.y.labels = custom_labels
 
-        ax = pca.plot_score(
-            scores=scores,
+        ax = plot_score(
+            scores,
+            components=(1, 2),
             show_labels=True,
             labels_column=2,
             show=False,

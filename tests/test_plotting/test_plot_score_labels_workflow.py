@@ -34,6 +34,26 @@ def _pca_dataset():
     return NDDataset(data, coordset=[y, x])
 
 
+def _precomputed_scores():
+    """Precomputed synthetic scores NDDataset (20×5, labeled) for plotting tests."""
+    rng = np.random.RandomState(42)
+    data = rng.randn(20, 5)
+    from spectrochempy import Coord
+    from spectrochempy import NDDataset
+
+    y = Coord(
+        data=np.arange(20),
+        labels=np.column_stack(
+            [
+                np.array([f"R{i}" for i in range(20)]),
+                np.array([f"G{i // 5}" for i in range(20)]),
+            ]
+        ),
+    )
+    x = Coord(data=np.arange(5))
+    return NDDataset(data, coordset=[y, x])
+
+
 class TestPlotScoreLabelsWorkflow:
     """Tests for PCA.plot_score labeling workflow."""
 
@@ -42,31 +62,25 @@ class TestPlotScoreLabelsWorkflow:
         Test that user-modified scores labels are used in plot_score.
 
         This tests the workflow:
-        1. Fit PCA
-        2. Get scores via transform()
-        3. Modify scores.y.labels
-        4. Call pca.plot_score(scores=scores, show_labels=True)
-        5. Verify labels are displayed
+        1. Obtain scores (precomputed)
+        2. Modify scores.y.labels
+        3. Call plot_score(scores=scores, show_labels=True)
+        4. Verify labels are displayed
 
         Note: When setting scores.y.labels, the new labels are APPENDED to existing
         labels (Coord behavior), not replaced. The custom labels end up in the last
         column, so labels_column should point to that column.
         """
-        import spectrochempy as scp
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
-        dataset = _pca_dataset()
+        scores = _precomputed_scores()
 
-        pca = scp.PCA(n_components=0.999)
-        pca.fit(dataset)
-
-        scores = pca.transform()
-
-        labels = [lab[:6] for lab in dataset.y.labels[:, 1]]
+        labels = [lab[:6] for lab in scores.y.labels[:, 1]]
         scores.y.labels = labels
 
         # Custom labels are appended, so use the last column (index 2)
-        ax = pca.plot_score(
-            scores=scores, show_labels=True, labels_column=2, show=False
+        ax = plot_score(
+            scores, components=(1, 2), show_labels=True, labels_column=2, show=False
         )
 
         assert (
@@ -82,14 +96,9 @@ class TestPlotScoreLabelsWorkflow:
         labels (Coord behavior), not replaced. The custom labels end up in the last
         column, so labels_column should point to that column.
         """
-        import spectrochempy as scp
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
-        dataset = _pca_dataset()
-
-        pca = scp.PCA(n_components=5)
-        pca.fit(dataset)
-
-        scores = pca.transform()
+        scores = _precomputed_scores()
 
         labels = [f"Sample_{i}" for i in range(scores.shape[0])]
         scores.y.labels = labels
@@ -97,8 +106,9 @@ class TestPlotScoreLabelsWorkflow:
         # Custom labels are appended, so use the last column
         custom_labels_column = scores.y.labels.shape[1] - 1
 
-        ax = pca.plot_score(
-            scores=scores,
+        ax = plot_score(
+            scores,
+            components=(1, 2),
             show_labels=True,
             labels_column=custom_labels_column,
             show=False,
@@ -165,22 +175,18 @@ class TestPlotScoreLabelsWorkflow:
 
         Note: Custom labels are appended to existing labels, so use the last column.
         """
-        import spectrochempy as scp
+        from spectrochempy.plotting.composite.plotscore import plot_score
 
-        dataset = _pca_dataset()
+        scores = _precomputed_scores()
 
-        pca = scp.PCA(n_components=5)
-        pca.fit(dataset)
-
-        scores = pca.transform()
         labels = [f"S{i}" for i in range(scores.shape[0])]
         scores.y.labels = labels
 
         # Custom labels are appended, so use the last column
         custom_labels_column = scores.y.labels.shape[1] - 1
 
-        ax = pca.plot_score(
-            scores=scores,
+        ax = plot_score(
+            scores,
             components=(1, 2, 3),
             show_labels=True,
             labels_column=custom_labels_column,
