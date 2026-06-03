@@ -58,6 +58,9 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- DEV: Classified plugin-dependent tests with explicit markers and skip guards
+  so optional plugin imports do not fail during core-only collection, while
+  keeping core-only and plugin/integration validation clearly separated.
 - CI: Added a dedicated core-only package-test validation row that skips
   official plugin installation, plugin diagnostics, documentation script
   execution, external testdata restore, coverage generation, and Codecov upload.
