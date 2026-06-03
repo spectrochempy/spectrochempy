@@ -8,12 +8,42 @@ from os import environ
 
 import numpy as np
 import pytest
+from numpy.testing import assert_allclose
 
 import spectrochempy as scp
-from spectrochempy.analysis.curvefitting._models import asymmetricvoigtmodel
 from spectrochempy.utils import docutils as chd
+from spectrochempy.utils import testing
 from spectrochempy.utils.constants import MASKED
-from spectrochempy.utils.mplutils import show
+
+
+@pytest.fixture()
+def efa_dataset():
+    time = np.linspace(0.0, 1.0, 48)
+    features = np.linspace(400.0, 700.0, 12)
+
+    concentrations = np.column_stack(
+        [
+            np.exp(-0.5 * ((time - 0.35) / 0.12) ** 2),
+            0.8 * np.exp(-0.5 * ((time - 0.68) / 0.14) ** 2),
+        ]
+    )
+    spectra = np.vstack(
+        [
+            1.0 + 0.3 * np.cos(np.linspace(0.0, np.pi, features.size)),
+            0.7 + 0.4 * np.sin(np.linspace(0.0, np.pi, features.size)),
+        ]
+    )
+    data = concentrations @ spectra
+
+    return scp.NDDataset(
+        data=data,
+        coordset=[
+            scp.Coord(time, units="minutes", title="time"),
+            scp.Coord(features, units="nm", title="wavelength"),
+        ],
+        title="synthetic EFA mixture",
+        units="absorbance",
+    )
 
 
 # test docstring
@@ -33,11 +63,15 @@ def test_EFA_docstrings():
     )
 
 
+@pytest.mark.data
 def test_example():
     # Init the model
     model = scp.EFA()
     # Read an experimental 2D spectra (N x M )
-    X = scp.read("irdata/nh4y-activation.spg")
+    path = scp.preferences.datadir / "irdata" / "nh4y-activation.spg"
+    if not path.exists():
+        pytest.skip("IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+    X = scp.read(path)
     # Fit the model
     model.fit(X)
     # Display components spectra (2 x M)
@@ -50,109 +84,68 @@ def test_example():
     # scp.show()
 
 
-def test_EFA(IR_dataset_2D):
-    ####################################################################################
-    # Generate a test dataset
-    # ----------------------------------------------------------------------------------
-    # 1) simulated chromatogram
-    # *************************
-
-    ntimes = 250
-    ncomponents = 2
-
-    t = scp.Coord.arange(ntimes, units="minutes", title="time")  # time coordinates
-    c = scp.Coord(range(ncomponents), title="components")  # component coordinates
-
-    data = np.zeros((ncomponents, ntimes), dtype=np.float64)
-
-    data[0] = asymmetricvoigtmodel().f(
-        t, ampl=4, width=20, ratio=0.5, asym=0.4, pos=50.0
-    )  # compound 1
-    data[1] = asymmetricvoigtmodel().f(
-        t, ampl=5, width=40, ratio=0.2, asym=0.9, pos=120.0
-    )  # compound 2
-
-    dsc = scp.NDDataset(data=data, coords=[c, t])
-    dsc.plot(title="concentration")
-
-    ####################################################################################
-    # 2) absorption spectra
-    # **********************
-
-    spec = np.array([[2.0, 3.0, 4.0, 2.0], [3.0, 4.0, 2.0, 1.0]])
-    w = scp.Coord(np.arange(1, 5, 1), units="nm", title="wavelength")
-
-    dss = scp.NDDataset(data=spec, coords=[c, w])
-    dss.plot(title="spectra")
-
-    ####################################################################################
-    # 3) simulated data matrix
-    # ************************
-
-    dataset = scp.dot(dsc.T, dss)
-    dataset.data = np.random.normal(dataset.data, 0.03)
-    dataset.title = "intensity"
-
-    dataset.plot_map()
-    show()
-
-    ####################################################################################
-    # 4) evolving factor analysis (EFA)
-    # *********************************
-
+def test_efa_fit_returns_forward_and_backward_ev(efa_dataset):
     efa = scp.EFA()
+    result = efa.fit(efa_dataset)
+
+    assert result is efa
+    testing.assert_dataset_equal(efa.X, efa_dataset)
+    assert efa.f_ev.shape == (efa_dataset.shape[0], efa_dataset.shape[1])
+    assert efa.b_ev.shape == efa.f_ev.shape
+    assert efa.f_ev.dims == ["y", "k"]
+    assert efa.b_ev.dims == ["y", "k"]
+    assert efa.f_ev.title == efa_dataset.title
+    assert efa.b_ev.title == efa_dataset.title
+
+    assert np.all(np.isfinite(efa.f_ev.data))
+    assert np.all(np.isfinite(efa.b_ev.data))
+    assert np.all(efa.f_ev.data >= 0.0)
+    assert np.all(efa.b_ev.data >= 0.0)
+    assert_allclose(efa.f_ev[-1, 2:].data, 0.0, atol=1.0e-12)
+    assert_allclose(efa.b_ev[0, 2:].data, 0.0, atol=1.0e-12)
+    assert efa.f_ev[-1, 1].data > efa.f_ev[-1, 2].data
+    assert efa.b_ev[0, 1].data > efa.b_ev[0, 2].data
+
+
+def test_efa_transform_uses_requested_components(efa_dataset):
+    efa = scp.EFA(n_components=2)
+    efa.fit(efa_dataset)
+
+    concentrations = efa.transform()
+
+    assert concentrations.shape == (efa_dataset.shape[0], 2)
+    assert concentrations.dims == ["y", "k"]
+    assert np.all(np.isfinite(concentrations.data))
+    assert np.all(concentrations.data >= 0.0)
+    testing.assert_coord_equal(concentrations.y, efa_dataset.y)
+
+
+def test_efa_cutoff_clips_forward_and_backward_ev(efa_dataset):
+    efa = scp.EFA()
+    efa.fit(efa_dataset)
+    raw_forward = efa.f_ev.copy()
+    raw_backward = efa.b_ev.copy()
+
+    cutoff = 1.0e-5
+    efa.cutoff = cutoff
+
+    assert np.min(efa.f_ev.data) >= cutoff
+    assert np.min(efa.b_ev.data) >= cutoff
+    assert np.max(raw_forward.data) > np.max(efa.f_ev.data[:, 2:])
+    assert np.max(raw_backward.data) > np.max(efa.b_ev.data[:, 2:])
+
+
+def test_efa_masked_data_uses_synthetic_dataset(efa_dataset):
+    dataset = efa_dataset.copy()
+    dataset[:, 3:5] = MASKED
+    dataset[10:12] = MASKED
+
+    efa = scp.EFA(n_components=2)
     efa.fit(dataset)
+    concentrations = efa.transform()
 
-    ####################################################################################
-    # Plots of the log(EV) for the forward and backward analysis
-    #
-
-    efa.f_ev.T.plot(yscale="log", legend=efa.f_ev.k.labels)
-
-    efa.b_ev.T.plot(yscale="log", legend=efa.b_ev.k.labels)
-
-    ####################################################################################
-    # Looking at these EFA curves, it is quite obvious that only two components
-    # are really significant, and this corresponds to the data that we have in
-    # input.
-    # We can consider that the third EFA components is mainly due to the noise,
-    # and so we can use it to set a cut of values
-
-    n_pc = efa.n_components = 2  # what is important here is to set n_components
-    efa.cutoff = np.max(efa.f_ev[:, n_pc].data)
-
-    f2 = efa.f_ev[:, :n_pc]
-    b2 = efa.b_ev[:, :n_pc]
-
-    # we concatenate the datasets to plot them in a single figure
-    both = scp.concatenate(f2, b2)
-    both.T.plot(yscale="log")
-
-    # ##################################################################################
-    # # Get the abstract concentration profile based on the FIFO EFA analysis
-    # #
-
-    c = efa.transform()
-    c.T.plot()
-
-    # scp.show()  # uncomment to show plot if needed (not necessary in jupyter notebook)
-
-    ds = IR_dataset_2D.copy()
-    #
-    # columns masking
-    ds[:, 1230.0:920.0] = MASKED  # do not forget to use float in slicing
-    ds[:, 5900.0:5890.0] = MASKED
-    #
-    # difference spectra
-    ds -= ds[-1]
-    #
-    # row masking
-    ds[10:12] = MASKED
-
-    efa = scp.EFA(n_components=4)
-    efa.fit(ds)
-
-    C = efa.transform()
-    C.T.plot()
-
-    show()
+    assert efa.X.shape == dataset.shape
+    testing.assert_dataset_equal(efa.X, dataset)
+    assert concentrations.shape == (dataset.shape[0], 2)
+    assert concentrations.dims == ["y", "k"]
+    assert np.all(np.isfinite(concentrations.data))
