@@ -52,37 +52,44 @@ def _read_scpy_data_or_skip(reader, path):
     return dataset
 
 
-@pytest.mark.data
-def test_read(tmp_path):
-    filename = IRDATA / "CO@Mo_Al2O3.SPG"
-    backup = tmp_path / filename.name
+def _requires_irdata():
+    if not IRDATA.exists():
+        pytest.skip("IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
 
-    # read normally
+
+@pytest.mark.data
+def test_read_local_file():
+    """Read a local SPG file and verify content."""
+    _requires_irdata()
+    filename = IRDATA / "CO@Mo_Al2O3.SPG"
+
     nd1 = scp.read(filename)
     assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
 
     nd1 = scp.read_omnic(filename)
     assert str(nd1) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
 
+
+@pytest.mark.data
+@pytest.mark.network
+def test_read_remote_fallback(tmp_path):
+    """Test remote download from GitHub when local file is moved away."""
+    _requires_irdata()
+    filename = IRDATA / "CO@Mo_Al2O3.SPG"
+    backup = tmp_path / filename.name
     filename.replace(backup)
     try:
-        # now try to download from github s not found locally (use _read_remote)
         nd2 = _read_scpy_data_or_skip(
             scp.read_omnic,
             "irdata/CO@Mo_Al2O3.SPG",
         )
         assert str(nd2) == "NDDataset: [float64] a.u. (shape: (y:19, x:3112))"
 
-        # delete file to simulate its absence:
-        filename.unlink()
-
-        # now try to download from github s not found locally (use _read_remote)
-        # but file doesn't exist on github
+        if filename.exists():
+            filename.unlink()
         with pytest.raises(FileNotFoundError):
             scp.read_omnic("irdata/nh4y-active.spg")
 
-        # now try a using generic read
-        # macOS CI: unlink() may not immediately reflect in exists()
         if filename.exists():
             filename.unlink()
         nd2 = _read_scpy_data_or_skip(scp.read, "irdata/CO@Mo_Al2O3.SPG")
@@ -94,11 +101,15 @@ def test_read(tmp_path):
         if backup.exists():
             backup.replace(filename)
 
-    # now try a using generic read with a missing
+
+def test_read_missing_file():
+    """Reading a non-existent relative path should raise FileNotFoundError."""
     with pytest.raises(FileNotFoundError):
         scp.read("irdata/nh4y-acti.spg")
 
-    # not a scpy readable type
+
+def test_read_invalid_url_type():
+    """Reading a non-scpy-readable URL should raise TypeError."""
     with pytest.raises(TypeError):
         scp.read("https://www.spectrochempy.fr/latest/index.html")
 
