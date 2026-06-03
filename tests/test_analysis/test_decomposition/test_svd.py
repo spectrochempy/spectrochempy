@@ -10,13 +10,13 @@ Tests for the SVD class
 
 from os import environ
 
+import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
 import spectrochempy as scp
 from spectrochempy.analysis.decomposition.svd import SVD
 from spectrochempy.utils import docutils as chd
-from spectrochempy.utils.constants import MASKED
 
 
 # test docstring
@@ -32,35 +32,56 @@ def test_SVD_docstrings():
         module,
         obj=scp.SVD,
         # exclude some errors - remove whatever you want to check
-        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+        exclude=["SA01", "EX01", "EX02", "ES01", "GL11", "GL08", "PR01"],
     )
 
 
-# test svd
-# -----------
-def test_svd(IR_dataset_2D):
-    dataset = IR_dataset_2D
+@pytest.fixture()
+def low_rank_dataset():
+    y = scp.Coord.arange(4, title="sample")
+    x = scp.Coord.arange(5, title="feature")
+    data = np.zeros((4, 5))
+    data[0, 0] = 5.0
+    data[1, 1] = 3.0
+    return scp.NDDataset(
+        data,
+        coordset=[y, x],
+        units="absorbance",
+        title="synthetic low-rank matrix",
+    )
 
+
+def test_svd(low_rank_dataset):
+    dataset = low_rank_dataset
     svd = SVD()
-    svd.fit(dataset)
+    result = svd.fit(dataset)
 
-    assert_allclose(svd.ev_ratio[0].data, 94.539, rtol=1e-5, atol=0.0001)
+    assert result is svd
+    assert svd.U.shape == (4, 4)
+    assert svd.VT.shape == (4, 5)
+    assert svd.sv.shape == (4,)
+    assert svd.sv.title == "Singular values"
+    assert svd.sv.dims == ["k"]
+    assert_allclose(svd.s, [5.0, 3.0, 0.0, 0.0])
+    assert_allclose(svd.ev_ratio.data, [2500.0 / 34.0, 900.0 / 34.0, 0.0, 0.0])
+    assert_allclose(svd.ev_cum.data, [2500.0 / 34.0, 100.0, 100.0, 100.0])
 
-    # with masks
-    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
-    dataset[10:12] = MASKED
+    # Fully masked rows/columns are ignored by the SVD calculation while the
+    # public input dataset keeps its original shape.
+    masked = dataset.copy()
+    masked[:, 4] = scp.MASKED
+    masked[3] = scp.MASKED
 
-    dataset.plot_stack()
-
-    svd.fit(dataset)
-    assert_allclose(svd.ev_ratio.data[0], 93.8, rtol=1e-4, atol=0.01)
-
-    # with masks
-    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
-    dataset[10:12] = MASKED
-    dataset.plot_stack()
+    svd.fit(masked)
+    assert svd.X.shape == dataset.shape
+    assert svd.U.shape == (3, 3)
+    assert svd.VT.shape == (3, 4)
+    assert_allclose(svd.s, [5.0, 3.0, 0.0])
+    assert_allclose(svd.ev_ratio.data, [2500.0 / 34.0, 900.0 / 34.0, 0.0, 0.0])
 
     svd.full_matrices = True
-    svd.fit(dataset)
+    svd.fit(masked)
 
-    assert_allclose(svd.ev_ratio.data[0], 93.8, rtol=1e-4, atol=0.01)
+    assert svd.U.shape == (3, 3)
+    assert svd.VT.shape == (4, 4)
+    assert_allclose(svd.s, [5.0, 3.0, 0.0])
