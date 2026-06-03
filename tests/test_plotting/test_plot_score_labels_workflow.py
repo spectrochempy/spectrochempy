@@ -6,10 +6,29 @@
 """Test PCA.plot_score labeling workflow."""
 
 import matplotlib
+import numpy as np
 import pytest
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+
+
+def _pca_dataset():
+    """Small deterministic dataset for PCA plotting tests (20×8, labeled)."""
+    rng = np.random.RandomState(42)
+    data = rng.randn(20, 8)
+    data[:10] += 2.0
+    from spectrochempy import Coord, NDDataset
+
+    y = Coord(
+        data=np.arange(20),
+        labels=np.column_stack([
+            np.array([f"R{i}" for i in range(20)]),
+            np.array([f"G{i // 5}" for i in range(20)]),
+        ]),
+    )
+    x = Coord(data=np.arange(8))
+    return NDDataset(data, coordset=[y, x])
 
 
 class TestPlotScoreLabelsWorkflow:
@@ -32,7 +51,7 @@ class TestPlotScoreLabelsWorkflow:
         """
         import spectrochempy as scp
 
-        dataset = scp.read("irdata/nh4y-activation.spg")
+        dataset = _pca_dataset()
 
         pca = scp.PCA(n_components=0.999)
         pca.fit(dataset)
@@ -62,7 +81,7 @@ class TestPlotScoreLabelsWorkflow:
         """
         import spectrochempy as scp
 
-        dataset = scp.read("irdata/nh4y-activation.spg")
+        dataset = _pca_dataset()
 
         pca = scp.PCA(n_components=5)
         pca.fit(dataset)
@@ -95,7 +114,7 @@ class TestPlotScoreLabelsWorkflow:
         """Test that plot_score works without passing scores (uses self.scores)."""
         import spectrochempy as scp
 
-        dataset = scp.read("irdata/nh4y-activation.spg")
+        dataset = _pca_dataset()
 
         pca = scp.PCA(n_components=5)
         pca.fit(dataset)
@@ -110,7 +129,7 @@ class TestPlotScoreLabelsWorkflow:
         """Test backward compatibility: scoreplot(scores, 1, 2) still works."""
         import spectrochempy as scp
 
-        dataset = scp.read("irdata/nh4y-activation.spg")
+        dataset = _pca_dataset()
 
         pca = scp.PCA(n_components=5)
         pca.fit(dataset)
@@ -127,7 +146,7 @@ class TestPlotScoreLabelsWorkflow:
         """Test that passing components as first positional still works."""
         import spectrochempy as scp
 
-        dataset = scp.read("irdata/nh4y-activation.spg")
+        dataset = _pca_dataset()
 
         pca = scp.PCA(n_components=5)
         pca.fit(dataset)
@@ -145,7 +164,7 @@ class TestPlotScoreLabelsWorkflow:
         """
         import spectrochempy as scp
 
-        dataset = scp.read("irdata/nh4y-activation.spg")
+        dataset = _pca_dataset()
 
         pca = scp.PCA(n_components=5)
         pca.fit(dataset)

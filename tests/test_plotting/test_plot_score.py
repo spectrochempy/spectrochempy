@@ -15,6 +15,24 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
+def _pca_dataset():
+    """Small deterministic dataset for PCA plotting tests (20×8, labeled)."""
+    rng = np.random.RandomState(42)
+    data = rng.randn(20, 8)
+    data[:10] += 2.0
+    from spectrochempy import Coord, NDDataset
+
+    y = Coord(
+        data=np.arange(20),
+        labels=np.column_stack([
+            np.array([f"R{i}" for i in range(20)]),
+            np.array([f"G{i // 5}" for i in range(20)]),
+        ]),
+    )
+    x = Coord(data=np.arange(8))
+    return NDDataset(data, coordset=[y, x])
+
+
 class TestPlotScore:
     """Tests for plot_score composite function."""
 
@@ -52,7 +70,7 @@ class TestPlotScore:
         """Test PCA.plot_score() wrapper."""
         import spectrochempy as scp
 
-        X = scp.read("irdata/nh4y-activation.spg")
+        X = _pca_dataset()
         pca = scp.PCA(n_components=5)
         pca.fit(X)
 
@@ -66,7 +84,7 @@ class TestPlotScore:
         """Test PCA.scoreplot() emits DeprecationWarning."""
         import spectrochempy as scp
 
-        X = scp.read("irdata/nh4y-activation.spg")
+        X = _pca_dataset()
         pca = scp.PCA(n_components=5)
         pca.fit(X)
 
@@ -242,7 +260,7 @@ class TestPlotScore:
         """Test plot_score with external scores object that has custom labels."""
         import spectrochempy as scp
 
-        X = scp.read("irdata/nh4y-activation.spg")
+        X = _pca_dataset()
         pca = scp.PCA(n_components=5)
         pca.fit(X)
 
@@ -272,7 +290,7 @@ class TestPlotScore:
         """Test plot_score with scores that have appended label columns."""
         import spectrochempy as scp
 
-        X = scp.read("irdata/nh4y-activation.spg")
+        X = _pca_dataset()
         pca = scp.PCA(n_components=5)
         pca.fit(X)
 
@@ -302,7 +320,7 @@ class TestPlotScore:
         """Test that plot_score still works without explicit scores argument."""
         import spectrochempy as scp
 
-        X = scp.read("irdata/nh4y-activation.spg")
+        X = _pca_dataset()
         pca = scp.PCA(n_components=5)
         pca.fit(X)
 
