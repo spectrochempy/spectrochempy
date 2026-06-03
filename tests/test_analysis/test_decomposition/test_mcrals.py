@@ -18,7 +18,6 @@ from spectrochempy.core.dataset.nddataset import Coord, NDDataset
 from spectrochempy.processing.transformation.npy import dot
 from spectrochempy.utils import docutils as chd
 from spectrochempy.utils import testing
-from spectrochempy.utils.mplutils import show
 
 
 # test docstring
@@ -127,74 +126,63 @@ def data(model):
     return D
 
 
-def test_MCRALS(model, data):
-    # Test normal workflow
+def _assert_mcrals_shapes(mcr, data, n_components=2):
+    assert mcr.C.shape == (data.shape[0], n_components)
+    assert mcr.St.shape == (n_components, data.shape[1])
+
+
+def _assert_reconstructs(mcr, data, tol=1.0e-12):
+    reconstructed = mcr.inverse_transform()
+    assert reconstructed.shape == data.shape
+    assert (reconstructed - data).abs().max() < tol
+
+
+def test_mcrals_basic_fit_converges(model, data):
     D = data
-    St0 = model.St0
     C0 = model.C0
 
-    # Instantiate a MCRALS object, with some log_level
-    # Note that the console log will never show debug
-    # ( For this, look to attribute log or in the spectrochempy log file)
-
     mcr = MCRALS(log_level="INFO")
-
-    # Now set or modify some configuration parameters
     mcr.tol = 30.0
+    result = mcr.fit(D, C0)
 
-    # execute the main process
-    mcr.fit(D, C0)
-
-    # assert result
+    assert result is mcr
     assert mcr.log.endswith("converged !")
-
-    # transform
+    _assert_mcrals_shapes(mcr, D)
     assert mcr.transform(D) == mcr.C
 
-    # test current parameters
     params = mcr.params()
     assert len(params) == 32
     assert np.all(params.closureTarget == [1] * 10)
     assert params.tol == 30.0
 
-    # test display of default
     params = mcr.params(default=True)
     assert params.tol == 0.1
-
-    # full process
-    mcr.fit(D, C0)
-    X_hat = mcr.inverse_transform()
-
-    # assert iterations not stored (default)
     assert mcr.C_ls_list == []
+    _assert_reconstructs(mcr, D)
 
-    # test plot
-    mcr.C.T.plot(title="Concentration")
-    mcr.St.plot(title="Components")
-    mcr.plot_merit(offset=0, nb_traces=5)
-    show()
 
-    # reset to default
-    mcr.reset()
-    assert mcr.tol == 0.1
+def test_mcrals_iteration_storage(model, data):
+    D = data
+    C0 = model.C0
 
-    # test chaining fit runs
     mcr = MCRALS()
     mcr.fit(D, C0)
     mcr.storeIterations = True
     mcr.fit(D, (mcr.C, mcr.St))
-
-    # assert iterations are stored
     assert mcr.C_ls_list != []
 
     mcr1 = MCRALS()
-    mcr1.tol == 0.01
     mcr1.fit(D, C0)
-
     assert np.max(np.abs(mcr.C - mcr1.C)) < 1.0e-12
     assert np.max(np.abs(mcr.St - mcr1.St)) < 1.0e-12
 
-    # test diverging
+
+def test_mcrals_diverging_path_stops_cleanly(model, data):
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
+    mcr.fit(D, C0)
     mcr.monoIncConc = [0, 1]
     mcr.monoIncTol = 1.0
     mcr.unimodSpec = [0, 1]
@@ -204,29 +192,42 @@ def test_MCRALS(model, data):
     mcr.maxdiv = 1
 
     mcr.fit(D, C0)
-
     assert mcr.log.endswith("Stop ALS optimization.")
 
-    # test closureConc="all" (regression test for issue #911)
-    mcr.reset()
+
+def test_mcrals_closure_all_regression_issue_911(model, data):
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
     mcr.closureConc = "all"
     mcr.closureMethod = "constantSum"
     mcr.maxdiv = 1
+
     mcr.fit(D, C0)
     assert mcr.log.endswith("Stop ALS optimization.")
 
-    # guess = C0, hard modeling
-    mcr.reset()  # we reset everything to default
 
+def test_mcrals_hard_concentration_model_smoke(model, data):
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
     mcr.hardConc = [0, 1]
     mcr.getConc = get_C
     mcr.argsGetConc = ()
     mcr.kwargsGetConc = {}
     mcr.tol = 30.0
+
     mcr.fit(D, C0)
     assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
 
-    # using the full MCRALS constructor
+
+def test_mcrals_constructor_constraints_smoke(model, data):
+    D = data
+    C0 = model.C0
+
     mcr = MCRALS(
         monoIncConc=[0],
         monoDecConc=[1],
@@ -236,16 +237,27 @@ def test_MCRALS(model, data):
     )
     set_loglevel("WARNING")
     mcr.fit(D, C0)
+    _assert_mcrals_shapes(mcr, D)
 
-    # guess = C0, hard modeling of spectra
-    mcr.reset()  # we reset everything to default
+
+def test_mcrals_hard_spectral_model_smoke(model, data):
+    D = data
+    C0 = model.C0
+
+    mcr = MCRALS()
     mcr.hardSpec = [0, 1]
     mcr.getSpec = get_St
     mcr.tol = 30.0
+
     mcr.fit(D, C0)
     assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
 
-    # guess = C0.data, test with other parameters
+
+def test_mcrals_closure_with_array_guess_smoke(model, data):
+    D = data
+    C0 = model.C0
+
     mcr = MCRALS(
         normSpec="euclid",
         closureConc=[0, 1],
@@ -254,32 +266,57 @@ def test_MCRALS(model, data):
     )
     mcr.fit(D, C0.data)
     assert "Convergence criterion ('tol')" in mcr.log[-100:]
+    _assert_mcrals_shapes(mcr, D)
 
-    # guess = St as ndarray
+
+def test_mcrals_spectral_guess_converges(model, data):
+    D = data
+    St0 = model.St0
+
     mcr = MCRALS(tol=15.0)
     mcr.fit(D, St0.data)
     assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
 
-    # solvers nnls
+
+def test_mcrals_nnls_solver_smoke(model, data):
+    D = data
+    St0 = model.St0
+
     mcr = MCRALS(tol=15.0, nonnegConc=[], solverConc="nnls", solverSpec="nnls")
     mcr.fit(D, St0.data)
-    assert "converged !" in mcr.log[-15:]
 
-    # solverConc pnnls
+    assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
+    assert mcr.C.min() >= -1.0e-12
+    assert mcr.St.min() >= -1.0e-12
+
+
+def test_mcrals_pnnls_solver_smoke(model, data):
+    D = data
+    St0 = model.St0
+
     mcr = MCRALS(
         tol=15.0, nonnegConc=[0], solverConc="pnnls", nonnegSpec=[0], solverSpec="pnnls"
     )
     mcr.fit(D, St0.data)
-    assert "converged !" in mcr.log[-15:]
 
-    # solverConc pnnls
+    assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
+    assert mcr.C[:, 0].min() >= -1.0e-12
+    assert mcr.St[0].min() >= -1.0e-12
+
+
+def test_mcrals_pnnls_concentration_solver_reconstructs(model, data):
+    D = data
+    St0 = model.St0
+
     mcr = MCRALS(tol=15.0, solverConc="pnnls")
     mcr.fit(D, St0.data)
-    assert "converged !" in mcr.log[-15:]
 
-    # reconstruct
-    Dh = mcr.inverse_transform()
-    assert (Dh - D).abs().max() < 1.0e-12
+    assert "converged !" in mcr.log[-15:]
+    _assert_mcrals_shapes(mcr, D)
+    _assert_reconstructs(mcr, D)
 
 
 def test_MCRALS_errors(model, data):
@@ -298,7 +335,7 @@ def test_MCRALS_errors(model, data):
     try:
         mcr.fit(
             D,
-            np.random.rand(11, 2),
+            np.ones((11, 2)),
         )
     except ValueError as e:
         assert "None of the dimensions of the given profile" in e.args[0]

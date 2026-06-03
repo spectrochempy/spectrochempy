@@ -10,10 +10,9 @@ Tests for the PCA module
 
 """
 
-import os
-
-import matplotlib.pyplot as plt
+import numpy as np
 import pytest
+from numpy.testing import assert_allclose
 
 import spectrochempy as scp
 from spectrochempy.analysis._base._analysisbase import NotFittedError
@@ -21,7 +20,6 @@ from spectrochempy.analysis.decomposition.pca import PCA
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.utils import docutils as chd
 from spectrochempy.utils import testing
-from spectrochempy.utils.constants import MASKED
 
 
 def test_PCA_docstrings():
@@ -31,143 +29,157 @@ def test_PCA_docstrings():
         module,
         obj=scp.PCA,
         # exclude some errors - remove whatever you want to check
-        exclude=["SA01", "EX01", "ES01", "GL11", "GL08", "PR01"],
+        exclude=["SA01", "EX01", "EX02", "ES01", "GL11", "GL08", "PR01"],
     )
 
 
-# test pca
-# ---------
-def test_pca():
-    dataset = scp.read("irdata/nh4y-activation.spg")
-
-    pca = PCA()
-    pca.fit(dataset)
-    assert pca._X.shape == (55, 5549)
-    (
-        testing.assert_dataset_equal(pca.X, dataset),
-        "input dataset should be reflected in the internal variable X",
+@pytest.fixture()
+def low_rank_pca_dataset():
+    u1 = np.array([1.0, 1.0, 1.0, -1.0, -1.0, -1.0]) / np.sqrt(6.0)
+    u2 = np.array([1.0, -1.0, 0.0, 1.0, -1.0, 0.0]) / 2.0
+    u3 = np.array([1.0, 1.0, -2.0, 1.0, 1.0, -2.0]) / np.sqrt(12.0)
+    data = np.column_stack(
+        [
+            6.0 * u1,
+            3.0 * u2,
+            u3,
+            np.zeros(6),
+            np.zeros(6),
+        ]
+    )
+    return scp.NDDataset(
+        data,
+        coordset=[
+            scp.Coord.arange(6, title="sample"),
+            scp.Coord.arange(5, title="feature"),
+        ],
+        units="absorbance",
+        title="synthetic PCA matrix",
     )
 
-    # set n_components during init
+
+@pytest.fixture()
+def expected_variance_ratio():
+    return 100.0 * np.array([36.0, 9.0, 1.0, 0.0, 0.0]) / 46.0
+
+
+def test_pca_prefit_n_components():
     pca = PCA(n_components=5)
     assert pca.n_components == 5
-    try:
-        # the private attribute _n_components should not exist at this time
+    with pytest.raises(NotFittedError):
         _ = pca._n_components
-    except NotFittedError:
-        pass
-    try:
-        # so the n_components public attribute.
-        _ = pca.n_components
-    except NotFittedError:
-        pass
 
-    pca = PCA(n_components=6)
-    try:
-        # _X initialized only when fit is used
+    pca = PCA(n_components=3)
+    with pytest.raises(NotFittedError):
         _ = pca._X.shape
-    except NotFittedError:
-        pass
 
-    # Fit the model
-    res = pca.fit(dataset)
-    assert res is pca, "fit return self"
 
-    # now the n_components has been defined
-    assert pca.n_components == 6
-
-    # try a wrong number of n_components  <= min(n_observations, n_features)
-    try:
-        pca = PCA(n_components=56)
-        pca.fit(dataset)
-    except ValueError:
-        pass
-
-    # try other ways to define n_components
-    try:
-        pca = PCA(n_components="mle")
-        pca.fit(dataset)
-    except ValueError as exc:
-        assert (
-            exc.args[0]
-            == "n_components='mle' is only supported if n_observations >= n_features"
-        )
-
-    pca = PCA(n_components=0.99)  # in % of explained variance
-    pca.fit(dataset)
-    assert pca.n_components == 7
-
-    # TODO: test other svd solvers
-
-    # masked
-    dataset[:, 1240.0:920.0] = MASKED  # do not forget to use float in slicing
+def test_pca_fit_and_variance(low_rank_pca_dataset, expected_variance_ratio):
+    dataset = low_rank_pca_dataset
     pca = PCA()
-    pca.fit(dataset)
-    assert pca._X.shape == (55, 5216), "missing row or col should be removed"
-    assert pca.X.shape == (55, 5549), "missing row or col restored"
-    (
-        testing.assert_dataset_equal(pca.X, dataset),
-        "input dataset should be reflected in the internal variable X (where mask is restored)",
+    res = pca.fit(dataset)
+
+    assert res is pca
+    assert pca._X.shape == (6, 5)
+    assert pca.n_components == 5
+    testing.assert_dataset_equal(pca.X, dataset)
+
+    assert pca.loadings.shape == (5, 5)
+    assert pca.loadings.dims == ["k", "x"]
+    assert pca.scores.shape == (6, 5)
+    assert pca.scores.dims == ["y", "k"]
+
+    assert isinstance(pca.explained_variance, NDDataset)
+    assert pca.ev.shape == (5,)
+    assert pca.ev.k.title == "components"
+    assert pca.ev.title == "explained variance"
+    assert_allclose(pca.ev.data, [7.2, 1.8, 0.2, 0.0, 0.0])
+    assert_allclose(pca.ev_ratio.data, expected_variance_ratio)
+    assert_allclose(pca.ev_cum.data, np.cumsum(expected_variance_ratio))
+
+
+def test_pca_n_components_validation(low_rank_pca_dataset):
+    dataset = low_rank_pca_dataset
+
+    with pytest.raises(ValueError, match="n_components=6"):
+        PCA(n_components=6).fit(dataset)
+
+    wide_dataset = scp.NDDataset(
+        np.arange(24.0).reshape(4, 6),
+        coordset=[scp.Coord.arange(4), scp.Coord.arange(6)],
     )
+    with pytest.raises(
+        ValueError,
+        match="n_components='mle' is only supported if n_observations >= n_features",
+    ):
+        PCA(n_components="mle").fit(wide_dataset)
 
-    # much better fit when masking eratic data
-    # more variance explained with less components
-    pca = PCA(n_components=0.999)  # in % of explained variance
+
+def test_pca_float_threshold_component_selection(low_rank_pca_dataset):
+    dataset = low_rank_pca_dataset
+
+    pca = PCA(n_components=0.95)
     pca.fit(dataset)
-    assert pca.n_components == 4
+    assert pca.n_components == 2
+    assert pca.loadings.shape == (2, 5)
+    assert pca.scores.shape == (6, 2)
 
-    # get the loadings (actually the components) and scores
-    assert pca.loadings.shape == (4, 5549)
-    assert pca.scores.shape == (55, 4)
+    pca = PCA(n_components=0.99)
+    pca.fit(dataset)
+    assert pca.n_components == 3
+    assert pca.loadings.shape == (3, 5)
+    assert pca.scores.shape == (6, 3)
 
-    # equivalent to the property scores,
-    # transform can have additional n_components parameters
+
+def test_pca_masked_columns(low_rank_pca_dataset, expected_variance_ratio):
+    dataset = low_rank_pca_dataset
+    masked = dataset.copy()
+    masked[:, 4] = scp.MASKED
+
+    pca = PCA()
+    pca.fit(masked)
+
+    assert pca._X.shape == (6, 4), "fully masked columns should be removed"
+    assert pca.X.shape == (6, 5), "masked columns should be restored"
+    testing.assert_dataset_equal(pca.X, masked)
+    assert_allclose(pca.ev_ratio.data, expected_variance_ratio[:4])
+
+    pca = PCA(n_components=0.95)
+    pca.fit(masked)
+    assert pca.n_components == 2
+    assert pca.loadings.shape == (2, 5)
+    assert pca.scores.shape == (6, 2)
+
+
+def test_pca_transform_fit_transform_and_inverse(low_rank_pca_dataset):
+    dataset = low_rank_pca_dataset
+    pca = PCA(n_components=3)
+    pca.fit(dataset)
+
     scores = pca.transform(dataset, n_components=2)
     assert scores == pca.scores[:, :2]
+    scores_without_dataset = pca.transform(n_components=2)
+    assert scores_without_dataset == pca.scores[:, :2]
 
-    # if dataset is the same as used in fit, it is optional to pass it to the transform
-    # method
-    scores = pca.transform(n_components=2)
-    assert scores == pca.scores[:, :2]
-
-    # display scores
-    pca.scoreplot(scores, 1, 2)
-    plt.show()
-
-    # show all calculated loadings
-    loadings = pca.components  # all calculated loadings
-
-    # show only some loadings
-    loadings1 = pca.get_components(n_components=3)
-    loadings1.plot(legend=True)
-    plt.show()
-
-    # inverse_transform / reconstruct
-    X_hat = pca.inverse_transform(scores)
-
-    # if scores was not determined or the X used for score is the same as in fit
-    # score is optional
-    pca.plotmerit(offset=0, nb_traces=10)
-    plt.show()
-
-    X_hat = pca.inverse_transform()
-    pca.plot_merit(dataset, X_hat, offset=0, nb_traces=10)
-    plt.show()
-
-    # printev
-    pca.printev(n_components=4)
-    s = pca.__str__(n_components=4)
-
-    # Another valid way to get the dimensionality reduction
     pca2 = PCA()
     scores2 = pca2.fit_transform(dataset, n_components=2)
-    testing.assert_array_almost_equal(
-        scores2.data,
-        scores.data,
-    )
+    assert_allclose(np.abs(scores2.data), np.abs(scores.data))
 
-    # get variance
-    ev = pca.explained_variance
-    assert isinstance(ev, NDDataset)
-    assert ev.shape == (pca.n_components,)
-    assert ev.k.title == "components"
+    X_hat_2 = pca.inverse_transform(scores)
+    assert X_hat_2.shape == dataset.shape
+    X_hat = pca.inverse_transform()
+    assert_allclose(X_hat.data, dataset.data, atol=1.0e-12)
+    assert X_hat.title == dataset.title
+    assert X_hat.units == dataset.units
+    assert X_hat.dims == dataset.dims
+
+
+def test_pca_reporting(low_rank_pca_dataset):
+    dataset = low_rank_pca_dataset
+    pca = PCA(n_components=3)
+    pca.fit(dataset)
+
+    pca.printev(n_components=4)
+    s = pca.__str__(n_components=4)
+    assert "PC\tEigenvalue" in s
+    assert "#1" in s

@@ -5,11 +5,12 @@
 # ======================================================================================
 # ruff: noqa
 
+import numpy as np
 import pytest
+from numpy.testing import assert_allclose
 
-from spectrochempy import Optimize
-from spectrochempy.utils.mplutils import show
-from spectrochempy.utils.testing import assert_approx_equal
+import spectrochempy as scp
+from spectrochempy.analysis.curvefitting._models import asymmetricvoigtmodel
 
 
 @pytest.fixture()
@@ -49,11 +50,49 @@ def script():
     """
 
 
-def test_fit_single_dataset(IR_dataset_2D, script):
-    dataset = IR_dataset_2D[54, 3700.0:3400.0]
+@pytest.fixture()
+def synthetic_two_peak_dataset():
+    x = scp.Coord(np.linspace(3700.0, 3400.0, 301), title="wavenumber", units="cm^-1")
+    model = asymmetricvoigtmodel()
+    y = (
+        model.f(x.data, ampl=1.0, pos=3620.0, width=200.0, ratio=0.0147, asym=0.1)
+        + model.f(x.data, ampl=0.2, pos=3520.0, width=200.0, ratio=0.1, asym=0.1)
+        + 0.0002 * x.data
+        - 0.5
+    )
+    return scp.NDDataset(
+        y,
+        coordset=[x],
+        units="absorbance",
+        title="synthetic optimize spectrum",
+    )
 
-    f1 = Optimize()
+
+def test_fit_single_dataset(synthetic_two_peak_dataset, script):
+    dataset = synthetic_two_peak_dataset
+
+    f1 = scp.Optimize()
     f1.script = script
     f1.autobase = True
     f1.max_iter = 10
-    f1.fit(dataset)
+    result = f1.fit(dataset)
+
+    assert result is f1
+    assert f1.n_components == 2
+    assert f1.components.shape == (3, dataset.size)
+    assert f1.predict().shape == (1, dataset.size)
+    assert f1.transform().shape == (1, 2)
+
+    residual = f1.predict().squeeze() - dataset
+    assert abs(residual.data).max() < 1e-6
+    assert_allclose(
+        [
+            f1.fp["pos_line_1"],
+            f1.fp["pos_line_2"],
+            f1.fp["width_line_1"],
+            f1.fp["width_line_2"],
+        ],
+        [3620.0, 3520.0, 200.0, 200.0],
+        rtol=0.02,
+        atol=3.0,
+    )
