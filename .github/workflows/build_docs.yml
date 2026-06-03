@@ -134,18 +134,18 @@ jobs:
           set -e
           . .venv/bin/activate
           python -c "
-import spectrochempy as scp
-print(f'scp.__version__ = {scp.__version__}')
-print(f'scp.__file__   = {scp.__file__}')
-assert 'site-packages/spectrochempy' not in scp.__file__, \
-    f'FAIL: spectrochempy resolved from site-packages instead of local checkout:\n  {scp.__file__}'
-print('OK: local editable checkout is active')
-# Reject stale hardcoded version that would produce wrong doc header
-stale = '0.9.1.dev0'
-assert stale not in scp.__version__, \
-    f'FAIL: version {scp.__version__} contains stale hardcoded value {stale!r} — setuptools_scm did not compute version from git tags'
-print(f'OK: version {scp.__version__} is computed from git tags')
-"
+          import spectrochempy as scp
+          print(f'scp.__version__ = {scp.__version__}')
+          print(f'scp.__file__   = {scp.__file__}')
+          assert 'site-packages/spectrochempy' not in scp.__file__, \
+              f'FAIL: spectrochempy resolved from site-packages instead of local checkout:\n  {scp.__file__}'
+          print('OK: local editable checkout is active')
+          # Reject stale hardcoded version that would produce wrong doc header
+          stale = '0.9.1.dev0'
+          assert stale not in scp.__version__, \
+              f'FAIL: version {scp.__version__} contains stale hardcoded value {stale!r} -- setuptools_scm did not compute version from git tags'
+          print(f'OK: version {scp.__version__} is computed from git tags')
+          "
 
       - name: Install Pandoc
         run: |
