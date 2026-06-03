@@ -6,6 +6,7 @@
 # ruff: noqa
 
 import logging
+import warnings
 
 from spectrochempy import (
     DEBUG,
@@ -13,34 +14,68 @@ from spectrochempy import (
     WARNING,
     debug_,
     error_,
+    get_loglevel,
     info_,
     set_loglevel,
     warning_,
 )
 
 
-def test_logger(caplog):
+def test_logger_level_filtering(caplog):
+    """Test that log level filtering works correctly for debug_, info_, error_."""
     logger = logging.getLogger("SpectroChemPy")
     logger.propagate = True
     caplog.set_level(DEBUG)
 
-    # We can set the level using strings
-
     set_loglevel(WARNING)
+    # debug_ and info_ should still create log records (caplog captures all),
+    # but error_ should too
+    debug_("debug msg at WARNING level")
+    info_("info msg at WARNING level")
+    error_(Exception, "error msg at WARNING level")
 
-    error_(Exception, "\n" + "*" * 80 + "\n")
-    debug_("debug in WARNING level - should not appear")
-    info_("info in WARNING level - should not appear")
-    warning_("OK this is a Warning")
-    error_(IndexError, "OK This is an Error")
+    assert get_loglevel() == WARNING
+    assert any(
+        r.levelname == "DEBUG" and "debug msg at WARNING level" in r.message
+        for r in caplog.records
+    )
+    assert any(
+        r.levelname == "INFO" and "info msg at WARNING level" in r.message
+        for r in caplog.records
+    )
+    assert any(
+        r.levelname == "ERROR" and "error msg at WARNING level" in r.message
+        for r in caplog.records
+    )
 
-    error_(NameError, "\n" + "*" * 80 + "\n")
+
+def test_logger_level_switch(caplog):
+    """Test switching log levels and verifying output."""
+    logger = logging.getLogger("SpectroChemPy")
+    logger.propagate = True
+    caplog.set_level(DEBUG)
 
     set_loglevel(INFO)
+    assert get_loglevel() == INFO
 
-    debug_("debug in INFO level - should not appear on stdout")
-    info_("OK - info in INFO level")
-    warning_("OK this is a Warning")
-    error_(Exception, "OK This is an Error")
+    info_("info msg at INFO level")
+    warning_("warning msg at INFO level")
+    error_(Exception, "error msg at INFO level")
 
-    error_(Exception, "\n" + "*" * 80 + "\n")
+    assert any(
+        r.levelname == "INFO" and "info msg at INFO level" in r.message
+        for r in caplog.records
+    )
+    assert any(
+        r.levelname == "ERROR" and "error msg at INFO level" in r.message
+        for r in caplog.records
+    )
+
+
+def test_warning_function():
+    """Test that warning_ emits a warning via the warnings system."""
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        warning_("test warning message for pytest")
+        assert len(w) == 1
+        assert "test warning message for pytest" in str(w[0].message)

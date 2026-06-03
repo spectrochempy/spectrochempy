@@ -15,6 +15,7 @@ import pytest
 from spectrochempy.utils.jsonutils import json_decoder, json_encoder
 
 
+@pytest.mark.data
 def test_json_encoder_decoder_no_encoding(IR_dataset_2D):
     """Test JSON encoding and decoding without encoding."""
     nd = IR_dataset_2D.copy()
@@ -30,6 +31,7 @@ def test_json_encoder_decoder_no_encoding(IR_dataset_2D):
     assert np.all(np.array(js["data"]["tolist"]) == jsd["data"])
 
 
+@pytest.mark.data
 def test_json_encoder_decoder_base64(IR_dataset_2D):
     """Test JSON encoding and decoding with base64 encoding."""
     nd = IR_dataset_2D.copy()
@@ -164,6 +166,7 @@ def test_nested_structures():
     assert decoded["another_key"][1] == "string"
 
 
+@pytest.mark.data
 def test_roundtrip_preservation(IR_dataset_2D):
     """Test that object properties are preserved during roundtrip conversion."""
     nd = IR_dataset_2D.copy()

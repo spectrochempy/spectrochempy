@@ -13,6 +13,7 @@ from spectrochempy.core.units import ur
 from spectrochempy.utils import testing
 
 
+@pytest.mark.data
 def test_compare_ndarrays(IR_dataset_1D):
     """Test comparison functions for NDArray objects."""
     nda1 = NDArray(IR_dataset_1D)
@@ -55,6 +56,7 @@ def test_compare_ndarrays(IR_dataset_1D):
     testing.assert_ndarray_equal(nda1, nda6, data_only=True)
 
 
+@pytest.mark.data
 def test_compare_coords(IR_dataset_2D):
     """Test comparison functions for Coord objects."""
     x1 = IR_dataset_2D.x
@@ -106,6 +108,7 @@ def test_compare_coords(IR_dataset_2D):
         testing.assert_coord_equal(x1, x6)
 
 
+@pytest.mark.data
 def test_compare_dataset(IR_dataset_1D):
     """Test comparison functions for NDDataset objects."""
     # dataset comparison
