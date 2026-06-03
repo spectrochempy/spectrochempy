@@ -64,6 +64,9 @@ Developer
 - DEV: Converted NMF analysis tests from the legacy MATLAB fixture to a
   deterministic non-negative synthetic dataset with focused parity,
   reconstruction, masking, metadata, and non-negativity checks.
+- DEV: Moved IRIS ``plot_merit`` coverage out of core analysis tests into the
+  IRIS plugin test suite, clarifying plugin ownership for plugin/data plotting
+  integration checks.
 - DEV: Classified plugin-dependent tests with explicit markers and skip guards
   so optional plugin imports do not fail during core-only collection, while
   keeping core-only and plugin/integration validation clearly separated.
