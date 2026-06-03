@@ -37,29 +37,27 @@ pytestmark = pytest.mark.docs
 
 @pytest.fixture(scope="module")
 def sample_dataset():
-    """Load a sample 2D IR dataset for testing docs examples.
+    """
+    Load a sample 2D IR dataset for testing docs examples.
 
     Requires external testdata (``irdata/nh4y-activation.spg``).
     Skips with a clear message when unavailable.
     """
     if not _has_ir_data:
-        pytest.skip(
-            "IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)"
-        )
+        pytest.skip("IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     return scp.read("irdata/nh4y-activation.spg")
 
 
 @pytest.fixture(scope="module")
 def sample_1d():
-    """Load a sample 1D IR spectrum for testing docs examples.
+    """
+    Load a sample 1D IR spectrum for testing docs examples.
 
     Requires external testdata (``irdata/nh4y-activation.spg``).
     Skips with a clear message when unavailable.
     """
     if not _has_ir_data:
-        pytest.skip(
-            "IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)"
-        )
+        pytest.skip("IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     return scp.read("irdata/nh4y-activation.spg")[0]
 
 
@@ -679,8 +677,11 @@ def test_advanced_latex_labels(sample_1d, clean_preferences, clean_rcparams):
 
 
 @pytest.mark.data
-def test_advanced_function_reproducibility(sample_1d, clean_preferences, clean_rcparams):
+def test_advanced_function_reproducibility(
+    sample_1d, clean_preferences, clean_rcparams
+):
     """Test function for reproducible plotting."""
+
     def plot_spectrum(dataset, title=None):
         ax = dataset.plot(linewidth=1.5, color="navy", grid=True)
         if title:
