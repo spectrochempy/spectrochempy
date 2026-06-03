@@ -50,8 +50,10 @@ class TestPlotScree:
     def test_pca_plot_scree_wrapper(self):
         """Test PCA.plot_scree() wrapper."""
         import spectrochempy as scp
+        from spectrochempy import NDDataset
 
-        X = scp.read("irdata/nh4y-activation.spg")
+        rng = np.random.RandomState(42)
+        X = NDDataset(rng.randn(20, 8))
         pca = scp.PCA(n_components=5)
         pca.fit(X)
 
@@ -64,8 +66,10 @@ class TestPlotScree:
     def test_pca_screeplot_deprecated(self):
         """Test PCA.screeplot() emits DeprecationWarning."""
         import spectrochempy as scp
+        from spectrochempy import NDDataset
 
-        X = scp.read("irdata/nh4y-activation.spg")
+        rng = np.random.RandomState(42)
+        X = NDDataset(rng.randn(20, 8))
         pca = scp.PCA(n_components=5)
         pca.fit(X)
 

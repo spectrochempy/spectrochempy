@@ -26,17 +26,16 @@ import pytest
 import numpy as np
 import matplotlib.colors
 
-from spectrochempy import NDDataset, read_omnic, preferences as prefs, show
+from spectrochempy import NDDataset, preferences as prefs, show
 
 
 # -----------------------------------------------------------------------------
 # Helpers
 # -----------------------------------------------------------------------------
-@pytest.fixture(scope="module")
-def ds2d():
-    """Shared 2D dataset for plot2D tests (loaded once per module)."""
-    path = "irdata/nh4y-activation.spg"
-    return read_omnic(path)
+@pytest.fixture
+def ds2d(sample_2d_dataset):
+    """Shared synthetic 2D dataset for plot2D tests."""
+    return sample_2d_dataset
 
 
 def _simple_2d_dataset():

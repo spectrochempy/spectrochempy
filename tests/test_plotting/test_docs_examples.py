@@ -23,6 +23,13 @@ from matplotlib.colors import TwoSlopeNorm
 import spectrochempy as scp
 from spectrochempy.application.preferences import preferences
 
+# Flag from top-level conftest indicating IR testdata availability
+# (downloaded via SCP_TEST_DATA_DOWNLOAD=1)
+from tests.conftest import _has_ir_data
+
+# All tests in this module validate documentation examples.
+pytestmark = pytest.mark.docs
+
 # ======================================================================================
 # Test Fixtures and Helpers
 # ======================================================================================
@@ -30,13 +37,27 @@ from spectrochempy.application.preferences import preferences
 
 @pytest.fixture(scope="module")
 def sample_dataset():
-    """Load a sample dataset for testing."""
+    """
+    Load a sample 2D IR dataset for testing docs examples.
+
+    Requires external testdata (``irdata/nh4y-activation.spg``).
+    Skips with a clear message when unavailable.
+    """
+    if not _has_ir_data:
+        pytest.skip("IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     return scp.read("irdata/nh4y-activation.spg")
 
 
 @pytest.fixture(scope="module")
 def sample_1d():
-    """Load a sample 1D dataset for testing."""
+    """
+    Load a sample 1D IR spectrum for testing docs examples.
+
+    Requires external testdata (``irdata/nh4y-activation.spg``).
+    Skips with a clear message when unavailable.
+    """
+    if not _has_ir_data:
+        pytest.skip("IR test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
     return scp.read("irdata/nh4y-activation.spg")[0]
 
 
@@ -100,6 +121,7 @@ def has_mappable(ax):
 # ======================================================================================
 
 
+@pytest.mark.data
 def test_overview_basic_plot(sample_dataset, clean_preferences, clean_rcparams):
     """Test basic plot - default behavior."""
     ax = sample_dataset.plot()
@@ -108,6 +130,7 @@ def test_overview_basic_plot(sample_dataset, clean_preferences, clean_rcparams):
     assert len(ax.get_lines()) > 0
 
 
+@pytest.mark.data
 def test_overview_plot_contour(sample_dataset, clean_preferences, clean_rcparams):
     """Test plot_contour method."""
     ax = sample_dataset.plot_contour()
@@ -116,6 +139,7 @@ def test_overview_plot_contour(sample_dataset, clean_preferences, clean_rcparams
     assert cmap_name is not None
 
 
+@pytest.mark.data
 def test_overview_plot_image(sample_dataset, clean_preferences, clean_rcparams):
     """Test plot_image method."""
     ax = sample_dataset.plot_image()
@@ -124,6 +148,7 @@ def test_overview_plot_image(sample_dataset, clean_preferences, clean_rcparams):
     assert cmap_name is not None
 
 
+@pytest.mark.data
 def test_overview_categorical_cmap_none(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -135,6 +160,7 @@ def test_overview_categorical_cmap_none(
     assert len(lines) > 0
 
 
+@pytest.mark.data
 def test_overview_colormap_precedence_explicit(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -146,6 +172,7 @@ def test_overview_colormap_precedence_explicit(
     assert mappable.get_cmap().name == "inferno"
 
 
+@pytest.mark.data
 def test_overview_colormap_precedence_prefs(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -158,6 +185,7 @@ def test_overview_colormap_precedence_prefs(
     assert mappable.get_cmap().name == "plasma"
 
 
+@pytest.mark.data
 def test_overview_colormap_precedence_style_auto(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -170,6 +198,7 @@ def test_overview_colormap_precedence_style_auto(
     assert mappable.get_cmap().name == "gray"
 
 
+@pytest.mark.data
 def test_overview_colormap_precedence_defaults(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -201,6 +230,7 @@ def test_overview_colormap_precedence_diverging(
 # ======================================================================================
 
 
+@pytest.mark.data
 def test_plot_types_line_plot(sample_1d, clean_preferences, clean_rcparams):
     """Test line plot for 1D data."""
     ax = sample_1d.plot()
@@ -208,6 +238,7 @@ def test_plot_types_line_plot(sample_1d, clean_preferences, clean_rcparams):
     assert len(ax.get_lines()) > 0
 
 
+@pytest.mark.data
 def test_plot_types_plot_lines(sample_dataset, clean_preferences, clean_rcparams):
     """Test plot_lines method."""
     ax = sample_dataset.plot_lines()
@@ -215,6 +246,7 @@ def test_plot_types_plot_lines(sample_dataset, clean_preferences, clean_rcparams
     assert len(ax.get_lines()) > 0
 
 
+@pytest.mark.data
 def test_plot_types_plot_image(sample_dataset, clean_preferences, clean_rcparams):
     """Test plot_image method."""
     ax = sample_dataset.plot_image()
@@ -223,6 +255,7 @@ def test_plot_types_plot_image(sample_dataset, clean_preferences, clean_rcparams
     assert cmap_name is not None
 
 
+@pytest.mark.data
 def test_plot_types_plot_image_colorbar_true(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -233,6 +266,7 @@ def test_plot_types_plot_image_colorbar_true(
     assert len(ax.figure.axes) > 0 or ax.images
 
 
+@pytest.mark.data
 def test_plot_types_plot_image_colorbar_false(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -241,12 +275,14 @@ def test_plot_types_plot_image_colorbar_false(
     assert ax is not None
 
 
+@pytest.mark.data
 def test_plot_types_plot_contour(sample_dataset, clean_preferences, clean_rcparams):
     """Test plot_contour method."""
     ax = sample_dataset.plot_contour()
     assert ax is not None
 
 
+@pytest.mark.data
 def test_plot_types_plot_contour_colorbar(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -255,18 +291,21 @@ def test_plot_types_plot_contour_colorbar(
     assert ax is not None
 
 
+@pytest.mark.data
 def test_plot_types_plot_surface(sample_dataset, clean_preferences, clean_rcparams):
     """Test plot_surface method."""
     ax = sample_dataset.plot_surface()
     assert ax is not None
 
 
+@pytest.mark.data
 def test_plot_types_plot_waterfall(sample_dataset, clean_preferences, clean_rcparams):
     """Test plot_waterfall method."""
     ax = sample_dataset.plot_waterfall()
     assert ax is not None
 
 
+@pytest.mark.data
 def test_plot_types_combining_options(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -287,42 +326,49 @@ def test_plot_types_combining_options(
 # ======================================================================================
 
 
+@pytest.mark.data
 def test_customization_color(sample_dataset, clean_preferences, clean_rcparams):
     """Test color customization."""
     ax = sample_dataset.plot(color="red")
     assert ax is not None
 
 
+@pytest.mark.data
 def test_customization_linewidth(sample_dataset, clean_preferences, clean_rcparams):
     """Test linewidth customization."""
     ax = sample_dataset.plot(linewidth=2)
     assert ax is not None
 
 
+@pytest.mark.data
 def test_customization_linestyle(sample_dataset, clean_preferences, clean_rcparams):
     """Test linestyle customization."""
     ax = sample_dataset.plot(linestyle="--")
     assert ax is not None
 
 
+@pytest.mark.data
 def test_customization_marker(sample_dataset, clean_preferences, clean_rcparams):
     """Test marker customization."""
     ax = sample_dataset.plot(marker="o")
     assert ax is not None
 
 
+@pytest.mark.data
 def test_customization_alpha(sample_dataset, clean_preferences, clean_rcparams):
     """Test alpha customization."""
     ax = sample_dataset.plot(alpha=0.7)
     assert ax is not None
 
 
+@pytest.mark.data
 def test_customization_xlim(sample_dataset, clean_preferences, clean_rcparams):
     """Test xlim customization."""
     ax = sample_dataset.plot(xlim=(1000, 2000))
     assert ax is not None
 
 
+@pytest.mark.data
 def test_customization_ylim(sample_dataset, clean_preferences, clean_rcparams):
     """Test ylim customization for 1D data."""
     # Use 1D data for ylim test
@@ -330,6 +376,7 @@ def test_customization_ylim(sample_dataset, clean_preferences, clean_rcparams):
     assert ax is not None
 
 
+@pytest.mark.data
 def test_customization_figsize(sample_dataset, clean_preferences, clean_rcparams):
     """Test figsize customization."""
     ax = sample_dataset.plot(figsize=(10, 4))
@@ -338,6 +385,7 @@ def test_customization_figsize(sample_dataset, clean_preferences, clean_rcparams
     assert ax.figure.get_figheight() == 4
 
 
+@pytest.mark.data
 def test_customization_grid(sample_dataset, clean_preferences, clean_rcparams):
     """Test grid customization."""
     ax = sample_dataset.plot(grid=True)
@@ -346,6 +394,7 @@ def test_customization_grid(sample_dataset, clean_preferences, clean_rcparams):
     assert len(ax.get_xgridlines()) > 0 or len(ax.get_ygridlines()) > 0
 
 
+@pytest.mark.data
 def test_customization_cmap(sample_dataset, clean_preferences, clean_rcparams):
     """Test cmap customization."""
     ax = sample_dataset.plot_image(cmap="viridis")
@@ -354,6 +403,7 @@ def test_customization_cmap(sample_dataset, clean_preferences, clean_rcparams):
     assert mappable.get_cmap().name == "viridis"
 
 
+@pytest.mark.data
 def test_customization_cmap_none_categorical(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -364,6 +414,7 @@ def test_customization_cmap_none_categorical(
     assert len(lines) > 0
 
 
+@pytest.mark.data
 def test_customization_normalization_centered(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -382,6 +433,7 @@ def test_customization_normalization_centered(
         assert True  # If we got here, plot worked
 
 
+@pytest.mark.data
 def test_customization_normalization_log(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -394,6 +446,7 @@ def test_customization_normalization_log(
     assert mappable is not None
 
 
+@pytest.mark.data
 def test_customization_combined(sample_dataset, clean_preferences, clean_rcparams):
     """Test combined customizations."""
     # Use plot_image for testing combined options with mappable
@@ -411,6 +464,7 @@ def test_customization_combined(sample_dataset, clean_preferences, clean_rcparam
 # ======================================================================================
 
 
+@pytest.mark.data
 def test_preferences_access(sample_dataset, clean_preferences, clean_rcparams):
     """Test accessing preferences."""
     prefs = scp.preferences
@@ -420,6 +474,7 @@ def test_preferences_access(sample_dataset, clean_preferences, clean_rcparams):
     assert prefs.style is not None
 
 
+@pytest.mark.data
 def test_preferences_change_defaults(sample_dataset, clean_preferences, clean_rcparams):
     """Test changing default preferences."""
     original_cmap = preferences.colormap
@@ -431,6 +486,7 @@ def test_preferences_change_defaults(sample_dataset, clean_preferences, clean_rc
     preferences.colormap = original_cmap
 
 
+@pytest.mark.data
 def test_preferences_reset(sample_dataset, clean_preferences, clean_rcparams):
     """Test resetting preferences."""
     preferences.colormap = "magma"
@@ -441,6 +497,7 @@ def test_preferences_reset(sample_dataset, clean_preferences, clean_rcparams):
     assert ax is not None
 
 
+@pytest.mark.data
 def test_preferences_colormap_sequential(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -484,6 +541,7 @@ def test_preferences_help():
 # ======================================================================================
 
 
+@pytest.mark.data
 def test_styles_available(sample_dataset, clean_preferences, clean_rcparams):
     """Test listing available styles."""
     from pathlib import Path
@@ -493,12 +551,14 @@ def test_styles_available(sample_dataset, clean_preferences, clean_rcparams):
     assert len(styles) > 0
 
 
+@pytest.mark.data
 def test_styles_apply_single_plot(sample_dataset, clean_preferences, clean_rcparams):
     """Test applying style to single plot."""
     ax = sample_dataset.plot(style="grayscale")
     assert ax is not None
 
 
+@pytest.mark.data
 def test_styles_affects_cmap_when_auto(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -511,6 +571,7 @@ def test_styles_affects_cmap_when_auto(
     assert mappable.get_cmap().name == "gray"
 
 
+@pytest.mark.data
 def test_styles_override_with_explicit_cmap(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -523,6 +584,7 @@ def test_styles_override_with_explicit_cmap(
     assert mappable.get_cmap().name == "viridis"
 
 
+@pytest.mark.data
 def test_styles_combine_with_options(sample_dataset, clean_preferences, clean_rcparams):
     """Test combining style with other options."""
     ax = sample_dataset.plot_image(
@@ -531,6 +593,7 @@ def test_styles_combine_with_options(sample_dataset, clean_preferences, clean_rc
     assert ax is not None
 
 
+@pytest.mark.data
 def test_styles_default_style(sample_dataset, clean_preferences, clean_rcparams):
     """Test setting default style."""
     original_style = scp.preferences.style
@@ -547,6 +610,7 @@ def test_styles_default_style(sample_dataset, clean_preferences, clean_rcparams)
 # ======================================================================================
 
 
+@pytest.mark.data
 def test_advanced_modify_axes(sample_1d, clean_preferences, clean_rcparams):
     """Test modifying axes after plotting."""
     ax = sample_1d.plot()
@@ -556,31 +620,34 @@ def test_advanced_modify_axes(sample_1d, clean_preferences, clean_rcparams):
     assert ax.get_title() == "Test Title"
 
 
-def test_advanced_subplots(clean_preferences, clean_rcparams):
+@pytest.mark.data
+def test_advanced_subplots(sample_dataset, clean_preferences, clean_rcparams):
     """Test creating subplots."""
     import matplotlib.pyplot as plt
 
-    ds = scp.read("irdata/nh4y-activation.spg")
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3))
 
-    _ = ds.plot(ax=ax1)
-    _ = ds.plot(ax=ax2, xlim=(2000, 1500))
+    _ = sample_dataset.plot(ax=ax1)
+    _ = sample_dataset.plot(ax=ax2, xlim=(2000, 1500))
 
     plt.close(fig)
 
 
+@pytest.mark.data
 def test_advanced_surface_plot(sample_dataset, clean_preferences, clean_rcparams):
     """Test surface plot."""
     ax = sample_dataset.plot_surface()
     assert ax is not None
 
 
+@pytest.mark.data
 def test_advanced_waterfall_plot(sample_dataset, clean_preferences, clean_rcparams):
     """Test waterfall plot."""
     ax = sample_dataset.plot_waterfall()
     assert ax is not None
 
 
+@pytest.mark.data
 def test_advanced_normalization_centered(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -599,6 +666,7 @@ def test_advanced_normalization_centered(
         assert True  # If we got here, plot worked
 
 
+@pytest.mark.data
 def test_advanced_latex_labels(sample_1d, clean_preferences, clean_rcparams):
     """Test LaTeX-like math in labels."""
     ax = sample_1d.plot()
@@ -608,9 +676,11 @@ def test_advanced_latex_labels(sample_1d, clean_preferences, clean_rcparams):
     assert ax.get_xlabel() != ""
 
 
-def test_advanced_function_reproducibility(clean_preferences, clean_rcparams):
+@pytest.mark.data
+def test_advanced_function_reproducibility(
+    sample_1d, clean_preferences, clean_rcparams
+):
     """Test function for reproducible plotting."""
-    ds = scp.read("irdata/nh4y-activation.spg")[0]
 
     def plot_spectrum(dataset, title=None):
         ax = dataset.plot(linewidth=1.5, color="navy", grid=True)
@@ -618,8 +688,8 @@ def test_advanced_function_reproducibility(clean_preferences, clean_rcparams):
             ax.set_title(title)
         return ax
 
-    ax1 = plot_spectrum(ds, title="Sample 1")
-    ax2 = plot_spectrum(ds, title="Sample 2")
+    ax1 = plot_spectrum(sample_1d, title="Sample 1")
+    ax2 = plot_spectrum(sample_1d, title="Sample 2")
     assert ax1 is not None
     assert ax2 is not None
 
@@ -637,6 +707,7 @@ def is_grayscale_color(color, tolerance=0.01):
     return abs(rgb[0] - rgb[1]) < tolerance and abs(rgb[1] - rgb[2]) < tolerance
 
 
+@pytest.mark.data
 def test_grayscale_style_1d_via_kwarg(sample_1d, clean_preferences, clean_rcparams):
     """Test 1D plot with style='grayscale' kwarg yields grayscale line colors."""
     ax = sample_1d.plot(style="grayscale")
@@ -645,6 +716,7 @@ def test_grayscale_style_1d_via_kwarg(sample_1d, clean_preferences, clean_rcpara
     assert is_grayscale_color(color), f"Expected grayscale, got {color}"
 
 
+@pytest.mark.data
 def test_grayscale_style_1d_via_prefs(sample_1d, clean_preferences, clean_rcparams):
     """Test 1D plot with prefs.style='grayscale' yields grayscale line colors."""
     preferences.style = "grayscale"
@@ -654,6 +726,7 @@ def test_grayscale_style_1d_via_prefs(sample_1d, clean_preferences, clean_rcpara
     assert is_grayscale_color(color), f"Expected grayscale, got {color}"
 
 
+@pytest.mark.data
 def test_grayscale_style_1d_explicit_color_overrides(
     sample_1d, clean_preferences, clean_rcparams
 ):
@@ -664,6 +737,7 @@ def test_grayscale_style_1d_explicit_color_overrides(
     assert color == "red", f"Expected red, got {color}"
 
 
+@pytest.mark.data
 def test_grayscale_style_2d_lines_via_kwarg(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -676,6 +750,7 @@ def test_grayscale_style_2d_lines_via_kwarg(
         assert is_grayscale_color(color), f"Line {i}: expected grayscale, got {color}"
 
 
+@pytest.mark.data
 def test_grayscale_style_2d_lines_via_prefs(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -689,6 +764,7 @@ def test_grayscale_style_2d_lines_via_prefs(
         assert is_grayscale_color(color), f"Line {i}: expected grayscale, got {color}"
 
 
+@pytest.mark.data
 def test_grayscale_style_2d_lines_explicit_color_overrides(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -699,6 +775,7 @@ def test_grayscale_style_2d_lines_explicit_color_overrides(
     assert color == "blue", f"Expected blue, got {color}"
 
 
+@pytest.mark.data
 def test_grayscale_style_2d_image_via_kwarg(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -710,6 +787,7 @@ def test_grayscale_style_2d_image_via_kwarg(
     assert mappable.get_cmap().name == "gray"
 
 
+@pytest.mark.data
 def test_grayscale_style_2d_image_via_prefs(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -722,6 +800,7 @@ def test_grayscale_style_2d_image_via_prefs(
     assert mappable.get_cmap().name == "gray"
 
 
+@pytest.mark.data
 def test_grayscale_style_prefs_colormap_overrides(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -733,6 +812,7 @@ def test_grayscale_style_prefs_colormap_overrides(
     assert mappable.get_cmap().name == "plasma"
 
 
+@pytest.mark.data
 def test_grayscale_style_explicit_cmap_overrides(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -744,6 +824,7 @@ def test_grayscale_style_explicit_cmap_overrides(
     assert mappable.get_cmap().name == "inferno"
 
 
+@pytest.mark.data
 def test_grayscale_style_categorical_still_works(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -768,6 +849,7 @@ def get_colorbar_ticks(ax):
     return None
 
 
+@pytest.mark.data
 def test_colorbar_consistency_contour_vs_contourf(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -788,6 +870,7 @@ def test_colorbar_consistency_contour_vs_contourf(
     assert np.allclose(ticks_contour, ticks_contourf, rtol=0.01), "Ticks should match"
 
 
+@pytest.mark.data
 def test_colorbar_consistency_contour_vs_image(
     sample_dataset, clean_preferences, clean_rcparams
 ):
@@ -808,6 +891,7 @@ def test_colorbar_consistency_contour_vs_image(
     assert np.allclose(ticks_contour, ticks_image, rtol=0.01), "Ticks should match"
 
 
+@pytest.mark.data
 def test_colorbar_ticks_monotonic(sample_dataset, clean_preferences, clean_rcparams):
     """Test colorbar ticks are monotonic increasing."""
     ax = sample_dataset.plot_contour(colorbar=True)
@@ -818,6 +902,7 @@ def test_colorbar_ticks_monotonic(sample_dataset, clean_preferences, clean_rcpar
     ), "Ticks should be monotonic"
 
 
+@pytest.mark.data
 def test_colorbar_continuous_mapping(sample_dataset, clean_preferences, clean_rcparams):
     """Test colorbar uses continuous mapping (not categorical)."""
     ax = sample_dataset.plot_contour(colorbar=True)
@@ -829,6 +914,7 @@ def test_colorbar_continuous_mapping(sample_dataset, clean_preferences, clean_rc
     ), "Should use continuous colormap"
 
 
+@pytest.mark.data
 def test_colorbar_cmap_name_consistent(
     sample_dataset, clean_preferences, clean_rcparams
 ):

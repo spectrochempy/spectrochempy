@@ -30,6 +30,17 @@ Developer
 - DEV: Modernized core dataset tests with stronger ``NDDataset``, ``NDMath``,
   ``Coord``, ``CoordSet``, ``NDArray``, and ``NDComplexArray`` validation and
   split the large dataset test module into focused test files.
+- DEV: Converted legacy plotting tests (1D, 2D, 3D, multiplot) from external
+  spectroscopy files to deterministic synthetic fixtures, making them runnable
+  in core-only CI without testdata downloads.
+- DEV: Converted PCA plotting tests (``plot_score``, ``plot_scree``) from
+  external IR data to deterministic synthetic datasets; decoupled 5 tests from
+  PCA computation using precomputed score fixtures.
+- DEV: Classified documentation plotting tests as ``docs``/``integration`` tests
+  with explicit ``pytest.mark.docs`` and ``pytest.mark.data`` markers; added
+  graceful skip when IR testdata is unavailable.
+- DEV: Registered ``docs`` and ``data`` pytest markers in the top-level
+  conftest for use across the test suite.
 - CI: Added reusable plugin version-status tooling and temporary
   ``next_patch.devN`` metadata injection for plugin development builds, with
   automatic conda uploads to ``spectrocat/label/dev`` on ``master`` when
