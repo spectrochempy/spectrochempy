@@ -19,6 +19,7 @@ from spectrochempy.utils.exceptions import (
 from spectrochempy.utils.testing import assert_dataset_almost_equal
 
 
+@pytest.mark.data
 def test_concatenate(IR_dataset_2D):
     dataset = IR_dataset_2D
     dim = "x"

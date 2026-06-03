@@ -8,6 +8,8 @@
 import numpy as np
 import pytest
 
+pytestmark = [pytest.mark.plugin, pytest.mark.data]
+
 pytest.importorskip(
     "spectrochempy_iris",
     reason="requires the optional spectrochempy-iris plugin",

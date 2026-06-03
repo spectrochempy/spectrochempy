@@ -11,6 +11,7 @@ Tests for the ndplugin module.
 """
 
 import numpy as np
+import pytest
 
 from spectrochempy.processing.transformation.autosub import autosub
 from spectrochempy.utils.mplutils import show
@@ -19,6 +20,7 @@ from spectrochempy.utils.mplutils import show
 # ------
 
 
+@pytest.mark.data
 def test_autosub(IR_dataset_2D):
     dataset = IR_dataset_2D
 

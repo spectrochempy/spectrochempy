@@ -13,6 +13,8 @@ import inspect
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.plugin
+
 _HYPERCOMPLEX_AVAILABLE = (
     importlib.util.find_spec("spectrochempy_hypercomplex") is not None
 )

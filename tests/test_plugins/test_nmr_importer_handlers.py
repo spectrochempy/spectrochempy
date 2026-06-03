@@ -5,6 +5,15 @@
 # ======================================================================================
 """Regression tests for the NMR plugin importer handlers."""
 
+import pytest
+
+pytestmark = pytest.mark.plugin
+
+pytest.importorskip(
+    "spectrochempy_nmr",
+    reason="requires the optional spectrochempy-nmr plugin",
+)
+
 from pathlib import Path
 
 from spectrochempy_nmr import _resolve_topspin_directory_target

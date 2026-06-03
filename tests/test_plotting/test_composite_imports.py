@@ -28,6 +28,7 @@ class TestPlotMeritImports:
         assert callable(plot_compare)
 
 
+@pytest.mark.plugin
 class TestIrisImports:
     """IRIS plugin integration checks for exported plotting helpers."""
 
@@ -38,6 +39,7 @@ class TestIrisImports:
             reason="requires the optional spectrochempy-iris plugin",
         )
 
+    @pytest.mark.plugin
     def test_plot_iris_lcurve_import(self):
         """Test import of plot_iris_lcurve."""
         self._check_plugin()
@@ -45,6 +47,7 @@ class TestIrisImports:
 
         assert callable(plot_iris_lcurve)
 
+    @pytest.mark.plugin
     def test_plot_iris_distribution_import(self):
         """Test import of plot_iris_distribution."""
         self._check_plugin()
@@ -52,6 +55,7 @@ class TestIrisImports:
 
         assert callable(plot_iris_distribution)
 
+    @pytest.mark.plugin
     def test_plot_iris_merit_import(self):
         """Test import of plot_iris_merit."""
         self._check_plugin()
