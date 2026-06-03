@@ -103,3 +103,15 @@ Developer
   deciding to run a release.  Writes a Markdown table (plugin, status, last
   tag, changed files count) to the workflow summary.  Read-only — no
   packages, tags, or releases are created.
+- DEV: Classified all reader/writer I/O tests with explicit ``pytest.mark.data``
+  (real instrument format files) or ``pytest.mark.network`` (remote downloads);
+  core-safe synthetic I/O tests are selectable via ``-m "not data and not
+  network"`` (18 tests, all pass with ``scpy-core``).
+- DEV: Converted ``test_write_csv.py`` from a real IR dataset fixture to
+  deterministic synthetic ``NDDataset`` and ``Coord`` objects, removing its
+  hidden external testdata dependency.
+- DEV: Split the monolithic ``test_read.py::test_read`` into four focused tests
+  — local file read (``data``), remote GitHub fallback (``data + network``),
+  missing file error (synthetic), and invalid URL type error (synthetic) —
+  with explicit marker separation and a shared ``_requires_irdata()`` skip
+  helper.

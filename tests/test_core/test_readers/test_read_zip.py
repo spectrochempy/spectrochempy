@@ -14,6 +14,14 @@ from spectrochempy import read_zip
 DATADIR = prefs.datadir
 AGIRDATA = DATADIR / "agirdata"
 
+pytestmark = pytest.mark.data
+
+
+@pytest.fixture(autouse=True)
+def _skip_if_no_testdata():
+    if not AGIRDATA.exists():
+        pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+
 
 def test_read_zip():
     A = read_zip(

@@ -15,6 +15,14 @@ DATADIR = prefs.datadir
 AGIR_FOLDER = DATADIR / "agirdata"
 IR_FOLDER = DATADIR / "irdata"
 
+pytestmark = pytest.mark.data
+
+
+@pytest.fixture(autouse=True)
+def _skip_if_no_testdata():
+    if not DATADIR.exists():
+        pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+
 
 def test_read_csv():
     prefs.csv_delimiter = ","
