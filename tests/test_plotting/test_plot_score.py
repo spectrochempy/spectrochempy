@@ -20,14 +20,17 @@ def _pca_dataset():
     rng = np.random.RandomState(42)
     data = rng.randn(20, 8)
     data[:10] += 2.0
-    from spectrochempy import Coord, NDDataset
+    from spectrochempy import Coord
+    from spectrochempy import NDDataset
 
     y = Coord(
         data=np.arange(20),
-        labels=np.column_stack([
-            np.array([f"R{i}" for i in range(20)]),
-            np.array([f"G{i // 5}" for i in range(20)]),
-        ]),
+        labels=np.column_stack(
+            [
+                np.array([f"R{i}" for i in range(20)]),
+                np.array([f"G{i // 5}" for i in range(20)]),
+            ]
+        ),
     )
     x = Coord(data=np.arange(8))
     return NDDataset(data, coordset=[y, x])
