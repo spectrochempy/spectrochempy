@@ -15,6 +15,14 @@ from spectrochempy.utils.testing import assert_dataset_equal
 DATADIR = prefs.datadir
 IRDATA = DATADIR / "irdata"
 
+pytestmark = pytest.mark.data
+
+
+@pytest.fixture(autouse=True)
+def _skip_if_no_testdata():
+    if not IRDATA.exists():
+        pytest.skip("test data not available (set SCP_TEST_DATA_DOWNLOAD=1)")
+
 
 def test_read_omnic():
     # Class method opening a dialog (but for test it is preset)

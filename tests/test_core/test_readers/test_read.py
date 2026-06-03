@@ -52,6 +52,7 @@ def _read_scpy_data_or_skip(reader, path):
     return dataset
 
 
+@pytest.mark.data
 def test_read(tmp_path):
     filename = IRDATA / "CO@Mo_Al2O3.SPG"
     backup = tmp_path / filename.name
