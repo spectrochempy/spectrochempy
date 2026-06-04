@@ -1,3 +1,4 @@
+# ruff: noqa: S101, PLC0415  # assert/local imports allowed in plugin tests
 # ======================================================================================
 # Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
 # CeCILL-B FREE SOFTWARE LICENSE AGREEMENT

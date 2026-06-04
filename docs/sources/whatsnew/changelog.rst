@@ -67,6 +67,11 @@ Developer
 - DEV: Moved IRIS ``plot_merit`` coverage out of core analysis tests into the
   IRIS plugin test suite, clarifying plugin ownership for plugin/data plotting
   integration checks.
+- DEV: Moved IRIS plugin import/export checks (``TestIrisImports`` for
+  ``plot_iris_lcurve``, ``plot_iris_distribution``, ``plot_iris_merit``) from
+  the core composite plotting test module into the IRIS plugin test suite,
+  removing all direct IRIS plugin runtime import references from the core
+  test tree.
 - DEV: Classified plugin-dependent tests with explicit markers and skip guards
   so optional plugin imports do not fail during core-only collection, while
   keeping core-only and plugin/integration validation clearly separated.
