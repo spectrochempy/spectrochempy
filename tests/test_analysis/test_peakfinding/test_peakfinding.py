@@ -49,7 +49,8 @@ def simple_peaks_dataset():
 @pytest.fixture
 def noisy_peaks_dataset(simple_peaks_dataset):
     """Add noise to make peak detection more challenging."""
-    noise = np.random.normal(0, 0.05, simple_peaks_dataset.size)
+    rng = np.random.default_rng(42)
+    noise = rng.normal(0, 0.05, size=simple_peaks_dataset.size)
     return simple_peaks_dataset + noise
 
 
