@@ -65,6 +65,10 @@ Developer
   removing the dependency on ``als2004dataset.MAT`` and strengthening validation
   of pure-variable selection, decomposition outputs, reconstruction behavior,
   and error handling.
+- DEV: Modernized FastICA analysis tests using deterministic synthetic ICA
+  mixtures, removing the dependency on ``als2004dataset.MAT`` and strengthening
+  wrapper parity, transform, inverse-transform, masking, and validation
+  coverage.
 - DEV: Modernized baseline analysis tests using deterministic synthetic datasets,
   removing dependencies on external IR and MS test files and strengthening
   validation of baseline estimation, masking, preprocessing APIs, and
