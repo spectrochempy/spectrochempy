@@ -79,6 +79,7 @@ savefig
 # Open code
 .opencode/
 opencode.json
+instruction_ai.md
 
 ###############################
 # Operating System           #
