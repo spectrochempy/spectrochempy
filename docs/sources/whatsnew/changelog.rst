@@ -29,6 +29,10 @@ Bug Fixes
 - Fixed ``NDDataset.squeeze()`` for singleton dimensions without explicit
   coordinates and aligned Labspec in-memory byte decoding with the Latin-1
   fallback already used for local files.
+- Fixed coordinate propagation in ``@_wrap_ndarray_output_to_nddataset``
+  when ``typey="features"`` and ``typex="components"`` are both set —
+  replaced sequential ``if`` blocks with an ``elif`` chain and added an
+  explicit combined case to prevent conflicting coordinate assignments.
 
 
 .. section

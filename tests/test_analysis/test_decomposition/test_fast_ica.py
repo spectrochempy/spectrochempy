@@ -60,12 +60,9 @@ def test_fastica_fit_shapes(fastica_dataset, ica_model):
     assert ica.mean.shape == (8,)
     assert ica.n_iter > 0
 
-    # mixing, St, whitening properties trigger a pre-existing coordinate bug
-    # when input has named coords (set_coordset(None, None) was used to mask it).
-    # TODO: Revert to public properties when the coordinate propagation bug is fixed.
-    # Validate via sklearn attributes for now.
-    assert ica._fast_ica.mixing_.shape == (8, 4)
-    assert ica._fast_ica.whitening_.shape == (4, 8)
+    assert ica.mixing.shape == (8, 4)
+    assert ica.St.shape == (4, 8)
+    assert ica.whitening.shape == (4, 8)
 
     testing.assert_dataset_equal(ica.X, fastica_dataset)
 
@@ -75,9 +72,10 @@ def test_fastica_finite_outputs(fastica_dataset, ica_model):
     ica.fit(fastica_dataset)
 
     assert np.all(np.isfinite(ica.components.data))
+    assert np.all(np.isfinite(ica.mixing.data))
+    assert np.all(np.isfinite(ica.St.data))
     assert np.all(np.isfinite(ica.mean.data))
-    assert np.all(np.isfinite(ica._fast_ica.mixing_))
-    assert np.all(np.isfinite(ica._fast_ica.whitening_))
+    assert np.all(np.isfinite(ica.whitening.data))
 
 
 def test_fastica_fit_transform(fastica_dataset, ica_model):
@@ -118,9 +116,10 @@ def test_fastica_sklearn_parity(fastica_dataset):
     skl_ica.fit(X_np)
 
     assert_allclose(scp_ica.components.data, skl_ica.components_)
-    assert_allclose(scp_ica._fast_ica.mixing_, skl_ica.mixing_)
+    assert_allclose(scp_ica.mixing.data, skl_ica.mixing_)
+    assert_allclose(scp_ica.St.data, skl_ica.mixing_.T)
     assert_allclose(scp_ica.mean.data, skl_ica.mean_)
-    assert_allclose(scp_ica._fast_ica.whitening_, skl_ica.whitening_)
+    assert_allclose(scp_ica.whitening.data, skl_ica.whitening_)
     assert scp_ica.n_iter == skl_ica.n_iter_
 
     U_scp = scp_ica.transform()

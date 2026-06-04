@@ -480,7 +480,46 @@ class _set_output:
                 X_transf.dims = X.dims
                 X_transf.set_coordset({X.dims[0]: X.coord(0), X.dims[1]: X.coord(1)})
             else:
-                if self.typey == "components":
+                if self.typesingle == "components":
+                    # occurs when the data are 1D such as ev_ratio...
+                    X_transf.dims = ["k"]
+                    X_transf.set_coordset(
+                        k=Coord(
+                            None,
+                            labels=[f"#{i}" for i in range(X_transf.shape[-1])],
+                            title="components",
+                        ),
+                    )
+                elif self.typesingle == "targets":
+                    # occurs when the data are 1D such as PLSRegression intercept...
+                    if X.coordset[0].labels is not None:
+                        labels = X.coordset[0].labels
+                    else:
+                        labels = [f"#{i + 1}" for i in range(X.shape[-1])]
+                    X_transf.dims = ["j"]
+                    X_transf.set_coordset(
+                        j=Coord(
+                            None,
+                            labels=labels,
+                            title="targets",
+                        ),
+                    )
+                elif self.typey == "features" and self.typex == "components":
+                    # combined: dim[0]=features, dim[1]=components
+                    X_transf.dims = [X.dims[1], "k"]
+                    X_transf.set_coordset(
+                        {
+                            X.dims[1]: (
+                                X.coord(1).copy() if X.coord(1) is not None else None
+                            ),
+                            "k": Coord(
+                                None,
+                                labels=[f"#{i}" for i in range(X_transf.shape[-1])],
+                                title="components",
+                            ),
+                        },
+                    )
+                elif self.typey == "components":
                     X_transf.dims = ["k", X.dims[1]]
                     X_transf.set_coordset(
                         {
@@ -494,7 +533,7 @@ class _set_output:
                             ),
                         },
                     )
-                if self.typex == "components":
+                elif self.typex == "components":
                     X_transf.dims = [X.dims[0], "k"]
                     X_transf.set_coordset(
                         {
@@ -509,7 +548,7 @@ class _set_output:
                             ),
                         },
                     )
-                if self.typex == "features":
+                elif self.typex == "features":
                     X_transf.dims = ["k", X.dims[1]]
                     X_transf.set_coordset(
                         {
@@ -523,7 +562,7 @@ class _set_output:
                             ),
                         },
                     )
-                if self.typey == "features":
+                elif self.typey == "features":
                     X_transf.dims = [X.dims[1], "k"]
                     X_transf.set_coordset(
                         {
@@ -536,30 +575,6 @@ class _set_output:
                                 title="components",
                             ),
                         },
-                    )
-                if self.typesingle == "components":
-                    # occurs when the data are 1D such as ev_ratio...
-                    X_transf.dims = ["k"]
-                    X_transf.set_coordset(
-                        k=Coord(
-                            None,
-                            labels=[f"#{i}" for i in range(X_transf.shape[-1])],
-                            title="components",
-                        ),
-                    )
-                if self.typesingle == "targets":
-                    # occurs when the data are 1D such as PLSRegression intercept...
-                    if X.coordset[0].labels is not None:
-                        labels = X.coordset[0].labels
-                    else:
-                        labels = [f"#{i + 1}" for i in range(X.shape[-1])]
-                    X_transf.dims = ["j"]
-                    X_transf.set_coordset(
-                        j=Coord(
-                            None,
-                            labels=labels,
-                            title="targets",
-                        ),
                     )
 
             # eventually restore masks
