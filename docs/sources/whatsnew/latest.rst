@@ -33,7 +33,7 @@ Developer
   mixtures, removing the dependency on ``als2004dataset.MAT`` and strengthening
   wrapper parity, transform, inverse-transform, masking, and validation
   coverage.
-- DEV: Fixed coordinate propagation in ``@_wrap_ndarray_output_to_nddataset``
+- FIX: Fixed coordinate propagation in ``@_wrap_ndarray_output_to_nddataset``
   when ``typey="features"`` and ``typex="components"`` are both set —
   replaced sequential ``if`` blocks with an ``elif`` chain and added an
   explicit combined case to prevent conflicting coordinate assignments.
