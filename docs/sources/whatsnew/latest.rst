@@ -25,6 +25,14 @@ Developer
 - DEV: Modernized selected analysis tests with deterministic synthetic datasets,
   reducing unnecessary real-data dependencies and strengthening numerical,
   shape, metadata, masking, and reporting assertions.
+- DEV: Modernized SIMPLISMA analysis tests using deterministic synthetic datasets,
+  removing the dependency on ``als2004dataset.MAT`` and strengthening validation
+  of pure-variable selection, decomposition outputs, reconstruction behavior,
+  and error handling.
+- DEV: Modernized baseline analysis tests using deterministic synthetic datasets,
+  removing dependencies on external IR and MS test files and strengthening
+  validation of baseline estimation, masking, preprocessing APIs, and
+  multivariate baseline workflows.
 - DEV: Converted NMF analysis tests from the legacy MATLAB fixture to a
   deterministic non-negative synthetic dataset with focused parity,
   reconstruction, masking, metadata, and non-negativity checks.
