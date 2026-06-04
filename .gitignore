@@ -78,6 +78,7 @@ savefig
 
 # Open code
 .opencode/
+opencode.json
 
 ###############################
 # Operating System           #
