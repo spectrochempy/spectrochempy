@@ -38,3 +38,36 @@ def simplisma_dataset():
         units="absorbance",
     )
     return dataset
+
+
+@pytest.fixture()
+def fastica_dataset():
+    n_observations = 100
+    n_variables = 8
+    n_components = 4
+
+    rng = np.random.default_rng(42)
+
+    t = np.linspace(0, 2 * np.pi, n_observations)
+    s1 = np.sin(2 * t)
+    s2 = np.sign(np.sin(3 * t))
+    s3 = rng.uniform(-1, 1, n_observations)
+    s4 = rng.laplace(0, 1, n_observations)
+
+    S_true = np.column_stack([s1, s2, s3, s4])
+
+    rng_mix = np.random.default_rng(7)
+    Mixing_true = rng_mix.uniform(-1, 1, (n_components, n_variables))
+
+    data = S_true @ Mixing_true
+
+    dataset = scp.NDDataset(
+        data,
+        coordset=[
+            scp.Coord(t, title="time", units="s"),
+            scp.Coord.arange(n_variables, title="feature"),
+        ],
+        title="synthetic ICA mixture",
+        units="absorbance",
+    )
+    return dataset
