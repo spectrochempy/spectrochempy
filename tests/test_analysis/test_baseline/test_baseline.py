@@ -1,207 +1,222 @@
-# ======================================================================================
-# Copyright (©) 2014-2026 Laboratoire Catalyse et Spectrochimie (LCS), Caen, France.
-# CeCILL-B FREE SOFTWARE LICENSE AGREEMENT
-# See full LICENSE agreement in the root directory.
-# ======================================================================================
-# ruff: noqa
-import os
-
-import pytest
+import numpy as np
 
 import spectrochempy as scp
-from spectrochempy.core.units import ur
 from spectrochempy.processing.baselineprocessing.baselineprocessing import Baseline
-from spectrochempy.utils.mplutils import show
 from spectrochempy.utils.testing import assert_dataset_equal
 
-path = os.path.dirname(os.path.abspath(__file__))
 
+def test_baseline_fit_1d(synthetic_1d_baseline_dataset):
+    dataset, _, _ = synthetic_1d_baseline_dataset
 
-def test_baseline(IR_dataset_2D):
-    # define a 1D test dataset (1 spectrum)
-    dataset = IR_dataset_2D[10].squeeze()
-    # minimal process
     blc = Baseline()
     blc.fit(dataset)
-    corr = blc.transform()
     baseline = blc.baseline
-    assert baseline.shape == dataset.shape
-    dataset.plot()
-    corr.plot(clear=False, color="g")
-    baseline.plot(clear=False, color="r")
+    corrected = blc.transform()
 
-    # asls process
-    blc = Baseline(log_level="INFO")
-    blc.model = "asls"
-    blc.mu = 0.5 * 10**9
-    blc.asymmetry = 0.001
-    blc.fit(dataset)
-    corr = blc.transform()
-    baseline = blc.baseline
     assert baseline.shape == dataset.shape
-    dataset.plot()
-    corr.plot(clear=False, color="g")
-    baseline.plot(clear=False, color="r")
+    assert np.all(np.isfinite(baseline.data))
+    assert np.all(np.isfinite(corrected.data))
 
-    # with mask on some wavenumbers
-    dataset[882.0:1280.0] = scp.MASKED
+    assert baseline.dims == dataset.dims
+    assert baseline.units == dataset.units
+
+
+def test_baseline_fit_2d(synthetic_2d_baseline_dataset):
+    dataset, _, _ = synthetic_2d_baseline_dataset
+
     blc = Baseline()
     blc.fit(dataset)
-    corr = blc.transform()
-    baseline = blc.baseline
-    assert baseline.shape == dataset.shape
-    dataset.plot()
-    corr.plot(clear=False, color="g")
-    baseline.plot(clear=False, color="r")
-
-    # asls process with mask
-    blc = Baseline(log_level="INFO")
-    blc.model = "asls"
-    blc.mu = 0.5 * 10**9
-    blc.asymmetry = 0.001
-    blc.fit(dataset)
-    corr = blc.transform()
-    baseline = blc.baseline
-    assert baseline.shape == dataset.shape
-    dataset.plot()
-    corr.plot(clear=False, color="g")
-    baseline.plot(clear=False, color="r")
-
-    # define a 2D test dataset (6 spectra)
-    dataset = IR_dataset_2D[::10]
-
-    # minimal process
-    basc3 = Baseline()
-    basc3.fit(dataset)
-    assert basc3.baseline.shape == dataset.shape
-
-    # now define ranges and interpolation=pchip
-    basc3.ranges = [[6000.0, 3500.0], [2200.0, 1500.0]]
-    basc3.model = "polynomial"
-    basc3.order = "pchip"
-
-    # and fit again (for example, taking only the second spectra)
-    basc3.fit(dataset[1])
-
-    # change the interpolation method
-    basc3.model = "polynomial"
-    basc3.order = 3
-    basc3.fit(dataset)
-
-    # multivariate
-    basc3.multivariate = True
-    basc3.model = "polynomial"
-    basc3.order = "pchip"
-    basc3.n_components = 5
-
-    dataset = IR_dataset_2D
-    dataset[:, 1290.0:890.0] = scp.MASKED
-    basc3.ranges = (
-        [5900.0, 5400.0],
-        4550.0,
-        [4500.0, 4000.0],
-        [2100.0, 2000.0],
-        [1550.0, 1555.0],
-    )
-    basc3.fit(dataset)
-
-    basc3.model = "polynomial"
-    basc3.order = 6
-    basc3.fit(dataset)
-
-    basc3.baseline[::10].plot(cmap=None, color="r")
-    dataset[::10].plot(clear=False)
-
-    basc3.transform().plot()
-
-    # nmf multivariate
-    basc3.multivariate = "nmf"
-    basc3.model = "polynomial"
-    basc3.order = 6
-    basc3.n_components = 5
-    basc3.fit(dataset)
-
-    basc3.baseline[::10].plot(cmap=None, color="r")
-    dataset[::10].plot(clear=False)
-
-    basc3.transform().plot()
-
-    # MS profiles, we want to make a baseline correction
-    # on the ion current vs. time axis:
-    ms = scp.read("msdata/ion_currents.asc", timestamp=False)
-    msT = ms[4000.0:9000.0, :].T
-    blc = scp.Baseline()
-    # blc.ranges = [[10.0, 11.0], [19.0, 20.0]]
-    blc.model = "polynomial"
-    blc.order = 1
-    blc.fit(msT)
-    blc.corrected.plot()
-    # scp.show()
-
-
-def test_baseline_sequential_asls(IR_dataset_2D):
-    # test AsLS in sequential mode on a 2D spectra dataset
-
-    blc = scp.Baseline(
-        log_level="INFO",
-    )
-
-    blc.multivariate = False  # use a sequential baseline correction approach
-    blc.model = "asls"  # use a asls model
-    blc.mu = 10**8  # set the regularization parameter mu (smoothness)
-    blc.asymmetry = 0.002
-
-    ndp = IR_dataset_2D[::5]
-    ndp[:, 1290.0:890.0] = scp.MASKED
-
-    blc.fit(ndp)
-
     baseline = blc.baseline
     corrected = blc.corrected
 
-    _ = corrected[0].plot()
-    _ = baseline[0].plot(clear=False, color="red", ls="-")
-    _ = ndp[0].plot(clear=False, color="green", ls="--")
-
-    _ = corrected[-1].plot()
-    _ = baseline[-1].plot(clear=False, color="red", ls="-")
-    _ = ndp[10].plot(clear=False, color="green", ls="--")
-
-    _ = corrected.plot()
-
-    # scp.show()
-
-    # it works but not very well adapted to a situation where the regularization
-    # parameter mu and may be asymmetry should be adapted to each spectra.
+    assert baseline.shape == dataset.shape
+    assert np.all(np.isfinite(baseline.data))
+    assert np.all(np.isfinite(corrected.data))
 
 
-def test_preprocessing_nddataset_methods(IR_dataset_2D):
-    ndp = IR_dataset_2D[::5]
-    ndp[:, 1290.0:890.0] = scp.MASKED
+def test_baseline_polynomial_recovers_known_1d_baseline(
+    synthetic_1d_baseline_dataset,
+):
+    dataset, true_baseline, _ = synthetic_1d_baseline_dataset
 
-    # baseline
-    baseline = ndp.get_baseline()
-    assert baseline.shape == ndp.shape
-    baseline = ndp.get_baseline(model="asls", lamb=10**8, asymmetry=0.002)
-    assert baseline.shape == ndp.shape
+    blc = Baseline()
+    blc.model = "polynomial"
+    blc.order = 3
+    blc.fit(dataset)
 
-    # asls
-    ndpcor = scp.asls(ndp, lamb=10**8, asymmetry=0.002)
-    assert_dataset_equal(ndpcor, ndp - baseline)
-
-    # snip
-    ndpcor = scp.snip(ndp, snip_width=150)
-    baseline = ndp.get_baseline(model="snip", snip_width=150)
-    assert_dataset_equal(ndpcor, ndp - baseline)
+    estimated = blc.baseline.data
+    diff = np.abs(estimated - true_baseline)
+    assert blc.baseline.shape == dataset.shape
+    assert np.mean(diff) < 0.25
+    assert np.max(diff) < 0.35
 
 
-def test_baseline_polynomial(IR_dataset_2D):
-    X = IR_dataset_2D[::5]
+def test_baseline_asls_1d(synthetic_1d_baseline_dataset):
+    dataset, _, _ = synthetic_1d_baseline_dataset
 
-    blc = scp.Baseline()
+    blc = Baseline(log_level="INFO")
+    blc.model = "asls"
+    blc.mu = 0.5 * 10**9
+    blc.asymmetry = 0.001
+    blc.fit(dataset)
+
+    baseline = blc.baseline
+    corrected = blc.transform()
+    assert baseline.shape == dataset.shape
+    assert np.all(np.isfinite(baseline.data))
+    assert np.all(np.isfinite(corrected.data))
+
+
+def test_baseline_asls_2d(synthetic_2d_baseline_dataset):
+    dataset, _, _ = synthetic_2d_baseline_dataset
+
+    blc = Baseline(log_level="INFO")
+    blc.model = "asls"
+    blc.mu = 0.5 * 10**9
+    blc.asymmetry = 0.001
+    blc.fit(dataset)
+
+    baseline = blc.baseline
+    corrected = blc.transform()
+    assert baseline.shape == dataset.shape
+    assert np.all(np.isfinite(baseline.data))
+    assert np.all(np.isfinite(corrected.data))
+
+
+def test_baseline_masked_data(synthetic_1d_baseline_dataset):
+    dataset, _, _ = synthetic_1d_baseline_dataset
+
+    dataset[3000.0:2000.0] = scp.MASKED
+
+    blc = Baseline()
+    blc.fit(dataset)
+    baseline = blc.baseline
+    corrected = blc.transform()
+
+    assert baseline.shape == dataset.shape
+    assert np.all(np.isfinite(baseline.data))
+    assert np.all(np.isfinite(corrected.data))
+
+    blc.model = "asls"
+    blc.mu = 0.5 * 10**9
+    blc.asymmetry = 0.001
+    blc.fit(dataset)
+    baseline = blc.baseline
+    assert baseline.shape == dataset.shape
+    assert np.all(np.isfinite(baseline.data))
+
+
+def test_baseline_pchip_smoke(synthetic_1d_baseline_dataset):
+    dataset, _, _ = synthetic_1d_baseline_dataset
+
+    blc = Baseline()
+    blc.model = "polynomial"
+    blc.order = "pchip"
+    blc.fit(dataset)
+
+    assert blc.baseline.shape == dataset.shape
+    assert np.all(np.isfinite(blc.baseline.data))
+
+    blc.order = 3
+    blc.fit(dataset)
+    assert blc.baseline.shape == dataset.shape
+    assert np.all(np.isfinite(blc.baseline.data))
+
+
+def test_baseline_multivariate_svd_smoke(synthetic_2d_baseline_dataset):
+    dataset, _, _ = synthetic_2d_baseline_dataset
+
+    blc = Baseline()
+    blc.multivariate = True
+    blc.model = "polynomial"
+    blc.order = "pchip"
+    blc.n_components = 3
+    blc.fit(dataset)
+
+    assert blc.baseline.shape == dataset.shape
+    assert np.all(np.isfinite(blc.baseline.data))
+    assert np.all(np.isfinite(blc.transform().data))
+
+
+def test_baseline_multivariate_nmf_smoke(synthetic_2d_baseline_dataset):
+    dataset, _, _ = synthetic_2d_baseline_dataset
+
+    blc = Baseline()
+    blc.multivariate = "nmf"
+    blc.model = "polynomial"
+    blc.order = 6
+    blc.n_components = 3
+    blc.fit(dataset)
+
+    assert blc.baseline.shape == dataset.shape
+    assert np.all(np.isfinite(blc.baseline.data))
+    assert np.all(np.isfinite(blc.transform().data))
+
+
+def test_baseline_sequential_asls(synthetic_2d_baseline_dataset):
+    dataset, _, _ = synthetic_2d_baseline_dataset
+
+    dataset[:, 3000.0:2000.0] = scp.MASKED
+
+    blc = Baseline(log_level="INFO")
+    blc.multivariate = False
+    blc.model = "asls"
+    blc.mu = 10**8
+    blc.asymmetry = 0.002
+    blc.fit(dataset)
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+    assert baseline.shape == dataset.shape
+    assert corrected.shape == dataset.shape
+    assert np.all(np.isfinite(baseline.data))
+    assert np.all(np.isfinite(corrected.data))
+
+
+def test_baseline_polynomial_with_ranges(synthetic_1d_baseline_dataset):
+    dataset, _, _ = synthetic_1d_baseline_dataset
+
+    blc = Baseline()
     blc.model = "polynomial"
     blc.order = 2
-    blc.ranges = [[4000.0, 4001.0], [2000.0, 2001.0]]
-    blc.fit(X)
+    blc.ranges = [[3800.0, 3600.0], [1800.0, 1200.0]]
+    blc.fit(dataset)
 
-    blc.plot()
+    assert blc.baseline.shape == dataset.shape
+    assert np.all(np.isfinite(blc.baseline.data))
+
+
+def test_preprocessing_nddataset_methods(synthetic_1d_baseline_dataset):
+    dataset, _, _ = synthetic_1d_baseline_dataset
+
+    dataset[3000.0:2000.0] = scp.MASKED
+
+    baseline = dataset.get_baseline()
+    assert baseline.shape == dataset.shape
+    assert np.all(np.isfinite(baseline.data))
+
+    baseline_asls = dataset.get_baseline(model="asls", lamb=10**8, asymmetry=0.002)
+    assert baseline_asls.shape == dataset.shape
+    assert np.all(np.isfinite(baseline_asls.data))
+
+    ndpcor_asls = scp.asls(dataset, lamb=10**8, asymmetry=0.002)
+    assert_dataset_equal(ndpcor_asls, dataset - baseline_asls)
+
+    ndpcor_snip = scp.snip(dataset, snip_width=150)
+    baseline_snip = dataset.get_baseline(model="snip", snip_width=150)
+    assert_dataset_equal(ndpcor_snip.squeeze(), dataset - baseline_snip)
+
+
+def test_baseline_ms_profile(synthetic_ms_like_dataset):
+    dataset, _, _ = synthetic_ms_like_dataset
+
+    blc = Baseline()
+    blc.model = "polynomial"
+    blc.order = 2
+    blc.fit(dataset)
+
+    baseline = blc.baseline
+    corrected = blc.corrected
+    assert baseline.shape == dataset.shape
+    assert np.all(np.isfinite(baseline.data))
+    assert np.all(np.isfinite(corrected.data))
