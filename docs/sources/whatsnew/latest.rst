@@ -20,6 +20,6 @@ Developer
   assignment path to use it, preserving existing behavior while reducing
   direct CoordSet internal coupling.
 
-- MAINT: Introduced a first ``CoordSet`` lifecycle slicing API and migrated
-  ``NDDataset`` slicing to delegate coordinate slicing through it, preserving
-  existing behavior without changing public APIs, storage, or serialization.
+- MAINT: Introduced an initial internal ``CoordSet`` lifecycle slicing API and
+  migrated ``NDDataset`` slicing to use it, preserving existing behavior
+  without changing public APIs, storage, or serialization.
