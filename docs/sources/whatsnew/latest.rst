@@ -26,6 +26,14 @@ Bug Fixes
 Developer
 ~~~~~~~~~
 
+- MAINT: Modernized PLS regression tests (``test_pls.py``): replaced the
+  network-dependent Corn dataset with a deterministic synthetic latent-variable
+  fixture (seeded RNG), split the monolithic test into 15 focused functions
+  across three test classes covering univariate/multivariate fits, score,
+  predict, transform, fit_transform, inverse_transform, and masked-data
+  handling, removed all plotting from algorithmic validation, and strengthened
+  assertions with sklearn numerical parity checks.
+
 - MAINT: Modernized selected analysis tests with deterministic synthetic datasets,
   reducing unnecessary real-data dependencies and strengthening numerical,
   shape, metadata, masking, and reporting assertions.
