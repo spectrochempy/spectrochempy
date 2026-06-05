@@ -1673,6 +1673,57 @@ def test_ptp_scalar():
     assert abs(r.magnitude - 2.0) < 1e-10
 
 
+def test_mean_dim_reduction_preserves_surviving_coordinate():
+    """Mean(dim=...) drops only the reduced coordinate."""
+    coord_y = Coord(np.array([10.0, 20.0, 30.0]), title="time")
+    coord_x = Coord(np.array([1.0, 2.0]), title="wavelength")
+    ds = NDDataset(np.arange(6.0).reshape(3, 2), coordset=[coord_y, coord_x])
+
+    r = ds.mean(dim="x")
+
+    assert r.shape == (3,)
+    assert r.dims == ["y"]
+    assert_array_equal(r.y.data, coord_y.data)
+    if isinstance(r.y, CoordSet):
+        assert r.y._1.title == "time"
+    else:
+        assert r.y.title == "time"
+
+
+def test_mean_keepdims_preserves_reduced_coordinate_as_singleton():
+    """Mean(dim=..., keepdims=True) keeps the reduced coordinate as size 1."""
+    coord_y = Coord(np.array([10.0, 20.0, 30.0]), title="time")
+    coord_x = Coord(np.array([1.0, 2.0]), title="wavelength")
+    ds = NDDataset(np.arange(6.0).reshape(3, 2), coordset=[coord_y, coord_x])
+
+    r = ds.mean(dim="x", keepdims=True)
+
+    assert r.shape == (3, 1)
+    assert r.dims == ["y", "x"]
+    assert_array_equal(r.y.data, coord_y.data)
+    assert_array_equal(r.x.data, [0])
+    assert r.x.title == "wavelength"
+
+
+def test_sum_keepdims_preserves_surviving_multicoord_group():
+    """Reduction on another dimension keeps same-dimension multicoords intact."""
+    coord_y = Coord(np.array([10.0, 20.0, 30.0]), title="time")
+    coord_x_primary = Coord(np.array([1.0, 2.0]), title="wavelength")
+    coord_x_secondary = Coord(np.array([100.0, 200.0]), title="index")
+    ds = NDDataset(np.arange(6.0).reshape(3, 2), coordset=[coord_y, coord_x_primary])
+    ds.x = CoordSet(coord_x_secondary.copy(), coord_x_primary.copy())
+    ds.x.select(2)
+
+    r = ds.sum(dim="y", keepdims=True)
+
+    assert r.shape == (1, 2)
+    assert isinstance(r.x, CoordSet)
+    assert r.x.is_same_dim
+    assert r.x.default == r.x._2
+    assert_array_equal(r.x._1.data, coord_x_primary.data)
+    assert_array_equal(r.x._2.data, coord_x_secondary.data)
+
+
 # ===============================================================================
 # CHARACTERISATION: pipe
 # ===============================================================================

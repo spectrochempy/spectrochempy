@@ -18,6 +18,7 @@ from spectrochempy.core.dataset.coord import Coord
 from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import DimensionalityError, ur
+from spectrochempy.utils.testing import assert_array_equal
 from spectrochempy.utils.testing import assert_coord_almost_equal
 
 
@@ -546,6 +547,32 @@ def test_coordset__drop_dims_preserves_remaining_multicoord_state(
     assert_coord_almost_equal(updated.y._1, coords.y._1, decimal=1)
     assert_coord_almost_equal(updated.y._2, coords.y._2, decimal=1)
     assert updated.x == coords.x
+
+
+def test_coordset__reduce_dim_drops_target_coordinate(coord0, coord1, coord2):
+    coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
+
+    updated = coords._reduce_dim("z", keepdims=False)
+
+    assert updated.names == ["x", "y"]
+    assert updated.x == coords.x
+    assert updated.y.is_same_dim
+    assert_coord_almost_equal(updated.y._1, coords.y._1, decimal=1)
+    assert_coord_almost_equal(updated.y._2, coords.y._2, decimal=1)
+
+
+def test_coordset__reduce_dim_keepdims_preserves_multicoord_group(coord0, coord1):
+    coords = CoordSet([coord0[:3], coord1[:3]], z=Coord([1.0, 2.0, 3.0]))
+    coords.x.select(2)
+
+    updated = coords._reduce_dim("x", keepdims=True)
+
+    assert updated.names == ["x", "z"]
+    assert updated.x.is_same_dim
+    assert updated.x.default == updated.x._2
+    assert_array_equal(updated.x._1.data, [0])
+    assert_array_equal(updated.x._2.data, [0])
+    assert updated.z == coords.z
 
 
 def test_coordset_arithmetics():

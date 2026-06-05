@@ -196,25 +196,21 @@ class _from_numpy_method:
 
 def _reduce_dims(cls, dim, keepdims=False):
     dims = cls.dims
+    new_coordset = None
     if hasattr(cls, "coordset"):
         coordset = cls.coordset
         if dim is not None:
             if coordset is not None:
-                idx = coordset.names.index(dim)
+                new_coordset = coordset._reduce_dim(dim, keepdims=keepdims)
                 if not keepdims:
-                    del coordset.coords[idx]
                     dims.remove(dim)
-                else:
-                    coordset.coords[idx].data = [
-                        0,
-                    ]
             elif not keepdims:
                 dims.remove(dim)
         else:
             # dim being None we eventually remove the coordset
-            cls.set_coordset(None)
+            new_coordset = None
 
-    return dims
+    return dims, new_coordset
 
 
 def _get_name(x):
@@ -1077,13 +1073,14 @@ class NDMath:
         if np.isscalar(m):
             return Quantity(m, cls.units) if cls.units is not None else m
 
-        dims = _reduce_dims(cls, dim, keepdims)
+        dims, coordset = _reduce_dims(cls, dim, keepdims)
         if hasattr(m, "mask"):
             cls._data = m.data
             cls._mask = m.mask
         else:
             cls._data = m
         cls.dims = dims
+        cls._coordset = coordset
 
         return cls
 
@@ -2046,10 +2043,11 @@ class NDMath:
         if np.isscalar(m):
             return Quantity(m, cls.units) if cls.units is not None else m
 
-        dims = _reduce_dims(cls, dim, keepdims)
+        dims, coordset = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
         cls.dims = dims
+        cls._coordset = coordset
 
         return cls
 
@@ -2248,10 +2246,11 @@ class NDMath:
         if np.isscalar(m):
             return Quantity(m, cls.units) if cls.units is not None else m
 
-        dims = _reduce_dims(cls, dim, keepdims)
+        dims, coordset = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
         cls.dims = dims
+        cls._coordset = coordset
 
         return cls
 
@@ -2378,10 +2377,11 @@ class NDMath:
         if np.isscalar(m):
             return Quantity(m, cls.units) if cls.units is not None else m
 
-        dims = _reduce_dims(cls, dim, keepdims)
+        dims, coordset = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
         cls.dims = dims
+        cls._coordset = coordset
 
         return cls
 
@@ -2439,10 +2439,11 @@ class NDMath:
         if np.isscalar(m):
             return Quantity(m, cls.units) if cls.units is not None else m
 
-        dims = _reduce_dims(cls, dim, keepdims)
+        dims, coordset = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
         cls.dims = dims
+        cls._coordset = coordset
 
         return cls
 
@@ -2529,10 +2530,11 @@ class NDMath:
         if np.isscalar(m):
             return Quantity(m, cls.units) if cls.units is not None else m
 
-        dims = _reduce_dims(cls, dim, keepdims)
+        dims, coordset = _reduce_dims(cls, dim, keepdims)
         cls._data = m.data
         cls._mask = m.mask
         cls.dims = dims
+        cls._coordset = coordset
 
         return cls
 
