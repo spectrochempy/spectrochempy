@@ -519,6 +519,19 @@ def test_coordset__slice_dims_preserves_multicoord_default(coord0, coord1, coord
     assert sliced.x == coords.x
 
 
+def test_coordset__replace_dim_preserves_multicoord_behavior():
+    coords = CoordSet(x=Coord([0.0, 1.0, 2.0]))
+    x2 = Coord(np.array([0.5, 0.8, 9.0]))
+    x1 = Coord(np.array([1.5, 5.8, -9.0]))
+
+    updated = coords._replace_dim("x", CoordSet(Coord(x2), Coord(x1)))
+
+    assert isinstance(updated.x, CoordSet)
+    assert updated.x.is_same_dim
+    assert_coord_almost_equal(updated.x["_1"], x1)
+    assert_coord_almost_equal(updated.x["_2"], x2)
+
+
 def test_coordset_arithmetics():
     # typical use case
     ds = NDDataset([0.0, 1.0, 2.0])

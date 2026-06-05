@@ -471,26 +471,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                 if self._coordset is None:
                     # we need to create a coordset first
                     self.set_coordset({self.dims[i]: None for i in range(self.ndim)})
-                idx = self._coordset.names.index(key)
-                _coordset = self._coordset
-                listcoord = False
-                if isinstance(value, list):
-                    listcoord = all(isinstance(item, Coord) for item in value)
-                if listcoord:
-                    _coordset[idx] = list(CoordSet(value).to_dict().values())[0]
-                    _coordset[idx].name = key
-                    _coordset[idx]._is_same_dim = True
-                elif isinstance(value, CoordSet):
-                    if len(value) > 1:
-                        value = CoordSet(value)
-                    _coordset[idx] = list(value.to_dict().values())[0]
-                    _coordset[idx].name = key
-                    _coordset[idx]._is_same_dim = True
-                elif isinstance(value, Coord):
-                    value.name = key
-                    _coordset[idx] = value
-                else:
-                    _coordset[idx] = Coord(value, name=key)
+                _coordset = self._coordset._replace_dim(key, value)
                 _coordset = self._valid_coordset(_coordset)
                 self._coordset.set(_coordset)
             else:

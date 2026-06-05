@@ -749,6 +749,39 @@ class CoordSet(HasTraits):
 
         return new_coords
 
+    def _replace_dim(self, dim, value):
+        """
+        Return a coordset with one dimension coordinate replaced.
+
+        This lifecycle wrapper preserves the existing assignment semantics used
+        by ``NDDataset`` for simple coordinates and same-dimension
+        multi-coordinate groups.
+        """
+        new_coords = self.copy()
+        idx = new_coords.names.index(dim)
+
+        listcoord = False
+        if isinstance(value, list):
+            listcoord = all(isinstance(item, Coord) for item in value)
+
+        if listcoord:
+            new_coords[idx] = list(CoordSet(value).to_dict().values())[0]
+            new_coords[idx].name = dim
+            new_coords[idx]._is_same_dim = True
+        elif isinstance(value, CoordSet):
+            if len(value) > 1:
+                value = CoordSet(value)
+            new_coords[idx] = list(value.to_dict().values())[0]
+            new_coords[idx].name = dim
+            new_coords[idx]._is_same_dim = True
+        elif isinstance(value, Coord):
+            value.name = dim
+            new_coords[idx] = value
+        else:
+            new_coords[idx] = Coord(value, name=dim)
+
+        return new_coords
+
     def _append(self, coord):
         # utility function to append coordinate with full validation
         if not isinstance(coord, tuple):
