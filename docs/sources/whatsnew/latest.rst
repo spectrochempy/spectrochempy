@@ -15,6 +15,11 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Developer
 ~~~~~~~~~
 
+- MAINT: Added an internal ``CoordSet`` lifecycle API for coordinate
+  assignment/replacement and migrated a focused ``NDDataset`` coordinate
+  assignment path to use it, preserving existing behavior while reducing
+  direct CoordSet internal coupling.
+
 - MAINT: Introduced a first ``CoordSet`` lifecycle slicing API and migrated
   ``NDDataset`` slicing to delegate coordinate slicing through it, preserving
   existing behavior without changing public APIs, storage, or serialization.

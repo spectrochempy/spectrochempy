@@ -17,6 +17,7 @@ from spectrochempy.core.dataset.coordset import CoordSet
 from spectrochempy.core.dataset.nddataset import NDDataset
 from spectrochempy.core.units import ur
 from spectrochempy.utils.testing import assert_array_equal
+from spectrochempy.utils.testing import assert_coord_almost_equal
 from spectrochempy.utils.testing import assert_units_equal
 
 # ==============================================================================
@@ -146,6 +147,55 @@ class TestNDDatasetCoordReplacement:
         ds.coordset.set_units(x="cm^-1", force=True)
         units = ds.coordset.units
         assert any(u is not None for u in units)
+
+    def test_replace_coord_via_dimension_attribute_preserves_metadata(self):
+        c = Coord([1, 2, 3], name="x", title="Old", units="cm^-1")
+        ds = NDDataset([10, 20, 30], coordset=CoordSet(c))
+        replacement = Coord(
+            [100, 200, 300],
+            name="wavelength",
+            title="Wavenumber",
+            units="nm",
+            labels=["a", "b", "c"],
+        )
+
+        ds.x = replacement
+
+        assert ds.shape == (3,)
+        assert_array_equal(ds.x.data, [100, 200, 300])
+        assert ds.x.name == "x"
+        assert ds.x.title == "Wavenumber"
+        assert_units_equal(ds.x.units, ur.nm)
+        assert_array_equal(ds.x.labels, ["a", "b", "c"])
+
+    def test_replace_coord_via_dimension_attribute_with_matching_length(self):
+        coord_y = Coord([1.0, 2.0, 3.0], name="y")
+        coord_x = Coord([10.0, 20.0], name="x")
+        ds = NDDataset(np.ones((3, 2)), coordset=[coord_y, coord_x])
+
+        ds.x = [100.0, 200.0]
+
+        assert ds.shape == (3, 2)
+        assert_array_equal(ds.x.data, [100.0, 200.0])
+
+    def test_replace_coord_via_dimension_attribute_rejects_wrong_length(self):
+        c = Coord([1, 2, 3], name="x")
+        ds = NDDataset([10, 20, 30], coordset=CoordSet(c))
+
+        with pytest.raises(ValueError, match="coordinate size=2 != data shape"):
+            ds.x = Coord([100, 200], name="wrong")
+
+    def test_replace_coord_via_dimension_attribute_preserves_multicoord_behavior(self):
+        ds = NDDataset([0.0, 1.0, 2.0])
+        x2 = Coord(np.array([0.5, 0.8, 9.0]))
+        x1 = Coord(np.array([1.5, 5.8, -9.0]))
+
+        ds.x = CoordSet(Coord(x2), Coord(x1))
+
+        assert isinstance(ds.x, CoordSet)
+        assert ds.x.is_same_dim
+        assert_coord_almost_equal(ds.x["_1"], x1)
+        assert_coord_almost_equal(ds.x["_2"], x2)
 
 
 # ==============================================================================

@@ -505,11 +505,11 @@ def test_coordset_deepcopy_isolation(coord0, coord1):
     assert "x" not in coords_copy.names
 
 
-def test_coordset_slice_dims_preserves_multicoord_default(coord0, coord1, coord2):
+def test_coordset__slice_dims_preserves_multicoord_default(coord0, coord1, coord2):
     coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
     coords.y.select(2)
 
-    sliced = coords.slice_dims(["z", "y", "x"], (slice(1, 4), slice(2, 5)))
+    sliced = coords._slice_dims(["z", "y", "x"], (slice(1, 4), slice(2, 5)))
 
     assert sliced.z.size == 2
     assert sliced.y.is_same_dim
@@ -517,6 +517,19 @@ def test_coordset_slice_dims_preserves_multicoord_default(coord0, coord1, coord2
     assert_coord_almost_equal(sliced.y._1, coord0[2:5], decimal=1)
     assert_coord_almost_equal(sliced.y._2, coord0[2:5], decimal=1)
     assert sliced.x == coords.x
+
+
+def test_coordset__replace_dim_preserves_multicoord_behavior():
+    coords = CoordSet(x=Coord([0.0, 1.0, 2.0]))
+    x2 = Coord(np.array([0.5, 0.8, 9.0]))
+    x1 = Coord(np.array([1.5, 5.8, -9.0]))
+
+    updated = coords._replace_dim("x", CoordSet(Coord(x2), Coord(x1)))
+
+    assert isinstance(updated.x, CoordSet)
+    assert updated.x.is_same_dim
+    assert_coord_almost_equal(updated.x["_1"], x1)
+    assert_coord_almost_equal(updated.x["_2"], x2)
 
 
 def test_coordset_arithmetics():
