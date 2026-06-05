@@ -15,6 +15,11 @@ See :ref:`release` for a full changelog, including other versions of SpectroChem
 Developer
 ~~~~~~~~~
 
+- MAINT: Added an internal ``CoordSet`` lifecycle helper for reduction-related
+  dimension cleanup and migrated ``ndmath._reduce_dims()`` to use it,
+  preserving existing behavior without changing public APIs, storage, or
+  serialization.
+
 - MAINT: Added an internal ``CoordSet`` lifecycle helper for reshape-related
   coordinate handling and migrated ``NDDataset.reshape()`` to use it,
   preserving existing behavior without changing public APIs, storage, or

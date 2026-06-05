@@ -877,6 +877,31 @@ class CoordSet(HasTraits):
 
         return CoordSet(*new_coords, dims=new_dims.copy())
 
+    def _reduce_dim(self, dim, *, keepdims=False):
+        """
+        Return a coordset updated for a standard reduction operation.
+
+        This lifecycle wrapper preserves the existing reduction-time dimension
+        cleanup while keeping coordinate handling inside ``CoordSet``.
+        """
+        if dim is None:
+            return None
+
+        if not keepdims:
+            return self._drop_dims(dim, missing="raise")
+
+        new_coords = self.copy()
+        idx = new_coords.names.index(dim)
+        coord = new_coords[idx]
+
+        if isinstance(coord, CoordSet):
+            for child in coord._coords:
+                child.data = [0]
+        else:
+            coord.data = [0]
+
+        return new_coords
+
     def _append(self, coord):
         # utility function to append coordinate with full validation
         if not isinstance(coord, tuple):
