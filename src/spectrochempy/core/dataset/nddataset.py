@@ -348,36 +348,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             return None
 
         if self._coordset is not None:
-            names = self._coordset.names  # all names of the current coordinates
-            new_coords = self._coordset.copy()  # [None] * len(names)
-            if isinstance(items, np.ndarray):
-                # probably a fancy indexing
-                items = (items,)
-            for i, item in enumerate(items):
-                # get the corresponding dimension name in the dims list
-                name = self.dims[i]
-                # get the corresponding index in the coordinate's names list
-                idx = names.index(name)
-                if self._coordset[idx].is_empty:
-                    new_coords[idx] = Coord(None, name=name)
-                elif not isinstance(self._coordset[idx], CoordSet):
-                    new_coords[idx] = self._coordset[idx][item]
-                else:
-                    # we must slice all internal coordinates
-                    newc = []
-                    for c in self._coordset[idx]._coords:
-                        newc.append(c[item])
-                    new_coords[idx] = CoordSet(*newc[::-1], name=name)
-                    # we reverse to be sure
-                    # the order will be  kept for internal coordinates
-                    new_coords[idx]._default = self._coordset[
-                        idx
-                    ]._default  # set the same default coord
-                    new_coords[idx]._is_same_dim = self._coordset[idx]._is_same_dim
-
-                # elif isinstance(item, (np.ndarray, list)):
-                #    new_coords[idx] = self._coordset[idx][item]
-
+            new_coords = self._coordset.slice_dims(self.dims, items)
             new.set_coordset(*new_coords, keepnames=True)
 
         new.history = f"Slice extracted: ({saveditems})"

@@ -53,3 +53,7 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- MAINT: Introduced a first ``CoordSet`` lifecycle slicing API and migrated
+  ``NDDataset`` slicing to delegate coordinate slicing through it, preserving
+  existing behavior without changing public APIs, storage, or serialization.
