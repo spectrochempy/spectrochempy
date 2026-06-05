@@ -558,41 +558,6 @@ class CoordSet(HasTraits):
         """
         return self.__copy__()
 
-    def slice_dims(self, dims, items):
-        """
-        Return a coordset sliced according to dataset dimensions and indexers.
-
-        This lifecycle wrapper preserves the existing slicing semantics while
-        keeping same-dimension multi-coordinate details inside CoordSet.
-        """
-        names = self.names
-        new_coords = self.copy()
-
-        if isinstance(items, np.ndarray):
-            # Fancy indexing from NDDataset can be returned as a single array.
-            items = (items,)
-
-        for axis, item in enumerate(items):
-            name = dims[axis]
-            idx = names.index(name)
-            coord = self[idx]
-
-            if coord.is_empty:
-                new_coords[idx] = Coord(None, name=name)
-            elif not isinstance(coord, CoordSet):
-                new_coords[idx] = coord[item]
-            else:
-                newc = [c[item] for c in coord._coords]
-                new_coords[idx] = CoordSet(*newc[::-1], name=name)
-                new_coords[idx]._default = coord._default
-                new_coords[idx]._is_same_dim = coord._is_same_dim
-                new_coords[idx]._set_names(
-                    [f"_{i + 1}" for i in range(len(new_coords[idx]))]
-                )
-                new_coords[idx]._set_parent_dim(name)
-
-        return new_coords
-
     def keys(self):
         """
         Alias for names.
@@ -749,6 +714,41 @@ class CoordSet(HasTraits):
     # ----------------------------------------------------------------------------------
     # private methods
     # ----------------------------------------------------------------------------------
+    def _slice_dims(self, dims, items):
+        """
+        Return a coordset sliced according to dataset dimensions and indexers.
+
+        This lifecycle wrapper preserves the existing slicing semantics while
+        keeping same-dimension multi-coordinate details inside CoordSet.
+        """
+        names = self.names
+        new_coords = self.copy()
+
+        if isinstance(items, np.ndarray):
+            # Fancy indexing from NDDataset can be returned as a single array.
+            items = (items,)
+
+        for axis, item in enumerate(items):
+            name = dims[axis]
+            idx = names.index(name)
+            coord = self[idx]
+
+            if coord.is_empty:
+                new_coords[idx] = Coord(None, name=name)
+            elif not isinstance(coord, CoordSet):
+                new_coords[idx] = coord[item]
+            else:
+                newc = [c[item] for c in coord._coords]
+                new_coords[idx] = CoordSet(*newc[::-1], name=name)
+                new_coords[idx]._default = coord._default
+                new_coords[idx]._is_same_dim = coord._is_same_dim
+                new_coords[idx]._set_names(
+                    [f"_{i + 1}" for i in range(len(new_coords[idx]))]
+                )
+                new_coords[idx]._set_parent_dim(name)
+
+        return new_coords
+
     def _append(self, coord):
         # utility function to append coordinate with full validation
         if not isinstance(coord, tuple):

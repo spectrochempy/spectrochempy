@@ -348,7 +348,7 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
             return None
 
         if self._coordset is not None:
-            new_coords = self._coordset.slice_dims(self.dims, items)
+            new_coords = self._coordset._slice_dims(self.dims, items)
             new.set_coordset(*new_coords, keepnames=True)
 
         new.history = f"Slice extracted: ({saveditems})"
