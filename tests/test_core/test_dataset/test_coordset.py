@@ -505,6 +505,20 @@ def test_coordset_deepcopy_isolation(coord0, coord1):
     assert "x" not in coords_copy.names
 
 
+def test_coordset_slice_dims_preserves_multicoord_default(coord0, coord1, coord2):
+    coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
+    coords.y.select(2)
+
+    sliced = coords.slice_dims(["z", "y", "x"], (slice(1, 4), slice(2, 5)))
+
+    assert sliced.z.size == 2
+    assert sliced.y.is_same_dim
+    assert sliced.y.default == sliced.y._2
+    assert_coord_almost_equal(sliced.y._1, coord0[2:5], decimal=1)
+    assert_coord_almost_equal(sliced.y._2, coord0[2:5], decimal=1)
+    assert sliced.x == coords.x
+
+
 def test_coordset_arithmetics():
     # typical use case
     ds = NDDataset([0.0, 1.0, 2.0])
