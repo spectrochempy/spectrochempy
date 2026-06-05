@@ -505,11 +505,11 @@ def test_coordset_deepcopy_isolation(coord0, coord1):
     assert "x" not in coords_copy.names
 
 
-def test_coordset_slice_dims_preserves_multicoord_default(coord0, coord1, coord2):
+def test_coordset__slice_dims_preserves_multicoord_default(coord0, coord1, coord2):
     coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
     coords.y.select(2)
 
-    sliced = coords.slice_dims(["z", "y", "x"], (slice(1, 4), slice(2, 5)))
+    sliced = coords._slice_dims(["z", "y", "x"], (slice(1, 4), slice(2, 5)))
 
     assert sliced.z.size == 2
     assert sliced.y.is_same_dim
