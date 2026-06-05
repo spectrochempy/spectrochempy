@@ -782,6 +782,28 @@ class CoordSet(HasTraits):
 
         return new_coords
 
+    def _drop_dims(self, dims, *, missing="ignore"):
+        """
+        Return a coordset with the given dimension coordinates removed.
+
+        This lifecycle wrapper preserves the existing squeeze-time semantics
+        while keeping missing-dimension handling inside ``CoordSet``.
+        """
+        if missing not in {"ignore", "raise"}:
+            raise ValueError("missing must be either 'ignore' or 'raise'")
+
+        if isinstance(dims, str):
+            dims = (dims,)
+
+        new_coords = self.copy()
+        for dim in dims:
+            if dim in new_coords.names:
+                del new_coords[dim]
+            elif missing == "raise":
+                raise KeyError(dim)
+
+        return new_coords
+
     def _append(self, coord):
         # utility function to append coordinate with full validation
         if not isinstance(coord, tuple):

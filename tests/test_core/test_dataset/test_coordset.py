@@ -532,6 +532,22 @@ def test_coordset__replace_dim_preserves_multicoord_behavior():
     assert_coord_almost_equal(updated.x["_2"], x2)
 
 
+def test_coordset__drop_dims_preserves_remaining_multicoord_state(
+    coord0, coord1, coord2
+):
+    coords = CoordSet(coord2, [coord0, coord0.copy()], coord1)
+    coords.y.select(2)
+
+    updated = coords._drop_dims(["z", "u"], missing="ignore")
+
+    assert updated.names == ["x", "y"]
+    assert updated.y.is_same_dim
+    assert updated.y.default == updated.y._2
+    assert_coord_almost_equal(updated.y._1, coords.y._1, decimal=1)
+    assert_coord_almost_equal(updated.y._2, coords.y._2, decimal=1)
+    assert updated.x == coords.x
+
+
 def test_coordset_arithmetics():
     # typical use case
     ds = NDDataset([0.0, 1.0, 2.0])
