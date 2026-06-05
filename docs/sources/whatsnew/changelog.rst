@@ -54,6 +54,10 @@ Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
 
+- MAINT: Added an internal ``CoordSet`` lifecycle API for dimension dropping
+  and migrated ``NDDataset.squeeze()`` to use it, preserving existing behavior
+  without changing public APIs, storage, or serialization.
+
 - MAINT: Added an internal ``CoordSet`` lifecycle API for coordinate
   assignment/replacement and migrated a focused ``NDDataset`` coordinate
   assignment path to use it, preserving existing behavior while reducing

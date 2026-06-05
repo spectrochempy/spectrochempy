@@ -1132,17 +1132,12 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         new, axis = super().squeeze(*dims, inplace=inplace, return_axis=True)
 
         if axis is not None and new._coordset is not None:
-            # if there are coordinates they have to be squeezed as well (remove
-            # coordinate for the squeezed axis)
-
-            for i in axis:
-                dim = old[i]
-                # Delete the coord for the squeezed dimension, if it exists.
-                # A dimension might have no explicit coord (e.g., singleton
-                # dim auto-created without a coord), in which case there is
-                # nothing to clean up.
-                with suppress(KeyError):
-                    del new._coordset[dim]
+            # Remove coordinates for squeezed axes, tolerating singleton dims
+            # that never had an explicit coordinate assigned.
+            new._coordset = new._coordset._drop_dims(
+                [old[i] for i in axis],
+                missing="ignore",
+            )
 
         return new
 

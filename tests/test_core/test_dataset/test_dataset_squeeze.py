@@ -65,5 +65,27 @@ def test_squeeze_named_dims_coord_consistency():
     assert squeezed.x.title == "temperature"
 
 
+def test_squeeze_preserves_remaining_multicoord_dimension():
+    """Squeeze keeps same-dimension multi-coordinates on surviving dims."""
+    coord_y = scp.Coord(np.array([0.0]), title="row")
+    coord_x_primary = scp.Coord(np.array([10.0, 20.0, 30.0]), title="wavelength")
+    coord_x_secondary = scp.Coord(np.array([1.0, 2.0, 3.0]), title="index")
+    ds = scp.NDDataset(np.ones((1, 3)), coordset=[coord_y, coord_x_primary])
+    ds.x = scp.CoordSet(coord_x_secondary.copy(), coord_x_primary.copy())
+    ds.x.select(2)
+
+    squeezed = ds.squeeze()
+
+    assert squeezed.shape == (3,)
+    assert squeezed.dims == ["x"]
+    assert isinstance(squeezed.x, scp.CoordSet)
+    assert squeezed.x.is_same_dim
+    assert squeezed.x.default == squeezed.x._2
+    assert_array_equal(squeezed.x._1.data, np.array([10.0, 20.0, 30.0]))
+    assert_array_equal(squeezed.x._2.data, np.array([1.0, 2.0, 3.0]))
+    assert squeezed.x._1.title == "wavelength"
+    assert squeezed.x._2.title == "index"
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
