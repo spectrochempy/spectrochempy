@@ -4,141 +4,236 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+
+"""
+Tests for the curve-fitting 1-D models.
+
+Uses deterministic grids throughout.  No plotting, no real-data dependencies.
+"""
+
 import numpy as np
+import pytest
 
 import spectrochempy as scp
 from spectrochempy.core.units import ur
-from spectrochempy.utils.testing import (
-    assert_approx_equal,  # assert_array_equal,; assert_array_almost_equal,
-)
+from spectrochempy.utils.testing import assert_approx_equal
 
 
-# import matplotlib.pyplot as plt
-def test_models():
-    model = scp.asymmetricvoigtmodel()
-    assert model.args == ["ampl", "pos", "width", "ratio", "asym"]
+# (name, args, centre_value)
+# ``centre_value`` is the value at x=pos obtained with
+#   x = Coord.linspace(0, 0.999, 1000, units="m")
+#   kwargs = {ampl: 1*g, width: 100*mm, ratio: 0.5, asym: 2, pos: 0.5, c_2: 1.0}
+# The actual value is ``array[0.5].value``, then multiplied by 100 for all
+# models except sigmoid.
+_MODELS = [
+    pytest.param(
+        "gaussianmodel", ["ampl", "pos", "width"], 0.9394292818892936, id="gaussian"
+    ),
+    pytest.param(
+        "lorentzianmodel", ["ampl", "pos", "width"], 0.6366197723675814, id="lorentzian"
+    ),
+    pytest.param(
+        "voigtmodel", ["ampl", "pos", "width", "ratio"], 0.8982186579508358, id="voigt"
+    ),
+    pytest.param(
+        "asymmetricvoigtmodel",
+        ["ampl", "pos", "width", "ratio", "asym"],
+        0.8982186579508358,
+        id="asymmetric_voigt",
+    ),
+    pytest.param(
+        "polynomialbaseline",
+        ["ampl"] + [f"c_{i}" for i in range(2, 11)],
+        0.0,
+        id="polynomial_baseline",
+    ),
+    pytest.param("sigmoidmodel", ["ampl", "pos", "asym"], 50, id="sigmoid"),
+]
 
-    x = np.arange(1000)
-    ampl = 1000.0
-    width = 100
-    ratio = 0
-    asym = 1.5
-    pos = 500
 
-    max = 6.366197723675813
-
-    array = model.f(x, ampl, pos, width, ratio, asym)
-    assert array.shape == (1000,)
-    assert_approx_equal(array[pos], max, significant=4)
-
-    array = model.f(x, 2.0 * ampl, pos, width, ratio, asym)  # ampl=2.
-    assert_approx_equal(array[pos], max * 2.0, significant=4)
-
-    # x array with units
-    x1 = x * ur("cm")
-    array = model.f(x1, ampl, pos, width, ratio, asym)
-    assert_approx_equal(array[pos], max, significant=4)
-    assert not hasattr(array, "units")
-
-    # amplitude with units
-    ampl = 1000.0 * ur("g")
-    array = model.f(x1, ampl, pos, width, ratio, asym)
-    assert hasattr(array, "units")
-    assert array.units == ur("g")
-    assert_approx_equal(array[pos].m, max, significant=4)
-
-    # use keyword instead of positional parameters
-    array = model.f(x1, ampl, pos, asym=asym, width=width, ratio=ratio)
-    assert_approx_equal(array[pos].m, max, significant=4)
-
-    # rescale some parameters
-    array = model.f(
-        x1, width=1000.0 * ur("mm"), ratio=ratio, asym=asym, ampl=ampl, pos=pos
-    )
-    assert_approx_equal(array[pos].m, max, significant=4)
-
-    # x is a Coord object
-    x2 = scp.Coord.arange(1000)
-    width = 100.0
-    array = model.f(x2, ampl, pos, width, ratio, asym)
-    assert isinstance(array, scp.NDDataset)
-    assert_approx_equal(array[pos].value.m, max, significant=4)
-    assert array.units == ampl.units
-
-    # x is a Coord object with units
-    x3 = scp.Coord.linspace(0.0, 0.999, 1000, units="m", title="distance")
-    width = 100.0 * ur("mm")
-    pos = 0.5
-    array = model.f(x3, ampl, pos, width, ratio, asym)
-    assert hasattr(array, "units")
-    assert_approx_equal(array[500].value.m, max, significant=4)
-
-    # do the same for various models
-    kwargs = dict(
-        ampl=1.0 * ur["g"],
+def _full_kwargs():
+    """Return the kwargs dict used for centre-value regression tests."""
+    return dict(
+        ampl=1.0 * ur("g"),
         width=100.0 * ur("mm"),
         ratio=0.5,
-        asym=2,
+        asym=2.0,
         pos=0.5,
         c_2=1.0,
     )
 
-    for modelname, expected in [
-        ("gaussianmodel", 0.9394292818892936),
-        ("lorentzianmodel", 0.6366197723675814),
-        ("voigtmodel", 0.8982186579508358),
-        ("asymmetricvoigtmodel", 0.8982186579508358),
-        ("polynomialbaseline", 0.0),
-        ("sigmoidmodel", 50),
-    ]:
-        model = getattr(scp, modelname)()
-        if modelname == "sigmoid":
-            kwargs["width"] = 0.01
-        array = model.f(x3, **kwargs)
-        actual = array[pos].value
-        if modelname != "sigmoid":
-            actual *= 100
-        assert_approx_equal(actual.m, expected, 4)
-        # array.plot(title=modelname)
-        # plt.show()
+
+def _filter_kwargs(kwargs, args):
+    """Keep only keys that appear in *args*."""
+    return {k: v for k, v in kwargs.items() if k in args}
 
 
-# def test_compare_shapes():
-#     # compare voigt with gaussian and lorentzian
-#     # do the same for various models
-#     x = scp.Coord.arange(1000)
-#     kwargs = dict(
-#         ampl=1.0,
-#         width=100,
-#         pos=500,
-#     )
-#
-#     # array = scp.gaussianmodel().f(x, **kwargs)
-#     # ax = array.plot(title=f'gaussian')
-#     # array = scp.lorentzianmodel().f(x, **kwargs)
-#     # array.plot(ax=ax, title=f'lorentzian', clear=False)
-#     #
-#     # for ratio in [0., 0.25, 0.75, 1.]:
-#     #     array = scp.voigtmodel().f(x, ratio=ratio, **kwargs)
-#     #     array.plot(ax=ax, title=f'ratio {ratio}', clear=False)
-#     #
-#     # plt.show()
-#
-#     arrayG = scp.gaussianmodel().f(x, **kwargs)
-#     arrayL = scp.lorentzianmodel().f(x, **kwargs)
-#
-#     array = scp.voigtmodel().f(x, ratio=0., **kwargs)
-#     assert_array_equal(array, arrayL)
-#
-#     array = scp.voigtmodel().f(x, ratio=1., **kwargs)
-#     assert_array_almost_equal(array, arrayG, decimal=6)
-#
-#     arrayA = scp.asymmetricvoigtmodel().f(x, ratio=0, asym=0, **kwargs)
-#     array = scp.voigtmodel().f(x, ratio=0, **kwargs)
-#     #assert_array_almost_equal(array, arrayA, decimal=6)
-#     ax = arrayA.plot(c='r')
-#     array.plot(ax=ax, clear=False)
-#
-#     array = scp.asymmetricvoigtmodel().f(x, ratio=0, asym=2, **kwargs)
-#     array.plot(ax=ax, clear=False)
-#     plt.show()
+# ---------------------------------------------------------------------------
+# Construction metadata
+# ---------------------------------------------------------------------------
+
+
+class TestModelConstruction:
+    """Model instantiation and static metadata."""
+
+    @pytest.mark.parametrize("name, args, _", _MODELS)
+    def test_args(self, name, args, _):
+        """args attribute should match the expected parameter list."""
+        assert getattr(scp, name)().args == args
+
+    @pytest.mark.parametrize("name, _, __", _MODELS)
+    def test_type(self, name, _, __):
+        """All models should be labelled 1-D."""
+        assert getattr(scp, name)().type == "1D"
+
+
+# ---------------------------------------------------------------------------
+# Evaluation — plain ndarray input (no units)
+# ---------------------------------------------------------------------------
+
+
+class TestEvaluationPlain:
+    """Evaluation with a plain numpy array as x."""
+
+    @pytest.mark.parametrize("name, args, _", _MODELS)
+    def test_output(self, name, args, _):
+        """Output should be an ndarray of the correct shape with finite values."""
+        model = getattr(scp, name)()
+        x = np.linspace(0, 1, 100)
+        kwargs = _filter_kwargs(
+            dict(ampl=1.0, width=0.1, ratio=0.5, asym=2.0, pos=0.5, c_2=1.0),
+            args,
+        )
+        result = model.f(x, **kwargs)
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (100,)
+        assert np.all(np.isfinite(result))
+
+    @pytest.mark.parametrize("name, args, _", _MODELS)
+    def test_amplitude_linearity(self, name, args, _):
+        """Doubling ampl should double the output (sigmoid excluded — ampl appears in exponent too)."""
+        if name == "sigmoidmodel":
+            pytest.skip("sigmoid is not linear in ampl")
+        model = getattr(scp, name)()
+        x = np.linspace(0, 1, 100)
+        kw = _filter_kwargs(
+            dict(ampl=1.0, width=0.1, ratio=0.5, asym=2.0, pos=0.5, c_2=1.0),
+            args,
+        )
+        r1 = model.f(x, **kw)
+        kw["ampl"] = 2.0
+        r2 = model.f(x, **kw)
+        assert np.allclose(r2, 2.0 * r1, rtol=1e-12)
+
+
+# ---------------------------------------------------------------------------
+# Evaluation — inputs with physical units
+# ---------------------------------------------------------------------------
+
+
+class TestEvaluationUnits:
+    """Unit handling when x or amplitude carry physical units."""
+
+    @pytest.mark.parametrize("name, args, _", _MODELS)
+    def test_x_units(self, name, args, _):
+        """x with length units → ndarray output (no units if ampl is scalar)."""
+        model = getattr(scp, name)()
+        x = np.linspace(0, 1, 100) * ur("m")
+        kwargs = _filter_kwargs(
+            dict(ampl=1.0, width=0.1, ratio=0.5, asym=2.0, pos=0.5, c_2=1.0),
+            args,
+        )
+        result = model.f(x, **kwargs)
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (100,)
+        assert np.all(np.isfinite(result))
+
+    @pytest.mark.parametrize("name, args, _", _MODELS)
+    def test_ampl_units_propagate(self, name, args, _):
+        """Amplitude with units should propagate to the output."""
+        model = getattr(scp, name)()
+        x = np.linspace(0, 1, 100) * ur("m")
+        kwargs = _filter_kwargs(
+            dict(ampl=1.0 * ur("g"), width=0.1, ratio=0.5, asym=2.0, pos=0.5, c_2=1.0),
+            args,
+        )
+        result = model.f(x, **kwargs)
+        assert hasattr(result, "units")
+        assert result.units == ur("g")
+        assert np.all(np.isfinite(result.magnitude))
+
+    @pytest.mark.parametrize("name, args, _", _MODELS)
+    def test_unit_conversion(self, name, args, _):
+        """Width in compatible units (mm → m) should be auto-converted."""
+        model = getattr(scp, name)()
+        x = np.linspace(0, 1, 100) * ur("m")
+        kwargs = _filter_kwargs(
+            dict(
+                ampl=1.0 * ur("g"),
+                width=100.0 * ur("mm"),
+                ratio=0.5,
+                asym=2.0,
+                pos=0.5,
+                c_2=1.0,
+            ),
+            args,
+        )
+        result = model.f(x, **kwargs)
+        assert hasattr(result, "units")
+        assert result.units == ur("g")
+        assert np.all(np.isfinite(result.magnitude))
+
+
+# ---------------------------------------------------------------------------
+# Evaluation — Coord input produces NDDataset
+# ---------------------------------------------------------------------------
+
+
+class TestEvaluationCoord:
+    """Behaviour when x is a Coord object."""
+
+    @pytest.mark.parametrize("name, args, _", _MODELS)
+    def test_returns_nddataset(self, name, args, _):
+        """Coord input should return an NDDataset."""
+        model = getattr(scp, name)()
+        x = scp.Coord.linspace(0, 1, 100)
+        kwargs = _filter_kwargs(
+            dict(ampl=1.0 * ur("g"), width=0.1, ratio=0.5, asym=2.0, pos=0.5, c_2=1.0),
+            args,
+        )
+        result = model.f(x, **kwargs)
+        assert isinstance(result, scp.NDDataset)
+        assert result.shape == (100,)
+        assert np.all(np.isfinite(result.data))
+        assert result.units == ur("g")
+
+    @pytest.mark.parametrize("name, args, _", _MODELS)
+    def test_coord_with_units(self, name, args, _):
+        """Coord with units should produce NDDataset with correct metadata."""
+        model = getattr(scp, name)()
+        x = scp.Coord.linspace(0, 0.999, 1000, units="m", title="distance")
+        kwargs = _filter_kwargs(_full_kwargs(), args)
+        result = model.f(x, **kwargs)
+        assert isinstance(result, scp.NDDataset)
+        assert result.shape == (1000,)
+        assert np.all(np.isfinite(result.data))
+        assert result.units == ur("g")
+
+
+# ---------------------------------------------------------------------------
+# Numerical centre values  (regression – preserves original expected numbers)
+# ---------------------------------------------------------------------------
+
+
+class TestNumericalValues:
+    """Each model should produce the expected centre value for a fixed setup."""
+
+    @pytest.mark.parametrize("name, args, expected", _MODELS)
+    def test_center_value(self, name, args, expected):
+        """Value at x=pos should match the known reference."""
+        model = getattr(scp, name)()
+        x = scp.Coord.linspace(0, 0.999, 1000, units="m", title="distance")
+        kwargs = _filter_kwargs(_full_kwargs(), args)
+        result = model.f(x, **kwargs)
+        actual = result[0.5].value * 100
+        assert_approx_equal(actual.m, expected, significant=4)

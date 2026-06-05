@@ -40,6 +40,12 @@ Developer
   fitting, non-isothermal multi-condition fitting), removed all plotting and
   debug output, and strengthened assertions with numerical convergence checks.
 
+- MAINT: Modernized curve-fitting model tests (``test_models.py``): replaced the
+  monolithic ``test_models`` with parametrized coverage of construction metadata,
+  evaluation on plain ndarray / unit-valued / Coord inputs, amplitude linearity,
+  and known centre-value regression for all six 1-D models; removed all dead
+  code (commented plotting blocks, unused imports, always-true guard).
+
 - MAINT: Modernized selected analysis tests with deterministic synthetic datasets,
   reducing unnecessary real-data dependencies and strengthening numerical,
   shape, metadata, masking, and reporting assertions.
