@@ -4,13 +4,23 @@
 # See full LICENSE agreement in the root directory.
 # ======================================================================================
 # ruff: noqa
+
+"""
+Tests for the kinetic utilities module.
+
+Uses deterministic synthetic kinetic data throughout.
+No plotting, no debug print calls, no network dependencies.
+"""
+
 import numpy as np
 import pytest
 
-from spectrochempy import show
-
-# import spectrochempy
 from spectrochempy.analysis.kinetic import kineticutilities as ku
+
+
+# ---------------------------------------------------------------------------
+# Cantera plugin availability
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.skipif(
@@ -18,8 +28,13 @@ from spectrochempy.analysis.kinetic import kineticutilities as ku
     reason="requires the experimental spectrochempy-cantera plugin with Cantera",
 )
 def test_cu():
-    # availability of cantera (should be installed if the test was not skipped)
+    """Cantera plugin should be available if not skipped."""
     assert not ku._cantera_is_not_available()
+
+
+# ---------------------------------------------------------------------------
+# Reaction equation regex parsing
+# ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -37,131 +52,205 @@ def test_cu():
     ],
 )
 def test_equations_regex(test_str, left_expected, right_expected):
+    """Reaction equation parsing should correctly separate reactants and products."""
     species = list(left_expected.keys()) + list(right_expected.keys())
     left, right = ku._interpret_equation(test_str, species)
-
     assert left_expected == left
     assert right_expected == right
 
 
-def test_ABC():
-    reactions = ("A -> B", "B -> C")
-    species_concentrations = {"A": 1.0, "B": 0.0, "C": 0.0}
-    time = np.arange(0, 10)
-    k_exp = np.array(((1.0e8, 52.0e3), (1.0e8, 50.0e3)))
+# ---------------------------------------------------------------------------
+# Kinetic model construction
+# ---------------------------------------------------------------------------
 
-    # isothermal
-    kin_exp = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=298.0)
-    C_exp = kin_exp.integrate(time)
-    k_guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
-    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess)
-    res = kin_guess.fit_to_concentrations(
-        C_exp,
-        iexp=[0, 1, 2],
-        i2iexp=[0, 1, 2],
-        dict_param_to_optimize={
-            "k[0].A": 1.1e8,
-            "k[1].Ea": 49.0e3,
-        },
-        optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
-    )
-    C_opt = kin_guess.integrate(time)
 
-    print(res[2]["x"])
-    assert max(res[2]["x"] - [1.0e8, 50.0e3]) < 1e-3
+def _reactions():
+    return ("A -> B", "B -> C")
 
-    _ = C_exp.T.plot(markers="o")
-    _ = C_opt.T.plot(clear=False)
 
-    # non-isothermal, single condition
+def _species_concentrations():
+    return {"A": 1.0, "B": 0.0, "C": 0.0}
 
-    # temperature profile
-    def T(t):
-        """temperature profile"""
-        T = np.zeros_like(t)
-        for i, ti in enumerate(t):
-            if ti < 2.5:  # plateau
-                T[i] = 298.0
-            elif ti < 7.5:  # ramp
-                T[i] = 298.0 + (308.0 - 298.0) * ti
-            else:  # plateau
-                T[i] = 308.0
-        return T
 
-    # Compute concentration profile
-    kin = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
-    C_exp = kin.integrate(
-        time, k_dt=0.01
-    )  # k_dt is a time step for the apporximation the rate constants vs time
+def _k_exp():
+    return np.array(((1.0e8, 52.0e3), (1.0e8, 50.0e3)))
 
-    _guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
-    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess, T=T)
-    res = kin_guess.fit_to_concentrations(
-        C_exp,
-        iexp=[0, 1, 2],
-        i2iexp=[0, 1, 2],
-        dict_param_to_optimize={
-            "k[0].A": 1.1e8,
-            "k[1].Ea": 49.0e3,
-        },
-        optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
-        ivp_solver_kwargs={"k_dt": 0.1},
-    )
 
-    print(res[2]["x"])
-    assert max((res[2]["x"] - [1.0e8, 50.0e3]) / [1.0e8, 50.0e3]) < 0.05
+def _k_guess():
+    return np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
 
-    C_opt = kin_guess.integrate(time, k_dt=0.1)
 
-    _ = C_exp.T.plot(marker="o", linewidth=0.0, clear=True)
-    _ = C_opt.T.plot(clear=False)
-    show()
+# ---------------------------------------------------------------------------
+# Fitting tests
+# ---------------------------------------------------------------------------
 
-    # non-isothermal, with several conditions
-    def T2(t):
-        """another temperature profile"""
-        T = np.zeros_like(t)
-        for i, ti in enumerate(t):
-            if ti < 2.5:  # plateau
-                T[i] = 298.0
-            elif ti < 7.5:  # ramp
-                T[i] = 298.0 + (320.0 - 298.0) * ti
-            else:  # plateau
-                T[i] = 320.0
-        return T
 
-    species_concentrations = (
-        {"A": 1.0, "B": 0.0, "C": 0.0},
-        {"A": 1.0, "B": 0.2, "C": 0.0},
-    )
-    T = (T, T2)
+class TestActionMassKinetics:
+    """ActionMassKinetics model fitting."""
 
-    time = (np.arange(0, 10), np.arange(0, 10, 0.5))
+    def test_initialization(self):
+        """Model construction should set expected attributes."""
+        kin = ku.ActionMassKinetics(
+            _reactions(), _species_concentrations(), _k_exp(), T=298.0
+        )
+        assert kin.n_reactions == 2
+        assert kin.n_species == 3
+        assert kin.species == ["A", "B", "C"]
+        assert kin.A.shape == (2, 3)
+        assert kin.B.shape == (2, 3)
 
-    # Compute concentration profiles
-    kin = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
-    C_exp = kin.integrate(time, k_dt=0.01)
+    def test_integrate_isothermal(self):
+        """Isothermal integration should return finite NDdata."""
+        kin = ku.ActionMassKinetics(
+            _reactions(), _species_concentrations(), _k_exp(), T=298.0
+        )
+        time = np.arange(0, 10)
+        C = kin.integrate(time)
+        assert C.shape == (10, 3)
+        assert np.all(np.isfinite(C.data))
 
-    k_guess = np.array(((1.5e8, 52.0e3), (1.0e8, 55.0e3)))
-    kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess, T=T)
-    res = kin_guess.fit_to_concentrations(
-        C_exp,
-        iexp=[0, 1, 2],
-        i2iexp=[0, 1, 2],
-        dict_param_to_optimize={
-            "k[0].A": 1.1e8,
-            "k[1].Ea": 49.0e3,
-        },
-        optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
-        ivp_solver_kwargs={"k_dt": 0.1},
-    )
+    def test_fit_isothermal(self):
+        """Isothermal fitting should recover true Arrhenius parameters."""
+        reactions = _reactions()
+        species_concentrations = _species_concentrations()
+        k_exp = _k_exp()
+        time = np.arange(0, 10)
 
-    print(res[2]["x"])
-    assert max((res[2]["x"] - [1.0e8, 50.0e3]) / [1.0e8, 50.0e3]) < 0.05
+        kin_exp = ku.ActionMassKinetics(
+            reactions, species_concentrations, k_exp, T=298.0
+        )
+        C_exp = kin_exp.integrate(time)
 
-    C_opt = kin_guess.integrate(time, k_dt=0.1)
+        k_guess = _k_guess()
+        kin_guess = ku.ActionMassKinetics(reactions, species_concentrations, k_guess)
+        res = kin_guess.fit_to_concentrations(
+            C_exp,
+            iexp=[0, 1, 2],
+            i2iexp=[0, 1, 2],
+            dict_param_to_optimize={
+                "k[0].A": 1.1e8,
+                "k[1].Ea": 49.0e3,
+            },
+            optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
+        )
 
-    for c_exp, c_opt in zip(C_exp, C_opt):
-        _ = c_exp.T.plot(marker="o", linewidth=0.0, clear=True)
-        _ = c_opt.T.plot(clear=False)
-        show()
+        assert isinstance(res, tuple) and len(res) == 3
+        assert res[2].success
+        assert max(res[2]["x"] - [1.0e8, 50.0e3]) < 1e-3
+
+        C_opt = kin_guess.integrate(time)
+        assert C_opt.shape == (10, 3)
+        assert np.all(np.isfinite(C_opt.data))
+
+    def test_fit_non_isothermal_single(self):
+        """Non-isothermal fitting (single condition) should recover parameters."""
+        reactions = _reactions()
+        species_concentrations = _species_concentrations()
+        k_exp = _k_exp()
+        time = np.arange(0, 10)
+
+        def T(t):
+            T = np.zeros_like(t)
+            for i, ti in enumerate(t):
+                if ti < 2.5:
+                    T[i] = 298.0
+                elif ti < 7.5:
+                    T[i] = 298.0 + (308.0 - 298.0) * ti
+                else:
+                    T[i] = 308.0
+            return T
+
+        kin = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=T)
+        C_exp = kin.integrate(time, k_dt=0.01)
+        assert C_exp.shape == (10, 3)
+        assert np.all(np.isfinite(C_exp.data))
+
+        k_guess = _k_guess()
+        kin_guess = ku.ActionMassKinetics(
+            reactions, species_concentrations, k_guess, T=T
+        )
+        res = kin_guess.fit_to_concentrations(
+            C_exp,
+            iexp=[0, 1, 2],
+            i2iexp=[0, 1, 2],
+            dict_param_to_optimize={
+                "k[0].A": 1.1e8,
+                "k[1].Ea": 49.0e3,
+            },
+            optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
+            ivp_solver_kwargs={"k_dt": 0.1},
+        )
+
+        assert isinstance(res, tuple) and len(res) == 3
+        assert res[2].success
+        assert max((res[2]["x"] - [1.0e8, 50.0e3]) / [1.0e8, 50.0e3]) < 0.05
+
+        C_opt = kin_guess.integrate(time, k_dt=0.1)
+        assert C_opt.shape == (10, 3)
+        assert np.all(np.isfinite(C_opt.data))
+
+    def test_fit_non_isothermal_multi(self):
+        """Non-isothermal fitting (multiple conditions) should recover parameters."""
+        reactions = _reactions()
+        k_exp = _k_exp()
+        time = (np.arange(0, 10), np.arange(0, 10, 0.5))
+
+        def T(t):
+            T = np.zeros_like(t)
+            for i, ti in enumerate(t):
+                if ti < 2.5:
+                    T[i] = 298.0
+                elif ti < 7.5:
+                    T[i] = 298.0 + (308.0 - 298.0) * ti
+                else:
+                    T[i] = 308.0
+            return T
+
+        def T2(t):
+            T = np.zeros_like(t)
+            for i, ti in enumerate(t):
+                if ti < 2.5:
+                    T[i] = 298.0
+                elif ti < 7.5:
+                    T[i] = 298.0 + (320.0 - 298.0) * ti
+                else:
+                    T[i] = 320.0
+            return T
+
+        species_concentrations = (
+            {"A": 1.0, "B": 0.0, "C": 0.0},
+            {"A": 1.0, "B": 0.2, "C": 0.0},
+        )
+
+        kin = ku.ActionMassKinetics(reactions, species_concentrations, k_exp, T=(T, T2))
+        C_exp = kin.integrate(time, k_dt=0.01)
+        assert isinstance(C_exp, list) and len(C_exp) == 2
+        for c in C_exp:
+            assert np.all(np.isfinite(c.data))
+        assert C_exp[0].shape[1] == 3
+        assert C_exp[1].shape[1] == 3
+
+        k_guess = _k_guess()
+        kin_guess = ku.ActionMassKinetics(
+            reactions, species_concentrations, k_guess, T=(T, T2)
+        )
+        res = kin_guess.fit_to_concentrations(
+            C_exp,
+            iexp=[0, 1, 2],
+            i2iexp=[0, 1, 2],
+            dict_param_to_optimize={
+                "k[0].A": 1.1e8,
+                "k[1].Ea": 49.0e3,
+            },
+            optimizer_kwargs={"xtol": 0.01, "ftol": 0.1},
+            ivp_solver_kwargs={"k_dt": 0.1},
+        )
+
+        assert isinstance(res, tuple) and len(res) == 3
+        assert res[2].success
+        assert max((res[2]["x"] - [1.0e8, 50.0e3]) / [1.0e8, 50.0e3]) < 0.05
+
+        C_opt = kin_guess.integrate(time, k_dt=0.1)
+        assert isinstance(C_opt, list) and len(C_opt) == 2
+        for c in C_opt:
+            assert np.all(np.isfinite(c.data))

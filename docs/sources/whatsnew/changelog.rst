@@ -70,6 +70,12 @@ Developer
   handling, removed all plotting from algorithmic validation, and strengthened
   assertions with sklearn numerical parity checks.
 
+- MAINT: Modernized kinetic utility tests (``test_kineticutilities.py``): split
+  the monolithic ``test_ABC`` into five focused tests (initialization,
+  isothermal integration, isothermal fitting, non-isothermal single-condition
+  fitting, non-isothermal multi-condition fitting), removed all plotting and
+  debug output, and strengthened assertions with numerical convergence checks.
+
 - MAINT: Modernized selected analysis tests with deterministic synthetic datasets,
   reducing unnecessary real-data dependencies and strengthening numerical,
   shape, metadata, masking, and reporting assertions.
