@@ -1554,7 +1554,8 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
         # --- Coordinate handling --------------------------------------------
         old_coordset = self.coordset
 
-        # Validate explicit coords early
+        # Explicit coordinate overrides are validated even when the source
+        # dataset has no coordset to preserve.
         if coords is not None:
             for dim_name, coord in coords.items():
                 if dim_name not in new_dims:
@@ -1567,54 +1568,17 @@ class NDDataset(NDMath, NDIO, NDComplexArray):
                         f"expected {shape[new_dims.index(dim_name)]}."
                     )
 
-        if coord_policy == "drop" or old_coordset is None:
+        if old_coordset is None:
             new._coordset = None
         else:
-            # Build the list of coords for all new dimensions
-            new_coords = []
-            for new_idx, new_dim in enumerate(new_dims):
-                new_size = shape[new_idx]
-
-                # 1. Explicit user coords take precedence
-                if coords is not None and new_dim in coords:
-                    new_coords.append(coords[new_dim])
-                    continue
-
-                # 2. Policy-based coord preservation
-                if coord_policy == "strict":
-                    # Validate that every old dim maps unambiguously
-                    for old_idx_s, old_dim_s in enumerate(old_dims):
-                        old_size_s = old_shape[old_idx_s]
-                        matches = [i for i, s in enumerate(shape) if s == old_size_s]
-                        if len(matches) != 1:
-                            raise ValueError(
-                                f"strict mode: cannot unambiguously map dim "
-                                f"'{old_dim_s}' (size {old_size_s}) to the new "
-                                f"shape {shape}."
-                            )
-                        if new_dims[matches[0]] != old_dim_s:
-                            raise ValueError(
-                                f"strict mode: dim '{old_dim_s}' maps to new dim "
-                                f"'{new_dims[matches[0]]}' but name changed."
-                            )
-                    # All valid — copy preserved coord if present
-                    if old_coordset is not None and new_dim in old_coordset.names:
-                        new_coords.append(old_coordset[new_dim].copy())
-                    else:
-                        new_coords.append(None)
-
-                else:  # "safe"
-                    if (
-                        new_dim in old_dims
-                        and old_shape[old_dims.index(new_dim)] == new_size
-                        and old_coordset is not None
-                        and new_dim in old_coordset.names
-                    ):
-                        new_coords.append(old_coordset[new_dim].copy())
-                    else:
-                        new_coords.append(None)
-
-            new._coordset = CoordSet(*new_coords, dims=new_dims.copy())
+            new._coordset = old_coordset._reshape_dims(
+                old_dims,
+                old_shape,
+                new_dims,
+                shape,
+                coord_policy=coord_policy,
+                coords=coords,
+            )
 
         new.history = f"Data reshaped from {old_shape} to {shape}"
         return new
