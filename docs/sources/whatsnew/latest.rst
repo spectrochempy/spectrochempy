@@ -46,6 +46,11 @@ Developer
   and known centre-value regression for all six 1-D models; removed all dead
   code (commented plotting blocks, unused imports, always-true guard).
 
+- MAINT: Final analysis test cleanup: replaced legacy ``np.random.seed`` /
+  ``np.random.rand`` usage in CP decomposition tests with
+  ``np.random.default_rng(42)`` and removed dead/commented test code from
+  ``test_base.py``.
+
 - MAINT: Modernized selected analysis tests with deterministic synthetic datasets,
   reducing unnecessary real-data dependencies and strengthening numerical,
   shape, metadata, masking, and reporting assertions.

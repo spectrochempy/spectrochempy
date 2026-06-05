@@ -21,11 +21,11 @@ tensorly = pytest.importorskip("tensorly")
 
 def _make_synthetic_3d():
     """Create synthetic 3D NDDataset for testing."""
-    np.random.seed(42)
+    rng = np.random.default_rng(42)
     # Create a 3D tensor with known CP structure (6 samples, 8 features, 10 time points)
-    A = np.random.rand(6, 2)
-    B = np.random.rand(8, 2)
-    C = np.random.rand(10, 2)
+    A = rng.random((6, 2))
+    B = rng.random((8, 2))
+    C = rng.random((10, 2))
     X = np.zeros((6, 8, 10))
     for r in range(2):
         X += np.outer(np.outer(A[:, r], B[:, r]), C[:, r]).reshape(6, 8, 10)
@@ -191,7 +191,7 @@ class TestCP:
 
     def test_cp_invalid_2d_input(self):
         """Test error on 2D input."""
-        ds = NDDataset(np.random.rand(10, 20))
+        ds = NDDataset(np.zeros((10, 20)))
         ds.dims = ["x", "y"]
         ds.set_coordset(x=Coord(np.arange(10)), y=Coord(np.arange(20)))
 
