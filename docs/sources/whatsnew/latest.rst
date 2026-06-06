@@ -12,8 +12,17 @@ What's New in Revision 0.9.4.dev
 These are the changes in SpectroChemPy-0.9.4.dev.
 See :ref:`release` for a full changelog, including other versions of SpectroChemPy.
 
+Bug Fixes
+~~~~~~~~~
+
+- Fixed preservation of reference-based coordinates when copying
+  ``CoordSet`` and ``NDDataset`` objects.
+
 Developer
 ~~~~~~~~~
+
+- TEST: Added focused behavioral tests covering reference preservation through
+  ``CoordSet.copy()``, ``copy.deepcopy(CoordSet)``, and ``NDDataset.copy()``.
 
 - TEST: Added CoordSet public-contract edge tests covering duplicate-title
   lookup, title/name collisions, synthetic alias collisions, reference lookup,

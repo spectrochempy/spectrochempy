@@ -26,6 +26,9 @@ Bug Fixes
 ~~~~~~~~~
 .. Add here new bug fixes (do not delete this comment)
 
+- Fixed preservation of reference-based coordinates when copying
+  ``CoordSet`` and ``NDDataset`` objects.
+
 
 .. section
 
@@ -53,6 +56,9 @@ Deprecations
 Developer
 ~~~~~~~~~
 .. Add here developer changes (do not delete this comment)
+
+- TEST: Added focused behavioral tests covering reference preservation through
+  ``CoordSet.copy()``, ``copy.deepcopy(CoordSet)``, and ``NDDataset.copy()``.
 
 - TEST: Added CoordSet public-contract edge tests covering duplicate-title
   lookup, title/name collisions, synthetic alias collisions, reference lookup,

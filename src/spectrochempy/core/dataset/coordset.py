@@ -1406,6 +1406,7 @@ class CoordSet(HasTraits):
         coords.name = self.name
         coords._is_same_dim = self._is_same_dim
         coords._default = self._default
+        coords._references = cpy.deepcopy(self._references, memo=memo)
         return coords
 
     def __copy__(self):
@@ -1418,6 +1419,7 @@ class CoordSet(HasTraits):
         # and is_same_dim and default for coordset
         coords._is_same_dim = self._is_same_dim
         coords._default = self._default
+        coords._references = cpy.copy(self._references)
         return coords
 
     def __eq__(self, other):
