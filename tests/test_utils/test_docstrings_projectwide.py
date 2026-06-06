@@ -8,7 +8,6 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-
 SOURCE_ROOT = Path(__file__).resolve().parents[2] / "src" / "spectrochempy"
 DOCREP_DOCSTRING_MARKERS = ("%(", "_docstring.", "@_docstring")
 
